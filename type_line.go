@@ -1,4 +1,4 @@
-package gatig
+package simplefeatures
 
 // Line is a LineString with exactly two points.
 type Line struct {

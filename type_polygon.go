@@ -1,4 +1,4 @@
-package gatig
+package simplefeatures
 
 // Polygon is a planar surface, defined by 1 exiterior boundary and 0 or more
 // interior boundaries. Each interior boundary defines a hole in the polygon.

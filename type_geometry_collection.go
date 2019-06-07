@@ -1,4 +1,4 @@
-package gatig
+package simplefeatures
 
 import "errors"
 

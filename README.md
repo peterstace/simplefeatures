@@ -1,6 +1,6 @@
-# GATIG
+# Simple Features
 
-Geometry Algorithms and Types (In Go)
+Go Implementation of the OpenGIS Simple Features Specification.
 
 ## Types
 

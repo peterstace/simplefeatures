@@ -1,4 +1,4 @@
-package gatig
+package simplefeatures
 
 // MultiPolygon is a multi surface whose elements are polygons.
 type MultiPolygon struct {

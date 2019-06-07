@@ -1,4 +1,4 @@
-package gatig_test
+package simplefeatures_test
 
 import (
 	"reflect"

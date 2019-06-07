@@ -1,4 +1,4 @@
-package gatig
+package simplefeatures
 
 // Point is a 0-dimensional geometry, and represents a single location in a
 // coordinate space.
