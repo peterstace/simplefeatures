@@ -30,10 +30,10 @@ Interface Types
 
 ## Progress
 
-[ ] Define the types
-[ ] Implement type construction constraints
-[ ] Type properties
-[ ] WKT
-[ ] Predicates
-[ ] Operators
-[ ] WKB
+- [ ] Define the types
+- [ ] Implement type construction constraints
+- [ ] Type properties
+- [ ] WKT
+- [ ] Predicates
+- [ ] Operators
+- [ ] WKB
