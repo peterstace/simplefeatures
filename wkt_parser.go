@@ -4,24 +4,17 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 )
 
 func UnmarshalWKT(r io.Reader) (Geometry, error) {
 	p := newParser(r)
-	var g Geometry
-	switch tok := p.nextToken(); tok {
-	case "POINT":
-		g = p.nextPointBody()
-	case "LINESTRING":
-		g = p.nextLineStringBody()
-	default:
-		return nil, fmt.Errorf("unexpected token: %v", tok)
-	}
+	geom := p.nextGeometryTaggedText()
 	p.checkEOF()
 	if p.err != nil {
 		return nil, p.err
 	}
-	return g, nil
+	return geom, nil
 }
 
 func newParser(r io.Reader) *parser {
@@ -37,6 +30,10 @@ func (p *parser) check(err error) {
 	if err != nil && p.err == nil {
 		p.err = err
 	}
+}
+
+func (p *parser) errorf(format string, args ...interface{}) {
+	p.check(fmt.Errorf(format, args...))
 }
 
 func (p *parser) nextToken() string {
@@ -55,29 +52,34 @@ func (p *parser) checkEOF() {
 	}
 }
 
-func (p *parser) nextEmptyOrOpener() string {
-	tok := p.nextToken()
-
-	// TODO: this doesn't seem quite right...
-	// Skip the Z, M or ZM of an SF1.2 3/4 dim coordinate.
-	if tok == "Z" || tok == "M" || tok == "ZM" {
-		tok = p.nextToken()
+func (p *parser) nextGeometryTaggedText() Geometry {
+	switch tok := p.nextToken(); strings.ToLower(tok) {
+	case "point":
+		return p.nextPointText()
+	case "linestring":
+		return p.nextLineStringText()
+	default:
+		p.errorf("unexpected token: %v", tok)
+		return nil
 	}
+}
 
+func (p *parser) nextEmptySetOrLeftParen() string {
+	tok := p.nextToken()
 	if tok != "EMPTY" && tok != "(" {
-		p.check(fmt.Errorf("expected 'Z', 'M', 'ZM', 'EMPTY' or '(' but encountered %v", tok))
+		p.errorf("expected 'EMPTY' or '(' but encountered %v", tok)
 	}
 	return tok
 }
 
-func (p *parser) nextCloser() {
+func (p *parser) nextRightParen() {
 	tok := p.nextToken()
 	if tok != ")" {
 		p.check(fmt.Errorf("expected ')' but encountered %v", tok))
 	}
 }
 
-func (p *parser) nextCloserOrComma() string {
+func (p *parser) nextCommaOrRightParen() string {
 	tok := p.nextToken()
 	if tok != ")" && tok != "," {
 		p.check(fmt.Errorf("expected ')' or ',' but encountered %v", tok))
@@ -85,50 +87,49 @@ func (p *parser) nextCloserOrComma() string {
 	return tok
 }
 
-func (p *parser) preciseCoordinate() Point {
-	xStr := p.nextToken()
-	yStr := p.nextToken()
-
-	// TODO: consume 0, 1, or 2 numeric tokens if they are next
-
-	x, err := strconv.ParseFloat(xStr, 64)
-	p.check(err)
-	y, err := strconv.ParseFloat(yStr, 64)
-	p.check(err)
+func (p *parser) nextPoint() Point {
+	// TODO: handle z, m, and zm points.
+	x := p.nextSignedNumericLiteral()
+	y := p.nextSignedNumericLiteral()
 	return NewPoint(x, y)
 }
 
-func (t *parser) coordinates() []Point {
-	tok := t.nextEmptyOrOpener()
-	if tok == "EMPTY" {
-		return nil
-	}
-
-	pt := t.preciseCoordinate()
-	pts := []Point{pt}
-
-	tok = t.nextCloserOrComma()
-	for tok == "," {
-		pt := t.preciseCoordinate()
-		pts = append(pts, pt)
-		tok = t.nextCloserOrComma()
-	}
-	return pts
+func (p *parser) nextSignedNumericLiteral() float64 {
+	tok := p.nextToken()
+	// TODO: only certain types of floats should
+	// be allowed. Should check against a regex.
+	f, err := strconv.ParseFloat(tok, 64)
+	p.check(err)
+	return f
 }
 
-func (p *parser) nextPointBody() Point {
-	tok := p.nextEmptyOrOpener()
+func (p *parser) nextPointText() Point {
+	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
 		return NewEmptyPoint()
 	}
-	pt := p.preciseCoordinate()
-	p.nextCloser()
+	pt := p.nextPoint()
+	p.nextRightParen()
 	return pt
 }
 
-func (p *parser) nextLineStringBody() LineString {
-	coords := p.coordinates()
-	ls, err := NewLineString(coords)
+func (p *parser) nextLineStringText() LineString {
+	tok := p.nextEmptySetOrLeftParen()
+	if tok == "EMPTY" {
+		ls, err := NewLineString(nil)
+		p.check(err)
+		return ls
+	}
+	pt := p.nextPoint()
+	pts := []Point{pt}
+	for {
+		tok := p.nextCommaOrRightParen()
+		if tok == ")" {
+			break
+		}
+		pts = append(pts, p.nextPoint())
+	}
+	ls, err := NewLineString(pts)
 	p.check(err)
 	return ls
 }
