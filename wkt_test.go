@@ -17,6 +17,7 @@ func TestUnmarshalWKTValidGrammar(t *testing.T) {
 		{"upper case", "POINT (1 1)"},
 		{"lower case", "point (1 1)"},
 		{"no space between tag and coord", "point(1 1)"},
+		{"exponent", "point (1e3 1.5e2)"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := UnmarshalWKT(strings.NewReader(tt.wkt))
@@ -28,6 +29,20 @@ func TestUnmarshalWKTValidGrammar(t *testing.T) {
 }
 
 func TestUnmarshalWKTInvalidGrammar(t *testing.T) {
+	for _, tt := range []struct {
+		name, wkt string
+	}{
+		{"NaN coord", "point(NaN NaN)"},
+		{"+Inf coord", "point(+Inf +Inf)"},
+		{"-Inf coord", "point(-Inf -Inf)"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := UnmarshalWKT(strings.NewReader(tt.wkt))
+			if err == nil {
+				t.Fatalf("expected error but got nil")
+			}
+		})
+	}
 }
 
 func TestUnmarshalWKTValid(t *testing.T) {

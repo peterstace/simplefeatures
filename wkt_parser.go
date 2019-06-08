@@ -3,9 +3,16 @@ package simplefeatures
 import (
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 	"strings"
 )
+
+// Function names is the parser are chosen to match closely with the BNF
+// productions in the WKT grammar.
+//
+// Convention: functions starting with 'next' consume token(s), and build the
+// next production in the grammar.
 
 func UnmarshalWKT(r io.Reader) (Geometry, error) {
 	p := newParser(r)
@@ -96,10 +103,12 @@ func (p *parser) nextPoint() Point {
 
 func (p *parser) nextSignedNumericLiteral() float64 {
 	tok := p.nextToken()
-	// TODO: only certain types of floats should
-	// be allowed. Should check against a regex.
 	f, err := strconv.ParseFloat(tok, 64)
 	p.check(err)
+	// NaNs are not allowed by the WKT grammar.
+	if math.IsNaN(f) {
+		p.errorf("invalid signed numeric literal: %s", tok)
+	}
 	return f
 }
 
