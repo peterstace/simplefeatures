@@ -18,12 +18,17 @@ func NewLineString(pts []Point) (LineString, error) {
 	return LineString{pts}, nil
 }
 
+// IsSimple returns true iff the curve defined by the LineString doesn't pass
+// through the same point twice (with the possible exception of the two
+// endpoints).
 func (s LineString) IsSimple() bool {
 	// TODO
-	return false
+	return true
 }
 
 func (s LineString) IsClosed() bool {
-	// TODO
-	return false
+	if len(s.pts) == 0 {
+		return false
+	}
+	return s.pts[0] == s.pts[len(s.pts)-1]
 }

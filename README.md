@@ -2,6 +2,9 @@
 
 Go Implementation of the OpenGIS Simple Features Specification.
 
+It is based on the [Simple Features Access - Part 1: Common
+Architecture](http://www.opengeospatial.org/standards/sfa).
+
 ## Types
 
 Concrete Types
