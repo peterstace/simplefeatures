@@ -21,3 +21,15 @@ func NewLinearRing(pts []Point) (LinearRing, error) {
 	}
 	return LinearRing{ls}, nil
 }
+
+func NewLinearRingFromCoords(coords []Coordinates) (LinearRing, error) {
+	var pts []Point
+	for _, c := range coords {
+		pt, err := NewPointFromCoords(c)
+		if err != nil {
+			return LinearRing{}, err
+		}
+		pts = append(pts, pt)
+	}
+	return NewLinearRing(pts)
+}

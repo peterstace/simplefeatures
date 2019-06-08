@@ -74,11 +74,11 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		ls, err := NewLineStringFromCoords(coords)
 		p.check(err)
 		return ls
-	//case "polygon":
-	//coords := p.nextPolygonText()
-	//err, poly := NewPolygonFromCoords(coords)
-	//p.check(err)
-	//return poly
+	case "polygon":
+		coords := p.nextPolygonText()
+		poly, err := NewPolygonFromCoords(coords)
+		p.check(err)
+		return poly
 	default:
 		p.errorf("unexpected token: %v", tok)
 		return nil
@@ -154,13 +154,20 @@ func (p *parser) nextLineStringText() []Coordinates {
 	return pts
 }
 
-func (p *parser) nextPolygonText() Polygon {
-	return Polygon{}
-	//tok := p.nextEmptySetOrLeftParen()
-	//if tok == "EMPTY" {
-	//return NewEmptyPolygon()
-	//}
-	//line := p.nextLineStringText()
-	//ring, err := NewLinearRing()
-	//rings := []LinearRing{}
+func (p *parser) nextPolygonText() [][]Coordinates {
+	tok := p.nextEmptySetOrLeftParen()
+	if tok == "EMPTY" {
+		return nil
+	}
+	line := p.nextLineStringText()
+	lines := [][]Coordinates{line}
+	for {
+		tok := p.nextCommaOrRightParen()
+		if tok == "," {
+			lines = append(lines, p.nextLineStringText())
+		} else {
+			break
+		}
+	}
+	return lines
 }
