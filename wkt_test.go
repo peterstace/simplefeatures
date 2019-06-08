@@ -35,11 +35,16 @@ func TestUnmarshalWKTInvalidGrammar(t *testing.T) {
 		{"NaN coord", "point(NaN NaN)"},
 		{"+Inf coord", "point(+Inf +Inf)"},
 		{"-Inf coord", "point(-Inf -Inf)"},
+
+		{"mixed empty", "LINESTRING(0 0, EMPTY, 2 2)"},
+		{"foo internal point", "LINESTRING(0 0, foo, 2 2)"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := UnmarshalWKT(strings.NewReader(tt.wkt))
 			if err == nil {
 				t.Fatalf("expected error but got nil")
+			} else {
+				t.Logf("got error: %v", err)
 			}
 		})
 	}

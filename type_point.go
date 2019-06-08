@@ -20,8 +20,5 @@ func NewEmptyPoint() Point {
 
 // NewPointFromCoords creates a new point gives its coordinates.
 func NewPointFromCoords(c Coordinates) (Point, error) {
-	if c.Empty {
-		return NewEmptyPoint(), nil
-	}
 	return NewPoint(c.X, c.Y)
 }

@@ -62,7 +62,10 @@ func (p *parser) checkEOF() {
 func (p *parser) nextGeometryTaggedText() Geometry {
 	switch tok := p.nextToken(); strings.ToLower(tok) {
 	case "point":
-		coords := p.nextPointText()
+		coords, empty := p.nextPointText()
+		if empty {
+			return NewEmptyPoint()
+		}
 		pt, err := NewPointFromCoords(coords)
 		p.check(err)
 		return pt
@@ -123,14 +126,14 @@ func (p *parser) nextSignedNumericLiteral() float64 {
 	return f
 }
 
-func (p *parser) nextPointText() Coordinates {
+func (p *parser) nextPointText() (coords Coordinates, empty bool) {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
-		return Coordinates{Empty: true}
+		return Coordinates{}, true
 	}
 	pt := p.nextPoint()
 	p.nextRightParen()
-	return pt
+	return pt, false
 }
 
 func (p *parser) nextLineStringText() []Coordinates {
@@ -142,10 +145,11 @@ func (p *parser) nextLineStringText() []Coordinates {
 	pts := []Coordinates{pt}
 	for {
 		tok := p.nextCommaOrRightParen()
-		if tok == ")" {
+		if tok == "," {
+			pts = append(pts, p.nextPoint())
+		} else {
 			break
 		}
-		pts = append(pts, p.nextPoint())
 	}
 	return pts
 }
