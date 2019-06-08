@@ -15,7 +15,22 @@ func NewLineString(pts []Point) (LineString, error) {
 	if len(pts) == 1 {
 		return LineString{}, errors.New("line strings cannot have 1 point")
 	}
+	// TODO: check empties are as appropriate
 	return LineString{pts}, nil
+}
+
+// NewLineStringFromCoords creates a line string from the coordinates defining
+// its points.
+func NewLineStringFromCoords(coords []Coordinates) (LineString, error) {
+	var pts []Point
+	for _, c := range coords {
+		pt, err := NewPointFromCoords(c)
+		if err != nil {
+			return LineString{}, err
+		}
+		pts = append(pts, pt)
+	}
+	return NewLineString(pts)
 }
 
 // IsSimple returns true iff the curve defined by the LineString doesn't pass

@@ -62,9 +62,20 @@ func (p *parser) checkEOF() {
 func (p *parser) nextGeometryTaggedText() Geometry {
 	switch tok := p.nextToken(); strings.ToLower(tok) {
 	case "point":
-		return p.nextPointText()
+		coords := p.nextPointText()
+		pt, err := NewPointFromCoords(coords)
+		p.check(err)
+		return pt
 	case "linestring":
-		return p.nextLineStringText()
+		coords := p.nextLineStringText()
+		ls, err := NewLineStringFromCoords(coords)
+		p.check(err)
+		return ls
+	//case "polygon":
+	//coords := p.nextPolygonText()
+	//err, poly := NewPolygonFromCoords(coords)
+	//p.check(err)
+	//return poly
 	default:
 		p.errorf("unexpected token: %v", tok)
 		return nil
@@ -94,11 +105,11 @@ func (p *parser) nextCommaOrRightParen() string {
 	return tok
 }
 
-func (p *parser) nextPoint() Point {
+func (p *parser) nextPoint() Coordinates {
 	// TODO: handle z, m, and zm points.
 	x := p.nextSignedNumericLiteral()
 	y := p.nextSignedNumericLiteral()
-	return NewPoint(x, y)
+	return Coordinates{X: x, Y: y}
 }
 
 func (p *parser) nextSignedNumericLiteral() float64 {
@@ -112,25 +123,23 @@ func (p *parser) nextSignedNumericLiteral() float64 {
 	return f
 }
 
-func (p *parser) nextPointText() Point {
+func (p *parser) nextPointText() Coordinates {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
-		return NewEmptyPoint()
+		return Coordinates{Empty: true}
 	}
 	pt := p.nextPoint()
 	p.nextRightParen()
 	return pt
 }
 
-func (p *parser) nextLineStringText() LineString {
+func (p *parser) nextLineStringText() []Coordinates {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
-		ls, err := NewLineString(nil)
-		p.check(err)
-		return ls
+		return nil
 	}
 	pt := p.nextPoint()
-	pts := []Point{pt}
+	pts := []Coordinates{pt}
 	for {
 		tok := p.nextCommaOrRightParen()
 		if tok == ")" {
@@ -138,7 +147,16 @@ func (p *parser) nextLineStringText() LineString {
 		}
 		pts = append(pts, p.nextPoint())
 	}
-	ls, err := NewLineString(pts)
-	p.check(err)
-	return ls
+	return pts
+}
+
+func (p *parser) nextPolygonText() Polygon {
+	return Polygon{}
+	//tok := p.nextEmptySetOrLeftParen()
+	//if tok == "EMPTY" {
+	//return NewEmptyPolygon()
+	//}
+	//line := p.nextLineStringText()
+	//ring, err := NewLinearRing()
+	//rings := []LinearRing{}
 }

@@ -60,7 +60,7 @@ func TestUnmarshalWKTValid(t *testing.T) {
 		{
 			name: "basic point (wikipedia)",
 			wkt:  "POINT (30 10)",
-			want: NewPoint(30, 10),
+			want: must(NewPoint(30, 10)),
 		},
 		{
 			name: "empty point",
@@ -71,24 +71,22 @@ func TestUnmarshalWKTValid(t *testing.T) {
 			name: "basic line string (wikipedia)",
 			wkt:  "LINESTRING (30 10, 10 30, 40 40)",
 			want: must(NewLineString([]Point{
-				NewPoint(30, 10),
-				NewPoint(10, 30),
-				NewPoint(40, 40),
+				must(NewPoint(30, 10)).(Point),
+				must(NewPoint(10, 30)).(Point),
+				must(NewPoint(40, 40)).(Point),
 			})),
 		},
-		/*
-			{
-				name: "basic polygon (wikipedia)",
-				wkt:  "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))",
-				want: must(NewPolygon(must(NewLinearRing([]Point{
-					NewPoint(30, 10),
-					NewPoint(40, 40),
-					NewPoint(20, 40),
-					NewPoint(10, 20),
-					NewPoint(30, 10),
-				})).(LinearRing))),
-			},
-		*/
+		{
+			name: "basic polygon (wikipedia)",
+			wkt:  "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))",
+			want: must(NewPolygon(must(NewLinearRing([]Point{
+				must(NewPoint(30, 10)).(Point),
+				must(NewPoint(40, 40)).(Point),
+				must(NewPoint(20, 40)).(Point),
+				must(NewPoint(10, 20)).(Point),
+				must(NewPoint(30, 10)).(Point),
+			})).(LinearRing))),
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := UnmarshalWKT(strings.NewReader(tt.wkt))
@@ -96,7 +94,7 @@ func TestUnmarshalWKTValid(t *testing.T) {
 				t.Fatalf("unexpected error: %v", err)
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("want=%#v got=%#v", got, tt.want)
+				t.Errorf("want=%#v got=%#v", tt.want, got)
 			}
 		})
 	}
