@@ -52,6 +52,15 @@ func (p *parser) nextToken() string {
 	return tok
 }
 
+func (p *parser) peekToken() string {
+	tok, err := p.lexer.peek()
+	if err == io.EOF {
+		err = io.ErrUnexpectedEOF
+	}
+	p.check(err)
+	return tok
+}
+
 func (p *parser) checkEOF() {
 	tok, err := p.lexer.next()
 	if err != io.EOF {
@@ -62,11 +71,8 @@ func (p *parser) checkEOF() {
 func (p *parser) nextGeometryTaggedText() Geometry {
 	switch tok := p.nextToken(); strings.ToLower(tok) {
 	case "point":
-		coords, empty := p.nextPointText()
-		if empty {
-			return NewEmptyPoint()
-		}
-		pt, err := NewPointFromCoords(coords)
+		coords := p.nextPointText()
+		pt, err := NewPointFromOptionalCoords(coords)
 		p.check(err)
 		return pt
 	case "linestring":
@@ -79,7 +85,11 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		poly, err := NewPolygonFromCoords(coords)
 		p.check(err)
 		return poly
-	//case "multipoint":
+	case "multipoint":
+		coords := p.nextMultipointText()
+		mp, err := NewMultiPointFromCoords(coords)
+		p.check(err)
+		return mp
 	//case "multilinestring":
 	//case "multipolygon":
 	//case "geometrycollection":
@@ -133,14 +143,14 @@ func (p *parser) nextSignedNumericLiteral() float64 {
 	return f
 }
 
-func (p *parser) nextPointText() (coords Coordinates, empty bool) {
+func (p *parser) nextPointText() OptionalCoordinates {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
-		return Coordinates{}, true
+		return OptionalCoordinates{Empty: true}
 	}
 	pt := p.nextPoint()
 	p.nextRightParen()
-	return pt, false
+	return OptionalCoordinates{Value: pt}
 }
 
 func (p *parser) nextLineStringText() []Coordinates {
@@ -177,4 +187,45 @@ func (p *parser) nextPolygonText() [][]Coordinates {
 		}
 	}
 	return lines
+}
+
+func (p *parser) nextMultipointText() []OptionalCoordinates {
+	tok := p.nextEmptySetOrLeftParen()
+	if tok == "EMPTY" {
+		return nil
+	}
+	pt := p.nextMultiPointStylePoint()
+	pts := []OptionalCoordinates{pt}
+	for {
+		tok := p.nextCommaOrRightParen()
+		if tok == "," {
+			pt := p.nextMultiPointStylePoint()
+			pts = append(pts, pt)
+		} else {
+			break
+		}
+	}
+	return pts
+}
+
+func (p *parser) nextMultiPointStylePoint() OptionalCoordinates {
+	// This is an extension of the spec, and is required to handle WKT output
+	// from non-complying implementations. In particular, PostGIS doesn't
+	// comply to the spec (it outputs points as part of a multipoint without
+	// their surrounding parentheses).
+	tok := p.peekToken()
+	if tok == "EMPTY" {
+		p.nextToken()
+		return OptionalCoordinates{Empty: true}
+	}
+	var useParens bool
+	if tok == "(" {
+		p.nextToken()
+		useParens = true
+	}
+	pt := p.nextPoint()
+	if useParens {
+		p.nextRightParen()
+	}
+	return OptionalCoordinates{Value: pt}
 }

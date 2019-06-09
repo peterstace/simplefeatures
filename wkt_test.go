@@ -35,6 +35,9 @@ func TestUnmarshalWKTInvalidGrammar(t *testing.T) {
 		{"NaN coord", "point(NaN NaN)"},
 		{"+Inf coord", "point(+Inf +Inf)"},
 		{"-Inf coord", "point(-Inf -Inf)"},
+		{"left unbalanced point", "point ( 1 2"},
+		{"right unbalanced point", "point 1 2 )"},
+		{"point no parens", "point 1 1"},
 
 		{"mixed empty", "LINESTRING(0 0, EMPTY, 2 2)"},
 		{"foo internal point", "LINESTRING(0 0, foo, 2 2)"},
@@ -91,6 +94,45 @@ func TestUnmarshalWKTValid(t *testing.T) {
 				must(NewPoint(10, 20)).(Point),
 				must(NewPoint(30, 10)).(Point),
 			})).(LinearRing))),
+		},
+		{
+			name: "polygon with hole (wikipedia)",
+			wkt:  "POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))",
+			want: must(NewPolygon(
+				must(NewLinearRing([]Point{
+					must(NewPoint(35, 10)).(Point),
+					must(NewPoint(45, 45)).(Point),
+					must(NewPoint(15, 40)).(Point),
+					must(NewPoint(10, 20)).(Point),
+					must(NewPoint(35, 10)).(Point),
+				})).(LinearRing),
+				must(NewLinearRing([]Point{
+					must(NewPoint(20, 30)).(Point),
+					must(NewPoint(35, 35)).(Point),
+					must(NewPoint(30, 20)).(Point),
+					must(NewPoint(20, 30)).(Point),
+				})).(LinearRing),
+			)),
+		},
+		{
+			name: "basic multipoint (wikipedia)",
+			wkt:  "MULTIPOINT ((10 40), (40 30), (20 20), (30 10))",
+			want: must(NewMultiPoint([]Point{
+				must(NewPoint(10, 40)).(Point),
+				must(NewPoint(40, 30)).(Point),
+				must(NewPoint(20, 20)).(Point),
+				must(NewPoint(30, 10)).(Point),
+			})),
+		},
+		{
+			name: "basic multipoint without parens (wikipedia)",
+			wkt:  "MULTIPOINT (10 40, 40 30, 20 20, 30 10)",
+			want: must(NewMultiPoint([]Point{
+				must(NewPoint(10, 40)).(Point),
+				must(NewPoint(40, 30)).(Point),
+				must(NewPoint(20, 20)).(Point),
+				must(NewPoint(30, 10)).(Point),
+			})),
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {

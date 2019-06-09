@@ -22,3 +22,12 @@ func NewEmptyPoint() Point {
 func NewPointFromCoords(c Coordinates) (Point, error) {
 	return NewPoint(c.X, c.Y)
 }
+
+// NewPointFromOptionalCoords creates a new point given its coordinates (which
+// may be empty).
+func NewPointFromOptionalCoords(c OptionalCoordinates) (Point, error) {
+	if c.Empty {
+		return NewEmptyPoint(), nil
+	}
+	return NewPoint(c.Value.X, c.Value.Y)
+}
