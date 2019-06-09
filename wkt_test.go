@@ -53,7 +53,7 @@ func TestUnmarshalWKTInvalidGrammar(t *testing.T) {
 	}
 }
 
-func TestUnmarshalWKTValid(t *testing.T) {
+func TestUnmarshalWKTPopulate(t *testing.T) {
 	must := func(g Geometry, err error) Geometry {
 		if err != nil {
 			t.Fatalf("could not create geometry: %v", err)
@@ -132,6 +132,15 @@ func TestUnmarshalWKTValid(t *testing.T) {
 				must(NewPoint(40, 30)).(Point),
 				must(NewPoint(20, 20)).(Point),
 				must(NewPoint(30, 10)).(Point),
+			})),
+		},
+		{
+			name: "mixed style multipoint",
+			wkt:  "MULTIPOINT (10 40, (40 30), EMPTY)",
+			want: must(NewMultiPoint([]Point{
+				must(NewPoint(10, 40)).(Point),
+				must(NewPoint(40, 30)).(Point),
+				NewEmptyPoint(),
 			})),
 		},
 	} {
