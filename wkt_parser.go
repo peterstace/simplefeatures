@@ -69,28 +69,28 @@ func (p *parser) checkEOF() {
 }
 
 func (p *parser) nextGeometryTaggedText() Geometry {
-	switch tok := p.nextToken(); strings.ToLower(tok) {
-	case "point":
+	switch tok := p.nextToken(); strings.ToUpper(tok) {
+	case "POINT":
 		coords := p.nextPointText()
 		pt, err := NewPointFromOptionalCoords(coords)
 		p.check(err)
 		return pt
-	case "linestring":
+	case "LINESTRING":
 		coords := p.nextLineStringText()
 		ls, err := NewLineStringFromCoords(coords)
 		p.check(err)
 		return ls
-	case "polygon":
+	case "POLYGON":
 		coords := p.nextPolygonText()
 		poly, err := NewPolygonFromCoords(coords)
 		p.check(err)
 		return poly
-	case "multipoint":
+	case "MULTIPOINT":
 		coords := p.nextMultiPointText()
 		mp, err := NewMultiPointFromCoords(coords)
 		p.check(err)
 		return mp
-	case "multilinestring":
+	case "MULTILINESTRING":
 		coords := p.nextPolygonText() // same production as polygon
 		mls, err := NewMultiLineStringFromCoordinates(coords)
 		p.check(err)
