@@ -92,10 +92,14 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		return mp
 	case "MULTILINESTRING":
 		coords := p.nextPolygonText() // same production as polygon
-		mls, err := NewMultiLineStringFromCoordinates(coords)
+		mls, err := NewMultiLineStringFromCoords(coords)
 		p.check(err)
 		return mls
-	//case "multipolygon":
+	case "MULTIPOLYGON":
+		coords := p.nextMultiPolygonText()
+		mp, err := NewMultiPolygonFromCoords(coords)
+		p.check(err)
+		return mp
 	//case "geometrycollection":
 	//case "triangle":
 	//case "polyhedralsurface":
@@ -232,4 +236,23 @@ func (p *parser) nextMultiPointStylePoint() OptionalCoordinates {
 		p.nextRightParen()
 	}
 	return OptionalCoordinates{Value: pt}
+}
+
+func (p *parser) nextMultiPolygonText() [][][]Coordinates {
+	tok := p.nextEmptySetOrLeftParen()
+	if tok == "EMPTY" {
+		return nil
+	}
+	poly := p.nextPolygonText()
+	polys := [][][]Coordinates{poly}
+	for {
+		tok := p.nextCommaOrRightParen()
+		if tok == "," {
+			poly := p.nextPolygonText()
+			polys = append(polys, poly)
+		} else {
+			break
+		}
+	}
+	return polys
 }

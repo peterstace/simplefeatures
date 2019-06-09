@@ -160,6 +160,59 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 				})).(LineString),
 			})),
 		},
+		{
+			name: "multipolygon 1 (wikipedia)",
+			wkt:  "MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)), ((15 5, 40 10, 10 20, 5 10, 15 5)))",
+			want: must(NewMultiPolygon([]Polygon{
+				must(NewPolygon(
+					must(NewLinearRing([]Point{
+						must(NewPoint(30, 20)).(Point),
+						must(NewPoint(45, 40)).(Point),
+						must(NewPoint(10, 40)).(Point),
+						must(NewPoint(30, 20)).(Point),
+					})).(LinearRing),
+				)).(Polygon),
+				must(NewPolygon(
+					must(NewLinearRing([]Point{
+						must(NewPoint(15, 5)).(Point),
+						must(NewPoint(40, 10)).(Point),
+						must(NewPoint(10, 20)).(Point),
+						must(NewPoint(5, 10)).(Point),
+						must(NewPoint(15, 5)).(Point),
+					})).(LinearRing),
+				)).(Polygon),
+			})),
+		},
+		{
+			name: "multipolygon 2 (wikipedia)",
+			wkt:  "MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)), ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35), (30 20, 20 15, 20 25, 30 20)))",
+			want: must(NewMultiPolygon([]Polygon{
+				must(NewPolygon(
+					must(NewLinearRing([]Point{
+						must(NewPoint(40, 40)).(Point),
+						must(NewPoint(20, 45)).(Point),
+						must(NewPoint(45, 30)).(Point),
+						must(NewPoint(40, 40)).(Point),
+					})).(LinearRing),
+				)).(Polygon),
+				must(NewPolygon(
+					must(NewLinearRing([]Point{
+						must(NewPoint(20, 35)).(Point),
+						must(NewPoint(10, 30)).(Point),
+						must(NewPoint(10, 10)).(Point),
+						must(NewPoint(30, 5)).(Point),
+						must(NewPoint(45, 20)).(Point),
+						must(NewPoint(20, 35)).(Point),
+					})).(LinearRing),
+					must(NewLinearRing([]Point{
+						must(NewPoint(30, 20)).(Point),
+						must(NewPoint(20, 15)).(Point),
+						must(NewPoint(20, 25)).(Point),
+						must(NewPoint(30, 20)).(Point),
+					})).(LinearRing),
+				)).(Polygon),
+			})),
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := UnmarshalWKT(strings.NewReader(tt.wkt))
