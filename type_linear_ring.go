@@ -40,7 +40,6 @@ func (r LinearRing) AsText() []byte {
 	return r.AppendWKT(nil)
 }
 
-func (r LinearRing) AppendWKT([]byte) []byte {
-	// TODO: not too sure what should be the representation. Maybe a line string?
-	return nil
+func (r LinearRing) AppendWKT(dst []byte) []byte {
+	return r.ls.AppendWKT(dst)
 }
