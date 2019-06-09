@@ -1,6 +1,8 @@
 package simplefeatures
 
-import "errors"
+import (
+	"errors"
+)
 
 // LinearRing is a LineString that is both closed (has the same start and end
 // point) and simple (doesn't self intersect).
@@ -32,4 +34,13 @@ func NewLinearRingFromCoords(coords []Coordinates) (LinearRing, error) {
 		pts = append(pts, pt)
 	}
 	return NewLinearRing(pts)
+}
+
+func (r LinearRing) AsText() []byte {
+	return r.AppendWKT(nil)
+}
+
+func (r LinearRing) AppendWKT([]byte) []byte {
+	// TODO: not too sure what should be the representation. Maybe a line string?
+	return nil
 }

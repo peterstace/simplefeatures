@@ -1,5 +1,9 @@
 package simplefeatures
 
+import (
+	"strconv"
+)
+
 // Polygon is a planar surface, defined by 1 exiterior boundary and 0 or more
 // interior boundaries. Each interior boundary defines a hole in the polygon.
 type Polygon struct {
@@ -38,4 +42,41 @@ func NewPolygonFromCoords(coords [][]Coordinates) (Polygon, error) {
 		holes = append(holes, hole)
 	}
 	return NewPolygon(outer, holes...)
+}
+
+func (p Polygon) AsText() []byte {
+	return p.AppendWKT(nil)
+}
+
+func (p Polygon) AppendWKT(dst []byte) []byte {
+	dst = append(dst, []byte("POLYGON")...)
+	if p.empty {
+		dst = append(dst, ' ')
+	}
+	return p.appendWKTBody(dst)
+}
+
+func (p Polygon) appendWKTBody(dst []byte) []byte {
+	if p.empty {
+		return append(dst, []byte("EMPTY")...)
+	}
+	dst = append(dst, '(')
+	ring := func(r LinearRing) {
+		dst = append(dst, '(')
+		for i, pt := range r.ls.pts {
+			dst = strconv.AppendFloat(dst, pt.x, 'f', -1, 64)
+			dst = append(dst, ' ')
+			dst = strconv.AppendFloat(dst, pt.y, 'f', -1, 64)
+			if i != len(r.ls.pts)-1 {
+				dst = append(dst, ',')
+			}
+		}
+		dst = append(dst, ')')
+	}
+	ring(p.outer)
+	for _, h := range p.holes {
+		dst = append(dst, ',')
+		ring(h)
+	}
+	return append(dst, ')')
 }

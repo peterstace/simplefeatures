@@ -1,5 +1,9 @@
 package simplefeatures
 
+import (
+	"strconv"
+)
+
 // MultiPoint is a 0-dimensional geometric collection of points. The points are
 // not connected or ordered.
 type MultiPoint struct {
@@ -21,4 +25,31 @@ func NewMultiPointFromCoords(coords []OptionalCoordinates) (MultiPoint, error) {
 		pts[i] = pt
 	}
 	return MultiPoint{pts}, nil
+}
+
+func (m MultiPoint) AsText() []byte {
+	return m.AppendWKT(nil)
+}
+
+func (m MultiPoint) AppendWKT(dst []byte) []byte {
+	dst = append(dst, []byte("MULTIPOINT")...)
+	if len(m.pts) == 0 {
+		return append(dst, []byte(" EMPTY")...)
+	}
+	dst = append(dst, '(')
+	for i, pt := range m.pts {
+		if pt.empty {
+			dst = append(dst, []byte("EMPTY")...)
+		} else {
+			dst = append(dst, '(')
+			dst = strconv.AppendFloat(dst, pt.x, 'f', -1, 64)
+			dst = append(dst, ' ')
+			dst = strconv.AppendFloat(dst, pt.y, 'f', -1, 64)
+			dst = append(dst, ')')
+		}
+		if i != len(m.pts)-1 {
+			dst = append(dst, ',')
+		}
+	}
+	return append(dst, ')')
 }

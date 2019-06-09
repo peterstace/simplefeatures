@@ -22,3 +22,22 @@ func NewMultiPolygonFromCoords(coords [][][]Coordinates) (MultiPolygon, error) {
 	}
 	return NewMultiPolygon(polys)
 }
+
+func (m MultiPolygon) AsText() []byte {
+	return m.AppendWKT(nil)
+}
+
+func (m MultiPolygon) AppendWKT(dst []byte) []byte {
+	dst = append(dst, []byte("MULTIPOLYGON")...)
+	if len(m.polys) == 0 {
+		return append(dst, []byte(" EMPTY")...)
+	}
+	dst = append(dst, '(')
+	for i, poly := range m.polys {
+		dst = poly.appendWKTBody(dst)
+		if i != len(m.polys)-1 {
+			dst = append(dst, ',')
+		}
+	}
+	return append(dst, ')')
+}

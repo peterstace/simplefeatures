@@ -1,5 +1,7 @@
 package simplefeatures
 
+import "io"
+
 // Line is a LineString with exactly two points.
 type Line struct {
 	ls LineString
@@ -13,4 +15,8 @@ func NewLine(p1, p2 Point) Line {
 		panic(err)
 	}
 	return Line{ls}
+}
+
+func (n Line) AsText(w io.Writer) error {
+	return nil
 }

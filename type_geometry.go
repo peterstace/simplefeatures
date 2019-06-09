@@ -1,7 +1,10 @@
 package simplefeatures
 
 type Geometry interface {
-	// TODO - not yet clear what this interface should be
+	// AsText returns the WKT representation of the geometry.
+	AsText() []byte
 
-	//IsEmpty() bool
+	// AppendWKT appends the WKT representation of the geometry to dst and
+	// returns the resultant slice.
+	AppendWKT(dst []byte) []byte
 }

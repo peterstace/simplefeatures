@@ -21,3 +21,22 @@ func NewMultiLineStringFromCoords(coords [][]Coordinates) (MultiLineString, erro
 	}
 	return MultiLineString{lines}, nil
 }
+
+func (m MultiLineString) AsText() []byte {
+	return m.AppendWKT(nil)
+}
+
+func (m MultiLineString) AppendWKT(dst []byte) []byte {
+	dst = append(dst, []byte("MULTILINESTRING")...)
+	if len(m.lines) == 0 {
+		return append(dst, []byte(" EMPTY")...)
+	}
+	dst = append(dst, '(')
+	for i, line := range m.lines {
+		dst = line.appendWKTBody(dst)
+		if i != len(m.lines)-1 {
+			dst = append(dst, ',')
+		}
+	}
+	return append(dst, ')')
+}

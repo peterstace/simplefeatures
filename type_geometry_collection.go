@@ -10,3 +10,22 @@ type GeometryCollection struct {
 func NewGeometryCollection(geoms []Geometry) GeometryCollection {
 	return GeometryCollection{geoms}
 }
+
+func (c GeometryCollection) AsText() []byte {
+	return c.AppendWKT(nil)
+}
+
+func (c GeometryCollection) AppendWKT(dst []byte) []byte {
+	dst = append(dst, []byte("GEOMETRYCOLLECTION")...)
+	if len(c.geoms) == 0 {
+		return append(dst, []byte(" EMPTY")...)
+	}
+	dst = append(dst, '(')
+	for i, geom := range c.geoms {
+		dst = geom.AppendWKT(dst)
+		if i != len(c.geoms)-1 {
+			dst = append(dst, ',')
+		}
+	}
+	return append(dst, ')')
+}

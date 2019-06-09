@@ -258,7 +258,6 @@ func (p *parser) nextMultiPolygonText() [][][]Coordinates {
 func (p *parser) nextGeometryCollectionText() Geometry {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
-		p.nextToken()
 		return NewGeometryCollection(nil)
 	}
 	geom := p.nextGeometryTaggedText()

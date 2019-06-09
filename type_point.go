@@ -1,5 +1,7 @@
 package simplefeatures
 
+import "strconv"
+
 // Point is a 0-dimensional geometry, and represents a single location in a
 // coordinate space.
 type Point struct {
@@ -30,4 +32,20 @@ func NewPointFromOptionalCoords(c OptionalCoordinates) (Point, error) {
 		return NewEmptyPoint(), nil
 	}
 	return NewPoint(c.Value.X, c.Value.Y)
+}
+
+func (p Point) AsText() []byte {
+	return p.AppendWKT(nil)
+}
+
+func (p Point) AppendWKT(dst []byte) []byte {
+	dst = append(dst, []byte("POINT")...)
+	if p.empty {
+		return append(dst, []byte(" EMPTY")...)
+	}
+	dst = append(dst, '(')
+	dst = strconv.AppendFloat(dst, p.x, 'f', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, p.y, 'f', -1, 64)
+	return append(dst, ')')
 }
