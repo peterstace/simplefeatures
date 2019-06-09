@@ -41,7 +41,14 @@ func (p Point) AsText() []byte {
 func (p Point) AppendWKT(dst []byte) []byte {
 	dst = append(dst, []byte("POINT")...)
 	if p.empty {
-		return append(dst, []byte(" EMPTY")...)
+		dst = append(dst, ' ')
+	}
+	return p.appendWKTBody(dst)
+}
+
+func (p Point) appendWKTBody(dst []byte) []byte {
+	if p.empty {
+		return append(dst, []byte("EMPTY")...)
 	}
 	dst = append(dst, '(')
 	dst = strconv.AppendFloat(dst, p.x, 'f', -1, 64)
