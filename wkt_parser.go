@@ -86,11 +86,15 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		p.check(err)
 		return poly
 	case "multipoint":
-		coords := p.nextMultipointText()
+		coords := p.nextMultiPointText()
 		mp, err := NewMultiPointFromCoords(coords)
 		p.check(err)
 		return mp
-	//case "multilinestring":
+	case "multilinestring":
+		coords := p.nextPolygonText() // same production as polygon
+		mls, err := NewMultiLineStringFromCoordinates(coords)
+		p.check(err)
+		return mls
 	//case "multipolygon":
 	//case "geometrycollection":
 	//case "triangle":
@@ -189,7 +193,7 @@ func (p *parser) nextPolygonText() [][]Coordinates {
 	return lines
 }
 
-func (p *parser) nextMultipointText() []OptionalCoordinates {
+func (p *parser) nextMultiPointText() []OptionalCoordinates {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
 		return nil

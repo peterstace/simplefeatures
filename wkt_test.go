@@ -143,6 +143,23 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 				NewEmptyPoint(),
 			})),
 		},
+		{
+			name: "multi line string (wikipedia)",
+			wkt:  "MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))",
+			want: must(NewMultiLineString([]LineString{
+				must(NewLineString([]Point{
+					must(NewPoint(10, 10)).(Point),
+					must(NewPoint(20, 20)).(Point),
+					must(NewPoint(10, 40)).(Point),
+				})).(LineString),
+				must(NewLineString([]Point{
+					must(NewPoint(40, 40)).(Point),
+					must(NewPoint(30, 30)).(Point),
+					must(NewPoint(40, 20)).(Point),
+					must(NewPoint(30, 10)).(Point),
+				})).(LineString),
+			})),
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := UnmarshalWKT(strings.NewReader(tt.wkt))
