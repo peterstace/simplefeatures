@@ -102,9 +102,6 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		return mp
 	case "GEOMETRYCOLLECTION":
 		return p.nextGeometryCollectionText()
-	//case "triangle":
-	//case "polyhedralsurface":
-	//case "tin":
 	default:
 		p.errorf("unexpected token: %v", tok)
 		return nil
