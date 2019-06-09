@@ -213,6 +213,17 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 				)).(Polygon),
 			})),
 		},
+		{
+			name: "geometry collection (wikipedia)",
+			wkt:  "GEOMETRYCOLLECTION(POINT(4 6),LINESTRING(4 6,7 10))",
+			want: NewGeometryCollection([]Geometry{
+				must(NewPoint(4, 6)),
+				must(NewLineString([]Point{
+					must(NewPoint(4, 6)).(Point),
+					must(NewPoint(7, 10)).(Point),
+				})),
+			}),
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := UnmarshalWKT(strings.NewReader(tt.wkt))

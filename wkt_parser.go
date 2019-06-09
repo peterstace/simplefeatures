@@ -100,7 +100,8 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		mp, err := NewMultiPolygonFromCoords(coords)
 		p.check(err)
 		return mp
-	//case "geometrycollection":
+	case "GEOMETRYCOLLECTION":
+		return p.nextGeometryCollectionText()
 	//case "triangle":
 	//case "polyhedralsurface":
 	//case "tin":
@@ -255,4 +256,24 @@ func (p *parser) nextMultiPolygonText() [][][]Coordinates {
 		}
 	}
 	return polys
+}
+
+func (p *parser) nextGeometryCollectionText() Geometry {
+	tok := p.nextEmptySetOrLeftParen()
+	if tok == "EMPTY" {
+		p.nextToken()
+		return NewGeometryCollection(nil)
+	}
+	geom := p.nextGeometryTaggedText()
+	geoms := []Geometry{geom}
+	for {
+		tok := p.nextCommaOrRightParen()
+		if tok == "," {
+			geom := p.nextGeometryTaggedText()
+			geoms = append(geoms, geom)
+		} else {
+			break
+		}
+	}
+	return NewGeometryCollection(geoms)
 }
