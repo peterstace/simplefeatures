@@ -79,6 +79,13 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		poly, err := NewPolygonFromCoords(coords)
 		p.check(err)
 		return poly
+	//case "multipoint":
+	//case "multilinestring":
+	//case "multipolygon":
+	//case "geometrycollection":
+	//case "triangle":
+	//case "polyhedralsurface":
+	//case "tin":
 	default:
 		p.errorf("unexpected token: %v", tok)
 		return nil
