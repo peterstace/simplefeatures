@@ -1,6 +1,10 @@
 package simplefeatures
 
-import "strconv"
+import (
+	"errors"
+	"math"
+	"strconv"
+)
 
 // Point is a 0-dimensional geometry, and represents a single location in a
 // coordinate space.
@@ -11,7 +15,12 @@ type Point struct {
 
 // NewPoint creates a new point.
 func NewPoint(x, y float64) (Point, error) {
-	// TODO: Inf and NaN not allowed.
+	if math.IsNaN(x) || math.IsNaN(y) {
+		return Point{}, errors.New("coordinate is NaN")
+	}
+	if math.IsInf(x, 0) || math.IsInf(y, 0) {
+		return Point{}, errors.New("coordinate is Inf")
+	}
 	return Point{x, y, false}, nil
 }
 
