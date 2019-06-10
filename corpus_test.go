@@ -42,7 +42,7 @@ var wktCorpus = map[int]corpusTestCase{
 		IsSimple: Yes,
 	},
 	202: {
-		WKT:      "LINESTRING(0 0,1 1)",
+		WKT:      "LINESTRING(0 0,1 2)",
 		IsSimple: Yes,
 	},
 	203: {

@@ -1,26 +1,45 @@
 package simplefeatures
 
-// Line is a LineString with exactly two points.
+import (
+	"errors"
+	"strconv"
+)
+
+// Line is a LineString with exactly two distinct points.
 type Line struct {
-	ls LineString
+	a, b Coordinates
 }
 
 // NewLine creates a line segment given the coordinates of its two endpoints.
-func NewLine(c1, c2 Coordinates) (Line, error) {
-	ls, err := NewLineString([]Coordinates{c1, c2})
-	return Line{ls}, err
+func NewLine(a, b Coordinates) (Line, error) {
+	if err := a.Validate(); err != nil {
+		return Line{}, err
+	}
+	if err := b.Validate(); err != nil {
+		return Line{}, err
+	}
+	if a.XY == b.XY {
+		return Line{}, errors.New("line endpoints must be distinct")
+	}
+	return Line{a, b}, nil
 }
 
-var _ Geometry = Line{}
-
 func (n Line) AsText() []byte {
-	return n.ls.AsText()
+	return n.AppendWKT(nil)
 }
 
 func (n Line) AppendWKT(dst []byte) []byte {
-	return n.ls.AppendWKT(dst)
+	dst = []byte("LINESTRING(")
+	dst = strconv.AppendFloat(dst, n.a.X, 'f', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, n.a.Y, 'f', -1, 64)
+	dst = append(dst, ',')
+	dst = strconv.AppendFloat(dst, n.b.X, 'f', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, n.b.Y, 'f', -1, 64)
+	return append(dst, ')')
 }
 
 func (n Line) IsSimple() bool {
-	return n.ls.IsSimple()
+	return true
 }

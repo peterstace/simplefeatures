@@ -16,6 +16,7 @@ func TestLineValidation(t *testing.T) {
 		{xy(0, 0), xy(0, 0)},
 		{xy(-1, -1), xy(-1, -1)},
 		{xy(0, 0), xy(1, math.NaN())},
+		{xy(0, 0), xy(math.NaN(), 1)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			_, err := NewLine(pts[0], pts[1])

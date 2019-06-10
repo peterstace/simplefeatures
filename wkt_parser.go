@@ -77,9 +77,15 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		return pt
 	case "LINESTRING":
 		coords := p.nextLineStringText()
-		ls, err := NewLineString(coords)
-		p.check(err)
-		return ls
+		if len(coords) == 2 {
+			ln, err := NewLine(coords[0], coords[1])
+			p.check(err)
+			return ln
+		} else {
+			ls, err := NewLineString(coords)
+			p.check(err)
+			return ls
+		}
 	case "POLYGON":
 		coords := p.nextPolygonText()
 		poly, err := NewPolygonFromCoords(coords)

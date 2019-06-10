@@ -218,10 +218,10 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 			wkt:  "GEOMETRYCOLLECTION(POINT(4 6),LINESTRING(4 6,7 10))",
 			want: NewGeometryCollection([]Geometry{
 				must(NewPoint(4, 6)),
-				must(NewLineString([]Coordinates{
-					{XY{4, 6}},
-					{XY{7, 10}},
-				})),
+				must(NewLine(
+					Coordinates{XY{4, 6}},
+					Coordinates{XY{7, 10}},
+				)),
 			}),
 		},
 	} {
