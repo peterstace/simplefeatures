@@ -43,3 +43,12 @@ func (n Line) AppendWKT(dst []byte) []byte {
 func (n Line) IsSimple() bool {
 	return true
 }
+
+func (n Line) Intersection(g Geometry) Geometry {
+	switch g := g.(type) {
+	case Line:
+		return intersectLineWithLine(n, g)
+	default:
+		panic("not implemented")
+	}
+}

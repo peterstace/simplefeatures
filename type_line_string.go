@@ -127,3 +127,7 @@ func (s LineString) IsClosed() bool {
 	}
 	return s.pts[0] == s.pts[len(s.pts)-1]
 }
+
+func (s LineString) Intersection(Geometry) Geometry {
+	panic("not implemented")
+}

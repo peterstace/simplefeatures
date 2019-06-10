@@ -43,3 +43,7 @@ func (m MultiLineString) AppendWKT(dst []byte) []byte {
 func (m MultiLineString) IsSimple() bool {
 	panic("not implemented")
 }
+
+func (m MultiLineString) Intersection(Geometry) Geometry {
+	panic("not implemented")
+}

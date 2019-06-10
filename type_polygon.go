@@ -84,3 +84,7 @@ func (p Polygon) appendWKTBody(dst []byte) []byte {
 func (p Polygon) IsSimple() bool {
 	panic("not implemented")
 }
+
+func (p Polygon) Intersection(Geometry) Geometry {
+	panic("not implemented")
+}

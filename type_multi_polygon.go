@@ -45,3 +45,7 @@ func (m MultiPolygon) AppendWKT(dst []byte) []byte {
 func (m MultiPolygon) IsSimple() bool {
 	panic("not implemented")
 }
+
+func (m MultiPolygon) Intersection(Geometry) Geometry {
+	panic("not implemented")
+}
