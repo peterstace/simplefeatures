@@ -12,8 +12,8 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 - [x] Point
 - [x] LineString
 - [x] Line
-- [/] LinearRing (waiting on the linestring simple check)
-- [/] Polygon (waiting on linear ring)
+- [x] LinearRing
+- [/] Polygon
 - [x] MultiPoint
 - [x] MultiLineString
 - [/] MultiPolygon (non-trivial)
