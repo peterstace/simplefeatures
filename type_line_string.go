@@ -5,20 +5,34 @@ import (
 	"strconv"
 )
 
-// LineString is a curve with linear interpolation between points. Each
-// consecutive pair of points defines a line segment.
+// LineString is a curve defined by linear interpolation between a finite set
+// of points. Each consecutive pair of points defines a line segment. It must
+// contain at least 2 distinct points.
 type LineString struct {
 	pts []Point
 }
 
-// NewLineString gives the LineString specified by its points. The number of
-// points must be either zero or greater than 1, otherwise an error is
-// returned.
+// NewLineString gives the LineString specified by its points.
 func NewLineString(pts []Point) (LineString, error) {
-	if len(pts) == 1 {
-		return LineString{}, errors.New("line strings cannot have 1 point")
+	// Empty line string.
+	if len(pts) == 0 {
+		return LineString{}, nil
 	}
-	// TODO: check for duplicate adjacent points
+
+	// Must have at least 2 distinct points.
+	type xy struct{ x, y float64 }
+	pointSet := make(map[xy]struct{})
+	for _, pt := range pts {
+		pointSet[xy{pt.x, pt.y}] = struct{}{}
+		if len(pointSet) == 2 {
+			break
+		}
+	}
+	if len(pointSet) < 2 {
+		return LineString{}, errors.New("LineString must contain either zero or at least two distinct points")
+	}
+
+	// TODO: cannot have empty points as part of a line string
 	return LineString{pts}, nil
 }
 
