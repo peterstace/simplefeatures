@@ -5,38 +5,53 @@ Go Implementation of the OpenGIS Simple Features Specification.
 It is based on the [Simple Features Access - Part 1: Common
 Architecture](http://www.opengeospatial.org/standards/sfa).
 
-## Types
+## Feature Checklist
 
-Concrete Types
+### Types
 
-| Name               | Description |
-| ---                | ---         |
-| Point              |             |
-| LineString         |             |
-| Line               |             |
-| LinearRing         |             |
-| Polygon            |             |
-| MultiPoint         |             |
-| MultiLineString    |             |
-| MultiPolygon       |             |
-| GeometryCollection |             |
+- [x] Point
+- [x] LineString
+- [x] Line
+- [x] LinearRing
+- [x] Polygon
+- [x] MultiPoint
+- [x] MultiLineString
+- [x] MultiPolygon
+- [x] GeometryCollection
+- [ ] TIN
+- [ ] Triangle
+- [ ] PolyhedralSurface
 
-Interface Types
+### Interfaces
 
-| Name         | Description |
-| ---          | ---         |
-| Geometry     |             |
-| Curve        |             |
-| Surface      |             |
-| MultiCurve   |             |
-| MultiSurface |             |
+#### Geometry Methods
 
-## Progress
+- [ ] Dimension
+- [ ] GeometryType
+- [ ] SRID
+- [ ] Envelope
+- [x] AsText
+- [ ] AsBinary
+- [ ] IsEmpty
+- [/] IsSimple
+- [ ] Is3D
+- [ ] IsMeasured
+- [ ] Boundary
 
-- [ ] Define the types
-- [ ] Implement type construction constraints
-- [ ] Type properties
-- [ ] WKT
-- [ ] Predicates
-- [ ] Operators
-- [ ] WKB
+#### Curve
+
+#### Surface
+
+#### MultiCurve
+
+#### MultiSurface
+
+## TODO
+
+- Implement type construction constraints
+- 2D, Z, M, ZM points.
+- Spatial Reference Systems.
+- Type properties
+- Predicates
+- Operators
+- WKB

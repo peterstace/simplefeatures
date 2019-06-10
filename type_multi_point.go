@@ -41,3 +41,7 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 	}
 	return append(dst, ')')
 }
+
+func (m MultiPoint) IsSimple() bool {
+	panic("not implemented")
+}

@@ -29,3 +29,7 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	}
 	return append(dst, ')')
 }
+
+func (c GeometryCollection) IsSimple() bool {
+	panic("not implemented")
+}

@@ -41,3 +41,7 @@ func (m MultiPolygon) AppendWKT(dst []byte) []byte {
 	}
 	return append(dst, ')')
 }
+
+func (m MultiPolygon) IsSimple() bool {
+	panic("not implemented")
+}

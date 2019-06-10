@@ -18,7 +18,7 @@ func NewLineString(pts []Point) (LineString, error) {
 	if len(pts) == 1 {
 		return LineString{}, errors.New("line strings cannot have 1 point")
 	}
-	// TODO: check empties are as appropriate
+	// TODO: check for duplicate adjacent points
 	return LineString{pts}, nil
 }
 

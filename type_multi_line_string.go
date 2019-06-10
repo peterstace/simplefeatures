@@ -40,3 +40,7 @@ func (m MultiLineString) AppendWKT(dst []byte) []byte {
 	}
 	return append(dst, ')')
 }
+
+func (m MultiLineString) IsSimple() bool {
+	panic("not implemented")
+}

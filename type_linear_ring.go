@@ -4,11 +4,13 @@ import (
 	"errors"
 )
 
-// LinearRing is a LineString that is both closed (has the same start and end
-// point) and simple (doesn't self intersect).
+// LinearRing is a LineString that is constainted to be closed (has the same
+// start and end point) and simple (doesn't self intersect).
 type LinearRing struct {
 	ls LineString
 }
+
+var _ Geometry = LinearRing{}
 
 func NewLinearRing(pts []Point) (LinearRing, error) {
 	ls, err := NewLineString(pts)
@@ -42,4 +44,10 @@ func (r LinearRing) AsText() []byte {
 
 func (r LinearRing) AppendWKT(dst []byte) []byte {
 	return r.ls.AppendWKT(dst)
+}
+
+// IsSimple always returns true. Simplicity is one of the LinearRing constraints.
+func (r LinearRing) IsSimple() bool {
+	panic("not implemented")
+	return true
 }

@@ -56,3 +56,7 @@ func (p Point) appendWKTBody(dst []byte) []byte {
 	dst = strconv.AppendFloat(dst, p.y, 'f', -1, 64)
 	return append(dst, ')')
 }
+
+func (p Point) IsSimple() bool {
+	panic("not implemented")
+}

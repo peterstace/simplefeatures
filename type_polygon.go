@@ -80,3 +80,7 @@ func (p Polygon) appendWKTBody(dst []byte) []byte {
 	}
 	return append(dst, ')')
 }
+
+func (p Polygon) IsSimple() bool {
+	panic("not implemented")
+}
