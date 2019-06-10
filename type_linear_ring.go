@@ -12,7 +12,7 @@ type LinearRing struct {
 
 var _ Geometry = LinearRing{}
 
-func NewLinearRing(pts []Point) (LinearRing, error) {
+func NewLinearRing(pts []Coordinates) (LinearRing, error) {
 	ls, err := NewLineString(pts)
 	if err != nil {
 		return LinearRing{}, err
@@ -24,18 +24,6 @@ func NewLinearRing(pts []Point) (LinearRing, error) {
 		return LinearRing{}, errors.New("linear rings must be simple")
 	}
 	return LinearRing{ls}, nil
-}
-
-func NewLinearRingFromCoords(coords []Coordinates) (LinearRing, error) {
-	var pts []Point
-	for _, c := range coords {
-		pt, err := NewPointFromCoords(c)
-		if err != nil {
-			return LinearRing{}, err
-		}
-		pts = append(pts, pt)
-	}
-	return NewLinearRing(pts)
 }
 
 func (r LinearRing) AsText() []byte {

@@ -13,6 +13,6 @@ func MustNewPoint(x, y float64) Point {
 	return Must(NewPoint(x, y)).(Point)
 }
 
-func MustNewLineString(pts []Point) LineString {
-	return Must(NewLineString(pts)).(LineString)
+func MustNewLineString(coords []Coordinates) LineString {
+	return Must(NewLineString(coords)).(LineString)
 }

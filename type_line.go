@@ -5,9 +5,9 @@ type Line struct {
 	ls LineString
 }
 
-// NewLine creates a line given the two points that define it.
-func NewLine(p1, p2 Point) (Line, error) {
-	ls, err := NewLineString([]Point{p1, p2})
+// NewLine creates a line segment given the coordinates of its two endpoints.
+func NewLine(c1, c2 Coordinates) (Line, error) {
+	ls, err := NewLineString([]Coordinates{c1, c2})
 	return Line{ls}, err
 }
 

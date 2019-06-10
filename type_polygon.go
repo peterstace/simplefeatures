@@ -29,13 +29,13 @@ func NewPolygonFromCoords(coords [][]Coordinates) (Polygon, error) {
 	if len(coords) == 0 {
 		return NewEmptyPolygon(), nil
 	}
-	outer, err := NewLinearRingFromCoords(coords[0])
+	outer, err := NewLinearRing(coords[0])
 	if err != nil {
 		return Polygon{}, err
 	}
 	var holes []LinearRing
 	for _, holeCoords := range coords[1:] {
-		hole, err := NewLinearRingFromCoords(holeCoords)
+		hole, err := NewLinearRing(holeCoords)
 		if err != nil {
 			return Polygon{}, err
 		}
@@ -64,9 +64,9 @@ func (p Polygon) appendWKTBody(dst []byte) []byte {
 	ring := func(r LinearRing) {
 		dst = append(dst, '(')
 		for i, pt := range r.ls.pts {
-			dst = strconv.AppendFloat(dst, pt.x, 'f', -1, 64)
+			dst = strconv.AppendFloat(dst, pt.X, 'f', -1, 64)
 			dst = append(dst, ' ')
-			dst = strconv.AppendFloat(dst, pt.y, 'f', -1, 64)
+			dst = strconv.AppendFloat(dst, pt.Y, 'f', -1, 64)
 			if i != len(r.ls.pts)-1 {
 				dst = append(dst, ',')
 			}

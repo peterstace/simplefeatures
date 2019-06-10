@@ -77,7 +77,7 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		return pt
 	case "LINESTRING":
 		coords := p.nextLineStringText()
-		ls, err := NewLineStringFromCoords(coords)
+		ls, err := NewLineString(coords)
 		p.check(err)
 		return ls
 	case "POLYGON":
@@ -135,7 +135,7 @@ func (p *parser) nextPoint() Coordinates {
 	// TODO: handle z, m, and zm points.
 	x := p.nextSignedNumericLiteral()
 	y := p.nextSignedNumericLiteral()
-	return Coordinates{X: x, Y: y}
+	return Coordinates{XY{x, y}}
 }
 
 func (p *parser) nextSignedNumericLiteral() float64 {

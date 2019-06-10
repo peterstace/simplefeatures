@@ -78,39 +78,39 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 		{
 			name: "basic line string (wikipedia)",
 			wkt:  "LINESTRING (30 10, 10 30, 40 40)",
-			want: must(NewLineString([]Point{
-				must(NewPoint(30, 10)).(Point),
-				must(NewPoint(10, 30)).(Point),
-				must(NewPoint(40, 40)).(Point),
+			want: must(NewLineString([]Coordinates{
+				{XY{30, 10}},
+				{XY{10, 30}},
+				{XY{40, 40}},
 			})),
 		},
 		{
 			name: "basic polygon (wikipedia)",
 			wkt:  "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))",
-			want: must(NewPolygon(must(NewLinearRing([]Point{
-				must(NewPoint(30, 10)).(Point),
-				must(NewPoint(40, 40)).(Point),
-				must(NewPoint(20, 40)).(Point),
-				must(NewPoint(10, 20)).(Point),
-				must(NewPoint(30, 10)).(Point),
+			want: must(NewPolygon(must(NewLinearRing([]Coordinates{
+				{XY{30, 10}},
+				{XY{40, 40}},
+				{XY{20, 40}},
+				{XY{10, 20}},
+				{XY{30, 10}},
 			})).(LinearRing))),
 		},
 		{
 			name: "polygon with hole (wikipedia)",
 			wkt:  "POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))",
 			want: must(NewPolygon(
-				must(NewLinearRing([]Point{
-					must(NewPoint(35, 10)).(Point),
-					must(NewPoint(45, 45)).(Point),
-					must(NewPoint(15, 40)).(Point),
-					must(NewPoint(10, 20)).(Point),
-					must(NewPoint(35, 10)).(Point),
+				must(NewLinearRing([]Coordinates{
+					{XY{35, 10}},
+					{XY{45, 45}},
+					{XY{15, 40}},
+					{XY{10, 20}},
+					{XY{35, 10}},
 				})).(LinearRing),
-				must(NewLinearRing([]Point{
-					must(NewPoint(20, 30)).(Point),
-					must(NewPoint(35, 35)).(Point),
-					must(NewPoint(30, 20)).(Point),
-					must(NewPoint(20, 30)).(Point),
+				must(NewLinearRing([]Coordinates{
+					{XY{20, 30}},
+					{XY{35, 35}},
+					{XY{30, 20}},
+					{XY{20, 30}},
 				})).(LinearRing),
 			)),
 		},
@@ -147,16 +147,16 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 			name: "multi line string (wikipedia)",
 			wkt:  "MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))",
 			want: must(NewMultiLineString([]LineString{
-				must(NewLineString([]Point{
-					must(NewPoint(10, 10)).(Point),
-					must(NewPoint(20, 20)).(Point),
-					must(NewPoint(10, 40)).(Point),
+				must(NewLineString([]Coordinates{
+					{XY{10, 10}},
+					{XY{20, 20}},
+					{XY{10, 40}},
 				})).(LineString),
-				must(NewLineString([]Point{
-					must(NewPoint(40, 40)).(Point),
-					must(NewPoint(30, 30)).(Point),
-					must(NewPoint(40, 20)).(Point),
-					must(NewPoint(30, 10)).(Point),
+				must(NewLineString([]Coordinates{
+					{XY{40, 40}},
+					{XY{30, 30}},
+					{XY{40, 20}},
+					{XY{30, 10}},
 				})).(LineString),
 			})),
 		},
@@ -165,20 +165,20 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 			wkt:  "MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)), ((15 5, 40 10, 10 20, 5 10, 15 5)))",
 			want: must(NewMultiPolygon([]Polygon{
 				must(NewPolygon(
-					must(NewLinearRing([]Point{
-						must(NewPoint(30, 20)).(Point),
-						must(NewPoint(45, 40)).(Point),
-						must(NewPoint(10, 40)).(Point),
-						must(NewPoint(30, 20)).(Point),
+					must(NewLinearRing([]Coordinates{
+						{XY{30, 20}},
+						{XY{45, 40}},
+						{XY{10, 40}},
+						{XY{30, 20}},
 					})).(LinearRing),
 				)).(Polygon),
 				must(NewPolygon(
-					must(NewLinearRing([]Point{
-						must(NewPoint(15, 5)).(Point),
-						must(NewPoint(40, 10)).(Point),
-						must(NewPoint(10, 20)).(Point),
-						must(NewPoint(5, 10)).(Point),
-						must(NewPoint(15, 5)).(Point),
+					must(NewLinearRing([]Coordinates{
+						{XY{15, 5}},
+						{XY{40, 10}},
+						{XY{10, 20}},
+						{XY{5, 10}},
+						{XY{15, 5}},
 					})).(LinearRing),
 				)).(Polygon),
 			})),
@@ -188,27 +188,27 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 			wkt:  "MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)), ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35), (30 20, 20 15, 20 25, 30 20)))",
 			want: must(NewMultiPolygon([]Polygon{
 				must(NewPolygon(
-					must(NewLinearRing([]Point{
-						must(NewPoint(40, 40)).(Point),
-						must(NewPoint(20, 45)).(Point),
-						must(NewPoint(45, 30)).(Point),
-						must(NewPoint(40, 40)).(Point),
+					must(NewLinearRing([]Coordinates{
+						{XY{40, 40}},
+						{XY{20, 45}},
+						{XY{45, 30}},
+						{XY{40, 40}},
 					})).(LinearRing),
 				)).(Polygon),
 				must(NewPolygon(
-					must(NewLinearRing([]Point{
-						must(NewPoint(20, 35)).(Point),
-						must(NewPoint(10, 30)).(Point),
-						must(NewPoint(10, 10)).(Point),
-						must(NewPoint(30, 5)).(Point),
-						must(NewPoint(45, 20)).(Point),
-						must(NewPoint(20, 35)).(Point),
+					must(NewLinearRing([]Coordinates{
+						{XY{20, 35}},
+						{XY{10, 30}},
+						{XY{10, 10}},
+						{XY{30, 5}},
+						{XY{45, 20}},
+						{XY{20, 35}},
 					})).(LinearRing),
-					must(NewLinearRing([]Point{
-						must(NewPoint(30, 20)).(Point),
-						must(NewPoint(20, 15)).(Point),
-						must(NewPoint(20, 25)).(Point),
-						must(NewPoint(30, 20)).(Point),
+					must(NewLinearRing([]Coordinates{
+						{XY{30, 20}},
+						{XY{20, 15}},
+						{XY{20, 25}},
+						{XY{30, 20}},
 					})).(LinearRing),
 				)).(Polygon),
 			})),
@@ -218,9 +218,9 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 			wkt:  "GEOMETRYCOLLECTION(POINT(4 6),LINESTRING(4 6,7 10))",
 			want: NewGeometryCollection([]Geometry{
 				must(NewPoint(4, 6)),
-				must(NewLineString([]Point{
-					must(NewPoint(4, 6)).(Point),
-					must(NewPoint(7, 10)).(Point),
+				must(NewLineString([]Coordinates{
+					{XY{4, 6}},
+					{XY{7, 10}},
 				})),
 			}),
 		},
