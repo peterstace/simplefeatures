@@ -117,36 +117,36 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 		{
 			name: "basic multipoint (wikipedia)",
 			wkt:  "MULTIPOINT ((10 40), (40 30), (20 20), (30 10))",
-			want: must(NewMultiPoint([]Point{
+			want: NewMultiPoint([]Point{
 				must(NewPoint(10, 40)).(Point),
 				must(NewPoint(40, 30)).(Point),
 				must(NewPoint(20, 20)).(Point),
 				must(NewPoint(30, 10)).(Point),
-			})),
+			}),
 		},
 		{
 			name: "basic multipoint without parens (wikipedia)",
 			wkt:  "MULTIPOINT (10 40, 40 30, 20 20, 30 10)",
-			want: must(NewMultiPoint([]Point{
+			want: NewMultiPoint([]Point{
 				must(NewPoint(10, 40)).(Point),
 				must(NewPoint(40, 30)).(Point),
 				must(NewPoint(20, 20)).(Point),
 				must(NewPoint(30, 10)).(Point),
-			})),
+			}),
 		},
 		{
 			name: "mixed style multipoint",
 			wkt:  "MULTIPOINT (10 40, (40 30), EMPTY)",
-			want: must(NewMultiPoint([]Point{
+			want: NewMultiPoint([]Point{
 				must(NewPoint(10, 40)).(Point),
 				must(NewPoint(40, 30)).(Point),
 				NewEmptyPoint(),
-			})),
+			}),
 		},
 		{
 			name: "multi line string (wikipedia)",
 			wkt:  "MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))",
-			want: must(NewMultiLineString([]LineString{
+			want: NewMultiLineString([]LineString{
 				must(NewLineString([]Coordinates{
 					{XY{10, 10}},
 					{XY{20, 20}},
@@ -158,7 +158,7 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 					{XY{40, 20}},
 					{XY{30, 10}},
 				})).(LineString),
-			})),
+			}),
 		},
 		{
 			name: "multipolygon 1 (wikipedia)",

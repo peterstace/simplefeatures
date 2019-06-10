@@ -37,5 +37,4 @@ func (r LinearRing) AppendWKT(dst []byte) []byte {
 // IsSimple always returns true. Simplicity is one of the LinearRing constraints.
 func (r LinearRing) IsSimple() bool {
 	panic("not implemented")
-	return true
 }

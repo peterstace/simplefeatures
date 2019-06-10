@@ -27,14 +27,14 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 	}
 
 	// Must have at least 2 distinct points.
-	pointSet := make(map[XY]struct{})
-	for _, pt := range pts {
-		pointSet[pt.XY] = struct{}{}
-		if len(pointSet) == 2 {
+	var twoDistinct bool
+	for _, pt := range pts[1:] {
+		if pt.XY != pts[0].XY {
+			twoDistinct = true
 			break
 		}
 	}
-	if len(pointSet) < 2 {
+	if !twoDistinct {
 		return LineString{}, errors.New("LineString must contain either zero or at least two distinct points")
 	}
 

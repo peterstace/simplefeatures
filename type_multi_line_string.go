@@ -5,9 +5,8 @@ type MultiLineString struct {
 	lines []LineString
 }
 
-func NewMultiLineString(lines []LineString) (MultiLineString, error) {
-	// TODO: validation
-	return MultiLineString{lines}, nil
+func NewMultiLineString(lines []LineString) MultiLineString {
+	return MultiLineString{lines}
 }
 
 func NewMultiLineStringFromCoords(coords [][]Coordinates) (MultiLineString, error) {

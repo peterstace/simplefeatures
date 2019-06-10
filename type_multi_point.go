@@ -6,9 +6,8 @@ type MultiPoint struct {
 	pts []Point
 }
 
-func NewMultiPoint(pts []Point) (MultiPoint, error) {
-	// TODO: error checking
-	return MultiPoint{pts}, nil
+func NewMultiPoint(pts []Point) MultiPoint {
+	return MultiPoint{pts}
 }
 
 func NewMultiPointFromCoords(coords []OptionalCoordinates) (MultiPoint, error) {
