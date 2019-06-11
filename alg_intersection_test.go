@@ -1,6 +1,7 @@
 package simplefeatures_test
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 
@@ -8,7 +9,7 @@ import (
 )
 
 func TestIntersectionLineWithLine(t *testing.T) {
-	for _, tt := range []struct {
+	for i, tt := range []struct {
 		in1, in2, out string
 	}{
 		{"LINESTRING(0 0,0 1)", "LINESTRING(0 0,1 0)", "POINT(0 0)"},
@@ -22,18 +23,20 @@ func TestIntersectionLineWithLine(t *testing.T) {
 		{"LINESTRING(0 0,1 1)", "LINESTRING(1 0,0 1)", "POINT(0.5 0.5)"},
 		{"LINESTRING(1 1,2 2)", "LINESTRING(0 0,3 3)", "LINESTRING(1 1,2 2)"},
 	} {
-		in1g, err := UnmarshalWKT(strings.NewReader(tt.in1))
-		if err != nil {
-			t.Fatalf("could not unmarshal wkt: %v", err)
-		}
-		in2g, err := UnmarshalWKT(strings.NewReader(tt.in2))
-		if err != nil {
-			t.Fatalf("could not unmarshal wkt: %v", err)
-		}
-		result := in1g.Intersection(in2g)
-		got := string(result.AsText())
-		if got != tt.out {
-			t.Errorf("got=%v want=%v", got, tt.out)
-		}
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			in1g, err := UnmarshalWKT(strings.NewReader(tt.in1))
+			if err != nil {
+				t.Fatalf("could not unmarshal wkt: %v", err)
+			}
+			in2g, err := UnmarshalWKT(strings.NewReader(tt.in2))
+			if err != nil {
+				t.Fatalf("could not unmarshal wkt: %v", err)
+			}
+			result := in1g.Intersection(in2g)
+			got := string(result.AsText())
+			if got != tt.out {
+				t.Errorf("got=%v want=%v", got, tt.out)
+			}
+		})
 	}
 }
