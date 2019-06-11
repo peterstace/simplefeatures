@@ -22,9 +22,7 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 - [ ] Triangle
 - [ ] PolyhedralSurface
 
-### Interfaces
-
-#### Geometry Methods
+### Geometry Attributes
 
 - [ ] Dimension
 - [ ] GeometryType
@@ -38,13 +36,33 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 - [ ] IsMeasured
 - [ ] Boundary
 
-#### Curve
+### Spatial Relationships
 
-#### Surface
+- [ ] Equals
+- [ ] Disjoint
+- [ ] Intersects
+- [ ] Touches
+- [ ] Crosses
+- [ ] Within
+- [ ] Contains
+- [ ] Overlaps
+- [ ] Relate
+- [ ] LocateAlong
+- [ ] LocateBetween
 
-#### MultiCurve
+### Spatial Analysis
 
-#### MultiSurface
+- [ ] Distance
+- [ ] Buffer
+- [ ] ConvexHull
+- [ ] Intersection
+- [ ] Union
+- [ ] Difference
+- [ ] SymDifference
+
+### Type Specific Methods
+
+TODO
 
 ## TODO
 
