@@ -64,3 +64,7 @@ func (p Point) appendWKTBody(dst []byte) []byte {
 func (p Point) IsSimple() bool {
 	panic("not implemented")
 }
+
+func (p Point) Intersection(Geometry) Geometry {
+	panic("not implemented")
+}

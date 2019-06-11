@@ -12,4 +12,8 @@ type Geometry interface {
 	// geometry points such as self intersection or self tangency. The precise
 	// condition will differ for each type of geometry.
 	IsSimple() bool
+
+	// Intersection returns a geometric object that represents the point set
+	// intersection of this geometry with another geometry.
+	Intersection(Geometry) Geometry
 }

@@ -44,3 +44,7 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 func (m MultiPoint) IsSimple() bool {
 	panic("not implemented")
 }
+
+func (m MultiPoint) Intersection(Geometry) Geometry {
+	panic("not implemented")
+}

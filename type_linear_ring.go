@@ -38,3 +38,7 @@ func (r LinearRing) AppendWKT(dst []byte) []byte {
 func (r LinearRing) IsSimple() bool {
 	panic("not implemented")
 }
+
+func (r LinearRing) Intersection(Geometry) Geometry {
+	panic("not implemented")
+}
