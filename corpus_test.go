@@ -93,6 +93,10 @@ var wktCorpus = map[int]corpusTestCase{
 		WKT:      "LINESTRING(1 1,2 2,3 2,3 3,0 0)",
 		IsSimple: No,
 	},
+	215: {
+		WKT:      "LINESTRING(0 0,1 1,2 2)",
+		IsSimple: Yes,
+	},
 
 	// Polygon
 	301: {
