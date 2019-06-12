@@ -7,21 +7,18 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 
 ## Feature Checklist
 
-### Types
-
-- [x] Point
-- [x] LineString
-- [x] Line
-- [x] LinearRing
-- [/] Polygon
-- [x] MultiPoint
-- [x] MultiLineString
-- [/] MultiPolygon (non-trivial)
-- [x] GeometryCollection
-- [ ] TIN
-- [ ] Triangle
-- [ ] PolyhedralSurface
-
+| Type                       | Geometry Assertions |
+| ---                        | ---                 |
+| Point                      | ✅                  |
+| Line                       | ✅                  |
+| LineString                 | ✅                  |
+| LinearRing                 | ✅                  |
+| Polygon                    | ⚠️                   |
+| MultiPoint                 | ✅                  |
+| MultiLineString            | ✅                  |
+| MultiPolygon (non-trivial) | ⚠️                   |
+| GeometryCollection         | ✅                  |
+                                 
 ### Geometry Attributes
 
 - [ ] Dimension
@@ -31,12 +28,14 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 - [x] AsText
 - [ ] AsBinary
 - [ ] IsEmpty
-- [/] IsSimple
+- [ ] IsSimple
 - [ ] Is3D
 - [ ] IsMeasured
 - [ ] Boundary
 
 ### Spatial Relationships
+
+Matrix:
 
 - [ ] Equals
 - [ ] Disjoint
@@ -47,29 +46,64 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 - [ ] Contains
 - [ ] Overlaps
 - [ ] Relate
+
+### Measures on Geometry
+
 - [ ] LocateAlong
 - [ ] LocateBetween
 
 ### Spatial Analysis
 
+Matrix
+
 - [ ] Distance
 - [ ] Buffer
 - [ ] ConvexHull
-- [ ] Intersection
+- [ ] Intersection (done for Line:Line)
 - [ ] Union
 - [ ] Difference
 - [ ] SymDifference
 
 ### Type Specific Methods
 
-TODO
+#### Geometry Collection
 
-## TODO
+- [ ] NumGeometries
+- [ ] GeometryN
 
-- Implement type construction constraints
-- 2D, Z, M, ZM points.
-- Spatial Reference Systems.
-- Type properties
-- Predicates
-- Operators
-- WKB
+#### Point
+
+- [ ] X
+- [ ] Y
+- [ ] Z
+- [ ] M
+
+#### Curve (Line, LineString, LinearRing)
+
+- [ ] Length
+- [ ] StartPoint
+- [ ] EndPoint
+- [ ] IsClosed
+- [ ] IsRing
+- [ ] NumPoints
+- [ ] PointN
+
+#### MultiCurve (MultiLineString)
+
+- [ ] IsClosed
+- [ ] Length
+
+#### Surface (Polygon)
+
+- [ ] Area
+- [ ] Centroid
+- [ ] PointOnSurface
+- [ ] ExteriorRing
+- [ ] NumInteriorRing
+- [ ] InteriorRingN
+
+#### MultiSurface (MultiPolygon)
+
+- [ ] Area
+- [ ] Centroid
+- [ ] PointOnSurface
