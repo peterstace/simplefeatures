@@ -73,38 +73,64 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 // through the same point twice (with the possible exception of the two
 // endpoints).
 func (s LineString) IsSimple() bool {
-	// TODO: I'm not happy with this algorithm. It doesn't feel very elegant. A
-	// better approach may be to implement it in terms of the Line type.
+	// 1. Build Lines
+	// 2. Check for pairwise intersection.
+	//  a. Point is allowed if lines adjacent.
+	//  b. Start to end is allowed if first and last line.
+	var lines []Line
 	n := len(s.pts)
-	for i := 0; i < n-2; i++ {
-		if s.pts[i].XY == s.pts[i+1].XY || s.pts[i+1].XY == s.pts[i+2].XY {
+	for i := 0; i < n-1; i++ {
+		if s.pts[i].XY == s.pts[i+1].XY {
 			continue
 		}
-		if parallel(
-			s.pts[i].XY,
-			s.pts[i+1].XY,
-			s.pts[i+1].XY,
-			s.pts[i+2].XY,
-		) {
-			return false
+		ln, err := NewLine(s.pts[i], s.pts[i+1])
+		if err != nil {
+			panic(err)
+		}
+		lines = append(lines, ln)
+	}
+	n = len(lines)
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
+			intersection := lines[i].Intersection(lines[j])
+			// TODO: need equals
 		}
 	}
-	for i := 0; i < n-3; i++ {
-		for j := i + 2; j < n-1; j++ {
-			if i == 0 && j == n-2 && s.pts[0].XY == s.pts[n-1].XY {
+
+	/*
+		// TODO: I'm not happy with this algorithm. It doesn't feel very elegant. A
+		// better approach may be to implement it in terms of the Line type.
+		n := len(s.pts)
+		for i := 0; i < n-2; i++ {
+			if s.pts[i].XY == s.pts[i+1].XY || s.pts[i+1].XY == s.pts[i+2].XY {
 				continue
 			}
-			if intersect(
+			if parallel(
 				s.pts[i].XY,
 				s.pts[i+1].XY,
-				s.pts[j].XY,
-				s.pts[j+1].XY,
+				s.pts[i+1].XY,
+				s.pts[i+2].XY,
 			) {
 				return false
 			}
 		}
-	}
-	return true
+		for i := 0; i < n-3; i++ {
+			for j := i + 2; j < n-1; j++ {
+				if i == 0 && j == n-2 && s.pts[0].XY == s.pts[n-1].XY {
+					continue
+				}
+				if intersect(
+					s.pts[i].XY,
+					s.pts[i+1].XY,
+					s.pts[j].XY,
+					s.pts[j+1].XY,
+				) {
+					return false
+				}
+			}
+		}
+		return true
+	*/
 }
 
 // parrallel tests if two line segments are parrallel with each other. The
