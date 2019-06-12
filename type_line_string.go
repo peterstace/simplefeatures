@@ -92,45 +92,39 @@ func (s LineString) IsSimple() bool {
 	n = len(lines)
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
+			// TODO: it would be better to use Dimension() and Equals() here
+			// once those are implemented.
 			intersection := lines[i].Intersection(lines[j])
-			// TODO: need equals
-		}
-	}
-
-	/*
-		// TODO: I'm not happy with this algorithm. It doesn't feel very elegant. A
-		// better approach may be to implement it in terms of the Line type.
-		n := len(s.pts)
-		for i := 0; i < n-2; i++ {
-			if s.pts[i].XY == s.pts[i+1].XY || s.pts[i+1].XY == s.pts[i+2].XY {
-				continue
-			}
-			if parallel(
-				s.pts[i].XY,
-				s.pts[i+1].XY,
-				s.pts[i+1].XY,
-				s.pts[i+2].XY,
-			) {
-				return false
-			}
-		}
-		for i := 0; i < n-3; i++ {
-			for j := i + 2; j < n-1; j++ {
-				if i == 0 && j == n-2 && s.pts[0].XY == s.pts[n-1].XY {
-					continue
-				}
-				if intersect(
-					s.pts[i].XY,
-					s.pts[i+1].XY,
-					s.pts[j].XY,
-					s.pts[j+1].XY,
-				) {
+			switch intersection := intersection.(type) {
+			case Point:
+				if i+1 == j {
+					// Adjacent lines will intersect at a point due to
+					// construction, so this case is okay.
+				} else if i == 0 && j == n-1 {
+					// The first and last segment are allowed to intersect at a
+					// point, so long as that point is the start of the first
+					// segment and the end of the last segment (i.e. a linear
+					// ring).
+					if intersection.coords.XY != lines[i].a.XY || intersection.coords.XY != lines[j].b.XY {
+						return false
+					}
+				} else {
+					// Any other point intersection (e.g. looping back on
+					// itself at a point) is disallowed for simple linestrings.
 					return false
 				}
+			case Line:
+				return false
+			case GeometryCollection:
+				if len(intersection.geoms) != 0 {
+					return false
+				}
+			default:
+				panic("unexpected intersection type")
 			}
 		}
-		return true
-	*/
+	}
+	return true
 }
 
 // parrallel tests if two line segments are parrallel with each other. The
