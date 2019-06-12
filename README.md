@@ -7,32 +7,18 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 
 ## Feature Checklist
 
-| Type                       | Geometry Assertions |
-| ---                        | ---                 |
-| Point                      | ✅                  |
-| Line                       | ✅                  |
-| LineString                 | ✅                  |
-| LinearRing                 | ✅                  |
-| Polygon                    | ⚠️                   |
-| MultiPoint                 | ✅                  |
-| MultiLineString            | ✅                  |
-| MultiPolygon (non-trivial) | ⚠️                   |
-| GeometryCollection         | ✅                  |
+| Type               | Assertions | Dimension | GeometryType | SRID | Envelope | AsText | AsBinary | IsEmpty | IsSimple | Is3D | IsMeasured | Boundary |
+| ---                | ---        | ---       | ---          | ---  | ---      | ---    | ---      | ---     | ---      | ---  | ---        | ---      |
+| Point              | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
+| Line               | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
+| LineString         | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
+| LinearRing         | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
+| Polygon            | ⚠️          | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
+| MultiPoint         | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
+| MultiLineString    | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
+| MultiPolygon       | ⚠️          | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
+| GeometryCollection | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
                                  
-### Geometry Attributes
-
-- [ ] Dimension
-- [ ] GeometryType
-- [ ] SRID
-- [ ] Envelope
-- [x] AsText
-- [ ] AsBinary
-- [ ] IsEmpty
-- [ ] IsSimple
-- [ ] Is3D
-- [ ] IsMeasured
-- [ ] Boundary
-
 ### Spatial Relationships
 
 Matrix:
