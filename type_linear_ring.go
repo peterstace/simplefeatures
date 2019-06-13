@@ -42,3 +42,9 @@ func (r LinearRing) IsSimple() bool {
 func (r LinearRing) Intersection(Geometry) Geometry {
 	panic("not implemented")
 }
+
+// IsEmpty always returns false. LinearRings cannot be empty due to their
+// assertions, in particular that LinearRings must be closed.
+func (r LinearRing) IsEmpty() bool {
+	return false
+}

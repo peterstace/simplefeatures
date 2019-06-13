@@ -9,15 +9,15 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 
 | Type               | Assertions | Dimension | GeometryType | SRID | Envelope | AsText | AsBinary | IsEmpty | IsSimple | Is3D | IsMeasured | Boundary |
 | ---                | ---        | ---       | ---          | ---  | ---      | ---    | ---      | ---     | ---      | ---  | ---        | ---      |
-| Point              | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
-| Line               | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
-| LineString         | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ✅       | ❌   | ❌         | ❌       |
-| LinearRing         | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
-| Polygon            | ⚠️          | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
-| MultiPoint         | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
-| MultiLineString    | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
-| MultiPolygon       | ⚠️          | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
-| GeometryCollection | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ❌      | ❌       | ❌   | ❌         | ❌       |
+| Point              | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
+| Line               | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
+| LineString         | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ❌       |
+| LinearRing         | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
+| Polygon            | ⚠️          | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
+| MultiPoint         | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
+| MultiLineString    | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
+| MultiPolygon       | ⚠️          | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
+| GeometryCollection | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
                                  
 ### Spatial Relationships
 
@@ -98,7 +98,7 @@ Matrix:
 | Point/MultiLineString                 | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
 | Point/MultiPolygon                    | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
 | Point/GeometryCollection              | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Line/Line                             | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
+| Line/Line                             | ❌       | ❌     | ❌         | ✅           | ❌    | ❌         | ❌            |
 | Line/LineString                       | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
 | Line/LinearRing                       | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
 | Line/Polygon                          | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |

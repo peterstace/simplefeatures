@@ -151,3 +151,7 @@ func (s LineString) IsClosed() bool {
 func (s LineString) Intersection(Geometry) Geometry {
 	panic("not implemented")
 }
+
+func (s LineString) IsEmpty() bool {
+	return len(s.pts) == 0
+}

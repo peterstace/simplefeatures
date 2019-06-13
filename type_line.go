@@ -52,3 +52,7 @@ func (n Line) Intersection(g Geometry) Geometry {
 		panic("not implemented")
 	}
 }
+
+func (n Line) IsEmpty() bool {
+	return false
+}

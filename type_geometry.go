@@ -16,4 +16,7 @@ type Geometry interface {
 	// Intersection returns a geometric object that represents the point set
 	// intersection of this geometry with another geometry.
 	Intersection(Geometry) Geometry
+
+	// IsEmpty returns true if this object an empty geometry.
+	IsEmpty() bool
 }

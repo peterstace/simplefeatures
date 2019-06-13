@@ -49,3 +49,7 @@ func (m MultiPolygon) IsSimple() bool {
 func (m MultiPolygon) Intersection(Geometry) Geometry {
 	panic("not implemented")
 }
+
+func (m MultiPolygon) IsEmpty() bool {
+	return len(m.polys) == 0
+}

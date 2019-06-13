@@ -37,3 +37,12 @@ func (c GeometryCollection) IsSimple() bool {
 func (c GeometryCollection) Intersection(Geometry) Geometry {
 	panic("not implemented")
 }
+
+func (c GeometryCollection) IsEmpty() bool {
+	for _, g := range c.geoms {
+		if !g.IsEmpty() {
+			return false
+		}
+	}
+	return true
+}

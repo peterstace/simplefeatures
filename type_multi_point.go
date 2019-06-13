@@ -48,3 +48,7 @@ func (m MultiPoint) IsSimple() bool {
 func (m MultiPoint) Intersection(Geometry) Geometry {
 	panic("not implemented")
 }
+
+func (m MultiPoint) IsEmpty() bool {
+	return len(m.pts) == 0
+}

@@ -47,3 +47,7 @@ func (m MultiLineString) IsSimple() bool {
 func (m MultiLineString) Intersection(Geometry) Geometry {
 	panic("not implemented")
 }
+
+func (m MultiLineString) IsEmpty() bool {
+	return len(m.lines) == 0
+}
