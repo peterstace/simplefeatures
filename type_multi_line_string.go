@@ -49,5 +49,17 @@ func (m MultiLineString) Intersection(Geometry) Geometry {
 }
 
 func (m MultiLineString) IsEmpty() bool {
-	return len(m.lines) == 0
+	for _, ln := range m.lines {
+		if !ln.IsEmpty() {
+			return false
+		}
+	}
+	return true
+}
+
+func (m MultiLineString) Dimension() int {
+	if m.IsEmpty() {
+		return 0
+	}
+	return 1
 }

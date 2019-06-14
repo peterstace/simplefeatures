@@ -52,3 +52,7 @@ func (m MultiPoint) Intersection(Geometry) Geometry {
 func (m MultiPoint) IsEmpty() bool {
 	return len(m.pts) == 0
 }
+
+func (m MultiPoint) Dimension() int {
+	return 0
+}

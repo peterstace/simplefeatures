@@ -92,3 +92,10 @@ func (p Polygon) Intersection(Geometry) Geometry {
 func (p Polygon) IsEmpty() bool {
 	return p.empty
 }
+
+func (p Polygon) Dimension() int {
+	if p.empty {
+		return 0
+	}
+	return 2
+}

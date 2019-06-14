@@ -56,3 +56,7 @@ func (n Line) Intersection(g Geometry) Geometry {
 func (n Line) IsEmpty() bool {
 	return false
 }
+
+func (n Line) Dimension() int {
+	return 1
+}

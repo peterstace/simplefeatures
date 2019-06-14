@@ -7,7 +7,7 @@ import (
 
 // LineString is a curve defined by linear interpolation between a finite set
 // of points. Each consecutive pair of points defines a line segment. It must
-// contain at least 2 distinct points.
+// contain either 0 points, or at least 2 distinct points.
 type LineString struct {
 	pts []Coordinates
 }
@@ -154,4 +154,11 @@ func (s LineString) Intersection(Geometry) Geometry {
 
 func (s LineString) IsEmpty() bool {
 	return len(s.pts) == 0
+}
+
+func (s LineString) Dimension() int {
+	if len(s.pts) == 0 {
+		return 0
+	}
+	return 1
 }

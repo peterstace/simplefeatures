@@ -46,3 +46,11 @@ func (c GeometryCollection) IsEmpty() bool {
 	}
 	return true
 }
+
+func (c GeometryCollection) Dimension() int {
+	dim := 0
+	for _, g := range c.geoms {
+		dim = max(dim, g.Dimension())
+	}
+	return dim
+}

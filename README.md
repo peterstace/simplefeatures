@@ -9,15 +9,15 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 
 | Type               | Assertions | Dimension | GeometryType | SRID | Envelope | AsText | AsBinary | IsEmpty | IsSimple | Is3D | IsMeasured | Boundary |
 | ---                | ---        | ---       | ---          | ---  | ---      | ---    | ---      | ---     | ---      | ---  | ---        | ---      |
-| Point              | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
-| Line               | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
-| LineString         | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ❌       |
-| LinearRing         | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
-| Polygon            | ⚠️          | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
-| MultiPoint         | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
-| MultiLineString    | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
-| MultiPolygon       | ⚠️          | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
-| GeometryCollection | ✅         | ❌        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ❌       | ❌   | ❌         | ❌       |
+| Point              | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
+| Line               | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
+| LineString         | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ❌       |
+| LinearRing         | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
+| Polygon            | ⚠️          | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
+| MultiPoint         | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
+| MultiLineString    | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
+| MultiPolygon       | ⚠️          | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
+| GeometryCollection | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
                                  
 ### Spatial Relationships
 
@@ -89,51 +89,51 @@ Matrix:
 
 | Type Combination                      | Distance | Buffer | ConvexHull | Intersection | Union | Difference | SymDifference |
 | ---                                   | ---      | ---    | ---        | ---          | ---   | ---        | ---           |
-| Point/Point                           | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Point/Line                            | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Point/LineString                      | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Point/LinearRing                      | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Point/Polygon                         | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Point/MultiPoint                      | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Point/MultiLineString                 | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Point/MultiPolygon                    | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Point/GeometryCollection              | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
+| Point/Point                           | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Point/Line                            | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Point/LineString                      | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Point/LinearRing                      | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Point/Polygon                         | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Point/MultiPoint                      | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Point/MultiLineString                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Point/MultiPolygon                    | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Point/GeometryCollection              | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | Line/Line                             | ❌       | ❌     | ❌         | ✅           | ❌    | ❌         | ❌            |
-| Line/LineString                       | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Line/LinearRing                       | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Line/Polygon                          | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Line/MultiPoint                       | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Line/MultiLineString                  | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Line/MultiPolygon                     | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Line/GeometryCollection               | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LineString/LineString                 | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LineString/LinearRing                 | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LineString/Polygon                    | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LineString/MultiPoint                 | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LineString/MultiLineString            | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LineString/MultiPolygon               | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LineString/GeometryCollection         | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LinearRing/LinearRing                 | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LinearRing/Polygon                    | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LinearRing/MultiPoint                 | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LinearRing/MultiLineString            | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LinearRing/MultiPolygon               | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| LinearRing/GeometryCollection         | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Polygon/Polygon                       | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Polygon/MultiPoint                    | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Polygon/MultiLineString               | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Polygon/MultiPolygon                  | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| Polygon/GeometryCollection            | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| MultiPoint/MultiPoint                 | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| MultiPoint/MultiLineString            | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| MultiPoint/MultiPolygon               | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| MultiPoint/GeometryCollection         | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| MultLineString/MultiLineString        | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| MultLineString/MultiPolygon           | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| MultLineString/GeometryCollection     | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| MultiPolygon/MultiPolygon             | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| MultiPolygon/GeometryCollection       | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
-| GeometryCollection/GeometryCollection | ❌       | ❌     | ❌         | ❌           | ❌    | ❌         | ❌            |
+| Line/LineString                       | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Line/LinearRing                       | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Line/Polygon                          | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Line/MultiPoint                       | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Line/MultiLineString                  | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Line/MultiPolygon                     | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Line/GeometryCollection               | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LineString/LineString                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LineString/LinearRing                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LineString/Polygon                    | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LineString/MultiPoint                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LineString/MultiLineString            | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LineString/MultiPolygon               | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LineString/GeometryCollection         | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LinearRing/LinearRing                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LinearRing/Polygon                    | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LinearRing/MultiPoint                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LinearRing/MultiLineString            | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LinearRing/MultiPolygon               | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LinearRing/GeometryCollection         | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Polygon/Polygon                       | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Polygon/MultiPoint                    | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Polygon/MultiLineString               | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Polygon/MultiPolygon                  | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Polygon/GeometryCollection            | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| MultiPoint/MultiPoint                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| MultiPoint/MultiLineString            | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| MultiPoint/MultiPolygon               | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| MultiPoint/GeometryCollection         | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| MultLineString/MultiLineString        | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| MultLineString/MultiPolygon           | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| MultLineString/GeometryCollection     | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| MultiPolygon/MultiPolygon             | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| MultiPolygon/GeometryCollection       | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| GeometryCollection/GeometryCollection | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 
 ### Type Specific Methods
 

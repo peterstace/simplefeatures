@@ -72,3 +72,8 @@ func (p Point) Intersection(Geometry) Geometry {
 func (p Point) IsEmpty() bool {
 	return p.empty
 }
+
+// Dimension returns 0 for both empty points and non-empty points.
+func (p Point) Dimension() int {
+	return 0
+}

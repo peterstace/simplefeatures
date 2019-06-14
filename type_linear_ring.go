@@ -48,3 +48,7 @@ func (r LinearRing) Intersection(Geometry) Geometry {
 func (r LinearRing) IsEmpty() bool {
 	return false
 }
+
+func (r LinearRing) Dimension() int {
+	return 1
+}

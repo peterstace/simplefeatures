@@ -51,5 +51,17 @@ func (m MultiPolygon) Intersection(Geometry) Geometry {
 }
 
 func (m MultiPolygon) IsEmpty() bool {
-	return len(m.polys) == 0
+	for _, p := range m.polys {
+		if !p.IsEmpty() {
+			return false
+		}
+	}
+	return true
+}
+
+func (m MultiPolygon) Dimension() int {
+	if m.IsEmpty() {
+		return 0
+	}
+	return 2
 }
