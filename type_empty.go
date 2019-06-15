@@ -13,11 +13,9 @@ func NewEmptyLineString() EmptySet {
 	return EmptySet{"POINTSTRING EMPTY"}
 }
 
-/*
 func NewEmptyPolygon() EmptySet {
-return EmptySet{"POLYGON EMPTY"}
+	return EmptySet{"POLYGON EMPTY"}
 }
-*/
 
 func (e EmptySet) AsText() []byte {
 	return []byte(e.wkt)

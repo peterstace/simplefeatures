@@ -12,13 +12,16 @@ func NewMultiPolygon(polys []Polygon) (MultiPolygon, error) {
 }
 
 func NewMultiPolygonFromCoords(coords [][][]Coordinates) (MultiPolygon, error) {
-	polys := make([]Polygon, len(coords))
-	for i, c := range coords {
+	var polys []Polygon
+	for _, c := range coords {
+		if len(c) == 0 {
+			continue
+		}
 		poly, err := NewPolygonFromCoords(c)
 		if err != nil {
 			return MultiPolygon{}, err
 		}
-		polys[i] = poly
+		polys = append(polys, poly)
 	}
 	return NewMultiPolygon(polys)
 }

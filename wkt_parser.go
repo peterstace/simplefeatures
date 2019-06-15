@@ -95,9 +95,13 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		}
 	case "POLYGON":
 		coords := p.nextPolygonText()
-		poly, err := NewPolygonFromCoords(coords)
-		p.check(err)
-		return poly
+		if len(coords) == 0 {
+			return NewEmptyPolygon()
+		} else {
+			poly, err := NewPolygonFromCoords(coords)
+			p.check(err)
+			return poly
+		}
 	case "MULTIPOINT":
 		coords := p.nextMultiPointText()
 		mp, err := NewMultiPointFromCoords(coords)

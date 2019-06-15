@@ -1,6 +1,7 @@
 package simplefeatures
 
 import (
+	"errors"
 	"strconv"
 )
 
@@ -9,7 +10,6 @@ import (
 type Polygon struct {
 	outer LinearRing
 	holes []LinearRing
-	empty bool
 }
 
 // NewPolygon creates a polygon given its outer and inner rings. No rings may
@@ -21,13 +21,9 @@ func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
 	return Polygon{outer: outer, holes: holes}, nil
 }
 
-func NewEmptyPolygon() Polygon {
-	return Polygon{empty: true}
-}
-
 func NewPolygonFromCoords(coords [][]Coordinates) (Polygon, error) {
 	if len(coords) == 0 {
-		return NewEmptyPolygon(), nil
+		return Polygon{}, errors.New("Polygon must have an outer ring")
 	}
 	outer, err := NewLinearRing(coords[0])
 	if err != nil {
@@ -50,16 +46,10 @@ func (p Polygon) AsText() []byte {
 
 func (p Polygon) AppendWKT(dst []byte) []byte {
 	dst = append(dst, []byte("POLYGON")...)
-	if p.empty {
-		dst = append(dst, ' ')
-	}
 	return p.appendWKTBody(dst)
 }
 
 func (p Polygon) appendWKTBody(dst []byte) []byte {
-	if p.empty {
-		return append(dst, []byte("EMPTY")...)
-	}
 	dst = append(dst, '(')
 	ring := func(r LinearRing) {
 		dst = append(dst, '(')
@@ -90,12 +80,9 @@ func (p Polygon) Intersection(Geometry) Geometry {
 }
 
 func (p Polygon) IsEmpty() bool {
-	return p.empty
+	return false
 }
 
 func (p Polygon) Dimension() int {
-	if p.empty {
-		return 0
-	}
 	return 2
 }
