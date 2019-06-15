@@ -110,8 +110,15 @@ func (s LineString) IsSimple() bool {
 				// point, so long as that point is the start of the first
 				// segment and the end of the last segment (i.e. a linear
 				// ring).
-				pt := intersection.(Point) // TODO use Equals
-				if pt.coords.XY != lines[i].a.XY || pt.coords.XY != lines[j].b.XY {
+				aPt, err := NewPointFromCoords(lines[i].a)
+				if err != nil {
+					panic(err)
+				}
+				bPt, err := NewPointFromCoords(lines[j].b)
+				if err != nil {
+					panic(err)
+				}
+				if !intersection.Equals(aPt) || !intersection.Equals(bPt) {
 					return false
 				}
 			} else {
