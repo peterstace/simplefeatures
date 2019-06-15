@@ -10,13 +10,16 @@ func NewMultiLineString(lines []LineString) MultiLineString {
 }
 
 func NewMultiLineStringFromCoords(coords [][]Coordinates) (MultiLineString, error) {
-	lines := make([]LineString, len(coords))
-	for i, c := range coords {
+	var lines []LineString
+	for _, c := range coords {
+		if len(c) == 0 {
+			continue
+		}
 		line, err := NewLineString(c)
 		if err != nil {
 			return MultiLineString{}, err
 		}
-		lines[i] = line
+		lines = append(lines, line)
 	}
 	return MultiLineString{lines}, nil
 }

@@ -38,21 +38,23 @@ func TestIsEmptyDimension(t *testing.T) {
 		{"GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(0 0,1 1))", false, 1},
 		{"GEOMETRYCOLLECTION(POLYGON((0 0,1 1,1 0,0 0)),POINT(1 1),LINESTRING(0 0,1 1))", false, 2},
 	} {
-		geom, err := UnmarshalWKT(strings.NewReader(tt.wkt))
-		if err != nil {
-			t.Fatal(err)
-		}
-		t.Run("IsEmpty_"+tt.wkt, func(t *testing.T) {
-			gotEmpty := geom.IsEmpty()
-			if gotEmpty != tt.wantEmpty {
-				t.Errorf("want=%v got=%v", tt.wantEmpty, gotEmpty)
+		t.Run(tt.wkt, func(t *testing.T) {
+			geom, err := UnmarshalWKT(strings.NewReader(tt.wkt))
+			if err != nil {
+				t.Fatal(err)
 			}
-		})
-		t.Run("Dimension_"+tt.wkt, func(t *testing.T) {
-			gotDim := geom.Dimension()
-			if gotDim != tt.wantDim {
-				t.Errorf("want=%v got=%v", tt.wantDim, gotDim)
-			}
+			t.Run("IsEmpty_"+tt.wkt, func(t *testing.T) {
+				gotEmpty := geom.IsEmpty()
+				if gotEmpty != tt.wantEmpty {
+					t.Errorf("want=%v got=%v", tt.wantEmpty, gotEmpty)
+				}
+			})
+			t.Run("Dimension_"+tt.wkt, func(t *testing.T) {
+				gotDim := geom.Dimension()
+				if gotDim != tt.wantDim {
+					t.Errorf("want=%v got=%v", tt.wantDim, gotDim)
+				}
+			})
 		})
 	}
 }

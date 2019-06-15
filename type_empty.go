@@ -9,11 +9,11 @@ func NewEmptyPoint() EmptySet {
 	return EmptySet{"POINT EMPTY"}
 }
 
-/*
 func NewEmptyLineString() EmptySet {
-return EmptySet{"POINTSTRING EMPTY"}
+	return EmptySet{"POINTSTRING EMPTY"}
 }
 
+/*
 func NewEmptyPolygon() EmptySet {
 return EmptySet{"POLYGON EMPTY"}
 }

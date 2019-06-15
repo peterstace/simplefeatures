@@ -81,11 +81,14 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		}
 	case "LINESTRING":
 		coords := p.nextLineStringText()
-		if len(coords) == 2 {
+		switch len(coords) {
+		case 0:
+			return NewEmptyLineString()
+		case 2:
 			ln, err := NewLine(coords[0], coords[1])
 			p.check(err)
 			return ln
-		} else {
+		default:
 			ls, err := NewLineString(coords)
 			p.check(err)
 			return ls

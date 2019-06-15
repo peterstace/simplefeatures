@@ -7,7 +7,7 @@ import (
 
 // LineString is a curve defined by linear interpolation between a finite set
 // of points. Each consecutive pair of points defines a line segment. It must
-// contain either 0 points, or at least 2 distinct points.
+// contain at least 2 distinct points.
 type LineString struct {
 	pts []Coordinates
 }
@@ -15,11 +15,6 @@ type LineString struct {
 // NewLineString creates a line string from the coordinates defining its
 // points.
 func NewLineString(pts []Coordinates) (LineString, error) {
-	// Empty line string.
-	if len(pts) == 0 {
-		return LineString{}, nil
-	}
-
 	for _, pt := range pts {
 		if err := pt.Validate(); err != nil {
 			return LineString{}, err
@@ -27,6 +22,10 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 	}
 
 	// Must have at least 2 distinct points.
+	err := errors.New("LineString must contain at least two distinct points")
+	if len(pts) == 0 {
+		return LineString{}, err
+	}
 	var twoDistinct bool
 	for _, pt := range pts[1:] {
 		if pt.XY != pts[0].XY {
@@ -35,7 +34,7 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 		}
 	}
 	if !twoDistinct {
-		return LineString{}, errors.New("LineString must contain either zero or at least two distinct points")
+		return LineString{}, err
 	}
 
 	return LineString{pts}, nil
@@ -125,24 +124,7 @@ func (s LineString) IsSimple() bool {
 	return true
 }
 
-// parrallel tests if two line segments are parrallel with each other. The
-// first line segment is [a,b] and the second is [c,d].
-func parallel(a, b, c, d XY) bool {
-	return (b.Y-a.Y)*(d.X-c.X) == (d.Y-c.Y)*(b.X-a.X)
-}
-
-// intersect checks if two line segments intersect. The first line segment is
-// [a,b] and the second is [c,d].
-func intersect(a, b, c, d XY) bool {
-	p := ((c.Y-d.Y)*(a.X-c.X) + (d.X-c.X)*(a.Y-c.Y)) / ((d.X-c.X)*(a.Y-b.Y) - (a.X-b.X)*(d.Y-c.Y))
-	q := ((a.Y-b.Y)*(a.X-c.X) + (b.X-a.X)*(a.Y-c.Y)) / ((d.X-c.X)*(a.Y-b.Y) - (a.X-b.X)*(d.Y-c.Y))
-	return p >= 0 && p <= 1 && q >= 0 && q <= 1
-}
-
 func (s LineString) IsClosed() bool {
-	if len(s.pts) == 0 {
-		return false
-	}
 	return s.pts[0] == s.pts[len(s.pts)-1]
 }
 
@@ -151,12 +133,9 @@ func (s LineString) Intersection(Geometry) Geometry {
 }
 
 func (s LineString) IsEmpty() bool {
-	return len(s.pts) == 0
+	return false
 }
 
 func (s LineString) Dimension() int {
-	if len(s.pts) == 0 {
-		return 0
-	}
 	return 1
 }
