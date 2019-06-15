@@ -145,12 +145,20 @@ func (p *parser) nextPoint() Coordinates {
 }
 
 func (p *parser) nextSignedNumericLiteral() float64 {
+	var negative bool
 	tok := p.nextToken()
+	if tok == "-" {
+		negative = true
+		tok = p.nextToken()
+	}
 	f, err := strconv.ParseFloat(tok, 64)
 	p.check(err)
 	// NaNs are not allowed by the WKT grammar.
 	if math.IsNaN(f) {
 		p.errorf("invalid signed numeric literal: %s", tok)
+	}
+	if negative {
+		f *= -1
 	}
 	return f
 }

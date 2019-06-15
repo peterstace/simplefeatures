@@ -71,6 +71,11 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 			want: must(NewPoint(30, 10)),
 		},
 		{
+			name: "point with negativen coords",
+			wkt:  "POINT (-30 -10)",
+			want: must(NewPoint(-30, -10)),
+		},
+		{
 			name: "empty point",
 			wkt:  "POINT EMPTY",
 			want: NewEmptyPoint(),
