@@ -54,3 +54,7 @@ func (c GeometryCollection) Dimension() int {
 	}
 	return dim
 }
+
+func (c GeometryCollection) Equals(other Geometry) bool {
+	return equals(c, other)
+}

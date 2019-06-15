@@ -68,3 +68,7 @@ func (m MultiPolygon) Dimension() int {
 	}
 	return 2
 }
+
+func (m MultiPolygon) Equals(other Geometry) bool {
+	return equals(m, other)
+}

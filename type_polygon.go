@@ -86,3 +86,7 @@ func (p Polygon) IsEmpty() bool {
 func (p Polygon) Dimension() int {
 	return 2
 }
+
+func (p Polygon) Equals(other Geometry) bool {
+	return equals(p, other)
+}

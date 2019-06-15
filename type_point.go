@@ -55,3 +55,7 @@ func (p Point) IsEmpty() bool {
 func (p Point) Dimension() int {
 	return 0
 }
+
+func (p Point) Equals(other Geometry) bool {
+	return equals(p, other)
+}

@@ -24,4 +24,8 @@ type Geometry interface {
 	// geometries, 0 for points, 1 for curves, and 2 for surfaces. For mixed
 	// geometries, it is the maximum dimension over the collection.
 	Dimension() int
+
+	// Equals checks if this geometry is equal to another geometrie. Two
+	// geometries are equal if they contain exactly the same points.
+	Equals(Geometry) bool
 }

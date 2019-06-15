@@ -41,3 +41,7 @@ func (e EmptySet) IsEmpty() bool {
 func (e EmptySet) Dimension() int {
 	return 0
 }
+
+func (e EmptySet) Equals(other Geometry) bool {
+	return equals(e, other)
+}
