@@ -21,8 +21,6 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
                                  
 ### Spatial Relationships
 
-Matrix:
-
 | Type Combination                      | Equals | Disjoin | Intersects | Touches | Crosses | Within | Contains | Overlaps | Relate |
 | ---                                   | ---    | ---     | ---        | ---     | ---     | ---    | ---      | ---      | ---    |
 | Point/Point                           | ❌     | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
