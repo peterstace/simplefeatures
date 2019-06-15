@@ -145,7 +145,6 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 			want: NewMultiPoint([]Point{
 				must(NewPoint(10, 40)).(Point),
 				must(NewPoint(40, 30)).(Point),
-				NewEmptyPoint(),
 			}),
 		},
 		{

@@ -193,21 +193,6 @@ var wktCorpus = map[int]corpusTestCase{
 	},
 }
 
-func TestWKTIdentity(t *testing.T) {
-	for id, tt := range wktCorpus {
-		t.Run(strconv.Itoa(id), func(t *testing.T) {
-			geom, err := UnmarshalWKT(strings.NewReader(tt.WKT))
-			if err != nil {
-				t.Fatalf("could not unmarshal WKT: %v", err)
-			}
-			out := geom.AsText()
-			if string(out) != tt.WKT {
-				t.Errorf("WKTs are different:\ninput:  %s\noutput: %s", tt.WKT, string(out))
-			}
-		})
-	}
-}
-
 func TestIsSimple(t *testing.T) {
 	for id, tt := range wktCorpus {
 		if !tt.IsSimple.Set {

@@ -72,9 +72,13 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 	switch tok := p.nextToken(); strings.ToUpper(tok) {
 	case "POINT":
 		coords := p.nextPointText()
-		pt, err := NewPointFromOptionalCoords(coords)
-		p.check(err)
-		return pt
+		if coords.Empty {
+			return NewEmptyPoint()
+		} else {
+			pt, err := NewPointFromCoords(coords.Value)
+			p.check(err)
+			return pt
+		}
 	case "LINESTRING":
 		coords := p.nextLineStringText()
 		if len(coords) == 2 {

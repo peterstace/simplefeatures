@@ -11,13 +11,16 @@ func NewMultiPoint(pts []Point) MultiPoint {
 }
 
 func NewMultiPointFromCoords(coords []OptionalCoordinates) (MultiPoint, error) {
-	pts := make([]Point, len(coords))
-	for i, c := range coords {
-		pt, err := NewPointFromOptionalCoords(c)
+	var pts []Point
+	for _, c := range coords {
+		if c.Empty {
+			continue
+		}
+		pt, err := NewPointFromCoords(c.Value)
 		if err != nil {
 			return MultiPoint{}, err
 		}
-		pts[i] = pt
+		pts = append(pts, pt)
 	}
 	return MultiPoint{pts}, nil
 }
