@@ -139,3 +139,7 @@ func (s LineString) IsEmpty() bool {
 func (s LineString) Dimension() int {
 	return 1
 }
+
+func (s LineString) Equals(other Geometry) bool {
+	return equals(s, other)
+}

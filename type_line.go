@@ -60,3 +60,7 @@ func (n Line) IsEmpty() bool {
 func (n Line) Dimension() int {
 	return 1
 }
+
+func (n Line) Equals(other Geometry) bool {
+	return equals(n, other)
+}

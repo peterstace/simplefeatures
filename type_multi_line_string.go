@@ -61,3 +61,7 @@ func (m MultiLineString) Dimension() int {
 	}
 	return 1
 }
+
+func (m MultiLineString) Equals(other Geometry) bool {
+	return equals(m, other)
+}

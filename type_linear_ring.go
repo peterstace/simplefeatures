@@ -52,3 +52,7 @@ func (r LinearRing) IsEmpty() bool {
 func (r LinearRing) Dimension() int {
 	return 1
 }
+
+func (r LinearRing) Equals(other Geometry) bool {
+	return equals(r, other)
+}

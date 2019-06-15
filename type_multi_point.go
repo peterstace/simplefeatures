@@ -59,3 +59,7 @@ func (m MultiPoint) IsEmpty() bool {
 func (m MultiPoint) Dimension() int {
 	return 0
 }
+
+func (m MultiPoint) Equals(other Geometry) bool {
+	return equals(m, other)
+}
