@@ -92,35 +92,33 @@ func (s LineString) IsSimple() bool {
 	n = len(lines)
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
-			// TODO: it would be better to use Dimension() and Equals() here
-			// once those are implemented.
 			intersection := lines[i].Intersection(lines[j])
-			switch intersection := intersection.(type) {
-			case Point:
-				if i+1 == j {
-					// Adjacent lines will intersect at a point due to
-					// construction, so this case is okay.
-				} else if i == 0 && j == n-1 {
-					// The first and last segment are allowed to intersect at a
-					// point, so long as that point is the start of the first
-					// segment and the end of the last segment (i.e. a linear
-					// ring).
-					if intersection.coords.XY != lines[i].a.XY || intersection.coords.XY != lines[j].b.XY {
-						return false
-					}
-				} else {
-					// Any other point intersection (e.g. looping back on
-					// itself at a point) is disallowed for simple linestrings.
-					return false
-				}
-			case Line:
+			if intersection.IsEmpty() {
+				continue
+			}
+			if intersection.Dimension() >= 1 {
+				// two overlapping line segments
 				return false
-			case GeometryCollection:
-				if len(intersection.geoms) != 0 {
+			}
+			// The intersection must be a single point.
+			if i+1 == j {
+				// Adjacent lines will intersect at a point due to
+				// construction, so this case is okay.
+				continue
+			}
+			if i == 0 && j == n-1 {
+				// The first and last segment are allowed to intersect at a
+				// point, so long as that point is the start of the first
+				// segment and the end of the last segment (i.e. a linear
+				// ring).
+				pt := intersection.(Point) // TODO use Equals
+				if pt.coords.XY != lines[i].a.XY || pt.coords.XY != lines[j].b.XY {
 					return false
 				}
-			default:
-				panic("unexpected intersection type")
+			} else {
+				// Any other point intersection (e.g. looping back on
+				// itself at a point) is disallowed for simple linestrings.
+				return false
 			}
 		}
 	}
