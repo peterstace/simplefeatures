@@ -9,10 +9,11 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 
 | Type               | Assertions | Dimension | GeometryType | SRID | Envelope | AsText | AsBinary | IsEmpty | IsSimple | Is3D | IsMeasured | Boundary |
 | ---                | ---        | ---       | ---          | ---  | ---      | ---    | ---      | ---     | ---      | ---  | ---        | ---      |
+| Empty              | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
 | Point              | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
 | Line               | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
 | LineString         | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ❌       |
-| LinearRing         | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
+| LinearRing         | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ❌       |
 | Polygon            | ⚠️          | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
 | MultiPoint         | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
 | MultiLineString    | ✅         | ✅        | ❌           | ❌   | ❌       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ❌       |
@@ -23,6 +24,16 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 
 | Type Combination                      | Equals | Disjoin | Intersects | Touches | Crosses | Within | Contains | Overlaps | Relate |
 | ---                                   | ---    | ---     | ---        | ---     | ---     | ---    | ---      | ---      | ---    |
+| Empty/Empty                           | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
+| Empty/Point                           | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
+| Empty/Line                            | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
+| Empty/LineString                      | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
+| Empty/LinearRing                      | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
+| Empty/Polygon                         | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
+| Empty/MultiPoint                      | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
+| Empty/MultiLineString                 | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
+| Empty/MultiPolygon                    | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
+| Empty/GeometryCollection              | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
 | Point/Point                           | ✅     | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
 | Point/Line                            | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
 | Point/LineString                      | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
@@ -73,6 +84,7 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 
 | Type               | LocateAlong | LocateBetween |
 | ---                | ---         | ---           |
+| Empty              | ❌          | ❌            |
 | Point              | ❌          | ❌            |
 | Line               | ❌          | ❌            |
 | LineString         | ❌          | ❌            |
@@ -87,6 +99,16 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 
 | Type Combination                      | Distance | Buffer | ConvexHull | Intersection | Union | Difference | SymDifference |
 | ---                                   | ---      | ---    | ---        | ---          | ---   | ---        | ---           |
+| Empty/Empty                           | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Empty/Point                           | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Empty/Line                            | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Empty/LineString                      | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Empty/LinearRing                      | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Empty/Polygon                         | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Empty/MultiPoint                      | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Empty/MultiLineString                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Empty/MultiPolygon                    | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Empty/GeometryCollection              | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | Point/Point                           | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | Point/Line                            | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | Point/LineString                      | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
