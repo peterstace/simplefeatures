@@ -8,10 +8,11 @@ import (
 	. "github.com/peterstace/simplefeatures"
 )
 
-func TestIntersectionLineWithLine(t *testing.T) {
+func TestIntersection(t *testing.T) {
 	for i, tt := range []struct {
 		in1, in2, out string
 	}{
+		// Line/Line
 		{"LINESTRING(0 0,0 1)", "LINESTRING(0 0,1 0)", "POINT(0 0)"},
 		{"LINESTRING(0 1,1 1)", "LINESTRING(1 0,1 1)", "POINT(1 1)"},
 		{"LINESTRING(0 1,0 0)", "LINESTRING(0 0,1 0)", "POINT(0 0)"},
@@ -30,6 +31,14 @@ func TestIntersectionLineWithLine(t *testing.T) {
 		{"LINESTRING(0 0,1 0)", "LINESTRING(1 0,0 0)", "LINESTRING(0 0,1 0)"},
 		{"LINESTRING(0 0,1 0)", "LINESTRING(0 0,1 0)", "LINESTRING(0 0,1 0)"},
 		{"LINESTRING(1 1,2 2)", "LINESTRING(0 0,3 3)", "LINESTRING(1 1,2 2)"},
+
+		// LinearRing/LinearRing
+		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(2 2,3 2,3 3,2 3,2 2)", "GEOMETRYCOLLECTION EMPTY"},
+		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(1 1,2 1,2 2,1 2,1 1)", "POINT(1 1)"},
+		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(1 0,2 0,2 1,1 1,1 0)", "LINESTRING(1 0,1 1)"},
+		{"LINEARRING(0 0,1 0,0 1,0 0)", "LINEARRING(1 0,1 1,0 1,1 0)", "LINESTRING(0 1,1 0)"},
+		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(0.5 0.5,1.5 0.5,1.5 1.5,0.5 1.5,0.5 0.5)", "MULTIPOINT((0.5 1),(1 0.5))"},
+		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(1 0,2 0,2 1,1 1,1.5 0.5,1 0.5,1 0)", "GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(1 0,1 0.5))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in1g, err := UnmarshalWKT(strings.NewReader(tt.in1))
@@ -43,7 +52,7 @@ func TestIntersectionLineWithLine(t *testing.T) {
 			result := in1g.Intersection(in2g)
 			got := string(result.AsText())
 			if got != tt.out {
-				t.Errorf("got=%v want=%v", got, tt.out)
+				t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got)
 			}
 		})
 	}

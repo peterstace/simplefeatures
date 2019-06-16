@@ -10,6 +10,13 @@ func intersection(g1, g2 Geometry) Geometry {
 	if ok1 && ok2 {
 		return intersectLineWithLine(ln1, ln2)
 	}
+
+	ring1, ok1 := g1.(LinearRing)
+	ring2, ok2 := g2.(LinearRing)
+	if ok1 && ok2 {
+		return intersectionLinearRingWithLinearRing(ring1, ring2)
+	}
+
 	panic("not implemented")
 }
 
@@ -120,4 +127,17 @@ func sub(a, b XY) XY {
 
 func cross(a, b XY) float64 {
 	return a.X*b.Y - a.Y*b.X
+}
+
+func intersectionLinearRingWithLinearRing(r1, r2 LinearRing) Geometry {
+	var collection []Geometry
+	for _, ln1 := range r1.ls.lines {
+		for _, ln2 := range r2.ls.lines {
+			inter := ln1.Intersection(ln2)
+			if !inter.IsEmpty() {
+				collection = append(collection, inter)
+			}
+		}
+	}
+	return canonicalise(collection)
 }
