@@ -90,6 +90,21 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 			})),
 		},
 		{
+			name: "empty linear ring",
+			wkt:  "LINEARRING EMPTY",
+			want: NewEmptyLineString(),
+		},
+		{
+			name: "populated linear ring",
+			wkt:  "LINEARRING(0 0,1 0,0 1,0 0)",
+			want: must(NewLinearRing([]Coordinates{
+				{XY{0, 0}},
+				{XY{1, 0}},
+				{XY{0, 1}},
+				{XY{0, 0}},
+			})),
+		},
+		{
 			name: "basic polygon (wikipedia)",
 			wkt:  "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))",
 			want: must(NewPolygon(must(NewLinearRing([]Coordinates{
@@ -235,7 +250,7 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 				t.Fatalf("unexpected error: %v", err)
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("want=%#v got=%#v", tt.want, got)
+				t.Errorf("\nwant=%#v\ngot=%#v\n", tt.want, got)
 			}
 		})
 	}

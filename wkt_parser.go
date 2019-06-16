@@ -93,6 +93,19 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 			p.check(err)
 			return ls
 		}
+	case "LINEARRING":
+		// LinearRings aren't standard WKT, but are supported by some other OGC
+		// style libraries. To attain maximum portability, we allow LINEARRING
+		// WKTs to be parsed, but marshal them out as LINESTRINGs.
+		coords := p.nextLineStringText() // re-use line string production
+		switch len(coords) {
+		case 0:
+			return NewEmptyLineString()
+		default:
+			ls, err := NewLinearRing(coords)
+			p.check(err)
+			return ls
+		}
 	case "POLYGON":
 		coords := p.nextPolygonText()
 		if len(coords) == 0 {
