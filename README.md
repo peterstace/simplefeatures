@@ -133,7 +133,7 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 | LineString/MultiLineString            | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | LineString/MultiPolygon               | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | LineString/GeometryCollection         | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
-| LinearRing/LinearRing                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LinearRing/LinearRing                 | ❌       | ❌     | ❌         | ✅           | ❌    | ❌         | ❌            |
 | LinearRing/Polygon                    | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | LinearRing/MultiPoint                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | LinearRing/MultiLineString            | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
