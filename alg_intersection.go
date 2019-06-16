@@ -42,27 +42,59 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	}
 
 	if colinear := cross(sub(b, a), sub(d, a)) == 0; colinear {
-		u := XY{
-			math.Max(math.Min(a.X, b.X), math.Min(c.X, d.X)),
-			math.Max(math.Min(a.Y, b.Y), math.Min(c.Y, d.Y)),
+		// TODO: use a proper bbox type
+		abBB := bbox{
+			min: XY{math.Min(a.X, b.X), math.Min(a.Y, b.Y)},
+			max: XY{math.Max(a.X, b.X), math.Max(a.Y, b.Y)},
 		}
-		v := XY{
-			math.Min(math.Max(a.X, b.X), math.Max(c.X, d.X)),
-			math.Min(math.Max(a.Y, b.Y), math.Max(c.Y, d.Y)),
+		cdBB := bbox{
+			min: XY{math.Min(c.X, d.X), math.Min(c.Y, d.Y)},
+			max: XY{math.Max(c.X, d.X), math.Max(c.Y, d.Y)},
 		}
-		if u.X > v.X || u.Y > v.Y {
+		if abBB.min.X > cdBB.max.X || abBB.max.X < cdBB.min.X ||
+			abBB.min.Y > cdBB.max.Y || abBB.max.Y < cdBB.min.Y {
 			// Line segments don't overlap at all.
 			return NewGeometryCollection(nil)
 		}
-		if u == v {
+
+		if abBB.max == cdBB.min {
 			// Line segments overlap at a point.
-			pt, err := NewPoint(u.X, u.Y)
+			pt, err := NewPoint(abBB.max.X, abBB.max.Y)
 			if err != nil {
 				panic(err)
 			}
 			return pt
 		}
+		if cdBB.max == abBB.min {
+			// Line segments overlap at a point.
+			pt, err := NewPoint(cdBB.max.X, cdBB.max.Y)
+			if err != nil {
+				panic(err)
+			}
+			return pt
+		}
+
 		// Line segments overlap over a line segment.
+		bb := bbox{
+			min: XY{
+				math.Max(abBB.min.X, cdBB.min.X),
+				math.Max(abBB.min.Y, cdBB.min.Y),
+			},
+			max: XY{
+				math.Min(abBB.max.X, cdBB.max.X),
+				math.Min(abBB.max.Y, cdBB.max.Y),
+			},
+		}
+		var (
+			u    = XY{bb.min.X, bb.min.Y}
+			v    = XY{bb.max.X, bb.max.Y}
+			rise = b.Y - a.Y
+			run  = b.X - a.X
+		)
+		if rise > 0 && run < 0 || rise < 0 && run > 0 {
+			u.X, v.X = v.X, u.X
+		}
+
 		ln, err := NewLine(Coordinates{u}, Coordinates{v})
 		if err != nil {
 			panic(err)
@@ -72,6 +104,10 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 
 	// Parrallel but not colinear, so cannot intersect anywhere.
 	return NewGeometryCollection(nil)
+}
+
+type bbox struct {
+	min, max XY
 }
 
 func dot(a, b XY) float64 {
