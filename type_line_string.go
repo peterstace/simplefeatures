@@ -46,16 +46,10 @@ func (s LineString) AsText() []byte {
 
 func (s LineString) AppendWKT(dst []byte) []byte {
 	dst = append(dst, []byte("LINESTRING")...)
-	if len(s.pts) == 0 {
-		dst = append(dst, ' ')
-	}
 	return s.appendWKTBody(dst)
 }
 
 func (s LineString) appendWKTBody(dst []byte) []byte {
-	if len(s.pts) == 0 {
-		return append(dst, []byte("EMPTY")...)
-	}
 	dst = append(dst, '(')
 	for i, pt := range s.pts {
 		dst = strconv.AppendFloat(dst, pt.X, 'f', -1, 64)
