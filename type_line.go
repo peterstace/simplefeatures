@@ -45,12 +45,7 @@ func (n Line) IsSimple() bool {
 }
 
 func (n Line) Intersection(g Geometry) Geometry {
-	switch g := g.(type) {
-	case Line:
-		return intersectLineWithLine(n, g)
-	default:
-		panic("not implemented")
-	}
+	return intersection(n, g)
 }
 
 func (n Line) IsEmpty() bool {

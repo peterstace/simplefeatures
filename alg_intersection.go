@@ -4,6 +4,15 @@ import (
 	"math"
 )
 
+func intersection(g1, g2 Geometry) Geometry {
+	ln1, ok1 := g1.(Line)
+	ln2, ok2 := g2.(Line)
+	if ok1 && ok2 {
+		return intersectLineWithLine(ln1, ln2)
+	}
+	panic("not implemented")
+}
+
 func intersectLineWithLine(n1, n2 Line) Geometry {
 	a := n1.a.XY
 	b := n1.b.XY

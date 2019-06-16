@@ -16,8 +16,9 @@ type Polygon struct {
 // cross each other, and can only intersect each with each other at a point.
 func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
 	// TODO: No rings may cross.
-	// TODO: Rings may intersect, but only at a point (and only as a tangent).
-	// TODO: check linear ring directions?
+	// TODO: Rings may intersect, but only at a single point
+	// TODO: must be connected
+	// TODO: all inner rings must be inside the outer ring
 	return Polygon{outer: outer, holes: holes}, nil
 }
 
@@ -75,8 +76,8 @@ func (p Polygon) IsSimple() bool {
 	panic("not implemented")
 }
 
-func (p Polygon) Intersection(Geometry) Geometry {
-	panic("not implemented")
+func (p Polygon) Intersection(g Geometry) Geometry {
+	return intersection(p, g)
 }
 
 func (p Polygon) IsEmpty() bool {

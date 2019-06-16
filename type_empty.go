@@ -29,9 +29,8 @@ func (e EmptySet) IsSimple() bool {
 	return true
 }
 
-func (e EmptySet) Intersection(Geometry) Geometry {
-	// TODO: global intersection dispatch?
-	return NewGeometryCollection(nil)
+func (e EmptySet) Intersection(g Geometry) Geometry {
+	return intersection(e, g)
 }
 
 func (e EmptySet) IsEmpty() bool {

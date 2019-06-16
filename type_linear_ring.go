@@ -39,8 +39,8 @@ func (r LinearRing) IsSimple() bool {
 	panic("not implemented")
 }
 
-func (r LinearRing) Intersection(Geometry) Geometry {
-	panic("not implemented")
+func (r LinearRing) Intersection(g Geometry) Geometry {
+	return intersection(r, g)
 }
 
 // IsEmpty always returns false. LinearRings cannot be empty due to their

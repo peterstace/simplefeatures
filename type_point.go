@@ -44,8 +44,8 @@ func (p Point) IsSimple() bool {
 	panic("not implemented")
 }
 
-func (p Point) Intersection(Geometry) Geometry {
-	panic("not implemented")
+func (p Point) Intersection(g Geometry) Geometry {
+	return intersection(p, g)
 }
 
 func (p Point) IsEmpty() bool {

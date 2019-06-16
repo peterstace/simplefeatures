@@ -34,8 +34,8 @@ func (c GeometryCollection) IsSimple() bool {
 	panic("not implemented")
 }
 
-func (c GeometryCollection) Intersection(Geometry) Geometry {
-	panic("not implemented")
+func (c GeometryCollection) Intersection(g Geometry) Geometry {
+	return intersection(c, g)
 }
 
 func (c GeometryCollection) IsEmpty() bool {
