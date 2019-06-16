@@ -9,7 +9,7 @@ import (
 // of points. Each consecutive pair of points defines a line segment. It must
 // contain at least 2 distinct points.
 type LineString struct {
-	pts []Coordinates
+	lines []Line
 }
 
 // NewLineString creates a line string from the coordinates defining its
@@ -37,7 +37,19 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 		return LineString{}, err
 	}
 
-	return LineString{pts}, nil
+	var lines []Line
+	for i := 0; i < len(pts)-1; i++ {
+		if pts[i].XY == pts[i+1].XY {
+			continue
+		}
+		ln, err := NewLine(pts[i], pts[i+1])
+		if err != nil {
+			panic(err)
+		}
+		lines = append(lines, ln)
+	}
+
+	return LineString{lines}, nil
 }
 
 func (s LineString) AsText() []byte {
@@ -51,14 +63,16 @@ func (s LineString) AppendWKT(dst []byte) []byte {
 
 func (s LineString) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
-	for i, pt := range s.pts {
-		dst = strconv.AppendFloat(dst, pt.X, 'f', -1, 64)
+	for _, ln := range s.lines {
+		dst = strconv.AppendFloat(dst, ln.a.X, 'f', -1, 64)
 		dst = append(dst, ' ')
-		dst = strconv.AppendFloat(dst, pt.Y, 'f', -1, 64)
-		if i != len(s.pts)-1 {
-			dst = append(dst, ',')
-		}
+		dst = strconv.AppendFloat(dst, ln.a.Y, 'f', -1, 64)
+		dst = append(dst, ',')
 	}
+	last := s.lines[len(s.lines)-1].b
+	dst = strconv.AppendFloat(dst, last.X, 'f', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, last.Y, 'f', -1, 64)
 	return append(dst, ')')
 }
 
@@ -66,26 +80,13 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 // through the same point twice (with the possible exception of the two
 // endpoints).
 func (s LineString) IsSimple() bool {
-	// 1. Build Lines
-	// 2. Check for pairwise intersection.
+	// 1. Check for pairwise intersection.
 	//  a. Point is allowed if lines adjacent.
 	//  b. Start to end is allowed if first and last line.
-	var lines []Line
-	n := len(s.pts)
-	for i := 0; i < n-1; i++ {
-		if s.pts[i].XY == s.pts[i+1].XY {
-			continue
-		}
-		ln, err := NewLine(s.pts[i], s.pts[i+1])
-		if err != nil {
-			panic(err)
-		}
-		lines = append(lines, ln)
-	}
-	n = len(lines)
+	n := len(s.lines)
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
-			intersection := lines[i].Intersection(lines[j])
+			intersection := s.lines[i].Intersection(s.lines[j])
 			if intersection.IsEmpty() {
 				continue
 			}
@@ -104,11 +105,11 @@ func (s LineString) IsSimple() bool {
 				// point, so long as that point is the start of the first
 				// segment and the end of the last segment (i.e. a linear
 				// ring).
-				aPt, err := NewPointFromCoords(lines[i].a)
+				aPt, err := NewPointFromCoords(s.lines[i].a)
 				if err != nil {
 					panic(err)
 				}
-				bPt, err := NewPointFromCoords(lines[j].b)
+				bPt, err := NewPointFromCoords(s.lines[j].b)
 				if err != nil {
 					panic(err)
 				}
@@ -126,7 +127,7 @@ func (s LineString) IsSimple() bool {
 }
 
 func (s LineString) IsClosed() bool {
-	return s.pts[0] == s.pts[len(s.pts)-1]
+	return s.lines[0].a.XY == s.lines[len(s.lines)-1].b.XY
 }
 
 func (s LineString) Intersection(g Geometry) Geometry {

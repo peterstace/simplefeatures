@@ -2,7 +2,6 @@ package simplefeatures
 
 import (
 	"errors"
-	"strconv"
 )
 
 // Polygon is a planar surface, defined by 1 exiterior boundary and 0 or more
@@ -52,22 +51,10 @@ func (p Polygon) AppendWKT(dst []byte) []byte {
 
 func (p Polygon) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
-	ring := func(r LinearRing) {
-		dst = append(dst, '(')
-		for i, pt := range r.ls.pts {
-			dst = strconv.AppendFloat(dst, pt.X, 'f', -1, 64)
-			dst = append(dst, ' ')
-			dst = strconv.AppendFloat(dst, pt.Y, 'f', -1, 64)
-			if i != len(r.ls.pts)-1 {
-				dst = append(dst, ',')
-			}
-		}
-		dst = append(dst, ')')
-	}
-	ring(p.outer)
+	dst = p.outer.ls.appendWKTBody(dst)
 	for _, h := range p.holes {
 		dst = append(dst, ',')
-		ring(h)
+		dst = h.ls.appendWKTBody(dst)
 	}
 	return append(dst, ')')
 }
