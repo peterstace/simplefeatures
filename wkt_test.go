@@ -255,3 +255,22 @@ func TestUnmarshalWKTPopulate(t *testing.T) {
 		})
 	}
 }
+
+func TestMarshalWKT(t *testing.T) {
+	for _, tt := range []struct {
+		wkt string
+	}{
+		{"GEOMETRYCOLLECTION(LINESTRING(0 0,1 1))"},
+	} {
+		t.Run(tt.wkt, func(t *testing.T) {
+			geom, err := UnmarshalWKT(strings.NewReader(tt.wkt))
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := string(geom.AsText())
+			if got != tt.wkt {
+				t.Errorf("\nInput:  %v\nOutput: %v\n", tt.wkt, got)
+			}
+		})
+	}
+}

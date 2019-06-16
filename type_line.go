@@ -29,7 +29,7 @@ func (n Line) AsText() []byte {
 }
 
 func (n Line) AppendWKT(dst []byte) []byte {
-	dst = []byte("LINESTRING(")
+	dst = append(dst, []byte("LINESTRING(")...)
 	dst = strconv.AppendFloat(dst, n.a.X, 'f', -1, 64)
 	dst = append(dst, ' ')
 	dst = strconv.AppendFloat(dst, n.a.Y, 'f', -1, 64)
