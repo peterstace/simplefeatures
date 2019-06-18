@@ -1,7 +1,6 @@
 package simplefeatures
 
 import (
-	"log"
 	"math"
 )
 
@@ -13,6 +12,7 @@ func isPointInsideOrOnRing(pt XY, ring LinearRing) bool {
 		panic(err)
 	}
 	// find max x coordinate
+	// TODO: should be able to use envelope for this
 	maxX := ring.ls.lines[0].a.X
 	for _, ln := range ring.ls.lines {
 		maxX = math.Max(maxX, ln.b.X)
@@ -26,15 +26,15 @@ func isPointInsideOrOnRing(pt XY, ring LinearRing) bool {
 
 	ray, err := NewLine(Coordinates{pt}, Coordinates{XY{maxX + 1, pt.Y}})
 	if err != nil {
-		log.Println(Coordinates{pt}, Coordinates{XY{maxX, pt.Y}})
 		panic(err)
 	}
-	log.Println("RAY", string(ray.AsText()))
 	var count int
 	for _, seg := range ring.ls.lines {
-		log.Println("SEG:", string(seg.AsText()))
 		inter := seg.Intersection(ray)
 		if inter.IsEmpty() {
+			continue
+		}
+		if inter.Dimension() == 1 {
 			continue
 		}
 		ep1, err := NewPointFromCoords(seg.a)
@@ -45,26 +45,17 @@ func isPointInsideOrOnRing(pt XY, ring LinearRing) bool {
 		if err != nil {
 			panic(err)
 		}
-		if inter.Dimension() == 1 || inter.Equals(ep1) || inter.Equals(ep2) {
-			if seg.b.Y < pt.Y {
-				log.Println("     ++")
+		if inter.Equals(ep1) || inter.Equals(ep2) {
+			otherY := ep1.coords.Y
+			if inter.Equals(ep1) {
+				otherY = ep2.coords.Y
+			}
+			if otherY < pt.Y {
 				count++
 			}
 		} else {
-			log.Println("     ++")
 			count++
 		}
-
-		// Increment if it passes through a point NOT in the endpoints.
-		// Only increment on Y condition:
-		//  - It passes through as a line
-		//  - It passes through an endpoint
-
-		//inter := seg.Intersection(ray)
-		//if !inter.IsEmpty() && seg.b.Y < pt.Y {
-		//count++
-		//}
 	}
-	log.Println("COUNT", count)
 	return count%2 == 1
 }
