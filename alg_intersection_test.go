@@ -49,21 +49,29 @@ func TestIntersection(t *testing.T) {
 		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(0.5 0.5,1.5 0.5,1.5 1.5,0.5 1.5,0.5 0.5)", "MULTIPOINT((0.5 1),(1 0.5))"},
 		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(1 0,2 0,2 1,1 1,1.5 0.5,1 0.5,1 0)", "GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(1 0,1 0.5))"},
 	} {
+		in1g, err := UnmarshalWKT(strings.NewReader(tt.in1))
+		if err != nil {
+			t.Fatalf("could not unmarshal wkt: %v", err)
+		}
+		in2g, err := UnmarshalWKT(strings.NewReader(tt.in2))
+		if err != nil {
+			t.Fatalf("could not unmarshal wkt: %v", err)
+		}
+
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			in1g, err := UnmarshalWKT(strings.NewReader(tt.in1))
-			if err != nil {
-				t.Fatalf("could not unmarshal wkt: %v", err)
-			}
-			in2g, err := UnmarshalWKT(strings.NewReader(tt.in2))
-			if err != nil {
-				t.Fatalf("could not unmarshal wkt: %v", err)
-			}
 			result := in1g.Intersection(in2g)
 			got := string(result.AsText())
 			if got != tt.out {
 				t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got)
 			}
-			// TODO: reverse inputs?
+		})
+
+		t.Run(strconv.Itoa(i)+"_reversed", func(t *testing.T) {
+			result := in2g.Intersection(in1g)
+			got := string(result.AsText())
+			if got != tt.out {
+				t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got)
+			}
 		})
 	}
 }
