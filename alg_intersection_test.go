@@ -12,6 +12,15 @@ func TestIntersection(t *testing.T) {
 	for i, tt := range []struct {
 		in1, in2, out string
 	}{
+		// Point/Line
+		{"POINT(0 0)", "LINESTRING(0 0,2 2)", "POINT(0 0)"},
+		{"POINT(1 1)", "LINESTRING(0 0,2 2)", "POINT(1 1)"},
+		{"POINT(2 2)", "LINESTRING(0 0,2 2)", "POINT(2 2)"},
+		{"POINT(3 3)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
+		{"POINT(-1 -1)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
+		{"POINT(0 2)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
+		{"POINT(2 0)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
+
 		// Line/Line
 		{"LINESTRING(0 0,0 1)", "LINESTRING(0 0,1 0)", "POINT(0 0)"},
 		{"LINESTRING(0 1,1 1)", "LINESTRING(1 0,1 1)", "POINT(1 1)"},
@@ -40,19 +49,28 @@ func TestIntersection(t *testing.T) {
 		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(0.5 0.5,1.5 0.5,1.5 1.5,0.5 1.5,0.5 0.5)", "MULTIPOINT((0.5 1),(1 0.5))"},
 		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(1 0,2 0,2 1,1 1,1.5 0.5,1 0.5,1 0)", "GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(1 0,1 0.5))"},
 	} {
+		in1g, err := UnmarshalWKT(strings.NewReader(tt.in1))
+		if err != nil {
+			t.Fatalf("could not unmarshal wkt: %v", err)
+		}
+		in2g, err := UnmarshalWKT(strings.NewReader(tt.in2))
+		if err != nil {
+			t.Fatalf("could not unmarshal wkt: %v", err)
+		}
+
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			in1g, err := UnmarshalWKT(strings.NewReader(tt.in1))
-			if err != nil {
-				t.Fatalf("could not unmarshal wkt: %v", err)
-			}
-			in2g, err := UnmarshalWKT(strings.NewReader(tt.in2))
-			if err != nil {
-				t.Fatalf("could not unmarshal wkt: %v", err)
-			}
 			result := in1g.Intersection(in2g)
 			got := string(result.AsText())
 			if got != tt.out {
 				t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got)
+			}
+		})
+
+		t.Run(strconv.Itoa(i)+"_reversed", func(t *testing.T) {
+			result := in2g.Intersection(in1g)
+			got := string(result.AsText())
+			if got != tt.out {
+				t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got)
 			}
 		})
 	}
