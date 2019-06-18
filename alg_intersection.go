@@ -1,22 +1,53 @@
 package simplefeatures
 
 import (
+	"fmt"
 	"math"
 )
 
+func rank(g Geometry) int {
+	switch g.(type) {
+	case EmptySet:
+		return 1
+	case Point:
+		return 2
+	case Line:
+		return 3
+	case LineString:
+		return 4
+	case LinearRing:
+		return 5
+	case Polygon:
+		return 6
+	case MultiPoint:
+		return 7
+	case MultiLineString:
+		return 8
+	case MultiPolygon:
+		return 9
+	case GeometryCollection:
+		return 10
+	default:
+		panic(fmt.Sprintf("unknown geometry type: %T", g))
+	}
+}
+
 func intersection(g1, g2 Geometry) Geometry {
-	ln1, ok1 := g1.(Line)
-	ln2, ok2 := g2.(Line)
-	if ok1 && ok2 {
-		return intersectLineWithLine(ln1, ln2)
+	if rank(g1) > rank(g2) {
+		g1, g2 = g2, g1
 	}
-
-	ring1, ok1 := g1.(LinearRing)
-	ring2, ok2 := g2.(LinearRing)
-	if ok1 && ok2 {
-		return intersectionLinearRingWithLinearRing(ring1, ring2)
+	switch g1 := g1.(type) {
+	case Line:
+		switch g2 := g2.(type) {
+		case Line:
+			return intersectLineWithLine(g1, g2)
+		}
+	case LinearRing:
+		switch g2 := g2.(type) {
+		case LinearRing:
+			return intersectLinearRingWithLinearRing(g1, g2)
+		}
 	}
-
 	panic("not implemented")
 }
 
@@ -129,7 +160,9 @@ func cross(a, b XY) float64 {
 	return a.X*b.Y - a.Y*b.X
 }
 
-func intersectionLinearRingWithLinearRing(r1, r2 LinearRing) Geometry {
+func intersectLinearRingWithLinearRing(r1, r2 LinearRing) Geometry {
+	// TODO: This should be able to be a bit more generic, e.g. apply to line
+	// strings instead.
 	var collection []Geometry
 	for _, ln1 := range r1.ls.lines {
 		for _, ln2 := range r2.ls.lines {
