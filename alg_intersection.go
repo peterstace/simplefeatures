@@ -37,6 +37,11 @@ func intersection(g1, g2 Geometry) Geometry {
 		g1, g2 = g2, g1
 	}
 	switch g1 := g1.(type) {
+	case Point:
+		switch g2 := g2.(type) {
+		case Line:
+			return intersectPointWithLine(g1, g2)
+		}
 	case Line:
 		switch g2 := g2.(type) {
 		case Line:
@@ -173,4 +178,8 @@ func intersectLinearRingWithLinearRing(r1, r2 LinearRing) Geometry {
 		}
 	}
 	return canonicalise(collection)
+}
+
+func intersectPointWithLine(point Point, line Line) Geometry {
+	return NewEmptyPoint()
 }

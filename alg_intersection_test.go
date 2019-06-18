@@ -12,6 +12,15 @@ func TestIntersection(t *testing.T) {
 	for i, tt := range []struct {
 		in1, in2, out string
 	}{
+		// Point/Line
+		{"POINT(0 0)", "LINESTRING(0 0,2 2)", "POINT(0 0)"},
+		{"POINT(1 1)", "LINESTRING(0 0,2 2)", "POINT(1 1)"},
+		{"POINT(2 2)", "LINESTRING(0 0,2 2)", "POINT(2 2)"},
+		{"POINT(3 3)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
+		{"POINT(-1 -1)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
+		{"POINT(0 2)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
+		{"POINT(2 0)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
+
 		// Line/Line
 		{"LINESTRING(0 0,0 1)", "LINESTRING(0 0,1 0)", "POINT(0 0)"},
 		{"LINESTRING(0 1,1 1)", "LINESTRING(1 0,1 1)", "POINT(1 1)"},
@@ -54,6 +63,7 @@ func TestIntersection(t *testing.T) {
 			if got != tt.out {
 				t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got)
 			}
+			// TODO: reverse inputs?
 		})
 	}
 }
