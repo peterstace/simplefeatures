@@ -44,3 +44,7 @@ func (e EmptySet) Dimension() int {
 func (e EmptySet) Equals(other Geometry) bool {
 	return equals(e, other)
 }
+
+func (e EmptySet) FiniteNumberOfPoints() (int, bool) {
+	panic("not implemented")
+}

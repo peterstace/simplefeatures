@@ -145,3 +145,7 @@ func (s LineString) Dimension() int {
 func (s LineString) Equals(other Geometry) bool {
 	return equals(s, other)
 }
+
+func (s LineString) FiniteNumberOfPoints() (int, bool) {
+	panic("not implemented")
+}

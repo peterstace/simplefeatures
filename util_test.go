@@ -36,3 +36,11 @@ func eq(t *testing.T, wkt1, wkt2 string) bool {
 	}
 	return wkt1 == wkt2
 }
+
+func geomFromWKT(t *testing.T, wkt string) Geometry {
+	geom, err := UnmarshalWKT(strings.NewReader(wkt))
+	if err != nil {
+		t.Fatalf("could not unmarshal WKT: %v", err)
+	}
+	return geom
+}

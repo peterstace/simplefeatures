@@ -72,3 +72,7 @@ func (m MultiPoint) Dimension() int {
 func (m MultiPoint) Equals(other Geometry) bool {
 	return equals(m, other)
 }
+
+func (m MultiPoint) FiniteNumberOfPoints() (int, bool) {
+	panic("not implemented")
+}

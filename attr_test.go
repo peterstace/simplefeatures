@@ -1,6 +1,7 @@
 package simplefeatures_test
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 
@@ -61,6 +62,7 @@ func TestIsEmptyDimension(t *testing.T) {
 
 func TestIsEmptyAndDimensionLinearRing(t *testing.T) {
 	// Tested on its own, since it cannot be constructed from WKT.
+	// TODO: It now can be represented using WKT, so this can be merged into the other test.
 	ring, err := NewLinearRing([]Coordinates{
 		{XY: XY{0, 0}}, {XY: XY{1, 0}}, {XY: XY{1, 1}}, {XY: XY{0, 0}},
 	})
@@ -72,5 +74,32 @@ func TestIsEmptyAndDimensionLinearRing(t *testing.T) {
 	}
 	if ring.Dimension() != 1 {
 		t.Errorf("expected dimension 1")
+	}
+}
+
+func TestFiniteNumberOfPoints(t *testing.T) {
+	for i, tt := range []struct {
+		wkt        string
+		isFinite   bool
+		pointCount int
+	}{
+		// TODO
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			geom := geomFromWKT(t, tt.wkt)
+			gotPointCount, gotIsFinite := geom.FiniteNumberOfPoints()
+			if tt.isFinite {
+				if !gotIsFinite {
+					t.Errorf("want finite but got not finite")
+				}
+				if gotPointCount != tt.pointCount {
+					t.Errorf("point count: want=%d got=%d", tt.pointCount, gotPointCount)
+				}
+			} else {
+				if gotIsFinite {
+					t.Errorf("want not finite but got finite")
+				}
+			}
+		})
 	}
 }

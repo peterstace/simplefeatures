@@ -20,14 +20,13 @@ func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
 	for i := 0; i < len(allRings); i++ {
 		for j := i + 1; j < len(allRings); j++ {
 			inter := allRings[i].Intersection(allRings[j])
+			// TODO: should instead use FiniteNumberOfPoints
 			if inter.IsEmpty() {
 				continue
 			}
 			if inter.Dimension() == 1 {
 				return Polygon{}, errors.New("polygon rings must not overlap")
 			}
-			// TODO: should instead cast to PointSet and count the number of
-			// distinct points rather than casting to concrete types.
 			switch inter := inter.(type) {
 			case Point:
 			case MultiPoint:
@@ -110,4 +109,8 @@ func (p Polygon) Dimension() int {
 
 func (p Polygon) Equals(other Geometry) bool {
 	return equals(p, other)
+}
+
+func (p Polygon) FiniteNumberOfPoints() (int, bool) {
+	panic("not implemented")
 }

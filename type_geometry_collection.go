@@ -58,3 +58,7 @@ func (c GeometryCollection) Dimension() int {
 func (c GeometryCollection) Equals(other Geometry) bool {
 	return equals(c, other)
 }
+
+func (c GeometryCollection) FiniteNumberOfPoints() (int, bool) {
+	panic("not implemented")
+}
