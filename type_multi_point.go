@@ -7,7 +7,15 @@ type MultiPoint struct {
 }
 
 func NewMultiPoint(pts []Point) MultiPoint {
-	return MultiPoint{pts}
+	ptSet := make(map[XY]Point)
+	for _, p := range pts {
+		ptSet[p.coords.XY] = p
+	}
+	ptSlice := make([]Point, 0, len(ptSet))
+	for _, p := range ptSet {
+		ptSlice = append(ptSlice, p)
+	}
+	return MultiPoint{ptSlice}
 }
 
 func NewMultiPointFromCoords(coords []OptionalCoordinates) (MultiPoint, error) {
@@ -22,7 +30,7 @@ func NewMultiPointFromCoords(coords []OptionalCoordinates) (MultiPoint, error) {
 		}
 		pts = append(pts, pt)
 	}
-	return MultiPoint{pts}, nil
+	return NewMultiPoint(pts), nil
 }
 
 func (m MultiPoint) AsText() []byte {
@@ -44,6 +52,7 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
+// This could just be "return true" because we de-duplicate points.
 func (m MultiPoint) IsSimple() bool {
 	panic("not implemented")
 }

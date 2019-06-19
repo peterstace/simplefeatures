@@ -11,6 +11,9 @@ func TestNotEquals(t *testing.T) {
 	wkts := []string{
 		"POINT(1 2)",
 		"POINT(2 1)",
+
+		"MULTIPOINT(1 2,2 1)",
+		"MULTIPOINT(1 2,3 1)",
 	}
 	for i := range wkts {
 		for j := range wkts {
@@ -38,6 +41,11 @@ func TestEquals(t *testing.T) {
 	for _, equalSet := range [][]string{
 		{"POINT (1 1)"},
 		{"POINT (2 3)"},
+		{
+			"MULTIPOINT(1 2,2 1)",
+			"MULTIPOINT(2 1,1 2)",
+			"MULTIPOINT(2 1,1 2,2 1)",
+		},
 	} {
 		for i := range equalSet {
 			for j := range equalSet {

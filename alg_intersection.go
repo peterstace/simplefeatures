@@ -1,36 +1,8 @@
 package simplefeatures
 
 import (
-	"fmt"
 	"math"
 )
-
-func rank(g Geometry) int {
-	switch g.(type) {
-	case EmptySet:
-		return 1
-	case Point:
-		return 2
-	case Line:
-		return 3
-	case LineString:
-		return 4
-	case LinearRing:
-		return 5
-	case Polygon:
-		return 6
-	case MultiPoint:
-		return 7
-	case MultiLineString:
-		return 8
-	case MultiPolygon:
-		return 9
-	case GeometryCollection:
-		return 10
-	default:
-		panic(fmt.Sprintf("unknown geometry type: %T", g))
-	}
-}
 
 func intersection(g1, g2 Geometry) Geometry {
 	if rank(g1) > rank(g2) {

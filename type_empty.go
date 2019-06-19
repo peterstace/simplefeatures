@@ -10,7 +10,7 @@ func NewEmptyPoint() EmptySet {
 }
 
 func NewEmptyLineString() EmptySet {
-	return EmptySet{"POINTSTRING EMPTY"}
+	return EmptySet{"LINESTRING EMPTY"}
 }
 
 func NewEmptyPolygon() EmptySet {

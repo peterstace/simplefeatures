@@ -61,7 +61,7 @@ func TestIntersection(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			result := in1g.Intersection(in2g)
 			got := string(result.AsText())
-			if got != tt.out {
+			if !eq(t, got, tt.out) {
 				t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got)
 			}
 		})
@@ -69,7 +69,7 @@ func TestIntersection(t *testing.T) {
 		t.Run(strconv.Itoa(i)+"_reversed", func(t *testing.T) {
 			result := in2g.Intersection(in1g)
 			got := string(result.AsText())
-			if got != tt.out {
+			if !eq(t, got, tt.out) {
 				t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got)
 			}
 		})
