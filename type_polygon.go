@@ -2,6 +2,7 @@ package simplefeatures
 
 import (
 	"errors"
+	"fmt"
 )
 
 // Polygon is a planar surface, defined by 1 exiterior boundary and 0 or more
@@ -14,10 +15,42 @@ type Polygon struct {
 // NewPolygon creates a polygon given its outer and inner rings. No rings may
 // cross each other, and can only intersect each with each other at a point.
 func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
-	// TODO: No rings may cross.
-	// TODO: Rings may intersect, but only at a single point
-	// TODO: must be connected
-	// TODO: all inner rings must be inside the outer ring
+	// Rings may intersect, but only at a single point.
+	allRings := append(holes, outer)
+	for i := 0; i < len(allRings); i++ {
+		for j := i + 1; j < len(allRings); j++ {
+			inter := allRings[i].Intersection(allRings[j])
+			if inter.IsEmpty() {
+				continue
+			}
+			if inter.Dimension() == 1 {
+				return Polygon{}, errors.New("polygon rings must not overlap")
+			}
+			// TODO: should instead cast to PointSet and count the number of
+			// distinct points rather than casting to concrete types.
+			switch inter := inter.(type) {
+			case Point:
+			case MultiPoint:
+				if len(inter.pts) > 1 {
+					return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
+				}
+			default:
+				return Polygon{}, fmt.Errorf("unknown intersection type: %T", inter)
+			}
+		}
+	}
+
+	// All inner rings must be inside the outer ring.
+	for _, hole := range holes {
+		for _, line := range hole.ls.lines {
+			if !isPointInsideOrOnRing(line.a.XY, outer) {
+				return Polygon{}, errors.New("hole must be inside outer ring")
+			}
+		}
+	}
+
+	// TODO: check for connectedness
+
 	return Polygon{outer: outer, holes: holes}, nil
 }
 

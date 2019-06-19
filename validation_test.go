@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 	"testing"
 
 	. "github.com/peterstace/simplefeatures"
@@ -82,6 +83,39 @@ func TestLinearRingValidation(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			_, err := NewLinearRing(pts)
+			if err == nil {
+				t.Error("expected error")
+			}
+		})
+	}
+}
+
+func TestPolygonValidation(t *testing.T) {
+	for i, wkt := range []string{
+		"POLYGON((0 0,1 0,1 1,0 1,0 0))",
+		"POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))",
+	} {
+		t.Run("valid_"+strconv.Itoa(i), func(t *testing.T) {
+			_, err := UnmarshalWKT(strings.NewReader(wkt))
+			if err != nil {
+				t.Error(err)
+			}
+		})
+	}
+	for i, wkt := range []string{
+		// intersect at a line
+		"POLYGON((0 0,3 0,3 3,0 3,0 0),(0 1,1 1,1 2,0 2,0 1))",
+
+		// intersect at two points
+		"POLYGON((0 0,3 0,3 3,0 3,0 0),(1 0,3 1,2 2,1 0))",
+
+		// inner ring is outside of the outer ring
+		"POLYGON((0 0,3 0,3 3,0 3,0 0),(4 0,7 0,7 3,4 3,4 0))",
+
+		// TODO: tests for connectedness
+	} {
+		t.Run("invalid_"+strconv.Itoa(i), func(t *testing.T) {
+			_, err := UnmarshalWKT(strings.NewReader(wkt))
 			if err == nil {
 				t.Error("expected error")
 			}
