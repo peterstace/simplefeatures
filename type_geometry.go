@@ -29,8 +29,8 @@ type Geometry interface {
 	// geometries are equal if they contain exactly the same points.
 	Equals(Geometry) bool
 
-	// FiniteNumberOfPoints returns a flag indicating if the geometry
-	// represents a finite number of points. If it does represent a finite
-	// number of points, then the returned int indicates the number of points.
+	// FiniteNumberOfPoints checks if the geometry represents a finite number
+	// of points. If it does, then the returned int is the number of distinct
+	// points represented.
 	FiniteNumberOfPoints() (int, bool)
 }
