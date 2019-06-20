@@ -83,7 +83,23 @@ func TestFiniteNumberOfPoints(t *testing.T) {
 		isFinite   bool
 		pointCount int
 	}{
-		// TODO
+		{"POINT EMPTY", true, 0},
+		{"POINT(1 1) ", true, 1},
+		{"MULTIPOINT(1 1,2 2,1 1)", true, 2},
+		{"LINESTRING(0 0,1 1)", false, 0},
+		{"LINESTRING(0 0,1 1,2 2)", false, 0},
+		{"LINEARRING(0 0,0 1,2 2,0 0)", false, 0},
+		{"POLYGON((0 0,0 1,2 2,0 0))", false, 0},
+		{"MULTIPOLYGON(((0 0,0 1,2 2,0 0)))", false, 0},
+		{"MULTIPOLYGON EMPTY", true, 0},
+		{"MULTILINESTRING((0 0,1 1,2 2))", false, 0},
+		{"MULTILINESTRING EMPTY", true, 0},
+		{"GEOMETRYCOLLECTION EMPTY", true, 0},
+		{"GEOMETRYCOLLECTION(POINT(0 1))", true, 1},
+		{"GEOMETRYCOLLECTION(POINT(0 1),POINT(2 2))", true, 2},
+		{"GEOMETRYCOLLECTION(POINT(0 1),POINT(0 1))", true, 1},
+		{"GEOMETRYCOLLECTION(MULTIPOINT(0 1,1 1),POINT(0 1))", true, 2},
+		{"GEOMETRYCOLLECTION(POINT(0 1),LINESTRING(0 0,1 1))", false, 0},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			geom := geomFromWKT(t, tt.wkt)

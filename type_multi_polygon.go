@@ -74,5 +74,5 @@ func (m MultiPolygon) Equals(other Geometry) bool {
 }
 
 func (m MultiPolygon) FiniteNumberOfPoints() (int, bool) {
-	panic("not implemented")
+	return 0, m.IsEmpty()
 }

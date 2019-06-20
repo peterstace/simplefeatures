@@ -112,5 +112,5 @@ func (p Polygon) Equals(other Geometry) bool {
 }
 
 func (p Polygon) FiniteNumberOfPoints() (int, bool) {
-	panic("not implemented")
+	return 0, false
 }

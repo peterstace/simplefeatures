@@ -67,5 +67,5 @@ func (m MultiLineString) Equals(other Geometry) bool {
 }
 
 func (m MultiLineString) FiniteNumberOfPoints() (int, bool) {
-	panic("not implemented")
+	return 0, m.IsEmpty()
 }

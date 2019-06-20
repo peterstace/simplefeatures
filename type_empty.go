@@ -46,5 +46,5 @@ func (e EmptySet) Equals(other Geometry) bool {
 }
 
 func (e EmptySet) FiniteNumberOfPoints() (int, bool) {
-	panic("not implemented")
+	return 0, true
 }

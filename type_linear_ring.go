@@ -58,5 +58,5 @@ func (r LinearRing) Equals(other Geometry) bool {
 }
 
 func (r LinearRing) FiniteNumberOfPoints() (int, bool) {
-	panic("not implemented")
+	return 0, false
 }

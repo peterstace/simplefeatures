@@ -147,5 +147,5 @@ func (s LineString) Equals(other Geometry) bool {
 }
 
 func (s LineString) FiniteNumberOfPoints() (int, bool) {
-	panic("not implemented")
+	return 0, false
 }

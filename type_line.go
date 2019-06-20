@@ -61,5 +61,5 @@ func (n Line) Equals(other Geometry) bool {
 }
 
 func (n Line) FiniteNumberOfPoints() (int, bool) {
-	panic("not implemented")
+	return 0, false
 }
