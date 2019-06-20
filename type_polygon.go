@@ -2,7 +2,6 @@ package simplefeatures
 
 import (
 	"errors"
-	"fmt"
 )
 
 // Polygon is a planar surface, defined by 1 exiterior boundary and 0 or more
@@ -20,22 +19,12 @@ func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
 	for i := 0; i < len(allRings); i++ {
 		for j := i + 1; j < len(allRings); j++ {
 			inter := allRings[i].Intersection(allRings[j])
-			if inter.IsEmpty() {
-				continue
-			}
-			if inter.Dimension() == 1 {
+			numPts, finite := inter.FiniteNumberOfPoints()
+			if !finite {
 				return Polygon{}, errors.New("polygon rings must not overlap")
 			}
-			// TODO: should instead cast to PointSet and count the number of
-			// distinct points rather than casting to concrete types.
-			switch inter := inter.(type) {
-			case Point:
-			case MultiPoint:
-				if len(inter.pts) > 1 {
-					return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
-				}
-			default:
-				return Polygon{}, fmt.Errorf("unknown intersection type: %T", inter)
+			if numPts > 1 {
+				return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
 			}
 		}
 	}
@@ -110,4 +99,8 @@ func (p Polygon) Dimension() int {
 
 func (p Polygon) Equals(other Geometry) bool {
 	return equals(p, other)
+}
+
+func (p Polygon) FiniteNumberOfPoints() (int, bool) {
+	return 0, false
 }

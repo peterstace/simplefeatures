@@ -72,3 +72,7 @@ func (m MultiPolygon) Dimension() int {
 func (m MultiPolygon) Equals(other Geometry) bool {
 	return equals(m, other)
 }
+
+func (m MultiPolygon) FiniteNumberOfPoints() (int, bool) {
+	return 0, m.IsEmpty()
+}

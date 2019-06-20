@@ -59,3 +59,7 @@ func (n Line) Dimension() int {
 func (n Line) Equals(other Geometry) bool {
 	return equals(n, other)
 }
+
+func (n Line) FiniteNumberOfPoints() (int, bool) {
+	return 0, false
+}

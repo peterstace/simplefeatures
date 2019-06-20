@@ -7,6 +7,7 @@ type MultiPoint struct {
 }
 
 func NewMultiPoint(pts []Point) MultiPoint {
+	// Deduplicate
 	ptSet := make(map[XY]Point)
 	for _, p := range pts {
 		ptSet[p.coords.XY] = p
@@ -71,4 +72,8 @@ func (m MultiPoint) Dimension() int {
 
 func (m MultiPoint) Equals(other Geometry) bool {
 	return equals(m, other)
+}
+
+func (m MultiPoint) FiniteNumberOfPoints() (int, bool) {
+	return len(m.pts), true
 }

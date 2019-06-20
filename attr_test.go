@@ -1,6 +1,7 @@
 package simplefeatures_test
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 
@@ -61,6 +62,7 @@ func TestIsEmptyDimension(t *testing.T) {
 
 func TestIsEmptyAndDimensionLinearRing(t *testing.T) {
 	// Tested on its own, since it cannot be constructed from WKT.
+	// TODO: It now can be represented using WKT, so this can be merged into the other test.
 	ring, err := NewLinearRing([]Coordinates{
 		{XY: XY{0, 0}}, {XY: XY{1, 0}}, {XY: XY{1, 1}}, {XY: XY{0, 0}},
 	})
@@ -72,5 +74,48 @@ func TestIsEmptyAndDimensionLinearRing(t *testing.T) {
 	}
 	if ring.Dimension() != 1 {
 		t.Errorf("expected dimension 1")
+	}
+}
+
+func TestFiniteNumberOfPoints(t *testing.T) {
+	for i, tt := range []struct {
+		wkt        string
+		isFinite   bool
+		pointCount int
+	}{
+		{"POINT EMPTY", true, 0},
+		{"POINT(1 1) ", true, 1},
+		{"MULTIPOINT(1 1,2 2,1 1)", true, 2},
+		{"LINESTRING(0 0,1 1)", false, 0},
+		{"LINESTRING(0 0,1 1,2 2)", false, 0},
+		{"LINEARRING(0 0,0 1,2 2,0 0)", false, 0},
+		{"POLYGON((0 0,0 1,2 2,0 0))", false, 0},
+		{"MULTIPOLYGON(((0 0,0 1,2 2,0 0)))", false, 0},
+		{"MULTIPOLYGON EMPTY", true, 0},
+		{"MULTILINESTRING((0 0,1 1,2 2))", false, 0},
+		{"MULTILINESTRING EMPTY", true, 0},
+		{"GEOMETRYCOLLECTION EMPTY", true, 0},
+		{"GEOMETRYCOLLECTION(POINT(0 1))", true, 1},
+		{"GEOMETRYCOLLECTION(POINT(0 1),POINT(2 2))", true, 2},
+		{"GEOMETRYCOLLECTION(POINT(0 1),POINT(0 1))", true, 1},
+		{"GEOMETRYCOLLECTION(MULTIPOINT(0 1,1 1),POINT(0 1))", true, 2},
+		{"GEOMETRYCOLLECTION(POINT(0 1),LINESTRING(0 0,1 1))", false, 0},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			geom := geomFromWKT(t, tt.wkt)
+			gotPointCount, gotIsFinite := geom.FiniteNumberOfPoints()
+			if tt.isFinite {
+				if !gotIsFinite {
+					t.Errorf("want finite but got not finite")
+				}
+				if gotPointCount != tt.pointCount {
+					t.Errorf("point count: want=%d got=%d", tt.pointCount, gotPointCount)
+				}
+			} else {
+				if gotIsFinite {
+					t.Errorf("want not finite but got finite")
+				}
+			}
+		})
 	}
 }

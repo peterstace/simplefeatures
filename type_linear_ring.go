@@ -56,3 +56,7 @@ func (r LinearRing) Dimension() int {
 func (r LinearRing) Equals(other Geometry) bool {
 	return equals(r, other)
 }
+
+func (r LinearRing) FiniteNumberOfPoints() (int, bool) {
+	return 0, false
+}
