@@ -112,7 +112,24 @@ func TestPolygonValidation(t *testing.T) {
 		// inner ring is outside of the outer ring
 		"POLYGON((0 0,3 0,3 3,0 3,0 0),(4 0,7 0,7 3,4 3,4 0))",
 
-		// TODO: tests for connectedness
+		// polygons aren't connected
+		`POLYGON(
+			(0 0, 4 0, 4 4, 0 4, 0 0),
+			(2 0, 3 1, 2 2, 1 1, 2 0),
+			(2 2, 3 3, 2 4, 1 3, 2 2)
+		)`,
+		`POLYGON(
+			(0 0, 6 0, 6 5, 0 5, 0 0),
+			(2 1, 4 1, 4 2, 2 2, 2 1),
+			(2 2, 3 3, 2 4, 1 3, 2 2),
+			(4 2, 5 3, 4 4, 3 3, 4 2)
+		)`,
+		`POLYGON(
+			(0 0,5 0,5 5,0 5,0 0),
+			(1 1,3 1,3 2,1 1),
+			(1 1,4 3,3 4,1 1),
+			(1 1,2 3,1 3,1 1)
+		)`,
 	} {
 		t.Run("invalid_"+strconv.Itoa(i), func(t *testing.T) {
 			_, err := UnmarshalWKT(strings.NewReader(wkt))
