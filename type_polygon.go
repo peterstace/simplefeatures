@@ -14,8 +14,12 @@ type Polygon struct {
 // NewPolygon creates a polygon given its outer and inner rings. No rings may
 // cross each other, and can only intersect each with each other at a point.
 func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
-	// Rings may intersect, but only at a single point.
 	allRings := append(holes, outer)
+	nextInterVert := len(allRings)
+	interVerts := make(map[XY]int)
+	graph := newGraph()
+
+	// Rings may intersect, but only at a single point.
 	for i := 0; i < len(allRings); i++ {
 		for j := i + 1; j < len(allRings); j++ {
 			inter := allRings[i].Intersection(allRings[j])
@@ -26,6 +30,15 @@ func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
 			if env.Min() != env.Max() {
 				return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
 			}
+
+			interVert, ok := interVerts[env.Min()]
+			if !ok {
+				interVert = nextInterVert
+				nextInterVert++
+				interVerts[env.Min()] = interVert
+			}
+			graph.addEdge(interVert, i)
+			graph.addEdge(interVert, j)
 		}
 	}
 
@@ -38,7 +51,14 @@ func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
 		}
 	}
 
-	// TODO: check for connectedness
+	// Connectedness check: a graph is created where the intersections and
+	// rings are modelled as vertices. Edges are added to the graph between an
+	// intersection vertex and a ring vertex if the ring participates in that
+	// intersection. The interior of the polygon is connected iff the graph
+	// does not contain a cycle.
+	if graph.hasCycle() {
+		return Polygon{}, errors.New("polygon interiors must be connected")
+	}
 
 	return Polygon{outer: outer, holes: holes}, nil
 }
