@@ -7,7 +7,11 @@ func newGraph() graph {
 	return make(map[int]map[int]struct{})
 }
 
+// addEdge adds an edge between two different. u and v must be distinct.
 func (g graph) addEdge(u, v int) {
+	if u == v {
+		panic("u and v must be distinct")
+	}
 	if g[u] == nil {
 		g[u] = make(map[int]struct{})
 	}
