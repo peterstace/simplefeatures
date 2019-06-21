@@ -56,6 +56,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		return pt
 	}
 
+	// TODO: invert if to un-indent flow.
 	if colinear := cross(sub(b, a), sub(d, a)) == 0; colinear {
 		// TODO: use a proper bbox type
 		abBB := bbox{
@@ -70,6 +71,29 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			abBB.min.Y > cdBB.max.Y || abBB.max.Y < cdBB.min.Y {
 			// Line segments don't overlap at all.
 			return NewGeometryCollection(nil)
+		}
+
+		// TODO: the checks for intersecting at a point could go above the
+		// overlap case. They don't need to use the bounding box, because we
+		// can just do a pairwise check on the endpoints for each 4
+		// combinations.
+
+		if abBB.max.X == cdBB.min.X && abBB.min.Y == cdBB.max.Y {
+			// Line segments overlap at a point.
+			pt, err := NewPoint(abBB.max.X, abBB.min.Y)
+			if err != nil {
+				panic(err)
+			}
+			return pt
+		}
+
+		if cdBB.max.X == abBB.min.X && cdBB.min.Y == abBB.max.Y {
+			// Line segments overlap at a point.
+			pt, err := NewPoint(cdBB.max.X, cdBB.min.Y)
+			if err != nil {
+				panic(err)
+			}
+			return pt
 		}
 
 		if abBB.max == cdBB.min {

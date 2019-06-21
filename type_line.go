@@ -1,7 +1,7 @@
 package simplefeatures
 
 import (
-	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -19,7 +19,7 @@ func NewLine(a, b Coordinates) (Line, error) {
 		return Line{}, err
 	}
 	if a.XY == b.XY {
-		return Line{}, errors.New("line endpoints must be distinct")
+		return Line{}, fmt.Errorf("line endpoints must be distinct: %v", a.XY)
 	}
 	return Line{a, b}, nil
 }

@@ -40,6 +40,7 @@ func TestIntersection(t *testing.T) {
 		{"LINESTRING(0 0,1 0)", "LINESTRING(1 0,0 0)", "LINESTRING(0 0,1 0)"},
 		{"LINESTRING(0 0,1 0)", "LINESTRING(0 0,1 0)", "LINESTRING(0 0,1 0)"},
 		{"LINESTRING(1 1,2 2)", "LINESTRING(0 0,3 3)", "LINESTRING(1 1,2 2)"},
+		{"LINESTRING(3 1,2 2)", "LINESTRING(1 3,2 2)", "POINT(2 2)"},
 
 		// LinearRing/LinearRing
 		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(2 2,3 2,3 3,2 3,2 2)", "GEOMETRYCOLLECTION EMPTY"},
@@ -49,29 +50,31 @@ func TestIntersection(t *testing.T) {
 		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(0.5 0.5,1.5 0.5,1.5 1.5,0.5 1.5,0.5 0.5)", "MULTIPOINT((0.5 1),(1 0.5))"},
 		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(1 0,2 0,2 1,1 1,1.5 0.5,1 0.5,1 0)", "GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(1 0,1 0.5))"},
 	} {
-		in1g, err := UnmarshalWKT(strings.NewReader(tt.in1))
-		if err != nil {
-			t.Fatalf("could not unmarshal wkt: %v", err)
-		}
-		in2g, err := UnmarshalWKT(strings.NewReader(tt.in2))
-		if err != nil {
-			t.Fatalf("could not unmarshal wkt: %v", err)
-		}
-
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			result := in1g.Intersection(in2g)
-			got := string(result.AsText())
-			if !eq(t, got, tt.out) {
-				t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got)
+			in1g, err := UnmarshalWKT(strings.NewReader(tt.in1))
+			if err != nil {
+				t.Fatalf("could not unmarshal wkt: %v", err)
 			}
-		})
+			in2g, err := UnmarshalWKT(strings.NewReader(tt.in2))
+			if err != nil {
+				t.Fatalf("could not unmarshal wkt: %v", err)
+			}
 
-		t.Run(strconv.Itoa(i)+"_reversed", func(t *testing.T) {
-			result := in2g.Intersection(in1g)
-			got := string(result.AsText())
-			if !eq(t, got, tt.out) {
-				t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got)
-			}
+			t.Run("forward", func(t *testing.T) {
+				result := in1g.Intersection(in2g)
+				got := string(result.AsText())
+				if !eq(t, got, tt.out) {
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got)
+				}
+			})
+
+			t.Run("reversed", func(t *testing.T) {
+				result := in2g.Intersection(in1g)
+				got := string(result.AsText())
+				if !eq(t, got, tt.out) {
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got)
+				}
+			})
 		})
 	}
 }
