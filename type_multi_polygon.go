@@ -76,3 +76,14 @@ func (m MultiPolygon) Equals(other Geometry) bool {
 func (m MultiPolygon) FiniteNumberOfPoints() (int, bool) {
 	return 0, m.IsEmpty()
 }
+
+func (m MultiPolygon) Envelope() (Envelope, bool) {
+	if len(m.polys) == 0 {
+		return Envelope{}, false
+	}
+	env := mustEnvelope(m.polys[0])
+	for _, poly := range m.polys[1:] {
+		env = env.Union(mustEnvelope(poly))
+	}
+	return env, true
+}

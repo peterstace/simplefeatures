@@ -25,6 +25,11 @@ type Geometry interface {
 	// geometries, it is the maximum dimension over the collection.
 	Dimension() int
 
+	// Envelope returns the axis aligned bounding box that most tightly
+	// surrounds the geometry. Envelopes are not defined for empty geometries,
+	// in which case the returned flag will be false.
+	Envelope() (Envelope, bool)
+
 	// Equals checks if this geometry is equal to another geometrie. Two
 	// geometries are equal if they contain exactly the same points.
 	Equals(Geometry) bool

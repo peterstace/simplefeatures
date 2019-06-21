@@ -88,3 +88,15 @@ func (c GeometryCollection) walk(fn func(Geometry)) {
 		}
 	}
 }
+
+func (c GeometryCollection) flatten() []Geometry {
+	var geoms []Geometry
+	c.walk(func(g Geometry) {
+		geoms = append(geoms, g)
+	})
+	return geoms
+}
+
+func (c GeometryCollection) Envelope() (Envelope, bool) {
+	return EnvelopeFromGeoms(c.flatten()...)
+}

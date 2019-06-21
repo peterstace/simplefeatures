@@ -149,3 +149,11 @@ func (s LineString) Equals(other Geometry) bool {
 func (s LineString) FiniteNumberOfPoints() (int, bool) {
 	return 0, false
 }
+
+func (s LineString) Envelope() (Envelope, bool) {
+	env := NewEnvelope(s.lines[0].a.XY)
+	for _, line := range s.lines {
+		env = env.Extend(line.b.XY)
+	}
+	return env, true
+}

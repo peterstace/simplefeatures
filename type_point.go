@@ -63,3 +63,7 @@ func (p Point) Equals(other Geometry) bool {
 func (p Point) FiniteNumberOfPoints() (int, bool) {
 	return 1, true
 }
+
+func (p Point) Envelope() (Envelope, bool) {
+	return NewEnvelope(p.coords.XY), true
+}
