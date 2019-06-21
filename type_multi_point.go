@@ -74,10 +74,6 @@ func (m MultiPoint) Equals(other Geometry) bool {
 	return equals(m, other)
 }
 
-func (m MultiPoint) FiniteNumberOfPoints() (int, bool) {
-	return len(m.pts), true
-}
-
 func (m MultiPoint) Envelope() (Envelope, bool) {
 	if len(m.pts) == 0 {
 		return Envelope{}, false

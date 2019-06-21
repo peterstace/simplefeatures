@@ -73,10 +73,6 @@ func (m MultiPolygon) Equals(other Geometry) bool {
 	return equals(m, other)
 }
 
-func (m MultiPolygon) FiniteNumberOfPoints() (int, bool) {
-	return 0, m.IsEmpty()
-}
-
 func (m MultiPolygon) Envelope() (Envelope, bool) {
 	if len(m.polys) == 0 {
 		return Envelope{}, false

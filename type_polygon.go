@@ -101,10 +101,6 @@ func (p Polygon) Equals(other Geometry) bool {
 	return equals(p, other)
 }
 
-func (p Polygon) FiniteNumberOfPoints() (int, bool) {
-	return 0, false
-}
-
 func (p Polygon) Envelope() (Envelope, bool) {
 	return p.outer.Envelope()
 }

@@ -57,10 +57,6 @@ func (r LinearRing) Equals(other Geometry) bool {
 	return equals(r, other)
 }
 
-func (r LinearRing) FiniteNumberOfPoints() (int, bool) {
-	return 0, false
-}
-
 func (r LinearRing) Envelope() (Envelope, bool) {
 	env := NewEnvelope(r.ls.lines[0].a.XY)
 	for _, line := range r.ls.lines[1:] {

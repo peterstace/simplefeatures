@@ -45,10 +45,6 @@ func (e EmptySet) Equals(other Geometry) bool {
 	return equals(e, other)
 }
 
-func (e EmptySet) FiniteNumberOfPoints() (int, bool) {
-	return 0, true
-}
-
 func (e EmptySet) Envelope() (Envelope, bool) {
 	return Envelope{}, false
 }
