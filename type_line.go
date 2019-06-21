@@ -60,6 +60,6 @@ func (n Line) Equals(other Geometry) bool {
 	return equals(n, other)
 }
 
-func (n Line) FiniteNumberOfPoints() (int, bool) {
-	return 0, false
+func (n Line) Envelope() (Envelope, bool) {
+	return NewEnvelope(n.a.XY, n.b.XY), true
 }

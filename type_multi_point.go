@@ -74,6 +74,13 @@ func (m MultiPoint) Equals(other Geometry) bool {
 	return equals(m, other)
 }
 
-func (m MultiPoint) FiniteNumberOfPoints() (int, bool) {
-	return len(m.pts), true
+func (m MultiPoint) Envelope() (Envelope, bool) {
+	if len(m.pts) == 0 {
+		return Envelope{}, false
+	}
+	env := NewEnvelope(m.pts[0].coords.XY)
+	for _, pt := range m.pts[1:] {
+		env = env.Extend(pt.coords.XY)
+	}
+	return env, true
 }

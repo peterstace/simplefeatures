@@ -66,6 +66,14 @@ func (m MultiLineString) Equals(other Geometry) bool {
 	return equals(m, other)
 }
 
-func (m MultiLineString) FiniteNumberOfPoints() (int, bool) {
-	return 0, m.IsEmpty()
+func (m MultiLineString) Envelope() (Envelope, bool) {
+	if len(m.lines) == 0 {
+		return Envelope{}, false
+	}
+	env := mustEnvelope(m.lines[0])
+	for _, line := range m.lines[1:] {
+		e := mustEnvelope(line)
+		env = env.Union(e)
+	}
+	return env, true
 }

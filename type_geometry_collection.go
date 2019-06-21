@@ -59,26 +59,6 @@ func (c GeometryCollection) Equals(other Geometry) bool {
 	return equals(c, other)
 }
 
-func (c GeometryCollection) FiniteNumberOfPoints() (int, bool) {
-	pts := make(map[XY]struct{})
-	finite := true
-	c.walk(func(g Geometry) {
-		_, fin := g.FiniteNumberOfPoints()
-		if !fin {
-			finite = false
-		}
-		switch g := g.(type) {
-		case Point:
-			pts[g.coords.XY] = struct{}{}
-		case MultiPoint:
-			for _, pt := range g.pts {
-				pts[pt.coords.XY] = struct{}{}
-			}
-		}
-	})
-	return len(pts), finite
-}
-
 func (c GeometryCollection) walk(fn func(Geometry)) {
 	for _, g := range c.geoms {
 		if col, ok := g.(GeometryCollection); ok {
@@ -87,4 +67,16 @@ func (c GeometryCollection) walk(fn func(Geometry)) {
 			fn(g)
 		}
 	}
+}
+
+func (c GeometryCollection) flatten() []Geometry {
+	var geoms []Geometry
+	c.walk(func(g Geometry) {
+		geoms = append(geoms, g)
+	})
+	return geoms
+}
+
+func (c GeometryCollection) Envelope() (Envelope, bool) {
+	return EnvelopeFromGeoms(c.flatten()...)
 }

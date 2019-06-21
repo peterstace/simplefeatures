@@ -19,11 +19,11 @@ func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
 	for i := 0; i < len(allRings); i++ {
 		for j := i + 1; j < len(allRings); j++ {
 			inter := allRings[i].Intersection(allRings[j])
-			numPts, finite := inter.FiniteNumberOfPoints()
-			if !finite {
-				return Polygon{}, errors.New("polygon rings must not overlap")
+			env, has := inter.Envelope()
+			if !has {
+				continue // no intersection
 			}
-			if numPts > 1 {
+			if env.Min() != env.Max() {
 				return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
 			}
 		}
@@ -101,6 +101,6 @@ func (p Polygon) Equals(other Geometry) bool {
 	return equals(p, other)
 }
 
-func (p Polygon) FiniteNumberOfPoints() (int, bool) {
-	return 0, false
+func (p Polygon) Envelope() (Envelope, bool) {
+	return p.outer.Envelope()
 }
