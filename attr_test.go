@@ -20,6 +20,7 @@ func TestIsEmptyDimension(t *testing.T) {
 		{"LINESTRING(0 0,1 1)", false, 1},
 		{"LINESTRING(0 0,1 1,2 2)", false, 1},
 		{"LINESTRING(0 0,1 1,1 0,0 0)", false, 1},
+		{"LINEARRING(0 0,1 0,1 1,0 0)", false, 1},
 		{"POLYGON EMPTY", true, 0},
 		{"POLYGON((0 0,1 1,1 0,0 0))", false, 2},
 		{"MULTIPOINT EMPTY", true, 0},
@@ -57,23 +58,6 @@ func TestIsEmptyDimension(t *testing.T) {
 				}
 			})
 		})
-	}
-}
-
-func TestIsEmptyAndDimensionLinearRing(t *testing.T) {
-	// Tested on its own, since it cannot be constructed from WKT.
-	// TODO: It now can be represented using WKT, so this can be merged into the other test.
-	ring, err := NewLinearRing([]Coordinates{
-		{XY: XY{0, 0}}, {XY: XY{1, 0}}, {XY: XY{1, 1}}, {XY: XY{0, 0}},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if ring.IsEmpty() {
-		t.Errorf("expected to not be empty")
-	}
-	if ring.Dimension() != 1 {
-		t.Errorf("expected dimension 1")
 	}
 }
 
