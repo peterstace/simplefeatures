@@ -1,7 +1,27 @@
 package simplefeatures
 
+import (
+	"strings"
+)
+
 type XY struct {
 	X, Y Scalar
+}
+
+func (xy XY) Equals(other XY) bool {
+	return xyeq(xy, other)
+}
+
+type xyString string
+
+func xykey(xy XY) xyString {
+	var buf strings.Builder
+	z := xy.X.AsRat(nil)
+	buf.WriteString(z.String())
+	buf.WriteByte(',')
+	xy.Y.AsRat(z)
+	buf.WriteString(z.String())
+	return xyString(buf.String())
 }
 
 func xysub(a, b XY) XY {

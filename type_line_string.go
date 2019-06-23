@@ -22,7 +22,7 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 	}
 	var twoDistinct bool
 	for _, pt := range pts[1:] {
-		if pt.XY != pts[0].XY {
+		if !xyeq(pt.XY, pts[0].XY) {
 			twoDistinct = true
 			break
 		}

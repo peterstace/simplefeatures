@@ -8,9 +8,9 @@ type MultiPoint struct {
 
 func NewMultiPoint(pts []Point) MultiPoint {
 	// Deduplicate
-	ptSet := make(map[XY]Point)
+	ptSet := make(map[xyString]Point)
 	for _, p := range pts {
-		ptSet[p.coords.XY] = p
+		ptSet[xykey(p.coords.XY)] = p
 	}
 	ptSlice := make([]Point, 0, len(ptSet))
 	for _, p := range ptSet {

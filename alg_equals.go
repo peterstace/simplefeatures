@@ -25,13 +25,13 @@ func equals(g1, g2 Geometry) bool {
 }
 
 func equalsMultiPointAndMultiPoint(mp1, mp2 MultiPoint) bool {
-	s1 := make(map[XY]bool)
-	s2 := make(map[XY]bool)
+	s1 := make(map[xyString]bool)
+	s2 := make(map[xyString]bool)
 	for _, p := range mp1.pts {
-		s1[p.coords.XY] = true
+		s1[xykey(p.coords.XY)] = true
 	}
 	for _, p := range mp2.pts {
-		s2[p.coords.XY] = true
+		s2[xykey(p.coords.XY)] = true
 	}
 	return reflect.DeepEqual(s1, s2)
 }
