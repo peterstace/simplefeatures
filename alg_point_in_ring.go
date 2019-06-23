@@ -10,7 +10,6 @@ func isPointInsideOrOnRing(pt XY, ring LinearRing) bool {
 	maxX := ring.ls.lines[0].a.X
 	for _, ln := range ring.ls.lines {
 		maxX = maxX.Max(ln.b.X)
-		//maxX = math.Max(maxX, ln.b.X)
 		if !ln.Intersection(ptg).IsEmpty() {
 			return true
 		}
