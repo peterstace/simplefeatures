@@ -12,7 +12,7 @@ type Line struct {
 
 // NewLine creates a line segment given the coordinates of its two endpoints.
 func NewLine(a, b Coordinates) (Line, error) {
-	if xyeq(a.XY, b.XY) {
+	if a.XY.Equals(b.XY) {
 		return Line{}, fmt.Errorf("line endpoints must be distinct: %v", a.XY)
 	}
 	return Line{a, b}, nil

@@ -30,29 +30,29 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	c := n2.a.XY
 	d := n2.b.XY
 
-	if parallel := seq(xycross(xysub(b, a), xysub(d, c)), zero); !parallel {
-		e := sadd(smul(ssub(c.Y, d.Y), ssub(a.X, c.X)), smul(ssub(d.X, c.X), ssub(a.Y, c.Y)))
+	if parallel := b.Sub(a).Cross(d.Sub(c)).Equals(zero); !parallel {
+		e := c.Y.Sub(d.Y).Mul(a.X.Sub(c.X)).Add(d.X.Sub(c.X).Mul(a.Y.Sub(c.Y)))
 		//e := (c.Y-d.Y)*(a.X-c.X) + (d.X-c.X)*(a.Y-c.Y)
-		f := ssub(smul(ssub(d.X, c.X), ssub(a.Y, b.Y)), smul(ssub(a.X, b.X), ssub(d.Y, c.Y)))
+		f := d.X.Sub(c.X).Mul(a.Y.Sub(b.Y)).Sub(a.X.Sub(b.X).Mul(d.Y.Sub(c.Y)))
 		//f := (d.X-c.X)*(a.Y-b.Y) - (a.X-b.X)*(d.Y-c.Y)
-		g := sadd(smul(ssub(a.Y, b.Y), ssub(a.X, c.X)), smul(ssub(b.X, a.X), ssub(a.Y, c.Y)))
+		g := a.Y.Sub(b.Y).Mul(a.X.Sub(c.X)).Add(b.X.Sub(a.X).Mul(a.Y.Sub(c.Y)))
 		//g := (a.Y-b.Y)*(a.X-c.X) + (b.X-a.X)*(a.Y-c.Y)
-		h := ssub(smul(ssub(d.X, c.X), ssub(a.Y, b.Y)), smul(ssub(a.X, b.X), ssub(d.Y, c.Y)))
+		h := d.X.Sub(c.X).Mul(a.Y.Sub(b.Y)).Sub(a.X.Sub(b.X).Mul(d.Y.Sub(c.Y)))
 		//h := (d.X-c.X)*(a.Y-b.Y) - (a.X-b.X)*(d.Y-c.Y)
 		// Division by zero is not possible, since the lines are not parallel.
-		p := sdiv(e, f)
+		p := e.Div(f)
 		//p := e / f
-		q := sdiv(g, h)
+		q := g.Div(h)
 		//q := g / h
-		if slt(p, zero) || sgt(p, one) || slt(q, zero) || sgt(q, one) {
+		if p.LT(zero) || p.GT(one) || q.LT(zero) || q.GT(one) {
 			//if p < 0 || p > 1 || q < 0 || q > 1 {
 			// Intersection between lines occurs beyond line endpoints.
 			return NewGeometryCollection(nil)
 		}
 		pt, err := NewPoint(
-			sadd(a.X, smul(p, ssub(b.X, a.X))),
+			a.X.Add(p.Mul(b.X.Sub(a.X))),
 			//a.X+p*(b.X-a.X),
-			sadd(a.Y, smul(p, ssub(b.Y, a.Y))),
+			a.Y.Add(p.Mul(b.Y.Sub(a.Y))),
 			//a.Y+p*(b.Y-a.Y),
 		)
 		if err != nil {
@@ -62,22 +62,22 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	}
 
 	// TODO: invert if to un-indent flow.
-	if colinear := seq(xycross(xysub(b, a), xysub(d, a)), zero); colinear {
+	if colinear := b.Sub(a).Cross(d.Sub(a)).Equals(zero); colinear {
 		// TODO: use a proper bbox type
 		abBB := bbox{
-			min: XY{smin(a.X, b.X), smin(a.Y, b.Y)},
+			min: XY{a.X.Min(b.X), a.Y.Min(b.Y)},
 			//min: XY{math.Min(a.X, b.X), math.Min(a.Y, b.Y)},
-			max: XY{smax(a.X, b.X), smax(a.Y, b.Y)},
+			max: XY{a.X.Max(b.X), a.Y.Max(b.Y)},
 			//max: XY{math.Max(a.X, b.X), math.Max(a.Y, b.Y)},
 		}
 		cdBB := bbox{
-			min: XY{smin(c.X, d.X), smin(c.Y, d.Y)},
+			min: XY{c.X.Min(d.X), c.Y.Min(d.Y)},
 			//min: XY{math.Min(c.X, d.X), math.Min(c.Y, d.Y)},
-			max: XY{smax(c.X, d.X), smax(c.Y, d.Y)},
+			max: XY{c.X.Max(d.X), c.Y.Max(d.Y)},
 			//max: XY{math.Max(c.X, d.X), math.Max(c.Y, d.Y)},
 		}
-		if sgt(abBB.min.X, cdBB.max.X) || slt(abBB.max.X, cdBB.min.X) ||
-			sgt(abBB.min.Y, cdBB.max.Y) || slt(abBB.max.Y, cdBB.min.Y) {
+		if abBB.min.X.GT(cdBB.max.X) || abBB.max.X.LT(cdBB.min.X) ||
+			abBB.min.Y.GT(cdBB.max.Y) || abBB.max.Y.LT(cdBB.min.Y) {
 			//if abBB.min.X > cdBB.max.X || abBB.max.X < cdBB.min.X ||
 			//abBB.min.Y > cdBB.max.Y || abBB.max.Y < cdBB.min.Y {
 			// Line segments don't overlap at all.
@@ -89,7 +89,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		// can just do a pairwise check on the endpoints for each 4
 		// combinations.
 
-		if seq(abBB.max.X, cdBB.min.X) && seq(abBB.min.Y, cdBB.max.Y) {
+		if abBB.max.X.Equals(cdBB.min.X) && abBB.min.Y.Equals(cdBB.max.Y) {
 			//if abBB.max.X == cdBB.min.X && abBB.min.Y == cdBB.max.Y {
 			// Line segments overlap at a point.
 			pt, err := NewPoint(abBB.max.X, abBB.min.Y)
@@ -99,7 +99,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			return pt
 		}
 
-		if seq(cdBB.max.X, abBB.min.X) && seq(cdBB.min.Y, abBB.max.Y) {
+		if cdBB.max.X.Equals(abBB.min.X) && cdBB.min.Y.Equals(abBB.max.Y) {
 			//if cdBB.max.X == abBB.min.X && cdBB.min.Y == abBB.max.Y {
 			// Line segments overlap at a point.
 			pt, err := NewPoint(cdBB.max.X, cdBB.min.Y)
@@ -109,7 +109,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			return pt
 		}
 
-		if xyeq(abBB.max, cdBB.min) {
+		if abBB.max.Equals(cdBB.min) {
 			//if abBB.max == cdBB.min {
 			// Line segments overlap at a point.
 			pt, err := NewPoint(abBB.max.X, abBB.max.Y)
@@ -118,7 +118,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			}
 			return pt
 		}
-		if xyeq(cdBB.max, abBB.min) {
+		if cdBB.max.Equals(abBB.min) {
 			//if cdBB.max == abBB.min {
 			// Line segments overlap at a point.
 			pt, err := NewPoint(cdBB.max.X, cdBB.max.Y)
@@ -131,25 +131,25 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		// Line segments overlap over a line segment.
 		bb := bbox{
 			min: XY{
-				smax(abBB.min.X, cdBB.min.X),
+				abBB.min.X.Max(cdBB.min.X),
 				//math.Max(abBB.min.X, cdBB.min.X),
-				smax(abBB.min.Y, cdBB.min.Y),
+				abBB.min.Y.Max(cdBB.min.Y),
 				//math.Max(abBB.min.Y, cdBB.min.Y),
 			},
 			max: XY{
-				smin(abBB.max.X, cdBB.max.X),
+				abBB.max.X.Min(cdBB.max.X),
 				//math.Min(abBB.max.X, cdBB.max.X),
-				smin(abBB.max.Y, cdBB.max.Y),
+				abBB.max.Y.Min(cdBB.max.Y),
 				//math.Min(abBB.max.Y, cdBB.max.Y),
 			},
 		}
 		var (
 			u    = XY{bb.min.X, bb.min.Y}
 			v    = XY{bb.max.X, bb.max.Y}
-			rise = ssub(b.Y, a.Y)
-			run  = ssub(b.X, a.X)
+			rise = b.Y.Sub(a.Y)
+			run  = b.X.Sub(a.X)
 		)
-		if sgt(rise, zero) && slt(run, zero) || slt(rise, zero) && sgt(run, zero) {
+		if rise.GT(zero) && run.LT(zero) || rise.LT(zero) && run.GT(zero) {
 			//if rise > 0 && run < 0 || rise < 0 && run > 0 {
 			u.X, v.X = v.X, u.X
 		}
@@ -186,21 +186,21 @@ func intersectLinearRingWithLinearRing(r1, r2 LinearRing) Geometry {
 
 func intersectPointWithLine(point Point, line Line) Geometry {
 	// TODO: use envelope instead
-	if slt(point.coords.X, smin(line.a.X, line.b.X)) ||
-		sgt(point.coords.X, smax(line.a.X, line.b.X)) ||
-		slt(point.coords.Y, smin(line.a.Y, line.b.Y)) ||
-		sgt(point.coords.Y, smax(line.a.Y, line.b.Y)) {
+	if point.coords.X.LT(line.a.X.Min(line.b.X)) ||
+		point.coords.X.GT(line.a.X.Max(line.b.X)) ||
+		point.coords.Y.LT(line.a.Y.Min(line.b.Y)) ||
+		point.coords.Y.GT(line.a.Y.Max(line.b.Y)) {
 		//if point.coords.X < math.Min(line.a.X, line.b.X) ||
 		//point.coords.X > math.Max(line.a.X, line.b.X) ||
 		//point.coords.Y < math.Min(line.a.Y, line.b.Y) ||
 		//point.coords.Y > math.Max(line.a.Y, line.b.Y) {
 		return NewEmptyPoint()
 	}
-	lhs := smul(ssub(point.coords.X, line.a.X), ssub(line.b.Y, line.a.Y))
+	lhs := point.coords.X.Sub(line.a.X).Mul(line.b.Y.Sub(line.a.Y))
 	//lhs := (point.coords.X - line.a.X) * (line.b.Y - line.a.Y)
-	rhs := smul(ssub(point.coords.Y, line.a.Y), ssub(line.b.X, line.a.X))
+	rhs := point.coords.Y.Sub(line.a.Y).Mul(line.b.X.Sub(line.a.X))
 	//rhs := (point.coords.Y - line.a.Y) * (line.b.X - line.a.X)
-	if seq(lhs, rhs) {
+	if lhs.Equals(rhs) {
 		//if lhs == rhs {
 		return point
 	}

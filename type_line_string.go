@@ -22,7 +22,7 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 	}
 	var twoDistinct bool
 	for _, pt := range pts[1:] {
-		if !xyeq(pt.XY, pts[0].XY) {
+		if !pt.XY.Equals(pts[0].XY) {
 			twoDistinct = true
 			break
 		}
@@ -33,7 +33,7 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 
 	var lines []Line
 	for i := 0; i < len(pts)-1; i++ {
-		if xyeq(pts[i].XY, pts[i+1].XY) {
+		if pts[i].XY.Equals(pts[i+1].XY) {
 			continue
 		}
 		ln, err := NewLine(pts[i], pts[i+1])
@@ -121,7 +121,7 @@ func (s LineString) IsSimple() bool {
 }
 
 func (s LineString) IsClosed() bool {
-	return xyeq(s.lines[0].a.XY, s.lines[len(s.lines)-1].b.XY)
+	return s.lines[0].a.XY.Equals(s.lines[len(s.lines)-1].b.XY)
 }
 
 func (s LineString) Intersection(g Geometry) Geometry {

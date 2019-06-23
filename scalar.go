@@ -52,54 +52,55 @@ func (s Scalar) AsRat(r *big.Rat) *big.Rat {
 	return r.Set(s.val)
 }
 
-func seq(a, b Scalar) bool {
-	return a.val.Cmp(b.val) == 0
+func (s Scalar) Equals(o Scalar) bool {
+	return s.val.Cmp(o.val) == 0
 }
 
-func smin(a, b Scalar) Scalar {
-	if a.val.Cmp(b.val) < 0 {
-		return a
+func (s Scalar) Min(o Scalar) Scalar {
+	if s.val.Cmp(o.val) < 0 {
+		return s
 	}
-	return b
+	return o
 }
 
-func smax(a, b Scalar) Scalar {
-	if a.val.Cmp(b.val) > 0 {
-		return a
+func (s Scalar) Max(o Scalar) Scalar {
+	if s.val.Cmp(o.val) > 0 {
+		return s
 	}
-	return b
+	return o
 }
 
-func sadd(a, b Scalar) Scalar {
-	return Scalar{new(big.Rat).Add(a.val, b.val)}
+func (s Scalar) Add(o Scalar) Scalar {
+	return Scalar{new(big.Rat).Add(s.val, o.val)}
 }
 
-func ssub(a, b Scalar) Scalar {
-	return Scalar{new(big.Rat).Sub(a.val, b.val)}
+func (s Scalar) Sub(o Scalar) Scalar {
+	return Scalar{new(big.Rat).Sub(s.val, o.val)}
 }
 
-func smul(a, b Scalar) Scalar {
-	return Scalar{new(big.Rat).Mul(a.val, b.val)}
+func (s Scalar) Mul(o Scalar) Scalar {
+	return Scalar{new(big.Rat).Mul(s.val, o.val)}
 }
 
-func sdiv(a, b Scalar) Scalar {
+func (s Scalar) Div(o Scalar) Scalar {
 	z := new(big.Rat)
-	z.Inv(b.val)
-	return Scalar{z.Mul(a.val, z)}
+	z.Inv(o.val)
+	z.Mul(z, s.val)
+	return Scalar{z}
 }
 
-func sgt(a, b Scalar) bool {
-	return a.val.Cmp(b.val) > 0
+func (s Scalar) GT(o Scalar) bool {
+	return s.val.Cmp(o.val) > 0
 }
 
-func slt(a, b Scalar) bool {
-	return a.val.Cmp(b.val) < 0
+func (s Scalar) LT(o Scalar) bool {
+	return s.val.Cmp(o.val) < 0
 }
 
-func sge(a, b Scalar) bool {
-	return a.val.Cmp(b.val) >= 0
+func (s Scalar) GTE(o Scalar) bool {
+	return s.val.Cmp(o.val) >= 0
 }
 
-func sle(a, b Scalar) bool {
-	return a.val.Cmp(b.val) <= 0
+func (s Scalar) LTE(o Scalar) bool {
+	return s.val.Cmp(o.val) <= 0
 }

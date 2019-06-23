@@ -16,7 +16,7 @@ type Polygon struct {
 func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
 	allRings := append(holes, outer)
 	nextInterVert := len(allRings)
-	interVerts := make(map[xyString]int)
+	interVerts := make(map[xyHash]int)
 	graph := newGraph()
 
 	// Rings may intersect, but only at a single point.
@@ -27,15 +27,15 @@ func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
 			if !has {
 				continue // no intersection
 			}
-			if !xyeq(env.Min(), env.Max()) {
+			if !env.Min().Equals(env.Max()) {
 				return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
 			}
 
-			interVert, ok := interVerts[xykey(env.Min())]
+			interVert, ok := interVerts[env.Min().asString()]
 			if !ok {
 				interVert = nextInterVert
 				nextInterVert++
-				interVerts[xykey(env.Min())] = interVert
+				interVerts[env.Min().asString()] = interVert
 			}
 			graph.addEdge(interVert, i)
 			graph.addEdge(interVert, j)

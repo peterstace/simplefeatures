@@ -48,15 +48,15 @@ func (e Envelope) Max() XY {
 
 func (e Envelope) Extend(point XY) Envelope {
 	return Envelope{
-		min: XY{smin(e.min.X, point.X), smin(e.min.Y, point.Y)},
-		max: XY{smax(e.max.X, point.X), smax(e.max.Y, point.Y)},
+		min: XY{e.min.X.Min(point.X), e.min.Y.Min(point.Y)},
+		max: XY{e.max.X.Max(point.X), e.max.Y.Max(point.Y)},
 	}
 }
 
 func (e Envelope) Union(other Envelope) Envelope {
 	return Envelope{
-		min: XY{smin(e.min.X, other.min.X), smin(e.min.Y, other.min.Y)},
-		max: XY{smax(e.max.X, other.max.X), smax(e.max.Y, other.max.Y)},
+		min: XY{e.min.X.Min(other.min.X), e.min.Y.Min(other.min.Y)},
+		max: XY{e.max.X.Max(other.max.X), e.max.Y.Max(other.max.Y)},
 	}
 }
 

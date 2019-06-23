@@ -9,18 +9,17 @@ func isPointInsideOrOnRing(pt XY, ring LinearRing) bool {
 	// TODO: should be able to use envelope for this
 	maxX := ring.ls.lines[0].a.X
 	for _, ln := range ring.ls.lines {
-		maxX = smax(maxX, ln.b.X)
+		maxX = maxX.Max(ln.b.X)
 		//maxX = math.Max(maxX, ln.b.X)
 		if !ln.Intersection(ptg).IsEmpty() {
 			return true
 		}
 	}
-	if sgt(pt.X, maxX) {
-		//if pt.X > maxX {
+	if pt.X.GT(maxX) {
 		return false
 	}
 
-	ray, err := NewLine(Coordinates{pt}, Coordinates{XY{sadd(maxX, one), pt.Y}})
+	ray, err := NewLine(Coordinates{pt}, Coordinates{XY{maxX.Add(one), pt.Y}})
 	if err != nil {
 		panic(err)
 	}
@@ -46,8 +45,7 @@ func isPointInsideOrOnRing(pt XY, ring LinearRing) bool {
 			if inter.Equals(ep1) {
 				otherY = ep2.coords.Y
 			}
-			if slt(otherY, pt.Y) {
-				//if otherY < pt.Y {
+			if otherY.LT(pt.Y) {
 				count++
 			}
 		} else {
