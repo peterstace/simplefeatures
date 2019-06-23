@@ -10,7 +10,7 @@ func equals(g1, g2 Geometry) bool {
 	case Point:
 		switch g2 := g2.(type) {
 		case Point:
-			return g1.coords.XY == g2.coords.XY
+			return xyeq(g1.coords.XY, g2.coords.XY)
 		case MultiPoint:
 			g1Set := NewMultiPoint([]Point{g1})
 			return equalsMultiPointAndMultiPoint(g1Set, g2)

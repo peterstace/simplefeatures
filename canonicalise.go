@@ -101,7 +101,7 @@ func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 
 	for pt := range points {
 		for _, line := range lines {
-			if line.a.XY == pt || line.b.XY == pt {
+			if xyeq(line.a.XY, pt) || xyeq(line.b.XY, pt) {
 				delete(points, pt)
 				break
 			}

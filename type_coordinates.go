@@ -1,6 +1,5 @@
 package simplefeatures
 
-// TODO: XY shouldn't be exported
 type XY struct {
 	X, Y Scalar
 }

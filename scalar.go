@@ -26,6 +26,16 @@ func NewScalar(s string) (Scalar, error) {
 	return Scalar{r}, nil
 }
 
+// NewScalarFromFloat64 creates a scalar that exactly equals the provided
+// float64. Panics if f is NaN or infinite.
+func NewScalarFromFloat64(f float64) Scalar {
+	z := new(big.Rat).SetFloat64(f)
+	if z == nil {
+		panic("f must be finite")
+	}
+	return Scalar{z}
+}
+
 // AsFloat converts the scalar into a float64. If the scalar is too large to be
 // represented as a float64, then the retuned value will be infinity or
 // negative infinity.

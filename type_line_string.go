@@ -33,7 +33,7 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 
 	var lines []Line
 	for i := 0; i < len(pts)-1; i++ {
-		if pts[i].XY == pts[i+1].XY {
+		if xyeq(pts[i].XY, pts[i+1].XY) {
 			continue
 		}
 		ln, err := NewLine(pts[i], pts[i+1])
@@ -121,7 +121,7 @@ func (s LineString) IsSimple() bool {
 }
 
 func (s LineString) IsClosed() bool {
-	return s.lines[0].a.XY == s.lines[len(s.lines)-1].b.XY
+	return xyeq(s.lines[0].a.XY, s.lines[len(s.lines)-1].b.XY)
 }
 
 func (s LineString) Intersection(g Geometry) Geometry {

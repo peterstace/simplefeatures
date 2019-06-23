@@ -62,23 +62,29 @@ func TestIsEmptyDimension(t *testing.T) {
 }
 
 func TestEnvelope(t *testing.T) {
+	xy := func(x, y float64) XY {
+		return XY{
+			NewScalarFromFloat64(x),
+			NewScalarFromFloat64(y),
+		}
+	}
 	for i, tt := range []struct {
 		wkt string
 		min XY
 		max XY
 	}{
-		{"POINT(1 1)", XY{1, 1}, XY{1, 1}},
-		{"LINESTRING(1 2,3 4)", XY{1, 2}, XY{3, 4}},
-		{"LINESTRING(4 1,2 3)", XY{2, 1}, XY{4, 3}},
-		{"LINESTRING(1 1,3 1,2 2,2 4)", XY{1, 1}, XY{3, 4}},
-		{"LINEARRING(1 1,3 1,2 2,2 4,1 1)", XY{1, 1}, XY{3, 4}},
-		{"POLYGON((1 1,3 1,2 2,2 4,1 1))", XY{1, 1}, XY{3, 4}},
-		{"MULTIPOINT(1 1,3 1,2 2,2 4,1 1)", XY{1, 1}, XY{3, 4}},
-		{"MULTILINESTRING((1 1,3 1,2 2,2 4,1 1),(4 1,4 2))", XY{1, 1}, XY{4, 4}},
-		{"MULTILINESTRING((4 1,4 2),(1 1,3 1,2 2,2 4,1 1))", XY{1, 1}, XY{4, 4}},
-		{"MULTIPOLYGON(((4 1,4 2,3 2,4 1)),((1 1,3 1,2 2,2 4,1 1)))", XY{1, 1}, XY{4, 4}},
-		{"GEOMETRYCOLLECTION(POINT(4 1),POINT(2 3))", XY{2, 1}, XY{4, 3}},
-		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(4 1),POINT(2 3)))", XY{2, 1}, XY{4, 3}},
+		{"POINT(1 1)", xy(1, 1), xy(1, 1)},
+		{"LINESTRING(1 2,3 4)", xy(1, 2), xy(3, 4)},
+		{"LINESTRING(4 1,2 3)", xy(2, 1), xy(4, 3)},
+		{"LINESTRING(1 1,3 1,2 2,2 4)", xy(1, 1), xy(3, 4)},
+		{"LINEARRING(1 1,3 1,2 2,2 4,1 1)", xy(1, 1), xy(3, 4)},
+		{"POLYGON((1 1,3 1,2 2,2 4,1 1))", xy(1, 1), xy(3, 4)},
+		{"MULTIPOINT(1 1,3 1,2 2,2 4,1 1)", xy(1, 1), xy(3, 4)},
+		{"MULTILINESTRING((1 1,3 1,2 2,2 4,1 1),(4 1,4 2))", xy(1, 1), xy(4, 4)},
+		{"MULTILINESTRING((4 1,4 2),(1 1,3 1,2 2,2 4,1 1))", xy(1, 1), xy(4, 4)},
+		{"MULTIPOLYGON(((4 1,4 2,3 2,4 1)),((1 1,3 1,2 2,2 4,1 1)))", xy(1, 1), xy(4, 4)},
+		{"GEOMETRYCOLLECTION(POINT(4 1),POINT(2 3))", xy(2, 1), xy(4, 3)},
+		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(4 1),POINT(2 3)))", xy(2, 1), xy(4, 3)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("wkt:", tt.wkt)
