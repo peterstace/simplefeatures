@@ -26,7 +26,7 @@ func (w XY) Cross(o XY) Scalar {
 
 type xyHash [sha256.Size]byte
 
-func (w XY) asString() xyHash {
+func (w XY) hash() xyHash {
 	h := sha256.New()
 	fmt.Fprintf(h, "%s,%s", w.X.val, w.Y.val)
 	var sum xyHash

@@ -48,8 +48,8 @@ type xyxyHash struct {
 
 func hashXYXY(a, b XY) xyxyHash {
 	return xyxyHash{
-		a.asString(),
-		b.asString(),
+		a.hash(),
+		b.hash(),
 	}
 }
 
@@ -62,7 +62,7 @@ func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 		switch g := g.(type) {
 		case EmptySet:
 		case Point:
-			points[g.coords.XY.asString()] = g
+			points[g.coords.XY.hash()] = g
 		case Line:
 			g = orderLine(g)
 			lines[hashXYXY(g.a.XY, g.b.XY)] = g
@@ -80,7 +80,7 @@ func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 			polys = append(polys, g)
 		case MultiPoint:
 			for _, pt := range g.pts {
-				points[pt.coords.XY.asString()] = pt
+				points[pt.coords.XY.hash()] = pt
 			}
 		case MultiLineString:
 			for _, linestr := range g.lines {
@@ -96,7 +96,7 @@ func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 		case GeometryCollection:
 			pts, lns, pls := flattenGeometries(g.geoms)
 			for _, pt := range pts {
-				points[pt.coords.XY.asString()] = pt
+				points[pt.coords.XY.hash()] = pt
 			}
 			for _, ln := range lns {
 				lines[hashXYXY(ln.a.XY, ln.b.XY)] = ln
@@ -110,7 +110,7 @@ func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 	for _, pt := range points {
 		for _, line := range lines {
 			if line.a.XY.Equals(pt.coords.XY) || line.b.XY.Equals(pt.coords.XY) {
-				delete(points, pt.coords.XY.asString())
+				delete(points, pt.coords.XY.hash())
 				break
 			}
 		}

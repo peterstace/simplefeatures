@@ -31,11 +31,11 @@ func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
 				return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
 			}
 
-			interVert, ok := interVerts[env.Min().asString()]
+			interVert, ok := interVerts[env.Min().hash()]
 			if !ok {
 				interVert = nextInterVert
 				nextInterVert++
-				interVerts[env.Min().asString()] = interVert
+				interVerts[env.Min().hash()] = interVert
 			}
 			graph.addEdge(interVert, i)
 			graph.addEdge(interVert, j)
