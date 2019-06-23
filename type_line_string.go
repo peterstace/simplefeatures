@@ -15,12 +15,6 @@ type LineString struct {
 // NewLineString creates a line string from the coordinates defining its
 // points.
 func NewLineString(pts []Coordinates) (LineString, error) {
-	for _, pt := range pts {
-		if err := pt.Validate(); err != nil {
-			return LineString{}, err
-		}
-	}
-
 	// Must have at least 2 distinct points.
 	err := errors.New("LineString must contain at least two distinct points")
 	if len(pts) == 0 {
@@ -64,15 +58,15 @@ func (s LineString) AppendWKT(dst []byte) []byte {
 func (s LineString) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
 	for _, ln := range s.lines {
-		dst = strconv.AppendFloat(dst, ln.a.X, 'f', -1, 64)
+		dst = strconv.AppendFloat(dst, ln.a.X.AsFloat(), 'f', -1, 64)
 		dst = append(dst, ' ')
-		dst = strconv.AppendFloat(dst, ln.a.Y, 'f', -1, 64)
+		dst = strconv.AppendFloat(dst, ln.a.Y.AsFloat(), 'f', -1, 64)
 		dst = append(dst, ',')
 	}
 	last := s.lines[len(s.lines)-1].b
-	dst = strconv.AppendFloat(dst, last.X, 'f', -1, 64)
+	dst = strconv.AppendFloat(dst, last.X.AsFloat(), 'f', -1, 64)
 	dst = append(dst, ' ')
-	dst = strconv.AppendFloat(dst, last.Y, 'f', -1, 64)
+	dst = strconv.AppendFloat(dst, last.Y.AsFloat(), 'f', -1, 64)
 	return append(dst, ')')
 }
 

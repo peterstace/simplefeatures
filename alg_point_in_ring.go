@@ -1,11 +1,5 @@
 package simplefeatures
 
-import (
-	"math"
-)
-
-type foo int
-
 func isPointInsideOrOnRing(pt XY, ring LinearRing) bool {
 	ptg, err := NewPointFromCoords(Coordinates{pt})
 	if err != nil {
@@ -15,16 +9,18 @@ func isPointInsideOrOnRing(pt XY, ring LinearRing) bool {
 	// TODO: should be able to use envelope for this
 	maxX := ring.ls.lines[0].a.X
 	for _, ln := range ring.ls.lines {
-		maxX = math.Max(maxX, ln.b.X)
+		maxX = smax(maxX, ln.b.X)
+		//maxX = math.Max(maxX, ln.b.X)
 		if !ln.Intersection(ptg).IsEmpty() {
 			return true
 		}
 	}
-	if pt.X > maxX {
+	if sgt(pt.X, maxX) {
+		//if pt.X > maxX {
 		return false
 	}
 
-	ray, err := NewLine(Coordinates{pt}, Coordinates{XY{maxX + 1, pt.Y}})
+	ray, err := NewLine(Coordinates{pt}, Coordinates{XY{sadd(maxX, one), pt.Y}})
 	if err != nil {
 		panic(err)
 	}
@@ -50,7 +46,8 @@ func isPointInsideOrOnRing(pt XY, ring LinearRing) bool {
 			if inter.Equals(ep1) {
 				otherY = ep2.coords.Y
 			}
-			if otherY < pt.Y {
+			if slt(otherY, pt.Y) {
+				//if otherY < pt.Y {
 				count++
 			}
 		} else {

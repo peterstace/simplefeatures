@@ -130,14 +130,18 @@ func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 }
 
 func xyCmp(a, b XY) int {
-	if a.X < b.X {
+	if slt(a.X, b.X) {
+		//if a.X < b.X {
 		return -1
-	} else if a.X > b.X {
+	} else if sgt(a.X, b.X) {
+		//} else if a.X > b.X {
 		return +1
 	}
-	if a.Y < b.Y {
+	if slt(a.Y, b.Y) {
+		//if a.Y < b.Y {
 		return -1
-	} else if a.Y > b.Y {
+	} else if sgt(a.Y, b.Y) {
+		//} else if a.Y > b.Y {
 		return +1
 	}
 	return 0

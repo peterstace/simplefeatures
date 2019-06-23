@@ -2,7 +2,6 @@ package simplefeatures
 
 import (
 	"fmt"
-	"math"
 )
 
 type Envelope struct {
@@ -47,21 +46,17 @@ func (e Envelope) Max() XY {
 	return e.max
 }
 
-func (e Envelope) Area() float64 {
-	return (e.max.X - e.min.X) * (e.max.Y - e.min.Y)
-}
-
 func (e Envelope) Extend(point XY) Envelope {
 	return Envelope{
-		min: XY{math.Min(e.min.X, point.X), math.Min(e.min.Y, point.Y)},
-		max: XY{math.Max(e.max.X, point.X), math.Max(e.max.Y, point.Y)},
+		min: XY{smin(e.min.X, point.X), smin(e.min.Y, point.Y)},
+		max: XY{smax(e.max.X, point.X), smax(e.max.Y, point.Y)},
 	}
 }
 
 func (e Envelope) Union(other Envelope) Envelope {
 	return Envelope{
-		min: XY{math.Min(e.min.X, other.min.X), math.Min(e.min.Y, other.min.Y)},
-		max: XY{math.Max(e.max.X, other.max.X), math.Max(e.max.Y, other.max.Y)},
+		min: XY{smin(e.min.X, other.min.X), smin(e.min.Y, other.min.Y)},
+		max: XY{smax(e.max.X, other.max.X), smax(e.max.Y, other.max.Y)},
 	}
 }
 

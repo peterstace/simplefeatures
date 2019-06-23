@@ -1,32 +1,31 @@
 package simplefeatures
 
-import (
-	"errors"
-	"math"
-)
-
+// TODO: XY shouldn't be exported
 type XY struct {
-	X, Y float64
+	X, Y Scalar
+}
+
+func xysub(a, b XY) XY {
+	return XY{
+		ssub(a.X, b.X),
+		//a.X - b.X,
+		ssub(a.Y, b.Y),
+		//a.Y - b.Y,
+	}
+}
+
+func xycross(a, b XY) Scalar {
+	return ssub(smul(a.X, b.Y), smul(a.Y, b.X))
+	//return a.X*b.Y - a.Y*b.X
+}
+
+func xyeq(a, b XY) bool {
+	return seq(a.X, b.X) && seq(a.Y, b.Y)
 }
 
 type Coordinates struct {
 	XY
 	// TODO: Put optional Z and M here.
-}
-
-// TODO: should the Validate function be on the XY instead of the Coordinates?
-
-// Validate checks if the coordinates could represent a valid point.
-// Coordinates can represent valid points if their X and Y values are not -Inf
-// or +Inf, and are not NaN.
-func (c Coordinates) Validate() error {
-	if math.IsNaN(c.X) || math.IsNaN(c.Y) {
-		return errors.New("coordinate is NaN")
-	}
-	if math.IsInf(c.X, 0) || math.IsInf(c.Y, 0) {
-		return errors.New("coordinate is Inf")
-	}
-	return nil
 }
 
 type OptionalCoordinates struct {
