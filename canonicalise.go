@@ -42,43 +42,51 @@ func canonicalise(geoms []Geometry) Geometry {
 	return NewGeometryCollection(allGeoms)
 }
 
-func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
-	type xyxy struct {
-		a, b XY
+type xyxyHash struct {
+	a, b xyHash
+}
+
+func hashXYXY(a, b XY) xyxyHash {
+	return xyxyHash{
+		a.hash(),
+		b.hash(),
 	}
-	points := map[XY]Point{}
-	lines := map[xyxy]Line{}
+}
+
+func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
+	points := map[xyHash]Point{}
+	lines := map[xyxyHash]Line{}
 	var polys []Polygon
 
 	for _, g := range geoms {
 		switch g := g.(type) {
 		case EmptySet:
 		case Point:
-			points[g.coords.XY] = g
+			points[g.coords.XY.hash()] = g
 		case Line:
 			g = orderLine(g)
-			lines[xyxy{g.a.XY, g.b.XY}] = g
+			lines[hashXYXY(g.a.XY, g.b.XY)] = g
 		case LineString:
 			for _, g := range g.lines {
 				g = orderLine(g)
-				lines[xyxy{g.a.XY, g.b.XY}] = g
+				lines[hashXYXY(g.a.XY, g.b.XY)] = g
 			}
 		case LinearRing:
 			for _, g := range g.ls.lines {
 				g = orderLine(g)
-				lines[xyxy{g.a.XY, g.b.XY}] = g
+				lines[hashXYXY(g.a.XY, g.b.XY)] = g
 			}
 		case Polygon:
 			polys = append(polys, g)
 		case MultiPoint:
 			for _, pt := range g.pts {
-				points[pt.coords.XY] = pt
+				points[pt.coords.XY.hash()] = pt
 			}
 		case MultiLineString:
 			for _, linestr := range g.lines {
 				for _, g := range linestr.lines {
 					g = orderLine(g)
-					lines[xyxy{g.a.XY, g.b.XY}] = g
+					lines[hashXYXY(g.a.XY, g.b.XY)] = g
 				}
 			}
 		case MultiPolygon:
@@ -88,10 +96,10 @@ func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 		case GeometryCollection:
 			pts, lns, pls := flattenGeometries(g.geoms)
 			for _, pt := range pts {
-				points[pt.coords.XY] = pt
+				points[pt.coords.XY.hash()] = pt
 			}
 			for _, ln := range lns {
-				lines[xyxy{ln.a.XY, ln.b.XY}] = ln
+				lines[hashXYXY(ln.a.XY, ln.b.XY)] = ln
 			}
 			polys = append(polys, pls...)
 		default:
@@ -99,10 +107,10 @@ func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 		}
 	}
 
-	for pt := range points {
+	for _, pt := range points {
 		for _, line := range lines {
-			if line.a.XY == pt || line.b.XY == pt {
-				delete(points, pt)
+			if line.a.XY.Equals(pt.coords.XY) || line.b.XY.Equals(pt.coords.XY) {
+				delete(points, pt.coords.XY.hash())
 				break
 			}
 		}
@@ -130,14 +138,14 @@ func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 }
 
 func xyCmp(a, b XY) int {
-	if a.X < b.X {
+	if a.X.LT(b.X) {
 		return -1
-	} else if a.X > b.X {
+	} else if a.X.GT(b.X) {
 		return +1
 	}
-	if a.Y < b.Y {
+	if a.Y.LT(b.Y) {
 		return -1
-	} else if a.Y > b.Y {
+	} else if a.Y.GT(b.Y) {
 		return +1
 	}
 	return 0

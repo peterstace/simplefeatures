@@ -9,10 +9,9 @@ func Must(g Geometry, err error) Geometry {
 	return g
 }
 
-func MustNewPoint(x, y float64) Point {
-	return Must(NewPoint(x, y)).(Point)
-}
-
-func MustNewLineString(coords []Coordinates) LineString {
-	return Must(NewLineString(coords)).(LineString)
+func NewXY(x, y float64) XY {
+	return XY{
+		NewScalarFromFloat64(x),
+		NewScalarFromFloat64(y),
+	}
 }

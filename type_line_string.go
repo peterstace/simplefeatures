@@ -15,12 +15,6 @@ type LineString struct {
 // NewLineString creates a line string from the coordinates defining its
 // points.
 func NewLineString(pts []Coordinates) (LineString, error) {
-	for _, pt := range pts {
-		if err := pt.Validate(); err != nil {
-			return LineString{}, err
-		}
-	}
-
 	// Must have at least 2 distinct points.
 	err := errors.New("LineString must contain at least two distinct points")
 	if len(pts) == 0 {
@@ -28,7 +22,7 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 	}
 	var twoDistinct bool
 	for _, pt := range pts[1:] {
-		if pt.XY != pts[0].XY {
+		if !pt.XY.Equals(pts[0].XY) {
 			twoDistinct = true
 			break
 		}
@@ -39,7 +33,7 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 
 	var lines []Line
 	for i := 0; i < len(pts)-1; i++ {
-		if pts[i].XY == pts[i+1].XY {
+		if pts[i].XY.Equals(pts[i+1].XY) {
 			continue
 		}
 		ln, err := NewLine(pts[i], pts[i+1])
@@ -64,15 +58,15 @@ func (s LineString) AppendWKT(dst []byte) []byte {
 func (s LineString) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
 	for _, ln := range s.lines {
-		dst = strconv.AppendFloat(dst, ln.a.X, 'f', -1, 64)
+		dst = strconv.AppendFloat(dst, ln.a.X.AsFloat(), 'f', -1, 64)
 		dst = append(dst, ' ')
-		dst = strconv.AppendFloat(dst, ln.a.Y, 'f', -1, 64)
+		dst = strconv.AppendFloat(dst, ln.a.Y.AsFloat(), 'f', -1, 64)
 		dst = append(dst, ',')
 	}
 	last := s.lines[len(s.lines)-1].b
-	dst = strconv.AppendFloat(dst, last.X, 'f', -1, 64)
+	dst = strconv.AppendFloat(dst, last.X.AsFloat(), 'f', -1, 64)
 	dst = append(dst, ' ')
-	dst = strconv.AppendFloat(dst, last.Y, 'f', -1, 64)
+	dst = strconv.AppendFloat(dst, last.Y.AsFloat(), 'f', -1, 64)
 	return append(dst, ')')
 }
 
@@ -127,7 +121,7 @@ func (s LineString) IsSimple() bool {
 }
 
 func (s LineString) IsClosed() bool {
-	return s.lines[0].a.XY == s.lines[len(s.lines)-1].b.XY
+	return s.lines[0].a.XY.Equals(s.lines[len(s.lines)-1].b.XY)
 }
 
 func (s LineString) Intersection(g Geometry) Geometry {

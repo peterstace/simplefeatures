@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/big"
 	"strconv"
 	"strings"
 )
@@ -168,7 +169,7 @@ func (p *parser) nextPoint() Coordinates {
 	return Coordinates{XY{x, y}}
 }
 
-func (p *parser) nextSignedNumericLiteral() float64 {
+func (p *parser) nextSignedNumericLiteral() Scalar {
 	var negative bool
 	tok := p.nextToken()
 	if tok == "-" {
@@ -184,7 +185,13 @@ func (p *parser) nextSignedNumericLiteral() float64 {
 	if negative {
 		f *= -1
 	}
-	return f
+
+	r, ok := new(big.Rat).SetString(strconv.FormatFloat(f, 'f', -1, 64))
+	if !ok {
+		p.errorf("invalid signed numeric literal: %s", tok)
+	}
+
+	return Scalar{r}
 }
 
 func (p *parser) nextPointText() OptionalCoordinates {

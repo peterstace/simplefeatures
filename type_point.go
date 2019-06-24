@@ -11,7 +11,7 @@ type Point struct {
 }
 
 // NewPoint creates a new point.
-func NewPoint(x, y float64) (Point, error) {
+func NewPoint(x, y Scalar) (Point, error) {
 	return NewPointFromCoords(Coordinates{XY{x, y}})
 }
 
@@ -19,8 +19,7 @@ func NewPoint(x, y float64) (Point, error) {
 
 // NewPointFromCoords creates a new point gives its coordinates.
 func NewPointFromCoords(c Coordinates) (Point, error) {
-	err := c.Validate()
-	return Point{coords: c}, err
+	return Point{coords: c}, nil
 }
 
 func (p Point) AsText() []byte {
@@ -34,9 +33,9 @@ func (p Point) AppendWKT(dst []byte) []byte {
 
 func (p Point) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
-	dst = strconv.AppendFloat(dst, p.coords.X, 'f', -1, 64)
+	dst = strconv.AppendFloat(dst, p.coords.X.AsFloat(), 'f', -1, 64)
 	dst = append(dst, ' ')
-	dst = strconv.AppendFloat(dst, p.coords.Y, 'f', -1, 64)
+	dst = strconv.AppendFloat(dst, p.coords.Y.AsFloat(), 'f', -1, 64)
 	return append(dst, ')')
 }
 
