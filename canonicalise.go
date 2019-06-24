@@ -23,11 +23,7 @@ func canonicalise(geoms []Geometry) Geometry {
 		if len(polys) == 1 {
 			return polys[0]
 		}
-		mp, err := NewMultiPolygon(polys)
-		if err != nil {
-			panic(err)
-		}
-		return mp
+		return must(NewMultiPolygon(polys)).(MultiPolygon)
 	}
 	var allGeoms []Geometry
 	for _, pt := range pts {
@@ -160,11 +156,7 @@ func lineCmp(a, b Line) int {
 
 func orderLine(line Line) Line {
 	if xyCmp(line.a.XY, line.b.XY) > 0 {
-		newLine, err := NewLine(line.b, line.a)
-		if err != nil {
-			panic(err)
-		}
-		return newLine
+		return must(NewLine(line.b, line.a)).(Line)
 	}
 	return line
 }

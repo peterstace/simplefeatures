@@ -25,10 +25,7 @@ func NewMultiPointFromCoords(coords []OptionalCoordinates) (MultiPoint, error) {
 		if c.Empty {
 			continue
 		}
-		pt, err := NewPointFromCoords(c.Value)
-		if err != nil {
-			return MultiPoint{}, err
-		}
+		pt := NewPointFromCoords(c.Value)
 		pts = append(pts, pt)
 	}
 	return NewMultiPoint(pts), nil

@@ -35,3 +35,10 @@ func rank(g Geometry) int {
 		panic(fmt.Sprintf("unknown geometry type: %T", g))
 	}
 }
+
+func must(x Geometry, err error) Geometry {
+	if err != nil {
+		panic(err)
+	}
+	return x
+}

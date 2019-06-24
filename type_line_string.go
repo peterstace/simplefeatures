@@ -36,10 +36,7 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 		if pts[i].XY.Equals(pts[i+1].XY) {
 			continue
 		}
-		ln, err := NewLine(pts[i], pts[i+1])
-		if err != nil {
-			panic(err)
-		}
+		ln := must(NewLine(pts[i], pts[i+1])).(Line)
 		lines = append(lines, ln)
 	}
 
@@ -99,14 +96,8 @@ func (s LineString) IsSimple() bool {
 				// point, so long as that point is the start of the first
 				// segment and the end of the last segment (i.e. a linear
 				// ring).
-				aPt, err := NewPointFromCoords(s.lines[i].a)
-				if err != nil {
-					panic(err)
-				}
-				bPt, err := NewPointFromCoords(s.lines[j].b)
-				if err != nil {
-					panic(err)
-				}
+				aPt := NewPointFromCoords(s.lines[i].a)
+				bPt := NewPointFromCoords(s.lines[j].b)
 				if !intersection.Equals(aPt) || !intersection.Equals(bPt) {
 					return false
 				}

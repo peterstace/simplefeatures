@@ -11,15 +11,15 @@ type Point struct {
 }
 
 // NewPoint creates a new point.
-func NewPoint(x, y Scalar) (Point, error) {
+func NewPoint(x, y Scalar) Point {
 	return NewPointFromCoords(Coordinates{XY{x, y}})
 }
 
 // TODO: NewPointZ, NewPointM, and NewPointZM ctors.
 
 // NewPointFromCoords creates a new point gives its coordinates.
-func NewPointFromCoords(c Coordinates) (Point, error) {
-	return Point{coords: c}, nil
+func NewPointFromCoords(c Coordinates) Point {
+	return Point{coords: c}
 }
 
 func (p Point) AsText() []byte {

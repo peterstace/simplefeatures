@@ -76,9 +76,7 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		if coords.Empty {
 			return NewEmptyPoint()
 		} else {
-			pt, err := NewPointFromCoords(coords.Value)
-			p.check(err)
-			return pt
+			return NewPointFromCoords(coords.Value)
 		}
 	case "LINESTRING":
 		coords := p.nextLineStringText()

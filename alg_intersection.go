@@ -42,14 +42,10 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			// Intersection between lines occurs beyond line endpoints.
 			return NewGeometryCollection(nil)
 		}
-		pt, err := NewPoint(
+		return NewPoint(
 			a.X.Add(p.Mul(b.X.Sub(a.X))),
 			a.Y.Add(p.Mul(b.Y.Sub(a.Y))),
 		)
-		if err != nil {
-			panic(err)
-		}
-		return pt
 	}
 
 	// TODO: invert if to un-indent flow.
@@ -76,37 +72,21 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 
 		if abBB.max.X.Equals(cdBB.min.X) && abBB.min.Y.Equals(cdBB.max.Y) {
 			// Line segments overlap at a point.
-			pt, err := NewPoint(abBB.max.X, abBB.min.Y)
-			if err != nil {
-				panic(err)
-			}
-			return pt
+			return NewPoint(abBB.max.X, abBB.min.Y)
 		}
 
 		if cdBB.max.X.Equals(abBB.min.X) && cdBB.min.Y.Equals(abBB.max.Y) {
 			// Line segments overlap at a point.
-			pt, err := NewPoint(cdBB.max.X, cdBB.min.Y)
-			if err != nil {
-				panic(err)
-			}
-			return pt
+			return NewPoint(cdBB.max.X, cdBB.min.Y)
 		}
 
 		if abBB.max.Equals(cdBB.min) {
 			// Line segments overlap at a point.
-			pt, err := NewPoint(abBB.max.X, abBB.max.Y)
-			if err != nil {
-				panic(err)
-			}
-			return pt
+			return NewPoint(abBB.max.X, abBB.max.Y)
 		}
 		if cdBB.max.Equals(abBB.min) {
 			// Line segments overlap at a point.
-			pt, err := NewPoint(cdBB.max.X, cdBB.max.Y)
-			if err != nil {
-				panic(err)
-			}
-			return pt
+			return NewPoint(cdBB.max.X, cdBB.max.Y)
 		}
 
 		// Line segments overlap over a line segment.
@@ -130,11 +110,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			u.X, v.X = v.X, u.X
 		}
 
-		ln, err := NewLine(Coordinates{u}, Coordinates{v})
-		if err != nil {
-			panic(err)
-		}
-		return ln
+		return must(NewLine(Coordinates{u}, Coordinates{v}))
 	}
 
 	// Parrallel but not colinear, so cannot intersect anywhere.
