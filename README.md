@@ -1,5 +1,7 @@
 # Simple Features
 
+[![Build Status](https://travis-ci.com/peterstace/simplefeatures.svg?token=ueRpGt4cSSnk321nW8xG&branch=master)](https://travis-ci.com/peterstace/simplefeatures)
+
 Go Implementation of the OpenGIS Simple Features Specification.
 
 It is based on the [Simple Features Access - Part 1: Common
