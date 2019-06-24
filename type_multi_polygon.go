@@ -54,12 +54,7 @@ func (m MultiPolygon) Intersection(g Geometry) Geometry {
 }
 
 func (m MultiPolygon) IsEmpty() bool {
-	for _, p := range m.polys {
-		if !p.IsEmpty() {
-			return false
-		}
-	}
-	return true
+	return len(m.polys) == 0
 }
 
 func (m MultiPolygon) Dimension() int {
