@@ -1,6 +1,12 @@
 package simplefeatures
 
-// GeometryCollection is a collection of 1 or more geometries.
+// GeometryCollection is a collection of geometries.
+//
+// Its assertions are:
+//
+// 1. It must contain only valid geometries.
+//
+// 2. It must contain zero or more geometries.
 type GeometryCollection struct {
 	geoms []Geometry
 }

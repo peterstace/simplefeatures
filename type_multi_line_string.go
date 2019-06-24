@@ -1,6 +1,10 @@
 package simplefeatures
 
 // MultiLineString is a multicurve whose elements are LineStrings.
+//
+// Its assertions are:
+//
+// 1. It must be made of up zero or more valid LineStrings.
 type MultiLineString struct {
 	lines []LineString
 }

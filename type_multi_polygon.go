@@ -1,13 +1,22 @@
 package simplefeatures
 
 // MultiPolygon is a multi surface whose elements are polygons.
+//
+// Its assertions are:
+//
+// 1. It must be made up of zero or more valid Polygons.
+//
+// 2. The interiors of any two polygons must not intersect. TODO: this is not
+// yet implemented.
+//
+// 3. The boundaries of any two polygons may touch only at a finite number of
+// points. TODO: this is not yet implemented.
 type MultiPolygon struct {
 	polys []Polygon
 }
 
 func NewMultiPolygon(polys []Polygon) (MultiPolygon, error) {
-	// TODO: The interiors of 2 polygons must not intersect.
-	// TODO: The boundaries of 2 polygons may touch only at a finite number of points.
+	// TODO: implement assertions
 	return MultiPolygon{polys}, nil
 }
 

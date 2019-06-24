@@ -6,6 +6,17 @@ import (
 
 // Polygon is a planar surface, defined by 1 exiterior boundary and 0 or more
 // interior boundaries. Each interior boundary defines a hole in the polygon.
+//
+// Its assertions are:
+//
+// 1. The out ring and holes must be valid LinearRings.
+//
+// 2. Each pair of rings must only intersect at a single point.
+//
+// 3. The interior of the polygon is connected.
+//
+// 4. The holes must be fully inside the outer ring.
+//
 type Polygon struct {
 	outer LinearRing
 	holes []LinearRing

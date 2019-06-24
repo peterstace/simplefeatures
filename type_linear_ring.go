@@ -4,14 +4,22 @@ import (
 	"errors"
 )
 
-// LinearRing is a LineString that is constainted to be closed (has the same
-// start and end point) and simple (doesn't self intersect).
+// LinearRing is a LineString that is constainted to be closed and simple.
+//
+// Its assertions are:
+//
+// 1. It must be a valid LineString.
+//
+// 2. It must be closed, i.e. the start and end points must be identical.
+//
+// 3. It must be simple, i.e. it must not self intersect (except for the start
+// and end points, which must intersect).
+//
 type LinearRing struct {
 	ls LineString
 }
 
-var _ Geometry = LinearRing{}
-
+// NewLinearRing builds a LinearRing from a sequence of coordinates.
 func NewLinearRing(pts []Coordinates) (LinearRing, error) {
 	ls, err := NewLineString(pts)
 	if err != nil {

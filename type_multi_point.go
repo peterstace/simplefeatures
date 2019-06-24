@@ -2,6 +2,10 @@ package simplefeatures
 
 // MultiPoint is a 0-dimensional geometric collection of points. The points are
 // not connected or ordered.
+//
+// Its assertions are:
+//
+// 1. It must be made up of 0 or more valid Points.
 type MultiPoint struct {
 	pts []Point
 }

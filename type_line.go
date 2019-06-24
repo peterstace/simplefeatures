@@ -5,7 +5,11 @@ import (
 	"strconv"
 )
 
-// Line is a LineString with exactly two distinct points.
+// Line is a single line segment between two points.
+//
+// Its assertions are:
+//
+// 1. The two points must be distinct.
 type Line struct {
 	a, b Coordinates
 }

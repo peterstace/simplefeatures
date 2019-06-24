@@ -6,6 +6,9 @@ import (
 
 // Point is a 0-dimensional geometry, and represents a single location in a
 // coordinate space.
+//
+// There aren't any assertions about what constitutes a valid point, other than
+// that it must be able to be represented by an XY.
 type Point struct {
 	coords Coordinates
 }

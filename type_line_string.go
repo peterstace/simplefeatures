@@ -6,8 +6,11 @@ import (
 )
 
 // LineString is a curve defined by linear interpolation between a finite set
-// of points. Each consecutive pair of points defines a line segment. It must
-// contain at least 2 distinct points.
+// of points. Each consecutive pair of points defines a line segment.
+//
+// Its assertions are:
+//
+// 1. It must contain at least 2 distinct points.
 type LineString struct {
 	lines []Line
 }
@@ -15,22 +18,6 @@ type LineString struct {
 // NewLineString creates a line string from the coordinates defining its
 // points.
 func NewLineString(pts []Coordinates) (LineString, error) {
-	// Must have at least 2 distinct points.
-	err := errors.New("LineString must contain at least two distinct points")
-	if len(pts) == 0 {
-		return LineString{}, err
-	}
-	var twoDistinct bool
-	for _, pt := range pts[1:] {
-		if !pt.XY.Equals(pts[0].XY) {
-			twoDistinct = true
-			break
-		}
-	}
-	if !twoDistinct {
-		return LineString{}, err
-	}
-
 	var lines []Line
 	for i := 0; i < len(pts)-1; i++ {
 		if pts[i].XY.Equals(pts[i+1].XY) {
@@ -39,7 +26,9 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 		ln := must(NewLine(pts[i], pts[i+1])).(Line)
 		lines = append(lines, ln)
 	}
-
+	if len(lines) == 0 {
+		return LineString{}, errors.New("LineString must contain at least two distinct points")
+	}
 	return LineString{lines}, nil
 }
 
