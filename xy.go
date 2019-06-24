@@ -20,6 +20,20 @@ func (w XY) Sub(o XY) XY {
 	}
 }
 
+func (w XY) Add(o XY) XY {
+	return XY{
+		w.X.Add(o.X),
+		w.Y.Add(o.Y),
+	}
+}
+
+func (w XY) Scale(s Scalar) XY {
+	return XY{
+		w.X.Mul(s),
+		w.Y.Mul(s),
+	}
+}
+
 func (w XY) Cross(o XY) Scalar {
 	return w.X.Mul(o.Y).Sub(w.Y.Mul(o.X))
 }

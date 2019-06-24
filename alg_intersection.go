@@ -42,10 +42,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			// Intersection between lines occurs beyond line endpoints.
 			return NewGeometryCollection(nil)
 		}
-		return NewPoint(
-			a.X.Add(p.Mul(b.X.Sub(a.X))),
-			a.Y.Add(p.Mul(b.Y.Sub(a.Y))),
-		)
+		return NewPoint(b.Sub(a).Scale(p).Add(a))
 	}
 
 	// TODO: invert if to un-indent flow.
@@ -72,21 +69,21 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 
 		if abBB.max.X.Equals(cdBB.min.X) && abBB.min.Y.Equals(cdBB.max.Y) {
 			// Line segments overlap at a point.
-			return NewPoint(abBB.max.X, abBB.min.Y)
+			return NewPointXY(abBB.max.X, abBB.min.Y)
 		}
 
 		if cdBB.max.X.Equals(abBB.min.X) && cdBB.min.Y.Equals(abBB.max.Y) {
 			// Line segments overlap at a point.
-			return NewPoint(cdBB.max.X, cdBB.min.Y)
+			return NewPointXY(cdBB.max.X, cdBB.min.Y)
 		}
 
 		if abBB.max.Equals(cdBB.min) {
 			// Line segments overlap at a point.
-			return NewPoint(abBB.max.X, abBB.max.Y)
+			return NewPoint(abBB.max)
 		}
 		if cdBB.max.Equals(abBB.min) {
 			// Line segments overlap at a point.
-			return NewPoint(cdBB.max.X, cdBB.max.Y)
+			return NewPoint(cdBB.max)
 		}
 
 		// Line segments overlap over a line segment.
