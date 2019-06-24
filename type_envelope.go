@@ -60,6 +60,8 @@ func (e Envelope) Union(other Envelope) Envelope {
 	}
 }
 
+// mustEnvelope gets the envelope from a Geometry. If it's not defined (because
+// the geometry is empty), then it panics.
 func mustEnvelope(g Geometry) Envelope {
 	env, ok := g.Envelope()
 	if !ok {
