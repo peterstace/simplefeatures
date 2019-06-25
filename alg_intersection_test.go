@@ -63,7 +63,7 @@ func TestIntersection(t *testing.T) {
 			t.Run("forward", func(t *testing.T) {
 				result := in1g.Intersection(in2g)
 				got := string(result.AsText())
-				if !eq(t, got, tt.out) {
+				if got != tt.out {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got)
 				}
 			})
@@ -71,7 +71,7 @@ func TestIntersection(t *testing.T) {
 			t.Run("reversed", func(t *testing.T) {
 				result := in2g.Intersection(in1g)
 				got := string(result.AsText())
-				if !eq(t, got, tt.out) {
+				if got != tt.out {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got)
 				}
 			})
