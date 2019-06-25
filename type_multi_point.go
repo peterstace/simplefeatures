@@ -12,15 +12,16 @@ type MultiPoint struct {
 
 func NewMultiPoint(pts []Point) MultiPoint {
 	// Deduplicate
-	ptSet := make(map[xyHash]Point)
-	for _, p := range pts {
-		ptSet[p.coords.XY.hash()] = p
+	dedupe := make([]Point, 0, len(pts))
+	seen := make(map[xyHash]bool)
+	for _, pt := range pts {
+		h := pt.coords.hash()
+		if !seen[h] {
+			seen[h] = true
+			dedupe = append(dedupe, pt)
+		}
 	}
-	ptSlice := make([]Point, 0, len(ptSet))
-	for _, p := range ptSet {
-		ptSlice = append(ptSlice, p)
-	}
-	return MultiPoint{ptSlice}
+	return MultiPoint{dedupe}
 }
 
 func NewMultiPointFromCoords(coords []OptionalCoordinates) (MultiPoint, error) {

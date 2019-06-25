@@ -1,6 +1,7 @@
 package simplefeatures_test
 
 import (
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -63,8 +64,7 @@ func TestMarshalUnmarshalWKT(t *testing.T) {
 		"POINT (-30 -10)",
 		"POINT EMPTY",
 		"LINESTRING(30 10,10 30,40 40)",
-		//"LINEARRING EMPTY", // TODO: enable this test once equals works for Empty vs Empty
-		//"LINEARRING(0 0,1 0,0 1,0 0)", // TODO: enable once LinearRing vs LinearRing equals works
+		"LINEARRING EMPTY",
 		"POLYGON((30 10,40 40,20 40,10 20,30 10))",
 		"POLYGON((35 10,45 45,15 40,10 20,35 10),(20 30,35 35,30 20,20 30))",
 		"MULTILINESTRING((10 10,20 20,10 40),(40 40,30 30,40 20,30 10))",
@@ -73,15 +73,30 @@ func TestMarshalUnmarshalWKT(t *testing.T) {
 		"GEOMETRYCOLLECTION(POINT(4 6),LINESTRING(4 6,7 10))",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			geom, err := UnmarshalWKT(strings.NewReader(wkt))
-			if err != nil {
-				t.Fatal(err)
-			}
-			asText := string(geom.AsText())
-			t.Logf("Input:  %v", wkt)
-			t.Logf("Output: %v", asText)
-			if !eq(t, wkt, asText) {
+			g1 := geomFromWKT(t, wkt)
+			g2 := geomFromWKT(t, string(g1.AsText()))
+			if !reflect.DeepEqual(g1, g2) {
+				t.Log("wkt", wkt)
+				t.Logf("g1 %#v", g1)
+				t.Logf("g2 %#v", g2)
 				t.Errorf("not equal")
+			}
+		})
+	}
+}
+
+func TestMarshalUnmarshalSpecial(t *testing.T) {
+	for i, tt := range []struct {
+		wkt1, wkt2 string
+	}{
+		// LinearRing emits LINESTRING WKT so cannot be tested in the normal way.
+		{"LINEARRING(0 0,1 0,0 1,0 0)", "LINESTRING(0 0,1 0,0 1,0 0)"},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g := geomFromWKT(t, tt.wkt1)
+			got := string(g.AsText())
+			if got != tt.wkt2 {
+				t.Errorf("want=%s got=%s", tt.wkt2, got)
 			}
 		})
 	}
