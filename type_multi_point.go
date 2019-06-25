@@ -88,5 +88,11 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 }
 
 func (m MultiPoint) Boundary() Geometry {
-	panic("not implemented")
+	// This is a little bit more complicated than it really has to be (it just
+	// has to always return an empty set). However, this is the behavour of
+	// Postgis.
+	if m.IsEmpty() {
+		return m
+	}
+	return NewGeometryCollection(nil)
 }

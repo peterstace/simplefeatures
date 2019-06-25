@@ -128,5 +128,8 @@ func (s LineString) Envelope() (Envelope, bool) {
 }
 
 func (s LineString) Boundary() Geometry {
-	panic("not implemented")
+	return NewMultiPoint([]Point{
+		NewPoint(s.lines[0].a.XY),
+		NewPoint(s.lines[len(s.lines)-1].b.XY),
+	})
 }

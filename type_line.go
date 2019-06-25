@@ -61,5 +61,8 @@ func (n Line) Envelope() (Envelope, bool) {
 	return NewEnvelope(n.a.XY, n.b.XY), true
 }
 func (n Line) Boundary() Geometry {
-	panic("not implemented")
+	return NewMultiPoint([]Point{
+		NewPoint(n.a.XY),
+		NewPoint(n.b.XY),
+	})
 }

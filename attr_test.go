@@ -1,6 +1,7 @@
 package simplefeatures_test
 
 import (
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -147,6 +148,46 @@ func TestIsSimple(t *testing.T) {
 			got := g.IsSimple()
 			if got != tt.wantSimple {
 				t.Errorf("got=%v want=%v", got, tt.wantSimple)
+			}
+		})
+	}
+}
+
+func TestBoundary(t *testing.T) {
+	for i, tt := range []struct {
+		wkt, boundary string
+	}{
+		{"POINT EMPTY", "POINT EMPTY"},
+		{"LINESTRING EMPTY", "LINESTRING EMPTY"},
+		{"POLYGON EMPTY", "POLYGON EMPTY"},
+		{"MULTIPOINT EMPTY", "MULTIPOINT EMPTY"},
+		//{"MULTILINESTRING EMPTY", "MULTILINESTRING EMPTY"},
+		//{"MULTIPOLYGON EMPTY", "MULTIPOLYGON EMPTY"},
+		//{"GEOMETRYCOLLECTION EMPTY", "GEOMETRYCOLLECTION EMPTY"},
+		//{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY)", "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY)"},
+
+		{"POINT(1 2)", "GEOMETRYCOLLECTION EMPTY"},
+		{"LINESTRING(1 2,3 4)", "MULTIPOINT(1 2,3 4)"},
+		{"LINESTRING(1 2,3 4,5 6)", "MULTIPOINT(1 2,5 6)"},
+		{"LINESTRING(1 2,3 4,5 6,7 8)", "MULTIPOINT(1 2,7 8)"},
+
+		// LINEARRING
+		// POLYGON
+
+		{"MULTIPOINT((1 2))", "GEOMETRYCOLLECTION EMPTY"},
+		{"MULTIPOINT((1 2),(3 4))", "GEOMETRYCOLLECTION EMPTY"},
+
+		// MULTILINESTRING
+		// MULTIPOLYGON
+		// GEOMETRYCOLLECTION
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			want := geomFromWKT(t, tt.boundary)
+			got := geomFromWKT(t, tt.wkt).Boundary()
+			if !reflect.DeepEqual(got, want) {
+				t.Logf("want: %s", string(want.AsText()))
+				t.Logf("got:  %s", string(got.AsText()))
+				t.Errorf("mismatch")
 			}
 		})
 	}

@@ -49,5 +49,5 @@ func (e EmptySet) Envelope() (Envelope, bool) {
 	return Envelope{}, false
 }
 func (e EmptySet) Boundary() Geometry {
-	panic("not implemented")
+	return e
 }

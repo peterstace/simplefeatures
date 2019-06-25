@@ -66,5 +66,5 @@ func (p Point) Envelope() (Envelope, bool) {
 }
 
 func (p Point) Boundary() Geometry {
-	panic("not implemented")
+	return NewGeometryCollection(nil)
 }
