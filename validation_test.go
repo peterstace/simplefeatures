@@ -8,10 +8,14 @@ import (
 	. "github.com/peterstace/simplefeatures"
 )
 
+func xy(x, y float64) Coordinates {
+	return Coordinates{XY: XY{
+		NewScalarFromFloat64(x),
+		NewScalarFromFloat64(y),
+	}}
+}
+
 func TestLineValidation(t *testing.T) {
-	xy := func(x, y float64) Coordinates {
-		return Coordinates{XY: NewXY(x, y)}
-	}
 	for i, pts := range [][2]Coordinates{
 		{xy(0, 0), xy(0, 0)},
 		{xy(-1, -1), xy(-1, -1)},
@@ -26,9 +30,6 @@ func TestLineValidation(t *testing.T) {
 }
 
 func TestLineStringValidation(t *testing.T) {
-	xy := func(x, y float64) Coordinates {
-		return Coordinates{XY: NewXY(x, y)}
-	}
 	for i, pts := range [][]Coordinates{
 		{xy(0, 0)},
 		{xy(1, 1)},
@@ -45,9 +46,6 @@ func TestLineStringValidation(t *testing.T) {
 }
 
 func TestLinearRingValidation(t *testing.T) {
-	xy := func(x, y float64) Coordinates {
-		return Coordinates{XY: NewXY(x, y)}
-	}
 	for i, pts := range [][]Coordinates{
 		{xy(0, 0), xy(1, 1), xy(0, 1)},                     // not closed
 		{xy(0, 0), xy(1, 1), xy(0, 1), xy(1, 0), xy(0, 0)}, // not simple
