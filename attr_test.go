@@ -120,3 +120,34 @@ func TestNoEnvelope(t *testing.T) {
 		})
 	}
 }
+
+func TestIsSimple(t *testing.T) {
+	for i, tt := range []struct {
+		wkt        string
+		wantSimple bool
+	}{
+		{"LINESTRING EMPTY", true},
+		{"LINESTRING(0 0,1 2)", true},
+		{"LINESTRING(0 0,1 1,1 1)", true},
+		{"LINESTRING(0 0,0 0,1 1)", true},
+		{"LINESTRING(0 0,1 1,0 0)", false},
+		{"LINESTRING(0 0,1 1,0 1)", true},
+		{"LINESTRING(0 0,1 1,0 1,0 0)", true},
+		{"LINESTRING(0 0,1 1,0 1,1 0)", false},
+		{"LINESTRING(0 0,1 1,0 1,1 0,0 0)", false},
+		{"LINESTRING(0 0,1 1,0 1,1 0,2 0)", false},
+		{"LINESTRING(0 0,1 1,0 1,0 0,1 1)", false},
+		{"LINESTRING(0 0,1 1,0 1,0 0,2 2)", false},
+		{"LINESTRING(1 1,2 2,0 0)", false},
+		{"LINESTRING(1 1,2 2,3 2,3 3,0 0)", false},
+		{"LINESTRING(0 0,1 1,2 2)", true},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g := geomFromWKT(t, tt.wkt)
+			got := g.IsSimple()
+			if got != tt.wantSimple {
+				t.Errorf("got=%v want=%v", got, tt.wantSimple)
+			}
+		})
+	}
+}
