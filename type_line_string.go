@@ -2,7 +2,6 @@ package simplefeatures
 
 import (
 	"errors"
-	"strconv"
 )
 
 // LineString is a curve defined by linear interpolation between a finite set
@@ -44,15 +43,15 @@ func (s LineString) AppendWKT(dst []byte) []byte {
 func (s LineString) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
 	for _, ln := range s.lines {
-		dst = strconv.AppendFloat(dst, ln.a.X.AsFloat(), 'f', -1, 64)
+		dst = ln.a.X.appendAsFloat(dst)
 		dst = append(dst, ' ')
-		dst = strconv.AppendFloat(dst, ln.a.Y.AsFloat(), 'f', -1, 64)
+		dst = ln.a.Y.appendAsFloat(dst)
 		dst = append(dst, ',')
 	}
 	last := s.lines[len(s.lines)-1].b
-	dst = strconv.AppendFloat(dst, last.X.AsFloat(), 'f', -1, 64)
+	dst = last.X.appendAsFloat(dst)
 	dst = append(dst, ' ')
-	dst = strconv.AppendFloat(dst, last.Y.AsFloat(), 'f', -1, 64)
+	dst = last.Y.appendAsFloat(dst)
 	return append(dst, ')')
 }
 

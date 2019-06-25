@@ -1,9 +1,5 @@
 package simplefeatures
 
-import (
-	"strconv"
-)
-
 // Point is a 0-dimensional geometry, and represents a single location in a
 // coordinate space.
 //
@@ -39,9 +35,9 @@ func (p Point) AppendWKT(dst []byte) []byte {
 
 func (p Point) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
-	dst = strconv.AppendFloat(dst, p.coords.X.AsFloat(), 'f', -1, 64)
+	dst = p.coords.X.appendAsFloat(dst)
 	dst = append(dst, ' ')
-	dst = strconv.AppendFloat(dst, p.coords.Y.AsFloat(), 'f', -1, 64)
+	dst = p.coords.Y.appendAsFloat(dst)
 	return append(dst, ')')
 }
 

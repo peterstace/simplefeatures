@@ -3,6 +3,7 @@ package simplefeatures
 import (
 	"errors"
 	"math/big"
+	"strconv"
 )
 
 // Scalar represents a rational number.
@@ -103,4 +104,8 @@ func (s Scalar) GTE(o Scalar) bool {
 
 func (s Scalar) LTE(o Scalar) bool {
 	return s.val.Cmp(o.val) <= 0
+}
+
+func (s Scalar) appendAsFloat(dst []byte) []byte {
+	return strconv.AppendFloat(dst, s.AsFloat(), 'f', -1, 64)
 }

@@ -2,7 +2,6 @@ package simplefeatures
 
 import (
 	"fmt"
-	"strconv"
 )
 
 // Line is a single line segment between two points.
@@ -28,13 +27,13 @@ func (n Line) AsText() []byte {
 
 func (n Line) AppendWKT(dst []byte) []byte {
 	dst = append(dst, []byte("LINESTRING(")...)
-	dst = strconv.AppendFloat(dst, n.a.X.AsFloat(), 'f', -1, 64)
+	dst = n.a.X.appendAsFloat(dst)
 	dst = append(dst, ' ')
-	dst = strconv.AppendFloat(dst, n.a.Y.AsFloat(), 'f', -1, 64)
+	dst = n.a.Y.appendAsFloat(dst)
 	dst = append(dst, ',')
-	dst = strconv.AppendFloat(dst, n.b.X.AsFloat(), 'f', -1, 64)
+	dst = n.b.X.appendAsFloat(dst)
 	dst = append(dst, ' ')
-	dst = strconv.AppendFloat(dst, n.b.Y.AsFloat(), 'f', -1, 64)
+	dst = n.b.Y.appendAsFloat(dst)
 	return append(dst, ')')
 }
 
