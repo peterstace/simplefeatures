@@ -72,3 +72,7 @@ func (r LinearRing) Envelope() (Envelope, bool) {
 	}
 	return env, true
 }
+
+func (r LinearRing) Boundary() Geometry {
+	panic("not implemented")
+}

@@ -126,3 +126,7 @@ func (s LineString) Envelope() (Envelope, bool) {
 	}
 	return env, true
 }
+
+func (s LineString) Boundary() Geometry {
+	panic("not implemented")
+}

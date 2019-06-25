@@ -86,3 +86,7 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 	}
 	return env, true
 }
+
+func (m MultiPoint) Boundary() Geometry {
+	panic("not implemented")
+}

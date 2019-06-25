@@ -64,3 +64,7 @@ func (p Point) Equals(other Geometry) bool {
 func (p Point) Envelope() (Envelope, bool) {
 	return NewEnvelope(p.coords.XY), true
 }
+
+func (p Point) Boundary() Geometry {
+	panic("not implemented")
+}

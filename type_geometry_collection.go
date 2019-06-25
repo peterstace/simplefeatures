@@ -86,3 +86,7 @@ func (c GeometryCollection) flatten() []Geometry {
 func (c GeometryCollection) Envelope() (Envelope, bool) {
 	return EnvelopeFromGeoms(c.flatten()...)
 }
+
+func (c GeometryCollection) Boundary() Geometry {
+	panic("not implemented")
+}

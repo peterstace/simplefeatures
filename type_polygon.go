@@ -135,3 +135,7 @@ func (p Polygon) Equals(other Geometry) bool {
 func (p Polygon) Envelope() (Envelope, bool) {
 	return p.outer.Envelope()
 }
+
+func (p Polygon) Boundary() Geometry {
+	panic("not implemented")
+}

@@ -81,3 +81,6 @@ func (m MultiLineString) Envelope() (Envelope, bool) {
 	}
 	return env, true
 }
+func (m MultiLineString) Boundary() Geometry {
+	panic("not implemented")
+}

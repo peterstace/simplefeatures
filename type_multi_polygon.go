@@ -87,3 +87,7 @@ func (m MultiPolygon) Envelope() (Envelope, bool) {
 	}
 	return env, true
 }
+
+func (m MultiPolygon) Boundary() Geometry {
+	panic("not implemented")
+}

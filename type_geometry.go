@@ -33,4 +33,7 @@ type Geometry interface {
 	// Equals checks if this geometry is equal to another geometrie. Two
 	// geometries are equal if they contain exactly the same points.
 	Equals(Geometry) bool
+
+	// Boundary returns the Geometry representing the limit of this geometry.
+	Boundary() Geometry
 }
