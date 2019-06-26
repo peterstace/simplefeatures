@@ -74,5 +74,6 @@ func (r LinearRing) Envelope() (Envelope, bool) {
 }
 
 func (r LinearRing) Boundary() Geometry {
-	panic("not implemented")
+	// Same behaviour as Postgis, but could be any empty set.
+	return NewMultiPoint(nil)
 }

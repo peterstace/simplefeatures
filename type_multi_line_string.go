@@ -82,5 +82,35 @@ func (m MultiLineString) Envelope() (Envelope, bool) {
 	return env, true
 }
 func (m MultiLineString) Boundary() Geometry {
-	panic("not implemented")
+	if m.IsEmpty() {
+		// Postgis behaviour (but any other empty set would be ok).
+		return NewMultiLineString(nil)
+	}
+
+	counts := make(map[xyHash]int)
+	var uniqueEndpoints []Point
+	for _, ls := range m.lines {
+		if ls.IsClosed() {
+			continue
+		}
+		for _, pt := range [2]Point{
+			NewPointFromCoords(ls.lines[0].a),
+			NewPointFromCoords(ls.lines[len(ls.lines)-1].b),
+		} {
+			hash := pt.coords.XY.hash()
+			_, seen := counts[hash]
+			if !seen {
+				uniqueEndpoints = append(uniqueEndpoints, pt)
+			}
+			counts[hash]++
+		}
+	}
+
+	var bound []Point
+	for _, pt := range uniqueEndpoints {
+		if counts[pt.coords.XY.hash()]%2 == 1 {
+			bound = append(bound, pt)
+		}
+	}
+	return NewMultiPoint(bound)
 }

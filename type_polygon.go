@@ -137,5 +137,13 @@ func (p Polygon) Envelope() (Envelope, bool) {
 }
 
 func (p Polygon) Boundary() Geometry {
-	panic("not implemented")
+	if len(p.holes) == 0 {
+		return p.outer.ls
+	}
+	bounds := make([]LineString, 0, 1+len(p.holes))
+	bounds = append(bounds, p.outer.ls)
+	for _, h := range p.holes {
+		bounds = append(bounds, h.ls)
+	}
+	return NewMultiLineString(bounds)
 }
