@@ -207,6 +207,10 @@ func TestBoundary(t *testing.T) {
 			"MULTILINESTRING((0 1,1 1),(1 1,1 0),(1 1,2 1),(1 2,1 1))",
 			"MULTIPOINT(0 1,1 0,2 1,1 2)",
 		},
+		{
+			"MULTILINESTRING((1 1,2 2),(1 1,2 2))",
+			"MULTIPOINT EMPTY",
+		},
 
 		// MULTIPOLYGON
 		// GEOMETRYCOLLECTION
