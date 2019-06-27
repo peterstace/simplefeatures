@@ -128,8 +128,8 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 | Line/MultiLineString                  | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | Line/MultiPolygon                     | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | Line/GeometryCollection               | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
-| LineString/LineString                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
-| LineString/LinearRing                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| LineString/LineString                 | ❌       | ❌     | ❌         | ✅           | ❌    | ❌         | ❌            |
+| LineString/LinearRing                 | ❌       | ❌     | ❌         | ✅           | ❌    | ❌         | ❌            |
 | LineString/Polygon                    | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | LineString/MultiPoint                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | LineString/MultiLineString            | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |

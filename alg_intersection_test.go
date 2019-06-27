@@ -42,6 +42,12 @@ func TestIntersection(t *testing.T) {
 		{"LINESTRING(1 1,2 2)", "LINESTRING(0 0,3 3)", "LINESTRING(1 1,2 2)"},
 		{"LINESTRING(3 1,2 2)", "LINESTRING(1 3,2 2)", "POINT(2 2)"},
 
+		// LineString/LineString -- most test cases covered by LR/LR
+		{"LINESTRING(0 0,1 0,1 1,0 1)", "LINESTRING(1 1,2 1,2 2,1 2)", "POINT(1 1)"},
+
+		// LineString/LinearRing -- most test cases covered by LR/LR
+		{"LINESTRING(0 0,1 0,1 1,0 1)", "LINEARRING(1 1,2 1,2 2,1 2,1 1)", "POINT(1 1)"},
+
 		// LinearRing/LinearRing
 		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(2 2,3 2,3 3,2 3,2 2)", "GEOMETRYCOLLECTION EMPTY"},
 		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(1 1,2 1,2 2,1 2,1 1)", "POINT(1 1)"},

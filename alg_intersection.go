@@ -1,5 +1,7 @@
 package simplefeatures
 
+import "fmt"
+
 func intersection(g1, g2 Geometry) Geometry {
 	if rank(g1) > rank(g2) {
 		g1, g2 = g2, g1
@@ -15,13 +17,20 @@ func intersection(g1, g2 Geometry) Geometry {
 		case Line:
 			return intersectLineWithLine(g1, g2)
 		}
+	case LineString:
+		switch g2 := g2.(type) {
+		case LineString:
+			return intersectLineStringWithLineString(g1, g2)
+		case LinearRing:
+			return intersectLineStringWithLineString(g1, g2.ls)
+		}
 	case LinearRing:
 		switch g2 := g2.(type) {
 		case LinearRing:
-			return intersectLinearRingWithLinearRing(g1, g2)
+			return intersectLineStringWithLineString(g1.ls, g2.ls)
 		}
 	}
-	panic("not implemented")
+	panic(fmt.Sprintf("not implemented: intersection with %T and %T", g1, g2))
 }
 
 func intersectLineWithLine(n1, n2 Line) Geometry {
@@ -118,12 +127,10 @@ type bbox struct {
 	min, max XY
 }
 
-func intersectLinearRingWithLinearRing(r1, r2 LinearRing) Geometry {
-	// TODO: This should be able to be a bit more generic, e.g. apply to line
-	// strings instead.
+func intersectLineStringWithLineString(ls1, ls2 LineString) Geometry {
 	var collection []Geometry
-	for _, ln1 := range r1.ls.lines {
-		for _, ln2 := range r2.ls.lines {
+	for _, ln1 := range ls1.lines {
+		for _, ln2 := range ls2.lines {
 			inter := ln1.Intersection(ln2)
 			if !inter.IsEmpty() {
 				collection = append(collection, inter)
