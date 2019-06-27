@@ -246,11 +246,6 @@ func TestBoundary(t *testing.T) {
 				LINESTRING(0 0,1 0,0 1,0 0)
 			)`,
 		},
-
-		//{
-		//"GEOMETRYCOLLECTION EMPTY",
-
-		// GEOMETRYCOLLECTION
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			want := geomFromWKT(t, tt.boundary)
