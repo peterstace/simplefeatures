@@ -88,5 +88,15 @@ func (c GeometryCollection) Envelope() (Envelope, bool) {
 }
 
 func (c GeometryCollection) Boundary() Geometry {
-	panic("not implemented")
+	if c.IsEmpty() {
+		return c
+	}
+	var bounds []Geometry
+	for _, g := range c.geoms {
+		bound := g.Boundary()
+		if !bound.IsEmpty() {
+			bounds = append(bounds, bound)
+		}
+	}
+	return NewGeometryCollection(bounds)
 }
