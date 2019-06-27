@@ -86,3 +86,17 @@ func (c GeometryCollection) flatten() []Geometry {
 func (c GeometryCollection) Envelope() (Envelope, bool) {
 	return EnvelopeFromGeoms(c.flatten()...)
 }
+
+func (c GeometryCollection) Boundary() Geometry {
+	if c.IsEmpty() {
+		return c
+	}
+	var bounds []Geometry
+	for _, g := range c.geoms {
+		bound := g.Boundary()
+		if !bound.IsEmpty() {
+			bounds = append(bounds, bound)
+		}
+	}
+	return NewGeometryCollection(bounds)
+}

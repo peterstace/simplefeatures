@@ -87,3 +87,17 @@ func (m MultiPolygon) Envelope() (Envelope, bool) {
 	}
 	return env, true
 }
+
+func (m MultiPolygon) Boundary() Geometry {
+	if m.IsEmpty() {
+		return m
+	}
+	var bounds []LineString
+	for _, poly := range m.polys {
+		bounds = append(bounds, poly.outer.ls)
+		for _, inner := range poly.holes {
+			bounds = append(bounds, inner.ls)
+		}
+	}
+	return NewMultiLineString(bounds)
+}

@@ -1,6 +1,7 @@
 package simplefeatures_test
 
 import (
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -147,6 +148,112 @@ func TestIsSimple(t *testing.T) {
 			got := g.IsSimple()
 			if got != tt.wantSimple {
 				t.Errorf("got=%v want=%v", got, tt.wantSimple)
+			}
+		})
+	}
+}
+
+func TestBoundary(t *testing.T) {
+	for i, tt := range []struct {
+		wkt, boundary string
+	}{
+		{"POINT EMPTY", "POINT EMPTY"},
+		{"LINESTRING EMPTY", "LINESTRING EMPTY"},
+		{"POLYGON EMPTY", "POLYGON EMPTY"},
+		{"MULTIPOINT EMPTY", "MULTIPOINT EMPTY"},
+		{"MULTILINESTRING EMPTY", "MULTILINESTRING EMPTY"},
+		{"MULTIPOLYGON EMPTY", "MULTIPOLYGON EMPTY"},
+
+		{"POINT(1 2)", "GEOMETRYCOLLECTION EMPTY"},
+		{"LINESTRING(1 2,3 4)", "MULTIPOINT(1 2,3 4)"},
+		{"LINESTRING(1 2,3 4,5 6)", "MULTIPOINT(1 2,5 6)"},
+		{"LINESTRING(1 2,3 4,5 6,7 8)", "MULTIPOINT(1 2,7 8)"},
+		{"LINESTRING(0 0,1 0,0 1,0 0)", "MULTIPOINT EMPTY"},
+		{"LINEARRING(0 0,1 0,0 1,0 0)", "MULTIPOINT EMPTY"},
+
+		{"POLYGON((0 0,1 0,1 1,0 1,0 0))", "LINESTRING(0 0,1 0,1 1,0 1,0 0)"},
+		{"POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))", "MULTILINESTRING((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))"},
+
+		{"MULTIPOINT((1 2))", "GEOMETRYCOLLECTION EMPTY"},
+		{"MULTIPOINT((1 2),(3 4))", "GEOMETRYCOLLECTION EMPTY"},
+
+		{
+			"MULTILINESTRING((0 0,1 1))",
+			"MULTIPOINT(0 0,1 1)",
+		},
+		{
+			"MULTILINESTRING((0 0,1 0),(0 1,1 1))",
+			"MULTIPOINT(0 0,1 0,0 1,1 1)",
+		},
+		{
+			"MULTILINESTRING((0 0,1 1),(1 1,1 0))",
+			"MULTIPOINT(0 0,1 0)",
+		},
+		{
+			"MULTILINESTRING((0 0,1 0,1 1),(0 0,0 1,1 1))",
+			"MULTIPOINT EMPTY",
+		},
+		{
+			"MULTILINESTRING((0 0,1 1),(0 1,1 1),(1 0,1 1))",
+			"MULTIPOINT(0 0,1 1,0 1,1 0)",
+		},
+		{
+			"MULTILINESTRING((0 0,0 1,1 1),(0 1,0 0,1 0))",
+			"MULTIPOINT(0 0,1 1,0 1,1 0)",
+		},
+		{
+			"MULTILINESTRING((0 1,1 1),(1 1,1 0),(1 1,2 1),(1 2,1 1))",
+			"MULTIPOINT(0 1,1 0,2 1,1 2)",
+		},
+		{
+			"MULTILINESTRING((1 1,2 2),(1 1,2 2))",
+			"MULTIPOINT EMPTY",
+		},
+
+		{
+			"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1)),((4 0,5 0,5 1,4 1,4 0)))",
+			"MULTILINESTRING((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1),(4 0,5 0,5 1,4 1,4 0))",
+		},
+		{
+			"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)))",
+			"MULTILINESTRING((0 0,3 0,3 3,0 3,0 0))",
+		},
+
+		{
+			"GEOMETRYCOLLECTION EMPTY",
+			"GEOMETRYCOLLECTION EMPTY",
+		},
+		{
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY)",
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY)",
+		},
+		{
+			"GEOMETRYCOLLECTION(POINT EMPTY, GEOMETRYCOLLECTION EMPTY)",
+			"GEOMETRYCOLLECTION(POINT EMPTY, GEOMETRYCOLLECTION EMPTY)",
+		},
+		{
+			"GEOMETRYCOLLECTION(POINT(1 1))",
+			"GEOMETRYCOLLECTION EMPTY",
+		},
+		{
+			`GEOMETRYCOLLECTION(
+				LINESTRING(1 0,0 5,5 2),
+				POINT(2 3),
+				POLYGON((0 0,1 0,0 1,0 0))
+			)`,
+			`GEOMETRYCOLLECTION(
+				MULTIPOINT(1 0,5 2),
+				LINESTRING(0 0,1 0,0 1,0 0)
+			)`,
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			want := geomFromWKT(t, tt.boundary)
+			got := geomFromWKT(t, tt.wkt).Boundary()
+			if !reflect.DeepEqual(got, want) {
+				t.Logf("want: %s", string(want.AsText()))
+				t.Logf("got:  %s", string(got.AsText()))
+				t.Errorf("mismatch")
 			}
 		})
 	}

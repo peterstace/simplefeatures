@@ -135,3 +135,15 @@ func (p Polygon) Equals(other Geometry) bool {
 func (p Polygon) Envelope() (Envelope, bool) {
 	return p.outer.Envelope()
 }
+
+func (p Polygon) Boundary() Geometry {
+	if len(p.holes) == 0 {
+		return p.outer.ls
+	}
+	bounds := make([]LineString, 0, 1+len(p.holes))
+	bounds = append(bounds, p.outer.ls)
+	for _, h := range p.holes {
+		bounds = append(bounds, h.ls)
+	}
+	return NewMultiLineString(bounds)
+}

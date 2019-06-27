@@ -126,3 +126,14 @@ func (s LineString) Envelope() (Envelope, bool) {
 	}
 	return env, true
 }
+
+func (s LineString) Boundary() Geometry {
+	if s.IsClosed() {
+		// Same behaviour as Postgis, but could instead be any other empty set.
+		return NewMultiPoint(nil)
+	}
+	return NewMultiPoint([]Point{
+		NewPoint(s.lines[0].a.XY),
+		NewPoint(s.lines[len(s.lines)-1].b.XY),
+	})
+}

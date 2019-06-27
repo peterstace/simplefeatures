@@ -72,3 +72,8 @@ func (r LinearRing) Envelope() (Envelope, bool) {
 	}
 	return env, true
 }
+
+func (r LinearRing) Boundary() Geometry {
+	// Same behaviour as Postgis, but could be any empty set.
+	return NewMultiPoint(nil)
+}
