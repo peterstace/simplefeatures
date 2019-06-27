@@ -1,6 +1,7 @@
 package simplefeatures_test
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -108,6 +109,57 @@ func TestPolygonValidation(t *testing.T) {
 		)`,
 	} {
 		t.Run("invalid_"+strconv.Itoa(i), func(t *testing.T) {
+			_, err := UnmarshalWKT(strings.NewReader(wkt))
+			if err == nil {
+				t.Error("expected error")
+			}
+		})
+	}
+}
+
+func TestMultiPolygonValidation(t *testing.T) {
+	for i, wkt := range []string{
+		`MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))`,
+		`MULTIPOLYGON(
+			((0 0,1 0,1 1,0 1,0 0)),
+			((2 0,3 0,3 1,2 1,2 0))
+		)`,
+		`MULTIPOLYGON(
+			((0 0,1 0,0 1,0 0)),
+			((1 0,2 0,1 1,1 0))
+		)`,
+		`MULTIPOLYGON(
+			((0 0,2 0,2 3,1 1,0 3,0 0)),
+			((1 2,2 3,0 3,1 2))
+		)`,
+		`MULTIPOLYGON(
+			((0 0,5 0,5 5,0 5,0 0),(1 1,4 1,4 4,1 4,1 1)),
+			((2 2,3 2,3 3,2 3,2 2))
+		)`,
+	} {
+		t.Run(fmt.Sprintf("valid_%d", i), func(t *testing.T) {
+			geomFromWKT(t, wkt)
+		})
+	}
+	for i, wkt := range []string{
+		`MULTIPOLYGON(
+			((0 0,0 1,1 1,1 0,0 0)),
+			((1 0,1 1,2 1,2 0,1 0))
+		)`,
+		`MULTIPOLYGON(
+			((0 0,2 0,2 2,0 2,0 0)),
+			((1 0,3 0,3 2,1 2,1 0))
+		)`,
+		`MULTIPOLYGON(
+			((1 0,2 0,1 3,1 0)),
+			((0 1,3 1,3 2,0 1))
+		)`,
+		`MULTIPOLYGON(
+			((0 0,3 0,3 3,0 3,0 0)),
+			((2 1,3 3,1 2,2 1))
+		)`,
+	} {
+		t.Run(fmt.Sprintf("invalid_%d", i), func(t *testing.T) {
 			_, err := UnmarshalWKT(strings.NewReader(wkt))
 			if err == nil {
 				t.Error("expected error")
