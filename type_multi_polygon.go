@@ -1,5 +1,7 @@
 package simplefeatures
 
+import "errors"
+
 // MultiPolygon is a multi surface whose elements are polygons.
 //
 // Its assertions are:
@@ -17,6 +19,18 @@ type MultiPolygon struct {
 
 func NewMultiPolygon(polys []Polygon) (MultiPolygon, error) {
 	// TODO: implement assertions
+
+	for i := 0; i < len(polys); i++ {
+		for j := i + 1; j < len(polys); j++ {
+			bound1 := polys[i].Boundary()
+			bound2 := polys[j].Boundary()
+			inter := bound1.Intersection(bound2)
+			if inter.Dimension() > 0 {
+				return MultiPolygon{}, errors.New("the boundaries of the polygon elements of multipolygons must only intersect at points")
+			}
+		}
+	}
+
 	return MultiPolygon{polys}, nil
 }
 
