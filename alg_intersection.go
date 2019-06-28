@@ -20,16 +20,41 @@ func intersection(g1, g2 Geometry) Geometry {
 	case LineString:
 		switch g2 := g2.(type) {
 		case LineString:
-			return intersectLineStringWithLineString(g1, g2)
+			return intersectMultiLineStringWithMultiLineString(
+				NewMultiLineString([]LineString{g1}),
+				NewMultiLineString([]LineString{g2}),
+			)
 		case LinearRing:
-			return intersectLineStringWithLineString(g1, g2.ls)
+			return intersectMultiLineStringWithMultiLineString(
+				NewMultiLineString([]LineString{g1}),
+				NewMultiLineString([]LineString{g2.ls}),
+			)
+		case MultiLineString:
+			return intersectMultiLineStringWithMultiLineString(
+				NewMultiLineString([]LineString{g1}),
+				g2,
+			)
 		}
 	case LinearRing:
 		switch g2 := g2.(type) {
 		case LinearRing:
-			return intersectLineStringWithLineString(g1.ls, g2.ls)
+			return intersectMultiLineStringWithMultiLineString(
+				NewMultiLineString([]LineString{g1.ls}),
+				NewMultiLineString([]LineString{g2.ls}),
+			)
+		case MultiLineString:
+			return intersectMultiLineStringWithMultiLineString(
+				NewMultiLineString([]LineString{g1.ls}),
+				g2,
+			)
+		}
+	case MultiLineString:
+		switch g2 := g2.(type) {
+		case MultiLineString:
+			return intersectMultiLineStringWithMultiLineString(g1, g2)
 		}
 	}
+
 	panic(fmt.Sprintf("not implemented: intersection with %T and %T", g1, g2))
 }
 
@@ -127,13 +152,17 @@ type bbox struct {
 	min, max XY
 }
 
-func intersectLineStringWithLineString(ls1, ls2 LineString) Geometry {
+func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) Geometry {
 	var collection []Geometry
-	for _, ln1 := range ls1.lines {
-		for _, ln2 := range ls2.lines {
-			inter := ln1.Intersection(ln2)
-			if !inter.IsEmpty() {
-				collection = append(collection, inter)
+	for _, ls1 := range mls1.lines {
+		for _, ln1 := range ls1.lines {
+			for _, ls2 := range mls2.lines {
+				for _, ln2 := range ls2.lines {
+					inter := ln1.Intersection(ln2)
+					if !inter.IsEmpty() {
+						collection = append(collection, inter)
+					}
+				}
 			}
 		}
 	}
