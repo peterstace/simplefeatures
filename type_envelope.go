@@ -60,6 +60,10 @@ func (e Envelope) Union(other Envelope) Envelope {
 	}
 }
 
+func (e Envelope) IntersectsPoint(p XY) bool {
+	return p.X.GTE(e.min.X) && p.X.LTE(e.max.X) && p.Y.GTE(e.min.Y) && p.Y.LTE(e.max.Y)
+}
+
 // mustEnvelope gets the envelope from a Geometry. If it's not defined (because
 // the geometry is empty), then it panics.
 func mustEnvelope(g Geometry) Envelope {
