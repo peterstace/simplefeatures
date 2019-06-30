@@ -60,6 +60,7 @@ func (n Line) Equals(other Geometry) bool {
 func (n Line) Envelope() (Envelope, bool) {
 	return NewEnvelope(n.a.XY, n.b.XY), true
 }
+
 func (n Line) Boundary() Geometry {
 	return NewMultiPoint([]Point{
 		NewPoint(n.a.XY),

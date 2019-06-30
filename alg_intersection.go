@@ -170,11 +170,11 @@ func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) Geo
 }
 
 func intersectPointWithLine(point Point, line Line) Geometry {
-	// TODO: use envelope instead
-	if point.coords.X.LT(line.a.X.Min(line.b.X)) ||
-		point.coords.X.GT(line.a.X.Max(line.b.X)) ||
-		point.coords.Y.LT(line.a.Y.Min(line.b.Y)) ||
-		point.coords.Y.GT(line.a.Y.Max(line.b.Y)) {
+	env, ok := line.Envelope()
+	if !ok {
+		panic("line must have envelope")
+	}
+	if !env.IntersectsPoint(point.coords.XY) {
 		return NewEmptyPoint()
 	}
 	lhs := point.coords.X.Sub(line.a.X).Mul(line.b.Y.Sub(line.a.Y))
