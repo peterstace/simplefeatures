@@ -12,6 +12,10 @@ func TestIntersection(t *testing.T) {
 	for i, tt := range []struct {
 		in1, in2, out string
 	}{
+		// Point/Point
+		{"POINT(1 2)", "POINT(1 2)", "POINT(1 2)"},
+		{"POINT(1 2)", "POINT(2 1)", "GEOMETRYCOLLECTION EMPTY"},
+
 		// Point/Line
 		{"POINT(0 0)", "LINESTRING(0 0,2 2)", "POINT(0 0)"},
 		{"POINT(1 1)", "LINESTRING(0 0,2 2)", "POINT(1 1)"},

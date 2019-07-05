@@ -12,6 +12,8 @@ func intersection(g1, g2 Geometry) Geometry {
 	switch g1 := g1.(type) {
 	case Point:
 		switch g2 := g2.(type) {
+		case Point:
+			return intersectPointWithPoint(g1, g2)
 		case Line:
 			return intersectPointWithLine(g1, g2)
 		case MultiPoint:
@@ -237,8 +239,15 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
 	}
 	for _, pt := range mp.pts {
 		if pt.Equals(point) {
-			return point
+			return NewPoint(point.coords.XY)
 		}
+	}
+	return NewGeometryCollection(nil)
+}
+
+func intersectPointWithPoint(pt1, pt2 Point) Geometry {
+	if pt1.Equals(pt2) {
+		return NewPoint(pt1.coords.XY)
 	}
 	return NewGeometryCollection(nil)
 }
