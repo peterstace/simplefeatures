@@ -152,7 +152,7 @@ func (p Polygon) Boundary() Geometry {
 	bounds := make([]LineString, 1+len(p.holes))
 	bounds[0] = p.outer.ls
 	for i, h := range p.holes {
-		bounds[i] = h.ls
+		bounds[1+i] = h.ls
 	}
 	return NewMultiLineString(bounds)
 }

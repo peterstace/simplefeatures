@@ -11,18 +11,14 @@ import (
 //
 // 1. It must be made up of zero or more valid Polygons.
 //
-// 2. The interiors of any two polygons must not intersect. TODO: this is not
-// yet implemented.
+// 2. The interiors of any two polygons must not intersect.
 //
-// 3. The boundaries of any two polygons may touch only at a finite number of
-// points. TODO: this is not yet implemented.
+// 3. The boundaries of any two polygons may touch only at a finite number of points.
 type MultiPolygon struct {
 	polys []Polygon
 }
 
 func NewMultiPolygon(polys []Polygon) (MultiPolygon, error) {
-	// TODO: implement assertions
-
 	for i := 0; i < len(polys); i++ {
 		for j := i + 1; j < len(polys); j++ {
 			bound1 := polys[i].Boundary()
@@ -36,7 +32,6 @@ func NewMultiPolygon(polys []Polygon) (MultiPolygon, error) {
 			}
 		}
 	}
-
 	return MultiPolygon{polys}, nil
 }
 
