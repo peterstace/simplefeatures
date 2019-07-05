@@ -146,7 +146,7 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 | Polygon/MultiLineString               | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | Polygon/MultiPolygon                  | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | Polygon/GeometryCollection            | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
-| MultiPoint/MultiPoint                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| MultiPoint/MultiPoint                 | ❌       | ❌     | ❌         | ✅           | ❌    | ❌         | ❌            |
 | MultiPoint/MultiLineString            | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | MultiPoint/MultiPolygon               | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | MultiPoint/GeometryCollection         | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |

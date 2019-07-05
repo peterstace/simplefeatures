@@ -1,6 +1,9 @@
 package simplefeatures
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 func intersection(g1, g2 Geometry) Geometry {
 	if rank(g1) > rank(g2) {
@@ -47,6 +50,11 @@ func intersection(g1, g2 Geometry) Geometry {
 				NewMultiLineString([]LineString{g1.ls}),
 				g2,
 			)
+		}
+	case MultiPoint:
+		switch g2 := g2.(type) {
+		case MultiPoint:
+			return intersectMultiPointWithMultiPoint(g1, g2)
 		}
 	case MultiLineString:
 		switch g2 := g2.(type) {
@@ -183,4 +191,40 @@ func intersectPointWithLine(point Point, line Line) Geometry {
 		return point
 	}
 	return NewEmptyPoint()
+}
+
+func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) Geometry {
+	mp1Set := newXYSet()
+	for _, pt := range mp1.pts {
+		mp1Set.add(pt.coords.XY)
+	}
+	mp2Set := newXYSet()
+	for _, pt := range mp2.pts {
+		mp2Set.add(pt.coords.XY)
+	}
+
+	allSet := newXYSet()
+	for _, pt := range mp1Set {
+		if mp2Set.contains(pt) {
+			allSet.add(pt)
+		}
+	}
+	for _, pt := range mp2Set {
+		if mp1Set.contains(pt) {
+			allSet.add(pt)
+		}
+	}
+
+	intersection := make([]Point, 0, len(allSet))
+	for _, pt := range allSet {
+		intersection = append(intersection, NewPoint(pt))
+	}
+	sort.Slice(intersection, func(i, j int) bool {
+		return intersection[i].coords.XY.Less(intersection[j].coords.XY)
+	})
+
+	if len(intersection) == 1 {
+		return intersection[0]
+	}
+	return NewMultiPoint(intersection)
 }

@@ -42,6 +42,17 @@ func (w XY) Midpoint(o XY) XY {
 	return w.Add(o).Scale(half)
 }
 
+// Less gives an ordering on XYs. If two XYs have different X values, then the
+// one with the lower X value is ordered before the one with the higher X
+// value. If the X values are then same, then the Y values are used (the lower
+// Y value comes first).
+func (w XY) Less(o XY) bool {
+	if !w.X.Equals(o.X) {
+		return w.X.LT(o.X)
+	}
+	return w.Y.LT(o.Y)
+}
+
 type xyHash [sha256.Size]byte
 
 func (w XY) hash() xyHash {
@@ -60,6 +71,11 @@ func newXYSet() xySet {
 
 func (s xySet) add(xy XY) {
 	s[xy.hash()] = xy
+}
+
+func (s xySet) contains(xy XY) bool {
+	_, ok := s[xy.hash()]
+	return ok
 }
 
 type xyxyHash struct {
