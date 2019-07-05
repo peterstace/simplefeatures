@@ -14,6 +14,7 @@ type Scalar struct {
 var (
 	zero = Scalar{val: big.NewRat(0, 1)}
 	one  = Scalar{val: big.NewRat(1, 1)}
+	half = Scalar{val: big.NewRat(1, 2)}
 )
 
 // NewScalar parses a string and returns the corresponding scalar. The string

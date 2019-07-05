@@ -1,6 +1,9 @@
 package simplefeatures
 
-import "errors"
+import (
+	"errors"
+	"sort"
+)
 
 // MultiPolygon is a multi surface whose elements are polygons.
 //
@@ -28,10 +31,98 @@ func NewMultiPolygon(polys []Polygon) (MultiPolygon, error) {
 			if inter.Dimension() > 0 {
 				return MultiPolygon{}, errors.New("the boundaries of the polygon elements of multipolygons must only intersect at points")
 			}
+			if polyInteriorsIntersect(polys[i], polys[j]) {
+				return MultiPolygon{}, errors.New("polygon interiors must not intersect")
+			}
 		}
 	}
 
 	return MultiPolygon{polys}, nil
+}
+
+func polyInteriorsIntersect(p1, p2 Polygon) bool {
+	// Run twice, swapping the order of the polygons each time.
+	for order := 0; order < 2; order++ {
+		p1, p2 = p2, p1
+
+		// Collect points along the boundary of the first polygon. Do this by
+		// first breaking the lines in the ring into multiple segments where
+		// they are intersected by the rings from the other polygon. Collect
+		// the original points in the boundary, plus the intersection points,
+		// then each midpoint between those points. These are enough points
+		// that one of the points will be inside the other polygon iff the
+		// interior of the polygons intersect.
+		allPts := newXYSet()
+		for _, r1 := range p1.rings() {
+			for _, line1 := range r1.ls.lines {
+				// Collect boundary control points and intersection points.
+				linePts := newXYSet()
+				linePts.add(line1.a.XY)
+				linePts.add(line1.b.XY)
+				for _, r2 := range p2.rings() {
+					for _, line2 := range r2.ls.lines {
+						env, ok := line1.Intersection(line2).Envelope()
+						if !ok {
+							continue
+						}
+						if !env.Min().Equals(env.Max()) {
+							continue
+						}
+						inter := env.Min()
+						if !inter.Equals(line1.a.XY) && !inter.Equals(line1.b.XY) {
+							linePts.add(inter)
+						}
+					}
+				}
+				// Collect midpoints.
+				if len(linePts) <= 2 {
+					for _, pt := range linePts {
+						allPts.add(pt)
+					}
+				} else {
+					linePtsSlice := make([]XY, 0, len(linePts))
+					for _, pt := range linePts {
+						linePtsSlice = append(linePtsSlice, pt)
+					}
+					sort.Slice(linePtsSlice, func(i, j int) bool {
+						ptI := linePtsSlice[i]
+						ptJ := linePtsSlice[j]
+						if !ptI.X.Equals(ptJ.X) {
+							return ptI.X.LT(ptJ.X)
+						}
+						return ptI.Y.LT(ptJ.Y)
+					})
+					allPts.add(linePtsSlice[0])
+					for i := 0; i+1 < len(linePtsSlice); i++ {
+						midpoint := linePtsSlice[i].Midpoint(linePtsSlice[i+1])
+						allPts.add(midpoint)
+						allPts.add(linePtsSlice[i+1])
+					}
+				}
+			}
+		}
+
+		// Check to see if any of the points from the boundary from the first
+		// polygon are inside the second polygon.
+		for _, pt := range allPts {
+			if isPointInteriorToPolygon(pt, p2) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
+	if pointRingSide(pt, poly.outer) != interior {
+		return false
+	}
+	for _, hole := range poly.holes {
+		if pointRingSide(pt, hole) != exterior {
+			return false
+		}
+	}
+	return true
 }
 
 func NewMultiPolygonFromCoords(coords [][][]Coordinates) (MultiPolygon, error) {

@@ -159,6 +159,10 @@ func TestMultiPolygonValidation(t *testing.T) {
 			((2 1,3 3,1 2,2 1))
 		)`,
 		`MULTIPOLYGON(
+			((2 1,3 3,1 2,2 1)),
+			((0 0,3 0,3 3,0 3,0 0))
+		)`,
+		`MULTIPOLYGON(
 			((0 0,0 1,1 0,0 0)),
 			((0 0,0 1,1 0,0 0))
 		)`,

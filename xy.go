@@ -38,6 +38,10 @@ func (w XY) Cross(o XY) Scalar {
 	return w.X.Mul(o.Y).Sub(w.Y.Mul(o.X))
 }
 
+func (w XY) Midpoint(o XY) XY {
+	return w.Add(o).Scale(half)
+}
+
 type xyHash [sha256.Size]byte
 
 func (w XY) hash() xyHash {
@@ -46,4 +50,25 @@ func (w XY) hash() xyHash {
 	var sum xyHash
 	h.Sum(sum[:0])
 	return sum
+}
+
+type xySet map[xyHash]XY
+
+func newXYSet() xySet {
+	return make(map[xyHash]XY)
+}
+
+func (s xySet) add(xy XY) {
+	s[xy.hash()] = xy
+}
+
+type xyxyHash struct {
+	a, b xyHash
+}
+
+func hashXYXY(a, b XY) xyxyHash {
+	return xyxyHash{
+		a.hash(),
+		b.hash(),
+	}
 }
