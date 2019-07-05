@@ -112,8 +112,9 @@ func (p Polygon) appendWKTBody(dst []byte) []byte {
 	return append(dst, ')')
 }
 
+// IsSimple always returns true. All Polygons are simple.
 func (p Polygon) IsSimple() bool {
-	panic("not implemented")
+	return true
 }
 
 func (p Polygon) Intersection(g Geometry) Geometry {

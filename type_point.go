@@ -42,7 +42,7 @@ func (p Point) appendWKTBody(dst []byte) []byte {
 }
 
 func (p Point) IsSimple() bool {
-	panic("not implemented")
+	return true
 }
 
 func (p Point) Intersection(g Geometry) Geometry {
