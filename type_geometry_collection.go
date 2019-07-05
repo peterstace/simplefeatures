@@ -36,10 +36,6 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-func (c GeometryCollection) IsSimple() bool {
-	panic("not implemented")
-}
-
 func (c GeometryCollection) Intersection(g Geometry) Geometry {
 	return intersection(c, g)
 }

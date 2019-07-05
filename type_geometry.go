@@ -8,11 +8,6 @@ type Geometry interface {
 	// returns the resultant slice.
 	AppendWKT(dst []byte) []byte
 
-	// IsSimple returns true iff the geometry doesn't contain any anomalous
-	// geometry points such as self intersection or self tangency. The precise
-	// condition will differ for each type of geometry.
-	IsSimple() bool
-
 	// Intersection returns a geometric object that represents the point set
 	// intersection of this geometry with another geometry.
 	Intersection(Geometry) Geometry
@@ -36,4 +31,16 @@ type Geometry interface {
 
 	// Boundary returns the Geometry representing the limit of this geometry.
 	Boundary() Geometry
+}
+
+// HeterogenousGeometry are geometries that contain a single element, or
+// elements all of the same type. Specifically, all geometries are heterogenous
+// except for GeometryCollection.
+type HeterogenousGeometry interface {
+	Geometry
+
+	// IsSimple returns true iff the geometry doesn't contain any anomalous
+	// geometry points such as self intersection or self tangency. The precise
+	// condition will differ for each type of geometry.
+	IsSimple() bool
 }

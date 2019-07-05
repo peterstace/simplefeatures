@@ -20,7 +20,7 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 | MultiPoint         | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
 | MultiLineString    | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
 | MultiPolygon       | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
-| GeometryCollection | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ✅       |
+| GeometryCollection | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | N/A      | ❌   | ❌         | ✅       |
                                  
 ### Spatial Relationships
 

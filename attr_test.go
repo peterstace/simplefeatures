@@ -166,7 +166,7 @@ func TestIsSimple(t *testing.T) {
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)))", true},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := geomFromWKT(t, tt.wkt)
+			g := geomFromWKT(t, tt.wkt).(HeterogenousGeometry)
 			got := g.IsSimple()
 			if got != tt.wantSimple {
 				t.Logf("wkt: %s", tt.wkt)
