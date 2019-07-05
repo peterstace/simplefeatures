@@ -162,6 +162,8 @@ func TestIsSimple(t *testing.T) {
 		{"MULTILINESTRING((0 0,1 1,2 2),(0 2,1 1,2 0))", false},
 		{"MULTILINESTRING((0 0,2 1,4 2),(4 2,2 3,0 4))", true},
 		{"MULTILINESTRING((0 0,2 0,4 0),(2 0,2 1))", false},
+
+		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)))", true},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g := geomFromWKT(t, tt.wkt)

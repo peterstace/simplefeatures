@@ -154,8 +154,9 @@ func (m MultiPolygon) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
+// IsSimple returns true. All MultiPolygons are simple by definition.
 func (m MultiPolygon) IsSimple() bool {
-	panic("not implemented")
+	return true
 }
 
 func (m MultiPolygon) Intersection(g Geometry) Geometry {
