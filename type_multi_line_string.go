@@ -47,8 +47,28 @@ func (m MultiLineString) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
+// IsSimple returns true iff the following conditions hold:
+//
+// 1. Each element (a LineString) is simple.
+//
+// 2. The intersection between any two elements occurs at points that are on
+// the boundaries of both elements.
 func (m MultiLineString) IsSimple() bool {
-	panic("not implemented")
+	for _, ls := range m.lines {
+		if !ls.IsSimple() {
+			return false
+		}
+	}
+	for i := 0; i < len(m.lines); i++ {
+		for j := i + 1; j < len(m.lines); j++ {
+			inter := m.lines[i].Intersection(m.lines[j])
+			bound := m.lines[i].Boundary().Intersection(m.lines[j].Boundary())
+			if !inter.Equals(inter.Intersection(bound)) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func (m MultiLineString) Intersection(g Geometry) Geometry {

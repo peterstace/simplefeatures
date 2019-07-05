@@ -155,11 +155,19 @@ func TestIsSimple(t *testing.T) {
 		{"MULTIPOINT EMPTY", true},
 
 		{"POLYGON EMPTY", true},
+
+		{"MULTILINESTRING EMPTY", true},
+		{"MULTILINESTRING((0 0,1 0))", true},
+		{"MULTILINESTRING((0 0,1 0,0 1,0 0))", true},
+		{"MULTILINESTRING((0 0,1 1,2 2),(0 2,1 1,2 0))", false},
+		{"MULTILINESTRING((0 0,2 1,4 2),(4 2,2 3,0 4))", true},
+		{"MULTILINESTRING((0 0,2 0,4 0),(2 0,2 1))", false},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g := geomFromWKT(t, tt.wkt)
 			got := g.IsSimple()
 			if got != tt.wantSimple {
+				t.Logf("wkt: %s", tt.wkt)
 				t.Errorf("got=%v want=%v", got, tt.wantSimple)
 			}
 		})
