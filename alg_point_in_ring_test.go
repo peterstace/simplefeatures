@@ -135,7 +135,7 @@ func TestPointInRing(t *testing.T) {
 					t.Fatal(err)
 				}
 				point := pointGeom.(Point)
-				got := isPointInsideOrOnRing(point.coords.XY, ring)
+				got := pointRingSide(point.coords.XY, ring) != exterior
 				t.Log(tc.ringWKT)
 				t.Log(st.pointWKT)
 				if got != st.inside {

@@ -1,6 +1,14 @@
 package simplefeatures
 
-func isPointInsideOrOnRing(pt XY, ring LinearRing) bool {
+type side int
+
+const (
+	interior side = -1
+	boundary side = 0
+	exterior side = +1
+)
+
+func pointRingSide(pt XY, ring LinearRing) side {
 	ptg := NewPointFromCoords(Coordinates{pt})
 	// find max x coordinate
 	// TODO: should be able to use envelope for this
@@ -8,11 +16,11 @@ func isPointInsideOrOnRing(pt XY, ring LinearRing) bool {
 	for _, ln := range ring.ls.lines {
 		maxX = maxX.Max(ln.b.X)
 		if !ln.Intersection(ptg).IsEmpty() {
-			return true
+			return boundary
 		}
 	}
 	if pt.X.GT(maxX) {
-		return false
+		return exterior
 	}
 
 	ray := must(NewLine(Coordinates{pt}, Coordinates{XY{maxX.Add(one), pt.Y}})).(Line)
@@ -39,5 +47,8 @@ func isPointInsideOrOnRing(pt XY, ring LinearRing) bool {
 			count++
 		}
 	}
-	return count%2 == 1
+	if count%2 == 1 {
+		return interior
+	}
+	return exterior
 }

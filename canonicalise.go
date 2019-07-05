@@ -38,17 +38,6 @@ func canonicalise(geoms []Geometry) Geometry {
 	return NewGeometryCollection(allGeoms)
 }
 
-type xyxyHash struct {
-	a, b xyHash
-}
-
-func hashXYXY(a, b XY) xyxyHash {
-	return xyxyHash{
-		a.hash(),
-		b.hash(),
-	}
-}
-
 func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 	points := map[xyHash]Point{}
 	lines := map[xyxyHash]Line{}

@@ -56,7 +56,7 @@ func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
 	// All inner rings must be inside the outer ring.
 	for _, hole := range holes {
 		for _, line := range hole.ls.lines {
-			if !isPointInsideOrOnRing(line.a.XY, outer) {
+			if pointRingSide(line.a.XY, outer) == exterior {
 				return Polygon{}, errors.New("hole must be inside outer ring")
 			}
 		}
@@ -136,14 +136,23 @@ func (p Polygon) Envelope() (Envelope, bool) {
 	return p.outer.Envelope()
 }
 
+func (p Polygon) rings() []LinearRing {
+	rings := make([]LinearRing, 1+len(p.holes))
+	rings[0] = p.outer
+	for i, h := range p.holes {
+		rings[1+i] = h
+	}
+	return rings
+}
+
 func (p Polygon) Boundary() Geometry {
 	if len(p.holes) == 0 {
 		return p.outer.ls
 	}
-	bounds := make([]LineString, 0, 1+len(p.holes))
-	bounds = append(bounds, p.outer.ls)
-	for _, h := range p.holes {
-		bounds = append(bounds, h.ls)
+	bounds := make([]LineString, 1+len(p.holes))
+	bounds[0] = p.outer.ls
+	for i, h := range p.holes {
+		bounds[1+i] = h.ls
 	}
 	return NewMultiLineString(bounds)
 }
