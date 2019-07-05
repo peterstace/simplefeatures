@@ -116,7 +116,7 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 | Point/LineString                      | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | Point/LinearRing                      | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | Point/Polygon                         | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
-| Point/MultiPoint                      | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
+| Point/MultiPoint                      | ❌       | ❌     | ❌         | ✅           | ❌    | ❌         | ❌            |
 | Point/MultiLineString                 | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | Point/MultiPolygon                    | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | Point/GeometryCollection              | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
