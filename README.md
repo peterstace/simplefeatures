@@ -17,7 +17,7 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 | LineString         | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
 | LinearRing         | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
 | Polygon            | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
-| MultiPoint         | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ✅       |
+| MultiPoint         | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
 | MultiLineString    | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ✅       |
 | MultiPolygon       | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ✅       |
 | GeometryCollection | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ⚠️        | ❌   | ❌         | ✅       |

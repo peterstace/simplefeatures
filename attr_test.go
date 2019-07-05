@@ -150,6 +150,10 @@ func TestIsSimple(t *testing.T) {
 
 		{"POLYGON((0 0,0 1,1 0,0 0))", true},
 
+		{"MULTIPOINT((1 2),(3 4),(5 6))", true},
+		{"MULTIPOINT((1 2),(3 4),(1 2))", false},
+		{"MULTIPOINT EMPTY", true},
+
 		{"POLYGON EMPTY", true},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {

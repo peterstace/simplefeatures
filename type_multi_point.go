@@ -11,17 +11,7 @@ type MultiPoint struct {
 }
 
 func NewMultiPoint(pts []Point) MultiPoint {
-	// Deduplicate
-	dedupe := make([]Point, 0, len(pts))
-	seen := make(map[xyHash]bool)
-	for _, pt := range pts {
-		h := pt.coords.hash()
-		if !seen[h] {
-			seen[h] = true
-			dedupe = append(dedupe, pt)
-		}
-	}
-	return MultiPoint{dedupe}
+	return MultiPoint{pts}
 }
 
 func NewMultiPointFromCoords(coords []OptionalCoordinates) (MultiPoint, error) {
@@ -55,9 +45,17 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-// This could just be "return true" because we de-duplicate points.
+// IsSimple returns true iff no two of its points are equal.
 func (m MultiPoint) IsSimple() bool {
-	panic("not implemented")
+	seen := make(map[xyHash]bool)
+	for _, p := range m.pts {
+		h := p.coords.XY.hash()
+		if seen[h] {
+			return false
+		}
+		seen[h] = true
+	}
+	return true
 }
 
 func (m MultiPoint) Intersection(g Geometry) Geometry {
