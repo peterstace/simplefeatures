@@ -28,8 +28,8 @@ func NewMultiLineStringFromCoords(coords [][]Coordinates) (MultiLineString, erro
 	return MultiLineString{lines}, nil
 }
 
-func (m MultiLineString) AsText() []byte {
-	return m.AppendWKT(nil)
+func (m MultiLineString) AsText() string {
+	return string(m.AppendWKT(nil))
 }
 
 func (m MultiLineString) AppendWKT(dst []byte) []byte {

@@ -17,8 +17,8 @@ func NewGeometryCollection(geoms []Geometry) GeometryCollection {
 	return GeometryCollection{geoms}
 }
 
-func (c GeometryCollection) AsText() []byte {
-	return c.AppendWKT(nil)
+func (c GeometryCollection) AsText() string {
+	return string(c.AppendWKT(nil))
 }
 
 func (c GeometryCollection) AppendWKT(dst []byte) []byte {

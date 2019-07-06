@@ -24,8 +24,8 @@ func NewPointFromCoords(c Coordinates) Point {
 	return Point{coords: c}
 }
 
-func (p Point) AsText() []byte {
-	return p.AppendWKT(nil)
+func (p Point) AsText() string {
+	return string(p.AppendWKT(nil))
 }
 
 func (p Point) AppendWKT(dst []byte) []byte {

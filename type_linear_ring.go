@@ -34,8 +34,8 @@ func NewLinearRing(pts []Coordinates) (LinearRing, error) {
 	return LinearRing{ls}, nil
 }
 
-func (r LinearRing) AsText() []byte {
-	return r.AppendWKT(nil)
+func (r LinearRing) AsText() string {
+	return string(r.AppendWKT(nil))
 }
 
 func (r LinearRing) AppendWKT(dst []byte) []byte {

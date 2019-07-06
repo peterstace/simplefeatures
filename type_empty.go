@@ -17,8 +17,8 @@ func NewEmptyPolygon() EmptySet {
 	return EmptySet{"POLYGON EMPTY"}
 }
 
-func (e EmptySet) AsText() []byte {
-	return []byte(e.wkt)
+func (e EmptySet) AsText() string {
+	return e.wkt
 }
 
 func (e EmptySet) AppendWKT(dst []byte) []byte {

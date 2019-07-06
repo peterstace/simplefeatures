@@ -21,8 +21,8 @@ func NewLine(a, b Coordinates) (Line, error) {
 	return Line{a, b}, nil
 }
 
-func (n Line) AsText() []byte {
-	return n.AppendWKT(nil)
+func (n Line) AsText() string {
+	return string(n.AppendWKT(nil))
 }
 
 func (n Line) AppendWKT(dst []byte) []byte {

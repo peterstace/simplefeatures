@@ -31,8 +31,8 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 	return LineString{lines}, nil
 }
 
-func (s LineString) AsText() []byte {
-	return s.AppendWKT(nil)
+func (s LineString) AsText() string {
+	return string(s.AppendWKT(nil))
 }
 
 func (s LineString) AppendWKT(dst []byte) []byte {

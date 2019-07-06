@@ -93,8 +93,8 @@ func NewPolygonFromCoords(coords [][]Coordinates) (Polygon, error) {
 	return NewPolygon(outer, holes...)
 }
 
-func (p Polygon) AsText() []byte {
-	return p.AppendWKT(nil)
+func (p Polygon) AsText() string {
+	return string(p.AppendWKT(nil))
 }
 
 func (p Polygon) AppendWKT(dst []byte) []byte {

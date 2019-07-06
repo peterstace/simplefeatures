@@ -135,8 +135,8 @@ func NewMultiPolygonFromCoords(coords [][][]Coordinates) (MultiPolygon, error) {
 	return NewMultiPolygon(polys)
 }
 
-func (m MultiPolygon) AsText() []byte {
-	return m.AppendWKT(nil)
+func (m MultiPolygon) AsText() string {
+	return string(m.AppendWKT(nil))
 }
 
 func (m MultiPolygon) AppendWKT(dst []byte) []byte {

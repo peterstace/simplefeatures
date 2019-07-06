@@ -26,8 +26,8 @@ func NewMultiPointFromCoords(coords []OptionalCoordinates) (MultiPoint, error) {
 	return NewMultiPoint(pts), nil
 }
 
-func (m MultiPoint) AsText() []byte {
-	return m.AppendWKT(nil)
+func (m MultiPoint) AsText() string {
+	return string(m.AppendWKT(nil))
 }
 
 func (m MultiPoint) AppendWKT(dst []byte) []byte {
