@@ -21,6 +21,34 @@ func NewLine(a, b Coordinates) (Line, error) {
 	return Line{a, b}, nil
 }
 
+// StartPoint gives the first point of the line.
+func (n Line) StartPoint() Point {
+	return NewPointFromCoords(n.a)
+}
+
+// EndPoint gives the second (last) point of the line.
+func (n Line) EndPoint() Point {
+	return NewPointFromCoords(n.b)
+}
+
+// NumPoints always returns 2.
+func (Line) NumPoints() int {
+	return 2
+}
+
+// PointN returns the first point when n is 0, and the second point when n is
+// 1. It panics if n is any other value.
+func (ln Line) PointN(n int) Point {
+	switch n {
+	case 0:
+		return ln.StartPoint()
+	case 1:
+		return ln.EndPoint()
+	default:
+		panic("n must be 0 or 1")
+	}
+}
+
 func (n Line) AsText() string {
 	return string(n.AppendWKT(nil))
 }

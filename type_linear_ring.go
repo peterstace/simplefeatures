@@ -34,6 +34,28 @@ func NewLinearRing(pts []Coordinates) (LinearRing, error) {
 	return LinearRing{ls}, nil
 }
 
+// StartPoint gives the first point of the linear ring.
+func (r LinearRing) StartPoint() Point {
+	return r.ls.StartPoint()
+}
+
+// EndPoint gives the last point of the linear ring. Because linear rings are
+// closed, this is by definition the same as the start point.
+func (r LinearRing) EndPoint() Point {
+	return r.ls.EndPoint()
+}
+
+// NumPoints gives the number of control points in the linear ring.
+func (r LinearRing) NumPoints() int {
+	return r.ls.NumPoints()
+}
+
+// PointN gives the nth (zero indexed) point in the line string. Panics if n is
+// out of range with respect to the number of points.
+func (r LinearRing) PointN(n int) Point {
+	return r.ls.PointN(n)
+}
+
 func (r LinearRing) AsText() string {
 	return string(r.AppendWKT(nil))
 }

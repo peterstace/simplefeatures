@@ -24,6 +24,11 @@ func NewPointFromCoords(c Coordinates) Point {
 	return Point{coords: c}
 }
 
+// XY gives the XY location of the point.
+func (p Point) XY() XY {
+	return p.coords.XY
+}
+
 func (p Point) AsText() string {
 	return string(p.AppendWKT(nil))
 }
