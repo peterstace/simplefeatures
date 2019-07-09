@@ -38,6 +38,10 @@ func NewScalarFromFloat64(f float64) Scalar {
 	return Scalar{z}
 }
 
+func (s Scalar) String() string {
+	return s.val.RatString()
+}
+
 // AsFloat converts the scalar into a float64. If the scalar is too large to be
 // represented as a float64, then the retuned value will be infinity or
 // negative infinity.

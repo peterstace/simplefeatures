@@ -17,6 +17,16 @@ func NewGeometryCollection(geoms []Geometry) GeometryCollection {
 	return GeometryCollection{geoms}
 }
 
+// NumGeometries gives the number of Geomety elements is the GeometryCollection.
+func (c GeometryCollection) NumGeometries() int {
+	return len(c.geoms)
+}
+
+// GeometryN gives the nth (zero based) Geometry in the GeometryCollection.
+func (c GeometryCollection) GeometryN(n int) Geometry {
+	return c.geoms[n]
+}
+
 func (c GeometryCollection) AsText() string {
 	return string(c.AppendWKT(nil))
 }

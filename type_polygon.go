@@ -93,6 +93,23 @@ func NewPolygonFromCoords(coords [][]Coordinates) (Polygon, error) {
 	return NewPolygon(outer, holes...)
 }
 
+// ExteriorRing gives the exterior ring of the polygon boundary.
+func (p Polygon) ExteriorRing() LinearRing {
+	return p.outer
+}
+
+// NumInteriorRings gives the number of interior rings in the polygon boundary.
+func (p Polygon) NumInteriorRings() int {
+	return len(p.holes)
+}
+
+// InteriorRingN gives the nth (zero indexed) interior ring in the polygon
+// boundary. It will panic if n is out of bounds with respect to the number of
+// interior rings.
+func (p Polygon) InteriorRingN(n int) LinearRing {
+	return p.holes[n]
+}
+
 func (p Polygon) AsText() string {
 	return string(p.AppendWKT(nil))
 }
