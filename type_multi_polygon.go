@@ -135,6 +135,16 @@ func NewMultiPolygonFromCoords(coords [][][]Coordinates) (MultiPolygon, error) {
 	return NewMultiPolygon(polys)
 }
 
+// NumPolygons gives the number of Polygon elements in the MultiPolygon.
+func (m MultiPolygon) NumPolygons() int {
+	return len(m.polys)
+}
+
+// PolygonN gives the nth (zero based) Polygon element.
+func (m MultiPolygon) PolygonN(n int) Polygon {
+	return m.polys[n]
+}
+
 func (m MultiPolygon) AsText() string {
 	return string(m.AppendWKT(nil))
 }

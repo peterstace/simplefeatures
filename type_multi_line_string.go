@@ -28,6 +28,17 @@ func NewMultiLineStringFromCoords(coords [][]Coordinates) (MultiLineString, erro
 	return MultiLineString{lines}, nil
 }
 
+// NumLineStrings gives the number of LineString elements in the
+// MultiLineString.
+func (m MultiLineString) NumLineStrings() int {
+	return len(m.lines)
+}
+
+// LineStringN gives the nth (zero indexed) LineString element.
+func (m MultiLineString) LineStringN(n int) LineString {
+	return m.lines[n]
+}
+
 func (m MultiLineString) AsText() string {
 	return string(m.AppendWKT(nil))
 }

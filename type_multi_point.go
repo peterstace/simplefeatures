@@ -26,6 +26,16 @@ func NewMultiPointFromCoords(coords []OptionalCoordinates) (MultiPoint, error) {
 	return NewMultiPoint(pts), nil
 }
 
+// NumPoints gives the number of element points making up the MultiPoint.
+func (m MultiPoint) NumPoints() int {
+	return len(m.pts)
+}
+
+// PointN gives the nth (zero indexed) Point.
+func (m MultiPoint) PointN(n int) Point {
+	return m.pts[n]
+}
+
 func (m MultiPoint) AsText() string {
 	return string(m.AppendWKT(nil))
 }

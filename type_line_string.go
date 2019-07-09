@@ -31,6 +31,30 @@ func NewLineString(pts []Coordinates) (LineString, error) {
 	return LineString{lines}, nil
 }
 
+// StartPoint gives the first point of the line string.
+func (s LineString) StartPoint() Point {
+	return s.lines[0].StartPoint()
+}
+
+// EndPoint gives the last point of the line string.
+func (s LineString) EndPoint() Point {
+	return s.lines[len(s.lines)-1].EndPoint()
+}
+
+// NumPoints gives the number of control points in the line string.
+func (s LineString) NumPoints() int {
+	return len(s.lines) + 1
+}
+
+// PointN gives the nth (zero indexed) point in the line string. Panics if n is
+// out of range with respect to the number of points.
+func (s LineString) PointN(n int) Point {
+	if n == s.NumPoints()-1 {
+		return s.EndPoint()
+	}
+	return s.lines[n].StartPoint()
+}
+
 func (s LineString) AsText() string {
 	return string(s.AppendWKT(nil))
 }
