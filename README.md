@@ -7,21 +7,58 @@ Go Implementation of the OpenGIS Simple Features Specification.
 It is based on the [Simple Features Access - Part 1: Common
 Architecture](http://www.opengeospatial.org/standards/sfa).
 
-## Feature Checklist
+#### Features Not Planned Yet
 
-| Type               | Assertions | Dimension | GeometryType | SRID | Envelope | AsText | AsBinary | IsEmpty | IsSimple | Is3D | IsMeasured | Boundary |
-| ---                | ---        | ---       | ---          | ---  | ---      | ---    | ---      | ---     | ---      | ---  | ---        | ---      |
-| Empty              | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
-| Point              | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
-| Line               | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
-| LineString         | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
-| LinearRing         | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
-| Polygon            | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
-| MultiPoint         | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
-| MultiLineString    | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
-| MultiPolygon       | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | ✅       | ❌   | ❌         | ✅       |
-| GeometryCollection | ✅         | ✅        | ❌           | ❌   | ✅       | ✅     | ❌       | ✅      | N/A      | ❌   | ❌         | ✅       |
+- SRIDs
+- Z/M Values
+
+### Feature Checklist
+
+| Type               | Assertions | Dimension | Envelope | AsText | AsBinary | IsEmpty | IsSimple | Boundary |
+| ---                | ---        | ---       | ---      | ---    | ---      | ---     | ---      | ---      |
+| Empty              | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
+| Point              | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
+| Line               | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
+| LineString         | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
+| LinearRing         | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
+| Polygon            | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
+| MultiPoint         | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
+| MultiLineString    | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
+| MultiPolygon       | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
+| GeometryCollection | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | N/A      | ✅       |
                                  
+### Type Specific Methods
+
+#### Accessors
+
+| Accessor Method  | Point | Line | LineString | LinearRing | Polygon | MultiPoint | MultiLineString | MultiPolygon | GeometryCollection |
+| ---              | ---   | ---  | ---        | ---        | ---     | ---        | ---             | ---          | ---                |
+| XY               | ✅    |      |            |            |         |            |                 |              |                    |
+| NumPoints        |       | ✅   | ✅         | ✅         |         | ✅         |                 |              |                    |
+| PointN           |       | ✅   | ✅         | ✅         |         | ✅         |                 |              |                    |
+| StartPoint       |       | ✅   | ✅         | ✅         |         |            |                 |              |                    |
+| EndPoint         |       | ✅   | ✅         | ✅         |         |            |                 |              |                    |
+| ExteriorRing     |       |      |            |            | ✅      |            |                 |              |                    |
+| NumInteriorRings |       |      |            |            | ✅      |            |                 |              |                    |
+| InteriorRingN    |       |      |            |            | ✅      |            |                 |              |                    |
+| NumLineStrings   |       |      |            |            |         |            | ✅              |              |                    |
+| LineStringN      |       |      |            |            |         |            | ✅              |              |                    |
+| NumPolygons      |       |      |            |            |         |            |                 | ✅           |                    |
+| PolygonN         |       |      |            |            |         |            |                 | ✅           |                    |
+| NumGeometries    |       |      |            |            |         |            |                 |              | ✅                 |
+| GeometryN        |       |      |            |            |         |            |                 |              | ✅                 |
+
+#### Calculations
+
+| Calc Method    | Point | Line | LineString | LinearRing | Polygon | MultiPoint | MultiLineString | MultiPolygon | GeometryCollection |
+| ---            | ---   | ---  | ---        | ---        | ---     | ---        | ---             | ---          | ---                |
+| Length         |       | ❌   | ❌         | ❌         |         |            | ❌              |              |                    |
+| IsClosed       |       | ❌   | ✅         | ❌         |         |            | ❌              |              |                    |
+| IsRing         |       | ❌   | ❌         | ❌         |         |            |                 |              |                    |
+| Area           |       |      |            |            | ❌      |            |                 | ❌           |                    |
+| Centroid       |       |      |            |            | ❌      |            |                 | ❌           |                    |
+| PointOnSurface |       |      |            |            | ❌      |            |                 | ❌           |                    |
+
 ### Spatial Relationships
 
 | Type Combination                      | Equals | Disjoin | Intersects | Touches | Crosses | Within | Contains | Overlaps | Relate |
@@ -82,21 +119,6 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 | MultiPolygon/GeometryCollection       | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
 | GeometryCollection/GeometryCollection | ⚠️      | ❌      | ❌         | ❌      | ❌      | ❌     | ❌       | ❌       | ❌     |
 
-### Measures on Geometry
-
-| Type               | LocateAlong | LocateBetween |
-| ---                | ---         | ---           |
-| Empty              | ❌          | ❌            |
-| Point              | ❌          | ❌            |
-| Line               | ❌          | ❌            |
-| LineString         | ❌          | ❌            |
-| LinearRing         | ❌          | ❌            |
-| Polygon            | ❌          | ❌            |
-| MultiPoint         | ❌          | ❌            |
-| MultiLineString    | ❌          | ❌            |
-| MultiPolygon       | ❌          | ❌            |
-| GeometryCollection | ❌          | ❌            |
-
 ### Spatial Analysis
 
 | Type Combination                      | Distance | Buffer | ConvexHull | Intersection | Union | Difference | SymDifference |
@@ -156,43 +178,3 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 | MultiPolygon/MultiPolygon             | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | MultiPolygon/GeometryCollection       | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
 | GeometryCollection/GeometryCollection | ❌       | ❌     | ❌         | ⚠️            | ❌    | ❌         | ❌            |
-
-### Type Specific Methods
-
-#### Geometry Collection
-
-| Type               | NumGeometries | GeometryN |
-| ---                | ---           | ---       |
-| GeometryCollection | ❌            | ❌        |
-
-#### Point
-
-| Type  | X   | Y   | Z   | M   |
-| ---   | --- | --- | --- | --- |
-| Point | ❌  | ❌  | ❌  | ❌  |
-
-#### Curve (Line, LineString, LinearRing)
-
-| Type               | Length | StartPoint | EndPoint | IsClosed | IsRing | NumPoints | PointN |
-| ---                | ---    | ---        | ---      | ---      | ---    | ---       | ---    |
-| Line               | ❌     | ❌         | ❌       | ❌       | ❌     | ❌        | ❌     |
-| LineString         | ❌     | ❌         | ❌       | ❌       | ❌     | ❌        | ❌     |
-| LinearRing         | ❌     | ❌         | ❌       | ❌       | ❌     | ❌        | ❌     |
-
-#### MultiCurve (MultiLineString)
-
-| Type            | IsClosed | Length |
-| ---             | ---      | ---    |
-| MultiLineString | ❌       | ❌     |
-
-#### Surface (Polygon)
-
-| Type    | Area | Centroid | PointOnSurface | ExteriorRing | NumInteriorRing | InteriorRingN |
-| ---     | ---  | ---      | ---            | ---          | ---             | ---           |
-| Polygon | ❌   | ❌       | ❌             | ❌           | ❌              | ❌            |
-
-#### MultiSurface (MultiPolygon)
-
-| Type         | Area | Centroid | PointOnSurface |
-| ---          | ---  | ---      | ---            |
-| MultiPolygon | ❌   | ❌       | ❌             |

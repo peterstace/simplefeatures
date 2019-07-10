@@ -1,5 +1,7 @@
 package simplefeatures
 
+// Geometry is the most general type of geometry supported, and exposes common
+// behaviour. All geometry types implement this interface.
 type Geometry interface {
 	// AsText returns the WKT representation of the geometry.
 	AsText() string
