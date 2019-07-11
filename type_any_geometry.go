@@ -16,12 +16,12 @@ type AnyGeometry struct {
 }
 
 // Value implements the "sql/driver".Valuer interface by emitting WKT.
-func (a AnyGeometry) Value() (driver.Value, error) {
+func (a *AnyGeometry) Value() (driver.Value, error) {
 	return a.Geom.AsText(), nil
 }
 
 // Scan implements the "sql".Scanner interface by parsing the src value as WKT.
-func (a AnyGeometry) Scan(src interface{}) error {
+func (a *AnyGeometry) Scan(src interface{}) error {
 	var r io.Reader
 	switch src := src.(type) {
 	case []byte:
