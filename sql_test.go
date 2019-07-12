@@ -12,9 +12,7 @@ func TestValuer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	valGeom := geomFromWKT(t, val.(string)).(Point)
-	expectDeepEqual(t, valGeom.XY().X.AsFloat(), 1.0)
-	expectDeepEqual(t, valGeom.XY().Y.AsFloat(), 2.0)
+	expectDeepEqual(t, any.Geom, geomFromWKT(t, val.(string)))
 }
 
 func TestValuerZero(t *testing.T) {
@@ -31,11 +29,8 @@ func TestScanner(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		got := any.Geom.(Point).XY()
-		expectDeepEqual(t, got.X.AsFloat(), 2.0)
-		expectDeepEqual(t, got.Y.AsFloat(), 3.0)
+		expectDeepEqual(t, any.Geom, geomFromWKT(t, wkt))
 	}
-
 	t.Run("string", func(t *testing.T) {
 		any = AnyGeometry{}
 		check(t, any.Scan(string(wkt)))
