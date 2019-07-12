@@ -17,6 +17,13 @@ func TestValuer(t *testing.T) {
 	expectDeepEqual(t, valGeom.XY().Y.AsFloat(), 2.0)
 }
 
+func TestValuerZero(t *testing.T) {
+	var any AnyGeometry
+	if _, err := any.Value(); err == nil {
+		t.Fatal("expected an error")
+	}
+}
+
 func TestScanner(t *testing.T) {
 	const wkt = "POINT(2 3)"
 	var any AnyGeometry

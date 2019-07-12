@@ -3,6 +3,7 @@ package simplefeatures
 import (
 	"bytes"
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -15,8 +16,12 @@ type AnyGeometry struct {
 	Geom Geometry
 }
 
-// Value implements the "sql/driver".Valuer interface by emitting WKT.
+// Value implements the "sql/driver".Valuer interface by emitting WKT. Gives
+// an error if the Geom element is nil.
 func (a *AnyGeometry) Value() (driver.Value, error) {
+	if a.Geom == nil {
+		return nil, errors.New("no geometry set")
+	}
 	return a.Geom.AsText(), nil
 }
 
