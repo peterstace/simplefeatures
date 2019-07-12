@@ -13,6 +13,20 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 - SRIDs
 - Z/M Values
 
+### Running Tests
+
+Unit tests can be run in the usual Go way:
+
+```
+go test ./...
+```
+
+To run the integration tests as well, use the `docker-compose.yml` file:
+
+```
+docker-compose up --abort-on-container-exit
+```
+
 ### Feature Checklist
 
 | Type               | Assertions | Dimension | Envelope | AsText | AsBinary | IsEmpty | IsSimple | Boundary |
