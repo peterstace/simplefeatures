@@ -15,13 +15,11 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 
 ### Running Tests
 
-Unit tests can be run in the usual Go way:
+Some of the tests have a dependency on a [Postgis](https://postgis.net/)
+database being available.
 
-```
-go test ./...
-```
-
-To run the integration tests as well, use the `docker-compose.yml` file:
+While the tests can be run in the usual Go way if you have Postgis set up
+locally, it's easier to run the tests using docker-compose:
 
 ```
 docker-compose up --abort-on-container-exit
