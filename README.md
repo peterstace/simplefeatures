@@ -13,6 +13,18 @@ Architecture](http://www.opengeospatial.org/standards/sfa).
 - SRIDs
 - Z/M Values
 
+### Running Tests
+
+Some of the tests have a dependency on a [Postgis](https://postgis.net/)
+database being available.
+
+While the tests can be run in the usual Go way if you have Postgis set up
+locally, it's easier to run the tests using docker-compose:
+
+```
+docker-compose up --abort-on-container-exit
+```
+
 ### Feature Checklist
 
 | Type               | Assertions | Dimension | Envelope | AsText | AsBinary | IsEmpty | IsSimple | Boundary |

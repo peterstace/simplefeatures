@@ -1,0 +1,12 @@
+version: "2"
+services:
+  postgis:
+    image: mdillon/postgis
+  tests:
+    image: golang:1
+    working_dir: /go/src/github.com/peterstace/simplefeatures
+    entrypoint: go test -v -test.count=1 ./...
+    volumes:
+      - .:/go/src/github.com/peterstace/simplefeatures
+    environment:
+      - GO111MODULE=on
