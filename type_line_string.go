@@ -1,6 +1,7 @@
 package simplefeatures
 
 import (
+	"database/sql/driver"
 	"errors"
 )
 
@@ -160,4 +161,8 @@ func (s LineString) Boundary() Geometry {
 		NewPoint(s.lines[0].a.XY),
 		NewPoint(s.lines[len(s.lines)-1].b.XY),
 	})
+}
+
+func (s LineString) Value() (driver.Value, error) {
+	return s.AsText(), nil
 }

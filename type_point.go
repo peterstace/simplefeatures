@@ -1,5 +1,9 @@
 package simplefeatures
 
+import (
+	"database/sql/driver"
+)
+
 // Point is a 0-dimensional geometry, and represents a single location in a
 // coordinate space.
 //
@@ -72,4 +76,8 @@ func (p Point) Envelope() (Envelope, bool) {
 
 func (p Point) Boundary() Geometry {
 	return NewGeometryCollection(nil)
+}
+
+func (p Point) Value() (driver.Value, error) {
+	return p.AsText(), nil
 }

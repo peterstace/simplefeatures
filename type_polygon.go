@@ -1,6 +1,7 @@
 package simplefeatures
 
 import (
+	"database/sql/driver"
 	"errors"
 )
 
@@ -173,4 +174,8 @@ func (p Polygon) Boundary() Geometry {
 		bounds[1+i] = h.ls
 	}
 	return NewMultiLineString(bounds)
+}
+
+func (p Polygon) Value() (driver.Value, error) {
+	return p.AsText(), nil
 }

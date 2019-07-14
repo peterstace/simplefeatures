@@ -1,6 +1,7 @@
 package simplefeatures
 
 import (
+	"database/sql/driver"
 	"errors"
 	"sort"
 )
@@ -211,4 +212,8 @@ func (m MultiPolygon) Boundary() Geometry {
 		}
 	}
 	return NewMultiLineString(bounds)
+}
+
+func (m MultiPolygon) Value() (driver.Value, error) {
+	return m.AsText(), nil
 }

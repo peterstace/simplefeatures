@@ -33,3 +33,10 @@ func expectPanics(t *testing.T, fn func()) {
 	}()
 	fn()
 }
+
+func expectNoErr(t *testing.T, err error) {
+	t.Helper()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

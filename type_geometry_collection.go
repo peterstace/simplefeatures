@@ -1,5 +1,9 @@
 package simplefeatures
 
+import (
+	"database/sql/driver"
+)
+
 // GeometryCollection is a collection of geometries.
 //
 // Its assertions are:
@@ -105,4 +109,8 @@ func (c GeometryCollection) Boundary() Geometry {
 		}
 	}
 	return NewGeometryCollection(bounds)
+}
+
+func (c GeometryCollection) Value() (driver.Value, error) {
+	return c.AsText(), nil
 }

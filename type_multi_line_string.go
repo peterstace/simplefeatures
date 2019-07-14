@@ -1,5 +1,9 @@
 package simplefeatures
 
+import (
+	"database/sql/driver"
+)
+
 // MultiLineString is a multicurve whose elements are LineStrings.
 //
 // Its assertions are:
@@ -144,4 +148,8 @@ func (m MultiLineString) Boundary() Geometry {
 		}
 	}
 	return NewMultiPoint(bound)
+}
+
+func (m MultiLineString) Value() (driver.Value, error) {
+	return m.AsText(), nil
 }

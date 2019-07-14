@@ -1,6 +1,7 @@
 package simplefeatures
 
 import (
+	"database/sql/driver"
 	"fmt"
 )
 
@@ -94,4 +95,8 @@ func (n Line) Boundary() Geometry {
 		NewPoint(n.a.XY),
 		NewPoint(n.b.XY),
 	})
+}
+
+func (n Line) Value() (driver.Value, error) {
+	return n.AsText(), nil
 }

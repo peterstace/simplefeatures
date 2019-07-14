@@ -1,6 +1,7 @@
 package simplefeatures
 
 import (
+	"database/sql/driver"
 	"errors"
 )
 
@@ -98,4 +99,8 @@ func (r LinearRing) Envelope() (Envelope, bool) {
 func (r LinearRing) Boundary() Geometry {
 	// Same behaviour as Postgis, but could be any empty set.
 	return NewMultiPoint(nil)
+}
+
+func (r LinearRing) Value() (driver.Value, error) {
+	return r.AsText(), nil
 }

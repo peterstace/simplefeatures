@@ -1,5 +1,9 @@
 package simplefeatures
 
+import (
+	"database/sql/driver"
+)
+
 // MultiPoint is a 0-dimensional geometric collection of points. The points are
 // not connected or ordered.
 //
@@ -103,4 +107,8 @@ func (m MultiPoint) Boundary() Geometry {
 		return m
 	}
 	return NewGeometryCollection(nil)
+}
+
+func (m MultiPoint) Value() (driver.Value, error) {
+	return m.AsText(), nil
 }

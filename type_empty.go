@@ -1,5 +1,9 @@
 package simplefeatures
 
+import (
+	"database/sql/driver"
+)
+
 // EmptySet is a 0-dimensional geometry that represents the empty pointset.
 type EmptySet struct {
 	wkt string
@@ -48,6 +52,11 @@ func (e EmptySet) Equals(other Geometry) bool {
 func (e EmptySet) Envelope() (Envelope, bool) {
 	return Envelope{}, false
 }
+
 func (e EmptySet) Boundary() Geometry {
 	return e
+}
+
+func (e EmptySet) Value() (driver.Value, error) {
+	return e.AsText(), nil
 }
