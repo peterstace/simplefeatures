@@ -15,6 +15,8 @@ import (
 // Convention: functions starting with 'next' consume token(s), and build the
 // next production in the grammar.
 
+// UnmarshalWKT a the Well Known Text (WKT), and returns the corresponding
+// Geometry.
 func UnmarshalWKT(r io.Reader) (Geometry, error) {
 	p := newParser(r)
 	geom := p.nextGeometryTaggedText()
