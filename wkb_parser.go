@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
+	"math"
 	"strconv"
 )
 
@@ -16,7 +16,6 @@ func UnmarshalWKB(r io.Reader) (Geometry, error) {
 	p.parseByteOrder()
 	p.parseGeomType()
 	geom := p.parseGeomRoot()
-	// TODO: check for trailing bytes
 	return geom, p.err
 }
 
@@ -44,21 +43,16 @@ func (p *wkbParser) setErr(err error) {
 }
 
 func (p *wkbParser) parseByteOrder() {
-	if p.err != nil {
-		return
-	}
 	var buf [1]byte
-	if _, err := io.ReadFull(p.r, buf[:]); err != nil {
-		p.err = err
-		return
-	}
+	_, err := io.ReadFull(p.r, buf[:])
+	p.setErr(err)
 	switch buf[0] {
 	case 0:
 		p.bo = binary.BigEndian
 	case 1:
 		p.bo = binary.LittleEndian
 	default:
-		p.err = fmt.Errorf("invalid byte order: %x", buf[0])
+		p.setErr(fmt.Errorf("invalid byte order: %x", buf[0]))
 	}
 }
 
@@ -86,14 +80,15 @@ func (p *wkbParser) parseGeomType() {
 }
 
 func (p *wkbParser) parseGeomRoot() Geometry {
-	if p.err != nil {
-		return nil
-	}
 	switch p.geomType {
 	case 1:
-		return NewPointFromCoords(p.parsePoint())
+		coords := p.parsePoint()
+		if coords.Empty {
+			return NewEmptyPoint()
+		} else {
+			return NewPointFromCoords(coords.Value)
+		}
 	case 2:
-		log.Println("case 2")
 		coords := p.parseLineString()
 		switch len(coords) {
 		case 0:
@@ -107,6 +102,26 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 			p.setErr(err)
 			return ls
 		}
+	case 3:
+		coords := p.parsePolygon()
+		if len(coords) == 0 {
+			return NewEmptyPolygon()
+		} else {
+			poly, err := NewPolygonFromCoords(coords)
+			p.setErr(err)
+			return poly
+		}
+	case 4:
+		return p.parseMultiPoint()
+	case 5:
+		// MultiLineString
+		fallthrough
+	case 6:
+		// MultiPolygon
+		fallthrough
+	case 7:
+		// GeometryCollection
+		fallthrough
 	default:
 		p.setErr(fmt.Errorf("unknown geometry type: %d", p.geomType))
 		return nil
@@ -114,13 +129,19 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 }
 
 func (p *wkbParser) read(ptr interface{}) {
-	if p.err != nil {
-		return
+	if p.bo == nil {
+		return // an error will have already been set
 	}
-	p.err = binary.Read(p.r, p.bo, ptr)
+	p.setErr(binary.Read(p.r, p.bo, ptr))
 }
 
-func (p *wkbParser) parsePoint() Coordinates {
+func (p *wkbParser) parseFloat64() float64 {
+	var f float64
+	p.read(&f)
+	return f
+}
+
+func (p *wkbParser) parsePoint() OptionalCoordinates {
 	x := p.parseFloat64()
 	y := p.parseFloat64()
 	var z, m float64
@@ -134,39 +155,63 @@ func (p *wkbParser) parsePoint() Coordinates {
 		z = p.parseFloat64()
 		m = p.parseFloat64()
 	default:
-		p.err = errors.New("unknown coord type")
-		return Coordinates{}
+		p.setErr(errors.New("unknown coord type"))
+		return OptionalCoordinates{}
+	}
+
+	if math.IsNaN(x) && math.IsNaN(y) {
+		// Empty points are represented as NaN,NaN is WKB.
+		return OptionalCoordinates{Empty: true}
+	}
+	if math.IsNaN(x) || math.IsNaN(y) {
+		p.setErr(errors.New("point contains mixed NaN values"))
+		return OptionalCoordinates{}
 	}
 
 	// Only XY is supported so far.
 	_, _ = z, m
 	xs, err := NewScalar(strconv.FormatFloat(x, 'f', -1, 64))
-	if err != nil {
-		p.err = err
-		return Coordinates{}
-	}
+	p.setErr(err)
 	ys, err := NewScalar(strconv.FormatFloat(y, 'f', -1, 64))
-	if err != nil {
-		p.err = err
-		return Coordinates{}
-	}
-	return Coordinates{XY{xs, ys}}
+	p.setErr(err)
+	return OptionalCoordinates{Value: Coordinates{XY{xs, ys}}}
 }
 
 func (p *wkbParser) parseLineString() []Coordinates {
 	n := p.parseUint32()
-	coords := make([]Coordinates, n)
-	for i := range coords {
-		coords[i] = p.parsePoint()
+	coords := make([]Coordinates, 0, n)
+	for i := uint32(0); i < n; i++ {
+		pt := p.parsePoint()
+		if !pt.Empty {
+			coords = append(coords, pt.Value)
+		}
 	}
 	return coords
 }
 
-func (p *wkbParser) parseFloat64() float64 {
-	if p.err != nil {
-		return 0
+func (p *wkbParser) parsePolygon() [][]Coordinates {
+	n := p.parseUint32()
+	coords := make([][]Coordinates, n)
+	for i := range coords {
+		coords[i] = p.parseLineString()
 	}
-	var f float64
-	p.read(&f)
-	return f
+	return coords
+}
+
+func (p *wkbParser) parseMultiPoint() MultiPoint {
+	n := p.parseUint32()
+	var pts []Point
+	for i := uint32(0); i < n; i++ {
+		geom, err := UnmarshalWKB(p.r)
+		p.setErr(err)
+		if geom != nil && geom.IsEmpty() {
+			continue
+		}
+		pt, ok := geom.(Point)
+		if !ok {
+			p.setErr(errors.New("non-Point found in MultiPoint"))
+		}
+		pts = append(pts, pt)
+	}
+	return NewMultiPoint(pts)
 }

@@ -118,9 +118,7 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		}
 	case "MULTIPOINT":
 		coords := p.nextMultiPointText()
-		mp, err := NewMultiPointFromCoords(coords)
-		p.check(err)
-		return mp
+		return NewMultiPointFromCoords(coords)
 	case "MULTILINESTRING":
 		coords := p.nextPolygonText() // same production as polygon
 		mls, err := NewMultiLineStringFromCoords(coords)
