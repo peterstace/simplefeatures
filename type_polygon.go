@@ -182,5 +182,5 @@ func (p Polygon) Value() (driver.Value, error) {
 }
 
 func (p Polygon) AsBinary(w io.Writer) error {
-	return MarshalWKB(p, w)
+	return nil // TODO
 }

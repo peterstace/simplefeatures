@@ -220,5 +220,5 @@ func (m MultiPolygon) Value() (driver.Value, error) {
 }
 
 func (m MultiPolygon) AsBinary(w io.Writer) error {
-	return MarshalWKB(m, w)
+	return nil // TODO
 }

@@ -115,5 +115,5 @@ func (m MultiPoint) Value() (driver.Value, error) {
 }
 
 func (m MultiPoint) AsBinary(w io.Writer) error {
-	return MarshalWKB(m, w)
+	return nil // TODO
 }

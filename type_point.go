@@ -96,8 +96,3 @@ func (p Point) AsBinary(w io.Writer) error {
 	marsh.writeFloat64(p.coords.Y.AsFloat())
 	return marsh.err
 }
-
-// TODO: remove me
-func MarshalWKB(g Geometry, w io.Writer) error {
-	return nil
-}

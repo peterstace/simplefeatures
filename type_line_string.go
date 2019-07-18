@@ -169,5 +169,5 @@ func (s LineString) Value() (driver.Value, error) {
 }
 
 func (s LineString) AsBinary(w io.Writer) error {
-	return MarshalWKB(s, w)
+	return nil // TODO
 }

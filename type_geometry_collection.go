@@ -117,5 +117,5 @@ func (c GeometryCollection) Value() (driver.Value, error) {
 }
 
 func (c GeometryCollection) AsBinary(w io.Writer) error {
-	return MarshalWKB(c, w)
+	return nil // TODO
 }
