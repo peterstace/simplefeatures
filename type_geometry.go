@@ -1,5 +1,7 @@
 package simplefeatures
 
+import "io"
+
 // Geometry is the most general type of geometry supported, and exposes common
 // behaviour. All geometry types implement this interface.
 type Geometry interface {
@@ -9,6 +11,10 @@ type Geometry interface {
 	// AppendWKT appends the WKT representation of the geometry to dst and
 	// returns the resultant slice.
 	AppendWKT(dst []byte) []byte
+
+	// AsBinary writes the WKB (Well Known Binary) representation of the
+	// geometry to the writer.
+	AsBinary(w io.Writer) error
 
 	// Intersection returns a geometric object that represents the point set
 	// intersection of this geometry with another geometry.

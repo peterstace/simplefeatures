@@ -9,10 +9,11 @@ import (
 	"strconv"
 )
 
+// TODO: When 3D/measure are supported, we will need to check for consistent
+// coordinate types inside compound geometries.
+
 // UnmarshalWKB reads the Well Known Binary (WKB), and returns the
 // corresponding Geometry.
-//
-// TODO: should check consistent coordinate types inside compound geometries.
 func UnmarshalWKB(r io.Reader) (Geometry, error) {
 	p := wkbParser{r: r}
 	p.parseByteOrder()
@@ -34,7 +35,7 @@ type wkbParser struct {
 	err       error
 	r         io.Reader
 	bo        binary.ByteOrder
-	geomType  int
+	geomType  uint32
 	coordType coordType
 }
 
@@ -66,7 +67,7 @@ func (p *wkbParser) parseUint32() uint32 {
 
 func (p *wkbParser) parseGeomType() {
 	geomCode := p.parseUint32()
-	p.geomType = int(geomCode % 1000)
+	p.geomType = geomCode % 1000
 	switch geomCode / 1000 {
 	case 0:
 		p.coordType = coordTypeXY
@@ -81,16 +82,26 @@ func (p *wkbParser) parseGeomType() {
 	}
 }
 
+const (
+	wkbGeomTypePoint              = uint32(1)
+	wkbGeomTypeLineString         = uint32(2)
+	wkbGeomTypePolygon            = uint32(3)
+	wkbGeomTypeMultiPoint         = uint32(4)
+	wkbGeomTypeMultiLineString    = uint32(5)
+	wkbGeomTypeMultiPolygon       = uint32(6)
+	wkbGeomTypeGeometryCollection = uint32(7)
+)
+
 func (p *wkbParser) parseGeomRoot() Geometry {
 	switch p.geomType {
-	case 1:
+	case wkbGeomTypePoint:
 		coords := p.parsePoint()
 		if coords.Empty {
 			return NewEmptyPoint()
 		} else {
 			return NewPointFromCoords(coords.Value)
 		}
-	case 2:
+	case wkbGeomTypeLineString:
 		coords := p.parseLineString()
 		switch len(coords) {
 		case 0:
@@ -104,7 +115,7 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 			p.setErr(err)
 			return ls
 		}
-	case 3:
+	case wkbGeomTypePolygon:
 		coords := p.parsePolygon()
 		if len(coords) == 0 {
 			return NewEmptyPolygon()
@@ -113,13 +124,13 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 			p.setErr(err)
 			return poly
 		}
-	case 4:
+	case wkbGeomTypeMultiPoint:
 		return p.parseMultiPoint()
-	case 5:
+	case wkbGeomTypeMultiLineString:
 		return p.parseMultiLineString()
-	case 6:
+	case wkbGeomTypeMultiPolygon:
 		return p.parseMultiPolygon()
-	case 7:
+	case wkbGeomTypeGeometryCollection:
 		return p.parseGeometryCollection()
 	default:
 		p.setErr(fmt.Errorf("unknown geometry type: %d", p.geomType))

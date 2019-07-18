@@ -2,6 +2,7 @@ package simplefeatures
 
 import (
 	"database/sql/driver"
+	"io"
 )
 
 // Point is a 0-dimensional geometry, and represents a single location in a
@@ -85,4 +86,18 @@ func (p Point) Boundary() Geometry {
 
 func (p Point) Value() (driver.Value, error) {
 	return p.AsText(), nil
+}
+
+func (p Point) AsBinary(w io.Writer) error {
+	marsh := newWKBMarshaller(w)
+	marsh.writeByteOrder()
+	marsh.writeGeomType(wkbGeomTypePoint)
+	marsh.writeFloat64(p.coords.X.AsFloat())
+	marsh.writeFloat64(p.coords.Y.AsFloat())
+	return marsh.err
+}
+
+// TODO: remove me
+func MarshalWKB(g Geometry, w io.Writer) error {
+	return nil
 }

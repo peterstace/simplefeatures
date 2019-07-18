@@ -2,6 +2,7 @@ package simplefeatures
 
 import (
 	"database/sql/driver"
+	"io"
 )
 
 // MultiLineString is a multicurve whose elements are LineStrings.
@@ -152,4 +153,8 @@ func (m MultiLineString) Boundary() Geometry {
 
 func (m MultiLineString) Value() (driver.Value, error) {
 	return m.AsText(), nil
+}
+
+func (m MultiLineString) AsBinary(w io.Writer) error {
+	return MarshalWKB(m, w)
 }

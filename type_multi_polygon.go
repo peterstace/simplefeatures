@@ -3,6 +3,7 @@ package simplefeatures
 import (
 	"database/sql/driver"
 	"errors"
+	"io"
 	"sort"
 )
 
@@ -216,4 +217,8 @@ func (m MultiPolygon) Boundary() Geometry {
 
 func (m MultiPolygon) Value() (driver.Value, error) {
 	return m.AsText(), nil
+}
+
+func (m MultiPolygon) AsBinary(w io.Writer) error {
+	return MarshalWKB(m, w)
 }
