@@ -15,6 +15,8 @@ import (
 // Convention: functions starting with 'next' consume token(s), and build the
 // next production in the grammar.
 
+// UnmarshalWKT parses a Well Known Text (WKT), and returns the corresponding
+// Geometry.
 func UnmarshalWKT(r io.Reader) (Geometry, error) {
 	p := newParser(r)
 	geom := p.nextGeometryTaggedText()
@@ -116,9 +118,7 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		}
 	case "MULTIPOINT":
 		coords := p.nextMultiPointText()
-		mp, err := NewMultiPointFromCoords(coords)
-		p.check(err)
-		return mp
+		return NewMultiPointFromCoords(coords)
 	case "MULTILINESTRING":
 		coords := p.nextPolygonText() // same production as polygon
 		mls, err := NewMultiLineStringFromCoords(coords)

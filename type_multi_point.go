@@ -18,7 +18,7 @@ func NewMultiPoint(pts []Point) MultiPoint {
 	return MultiPoint{pts}
 }
 
-func NewMultiPointFromCoords(coords []OptionalCoordinates) (MultiPoint, error) {
+func NewMultiPointFromCoords(coords []OptionalCoordinates) MultiPoint {
 	var pts []Point
 	for _, c := range coords {
 		if c.Empty {
@@ -27,7 +27,7 @@ func NewMultiPointFromCoords(coords []OptionalCoordinates) (MultiPoint, error) {
 		pt := NewPointFromCoords(c.Value)
 		pts = append(pts, pt)
 	}
-	return NewMultiPoint(pts), nil
+	return NewMultiPoint(pts)
 }
 
 // NumPoints gives the number of element points making up the MultiPoint.

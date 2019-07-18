@@ -33,6 +33,11 @@ func (p Point) XY() XY {
 	return p.coords.XY
 }
 
+// Coordinates returns the coordinates of the point.
+func (p Point) Coordinates() Coordinates {
+	return p.coords
+}
+
 func (p Point) AsText() string {
 	return string(p.AppendWKT(nil))
 }
