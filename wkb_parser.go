@@ -11,6 +11,8 @@ import (
 
 // UnmarshalWKB reads the Well Known Binary (WKB), and returns the
 // corresponding Geometry.
+//
+// TODO: should check consistent coordinate types inside compound geometries.
 func UnmarshalWKB(r io.Reader) (Geometry, error) {
 	p := wkbParser{r: r}
 	p.parseByteOrder()
@@ -22,10 +24,10 @@ func UnmarshalWKB(r io.Reader) (Geometry, error) {
 type coordType byte
 
 const (
-	coordTypeXY   coordType = 1
-	coordTypeXYZ  coordType = 2
-	coordTypeXYM  coordType = 3
-	coordTypeXYZM coordType = 4
+	coordTypeXY coordType = 1 + iota
+	coordTypeXYZ
+	coordTypeXYM
+	coordTypeXYZM
 )
 
 type wkbParser struct {
@@ -114,14 +116,11 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 	case 4:
 		return p.parseMultiPoint()
 	case 5:
-		// MultiLineString
-		fallthrough
+		return p.parseMultiLineString()
 	case 6:
-		// MultiPolygon
-		fallthrough
+		return p.parseMultiPolygon()
 	case 7:
-		// GeometryCollection
-		fallthrough
+		return p.parseGeometryCollection()
 	default:
 		p.setErr(fmt.Errorf("unknown geometry type: %d", p.geomType))
 		return nil
@@ -214,4 +213,60 @@ func (p *wkbParser) parseMultiPoint() MultiPoint {
 		pts = append(pts, pt)
 	}
 	return NewMultiPoint(pts)
+}
+
+func (p *wkbParser) parseMultiLineString() MultiLineString {
+	n := p.parseUint32()
+	var lss []LineString
+	for i := uint32(0); i < n; i++ {
+		geom, err := UnmarshalWKB(p.r)
+		p.setErr(err)
+		if geom != nil && geom.IsEmpty() {
+			continue
+		}
+		switch geom := geom.(type) {
+		case LineString:
+			lss = append(lss, geom)
+		case Line:
+			c1 := geom.StartPoint().Coordinates()
+			c2 := geom.EndPoint().Coordinates()
+			ls, err := NewLineString([]Coordinates{c1, c2})
+			p.setErr(err)
+			lss = append(lss, ls)
+		default:
+			p.setErr(errors.New("non-LineString found in MultiLineString"))
+		}
+	}
+	return NewMultiLineString(lss)
+}
+
+func (p *wkbParser) parseMultiPolygon() MultiPolygon {
+	n := p.parseUint32()
+	var polys []Polygon
+	for i := uint32(0); i < n; i++ {
+		geom, err := UnmarshalWKB(p.r)
+		p.setErr(err)
+		if geom != nil && geom.IsEmpty() {
+			continue
+		}
+		poly, ok := geom.(Polygon)
+		if !ok {
+			p.setErr(errors.New("non-Polygon found in MultiPolygon"))
+		}
+		polys = append(polys, poly)
+	}
+	mpoly, err := NewMultiPolygon(polys)
+	p.setErr(err)
+	return mpoly
+}
+
+func (p *wkbParser) parseGeometryCollection() GeometryCollection {
+	n := p.parseUint32()
+	var geoms []Geometry
+	for i := uint32(0); i < n; i++ {
+		geom, err := UnmarshalWKB(p.r)
+		p.setErr(err)
+		geoms = append(geoms, geom)
+	}
+	return NewGeometryCollection(geoms)
 }
