@@ -21,23 +21,23 @@ func grahamScan(ps []XY) []XY {
 
 	sortByPolarAngle(ps)
 
-	s := make([]XY, 2, len(ps))
-	copy(s, ps[:2])
-	t := make([]XY, len(ps)-2)
-	copy(t, ps[2:])
+	resultStack := make([]XY, 2, len(ps))
+	copy(resultStack, ps[:2])
+	toDoStack := make([]XY, len(ps)-2)
+	copy(toDoStack, ps[2:])
 
-	for i := 0; i < len(t); i++ {
-		ori := orientation(s[len(s)-2], s[len(s)-1], t[i])
+	for i := 0; i < len(toDoStack); i++ {
+		ori := orientation(resultStack[len(resultStack)-2], resultStack[len(resultStack)-1], toDoStack[i])
 		switch {
 		case ori == leftTurn:
-			s = append(s, t[i])
+			resultStack = append(resultStack, toDoStack[i])
 		default:
-			s = s[:len(s)-1]
-			s = append(s, t[i])
+			resultStack = resultStack[:len(resultStack)-1]
+			resultStack = append(resultStack, toDoStack[i])
 		}
 	}
 
-	return append(s, s[0])
+	return append(resultStack, resultStack[0])
 }
 
 // soryByPolarAngle sorts the points by their polar angle
