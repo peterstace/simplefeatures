@@ -198,3 +198,7 @@ func (p Polygon) AsBinary(w io.Writer) error {
 	}
 	return marsh.err
 }
+
+func (p Polygon) ConvexHull() Geometry {
+	return nil // TODO
+}

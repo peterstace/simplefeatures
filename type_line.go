@@ -113,3 +113,7 @@ func (n Line) AsBinary(w io.Writer) error {
 	marsh.writeFloat64(n.EndPoint().XY().Y.AsFloat())
 	return marsh.err
 }
+
+func (n Line) ConvexHull() Geometry {
+	return nil // TODO
+}

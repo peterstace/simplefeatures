@@ -180,3 +180,7 @@ func (s LineString) AsBinary(w io.Writer) error {
 	}
 	return marsh.err
 }
+
+func (s LineString) ConvexHull() Geometry {
+	return nil // TODO
+}

@@ -231,3 +231,7 @@ func (m MultiPolygon) AsBinary(w io.Writer) error {
 	}
 	return marsh.err
 }
+
+func (m MultiPolygon) ConvexHull() Geometry {
+	return nil // TODO
+}

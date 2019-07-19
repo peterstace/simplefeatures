@@ -109,3 +109,7 @@ func (r LinearRing) Value() (driver.Value, error) {
 func (r LinearRing) AsBinary(w io.Writer) error {
 	return r.ls.AsBinary(w)
 }
+
+func (r LinearRing) ConvexHull() Geometry {
+	return nil // TODO
+}

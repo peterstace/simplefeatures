@@ -167,3 +167,7 @@ func (m MultiLineString) AsBinary(w io.Writer) error {
 	}
 	return marsh.err
 }
+
+func (m MultiLineString) ConvexHull() Geometry {
+	return nil // TODO
+}

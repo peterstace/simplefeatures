@@ -39,6 +39,10 @@ type Geometry interface {
 
 	// Boundary returns the Geometry representing the limit of this geometry.
 	Boundary() Geometry
+
+	// Convex hull returns a Geometry that represents the smallest convex set
+	// that contains this geometry.
+	ConvexHull() Geometry
 }
 
 // HeterogenousGeometry are geometries that contain a single element, or

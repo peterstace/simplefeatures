@@ -132,3 +132,7 @@ func (c GeometryCollection) AsBinary(w io.Writer) error {
 	}
 	return marsh.err
 }
+
+func (c GeometryCollection) ConvexHull() Geometry {
+	return nil // TODO
+}

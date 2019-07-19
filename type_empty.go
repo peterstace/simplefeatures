@@ -80,3 +80,7 @@ func (e EmptySet) AsBinary(w io.Writer) error {
 	}
 	return marsh.err
 }
+
+func (e EmptySet) ConvexHull() Geometry {
+	return nil // TODO
+}

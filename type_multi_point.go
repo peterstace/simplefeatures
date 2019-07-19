@@ -135,3 +135,7 @@ func (m MultiPoint) AsBinary(w io.Writer) error {
 	}
 	return marsh.err
 }
+
+func (m MultiPoint) ConvexHull() Geometry {
+	return nil // TODO
+}

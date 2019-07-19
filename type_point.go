@@ -96,3 +96,7 @@ func (p Point) AsBinary(w io.Writer) error {
 	marsh.writeFloat64(p.coords.Y.AsFloat())
 	return marsh.err
 }
+
+func (p Point) ConvexHull() Geometry {
+	return nil // TODO
+}
