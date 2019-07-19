@@ -1,6 +1,7 @@
 package simplefeatures
 
 import (
+	"fmt"
 	"sort"
 )
 
@@ -33,7 +34,7 @@ func convexHullG(g Geometry) Geometry {
 		}
 		poly, err := NewPolygonFromCoords(coords)
 		if err != nil {
-			panic("bug in grahamScan routine - didn't produce a valid polygon")
+			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid polygon: %v", err))
 		}
 		return poly
 	}
