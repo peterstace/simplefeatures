@@ -281,3 +281,18 @@ func TestBoundary(t *testing.T) {
 		})
 	}
 }
+
+func TestConvexHull(t *testing.T) {
+	for i, tt := range []struct {
+		input  string
+		output string
+	}{
+		{
+			input:  `POINT EMPTY`,
+			output: `POINT EMPTY`,
+		},
+	} {
+		_ = i
+		_ = tt
+	}
+}
