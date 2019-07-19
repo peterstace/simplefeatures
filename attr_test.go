@@ -288,8 +288,72 @@ func TestConvexHull(t *testing.T) {
 		output string
 	}{
 		{
-			input:  `POINT EMPTY`,
-			output: `POINT EMPTY`,
+			input:  "POINT EMPTY",
+			output: "POINT EMPTY",
+		},
+		{
+			input:  "POINT(1 2)",
+			output: "POINT(1 2)",
+		},
+		{
+			input:  "LINESTRING EMPTY",
+			output: "LINESTRING EMPTY",
+		},
+		{
+			input:  "LINESTRING(1 2,3 4)",
+			output: "LINESTRING(1 2,3 4)",
+		},
+		{
+			input:  "LINESTRING(0 0,1 1,1 0,0 1)",
+			output: "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+		},
+		{
+			input:  "POLYGON((0 0,0 1,1 0,0 0))",
+			output: "POLYGON((0 0,0 1,1 0,0 0))",
+		},
+		{
+			input:  "POLYGON((0 0,2 0,1 1,2 2,0 2,0 0))",
+			output: "POLYGON((0 0,0 2,2 2,2 0,0 0))",
+		},
+		{
+			input:  "POLYGON EMPTY",
+			output: "POLYGON EMPTY",
+		},
+		{
+			input:  "MULTIPOINT(0 0,0 1,1 0)",
+			output: "POLYGON((0 0,0 1,1 0,0 0))",
+		},
+		{
+			input:  "MULTIPOINT EMPTY",
+			output: "MULTIPOINT EMPTY",
+		},
+		{
+			input:  "MULTILINESTRING EMPTY",
+			output: "MULTILINESTRING EMPTY",
+		},
+		{
+			input:  "MULTILINESTRING((0 1,2 3))",
+			output: "LINESTRING(0 1,2 3)",
+		},
+		{
+			input:  "MULTIPOLYGON EMPTY",
+			output: "MULTIPOLYGON EMPTY",
+		},
+		{
+			input:  "MULTIPOLYGON(((0 0,1 0,0 1,0 0)))",
+			output: "POLYGON((0 0,0 1,1 0,0 0))",
+		},
+		{
+			input:  "GEOMETRYCOLLECTION EMPTY",
+			output: "GEOMETRYCOLLECTION EMPTY",
+		},
+		{
+			input:  "GEOMETRYCOLLECTION(POINT(1 2))",
+			output: "POINT(1 2)",
+		},
+		{
+			input:  "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 2)),POINT(2 1))",
+			output: "LINESTRING(1 2,2 1)",
 		},
 	} {
 		_ = i
