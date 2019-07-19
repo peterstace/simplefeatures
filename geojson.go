@@ -5,17 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"math"
 	"strconv"
 )
 
-func UnmarshalGeoJSON(r io.Reader) (Geometry, error) {
+func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 	var firstPass struct {
 		Type string `json:"type"`
 	}
-	var rCopy bytes.Buffer
-	if err := json.NewDecoder(io.TeeReader(r, &rCopy)).Decode(&firstPass); err != nil {
+	if err := json.NewDecoder(bytes.NewReader(input)).Decode(&firstPass); err != nil {
 		return nil, err
 	}
 
@@ -24,7 +22,7 @@ func UnmarshalGeoJSON(r io.Reader) (Geometry, error) {
 		var secondPass struct {
 			Coords []float64 `json:"coordinates"`
 		}
-		if err := json.NewDecoder(&rCopy).Decode(&secondPass); err != nil {
+		if err := json.NewDecoder(bytes.NewReader(input)).Decode(&secondPass); err != nil {
 			return nil, err
 		}
 		if len(secondPass.Coords) == 0 {
@@ -39,7 +37,7 @@ func UnmarshalGeoJSON(r io.Reader) (Geometry, error) {
 		var secondPass struct {
 			Coords [][]float64 `json:"coordinates"`
 		}
-		if err := json.NewDecoder(&rCopy).Decode(&secondPass); err != nil {
+		if err := json.NewDecoder(bytes.NewReader(input)).Decode(&secondPass); err != nil {
 			return nil, err
 		}
 		coords, err := twoDimFloat64sToCoordinates(secondPass.Coords)
@@ -65,7 +63,7 @@ func UnmarshalGeoJSON(r io.Reader) (Geometry, error) {
 		var secondPass struct {
 			Coords [][][]float64 `json:"coordinates"`
 		}
-		if err := json.NewDecoder(&rCopy).Decode(&secondPass); err != nil {
+		if err := json.NewDecoder(bytes.NewReader(input)).Decode(&secondPass); err != nil {
 			return nil, err
 		}
 		coords, err := threeDimFloat64sToCoordinates(secondPass.Coords)
@@ -89,7 +87,7 @@ func UnmarshalGeoJSON(r io.Reader) (Geometry, error) {
 		var secondPass struct {
 			Coords [][][][]float64 `json:"coordinates"`
 		}
-		if err := json.NewDecoder(&rCopy).Decode(&secondPass); err != nil {
+		if err := json.NewDecoder(bytes.NewReader(input)).Decode(&secondPass); err != nil {
 			return nil, err
 		}
 		coords, err := fourDimFloat64sToCoordinates(secondPass.Coords)
@@ -101,7 +99,7 @@ func UnmarshalGeoJSON(r io.Reader) (Geometry, error) {
 		var secondPass struct {
 			Geometries []AnyGeometry `json:"geometries"`
 		}
-		if err := json.NewDecoder(&rCopy).Decode(&secondPass); err != nil {
+		if err := json.NewDecoder(bytes.NewReader(input)).Decode(&secondPass); err != nil {
 			return nil, err
 		}
 		geoms := make([]Geometry, len(secondPass.Geometries))

@@ -2,7 +2,6 @@ package simplefeatures_test
 
 import (
 	"strconv"
-	"strings"
 	"testing"
 
 	. "github.com/peterstace/simplefeatures"
@@ -433,7 +432,7 @@ func TestGeoJSONUnmarshalValid(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, err := UnmarshalGeoJSON(strings.NewReader(tt.geojson))
+			got, err := UnmarshalGeoJSON([]byte(tt.geojson))
 			expectNoErr(t, err)
 			want := geomFromWKT(t, tt.wkt)
 			expectDeepEqual(t, got, want)
