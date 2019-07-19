@@ -31,11 +31,6 @@ func grahamScan(ps []Point) []Point {
 		switch {
 		case ori == Left:
 			s = append(s, t[i])
-		case ori == Collinear:
-			if distance(s[len(s)-2], s[len(s)-1]) < distance(s[len(s)-2], t[i]) {
-				s = s[:len(s)-1]
-				s = append(s, t[i])
-			}
 		default:
 			s = s[:len(s)-1]
 			s = append(s, t[i])
@@ -59,6 +54,10 @@ func sortByPolarAngle(ps []Point) []Point {
 			return false
 		}
 		ori := orientation(virtualPoint, ps[i], ps[j])
+
+		if ori == Collinear {
+			return distance(virtualPoint, ps[i]) < distance(virtualPoint, ps[j])
+		}
 
 		return ori == Left
 	})
