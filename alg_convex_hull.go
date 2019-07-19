@@ -1,7 +1,6 @@
 package simplefeatures
 
 import (
-	"math"
 	"sort"
 )
 
@@ -15,15 +14,15 @@ const (
 )
 
 // graphamScan returns a convex hull.
-func grahamScan(ps []Point) []Point {
+func grahamScan(ps []XY) []XY {
 	if len(ps) < 3 {
 		return nil
 	}
 	sortedPoints := sortByPolarAngle(ps)
 
-	s := make([]Point, 2, len(sortedPoints))
+	s := make([]XY, 2, len(sortedPoints))
 	copy(s, sortedPoints[:2])
-	t := make([]Point, len(sortedPoints)-2)
+	t := make([]XY, len(sortedPoints)-2)
 	copy(t, sortedPoints[2:])
 
 	for i := 0; i < len(t); i++ {
@@ -41,7 +40,7 @@ func grahamScan(ps []Point) []Point {
 }
 
 // soryByPolarAngle sorts the points by their polar angle
-func sortByPolarAngle(ps []Point) []Point {
+func sortByPolarAngle(ps []XY) []XY {
 	ltlp := ltl(ps)
 
 	// swap the ltl point with first point
@@ -56,7 +55,7 @@ func sortByPolarAngle(ps []Point) []Point {
 		ori := orientation(virtualPoint, ps[i], ps[j])
 
 		if ori == Collinear {
-			return distance(virtualPoint, ps[i]) < distance(virtualPoint, ps[j])
+			return distanceSq(virtualPoint, ps[i]).LT(distanceSq(virtualPoint, ps[j]))
 		}
 
 		return ori == Left
@@ -66,13 +65,13 @@ func sortByPolarAngle(ps []Point) []Point {
 }
 
 // ltl stands for lowest-then-leftmost points. It returns the index of lowest-then-leftmost point
-func ltl(ps []Point) int {
+func ltl(ps []XY) int {
 	rpi := 0
 
 	for i := 1; i < len(ps); i++ {
-		if ps[i].XY().Y.AsFloat() < ps[rpi].XY().Y.AsFloat() ||
-			(ps[i].XY().Y.AsFloat() == ps[rpi].XY().Y.AsFloat() &&
-				ps[i].XY().X.AsFloat() < ps[rpi].XY().X.AsFloat()) {
+		if ps[i].Y.AsFloat() < ps[rpi].Y.AsFloat() ||
+			(ps[i].Y.AsFloat() == ps[rpi].Y.AsFloat() &&
+				ps[i].X.AsFloat() < ps[rpi].X.AsFloat()) {
 			rpi = i
 		}
 	}
@@ -82,14 +81,14 @@ func ltl(ps []Point) int {
 
 // orientation checks if s is on the right hand side or left hand side of the line formed by p and q
 // if it returns -1 which means there is an unexpected result.
-func orientation(p, q, s Point) int {
+func orientation(p, q, s XY) int {
 	cp := crossProduct(p, q, s)
 	switch {
-	case cp > 0:
+	case cp.GT(NewScalarFromFloat64(0)):
 		return Left
-	case cp == 0:
+	case cp.Equals(NewScalarFromFloat64(0)):
 		return Collinear
-	case cp < 0:
+	case cp.LT(NewScalarFromFloat64(0)):
 		return Right
 	default:
 		return -1
@@ -102,16 +101,19 @@ func orientation(p, q, s Point) int {
 //         | s.X s.Y 1 |
 // when p, q and s are clockwise, the return value is negative
 // when p, q and s are anticlockwise, the return value is positive
-func crossProduct(p, q, s Point) float64 {
-	return p.XY().X.AsFloat()*q.XY().Y.AsFloat() - p.XY().Y.AsFloat()*q.XY().X.AsFloat() +
-		q.XY().X.AsFloat()*s.XY().Y.AsFloat() - q.XY().Y.AsFloat()*s.XY().X.AsFloat() +
-		s.XY().X.AsFloat()*p.XY().Y.AsFloat() - s.XY().Y.AsFloat()*p.XY().X.AsFloat()
+func crossProduct(p, q, s XY) Scalar {
+	return q.Sub(p).Cross(s.Sub(q))
+	// return p.X.Mul(q.Y).Sub(p.Y.Mul(q.X)).Add(q.X.Mul(s.Y)).Sub(q.Y.Mul(s.X)).Mul(s.X.Mul(p.Y)).Sub(s.Y.Mul(p.X))
+	// return p.X.AsFloat()*q.Y.AsFloat() - p.Y.AsFloat()*q.X.AsFloat() +
+	// 	q.X.AsFloat()*s.Y.AsFloat() - q.Y.AsFloat()*s.X.AsFloat() +
+	// 	s.X.AsFloat()*p.Y.AsFloat() - s.Y.AsFloat()*p.X.AsFloat()
 }
 
 // distance give the length of p an q
-func distance(p, q Point) float64 {
-	return math.Sqrt(
-		(p.XY().X.AsFloat()-q.XY().X.AsFloat())*(p.XY().X.AsFloat()-q.XY().X.AsFloat()) +
-			(p.XY().Y.AsFloat()-q.XY().Y.AsFloat())*(p.XY().Y.AsFloat()-q.XY().Y.AsFloat()),
-	)
+func distanceSq(p, q XY) Scalar {
+	return p.Sub(q).Dot(p.Sub(q))
+	// return math.Sqrt(
+	// 	(p.X.AsFloat()-q.X.AsFloat())*(p.X.AsFloat()-q.X.AsFloat()) +
+	// 		(p.Y.AsFloat()-q.Y.AsFloat())*(p.Y.AsFloat()-q.Y.AsFloat()),
+	// )
 }

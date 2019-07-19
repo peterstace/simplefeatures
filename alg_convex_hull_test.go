@@ -8,32 +8,32 @@ import (
 func TestCrossProduct(t *testing.T) {
 	testCases := []struct {
 		name     string
-		p        Point
-		q        Point
-		s        Point
-		expected float64
+		p        XY
+		q        XY
+		s        XY
+		expected Scalar
 	}{
 		{
 			name:     "happy path 1",
-			p:        NewPointXY(NewScalarFromFloat64(0), NewScalarFromFloat64(0)),
-			q:        NewPointXY(NewScalarFromFloat64(1), NewScalarFromFloat64(0)),
-			s:        NewPointXY(NewScalarFromFloat64(0), NewScalarFromFloat64(1)),
-			expected: 1,
+			p:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(0)},
+			q:        XY{NewScalarFromFloat64(1), NewScalarFromFloat64(0)},
+			s:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(1)},
+			expected: NewScalarFromFloat64(1),
 		},
 		{
 			name:     "happy path 2",
-			p:        NewPointXY(NewScalarFromFloat64(0), NewScalarFromFloat64(0)),
-			q:        NewPointXY(NewScalarFromFloat64(0.5), NewScalarFromFloat64(0)),
-			s:        NewPointXY(NewScalarFromFloat64(0), NewScalarFromFloat64(0.5)),
-			expected: 0.25,
+			p:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(0)},
+			q:        XY{NewScalarFromFloat64(0.5), NewScalarFromFloat64(0)},
+			s:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(0.5)},
+			expected: NewScalarFromFloat64(0.25),
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			actual := crossProduct(tc.p, tc.q, tc.s)
-			if actual != tc.expected {
-				t.Errorf("expected: %f, got: %f", tc.expected, actual)
+			if !actual.Equals(tc.expected) {
+				t.Errorf("expected: %v, got: %v", tc.expected, actual)
 			}
 		})
 	}
@@ -42,30 +42,30 @@ func TestCrossProduct(t *testing.T) {
 func TestOrientation(t *testing.T) {
 	testCases := []struct {
 		name     string
-		p        Point
-		q        Point
-		s        Point
+		p        XY
+		q        XY
+		s        XY
 		expected int
 	}{
 		{
 			name:     "when the s is on left hand side of line of p and q",
-			p:        NewPointXY(NewScalarFromFloat64(0), NewScalarFromFloat64(0)),
-			q:        NewPointXY(NewScalarFromFloat64(1), NewScalarFromFloat64(0)),
-			s:        NewPointXY(NewScalarFromFloat64(0), NewScalarFromFloat64(1)),
+			p:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(0)},
+			q:        XY{NewScalarFromFloat64(1), NewScalarFromFloat64(0)},
+			s:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(1)},
 			expected: Left,
 		},
 		{
 			name:     "when the s is on right hand side of line of p and q",
-			p:        NewPointXY(NewScalarFromFloat64(0), NewScalarFromFloat64(0)),
-			q:        NewPointXY(NewScalarFromFloat64(0), NewScalarFromFloat64(1)),
-			s:        NewPointXY(NewScalarFromFloat64(1), NewScalarFromFloat64(0)),
+			p:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(0)},
+			q:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(1)},
+			s:        XY{NewScalarFromFloat64(1), NewScalarFromFloat64(0)},
 			expected: Right,
 		},
 		{
 			name:     "when the s, q and p are collinear",
-			p:        NewPointXY(NewScalarFromFloat64(1), NewScalarFromFloat64(1)),
-			q:        NewPointXY(NewScalarFromFloat64(2), NewScalarFromFloat64(2)),
-			s:        NewPointXY(NewScalarFromFloat64(3), NewScalarFromFloat64(3)),
+			p:        XY{NewScalarFromFloat64(1), NewScalarFromFloat64(1)},
+			q:        XY{NewScalarFromFloat64(2), NewScalarFromFloat64(2)},
+			s:        XY{NewScalarFromFloat64(3), NewScalarFromFloat64(3)},
 			expected: Collinear,
 		},
 	}
@@ -80,32 +80,32 @@ func TestOrientation(t *testing.T) {
 	}
 }
 
-func TestDistance(t *testing.T) {
+func TestDistanceSq(t *testing.T) {
 	testCases := []struct {
 		name     string
-		p        Point
-		q        Point
-		expected float64
+		p        XY
+		q        XY
+		expected Scalar
 	}{
 		{
 			name:     "when the points are the same",
-			p:        NewPointXY(NewScalarFromFloat64(1), NewScalarFromFloat64(1)),
-			q:        NewPointXY(NewScalarFromFloat64(1), NewScalarFromFloat64(1)),
-			expected: 0,
+			p:        XY{NewScalarFromFloat64(1), NewScalarFromFloat64(1)},
+			q:        XY{NewScalarFromFloat64(1), NewScalarFromFloat64(1)},
+			expected: NewScalarFromFloat64(0),
 		},
 		{
 			name:     "when the points are different",
-			p:        NewPointXY(NewScalarFromFloat64(0), NewScalarFromFloat64(0)),
-			q:        NewPointXY(NewScalarFromFloat64(3), NewScalarFromFloat64(4)),
-			expected: 5,
+			p:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(0)},
+			q:        XY{NewScalarFromFloat64(3), NewScalarFromFloat64(4)},
+			expected: NewScalarFromFloat64(25),
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := distance(tc.p, tc.q)
-			if actual != tc.expected {
-				t.Errorf("expected %f, got %f", actual, tc.expected)
+			actual := distanceSq(tc.p, tc.q)
+			if !actual.Equals(tc.expected) {
+				t.Errorf("expected %v, got %v", actual, tc.expected)
 			}
 		})
 	}
@@ -114,159 +114,60 @@ func TestDistance(t *testing.T) {
 func TestGrahamScan(t *testing.T) {
 	testCases := []struct {
 		name     string
-		points   []Point
-		expected []Point
+		points   []XY
+		expected []XY
 	}{
 		{
 			name: "when the number of points is less than 3",
-			points: []Point{
-				NewPointXY(
-					NewScalarFromFloat64(1),
-					NewScalarFromFloat64(2),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(2),
-					NewScalarFromFloat64(4),
-				),
+			points: []XY{
+				XY{NewScalarFromFloat64(1), NewScalarFromFloat64(2)},
+				XY{NewScalarFromFloat64(2), NewScalarFromFloat64(4)},
 			},
 			expected: nil,
 		},
 		{
 			name: "when there are no collinear points",
-			points: []Point{
-				NewPointXY(
-					NewScalarFromFloat64(7),
-					NewScalarFromFloat64(7),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(8),
-					NewScalarFromFloat64(5),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(7),
-					NewScalarFromFloat64(2),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(6),
-					NewScalarFromFloat64(5),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(5),
-					NewScalarFromFloat64(5),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(4),
-					NewScalarFromFloat64(6),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(4),
-					NewScalarFromFloat64(2),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(3),
-					NewScalarFromFloat64(7),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(2),
-					NewScalarFromFloat64(1),
-				),
+			points: []XY{
+				XY{NewScalarFromFloat64(7), NewScalarFromFloat64(7)},
+				XY{NewScalarFromFloat64(8), NewScalarFromFloat64(5)},
+				XY{NewScalarFromFloat64(7), NewScalarFromFloat64(2)},
+				XY{NewScalarFromFloat64(6), NewScalarFromFloat64(5)},
+				XY{NewScalarFromFloat64(5), NewScalarFromFloat64(5)},
+				XY{NewScalarFromFloat64(4), NewScalarFromFloat64(6)},
+				XY{NewScalarFromFloat64(4), NewScalarFromFloat64(2)},
+				XY{NewScalarFromFloat64(3), NewScalarFromFloat64(7)},
+				XY{NewScalarFromFloat64(2), NewScalarFromFloat64(1)},
 			},
-			expected: []Point{
-				NewPointXY(
-					NewScalarFromFloat64(2),
-					NewScalarFromFloat64(1),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(7),
-					NewScalarFromFloat64(2),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(8),
-					NewScalarFromFloat64(5),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(7),
-					NewScalarFromFloat64(7),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(3),
-					NewScalarFromFloat64(7),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(2),
-					NewScalarFromFloat64(1),
-				),
+			expected: []XY{
+				XY{NewScalarFromFloat64(2), NewScalarFromFloat64(1)},
+				XY{NewScalarFromFloat64(7), NewScalarFromFloat64(2)},
+				XY{NewScalarFromFloat64(8), NewScalarFromFloat64(5)},
+				XY{NewScalarFromFloat64(7), NewScalarFromFloat64(7)},
+				XY{NewScalarFromFloat64(3), NewScalarFromFloat64(7)},
+				XY{NewScalarFromFloat64(2), NewScalarFromFloat64(1)},
 			},
 		},
 		{
 			name: "when there are collinear points",
-			points: []Point{
-				NewPointXY(
-					NewScalarFromFloat64(7),
-					NewScalarFromFloat64(7),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(8),
-					NewScalarFromFloat64(5),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(7),
-					NewScalarFromFloat64(2),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(6),
-					NewScalarFromFloat64(5),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(5),
-					NewScalarFromFloat64(5),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(4),
-					NewScalarFromFloat64(6),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(4),
-					NewScalarFromFloat64(2),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(3),
-					NewScalarFromFloat64(7),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(2),
-					NewScalarFromFloat64(1),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(14),
-					NewScalarFromFloat64(9),
-				),
+			points: []XY{
+				XY{NewScalarFromFloat64(7), NewScalarFromFloat64(7)},
+				XY{NewScalarFromFloat64(8), NewScalarFromFloat64(5)},
+				XY{NewScalarFromFloat64(7), NewScalarFromFloat64(2)},
+				XY{NewScalarFromFloat64(6), NewScalarFromFloat64(5)},
+				XY{NewScalarFromFloat64(5), NewScalarFromFloat64(5)},
+				XY{NewScalarFromFloat64(4), NewScalarFromFloat64(6)},
+				XY{NewScalarFromFloat64(4), NewScalarFromFloat64(2)},
+				XY{NewScalarFromFloat64(3), NewScalarFromFloat64(7)},
+				XY{NewScalarFromFloat64(2), NewScalarFromFloat64(1)},
+				XY{NewScalarFromFloat64(14), NewScalarFromFloat64(9)},
 			},
-			expected: []Point{
-				NewPointXY(
-					NewScalarFromFloat64(2),
-					NewScalarFromFloat64(1),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(7),
-					NewScalarFromFloat64(2),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(14),
-					NewScalarFromFloat64(9),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(7),
-					NewScalarFromFloat64(7),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(3),
-					NewScalarFromFloat64(7),
-				),
-				NewPointXY(
-					NewScalarFromFloat64(2),
-					NewScalarFromFloat64(1),
-				),
+			expected: []XY{
+				XY{NewScalarFromFloat64(2), NewScalarFromFloat64(1)},
+				XY{NewScalarFromFloat64(7), NewScalarFromFloat64(2)},
+				XY{NewScalarFromFloat64(14), NewScalarFromFloat64(9)},
+				XY{NewScalarFromFloat64(7), NewScalarFromFloat64(7)},
+				XY{NewScalarFromFloat64(3), NewScalarFromFloat64(7)},
+				XY{NewScalarFromFloat64(2), NewScalarFromFloat64(1)},
 			},
 		},
 	}

@@ -42,6 +42,10 @@ func (w XY) Midpoint(o XY) XY {
 	return w.Add(o).Scale(half)
 }
 
+func (w XY) Dot(o XY) Scalar {
+	return w.X.Mul(o.X).Add(w.Y.Mul(o.Y))
+}
+
 // Less gives an ordering on XYs. If two XYs have different X values, then the
 // one with the lower X value is ordered before the one with the higher X
 // value. If the X values are then same, then the Y values are used (the lower
