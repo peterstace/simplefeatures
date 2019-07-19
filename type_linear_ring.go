@@ -107,5 +107,5 @@ func (r LinearRing) Value() (driver.Value, error) {
 }
 
 func (r LinearRing) AsBinary(w io.Writer) error {
-	return nil // TODO
+	return r.ls.AsBinary(w)
 }
