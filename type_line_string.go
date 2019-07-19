@@ -182,5 +182,14 @@ func (s LineString) AsBinary(w io.Writer) error {
 }
 
 func (s LineString) ConvexHull() Geometry {
-	return nil // TODO
+	return convexHullG(s)
+}
+
+func (s LineString) convexHullPointSet() []XY {
+	n := s.NumPoints()
+	points := make([]XY, n)
+	for i := 0; i < n; i++ {
+		points[i] = s.PointN(i).XY()
+	}
+	return points
 }

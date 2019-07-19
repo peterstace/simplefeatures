@@ -115,5 +115,12 @@ func (n Line) AsBinary(w io.Writer) error {
 }
 
 func (n Line) ConvexHull() Geometry {
-	return nil // TODO
+	return convexHullG(n)
+}
+
+func (n Line) convexHullPointSet() []XY {
+	return []XY{
+		n.StartPoint().XY(),
+		n.EndPoint().XY(),
+	}
 }

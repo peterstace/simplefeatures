@@ -80,6 +80,8 @@ func (c GeometryCollection) Equals(other Geometry) bool {
 	return equals(c, other)
 }
 
+// walk traverses a tree of GeometryCollections, triggering a callback at each
+// non-Geometry collection leaf.
 func (c GeometryCollection) walk(fn func(Geometry)) {
 	for _, g := range c.geoms {
 		if col, ok := g.(GeometryCollection); ok {
@@ -134,5 +136,15 @@ func (c GeometryCollection) AsBinary(w io.Writer) error {
 }
 
 func (c GeometryCollection) ConvexHull() Geometry {
-	return nil // TODO
+	return convexHullG(c)
+}
+
+func (c GeometryCollection) convexHullPointSet() []XY {
+	var points []XY
+	n := c.NumGeometries()
+	for i := 0; i < n; i++ {
+		g := c.GeometryN(i)
+		points = append(points, g.convexHullPointSet()...)
+	}
+	return points
 }

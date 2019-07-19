@@ -4,16 +4,42 @@ import (
 	"sort"
 )
 
-const (
-	// rightTurn indicates the orientation is right turn which is anticlockwise
-	rightTurn = iota
-	// collinear indicates three points are on the same line
-	collinear
-	// leftTurn indicates the orientation is left turn which is clockwise
-	leftTurn
-)
+func convexHullG(g Geometry) Geometry {
+	if g.IsEmpty() {
+		// special case to mirror postgis behaviour
+		return g
+	}
+	pts := g.convexHullPointSet()
+	hull := grahamScan(pts)
+	switch len(hull) {
+	case 0:
+		return NewGeometryCollection(nil)
+	case 1:
+		return NewPoint(hull[0])
+	case 2:
+		ln, err := NewLine(
+			Coordinates{hull[0]},
+			Coordinates{hull[1]},
+		)
+		if err != nil {
+			panic("bug in grahamScan routine - output 2 coincident points")
+		}
+		return ln
+	default:
+		coords := make([][]Coordinates, 1)
+		coords[0] = make([]Coordinates, len(hull))
+		for i := range hull {
+			coords[0][i] = Coordinates{XY: hull[i]}
+		}
+		poly, err := NewPolygonFromCoords(coords)
+		if err != nil {
+			panic("bug in grahamScan routine - didn't produce a valid polygon")
+		}
+		return poly
+	}
+}
 
-// graphamScan returns a convex hull.
+// grahamScan returns the convex hull of the input points.
 func grahamScan(ps []XY) []XY {
 	if len(ps) < 3 {
 		return nil
@@ -77,6 +103,15 @@ func ltl(ps []XY) int {
 
 	return rpi
 }
+
+const (
+	// rightTurn indicates the orientation is right turn which is anticlockwise
+	rightTurn = iota
+	// collinear indicates three points are on the same line
+	collinear
+	// leftTurn indicates the orientation is left turn which is clockwise
+	leftTurn
+)
 
 // orientation checks if s is on the right hand side or left hand side of the line formed by p and q
 // if it returns -1 which means there is an unexpected result.

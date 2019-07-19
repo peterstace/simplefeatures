@@ -43,6 +43,10 @@ type Geometry interface {
 	// Convex hull returns a Geometry that represents the smallest convex set
 	// that contains this geometry.
 	ConvexHull() Geometry
+
+	// convexHullPointset returns the list of points that must be considered
+	// when finding the convex hull.
+	convexHullPointSet() []XY
 }
 
 // HeterogenousGeometry are geometries that contain a single element, or

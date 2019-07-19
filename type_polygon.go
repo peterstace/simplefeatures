@@ -199,6 +199,12 @@ func (p Polygon) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
+// ConvexHull returns the convex hull of the Polygon, which is always another
+// Polygon.
 func (p Polygon) ConvexHull() Geometry {
-	return nil // TODO
+	return convexHullG(p)
+}
+
+func (p Polygon) convexHullPointSet() []XY {
+	return p.ExteriorRing().convexHullPointSet()
 }
