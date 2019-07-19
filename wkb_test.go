@@ -25,7 +25,7 @@ func hexStringToBytes(t *testing.T, s string) []byte {
 	return buf
 }
 
-func TestWKBParser(t *testing.T) {
+func TestWKBParseValid(t *testing.T) {
 	// Test cases generated from:
 	/*
 		SELECT
@@ -469,25 +469,25 @@ func TestWKBParserInvalidGeometryType(t *testing.T) {
 	}
 }
 
-func TestWKBMarshal(t *testing.T) {
+func TestWKBMarshalValid(t *testing.T) {
 	for i, wkt := range []string{
 		"POINT EMPTY",
 		"POINT(1 2)",
 		"LINESTRING EMPTY",
-		//"LINESTRING(1 2,3 4)",
-		//"LINESTRING(1 2,3 4,5 6)",
+		"LINESTRING(1 2,3 4)",
+		"LINESTRING(1 2,3 4,5 6)",
 		"POLYGON EMPTY",
-		//"POLYGON((0 0,4 0,0 4,0 0),(1 1,2 1,1 2,1 1))",
-		//"MULTIPOINT EMPTY",
-		//"MULTIPOINT(1 2)",
-		//"MULTIPOINT(1 2,3 4)",
-		//"MULTILINESTRING EMPTY",
-		//"MULTILINESTRING((0 1,2 3,4 5))",
-		//"MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))",
-		//"MULTIPOLYGON EMPTY",
-		//"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((1 0,2 0,1 1,1 0)))",
-		//"GEOMETRYCOLLECTION EMPTY",
-		//"GEOMETRYCOLLECTION(POINT(1 2),POINT(3 4))",
+		"POLYGON((0 0,4 0,0 4,0 0),(1 1,2 1,1 2,1 1))",
+		"MULTIPOINT EMPTY",
+		"MULTIPOINT(1 2)",
+		"MULTIPOINT(1 2,3 4)",
+		"MULTILINESTRING EMPTY",
+		"MULTILINESTRING((0 1,2 3,4 5))",
+		"MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))",
+		"MULTIPOLYGON EMPTY",
+		"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((1 0,2 0,1 1,1 0)))",
+		"GEOMETRYCOLLECTION EMPTY",
+		"GEOMETRYCOLLECTION(POINT(1 2),LINESTRING(1 2,3 4))",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			geom := geomFromWKT(t, wkt)

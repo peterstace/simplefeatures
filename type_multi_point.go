@@ -115,5 +115,14 @@ func (m MultiPoint) Value() (driver.Value, error) {
 }
 
 func (m MultiPoint) AsBinary(w io.Writer) error {
-	return nil // TODO
+	marsh := newWKBMarshaller(w)
+	marsh.writeByteOrder()
+	marsh.writeGeomType(wkbGeomTypeMultiPoint)
+	n := m.NumPoints()
+	marsh.writeCount(n)
+	for i := 0; i < n; i++ {
+		pt := m.PointN(i)
+		marsh.setErr(pt.AsBinary(w))
+	}
+	return marsh.err
 }
