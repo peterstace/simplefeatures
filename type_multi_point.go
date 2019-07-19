@@ -18,13 +18,22 @@ func NewMultiPoint(pts []Point) MultiPoint {
 	return MultiPoint{pts}
 }
 
-func NewMultiPointFromCoords(coords []OptionalCoordinates) MultiPoint {
+func NewMultiPointFromOptionalCoords(coords []OptionalCoordinates) MultiPoint {
 	var pts []Point
 	for _, c := range coords {
 		if c.Empty {
 			continue
 		}
 		pt := NewPointFromCoords(c.Value)
+		pts = append(pts, pt)
+	}
+	return NewMultiPoint(pts)
+}
+
+func NewMultiPointFromCoords(coords []Coordinates) MultiPoint {
+	var pts []Point
+	for _, c := range coords {
+		pt := NewPointFromCoords(c)
 		pts = append(pts, pt)
 	}
 	return NewMultiPoint(pts)

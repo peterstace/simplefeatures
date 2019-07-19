@@ -45,3 +45,14 @@ func (a *AnyGeometry) Scan(src interface{}) error {
 	a.Geom, err = UnmarshalWKT(r)
 	return err
 }
+
+// UnmarshalJSON implements the "encoding/json".Unmarshaller interface by
+// parsing the JSON stream as GeoJSON.
+func (a *AnyGeometry) UnmarshalJSON(p []byte) error {
+	geom, err := UnmarshalGeoJSON(bytes.NewReader(p))
+	if err != nil {
+		return err
+	}
+	a.Geom = geom
+	return nil
+}
