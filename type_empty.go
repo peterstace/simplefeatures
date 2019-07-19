@@ -73,14 +73,10 @@ func (e EmptySet) AsBinary(w io.Writer) error {
 	case wkbGeomTypePoint:
 		marsh.writeFloat64(math.NaN())
 		marsh.writeFloat64(math.NaN())
-		return marsh.err
 	case wkbGeomTypeLineString, wkbGeomTypePolygon:
 		marsh.writeCount(0)
-		return marsh.err
 	default:
-		if marsh.err != nil {
-			return marsh.err
-		}
-		return errors.New("unknown empty geometry type (this shouldn't ever happen)")
+		marsh.setErr(errors.New("unknown empty geometry type (this shouldn't ever happen)"))
 	}
+	return marsh.err
 }
