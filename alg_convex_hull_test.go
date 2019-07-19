@@ -52,21 +52,21 @@ func TestOrientation(t *testing.T) {
 			p:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(0)},
 			q:        XY{NewScalarFromFloat64(1), NewScalarFromFloat64(0)},
 			s:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(1)},
-			expected: Left,
+			expected: leftTurn,
 		},
 		{
 			name:     "when the s is on right hand side of line of p and q",
 			p:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(0)},
 			q:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(1)},
 			s:        XY{NewScalarFromFloat64(1), NewScalarFromFloat64(0)},
-			expected: Right,
+			expected: rightTurn,
 		},
 		{
 			name:     "when the s, q and p are collinear",
 			p:        XY{NewScalarFromFloat64(1), NewScalarFromFloat64(1)},
 			q:        XY{NewScalarFromFloat64(2), NewScalarFromFloat64(2)},
 			s:        XY{NewScalarFromFloat64(3), NewScalarFromFloat64(3)},
-			expected: Collinear,
+			expected: collinear,
 		},
 	}
 

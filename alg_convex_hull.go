@@ -5,12 +5,12 @@ import (
 )
 
 const (
-	// Right indicates the orientation is right turn which is anticlockwise
-	Right = iota
-	// Collinear indicates three points are on the same line
-	Collinear
-	// Left indicates the orientation is left turn which is clockwise
-	Left
+	// rightTurn indicates the orientation is right turn which is anticlockwise
+	rightTurn = iota
+	// collinear indicates three points are on the same line
+	collinear
+	// leftTurn indicates the orientation is left turn which is clockwise
+	leftTurn
 )
 
 // graphamScan returns a convex hull.
@@ -18,17 +18,18 @@ func grahamScan(ps []XY) []XY {
 	if len(ps) < 3 {
 		return nil
 	}
-	sortedPoints := sortByPolarAngle(ps)
 
-	s := make([]XY, 2, len(sortedPoints))
-	copy(s, sortedPoints[:2])
-	t := make([]XY, len(sortedPoints)-2)
-	copy(t, sortedPoints[2:])
+	sortByPolarAngle(ps)
+
+	s := make([]XY, 2, len(ps))
+	copy(s, ps[:2])
+	t := make([]XY, len(ps)-2)
+	copy(t, ps[2:])
 
 	for i := 0; i < len(t); i++ {
 		ori := orientation(s[len(s)-2], s[len(s)-1], t[i])
 		switch {
-		case ori == Left:
+		case ori == leftTurn:
 			s = append(s, t[i])
 		default:
 			s = s[:len(s)-1]
@@ -40,7 +41,7 @@ func grahamScan(ps []XY) []XY {
 }
 
 // soryByPolarAngle sorts the points by their polar angle
-func sortByPolarAngle(ps []XY) []XY {
+func sortByPolarAngle(ps []XY) {
 	ltlp := ltl(ps)
 
 	// swap the ltl point with first point
@@ -54,14 +55,12 @@ func sortByPolarAngle(ps []XY) []XY {
 		}
 		ori := orientation(virtualPoint, ps[i], ps[j])
 
-		if ori == Collinear {
+		if ori == collinear {
 			return distanceSq(virtualPoint, ps[i]).LT(distanceSq(virtualPoint, ps[j]))
 		}
 
-		return ori == Left
+		return ori == leftTurn
 	})
-
-	return ps
 }
 
 // ltl stands for lowest-then-leftmost points. It returns the index of lowest-then-leftmost point
@@ -84,12 +83,12 @@ func ltl(ps []XY) int {
 func orientation(p, q, s XY) int {
 	cp := crossProduct(p, q, s)
 	switch {
-	case cp.GT(NewScalarFromFloat64(0)):
-		return Left
-	case cp.Equals(NewScalarFromFloat64(0)):
-		return Collinear
-	case cp.LT(NewScalarFromFloat64(0)):
-		return Right
+	case cp.GT(zero):
+		return leftTurn
+	case cp.Equals(zero):
+		return collinear
+	case cp.LT(zero):
+		return rightTurn
 	default:
 		return -1
 	}
@@ -103,17 +102,9 @@ func orientation(p, q, s XY) int {
 // when p, q and s are anticlockwise, the return value is positive
 func crossProduct(p, q, s XY) Scalar {
 	return q.Sub(p).Cross(s.Sub(q))
-	// return p.X.Mul(q.Y).Sub(p.Y.Mul(q.X)).Add(q.X.Mul(s.Y)).Sub(q.Y.Mul(s.X)).Mul(s.X.Mul(p.Y)).Sub(s.Y.Mul(p.X))
-	// return p.X.AsFloat()*q.Y.AsFloat() - p.Y.AsFloat()*q.X.AsFloat() +
-	// 	q.X.AsFloat()*s.Y.AsFloat() - q.Y.AsFloat()*s.X.AsFloat() +
-	// 	s.X.AsFloat()*p.Y.AsFloat() - s.Y.AsFloat()*p.X.AsFloat()
 }
 
 // distance give the length of p an q
 func distanceSq(p, q XY) Scalar {
 	return p.Sub(q).Dot(p.Sub(q))
-	// return math.Sqrt(
-	// 	(p.X.AsFloat()-q.X.AsFloat())*(p.X.AsFloat()-q.X.AsFloat()) +
-	// 		(p.Y.AsFloat()-q.Y.AsFloat())*(p.Y.AsFloat()-q.Y.AsFloat()),
-	// )
 }
