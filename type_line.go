@@ -3,6 +3,7 @@ package simplefeatures
 import (
 	"database/sql/driver"
 	"fmt"
+	"io"
 )
 
 // Line is a single line segment between two points.
@@ -99,4 +100,16 @@ func (n Line) Boundary() Geometry {
 
 func (n Line) Value() (driver.Value, error) {
 	return n.AsText(), nil
+}
+
+func (n Line) AsBinary(w io.Writer) error {
+	marsh := newWKBMarshaller(w)
+	marsh.writeByteOrder()
+	marsh.writeGeomType(wkbGeomTypeLineString)
+	marsh.writeCount(2)
+	marsh.writeFloat64(n.StartPoint().XY().X.AsFloat())
+	marsh.writeFloat64(n.StartPoint().XY().Y.AsFloat())
+	marsh.writeFloat64(n.EndPoint().XY().X.AsFloat())
+	marsh.writeFloat64(n.EndPoint().XY().Y.AsFloat())
+	return marsh.err
 }

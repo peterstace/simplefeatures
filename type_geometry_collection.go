@@ -2,6 +2,7 @@ package simplefeatures
 
 import (
 	"database/sql/driver"
+	"io"
 )
 
 // GeometryCollection is a collection of geometries.
@@ -113,4 +114,17 @@ func (c GeometryCollection) Boundary() Geometry {
 
 func (c GeometryCollection) Value() (driver.Value, error) {
 	return c.AsText(), nil
+}
+
+func (c GeometryCollection) AsBinary(w io.Writer) error {
+	marsh := newWKBMarshaller(w)
+	marsh.writeByteOrder()
+	marsh.writeGeomType(wkbGeomTypeGeometryCollection)
+	n := c.NumGeometries()
+	marsh.writeCount(n)
+	for i := 0; i < n; i++ {
+		geom := c.GeometryN(i)
+		marsh.setErr(geom.AsBinary(w))
+	}
+	return marsh.err
 }

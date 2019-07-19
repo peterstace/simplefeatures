@@ -2,6 +2,7 @@ package simplefeatures
 
 import (
 	"database/sql/driver"
+	"io"
 )
 
 // MultiPoint is a 0-dimensional geometric collection of points. The points are
@@ -111,4 +112,17 @@ func (m MultiPoint) Boundary() Geometry {
 
 func (m MultiPoint) Value() (driver.Value, error) {
 	return m.AsText(), nil
+}
+
+func (m MultiPoint) AsBinary(w io.Writer) error {
+	marsh := newWKBMarshaller(w)
+	marsh.writeByteOrder()
+	marsh.writeGeomType(wkbGeomTypeMultiPoint)
+	n := m.NumPoints()
+	marsh.writeCount(n)
+	for i := 0; i < n; i++ {
+		pt := m.PointN(i)
+		marsh.setErr(pt.AsBinary(w))
+	}
+	return marsh.err
 }

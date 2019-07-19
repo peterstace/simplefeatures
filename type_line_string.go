@@ -3,6 +3,7 @@ package simplefeatures
 import (
 	"database/sql/driver"
 	"errors"
+	"io"
 )
 
 // LineString is a curve defined by linear interpolation between a finite set
@@ -165,4 +166,17 @@ func (s LineString) Boundary() Geometry {
 
 func (s LineString) Value() (driver.Value, error) {
 	return s.AsText(), nil
+}
+
+func (s LineString) AsBinary(w io.Writer) error {
+	marsh := newWKBMarshaller(w)
+	marsh.writeByteOrder()
+	marsh.writeGeomType(wkbGeomTypeLineString)
+	n := s.NumPoints()
+	marsh.writeCount(n)
+	for i := 0; i < n; i++ {
+		marsh.writeFloat64(s.PointN(i).XY().X.AsFloat())
+		marsh.writeFloat64(s.PointN(i).XY().Y.AsFloat())
+	}
+	return marsh.err
 }

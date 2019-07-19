@@ -3,6 +3,7 @@ package simplefeatures
 import (
 	"database/sql/driver"
 	"errors"
+	"io"
 )
 
 // LinearRing is a LineString that is constainted to be closed and simple.
@@ -103,4 +104,8 @@ func (r LinearRing) Boundary() Geometry {
 
 func (r LinearRing) Value() (driver.Value, error) {
 	return r.AsText(), nil
+}
+
+func (r LinearRing) AsBinary(w io.Writer) error {
+	return r.ls.AsBinary(w)
 }

@@ -3,6 +3,7 @@ package simplefeatures
 import (
 	"database/sql/driver"
 	"errors"
+	"io"
 )
 
 // Polygon is a planar surface, defined by 1 exiterior boundary and 0 or more
@@ -178,4 +179,22 @@ func (p Polygon) Boundary() Geometry {
 
 func (p Polygon) Value() (driver.Value, error) {
 	return p.AsText(), nil
+}
+
+func (p Polygon) AsBinary(w io.Writer) error {
+	marsh := newWKBMarshaller(w)
+	marsh.writeByteOrder()
+	marsh.writeGeomType(wkbGeomTypePolygon)
+	rings := p.rings()
+	marsh.writeCount(len(rings))
+	for _, ring := range rings {
+		numPts := ring.NumPoints()
+		marsh.writeCount(numPts)
+		for i := 0; i < numPts; i++ {
+			pt := ring.PointN(i)
+			marsh.writeFloat64(pt.XY().X.AsFloat())
+			marsh.writeFloat64(pt.XY().Y.AsFloat())
+		}
+	}
+	return marsh.err
 }

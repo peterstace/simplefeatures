@@ -2,23 +2,27 @@ package simplefeatures
 
 import (
 	"database/sql/driver"
+	"errors"
+	"io"
+	"math"
 )
 
 // EmptySet is a 0-dimensional geometry that represents the empty pointset.
 type EmptySet struct {
-	wkt string
+	wkt     string
+	wkbType uint32
 }
 
 func NewEmptyPoint() EmptySet {
-	return EmptySet{"POINT EMPTY"}
+	return EmptySet{"POINT EMPTY", wkbGeomTypePoint}
 }
 
 func NewEmptyLineString() EmptySet {
-	return EmptySet{"LINESTRING EMPTY"}
+	return EmptySet{"LINESTRING EMPTY", wkbGeomTypeLineString}
 }
 
 func NewEmptyPolygon() EmptySet {
-	return EmptySet{"POLYGON EMPTY"}
+	return EmptySet{"POLYGON EMPTY", wkbGeomTypePolygon}
 }
 
 func (e EmptySet) AsText() string {
@@ -59,4 +63,20 @@ func (e EmptySet) Boundary() Geometry {
 
 func (e EmptySet) Value() (driver.Value, error) {
 	return e.AsText(), nil
+}
+
+func (e EmptySet) AsBinary(w io.Writer) error {
+	marsh := newWKBMarshaller(w)
+	marsh.writeByteOrder()
+	marsh.writeGeomType(e.wkbType)
+	switch e.wkbType {
+	case wkbGeomTypePoint:
+		marsh.writeFloat64(math.NaN())
+		marsh.writeFloat64(math.NaN())
+	case wkbGeomTypeLineString, wkbGeomTypePolygon:
+		marsh.writeCount(0)
+	default:
+		marsh.setErr(errors.New("unknown empty geometry type (this shouldn't ever happen)"))
+	}
+	return marsh.err
 }
