@@ -1,6 +1,9 @@
 package simplefeatures
 
-import "sort"
+import (
+	"math"
+	"sort"
+)
 
 const (
 	// Right indicates the orientation is right turn which is anticlockwise
@@ -16,7 +19,6 @@ func grahamScan(ps []Point) []Point {
 	if len(ps) < 3 {
 		return nil
 	}
-	// TODO: handle the case that three points are collinear
 	sortedPoints := sortByPolarAngle(ps)
 
 	s := make([]Point, 2, len(sortedPoints))
@@ -25,9 +27,16 @@ func grahamScan(ps []Point) []Point {
 	copy(t, sortedPoints[2:])
 
 	for i := 0; i < len(t); i++ {
-		if orientation(s[len(s)-2], s[len(s)-1], t[i]) == Left {
+		ori := orientation(s[len(s)-2], s[len(s)-1], t[i])
+		switch {
+		case ori == Left:
 			s = append(s, t[i])
-		} else {
+		case ori == Collinear:
+			if distance(s[len(s)-2], s[len(s)-1]) < distance(s[len(s)-2], t[i]) {
+				s = s[:len(s)-1]
+				s = append(s, t[i])
+			}
+		default:
 			s = s[:len(s)-1]
 			s = append(s, t[i])
 		}
@@ -36,6 +45,7 @@ func grahamScan(ps []Point) []Point {
 	return append(s, s[0])
 }
 
+// soryByPolarAngle sorts the points by their polar angle
 func sortByPolarAngle(ps []Point) []Point {
 	ltlp := ltl(ps)
 
@@ -48,7 +58,9 @@ func sortByPolarAngle(ps []Point) []Point {
 		if i == 0 {
 			return false
 		}
-		return orientation(virtualPoint, ps[i], ps[j]) == Left
+		ori := orientation(virtualPoint, ps[i], ps[j])
+
+		return ori == Left
 	})
 
 	return ps
@@ -95,4 +107,12 @@ func crossProduct(p, q, s Point) float64 {
 	return p.XY().X.AsFloat()*q.XY().Y.AsFloat() - p.XY().Y.AsFloat()*q.XY().X.AsFloat() +
 		q.XY().X.AsFloat()*s.XY().Y.AsFloat() - q.XY().Y.AsFloat()*s.XY().X.AsFloat() +
 		s.XY().X.AsFloat()*p.XY().Y.AsFloat() - s.XY().Y.AsFloat()*p.XY().X.AsFloat()
+}
+
+// distance give the length of p an q
+func distance(p, q Point) float64 {
+	return math.Sqrt(
+		(p.XY().X.AsFloat()-q.XY().X.AsFloat())*(p.XY().X.AsFloat()-q.XY().X.AsFloat()) +
+			(p.XY().Y.AsFloat()-q.XY().Y.AsFloat())*(p.XY().Y.AsFloat()-q.XY().Y.AsFloat()),
+	)
 }

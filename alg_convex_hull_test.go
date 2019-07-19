@@ -80,6 +80,37 @@ func TestOrientation(t *testing.T) {
 	}
 }
 
+func TestDistance(t *testing.T) {
+	testCases := []struct {
+		name     string
+		p        Point
+		q        Point
+		expected float64
+	}{
+		{
+			name:     "when the points are the same",
+			p:        NewPointXY(NewScalarFromFloat64(1), NewScalarFromFloat64(1)),
+			q:        NewPointXY(NewScalarFromFloat64(1), NewScalarFromFloat64(1)),
+			expected: 0,
+		},
+		{
+			name:     "when the points are different",
+			p:        NewPointXY(NewScalarFromFloat64(0), NewScalarFromFloat64(0)),
+			q:        NewPointXY(NewScalarFromFloat64(3), NewScalarFromFloat64(4)),
+			expected: 5,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := distance(tc.p, tc.q)
+			if actual != tc.expected {
+				t.Errorf("expected %f, got %f", actual, tc.expected)
+			}
+		})
+	}
+}
+
 func TestGrahamScan(t *testing.T) {
 	testCases := []struct {
 		name     string
@@ -101,6 +132,7 @@ func TestGrahamScan(t *testing.T) {
 			expected: nil,
 		},
 		{
+			name: "when there are no collinear points",
 			points: []Point{
 				NewPointXY(
 					NewScalarFromFloat64(7),
@@ -151,6 +183,77 @@ func TestGrahamScan(t *testing.T) {
 				NewPointXY(
 					NewScalarFromFloat64(8),
 					NewScalarFromFloat64(5),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(7),
+					NewScalarFromFloat64(7),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(3),
+					NewScalarFromFloat64(7),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(2),
+					NewScalarFromFloat64(1),
+				),
+			},
+		},
+		{
+			name: "when there are collinear points",
+			points: []Point{
+				NewPointXY(
+					NewScalarFromFloat64(7),
+					NewScalarFromFloat64(7),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(8),
+					NewScalarFromFloat64(5),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(7),
+					NewScalarFromFloat64(2),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(6),
+					NewScalarFromFloat64(5),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(5),
+					NewScalarFromFloat64(5),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(4),
+					NewScalarFromFloat64(6),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(4),
+					NewScalarFromFloat64(2),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(3),
+					NewScalarFromFloat64(7),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(2),
+					NewScalarFromFloat64(1),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(14),
+					NewScalarFromFloat64(9),
+				),
+			},
+			expected: []Point{
+				NewPointXY(
+					NewScalarFromFloat64(2),
+					NewScalarFromFloat64(1),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(7),
+					NewScalarFromFloat64(2),
+				),
+				NewPointXY(
+					NewScalarFromFloat64(14),
+					NewScalarFromFloat64(9),
 				),
 				NewPointXY(
 					NewScalarFromFloat64(7),
