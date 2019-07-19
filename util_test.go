@@ -20,7 +20,21 @@ func geomFromWKT(t *testing.T, wkt string) Geometry {
 func expectDeepEqual(t *testing.T, got, want interface{}) {
 	t.Helper()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("got=%+v want=%+v", got, want)
+		args := []interface{}{got, want}
+		format := `
+expected to be equal, but aren't:
+	got:  %+v
+	want: %+v
+`
+		// Special cases for geometries:
+		gotGeom, okGot := got.(Geometry)
+		wantGeom, okWant := want.(Geometry)
+		if okGot && okWant {
+			format += "    got  (WKT): %s\n"
+			format += "    want (WKT): %s\n"
+			args = append(args, gotGeom.AsText(), wantGeom.AsText())
+		}
+		t.Errorf(format, args...)
 	}
 }
 

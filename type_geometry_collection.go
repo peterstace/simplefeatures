@@ -19,6 +19,10 @@ type GeometryCollection struct {
 // NewGeometryCollection creates a potentially heterogenous collection of
 // geometries. There are no constraints on the collection.
 func NewGeometryCollection(geoms []Geometry) GeometryCollection {
+	if len(geoms) == 0 {
+		// Store empty geoms as nil to make testing easier.
+		geoms = nil
+	}
 	return GeometryCollection{geoms}
 }
 
