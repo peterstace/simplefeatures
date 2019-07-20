@@ -2,6 +2,7 @@ package simplefeatures
 
 import (
 	"fmt"
+	"log"
 	"sort"
 )
 
@@ -27,6 +28,7 @@ func convexHullG(g Geometry) Geometry {
 		}
 		return ln
 	default:
+		hull = append(hull, hull[0]) // close the polygon
 		coords := make([][]Coordinates, 1)
 		coords[0] = make([]Coordinates, len(hull))
 		for i := range hull {
@@ -40,50 +42,116 @@ func convexHullG(g Geometry) Geometry {
 	}
 }
 
+type pointStack []XY
+
+func (s *pointStack) push(p XY) {
+	(*s) = append(*s, p)
+}
+
+func (s *pointStack) pop() XY {
+	p := s.top()
+	(*s) = (*s)[:len(*s)-1]
+	return p
+}
+
+func (s *pointStack) top() XY {
+	return (*s)[len(*s)-1]
+}
+
+func (s *pointStack) underTop() XY {
+	return (*s)[len(*s)-2]
+}
+
 // grahamScan returns the convex hull of the input points.
-func grahamScan(ps []XY) []XY {
-	if len(ps) < 3 {
-		return nil
+func grahamScan(pts []XY) []XY {
+	log.Println("grahamScan input", len(pts))
+	for _, pt := range pts {
+		log.Println("\t", pt)
+	}
+	if len(pts) <= 1 {
+		return pts
 	}
 
-	sortByPolarAngle(ps)
+	sortByPolarAngle(pts)
+	log.Println("grahamScan sorted")
+	for _, pt := range pts {
+		log.Println("\t", pt)
+	}
 
-	resultStack := make([]XY, 2, len(ps))
-	copy(resultStack, ps[:2])
-	toDoStack := make([]XY, len(ps)-2)
-	copy(toDoStack, ps[2:])
+	var resultStack pointStack
+	resultStack.push(pts[0])
+	pts = pts[1:]
+	for len(pts) > 0 && len(resultStack) < 2 {
+		if !resultStack.top().Equals(pts[0]) {
+			resultStack.push(pts[0])
+		}
+		pts = pts[1:]
+	}
 
-	for i := 0; i < len(toDoStack); i++ {
-		ori := orientation(resultStack[len(resultStack)-2], resultStack[len(resultStack)-1], toDoStack[i])
+	log.Println("state after initial population")
+	for _, pt := range resultStack {
+		log.Println("\t stack ", pt)
+	}
+	for _, pt := range pts {
+		log.Println("\t pts   ", pt)
+	}
+
+	for len(pts) > 0 {
+		log.Println("considering", pts[0])
+		ori := orient(resultStack.underTop(), resultStack.top(), pts[0])
+		log.Println("\tori:", ori)
 		switch {
 		case ori == leftTurn:
-			resultStack = append(resultStack, toDoStack[i])
+			log.Println("\tnot popping")
+			resultStack.push(pts[0])
 		default:
-			resultStack = resultStack[:len(resultStack)-1]
-			resultStack = append(resultStack, toDoStack[i])
+			log.Println("\tpopping")
+			resultStack.pop()
+			resultStack.push(pts[0])
+		}
+		pts = pts[1:]
+
+		log.Println("\tstack state")
+		for _, pt := range resultStack {
+			log.Println("\t", pt)
 		}
 	}
 
-	return append(resultStack, resultStack[0])
+	log.Println("grahamScan output")
+	for _, pt := range resultStack {
+		log.Println("\t", pt)
+	}
+	return resultStack
 }
 
+//func deduplicate(pts []XY) []XY {
+//j := -1 // tracks last deduplicated element
+//for i := range pts {
+//if j < 0 || !pts[i].Equals(pts[j]) {
+//j++
+//pts[j] = pts[i]
+//}
+//}
+//return pts[:j+1]
+//}
+
 // soryByPolarAngle sorts the points by their polar angle
-func sortByPolarAngle(ps []XY) {
-	ltlp := ltl(ps)
+func sortByPolarAngle(pts []XY) {
+	ltlp := ltl(pts)
 
 	// swap the ltl point with first point
-	ps[ltlp], ps[0] = ps[0], ps[ltlp]
+	pts[ltlp], pts[0] = pts[0], pts[ltlp]
 
-	virtualPoint := ps[0]
+	virtualPoint := pts[0]
 
-	sort.Slice(ps, func(i, j int) bool {
+	sort.Slice(pts, func(i, j int) bool {
 		if i == 0 {
 			return false
 		}
-		ori := orientation(virtualPoint, ps[i], ps[j])
+		ori := orient(virtualPoint, pts[i], pts[j])
 
 		if ori == collinear {
-			return distanceSq(virtualPoint, ps[i]).LT(distanceSq(virtualPoint, ps[j]))
+			return distanceSq(virtualPoint, pts[i]).GT(distanceSq(virtualPoint, pts[j]))
 		}
 
 		return ori == leftTurn
@@ -91,13 +159,11 @@ func sortByPolarAngle(ps []XY) {
 }
 
 // ltl stands for lowest-then-leftmost points. It returns the index of lowest-then-leftmost point
-func ltl(ps []XY) int {
+func ltl(pts []XY) int {
 	rpi := 0
 
-	for i := 1; i < len(ps); i++ {
-		if ps[i].Y.AsFloat() < ps[rpi].Y.AsFloat() ||
-			(ps[i].Y.AsFloat() == ps[rpi].Y.AsFloat() &&
-				ps[i].X.AsFloat() < ps[rpi].X.AsFloat()) {
+	for i := 1; i < len(pts); i++ {
+		if pts[i].Y.LT(pts[rpi].Y) || (pts[i].Y.Equals(pts[rpi].Y) && pts[i].X.LT(pts[rpi].X)) {
 			rpi = i
 		}
 	}
@@ -105,18 +171,33 @@ func ltl(ps []XY) int {
 	return rpi
 }
 
+type orientation int
+
 const (
 	// rightTurn indicates the orientation is right turn which is anticlockwise
-	rightTurn = iota
+	rightTurn orientation = iota + 1
 	// collinear indicates three points are on the same line
 	collinear
 	// leftTurn indicates the orientation is left turn which is clockwise
 	leftTurn
 )
 
-// orientation checks if s is on the right hand side or left hand side of the line formed by p and q
+func (o orientation) String() string {
+	switch o {
+	case rightTurn:
+		return "right turn"
+	case collinear:
+		return "collinear"
+	case leftTurn:
+		return "left turn"
+	default:
+		return "invalid orientation"
+	}
+}
+
+// orient checks if s is on the right hand side or left hand side of the line formed by p and q
 // if it returns -1 which means there is an unexpected result.
-func orientation(p, q, s XY) int {
+func orient(p, q, s XY) orientation {
 	cp := crossProduct(p, q, s)
 	switch {
 	case cp.GT(zero):
