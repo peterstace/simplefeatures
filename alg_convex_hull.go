@@ -29,8 +29,7 @@ func convexHullG(g Geometry) Geometry {
 		return ln
 	default:
 		hull = append(hull, hull[0]) // close the polygon
-		coords := make([][]Coordinates, 1)
-		coords[0] = make([]Coordinates, len(hull))
+		coords := [][]Coordinates{make([]Coordinates, len(hull))}
 		for i := range hull {
 			coords[0][i] = Coordinates{XY: hull[i]}
 		}
@@ -77,6 +76,7 @@ func grahamScan(pts []XY) []XY {
 	for _, pt := range pts {
 		log.Println("\t", pt)
 	}
+	pts = append(pts, pts[0])
 
 	var resultStack pointStack
 	resultStack.push(pts[0])
@@ -100,13 +100,22 @@ func grahamScan(pts []XY) []XY {
 		log.Println("considering", pts[0])
 		ori := orient(resultStack.underTop(), resultStack.top(), pts[0])
 		log.Println("\tori:", ori)
-		switch {
-		case ori == leftTurn:
+		switch ori {
+		case leftTurn:
 			log.Println("\tnot popping")
 			resultStack.push(pts[0])
+		case collinear:
+			if distanceSq(resultStack.underTop(), pts[0]).GT(distanceSq(resultStack.underTop(), resultStack.top())) {
+				resultStack.pop()
+				resultStack.push(pts[0])
+			}
 		default:
 			log.Println("\tpopping")
 			resultStack.pop()
+			if orient(resultStack.underTop(), resultStack.top(), pts[0]) == collinear {
+				log.Println("\tdouble popping")
+				resultStack.pop()
+			}
 			resultStack.push(pts[0])
 		}
 		pts = pts[1:]
@@ -137,23 +146,42 @@ func grahamScan(pts []XY) []XY {
 
 // soryByPolarAngle sorts the points by their polar angle
 func sortByPolarAngle(pts []XY) {
+	//log.Println("sort")
 	ltlp := ltl(pts)
 
 	// swap the ltl point with first point
 	pts[ltlp], pts[0] = pts[0], pts[ltlp]
 
-	virtualPoint := pts[0]
+	//for _, pt := range pts[1:] {
+	//log.Println("\t", pt)
+	//}
 
+	virtualPoint := pts[0]
+	//log.Println("\tvirt", virtualPoint)
+
+	pts = pts[1:]
 	sort.Slice(pts, func(i, j int) bool {
-		if i == 0 {
+		//if i == 0 {
+		//return false
+		//}
+
+		if virtualPoint.Equals(pts[i]) {
+			//log.Printf("\tsort %s %s true", pts[i], pts[j])
+			return true
+		}
+		if virtualPoint.Equals(pts[j]) {
+			//log.Printf("\tsort %s %s false", pts[i], pts[j])
 			return false
 		}
+
 		ori := orient(virtualPoint, pts[i], pts[j])
 
 		if ori == collinear {
+			//log.Printf("\tsort %s %s %t", pts[i], pts[j], distanceSq(virtualPoint, pts[i]).GT(distanceSq(virtualPoint, pts[j])))
 			return distanceSq(virtualPoint, pts[i]).GT(distanceSq(virtualPoint, pts[j]))
 		}
 
+		//log.Printf("\tsort %s %s %t", pts[i], pts[j], ori == leftTurn)
 		return ori == leftTurn
 	})
 }
