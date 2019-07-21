@@ -2,7 +2,6 @@ package simplefeatures
 
 import (
 	"fmt"
-	"log"
 	"sort"
 )
 
@@ -28,7 +27,6 @@ func convexHullG(g Geometry) Geometry {
 		}
 		return ln
 	default:
-		hull = append(hull, hull[0]) // close the polygon
 		coords := [][]Coordinates{make([]Coordinates, len(hull))}
 		for i := range hull {
 			coords[0][i] = Coordinates{XY: hull[i]}
@@ -61,156 +59,94 @@ func (s *pointStack) underTop() XY {
 	return (*s)[len(*s)-2]
 }
 
-// grahamScan returns the convex hull of the input points.
+// grahamScan returns the convex hull of the input points. It will either
+// represent the empty set (zero points), a point (one point), a line (2
+// points), or a closed polygon (>= 3 points).
 func grahamScan(pts []XY) []XY {
-	log.Println("grahamScan input", len(pts))
-	for _, pt := range pts {
-		log.Println("\t", pt)
-	}
 	if len(pts) <= 1 {
 		return pts
 	}
 
 	sortByPolarAngle(pts)
-	log.Println("grahamScan sorted")
-	for _, pt := range pts {
-		log.Println("\t", pt)
-	}
+
+	// Append the lowest-then-leftmost point so that the polygon will be closed.
 	pts = append(pts, pts[0])
 
-	var resultStack pointStack
-	resultStack.push(pts[0])
+	var stack pointStack
+	stack.push(pts[0])
 	pts = pts[1:]
-	for len(pts) > 0 && len(resultStack) < 2 {
-		if !resultStack.top().Equals(pts[0]) {
-			resultStack.push(pts[0])
+	for len(pts) > 0 && len(stack) < 2 {
+		if !stack.top().Equals(pts[0]) {
+			stack.push(pts[0])
 		}
 		pts = pts[1:]
-	}
-
-	log.Println("state after initial population")
-	for _, pt := range resultStack {
-		log.Println("\t stack ", pt)
-	}
-	for _, pt := range pts {
-		log.Println("\t pts   ", pt)
 	}
 
 	for len(pts) > 0 {
-		log.Println("considering", pts[0])
-		ori := orient(resultStack.underTop(), resultStack.top(), pts[0])
-		log.Println("\tori:", ori)
+		ori := orientation(stack.underTop(), stack.top(), pts[0])
 		switch ori {
 		case leftTurn:
-			log.Println("\tnot popping")
-			resultStack.push(pts[0])
+			stack.push(pts[0])
 		case collinear:
-			if distanceSq(resultStack.underTop(), pts[0]).GT(distanceSq(resultStack.underTop(), resultStack.top())) {
-				resultStack.pop()
-				resultStack.push(pts[0])
+			if distanceSq(stack.underTop(), pts[0]).GT(distanceSq(stack.underTop(), stack.top())) {
+				stack.pop()
+				stack.push(pts[0])
 			}
 		default:
-			log.Println("\tpopping")
-			resultStack.pop()
-			if orient(resultStack.underTop(), resultStack.top(), pts[0]) == collinear {
-				log.Println("\tdouble popping")
-				resultStack.pop()
+			stack.pop()
+			if orientation(stack.underTop(), stack.top(), pts[0]) == collinear {
+				stack.pop()
 			}
-			resultStack.push(pts[0])
+			stack.push(pts[0])
 		}
 		pts = pts[1:]
-
-		log.Println("\tstack state")
-		for _, pt := range resultStack {
-			log.Println("\t", pt)
-		}
 	}
-
-	log.Println("grahamScan output")
-	for _, pt := range resultStack {
-		log.Println("\t", pt)
-	}
-	return resultStack
+	return stack
 }
 
-//func deduplicate(pts []XY) []XY {
-//j := -1 // tracks last deduplicated element
-//for i := range pts {
-//if j < 0 || !pts[i].Equals(pts[j]) {
-//j++
-//pts[j] = pts[i]
-//}
-//}
-//return pts[:j+1]
-//}
-
-// soryByPolarAngle sorts the points by their polar angle
+// soryByPolarAngle sorts the points by their polar angle relative to the
+// lowest-then-leftmost point.
 func sortByPolarAngle(pts []XY) {
-	//log.Println("sort")
+	// the lowest-then-leftmost (anchor) point comes first
 	ltlp := ltl(pts)
-
-	// swap the ltl point with first point
 	pts[ltlp], pts[0] = pts[0], pts[ltlp]
+	anchor := pts[0]
 
-	//for _, pt := range pts[1:] {
-	//log.Println("\t", pt)
-	//}
-
-	virtualPoint := pts[0]
-	//log.Println("\tvirt", virtualPoint)
-
-	pts = pts[1:]
+	pts = pts[1:] // only sort the remaining points
 	sort.Slice(pts, func(i, j int) bool {
-		//if i == 0 {
-		//return false
-		//}
-
-		if virtualPoint.Equals(pts[i]) {
-			//log.Printf("\tsort %s %s true", pts[i], pts[j])
+		if anchor.Equals(pts[i]) {
 			return true
 		}
-		if virtualPoint.Equals(pts[j]) {
-			//log.Printf("\tsort %s %s false", pts[i], pts[j])
+		if anchor.Equals(pts[j]) {
 			return false
 		}
-
-		ori := orient(virtualPoint, pts[i], pts[j])
-
-		if ori == collinear {
-			//log.Printf("\tsort %s %s %t", pts[i], pts[j], distanceSq(virtualPoint, pts[i]).GT(distanceSq(virtualPoint, pts[j])))
-			return distanceSq(virtualPoint, pts[i]).GT(distanceSq(virtualPoint, pts[j]))
-		}
-
-		//log.Printf("\tsort %s %s %t", pts[i], pts[j], ori == leftTurn)
-		return ori == leftTurn
+		return orientation(anchor, pts[i], pts[j]) == leftTurn
 	})
 }
 
-// ltl stands for lowest-then-leftmost points. It returns the index of lowest-then-leftmost point
+// ltl finds the index of the lowest-then-leftmost point.
 func ltl(pts []XY) int {
 	rpi := 0
-
 	for i := 1; i < len(pts); i++ {
 		if pts[i].Y.LT(pts[rpi].Y) || (pts[i].Y.Equals(pts[rpi].Y) && pts[i].X.LT(pts[rpi].X)) {
 			rpi = i
 		}
 	}
-
 	return rpi
 }
 
-type orientation int
+type threePointOrientation int
 
 const (
 	// rightTurn indicates the orientation is right turn which is anticlockwise
-	rightTurn orientation = iota + 1
+	rightTurn threePointOrientation = iota + 1
 	// collinear indicates three points are on the same line
 	collinear
 	// leftTurn indicates the orientation is left turn which is clockwise
 	leftTurn
 )
 
-func (o orientation) String() string {
+func (o threePointOrientation) String() string {
 	switch o {
 	case rightTurn:
 		return "right turn"
@@ -223,33 +159,21 @@ func (o orientation) String() string {
 	}
 }
 
-// orient checks if s is on the right hand side or left hand side of the line formed by p and q
-// if it returns -1 which means there is an unexpected result.
-func orient(p, q, s XY) orientation {
-	cp := crossProduct(p, q, s)
+// orientation checks if s is on the right hand side or left hand side of the line formed by p and q.
+func orientation(p, q, s XY) threePointOrientation {
+	cp := q.Sub(p).Cross(s.Sub(q))
 	switch {
 	case cp.GT(zero):
 		return leftTurn
-	case cp.Equals(zero):
-		return collinear
 	case cp.LT(zero):
 		return rightTurn
 	default:
-		return -1
+		return collinear
 	}
 }
 
-// crossProduct implements Heron's formula which returns the 2 times of area formed by p, q and s
-//         | p.X p.Y 1 |
-// 2 * S = | q.X q.Y 1 |
-//         | s.X s.Y 1 |
-// when p, q and s are clockwise, the return value is negative
-// when p, q and s are anticlockwise, the return value is positive
-func crossProduct(p, q, s XY) Scalar {
-	return q.Sub(p).Cross(s.Sub(q))
-}
-
-// distance give the length of p an q
+// distanceSq gives the square of the distance between p and q.
 func distanceSq(p, q XY) Scalar {
-	return p.Sub(q).Dot(p.Sub(q))
+	pSubQ := p.Sub(q)
+	return pSubQ.Dot(pSubQ)
 }

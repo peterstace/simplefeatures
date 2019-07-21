@@ -8,7 +8,7 @@ func TestOrientation(t *testing.T) {
 		p        XY
 		q        XY
 		s        XY
-		expected orientation
+		expected threePointOrientation
 	}{
 		{
 			name:     "when the s is on left hand side of line of p and q",
@@ -35,7 +35,7 @@ func TestOrientation(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := orient(tc.p, tc.q, tc.s)
+			actual := orientation(tc.p, tc.q, tc.s)
 			if actual != tc.expected {
 				t.Errorf("expected: %d, got: %d", tc.expected, actual)
 			}
