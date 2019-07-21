@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-func convexHullG(g Geometry) Geometry {
+func convexHull(g Geometry) Geometry {
 	if g.IsEmpty() {
 		// special case to mirror postgis behaviour
 		return g
@@ -62,73 +62,85 @@ func (s *pointStack) underTop() XY {
 // grahamScan returns the convex hull of the input points. It will either
 // represent the empty set (zero points), a point (one point), a line (2
 // points), or a closed polygon (>= 3 points).
-func grahamScan(pts []XY) []XY {
-	if len(pts) <= 1 {
-		return pts
+func grahamScan(ps []XY) []XY {
+	if len(ps) <= 1 {
+		return ps
 	}
 
-	sortByPolarAngle(pts)
+	sortByPolarAngle(ps)
 
 	// Append the lowest-then-leftmost point so that the polygon will be closed.
-	pts = append(pts, pts[0])
+	ps = append(ps, ps[0])
 
+	var i int // tracks progress through the ps slice
 	var stack pointStack
-	stack.push(pts[0])
-	pts = pts[1:]
-	for len(pts) > 0 && len(stack) < 2 {
-		if !stack.top().Equals(pts[0]) {
-			stack.push(pts[0])
+	stack.push(ps[0])
+	i++
+	for i < len(ps) && len(stack) < 2 {
+		if !stack.top().Equals(ps[i]) {
+			stack.push(ps[i])
 		}
-		pts = pts[1:]
+		i++
 	}
 
-	for len(pts) > 0 {
-		ori := orientation(stack.underTop(), stack.top(), pts[0])
+	for i < len(ps) {
+		ori := orientation(stack.underTop(), stack.top(), ps[i])
 		switch ori {
 		case leftTurn:
-			stack.push(pts[0])
+			// This point _might_ be part of the convex hull. It will be popped
+			// later if it actually isn't part of the convex hull.
+			stack.push(ps[i])
 		case collinear:
-			if distanceSq(stack.underTop(), pts[0]).GT(distanceSq(stack.underTop(), stack.top())) {
+			// This point is part of the convex hull, so long as it extends the
+			// current line segment (in which case the preceding point is
+			// _not_ part of the convex hull).
+			if distanceSq(stack.underTop(), ps[i]).GT(distanceSq(stack.underTop(), stack.top())) {
 				stack.pop()
-				stack.push(pts[0])
+				stack.push(ps[i])
 			}
 		default:
+			//  The preceding point was _not_ part of the convex hull (so it is
+			//  popped). Potentially the new point is just an extension of a
+			//  straight line (so pop the preceding point in that case so as to
+			//  eliminate collinear points).
 			stack.pop()
-			if orientation(stack.underTop(), stack.top(), pts[0]) == collinear {
+			if orientation(stack.underTop(), stack.top(), ps[i]) == collinear {
 				stack.pop()
 			}
-			stack.push(pts[0])
+			stack.push(ps[i])
 		}
-		pts = pts[1:]
+		i++
 	}
 	return stack
 }
 
-// soryByPolarAngle sorts the points by their polar angle relative to the
-// lowest-then-leftmost point.
-func sortByPolarAngle(pts []XY) {
+// sortByPolarAngle sorts the points by their polar angle relative to the
+// lowest-then-leftmost anchor point.
+func sortByPolarAngle(ps []XY) {
 	// the lowest-then-leftmost (anchor) point comes first
-	ltlp := ltl(pts)
-	pts[ltlp], pts[0] = pts[0], pts[ltlp]
-	anchor := pts[0]
+	ltlp := ltl(ps)
+	ps[ltlp], ps[0] = ps[0], ps[ltlp]
+	anchor := ps[0]
 
-	pts = pts[1:] // only sort the remaining points
-	sort.Slice(pts, func(i, j int) bool {
-		if anchor.Equals(pts[i]) {
+	ps = ps[1:] // only sort the remaining points
+	sort.Slice(ps, func(i, j int) bool {
+		if anchor.Equals(ps[i]) {
 			return true
 		}
-		if anchor.Equals(pts[j]) {
+		if anchor.Equals(ps[j]) {
 			return false
 		}
-		return orientation(anchor, pts[i], pts[j]) == leftTurn
+		return orientation(anchor, ps[i], ps[j]) == leftTurn
 	})
 }
 
 // ltl finds the index of the lowest-then-leftmost point.
-func ltl(pts []XY) int {
+func ltl(ps []XY) int {
 	rpi := 0
-	for i := 1; i < len(pts); i++ {
-		if pts[i].Y.LT(pts[rpi].Y) || (pts[i].Y.Equals(pts[rpi].Y) && pts[i].X.LT(pts[rpi].X)) {
+	for i := 1; i < len(ps); i++ {
+		if ps[i].Y.LT(ps[rpi].Y) ||
+			(ps[i].Y.Equals(ps[rpi].Y) &&
+				ps[i].X.LT(ps[rpi].X)) {
 			rpi = i
 		}
 	}

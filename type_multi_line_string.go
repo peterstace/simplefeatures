@@ -169,7 +169,7 @@ func (m MultiLineString) AsBinary(w io.Writer) error {
 }
 
 func (m MultiLineString) ConvexHull() Geometry {
-	return convexHullG(m)
+	return convexHull(m)
 }
 
 func (m MultiLineString) convexHullPointSet() []XY {

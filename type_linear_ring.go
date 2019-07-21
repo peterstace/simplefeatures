@@ -113,7 +113,7 @@ func (r LinearRing) AsBinary(w io.Writer) error {
 // ConvexHull returns the convex hull of the LinearRing, which is always a
 // Polygon.
 func (r LinearRing) ConvexHull() Geometry {
-	return convexHullG(r)
+	return convexHull(r)
 }
 
 func (r LinearRing) convexHullPointSet() []XY {

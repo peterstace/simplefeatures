@@ -139,7 +139,7 @@ func (m MultiPoint) AsBinary(w io.Writer) error {
 // ConvexHull finds the convex hull of the set of points. This may either be
 // the empty set, a single point, a line, or a polygon.
 func (m MultiPoint) ConvexHull() Geometry {
-	return convexHullG(m)
+	return convexHull(m)
 }
 
 func (m MultiPoint) convexHullPointSet() []XY {

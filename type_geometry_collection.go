@@ -136,7 +136,7 @@ func (c GeometryCollection) AsBinary(w io.Writer) error {
 }
 
 func (c GeometryCollection) ConvexHull() Geometry {
-	return convexHullG(c)
+	return convexHull(c)
 }
 
 func (c GeometryCollection) convexHullPointSet() []XY {

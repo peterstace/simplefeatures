@@ -233,7 +233,7 @@ func (m MultiPolygon) AsBinary(w io.Writer) error {
 }
 
 func (m MultiPolygon) ConvexHull() Geometry {
-	return convexHullG(m)
+	return convexHull(m)
 }
 
 func (m MultiPolygon) convexHullPointSet() []XY {

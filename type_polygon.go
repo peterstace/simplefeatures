@@ -202,7 +202,7 @@ func (p Polygon) AsBinary(w io.Writer) error {
 // ConvexHull returns the convex hull of the Polygon, which is always another
 // Polygon.
 func (p Polygon) ConvexHull() Geometry {
-	return convexHullG(p)
+	return convexHull(p)
 }
 
 func (p Polygon) convexHullPointSet() []XY {

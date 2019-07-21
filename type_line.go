@@ -115,7 +115,7 @@ func (n Line) AsBinary(w io.Writer) error {
 }
 
 func (n Line) ConvexHull() Geometry {
-	return convexHullG(n)
+	return convexHull(n)
 }
 
 func (n Line) convexHullPointSet() []XY {

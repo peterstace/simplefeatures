@@ -100,7 +100,7 @@ func (p Point) AsBinary(w io.Writer) error {
 // ConvexHull returns the convex hull of this Point, which is always the same
 // point.
 func (p Point) ConvexHull() Geometry {
-	return convexHullG(p)
+	return convexHull(p)
 }
 
 func (p Point) convexHullPointSet() []XY {
