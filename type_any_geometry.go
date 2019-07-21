@@ -3,6 +3,7 @@ package simplefeatures
 import (
 	"bytes"
 	"database/sql/driver"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -55,4 +56,8 @@ func (a *AnyGeometry) UnmarshalJSON(p []byte) error {
 	}
 	a.Geom = geom
 	return nil
+}
+
+func (a AnyGeometry) MarshalJSON() ([]byte, error) {
+	return json.Marshal(a.Geom)
 }

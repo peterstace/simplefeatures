@@ -9,20 +9,21 @@ import (
 
 // EmptySet is a 0-dimensional geometry that represents the empty pointset.
 type EmptySet struct {
-	wkt     string
-	wkbType uint32
+	wkt      string
+	wkbType  uint32
+	jsonType string
 }
 
 func NewEmptyPoint() EmptySet {
-	return EmptySet{"POINT EMPTY", wkbGeomTypePoint}
+	return EmptySet{"POINT EMPTY", wkbGeomTypePoint, "Point"}
 }
 
 func NewEmptyLineString() EmptySet {
-	return EmptySet{"LINESTRING EMPTY", wkbGeomTypeLineString}
+	return EmptySet{"LINESTRING EMPTY", wkbGeomTypeLineString, "LineString"}
 }
 
 func NewEmptyPolygon() EmptySet {
-	return EmptySet{"POLYGON EMPTY", wkbGeomTypePolygon}
+	return EmptySet{"POLYGON EMPTY", wkbGeomTypePolygon, "Polygon"}
 }
 
 func (e EmptySet) AsText() string {
@@ -79,4 +80,8 @@ func (e EmptySet) AsBinary(w io.Writer) error {
 		marsh.setErr(errors.New("unknown empty geometry type (this shouldn't ever happen)"))
 	}
 	return marsh.err
+}
+
+func (e EmptySet) MarshalJSON() ([]byte, error) {
+	return marshalGeoJSON(e.jsonType, []int{})
 }

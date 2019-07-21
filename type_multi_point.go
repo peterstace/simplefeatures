@@ -135,3 +135,11 @@ func (m MultiPoint) AsBinary(w io.Writer) error {
 	}
 	return marsh.err
 }
+
+func (m MultiPoint) MarshalJSON() ([]byte, error) {
+	coords := make([]Coordinates, len(m.pts))
+	for i, pt := range m.pts {
+		coords[i] = pt.Coordinates()
+	}
+	return marshalGeoJSON("MultiPoint", coords)
+}

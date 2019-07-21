@@ -113,3 +113,10 @@ func (n Line) AsBinary(w io.Writer) error {
 	marsh.writeFloat64(n.EndPoint().XY().Y.AsFloat())
 	return marsh.err
 }
+
+func (n Line) MarshalJSON() ([]byte, error) {
+	return marshalGeoJSON("LineString", []Coordinates{
+		n.StartPoint().Coordinates(),
+		n.EndPoint().Coordinates(),
+	})
+}

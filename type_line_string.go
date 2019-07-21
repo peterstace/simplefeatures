@@ -180,3 +180,12 @@ func (s LineString) AsBinary(w io.Writer) error {
 	}
 	return marsh.err
 }
+
+func (s LineString) MarshalJSON() ([]byte, error) {
+	n := s.NumPoints()
+	coords := make([]Coordinates, n)
+	for i := 0; i < n; i++ {
+		coords[i] = s.PointN(i).Coordinates()
+	}
+	return marshalGeoJSON("LineString", coords)
+}
