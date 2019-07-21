@@ -1,7 +1,12 @@
-version: "2"
+version: "2.1"
 services:
   postgis:
     image: mdillon/postgis
+    healthcheck:
+      test: "pg_isready -U postgres"
+      interval: '100ms'
+      timeout: '1s'
+      retries: 50
   tests:
     image: golang:1
     working_dir: /go/src/github.com/peterstace/simplefeatures
@@ -10,3 +15,6 @@ services:
       - .:/go/src/github.com/peterstace/simplefeatures
     environment:
       - GO111MODULE=on
+    depends_on:
+      postgis:
+        condition: service_healthy
