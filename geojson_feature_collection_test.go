@@ -77,13 +77,49 @@ func TestGeoJSONFeatureCollectionInvalidUnmarshal(t *testing.T) {
 		errFragment string
 	}{
 		{
-			input:       `{"type":"foo","features":[{"type":"Point","coordinates":[1,2]}]}`,
-			errFragment: "type field isn't set to FeatureCollection",
+			// Valid case.
+			input: `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]}}]}`,
+		},
+		{
+			input:       `{"type":"Foo","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]}}]}`,
+			errFragment: "type field not set to FeatureCollection",
+		},
+		{
+			input:       `{"type":"FeatureCollection","features":[{"type":"Foo","geometry":{"type":"Point","coordinates":[1,2]}}]}`,
+			errFragment: "type field not set to Feature",
+		},
+		{
+			input:       `{"type":"FeatureCollection","features":[{"geometry":{"type":"Point","coordinates":[1,2]}}]}`,
+			errFragment: "feature type field missing or empty",
+		},
+		{
+			input:       `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"ZORT","coordinates":[1,2]}}]}`,
+			errFragment: "unknown geojson type: ZORT",
+		},
+		{
+			input:       `{"type":"FeatureCollection","features":[{"type":"Feature"}]}`,
+			errFragment: "geometry field missing or empty",
+		},
+		{
+			input: `{"type":"FeatureCollection","features":[{"type":"Feature","properties":"zoortle","geometry":{"type":"Point","coordinates":[1,2]}}]}`,
+			// This error message is from the Go standard lib, so don't want to
+			// string match the error too closely. Since it contains
+			// 'features', we know it's about the features field.
+			errFragment: "features",
 		},
 	} {
+		if i == 0 {
+			// Ensure that the first feature collection is valid, since that's
+			// what the other test cases are based on.
+			var fc GeoJSONFeatureCollection
+			r := strings.NewReader(tt.input)
+			expectNoErr(t, json.NewDecoder(r).Decode(&fc))
+			continue
+		}
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var fc GeoJSONFeatureCollection
-			err := json.NewDecoder(strings.NewReader(tt.input)).Decode(&fc)
+			r := strings.NewReader(tt.input)
+			err := json.NewDecoder(r).Decode(&fc)
 			if err == nil {
 				t.Fatal("expected error but got nil")
 			}

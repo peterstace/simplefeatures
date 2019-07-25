@@ -18,8 +18,8 @@ type GeoJSONFeature struct {
 	ID interface{}
 
 	// Properties are free-form properties that are associated with the
-	// feature. It can either be left as nil, or populated with any value that
-	// can be marshalled to JSON.
+	// feature. If there are no properties associated with the feature, then it
+	// can either be left as nil.
 	Properties map[string]interface{}
 }
 
@@ -34,11 +34,20 @@ func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 		return err
 	}
 
-	// TODO: check for type not set correctly
+	if topLevel.Type == "" {
+		return errors.New("feature type field missing or empty")
+	}
+	if topLevel.Type != "Feature" {
+		return fmt.Errorf("type field not set to Feature: '%s'", topLevel.Type)
+	}
 
 	f.ID = topLevel.ID
 	f.Properties = topLevel.Properties
-	f.Geometry = topLevel.Geometry.Geom // TODO: check for case where geometry is nil
+
+	if topLevel.Geometry.Geom == nil {
+		return fmt.Errorf("geometry field missing or empty")
+	}
+	f.Geometry = topLevel.Geometry.Geom
 
 	return nil
 }
@@ -55,10 +64,10 @@ func (c *GeoJSONFeatureCollection) UnmarshalJSON(p []byte) error {
 		return err
 	}
 	if topLevel.Type == "" {
-		return errors.New("type field missing or empty")
+		return errors.New("feature collection type field missing or empty")
 	}
 	if topLevel.Type != "FeatureCollection" {
-		return fmt.Errorf("type field isn't set to FeatureCollection: '%s'", topLevel.Type)
+		return fmt.Errorf("type field not set to FeatureCollection: '%s'", topLevel.Type)
 	}
 	(*c) = make([]GeoJSONFeature, len(topLevel.Features))
 	copy(*c, topLevel.Features)
