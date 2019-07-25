@@ -109,6 +109,7 @@ func grahamScan(ps []XY) []XY {
 	// Append the lowest-then-leftmost point so that the polygon will be closed.
 	ps = append(ps, ps[0])
 
+	// Populate the stack with the first 2 distict points.
 	var i int // tracks progress through the ps slice
 	var stack pointStack
 	stack.push(ps[0])
@@ -161,12 +162,17 @@ func sortByPolarAngle(ps []XY) {
 
 	ps = ps[1:] // only sort the remaining points
 	sort.Slice(ps, func(i, j int) bool {
+		// If any point is equal to the anchor point, then always put it first.
+		// This allows those duplicated points to be removed when the results
+		// stack is initiated.
 		if anchor.Equals(ps[i]) {
 			return true
 		}
 		if anchor.Equals(ps[j]) {
 			return false
 		}
+		// In the normal case, check which order the points are in relative to
+		// the anchor.
 		return orientation(anchor, ps[i], ps[j]) == leftTurn
 	})
 }
