@@ -13,7 +13,7 @@ type GeoJSONFeature struct {
 	Geometry Geometry
 
 	// ID is an identifier to refer to the feature. If an identifier isn't
-	// applicable, ID can be left as nil. If it is set, then it's value should
+	// applicable, ID can be left as nil. If it's set, then its value should
 	// marshal into a JSON string or number (this is not enforced).
 	ID interface{}
 
@@ -52,6 +52,27 @@ func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 	return nil
 }
 
+func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
+	if f.Geometry == nil {
+		return nil, errors.New("Geometry field not set")
+	}
+	props := f.Properties
+	if props == nil {
+		props = map[string]interface{}{}
+	}
+	return json.Marshal(struct {
+		Type       string                 `json:"type"`
+		Geometry   Geometry               `json:"geometry"`
+		ID         interface{}            `json:"id,omitempty"`
+		Properties map[string]interface{} `json:"properties"`
+	}{
+		"Feature",
+		f.Geometry,
+		f.ID,
+		props,
+	})
+}
+
 // GeoJSONFeatureCollection is a collection of GeoJSONFeatures.
 type GeoJSONFeatureCollection []GeoJSONFeature
 
@@ -72,4 +93,15 @@ func (c *GeoJSONFeatureCollection) UnmarshalJSON(p []byte) error {
 	(*c) = make([]GeoJSONFeature, len(topLevel.Features))
 	copy(*c, topLevel.Features)
 	return nil
+}
+
+func (c GeoJSONFeatureCollection) MarshalJSON() ([]byte, error) {
+	var col []GeoJSONFeature = c
+	if col == nil {
+		col = []GeoJSONFeature{}
+	}
+	return json.Marshal(struct {
+		Type     string           `json:"type"`
+		Features []GeoJSONFeature `json:"features"`
+	}{"FeatureCollection", col})
 }

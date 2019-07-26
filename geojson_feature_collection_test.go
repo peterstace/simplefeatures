@@ -129,3 +129,39 @@ func TestGeoJSONFeatureCollectionInvalidUnmarshal(t *testing.T) {
 		})
 	}
 }
+
+func TestGeoJSONFeatureCollectionEmpty(t *testing.T) {
+	out, err := json.Marshal(GeoJSONFeatureCollection{})
+	expectNoErr(t, err)
+	expectDeepEqual(t, string(out), `{"type":"FeatureCollection","features":[]}`)
+}
+
+func TestGeoJSONFeatureCollectionNil(t *testing.T) {
+	out, err := json.Marshal(GeoJSONFeatureCollection(nil))
+	expectNoErr(t, err)
+	expectDeepEqual(t, string(out), `{"type":"FeatureCollection","features":[]}`)
+}
+
+func TestGeoJSONFeatureCollectionNilGeometry(t *testing.T) {
+	if _, err := json.Marshal(GeoJSONFeatureCollection{{}}); err == nil {
+		t.Error("expected error but got nil")
+	}
+}
+
+func TestGeoJSONFeatureCollectionAndPropertiesNil(t *testing.T) {
+	out, err := json.Marshal(GeoJSONFeatureCollection{{Geometry: geomFromWKT(t, "POINT(1 2)")}})
+	expectNoErr(t, err)
+	expectDeepEqual(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"properties":{}}]}`)
+}
+
+func TestGeoJSONFeatureCollectionAndPropertiesSet(t *testing.T) {
+	out, err := json.Marshal(GeoJSONFeatureCollection{{
+		Geometry: geomFromWKT(t, "POINT(1 2)"),
+		ID:       "myid",
+		Properties: map[string]interface{}{
+			"foo": "bar",
+		},
+	}})
+	expectNoErr(t, err)
+	expectDeepEqual(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"id":"myid","properties":{"foo":"bar"}}]}`)
+}
