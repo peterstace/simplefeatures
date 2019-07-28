@@ -23,6 +23,8 @@ type GeoJSONFeature struct {
 	Properties map[string]interface{}
 }
 
+// UnmarshalJSON implements the encoding/json Unmarshaler interface by
+// unmarshalling a GeoJSON Feature Collection object.
 func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 	var topLevel struct {
 		Type       string                 `json:"type"`
@@ -52,6 +54,8 @@ func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 	return nil
 }
 
+// MarshalJSON implements the encoding/json Marshaler interface by marshalling
+// into a GeoJSON FeatureCollection object.
 func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
 	if f.Geometry == nil {
 		return nil, errors.New("Geometry field not set")
@@ -76,6 +80,8 @@ func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
 // GeoJSONFeatureCollection is a collection of GeoJSONFeatures.
 type GeoJSONFeatureCollection []GeoJSONFeature
 
+// UnmarshalJSON implements the encoding/json Unmarshaler interface by
+// unmarshalling a GeoJSON FeatureCollection object.
 func (c *GeoJSONFeatureCollection) UnmarshalJSON(p []byte) error {
 	var topLevel struct {
 		Type     string           `json:"type"`
@@ -95,6 +101,8 @@ func (c *GeoJSONFeatureCollection) UnmarshalJSON(p []byte) error {
 	return nil
 }
 
+// MarshalJSON implements the encoding/json Marshaler interface by marshalling
+// into a GeoJSON FeatureCollection object.
 func (c GeoJSONFeatureCollection) MarshalJSON() ([]byte, error) {
 	var col []GeoJSONFeature = c
 	if col == nil {
