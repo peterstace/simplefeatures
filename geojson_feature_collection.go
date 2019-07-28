@@ -7,6 +7,7 @@ import (
 )
 
 // GeoJSONFeature represents a Geometry with associated free-form properties.
+// GeoJSONFeature values have a one to one correspondence with GeoJSON Features.
 type GeoJSONFeature struct {
 	// Geometry is the Geometry that is associated with the Feature. It must be
 	// populated.
@@ -62,6 +63,7 @@ func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
 	}
 	props := f.Properties
 	if props == nil {
+		// As per the GeoJSON spec, the properties field must be an object (not null).
 		props = map[string]interface{}{}
 	}
 	return json.Marshal(struct {
@@ -78,6 +80,8 @@ func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
 }
 
 // GeoJSONFeatureCollection is a collection of GeoJSONFeatures.
+// GeoJSONFeatureCollection values have a one to one correspondence with
+// GeoJSON FeatureCollections.
 type GeoJSONFeatureCollection []GeoJSONFeature
 
 // UnmarshalJSON implements the encoding/json Unmarshaler interface by
@@ -96,8 +100,7 @@ func (c *GeoJSONFeatureCollection) UnmarshalJSON(p []byte) error {
 	if topLevel.Type != "FeatureCollection" {
 		return fmt.Errorf("type field not set to FeatureCollection: '%s'", topLevel.Type)
 	}
-	(*c) = make([]GeoJSONFeature, len(topLevel.Features))
-	copy(*c, topLevel.Features)
+	*c = topLevel.Features
 	return nil
 }
 
