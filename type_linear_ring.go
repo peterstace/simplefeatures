@@ -111,5 +111,5 @@ func (r LinearRing) AsBinary(w io.Writer) error {
 }
 
 func (r LinearRing) MarshalJSON() ([]byte, error) {
-	return marshalGeoJSON("XXX", nil)
+	return r.ls.MarshalJSON()
 }
