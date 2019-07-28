@@ -198,3 +198,16 @@ func (p Polygon) AsBinary(w io.Writer) error {
 	}
 	return marsh.err
 }
+
+func (p Polygon) MarshalJSON() ([]byte, error) {
+	rings := p.rings()
+	coords := make([][]Coordinates, len(rings))
+	for i, r := range rings {
+		n := r.NumPoints()
+		coords[i] = make([]Coordinates, n)
+		for j := 0; j < n; j++ {
+			coords[i][j] = r.PointN(j).Coordinates()
+		}
+	}
+	return marshalGeoJSON("Polygon", coords)
+}

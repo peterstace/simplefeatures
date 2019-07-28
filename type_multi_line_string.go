@@ -167,3 +167,16 @@ func (m MultiLineString) AsBinary(w io.Writer) error {
 	}
 	return marsh.err
 }
+
+func (m MultiLineString) MarshalJSON() ([]byte, error) {
+	numLines := m.NumLineStrings()
+	coords := make([][]Coordinates, numLines)
+	for i := 0; i < numLines; i++ {
+		numPts := m.LineStringN(i).NumPoints()
+		coords[i] = make([]Coordinates, numPts)
+		for j := 0; j < numPts; j++ {
+			coords[i][j] = m.LineStringN(i).PointN(j).Coordinates()
+		}
+	}
+	return marshalGeoJSON("MultiLineString", coords)
+}

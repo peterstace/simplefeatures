@@ -1,6 +1,9 @@
 package simplefeatures
 
-import "io"
+import (
+	"encoding/json"
+	"io"
+)
 
 // Geometry is the most general type of geometry supported, and exposes common
 // behaviour. All geometry types implement this interface.
@@ -39,6 +42,8 @@ type Geometry interface {
 
 	// Boundary returns the Geometry representing the limit of this geometry.
 	Boundary() Geometry
+
+	json.Marshaler
 }
 
 // HeterogenousGeometry are geometries that contain a single element, or

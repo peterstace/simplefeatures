@@ -231,3 +231,20 @@ func (m MultiPolygon) AsBinary(w io.Writer) error {
 	}
 	return marsh.err
 }
+
+func (m MultiPolygon) MarshalJSON() ([]byte, error) {
+	numPolys := m.NumPolygons()
+	coords := make([][][]Coordinates, numPolys)
+	for i := 0; i < numPolys; i++ {
+		rings := m.PolygonN(i).rings()
+		coords[i] = make([][]Coordinates, len(rings))
+		for j, r := range rings {
+			n := r.NumPoints()
+			coords[i][j] = make([]Coordinates, n)
+			for k := 0; k < n; k++ {
+				coords[i][j][k] = r.PointN(k).Coordinates()
+			}
+		}
+	}
+	return marshalGeoJSON("MultiPolygon", coords)
+}
