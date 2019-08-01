@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures"
+	. "github.com/peterstace/simplefeatures/geom"
 )
 
 func TestGeoJSONFeatureCollectionValidUnmarshal(t *testing.T) {

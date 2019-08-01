@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures"
+	. "github.com/peterstace/simplefeatures/geom"
 )
 
 func geomFromWKT(t *testing.T, wkt string) Geometry {

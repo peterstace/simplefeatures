@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures"
+	. "github.com/peterstace/simplefeatures/geom"
 )
 
 func TestValuerAny(t *testing.T) {
