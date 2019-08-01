@@ -106,3 +106,7 @@ func (p Point) ConvexHull() Geometry {
 func (p Point) convexHullPointSet() []XY {
 	return []XY{p.XY()}
 }
+
+func (p Point) MarshalJSON() ([]byte, error) {
+	return marshalGeoJSON("Point", p.Coordinates())
+}

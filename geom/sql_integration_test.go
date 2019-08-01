@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	_ "github.com/lib/pq"
-	. "github.com/peterstace/simplefeatures"
+	. "github.com/peterstace/simplefeatures/geom"
 )
 
 func newDB(t *testing.T) *sql.DB {

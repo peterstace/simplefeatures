@@ -1,6 +1,9 @@
 package simplefeatures
 
-import "io"
+import (
+	"encoding/json"
+	"io"
+)
 
 // Geometry is the most general type of geometry supported, and exposes common
 // behaviour. All geometry types implement this interface.
@@ -47,6 +50,8 @@ type Geometry interface {
 	// convexHullPointset returns the list of points that must be considered
 	// when finding the convex hull.
 	convexHullPointSet() []XY
+
+	json.Marshaler
 }
 
 // HeterogenousGeometry are geometries that contain a single element, or

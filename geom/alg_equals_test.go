@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures"
+	. "github.com/peterstace/simplefeatures/geom"
 )
 
 func TestNotEquals(t *testing.T) {

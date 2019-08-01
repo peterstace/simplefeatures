@@ -171,3 +171,17 @@ func fourDimFloat64sToCoordinates(outer [][][][]float64) ([][][]Coordinates, err
 	}
 	return coords, nil
 }
+
+func marshalGeoJSON(geomType string, coordinates interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	buf.WriteString(`{"type":"`)
+	buf.WriteString(geomType)
+	buf.WriteString(`","coordinates":`)
+	coordJSON, err := json.Marshal(coordinates)
+	if err != nil {
+		return nil, err
+	}
+	buf.Write(coordJSON)
+	buf.WriteRune('}')
+	return buf.Bytes(), nil
+}

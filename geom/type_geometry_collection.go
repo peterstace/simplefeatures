@@ -2,6 +2,7 @@ package simplefeatures
 
 import (
 	"database/sql/driver"
+	"encoding/json"
 	"io"
 )
 
@@ -147,4 +148,19 @@ func (c GeometryCollection) convexHullPointSet() []XY {
 		points = append(points, g.convexHullPointSet()...)
 	}
 	return points
+}
+
+func (c GeometryCollection) MarshalJSON() ([]byte, error) {
+	buf := []byte(`{"type":"GeometryCollection","geometries":`)
+	var geoms = c.geoms
+	if geoms == nil {
+		geoms = []Geometry{}
+	}
+	geomsJSON, err := json.Marshal(geoms)
+	if err != nil {
+		return nil, err
+	}
+	buf = append(buf, geomsJSON...)
+	buf = append(buf, '}')
+	return buf, nil
 }

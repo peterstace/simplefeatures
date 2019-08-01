@@ -193,3 +193,12 @@ func (s LineString) convexHullPointSet() []XY {
 	}
 	return points
 }
+
+func (s LineString) MarshalJSON() ([]byte, error) {
+	n := s.NumPoints()
+	coords := make([]Coordinates, n)
+	for i := 0; i < n; i++ {
+		coords[i] = s.PointN(i).Coordinates()
+	}
+	return marshalGeoJSON("LineString", coords)
+}

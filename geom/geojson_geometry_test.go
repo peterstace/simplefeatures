@@ -1,10 +1,11 @@
 package simplefeatures_test
 
 import (
+	"encoding/json"
 	"strconv"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures"
+	. "github.com/peterstace/simplefeatures/geom"
 )
 
 func TestGeoJSONUnmarshalValid(t *testing.T) {
@@ -80,7 +81,7 @@ func TestGeoJSONUnmarshalValid(t *testing.T) {
 		        ('GEOMETRYCOLLECTIONZ EMPTY'),
 		        ('GEOMETRYCOLLECTIONM EMPTY'),
 		        ('GEOMETRYCOLLECTIONZM EMPTY'),
-		        ('GEOMETRYCOLLECTION(POINT(1 2),POINT(3 4))'),M(3 4 5 5))')
+		        ('GEOMETRYCOLLECTION(POINT(1 2),POINT(3 4))'),
 		        ('GEOMETRYCOLLECTIONZ(POINTZ(1 2 3),POINTZ(3 4 5))'),
 		        ('GEOMETRYCOLLECTIONM(POINTM(1 2 3),POINTM(3 4 5))'),
 		        ('GEOMETRYCOLLECTIONZM(POINTZM(1 2 3 4),POINTZM(3 4 5 5))')
@@ -438,4 +439,139 @@ func TestGeoJSONUnmarshalValid(t *testing.T) {
 			expectDeepEqual(t, got, want)
 		})
 	}
+}
+
+func TestGeoJSONMarshal(t *testing.T) {
+	// Test cases are from:
+	/*
+	   SELECT wkt, ST_AsGeoJSON(ST_GeomFromText(wkt)) AS geojson
+	   FROM (
+	           VALUES
+	           ('POINT EMPTY'),
+	           ('POINT(1 2)'),
+	           ('LINESTRING EMPTY'),
+	           ('LINESTRING(1 2,3 4)'),
+	           ('LINESTRING(1 2,3 4,5 6)'),
+	           ('POLYGON EMPTY'),
+	           ('POLYGON((0 0,4 0,0 4,0 0),(1 1,2 1,1 2,1 1))'),
+	           ('MULTIPOINT EMPTY'),
+	           ('MULTIPOINT(1 2)'),
+	           ('MULTIPOINT(1 2,3 4)'),
+	           ('MULTILINESTRING EMPTY'),
+	           ('MULTILINESTRING((0 1,2 3,4 5))'),
+	           ('MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))'),
+	           ('MULTIPOLYGON EMPTY'),
+	           ('MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((1 0,2 0,1 1,1 0)))'),
+	           ('GEOMETRYCOLLECTION EMPTY'),
+	           ('GEOMETRYCOLLECTION(POINT(1 2),POINT(3 4))')
+	   ) AS q (wkt);
+	*/
+	for _, tt := range []struct {
+		wkt  string
+		want string
+	}{
+		{
+			wkt:  "POINT EMPTY",
+			want: `{"type":"Point","coordinates":[]}`,
+		},
+		{
+			wkt:  "POINT(1 2)",
+			want: `{"type":"Point","coordinates":[1,2]}`,
+		},
+		{
+			wkt:  "LINESTRING EMPTY",
+			want: `{"type":"LineString","coordinates":[]}`,
+		},
+		{
+			wkt:  "LINESTRING(1 2,3 4)",
+			want: `{"type":"LineString","coordinates":[[1,2],[3,4]]}`,
+		},
+		{
+			wkt:  "LINESTRING(1 2,3 4,5 6)",
+			want: `{"type":"LineString","coordinates":[[1,2],[3,4],[5,6]]}`,
+		},
+		{
+			wkt:  "POLYGON EMPTY",
+			want: `{"type":"Polygon","coordinates":[]}`,
+		},
+		{
+			wkt:  "POLYGON((0 0,4 0,0 4,0 0),(1 1,2 1,1 2,1 1))",
+			want: `{"type":"Polygon","coordinates":[[[0,0],[4,0],[0,4],[0,0]],[[1,1],[2,1],[1,2],[1,1]]]}`,
+		},
+		{
+			wkt:  "MULTIPOINT EMPTY",
+			want: `{"type":"MultiPoint","coordinates":[]}`,
+		},
+		{
+			wkt:  "MULTIPOINT(1 2)",
+			want: `{"type":"MultiPoint","coordinates":[[1,2]]}`,
+		},
+		{
+			wkt:  "MULTIPOINT(1 2,3 4)",
+			want: `{"type":"MultiPoint","coordinates":[[1,2],[3,4]]}`,
+		},
+		{
+			wkt:  "MULTILINESTRING EMPTY",
+			want: `{"type":"MultiLineString","coordinates":[]}`,
+		},
+		{
+			wkt:  "MULTILINESTRING((0 1,2 3,4 5))",
+			want: `{"type":"MultiLineString","coordinates":[[[0,1],[2,3],[4,5]]]}`,
+		},
+		{
+			wkt:  "MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))",
+			want: `{"type":"MultiLineString","coordinates":[[[0,1],[2,3]],[[4,5],[6,7],[8,9]]]}`,
+		},
+		{
+			wkt:  "MULTIPOLYGON EMPTY",
+			want: `{"type":"MultiPolygon","coordinates":[]}`,
+		},
+		{
+			wkt:  "MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((1 0,2 0,1 1,1 0)))",
+			want: `{"type":"MultiPolygon","coordinates":[[[[0,0],[1,0],[0,1],[0,0]]],[[[1,0],[2,0],[1,1],[1,0]]]]}`,
+		},
+		{
+			wkt:  "GEOMETRYCOLLECTION EMPTY",
+			want: `{"type":"GeometryCollection","geometries":[]}`,
+		},
+		{
+			wkt:  "GEOMETRYCOLLECTION(POINT(1 2),POINT(3 4))",
+			want: `{"type":"GeometryCollection","geometries":[{"type":"Point","coordinates":[1,2]},{"type":"Point","coordinates":[3,4]}]}`,
+		},
+	} {
+		t.Run(tt.wkt, func(t *testing.T) {
+			geom := geomFromWKT(t, tt.wkt)
+			gotJSON, err := json.Marshal(geom)
+			expectNoErr(t, err)
+			if string(gotJSON) != tt.want {
+				t.Error("json doesn't match")
+				t.Logf("got:  %v", string(gotJSON))
+				t.Logf("want: %v", tt.want)
+			}
+		})
+	}
+}
+
+func TestGeoJSONMarshalAnyGeometryPopulated(t *testing.T) {
+	any := AnyGeometry{geomFromWKT(t, "POINT(1 2)")}
+	got, err := json.Marshal(any)
+	expectNoErr(t, err)
+	const want = `{"type":"Point","coordinates":[1,2]}`
+	expectDeepEqual(t, string(got), want)
+}
+
+func TestGeoJSONMarshalAnyGeometryNil(t *testing.T) {
+	var any AnyGeometry
+	got, err := json.Marshal(any)
+	expectNoErr(t, err)
+	const want = `null`
+	expectDeepEqual(t, string(got), want)
+}
+
+func TestGeoJSONMarshalLinearRing(t *testing.T) {
+	geom := geomFromWKT(t, `LINEARRING(0 0,0 1,1 1,1 0,0 0)`)
+	got, err := json.Marshal(geom)
+	expectNoErr(t, err)
+	const want = `{"type":"LineString","coordinates":[[0,0],[0,1],[1,1],[1,0],[0,0]]}`
+	expectDeepEqual(t, string(got), want)
 }

@@ -119,3 +119,7 @@ func (r LinearRing) ConvexHull() Geometry {
 func (r LinearRing) convexHullPointSet() []XY {
 	return r.ls.convexHullPointSet()
 }
+
+func (r LinearRing) MarshalJSON() ([]byte, error) {
+	return r.ls.MarshalJSON()
+}
