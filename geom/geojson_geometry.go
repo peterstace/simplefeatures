@@ -125,11 +125,11 @@ func oneDimFloat64sToCoordinates(fs []float64) (Coordinates, error) {
 	}
 	xstr := strconv.FormatFloat(fs[0], 'f', -1, 64)
 	ystr := strconv.FormatFloat(fs[1], 'f', -1, 64)
-	x, err := NewScalar(xstr)
+	x, err := NewScalarS(xstr)
 	if err != nil {
 		return Coordinates{}, err
 	}
-	y, err := NewScalar(ystr)
+	y, err := NewScalarS(ystr)
 	if err != nil {
 		return Coordinates{}, err
 	}

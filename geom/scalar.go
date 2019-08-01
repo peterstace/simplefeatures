@@ -2,6 +2,7 @@ package simplefeatures
 
 import (
 	"errors"
+	"fmt"
 	"math/big"
 	"strconv"
 )
@@ -17,10 +18,10 @@ var (
 	half = Scalar{val: big.NewRat(1, 2)}
 )
 
-// NewScalar parses a string and returns the corresponding scalar. The string
+// NewScalarS parses a string and returns the corresponding scalar. The string
 // can be a decimal representation, or a fractional representation (the same as
 // big.Rat.SetString).
-func NewScalar(s string) (Scalar, error) {
+func NewScalarS(s string) (Scalar, error) {
 	r, ok := new(big.Rat).SetString(s)
 	if !ok {
 		return Scalar{}, errors.New("invalid scalar")
@@ -28,14 +29,34 @@ func NewScalar(s string) (Scalar, error) {
 	return Scalar{r}, nil
 }
 
-// NewScalarFromFloat64 creates a scalar that exactly equals the provided
-// float64. Panics if f is NaN or infinite.
-func NewScalarFromFloat64(f float64) Scalar {
+// MustNewScalarS parses a string by calling NewScalarS. It panics if the
+// string cannot be parsed.
+func MustNewScalarS(s string) Scalar {
+	scal, err := NewScalarS(s)
+	if err != nil {
+		panic("MustNewScalarS: " + err.Error())
+	}
+	return scal
+}
+
+// NewScalarF creates a scalar that exactly equals the provided float64. It
+// gives an error if f is NaN or infinite.
+func NewScalarF(f float64) (Scalar, error) {
 	z := new(big.Rat).SetFloat64(f)
 	if z == nil {
-		panic("f must be finite")
+		return Scalar{}, fmt.Errorf("f must be finite: %v", f)
 	}
-	return Scalar{z}
+	return Scalar{z}, nil
+}
+
+// MustNewScalarF creates a scalar that exactly equals the provided float64.
+// It panics if f is NaN or infinite.
+func MustNewScalarF(f float64) Scalar {
+	scal, err := NewScalarF(f)
+	if err != nil {
+		panic("MustNewScalarF: " + err.Error())
+	}
+	return scal
 }
 
 func (s Scalar) String() string {

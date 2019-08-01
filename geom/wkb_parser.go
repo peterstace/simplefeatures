@@ -180,9 +180,9 @@ func (p *wkbParser) parsePoint() OptionalCoordinates {
 
 	// Only XY is supported so far.
 	_, _ = z, m
-	xs, err := NewScalar(strconv.FormatFloat(x, 'f', -1, 64))
+	xs, err := NewScalarS(strconv.FormatFloat(x, 'f', -1, 64))
 	p.setErr(err)
-	ys, err := NewScalar(strconv.FormatFloat(y, 'f', -1, 64))
+	ys, err := NewScalarS(strconv.FormatFloat(y, 'f', -1, 64))
 	p.setErr(err)
 	return OptionalCoordinates{Value: Coordinates{XY{xs, ys}}}
 }

@@ -11,8 +11,8 @@ import (
 
 func xy(x, y float64) Coordinates {
 	return Coordinates{XY: XY{
-		NewScalarFromFloat64(x),
-		NewScalarFromFloat64(y),
+		MustNewScalarF(x),
+		MustNewScalarF(y),
 	}}
 }
 
