@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures"
+	. "github.com/peterstace/simplefeatures/geom"
 )
 
 func TestPointAccessor(t *testing.T) {

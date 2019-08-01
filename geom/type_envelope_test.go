@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures"
+	. "github.com/peterstace/simplefeatures/geom"
 )
 
 func TestEnvelopeIntersectsPoint(t *testing.T) {

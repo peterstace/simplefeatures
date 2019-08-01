@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures"
+	. "github.com/peterstace/simplefeatures/geom"
 )
 
 func xy(x, y float64) Coordinates {
