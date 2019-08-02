@@ -48,108 +48,117 @@ func convexHull(g Geometry) Geometry {
 		return g
 	}
 	pts := g.convexHullPointSet()
-	hull := grahamScan(pts)
-	switch len(hull) {
+	// TODO: length may not be a good signal to indicate
+	// how to convert XY to Geometry. Need to revisit
+	switch len(pts) {
 	case 0:
 		return NewGeometryCollection(nil)
 	case 1:
-		return NewPoint(hull[0])
+		return NewPoint(pts[0])
 	case 2:
+		if pts[0].Equals(pts[1]) {
+			return NewPoint(pts[0])
+		}
 		ln, err := NewLine(
-			Coordinates{hull[0]},
-			Coordinates{hull[1]},
+			Coordinates{pts[0]},
+			Coordinates{pts[1]},
 		)
 		if err != nil {
-			panic("bug in grahamScan routine - output 2 coincident points")
+			panic(err)
 		}
 		return ln
-	default:
-		coords := [][]Coordinates{make([]Coordinates, len(hull))}
-		for i := range hull {
-			coords[0][i] = Coordinates{XY: hull[i]}
-		}
-		poly, err := NewPolygonFromCoords(coords)
-		if err != nil {
-			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid polygon: %v", err))
-		}
-		return poly
 	}
-}
 
-type pointStack []XY
+	// TODO: check if the points are all the same
+	isSame := true
+	for i := 1; i < len(pts); i++ {
+		if !pts[0].Equals(pts[i]) {
+			isSame = false
+			break
+		}
+	}
+	if isSame {
+		return NewPoint(pts[0])
+	}
 
-func (s *pointStack) push(p XY) {
-	(*s) = append(*s, p)
-}
+	cl, ok := collinearLine(pts)
+	if ok {
+		return cl
+	}
 
-func (s *pointStack) pop() XY {
-	p := s.top()
-	(*s) = (*s)[:len(*s)-1]
-	return p
-}
-
-func (s *pointStack) top() XY {
-	return (*s)[len(*s)-1]
-}
-
-func (s *pointStack) underTop() XY {
-	return (*s)[len(*s)-2]
+	hull := grahamScan(pts)
+	coords := [][]Coordinates{make([]Coordinates, len(hull))}
+	for i := range hull {
+		coords[0][i] = Coordinates{XY: hull[i]}
+	}
+	poly, err := NewPolygonFromCoords(coords)
+	if err != nil {
+		panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid polygon: %v", err))
+	}
+	return poly
 }
 
 // grahamScan returns the convex hull of the input points. It will either
 // represent the empty set (zero points), a point (one point), a line (2
 // points), or a closed polygon (>= 3 points).
 func grahamScan(ps []XY) []XY {
-	if len(ps) <= 1 {
-		return ps
+	fmt.Println("----------Origin------------")
+	for _, v := range ps {
+		fmt.Printf("X: %f, Y: %f\n", v.X.AsFloat(), v.Y.AsFloat())
 	}
+	fmt.Println("----------------------")
 
 	sortByPolarAngle(ps)
 
-	// Append the lowest-then-leftmost point so that the polygon will be closed.
-	ps = append(ps, ps[0])
-
-	// Populate the stack with the first 2 distict points.
-	var i int // tracks progress through the ps slice
-	var stack pointStack
-	stack.push(ps[0])
-	i++
-	for i < len(ps) && len(stack) < 2 {
-		if !stack.top().Equals(ps[i]) {
-			stack.push(ps[i])
-		}
-		i++
+	fmt.Println("----------Sorted------------")
+	for _, v := range ps {
+		fmt.Printf("X: %f, Y: %f\n", v.X.AsFloat(), v.Y.AsFloat())
 	}
+	fmt.Println("----------------------")
 
-	for i < len(ps) {
-		ori := orientation(stack.underTop(), stack.top(), ps[i])
+	// Append the lowest-then-leftmost point so that the polygon will be closed.
+	resultStack := make([]XY, 0, len(ps))
+	resultStack = append(resultStack, ps[0], ps[0])
+	toDoStack := make([]XY, len(ps)-1)
+	copy(toDoStack, ps[1:])
+
+	for len(toDoStack) > 0 {
+		toBeCompared := toDoStack[0]
+		ori := orientation(resultStack[len(resultStack)-2], resultStack[len(resultStack)-1], toBeCompared)
 		switch ori {
 		case leftTurn:
-			// This point _might_ be part of the convex hull. It will be popped
-			// later if it actually isn't part of the convex hull.
-			stack.push(ps[i])
+			resultStack = append(resultStack, toBeCompared)
+			toDoStack = toDoStack[1:]
 		case collinear:
-			// This point is part of the convex hull, so long as it extends the
-			// current line segment (in which case the preceding point is
-			// _not_ part of the convex hull).
-			if distanceSq(stack.underTop(), ps[i]).GT(distanceSq(stack.underTop(), stack.top())) {
-				stack.pop()
-				stack.push(ps[i])
+			if distanceSq(resultStack[len(resultStack)-2], resultStack[len(resultStack)-1]).LT(distanceSq(resultStack[len(resultStack)-2], toBeCompared)) {
+				resultStack = resultStack[:len(resultStack)-1]
+				resultStack = append(resultStack, toBeCompared)
 			}
+			toDoStack = toDoStack[1:]
 		default:
-			//  The preceding point was _not_ part of the convex hull (so it is
-			//  popped). Potentially the new point is just an extension of a
-			//  straight line (so pop the preceding point in that case so as to
-			//  eliminate collinear points).
-			stack.pop()
-			if orientation(stack.underTop(), stack.top(), ps[i]) == collinear {
-				stack.pop()
-			}
-			stack.push(ps[i])
+			resultStack = resultStack[:len(resultStack)-1]
 		}
-		i++
 	}
-	return stack
+
+	resultStack = append(resultStack, resultStack[0])
+
+	fmt.Println("---------Before Replacing-------------")
+	for _, v := range resultStack {
+		fmt.Printf("X: %f, Y: %f\n", v.X.AsFloat(), v.Y.AsFloat())
+	}
+	fmt.Println("----------------------")
+
+	if resultStack[0] == resultStack[1] {
+		resultStack = resultStack[1:]
+	}
+
+	fmt.Println("---------Result-------------")
+	for _, v := range resultStack {
+		fmt.Printf("X: %f, Y: %f\n", v.X.AsFloat(), v.Y.AsFloat())
+	}
+	fmt.Println("----------------------")
+
+	return resultStack
 }
 
 // sortByPolarAngle sorts the points by their polar angle relative to the
@@ -158,22 +167,21 @@ func sortByPolarAngle(ps []XY) {
 	// the lowest-then-leftmost (anchor) point comes first
 	ltlp := ltl(ps)
 	ps[ltlp], ps[0] = ps[0], ps[ltlp]
-	anchor := ps[0]
+	virtualPoint := ps[0]
 
 	ps = ps[1:] // only sort the remaining points
-	sort.Slice(ps, func(i, j int) bool {
-		// If any point is equal to the anchor point, then always put it first.
-		// This allows those duplicated points to be removed when the results
-		// stack is initiated.
-		if anchor.Equals(ps[i]) {
-			return true
-		}
-		if anchor.Equals(ps[j]) {
+	sort.SliceStable(ps, func(i, j int) bool {
+		if i == 0 {
 			return false
 		}
-		// In the normal case, check which order the points are in relative to
-		// the anchor.
-		return orientation(anchor, ps[i], ps[j]) == leftTurn
+
+		ori := orientation(virtualPoint, ps[i], ps[j])
+
+		if ori == collinear {
+			return distanceSq(virtualPoint, ps[i]).LT(distanceSq(virtualPoint, ps[j]))
+		}
+
+		return ori == leftTurn
 	})
 }
 
@@ -194,4 +202,37 @@ func ltl(ps []XY) int {
 func distanceSq(p, q XY) Scalar {
 	pSubQ := p.Sub(q)
 	return pSubQ.Dot(pSubQ)
+}
+
+func collinearLine(pts []XY) (Geometry, bool) {
+	if len(pts) < 2 {
+		return nil, false
+	}
+	ps := make([]XY, len(pts))
+	copy(ps, pts)
+
+	startPoint := ps[ltl(ps)]
+	// check collinear
+	sort.Slice(ps, func(i, j int) bool {
+		return distanceSq(startPoint, ps[i]).LT(distanceSq(startPoint, ps[j]))
+	})
+
+	if ps[0].Equals(ps[len(ps)-1]) {
+		return nil, false
+	}
+
+	for i := 1; i < len(ps); i++ {
+		if orientation(ps[0], ps[len(ps)-1], ps[i]) != collinear {
+			return nil, false
+		}
+	}
+
+	// already check that if the initial point is as same as the end point.
+	// Ignore error here.
+	cl, _ := NewLine(
+		Coordinates{ps[0]},
+		Coordinates{ps[len(ps)-1]},
+	)
+
+	return cl, true
 }
