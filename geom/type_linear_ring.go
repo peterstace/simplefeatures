@@ -110,6 +110,16 @@ func (r LinearRing) AsBinary(w io.Writer) error {
 	return r.ls.AsBinary(w)
 }
 
+// ConvexHull returns the convex hull of the LinearRing, which is always a
+// Polygon.
+func (r LinearRing) ConvexHull() Geometry {
+	return convexHull(r)
+}
+
+func (r LinearRing) convexHullPointSet() []XY {
+	return r.ls.convexHullPointSet()
+}
+
 func (r LinearRing) MarshalJSON() ([]byte, error) {
 	return r.ls.MarshalJSON()
 }

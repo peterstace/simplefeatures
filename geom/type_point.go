@@ -97,6 +97,16 @@ func (p Point) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
+// ConvexHull returns the convex hull of this Point, which is always the same
+// point.
+func (p Point) ConvexHull() Geometry {
+	return convexHull(p)
+}
+
+func (p Point) convexHullPointSet() []XY {
+	return []XY{p.XY()}
+}
+
 func (p Point) MarshalJSON() ([]byte, error) {
 	return marshalGeoJSON("Point", p.Coordinates())
 }

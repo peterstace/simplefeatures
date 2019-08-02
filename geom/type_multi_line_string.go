@@ -168,6 +168,23 @@ func (m MultiLineString) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
+func (m MultiLineString) ConvexHull() Geometry {
+	return convexHull(m)
+}
+
+func (m MultiLineString) convexHullPointSet() []XY {
+	var points []XY
+	n := m.NumLineStrings()
+	for i := 0; i < n; i++ {
+		line := m.LineStringN(i)
+		m := line.NumPoints()
+		for j := 0; j < m; j++ {
+			points = append(points, line.PointN(j).XY())
+		}
+	}
+	return points
+}
+
 func (m MultiLineString) MarshalJSON() ([]byte, error) {
 	numLines := m.NumLineStrings()
 	coords := make([][]Coordinates, numLines)
