@@ -102,19 +102,8 @@ func convexHull(g Geometry) Geometry {
 // represent the empty set (zero points), a point (one point), a line (2
 // points), or a closed polygon (>= 3 points).
 func grahamScan(ps []XY) []XY {
-	fmt.Println("----------Origin------------")
-	for _, v := range ps {
-		fmt.Printf("X: %f, Y: %f\n", v.X.AsFloat(), v.Y.AsFloat())
-	}
-	fmt.Println("----------------------")
 
 	sortByPolarAngle(ps)
-
-	fmt.Println("----------Sorted------------")
-	for _, v := range ps {
-		fmt.Printf("X: %f, Y: %f\n", v.X.AsFloat(), v.Y.AsFloat())
-	}
-	fmt.Println("----------------------")
 
 	// Append the lowest-then-leftmost point so that the polygon will be closed.
 	resultStack := make([]XY, 0, len(ps))
@@ -142,21 +131,9 @@ func grahamScan(ps []XY) []XY {
 
 	resultStack = append(resultStack, resultStack[0])
 
-	fmt.Println("---------Before Replacing-------------")
-	for _, v := range resultStack {
-		fmt.Printf("X: %f, Y: %f\n", v.X.AsFloat(), v.Y.AsFloat())
-	}
-	fmt.Println("----------------------")
-
 	if resultStack[0] == resultStack[1] {
 		resultStack = resultStack[1:]
 	}
-
-	fmt.Println("---------Result-------------")
-	for _, v := range resultStack {
-		fmt.Printf("X: %f, Y: %f\n", v.X.AsFloat(), v.Y.AsFloat())
-	}
-	fmt.Println("----------------------")
 
 	return resultStack
 }
