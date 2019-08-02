@@ -1,0 +1,20 @@
+version: "2.1"
+services:
+  postgis:
+    image: mdillon/postgis
+    healthcheck:
+      test: "pg_isready -U postgres"
+      interval: '100ms'
+      timeout: '1s'
+      retries: 50
+  fuzz:
+    build:
+      context: .
+      dockerfile: ./fuzztests/Dockerfile
+    entrypoint: /go/bin/fuzztests --path . --dburl 'postgres://postgres:password@postgis:5432/postgres?sslmode=disable'
+    environment:
+      - GO111MODULE=on
+    depends_on:
+      postgis:
+        condition: service_healthy
+
