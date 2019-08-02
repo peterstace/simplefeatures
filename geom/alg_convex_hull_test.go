@@ -1,4 +1,4 @@
-package simplefeatures_test
+package geom_test
 
 import (
 	"strconv"

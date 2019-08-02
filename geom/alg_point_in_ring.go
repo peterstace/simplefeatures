@@ -1,4 +1,4 @@
-package simplefeatures
+package geom
 
 type side int
 
