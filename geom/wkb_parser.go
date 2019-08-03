@@ -107,11 +107,11 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 		case 0:
 			return NewEmptyLineString()
 		case 2:
-			ln, err := NewLine(coords[0], coords[1])
+			ln, err := NewLineC(coords[0], coords[1])
 			p.setErr(err)
 			return ln
 		default:
-			ls, err := NewLineString(coords)
+			ls, err := NewLineStringC(coords)
 			p.setErr(err)
 			return ls
 		}
@@ -241,7 +241,7 @@ func (p *wkbParser) parseMultiLineString() MultiLineString {
 		case Line:
 			c1 := geom.StartPoint().Coordinates()
 			c2 := geom.EndPoint().Coordinates()
-			ls, err := NewLineString([]Coordinates{c1, c2})
+			ls, err := NewLineStringC([]Coordinates{c1, c2})
 			p.setErr(err)
 			lss = append(lss, ls)
 		default:

@@ -50,9 +50,9 @@ func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 			case 0:
 				return NewEmptyLineString(), nil
 			case 2:
-				return NewLine(coords[0], coords[1])
+				return NewLineC(coords[0], coords[1])
 			default:
-				return NewLineString(coords)
+				return NewLineStringC(coords)
 			}
 		case "MultiPoint":
 			return NewMultiPointC(coords), nil

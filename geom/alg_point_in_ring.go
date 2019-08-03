@@ -23,7 +23,7 @@ func pointRingSide(pt XY, ring LinearRing) side {
 		return exterior
 	}
 
-	ray := must(NewLine(Coordinates{pt}, Coordinates{XY{maxX.Add(one), pt.Y}})).(Line)
+	ray := must(NewLineC(Coordinates{pt}, Coordinates{XY{maxX.Add(one), pt.Y}})).(Line)
 	var count int
 	for _, seg := range ring.ls.lines {
 		inter := seg.Intersection(ray)

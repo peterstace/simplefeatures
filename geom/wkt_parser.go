@@ -86,11 +86,11 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		case 0:
 			return NewEmptyLineString()
 		case 2:
-			ln, err := NewLine(coords[0], coords[1])
+			ln, err := NewLineC(coords[0], coords[1])
 			p.check(err)
 			return ln
 		default:
-			ls, err := NewLineString(coords)
+			ls, err := NewLineStringC(coords)
 			p.check(err)
 			return ls
 		}

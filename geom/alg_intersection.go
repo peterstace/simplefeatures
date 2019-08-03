@@ -153,7 +153,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			u.X, v.X = v.X, u.X
 		}
 
-		return must(NewLine(Coordinates{u}, Coordinates{v}))
+		return must(NewLineC(Coordinates{u}, Coordinates{v}))
 	}
 
 	// Parrallel but not colinear, so cannot intersect anywhere.

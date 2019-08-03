@@ -29,7 +29,7 @@ func NewMultiLineStringC(coords [][]Coordinates) (MultiLineString, error) {
 		if len(c) == 0 {
 			continue
 		}
-		line, err := NewLineString(c)
+		line, err := NewLineStringC(c)
 		if err != nil {
 			return MultiLineString{}, err
 		}

@@ -16,15 +16,15 @@ type LineString struct {
 	lines []Line
 }
 
-// NewLineString creates a line string from the coordinates defining its
+// NewLineStringC creates a line string from the coordinates defining its
 // points.
-func NewLineString(pts []Coordinates) (LineString, error) {
+func NewLineStringC(pts []Coordinates) (LineString, error) {
 	var lines []Line
 	for i := 0; i < len(pts)-1; i++ {
 		if pts[i].XY.Equals(pts[i+1].XY) {
 			continue
 		}
-		ln := must(NewLine(pts[i], pts[i+1])).(Line)
+		ln := must(NewLineC(pts[i], pts[i+1])).(Line)
 		lines = append(lines, ln)
 	}
 	if len(lines) == 0 {
