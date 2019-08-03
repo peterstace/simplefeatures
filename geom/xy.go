@@ -9,6 +9,15 @@ type XY struct {
 	X, Y Scalar
 }
 
+// MustNewXYF creates an XY from x and y float64 values. If either value is not
+// finite, then it panics.
+func MustNewXYF(x, y float64) XY {
+	return XY{
+		MustNewScalarF(x),
+		MustNewScalarF(y),
+	}
+}
+
 func (w XY) Equals(o XY) bool {
 	return w.X.Equals(o.X) && w.Y.Equals(o.Y)
 }

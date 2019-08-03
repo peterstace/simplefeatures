@@ -53,9 +53,9 @@ func convexHull(g Geometry) Geometry {
 	case 0:
 		return NewGeometryCollection(nil)
 	case 1:
-		return NewPoint(hull[0])
+		return NewPointXY(hull[0])
 	case 2:
-		ln, err := NewLine(
+		ln, err := NewLineC(
 			Coordinates{hull[0]},
 			Coordinates{hull[1]},
 		)
@@ -68,7 +68,7 @@ func convexHull(g Geometry) Geometry {
 		for i := range hull {
 			coords[0][i] = Coordinates{XY: hull[i]}
 		}
-		poly, err := NewPolygonFromCoords(coords)
+		poly, err := NewPolygonC(coords)
 		if err != nil {
 			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid polygon: %v", err))
 		}

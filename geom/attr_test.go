@@ -65,8 +65,8 @@ func TestIsEmptyDimension(t *testing.T) {
 func TestEnvelope(t *testing.T) {
 	xy := func(x, y float64) XY {
 		return XY{
-			NewScalarFromFloat64(x),
-			NewScalarFromFloat64(y),
+			MustNewScalarF(x),
+			MustNewScalarF(y),
 		}
 	}
 	for i, tt := range []struct {
