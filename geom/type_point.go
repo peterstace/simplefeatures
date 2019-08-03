@@ -1,4 +1,4 @@
-package simplefeatures
+package geom
 
 import (
 	"database/sql/driver"
@@ -95,6 +95,16 @@ func (p Point) AsBinary(w io.Writer) error {
 	marsh.writeFloat64(p.coords.X.AsFloat())
 	marsh.writeFloat64(p.coords.Y.AsFloat())
 	return marsh.err
+}
+
+// ConvexHull returns the convex hull of this Point, which is always the same
+// point.
+func (p Point) ConvexHull() Geometry {
+	return convexHull(p)
+}
+
+func (p Point) convexHullPointSet() []XY {
+	return []XY{p.XY()}
 }
 
 func (p Point) MarshalJSON() ([]byte, error) {

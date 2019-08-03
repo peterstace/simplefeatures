@@ -1,4 +1,4 @@
-package simplefeatures
+package geom
 
 import (
 	"database/sql/driver"
@@ -200,6 +200,16 @@ func (p Polygon) AsBinary(w io.Writer) error {
 		}
 	}
 	return marsh.err
+}
+
+// ConvexHull returns the convex hull of the Polygon, which is always another
+// Polygon.
+func (p Polygon) ConvexHull() Geometry {
+	return convexHull(p)
+}
+
+func (p Polygon) convexHullPointSet() []XY {
+	return p.ExteriorRing().convexHullPointSet()
 }
 
 func (p Polygon) MarshalJSON() ([]byte, error) {

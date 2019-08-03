@@ -1,4 +1,4 @@
-package simplefeatures
+package geom
 
 import (
 	"database/sql/driver"
@@ -112,6 +112,17 @@ func (n Line) AsBinary(w io.Writer) error {
 	marsh.writeFloat64(n.EndPoint().XY().X.AsFloat())
 	marsh.writeFloat64(n.EndPoint().XY().Y.AsFloat())
 	return marsh.err
+}
+
+func (n Line) ConvexHull() Geometry {
+	return convexHull(n)
+}
+
+func (n Line) convexHullPointSet() []XY {
+	return []XY{
+		n.StartPoint().XY(),
+		n.EndPoint().XY(),
+	}
 }
 
 func (n Line) MarshalJSON() ([]byte, error) {

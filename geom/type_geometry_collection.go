@@ -1,4 +1,4 @@
-package simplefeatures
+package geom
 
 import (
 	"database/sql/driver"
@@ -81,6 +81,8 @@ func (c GeometryCollection) Equals(other Geometry) bool {
 	return equals(c, other)
 }
 
+// walk traverses a tree of GeometryCollections, triggering a callback at each
+// non-Geometry collection leaf.
 func (c GeometryCollection) walk(fn func(Geometry)) {
 	for _, g := range c.geoms {
 		if col, ok := g.(GeometryCollection); ok {
@@ -132,6 +134,20 @@ func (c GeometryCollection) AsBinary(w io.Writer) error {
 		marsh.setErr(geom.AsBinary(w))
 	}
 	return marsh.err
+}
+
+func (c GeometryCollection) ConvexHull() Geometry {
+	return convexHull(c)
+}
+
+func (c GeometryCollection) convexHullPointSet() []XY {
+	var points []XY
+	n := c.NumGeometries()
+	for i := 0; i < n; i++ {
+		g := c.GeometryN(i)
+		points = append(points, g.convexHullPointSet()...)
+	}
+	return points
 }
 
 func (c GeometryCollection) MarshalJSON() ([]byte, error) {

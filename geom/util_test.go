@@ -1,4 +1,4 @@
-package simplefeatures_test
+package geom_test
 
 import (
 	"reflect"
@@ -28,11 +28,14 @@ expected to be equal, but aren't:
 `
 		// Special cases for geometries:
 		gotGeom, okGot := got.(Geometry)
-		wantGeom, okWant := want.(Geometry)
-		if okGot && okWant {
+		if okGot {
 			format += "    got  (WKT): %s\n"
+			args = append(args, gotGeom.AsText())
+		}
+		wantGeom, okWant := want.(Geometry)
+		if okWant {
 			format += "    want (WKT): %s\n"
-			args = append(args, gotGeom.AsText(), wantGeom.AsText())
+			args = append(args, wantGeom.AsText())
 		}
 		t.Errorf(format, args...)
 	}

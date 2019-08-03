@@ -1,4 +1,4 @@
-package simplefeatures
+package geom
 
 import (
 	"database/sql/driver"
@@ -137,6 +137,21 @@ func (m MultiPoint) AsBinary(w io.Writer) error {
 		marsh.setErr(pt.AsBinary(w))
 	}
 	return marsh.err
+}
+
+// ConvexHull finds the convex hull of the set of points. This may either be
+// the empty set, a single point, a line, or a polygon.
+func (m MultiPoint) ConvexHull() Geometry {
+	return convexHull(m)
+}
+
+func (m MultiPoint) convexHullPointSet() []XY {
+	n := m.NumPoints()
+	points := make([]XY, n)
+	for i := 0; i < n; i++ {
+		points[i] = m.PointN(i).XY()
+	}
+	return points
 }
 
 func (m MultiPoint) MarshalJSON() ([]byte, error) {

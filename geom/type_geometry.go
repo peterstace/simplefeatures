@@ -1,4 +1,4 @@
-package simplefeatures
+package geom
 
 import (
 	"encoding/json"
@@ -42,6 +42,14 @@ type Geometry interface {
 
 	// Boundary returns the Geometry representing the limit of this geometry.
 	Boundary() Geometry
+
+	// Convex hull returns a Geometry that represents the smallest convex set
+	// that contains this geometry.
+	ConvexHull() Geometry
+
+	// convexHullPointset returns the list of points that must be considered
+	// when finding the convex hull.
+	convexHullPointSet() []XY
 
 	json.Marshaler
 }

@@ -1,4 +1,4 @@
-package simplefeatures
+package geom
 
 // graph is an adjacency list representing an undirected simple graph.
 type graph map[int]map[int]struct{}

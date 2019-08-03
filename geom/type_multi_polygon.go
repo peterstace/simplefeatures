@@ -1,4 +1,4 @@
-package simplefeatures
+package geom
 
 import (
 	"database/sql/driver"
@@ -233,6 +233,23 @@ func (m MultiPolygon) AsBinary(w io.Writer) error {
 		marsh.setErr(poly.AsBinary(w))
 	}
 	return marsh.err
+}
+
+func (m MultiPolygon) ConvexHull() Geometry {
+	return convexHull(m)
+}
+
+func (m MultiPolygon) convexHullPointSet() []XY {
+	var points []XY
+	numPolys := m.NumPolygons()
+	for i := 0; i < numPolys; i++ {
+		ring := m.PolygonN(i).ExteriorRing()
+		numPts := ring.NumPoints()
+		for j := 0; j < numPts; j++ {
+			points = append(points, ring.PointN(j).XY())
+		}
+	}
+	return points
 }
 
 func (m MultiPolygon) MarshalJSON() ([]byte, error) {
