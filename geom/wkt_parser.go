@@ -78,7 +78,7 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		if coords.Empty {
 			return NewEmptyPoint()
 		} else {
-			return NewPointFromCoords(coords.Value)
+			return NewPointC(coords.Value)
 		}
 	case "LINESTRING":
 		coords := p.nextLineStringText()
@@ -86,11 +86,11 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		case 0:
 			return NewEmptyLineString()
 		case 2:
-			ln, err := NewLine(coords[0], coords[1])
+			ln, err := NewLineC(coords[0], coords[1])
 			p.check(err)
 			return ln
 		default:
-			ls, err := NewLineString(coords)
+			ls, err := NewLineStringC(coords)
 			p.check(err)
 			return ls
 		}
@@ -112,21 +112,21 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		if len(coords) == 0 {
 			return NewEmptyPolygon()
 		} else {
-			poly, err := NewPolygonFromCoords(coords)
+			poly, err := NewPolygonC(coords)
 			p.check(err)
 			return poly
 		}
 	case "MULTIPOINT":
 		coords := p.nextMultiPointText()
-		return NewMultiPointFromOptionalCoords(coords)
+		return NewMultiPointOC(coords)
 	case "MULTILINESTRING":
 		coords := p.nextPolygonText() // same production as polygon
-		mls, err := NewMultiLineStringFromCoords(coords)
+		mls, err := NewMultiLineStringC(coords)
 		p.check(err)
 		return mls
 	case "MULTIPOLYGON":
 		coords := p.nextMultiPolygonText()
-		mp, err := NewMultiPolygonFromCoords(coords)
+		mp, err := NewMultiPolygonC(coords)
 		p.check(err)
 		return mp
 	case "GEOMETRYCOLLECTION":

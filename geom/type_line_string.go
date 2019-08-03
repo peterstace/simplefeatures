@@ -16,15 +16,15 @@ type LineString struct {
 	lines []Line
 }
 
-// NewLineString creates a line string from the coordinates defining its
+// NewLineStringC creates a line string from the coordinates defining its
 // points.
-func NewLineString(pts []Coordinates) (LineString, error) {
+func NewLineStringC(pts []Coordinates) (LineString, error) {
 	var lines []Line
 	for i := 0; i < len(pts)-1; i++ {
 		if pts[i].XY.Equals(pts[i+1].XY) {
 			continue
 		}
-		ln := must(NewLine(pts[i], pts[i+1])).(Line)
+		ln := must(NewLineC(pts[i], pts[i+1])).(Line)
 		lines = append(lines, ln)
 	}
 	if len(lines) == 0 {
@@ -110,8 +110,8 @@ func (s LineString) IsSimple() bool {
 				// point, so long as that point is the start of the first
 				// segment and the end of the last segment (i.e. a linear
 				// ring).
-				aPt := NewPointFromCoords(s.lines[i].a)
-				bPt := NewPointFromCoords(s.lines[j].b)
+				aPt := NewPointC(s.lines[i].a)
+				bPt := NewPointC(s.lines[j].b)
 				if !intersection.Equals(aPt) || !intersection.Equals(bPt) {
 					return false
 				}
@@ -159,8 +159,8 @@ func (s LineString) Boundary() Geometry {
 		return NewMultiPoint(nil)
 	}
 	return NewMultiPoint([]Point{
-		NewPoint(s.lines[0].a.XY),
-		NewPoint(s.lines[len(s.lines)-1].b.XY),
+		NewPointXY(s.lines[0].a.XY),
+		NewPointXY(s.lines[len(s.lines)-1].b.XY),
 	})
 }
 

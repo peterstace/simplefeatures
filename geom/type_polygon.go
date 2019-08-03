@@ -76,7 +76,10 @@ func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
 	return Polygon{outer: outer, holes: holes}, nil
 }
 
-func NewPolygonFromCoords(coords [][]Coordinates) (Polygon, error) {
+// NewPolygonC creates a new polygon from its Coordinates. The first dimension
+// of the Coordinates slice is the ring number, and the second dimension of the
+// Coordinates slice is the position within the ring.
+func NewPolygonC(coords [][]Coordinates) (Polygon, error) {
 	if len(coords) == 0 {
 		return Polygon{}, errors.New("Polygon must have an outer ring")
 	}

@@ -145,7 +145,7 @@ func lineCmp(a, b Line) int {
 
 func orderLine(line Line) Line {
 	if xyCmp(line.a.XY, line.b.XY) > 0 {
-		return must(NewLine(line.b, line.a)).(Line)
+		return must(NewLineC(line.b, line.a)).(Line)
 	}
 	return line
 }

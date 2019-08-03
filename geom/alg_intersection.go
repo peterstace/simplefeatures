@@ -88,7 +88,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			// Intersection between lines occurs beyond line endpoints.
 			return NewGeometryCollection(nil)
 		}
-		return NewPoint(b.Sub(a).Scale(p).Add(a))
+		return NewPointXY(b.Sub(a).Scale(p).Add(a))
 	}
 
 	// TODO: invert if to un-indent flow.
@@ -115,21 +115,21 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 
 		if abBB.max.X.Equals(cdBB.min.X) && abBB.min.Y.Equals(cdBB.max.Y) {
 			// Line segments overlap at a point.
-			return NewPointXY(abBB.max.X, abBB.min.Y)
+			return NewPointS(abBB.max.X, abBB.min.Y)
 		}
 
 		if cdBB.max.X.Equals(abBB.min.X) && cdBB.min.Y.Equals(abBB.max.Y) {
 			// Line segments overlap at a point.
-			return NewPointXY(cdBB.max.X, cdBB.min.Y)
+			return NewPointS(cdBB.max.X, cdBB.min.Y)
 		}
 
 		if abBB.max.Equals(cdBB.min) {
 			// Line segments overlap at a point.
-			return NewPoint(abBB.max)
+			return NewPointXY(abBB.max)
 		}
 		if cdBB.max.Equals(abBB.min) {
 			// Line segments overlap at a point.
-			return NewPoint(cdBB.max)
+			return NewPointXY(cdBB.max)
 		}
 
 		// Line segments overlap over a line segment.
@@ -153,7 +153,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			u.X, v.X = v.X, u.X
 		}
 
-		return must(NewLine(Coordinates{u}, Coordinates{v}))
+		return must(NewLineC(Coordinates{u}, Coordinates{v}))
 	}
 
 	// Parrallel but not colinear, so cannot intersect anywhere.
@@ -221,7 +221,7 @@ func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) Geometry {
 
 	intersection := make([]Point, 0, len(allSet))
 	for _, pt := range allSet {
-		intersection = append(intersection, NewPoint(pt))
+		intersection = append(intersection, NewPointXY(pt))
 	}
 	sort.Slice(intersection, func(i, j int) bool {
 		return intersection[i].coords.XY.Less(intersection[j].coords.XY)
@@ -239,7 +239,7 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
 	}
 	for _, pt := range mp.pts {
 		if pt.Equals(point) {
-			return NewPoint(point.coords.XY)
+			return NewPointXY(point.coords.XY)
 		}
 	}
 	return NewGeometryCollection(nil)
@@ -247,7 +247,7 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
 
 func intersectPointWithPoint(pt1, pt2 Point) Geometry {
 	if pt1.Equals(pt2) {
-		return NewPoint(pt1.coords.XY)
+		return NewPointXY(pt1.coords.XY)
 	}
 	return NewGeometryCollection(nil)
 }

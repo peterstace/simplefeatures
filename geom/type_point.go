@@ -14,18 +14,18 @@ type Point struct {
 	coords Coordinates
 }
 
-// NewPoint creates a new point from an XY.
-func NewPoint(xy XY) Point {
-	return NewPointXY(xy.X, xy.Y)
+// NewPointXY creates a new point from an XY.
+func NewPointXY(xy XY) Point {
+	return NewPointS(xy.X, xy.Y)
 }
 
-// NewPointXY creates a new point from an X and a Y.
-func NewPointXY(x, y Scalar) Point {
-	return NewPointFromCoords(Coordinates{XY{x, y}})
+// NewPointS creates a new point from scalar values.
+func NewPointS(x, y Scalar) Point {
+	return NewPointC(Coordinates{XY{x, y}})
 }
 
-// NewPointFromCoords creates a new point gives its coordinates.
-func NewPointFromCoords(c Coordinates) Point {
+// NewPointC creates a new point gives its Coordinates.
+func NewPointC(c Coordinates) Point {
 	return Point{coords: c}
 }
 

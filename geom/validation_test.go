@@ -11,8 +11,8 @@ import (
 
 func xy(x, y float64) Coordinates {
 	return Coordinates{XY: XY{
-		NewScalarFromFloat64(x),
-		NewScalarFromFloat64(y),
+		MustNewScalarF(x),
+		MustNewScalarF(y),
 	}}
 }
 
@@ -22,7 +22,7 @@ func TestLineValidation(t *testing.T) {
 		{xy(-1, -1), xy(-1, -1)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := NewLine(pts[0], pts[1])
+			_, err := NewLineC(pts[0], pts[1])
 			if err == nil {
 				t.Error("expected error")
 			}
@@ -38,7 +38,7 @@ func TestLineStringValidation(t *testing.T) {
 		{xy(1, 1), xy(1, 1)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := NewLineString(pts)
+			_, err := NewLineStringC(pts)
 			if err == nil {
 				t.Error("expected error")
 			}
