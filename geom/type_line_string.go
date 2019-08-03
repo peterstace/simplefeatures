@@ -110,8 +110,8 @@ func (s LineString) IsSimple() bool {
 				// point, so long as that point is the start of the first
 				// segment and the end of the last segment (i.e. a linear
 				// ring).
-				aPt := NewPointFromCoords(s.lines[i].a)
-				bPt := NewPointFromCoords(s.lines[j].b)
+				aPt := NewPointC(s.lines[i].a)
+				bPt := NewPointC(s.lines[j].b)
 				if !intersection.Equals(aPt) || !intersection.Equals(bPt) {
 					return false
 				}
@@ -159,8 +159,8 @@ func (s LineString) Boundary() Geometry {
 		return NewMultiPoint(nil)
 	}
 	return NewMultiPoint([]Point{
-		NewPoint(s.lines[0].a.XY),
-		NewPoint(s.lines[len(s.lines)-1].b.XY),
+		NewPointXY(s.lines[0].a.XY),
+		NewPointXY(s.lines[len(s.lines)-1].b.XY),
 	})
 }
 

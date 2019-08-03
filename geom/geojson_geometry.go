@@ -32,7 +32,7 @@ func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewPointFromCoords(coords), nil
+		return NewPointC(coords), nil
 	case "LineString", "MultiPoint":
 		var secondPass struct {
 			Coords [][]float64 `json:"coordinates"`
@@ -55,7 +55,7 @@ func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 				return NewLineString(coords)
 			}
 		case "MultiPoint":
-			return NewMultiPointFromCoords(coords), nil
+			return NewMultiPointC(coords), nil
 		default:
 			panic("switch case bug")
 		}
@@ -76,10 +76,10 @@ func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 			case 0:
 				return NewEmptyPolygon(), nil
 			default:
-				return NewPolygonFromCoords(coords)
+				return NewPolygonC(coords)
 			}
 		case "MultiLineString":
-			return NewMultiLineStringFromCoords(coords)
+			return NewMultiLineStringC(coords)
 		default:
 			panic("switch case bug")
 		}
@@ -94,7 +94,7 @@ func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewMultiPolygonFromCoords(coords)
+		return NewMultiPolygonC(coords)
 	case "GeometryCollection":
 		var secondPass struct {
 			Geometries []AnyGeometry `json:"geometries"`

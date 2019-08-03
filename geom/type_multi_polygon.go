@@ -20,6 +20,8 @@ type MultiPolygon struct {
 	polys []Polygon
 }
 
+// NewMultiPolygon creates a MultiPolygon from its constintuent Polygons. It
+// gives an error if any of the MultiPolygon assertions are not maintained.
 func NewMultiPolygon(polys []Polygon) (MultiPolygon, error) {
 	for i := 0; i < len(polys); i++ {
 		for j := i + 1; j < len(polys); j++ {
@@ -122,13 +124,14 @@ func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
 	return true
 }
 
-func NewMultiPolygonFromCoords(coords [][][]Coordinates) (MultiPolygon, error) {
+// NewMultiPolygonC creates a new MultiPolygon from its constituent Coordinate values.
+func NewMultiPolygonC(coords [][][]Coordinates) (MultiPolygon, error) {
 	var polys []Polygon
 	for _, c := range coords {
 		if len(c) == 0 {
 			continue
 		}
-		poly, err := NewPolygonFromCoords(c)
+		poly, err := NewPolygonC(c)
 		if err != nil {
 			return MultiPolygon{}, err
 		}

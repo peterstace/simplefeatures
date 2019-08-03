@@ -99,7 +99,7 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 		if coords.Empty {
 			return NewEmptyPoint()
 		} else {
-			return NewPointFromCoords(coords.Value)
+			return NewPointC(coords.Value)
 		}
 	case wkbGeomTypeLineString:
 		coords := p.parseLineString()
@@ -120,7 +120,7 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 		if len(coords) == 0 {
 			return NewEmptyPolygon()
 		} else {
-			poly, err := NewPolygonFromCoords(coords)
+			poly, err := NewPolygonC(coords)
 			p.setErr(err)
 			return poly
 		}
