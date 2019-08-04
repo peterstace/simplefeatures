@@ -20,6 +20,7 @@ func TestFuzz(t *testing.T) {
 	candidates := extractStringsFromSource(t)
 	CheckWKTParse(t, pg, candidates)
 	CheckWKBParse(t, pg, candidates)
+	CheckGeoJSONParse(t, pg, candidates)
 	//corpus := newCorpus(db, candidates)
 	//corpus.loadGeometries(t)
 	//corpus.checkProperties()

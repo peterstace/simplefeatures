@@ -46,3 +46,18 @@ func (p PostGIS) WKBIsValidWithReason(t *testing.T, wkb string) (bool, string) {
 	}
 	return isValid, reason
 }
+
+func (p PostGIS) GeoJSONIsValidWithReason(t *testing.T, geojson string) (bool, string) {
+	var isValid bool
+	err := p.db.QueryRow(`SELECT ST_IsValid(ST_GeomFromGeoJSON($1))`, geojson).Scan(&isValid)
+	if err != nil {
+		return false, err.Error()
+	}
+
+	var reason string
+	err = p.db.QueryRow(`SELECT ST_IsValidReason(ST_GeomFromGeoJSON($1))`, geojson).Scan(&reason)
+	if err != nil {
+		return false, err.Error()
+	}
+	return isValid, reason
+}

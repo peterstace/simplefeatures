@@ -12,7 +12,9 @@ import (
 )
 
 func CheckWKTParse(t *testing.T, pg PostGIS, candidates []string) {
+	var any bool
 	for i, wkt := range candidates {
+		any = true
 		t.Run(fmt.Sprintf("CheckWKTParse_%d", i), func(t *testing.T) {
 
 			// The simple feature library accepts LINEARRING WKTs. However,
@@ -32,6 +34,11 @@ func CheckWKTParse(t *testing.T, pg PostGIS, candidates []string) {
 				t.Errorf("mismatch")
 			}
 		})
+	}
+	if !any {
+		// We know there are some some valid WKT strings, so if this happens
+		// then something is wrong with the extraction or conversion logic.
+		t.Errorf("could not extract any WKTs")
 	}
 }
 
@@ -75,4 +82,37 @@ func hexStringToBytes(s string) ([]byte, error) {
 		buf = append(buf, byte(x))
 	}
 	return buf, nil
+}
+
+func CheckGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
+	var any bool
+	for i, geojson := range candidates {
+		if geojson == `{"type":"Point","coordinates":[]}` {
+			// From https://tools.ietf.org/html/rfc7946#section-3.1:
+			//
+			// > GeoJSON processors MAY interpret Geometry objects with
+			// > empty "coordinates" arrays as null objects.
+			//
+			// Simplefeatures chooses to accept this as an empty point, but
+			// Postgres rejects it.
+			continue
+		}
+		any = true
+		t.Run(fmt.Sprintf("CheckGeoJSONParse_%d", i), func(t *testing.T) {
+			_, sfErr := geom.UnmarshalGeoJSON([]byte(geojson))
+			isValid, reason := pg.GeoJSONIsValidWithReason(t, geojson)
+			if (sfErr == nil) != isValid {
+				t.Logf("GeoJSON: %v", geojson)
+				t.Logf("SimpleFeatures err: %v", sfErr)
+				t.Logf("PostGIS IsValid: %v", isValid)
+				t.Logf("PostGIS Reason: %v", reason)
+				t.Errorf("mismatch")
+			}
+		})
+	}
+	if !any {
+		// We know there are some some valid geojson strings, so if this happens
+		// then something is wrong with the extraction or conversion logic.
+		t.Errorf("could not extract any geojsons")
+	}
 }
