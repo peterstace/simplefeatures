@@ -1,4 +1,2 @@
-language: go
 script:
-  - go install -v ./...
   - docker-compose up --abort-on-container-exit
