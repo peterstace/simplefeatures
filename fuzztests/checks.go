@@ -120,7 +120,6 @@ func CheckGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
 func CheckWKT(t *testing.T, pg PostGIS, geoms []geom.Geometry) {
 	for i, g := range geoms {
 		t.Run(fmt.Sprintf("CheckWKT_%d", i), func(t *testing.T) {
-			want := pg.AsText(t, g)
 			got := g.AsText()
 			if strings.Contains(got, "MULTIPOINT") {
 				// Skip Multipoints. This is because Postgis doesn't follow the SFA
@@ -128,7 +127,7 @@ func CheckWKT(t *testing.T, pg PostGIS, geoms []geom.Geometry) {
 				// The simplefeatures library follows the spec correctly.
 				t.SkipNow()
 			}
-
+			want := pg.AsText(t, g)
 			if want != got {
 				t.Logf("got:  %v", got)
 				t.Logf("want: %v", want)
