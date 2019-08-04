@@ -19,6 +19,7 @@ func TestFuzz(t *testing.T) {
 	pg := setupDB(t)
 	candidates := extractStringsFromSource(t)
 	CheckWKTParse(t, pg, candidates)
+	CheckWKBParse(t, pg, candidates)
 	//corpus := newCorpus(db, candidates)
 	//corpus.loadGeometries(t)
 	//corpus.checkProperties()
