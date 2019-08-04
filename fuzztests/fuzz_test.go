@@ -16,15 +16,15 @@ import (
 )
 
 func TestFuzz(t *testing.T) {
-	db := setupDB(t)
+	pg := setupDB(t)
 	candidates := extractStringsFromSource(t)
-	CheckWKTParse(t, db, candidates)
+	CheckWKTParse(t, pg, candidates)
 	//corpus := newCorpus(db, candidates)
 	//corpus.loadGeometries(t)
 	//corpus.checkProperties()
 }
 
-func setupDB(t *testing.T) *sql.DB {
+func setupDB(t *testing.T) PostGIS {
 	db, err := sql.Open("postgres", "postgres://postgres:password@postgis:5432/postgres?sslmode=disable")
 	if err != nil {
 		t.Fatal(err)
@@ -32,7 +32,7 @@ func setupDB(t *testing.T) *sql.DB {
 	if err := db.Ping(); err != nil {
 		t.Fatal(err)
 	}
-	return db
+	return PostGIS{db}
 }
 
 func extractStringsFromSource(t *testing.T) []string {

@@ -1,13 +1,6 @@
 package main
 
-import (
-	"database/sql"
-	"sort"
-	"strings"
-
-	"github.com/peterstace/simplefeatures/geom"
-)
-
+/*
 type corpus struct {
 	engines    [2]GeometryEngine
 	candidates []string
@@ -149,3 +142,4 @@ func newCorpus(db *sql.DB, candidates []string) *corpus {
 //}
 //}
 //}
+*/

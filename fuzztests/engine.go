@@ -1,14 +1,6 @@
 package main
 
-import (
-	"bytes"
-	"database/sql"
-	"errors"
-	"strconv"
-	"strings"
-
-	"github.com/peterstace/simplefeatures/geom"
-)
+/*
 
 // GeometryEngine describes all of the operations that a geometry engine should
 // be able to perform. This is an abstraction such that the simplefeatures
@@ -109,3 +101,4 @@ func (p *PostgisEngine) AsText(g geom.Geometry) (string, error) {
 	err := p.db.QueryRow(`SELECT ST_AsText($1)`, g).Scan(&wkt)
 	return wkt, err
 }
+*/
