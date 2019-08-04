@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	"go/ast"
@@ -13,17 +14,19 @@ import (
 	"testing"
 
 	_ "github.com/lib/pq"
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestFuzz(t *testing.T) {
 	pg := setupDB(t)
 	candidates := extractStringsFromSource(t)
+
 	CheckWKTParse(t, pg, candidates)
 	CheckWKBParse(t, pg, candidates)
 	CheckGeoJSONParse(t, pg, candidates)
-	//corpus := newCorpus(db, candidates)
-	//corpus.loadGeometries(t)
-	//corpus.checkProperties()
+
+	geoms := convertToGeometries(t, candidates)
+	_ = geoms
 }
 
 func setupDB(t *testing.T) PostGIS {
@@ -69,5 +72,55 @@ func extractStringsFromSource(t *testing.T) []string {
 	}); err != nil {
 		t.Fatal(err)
 	}
+
+	strSet := map[string]struct{}{}
+	for _, s := range strs {
+		strSet[strings.TrimSpace(s)] = struct{}{}
+	}
+	strs = strs[:0]
+	for s := range strSet {
+		strs = append(strs, s)
+	}
 	return strs
+}
+
+func convertToGeometries(t *testing.T, candidates []string) []geom.Geometry {
+	var geoms []geom.Geometry
+	for _, c := range candidates {
+		g, err := geom.UnmarshalWKT(strings.NewReader(c))
+		if err == nil {
+			geoms = append(geoms, g)
+		}
+	}
+	if len(geoms) == 0 {
+		t.Fatal("could not extract any WKT geoms")
+	}
+
+	oldCount := len(geoms)
+	for _, c := range candidates {
+		buf, err := hexStringToBytes(c)
+		if err != nil {
+			continue
+		}
+		g, err := geom.UnmarshalWKB(bytes.NewReader(buf))
+		if err == nil {
+			geoms = append(geoms, g)
+		}
+	}
+	if oldCount == len(geoms) {
+		t.Fatal("could not extract any WKB geoms")
+	}
+
+	oldCount = len(geoms)
+	for _, c := range candidates {
+		g, err := geom.UnmarshalGeoJSON([]byte(c))
+		if err == nil {
+			geoms = append(geoms, g)
+		}
+	}
+	if oldCount == len(geoms) {
+		t.Fatal("could not extract any geojson")
+	}
+
+	return geoms
 }
