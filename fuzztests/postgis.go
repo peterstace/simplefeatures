@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"strings"
 	"testing"
+
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 type PostGIS struct {
@@ -60,4 +62,12 @@ func (p PostGIS) GeoJSONIsValidWithReason(t *testing.T, geojson string) (bool, s
 		return false, err.Error()
 	}
 	return isValid, reason
+}
+
+func (p PostGIS) AsText(t *testing.T, g geom.Geometry) string {
+	var asText string
+	if err := p.db.QueryRow(`SELECT ST_AsText($1)`, g).Scan(&asText); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return asText
 }

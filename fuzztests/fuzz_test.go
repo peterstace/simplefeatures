@@ -26,7 +26,8 @@ func TestFuzz(t *testing.T) {
 	CheckGeoJSONParse(t, pg, candidates)
 
 	geoms := convertToGeometries(t, candidates)
-	_ = geoms
+
+	CheckWKT(t, pg, geoms)
 }
 
 func setupDB(t *testing.T) PostGIS {
