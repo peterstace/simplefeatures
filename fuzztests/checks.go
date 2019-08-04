@@ -136,3 +136,21 @@ func CheckWKT(t *testing.T, pg PostGIS, geoms []geom.Geometry) {
 		})
 	}
 }
+
+func CheckWKB(t *testing.T, pg PostGIS, geoms []geom.Geometry) {
+	for i, g := range geoms {
+		t.Run(fmt.Sprintf("CheckWKB_%d", i), func(t *testing.T) {
+			var got bytes.Buffer
+			if err := g.AsBinary(&got); err != nil {
+				t.Fatalf("writing wkb: %v", err)
+			}
+			want := pg.AsBinary(t, g)
+			if !bytes.Equal(got.Bytes(), want) {
+				t.Logf("WKT:  %v", g.AsText())
+				t.Logf("got:  %v", got.Bytes())
+				t.Logf("want: %v", want)
+				t.Error("mismatch")
+			}
+		})
+	}
+}

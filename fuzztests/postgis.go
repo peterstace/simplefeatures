@@ -71,3 +71,11 @@ func (p PostGIS) AsText(t *testing.T, g geom.Geometry) string {
 	}
 	return asText
 }
+
+func (p PostGIS) AsBinary(t *testing.T, g geom.Geometry) []byte {
+	var asBinary []byte
+	if err := p.db.QueryRow(`SELECT ST_AsBinary($1::geometry)`, g).Scan(&asBinary); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return asBinary
+}

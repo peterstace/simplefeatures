@@ -28,6 +28,10 @@ func TestFuzz(t *testing.T) {
 	geoms := convertToGeometries(t, candidates)
 
 	CheckWKT(t, pg, geoms)
+
+	// TODO: a few things are happening here with empty points (alternate
+	// binary representations of NaN).
+	//CheckWKB(t, pg, geoms)
 }
 
 func setupDB(t *testing.T) PostGIS {
