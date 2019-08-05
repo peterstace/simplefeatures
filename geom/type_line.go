@@ -15,8 +15,8 @@ type Line struct {
 	a, b Coordinates
 }
 
-// NewLine creates a line segment given the coordinates of its two endpoints.
-func NewLine(a, b Coordinates) (Line, error) {
+// NewLineC creates a line segment given the Coordinates of its two endpoints.
+func NewLineC(a, b Coordinates) (Line, error) {
 	if a.XY.Equals(b.XY) {
 		return Line{}, fmt.Errorf("line endpoints must be distinct: %v", a.XY)
 	}
@@ -25,12 +25,12 @@ func NewLine(a, b Coordinates) (Line, error) {
 
 // StartPoint gives the first point of the line.
 func (n Line) StartPoint() Point {
-	return NewPointFromCoords(n.a)
+	return NewPointC(n.a)
 }
 
 // EndPoint gives the second (last) point of the line.
 func (n Line) EndPoint() Point {
-	return NewPointFromCoords(n.b)
+	return NewPointC(n.b)
 }
 
 // NumPoints always returns 2.
@@ -93,8 +93,8 @@ func (n Line) Envelope() (Envelope, bool) {
 
 func (n Line) Boundary() Geometry {
 	return NewMultiPoint([]Point{
-		NewPoint(n.a.XY),
-		NewPoint(n.b.XY),
+		NewPointXY(n.a.XY),
+		NewPointXY(n.b.XY),
 	})
 }
 

@@ -9,7 +9,7 @@ const (
 )
 
 func pointRingSide(pt XY, ring LinearRing) side {
-	ptg := NewPointFromCoords(Coordinates{pt})
+	ptg := NewPointC(Coordinates{pt})
 	// find max x coordinate
 	// TODO: should be able to use envelope for this
 	maxX := ring.ls.lines[0].a.X
@@ -23,7 +23,7 @@ func pointRingSide(pt XY, ring LinearRing) side {
 		return exterior
 	}
 
-	ray := must(NewLine(Coordinates{pt}, Coordinates{XY{maxX.Add(one), pt.Y}})).(Line)
+	ray := must(NewLineC(Coordinates{pt}, Coordinates{XY{maxX.Add(one), pt.Y}})).(Line)
 	var count int
 	for _, seg := range ring.ls.lines {
 		inter := seg.Intersection(ray)
@@ -33,8 +33,8 @@ func pointRingSide(pt XY, ring LinearRing) side {
 		if inter.Dimension() == 1 {
 			continue
 		}
-		ep1 := NewPointFromCoords(seg.a)
-		ep2 := NewPointFromCoords(seg.b)
+		ep1 := NewPointC(seg.a)
+		ep2 := NewPointC(seg.b)
 		if inter.Equals(ep1) || inter.Equals(ep2) {
 			otherY := ep1.coords.Y
 			if inter.Equals(ep1) {

@@ -54,12 +54,12 @@ func convexHull(g Geometry) Geometry {
 	case 0:
 		return NewGeometryCollection(nil)
 	case 1:
-		return NewPoint(pts[0])
+		return NewPointXY(pts[0])
 	case 2:
 		if pts[0].Equals(pts[1]) {
-			return NewPoint(pts[0])
+			return NewPointXY(pts[0])
 		}
-		ln, err := NewLine(
+		ln, err := NewLineC(
 			Coordinates{pts[0]},
 			Coordinates{pts[1]},
 		)
@@ -78,7 +78,7 @@ func convexHull(g Geometry) Geometry {
 		}
 	}
 	if isSame {
-		return NewPoint(pts[0])
+		return NewPointXY(pts[0])
 	}
 
 	cl, ok := collinearLine(pts)
@@ -91,7 +91,7 @@ func convexHull(g Geometry) Geometry {
 	for i := range hull {
 		coords[0][i] = Coordinates{XY: hull[i]}
 	}
-	poly, err := NewPolygonFromCoords(coords)
+	poly, err := NewPolygonC(coords)
 	if err != nil {
 		panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid polygon: %v", err))
 	}
@@ -206,7 +206,7 @@ func collinearLine(pts []XY) (Geometry, bool) {
 
 	// already check that if the initial point is as same as the end point.
 	// Ignore error here.
-	cl, _ := NewLine(
+	cl, _ := NewLineC(
 		Coordinates{ps[0]},
 		Coordinates{ps[len(ps)-1]},
 	)

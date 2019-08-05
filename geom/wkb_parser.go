@@ -99,7 +99,7 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 		if coords.Empty {
 			return NewEmptyPoint()
 		} else {
-			return NewPointFromCoords(coords.Value)
+			return NewPointC(coords.Value)
 		}
 	case wkbGeomTypeLineString:
 		coords := p.parseLineString()
@@ -107,11 +107,11 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 		case 0:
 			return NewEmptyLineString()
 		case 2:
-			ln, err := NewLine(coords[0], coords[1])
+			ln, err := NewLineC(coords[0], coords[1])
 			p.setErr(err)
 			return ln
 		default:
-			ls, err := NewLineString(coords)
+			ls, err := NewLineStringC(coords)
 			p.setErr(err)
 			return ls
 		}
@@ -120,7 +120,7 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 		if len(coords) == 0 {
 			return NewEmptyPolygon()
 		} else {
-			poly, err := NewPolygonFromCoords(coords)
+			poly, err := NewPolygonC(coords)
 			p.setErr(err)
 			return poly
 		}
@@ -180,9 +180,9 @@ func (p *wkbParser) parsePoint() OptionalCoordinates {
 
 	// Only XY is supported so far.
 	_, _ = z, m
-	xs, err := NewScalar(strconv.FormatFloat(x, 'f', -1, 64))
+	xs, err := NewScalarS(strconv.FormatFloat(x, 'f', -1, 64))
 	p.setErr(err)
-	ys, err := NewScalar(strconv.FormatFloat(y, 'f', -1, 64))
+	ys, err := NewScalarS(strconv.FormatFloat(y, 'f', -1, 64))
 	p.setErr(err)
 	return OptionalCoordinates{Value: Coordinates{XY{xs, ys}}}
 }
@@ -241,7 +241,7 @@ func (p *wkbParser) parseMultiLineString() MultiLineString {
 		case Line:
 			c1 := geom.StartPoint().Coordinates()
 			c2 := geom.EndPoint().Coordinates()
-			ls, err := NewLineString([]Coordinates{c1, c2})
+			ls, err := NewLineStringC([]Coordinates{c1, c2})
 			p.setErr(err)
 			lss = append(lss, ls)
 		default:

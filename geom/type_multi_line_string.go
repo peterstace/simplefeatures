@@ -14,17 +14,22 @@ type MultiLineString struct {
 	lines []LineString
 }
 
+// NewMultiLineString creates a MultiLineString from its constintuent
+// LineStrings.
 func NewMultiLineString(lines []LineString) MultiLineString {
 	return MultiLineString{lines}
 }
 
-func NewMultiLineStringFromCoords(coords [][]Coordinates) (MultiLineString, error) {
+// NewMultiLineStringC creates a MultiLineString from its coordinates. The
+// first dimension of the coordinates slice indicates the LineString, and the
+// second dimension indiates the Coordinate within a LineString.
+func NewMultiLineStringC(coords [][]Coordinates) (MultiLineString, error) {
 	var lines []LineString
 	for _, c := range coords {
 		if len(c) == 0 {
 			continue
 		}
-		line, err := NewLineString(c)
+		line, err := NewLineStringC(c)
 		if err != nil {
 			return MultiLineString{}, err
 		}
@@ -130,8 +135,8 @@ func (m MultiLineString) Boundary() Geometry {
 			continue
 		}
 		for _, pt := range [2]Point{
-			NewPointFromCoords(ls.lines[0].a),
-			NewPointFromCoords(ls.lines[len(ls.lines)-1].b),
+			NewPointC(ls.lines[0].a),
+			NewPointC(ls.lines[len(ls.lines)-1].b),
 		} {
 			hash := pt.coords.XY.hash()
 			_, seen := counts[hash]

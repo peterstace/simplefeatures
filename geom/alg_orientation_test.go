@@ -12,23 +12,23 @@ func TestOrientation(t *testing.T) {
 	}{
 		{
 			name:     "when the s is on left hand side of line of p and q",
-			p:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(0)},
-			q:        XY{NewScalarFromFloat64(1), NewScalarFromFloat64(0)},
-			s:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(1)},
+			p:        XY{MustNewScalarF(0), MustNewScalarF(0)},
+			q:        XY{MustNewScalarF(1), MustNewScalarF(0)},
+			s:        XY{MustNewScalarF(0), MustNewScalarF(1)},
 			expected: leftTurn,
 		},
 		{
 			name:     "when the s is on right hand side of line of p and q",
-			p:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(0)},
-			q:        XY{NewScalarFromFloat64(0), NewScalarFromFloat64(1)},
-			s:        XY{NewScalarFromFloat64(1), NewScalarFromFloat64(0)},
+			p:        XY{MustNewScalarF(0), MustNewScalarF(0)},
+			q:        XY{MustNewScalarF(0), MustNewScalarF(1)},
+			s:        XY{MustNewScalarF(1), MustNewScalarF(0)},
 			expected: rightTurn,
 		},
 		{
 			name:     "when the s, q and p are collinear",
-			p:        XY{NewScalarFromFloat64(1), NewScalarFromFloat64(1)},
-			q:        XY{NewScalarFromFloat64(2), NewScalarFromFloat64(2)},
-			s:        XY{NewScalarFromFloat64(3), NewScalarFromFloat64(3)},
+			p:        XY{MustNewScalarF(1), MustNewScalarF(1)},
+			q:        XY{MustNewScalarF(2), MustNewScalarF(2)},
+			s:        XY{MustNewScalarF(3), MustNewScalarF(3)},
 			expected: collinear,
 		},
 	}

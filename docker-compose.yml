@@ -10,7 +10,7 @@ services:
   tests:
     image: golang:1
     working_dir: /go/src/github.com/peterstace/simplefeatures
-    entrypoint: go test -v -test.count=1 ./...
+    entrypoint: go test -v -test.count=1 ./fuzztests
     volumes:
       - .:/go/src/github.com/peterstace/simplefeatures
     environment:
