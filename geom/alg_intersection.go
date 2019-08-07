@@ -16,6 +16,8 @@ func intersection(g1, g2 Geometry) Geometry {
 			return intersectPointWithPoint(g1, g2)
 		case Line:
 			return intersectPointWithLine(g1, g2)
+		case LineString:
+			return intersectPointWithLineString(g1, g2)
 		case MultiPoint:
 			return intersectPointWithMultiPoint(g1, g2)
 		}
@@ -193,6 +195,16 @@ func intersectPointWithLine(point Point, line Line) Geometry {
 	rhs := point.coords.Y.Sub(line.a.Y).Mul(line.b.X.Sub(line.a.X))
 	if lhs.Equals(rhs) {
 		return point
+	}
+	return NewEmptyPoint()
+}
+
+func intersectPointWithLineString(pt Point, ls LineString) Geometry {
+	for _, ln := range ls.lines {
+		g := intersectPointWithLine(pt, ln)
+		if !g.IsEmpty() {
+			return g
+		}
 	}
 	return NewEmptyPoint()
 }

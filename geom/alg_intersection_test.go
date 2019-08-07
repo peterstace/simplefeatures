@@ -25,6 +25,12 @@ func TestIntersection(t *testing.T) {
 		{"POINT(0 2)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
 		{"POINT(2 0)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
 
+		// Point/LineString
+		{"POINT(0 0)", "LINESTRING(1 0,2 1,3 0)", "POINT EMPTY"},
+		{"POINT(1 0)", "LINESTRING(1 0,2 1,3 0)", "POINT(1 0)"},
+		{"POINT(2 1)", "LINESTRING(1 0,2 1,3 0)", "POINT(2 1)"},
+		{"POINT(1.5 0.5)", "LINESTRING(1 0,2 1,3 0)", "POINT(1.5 0.5)"},
+
 		// Line/Line
 		{"LINESTRING(0 0,0 1)", "LINESTRING(0 0,1 0)", "POINT(0 0)"},
 		{"LINESTRING(0 1,1 1)", "LINESTRING(1 0,1 1)", "POINT(1 1)"},

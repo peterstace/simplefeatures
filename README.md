@@ -148,7 +148,7 @@ docker-compose up --abort-on-container-exit
 | Empty/GeometryCollection              | ❌       | ⚠️            | ❌    | ❌         | ❌            |
 | Point/Point                           | ❌       | ✅           | ❌    | ❌         | ❌            |
 | Point/Line                            | ❌       | ✅           | ❌    | ❌         | ❌            |
-| Point/LineString                      | ❌       | ⚠️            | ❌    | ❌         | ❌            |
+| Point/LineString                      | ❌       | ✅           | ❌    | ❌         | ❌            |
 | Point/LinearRing                      | ❌       | ⚠️            | ❌    | ❌         | ❌            |
 | Point/Polygon                         | ❌       | ⚠️            | ❌    | ❌         | ❌            |
 | Point/MultiPoint                      | ❌       | ✅           | ❌    | ❌         | ❌            |
