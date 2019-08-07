@@ -142,7 +142,7 @@ func grahamScan(ps []XY) []XY {
 			//  straight line (so pop the preceding point in that case so as to
 			//  eliminate collinear points).
 			stack.pop()
-			if orientation(stack.underTop(), stack.top(), ps[i]) == collinear {
+			if orientation(stack.underTop(), stack.top(), ps[i]) != leftTurn {
 				stack.pop()
 			}
 			stack.push(ps[i])

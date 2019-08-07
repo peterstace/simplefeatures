@@ -159,7 +159,7 @@ func TestConvexHull(t *testing.T) {
 		{
 			// there are collinear points",
 			input:  "MULTIPOINT(7 7,8 5,7 2,6 5,5 5,4 6,4 2,3 7,2 1,14 9)",
-			output: "POLYGON((2 1,7 2,14 9,7 7,3 7,2 1))",
+			output: "POLYGON((2 1,7 2,14 9,3 7,2 1))",
 		},
 		{
 			// reproduced a bug
