@@ -29,16 +29,16 @@ docker-compose up --abort-on-container-exit
 
 | Type               | Assertions | Dimension | Envelope | AsText | AsBinary | IsEmpty | IsSimple | Boundary |
 | ---                | ---        | ---       | ---      | ---    | ---      | ---     | ---      | ---      |
-| Empty              | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
-| Point              | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
-| Line               | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
-| LineString         | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
-| LinearRing         | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
-| Polygon            | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
-| MultiPoint         | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
-| MultiLineString    | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
-| MultiPolygon       | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | ✅       | ✅       |
-| GeometryCollection | ✅         | ✅        | ✅       | ✅     | ❌       | ✅      | N/A      | ✅       |
+| Empty              | ✅         | ✅        | ✅       | ✅     | ✅       | ✅      | ✅       | ✅       |
+| Point              | ✅         | ✅        | ✅       | ✅     | ✅       | ✅      | ✅       | ✅       |
+| Line               | ✅         | ✅        | ✅       | ✅     | ✅       | ✅      | ✅       | ✅       |
+| LineString         | ✅         | ✅        | ✅       | ✅     | ✅       | ✅      | ✅       | ✅       |
+| LinearRing         | ✅         | ✅        | ✅       | ✅     | ✅       | ✅      | ✅       | ✅       |
+| Polygon            | ✅         | ✅        | ✅       | ✅     | ✅       | ✅      | ✅       | ✅       |
+| MultiPoint         | ✅         | ✅        | ✅       | ✅     | ✅       | ✅      | ✅       | ✅       |
+| MultiLineString    | ✅         | ✅        | ✅       | ✅     | ✅       | ✅      | ✅       | ✅       |
+| MultiPolygon       | ✅         | ✅        | ✅       | ✅     | ✅       | ✅      | ✅       | ✅       |
+| GeometryCollection | ✅         | ✅        | ✅       | ✅     | ✅       | ✅      | N/A      | ✅       |
                                  
 ### Type Specific Methods
 
@@ -194,13 +194,13 @@ docker-compose up --abort-on-container-exit
 
 | Type               | Buffer | Convex Hull |
 | ---                | ---    | ---         |
-| Empty              | ❌     | ❌          |
-| Point              | ❌     | ❌          |
-| Line               | ❌     | ❌          |
-| LineString         | ❌     | ❌          |
-| LinearRing         | ❌     | ❌          |
-| Polygon            | ❌     | ❌          |
-| MultiPoint         | ❌     | ❌          |
-| MultiLineString    | ❌     | ❌          |
-| MultiPolygon       | ❌     | ❌          |
-| GeometryCollection | ❌     | ❌          |
+| Empty              | ❌     | ✅          |
+| Point              | ❌     | ✅          |
+| Line               | ❌     | ✅          |
+| LineString         | ❌     | ✅          |
+| LinearRing         | ❌     | ✅          |
+| Polygon            | ❌     | ✅          |
+| MultiPoint         | ❌     | ✅          |
+| MultiLineString    | ❌     | ✅          |
+| MultiPolygon       | ❌     | ✅          |
+| GeometryCollection | ❌     | ✅          |
