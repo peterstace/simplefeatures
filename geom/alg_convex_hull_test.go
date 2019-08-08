@@ -176,6 +176,10 @@ func TestConvexHull(t *testing.T) {
 			input:  "MULTIPOINT(0 0,1 0,2 0,3 0,0 1,1 1,2 1,3 1,0 2,1 2,2 2,3 2,0 3,1 3,2 3,3 3)",
 			output: "POLYGON((0 0,3 0,3 3,0 3,0 0))",
 		},
+		{
+			input:  `MULTIPOINT((0.532 0.548),(0.385 0.378),(0.428 0.463),(0.506 0.443),(0.372 0.613),(0.648 0.636),(0.417 0.447))`,
+			output: `POLYGON((0.385 0.378,0.506 0.443,0.648 0.636,0.372 0.613,0.385 0.378))`,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Logf("input: %s", tt.input)

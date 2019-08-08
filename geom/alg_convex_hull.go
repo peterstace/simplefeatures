@@ -137,12 +137,11 @@ func grahamScan(ps []XY) []XY {
 				stack.push(ps[i])
 			}
 		default:
-			//  The preceding point was _not_ part of the convex hull (so it is
-			//  popped). Potentially the new point is just an extension of a
-			//  straight line (so pop the preceding point in that case so as to
-			//  eliminate collinear points).
+			// The preceding point was _not_ part of the convex hull (so it is
+			// popped). Potentially the new point reveals that other previous
+			// points are also not part of the hull (so pop those as well).
 			stack.pop()
-			if orientation(stack.underTop(), stack.top(), ps[i]) != leftTurn {
+			for orientation(stack.underTop(), stack.top(), ps[i]) != leftTurn {
 				stack.pop()
 			}
 			stack.push(ps[i])
