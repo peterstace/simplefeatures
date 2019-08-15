@@ -253,6 +253,12 @@ func (m MultiPolygon) convexHullPointSet() []XY {
 }
 
 func (m MultiPolygon) MarshalJSON() ([]byte, error) {
+	return marshalGeoJSON("MultiPolygon", m.Coordinates())
+}
+
+// Coordinates returns the coordinates of each constituent Polygon of the
+// MultiPolygon.
+func (m MultiPolygon) Coordinates() [][][]Coordinates {
 	numPolys := m.NumPolygons()
 	coords := make([][][]Coordinates, numPolys)
 	for i := 0; i < numPolys; i++ {
@@ -266,5 +272,5 @@ func (m MultiPolygon) MarshalJSON() ([]byte, error) {
 			}
 		}
 	}
-	return marshalGeoJSON("MultiPolygon", coords)
+	return coords
 }

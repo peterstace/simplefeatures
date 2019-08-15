@@ -123,3 +123,8 @@ func (r LinearRing) convexHullPointSet() []XY {
 func (r LinearRing) MarshalJSON() ([]byte, error) {
 	return r.ls.MarshalJSON()
 }
+
+// LinearRing returns the coordinates of the points making up the LinearRings.
+func (r LinearRing) Coordinates() []Coordinates {
+	return r.ls.Coordinates()
+}

@@ -126,8 +126,10 @@ func (n Line) convexHullPointSet() []XY {
 }
 
 func (n Line) MarshalJSON() ([]byte, error) {
-	return marshalGeoJSON("LineString", []Coordinates{
-		n.StartPoint().Coordinates(),
-		n.EndPoint().Coordinates(),
-	})
+	return marshalGeoJSON("LineString", n.Coordinates())
+}
+
+// Coordinates returns the coordinates of the start and end point of the Line.
+func (n Line) Coordinates() []Coordinates {
+	return []Coordinates{n.a, n.b}
 }

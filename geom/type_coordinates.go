@@ -18,3 +18,7 @@ func (c Coordinates) MarshalJSON() ([]byte, error) {
 	buf = append(buf, ']')
 	return buf, nil
 }
+
+func (c Coordinates) Equals(other Coordinates) bool {
+	return c.XY.Equals(other.XY)
+}

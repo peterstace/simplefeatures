@@ -281,3 +281,107 @@ func TestBoundary(t *testing.T) {
 		})
 	}
 }
+
+func TestCoordinates(t *testing.T) {
+	cmp0d := func(t *testing.T, got Coordinates, want [2]int) {
+		if !got.XY.X.Equals(MustNewScalarS(strconv.Itoa(want[0]))) {
+			t.Errorf("coordinate mismatch: got=%v want=%v", got, want)
+		}
+		if !got.XY.Y.Equals(MustNewScalarS(strconv.Itoa(want[1]))) {
+			t.Errorf("coordinate mismatch: got=%v want=%v", got, want)
+		}
+	}
+	cmp1d := func(t *testing.T, got []Coordinates, want [][2]int) {
+		if len(got) != len(want) {
+			t.Errorf("length mismatch: got=%v want=%v", len(got), len(want))
+		}
+		for i := range got {
+			cmp0d(t, got[i], want[i])
+		}
+	}
+	cmp2d := func(t *testing.T, got [][]Coordinates, want [][][2]int) {
+		if len(got) != len(want) {
+			t.Errorf("length mismatch: got=%v want=%v", len(got), len(want))
+		}
+		for i := range got {
+			cmp1d(t, got[i], want[i])
+		}
+	}
+	cmp3d := func(t *testing.T, got [][][]Coordinates, want [][][][2]int) {
+		if len(got) != len(want) {
+			t.Errorf("length mismatch: got=%v want=%v", len(got), len(want))
+		}
+		for i := range got {
+			cmp2d(t, got[i], want[i])
+		}
+	}
+	t.Run("Point", func(t *testing.T) {
+		cmp0d(t,
+			geomFromWKT(t, "POINT(1 2)").(Point).Coordinates(),
+			[2]int{1, 2},
+		)
+	})
+	t.Run("Line-LineString-LinearRing-MultiPoint", func(t *testing.T) {
+		for _, tt := range []struct {
+			wkt  string
+			want [][2]int
+		}{
+			{"LINESTRING(0 1,2 3)", [][2]int{{0, 1}, {2, 3}}},
+			{"LINESTRING(0 1,2 3,4 5)", [][2]int{{0, 1}, {2, 3}, {4, 5}}},
+			{"LINEARRING(0 0,1 0,0 1,0 0)", [][2]int{{0, 0}, {1, 0}, {0, 1}, {0, 0}}},
+			{"MULTIPOINT(0 1,2 3,4 5)", [][2]int{{0, 1}, {2, 3}, {4, 5}}},
+		} {
+			cmp1d(t,
+				geomFromWKT(t, tt.wkt).(interface{ Coordinates() []Coordinates }).Coordinates(),
+				tt.want,
+			)
+		}
+	})
+	t.Run("Polygon-MultiLineString", func(t *testing.T) {
+		for _, tt := range []struct {
+			wkt  string
+			want [][][2]int
+		}{
+			{
+				"POLYGON((0 0,0 10,10 0,0 0),(2 2,2 7,7 2,2 2))",
+				[][][2]int{
+					{{0, 0}, {0, 10}, {10, 0}, {0, 0}},
+					{{2, 2}, {2, 7}, {7, 2}, {2, 2}},
+				},
+			},
+			{
+				"MULTILINESTRING((0 0,0 10,10 0,0 0),(2 2,2 8,8 2,2 2))",
+				[][][2]int{
+					{{0, 0}, {0, 10}, {10, 0}, {0, 0}},
+					{{2, 2}, {2, 8}, {8, 2}, {2, 2}},
+				},
+			},
+		} {
+			cmp2d(t,
+				geomFromWKT(t, tt.wkt).(interface{ Coordinates() [][]Coordinates }).Coordinates(),
+				tt.want,
+			)
+		}
+
+	})
+	t.Run("MultiPolygon", func(t *testing.T) {
+		const wkt = `MULTIPOLYGON(
+			((0 0,0 10,10 0,0 0),(2 2,2 7,7 2,2 2)),
+			((100 100,100 110,110 100,100 100),(102 102,102 107,107 102,102 102))
+		)`
+		cmp3d(t,
+			geomFromWKT(t, wkt).(interface{ Coordinates() [][][]Coordinates }).Coordinates(),
+			[][][][2]int{
+				{
+					{{0, 0}, {0, 10}, {10, 0}, {0, 0}},
+					{{2, 2}, {2, 7}, {7, 2}, {2, 2}},
+				},
+				{
+					{{100, 100}, {100, 110}, {110, 100}, {100, 100}},
+					{{102, 102}, {102, 107}, {107, 102}, {102, 102}},
+				},
+			},
+		)
+
+	})
+}
