@@ -213,6 +213,12 @@ func (p Polygon) convexHullPointSet() []XY {
 }
 
 func (p Polygon) MarshalJSON() ([]byte, error) {
+	return marshalGeoJSON("Polygon", p.Coordinates())
+}
+
+// Coordinates returns the coordinates of the rings making up the Polygon
+// (external ring first, then internal rings after).
+func (p Polygon) Coordinates() [][]Coordinates {
 	rings := p.rings()
 	coords := make([][]Coordinates, len(rings))
 	for i, r := range rings {
@@ -222,5 +228,5 @@ func (p Polygon) MarshalJSON() ([]byte, error) {
 			coords[i][j] = r.PointN(j).Coordinates()
 		}
 	}
-	return marshalGeoJSON("Polygon", coords)
+	return coords
 }

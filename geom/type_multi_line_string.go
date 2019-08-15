@@ -191,6 +191,12 @@ func (m MultiLineString) convexHullPointSet() []XY {
 }
 
 func (m MultiLineString) MarshalJSON() ([]byte, error) {
+	return marshalGeoJSON("MultiLineString", m.Coordinates())
+}
+
+// Coordinates returns the coordinates of each constintuent LineString in the
+// MultiLineString.
+func (m MultiLineString) Coordinates() [][]Coordinates {
 	numLines := m.NumLineStrings()
 	coords := make([][]Coordinates, numLines)
 	for i := 0; i < numLines; i++ {
@@ -200,5 +206,5 @@ func (m MultiLineString) MarshalJSON() ([]byte, error) {
 			coords[i][j] = m.LineStringN(i).PointN(j).Coordinates()
 		}
 	}
-	return marshalGeoJSON("MultiLineString", coords)
+	return coords
 }

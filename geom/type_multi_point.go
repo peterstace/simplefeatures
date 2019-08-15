@@ -155,9 +155,15 @@ func (m MultiPoint) convexHullPointSet() []XY {
 }
 
 func (m MultiPoint) MarshalJSON() ([]byte, error) {
+	return marshalGeoJSON("MultiPoint", m.Coordinates())
+}
+
+// Coordinates returns the coordinates of the points represented by the
+// MultiPoint.
+func (m MultiPoint) Coordinates() []Coordinates {
 	coords := make([]Coordinates, len(m.pts))
-	for i, pt := range m.pts {
-		coords[i] = pt.Coordinates()
+	for i := range coords {
+		coords[i] = m.pts[i].Coordinates()
 	}
-	return marshalGeoJSON("MultiPoint", coords)
+	return coords
 }
