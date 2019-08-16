@@ -263,3 +263,237 @@ func intersectPointWithPoint(pt1, pt2 Point) Geometry {
 	}
 	return NewGeometryCollection(nil)
 }
+
+func hasIntersection(g1, g2 Geometry) (intersects bool, dimension int) {
+	if rank(g1) > rank(g2) {
+		g1, g2 = g2, g1
+	}
+	switch g1 := g1.(type) {
+	case Point:
+		switch g2 := g2.(type) {
+		case Point:
+			return hasIntersectionPointWithPoint(g1, g2)
+		case Line:
+			return hasIntersectionPointWithLine(g1, g2)
+		case LineString:
+			return hasIntersectionPointWithLineString(g1, g2)
+		case MultiPoint:
+			return hasIntersectionPointWithMultiPoint(g1, g2)
+		}
+	case Line:
+		switch g2 := g2.(type) {
+		case Line:
+			return hasIntersectionLineWithLine(g1, g2)
+		}
+	case LineString:
+		switch g2 := g2.(type) {
+		case LineString:
+			return hasIntersectionMultiLineStringWithMultiLineString(
+				NewMultiLineString([]LineString{g1}),
+				NewMultiLineString([]LineString{g2}),
+			)
+		case LinearRing:
+			return hasIntersectionMultiLineStringWithMultiLineString(
+				NewMultiLineString([]LineString{g1}),
+				NewMultiLineString([]LineString{g2.ls}),
+			)
+		case MultiLineString:
+			return hasIntersectionMultiLineStringWithMultiLineString(
+				NewMultiLineString([]LineString{g1}),
+				g2,
+			)
+		}
+	case LinearRing:
+		switch g2 := g2.(type) {
+		case LinearRing:
+			return hasIntersectionMultiLineStringWithMultiLineString(
+				NewMultiLineString([]LineString{g1.ls}),
+				NewMultiLineString([]LineString{g2.ls}),
+			)
+		case MultiLineString:
+			return hasIntersectionMultiLineStringWithMultiLineString(
+				NewMultiLineString([]LineString{g1.ls}),
+				g2,
+			)
+		}
+	case MultiPoint:
+		switch g2 := g2.(type) {
+		case MultiPoint:
+			return hasIntersectionMultiPointWithMultiPoint(g1, g2)
+		}
+	case MultiLineString:
+		switch g2 := g2.(type) {
+		case MultiLineString:
+			return hasIntersectionMultiLineStringWithMultiLineString(g1, g2)
+		}
+	}
+
+	panic(fmt.Sprintf("not implemented: hasIntersection with %T and %T", g1, g2))
+}
+
+func hasIntersectionLineWithLine(n1, n2 Line) (intersects bool, dimension int) {
+	// Speed is O(1), but there are divisions and multiplications involved.
+	a := n1.a.XY
+	b := n1.b.XY
+	c := n2.a.XY
+	d := n2.b.XY
+
+	if parallel := b.Sub(a).Cross(d.Sub(c)).Equals(zero); !parallel {
+		e := c.Y.Sub(d.Y).Mul(a.X.Sub(c.X)).Add(d.X.Sub(c.X).Mul(a.Y.Sub(c.Y)))
+		f := d.X.Sub(c.X).Mul(a.Y.Sub(b.Y)).Sub(a.X.Sub(b.X).Mul(d.Y.Sub(c.Y)))
+		g := a.Y.Sub(b.Y).Mul(a.X.Sub(c.X)).Add(b.X.Sub(a.X).Mul(a.Y.Sub(c.Y)))
+		h := d.X.Sub(c.X).Mul(a.Y.Sub(b.Y)).Sub(a.X.Sub(b.X).Mul(d.Y.Sub(c.Y)))
+		// Division by zero is not possible, since the lines are not parallel.
+		p := e.Div(f)
+		q := g.Div(h)
+		if p.LT(zero) || p.GT(one) || q.LT(zero) || q.GT(one) {
+			// Intersection between lines occurs beyond line endpoints.
+			return false, 0 // No intersection
+		}
+		return true, 0 // Point has dimension 0
+	}
+
+	// TODO: invert if to un-indent flow.
+	if colinear := b.Sub(a).Cross(d.Sub(a)).Equals(zero); colinear {
+		// TODO: use a proper bbox type
+		abBB := bbox{
+			min: XY{a.X.Min(b.X), a.Y.Min(b.Y)},
+			max: XY{a.X.Max(b.X), a.Y.Max(b.Y)},
+		}
+		cdBB := bbox{
+			min: XY{c.X.Min(d.X), c.Y.Min(d.Y)},
+			max: XY{c.X.Max(d.X), c.Y.Max(d.Y)},
+		}
+		if abBB.min.X.GT(cdBB.max.X) || abBB.max.X.LT(cdBB.min.X) ||
+			abBB.min.Y.GT(cdBB.max.Y) || abBB.max.Y.LT(cdBB.min.Y) {
+			// Line segments don't overlap at all.
+			return false, 0 // No intersection
+		}
+
+		// TODO: the checks for intersecting at a point could go above the
+		// overlap case. They don't need to use the bounding box, because we
+		// can just do a pairwise check on the endpoints for each 4
+		// combinations.
+
+		if abBB.max.X.Equals(cdBB.min.X) && abBB.min.Y.Equals(cdBB.max.Y) {
+			// Line segments overlap at a point.
+			return true, 0 // Point has dimension 0
+		}
+
+		if cdBB.max.X.Equals(abBB.min.X) && cdBB.min.Y.Equals(abBB.max.Y) {
+			// Line segments overlap at a point.
+			return true, 0 // Point has dimension 0
+		}
+
+		if abBB.max.Equals(cdBB.min) {
+			// Line segments overlap at a point.
+			return true, 0 // Point has dimension 0
+		}
+		if cdBB.max.Equals(abBB.min) {
+			// Line segments overlap at a point.
+			return true, 0 // Point has dimension 0
+		}
+
+		// Line segments overlap over a line segment.
+		bb := bbox{
+			min: XY{
+				abBB.min.X.Max(cdBB.min.X),
+				abBB.min.Y.Max(cdBB.min.Y),
+			},
+			max: XY{
+				abBB.max.X.Min(cdBB.max.X),
+				abBB.max.Y.Min(cdBB.max.Y),
+			},
+		}
+		var (
+			u    = XY{bb.min.X, bb.min.Y}
+			v    = XY{bb.max.X, bb.max.Y}
+			rise = b.Y.Sub(a.Y)
+			run  = b.X.Sub(a.X)
+		)
+		if rise.GT(zero) && run.LT(zero) || rise.LT(zero) && run.GT(zero) {
+			u.X, v.X = v.X, u.X
+		}
+
+		return true, 1 // Colinear line overlap, line has dimension 1
+	}
+
+	// Parrallel but not colinear, so cannot intersect anywhere.
+	return false, 0 // No intersection
+}
+
+func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (intersects bool, dimension int) {
+	// Speed is O(n * m) where n, m are the number of lines in each input.
+	// This may be the best case, because we must visit all combinations in case
+	// any colinear line overlaps exist which would raise the dimensionality.
+	for _, ls1 := range mls1.lines {
+		for _, ln1 := range ls1.lines {
+			for _, ls2 := range mls2.lines {
+				for _, ln2 := range ls2.lines {
+					if inter, dim := hasIntersectionLineWithLine(ln1, ln2); inter {
+						intersects = true
+						if dim > dimension {
+							dimension = dim
+						}
+					}
+				}
+			}
+		}
+	}
+	return intersects, dimension
+}
+
+func hasIntersectionPointWithLine(point Point, line Line) (intersects bool, dimension int) {
+	// Speed is O(1) using a bounding box check then a point-on-line check.
+	env, ok := line.Envelope()
+	if !ok {
+		panic("line must have envelope")
+	}
+	if !env.IntersectsPoint(point.coords.XY) {
+		return false, 0 // No intersection
+	}
+	lhs := point.coords.X.Sub(line.a.X).Mul(line.b.Y.Sub(line.a.Y))
+	rhs := point.coords.Y.Sub(line.a.Y).Mul(line.b.X.Sub(line.a.X))
+	if lhs.Equals(rhs) {
+		return true, 0 // Point has dimension 0
+	}
+	return false, 0 // No intersection
+}
+
+func hasIntersectionPointWithLineString(pt Point, ls LineString) (intersects bool, dimension int) {
+	// Worst case speed is O(n), n is the number of lines.
+	for _, ln := range ls.lines {
+		if intersects, dimension = hasIntersectionPointWithLine(pt, ln); intersects {
+			return true, 0 // Point has dimension 0
+		}
+	}
+	return false, 0 // No intersection
+}
+
+func hasIntersectionMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (intersects bool, dimension int) {
+	// To do: improve the speed efficiency, it's currently O(n^2)
+	for _, pt := range mp1.pts {
+		if intersects, dimension = hasIntersectionPointWithMultiPoint(pt, mp2); intersects {
+			return true, 0 // Point and MultiPoint both have dimension 0
+		}
+	}
+	return false, 0 // No intersection
+}
+
+func hasIntersectionPointWithMultiPoint(point Point, mp MultiPoint) (intersects bool, dimension int) {
+	// Worst case speed is O(n) but that's optimal because mp is not sorted.
+	for _, pt := range mp.pts {
+		if pt.Equals(point) {
+			return true, 0 // Point and MultiPoint both have dimension 0
+		}
+	}
+	return false, 0 // No intersection
+}
+
+func hasIntersectionPointWithPoint(pt1, pt2 Point) (intersects bool, dimension int) {
+	// Speed is O(1).
+	if pt1.Equals(pt2) {
+		return true, 0 // Point has dimension 0
+	}
+	return false, 0 // No intersection
+}
