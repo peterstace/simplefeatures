@@ -14,15 +14,15 @@ type EmptySet struct {
 	jsonType string
 }
 
-func NewEmptyPoint() EmptySet {
+func NewEmptyPoint(opts ...ConstructorOption) EmptySet {
 	return EmptySet{"POINT EMPTY", wkbGeomTypePoint, "Point"}
 }
 
-func NewEmptyLineString() EmptySet {
+func NewEmptyLineString(opts ...ConstructorOption) EmptySet {
 	return EmptySet{"LINESTRING EMPTY", wkbGeomTypeLineString, "LineString"}
 }
 
-func NewEmptyPolygon() EmptySet {
+func NewEmptyPolygon(opts ...ConstructorOption) EmptySet {
 	return EmptySet{"POLYGON EMPTY", wkbGeomTypePolygon, "Polygon"}
 }
 

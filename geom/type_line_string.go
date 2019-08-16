@@ -18,13 +18,13 @@ type LineString struct {
 
 // NewLineStringC creates a line string from the coordinates defining its
 // points.
-func NewLineStringC(pts []Coordinates) (LineString, error) {
+func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, error) {
 	var lines []Line
 	for i := 0; i < len(pts)-1; i++ {
 		if pts[i].XY.Equals(pts[i+1].XY) {
 			continue
 		}
-		ln := must(NewLineC(pts[i], pts[i+1])).(Line)
+		ln := must(NewLineC(pts[i], pts[i+1], opts...)).(Line)
 		lines = append(lines, ln)
 	}
 	if len(lines) == 0 {

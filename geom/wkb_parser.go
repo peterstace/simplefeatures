@@ -14,8 +14,8 @@ import (
 
 // UnmarshalWKB reads the Well Known Binary (WKB), and returns the
 // corresponding Geometry.
-func UnmarshalWKB(r io.Reader) (Geometry, error) {
-	p := wkbParser{r: r}
+func UnmarshalWKB(r io.Reader, opts ...ConstructorOption) (Geometry, error) {
+	p := wkbParser{r: r, opts: opts}
 	p.parseByteOrder()
 	p.parseGeomType()
 	geom := p.parseGeomRoot()
@@ -37,6 +37,7 @@ type wkbParser struct {
 	bo        binary.ByteOrder
 	geomType  uint32
 	coordType coordType
+	opts      []ConstructorOption
 }
 
 func (p *wkbParser) setErr(err error) {
@@ -97,30 +98,30 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 	case wkbGeomTypePoint:
 		coords := p.parsePoint()
 		if coords.Empty {
-			return NewEmptyPoint()
+			return NewEmptyPoint(p.opts...)
 		} else {
-			return NewPointC(coords.Value)
+			return NewPointC(coords.Value, p.opts...)
 		}
 	case wkbGeomTypeLineString:
 		coords := p.parseLineString()
 		switch len(coords) {
 		case 0:
-			return NewEmptyLineString()
+			return NewEmptyLineString(p.opts...)
 		case 2:
-			ln, err := NewLineC(coords[0], coords[1])
+			ln, err := NewLineC(coords[0], coords[1], p.opts...)
 			p.setErr(err)
 			return ln
 		default:
-			ls, err := NewLineStringC(coords)
+			ls, err := NewLineStringC(coords, p.opts...)
 			p.setErr(err)
 			return ls
 		}
 	case wkbGeomTypePolygon:
 		coords := p.parsePolygon()
 		if len(coords) == 0 {
-			return NewEmptyPolygon()
+			return NewEmptyPolygon(p.opts...)
 		} else {
-			poly, err := NewPolygonC(coords)
+			poly, err := NewPolygonC(coords, p.opts...)
 			p.setErr(err)
 			return poly
 		}
@@ -223,7 +224,7 @@ func (p *wkbParser) parseMultiPoint() MultiPoint {
 		}
 		pts = append(pts, pt)
 	}
-	return NewMultiPoint(pts)
+	return NewMultiPoint(pts, p.opts...)
 }
 
 func (p *wkbParser) parseMultiLineString() MultiLineString {
@@ -241,14 +242,14 @@ func (p *wkbParser) parseMultiLineString() MultiLineString {
 		case Line:
 			c1 := geom.StartPoint().Coordinates()
 			c2 := geom.EndPoint().Coordinates()
-			ls, err := NewLineStringC([]Coordinates{c1, c2})
+			ls, err := NewLineStringC([]Coordinates{c1, c2}, p.opts...)
 			p.setErr(err)
 			lss = append(lss, ls)
 		default:
 			p.setErr(errors.New("non-LineString found in MultiLineString"))
 		}
 	}
-	return NewMultiLineString(lss)
+	return NewMultiLineString(lss, p.opts...)
 }
 
 func (p *wkbParser) parseMultiPolygon() MultiPolygon {
@@ -266,7 +267,7 @@ func (p *wkbParser) parseMultiPolygon() MultiPolygon {
 		}
 		polys = append(polys, poly)
 	}
-	mpoly, err := NewMultiPolygon(polys)
+	mpoly, err := NewMultiPolygon(polys, p.opts...)
 	p.setErr(err)
 	return mpoly
 }
@@ -279,5 +280,5 @@ func (p *wkbParser) parseGeometryCollection() GeometryCollection {
 		p.setErr(err)
 		geoms = append(geoms, geom)
 	}
-	return NewGeometryCollection(geoms)
+	return NewGeometryCollection(geoms, p.opts...)
 }

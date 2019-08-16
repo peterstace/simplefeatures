@@ -22,7 +22,7 @@ type LinearRing struct {
 }
 
 // NewLinearRing builds a LinearRing from a sequence of coordinates.
-func NewLinearRing(pts []Coordinates) (LinearRing, error) {
+func NewLinearRing(pts []Coordinates, opts ...ConstructorOption) (LinearRing, error) {
 	ls, err := NewLineStringC(pts)
 	if err != nil {
 		return LinearRing{}, err
@@ -30,7 +30,7 @@ func NewLinearRing(pts []Coordinates) (LinearRing, error) {
 	if !ls.IsClosed() {
 		return LinearRing{}, errors.New("linear rings must be closed")
 	}
-	if !ls.IsSimple() {
+	if doExpensiveValidations(opts) && !ls.IsSimple() {
 		return LinearRing{}, errors.New("linear rings must be simple")
 	}
 	return LinearRing{ls}, nil

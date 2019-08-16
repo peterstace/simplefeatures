@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func UnmarshalGeoJSON(input []byte) (Geometry, error) {
+func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error) {
 	var firstPass struct {
 		Type string `json:"type"`
 	}
@@ -26,13 +26,13 @@ func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 			return nil, err
 		}
 		if len(secondPass.Coords) == 0 {
-			return NewEmptyPoint(), nil
+			return NewEmptyPoint(opts...), nil
 		}
 		coords, err := oneDimFloat64sToCoordinates(secondPass.Coords)
 		if err != nil {
 			return nil, err
 		}
-		return NewPointC(coords), nil
+		return NewPointC(coords, opts...), nil
 	case "LineString", "MultiPoint":
 		var secondPass struct {
 			Coords [][]float64 `json:"coordinates"`
@@ -48,14 +48,14 @@ func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 		case "LineString":
 			switch len(coords) {
 			case 0:
-				return NewEmptyLineString(), nil
+				return NewEmptyLineString(opts...), nil
 			case 2:
-				return NewLineC(coords[0], coords[1])
+				return NewLineC(coords[0], coords[1], opts...)
 			default:
-				return NewLineStringC(coords)
+				return NewLineStringC(coords, opts...)
 			}
 		case "MultiPoint":
-			return NewMultiPointC(coords), nil
+			return NewMultiPointC(coords, opts...), nil
 		default:
 			panic("switch case bug")
 		}
@@ -74,12 +74,12 @@ func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 		case "Polygon":
 			switch len(coords) {
 			case 0:
-				return NewEmptyPolygon(), nil
+				return NewEmptyPolygon(opts...), nil
 			default:
-				return NewPolygonC(coords)
+				return NewPolygonC(coords, opts...)
 			}
 		case "MultiLineString":
-			return NewMultiLineStringC(coords)
+			return NewMultiLineStringC(coords, opts...)
 		default:
 			panic("switch case bug")
 		}
@@ -94,7 +94,7 @@ func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewMultiPolygonC(coords)
+		return NewMultiPolygonC(coords, opts...)
 	case "GeometryCollection":
 		var secondPass struct {
 			Geometries []AnyGeometry `json:"geometries"`
@@ -106,7 +106,7 @@ func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 		for i := range geoms {
 			geoms[i] = secondPass.Geometries[i].Geom
 		}
-		return NewGeometryCollection(geoms), nil
+		return NewGeometryCollection(geoms, opts...), nil
 	case "":
 		return nil, errors.New("type field missing or empty")
 	default:
