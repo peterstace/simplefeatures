@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"math"
 	"sort"
 )
 
@@ -78,7 +79,17 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	c := n2.a.XY
 	d := n2.b.XY
 
-	if parallel := b.Sub(a).Cross(d.Sub(c)).Equals(zero); !parallel {
+	o1 := orientation(a, b, c)
+	o2 := orientation(a, b, d)
+	o3 := orientation(c, d, a)
+	o4 := orientation(c, d, b)
+
+	if o1 != o2 &&
+		(o1 == leftTurn || o1 == rightTurn) &&
+		(o2 == leftTurn || o2 == rightTurn) &&
+		o3 != o4 &&
+		(o3 == leftTurn || o3 == rightTurn) &&
+		(o4 == leftTurn || o4 == rightTurn) {
 		e := c.Y.Sub(d.Y).Mul(a.X.Sub(c.X)).Add(d.X.Sub(c.X).Mul(a.Y.Sub(c.Y)))
 		f := d.X.Sub(c.X).Mul(a.Y.Sub(b.Y)).Sub(a.X.Sub(b.X).Mul(d.Y.Sub(c.Y)))
 		g := a.Y.Sub(b.Y).Mul(a.X.Sub(c.X)).Add(b.X.Sub(a.X).Mul(a.Y.Sub(c.Y)))
@@ -93,72 +104,38 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		return NewPointXY(b.Sub(a).Scale(p).Add(a))
 	}
 
-	// TODO: invert if to un-indent flow.
-	if colinear := b.Sub(a).Cross(d.Sub(a)).Equals(zero); colinear {
-		// TODO: use a proper bbox type
-		abBB := bbox{
-			min: XY{a.X.Min(b.X), a.Y.Min(b.Y)},
-			max: XY{a.X.Max(b.X), a.Y.Max(b.Y)},
+	if o1 != o2 && o3 != o4 {
+		if o1 == collinear {
+			return NewPointXY(c)
 		}
-		cdBB := bbox{
-			min: XY{c.X.Min(d.X), c.Y.Min(d.Y)},
-			max: XY{c.X.Max(d.X), c.Y.Max(d.Y)},
+		if o2 == collinear {
+			return NewPointXY(d)
 		}
-		if abBB.min.X.GT(cdBB.max.X) || abBB.max.X.LT(cdBB.min.X) ||
-			abBB.min.Y.GT(cdBB.max.Y) || abBB.max.Y.LT(cdBB.min.Y) {
-			// Line segments don't overlap at all.
-			return NewGeometryCollection(nil)
+		if o3 == collinear {
+			return NewPointXY(a)
 		}
-
-		// TODO: the checks for intersecting at a point could go above the
-		// overlap case. They don't need to use the bounding box, because we
-		// can just do a pairwise check on the endpoints for each 4
-		// combinations.
-
-		if abBB.max.X.Equals(cdBB.min.X) && abBB.min.Y.Equals(cdBB.max.Y) {
-			// Line segments overlap at a point.
-			return NewPointS(abBB.max.X, abBB.min.Y)
+		if o4 == collinear {
+			return NewPointXY(b)
 		}
-
-		if cdBB.max.X.Equals(abBB.min.X) && cdBB.min.Y.Equals(abBB.max.Y) {
-			// Line segments overlap at a point.
-			return NewPointS(cdBB.max.X, cdBB.min.Y)
-		}
-
-		if abBB.max.Equals(cdBB.min) {
-			// Line segments overlap at a point.
-			return NewPointXY(abBB.max)
-		}
-		if cdBB.max.Equals(abBB.min) {
-			// Line segments overlap at a point.
-			return NewPointXY(cdBB.max)
-		}
-
-		// Line segments overlap over a line segment.
-		bb := bbox{
-			min: XY{
-				abBB.min.X.Max(cdBB.min.X),
-				abBB.min.Y.Max(cdBB.min.Y),
-			},
-			max: XY{
-				abBB.max.X.Min(cdBB.max.X),
-				abBB.max.Y.Min(cdBB.max.Y),
-			},
-		}
-		var (
-			u    = XY{bb.min.X, bb.min.Y}
-			v    = XY{bb.max.X, bb.max.Y}
-			rise = b.Y.Sub(a.Y)
-			run  = b.X.Sub(a.X)
-		)
-		if rise.GT(zero) && run.LT(zero) || rise.LT(zero) && run.GT(zero) {
-			u.X, v.X = v.X, u.X
-		}
-
-		return must(NewLineC(Coordinates{u}, Coordinates{v}))
 	}
 
-	// Parrallel but not colinear, so cannot intersect anywhere.
+	if o1 == collinear && o2 == collinear && o3 == collinear && o4 == collinear {
+		if (!onSegment(a, b, c) && !onSegment(a, b, d)) && (!onSegment(c, d, a) && !onSegment(c, d, b)) {
+			return NewGeometryCollection(nil)
+		}
+		pts := make([]XY, 0, 4)
+		pts = append(pts, a, b, c, d)
+		rth := rightmostThenHighestIndex(pts)
+		pts = append(pts[:rth], pts[rth+1:]...)
+		ltl := leftmostThenLowestIndex(pts)
+		pts = append(pts[:ltl], pts[ltl+1:]...)
+		if pts[0].Equals(pts[1]) {
+			return NewPointXY(pts[0])
+		}
+
+		return must(NewLineC(Coordinates{pts[leftmostThenLowestIndex(pts)]}, Coordinates{pts[rightmostThenHighestIndex(pts)]}))
+	}
+
 	return NewGeometryCollection(nil)
 }
 
@@ -262,4 +239,53 @@ func intersectPointWithPoint(pt1, pt2 Point) Geometry {
 		return NewPointXY(pt1.coords.XY)
 	}
 	return NewGeometryCollection(nil)
+}
+
+// rightmostThenHighest finds the rightmost-then-highest point
+func rightmostThenHighest(ps []XY) XY {
+	return ps[rightmostThenHighestIndex(ps)]
+}
+
+// rightmostThenHighestIndex finds the rightmost-then-highest point
+func rightmostThenHighestIndex(ps []XY) int {
+	rpi := 0
+	for i := 1; i < len(ps); i++ {
+		if ps[i].X.GT(ps[rpi].X) ||
+			(ps[i].X.Equals(ps[rpi].X) &&
+				ps[i].Y.GT(ps[rpi].Y)) {
+			rpi = i
+		}
+	}
+	return rpi
+}
+
+// leftmostThenLowestIndex finds the index of the leftmost-then-lowest point.
+func leftmostThenLowestIndex(ps []XY) int {
+	rpi := 0
+	for i := 1; i < len(ps); i++ {
+		if ps[i].X.LT(ps[rpi].X) ||
+			(ps[i].X.Equals(ps[rpi].X) &&
+				ps[i].Y.LT(ps[rpi].Y)) {
+			rpi = i
+		}
+	}
+	return rpi
+}
+
+// leftmostThenLowest finds the lowest-then-leftmost point
+func leftmostThenLowest(ps []XY) XY {
+	return ps[leftmostThenLowestIndex(ps)]
+}
+
+// onSegement check if point r on the segment formed by p and q.
+// p, q and r should be collinear
+func onSegment(p XY, q XY, r XY) bool {
+	if r.X.AsFloat() <= math.Max(p.X.AsFloat(), q.X.AsFloat()) &&
+		r.X.AsFloat() >= math.Min(p.X.AsFloat(), q.X.AsFloat()) &&
+		r.Y.AsFloat() <= math.Max(p.Y.AsFloat(), q.Y.AsFloat()) &&
+		r.Y.AsFloat() >= math.Min(p.Y.AsFloat(), q.Y.AsFloat()) {
+		return true
+	}
+
+	return false
 }
