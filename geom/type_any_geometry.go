@@ -20,6 +20,12 @@ type AnyGeometry struct {
 	Options []ConstructorOption
 }
 
+// SetOptions is a helper to set provided variadic list of options into
+// the Options field.
+func (a *AnyGeometry) SetOptions(opts ...ConstructorOption) {
+	a.Options = opts
+}
+
 // Value implements the "sql/driver".Valuer interface by emitting WKB. Gives
 // an error if the Geom element is nil.
 func (a *AnyGeometry) Value() (driver.Value, error) {
