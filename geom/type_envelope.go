@@ -62,7 +62,6 @@ func (e Envelope) Union(other Envelope) Envelope {
 }
 
 func (e Envelope) IntersectsPoint(p XY) bool {
-	// TODO: epsilon ?
 	return p.X >= e.min.X && p.X <= e.max.X && p.Y >= e.min.Y && p.Y <= e.max.Y
 }
 

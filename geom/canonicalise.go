@@ -38,40 +38,44 @@ func canonicalise(geoms []Geometry) Geometry {
 	return NewGeometryCollection(allGeoms)
 }
 
+type xyxy struct {
+	a, b XY
+}
+
 func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
-	points := map[xyHash]Point{}
-	lines := map[xyxyHash]Line{}
+	points := map[XY]Point{}
+	lines := map[xyxy]Line{}
 	var polys []Polygon
 
 	for _, g := range geoms {
 		switch g := g.(type) {
 		case EmptySet:
 		case Point:
-			points[g.coords.XY.hash()] = g
+			points[g.coords.XY] = g
 		case Line:
 			g = orderLine(g)
-			lines[hashXYXY(g.a.XY, g.b.XY)] = g
+			lines[xyxy{g.a.XY, g.b.XY}] = g
 		case LineString:
 			for _, g := range g.lines {
 				g = orderLine(g)
-				lines[hashXYXY(g.a.XY, g.b.XY)] = g
+				lines[xyxy{g.a.XY, g.b.XY}] = g
 			}
 		case LinearRing:
 			for _, g := range g.ls.lines {
 				g = orderLine(g)
-				lines[hashXYXY(g.a.XY, g.b.XY)] = g
+				lines[xyxy{g.a.XY, g.b.XY}] = g
 			}
 		case Polygon:
 			polys = append(polys, g)
 		case MultiPoint:
 			for _, pt := range g.pts {
-				points[pt.coords.XY.hash()] = pt
+				points[pt.coords.XY] = pt
 			}
 		case MultiLineString:
 			for _, linestr := range g.lines {
 				for _, g := range linestr.lines {
 					g = orderLine(g)
-					lines[hashXYXY(g.a.XY, g.b.XY)] = g
+					lines[xyxy{g.a.XY, g.b.XY}] = g
 				}
 			}
 		case MultiPolygon:
@@ -81,10 +85,10 @@ func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 		case GeometryCollection:
 			pts, lns, pls := flattenGeometries(g.geoms)
 			for _, pt := range pts {
-				points[pt.coords.XY.hash()] = pt
+				points[pt.coords.XY] = pt
 			}
 			for _, ln := range lns {
-				lines[hashXYXY(ln.a.XY, ln.b.XY)] = ln
+				lines[xyxy{ln.a.XY, ln.b.XY}] = ln
 			}
 			polys = append(polys, pls...)
 		default:
@@ -95,7 +99,7 @@ func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 	for _, pt := range points {
 		for _, line := range lines {
 			if line.a.XY.Equals(pt.coords.XY) || line.b.XY.Equals(pt.coords.XY) {
-				delete(points, pt.coords.XY.hash())
+				delete(points, pt.coords.XY)
 				break
 			}
 		}

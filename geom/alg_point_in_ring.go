@@ -21,7 +21,6 @@ func pointRingSide(pt XY, ring LinearRing) side {
 			return boundary
 		}
 	}
-	// TODO: epsilon check
 	if pt.X > maxX {
 		return exterior
 	}
@@ -43,7 +42,6 @@ func pointRingSide(pt XY, ring LinearRing) side {
 			if inter.Equals(ep1) {
 				otherY = ep2.coords.Y
 			}
-			// TODO: epsilon check?
 			if otherY < pt.Y {
 				count++
 			}

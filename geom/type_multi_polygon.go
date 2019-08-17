@@ -53,13 +53,13 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 		// then each midpoint between those points. These are enough points
 		// that one of the points will be inside the other polygon iff the
 		// interior of the polygons intersect.
-		allPts := newXYSet()
+		allPts := make(map[XY]struct{})
 		for _, r1 := range p1.rings() {
 			for _, line1 := range r1.ls.lines {
 				// Collect boundary control points and intersection points.
-				linePts := newXYSet()
-				linePts.add(line1.a.XY)
-				linePts.add(line1.b.XY)
+				linePts := make(map[XY]struct{})
+				linePts[line1.a.XY] = struct{}{}
+				linePts[line1.b.XY] = struct{}{}
 				for _, r2 := range p2.rings() {
 					for _, line2 := range r2.ls.lines {
 						env, ok := line1.Intersection(line2).Envelope()
@@ -71,18 +71,18 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 						}
 						inter := env.Min()
 						if !inter.Equals(line1.a.XY) && !inter.Equals(line1.b.XY) {
-							linePts.add(inter)
+							linePts[inter] = struct{}{}
 						}
 					}
 				}
 				// Collect midpoints.
 				if len(linePts) <= 2 {
-					for _, pt := range linePts {
-						allPts.add(pt)
+					for pt := range linePts {
+						allPts[pt] = struct{}{}
 					}
 				} else {
 					linePtsSlice := make([]XY, 0, len(linePts))
-					for _, pt := range linePts {
+					for pt := range linePts {
 						linePtsSlice = append(linePtsSlice, pt)
 					}
 					sort.Slice(linePtsSlice, func(i, j int) bool {
@@ -93,11 +93,11 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 						}
 						return ptI.Y < ptJ.Y
 					})
-					allPts.add(linePtsSlice[0])
+					allPts[linePtsSlice[0]] = struct{}{}
 					for i := 0; i+1 < len(linePtsSlice); i++ {
 						midpoint := linePtsSlice[i].Midpoint(linePtsSlice[i+1])
-						allPts.add(midpoint)
-						allPts.add(linePtsSlice[i+1])
+						allPts[midpoint] = struct{}{}
+						allPts[linePtsSlice[i+1]] = struct{}{}
 					}
 				}
 			}
@@ -105,7 +105,7 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 
 		// Check to see if any of the points from the boundary from the first
 		// polygon are inside the second polygon.
-		for _, pt := range allPts {
+		for pt := range allPts {
 			if isPointInteriorToPolygon(pt, p2) {
 				return true
 			}

@@ -1,23 +1,10 @@
 package geom
 
-import (
-	"crypto/sha256"
-	"encoding/binary"
-)
-
 type XY struct {
 	X, Y float64
 }
 
-// TODO: no must...
-// MustNewXYF creates an XY from x and y float64 values. If either value is not
-// finite, then it panics.
-func MustNewXYF(x, y float64) XY {
-	return XY{x, y}
-}
-
 func (w XY) Equals(o XY) bool {
-	// TODO: epsilon check?
 	return w.X == o.X && w.Y == o.Y
 }
 
@@ -63,42 +50,4 @@ func (w XY) Less(o XY) bool {
 		return w.X < o.X
 	}
 	return w.Y < o.Y
-}
-
-type xyHash [sha256.Size]byte
-
-// TODO: don't need a hash anymore, since XY is now fixed size.
-func (w XY) hash() xyHash {
-	h := sha256.New()
-	binary.Write(h, binary.LittleEndian, w.X)
-	binary.Write(h, binary.LittleEndian, w.Y)
-	var sum xyHash
-	h.Sum(sum[:0])
-	return sum
-}
-
-type xySet map[xyHash]XY
-
-func newXYSet() xySet {
-	return make(map[xyHash]XY)
-}
-
-func (s xySet) add(xy XY) {
-	s[xy.hash()] = xy
-}
-
-func (s xySet) contains(xy XY) bool {
-	_, ok := s[xy.hash()]
-	return ok
-}
-
-type xyxyHash struct {
-	a, b xyHash
-}
-
-func hashXYXY(a, b XY) xyxyHash {
-	return xyxyHash{
-		a.hash(),
-		b.hash(),
-	}
 }

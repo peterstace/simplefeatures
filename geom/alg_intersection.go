@@ -79,7 +79,6 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	c := n2.a.XY
 	d := n2.b.XY
 
-	// TODO: epsilon check?
 	if parallel := b.Sub(a).Cross(d.Sub(c)) == 0; !parallel {
 		e := (c.Y-d.Y)*(a.X-c.X) + (d.X-c.X)*(a.Y-c.Y)
 		f := (d.X-c.X)*(a.Y-b.Y) - (a.X-b.X)*(d.Y-c.Y)
@@ -88,7 +87,6 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		// Division by zero is not possible, since the lines are not parallel.
 		p := e / f
 		q := g / h
-		// TODO: epsilon check?
 		if p < 0 || p > 1 || q < 0 || q > 1 {
 			// Intersection between lines occurs beyond line endpoints.
 			return NewGeometryCollection(nil)
@@ -97,7 +95,6 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	}
 
 	// TODO: invert if to un-indent flow.
-	// TODO: epsilon check?
 	if colinear := b.Sub(a).Cross(d.Sub(a)) == 0; colinear {
 		// TODO: use a proper bbox type
 		abBB := bbox{
@@ -108,7 +105,6 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			min: XY{math.Min(c.X, d.X), math.Min(c.Y, d.Y)},
 			max: XY{math.Max(c.X, d.X), math.Max(c.Y, d.Y)},
 		}
-		// TODO: epsilon?
 		if abBB.min.X > cdBB.max.X || abBB.max.X < cdBB.min.X ||
 			abBB.min.Y > cdBB.max.Y || abBB.max.Y < cdBB.min.Y {
 			// Line segments don't overlap at all.
@@ -120,13 +116,11 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		// can just do a pairwise check on the endpoints for each 4
 		// combinations.
 
-		// TODO: epsilon check?
 		if abBB.max.X == cdBB.min.X && abBB.min.Y == cdBB.max.Y {
 			// Line segments overlap at a point.
 			return NewPointS(abBB.max.X, abBB.min.Y)
 		}
 
-		// TODO: epsilon check?
 		if cdBB.max.X == abBB.min.X && cdBB.min.Y == abBB.max.Y {
 			// Line segments overlap at a point.
 			return NewPointS(cdBB.max.X, cdBB.min.Y)
@@ -158,7 +152,6 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			rise = b.Y - a.Y
 			run  = b.X - a.X
 		)
-		// TODO: epsilon check?
 		if rise > 0 && run < 0 || rise < 0 && run > 0 {
 			u.X, v.X = v.X, u.X
 		}
@@ -201,7 +194,6 @@ func intersectPointWithLine(point Point, line Line) Geometry {
 	}
 	lhs := (point.coords.X - line.a.X) * (line.b.Y - line.a.Y)
 	rhs := (point.coords.Y - line.a.Y) * (line.b.X - line.a.X)
-	// TODO: epsilon check?
 	if lhs == rhs {
 		return point
 	}
@@ -219,29 +211,29 @@ func intersectPointWithLineString(pt Point, ls LineString) Geometry {
 }
 
 func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) Geometry {
-	mp1Set := newXYSet()
+	mp1Set := make(map[XY]struct{})
 	for _, pt := range mp1.pts {
-		mp1Set.add(pt.coords.XY)
+		mp1Set[pt.Coordinates().XY] = struct{}{}
 	}
-	mp2Set := newXYSet()
+	mp2Set := make(map[XY]struct{})
 	for _, pt := range mp2.pts {
-		mp2Set.add(pt.coords.XY)
+		mp2Set[pt.Coordinates().XY] = struct{}{}
 	}
 
-	allSet := newXYSet()
-	for _, pt := range mp1Set {
-		if mp2Set.contains(pt) {
-			allSet.add(pt)
+	interSet := make(map[XY]struct{})
+	for pt := range mp1Set {
+		if _, ok := mp2Set[pt]; ok {
+			interSet[pt] = struct{}{}
 		}
 	}
-	for _, pt := range mp2Set {
-		if mp1Set.contains(pt) {
-			allSet.add(pt)
+	for pt := range mp2Set {
+		if _, ok := mp1Set[pt]; ok {
+			interSet[pt] = struct{}{}
 		}
 	}
 
-	intersection := make([]Point, 0, len(allSet))
-	for _, pt := range allSet {
+	intersection := make([]Point, 0, len(interSet))
+	for pt := range interSet {
 		intersection = append(intersection, NewPointXY(pt))
 	}
 	sort.Slice(intersection, func(i, j int) bool {

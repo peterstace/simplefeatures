@@ -74,13 +74,12 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 
 // IsSimple returns true iff no two of its points are equal.
 func (m MultiPoint) IsSimple() bool {
-	seen := make(map[xyHash]bool)
+	seen := make(map[XY]bool)
 	for _, p := range m.pts {
-		h := p.coords.XY.hash()
-		if seen[h] {
+		if seen[p.coords.XY] {
 			return false
 		}
-		seen[h] = true
+		seen[p.coords.XY] = true
 	}
 	return true
 }

@@ -32,7 +32,6 @@ func (o threePointOrientation) String() string {
 // orientation checks if s is on the right hand side or left hand side of the line formed by p and q.
 func orientation(p, q, s XY) threePointOrientation {
 	cp := q.Sub(p).Cross(s.Sub(q))
-	// TODO: do we need some sort of epsilon check here?
 	switch {
 	case cp > 0:
 		return leftTurn
