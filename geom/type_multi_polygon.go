@@ -22,17 +22,19 @@ type MultiPolygon struct {
 
 // NewMultiPolygon creates a MultiPolygon from its constintuent Polygons. It
 // gives an error if any of the MultiPolygon assertions are not maintained.
-func NewMultiPolygon(polys []Polygon) (MultiPolygon, error) {
-	for i := 0; i < len(polys); i++ {
-		for j := i + 1; j < len(polys); j++ {
-			bound1 := polys[i].Boundary()
-			bound2 := polys[j].Boundary()
-			inter := bound1.Intersection(bound2)
-			if inter.Dimension() > 0 {
-				return MultiPolygon{}, errors.New("the boundaries of the polygon elements of multipolygons must only intersect at points")
-			}
-			if polyInteriorsIntersect(polys[i], polys[j]) {
-				return MultiPolygon{}, errors.New("polygon interiors must not intersect")
+func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
+	if doExpensiveValidations(opts) {
+		for i := 0; i < len(polys); i++ {
+			for j := i + 1; j < len(polys); j++ {
+				bound1 := polys[i].Boundary()
+				bound2 := polys[j].Boundary()
+				inter := bound1.Intersection(bound2)
+				if inter.Dimension() > 0 {
+					return MultiPolygon{}, errors.New("the boundaries of the polygon elements of multipolygons must only intersect at points")
+				}
+				if polyInteriorsIntersect(polys[i], polys[j]) {
+					return MultiPolygon{}, errors.New("polygon interiors must not intersect")
+				}
 			}
 		}
 	}
@@ -125,19 +127,19 @@ func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
 }
 
 // NewMultiPolygonC creates a new MultiPolygon from its constituent Coordinate values.
-func NewMultiPolygonC(coords [][][]Coordinates) (MultiPolygon, error) {
+func NewMultiPolygonC(coords [][][]Coordinates, opts ...ConstructorOption) (MultiPolygon, error) {
 	var polys []Polygon
 	for _, c := range coords {
 		if len(c) == 0 {
 			continue
 		}
-		poly, err := NewPolygonC(c)
+		poly, err := NewPolygonC(c, opts...)
 		if err != nil {
 			return MultiPolygon{}, err
 		}
 		polys = append(polys, poly)
 	}
-	return NewMultiPolygon(polys)
+	return NewMultiPolygon(polys, opts...)
 }
 
 // NumPolygons gives the number of Polygon elements in the MultiPolygon.

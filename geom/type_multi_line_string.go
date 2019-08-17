@@ -16,20 +16,20 @@ type MultiLineString struct {
 
 // NewMultiLineString creates a MultiLineString from its constintuent
 // LineStrings.
-func NewMultiLineString(lines []LineString) MultiLineString {
+func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLineString {
 	return MultiLineString{lines}
 }
 
 // NewMultiLineStringC creates a MultiLineString from its coordinates. The
 // first dimension of the coordinates slice indicates the LineString, and the
 // second dimension indiates the Coordinate within a LineString.
-func NewMultiLineStringC(coords [][]Coordinates) (MultiLineString, error) {
+func NewMultiLineStringC(coords [][]Coordinates, opts ...ConstructorOption) (MultiLineString, error) {
 	var lines []LineString
 	for _, c := range coords {
 		if len(c) == 0 {
 			continue
 		}
-		line, err := NewLineStringC(c)
+		line, err := NewLineStringC(c, opts...)
 		if err != nil {
 			return MultiLineString{}, err
 		}

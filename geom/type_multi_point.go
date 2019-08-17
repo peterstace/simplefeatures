@@ -15,32 +15,32 @@ type MultiPoint struct {
 	pts []Point
 }
 
-func NewMultiPoint(pts []Point) MultiPoint {
+func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 	return MultiPoint{pts}
 }
 
 // NewMultiPointOC creates a new MultiPoint consisting of a Point for each
 // non-empty OptionalCoordinate.
-func NewMultiPointOC(coords []OptionalCoordinates) MultiPoint {
+func NewMultiPointOC(coords []OptionalCoordinates, opts ...ConstructorOption) MultiPoint {
 	var pts []Point
 	for _, c := range coords {
 		if c.Empty {
 			continue
 		}
-		pt := NewPointC(c.Value)
+		pt := NewPointC(c.Value, opts...)
 		pts = append(pts, pt)
 	}
-	return NewMultiPoint(pts)
+	return NewMultiPoint(pts, opts...)
 }
 
 // NewMultiPointC creates a new MultiPoint consisting of a point for each coordinate.
-func NewMultiPointC(coords []Coordinates) MultiPoint {
+func NewMultiPointC(coords []Coordinates, opts ...ConstructorOption) MultiPoint {
 	var pts []Point
 	for _, c := range coords {
-		pt := NewPointC(c)
+		pt := NewPointC(c, opts...)
 		pts = append(pts, pt)
 	}
-	return NewMultiPoint(pts)
+	return NewMultiPoint(pts, opts...)
 }
 
 // NumPoints gives the number of element points making up the MultiPoint.
