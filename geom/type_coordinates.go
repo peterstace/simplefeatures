@@ -11,7 +11,6 @@ type OptionalCoordinates struct {
 }
 
 func (c Coordinates) MarshalJSON() ([]byte, error) {
-	// TODO: allocate max needed slice, e.g. 1 + 18 + 1 + 18 + 1 == 38
 	buf := []byte{'['}
 	buf = appendFloat(buf, c.XY.X)
 	buf = append(buf, ',')
