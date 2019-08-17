@@ -51,8 +51,7 @@ func (w XY) Midpoint(o XY) XY {
 }
 
 func (w XY) Dot(o XY) float64 {
-	// TODO: remove float64 cast
-	return float64(w.X*o.X + w.Y*o.Y)
+	return w.X*o.X + w.Y*o.Y
 }
 
 // Less gives an ordering on XYs. If two XYs have different X values, then the
