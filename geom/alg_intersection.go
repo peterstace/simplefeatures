@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"math"
 	"sort"
 )
 
@@ -78,15 +79,17 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	c := n2.a.XY
 	d := n2.b.XY
 
-	if parallel := b.Sub(a).Cross(d.Sub(c)).Equals(zero); !parallel {
-		e := c.Y.Sub(d.Y).Mul(a.X.Sub(c.X)).Add(d.X.Sub(c.X).Mul(a.Y.Sub(c.Y)))
-		f := d.X.Sub(c.X).Mul(a.Y.Sub(b.Y)).Sub(a.X.Sub(b.X).Mul(d.Y.Sub(c.Y)))
-		g := a.Y.Sub(b.Y).Mul(a.X.Sub(c.X)).Add(b.X.Sub(a.X).Mul(a.Y.Sub(c.Y)))
-		h := d.X.Sub(c.X).Mul(a.Y.Sub(b.Y)).Sub(a.X.Sub(b.X).Mul(d.Y.Sub(c.Y)))
+	// TODO: epsilon check?
+	if parallel := b.Sub(a).Cross(d.Sub(c)) == 0; !parallel {
+		e := (c.Y-d.Y)*(a.X-c.X) + (d.X-c.X)*(a.Y-c.Y)
+		f := (d.X-c.X)*(a.Y-b.Y) - (a.X-b.X)*(d.Y-c.Y)
+		g := (a.Y-b.Y)*(a.X-c.X) + (b.X-a.X)*(a.Y-c.Y)
+		h := (d.X-c.X)*(a.Y-b.Y) - (a.X-b.X)*(d.Y-c.Y)
 		// Division by zero is not possible, since the lines are not parallel.
-		p := e.Div(f)
-		q := g.Div(h)
-		if p.LT(zero) || p.GT(one) || q.LT(zero) || q.GT(one) {
+		p := e / f
+		q := g / h
+		// TODO: epsilon check?
+		if p < 0 || p > 1 || q < 0 || q > 1 {
 			// Intersection between lines occurs beyond line endpoints.
 			return NewGeometryCollection(nil)
 		}
@@ -94,18 +97,20 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	}
 
 	// TODO: invert if to un-indent flow.
-	if colinear := b.Sub(a).Cross(d.Sub(a)).Equals(zero); colinear {
+	// TODO: epsilon check?
+	if colinear := b.Sub(a).Cross(d.Sub(a)) == 0; colinear {
 		// TODO: use a proper bbox type
 		abBB := bbox{
-			min: XY{a.X.Min(b.X), a.Y.Min(b.Y)},
-			max: XY{a.X.Max(b.X), a.Y.Max(b.Y)},
+			min: XY{math.Min(a.X, b.X), math.Min(a.Y, b.Y)},
+			max: XY{math.Max(a.X, b.X), math.Max(a.Y, b.Y)},
 		}
 		cdBB := bbox{
-			min: XY{c.X.Min(d.X), c.Y.Min(d.Y)},
-			max: XY{c.X.Max(d.X), c.Y.Max(d.Y)},
+			min: XY{math.Min(c.X, d.X), math.Min(c.Y, d.Y)},
+			max: XY{math.Max(c.X, d.X), math.Max(c.Y, d.Y)},
 		}
-		if abBB.min.X.GT(cdBB.max.X) || abBB.max.X.LT(cdBB.min.X) ||
-			abBB.min.Y.GT(cdBB.max.Y) || abBB.max.Y.LT(cdBB.min.Y) {
+		// TODO: epsilon?
+		if abBB.min.X > cdBB.max.X || abBB.max.X < cdBB.min.X ||
+			abBB.min.Y > cdBB.max.Y || abBB.max.Y < cdBB.min.Y {
 			// Line segments don't overlap at all.
 			return NewGeometryCollection(nil)
 		}
@@ -115,12 +120,14 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		// can just do a pairwise check on the endpoints for each 4
 		// combinations.
 
-		if abBB.max.X.Equals(cdBB.min.X) && abBB.min.Y.Equals(cdBB.max.Y) {
+		// TODO: epsilon check?
+		if abBB.max.X == cdBB.min.X && abBB.min.Y == cdBB.max.Y {
 			// Line segments overlap at a point.
 			return NewPointS(abBB.max.X, abBB.min.Y)
 		}
 
-		if cdBB.max.X.Equals(abBB.min.X) && cdBB.min.Y.Equals(abBB.max.Y) {
+		// TODO: epsilon check?
+		if cdBB.max.X == abBB.min.X && cdBB.min.Y == abBB.max.Y {
 			// Line segments overlap at a point.
 			return NewPointS(cdBB.max.X, cdBB.min.Y)
 		}
@@ -137,21 +144,22 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		// Line segments overlap over a line segment.
 		bb := bbox{
 			min: XY{
-				abBB.min.X.Max(cdBB.min.X),
-				abBB.min.Y.Max(cdBB.min.Y),
+				math.Max(abBB.min.X, cdBB.min.X),
+				math.Max(abBB.min.Y, cdBB.min.Y),
 			},
 			max: XY{
-				abBB.max.X.Min(cdBB.max.X),
-				abBB.max.Y.Min(cdBB.max.Y),
+				math.Min(abBB.max.X, cdBB.max.X),
+				math.Min(abBB.max.Y, cdBB.max.Y),
 			},
 		}
 		var (
 			u    = XY{bb.min.X, bb.min.Y}
 			v    = XY{bb.max.X, bb.max.Y}
-			rise = b.Y.Sub(a.Y)
-			run  = b.X.Sub(a.X)
+			rise = b.Y - a.Y
+			run  = b.X - a.X
 		)
-		if rise.GT(zero) && run.LT(zero) || rise.LT(zero) && run.GT(zero) {
+		// TODO: epsilon check?
+		if rise > 0 && run < 0 || rise < 0 && run > 0 {
 			u.X, v.X = v.X, u.X
 		}
 
@@ -191,9 +199,10 @@ func intersectPointWithLine(point Point, line Line) Geometry {
 	if !env.IntersectsPoint(point.coords.XY) {
 		return NewEmptyPoint()
 	}
-	lhs := point.coords.X.Sub(line.a.X).Mul(line.b.Y.Sub(line.a.Y))
-	rhs := point.coords.Y.Sub(line.a.Y).Mul(line.b.X.Sub(line.a.X))
-	if lhs.Equals(rhs) {
+	lhs := (point.coords.X - line.a.X) * (line.b.Y - line.a.Y)
+	rhs := (point.coords.Y - line.a.Y) * (line.b.X - line.a.X)
+	// TODO: epsilon check?
+	if lhs == rhs {
 		return point
 	}
 	return NewEmptyPoint()

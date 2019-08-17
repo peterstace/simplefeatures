@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"math/big"
 	"strconv"
 	"strings"
 )
@@ -168,7 +167,7 @@ func (p *parser) nextPoint() Coordinates {
 	return Coordinates{XY{x, y}}
 }
 
-func (p *parser) nextSignedNumericLiteral() Scalar {
+func (p *parser) nextSignedNumericLiteral() float64 {
 	var negative bool
 	tok := p.nextToken()
 	if tok == "-" {
@@ -177,20 +176,14 @@ func (p *parser) nextSignedNumericLiteral() Scalar {
 	}
 	f, err := strconv.ParseFloat(tok, 64)
 	p.check(err)
-	// NaNs are not allowed by the WKT grammar.
-	if math.IsNaN(f) {
+	// NaNs and Infs are not allowed by the WKT grammar.
+	if math.IsNaN(f) || math.IsInf(f, 0) {
 		p.errorf("invalid signed numeric literal: %s", tok)
 	}
 	if negative {
 		f *= -1
 	}
-
-	r, ok := new(big.Rat).SetString(strconv.FormatFloat(f, 'f', -1, 64))
-	if !ok {
-		p.errorf("invalid signed numeric literal: %s", tok)
-	}
-
-	return Scalar{r}
+	return f
 }
 
 func (p *parser) nextPointText() OptionalCoordinates {

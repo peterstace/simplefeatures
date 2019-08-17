@@ -64,10 +64,7 @@ func TestIsEmptyDimension(t *testing.T) {
 
 func TestEnvelope(t *testing.T) {
 	xy := func(x, y float64) XY {
-		return XY{
-			MustNewScalarF(x),
-			MustNewScalarF(y),
-		}
+		return XY{x, y}
 	}
 	for i, tt := range []struct {
 		wkt string
@@ -283,15 +280,15 @@ func TestBoundary(t *testing.T) {
 }
 
 func TestCoordinates(t *testing.T) {
-	cmp0d := func(t *testing.T, got Coordinates, want [2]int) {
-		if !got.XY.X.Equals(MustNewScalarS(strconv.Itoa(want[0]))) {
+	cmp0d := func(t *testing.T, got Coordinates, want [2]float64) {
+		if got.XY.X != want[0] {
 			t.Errorf("coordinate mismatch: got=%v want=%v", got, want)
 		}
-		if !got.XY.Y.Equals(MustNewScalarS(strconv.Itoa(want[1]))) {
+		if got.XY.Y != want[1] {
 			t.Errorf("coordinate mismatch: got=%v want=%v", got, want)
 		}
 	}
-	cmp1d := func(t *testing.T, got []Coordinates, want [][2]int) {
+	cmp1d := func(t *testing.T, got []Coordinates, want [][2]float64) {
 		if len(got) != len(want) {
 			t.Errorf("length mismatch: got=%v want=%v", len(got), len(want))
 		}
@@ -299,7 +296,7 @@ func TestCoordinates(t *testing.T) {
 			cmp0d(t, got[i], want[i])
 		}
 	}
-	cmp2d := func(t *testing.T, got [][]Coordinates, want [][][2]int) {
+	cmp2d := func(t *testing.T, got [][]Coordinates, want [][][2]float64) {
 		if len(got) != len(want) {
 			t.Errorf("length mismatch: got=%v want=%v", len(got), len(want))
 		}
@@ -307,7 +304,7 @@ func TestCoordinates(t *testing.T) {
 			cmp1d(t, got[i], want[i])
 		}
 	}
-	cmp3d := func(t *testing.T, got [][][]Coordinates, want [][][][2]int) {
+	cmp3d := func(t *testing.T, got [][][]Coordinates, want [][][][2]float64) {
 		if len(got) != len(want) {
 			t.Errorf("length mismatch: got=%v want=%v", len(got), len(want))
 		}
@@ -318,18 +315,18 @@ func TestCoordinates(t *testing.T) {
 	t.Run("Point", func(t *testing.T) {
 		cmp0d(t,
 			geomFromWKT(t, "POINT(1 2)").(Point).Coordinates(),
-			[2]int{1, 2},
+			[2]float64{1, 2},
 		)
 	})
 	t.Run("Line-LineString-LinearRing-MultiPoint", func(t *testing.T) {
 		for _, tt := range []struct {
 			wkt  string
-			want [][2]int
+			want [][2]float64
 		}{
-			{"LINESTRING(0 1,2 3)", [][2]int{{0, 1}, {2, 3}}},
-			{"LINESTRING(0 1,2 3,4 5)", [][2]int{{0, 1}, {2, 3}, {4, 5}}},
-			{"LINEARRING(0 0,1 0,0 1,0 0)", [][2]int{{0, 0}, {1, 0}, {0, 1}, {0, 0}}},
-			{"MULTIPOINT(0 1,2 3,4 5)", [][2]int{{0, 1}, {2, 3}, {4, 5}}},
+			{"LINESTRING(0 1,2 3)", [][2]float64{{0, 1}, {2, 3}}},
+			{"LINESTRING(0 1,2 3,4 5)", [][2]float64{{0, 1}, {2, 3}, {4, 5}}},
+			{"LINEARRING(0 0,1 0,0 1,0 0)", [][2]float64{{0, 0}, {1, 0}, {0, 1}, {0, 0}}},
+			{"MULTIPOINT(0 1,2 3,4 5)", [][2]float64{{0, 1}, {2, 3}, {4, 5}}},
 		} {
 			cmp1d(t,
 				geomFromWKT(t, tt.wkt).(interface{ Coordinates() []Coordinates }).Coordinates(),
@@ -340,18 +337,18 @@ func TestCoordinates(t *testing.T) {
 	t.Run("Polygon-MultiLineString", func(t *testing.T) {
 		for _, tt := range []struct {
 			wkt  string
-			want [][][2]int
+			want [][][2]float64
 		}{
 			{
 				"POLYGON((0 0,0 10,10 0,0 0),(2 2,2 7,7 2,2 2))",
-				[][][2]int{
+				[][][2]float64{
 					{{0, 0}, {0, 10}, {10, 0}, {0, 0}},
 					{{2, 2}, {2, 7}, {7, 2}, {2, 2}},
 				},
 			},
 			{
 				"MULTILINESTRING((0 0,0 10,10 0,0 0),(2 2,2 8,8 2,2 2))",
-				[][][2]int{
+				[][][2]float64{
 					{{0, 0}, {0, 10}, {10, 0}, {0, 0}},
 					{{2, 2}, {2, 8}, {8, 2}, {2, 2}},
 				},
@@ -371,7 +368,7 @@ func TestCoordinates(t *testing.T) {
 		)`
 		cmp3d(t,
 			geomFromWKT(t, wkt).(interface{ Coordinates() [][][]Coordinates }).Coordinates(),
-			[][][][2]int{
+			[][][][2]float64{
 				{
 					{{0, 0}, {0, 10}, {10, 0}, {0, 0}},
 					{{2, 2}, {2, 7}, {7, 2}, {2, 2}},

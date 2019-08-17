@@ -88,10 +88,10 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 					sort.Slice(linePtsSlice, func(i, j int) bool {
 						ptI := linePtsSlice[i]
 						ptJ := linePtsSlice[j]
-						if !ptI.X.Equals(ptJ.X) {
-							return ptI.X.LT(ptJ.X)
+						if ptI.X != ptJ.X {
+							return ptI.X < ptJ.X
 						}
-						return ptI.Y.LT(ptJ.Y)
+						return ptI.Y < ptJ.Y
 					})
 					allPts.add(linePtsSlice[0])
 					for i := 0; i+1 < len(linePtsSlice); i++ {

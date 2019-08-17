@@ -57,13 +57,13 @@ func (n Line) AsText() string {
 
 func (n Line) AppendWKT(dst []byte) []byte {
 	dst = append(dst, []byte("LINESTRING(")...)
-	dst = n.a.X.appendAsFloat(dst)
+	dst = appendFloat(dst, n.a.X)
 	dst = append(dst, ' ')
-	dst = n.a.Y.appendAsFloat(dst)
+	dst = appendFloat(dst, n.a.Y)
 	dst = append(dst, ',')
-	dst = n.b.X.appendAsFloat(dst)
+	dst = appendFloat(dst, n.b.X)
 	dst = append(dst, ' ')
-	dst = n.b.Y.appendAsFloat(dst)
+	dst = appendFloat(dst, n.b.Y)
 	return append(dst, ')')
 }
 
@@ -107,10 +107,10 @@ func (n Line) AsBinary(w io.Writer) error {
 	marsh.writeByteOrder()
 	marsh.writeGeomType(wkbGeomTypeLineString)
 	marsh.writeCount(2)
-	marsh.writeFloat64(n.StartPoint().XY().X.AsFloat())
-	marsh.writeFloat64(n.StartPoint().XY().Y.AsFloat())
-	marsh.writeFloat64(n.EndPoint().XY().X.AsFloat())
-	marsh.writeFloat64(n.EndPoint().XY().Y.AsFloat())
+	marsh.writeFloat64(n.StartPoint().XY().X)
+	marsh.writeFloat64(n.StartPoint().XY().Y)
+	marsh.writeFloat64(n.EndPoint().XY().X)
+	marsh.writeFloat64(n.EndPoint().XY().Y)
 	return marsh.err
 }
 

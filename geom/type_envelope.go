@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"math"
 )
 
 type Envelope struct {
@@ -48,20 +49,21 @@ func (e Envelope) Max() XY {
 
 func (e Envelope) Extend(point XY) Envelope {
 	return Envelope{
-		min: XY{e.min.X.Min(point.X), e.min.Y.Min(point.Y)},
-		max: XY{e.max.X.Max(point.X), e.max.Y.Max(point.Y)},
+		min: XY{math.Min(e.min.X, point.X), math.Min(e.min.Y, point.Y)},
+		max: XY{math.Max(e.max.X, point.X), math.Max(e.max.Y, point.Y)},
 	}
 }
 
 func (e Envelope) Union(other Envelope) Envelope {
 	return Envelope{
-		min: XY{e.min.X.Min(other.min.X), e.min.Y.Min(other.min.Y)},
-		max: XY{e.max.X.Max(other.max.X), e.max.Y.Max(other.max.Y)},
+		min: XY{math.Min(e.min.X, other.min.X), math.Min(e.min.Y, other.min.Y)},
+		max: XY{math.Max(e.max.X, other.max.X), math.Max(e.max.Y, other.max.Y)},
 	}
 }
 
 func (e Envelope) IntersectsPoint(p XY) bool {
-	return p.X.GTE(e.min.X) && p.X.LTE(e.max.X) && p.Y.GTE(e.min.Y) && p.Y.LTE(e.max.Y)
+	// TODO: epsilon ?
+	return p.X >= e.min.X && p.X <= e.max.X && p.Y >= e.min.Y && p.Y <= e.max.Y
 }
 
 // mustEnvelope gets the envelope from a Geometry. If it's not defined (because

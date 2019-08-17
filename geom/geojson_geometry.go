@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 )
 
 func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error) {
@@ -123,17 +122,7 @@ func oneDimFloat64sToCoordinates(fs []float64) (Coordinates, error) {
 			return Coordinates{}, errors.New("coordinate is NaN or inf")
 		}
 	}
-	xstr := strconv.FormatFloat(fs[0], 'f', -1, 64)
-	ystr := strconv.FormatFloat(fs[1], 'f', -1, 64)
-	x, err := NewScalarS(xstr)
-	if err != nil {
-		return Coordinates{}, err
-	}
-	y, err := NewScalarS(ystr)
-	if err != nil {
-		return Coordinates{}, err
-	}
-	return Coordinates{XY{x, y}}, nil
+	return Coordinates{XY{fs[0], fs[1]}}, nil
 }
 
 func twoDimFloat64sToCoordinates(outer [][]float64) ([]Coordinates, error) {

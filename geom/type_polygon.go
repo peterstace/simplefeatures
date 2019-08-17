@@ -196,8 +196,8 @@ func (p Polygon) AsBinary(w io.Writer) error {
 		marsh.writeCount(numPts)
 		for i := 0; i < numPts; i++ {
 			pt := ring.PointN(i)
-			marsh.writeFloat64(pt.XY().X.AsFloat())
-			marsh.writeFloat64(pt.XY().Y.AsFloat())
+			marsh.writeFloat64(pt.XY().X)
+			marsh.writeFloat64(pt.XY().Y)
 		}
 	}
 	return marsh.err
