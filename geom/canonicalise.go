@@ -38,11 +38,10 @@ func canonicalise(geoms []Geometry) Geometry {
 	return NewGeometryCollection(allGeoms)
 }
 
-type xyxy struct {
-	a, b XY
-}
-
 func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
+	type xyxy struct {
+		a, b XY
+	}
 	points := map[XY]Point{}
 	lines := map[xyxy]Line{}
 	var polys []Polygon
