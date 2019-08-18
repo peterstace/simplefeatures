@@ -231,3 +231,10 @@ func (p Polygon) Coordinates() [][]Coordinates {
 	}
 	return coords
 }
+
+// TransformXY transforms this Polygon into another Polygon according to fn.
+func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := p.Coordinates()
+	transform2dCoords(coords, fn)
+	return NewPolygonC(coords, opts...)
+}

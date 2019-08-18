@@ -51,6 +51,14 @@ type Geometry interface {
 	// when finding the convex hull.
 	convexHullPointSet() []XY
 
+	// TransformXY transforms this Geometry into another geometry according the
+	// mapping provided by the XY function. Some classes of mappings (such as
+	// affine transformations) will preserve the validity this Geometry in the
+	// transformed Geometry, in which case no error will be returned. Other
+	// types of transformations may result in a validation error if their
+	// mapping results in an invalid Geometry.
+	TransformXY(func(XY) XY, ...ConstructorOption) (Geometry, error)
+
 	json.Marshaler
 }
 

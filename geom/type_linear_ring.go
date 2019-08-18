@@ -128,3 +128,10 @@ func (r LinearRing) MarshalJSON() ([]byte, error) {
 func (r LinearRing) Coordinates() []Coordinates {
 	return r.ls.Coordinates()
 }
+
+// TransformXY transforms this LinearRing into another LinearRing according to fn.
+func (r LinearRing) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := r.Coordinates()
+	transform1dCoords(coords, fn)
+	return NewLinearRing(coords, opts...)
+}

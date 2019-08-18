@@ -133,3 +133,10 @@ func (n Line) MarshalJSON() ([]byte, error) {
 func (n Line) Coordinates() []Coordinates {
 	return []Coordinates{n.a, n.b}
 }
+
+// TransformXY transforms this Line into another Line according to fn.
+func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := n.Coordinates()
+	transform1dCoords(coords, fn)
+	return NewLineC(coords[0], coords[1], opts...)
+}

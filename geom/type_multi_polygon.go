@@ -276,3 +276,10 @@ func (m MultiPolygon) Coordinates() [][][]Coordinates {
 	}
 	return coords
 }
+
+// TransformXY transforms this MultiPolygon into another MultiPolygon according to fn.
+func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := m.Coordinates()
+	transform3dCoords(coords, fn)
+	return NewMultiPolygonC(coords, opts...)
+}

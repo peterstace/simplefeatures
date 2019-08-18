@@ -166,3 +166,10 @@ func (m MultiPoint) Coordinates() []Coordinates {
 	}
 	return coords
 }
+
+// TransformXY transforms this MultiPoint into another MultiPoint according to fn.
+func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := m.Coordinates()
+	transform1dCoords(coords, fn)
+	return NewMultiPointC(coords, opts...), nil
+}

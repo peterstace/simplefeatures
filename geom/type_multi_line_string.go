@@ -207,3 +207,10 @@ func (m MultiLineString) Coordinates() [][]Coordinates {
 	}
 	return coords
 }
+
+// TransformXY transforms this MultiLineString into another MultiLineString according to fn.
+func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := m.Coordinates()
+	transform2dCoords(coords, fn)
+	return NewMultiLineStringC(coords, opts...)
+}

@@ -382,3 +382,39 @@ func TestCoordinates(t *testing.T) {
 
 	})
 }
+
+func TestTransformXY(t *testing.T) {
+	transform := func(in XY) XY {
+		return XY{in.X * 1.5, in.Y}
+	}
+	for i, tt := range []struct {
+		wktIn, wktOut string
+	}{
+		{"POINT EMPTY", "POINT EMPTY"},
+		{"LINESTRING EMPTY", "LINESTRING EMPTY"},
+		{"POLYGON EMPTY", "POLYGON EMPTY"},
+
+		{"POINT(1 3)", "POINT(1.5 3)"},
+		{"LINESTRING(1 2,3 4)", "LINESTRING(1.5 2,4.5 4)"},
+		{"LINESTRING(1 2,3 4,5 6)", "LINESTRING(1.5 2,4.5 4,7.5 6)"},
+		{"LINEARRING(0 0,0 1,1 0,0 0)", "LINEARRING(0 0,0 1,1.5 0,0 0)"},
+		{"POLYGON((0 0,0 1,1 0,0 0))", "POLYGON((0 0,0 1,1.5 0,0 0))"},
+		{"MULTIPOINT(0 0,0 1,1 0,0 0)", "MULTIPOINT(0 0,0 1,1.5 0,0 0)"},
+		{"MULTILINESTRING((1 2,3 4,5 6))", "MULTILINESTRING((1.5 2,4.5 4,7.5 6))"},
+		{"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", "MULTIPOLYGON(((0 0,0 1,1.5 0,0 0)))"},
+
+		{"GEOMETRYCOLLECTION EMPTY", "GEOMETRYCOLLECTION EMPTY"},
+		{"GEOMETRYCOLLECTION(POINT EMPTY)", "GEOMETRYCOLLECTION(POINT EMPTY)"},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", "GEOMETRYCOLLECTION(POINT(1.5 2))"},
+		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 2)))", "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1.5 2)))"},
+	} {
+
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g := geomFromWKT(t, tt.wktIn)
+			got, err := g.TransformXY(transform)
+			expectNoErr(t, err)
+			want := geomFromWKT(t, tt.wktOut)
+			expectDeepEqual(t, got, want)
+		})
+	}
+}
