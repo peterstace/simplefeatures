@@ -1,5 +1,7 @@
 package geom
 
+import "math"
+
 type side int
 
 const (
@@ -14,16 +16,16 @@ func pointRingSide(pt XY, ring LinearRing) side {
 	// TODO: should be able to use envelope for this
 	maxX := ring.ls.lines[0].a.X
 	for _, ln := range ring.ls.lines {
-		maxX = maxX.Max(ln.b.X)
+		maxX = math.Max(maxX, ln.b.X)
 		if !ln.Intersection(ptg).IsEmpty() {
 			return boundary
 		}
 	}
-	if pt.X.GT(maxX) {
+	if pt.X > maxX {
 		return exterior
 	}
 
-	ray := must(NewLineC(Coordinates{pt}, Coordinates{XY{maxX.Add(one), pt.Y}})).(Line)
+	ray := must(NewLineC(Coordinates{pt}, Coordinates{XY{maxX + 1, pt.Y}})).(Line)
 	var count int
 	for _, seg := range ring.ls.lines {
 		inter := seg.Intersection(ray)
@@ -40,7 +42,7 @@ func pointRingSide(pt XY, ring LinearRing) side {
 			if inter.Equals(ep1) {
 				otherY = ep2.coords.Y
 			}
-			if otherY.LT(pt.Y) {
+			if otherY < pt.Y {
 				count++
 			}
 		} else {

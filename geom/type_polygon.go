@@ -30,7 +30,7 @@ func NewPolygon(outer LinearRing, holes []LinearRing, opts ...ConstructorOption)
 	if doExpensiveValidations(opts) {
 		allRings := append(holes, outer)
 		nextInterVert := len(allRings)
-		interVerts := make(map[xyHash]int)
+		interVerts := make(map[XY]int)
 		graph := newGraph()
 
 		// Rings may intersect, but only at a single point.
@@ -45,11 +45,11 @@ func NewPolygon(outer LinearRing, holes []LinearRing, opts ...ConstructorOption)
 					return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
 				}
 
-				interVert, ok := interVerts[env.Min().hash()]
+				interVert, ok := interVerts[env.Min()]
 				if !ok {
 					interVert = nextInterVert
 					nextInterVert++
-					interVerts[env.Min().hash()] = interVert
+					interVerts[env.Min()] = interVert
 				}
 				graph.addEdge(interVert, i)
 				graph.addEdge(interVert, j)
@@ -196,8 +196,8 @@ func (p Polygon) AsBinary(w io.Writer) error {
 		marsh.writeCount(numPts)
 		for i := 0; i < numPts; i++ {
 			pt := ring.PointN(i)
-			marsh.writeFloat64(pt.XY().X.AsFloat())
-			marsh.writeFloat64(pt.XY().Y.AsFloat())
+			marsh.writeFloat64(pt.XY().X)
+			marsh.writeFloat64(pt.XY().Y)
 		}
 	}
 	return marsh.err

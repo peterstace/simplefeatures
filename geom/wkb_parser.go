@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"strconv"
 )
 
 // TODO: When 3D/measure are supported, we will need to check for consistent
@@ -181,11 +180,7 @@ func (p *wkbParser) parsePoint() OptionalCoordinates {
 
 	// Only XY is supported so far.
 	_, _ = z, m
-	xs, err := NewScalarS(strconv.FormatFloat(x, 'f', -1, 64))
-	p.setErr(err)
-	ys, err := NewScalarS(strconv.FormatFloat(y, 'f', -1, 64))
-	p.setErr(err)
-	return OptionalCoordinates{Value: Coordinates{XY{xs, ys}}}
+	return OptionalCoordinates{Value: Coordinates{XY{x, y}}}
 }
 
 func (p *wkbParser) parseLineString() []Coordinates {

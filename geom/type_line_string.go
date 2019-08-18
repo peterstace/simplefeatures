@@ -69,15 +69,15 @@ func (s LineString) AppendWKT(dst []byte) []byte {
 func (s LineString) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
 	for _, ln := range s.lines {
-		dst = ln.a.X.appendAsFloat(dst)
+		dst = appendFloat(dst, ln.a.X)
 		dst = append(dst, ' ')
-		dst = ln.a.Y.appendAsFloat(dst)
+		dst = appendFloat(dst, ln.a.Y)
 		dst = append(dst, ',')
 	}
 	last := s.lines[len(s.lines)-1].b
-	dst = last.X.appendAsFloat(dst)
+	dst = appendFloat(dst, last.X)
 	dst = append(dst, ' ')
-	dst = last.Y.appendAsFloat(dst)
+	dst = appendFloat(dst, last.Y)
 	return append(dst, ')')
 }
 
@@ -175,8 +175,8 @@ func (s LineString) AsBinary(w io.Writer) error {
 	n := s.NumPoints()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {
-		marsh.writeFloat64(s.PointN(i).XY().X.AsFloat())
-		marsh.writeFloat64(s.PointN(i).XY().Y.AsFloat())
+		marsh.writeFloat64(s.PointN(i).XY().X)
+		marsh.writeFloat64(s.PointN(i).XY().Y)
 	}
 	return marsh.err
 }

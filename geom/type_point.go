@@ -16,12 +16,12 @@ type Point struct {
 
 // NewPointXY creates a new point from an XY.
 func NewPointXY(xy XY, _ ...ConstructorOption) Point {
-	return NewPointS(xy.X, xy.Y)
+	return NewPointC(Coordinates{XY: xy})
 }
 
-// NewPointS creates a new point from scalar values.
-func NewPointS(x, y Scalar, _ ...ConstructorOption) Point {
-	return NewPointC(Coordinates{XY{x, y}})
+// NewPointF creates a new point from float64 x and y values.
+func NewPointF(x, y float64, _ ...ConstructorOption) Point {
+	return NewPointXY(XY{x, y})
 }
 
 // NewPointC creates a new point gives its Coordinates.
@@ -50,9 +50,9 @@ func (p Point) AppendWKT(dst []byte) []byte {
 
 func (p Point) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
-	dst = p.coords.X.appendAsFloat(dst)
+	dst = appendFloat(dst, p.coords.X)
 	dst = append(dst, ' ')
-	dst = p.coords.Y.appendAsFloat(dst)
+	dst = appendFloat(dst, p.coords.Y)
 	return append(dst, ')')
 }
 
@@ -92,8 +92,8 @@ func (p Point) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(wkbGeomTypePoint)
-	marsh.writeFloat64(p.coords.X.AsFloat())
-	marsh.writeFloat64(p.coords.Y.AsFloat())
+	marsh.writeFloat64(p.coords.X)
+	marsh.writeFloat64(p.coords.Y)
 	return marsh.err
 }
 

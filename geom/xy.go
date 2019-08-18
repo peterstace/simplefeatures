@@ -1,58 +1,44 @@
 package geom
 
-import (
-	"crypto/sha256"
-	"fmt"
-)
-
 type XY struct {
-	X, Y Scalar
-}
-
-// MustNewXYF creates an XY from x and y float64 values. If either value is not
-// finite, then it panics.
-func MustNewXYF(x, y float64) XY {
-	return XY{
-		MustNewScalarF(x),
-		MustNewScalarF(y),
-	}
+	X, Y float64
 }
 
 func (w XY) Equals(o XY) bool {
-	return w.X.Equals(o.X) && w.Y.Equals(o.Y)
+	return w.X == o.X && w.Y == o.Y
 }
 
 func (w XY) Sub(o XY) XY {
 	return XY{
-		w.X.Sub(o.X),
-		w.Y.Sub(o.Y),
+		w.X - o.X,
+		w.Y - o.Y,
 	}
 }
 
 func (w XY) Add(o XY) XY {
 	return XY{
-		w.X.Add(o.X),
-		w.Y.Add(o.Y),
+		w.X + o.X,
+		w.Y + o.Y,
 	}
 }
 
-func (w XY) Scale(s Scalar) XY {
+func (w XY) Scale(s float64) XY {
 	return XY{
-		w.X.Mul(s),
-		w.Y.Mul(s),
+		w.X * s,
+		w.Y * s,
 	}
 }
 
-func (w XY) Cross(o XY) Scalar {
-	return w.X.Mul(o.Y).Sub(w.Y.Mul(o.X))
+func (w XY) Cross(o XY) float64 {
+	return (w.X * o.Y) - (w.Y * o.X)
 }
 
 func (w XY) Midpoint(o XY) XY {
-	return w.Add(o).Scale(half)
+	return w.Add(o).Scale(0.5)
 }
 
-func (w XY) Dot(o XY) Scalar {
-	return w.X.Mul(o.X).Add(w.Y.Mul(o.Y))
+func (w XY) Dot(o XY) float64 {
+	return w.X*o.X + w.Y*o.Y
 }
 
 // Less gives an ordering on XYs. If two XYs have different X values, then the
@@ -60,44 +46,8 @@ func (w XY) Dot(o XY) Scalar {
 // value. If the X values are then same, then the Y values are used (the lower
 // Y value comes first).
 func (w XY) Less(o XY) bool {
-	if !w.X.Equals(o.X) {
-		return w.X.LT(o.X)
+	if w.X != o.X {
+		return w.X < o.X
 	}
-	return w.Y.LT(o.Y)
-}
-
-type xyHash [sha256.Size]byte
-
-func (w XY) hash() xyHash {
-	h := sha256.New()
-	fmt.Fprintf(h, "%s,%s", w.X.val, w.Y.val)
-	var sum xyHash
-	h.Sum(sum[:0])
-	return sum
-}
-
-type xySet map[xyHash]XY
-
-func newXYSet() xySet {
-	return make(map[xyHash]XY)
-}
-
-func (s xySet) add(xy XY) {
-	s[xy.hash()] = xy
-}
-
-func (s xySet) contains(xy XY) bool {
-	_, ok := s[xy.hash()]
-	return ok
-}
-
-type xyxyHash struct {
-	a, b xyHash
-}
-
-func hashXYXY(a, b XY) xyxyHash {
-	return xyxyHash{
-		a.hash(),
-		b.hash(),
-	}
+	return w.Y < o.Y
 }

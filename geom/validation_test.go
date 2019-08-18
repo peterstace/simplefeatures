@@ -10,10 +10,7 @@ import (
 )
 
 func xy(x, y float64) Coordinates {
-	return Coordinates{XY: XY{
-		MustNewScalarF(x),
-		MustNewScalarF(y),
-	}}
+	return Coordinates{XY: XY{x, y}}
 }
 
 func TestLineValidation(t *testing.T) {

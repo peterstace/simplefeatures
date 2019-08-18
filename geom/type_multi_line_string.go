@@ -128,7 +128,7 @@ func (m MultiLineString) Boundary() Geometry {
 		return NewMultiLineString(nil)
 	}
 
-	counts := make(map[xyHash]int)
+	counts := make(map[XY]int)
 	var uniqueEndpoints []Point
 	for _, ls := range m.lines {
 		if ls.IsClosed() {
@@ -138,18 +138,17 @@ func (m MultiLineString) Boundary() Geometry {
 			NewPointC(ls.lines[0].a),
 			NewPointC(ls.lines[len(ls.lines)-1].b),
 		} {
-			hash := pt.coords.XY.hash()
-			_, seen := counts[hash]
+			_, seen := counts[pt.coords.XY]
 			if !seen {
 				uniqueEndpoints = append(uniqueEndpoints, pt)
 			}
-			counts[hash]++
+			counts[pt.coords.XY]++
 		}
 	}
 
 	var bound []Point
 	for _, pt := range uniqueEndpoints {
-		if counts[pt.coords.XY.hash()]%2 == 1 {
+		if counts[pt.coords.XY]%2 == 1 {
 			bound = append(bound, pt)
 		}
 	}

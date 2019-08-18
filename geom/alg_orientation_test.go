@@ -12,23 +12,23 @@ func TestOrientation(t *testing.T) {
 	}{
 		{
 			name:     "when the s is on left hand side of line of p and q",
-			p:        XY{MustNewScalarF(0), MustNewScalarF(0)},
-			q:        XY{MustNewScalarF(1), MustNewScalarF(0)},
-			s:        XY{MustNewScalarF(0), MustNewScalarF(1)},
+			p:        XY{0, 0},
+			q:        XY{1, 0},
+			s:        XY{0, 1},
 			expected: leftTurn,
 		},
 		{
 			name:     "when the s is on right hand side of line of p and q",
-			p:        XY{MustNewScalarF(0), MustNewScalarF(0)},
-			q:        XY{MustNewScalarF(0), MustNewScalarF(1)},
-			s:        XY{MustNewScalarF(1), MustNewScalarF(0)},
+			p:        XY{0, 0},
+			q:        XY{0, 1},
+			s:        XY{1, 0},
 			expected: rightTurn,
 		},
 		{
 			name:     "when the s, q and p are collinear",
-			p:        XY{MustNewScalarF(1), MustNewScalarF(1)},
-			q:        XY{MustNewScalarF(2), MustNewScalarF(2)},
-			s:        XY{MustNewScalarF(3), MustNewScalarF(3)},
+			p:        XY{1, 1},
+			q:        XY{2, 2},
+			s:        XY{3, 3},
 			expected: collinear,
 		},
 	}
