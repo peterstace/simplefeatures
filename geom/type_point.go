@@ -110,3 +110,10 @@ func (p Point) convexHullPointSet() []XY {
 func (p Point) MarshalJSON() ([]byte, error) {
 	return marshalGeoJSON("Point", p.Coordinates())
 }
+
+// TransformXY transforms this Point into another Point according to fn.
+func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := p.Coordinates()
+	coords.XY = fn(coords.XY)
+	return NewPointC(coords, opts...), nil
+}

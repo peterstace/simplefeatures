@@ -95,3 +95,9 @@ func (e EmptySet) convexHullPointSet() []XY {
 func (e EmptySet) MarshalJSON() ([]byte, error) {
 	return marshalGeoJSON(e.jsonType, []int{})
 }
+
+// TransformXY transforms this EmptySet into another EmptySet according to
+// fn. It does this by ignoring fn and returning itself.
+func (e EmptySet) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	return e, nil
+}
