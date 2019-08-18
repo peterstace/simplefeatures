@@ -118,12 +118,12 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 
 		if abBB.max.X == cdBB.min.X && abBB.min.Y == cdBB.max.Y {
 			// Line segments overlap at a point.
-			return NewPointS(abBB.max.X, abBB.min.Y)
+			return NewPointF(abBB.max.X, abBB.min.Y)
 		}
 
 		if cdBB.max.X == abBB.min.X && cdBB.min.Y == abBB.max.Y {
 			// Line segments overlap at a point.
-			return NewPointS(cdBB.max.X, cdBB.min.Y)
+			return NewPointF(cdBB.max.X, cdBB.min.Y)
 		}
 
 		if abBB.max.Equals(cdBB.min) {

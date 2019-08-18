@@ -16,13 +16,12 @@ type Point struct {
 
 // NewPointXY creates a new point from an XY.
 func NewPointXY(xy XY, _ ...ConstructorOption) Point {
-	return NewPointS(xy.X, xy.Y)
+	return NewPointC(Coordinates{XY: xy})
 }
 
-// TODO: rename to NewPointF
-// NewPointS creates a new point from scalar values.
-func NewPointS(x, y float64, _ ...ConstructorOption) Point {
-	return NewPointC(Coordinates{XY{x, y}})
+// NewPointF creates a new point from float64 x and y values.
+func NewPointF(x, y float64, _ ...ConstructorOption) Point {
+	return NewPointXY(XY{x, y})
 }
 
 // NewPointC creates a new point gives its Coordinates.
