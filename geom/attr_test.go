@@ -408,7 +408,6 @@ func TestTransformXY(t *testing.T) {
 		{"GEOMETRYCOLLECTION(POINT(1 2))", "GEOMETRYCOLLECTION(POINT(1.5 2))"},
 		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 2)))", "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1.5 2)))"},
 	} {
-
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g := geomFromWKT(t, tt.wktIn)
 			got, err := g.TransformXY(transform)
