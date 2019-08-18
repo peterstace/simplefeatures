@@ -16,31 +16,31 @@ geometries. This is the same access and storage model used by libraries such as
 #### Supported Features
 
 - Marshalling/unmarshalling:
-		- WKT (well known text)
-		- WKB (well known binary)
-		- GeoJSON
+	- WKT (well known text)
+	- WKB (well known binary)
+	- GeoJSON
 
 - Geometry attribute calculations:
-		- Geometry validity checks
-		- Dimensionality check
-		- Bounding box calculation
-		- Emptiness check
-		- Boudary calculation
+	- Geometry validity checks
+	- Dimensionality check
+	- Bounding box calculation
+	- Emptiness check
+	- Boudary calculation
 
 - Spatial analysis:
-		- Convex Hull calculation
+	- Convex Hull calculation
 
 #### In the works
 
 - Spatial analysis:
-		- Intersection calculation
-		- Spatially equality calculation
-		- Length calculation
-		- Closed geometry calculation
-		- Ring property calculation
-		- Area calculation
-		- Centroid calculation
-		- Point on surface calculation
+	- Intersection calculation
+	- Spatially equality calculation
+	- Length calculation
+	- Closed geometry calculation
+	- Ring property calculation
+	- Area calculation
+	- Centroid calculation
+	- Point on surface calculation
 
 #### Features Not Planned Yet
 
@@ -48,15 +48,15 @@ geometries. This is the same access and storage model used by libraries such as
 - 3D/Measure coordinates.
 
 - Spatial analysis:
-		- Geometry buffering
-		- Disjoint check
-		- Intersects check
-		- Touches check
-		- Crosses check
-		- Within check
-		- Contains check
-		- Overlaps check
-		- Relates check
+	- Geometry buffering
+	- Disjoint check
+	- Intersects check
+	- Touches check
+	- Crosses check
+	- Within check
+	- Contains check
+	- Overlaps check
+	- Relates check
 
 ### Tests
 
