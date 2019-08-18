@@ -5,7 +5,7 @@
 
 Simple Features is a pure Go Implementation of the OpenGIS Simple Feature Access
 Specification (which can be found
-[here](http://www.opengeospatial.org/standards/sfa).
+[here](http://www.opengeospatial.org/standards/sfa)).
 
 The specification describes a common access and storage model for 2-dimensional
 geometries. This is the same access and storage model used by libraries such as
