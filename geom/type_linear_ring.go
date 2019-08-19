@@ -21,8 +21,8 @@ type LinearRing struct {
 	ls LineString
 }
 
-// NewLinearRing builds a LinearRing from a sequence of coordinates.
-func NewLinearRing(pts []Coordinates, opts ...ConstructorOption) (LinearRing, error) {
+// NewLinearRingC builds a LinearRing from a sequence of coordinates.
+func NewLinearRingC(pts []Coordinates, opts ...ConstructorOption) (LinearRing, error) {
 	ls, err := NewLineStringC(pts)
 	if err != nil {
 		return LinearRing{}, err
@@ -133,5 +133,5 @@ func (r LinearRing) Coordinates() []Coordinates {
 func (r LinearRing) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := r.Coordinates()
 	transform1dCoords(coords, fn)
-	return NewLinearRing(coords, opts...)
+	return NewLinearRingC(coords, opts...)
 }

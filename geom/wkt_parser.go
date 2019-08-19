@@ -103,7 +103,7 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		case 0:
 			return NewEmptyLineString(p.opts...)
 		default:
-			ls, err := NewLinearRing(coords, p.opts...)
+			ls, err := NewLinearRingC(coords, p.opts...)
 			p.check(err)
 			return ls
 		}

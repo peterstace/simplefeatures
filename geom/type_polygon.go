@@ -84,13 +84,13 @@ func NewPolygonC(coords [][]Coordinates, opts ...ConstructorOption) (Polygon, er
 	if len(coords) == 0 {
 		return Polygon{}, errors.New("Polygon must have an outer ring")
 	}
-	outer, err := NewLinearRing(coords[0], opts...)
+	outer, err := NewLinearRingC(coords[0], opts...)
 	if err != nil {
 		return Polygon{}, err
 	}
 	var holes []LinearRing
 	for _, holeCoords := range coords[1:] {
-		hole, err := NewLinearRing(holeCoords, opts...)
+		hole, err := NewLinearRingC(holeCoords, opts...)
 		if err != nil {
 			return Polygon{}, err
 		}
