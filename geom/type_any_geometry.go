@@ -28,7 +28,7 @@ func (a *AnyGeometry) SetOptions(opts ...ConstructorOption) {
 
 // Value implements the "sql/driver".Valuer interface by emitting WKB. Gives
 // an error if the Geom element is nil.
-func (a *AnyGeometry) Value() (driver.Value, error) {
+func (a AnyGeometry) Value() (driver.Value, error) {
 	if a.Geom == nil {
 		return nil, errors.New("no geometry set")
 	}
