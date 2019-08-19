@@ -96,6 +96,11 @@ func (m MultiLineString) Intersection(g Geometry) Geometry {
 	return intersection(m, g)
 }
 
+func (m MultiLineString) Intersects(g Geometry) bool {
+	has, _ := hasIntersection(m, g)
+	return has
+}
+
 func (m MultiLineString) IsEmpty() bool {
 	return len(m.lines) == 0
 }

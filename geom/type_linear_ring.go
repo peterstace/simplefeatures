@@ -75,6 +75,11 @@ func (r LinearRing) Intersection(g Geometry) Geometry {
 	return intersection(r, g)
 }
 
+func (r LinearRing) Intersects(g Geometry) bool {
+	has, _ := hasIntersection(r, g)
+	return has
+}
+
 // IsEmpty always returns false. LinearRings cannot be empty due to their
 // assertions, in particular that LinearRings must be closed.
 func (r LinearRing) IsEmpty() bool {

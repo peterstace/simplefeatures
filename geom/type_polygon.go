@@ -143,6 +143,11 @@ func (p Polygon) Intersection(g Geometry) Geometry {
 	return intersection(p, g)
 }
 
+func (p Polygon) Intersects(g Geometry) bool {
+	has, _ := hasIntersection(p, g)
+	return has
+}
+
 func (p Polygon) IsEmpty() bool {
 	return false
 }

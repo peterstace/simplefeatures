@@ -75,6 +75,11 @@ func (n Line) Intersection(g Geometry) Geometry {
 	return intersection(n, g)
 }
 
+func (n Line) Intersects(g Geometry) bool {
+	has, _ := hasIntersection(n, g)
+	return has
+}
+
 func (n Line) IsEmpty() bool {
 	return false
 }

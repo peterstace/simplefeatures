@@ -23,6 +23,10 @@ type Geometry interface {
 	// intersection of this geometry with another geometry.
 	Intersection(Geometry) Geometry
 
+	// Intersects returns true if the intersection of this gemoetry with the
+	// specified other geometry is not empty, or false if it is empty.
+	Intersects(Geometry) bool
+
 	// IsEmpty returns true if this object an empty geometry.
 	IsEmpty() bool
 
