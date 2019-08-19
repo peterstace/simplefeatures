@@ -140,12 +140,26 @@ func CheckWKT(t *testing.T, pg PostGIS, geoms []geom.Geometry) {
 func CheckWKB(t *testing.T, pg PostGIS, geoms []geom.Geometry) {
 	for i, g := range geoms {
 		t.Run(fmt.Sprintf("CheckWKB_%d", i), func(t *testing.T) {
+			if _, ok := g.(geom.EmptySet); ok && g.AsText() == "POINT EMPTY" {
+				// Empty point WKB use NaN as part of their representation.
+				// Go's math.NaN() and Postgis use slightly different (but
+				// compatible) representations of NaN.
+				return
+			}
+			if _, ok := g.(geom.GeometryCollection); ok && g.IsEmpty() {
+				// The behaviour for GeometryCollections in Postgis is to just
+				// give 'GEOMETRYCOLLECTION EMPTY' whenever the contents of a
+				// geometry collection are all empty geometries. This doesn't
+				// seem like correct behaviour, so these cases are skipped.
+				return
+			}
 			var got bytes.Buffer
 			if err := g.AsBinary(&got); err != nil {
 				t.Fatalf("writing wkb: %v", err)
 			}
 			want := pg.AsBinary(t, g)
 			if !bytes.Equal(got.Bytes(), want) {
+				t.Logf("%v", g.(geom.GeometryCollection).NumGeometries())
 				t.Logf("WKT:  %v", g.AsText())
 				t.Logf("got:  %v", got.Bytes())
 				t.Logf("want: %v", want)
