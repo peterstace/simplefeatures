@@ -82,7 +82,7 @@ func (p PostGIS) AsBinary(t *testing.T, g geom.Geometry) []byte {
 
 func (p PostGIS) AsGeoJSON(t *testing.T, g geom.Geometry) []byte {
 	var geojson []byte
-	if err := p.db.QueryRow(`SELECT ST_AsGeoJSON($1::geometry)`, g).Scan(&geojson); err != nil {
+	if err := p.db.QueryRow(`SELECT ST_AsGeoJSON(ST_GeomFromWKB($1))`, g).Scan(&geojson); err != nil {
 		t.Fatalf("pg error: %v", err)
 	}
 	return geojson
@@ -91,7 +91,7 @@ func (p PostGIS) AsGeoJSON(t *testing.T, g geom.Geometry) []byte {
 func (p PostGIS) IsEmpty(t *testing.T, g geom.Geometry) bool {
 	var empty bool
 	if err := p.db.QueryRow(`
-		SELECT ST_IsEmpty(ST_GeomFromText($1))`, g,
+		SELECT ST_IsEmpty(ST_GeomFromWKB($1))`, g,
 	).Scan(&empty); err != nil {
 		t.Fatalf("pg error: %v", err)
 	}
