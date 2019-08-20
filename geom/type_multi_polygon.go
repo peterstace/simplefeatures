@@ -185,9 +185,6 @@ func (m MultiPolygon) IsEmpty() bool {
 }
 
 func (m MultiPolygon) Dimension() int {
-	if m.IsEmpty() {
-		return 0
-	}
 	return 2
 }
 

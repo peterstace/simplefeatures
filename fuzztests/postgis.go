@@ -79,3 +79,37 @@ func (p PostGIS) AsBinary(t *testing.T, g geom.Geometry) []byte {
 	}
 	return asBinary
 }
+
+func (p PostGIS) AsGeoJSON(t *testing.T, g geom.Geometry) []byte {
+	var geojson []byte
+	if err := p.db.QueryRow(`SELECT ST_AsGeoJSON(ST_GeomFromWKB($1))`, g).Scan(&geojson); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return geojson
+}
+
+func (p PostGIS) IsEmpty(t *testing.T, g geom.Geometry) bool {
+	var empty bool
+	if err := p.db.QueryRow(`
+		SELECT ST_IsEmpty(ST_GeomFromWKB($1))`, g,
+	).Scan(&empty); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return empty
+}
+
+func (p PostGIS) Dimension(t *testing.T, g geom.Geometry) int {
+	var dim int
+	if err := p.db.QueryRow(`SELECT ST_Dimension(ST_GeomFromWKB($1))`, g).Scan(&dim); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return dim
+}
+
+func (p PostGIS) Envelope(t *testing.T, g geom.Geometry) geom.Geometry {
+	var env geom.AnyGeometry
+	if err := p.db.QueryRow(`SELECT ST_AsBinary(ST_Envelope(ST_GeomFromWKB($1)))`, g).Scan(&env); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return env.Geom
+}

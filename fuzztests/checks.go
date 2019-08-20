@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -27,7 +28,6 @@ func CheckWKTParse(t *testing.T, pg PostGIS, candidates []string) {
 			_, sfErr := geom.UnmarshalWKT(strings.NewReader(wkt))
 			isValid, reason := pg.WKTIsValidWithReason(t, wkt)
 			if (sfErr == nil) != isValid {
-				t.Logf("WKT: %v", wkt)
 				t.Logf("SimpleFeatures err: %v", sfErr)
 				t.Logf("PostGIS IsValid: %v", isValid)
 				t.Logf("PostGIS Reason: %v", reason)
@@ -117,54 +117,130 @@ func CheckGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
 	}
 }
 
-func CheckWKT(t *testing.T, pg PostGIS, geoms []geom.Geometry) {
-	for i, g := range geoms {
-		t.Run(fmt.Sprintf("CheckWKT_%d", i), func(t *testing.T) {
-			got := g.AsText()
-			if strings.Contains(got, "MULTIPOINT") {
-				// Skip Multipoints. This is because Postgis doesn't follow the SFA
-				// spec by not including parenthesis around each individual point.
-				// The simplefeatures library follows the spec correctly.
-				t.SkipNow()
-			}
-			want := pg.AsText(t, g)
-			if want != got {
-				t.Logf("got:  %v", got)
-				t.Logf("want: %v", want)
-				t.Error("mismatch")
-			}
-		})
-	}
+func CheckWKT(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckWKT", func(t *testing.T) {
+		got := g.AsText()
+		if strings.Contains(got, "MULTIPOINT") {
+			// Skip Multipoints. This is because Postgis doesn't follow the SFA
+			// spec by not including parenthesis around each individual point.
+			// The simplefeatures library follows the spec correctly.
+			return
+		}
+		want := pg.AsText(t, g)
+		if want != got {
+			t.Logf("got:  %v", got)
+			t.Logf("want: %v", want)
+			t.Error("mismatch")
+		}
+	})
 }
 
-func CheckWKB(t *testing.T, pg PostGIS, geoms []geom.Geometry) {
-	for i, g := range geoms {
-		t.Run(fmt.Sprintf("CheckWKB_%d", i), func(t *testing.T) {
-			if _, ok := g.(geom.EmptySet); ok && g.AsText() == "POINT EMPTY" {
-				// Empty point WKB use NaN as part of their representation.
-				// Go's math.NaN() and Postgis use slightly different (but
-				// compatible) representations of NaN.
-				return
+func CheckWKB(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckWKB", func(t *testing.T) {
+		if _, ok := g.(geom.EmptySet); ok && g.AsText() == "POINT EMPTY" {
+			// Empty point WKB use NaN as part of their representation.
+			// Go's math.NaN() and Postgis use slightly different (but
+			// compatible) representations of NaN.
+			return
+		}
+		if _, ok := g.(geom.GeometryCollection); ok && g.IsEmpty() {
+			// The behaviour for GeometryCollections in Postgis is to just
+			// give 'GEOMETRYCOLLECTION EMPTY' whenever the contents of a
+			// geometry collection are all empty geometries. This doesn't
+			// seem like correct behaviour, so these cases are skipped.
+			return
+		}
+		var got bytes.Buffer
+		if err := g.AsBinary(&got); err != nil {
+			t.Fatalf("writing wkb: %v", err)
+		}
+		want := pg.AsBinary(t, g)
+		if !bytes.Equal(got.Bytes(), want) {
+			t.Logf("got:  %v", got.Bytes())
+			t.Logf("want: %v", want)
+			t.Error("mismatch")
+		}
+	})
+}
+
+func CheckGeoJSON(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckGeoJSON", func(t *testing.T) {
+
+		// PostGIS cannot convert to geojson in the case where it has
+		// nested geometry collections. That seems to be based on the
+		// following section of https://tools.ietf.org/html/rfc7946:
+		//
+		// To maximize interoperability, implementations SHOULD avoid
+		// nested GeometryCollections.  Furthermore, GeometryCollections
+		// composed of a single part or a number of parts of a single type
+		// SHOULD be avoided when that single part or a single object of
+		// multipart type (MultiPoint, MultiLineString, or MultiPolygon)
+		// could be used instead.
+		if gc, ok := g.(geom.GeometryCollection); ok {
+			for i := 0; i < gc.NumGeometries(); i++ {
+				if _, ok := gc.GeometryN(i).(geom.GeometryCollection); ok {
+					return
+				}
 			}
-			if _, ok := g.(geom.GeometryCollection); ok && g.IsEmpty() {
-				// The behaviour for GeometryCollections in Postgis is to just
-				// give 'GEOMETRYCOLLECTION EMPTY' whenever the contents of a
-				// geometry collection are all empty geometries. This doesn't
-				// seem like correct behaviour, so these cases are skipped.
-				return
-			}
-			var got bytes.Buffer
-			if err := g.AsBinary(&got); err != nil {
-				t.Fatalf("writing wkb: %v", err)
-			}
-			want := pg.AsBinary(t, g)
-			if !bytes.Equal(got.Bytes(), want) {
-				t.Logf("%v", g.(geom.GeometryCollection).NumGeometries())
-				t.Logf("WKT:  %v", g.AsText())
-				t.Logf("got:  %v", got.Bytes())
-				t.Logf("want: %v", want)
-				t.Error("mismatch")
-			}
-		})
-	}
+		}
+
+		got, err := g.MarshalJSON()
+		if err != nil {
+			t.Fatalf("could not convert to geojson: %v", err)
+		}
+		want := pg.AsGeoJSON(t, g)
+		if !bytes.Equal(got, want) {
+			t.Logf("got:  %v", string(got))
+			t.Logf("want: %v", string(want))
+			t.Error("mismatch")
+		}
+	})
+}
+
+func CheckIsEmpty(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckIsEmpty", func(t *testing.T) {
+		got := g.IsEmpty()
+		want := pg.IsEmpty(t, g)
+		if got != want {
+			t.Logf("got:  %v", got)
+			t.Logf("want: %v", want)
+			t.Error("mismatch")
+		}
+	})
+}
+
+func CheckDimension(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckDimension", func(t *testing.T) {
+		got := g.Dimension()
+		want := pg.Dimension(t, g)
+		if got != want {
+			t.Logf("got:  %v", got)
+			t.Logf("want: %v", want)
+			t.Error("mismatch")
+		}
+	})
+}
+
+func CheckEnvelope(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckEnvelope", func(t *testing.T) {
+		if g.IsEmpty() {
+			// PostGIS allows envelopes on empty geometries, but they are empty
+			// envelopes. In simplefeatures, an envelope is never empty, so we
+			// skip testing that case.
+			return
+		}
+		env, ok := g.Envelope()
+		if !ok {
+			// We just checked IsEmpty, so this should never happen.
+			panic("could not get envelope")
+		}
+		got := env.AsGeometry()
+		want := pg.Envelope(t, g)
+
+		if !reflect.DeepEqual(got, want) {
+			t.Logf("got:  %v", got.AsText())
+			t.Logf("want: %v", want.AsText())
+			t.Error("mismatch")
+		}
+	})
 }

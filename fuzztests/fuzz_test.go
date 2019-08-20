@@ -27,8 +27,23 @@ func TestFuzz(t *testing.T) {
 
 	geoms := convertToGeometries(t, candidates)
 
-	CheckWKT(t, pg, geoms)
-	CheckWKB(t, pg, geoms)
+	for i, g := range geoms {
+		t.Run(fmt.Sprintf("geom_%d_", i), func(t *testing.T) {
+			t.Logf("WKT: %v", g.AsText())
+			CheckWKT(t, pg, g)
+			CheckWKB(t, pg, g)
+			CheckGeoJSON(t, pg, g)
+			CheckIsEmpty(t, pg, g)
+			CheckDimension(t, pg, g)
+			CheckEnvelope(t, pg, g)
+			// TODO: Boundary
+			// TODO: ConvexHull
+			// TODO: IsSimple
+		})
+	}
+
+	// TODO: Intersection
+	// TODO: Equals
 }
 
 func setupDB(t *testing.T) PostGIS {

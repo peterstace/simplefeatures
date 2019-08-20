@@ -25,3 +25,18 @@ func TestEnvelopeIntersectsPoint(t *testing.T) {
 		}
 	}
 }
+
+func TestEnvelopeAsGeometry(t *testing.T) {
+	for _, tt := range []struct {
+		env     Envelope
+		wantWKT string
+	}{
+		{NewEnvelope(XY{5, 8}), "POINT(5 8)"},
+		{NewEnvelope(XY{1, 2}, XY{5, 2}), "LINESTRING(1 2,5 2)"},
+		{NewEnvelope(XY{1, 2}, XY{1, 7}), "LINESTRING(1 2,1 7)"},
+		{NewEnvelope(XY{3, 4}, XY{8, 0}), "POLYGON((3 0,3 4,8 4,8 0,3 0))"},
+	} {
+		got := tt.env.AsGeometry()
+		expectDeepEqual(t, got, geomFromWKT(t, tt.wantWKT))
+	}
+}
