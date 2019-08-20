@@ -122,7 +122,7 @@ func (m MultiPoint) Boundary() Geometry {
 }
 
 func (m MultiPoint) Value() (driver.Value, error) {
-	return m.AsText(), nil
+	return wkbAsBytes(m)
 }
 
 func (m MultiPoint) AsBinary(w io.Writer) error {

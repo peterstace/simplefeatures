@@ -120,7 +120,7 @@ func (c GeometryCollection) Boundary() Geometry {
 }
 
 func (c GeometryCollection) Value() (driver.Value, error) {
-	return c.AsText(), nil
+	return wkbAsBytes(c)
 }
 
 func (c GeometryCollection) AsBinary(w io.Writer) error {

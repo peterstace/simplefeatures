@@ -85,7 +85,7 @@ func (p Point) Boundary() Geometry {
 }
 
 func (p Point) Value() (driver.Value, error) {
-	return p.AsText(), nil
+	return wkbAsBytes(p)
 }
 
 func (p Point) AsBinary(w io.Writer) error {
