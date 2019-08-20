@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -215,6 +216,30 @@ func CheckDimension(t *testing.T, pg PostGIS, g geom.Geometry) {
 		if got != want {
 			t.Logf("got:  %v", got)
 			t.Logf("want: %v", want)
+			t.Error("mismatch")
+		}
+	})
+}
+
+func CheckEnvelope(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckEnvelope", func(t *testing.T) {
+		if g.IsEmpty() {
+			// PostGIS allows envelopes on empty geometries, but they are empty
+			// envelopes. In simplefeatures, an envelope is never empty, so we
+			// skip testing that case.
+			return
+		}
+		env, ok := g.Envelope()
+		if !ok {
+			// We just checked IsEmpty, so this should never happen.
+			panic("could not get envelope")
+		}
+		got := env.AsGeometry()
+		want := pg.Envelope(t, g)
+
+		if !reflect.DeepEqual(got, want) {
+			t.Logf("got:  %v", got.AsText())
+			t.Logf("want: %v", want.AsText())
 			t.Error("mismatch")
 		}
 	})

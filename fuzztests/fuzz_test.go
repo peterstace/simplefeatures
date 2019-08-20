@@ -35,7 +35,7 @@ func TestFuzz(t *testing.T) {
 			CheckGeoJSON(t, pg, g)
 			CheckIsEmpty(t, pg, g)
 			CheckDimension(t, pg, g)
-			// TODO: Envelope
+			CheckEnvelope(t, pg, g)
 			// TODO: Boundary
 			// TODO: ConvexHull
 			// TODO: IsSimple

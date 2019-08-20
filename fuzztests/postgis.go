@@ -105,3 +105,11 @@ func (p PostGIS) Dimension(t *testing.T, g geom.Geometry) int {
 	}
 	return dim
 }
+
+func (p PostGIS) Envelope(t *testing.T, g geom.Geometry) geom.Geometry {
+	var env geom.AnyGeometry
+	if err := p.db.QueryRow(`SELECT ST_AsBinary(ST_Envelope(ST_GeomFromWKB($1)))`, g).Scan(&env); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return env.Geom
+}
