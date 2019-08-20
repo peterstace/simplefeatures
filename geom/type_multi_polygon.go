@@ -221,7 +221,7 @@ func (m MultiPolygon) Boundary() Geometry {
 }
 
 func (m MultiPolygon) Value() (driver.Value, error) {
-	return m.AsText(), nil
+	return wkbAsBytes(m)
 }
 
 func (m MultiPolygon) AsBinary(w io.Writer) error {

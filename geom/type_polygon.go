@@ -182,7 +182,7 @@ func (p Polygon) Boundary() Geometry {
 }
 
 func (p Polygon) Value() (driver.Value, error) {
-	return p.AsText(), nil
+	return wkbAsBytes(p)
 }
 
 func (p Polygon) AsBinary(w io.Writer) error {

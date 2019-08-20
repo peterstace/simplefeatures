@@ -156,7 +156,7 @@ func (m MultiLineString) Boundary() Geometry {
 }
 
 func (m MultiLineString) Value() (driver.Value, error) {
-	return m.AsText(), nil
+	return wkbAsBytes(m)
 }
 
 func (m MultiLineString) AsBinary(w io.Writer) error {

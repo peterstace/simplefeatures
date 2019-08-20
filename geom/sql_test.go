@@ -68,7 +68,9 @@ func TestValuerConcrete(t *testing.T) {
 			geom := geomFromWKT(t, wkt).(driver.Valuer)
 			val, err := geom.Value()
 			expectNoErr(t, err)
-			expectDeepEqual(t, geom, geomFromWKT(t, val.(string)))
+			g, err := UnmarshalWKB(bytes.NewReader(val.([]byte)))
+			expectNoErr(t, err)
+			expectDeepEqual(t, geom, g)
 		})
 	}
 }
@@ -77,5 +79,7 @@ func TestValuerLinearRing(t *testing.T) {
 	geom := geomFromWKT(t, "LINEARRING(0 0,1 0,0 1,0 0)").(driver.Valuer)
 	val, err := geom.Value()
 	expectNoErr(t, err)
-	expectDeepEqual(t, geomFromWKT(t, "LINESTRING(0 0,1 0,0 1,0 0)"), geomFromWKT(t, val.(string)))
+	g, err := UnmarshalWKB(bytes.NewReader(val.([]byte)))
+	expectNoErr(t, err)
+	expectDeepEqual(t, geomFromWKT(t, "LINESTRING(0 0,1 0,0 1,0 0)"), g)
 }

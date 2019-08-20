@@ -165,7 +165,7 @@ func (s LineString) Boundary() Geometry {
 }
 
 func (s LineString) Value() (driver.Value, error) {
-	return s.AsText(), nil
+	return wkbAsBytes(s)
 }
 
 func (s LineString) AsBinary(w io.Writer) error {

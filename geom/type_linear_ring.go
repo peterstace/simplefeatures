@@ -103,7 +103,7 @@ func (r LinearRing) Boundary() Geometry {
 }
 
 func (r LinearRing) Value() (driver.Value, error) {
-	return r.AsText(), nil
+	return wkbAsBytes(r)
 }
 
 func (r LinearRing) AsBinary(w io.Writer) error {

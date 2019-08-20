@@ -99,7 +99,7 @@ func (n Line) Boundary() Geometry {
 }
 
 func (n Line) Value() (driver.Value, error) {
-	return n.AsText(), nil
+	return wkbAsBytes(n)
 }
 
 func (n Line) AsBinary(w io.Writer) error {

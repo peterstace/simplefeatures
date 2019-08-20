@@ -63,7 +63,7 @@ func (e EmptySet) Boundary() Geometry {
 }
 
 func (e EmptySet) Value() (driver.Value, error) {
-	return e.AsText(), nil
+	return wkbAsBytes(e)
 }
 
 func (e EmptySet) AsBinary(w io.Writer) error {
