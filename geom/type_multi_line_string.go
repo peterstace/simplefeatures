@@ -101,9 +101,6 @@ func (m MultiLineString) IsEmpty() bool {
 }
 
 func (m MultiLineString) Dimension() int {
-	if m.IsEmpty() {
-		return 0
-	}
 	return 1
 }
 

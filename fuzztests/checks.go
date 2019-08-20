@@ -202,7 +202,19 @@ func CheckIsEmpty(t *testing.T, pg PostGIS, g geom.Geometry) {
 		want := pg.IsEmpty(t, g)
 		if got != want {
 			t.Logf("got:  %v", got)
-			t.Logf("want: %v", got)
+			t.Logf("want: %v", want)
+			t.Error("mismatch")
+		}
+	})
+}
+
+func CheckDimension(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckDimension", func(t *testing.T) {
+		got := g.Dimension()
+		want := pg.Dimension(t, g)
+		if got != want {
+			t.Logf("got:  %v", got)
+			t.Logf("want: %v", want)
 			t.Error("mismatch")
 		}
 	})

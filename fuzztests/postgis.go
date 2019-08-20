@@ -97,3 +97,11 @@ func (p PostGIS) IsEmpty(t *testing.T, g geom.Geometry) bool {
 	}
 	return empty
 }
+
+func (p PostGIS) Dimension(t *testing.T, g geom.Geometry) int {
+	var dim int
+	if err := p.db.QueryRow(`SELECT ST_Dimension(ST_GeomFromWKB($1))`, g).Scan(&dim); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return dim
+}

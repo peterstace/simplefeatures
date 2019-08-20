@@ -9,21 +9,22 @@ import (
 
 // EmptySet is a 0-dimensional geometry that represents the empty pointset.
 type EmptySet struct {
-	wkt      string
-	wkbType  uint32
-	jsonType string
+	wkt       string
+	wkbType   uint32
+	jsonType  string
+	dimension int
 }
 
 func NewEmptyPoint(opts ...ConstructorOption) EmptySet {
-	return EmptySet{"POINT EMPTY", wkbGeomTypePoint, "Point"}
+	return EmptySet{"POINT EMPTY", wkbGeomTypePoint, "Point", 0}
 }
 
 func NewEmptyLineString(opts ...ConstructorOption) EmptySet {
-	return EmptySet{"LINESTRING EMPTY", wkbGeomTypeLineString, "LineString"}
+	return EmptySet{"LINESTRING EMPTY", wkbGeomTypeLineString, "LineString", 1}
 }
 
 func NewEmptyPolygon(opts ...ConstructorOption) EmptySet {
-	return EmptySet{"POLYGON EMPTY", wkbGeomTypePolygon, "Polygon"}
+	return EmptySet{"POLYGON EMPTY", wkbGeomTypePolygon, "Polygon", 2}
 }
 
 func (e EmptySet) AsText() string {
@@ -47,7 +48,7 @@ func (e EmptySet) IsEmpty() bool {
 }
 
 func (e EmptySet) Dimension() int {
-	return 0
+	return e.dimension
 }
 
 func (e EmptySet) Equals(other Geometry) bool {
