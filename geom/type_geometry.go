@@ -61,15 +61,3 @@ type Geometry interface {
 
 	json.Marshaler
 }
-
-// HeterogenousGeometry are geometries that contain a single element, or
-// elements all of the same type. Specifically, all geometries are heterogenous
-// except for GeometryCollection.
-type HeterogenousGeometry interface {
-	Geometry
-
-	// IsSimple returns true iff the geometry doesn't contain any anomalous
-	// geometry points such as self intersection or self tangency. The precise
-	// condition will differ for each type of geometry.
-	IsSimple() bool
-}

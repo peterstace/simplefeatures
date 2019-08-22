@@ -113,3 +113,11 @@ func (p PostGIS) Envelope(t *testing.T, g geom.Geometry) geom.Geometry {
 	}
 	return env.Geom
 }
+
+func (p PostGIS) IsSimple(t *testing.T, g geom.Geometry) bool {
+	var simple bool
+	if err := p.db.QueryRow(`SELECT ST_IsSimple(ST_GeomFromWKB($1))`, g).Scan(&simple); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return simple
+}

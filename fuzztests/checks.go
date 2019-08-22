@@ -244,3 +244,42 @@ func CheckEnvelope(t *testing.T, pg PostGIS, g geom.Geometry) {
 		}
 	})
 }
+
+func CheckIsSimple(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckIsSimple", func(t *testing.T) {
+		t.Logf("WKT: %v\n", g.AsText())
+		s, ok := g.(interface{ IsSimple() bool })
+		if !ok {
+			_, ok := g.(geom.GeometryCollection)
+			if !ok {
+				t.Fatalf("GeometryCollection is the only type that doesn't implement IsSimple")
+			}
+			return
+		}
+
+		// PostGIS doesn't treat MultiLineStrings containing duplicated
+		// LineStrings as non-simple, e.g. MULTILINESTRING((0 0,1 1),(0 0,1
+		// 1)). This doesn't seem like correct behaviour to me. It must be
+		// deduplicating the LineStrings before checking simplicity. This
+		// library doesn't do that, so skip any LineStrings that contain
+		// duplicates.
+		if mls, ok := g.(geom.MultiLineString); ok {
+			n := mls.NumLineStrings()
+			for i := 0; i < n; i++ {
+				for j := 0; j < n; j++ {
+					if reflect.DeepEqual(mls.LineStringN(i), mls.LineStringN(j)) {
+						return
+					}
+				}
+			}
+		}
+
+		got := s.IsSimple()
+		want := pg.IsSimple(t, g)
+		if got != want {
+			t.Logf("got:  %v", got)
+			t.Logf("want: %v", want)
+			t.Error("mismatch")
+		}
+	})
+}
