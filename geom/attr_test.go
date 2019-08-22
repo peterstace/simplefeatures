@@ -159,11 +159,14 @@ func TestIsSimple(t *testing.T) {
 		{"MULTILINESTRING((0 0,1 1,2 2),(0 2,1 1,2 0))", false},
 		{"MULTILINESTRING((0 0,2 1,4 2),(4 2,2 3,0 4))", true},
 		{"MULTILINESTRING((0 0,2 0,4 0),(2 0,2 1))", false},
+		{"MULTILINESTRING((0 0,0 1,1 1),(0 1,0 0,1 0))", false}, // reproduced a bug
+		{"MULTILINESTRING((0 0,1 0),(0 1,1 1))", true},          // reproduced a bug
+		{"MULTILINESTRING((1 1,2 2),(1 1,2 2))", false},
 
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)))", true},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := geomFromWKT(t, tt.wkt).(HeterogenousGeometry)
+			g := geomFromWKT(t, tt.wkt).(interface{ IsSimple() bool })
 			got := g.IsSimple()
 			if got != tt.wantSimple {
 				t.Logf("wkt: %s", tt.wkt)

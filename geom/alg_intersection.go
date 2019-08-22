@@ -7,6 +7,13 @@ import (
 )
 
 func intersection(g1, g2 Geometry) Geometry {
+	if g2.IsEmpty() {
+		return g2
+	}
+	if g1.IsEmpty() {
+		return g1
+	}
+
 	if rank(g1) > rank(g2) {
 		g1, g2 = g2, g1
 	}
@@ -26,6 +33,8 @@ func intersection(g1, g2 Geometry) Geometry {
 		switch g2 := g2.(type) {
 		case Line:
 			return intersectLineWithLine(g1, g2)
+		case MultiPoint:
+			return intersectLineWithMultiPoint(g1, g2)
 		}
 	case LineString:
 		switch g2 := g2.(type) {
@@ -161,6 +170,21 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 
 	// Parrallel but not colinear, so cannot intersect anywhere.
 	return NewGeometryCollection(nil)
+}
+
+func intersectLineWithMultiPoint(ln Line, mp MultiPoint) Geometry {
+	var pts []Point
+	n := mp.NumPoints()
+	for i := 0; i < n; i++ {
+		pt := mp.PointN(i)
+		if !pt.Intersection(ln).IsEmpty() {
+			pts = append(pts, pt)
+		}
+	}
+	if len(pts) == 1 {
+		return pts[0]
+	}
+	return NewMultiPoint(pts)
 }
 
 type bbox struct {

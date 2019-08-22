@@ -9,11 +9,17 @@ import (
 
 func TestNotEquals(t *testing.T) {
 	wkts := []string{
+		"POINT EMPTY",
+
 		"POINT(1 2)",
 		"POINT(2 1)",
 
 		"MULTIPOINT(1 2,2 1)",
 		"MULTIPOINT(1 2,3 1)",
+
+		"LINESTRING(0 0,1 1)",
+
+		"POLYGON((0 0,0 1,1 0,0 0))",
 	}
 	for i := range wkts {
 		for j := range wkts {
@@ -45,6 +51,17 @@ func TestEquals(t *testing.T) {
 			"MULTIPOINT(1 2,2 1)",
 			"MULTIPOINT(2 1,1 2)",
 			"MULTIPOINT(2 1,1 2,2 1)",
+		},
+		{
+			"POINT EMPTY",
+			"LINESTRING EMPTY",
+			"POLYGON EMPTY",
+			"MULTIPOINT EMPTY",
+			"MULTILINESTRING EMPTY",
+			"MULTIPOLYGON EMPTY",
+			"GEOMETRYCOLLECTION EMPTY",
+			"GEOMETRYCOLLECTION(POINT EMPTY)",
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY)",
 		},
 	} {
 		for i := range equalSet {
