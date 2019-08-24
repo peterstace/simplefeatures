@@ -280,3 +280,7 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Ge
 	transform3dCoords(coords, fn)
 	return NewMultiPolygonC(coords, opts...)
 }
+
+func (m MultiPolygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return false // TODO
+}

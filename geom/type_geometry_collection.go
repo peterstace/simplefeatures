@@ -177,3 +177,7 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 	}
 	return NewGeometryCollection(transformed), nil
 }
+
+func (c GeometryCollection) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return false // TODO
+}

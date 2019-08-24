@@ -59,5 +59,47 @@ type Geometry interface {
 	// mapping results in an invalid Geometry.
 	TransformXY(func(XY) XY, ...ConstructorOption) (Geometry, error)
 
+	// EqualsExact checks if this geometry is equal with another geometry from
+	// a structural pointwise equality perspective. Geometries that are
+	// structurally equal are defined by exactly same control points in the
+	// same order. Note that even if two geometries are topoligically equal
+	// (i.e. represent the same point set), they may not be defined by exactly
+	// the same control points in the same order (e.g. ring ordering and
+	// direction may differ, or the ordering of elements in multi-element sets
+	// may differ).
+	EqualsExact(Geometry, ...EqualsExactOption) bool
+
 	json.Marshaler
 }
+
+type EqualsExactOption func(s *equalsExactOptionSet)
+
+type equalsExactOptionSet struct {
+	toleranceSq float64
+	ignoreOrder bool
+}
+
+func newEqualsExactOptionSet(opts []EqualsExactOption) equalsExactOptionSet {
+	var s equalsExactOptionSet
+	for _, o := range opts {
+		o(&s)
+	}
+	return s
+}
+
+func Tolerance(within float64) EqualsExactOption {
+	return func(s *equalsExactOptionSet) {
+		s.toleranceSq = within * within
+	}
+}
+
+func (os equalsExactOptionSet) eq(a XY, b XY) bool {
+	asb := a.Sub(b)
+	return asb.Dot(asb) <= os.toleranceSq
+}
+
+var IgnoreOrder = EqualsExactOption(
+	func(s *equalsExactOptionSet) {
+		s.ignoreOrder = true
+	},
+)

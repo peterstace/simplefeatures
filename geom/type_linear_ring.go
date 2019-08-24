@@ -135,3 +135,7 @@ func (r LinearRing) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geom
 	transform1dCoords(coords, fn)
 	return NewLinearRingC(coords, opts...)
 }
+
+func (r LinearRing) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return false // TODO
+}

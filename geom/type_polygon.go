@@ -238,3 +238,7 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometr
 	transform2dCoords(coords, fn)
 	return NewPolygonC(coords, opts...)
 }
+
+func (p Polygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return false // TODO
+}

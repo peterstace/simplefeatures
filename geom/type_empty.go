@@ -102,3 +102,10 @@ func (e EmptySet) MarshalJSON() ([]byte, error) {
 func (e EmptySet) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	return e, nil
 }
+
+// EqualsExact checks if this EmptySet is exactly equal to another geometry
+// by checking if the other geometry is an empty set of the same type.
+func (e EmptySet) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	o, ok := other.(EmptySet)
+	return ok && e.wkbType == o.wkbType
+}

@@ -214,3 +214,7 @@ func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geom
 	transform1dCoords(coords, fn)
 	return NewLineStringC(coords, opts...)
 }
+
+func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return false // TODO
+}

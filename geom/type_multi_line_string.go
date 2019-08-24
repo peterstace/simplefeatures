@@ -211,3 +211,7 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 	transform2dCoords(coords, fn)
 	return NewMultiLineStringC(coords, opts...)
 }
+
+func (m MultiLineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return false // TODO
+}

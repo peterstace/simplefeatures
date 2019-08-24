@@ -117,3 +117,13 @@ func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry,
 	coords.XY = fn(coords.XY)
 	return NewPointC(coords, opts...), nil
 }
+
+// EqualsExact checks if this Point is exactly equal to another Point.
+func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	o, ok := other.(Point)
+	if !ok {
+		return false
+	}
+	eq := newEqualsExactOptionSet(opts).eq
+	return eq(p.XY(), o.XY())
+}

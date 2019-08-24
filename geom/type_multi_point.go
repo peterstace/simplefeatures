@@ -173,3 +173,7 @@ func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geom
 	transform1dCoords(coords, fn)
 	return NewMultiPointC(coords, opts...), nil
 }
+
+func (m MultiPoint) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return false // TODO
+}
