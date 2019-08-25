@@ -7,12 +7,6 @@ import (
 )
 
 func TestEqualsExact(t *testing.T) {
-	// Always equal to itself.
-	// Always not-equal to another type.
-	// Sometimes equal to others.
-
-	// List a bunch of different geometries. Indicate which ones should be equal to which other ones?
-
 	wkts := map[string]string{
 		"pt_a": "POINT(2 3)",
 		"pt_b": "POINT(3 -1)",
@@ -26,7 +20,26 @@ func TestEqualsExact(t *testing.T) {
 		"ln_c": "LINESTRING(1.1 2,3 4)",
 		"ln_d": "LINESTRING(3 4,1 2)",
 
-		// TODO: LineString
+		"ls_a": "LINESTRING(1 2,3 4,5 6)",
+		"ls_b": "LINESTRING(1 2,3 4,5 6.1)",
+		"ls_c": "LINESTRING(5 6,3 4,1 2)",
+
+		// ccw rings
+		"ls_m": "LINESTRING(0 0,1 0,0 1,0 0)",
+		"ls_n": "LINESTRING(1 0,0 1,0 0,1 0)",
+		"ls_o": "LINESTRING(0 1,0 0,1 0,0 1)",
+		// cw rings
+		"ls_p": "LINESTRING(0 0,0 1,1 0,0 0)",
+		"ls_q": "LINESTRING(1 0,0 0,0 1,1 0)",
+		"ls_r": "LINESTRING(0 1,1 0,0 0,0 1)",
+
+		"lr_a": "LINEARRING(0 0,0 1,1 1,1 0,0 0)",
+		"lr_b": "LINEARRING(0 0,1 0,1 1,0 1,0 0)",
+		"lr_c": "LINESTRING(0 0,1 0,1 1,0 1,0 0)",
+
+		"lr_d": "LINEARRING(1 1,0 1,1 0,1 1)",
+		"lr_e": "LINEARRING(1 1,0 1,1 0.1,1 1)",
+
 		// TODO: LinearRing
 		// TODO: EmptySet (LineString)
 
@@ -47,10 +60,49 @@ func TestEqualsExact(t *testing.T) {
 		{"ln_a", "ln_b"},
 		{"ln_b", "ln_c"},
 		{"ln_a", "ln_c"},
+
+		{"ls_a", "ls_b"},
+
+		{"lr_b", "lr_c"},
+		{"lr_d", "lr_e"},
 	}
 
 	eqWithoutOrder := []pair{
 		{"ln_a", "ln_d"},
+		{"ls_a", "ls_c"},
+
+		//{"ls_m", "ls_n"},
+		//{"ls_n", "ls_o"},
+		//{"ls_o", "ls_m"},
+
+		{"ls_m", "ls_n"},
+		{"ls_m", "ls_o"},
+		{"ls_m", "ls_p"},
+		{"ls_m", "ls_q"},
+		{"ls_m", "ls_r"},
+		{"ls_n", "ls_o"},
+		{"ls_n", "ls_p"},
+		{"ls_n", "ls_q"},
+		{"ls_n", "ls_r"},
+		{"ls_o", "ls_p"},
+		{"ls_o", "ls_q"},
+		{"ls_o", "ls_r"},
+		{"ls_p", "ls_q"},
+		{"ls_p", "ls_r"},
+		{"ls_q", "ls_r"},
+
+		{"lr_a", "lr_b"},
+		{"lr_b", "lr_c"},
+		{"lr_c", "lr_a"},
+	}
+
+	for _, p := range append(eqWithTolerance, eqWithoutOrder...) {
+		if _, ok := wkts[p.keyA]; !ok {
+			t.Fatalf("bad test setup: %v doesn't exist", p.keyA)
+		}
+		if _, ok := wkts[p.keyB]; !ok {
+			t.Fatalf("bad test setup: %v doesn't exist", p.keyB)
+		}
 	}
 
 	t.Run("reflexive", func(t *testing.T) {

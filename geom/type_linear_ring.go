@@ -137,5 +137,6 @@ func (r LinearRing) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geom
 }
 
 func (r LinearRing) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	return false // TODO
+	c, ok := other.(curve)
+	return ok && curvesExactEqual(r, c, opts)
 }

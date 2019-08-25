@@ -216,5 +216,6 @@ func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geom
 }
 
 func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	return false // TODO
+	c, ok := other.(curve)
+	return ok && curvesExactEqual(s, c, opts)
 }

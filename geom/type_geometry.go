@@ -71,35 +71,3 @@ type Geometry interface {
 
 	json.Marshaler
 }
-
-type EqualsExactOption func(s *equalsExactOptionSet)
-
-type equalsExactOptionSet struct {
-	toleranceSq float64
-	ignoreOrder bool
-}
-
-func newEqualsExactOptionSet(opts []EqualsExactOption) equalsExactOptionSet {
-	var s equalsExactOptionSet
-	for _, o := range opts {
-		o(&s)
-	}
-	return s
-}
-
-func Tolerance(within float64) EqualsExactOption {
-	return func(s *equalsExactOptionSet) {
-		s.toleranceSq = within * within
-	}
-}
-
-func (os equalsExactOptionSet) eq(a XY, b XY) bool {
-	asb := a.Sub(b)
-	return asb.Dot(asb) <= os.toleranceSq
-}
-
-var IgnoreOrder = EqualsExactOption(
-	func(s *equalsExactOptionSet) {
-		s.ignoreOrder = true
-	},
-)

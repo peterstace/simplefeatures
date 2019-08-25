@@ -143,16 +143,6 @@ func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, 
 
 // EqualsExact checks if this Line is exactly equal to another Line.
 func (n Line) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	o, ok := other.(Line)
-	if !ok {
-		return false
-	}
-	os := newEqualsExactOptionSet(opts)
-	eq := os.eq
-	if os.ignoreOrder {
-		return eq(n.a.XY, o.a.XY) && eq(n.b.XY, o.b.XY) ||
-			eq(n.a.XY, o.b.XY) && eq(n.b.XY, o.a.XY)
-	} else {
-		return eq(n.a.XY, o.a.XY) && eq(n.b.XY, o.b.XY)
-	}
+	c, ok := other.(curve)
+	return ok && curvesExactEqual(n, c, opts)
 }
