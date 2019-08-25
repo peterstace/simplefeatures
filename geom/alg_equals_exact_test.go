@@ -20,6 +20,8 @@ func TestEqualsExact(t *testing.T) {
 		"ln_c": "LINESTRING(1.1 2,3 4)",
 		"ln_d": "LINESTRING(3 4,1 2)",
 
+		"ls_empty": "LINESTRING EMPTY",
+
 		"ls_a": "LINESTRING(1 2,3 4,5 6)",
 		"ls_b": "LINESTRING(1 2,3 4,5 6.1)",
 		"ls_c": "LINESTRING(5 6,3 4,1 2)",
@@ -40,13 +42,33 @@ func TestEqualsExact(t *testing.T) {
 		"lr_d": "LINEARRING(1 1,0 1,1 0,1 1)",
 		"lr_e": "LINEARRING(1 1,0 1,1 0.1,1 1)",
 
-		// TODO: LinearRing
-		// TODO: EmptySet (LineString)
-
 		// TODO: Polygon
 		// TODO: EmptySet (Polygon)
 
-		// TODO: MultiPoint
+		"mp_empty": "MULTIPOINT EMPTY",
+
+		"mp_1_a": "MULTIPOINT(4 8)",
+		"mp_1_b": "MULTIPOINT(4 8.1)",
+		"mp_1_c": "MULTIPOINT(2 5)",
+
+		"mp_2_a": "MULTIPOINT(4 2,7 5)",
+		"mp_2_b": "MULTIPOINT(4 1.9,7.1 5)",
+		"mp_2_c": "MULTIPOINT(3 8,2 5)",
+		"mp_2_d": "MULTIPOINT(2 5,3 8)",
+
+		"mp_2_e": "MULTIPOINT(2 5,2 5)",
+
+		"mp_3_a": "MULTIPOINT(1 1,1 2,2 1)",
+		"mp_3_b": "MULTIPOINT(1 1,2 1,1 2)",
+		"mp_3_c": "MULTIPOINT(1 2,1 1,2 1)",
+		"mp_3_d": "MULTIPOINT(1 2,2 1,1 1)",
+		"mp_3_e": "MULTIPOINT(2 1,1 1,1 2)",
+		"mp_3_f": "MULTIPOINT(2 1,1 2,1 1)",
+
+		"mp_3_g": "MULTIPOINT(3 3,3 3,7 6)",
+		"mp_3_h": "MULTIPOINT(7 6,3 3,3 3)",
+		"mp_3_i": "MULTIPOINT(3 3,7 6,3 3)",
+
 		// TODO: MultiLineString
 		// TODO: MultiPolygon
 	}
@@ -65,6 +87,9 @@ func TestEqualsExact(t *testing.T) {
 
 		{"lr_b", "lr_c"},
 		{"lr_d", "lr_e"},
+
+		{"mp_1_a", "mp_1_b"},
+		{"mp_2_a", "mp_2_b"},
 	}
 
 	eqWithoutOrder := []pair{
@@ -94,6 +119,28 @@ func TestEqualsExact(t *testing.T) {
 		{"lr_a", "lr_b"},
 		{"lr_b", "lr_c"},
 		{"lr_c", "lr_a"},
+
+		{"mp_2_c", "mp_2_d"},
+
+		{"mp_3_a", "mp_3_b"},
+		{"mp_3_a", "mp_3_c"},
+		{"mp_3_a", "mp_3_d"},
+		{"mp_3_a", "mp_3_e"},
+		{"mp_3_a", "mp_3_f"},
+		{"mp_3_b", "mp_3_c"},
+		{"mp_3_b", "mp_3_d"},
+		{"mp_3_b", "mp_3_e"},
+		{"mp_3_b", "mp_3_f"},
+		{"mp_3_c", "mp_3_d"},
+		{"mp_3_c", "mp_3_e"},
+		{"mp_3_c", "mp_3_f"},
+		{"mp_3_d", "mp_3_e"},
+		{"mp_3_d", "mp_3_f"},
+		{"mp_3_e", "mp_3_f"},
+
+		{"mp_3_g", "mp_3_h"},
+		{"mp_3_h", "mp_3_i"},
+		{"mp_3_i", "mp_3_g"},
 	}
 
 	for _, p := range append(eqWithTolerance, eqWithoutOrder...) {
@@ -108,10 +155,10 @@ func TestEqualsExact(t *testing.T) {
 	t.Run("reflexive", func(t *testing.T) {
 		for key, wkt := range wkts {
 			t.Run(key, func(t *testing.T) {
-				t.Logf("WKT: %v", wkt)
 				g := geomFromWKT(t, wkt)
 				t.Run("no options", func(t *testing.T) {
 					if !g.EqualsExact(g) {
+						t.Logf("WKT: %v", wkt)
 						t.Errorf("should be equal to itself")
 					}
 				})
@@ -136,6 +183,8 @@ func TestEqualsExact(t *testing.T) {
 					gB := geomFromWKT(t, wkts[keyB])
 					got := gA.EqualsExact(gB, geom.Tolerance(0.125))
 					if got != want {
+						t.Logf("WKT A: %v", wkts[keyA])
+						t.Logf("WKT B: %v", wkts[keyB])
 						t.Errorf("got=%v want=%v", got, want)
 					}
 				})
@@ -160,6 +209,8 @@ func TestEqualsExact(t *testing.T) {
 					gB := geomFromWKT(t, wkts[keyB])
 					got := gA.EqualsExact(gB, geom.IgnoreOrder)
 					if got != want {
+						t.Logf("WKT A: %v", wkts[keyA])
+						t.Logf("WKT B: %v", wkts[keyB])
 						t.Errorf("got=%v want=%v", got, want)
 					}
 				})

@@ -175,5 +175,6 @@ func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geom
 }
 
 func (m MultiPoint) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	return false // TODO
+	o, ok := other.(MultiPoint)
+	return ok && multiPointExactEqual(m, o, opts)
 }
