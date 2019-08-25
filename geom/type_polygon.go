@@ -240,6 +240,5 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometr
 }
 
 func (p Polygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	o, ok := other.(Polygon)
-	return ok && polygonExactEqual(p, o, opts)
+	return false // TODO
 }

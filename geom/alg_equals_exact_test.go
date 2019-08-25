@@ -40,15 +40,11 @@ func TestEqualsExact(t *testing.T) {
 		"lr_d": "LINEARRING(1 1,0 1,1 0,1 1)",
 		"lr_e": "LINEARRING(1 1,0 1,1 0.1,1 1)",
 
-		"ls_empty": "LINESTRING EMPTY",
+		// TODO: LinearRing
+		// TODO: EmptySet (LineString)
 
 		// TODO: Polygon
-		"p_a": "POLYGON((0 0,0 1,1 0,0 0))",
-
-		//"p_b": "POLYGON((1 1,1 9,9 1,1 1),(2 2,2 3,3 2,2 2))",
-		//"p_c": "POLYGON((1 1,1 9,9 1,1 1),(4 4,4 5,5 4,4 4))",
-
-		"p_empty": "POLYGON EMPTY",
+		// TODO: EmptySet (Polygon)
 
 		// TODO: MultiPoint
 		// TODO: MultiLineString
