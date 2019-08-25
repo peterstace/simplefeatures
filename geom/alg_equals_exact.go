@@ -90,3 +90,12 @@ func isRing(c curve) bool {
 	ptB := c.PointN(c.NumPoints() - 1)
 	return ptA.XY().Equals(ptB.XY())
 }
+
+func polygonExactEqual(p1, p2 Polygon, opts []EqualsExactOption) bool {
+	if !curvesExactEqual(p1.ExteriorRing(), p2.ExteriorRing(), opts) {
+		return false
+	}
+
+	// TODO: check inner rings
+	return true
+}
