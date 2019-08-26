@@ -269,7 +269,3 @@ func TestEqualsExact(t *testing.T) {
 		}
 	})
 }
-
-func TestEqualsExactOrthogonal(t *testing.T) {
-	// TODO: check that the two options don't interact with each other badly.
-}
