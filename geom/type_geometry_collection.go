@@ -179,5 +179,6 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 }
 
 func (c GeometryCollection) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	return false // TODO
+	o, ok := other.(GeometryCollection)
+	return ok && geometryCollectionExactEqual(c, o, opts)
 }

@@ -101,6 +101,16 @@ func TestEqualsExact(t *testing.T) {
 		"mpo_1_a":   "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))",
 		"mpo_1_b":   "MULTIPOLYGON(((0 0,1 0,0 1,0 0)))",
 		"mpo_1_c":   "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))",
+
+		"g_empty": "GEOMETRYCOLLECTION EMPTY",
+		"g_1_a":   "GEOMETRYCOLLECTION(POINT(1 2))",
+		"g_1_b":   "GEOMETRYCOLLECTION(POINT(1 3))",
+		"g_1_c":   "GEOMETRYCOLLECTION(POINT(1.1 9))",
+		"g_1_d":   "GEOMETRYCOLLECTION(POINT(1.0 9))",
+		"g_2_a":   "GEOMETRYCOLLECTION(POINT(1 3),LINESTRING(1 2,3 4))",
+		"g_2_b":   "GEOMETRYCOLLECTION(LINESTRING(1 2,3 4),POINT(1 3))",
+		"g_2_c":   "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 5),LINESTRING(1 2,3 4)))",
+		"g_2_d":   "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(LINESTRING(1 2,3 4),POINT(1 5)))",
 	}
 
 	type pair struct{ keyA, keyB string }
@@ -122,6 +132,8 @@ func TestEqualsExact(t *testing.T) {
 		{"mp_2_a", "mp_2_b"},
 
 		{"p_c", "p_d"},
+
+		{"g_1_c", "g_1_d"},
 	}
 
 	eqWithoutOrder := []pair{
@@ -177,6 +189,9 @@ func TestEqualsExact(t *testing.T) {
 		{"mls_c", "mls_d"},
 
 		{"mpo_1_a", "mpo_1_b"},
+
+		{"g_2_a", "g_2_b"},
+		{"g_2_c", "g_2_d"},
 	}
 
 	for _, p := range append(eqWithTolerance, eqWithoutOrder...) {

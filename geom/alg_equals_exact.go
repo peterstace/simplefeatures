@@ -149,6 +149,19 @@ func multiPolygonExactEqual(mp1, mp2 MultiPolygon, opts []EqualsExactOption) boo
 	return structureEqual(n, polyEq, newEqualsExactOptionSet(opts).ignoreOrder)
 }
 
+func geometryCollectionExactEqual(gc1, gc2 GeometryCollection, opts []EqualsExactOption) bool {
+	n := gc1.NumGeometries()
+	if n != gc2.NumGeometries() {
+		return false
+	}
+	eq := func(i, j int) bool {
+		gA := gc1.GeometryN(i)
+		gB := gc2.GeometryN(j)
+		return gA.EqualsExact(gB, opts...)
+	}
+	return structureEqual(n, eq, newEqualsExactOptionSet(opts).ignoreOrder)
+}
+
 // structureEqual checks if the structure of two geometries each with n sub
 // elements are equal. The eq function should check if sub element i from the
 // first geometry is equal to sub element j from the second geometry.
