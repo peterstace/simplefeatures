@@ -239,6 +239,7 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometr
 	return NewPolygonC(coords, opts...)
 }
 
+// EqualsExact checks if this Polygon is exactly equal to another Polygon.
 func (p Polygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	o, ok := other.(Polygon)
 	return ok && polygonExactEqual(p, o, opts)

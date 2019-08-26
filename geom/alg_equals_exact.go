@@ -1,5 +1,7 @@
 package geom
 
+// EqualsExactOption allows the behaviour of the EqualsExact method in the
+// Geometry interface to be modified.
 type EqualsExactOption func(s *equalsExactOptionSet)
 
 type equalsExactOptionSet struct {
@@ -15,6 +17,9 @@ func newEqualsExactOptionSet(opts []EqualsExactOption) equalsExactOptionSet {
 	return s
 }
 
+// Tolerance modifies the behaviour of the EqualsExact method by allowing two
+// geometry control points be be considered equal if they are within the given
+// euclidean distance of each other.
 func Tolerance(within float64) EqualsExactOption {
 	return func(s *equalsExactOptionSet) {
 		s.toleranceSq = within * within
@@ -26,12 +31,35 @@ func (os equalsExactOptionSet) eq(a XY, b XY) bool {
 	return asb.Dot(asb) <= os.toleranceSq
 }
 
+// IgnoreOrder modifies the behaviour of the EqualsExact method by ignoring
+// ordering that doesn't have a material impact on geometries.
+//
+// For Points, there is no ordering, so this option does nothing.
+//
+// For curves (Line, LineString, and LinearRing), the direction of the curve
+// (start to end or end to start) is ignored. For curves that are rings (i.e.
+// are simple and closed), the location of the start and end point of the ring
+// is also ignored.
+//
+// For polygons the ordering between any interior rings is ignored, as is the
+// ordering inside the rings themselves.
+//
+// For collections (MultiPoint, MultiLineString, MultiPolygon, and
+// GeometryCollection), the ordering of constituent elements in the collection
+// are ignored.
 var IgnoreOrder = EqualsExactOption(
 	func(s *equalsExactOptionSet) {
 		s.ignoreOrder = true
 	},
 )
 
+func ignoreOrder(opts []EqualsExactOption) bool {
+	return newEqualsExactOptionSet(opts).ignoreOrder
+}
+
+// curve abstracts Line, LineString, and LinearRing. TODO: There is a plan to
+// remove the Line and LinearRing types (see #22 and #23), at which point this
+// interface can be removed.
 type curve interface {
 	NumPoints() int
 	PointN(int) Point
@@ -120,7 +148,7 @@ func polygonExactEqual(p1, p2 Polygon, opts []EqualsExactOption) bool {
 		ringB := p2.InteriorRingN(j)
 		return curvesExactEqual(ringA, ringB, opts)
 	}
-	return structureEqual(n, ringsEq, newEqualsExactOptionSet(opts).ignoreOrder)
+	return structureEqual(n, ringsEq, ignoreOrder(opts))
 }
 
 func multiLineStringExactEqual(mls1, mls2 MultiLineString, opts []EqualsExactOption) bool {
@@ -133,7 +161,7 @@ func multiLineStringExactEqual(mls1, mls2 MultiLineString, opts []EqualsExactOpt
 		lsB := mls2.LineStringN(j)
 		return curvesExactEqual(lsA, lsB, opts)
 	}
-	return structureEqual(n, lsEq, newEqualsExactOptionSet(opts).ignoreOrder)
+	return structureEqual(n, lsEq, ignoreOrder(opts))
 }
 
 func multiPolygonExactEqual(mp1, mp2 MultiPolygon, opts []EqualsExactOption) bool {
@@ -146,7 +174,7 @@ func multiPolygonExactEqual(mp1, mp2 MultiPolygon, opts []EqualsExactOption) boo
 		pB := mp2.PolygonN(j)
 		return polygonExactEqual(pA, pB, opts)
 	}
-	return structureEqual(n, polyEq, newEqualsExactOptionSet(opts).ignoreOrder)
+	return structureEqual(n, polyEq, ignoreOrder(opts))
 }
 
 func geometryCollectionExactEqual(gc1, gc2 GeometryCollection, opts []EqualsExactOption) bool {
@@ -159,7 +187,7 @@ func geometryCollectionExactEqual(gc1, gc2 GeometryCollection, opts []EqualsExac
 		gB := gc2.GeometryN(j)
 		return gA.EqualsExact(gB, opts...)
 	}
-	return structureEqual(n, eq, newEqualsExactOptionSet(opts).ignoreOrder)
+	return structureEqual(n, eq, ignoreOrder(opts))
 }
 
 // structureEqual checks if the structure of two geometries each with n sub

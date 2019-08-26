@@ -178,6 +178,7 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 	return NewGeometryCollection(transformed), nil
 }
 
+// EqualsExact checks if this GeometryCollection is exactly equal to another GeometryCollection.
 func (c GeometryCollection) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	o, ok := other.(GeometryCollection)
 	return ok && geometryCollectionExactEqual(c, o, opts)
