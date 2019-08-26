@@ -85,6 +85,8 @@ func curvesExactEqual(c1, c2 curve, opts []EqualsExactOption) bool {
 	return false
 }
 
+// TODO: All curves should have an IsRing function. Once that exists, then this
+// can be removed.
 func isRing(c curve) bool {
 	ptA := c.PointN(0)
 	ptB := c.PointN(c.NumPoints() - 1)
@@ -132,6 +134,19 @@ func multiLineStringExactEqual(mls1, mls2 MultiLineString, opts []EqualsExactOpt
 		return curvesExactEqual(lsA, lsB, opts)
 	}
 	return structureEqual(n, lsEq, newEqualsExactOptionSet(opts).ignoreOrder)
+}
+
+func multiPolygonExactEqual(mp1, mp2 MultiPolygon, opts []EqualsExactOption) bool {
+	n := mp1.NumPolygons()
+	if n != mp2.NumPolygons() {
+		return false
+	}
+	polyEq := func(i, j int) bool {
+		pA := mp1.PolygonN(i)
+		pB := mp2.PolygonN(j)
+		return polygonExactEqual(pA, pB, opts)
+	}
+	return structureEqual(n, polyEq, newEqualsExactOptionSet(opts).ignoreOrder)
 }
 
 // structureEqual checks if the structure of two geometries each with n sub

@@ -282,5 +282,6 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Ge
 }
 
 func (m MultiPolygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	return false // TODO
+	o, ok := other.(MultiPolygon)
+	return ok && multiPolygonExactEqual(m, o, opts)
 }

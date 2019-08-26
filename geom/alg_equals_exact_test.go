@@ -97,7 +97,10 @@ func TestEqualsExact(t *testing.T) {
 			(5 3,4 8,1 2,9 8)
 		)`,
 
-		// TODO: MultiPolygon
+		"mpo_empty": "MULTIPOLYGON EMPTY",
+		"mpo_1_a":   "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))",
+		"mpo_1_b":   "MULTIPOLYGON(((0 0,1 0,0 1,0 0)))",
+		"mpo_1_c":   "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))",
 	}
 
 	type pair struct{ keyA, keyB string }
@@ -172,6 +175,8 @@ func TestEqualsExact(t *testing.T) {
 
 		{"mls_a", "mls_b"},
 		{"mls_c", "mls_d"},
+
+		{"mpo_1_a", "mpo_1_b"},
 	}
 
 	for _, p := range append(eqWithTolerance, eqWithoutOrder...) {
