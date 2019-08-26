@@ -59,5 +59,14 @@ type Geometry interface {
 	// mapping results in an invalid Geometry.
 	TransformXY(func(XY) XY, ...ConstructorOption) (Geometry, error)
 
+	// EqualsExact checks if this geometry is equal to another geometry from a
+	// structural pointwise equality perspective. Geometries that are
+	// structurally equal are defined by exactly same control points in the
+	// same order. Note that even if two geometries are spatially equal (i.e.
+	// represent the same point set), they may not be defined by exactly the
+	// same way. Ordering differences and numeric tolerances can be accounted
+	// for using options.
+	EqualsExact(Geometry, ...EqualsExactOption) bool
+
 	json.Marshaler
 }

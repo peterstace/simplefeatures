@@ -214,3 +214,9 @@ func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geom
 	transform1dCoords(coords, fn)
 	return NewLineStringC(coords, opts...)
 }
+
+// EqualsExact checks if this LineString is exactly equal to another curve.
+func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	c, ok := other.(curve)
+	return ok && curvesExactEqual(s, c, opts)
+}

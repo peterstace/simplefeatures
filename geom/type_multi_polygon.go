@@ -280,3 +280,9 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Ge
 	transform3dCoords(coords, fn)
 	return NewMultiPolygonC(coords, opts...)
 }
+
+// EqualsExact checks if this MultiPolygon is exactly equal to another MultiPolygon.
+func (m MultiPolygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	o, ok := other.(MultiPolygon)
+	return ok && multiPolygonExactEqual(m, o, opts)
+}

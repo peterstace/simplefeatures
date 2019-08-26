@@ -135,3 +135,9 @@ func (r LinearRing) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geom
 	transform1dCoords(coords, fn)
 	return NewLinearRingC(coords, opts...)
 }
+
+// EqualsExact checks if this LinearRing is exactly equal to another curve.
+func (r LinearRing) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	c, ok := other.(curve)
+	return ok && curvesExactEqual(r, c, opts)
+}
