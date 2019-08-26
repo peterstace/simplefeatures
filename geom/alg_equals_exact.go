@@ -116,30 +116,31 @@ func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
 }
 
 func validPermutation(n int, eq func(i, j int) bool) bool {
-	choices := make(map[int]struct{})
+	choices := make([]int, n)
 	for i := 0; i < n; i++ {
-		choices[i] = struct{}{}
+		choices[i] = i
 	}
-
-	// TODO: I don't think this is exactly safe... because of the way map
-	// iterations work. It would be safer to use a slice. When wanting to
-	// 'remove' and element at index i, just swap i and the last element, then
-	// reduce the slice length. Reverse operations to put it back.
 
 	var recurse func(int) bool
 	recurse = func(level int) bool {
 		if len(choices) == 0 {
 			return true
 		}
-		for c := range choices {
+		for i, c := range choices {
 			if !eq(level, c) {
 				continue
 			}
-			delete(choices, c)
+
+			// Recurse using all choices _except_ for c by swapping c with the
+			// last choice, shortening the slice by 1, then recursing. The
+			// original choices state is restored after recursing.
+			choices[i], choices[len(choices)-1] = choices[len(choices)-1], choices[i]
+			choices = choices[:len(choices)-1]
 			if recurse(level + 1) {
 				return true
 			}
-			choices[c] = struct{}{}
+			choices = choices[:len(choices)+1]
+			choices[i], choices[len(choices)-1] = choices[len(choices)-1], choices[i]
 		}
 		return false
 	}
