@@ -42,8 +42,22 @@ func TestEqualsExact(t *testing.T) {
 		"lr_d": "LINEARRING(1 1,0 1,1 0,1 1)",
 		"lr_e": "LINEARRING(1 1,0 1,1 0.1,1 1)",
 
-		// TODO: Polygon
-		// TODO: EmptySet (Polygon)
+		"p_empty": "POLYGON EMPTY",
+		"p_a":     "POLYGON((0 0,0 1,1 0,0 0))",
+		"p_b":     "POLYGON((0 0,1 0,0 1,0 0))",
+		"p_c":     "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+		"p_d":     "POLYGON((0 0,0 1,1 1,1 0.1,0 0))",
+
+		"p_e": `POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(1 1,2 1,2 2,1 2,1 1),
+			(3 1,4 1,4 2,3 2,3 1)
+		)`,
+		"p_f": `POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(3 1,4 1,4 2,3 2,3 1),
+			(1 1,2 1,2 2,1 2,1 1)
+		)`,
 
 		"mp_empty": "MULTIPOINT EMPTY",
 
@@ -69,7 +83,20 @@ func TestEqualsExact(t *testing.T) {
 		"mp_3_h": "MULTIPOINT(7 6,3 3,3 3)",
 		"mp_3_i": "MULTIPOINT(3 3,7 6,3 3)",
 
-		// TODO: MultiLineString
+		"mls_empty": "MULTILINESTRING EMPTY",
+
+		"mls_a": "MULTILINESTRING((0 1,2 3,4 5))",
+		"mls_b": "MULTILINESTRING((4 5,2 3,0 1))",
+
+		"mls_c": `MULTILINESTRING(
+			(5 3,4 8,1 2,9 8),
+			(8 4,6 1,3 9,0 2)
+		)`,
+		"mls_d": `MULTILINESTRING(
+			(8 4,6 1,3 9,0 2),
+			(5 3,4 8,1 2,9 8)
+		)`,
+
 		// TODO: MultiPolygon
 	}
 
@@ -90,15 +117,13 @@ func TestEqualsExact(t *testing.T) {
 
 		{"mp_1_a", "mp_1_b"},
 		{"mp_2_a", "mp_2_b"},
+
+		{"p_c", "p_d"},
 	}
 
 	eqWithoutOrder := []pair{
 		{"ln_a", "ln_d"},
 		{"ls_a", "ls_c"},
-
-		//{"ls_m", "ls_n"},
-		//{"ls_n", "ls_o"},
-		//{"ls_o", "ls_m"},
 
 		{"ls_m", "ls_n"},
 		{"ls_m", "ls_o"},
@@ -141,6 +166,12 @@ func TestEqualsExact(t *testing.T) {
 		{"mp_3_g", "mp_3_h"},
 		{"mp_3_h", "mp_3_i"},
 		{"mp_3_i", "mp_3_g"},
+
+		{"p_a", "p_b"},
+		{"p_e", "p_f"},
+
+		{"mls_a", "mls_b"},
+		{"mls_c", "mls_d"},
 	}
 
 	for _, p := range append(eqWithTolerance, eqWithoutOrder...) {

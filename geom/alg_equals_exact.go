@@ -96,25 +96,61 @@ func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
 	if mp2.NumPoints() != n {
 		return false
 	}
-
 	os := newEqualsExactOptionSet(opts)
 	ptsEq := func(i, j int) bool {
 		ptA := mp1.PointN(i).XY()
 		ptB := mp2.PointN(j).XY()
 		return os.eq(ptA, ptB)
 	}
-	if os.ignoreOrder {
-		return validPermutation(n, ptsEq)
-	} else {
-		for i := 0; i < n; i++ {
-			if !ptsEq(i, i) {
-				return false
-			}
-		}
-		return true
-	}
+	return structureEqual(n, ptsEq, os.ignoreOrder)
 }
 
+func polygonExactEqual(p1, p2 Polygon, opts []EqualsExactOption) bool {
+	n := p1.NumInteriorRings()
+	if n != p2.NumInteriorRings() {
+		return false
+	}
+	if !curvesExactEqual(p1.ExteriorRing(), p2.ExteriorRing(), opts) {
+		return false
+	}
+	ringsEq := func(i, j int) bool {
+		ringA := p1.InteriorRingN(i)
+		ringB := p2.InteriorRingN(j)
+		return curvesExactEqual(ringA, ringB, opts)
+	}
+	return structureEqual(n, ringsEq, newEqualsExactOptionSet(opts).ignoreOrder)
+}
+
+func multiLineStringExactEqual(mls1, mls2 MultiLineString, opts []EqualsExactOption) bool {
+	n := mls1.NumLineStrings()
+	if n != mls2.NumLineStrings() {
+		return false
+	}
+	lsEq := func(i, j int) bool {
+		lsA := mls1.LineStringN(i)
+		lsB := mls2.LineStringN(j)
+		return curvesExactEqual(lsA, lsB, opts)
+	}
+	return structureEqual(n, lsEq, newEqualsExactOptionSet(opts).ignoreOrder)
+}
+
+// structureEqual checks if the structure of two geometries each with n sub
+// elements are equal. The eq function should check if sub element i from the
+// first geometry is equal to sub element j from the second geometry.
+func structureEqual(n int, eq func(i, j int) bool, ignoreOrder bool) bool {
+	if ignoreOrder {
+		return validPermutation(n, eq)
+	}
+	for i := 0; i < n; i++ {
+		if !eq(i, i) {
+			return false
+		}
+	}
+	return true
+}
+
+// validPermutation tests if there is a permutation of 0, 1, ... n-1 such that
+// eq is always true pairwise across permuted and unpermuted values.
 func validPermutation(n int, eq func(i, j int) bool) bool {
 	choices := make([]int, n)
 	for i := 0; i < n; i++ {

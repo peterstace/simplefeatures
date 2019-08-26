@@ -213,5 +213,6 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 }
 
 func (m MultiLineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	return false // TODO
+	o, ok := other.(MultiLineString)
+	return ok && multiLineStringExactEqual(m, o, opts)
 }
