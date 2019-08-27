@@ -11,7 +11,7 @@ type PostGIS struct {
 	db *sql.DB
 }
 
-func (p PostGIS) WKTIsValidWithReason(t *testing.T, wkt string) (bool, string) {
+func (p PostGIS) WKTIsValidWithReason(wkt string) (bool, string) {
 	var isValid bool
 	var reason string
 	err := p.db.QueryRow(`
@@ -21,6 +21,10 @@ func (p PostGIS) WKTIsValidWithReason(t *testing.T, wkt string) (bool, string) {
 		wkt,
 	).Scan(&isValid, &reason)
 	if err != nil {
+		// It's not possible to distinguish between problems with the geometry
+		// and problems with the database except by string-matching. It's
+		// better to just report all errors, even if this means there will be
+		// some false errors in the case of connectivity problems (or similar).
 		return false, err.Error()
 	}
 	return isValid, reason

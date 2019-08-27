@@ -5,7 +5,7 @@ type ConstructorOption func(o *ctorOptionSet)
 
 // DisableAllValidations causes geometry constructors to skip all validations.
 // This allows invalid geometries to be loaded, but also has several
-// implications for using the resultant geomerties:
+// implications for using the resultant geometries:
 //
 // 1. If the geometry is invalid, then any geometric calculations resulting
 //    from the geometry may be invalid.
@@ -14,9 +14,8 @@ type ConstructorOption func(o *ctorOptionSet)
 //    cause a panic or infinite loop (this is a theoretical concern that
 //    hasn't yet been observed in practice).
 //
-// This option should be used with caution, but can be safely used with
-// geometries that are known to be valid a priori. It can also be used with
-// invalid geometries for cases where no geometric calculations need to be
+// This option should be used with caution. It is most useful when invalid
+// geometries need to be loaded, but no geometric calculations will be
 // performed.
 func DisableAllValidations(o *ctorOptionSet) {
 	o.skipAllValidations = true
@@ -25,6 +24,9 @@ func DisableAllValidations(o *ctorOptionSet) {
 // DisableExpensiveValidations gives a hint that geometry constructors may opt
 // to skip any expensive validations. All of the caveats that come with the
 // DisableAllValidations option also come with this option.
+//
+// This option should be used with caution, but can safely be used with
+// geometries that are known to be valid a priori.
 func DisableExpensiveValidations(o *ctorOptionSet) {
 	o.skipExpensiveValidations = true
 }
