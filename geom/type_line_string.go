@@ -27,7 +27,7 @@ func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, e
 		ln := must(NewLineC(pts[i], pts[i+1], opts...)).(Line)
 		lines = append(lines, ln)
 	}
-	if len(lines) == 0 {
+	if doCheapValidations(opts) && len(lines) == 0 {
 		return LineString{}, errors.New("LineString must contain at least two distinct points")
 	}
 	return LineString{lines}, nil

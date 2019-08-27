@@ -23,18 +23,19 @@ type MultiPolygon struct {
 // NewMultiPolygon creates a MultiPolygon from its constintuent Polygons. It
 // gives an error if any of the MultiPolygon assertions are not maintained.
 func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
-	if doExpensiveValidations(opts) {
-		for i := 0; i < len(polys); i++ {
-			for j := i + 1; j < len(polys); j++ {
-				bound1 := polys[i].Boundary()
-				bound2 := polys[j].Boundary()
-				inter := bound1.Intersection(bound2)
-				if inter.Dimension() > 0 {
-					return MultiPolygon{}, errors.New("the boundaries of the polygon elements of multipolygons must only intersect at points")
-				}
-				if polyInteriorsIntersect(polys[i], polys[j]) {
-					return MultiPolygon{}, errors.New("polygon interiors must not intersect")
-				}
+	if !doExpensiveValidations(opts) {
+		return MultiPolygon{polys}, nil
+	}
+	for i := 0; i < len(polys); i++ {
+		for j := i + 1; j < len(polys); j++ {
+			bound1 := polys[i].Boundary()
+			bound2 := polys[j].Boundary()
+			inter := bound1.Intersection(bound2)
+			if inter.Dimension() > 0 {
+				return MultiPolygon{}, errors.New("the boundaries of the polygon elements of multipolygons must only intersect at points")
+			}
+			if polyInteriorsIntersect(polys[i], polys[j]) {
+				return MultiPolygon{}, errors.New("polygon interiors must not intersect")
 			}
 		}
 	}

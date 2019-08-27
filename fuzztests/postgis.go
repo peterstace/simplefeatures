@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"strings"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -12,25 +11,21 @@ type PostGIS struct {
 	db *sql.DB
 }
 
-func (p PostGIS) WKTIsValidWithReason(t *testing.T, wkt string) (bool, string) {
+func (p PostGIS) WKTIsValidWithReason(wkt string) (bool, string) {
 	var isValid bool
-	err := p.db.QueryRow(`SELECT ST_IsValid(ST_GeomFromText($1))`, wkt).Scan(&isValid)
-	if err != nil && strings.Contains(err.Error(), "parse error") {
-		isValid = false
-		err = nil
-	}
-	if err != nil {
-		t.Fatalf("postgis error: %v", err)
-	}
-
 	var reason string
-	err = p.db.QueryRow(`SELECT ST_IsValidReason(ST_GeomFromText($1))`, wkt).Scan(&reason)
-	if err != nil && strings.Contains(err.Error(), "parse error") {
-		reason = err.Error()
-		err = nil
-	}
+	err := p.db.QueryRow(`
+		SELECT
+			ST_IsValid(ST_GeomFromText($1)),
+			ST_IsValidReason(ST_GeomFromText($1))`,
+		wkt,
+	).Scan(&isValid, &reason)
 	if err != nil {
-		t.Fatalf("postgis error: %v", err)
+		// It's not possible to distinguish between problems with the geometry
+		// and problems with the database except by string-matching. It's
+		// better to just report all errors, even if this means there will be
+		// some false errors in the case of connectivity problems (or similar).
+		return false, err.Error()
 	}
 	return isValid, reason
 }
