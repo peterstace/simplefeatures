@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"strings"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -14,23 +13,15 @@ type PostGIS struct {
 
 func (p PostGIS) WKTIsValidWithReason(t *testing.T, wkt string) (bool, string) {
 	var isValid bool
-	err := p.db.QueryRow(`SELECT ST_IsValid(ST_GeomFromText($1))`, wkt).Scan(&isValid)
-	if err != nil && strings.Contains(err.Error(), "parse error") {
-		isValid = false
-		err = nil
-	}
-	if err != nil {
-		t.Fatalf("postgis error: %v", err)
-	}
-
 	var reason string
-	err = p.db.QueryRow(`SELECT ST_IsValidReason(ST_GeomFromText($1))`, wkt).Scan(&reason)
-	if err != nil && strings.Contains(err.Error(), "parse error") {
-		reason = err.Error()
-		err = nil
-	}
+	err := p.db.QueryRow(`
+		SELECT
+			ST_IsValid(ST_GeomFromText($1)),
+			ST_IsValidReason(ST_GeomFromText($1))`,
+		wkt,
+	).Scan(&isValid, &reason)
 	if err != nil {
-		t.Fatalf("postgis error: %v", err)
+		return false, err.Error()
 	}
 	return isValid, reason
 }
