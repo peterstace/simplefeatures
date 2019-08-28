@@ -132,3 +132,13 @@ func (p PostGIS) Boundary(t *testing.T, g geom.Geometry) geom.Geometry {
 	}
 	return boundary.Geom
 }
+
+func (p PostGIS) ConvexHull(t *testing.T, g geom.Geometry) geom.Geometry {
+	var hull geom.AnyGeometry
+	if err := p.db.QueryRow(
+		`SELECT ST_AsBinary(ST_ConvexHull(ST_GeomFromWKB($1)))`, g,
+	).Scan(&hull); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return hull.Geom
+}

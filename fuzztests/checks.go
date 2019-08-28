@@ -299,3 +299,15 @@ func CheckBoundary(t *testing.T, pg PostGIS, g geom.Geometry) {
 		}
 	})
 }
+
+func CheckConvexHull(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckConvexHull", func(t *testing.T) {
+		got := g.ConvexHull()
+		want := pg.ConvexHull(t, g)
+		if !got.EqualsExact(want, geom.IgnoreOrder) {
+			t.Logf("got:  %v", got.AsText())
+			t.Logf("want: %v", want.AsText())
+			t.Error("mismatch")
+		}
+	})
+}
