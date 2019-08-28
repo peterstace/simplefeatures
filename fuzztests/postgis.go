@@ -59,60 +59,78 @@ func (p PostGIS) GeoJSONIsValidWithReason(t *testing.T, geojson string) (bool, s
 	return isValid, reason
 }
 
-func (p PostGIS) AsText(t *testing.T, g geom.Geometry) string {
-	var asText string
-	if err := p.db.QueryRow(`SELECT ST_AsText(ST_GeomFromWKB($1))`, g).Scan(&asText); err != nil {
+func (p PostGIS) geomFunc(t *testing.T, g geom.Geometry, stFunc string) geom.Geometry {
+	var ag geom.AnyGeometry
+	if err := p.db.QueryRow(
+		"SELECT ST_AsBinary("+stFunc+"(ST_GeomFromWKB($1)))", g,
+	).Scan(&ag); err != nil {
 		t.Fatalf("pg error: %v", err)
 	}
-	return asText
+	return ag.Geom
+}
+
+func (p PostGIS) boolFunc(t *testing.T, g geom.Geometry, stFunc string) bool {
+	var b bool
+	if err := p.db.QueryRow(
+		"SELECT "+stFunc+"(ST_GeomFromWKB($1))", g,
+	).Scan(&b); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return b
+}
+
+func (p PostGIS) intFunc(t *testing.T, g geom.Geometry, stFunc string) int {
+	var i int
+	if err := p.db.QueryRow(
+		"SELECT "+stFunc+"(ST_GeomFromWKB($1))", g,
+	).Scan(&i); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return i
+}
+
+func (p PostGIS) bytesFunc(t *testing.T, g geom.Geometry, stFunc string) []byte {
+	var bytes []byte
+	if err := p.db.QueryRow(
+		"SELECT "+stFunc+"(ST_GeomFromWKB($1))", g,
+	).Scan(&bytes); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return bytes
+}
+
+func (p PostGIS) AsText(t *testing.T, g geom.Geometry) string {
+	return string(p.bytesFunc(t, g, "ST_AsText"))
 }
 
 func (p PostGIS) AsBinary(t *testing.T, g geom.Geometry) []byte {
-	var asBinary []byte
-	if err := p.db.QueryRow(`SELECT ST_AsBinary(ST_GeomFromWKB($1))`, g).Scan(&asBinary); err != nil {
-		t.Fatalf("pg error: %v", err)
-	}
-	return asBinary
+	return p.bytesFunc(t, g, "ST_AsBinary")
 }
 
 func (p PostGIS) AsGeoJSON(t *testing.T, g geom.Geometry) []byte {
-	var geojson []byte
-	if err := p.db.QueryRow(`SELECT ST_AsGeoJSON(ST_GeomFromWKB($1))`, g).Scan(&geojson); err != nil {
-		t.Fatalf("pg error: %v", err)
-	}
-	return geojson
+	return p.bytesFunc(t, g, "ST_AsGeoJSON")
 }
 
 func (p PostGIS) IsEmpty(t *testing.T, g geom.Geometry) bool {
-	var empty bool
-	if err := p.db.QueryRow(`
-		SELECT ST_IsEmpty(ST_GeomFromWKB($1))`, g,
-	).Scan(&empty); err != nil {
-		t.Fatalf("pg error: %v", err)
-	}
-	return empty
+	return p.boolFunc(t, g, "ST_IsEmpty")
 }
 
 func (p PostGIS) Dimension(t *testing.T, g geom.Geometry) int {
-	var dim int
-	if err := p.db.QueryRow(`SELECT ST_Dimension(ST_GeomFromWKB($1))`, g).Scan(&dim); err != nil {
-		t.Fatalf("pg error: %v", err)
-	}
-	return dim
+	return p.intFunc(t, g, "ST_Dimension")
 }
 
 func (p PostGIS) Envelope(t *testing.T, g geom.Geometry) geom.Geometry {
-	var env geom.AnyGeometry
-	if err := p.db.QueryRow(`SELECT ST_AsBinary(ST_Envelope(ST_GeomFromWKB($1)))`, g).Scan(&env); err != nil {
-		t.Fatalf("pg error: %v", err)
-	}
-	return env.Geom
+	return p.geomFunc(t, g, "ST_Envelope")
 }
 
 func (p PostGIS) IsSimple(t *testing.T, g geom.Geometry) bool {
-	var simple bool
-	if err := p.db.QueryRow(`SELECT ST_IsSimple(ST_GeomFromWKB($1))`, g).Scan(&simple); err != nil {
-		t.Fatalf("pg error: %v", err)
-	}
-	return simple
+	return p.boolFunc(t, g, "ST_IsSimple")
+}
+
+func (p PostGIS) Boundary(t *testing.T, g geom.Geometry) geom.Geometry {
+	return p.geomFunc(t, g, "ST_Boundary")
+}
+
+func (p PostGIS) ConvexHull(t *testing.T, g geom.Geometry) geom.Geometry {
+	return p.geomFunc(t, g, "ST_ConvexHull")
 }

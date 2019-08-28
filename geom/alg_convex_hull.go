@@ -44,7 +44,14 @@ func orientation(p, q, s XY) threePointOrientation {
 
 func convexHull(g Geometry) Geometry {
 	if g.IsEmpty() {
-		// special case to mirror postgis behaviour
+		// Any empty geometry could be returned here to to give correct
+		// behaviour. However, to replicate PostGIS behaviour, we always return
+		// an empty geometry of the original type. For GeometryCollections, a
+		// new geometry is created to eleminate any empty constituent
+		// geometries.
+		if _, ok := g.(GeometryCollection); ok {
+			return NewGeometryCollection(nil)
+		}
 		return g
 	}
 	pts := g.convexHullPointSet()
