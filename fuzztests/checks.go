@@ -247,7 +247,6 @@ func CheckEnvelope(t *testing.T, pg PostGIS, g geom.Geometry) {
 
 func CheckIsSimple(t *testing.T, pg PostGIS, g geom.Geometry) {
 	t.Run("CheckIsSimple", func(t *testing.T) {
-		t.Logf("WKT: %v\n", g.AsText())
 		s, ok := g.(interface{ IsSimple() bool })
 		if !ok {
 			_, ok := g.(geom.GeometryCollection)
@@ -279,6 +278,23 @@ func CheckIsSimple(t *testing.T, pg PostGIS, g geom.Geometry) {
 		if got != want {
 			t.Logf("got:  %v", got)
 			t.Logf("want: %v", want)
+			t.Error("mismatch")
+		}
+	})
+}
+
+func CheckBoundary(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckBoundary", func(t *testing.T) {
+		if _, ok := g.(geom.GeometryCollection); ok {
+			// PostGIS cannot calculate the boundary of GeometryCollections.
+			// Some other libraries can, so simplefeatures does as well.
+			return
+		}
+		got := g.Boundary()
+		want := pg.Boundary(t, g)
+		if !got.EqualsExact(want, geom.IgnoreOrder) {
+			t.Logf("got:  %v", got.AsText())
+			t.Logf("want: %v", want.AsText())
 			t.Error("mismatch")
 		}
 	})

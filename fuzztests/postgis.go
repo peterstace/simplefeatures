@@ -95,7 +95,9 @@ func (p PostGIS) IsEmpty(t *testing.T, g geom.Geometry) bool {
 
 func (p PostGIS) Dimension(t *testing.T, g geom.Geometry) int {
 	var dim int
-	if err := p.db.QueryRow(`SELECT ST_Dimension(ST_GeomFromWKB($1))`, g).Scan(&dim); err != nil {
+	if err := p.db.QueryRow(
+		`SELECT ST_Dimension(ST_GeomFromWKB($1))`, g,
+	).Scan(&dim); err != nil {
 		t.Fatalf("pg error: %v", err)
 	}
 	return dim
@@ -103,7 +105,9 @@ func (p PostGIS) Dimension(t *testing.T, g geom.Geometry) int {
 
 func (p PostGIS) Envelope(t *testing.T, g geom.Geometry) geom.Geometry {
 	var env geom.AnyGeometry
-	if err := p.db.QueryRow(`SELECT ST_AsBinary(ST_Envelope(ST_GeomFromWKB($1)))`, g).Scan(&env); err != nil {
+	if err := p.db.QueryRow(
+		`SELECT ST_AsBinary(ST_Envelope(ST_GeomFromWKB($1)))`, g,
+	).Scan(&env); err != nil {
 		t.Fatalf("pg error: %v", err)
 	}
 	return env.Geom
@@ -111,8 +115,20 @@ func (p PostGIS) Envelope(t *testing.T, g geom.Geometry) geom.Geometry {
 
 func (p PostGIS) IsSimple(t *testing.T, g geom.Geometry) bool {
 	var simple bool
-	if err := p.db.QueryRow(`SELECT ST_IsSimple(ST_GeomFromWKB($1))`, g).Scan(&simple); err != nil {
+	if err := p.db.QueryRow(
+		`SELECT ST_IsSimple(ST_GeomFromWKB($1))`, g,
+	).Scan(&simple); err != nil {
 		t.Fatalf("pg error: %v", err)
 	}
 	return simple
+}
+
+func (p PostGIS) Boundary(t *testing.T, g geom.Geometry) geom.Geometry {
+	var boundary geom.AnyGeometry
+	if err := p.db.QueryRow(
+		`SELECT ST_AsBinary(ST_Boundary(ST_GeomFromWKB($1)))`, g,
+	).Scan(&boundary); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return boundary.Geom
 }

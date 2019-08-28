@@ -41,7 +41,7 @@ func TestFuzz(t *testing.T) {
 			CheckDimension(t, pg, g)
 			CheckEnvelope(t, pg, g)
 			CheckIsSimple(t, pg, g)
-			// TODO: Boundary
+			CheckBoundary(t, pg, g)
 			// TODO: ConvexHull
 		})
 	}
