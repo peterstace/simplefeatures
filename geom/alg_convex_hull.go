@@ -162,7 +162,7 @@ func grahamScan(ps []XY) []XY {
 // lowest-then-leftmost anchor point.
 func sortByPolarAngle(ps []XY) {
 	// the lowest-then-leftmost (anchor) point comes first
-	ltlp := ltl(ps)
+	ltlp := lowestThenLeftmost(ps)
 	ps[ltlp], ps[0] = ps[0], ps[ltlp]
 	anchor := ps[0]
 
@@ -183,8 +183,8 @@ func sortByPolarAngle(ps []XY) {
 	})
 }
 
-// ltl finds the index of the lowest-then-leftmost point.
-func ltl(ps []XY) int {
+// lowestThenLeftmost finds the index of the lowest-then-leftmost point.
+func lowestThenLeftmost(ps []XY) int {
 	rpi := 0
 	for i := 1; i < len(ps); i++ {
 		if ps[i].Y < ps[rpi].Y || (ps[i].Y == ps[rpi].Y && ps[i].X < ps[rpi].X) {

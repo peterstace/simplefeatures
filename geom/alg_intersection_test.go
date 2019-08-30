@@ -53,8 +53,8 @@ func TestIntersection(t *testing.T) {
 		{"LINESTRING(1 0,2 0)", "LINESTRING(0 0,3 0)", "LINESTRING(1 0,2 0)"},
 		{"LINESTRING(0 0,0 1)", "LINESTRING(1 0,1 1)", "GEOMETRYCOLLECTION EMPTY"},
 		{"LINESTRING(0 0,1 1)", "LINESTRING(1 0,0 1)", "POINT(0.5 0.5)"},
-		{"LINESTRING(1 0,0 1)", "LINESTRING(0 1,1 0)", "LINESTRING(1 0,0 1)"},
-		{"LINESTRING(1 0,0 1)", "LINESTRING(1 0,0 1)", "LINESTRING(1 0,0 1)"},
+		{"LINESTRING(1 0,0 1)", "LINESTRING(0 1,1 0)", "LINESTRING(0 1,1 0)"},
+		{"LINESTRING(1 0,0 1)", "LINESTRING(1 0,0 1)", "LINESTRING(0 1,1 0)"},
 		{"LINESTRING(0 0,1 1)", "LINESTRING(1 1,0 0)", "LINESTRING(0 0,1 1)"},
 		{"LINESTRING(0 0,1 1)", "LINESTRING(0 0,1 1)", "LINESTRING(0 0,1 1)"},
 		{"LINESTRING(0 0,0 1)", "LINESTRING(0 1,0 0)", "LINESTRING(0 0,0 1)"},
@@ -121,10 +121,9 @@ func TestIntersection(t *testing.T) {
 			}
 
 			t.Run("forward", func(t *testing.T) {
-				result := in1g.Intersection(in2g)
-				got := string(result.AsText())
-				if got != tt.out {
-					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got)
+				got := in1g.Intersection(in2g)
+				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got.AsText())
 				}
 			})
 
@@ -136,10 +135,9 @@ func TestIntersection(t *testing.T) {
 				return
 			}
 			t.Run("reversed", func(t *testing.T) {
-				result := in2g.Intersection(in1g)
-				got := string(result.AsText())
-				if got != tt.out {
-					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got)
+				got := in2g.Intersection(in1g)
+				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got.AsText())
 				}
 			})
 		})
