@@ -109,15 +109,9 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 
 		e := (c.Y-d.Y)*(a.X-c.X) + (d.X-c.X)*(a.Y-c.Y)
 		f := (d.X-c.X)*(a.Y-b.Y) - (a.X-b.X)*(d.Y-c.Y)
-		g := (a.Y-b.Y)*(a.X-c.X) + (b.X-a.X)*(a.Y-c.Y)
-		h := (d.X-c.X)*(a.Y-b.Y) - (a.X-b.X)*(d.Y-c.Y)
 		// Division by zero is not possible, since the lines are not parallel.
 		p := e / f
-		q := g / h
-		if p < 0 || p > 1 || q < 0 || q > 1 {
-			// Intersection between lines occurs beyond line endpoints.
-			return NewGeometryCollection(nil)
-		}
+
 		return NewPointXY(b.Sub(a).Scale(p).Add(a))
 	}
 
