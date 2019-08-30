@@ -84,12 +84,20 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	o3 := orientation(c, d, a)
 	o4 := orientation(c, d, b)
 
-	if o1 != o2 &&
-		(o1 == leftTurn || o1 == rightTurn) &&
-		(o2 == leftTurn || o2 == rightTurn) &&
-		o3 != o4 &&
-		(o3 == leftTurn || o3 == rightTurn) &&
-		(o4 == leftTurn || o4 == rightTurn) {
+	if o1 != o2 && o3 != o4 {
+		if o1 == collinear {
+			return NewPointXY(c)
+		}
+		if o2 == collinear {
+			return NewPointXY(d)
+		}
+		if o3 == collinear {
+			return NewPointXY(a)
+		}
+		if o4 == collinear {
+			return NewPointXY(b)
+		}
+
 		e := c.Y.Sub(d.Y).Mul(a.X.Sub(c.X)).Add(d.X.Sub(c.X).Mul(a.Y.Sub(c.Y)))
 		f := d.X.Sub(c.X).Mul(a.Y.Sub(b.Y)).Sub(a.X.Sub(b.X).Mul(d.Y.Sub(c.Y)))
 		g := a.Y.Sub(b.Y).Mul(a.X.Sub(c.X)).Add(b.X.Sub(a.X).Mul(a.Y.Sub(c.Y)))
@@ -104,25 +112,14 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		return NewPointXY(b.Sub(a).Scale(p).Add(a))
 	}
 
-	if o1 != o2 && o3 != o4 {
-		if o1 == collinear {
-			return NewPointXY(c)
-		}
-		if o2 == collinear {
-			return NewPointXY(d)
-		}
-		if o3 == collinear {
-			return NewPointXY(a)
-		}
-		if o4 == collinear {
-			return NewPointXY(b)
-		}
-	}
-
-	if o1 == collinear && o2 == collinear && o3 == collinear && o4 == collinear {
+	if o1 == collinear && o2 == collinear {
 		if (!onSegment(a, b, c) && !onSegment(a, b, d)) && (!onSegment(c, d, a) && !onSegment(c, d, b)) {
 			return NewGeometryCollection(nil)
 		}
+
+		// --------------------------------------------------
+		// This block is to pass tests
+		// for exmaple, LINESTRING(1 0, 0, 1) and (0 1,1 0) are same but it will fail test
 		pts := make([]XY, 0, 4)
 		pts = append(pts, a, b, c, d)
 		rth := rightmostThenHighestIndex(pts)
@@ -132,6 +129,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		if pts[0].Equals(pts[1]) {
 			return NewPointXY(pts[0])
 		}
+		// --------------------------------------------------
 
 		return must(NewLineC(Coordinates{pts[leftmostThenLowestIndex(pts)]}, Coordinates{pts[rightmostThenHighestIndex(pts)]}))
 	}
