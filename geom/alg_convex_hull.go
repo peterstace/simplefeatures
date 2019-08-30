@@ -33,9 +33,9 @@ func (o threePointOrientation) String() string {
 func orientation(p, q, s XY) threePointOrientation {
 	cp := q.Sub(p).Cross(s.Sub(q))
 	switch {
-	case cp.GT(zero):
+	case cp > 0:
 		return leftTurn
-	case cp.LT(zero):
+	case cp < 0:
 		return rightTurn
 	default:
 		return collinear
@@ -44,7 +44,14 @@ func orientation(p, q, s XY) threePointOrientation {
 
 func convexHull(g Geometry) Geometry {
 	if g.IsEmpty() {
-		// special case to mirror postgis behaviour
+		// Any empty geometry could be returned here to to give correct
+		// behaviour. However, to replicate PostGIS behaviour, we always return
+		// an empty geometry of the original type. For GeometryCollections, a
+		// new geometry is created to eleminate any empty constituent
+		// geometries.
+		if _, ok := g.(GeometryCollection); ok {
+			return NewGeometryCollection(nil)
+		}
 		return g
 	}
 	pts := g.convexHullPointSet()
@@ -132,7 +139,7 @@ func grahamScan(ps []XY) []XY {
 			// This point is part of the convex hull, so long as it extends the
 			// current line segment (in which case the preceding point is
 			// _not_ part of the convex hull).
-			if distanceSq(stack.underTop(), ps[i]).GT(distanceSq(stack.underTop(), stack.top())) {
+			if distanceSq(stack.underTop(), ps[i]) > distanceSq(stack.underTop(), stack.top()) {
 				stack.pop()
 				stack.push(ps[i])
 			}
@@ -180,9 +187,7 @@ func sortByPolarAngle(ps []XY) {
 func lowestThenLeftmost(ps []XY) int {
 	rpi := 0
 	for i := 1; i < len(ps); i++ {
-		if ps[i].Y.LT(ps[rpi].Y) ||
-			(ps[i].Y.Equals(ps[rpi].Y) &&
-				ps[i].X.LT(ps[rpi].X)) {
+		if ps[i].Y < ps[rpi].Y || (ps[i].Y == ps[rpi].Y && ps[i].X < ps[rpi].X) {
 			rpi = i
 		}
 	}
@@ -190,7 +195,7 @@ func lowestThenLeftmost(ps []XY) int {
 }
 
 // distanceSq gives the square of the distance between p and q.
-func distanceSq(p, q XY) Scalar {
+func distanceSq(p, q XY) float64 {
 	pSubQ := p.Sub(q)
 	return pSubQ.Dot(pSubQ)
 }

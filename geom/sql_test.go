@@ -1,6 +1,7 @@
 package geom_test
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"strconv"
 	"testing"
@@ -9,12 +10,16 @@ import (
 )
 
 func TestValuerAny(t *testing.T) {
-	any := AnyGeometry{geomFromWKT(t, "POINT(1 2)")}
+	any := AnyGeometry{Geom: geomFromWKT(t, "POINT(1 2)")}
 	val, err := any.Value()
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectDeepEqual(t, any.Geom, geomFromWKT(t, val.(string)))
+	geom, err := UnmarshalWKB(bytes.NewReader(val.([]byte)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectDeepEqual(t, any.Geom, geom)
 }
 
 func TestValuerAnyZero(t *testing.T) {
@@ -26,6 +31,8 @@ func TestValuerAnyZero(t *testing.T) {
 
 func TestScanner(t *testing.T) {
 	const wkt = "POINT(2 3)"
+	var wkb bytes.Buffer
+	expectNoErr(t, geomFromWKT(t, wkt).AsBinary(&wkb))
 	var any AnyGeometry
 	check := func(t *testing.T, err error) {
 		if err != nil {
@@ -35,11 +42,11 @@ func TestScanner(t *testing.T) {
 	}
 	t.Run("string", func(t *testing.T) {
 		any = AnyGeometry{}
-		check(t, any.Scan(string(wkt)))
+		check(t, any.Scan(string(wkb.Bytes())))
 	})
 	t.Run("byte", func(t *testing.T) {
 		any = AnyGeometry{}
-		check(t, any.Scan([]byte(wkt)))
+		check(t, any.Scan([]byte(wkb.Bytes())))
 	})
 }
 
@@ -61,7 +68,9 @@ func TestValuerConcrete(t *testing.T) {
 			geom := geomFromWKT(t, wkt).(driver.Valuer)
 			val, err := geom.Value()
 			expectNoErr(t, err)
-			expectDeepEqual(t, geom, geomFromWKT(t, val.(string)))
+			g, err := UnmarshalWKB(bytes.NewReader(val.([]byte)))
+			expectNoErr(t, err)
+			expectDeepEqual(t, geom, g)
 		})
 	}
 }
@@ -70,5 +79,7 @@ func TestValuerLinearRing(t *testing.T) {
 	geom := geomFromWKT(t, "LINEARRING(0 0,1 0,0 1,0 0)").(driver.Valuer)
 	val, err := geom.Value()
 	expectNoErr(t, err)
-	expectDeepEqual(t, geomFromWKT(t, "LINESTRING(0 0,1 0,0 1,0 0)"), geomFromWKT(t, val.(string)))
+	g, err := UnmarshalWKB(bytes.NewReader(val.([]byte)))
+	expectNoErr(t, err)
+	expectDeepEqual(t, geomFromWKT(t, "LINESTRING(0 0,1 0,0 1,0 0)"), g)
 }

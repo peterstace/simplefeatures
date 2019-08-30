@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"strings"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -12,25 +11,21 @@ type PostGIS struct {
 	db *sql.DB
 }
 
-func (p PostGIS) WKTIsValidWithReason(t *testing.T, wkt string) (bool, string) {
+func (p PostGIS) WKTIsValidWithReason(wkt string) (bool, string) {
 	var isValid bool
-	err := p.db.QueryRow(`SELECT ST_IsValid(ST_GeomFromText($1))`, wkt).Scan(&isValid)
-	if err != nil && strings.Contains(err.Error(), "parse error") {
-		isValid = false
-		err = nil
-	}
-	if err != nil {
-		t.Fatalf("postgis error: %v", err)
-	}
-
 	var reason string
-	err = p.db.QueryRow(`SELECT ST_IsValidReason(ST_GeomFromText($1))`, wkt).Scan(&reason)
-	if err != nil && strings.Contains(err.Error(), "parse error") {
-		reason = err.Error()
-		err = nil
-	}
+	err := p.db.QueryRow(`
+		SELECT
+			ST_IsValid(ST_GeomFromText($1)),
+			ST_IsValidReason(ST_GeomFromText($1))`,
+		wkt,
+	).Scan(&isValid, &reason)
 	if err != nil {
-		t.Fatalf("postgis error: %v", err)
+		// It's not possible to distinguish between problems with the geometry
+		// and problems with the database except by string-matching. It's
+		// better to just report all errors, even if this means there will be
+		// some false errors in the case of connectivity problems (or similar).
+		return false, err.Error()
 	}
 	return isValid, reason
 }
@@ -64,18 +59,78 @@ func (p PostGIS) GeoJSONIsValidWithReason(t *testing.T, geojson string) (bool, s
 	return isValid, reason
 }
 
-func (p PostGIS) AsText(t *testing.T, g geom.Geometry) string {
-	var asText string
-	if err := p.db.QueryRow(`SELECT ST_AsText($1)`, g).Scan(&asText); err != nil {
+func (p PostGIS) geomFunc(t *testing.T, g geom.Geometry, stFunc string) geom.Geometry {
+	var ag geom.AnyGeometry
+	if err := p.db.QueryRow(
+		"SELECT ST_AsBinary("+stFunc+"(ST_GeomFromWKB($1)))", g,
+	).Scan(&ag); err != nil {
 		t.Fatalf("pg error: %v", err)
 	}
-	return asText
+	return ag.Geom
+}
+
+func (p PostGIS) boolFunc(t *testing.T, g geom.Geometry, stFunc string) bool {
+	var b bool
+	if err := p.db.QueryRow(
+		"SELECT "+stFunc+"(ST_GeomFromWKB($1))", g,
+	).Scan(&b); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return b
+}
+
+func (p PostGIS) intFunc(t *testing.T, g geom.Geometry, stFunc string) int {
+	var i int
+	if err := p.db.QueryRow(
+		"SELECT "+stFunc+"(ST_GeomFromWKB($1))", g,
+	).Scan(&i); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return i
+}
+
+func (p PostGIS) bytesFunc(t *testing.T, g geom.Geometry, stFunc string) []byte {
+	var bytes []byte
+	if err := p.db.QueryRow(
+		"SELECT "+stFunc+"(ST_GeomFromWKB($1))", g,
+	).Scan(&bytes); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return bytes
+}
+
+func (p PostGIS) AsText(t *testing.T, g geom.Geometry) string {
+	return string(p.bytesFunc(t, g, "ST_AsText"))
 }
 
 func (p PostGIS) AsBinary(t *testing.T, g geom.Geometry) []byte {
-	var asBinary []byte
-	if err := p.db.QueryRow(`SELECT ST_AsBinary($1::geometry)`, g).Scan(&asBinary); err != nil {
-		t.Fatalf("pg error: %v", err)
-	}
-	return asBinary
+	return p.bytesFunc(t, g, "ST_AsBinary")
+}
+
+func (p PostGIS) AsGeoJSON(t *testing.T, g geom.Geometry) []byte {
+	return p.bytesFunc(t, g, "ST_AsGeoJSON")
+}
+
+func (p PostGIS) IsEmpty(t *testing.T, g geom.Geometry) bool {
+	return p.boolFunc(t, g, "ST_IsEmpty")
+}
+
+func (p PostGIS) Dimension(t *testing.T, g geom.Geometry) int {
+	return p.intFunc(t, g, "ST_Dimension")
+}
+
+func (p PostGIS) Envelope(t *testing.T, g geom.Geometry) geom.Geometry {
+	return p.geomFunc(t, g, "ST_Envelope")
+}
+
+func (p PostGIS) IsSimple(t *testing.T, g geom.Geometry) bool {
+	return p.boolFunc(t, g, "ST_IsSimple")
+}
+
+func (p PostGIS) Boundary(t *testing.T, g geom.Geometry) geom.Geometry {
+	return p.geomFunc(t, g, "ST_Boundary")
+}
+
+func (p PostGIS) ConvexHull(t *testing.T, g geom.Geometry) geom.Geometry {
+	return p.geomFunc(t, g, "ST_ConvexHull")
 }

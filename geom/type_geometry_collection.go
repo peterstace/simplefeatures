@@ -19,7 +19,7 @@ type GeometryCollection struct {
 
 // NewGeometryCollection creates a potentially heterogenous collection of
 // geometries. There are no constraints on the collection.
-func NewGeometryCollection(geoms []Geometry) GeometryCollection {
+func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) GeometryCollection {
 	if len(geoms) == 0 {
 		// Store empty geoms as nil to make testing easier.
 		geoms = nil
@@ -120,7 +120,7 @@ func (c GeometryCollection) Boundary() Geometry {
 }
 
 func (c GeometryCollection) Value() (driver.Value, error) {
-	return c.AsText(), nil
+	return wkbAsBytes(c)
 }
 
 func (c GeometryCollection) AsBinary(w io.Writer) error {
@@ -163,4 +163,23 @@ func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 	buf = append(buf, geomsJSON...)
 	buf = append(buf, '}')
 	return buf, nil
+}
+
+// TransformXY transforms this GeometryCollection into another GeometryCollection according to fn.
+func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	transformed := make([]Geometry, len(c.geoms))
+	for i := range c.geoms {
+		var err error
+		transformed[i], err = c.geoms[i].TransformXY(fn, opts...)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return NewGeometryCollection(transformed), nil
+}
+
+// EqualsExact checks if this GeometryCollection is exactly equal to another GeometryCollection.
+func (c GeometryCollection) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	o, ok := other.(GeometryCollection)
+	return ok && geometryCollectionExactEqual(c, o, opts)
 }

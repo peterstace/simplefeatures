@@ -15,32 +15,32 @@ type MultiPoint struct {
 	pts []Point
 }
 
-func NewMultiPoint(pts []Point) MultiPoint {
+func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 	return MultiPoint{pts}
 }
 
 // NewMultiPointOC creates a new MultiPoint consisting of a Point for each
 // non-empty OptionalCoordinate.
-func NewMultiPointOC(coords []OptionalCoordinates) MultiPoint {
+func NewMultiPointOC(coords []OptionalCoordinates, opts ...ConstructorOption) MultiPoint {
 	var pts []Point
 	for _, c := range coords {
 		if c.Empty {
 			continue
 		}
-		pt := NewPointC(c.Value)
+		pt := NewPointC(c.Value, opts...)
 		pts = append(pts, pt)
 	}
-	return NewMultiPoint(pts)
+	return NewMultiPoint(pts, opts...)
 }
 
 // NewMultiPointC creates a new MultiPoint consisting of a point for each coordinate.
-func NewMultiPointC(coords []Coordinates) MultiPoint {
+func NewMultiPointC(coords []Coordinates, opts ...ConstructorOption) MultiPoint {
 	var pts []Point
 	for _, c := range coords {
-		pt := NewPointC(c)
+		pt := NewPointC(c, opts...)
 		pts = append(pts, pt)
 	}
-	return NewMultiPoint(pts)
+	return NewMultiPoint(pts, opts...)
 }
 
 // NumPoints gives the number of element points making up the MultiPoint.
@@ -74,13 +74,12 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 
 // IsSimple returns true iff no two of its points are equal.
 func (m MultiPoint) IsSimple() bool {
-	seen := make(map[xyHash]bool)
+	seen := make(map[XY]bool)
 	for _, p := range m.pts {
-		h := p.coords.XY.hash()
-		if seen[h] {
+		if seen[p.coords.XY] {
 			return false
 		}
-		seen[h] = true
+		seen[p.coords.XY] = true
 	}
 	return true
 }
@@ -123,7 +122,7 @@ func (m MultiPoint) Boundary() Geometry {
 }
 
 func (m MultiPoint) Value() (driver.Value, error) {
-	return m.AsText(), nil
+	return wkbAsBytes(m)
 }
 
 func (m MultiPoint) AsBinary(w io.Writer) error {
@@ -166,4 +165,17 @@ func (m MultiPoint) Coordinates() []Coordinates {
 		coords[i] = m.pts[i].Coordinates()
 	}
 	return coords
+}
+
+// TransformXY transforms this MultiPoint into another MultiPoint according to fn.
+func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := m.Coordinates()
+	transform1dCoords(coords, fn)
+	return NewMultiPointC(coords, opts...), nil
+}
+
+// EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.
+func (m MultiPoint) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	o, ok := other.(MultiPoint)
+	return ok && multiPointExactEqual(m, o, opts)
 }

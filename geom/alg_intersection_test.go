@@ -12,6 +12,15 @@ func TestIntersection(t *testing.T) {
 	for i, tt := range []struct {
 		in1, in2, out string
 	}{
+		// Empty/ANY - always returns the empty geometry as-is to match PostGIS.
+		{"POINT EMPTY", "POINT(2 3)", "POINT EMPTY"},
+		{"POLYGON EMPTY", "POINT(2 3)", "POLYGON EMPTY"},
+		{"LINESTRING EMPTY", "POINT(2 3)", "LINESTRING EMPTY"},
+
+		// Empty/Empty - always returns the second geometry to match PostGIS.
+		{"POINT EMPTY", "LINESTRING EMPTY", "LINESTRING EMPTY"},
+		{"POLYGON EMPTY", "GEOMETRYCOLLECTION EMPTY", "GEOMETRYCOLLECTION EMPTY"},
+
 		// Point/Point
 		{"POINT(1 2)", "POINT(1 2)", "POINT(1 2)"},
 		{"POINT(1 2)", "POINT(2 1)", "GEOMETRYCOLLECTION EMPTY"},
@@ -24,6 +33,9 @@ func TestIntersection(t *testing.T) {
 		{"POINT(-1 -1)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
 		{"POINT(0 2)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
 		{"POINT(2 0)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
+		{"POINT(0 3.14)", "LINESTRING(0 0,0 4)", "POINT(0 3.14)"},
+		{"POINT(1 0.25)", "LINESTRING(0 0,4 1)", "POINT(1 0.25)"},
+		{"POINT(2 0.5)", "LINESTRING(0 0,4 1)", "POINT(2 0.5)"},
 
 		// Point/LineString
 		{"POINT(0 0)", "LINESTRING(1 0,2 1,3 0)", "POINT EMPTY"},
@@ -51,6 +63,15 @@ func TestIntersection(t *testing.T) {
 		{"LINESTRING(0 0,1 0)", "LINESTRING(0 0,1 0)", "LINESTRING(0 0,1 0)"},
 		{"LINESTRING(1 1,2 2)", "LINESTRING(0 0,3 3)", "LINESTRING(1 1,2 2)"},
 		{"LINESTRING(3 1,2 2)", "LINESTRING(1 3,2 2)", "POINT(2 2)"},
+
+		// Line/MultiPoint
+		{"LINESTRING(0 0,1 1)", "MULTIPOINT EMPTY", "MULTIPOINT EMPTY"},
+		{"LINESTRING(0 0,1 1)", "MULTIPOINT(1 0)", "MULTIPOINT EMPTY"},
+		{"LINESTRING(0 0,1 1)", "MULTIPOINT(1 0,0 1)", "MULTIPOINT EMPTY"},
+		{"LINESTRING(0 0,1 1)", "MULTIPOINT(0.5 0.5)", "POINT(0.5 0.5)"},
+		{"LINESTRING(0 0,1 1)", "MULTIPOINT(0 0)", "POINT(0 0)"},
+		{"LINESTRING(0 0,1 1)", "MULTIPOINT(0.5 0.5,1 0)", "POINT(0.5 0.5)"},
+		{"LINESTRING(0 0,1 1)", "MULTIPOINT(1 1,0 1)", "POINT(1 1)"},
 
 		// LineString/LineString -- most test cases covered by LR/LR
 		{"LINESTRING(0 0,1 0,1 1,0 1)", "LINESTRING(1 1,2 1,2 2,1 2)", "POINT(1 1)"},
@@ -107,6 +128,13 @@ func TestIntersection(t *testing.T) {
 				}
 			})
 
+			if in1g.IsEmpty() && in2g.IsEmpty() {
+				// We always return the second geometry when both are
+				// empty, to match PostGIS behaviour. This implies that
+				// intersection is non-commutative for the empty/empty
+				// case, so skip the reverse case.
+				return
+			}
 			t.Run("reversed", func(t *testing.T) {
 				result := in2g.Intersection(in1g)
 				got := string(result.AsText())

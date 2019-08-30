@@ -10,10 +10,7 @@ import (
 )
 
 func xy(x, y float64) Coordinates {
-	return Coordinates{XY: XY{
-		MustNewScalarF(x),
-		MustNewScalarF(y),
-	}}
+	return Coordinates{XY: XY{x, y}}
 }
 
 func TestLineValidation(t *testing.T) {
@@ -52,7 +49,7 @@ func TestLinearRingValidation(t *testing.T) {
 		{xy(0, 0), xy(1, 1), xy(0, 1), xy(1, 0), xy(0, 0)}, // not simple
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := NewLinearRing(pts)
+			_, err := NewLinearRingC(pts)
 			if err == nil {
 				t.Error("expected error")
 			}

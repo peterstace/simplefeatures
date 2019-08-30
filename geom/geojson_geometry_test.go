@@ -553,7 +553,7 @@ func TestGeoJSONMarshal(t *testing.T) {
 }
 
 func TestGeoJSONMarshalAnyGeometryPopulated(t *testing.T) {
-	any := AnyGeometry{geomFromWKT(t, "POINT(1 2)")}
+	any := AnyGeometry{Geom: geomFromWKT(t, "POINT(1 2)")}
 	got, err := json.Marshal(any)
 	expectNoErr(t, err)
 	const want = `{"type":"Point","coordinates":[1,2]}`

@@ -7,6 +7,13 @@ import (
 )
 
 func intersection(g1, g2 Geometry) Geometry {
+	if g2.IsEmpty() {
+		return g2
+	}
+	if g1.IsEmpty() {
+		return g1
+	}
+
 	if rank(g1) > rank(g2) {
 		g1, g2 = g2, g1
 	}
@@ -26,6 +33,8 @@ func intersection(g1, g2 Geometry) Geometry {
 		switch g2 := g2.(type) {
 		case Line:
 			return intersectLineWithLine(g1, g2)
+		case MultiPoint:
+			return intersectLineWithMultiPoint(g1, g2)
 		}
 	case LineString:
 		switch g2 := g2.(type) {
@@ -98,14 +107,14 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			return NewPointXY(b)
 		}
 
-		e := c.Y.Sub(d.Y).Mul(a.X.Sub(c.X)).Add(d.X.Sub(c.X).Mul(a.Y.Sub(c.Y)))
-		f := d.X.Sub(c.X).Mul(a.Y.Sub(b.Y)).Sub(a.X.Sub(b.X).Mul(d.Y.Sub(c.Y)))
-		g := a.Y.Sub(b.Y).Mul(a.X.Sub(c.X)).Add(b.X.Sub(a.X).Mul(a.Y.Sub(c.Y)))
-		h := d.X.Sub(c.X).Mul(a.Y.Sub(b.Y)).Sub(a.X.Sub(b.X).Mul(d.Y.Sub(c.Y)))
+		e := (c.Y-d.Y)*(a.X-c.X) + (d.X-c.X)*(a.Y-c.Y)
+		f := (d.X-c.X)*(a.Y-b.Y) - (a.X-b.X)*(d.Y-c.Y)
+		g := (a.Y-b.Y)*(a.X-c.X) + (b.X-a.X)*(a.Y-c.Y)
+		h := (d.X-c.X)*(a.Y-b.Y) - (a.X-b.X)*(d.Y-c.Y)
 		// Division by zero is not possible, since the lines are not parallel.
-		p := e.Div(f)
-		q := g.Div(h)
-		if p.LT(zero) || p.GT(one) || q.LT(zero) || q.GT(one) {
+		p := e / f
+		q := g / h
+		if p < 0 || p > 1 || q < 0 || q > 1 {
 			// Intersection between lines occurs beyond line endpoints.
 			return NewGeometryCollection(nil)
 		}
@@ -137,6 +146,21 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	return NewGeometryCollection(nil)
 }
 
+func intersectLineWithMultiPoint(ln Line, mp MultiPoint) Geometry {
+	var pts []Point
+	n := mp.NumPoints()
+	for i := 0; i < n; i++ {
+		pt := mp.PointN(i)
+		if !pt.Intersection(ln).IsEmpty() {
+			pts = append(pts, pt)
+		}
+	}
+	if len(pts) == 1 {
+		return pts[0]
+	}
+	return NewMultiPoint(pts)
+}
+
 type bbox struct {
 	min, max XY
 }
@@ -166,9 +190,9 @@ func intersectPointWithLine(point Point, line Line) Geometry {
 	if !env.IntersectsPoint(point.coords.XY) {
 		return NewEmptyPoint()
 	}
-	lhs := point.coords.X.Sub(line.a.X).Mul(line.b.Y.Sub(line.a.Y))
-	rhs := point.coords.Y.Sub(line.a.Y).Mul(line.b.X.Sub(line.a.X))
-	if lhs.Equals(rhs) {
+	lhs := (point.coords.X - line.a.X) * (line.b.Y - line.a.Y)
+	rhs := (point.coords.Y - line.a.Y) * (line.b.X - line.a.X)
+	if lhs == rhs {
 		return point
 	}
 	return NewEmptyPoint()
@@ -185,29 +209,29 @@ func intersectPointWithLineString(pt Point, ls LineString) Geometry {
 }
 
 func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) Geometry {
-	mp1Set := newXYSet()
+	mp1Set := make(map[XY]struct{})
 	for _, pt := range mp1.pts {
-		mp1Set.add(pt.coords.XY)
+		mp1Set[pt.Coordinates().XY] = struct{}{}
 	}
-	mp2Set := newXYSet()
+	mp2Set := make(map[XY]struct{})
 	for _, pt := range mp2.pts {
-		mp2Set.add(pt.coords.XY)
+		mp2Set[pt.Coordinates().XY] = struct{}{}
 	}
 
-	allSet := newXYSet()
-	for _, pt := range mp1Set {
-		if mp2Set.contains(pt) {
-			allSet.add(pt)
+	interSet := make(map[XY]struct{})
+	for pt := range mp1Set {
+		if _, ok := mp2Set[pt]; ok {
+			interSet[pt] = struct{}{}
 		}
 	}
-	for _, pt := range mp2Set {
-		if mp1Set.contains(pt) {
-			allSet.add(pt)
+	for pt := range mp2Set {
+		if _, ok := mp1Set[pt]; ok {
+			interSet[pt] = struct{}{}
 		}
 	}
 
-	intersection := make([]Point, 0, len(allSet))
-	for _, pt := range allSet {
+	intersection := make([]Point, 0, len(interSet))
+	for pt := range interSet {
 		intersection = append(intersection, NewPointXY(pt))
 	}
 	sort.Slice(intersection, func(i, j int) bool {
@@ -248,9 +272,9 @@ func rightmostThenHighest(ps []XY) XY {
 func rightmostThenHighestIndex(ps []XY) int {
 	rpi := 0
 	for i := 1; i < len(ps); i++ {
-		if ps[i].X.GT(ps[rpi].X) ||
-			(ps[i].X.Equals(ps[rpi].X) &&
-				ps[i].Y.GT(ps[rpi].Y)) {
+		if ps[i].X > ps[rpi].X ||
+			(ps[i].X == ps[rpi].X &&
+				ps[i].Y > ps[rpi].Y) {
 			rpi = i
 		}
 	}
@@ -261,9 +285,9 @@ func rightmostThenHighestIndex(ps []XY) int {
 func leftmostThenLowestIndex(ps []XY) int {
 	rpi := 0
 	for i := 1; i < len(ps); i++ {
-		if ps[i].X.LT(ps[rpi].X) ||
-			(ps[i].X.Equals(ps[rpi].X) &&
-				ps[i].Y.LT(ps[rpi].Y)) {
+		if ps[i].X < ps[rpi].X ||
+			(ps[i].X == ps[rpi].X &&
+				ps[i].Y < ps[rpi].Y) {
 			rpi = i
 		}
 	}
@@ -278,10 +302,10 @@ func leftmostThenLowest(ps []XY) XY {
 // onSegement check if point r on the segment formed by p and q.
 // p, q and r should be collinear
 func onSegment(p XY, q XY, r XY) bool {
-	if r.X.AsFloat() <= math.Max(p.X.AsFloat(), q.X.AsFloat()) &&
-		r.X.AsFloat() >= math.Min(p.X.AsFloat(), q.X.AsFloat()) &&
-		r.Y.AsFloat() <= math.Max(p.Y.AsFloat(), q.Y.AsFloat()) &&
-		r.Y.AsFloat() >= math.Min(p.Y.AsFloat(), q.Y.AsFloat()) {
+	if r.X <= math.Max(p.X, q.X) &&
+		r.X >= math.Min(p.X, q.X) &&
+		r.Y <= math.Max(p.Y, q.Y) &&
+		r.Y >= math.Min(p.Y, q.Y) {
 		return true
 	}
 

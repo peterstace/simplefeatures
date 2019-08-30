@@ -9,21 +9,22 @@ import (
 
 // EmptySet is a 0-dimensional geometry that represents the empty pointset.
 type EmptySet struct {
-	wkt      string
-	wkbType  uint32
-	jsonType string
+	wkt       string
+	wkbType   uint32
+	jsonType  string
+	dimension int
 }
 
-func NewEmptyPoint() EmptySet {
-	return EmptySet{"POINT EMPTY", wkbGeomTypePoint, "Point"}
+func NewEmptyPoint(opts ...ConstructorOption) EmptySet {
+	return EmptySet{"POINT EMPTY", wkbGeomTypePoint, "Point", 0}
 }
 
-func NewEmptyLineString() EmptySet {
-	return EmptySet{"LINESTRING EMPTY", wkbGeomTypeLineString, "LineString"}
+func NewEmptyLineString(opts ...ConstructorOption) EmptySet {
+	return EmptySet{"LINESTRING EMPTY", wkbGeomTypeLineString, "LineString", 1}
 }
 
-func NewEmptyPolygon() EmptySet {
-	return EmptySet{"POLYGON EMPTY", wkbGeomTypePolygon, "Polygon"}
+func NewEmptyPolygon(opts ...ConstructorOption) EmptySet {
+	return EmptySet{"POLYGON EMPTY", wkbGeomTypePolygon, "Polygon", 2}
 }
 
 func (e EmptySet) AsText() string {
@@ -47,7 +48,7 @@ func (e EmptySet) IsEmpty() bool {
 }
 
 func (e EmptySet) Dimension() int {
-	return 0
+	return e.dimension
 }
 
 func (e EmptySet) Equals(other Geometry) bool {
@@ -63,7 +64,7 @@ func (e EmptySet) Boundary() Geometry {
 }
 
 func (e EmptySet) Value() (driver.Value, error) {
-	return e.AsText(), nil
+	return wkbAsBytes(e)
 }
 
 func (e EmptySet) AsBinary(w io.Writer) error {
@@ -94,4 +95,17 @@ func (e EmptySet) convexHullPointSet() []XY {
 
 func (e EmptySet) MarshalJSON() ([]byte, error) {
 	return marshalGeoJSON(e.jsonType, []int{})
+}
+
+// TransformXY transforms this EmptySet into another EmptySet according to
+// fn. It does this by ignoring fn and returning itself.
+func (e EmptySet) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	return e, nil
+}
+
+// EqualsExact checks if this EmptySet is exactly equal to another geometry
+// by checking if the other geometry is an empty set of the same type.
+func (e EmptySet) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	o, ok := other.(EmptySet)
+	return ok && e.wkbType == o.wkbType
 }

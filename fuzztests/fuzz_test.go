@@ -9,6 +9,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -27,11 +28,26 @@ func TestFuzz(t *testing.T) {
 
 	geoms := convertToGeometries(t, candidates)
 
-	CheckWKT(t, pg, geoms)
+	for i, g := range geoms {
+		// Use fmt log instead of t log in case of panic.
+		fmt.Printf("index=%d WKT=%v\n", i, g.AsText())
+	}
+	for i, g := range geoms {
+		t.Run(fmt.Sprintf("geom_%d_", i), func(t *testing.T) {
+			CheckWKT(t, pg, g)
+			CheckWKB(t, pg, g)
+			CheckGeoJSON(t, pg, g)
+			CheckIsEmpty(t, pg, g)
+			CheckDimension(t, pg, g)
+			CheckEnvelope(t, pg, g)
+			CheckIsSimple(t, pg, g)
+			CheckBoundary(t, pg, g)
+			CheckConvexHull(t, pg, g)
+		})
+	}
 
-	// TODO: a few things are happening here with empty points (alternate
-	// binary representations of NaN).
-	//CheckWKB(t, pg, geoms)
+	// TODO: Intersection
+	// TODO: Equals
 }
 
 func setupDB(t *testing.T) PostGIS {
@@ -86,6 +102,7 @@ func extractStringsFromSource(t *testing.T) []string {
 	for s := range strSet {
 		strs = append(strs, s)
 	}
+	sort.Strings(strs)
 	return strs
 }
 

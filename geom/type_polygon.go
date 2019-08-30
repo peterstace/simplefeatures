@@ -26,76 +26,77 @@ type Polygon struct {
 
 // NewPolygon creates a polygon given its outer and inner rings. No rings may
 // cross each other, and can only intersect each with each other at a point.
-func NewPolygon(outer LinearRing, holes ...LinearRing) (Polygon, error) {
-	allRings := append(holes, outer)
-	nextInterVert := len(allRings)
-	interVerts := make(map[xyHash]int)
-	graph := newGraph()
+func NewPolygon(outer LinearRing, holes []LinearRing, opts ...ConstructorOption) (Polygon, error) {
+	if doExpensiveValidations(opts) {
+		allRings := append(holes, outer)
+		nextInterVert := len(allRings)
+		interVerts := make(map[XY]int)
+		graph := newGraph()
 
-	// Rings may intersect, but only at a single point.
-	for i := 0; i < len(allRings); i++ {
-		for j := i + 1; j < len(allRings); j++ {
-			inter := allRings[i].Intersection(allRings[j])
-			env, has := inter.Envelope()
-			if !has {
-				continue // no intersection
-			}
-			if !env.Min().Equals(env.Max()) {
-				return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
-			}
+		// Rings may intersect, but only at a single point.
+		for i := 0; i < len(allRings); i++ {
+			for j := i + 1; j < len(allRings); j++ {
+				inter := allRings[i].Intersection(allRings[j])
+				env, has := inter.Envelope()
+				if !has {
+					continue // no intersection
+				}
+				if !env.Min().Equals(env.Max()) {
+					return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
+				}
 
-			interVert, ok := interVerts[env.Min().hash()]
-			if !ok {
-				interVert = nextInterVert
-				nextInterVert++
-				interVerts[env.Min().hash()] = interVert
-			}
-			graph.addEdge(interVert, i)
-			graph.addEdge(interVert, j)
-		}
-	}
-
-	// All inner rings must be inside the outer ring.
-	for _, hole := range holes {
-		for _, line := range hole.ls.lines {
-			if pointRingSide(line.a.XY, outer) == exterior {
-				return Polygon{}, errors.New("hole must be inside outer ring")
+				interVert, ok := interVerts[env.Min()]
+				if !ok {
+					interVert = nextInterVert
+					nextInterVert++
+					interVerts[env.Min()] = interVert
+				}
+				graph.addEdge(interVert, i)
+				graph.addEdge(interVert, j)
 			}
 		}
-	}
 
-	// Connectedness check: a graph is created where the intersections and
-	// rings are modelled as vertices. Edges are added to the graph between an
-	// intersection vertex and a ring vertex if the ring participates in that
-	// intersection. The interior of the polygon is connected iff the graph
-	// does not contain a cycle.
-	if graph.hasCycle() {
-		return Polygon{}, errors.New("polygon interiors must be connected")
-	}
+		// All inner rings must be inside the outer ring.
+		for _, hole := range holes {
+			for _, line := range hole.ls.lines {
+				if pointRingSide(line.a.XY, outer) == exterior {
+					return Polygon{}, errors.New("hole must be inside outer ring")
+				}
+			}
+		}
 
+		// Connectedness check: a graph is created where the intersections and
+		// rings are modelled as vertices. Edges are added to the graph between an
+		// intersection vertex and a ring vertex if the ring participates in that
+		// intersection. The interior of the polygon is connected iff the graph
+		// does not contain a cycle.
+		if graph.hasCycle() {
+			return Polygon{}, errors.New("polygon interiors must be connected")
+		}
+	}
 	return Polygon{outer: outer, holes: holes}, nil
 }
 
 // NewPolygonC creates a new polygon from its Coordinates. The first dimension
 // of the Coordinates slice is the ring number, and the second dimension of the
 // Coordinates slice is the position within the ring.
-func NewPolygonC(coords [][]Coordinates) (Polygon, error) {
+func NewPolygonC(coords [][]Coordinates, opts ...ConstructorOption) (Polygon, error) {
 	if len(coords) == 0 {
 		return Polygon{}, errors.New("Polygon must have an outer ring")
 	}
-	outer, err := NewLinearRing(coords[0])
+	outer, err := NewLinearRingC(coords[0], opts...)
 	if err != nil {
 		return Polygon{}, err
 	}
 	var holes []LinearRing
 	for _, holeCoords := range coords[1:] {
-		hole, err := NewLinearRing(holeCoords)
+		hole, err := NewLinearRingC(holeCoords, opts...)
 		if err != nil {
 			return Polygon{}, err
 		}
 		holes = append(holes, hole)
 	}
-	return NewPolygon(outer, holes...)
+	return NewPolygon(outer, holes, opts...)
 }
 
 // ExteriorRing gives the exterior ring of the polygon boundary.
@@ -181,7 +182,7 @@ func (p Polygon) Boundary() Geometry {
 }
 
 func (p Polygon) Value() (driver.Value, error) {
-	return p.AsText(), nil
+	return wkbAsBytes(p)
 }
 
 func (p Polygon) AsBinary(w io.Writer) error {
@@ -195,8 +196,8 @@ func (p Polygon) AsBinary(w io.Writer) error {
 		marsh.writeCount(numPts)
 		for i := 0; i < numPts; i++ {
 			pt := ring.PointN(i)
-			marsh.writeFloat64(pt.XY().X.AsFloat())
-			marsh.writeFloat64(pt.XY().Y.AsFloat())
+			marsh.writeFloat64(pt.XY().X)
+			marsh.writeFloat64(pt.XY().Y)
 		}
 	}
 	return marsh.err
@@ -229,4 +230,17 @@ func (p Polygon) Coordinates() [][]Coordinates {
 		}
 	}
 	return coords
+}
+
+// TransformXY transforms this Polygon into another Polygon according to fn.
+func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := p.Coordinates()
+	transform2dCoords(coords, fn)
+	return NewPolygonC(coords, opts...)
+}
+
+// EqualsExact checks if this Polygon is exactly equal to another Polygon.
+func (p Polygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	o, ok := other.(Polygon)
+	return ok && polygonExactEqual(p, o, opts)
 }

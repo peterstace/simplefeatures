@@ -9,7 +9,7 @@ import (
 
 func TestPointAccessor(t *testing.T) {
 	pt := geomFromWKT(t, "POINT(1 2)").(Point)
-	want := XY{MustNewScalarF(1), MustNewScalarF(2)}
+	want := XY{1, 2}
 	got := pt.XY()
 	if !want.Equals(got) {
 		t.Errorf("got=%v want=%v", got, want)

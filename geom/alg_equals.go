@@ -1,8 +1,21 @@
 package geom
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 func equals(g1, g2 Geometry) bool {
+	if g1.IsEmpty() && g2.IsEmpty() {
+		return true
+	}
+	if g1.IsEmpty() || g2.IsEmpty() {
+		return false
+	}
+	if g1.Dimension() != g2.Dimension() {
+		return false
+	}
+
 	if rank(g1) > rank(g2) {
 		g1, g2 = g2, g1
 	}
@@ -21,17 +34,17 @@ func equals(g1, g2 Geometry) bool {
 			return equalsMultiPointAndMultiPoint(g1, g2)
 		}
 	}
-	panic("not implemented")
+	panic(fmt.Sprintf("not implemented: equals with %T and %T", g1, g2))
 }
 
 func equalsMultiPointAndMultiPoint(mp1, mp2 MultiPoint) bool {
-	s1 := make(map[xyHash]bool)
-	s2 := make(map[xyHash]bool)
+	s1 := make(map[XY]struct{})
+	s2 := make(map[XY]struct{})
 	for _, p := range mp1.pts {
-		s1[p.coords.XY.hash()] = true
+		s1[p.coords.XY] = struct{}{}
 	}
 	for _, p := range mp2.pts {
-		s2[p.coords.XY.hash()] = true
+		s2[p.coords.XY] = struct{}{}
 	}
 	return reflect.DeepEqual(s1, s2)
 }

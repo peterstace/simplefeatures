@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"math"
 )
 
 type Envelope struct {
@@ -38,6 +39,33 @@ func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 	return env, true
 }
 
+// AsGeometry returns the envelope as a Geometry. In the regular case where the
+// envelope covers some area, then a Polygon geometry is returned. In
+// degenerate cases where the envelope only covers a line or a point, a
+// Line or Point geometry is returned.
+func (e Envelope) AsGeometry() Geometry {
+	if e.min.Equals(e.max) {
+		return NewPointXY(e.min)
+	}
+	var err error
+	var g Geometry
+	if e.min.X == e.max.X || e.min.Y == e.max.Y {
+		g, err = NewLineC(Coordinates{XY: e.min}, Coordinates{XY: e.max})
+	} else {
+		g, err = NewPolygonC([][]Coordinates{{
+			{XY: XY{e.min.X, e.min.Y}},
+			{XY: XY{e.min.X, e.max.Y}},
+			{XY: XY{e.max.X, e.max.Y}},
+			{XY: XY{e.max.X, e.min.Y}},
+			{XY: XY{e.min.X, e.min.Y}},
+		}})
+	}
+	if err != nil {
+		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
+	}
+	return g
+}
+
 func (e Envelope) Min() XY {
 	return e.min
 }
@@ -48,20 +76,20 @@ func (e Envelope) Max() XY {
 
 func (e Envelope) Extend(point XY) Envelope {
 	return Envelope{
-		min: XY{e.min.X.Min(point.X), e.min.Y.Min(point.Y)},
-		max: XY{e.max.X.Max(point.X), e.max.Y.Max(point.Y)},
+		min: XY{math.Min(e.min.X, point.X), math.Min(e.min.Y, point.Y)},
+		max: XY{math.Max(e.max.X, point.X), math.Max(e.max.Y, point.Y)},
 	}
 }
 
 func (e Envelope) Union(other Envelope) Envelope {
 	return Envelope{
-		min: XY{e.min.X.Min(other.min.X), e.min.Y.Min(other.min.Y)},
-		max: XY{e.max.X.Max(other.max.X), e.max.Y.Max(other.max.Y)},
+		min: XY{math.Min(e.min.X, other.min.X), math.Min(e.min.Y, other.min.Y)},
+		max: XY{math.Max(e.max.X, other.max.X), math.Max(e.max.Y, other.max.Y)},
 	}
 }
 
 func (e Envelope) IntersectsPoint(p XY) bool {
-	return p.X.GTE(e.min.X) && p.X.LTE(e.max.X) && p.Y.GTE(e.min.Y) && p.Y.LTE(e.max.Y)
+	return p.X >= e.min.X && p.X <= e.max.X && p.Y >= e.min.Y && p.Y <= e.max.Y
 }
 
 // mustEnvelope gets the envelope from a Geometry. If it's not defined (because
