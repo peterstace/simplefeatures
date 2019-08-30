@@ -295,12 +295,8 @@ func leftmostThenLowest(ps []XY) XY {
 // onSegement check if point r on the segment formed by p and q.
 // p, q and r should be collinear
 func onSegment(p XY, q XY, r XY) bool {
-	if r.X <= math.Max(p.X, q.X) &&
+	return r.X <= math.Max(p.X, q.X) &&
 		r.X >= math.Min(p.X, q.X) &&
 		r.Y <= math.Max(p.Y, q.Y) &&
-		r.Y >= math.Min(p.Y, q.Y) {
-		return true
-	}
-
-	return false
+		r.Y >= math.Min(p.Y, q.Y)
 }
