@@ -126,9 +126,8 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 			return NewGeometryCollection(nil)
 		}
 
-		// --------------------------------------------------
-		// This block is to pass tests
-		// for exmaple, LINESTRING(1 0, 0, 1) and (0 1,1 0) are same but it will fail test
+		// ---------------------
+		// This block is to remove the collinear points in between the two endpoints
 		pts := make([]XY, 0, 4)
 		pts = append(pts, a, b, c, d)
 		rth := rightmostThenHighestIndex(pts)
@@ -138,9 +137,9 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		if pts[0].Equals(pts[1]) {
 			return NewPointXY(pts[0])
 		}
-		// --------------------------------------------------
+		//----------------------
 
-		return must(NewLineC(Coordinates{pts[leftmostThenLowestIndex(pts)]}, Coordinates{pts[rightmostThenHighestIndex(pts)]}))
+		return must(NewLineC(Coordinates{pts[0]}, Coordinates{pts[1]}))
 	}
 
 	return NewGeometryCollection(nil)
