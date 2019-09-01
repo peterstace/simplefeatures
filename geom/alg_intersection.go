@@ -26,6 +26,8 @@ func intersection(g1, g2 Geometry) Geometry {
 			return intersectPointWithLine(g1, g2)
 		case LineString:
 			return intersectPointWithLineString(g1, g2)
+		case Polygon:
+			return intersectPointWithPolygon(g1, g2)
 		case MultiPoint:
 			return intersectPointWithMultiPoint(g1, g2)
 		}
@@ -299,4 +301,18 @@ func onSegment(p XY, q XY, r XY) bool {
 		r.X >= math.Min(p.X, q.X) &&
 		r.Y <= math.Max(p.Y, q.Y) &&
 		r.Y >= math.Min(p.Y, q.Y)
+}
+
+func intersectPointWithPolygon(pt Point, p Polygon) Geometry {
+	if pointRingSide(pt.XY(), p.ExteriorRing()) == exterior {
+		return NewGeometryCollection(nil)
+	}
+	n := p.NumInteriorRings()
+	for i := 0; i < n; i++ {
+		ring := p.InteriorRingN(i)
+		if pointRingSide(pt.XY(), ring) == interior {
+			return NewGeometryCollection(nil)
+		}
+	}
+	return pt
 }
