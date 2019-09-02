@@ -26,6 +26,8 @@ func intersection(g1, g2 Geometry) Geometry {
 			return intersectPointWithLine(g1, g2)
 		case LineString:
 			return intersectPointWithLineString(g1, g2)
+		case Polygon:
+			return intersectMultiPointWithPolygon(NewMultiPoint([]Point{g1}), g2)
 		case MultiPoint:
 			return intersectPointWithMultiPoint(g1, g2)
 		}
@@ -66,6 +68,11 @@ func intersection(g1, g2 Geometry) Geometry {
 				NewMultiLineString([]LineString{g1.ls}),
 				g2,
 			)
+		}
+	case Polygon:
+		switch g2 := g2.(type) {
+		case MultiPoint:
+			return intersectMultiPointWithPolygon(g2, g1)
 		}
 	case MultiPoint:
 		switch g2 := g2.(type) {
@@ -299,4 +306,32 @@ func onSegment(p XY, q XY, r XY) bool {
 		r.X >= math.Min(p.X, q.X) &&
 		r.Y <= math.Max(p.Y, q.Y) &&
 		r.Y >= math.Min(p.Y, q.Y)
+}
+
+func intersectMultiPointWithPolygon(mp MultiPoint, p Polygon) Geometry {
+	var pts []Point
+	n := mp.NumPoints()
+outer:
+	for i := 0; i < n; i++ {
+		pt := mp.PointN(i)
+		if pointRingSide(pt.XY(), p.ExteriorRing()) == exterior {
+			continue
+		}
+		m := p.NumInteriorRings()
+		for j := 0; j < m; j++ {
+			ring := p.InteriorRingN(j)
+			if pointRingSide(pt.XY(), ring) == interior {
+				continue outer
+			}
+		}
+		pts = append(pts, pt)
+	}
+	switch len(pts) {
+	case 0:
+		return NewGeometryCollection(nil)
+	case 1:
+		return pts[0]
+	default:
+		return NewMultiPoint(pts)
+	}
 }

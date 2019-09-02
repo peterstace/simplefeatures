@@ -43,6 +43,43 @@ func TestIntersection(t *testing.T) {
 		{"POINT(2 1)", "LINESTRING(1 0,2 1,3 0)", "POINT(2 1)"},
 		{"POINT(1.5 0.5)", "LINESTRING(1 0,2 1,3 0)", "POINT(1.5 0.5)"},
 
+		// Point/Polygon
+		{`POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(1 1,2 1,2 2,1 2,1 1),
+			(3 1,4 1,4 2,3 2,3 1)
+		)`, `POINT(1 2)`, `POINT(1 2)`},
+		{`POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(1 1,2 1,2 2,1 2,1 1),
+			(3 1,4 1,4 2,3 2,3 1)
+		)`, `POINT(2.5 1.5)`, `POINT(2.5 1.5)`},
+		{`POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(1 1,2 1,2 2,1 2,1 1),
+			(3 1,4 1,4 2,3 2,3 1)
+		)`, `POINT(4 1)`, `POINT(4 1)`},
+		{`POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(1 1,2 1,2 2,1 2,1 1),
+			(3 1,4 1,4 2,3 2,3 1)
+		)`, `POINT(5 3)`, `POINT(5 3)`},
+		{`POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(1 1,2 1,2 2,1 2,1 1),
+			(3 1,4 1,4 2,3 2,3 1)
+		)`, `POINT(1.5 1.5)`, `GEOMETRYCOLLECTION EMPTY`},
+		{`POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(1 1,2 1,2 2,1 2,1 1),
+			(3 1,4 1,4 2,3 2,3 1)
+		)`, `POINT(3.5 1.5)`, `GEOMETRYCOLLECTION EMPTY`},
+		{`POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(1 1,2 1,2 2,1 2,1 1),
+			(3 1,4 1,4 2,3 2,3 1)
+		)`, `POINT(6 2)`, `GEOMETRYCOLLECTION EMPTY`},
+
 		// Line/Line
 		{"LINESTRING(0 0,0 1)", "LINESTRING(0 0,1 0)", "POINT(0 0)"},
 		{"LINESTRING(0 1,1 1)", "LINESTRING(1 0,1 1)", "POINT(1 1)"},
@@ -104,6 +141,18 @@ func TestIntersection(t *testing.T) {
 		{"MULTIPOINT((1 2),(3 4))", "POINT(1 2)", "POINT(1 2)"},
 		{"MULTIPOINT((3 4),(1 2))", "POINT(1 2)", "POINT(1 2)"},
 		{"MULTIPOINT((5 6),(7 8))", "POINT(1 2)", "GEOMETRYCOLLECTION EMPTY"},
+
+		// MultiPoint/Polygon
+		{`POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(1 1,2 1,2 2,1 2,1 1),
+			(3 1,4 1,4 2,3 2,3 1)
+		)`, `MULTIPOINT(1 2,10 10)`, `POINT(1 2)`},
+		{`POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(1 1,2 1,2 2,1 2,1 1),
+			(3 1,4 1,4 2,3 2,3 1)
+		)`, `MULTIPOINT(1 2)`, `POINT(1 2)`},
 
 		// MultiLineString with other lines  -- most test cases covered by LR/LR
 		{"MULTILINESTRING((0 0,1 0,1 1,0 1))", "LINESTRING(1 1,2 1,2 2,1 2,1 1)", "POINT(1 1)"},
