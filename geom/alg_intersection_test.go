@@ -142,6 +142,18 @@ func TestIntersection(t *testing.T) {
 		{"MULTIPOINT((3 4),(1 2))", "POINT(1 2)", "POINT(1 2)"},
 		{"MULTIPOINT((5 6),(7 8))", "POINT(1 2)", "GEOMETRYCOLLECTION EMPTY"},
 
+		// MultiPoint/Polygon
+		{`POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(1 1,2 1,2 2,1 2,1 1),
+			(3 1,4 1,4 2,3 2,3 1)
+		)`, `MULTIPOINT(1 2,10 10)`, `POINT(1 2)`},
+		{`POLYGON(
+			(0 0,5 0,5 3,0 3,0 0),
+			(1 1,2 1,2 2,1 2,1 1),
+			(3 1,4 1,4 2,3 2,3 1)
+		)`, `MULTIPOINT(1 2)`, `POINT(1 2)`},
+
 		// MultiLineString with other lines  -- most test cases covered by LR/LR
 		{"MULTILINESTRING((0 0,1 0,1 1,0 1))", "LINESTRING(1 1,2 1,2 2,1 2,1 1)", "POINT(1 1)"},
 		{"MULTILINESTRING((0 0,1 0,1 1,0 1))", "LINEARRING(1 1,2 1,2 2,1 2,1 1)", "POINT(1 1)"},
