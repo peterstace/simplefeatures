@@ -11,7 +11,8 @@ import (
 //
 // Its assertions are:
 //
-// 1. The out ring and holes must be valid LinearRings.
+// 1. The outer ring and holes must be valid linear rings (i.e. be simple and
+//    closed LineStrings).
 //
 // 2. Each pair of rings must only intersect at a single point.
 //
@@ -20,15 +21,28 @@ import (
 // 4. The holes must be fully inside the outer ring.
 //
 type Polygon struct {
-	outer LinearRing
-	holes []LinearRing
+	outer LineString
+	holes []LineString
 }
 
 // NewPolygon creates a polygon given its outer and inner rings. No rings may
 // cross each other, and can only intersect each with each other at a point.
-func NewPolygon(outer LinearRing, holes []LinearRing, opts ...ConstructorOption) (Polygon, error) {
+func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption) (Polygon, error) {
+	allRings := append(holes, outer)
+	if doCheapValidations(opts) {
+		for _, r := range allRings {
+			if !r.IsClosed() {
+				return Polygon{}, errors.New("polygon rings must be closed")
+			}
+		}
+	}
 	if doExpensiveValidations(opts) {
-		allRings := append(holes, outer)
+		for _, r := range allRings {
+			if !r.IsSimple() {
+				return Polygon{}, errors.New("polygon rings must be simple")
+			}
+		}
+
 		nextInterVert := len(allRings)
 		interVerts := make(map[XY]int)
 		graph := newGraph()
@@ -58,7 +72,7 @@ func NewPolygon(outer LinearRing, holes []LinearRing, opts ...ConstructorOption)
 
 		// All inner rings must be inside the outer ring.
 		for _, hole := range holes {
-			for _, line := range hole.ls.lines {
+			for _, line := range hole.lines {
 				if pointRingSide(line.a.XY, outer) == exterior {
 					return Polygon{}, errors.New("hole must be inside outer ring")
 				}
@@ -84,23 +98,19 @@ func NewPolygonC(coords [][]Coordinates, opts ...ConstructorOption) (Polygon, er
 	if len(coords) == 0 {
 		return Polygon{}, errors.New("Polygon must have an outer ring")
 	}
-	outer, err := NewLinearRingC(coords[0], opts...)
-	if err != nil {
-		return Polygon{}, err
-	}
-	var holes []LinearRing
-	for _, holeCoords := range coords[1:] {
-		hole, err := NewLinearRingC(holeCoords, opts...)
+	rings := make([]LineString, len(coords))
+	for i := range rings {
+		var err error
+		rings[i], err = NewLineStringC(coords[i], opts...)
 		if err != nil {
 			return Polygon{}, err
 		}
-		holes = append(holes, hole)
 	}
-	return NewPolygon(outer, holes, opts...)
+	return NewPolygon(rings[0], rings[1:], opts...)
 }
 
 // ExteriorRing gives the exterior ring of the polygon boundary.
-func (p Polygon) ExteriorRing() LinearRing {
+func (p Polygon) ExteriorRing() LineString {
 	return p.outer
 }
 
@@ -112,7 +122,7 @@ func (p Polygon) NumInteriorRings() int {
 // InteriorRingN gives the nth (zero indexed) interior ring in the polygon
 // boundary. It will panic if n is out of bounds with respect to the number of
 // interior rings.
-func (p Polygon) InteriorRingN(n int) LinearRing {
+func (p Polygon) InteriorRingN(n int) LineString {
 	return p.holes[n]
 }
 
@@ -127,10 +137,10 @@ func (p Polygon) AppendWKT(dst []byte) []byte {
 
 func (p Polygon) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
-	dst = p.outer.ls.appendWKTBody(dst)
+	dst = p.outer.appendWKTBody(dst)
 	for _, h := range p.holes {
 		dst = append(dst, ',')
-		dst = h.ls.appendWKTBody(dst)
+		dst = h.appendWKTBody(dst)
 	}
 	return append(dst, ')')
 }
@@ -160,8 +170,8 @@ func (p Polygon) Envelope() (Envelope, bool) {
 	return p.outer.Envelope()
 }
 
-func (p Polygon) rings() []LinearRing {
-	rings := make([]LinearRing, 1+len(p.holes))
+func (p Polygon) rings() []LineString {
+	rings := make([]LineString, 1+len(p.holes))
 	rings[0] = p.outer
 	for i, h := range p.holes {
 		rings[1+i] = h
@@ -171,12 +181,12 @@ func (p Polygon) rings() []LinearRing {
 
 func (p Polygon) Boundary() Geometry {
 	if len(p.holes) == 0 {
-		return p.outer.ls
+		return p.outer
 	}
 	bounds := make([]LineString, 1+len(p.holes))
-	bounds[0] = p.outer.ls
+	bounds[0] = p.outer
 	for i, h := range p.holes {
-		bounds[1+i] = h.ls
+		bounds[1+i] = h
 	}
 	return NewMultiLineString(bounds)
 }

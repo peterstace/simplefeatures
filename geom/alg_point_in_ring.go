@@ -10,12 +10,14 @@ const (
 	exterior side = +1
 )
 
-func pointRingSide(pt XY, ring LinearRing) side {
+// pointRingSide checks the side of a ring that a point is on. It assumes that
+// the input ring is actually a ring (i.e. closed and simple).
+func pointRingSide(pt XY, ring LineString) side {
 	ptg := NewPointC(Coordinates{pt})
 	// find max x coordinate
 	// TODO: should be able to use envelope for this
-	maxX := ring.ls.lines[0].a.X
-	for _, ln := range ring.ls.lines {
+	maxX := ring.lines[0].a.X
+	for _, ln := range ring.lines {
 		maxX = math.Max(maxX, ln.b.X)
 		if !ln.Intersection(ptg).IsEmpty() {
 			return boundary
@@ -27,7 +29,7 @@ func pointRingSide(pt XY, ring LinearRing) side {
 
 	ray := must(NewLineC(Coordinates{pt}, Coordinates{XY{maxX + 1, pt.Y}})).(Line)
 	var count int
-	for _, seg := range ring.ls.lines {
+	for _, seg := range ring.lines {
 		inter := seg.Intersection(ray)
 		if inter.IsEmpty() {
 			continue

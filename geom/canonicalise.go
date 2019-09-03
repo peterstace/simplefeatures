@@ -59,11 +59,6 @@ func flattenGeometries(geoms []Geometry) ([]Point, []Line, []Polygon) {
 				g = orderLine(g)
 				lines[xyxy{g.a.XY, g.b.XY}] = g
 			}
-		case LinearRing:
-			for _, g := range g.ls.lines {
-				g = orderLine(g)
-				lines[xyxy{g.a.XY, g.b.XY}] = g
-			}
 		case Polygon:
 			polys = append(polys, g)
 		case MultiPoint:

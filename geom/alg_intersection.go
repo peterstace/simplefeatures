@@ -45,27 +45,9 @@ func intersection(g1, g2 Geometry) Geometry {
 				NewMultiLineString([]LineString{g1}),
 				NewMultiLineString([]LineString{g2}),
 			)
-		case LinearRing:
-			return intersectMultiLineStringWithMultiLineString(
-				NewMultiLineString([]LineString{g1}),
-				NewMultiLineString([]LineString{g2.ls}),
-			)
 		case MultiLineString:
 			return intersectMultiLineStringWithMultiLineString(
 				NewMultiLineString([]LineString{g1}),
-				g2,
-			)
-		}
-	case LinearRing:
-		switch g2 := g2.(type) {
-		case LinearRing:
-			return intersectMultiLineStringWithMultiLineString(
-				NewMultiLineString([]LineString{g1.ls}),
-				NewMultiLineString([]LineString{g2.ls}),
-			)
-		case MultiLineString:
-			return intersectMultiLineStringWithMultiLineString(
-				NewMultiLineString([]LineString{g1.ls}),
 				g2,
 			)
 		}
