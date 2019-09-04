@@ -29,65 +29,64 @@ type Polygon struct {
 // cross each other, and can only intersect each with each other at a point.
 func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption) (Polygon, error) {
 	allRings := append(holes, outer)
-	if doCheapValidations(opts) {
-		for _, r := range allRings {
-			if !r.IsClosed() {
-				return Polygon{}, errors.New("polygon rings must be closed")
+	for _, r := range allRings {
+		if doCheapValidations(opts) && !r.IsClosed() {
+			return Polygon{}, errors.New("polygon rings must be closed")
+		}
+		if doExpensiveValidations(opts) && !r.IsSimple() {
+			return Polygon{}, errors.New("polygon rings must be simple")
+		}
+	}
+
+	if !doExpensiveValidations(opts) {
+		return Polygon{outer, holes}, nil
+	}
+
+	nextInterVert := len(allRings)
+	interVerts := make(map[XY]int)
+	graph := newGraph()
+
+	// Rings may intersect, but only at a single point.
+	for i := 0; i < len(allRings); i++ {
+		for j := i + 1; j < len(allRings); j++ {
+			inter := allRings[i].Intersection(allRings[j])
+			env, has := inter.Envelope()
+			if !has {
+				continue // no intersection
+			}
+			if !env.Min().Equals(env.Max()) {
+				return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
+			}
+
+			interVert, ok := interVerts[env.Min()]
+			if !ok {
+				interVert = nextInterVert
+				nextInterVert++
+				interVerts[env.Min()] = interVert
+			}
+			graph.addEdge(interVert, i)
+			graph.addEdge(interVert, j)
+		}
+	}
+
+	// All inner rings must be inside the outer ring.
+	for _, hole := range holes {
+		for _, line := range hole.lines {
+			if pointRingSide(line.a.XY, outer) == exterior {
+				return Polygon{}, errors.New("hole must be inside outer ring")
 			}
 		}
 	}
-	if doExpensiveValidations(opts) {
-		for _, r := range allRings {
-			if !r.IsSimple() {
-				return Polygon{}, errors.New("polygon rings must be simple")
-			}
-		}
 
-		nextInterVert := len(allRings)
-		interVerts := make(map[XY]int)
-		graph := newGraph()
-
-		// Rings may intersect, but only at a single point.
-		for i := 0; i < len(allRings); i++ {
-			for j := i + 1; j < len(allRings); j++ {
-				inter := allRings[i].Intersection(allRings[j])
-				env, has := inter.Envelope()
-				if !has {
-					continue // no intersection
-				}
-				if !env.Min().Equals(env.Max()) {
-					return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
-				}
-
-				interVert, ok := interVerts[env.Min()]
-				if !ok {
-					interVert = nextInterVert
-					nextInterVert++
-					interVerts[env.Min()] = interVert
-				}
-				graph.addEdge(interVert, i)
-				graph.addEdge(interVert, j)
-			}
-		}
-
-		// All inner rings must be inside the outer ring.
-		for _, hole := range holes {
-			for _, line := range hole.lines {
-				if pointRingSide(line.a.XY, outer) == exterior {
-					return Polygon{}, errors.New("hole must be inside outer ring")
-				}
-			}
-		}
-
-		// Connectedness check: a graph is created where the intersections and
-		// rings are modelled as vertices. Edges are added to the graph between an
-		// intersection vertex and a ring vertex if the ring participates in that
-		// intersection. The interior of the polygon is connected iff the graph
-		// does not contain a cycle.
-		if graph.hasCycle() {
-			return Polygon{}, errors.New("polygon interiors must be connected")
-		}
+	// Connectedness check: a graph is created where the intersections and
+	// rings are modelled as vertices. Edges are added to the graph between an
+	// intersection vertex and a ring vertex if the ring participates in that
+	// intersection. The interior of the polygon is connected iff the graph
+	// does not contain a cycle.
+	if graph.hasCycle() {
+		return Polygon{}, errors.New("polygon interiors must be connected")
 	}
+
 	return Polygon{outer: outer, holes: holes}, nil
 }
 
