@@ -64,7 +64,6 @@ func TestMarshalUnmarshalWKT(t *testing.T) {
 		"POINT (-30 -10)",
 		"POINT EMPTY",
 		"LINESTRING(30 10,10 30,40 40)",
-		"LINEARRING EMPTY",
 		"POLYGON((30 10,40 40,20 40,10 20,30 10))",
 		"POLYGON((35 10,45 45,15 40,10 20,35 10),(20 30,35 35,30 20,20 30))",
 		"MULTILINESTRING((10 10,20 20,10 40),(40 40,30 30,40 20,30 10))",
@@ -80,23 +79,6 @@ func TestMarshalUnmarshalWKT(t *testing.T) {
 				t.Logf("g1 %#v", g1)
 				t.Logf("g2 %#v", g2)
 				t.Errorf("not equal")
-			}
-		})
-	}
-}
-
-func TestMarshalUnmarshalSpecial(t *testing.T) {
-	for i, tt := range []struct {
-		wkt1, wkt2 string
-	}{
-		// LinearRing emits LINESTRING WKT so cannot be tested in the normal way.
-		{"LINEARRING(0 0,1 0,0 1,0 0)", "LINESTRING(0 0,1 0,0 1,0 0)"},
-	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := geomFromWKT(t, tt.wkt1)
-			got := string(g.AsText())
-			if got != tt.wkt2 {
-				t.Errorf("want=%s got=%s", tt.wkt2, got)
 			}
 		})
 	}

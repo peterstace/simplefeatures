@@ -567,11 +567,3 @@ func TestGeoJSONMarshalAnyGeometryNil(t *testing.T) {
 	const want = `null`
 	expectDeepEqual(t, string(got), want)
 }
-
-func TestGeoJSONMarshalLinearRing(t *testing.T) {
-	geom := geomFromWKT(t, `LINEARRING(0 0,0 1,1 1,1 0,0 0)`)
-	got, err := json.Marshal(geom)
-	expectNoErr(t, err)
-	const want = `{"type":"LineString","coordinates":[[0,0],[0,1],[1,1],[1,0],[0,0]]}`
-	expectDeepEqual(t, string(got), want)
-}

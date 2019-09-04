@@ -83,37 +83,11 @@ func TestLineStringAccessor(t *testing.T) {
 	})
 }
 
-func TestLinearRingAccessor(t *testing.T) {
-	ls := geomFromWKT(t, "LINEARRING(0 0,1 0,0 1,0 0)").(LinearRing)
-	pt0 := geomFromWKT(t, "POINT(0 0)")
-	pt1 := geomFromWKT(t, "POINT(1 0)")
-	pt2 := geomFromWKT(t, "POINT(0 1)")
-	pt3 := geomFromWKT(t, "POINT(0 0)")
-
-	t.Run("start", func(t *testing.T) {
-		expectDeepEqual(t, ls.StartPoint(), pt0)
-	})
-	t.Run("end", func(t *testing.T) {
-		expectDeepEqual(t, ls.EndPoint(), pt3)
-	})
-	t.Run("num points", func(t *testing.T) {
-		expectDeepEqual(t, ls.NumPoints(), 4)
-	})
-	t.Run("point n", func(t *testing.T) {
-		expectPanics(t, func() { ls.PointN(-1) })
-		expectDeepEqual(t, ls.PointN(0), pt0)
-		expectDeepEqual(t, ls.PointN(1), pt1)
-		expectDeepEqual(t, ls.PointN(2), pt2)
-		expectDeepEqual(t, ls.PointN(3), pt3)
-		expectPanics(t, func() { ls.PointN(4) })
-	})
-}
-
 func TestPolygonAccessor(t *testing.T) {
 	poly := geomFromWKT(t, "POLYGON((0 0,5 0,5 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1),(3 1,4 1,4 2,3 2,3 1))").(Polygon)
-	outer := geomFromWKT(t, "LINEARRING(0 0,5 0,5 3,0 3,0 0)")
-	inner0 := geomFromWKT(t, "LINEARRING(1 1,2 1,2 2,1 2,1 1)")
-	inner1 := geomFromWKT(t, "LINEARRING(3 1,4 1,4 2,3 2,3 1)")
+	outer := geomFromWKT(t, "LINESTRING(0 0,5 0,5 3,0 3,0 0)")
+	inner0 := geomFromWKT(t, "LINESTRING(1 1,2 1,2 2,1 2,1 1)")
+	inner1 := geomFromWKT(t, "LINESTRING(3 1,4 1,4 2,3 2,3 1)")
 
 	expectDeepEqual(t, poly.ExteriorRing(), outer)
 	expectDeepEqual(t, poly.NumInteriorRings(), 2)

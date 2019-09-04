@@ -500,16 +500,3 @@ func TestWKBMarshalValid(t *testing.T) {
 		})
 	}
 }
-
-func TestWKBMarshalValidLinearRing(t *testing.T) {
-	const wkt = "LINEARRING(0 0,1 0,0 1,0 0)"
-	geom := geomFromWKT(t, wkt)
-
-	var buf bytes.Buffer
-	err := geom.AsBinary(&buf)
-	expectNoErr(t, err)
-
-	readBackGeom, err := UnmarshalWKB(&buf)
-	expectNoErr(t, err)
-	expectDeepEqual(t, readBackGeom, geomFromWKT(t, "LINESTRING(0 0,1 0,0 1,0 0)"))
-}

@@ -21,7 +21,6 @@ func TestIsEmptyDimension(t *testing.T) {
 		{"LINESTRING(0 0,1 1)", false, 1},
 		{"LINESTRING(0 0,1 1,2 2)", false, 1},
 		{"LINESTRING(0 0,1 1,1 0,0 0)", false, 1},
-		{"LINEARRING(0 0,1 0,1 1,0 0)", false, 1},
 		{"POLYGON EMPTY", true, 2},
 		{"POLYGON((0 0,1 1,1 0,0 0))", false, 2},
 		{"MULTIPOINT EMPTY", true, 0},
@@ -75,7 +74,6 @@ func TestEnvelope(t *testing.T) {
 		{"LINESTRING(1 2,3 4)", xy(1, 2), xy(3, 4)},
 		{"LINESTRING(4 1,2 3)", xy(2, 1), xy(4, 3)},
 		{"LINESTRING(1 1,3 1,2 2,2 4)", xy(1, 1), xy(3, 4)},
-		{"LINEARRING(1 1,3 1,2 2,2 4,1 1)", xy(1, 1), xy(3, 4)},
 		{"POLYGON((1 1,3 1,2 2,2 4,1 1))", xy(1, 1), xy(3, 4)},
 		{"MULTIPOINT(1 1,3 1,2 2,2 4,1 1)", xy(1, 1), xy(3, 4)},
 		{"MULTILINESTRING((1 1,3 1,2 2,2 4,1 1),(4 1,4 2))", xy(1, 1), xy(4, 4)},
@@ -143,8 +141,6 @@ func TestIsSimple(t *testing.T) {
 		{"LINESTRING(1 1,2 2,3 2,3 3,0 0)", false},
 		{"LINESTRING(0 0,1 1,2 2)", true},
 
-		{"LINEARRING(0 0,0 1,1 0,0 0)", true},
-
 		{"POLYGON((0 0,0 1,1 0,0 0))", true},
 
 		{"MULTIPOINT((1 2),(3 4),(5 6))", true},
@@ -192,7 +188,6 @@ func TestBoundary(t *testing.T) {
 		{"LINESTRING(1 2,3 4,5 6)", "MULTIPOINT(1 2,5 6)"},
 		{"LINESTRING(1 2,3 4,5 6,7 8)", "MULTIPOINT(1 2,7 8)"},
 		{"LINESTRING(0 0,1 0,0 1,0 0)", "MULTIPOINT EMPTY"},
-		{"LINEARRING(0 0,1 0,0 1,0 0)", "MULTIPOINT EMPTY"},
 
 		{"POLYGON((0 0,1 0,1 1,0 1,0 0))", "LINESTRING(0 0,1 0,1 1,0 1,0 0)"},
 		{"POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))", "MULTILINESTRING((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))"},
@@ -328,7 +323,6 @@ func TestCoordinates(t *testing.T) {
 		}{
 			{"LINESTRING(0 1,2 3)", [][2]float64{{0, 1}, {2, 3}}},
 			{"LINESTRING(0 1,2 3,4 5)", [][2]float64{{0, 1}, {2, 3}, {4, 5}}},
-			{"LINEARRING(0 0,1 0,0 1,0 0)", [][2]float64{{0, 0}, {1, 0}, {0, 1}, {0, 0}}},
 			{"MULTIPOINT(0 1,2 3,4 5)", [][2]float64{{0, 1}, {2, 3}, {4, 5}}},
 		} {
 			cmp1d(t,
@@ -400,7 +394,6 @@ func TestTransformXY(t *testing.T) {
 		{"POINT(1 3)", "POINT(1.5 3)"},
 		{"LINESTRING(1 2,3 4)", "LINESTRING(1.5 2,4.5 4)"},
 		{"LINESTRING(1 2,3 4,5 6)", "LINESTRING(1.5 2,4.5 4,7.5 6)"},
-		{"LINEARRING(0 0,0 1,1 0,0 0)", "LINEARRING(0 0,0 1,1.5 0,0 0)"},
 		{"POLYGON((0 0,0 1,1 0,0 0))", "POLYGON((0 0,0 1,1.5 0,0 0))"},
 		{"MULTIPOINT(0 0,0 1,1 0,0 0)", "MULTIPOINT(0 0,0 1,1.5 0,0 0)"},
 		{"MULTILINESTRING((1 2,3 4,5 6))", "MULTILINESTRING((1.5 2,4.5 4,7.5 6))"},

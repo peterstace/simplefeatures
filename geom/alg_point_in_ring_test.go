@@ -17,7 +17,7 @@ func TestPointInRing(t *testing.T) {
 	}
 	for i, tc := range []testCase{
 		{
-			ringWKT: "LINEARRING(0 0,2 0,2 2,0 2,0 0)",
+			ringWKT: "LINESTRING(0 0,2 0,2 2,0 2,0 0)",
 			subTests: []subTestCase{
 				{"POINT(1 1)", true},
 				{"POINT(0 1)", true},
@@ -31,7 +31,7 @@ func TestPointInRing(t *testing.T) {
 			},
 		},
 		{
-			ringWKT: "LINEARRING(0 0,4 0,4 2,2 1,0 2,0 0)",
+			ringWKT: "LINESTRING(0 0,4 0,4 2,2 1,0 2,0 0)",
 			subTests: []subTestCase{
 				{"POINT(0 1)", true},
 				{"POINT(1 1)", true},
@@ -42,7 +42,7 @@ func TestPointInRing(t *testing.T) {
 			},
 		},
 		{
-			ringWKT: "LINEARRING(0 0,2 1,4 0,4 2,0 2,0 0)",
+			ringWKT: "LINESTRING(0 0,2 1,4 0,4 2,0 2,0 0)",
 			subTests: []subTestCase{
 				{"POINT(0 1)", true},
 				{"POINT(1 1)", true},
@@ -53,7 +53,7 @@ func TestPointInRing(t *testing.T) {
 			},
 		},
 		{
-			ringWKT: "LINEARRING(0 0,6 0,6 2,4 1,2 1,0 2,0 0)",
+			ringWKT: "LINESTRING(0 0,6 0,6 2,4 1,2 1,0 2,0 0)",
 			subTests: []subTestCase{
 				{"POINT(1 1)", true},
 				{"POINT(2 1)", true},
@@ -63,7 +63,7 @@ func TestPointInRing(t *testing.T) {
 			},
 		},
 		{
-			ringWKT: "LINEARRING(0 0,6 0,4 1,2 1,0 2,0 0)",
+			ringWKT: "LINESTRING(0 0,6 0,4 1,2 1,0 2,0 0)",
 			subTests: []subTestCase{
 				{"POINT(1 1)", true},
 				{"POINT(2 1)", true},
@@ -73,7 +73,7 @@ func TestPointInRing(t *testing.T) {
 			},
 		},
 		{
-			ringWKT: "LINEARRING(0 0,2 1,4 1,6 0,6 2,0 2,0 0)",
+			ringWKT: "LINESTRING(0 0,2 1,4 1,6 0,6 2,0 2,0 0)",
 			subTests: []subTestCase{
 				{"POINT(1 1)", true},
 				{"POINT(2 1)", true},
@@ -83,7 +83,7 @@ func TestPointInRing(t *testing.T) {
 			},
 		},
 		{
-			ringWKT: "LINEARRING(0 0,2 1,4 1,6 2,0 2,0 0)",
+			ringWKT: "LINESTRING(0 0,2 1,4 1,6 2,0 2,0 0)",
 			subTests: []subTestCase{
 				{"POINT(1 1)", true},
 				{"POINT(2 1)", true},
@@ -93,7 +93,7 @@ func TestPointInRing(t *testing.T) {
 			},
 		},
 		{
-			ringWKT: "LINEARRING(0 0,2 0,2 3,1 1,0 3,0 0)",
+			ringWKT: "LINESTRING(0 0,2 0,2 3,1 1,0 3,0 0)",
 			subTests: []subTestCase{
 				{"POINT(0 1)", true},
 				{"POINT(0.5 1)", true},
@@ -127,7 +127,11 @@ func TestPointInRing(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		ring := ringGeom.(LinearRing)
+		ring := ringGeom.(LineString)
+		if !ring.IsClosed() || !ring.IsSimple() {
+			t.Fatal("test ring is either not closed or not simple")
+		}
+
 		for j, st := range tc.subTests {
 			t.Run(fmt.Sprintf("%d_%d", i, j), func(t *testing.T) {
 				pointGeom, err := UnmarshalWKT(strings.NewReader(st.pointWKT))
