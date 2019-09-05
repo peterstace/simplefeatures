@@ -244,3 +244,9 @@ func (p Polygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	o, ok := other.(Polygon)
 	return ok && polygonExactEqual(p, o, opts)
 }
+
+// Valid checks if this Polygon is valid
+func (p Polygon) Valid() bool {
+	_, err := NewPolygonC(p.Coordinates())
+	return err == nil
+}

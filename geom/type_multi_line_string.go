@@ -217,3 +217,9 @@ func (m MultiLineString) EqualsExact(other Geometry, opts ...EqualsExactOption) 
 	o, ok := other.(MultiLineString)
 	return ok && multiLineStringExactEqual(m, o, opts)
 }
+
+// Valid checks if this MultiLineString is valid
+func (m MultiLineString) Valid() bool {
+	_, err := NewMultiLineStringC(m.Coordinates())
+	return err == nil
+}
