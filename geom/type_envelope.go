@@ -92,6 +92,10 @@ func (e Envelope) IntersectsPoint(p XY) bool {
 	return p.X >= e.min.X && p.X <= e.max.X && p.Y >= e.min.Y && p.Y <= e.max.Y
 }
 
+func (e Envelope) Intersects(o Envelope) bool {
+	return false
+}
+
 // mustEnvelope gets the envelope from a Geometry. If it's not defined (because
 // the geometry is empty), then it panics.
 func mustEnvelope(g Geometry) Envelope {
