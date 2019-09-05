@@ -105,6 +105,10 @@ func TestIntersection(t *testing.T) {
 				if got != tt.out {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got)
 				}
+				intersects := in1g.Intersects(in2g)
+				if intersects == result.IsEmpty() {
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v\nintersects: %v", tt.in1, tt.in2, tt.out, got, intersects)
+				}
 			})
 
 			t.Run("reversed", func(t *testing.T) {
@@ -112,6 +116,10 @@ func TestIntersection(t *testing.T) {
 				got := string(result.AsText())
 				if got != tt.out {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got)
+				}
+				intersects := in2g.Intersects(in1g)
+				if intersects == result.IsEmpty() {
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v\nintersects: %v", tt.in1, tt.in2, tt.out, got, intersects)
 				}
 			})
 		})
