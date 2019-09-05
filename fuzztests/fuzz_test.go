@@ -43,6 +43,7 @@ func TestFuzz(t *testing.T) {
 			CheckIsSimple(t, pg, g)
 			CheckBoundary(t, pg, g)
 			CheckConvexHull(t, pg, g)
+			CheckIsValid(t, pg, g)
 		})
 	}
 

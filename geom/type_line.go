@@ -147,8 +147,8 @@ func (n Line) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	return ok && curvesExactEqual(n, c, opts)
 }
 
-// Valid checks if this Line is valid
-func (n Line) Valid() bool {
+// IsValid checks if this Line is valid
+func (n Line) IsValid() bool {
 	_, err := NewLineC(n.a, n.b)
 	return err == nil
 }

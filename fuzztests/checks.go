@@ -311,3 +311,15 @@ func CheckConvexHull(t *testing.T, pg PostGIS, g geom.Geometry) {
 		}
 	})
 }
+
+func CheckIsValid(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckIsValid", func(t *testing.T) {
+		got := g.IsValid()
+		want := pg.IsValid(t, g)
+		if got != want {
+			t.Logf("got:  %t", got)
+			t.Logf("want: %t", want)
+			t.Error("mismatch")
+		}
+	})
+}

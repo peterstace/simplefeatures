@@ -142,8 +142,8 @@ func (r LinearRing) EqualsExact(other Geometry, opts ...EqualsExactOption) bool 
 	return ok && curvesExactEqual(r, c, opts)
 }
 
-// Valid checks if this LinearRing is valid
-func (r LinearRing) Valid() bool {
+// IsValid checks if this LinearRing is valid
+func (r LinearRing) IsValid() bool {
 	_, err := NewLinearRingC(r.Coordinates())
 	return err == nil
 }

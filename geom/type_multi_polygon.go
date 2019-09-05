@@ -288,8 +288,8 @@ func (m MultiPolygon) EqualsExact(other Geometry, opts ...EqualsExactOption) boo
 	return ok && multiPolygonExactEqual(m, o, opts)
 }
 
-// Valid checks if this MultiPolygon is valid
-func (m MultiPolygon) Valid() bool {
+// IsValid checks if this MultiPolygon is valid
+func (m MultiPolygon) IsValid() bool {
 	_, err := NewMultiPolygonC(m.Coordinates())
 	return err == nil
 }

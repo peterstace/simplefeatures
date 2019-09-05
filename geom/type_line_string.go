@@ -221,8 +221,8 @@ func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool 
 	return ok && curvesExactEqual(s, c, opts)
 }
 
-// Valid checks if this LineString is valid
-func (s LineString) Valid() bool {
+// IsValid checks if this LineString is valid
+func (s LineString) IsValid() bool {
 	_, err := NewLineStringC(s.Coordinates())
 	return err == nil
 }

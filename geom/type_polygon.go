@@ -245,8 +245,8 @@ func (p Polygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	return ok && polygonExactEqual(p, o, opts)
 }
 
-// Valid checks if this Polygon is valid
-func (p Polygon) Valid() bool {
+// IsValid checks if this Polygon is valid
+func (p Polygon) IsValid() bool {
 	_, err := NewPolygonC(p.Coordinates())
 	return err == nil
 }

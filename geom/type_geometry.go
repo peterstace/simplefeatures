@@ -68,9 +68,9 @@ type Geometry interface {
 	// for using options.
 	EqualsExact(Geometry, ...EqualsExactOption) bool
 
-	// Valid returns if the current geometry is valid. It is useful to use when
+	// IsValid returns if the current geometry is valid. It is useful to use when
 	// validation is disabled at constructing, for example, json.Unmarshal
-	Valid() bool
+	IsValid() bool
 
 	json.Marshaler
 }

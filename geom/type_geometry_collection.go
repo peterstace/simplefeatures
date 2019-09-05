@@ -184,8 +184,8 @@ func (c GeometryCollection) EqualsExact(other Geometry, opts ...EqualsExactOptio
 	return ok && geometryCollectionExactEqual(c, o, opts)
 }
 
-// Valid checks if this GeometryCollection is valid. However, there is no
+// IsValid checks if this GeometryCollection is valid. However, there is no
 // constraints on it, so this function always returns true
-func (c GeometryCollection) Valid() bool {
+func (c GeometryCollection) IsValid() bool {
 	return true
 }

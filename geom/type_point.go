@@ -128,8 +128,8 @@ func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	return eq(p.XY(), o.XY())
 }
 
-// Valid checks if this Point is valid, but there is not way to indicate if
+// IsValid checks if this Point is valid, but there is not way to indicate if
 // Point is valid, so this function always returns true
-func (p Point) Valid() bool {
+func (p Point) IsValid() bool {
 	return true
 }

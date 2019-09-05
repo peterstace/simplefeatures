@@ -110,8 +110,8 @@ func (e EmptySet) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	return ok && e.wkbType == o.wkbType
 }
 
-// Valid checks if this EmptySet is valid. However, this is no constraints on
+// IsValid checks if this EmptySet is valid. However, this is no constraints on
 // EmptySet, so this function always returns true
-func (e EmptySet) Valid() bool {
+func (e EmptySet) IsValid() bool {
 	return true
 }

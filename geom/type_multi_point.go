@@ -180,8 +180,8 @@ func (m MultiPoint) EqualsExact(other Geometry, opts ...EqualsExactOption) bool 
 	return ok && multiPointExactEqual(m, o, opts)
 }
 
-// Valid checks if this MultiPoint is valid. However, there is no way to indicate
+// IsValid checks if this MultiPoint is valid. However, there is no way to indicate
 // whether or not MultiPoint is valid, so this function always returns true
-func (m MultiPoint) Valid() bool {
+func (m MultiPoint) IsValid() bool {
 	return true
 }
