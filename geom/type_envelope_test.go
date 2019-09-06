@@ -42,101 +42,34 @@ func TestEnvelopeAsGeometry(t *testing.T) {
 	}
 }
 
+// env is a helper to create an envelope in a compact way.
+func env(x1, y1, x2, y2 float64) Envelope {
+	return NewEnvelope(XY{x1, y1}, XY{x2, y2})
+}
+
 func TestEnvelopeIntersects(t *testing.T) {
 	for i, tt := range []struct {
 		e1, e2 Envelope
 		want   bool
 	}{
-		{
-			NewEnvelope(XY{0, 0}, XY{1, 1}),
-			NewEnvelope(XY{2, 2}, XY{3, 3}),
-			false,
-		},
-		{
-			NewEnvelope(XY{0, 2}, XY{1, 3}),
-			NewEnvelope(XY{2, 0}, XY{3, 1}),
-			false,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{1, 1}),
-			NewEnvelope(XY{1, 1}, XY{2, 2}),
-			true,
-		},
-		{
-			NewEnvelope(XY{0, 1}, XY{1, 2}),
-			NewEnvelope(XY{1, 0}, XY{2, 1}),
-			true,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{2, 2}),
-			NewEnvelope(XY{1, 1}, XY{3, 3}),
-			true,
-		},
-		{
-			NewEnvelope(XY{0, 1}, XY{2, 3}),
-			NewEnvelope(XY{1, 0}, XY{3, 2}),
-			true,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{2, 1}),
-			NewEnvelope(XY{1, 0}, XY{3, 1}),
-			true,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{1, 2}),
-			NewEnvelope(XY{0, 1}, XY{1, 3}),
-			true,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{2, 2}),
-			NewEnvelope(XY{1, -1}, XY{3, 3}),
-			true,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{2, 2}),
-			NewEnvelope(XY{1, -1}, XY{3, 3}),
-			true,
-		},
-		{
-			NewEnvelope(XY{-1, 0}, XY{2, 1}),
-			NewEnvelope(XY{0, -1}, XY{1, 2}),
-			true,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{1, 1}),
-			NewEnvelope(XY{-1, -1}, XY{2, 2}),
-			true,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{1, 1}),
-			NewEnvelope(XY{1, 0}, XY{2, 1}),
-			true,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{1, 1}),
-			NewEnvelope(XY{0, 1}, XY{1, 2}),
-			true,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{1, 1}),
-			NewEnvelope(XY{2, 0}, XY{3, 1}),
-			false,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{1, 1}),
-			NewEnvelope(XY{0, 2}, XY{1, 3}),
-			false,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{1, 1}),
-			NewEnvelope(XY{2, -1}, XY{3, 2}),
-			false,
-		},
-		{
-			NewEnvelope(XY{0, 0}, XY{1, 1}),
-			NewEnvelope(XY{-1, -2}, XY{2, -1}),
-			false,
-		},
+		{env(0, 0, 1, 1), env(2, 2, 3, 3), false},
+		{env(0, 2, 1, 3), env(2, 0, 3, 1), false},
+		{env(0, 0, 1, 1), env(1, 1, 2, 2), true},
+		{env(0, 1, 1, 2), env(1, 0, 2, 1), true},
+		{env(0, 0, 2, 2), env(1, 1, 3, 3), true},
+		{env(0, 1, 2, 3), env(1, 0, 3, 2), true},
+		{env(0, 0, 2, 1), env(1, 0, 3, 1), true},
+		{env(0, 0, 1, 2), env(0, 1, 1, 3), true},
+		{env(0, 0, 2, 2), env(1, -1, 3, 3), true},
+		{env(0, 0, 2, 2), env(1, -1, 3, 3), true},
+		{env(-1, 0, 2, 1), env(0, -1, 1, 2), true},
+		{env(0, 0, 1, 1), env(-1, -1, 2, 2), true},
+		{env(0, 0, 1, 1), env(1, 0, 2, 1), true},
+		{env(0, 0, 1, 1), env(0, 1, 1, 2), true},
+		{env(0, 0, 1, 1), env(2, 0, 3, 1), false},
+		{env(0, 0, 1, 1), env(0, 2, 1, 3), false},
+		{env(0, 0, 1, 1), env(2, -1, 3, 2), false},
+		{env(0, 0, 1, 1), env(-1, -2, 2, -1), false},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got1 := tt.e1.Intersects(tt.e2)
