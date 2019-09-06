@@ -28,9 +28,9 @@ func (o threePointOrientation) String() string {
 func orientation(p, q, s XY) threePointOrientation {
 	cp := q.Sub(p).Cross(s.Sub(q))
 	switch {
-	case cp.GT(zero):
+	case cp > 0:
 		return leftTurn
-	case cp.LT(zero):
+	case cp < 0:
 		return rightTurn
 	default:
 		return collinear

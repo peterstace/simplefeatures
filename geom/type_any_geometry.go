@@ -10,23 +10,34 @@ import (
 	"strings"
 )
 
-// AnyGeometry is a concrete type that holds any Geometry value. It exists to
-// make SQL interactions easier (specifically to allow geometries to be scanned
-// in from an SQL DB).
+// AnyGeometry is a concrete type that holds any Geometry value. It exists as a
+// helper to make SQL and JSON interactions easier.
 type AnyGeometry struct {
+	// Geom is the destination into which scanned geometries are stored.
 	Geom Geometry
+
+	// Options control the way that geometries are constructed.
+	Options []ConstructorOption
 }
 
-// Value implements the "sql/driver".Valuer interface by emitting WKT. Gives
+// SetOptions is a helper to set provided variadic list of options into
+// the Options field.
+func (a *AnyGeometry) SetOptions(opts ...ConstructorOption) {
+	a.Options = opts
+}
+
+// Value implements the "sql/driver".Valuer interface by emitting WKB. Gives
 // an error if the Geom element is nil.
-func (a *AnyGeometry) Value() (driver.Value, error) {
+func (a AnyGeometry) Value() (driver.Value, error) {
 	if a.Geom == nil {
 		return nil, errors.New("no geometry set")
 	}
-	return a.Geom.AsText(), nil
+	var buf bytes.Buffer
+	err := a.Geom.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
-// Scan implements the "sql".Scanner interface by parsing the src value as WKT.
+// Scan implements the "sql".Scanner interface by parsing the src value as WKB.
 func (a *AnyGeometry) Scan(src interface{}) error {
 	var r io.Reader
 	switch src := src.(type) {
@@ -43,14 +54,14 @@ func (a *AnyGeometry) Scan(src interface{}) error {
 	}
 
 	var err error
-	a.Geom, err = UnmarshalWKT(r)
+	a.Geom, err = UnmarshalWKB(r, a.Options...)
 	return err
 }
 
 // UnmarshalJSON implements the "encoding/json".Unmarshaller interface by
 // parsing the JSON stream as GeoJSON.
 func (a *AnyGeometry) UnmarshalJSON(p []byte) error {
-	geom, err := UnmarshalGeoJSON(p)
+	geom, err := UnmarshalGeoJSON(p, a.Options...)
 	if err != nil {
 		return err
 	}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"math/big"
 	"strconv"
 	"strings"
 )
@@ -17,8 +16,8 @@ import (
 
 // UnmarshalWKT parses a Well Known Text (WKT), and returns the corresponding
 // Geometry.
-func UnmarshalWKT(r io.Reader) (Geometry, error) {
-	p := newParser(r)
+func UnmarshalWKT(r io.Reader, opts ...ConstructorOption) (Geometry, error) {
+	p := newParser(r, opts)
 	geom := p.nextGeometryTaggedText()
 	p.checkEOF()
 	if p.err != nil {
@@ -27,12 +26,13 @@ func UnmarshalWKT(r io.Reader) (Geometry, error) {
 	return geom, nil
 }
 
-func newParser(r io.Reader) *parser {
-	return &parser{lexer: newWKTLexer(r)}
+func newParser(r io.Reader, opts []ConstructorOption) *parser {
+	return &parser{lexer: newWKTLexer(r), opts: opts}
 }
 
 type parser struct {
 	lexer *wktLexer
+	opts  []ConstructorOption
 	err   error
 }
 
@@ -76,21 +76,21 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 	case "POINT":
 		coords := p.nextPointText()
 		if coords.Empty {
-			return NewEmptyPoint()
+			return NewEmptyPoint(p.opts...)
 		} else {
-			return NewPointC(coords.Value)
+			return NewPointC(coords.Value, p.opts...)
 		}
 	case "LINESTRING":
 		coords := p.nextLineStringText()
 		switch len(coords) {
 		case 0:
-			return NewEmptyLineString()
+			return NewEmptyLineString(p.opts...)
 		case 2:
-			ln, err := NewLineC(coords[0], coords[1])
+			ln, err := NewLineC(coords[0], coords[1], p.opts...)
 			p.check(err)
 			return ln
 		default:
-			ls, err := NewLineStringC(coords)
+			ls, err := NewLineStringC(coords, p.opts...)
 			p.check(err)
 			return ls
 		}
@@ -101,32 +101,32 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		coords := p.nextLineStringText() // re-use line string production
 		switch len(coords) {
 		case 0:
-			return NewEmptyLineString()
+			return NewEmptyLineString(p.opts...)
 		default:
-			ls, err := NewLinearRing(coords)
+			ls, err := NewLinearRingC(coords, p.opts...)
 			p.check(err)
 			return ls
 		}
 	case "POLYGON":
 		coords := p.nextPolygonText()
 		if len(coords) == 0 {
-			return NewEmptyPolygon()
+			return NewEmptyPolygon(p.opts...)
 		} else {
-			poly, err := NewPolygonC(coords)
+			poly, err := NewPolygonC(coords, p.opts...)
 			p.check(err)
 			return poly
 		}
 	case "MULTIPOINT":
 		coords := p.nextMultiPointText()
-		return NewMultiPointOC(coords)
+		return NewMultiPointOC(coords, p.opts...)
 	case "MULTILINESTRING":
 		coords := p.nextPolygonText() // same production as polygon
-		mls, err := NewMultiLineStringC(coords)
+		mls, err := NewMultiLineStringC(coords, p.opts...)
 		p.check(err)
 		return mls
 	case "MULTIPOLYGON":
 		coords := p.nextMultiPolygonText()
-		mp, err := NewMultiPolygonC(coords)
+		mp, err := NewMultiPolygonC(coords, p.opts...)
 		p.check(err)
 		return mp
 	case "GEOMETRYCOLLECTION":
@@ -167,7 +167,7 @@ func (p *parser) nextPoint() Coordinates {
 	return Coordinates{XY{x, y}}
 }
 
-func (p *parser) nextSignedNumericLiteral() Scalar {
+func (p *parser) nextSignedNumericLiteral() float64 {
 	var negative bool
 	tok := p.nextToken()
 	if tok == "-" {
@@ -176,20 +176,14 @@ func (p *parser) nextSignedNumericLiteral() Scalar {
 	}
 	f, err := strconv.ParseFloat(tok, 64)
 	p.check(err)
-	// NaNs are not allowed by the WKT grammar.
-	if math.IsNaN(f) {
+	// NaNs and Infs are not allowed by the WKT grammar.
+	if math.IsNaN(f) || math.IsInf(f, 0) {
 		p.errorf("invalid signed numeric literal: %s", tok)
 	}
 	if negative {
 		f *= -1
 	}
-
-	r, ok := new(big.Rat).SetString(strconv.FormatFloat(f, 'f', -1, 64))
-	if !ok {
-		p.errorf("invalid signed numeric literal: %s", tok)
-	}
-
-	return Scalar{r}
+	return f
 }
 
 func (p *parser) nextPointText() OptionalCoordinates {
@@ -301,7 +295,7 @@ func (p *parser) nextMultiPolygonText() [][][]Coordinates {
 func (p *parser) nextGeometryCollectionText() Geometry {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
-		return NewGeometryCollection(nil)
+		return NewGeometryCollection(nil, p.opts...)
 	}
 	geom := p.nextGeometryTaggedText()
 	geoms := []Geometry{geom}
@@ -314,5 +308,5 @@ func (p *parser) nextGeometryCollectionText() Geometry {
 			break
 		}
 	}
-	return NewGeometryCollection(geoms)
+	return NewGeometryCollection(geoms, p.opts...)
 }

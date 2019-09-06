@@ -22,7 +22,10 @@ type MultiPolygon struct {
 
 // NewMultiPolygon creates a MultiPolygon from its constintuent Polygons. It
 // gives an error if any of the MultiPolygon assertions are not maintained.
-func NewMultiPolygon(polys []Polygon) (MultiPolygon, error) {
+func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
+	if !doExpensiveValidations(opts) {
+		return MultiPolygon{polys}, nil
+	}
 	for i := 0; i < len(polys); i++ {
 		for j := i + 1; j < len(polys); j++ {
 			bound1 := polys[i].Boundary()
@@ -51,13 +54,13 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 		// then each midpoint between those points. These are enough points
 		// that one of the points will be inside the other polygon iff the
 		// interior of the polygons intersect.
-		allPts := newXYSet()
+		allPts := make(map[XY]struct{})
 		for _, r1 := range p1.rings() {
 			for _, line1 := range r1.ls.lines {
 				// Collect boundary control points and intersection points.
-				linePts := newXYSet()
-				linePts.add(line1.a.XY)
-				linePts.add(line1.b.XY)
+				linePts := make(map[XY]struct{})
+				linePts[line1.a.XY] = struct{}{}
+				linePts[line1.b.XY] = struct{}{}
 				for _, r2 := range p2.rings() {
 					for _, line2 := range r2.ls.lines {
 						env, ok := line1.Intersection(line2).Envelope()
@@ -69,33 +72,33 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 						}
 						inter := env.Min()
 						if !inter.Equals(line1.a.XY) && !inter.Equals(line1.b.XY) {
-							linePts.add(inter)
+							linePts[inter] = struct{}{}
 						}
 					}
 				}
 				// Collect midpoints.
 				if len(linePts) <= 2 {
-					for _, pt := range linePts {
-						allPts.add(pt)
+					for pt := range linePts {
+						allPts[pt] = struct{}{}
 					}
 				} else {
 					linePtsSlice := make([]XY, 0, len(linePts))
-					for _, pt := range linePts {
+					for pt := range linePts {
 						linePtsSlice = append(linePtsSlice, pt)
 					}
 					sort.Slice(linePtsSlice, func(i, j int) bool {
 						ptI := linePtsSlice[i]
 						ptJ := linePtsSlice[j]
-						if !ptI.X.Equals(ptJ.X) {
-							return ptI.X.LT(ptJ.X)
+						if ptI.X != ptJ.X {
+							return ptI.X < ptJ.X
 						}
-						return ptI.Y.LT(ptJ.Y)
+						return ptI.Y < ptJ.Y
 					})
-					allPts.add(linePtsSlice[0])
+					allPts[linePtsSlice[0]] = struct{}{}
 					for i := 0; i+1 < len(linePtsSlice); i++ {
 						midpoint := linePtsSlice[i].Midpoint(linePtsSlice[i+1])
-						allPts.add(midpoint)
-						allPts.add(linePtsSlice[i+1])
+						allPts[midpoint] = struct{}{}
+						allPts[linePtsSlice[i+1]] = struct{}{}
 					}
 				}
 			}
@@ -103,7 +106,7 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 
 		// Check to see if any of the points from the boundary from the first
 		// polygon are inside the second polygon.
-		for _, pt := range allPts {
+		for pt := range allPts {
 			if isPointInteriorToPolygon(pt, p2) {
 				return true
 			}
@@ -125,19 +128,19 @@ func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
 }
 
 // NewMultiPolygonC creates a new MultiPolygon from its constituent Coordinate values.
-func NewMultiPolygonC(coords [][][]Coordinates) (MultiPolygon, error) {
+func NewMultiPolygonC(coords [][][]Coordinates, opts ...ConstructorOption) (MultiPolygon, error) {
 	var polys []Polygon
 	for _, c := range coords {
 		if len(c) == 0 {
 			continue
 		}
-		poly, err := NewPolygonC(c)
+		poly, err := NewPolygonC(c, opts...)
 		if err != nil {
 			return MultiPolygon{}, err
 		}
 		polys = append(polys, poly)
 	}
-	return NewMultiPolygon(polys)
+	return NewMultiPolygon(polys, opts...)
 }
 
 // NumPolygons gives the number of Polygon elements in the MultiPolygon.
@@ -188,9 +191,6 @@ func (m MultiPolygon) IsEmpty() bool {
 }
 
 func (m MultiPolygon) Dimension() int {
-	if m.IsEmpty() {
-		return 0
-	}
 	return 2
 }
 
@@ -224,7 +224,7 @@ func (m MultiPolygon) Boundary() Geometry {
 }
 
 func (m MultiPolygon) Value() (driver.Value, error) {
-	return m.AsText(), nil
+	return wkbAsBytes(m)
 }
 
 func (m MultiPolygon) AsBinary(w io.Writer) error {
@@ -278,4 +278,23 @@ func (m MultiPolygon) Coordinates() [][][]Coordinates {
 		}
 	}
 	return coords
+}
+
+// TransformXY transforms this MultiPolygon into another MultiPolygon according to fn.
+func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := m.Coordinates()
+	transform3dCoords(coords, fn)
+	return NewMultiPolygonC(coords, opts...)
+}
+
+// EqualsExact checks if this MultiPolygon is exactly equal to another MultiPolygon.
+func (m MultiPolygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	o, ok := other.(MultiPolygon)
+	return ok && multiPolygonExactEqual(m, o, opts)
+}
+
+// IsValid checks if this MultiPolygon is valid
+func (m MultiPolygon) IsValid() bool {
+	_, err := NewMultiPolygonC(m.Coordinates())
+	return err == nil
 }

@@ -16,8 +16,8 @@ type Line struct {
 }
 
 // NewLineC creates a line segment given the Coordinates of its two endpoints.
-func NewLineC(a, b Coordinates) (Line, error) {
-	if a.XY.Equals(b.XY) {
+func NewLineC(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
+	if doCheapValidations(opts) && a.XY.Equals(b.XY) {
 		return Line{}, fmt.Errorf("line endpoints must be distinct: %v", a.XY)
 	}
 	return Line{a, b}, nil
@@ -57,13 +57,13 @@ func (n Line) AsText() string {
 
 func (n Line) AppendWKT(dst []byte) []byte {
 	dst = append(dst, []byte("LINESTRING(")...)
-	dst = n.a.X.appendAsFloat(dst)
+	dst = appendFloat(dst, n.a.X)
 	dst = append(dst, ' ')
-	dst = n.a.Y.appendAsFloat(dst)
+	dst = appendFloat(dst, n.a.Y)
 	dst = append(dst, ',')
-	dst = n.b.X.appendAsFloat(dst)
+	dst = appendFloat(dst, n.b.X)
 	dst = append(dst, ' ')
-	dst = n.b.Y.appendAsFloat(dst)
+	dst = appendFloat(dst, n.b.Y)
 	return append(dst, ')')
 }
 
@@ -104,7 +104,7 @@ func (n Line) Boundary() Geometry {
 }
 
 func (n Line) Value() (driver.Value, error) {
-	return n.AsText(), nil
+	return wkbAsBytes(n)
 }
 
 func (n Line) AsBinary(w io.Writer) error {
@@ -112,10 +112,10 @@ func (n Line) AsBinary(w io.Writer) error {
 	marsh.writeByteOrder()
 	marsh.writeGeomType(wkbGeomTypeLineString)
 	marsh.writeCount(2)
-	marsh.writeFloat64(n.StartPoint().XY().X.AsFloat())
-	marsh.writeFloat64(n.StartPoint().XY().Y.AsFloat())
-	marsh.writeFloat64(n.EndPoint().XY().X.AsFloat())
-	marsh.writeFloat64(n.EndPoint().XY().Y.AsFloat())
+	marsh.writeFloat64(n.StartPoint().XY().X)
+	marsh.writeFloat64(n.StartPoint().XY().Y)
+	marsh.writeFloat64(n.EndPoint().XY().X)
+	marsh.writeFloat64(n.EndPoint().XY().Y)
 	return marsh.err
 }
 
@@ -137,4 +137,23 @@ func (n Line) MarshalJSON() ([]byte, error) {
 // Coordinates returns the coordinates of the start and end point of the Line.
 func (n Line) Coordinates() []Coordinates {
 	return []Coordinates{n.a, n.b}
+}
+
+// TransformXY transforms this Line into another Line according to fn.
+func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := n.Coordinates()
+	transform1dCoords(coords, fn)
+	return NewLineC(coords[0], coords[1], opts...)
+}
+
+// EqualsExact checks if this Line is exactly equal to another curve.
+func (n Line) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	c, ok := other.(curve)
+	return ok && curvesExactEqual(n, c, opts)
+}
+
+// IsValid checks if this Line is valid
+func (n Line) IsValid() bool {
+	_, err := NewLineC(n.a, n.b)
+	return err == nil
 }

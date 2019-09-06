@@ -18,16 +18,16 @@ type LineString struct {
 
 // NewLineStringC creates a line string from the coordinates defining its
 // points.
-func NewLineStringC(pts []Coordinates) (LineString, error) {
+func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, error) {
 	var lines []Line
 	for i := 0; i < len(pts)-1; i++ {
 		if pts[i].XY.Equals(pts[i+1].XY) {
 			continue
 		}
-		ln := must(NewLineC(pts[i], pts[i+1])).(Line)
+		ln := must(NewLineC(pts[i], pts[i+1], opts...)).(Line)
 		lines = append(lines, ln)
 	}
-	if len(lines) == 0 {
+	if doCheapValidations(opts) && len(lines) == 0 {
 		return LineString{}, errors.New("LineString must contain at least two distinct points")
 	}
 	return LineString{lines}, nil
@@ -69,15 +69,15 @@ func (s LineString) AppendWKT(dst []byte) []byte {
 func (s LineString) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
 	for _, ln := range s.lines {
-		dst = ln.a.X.appendAsFloat(dst)
+		dst = appendFloat(dst, ln.a.X)
 		dst = append(dst, ' ')
-		dst = ln.a.Y.appendAsFloat(dst)
+		dst = appendFloat(dst, ln.a.Y)
 		dst = append(dst, ',')
 	}
 	last := s.lines[len(s.lines)-1].b
-	dst = last.X.appendAsFloat(dst)
+	dst = appendFloat(dst, last.X)
 	dst = append(dst, ' ')
-	dst = last.Y.appendAsFloat(dst)
+	dst = appendFloat(dst, last.Y)
 	return append(dst, ')')
 }
 
@@ -170,7 +170,7 @@ func (s LineString) Boundary() Geometry {
 }
 
 func (s LineString) Value() (driver.Value, error) {
-	return s.AsText(), nil
+	return wkbAsBytes(s)
 }
 
 func (s LineString) AsBinary(w io.Writer) error {
@@ -180,8 +180,8 @@ func (s LineString) AsBinary(w io.Writer) error {
 	n := s.NumPoints()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {
-		marsh.writeFloat64(s.PointN(i).XY().X.AsFloat())
-		marsh.writeFloat64(s.PointN(i).XY().Y.AsFloat())
+		marsh.writeFloat64(s.PointN(i).XY().X)
+		marsh.writeFloat64(s.PointN(i).XY().Y)
 	}
 	return marsh.err
 }
@@ -211,4 +211,23 @@ func (s LineString) Coordinates() []Coordinates {
 		coords[i] = s.PointN(i).Coordinates()
 	}
 	return coords
+}
+
+// TransformXY transforms this LineString into another LineString according to fn.
+func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := s.Coordinates()
+	transform1dCoords(coords, fn)
+	return NewLineStringC(coords, opts...)
+}
+
+// EqualsExact checks if this LineString is exactly equal to another curve.
+func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	c, ok := other.(curve)
+	return ok && curvesExactEqual(s, c, opts)
+}
+
+// IsValid checks if this LineString is valid
+func (s LineString) IsValid() bool {
+	_, err := NewLineStringC(s.Coordinates())
+	return err == nil
 }

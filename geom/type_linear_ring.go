@@ -21,16 +21,16 @@ type LinearRing struct {
 	ls LineString
 }
 
-// NewLinearRing builds a LinearRing from a sequence of coordinates.
-func NewLinearRing(pts []Coordinates) (LinearRing, error) {
-	ls, err := NewLineStringC(pts)
+// NewLinearRingC builds a LinearRing from a sequence of coordinates.
+func NewLinearRingC(pts []Coordinates, opts ...ConstructorOption) (LinearRing, error) {
+	ls, err := NewLineStringC(pts, opts...)
 	if err != nil {
 		return LinearRing{}, err
 	}
-	if !ls.IsClosed() {
+	if doCheapValidations(opts) && !ls.IsClosed() {
 		return LinearRing{}, errors.New("linear rings must be closed")
 	}
-	if !ls.IsSimple() {
+	if doExpensiveValidations(opts) && !ls.IsSimple() {
 		return LinearRing{}, errors.New("linear rings must be simple")
 	}
 	return LinearRing{ls}, nil
@@ -108,7 +108,7 @@ func (r LinearRing) Boundary() Geometry {
 }
 
 func (r LinearRing) Value() (driver.Value, error) {
-	return r.AsText(), nil
+	return wkbAsBytes(r)
 }
 
 func (r LinearRing) AsBinary(w io.Writer) error {
@@ -132,4 +132,23 @@ func (r LinearRing) MarshalJSON() ([]byte, error) {
 // LinearRing returns the coordinates of the points making up the LinearRings.
 func (r LinearRing) Coordinates() []Coordinates {
 	return r.ls.Coordinates()
+}
+
+// TransformXY transforms this LinearRing into another LinearRing according to fn.
+func (r LinearRing) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	coords := r.Coordinates()
+	transform1dCoords(coords, fn)
+	return NewLinearRingC(coords, opts...)
+}
+
+// EqualsExact checks if this LinearRing is exactly equal to another curve.
+func (r LinearRing) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	c, ok := other.(curve)
+	return ok && curvesExactEqual(r, c, opts)
+}
+
+// IsValid checks if this LinearRing is valid
+func (r LinearRing) IsValid() bool {
+	_, err := NewLinearRingC(r.Coordinates())
+	return err == nil
 }
