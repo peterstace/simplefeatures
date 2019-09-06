@@ -93,7 +93,8 @@ func (e Envelope) IntersectsPoint(p XY) bool {
 }
 
 func (e Envelope) Intersects(o Envelope) bool {
-	return false
+	return (e.min.X <= o.max.X) && (e.max.X >= o.min.X) &&
+		(e.min.Y <= o.max.Y) && (e.max.Y >= o.min.Y)
 }
 
 // mustEnvelope gets the envelope from a Geometry. If it's not defined (because

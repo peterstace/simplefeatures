@@ -117,6 +117,26 @@ func TestEnvelopeIntersects(t *testing.T) {
 			NewEnvelope(XY{0, 1}, XY{1, 2}),
 			true,
 		},
+		{
+			NewEnvelope(XY{0, 0}, XY{1, 1}),
+			NewEnvelope(XY{2, 0}, XY{3, 1}),
+			false,
+		},
+		{
+			NewEnvelope(XY{0, 0}, XY{1, 1}),
+			NewEnvelope(XY{0, 2}, XY{1, 3}),
+			false,
+		},
+		{
+			NewEnvelope(XY{0, 0}, XY{1, 1}),
+			NewEnvelope(XY{2, -1}, XY{3, 2}),
+			false,
+		},
+		{
+			NewEnvelope(XY{0, 0}, XY{1, 1}),
+			NewEnvelope(XY{-1, -2}, XY{2, -1}),
+			false,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got1 := tt.e1.Intersects(tt.e2)
