@@ -420,7 +420,7 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, dimension int) {
 }
 
 func hasIntersectionLineWithLine(n1, n2 Line) (intersects bool, dimension int) {
-	// Speed is O(1), but there are divisions and multiplications involved.
+	// Speed is O(1), but there are multiplications involved.
 	a := n1.a.XY
 	b := n1.b.XY
 	c := n2.a.XY
