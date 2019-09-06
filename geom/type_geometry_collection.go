@@ -183,3 +183,15 @@ func (c GeometryCollection) EqualsExact(other Geometry, opts ...EqualsExactOptio
 	o, ok := other.(GeometryCollection)
 	return ok && geometryCollectionExactEqual(c, o, opts)
 }
+
+// IsValid checks if this GeometryCollection is valid. However, there is no
+// constraints on it, so this function always returns true
+func (c GeometryCollection) IsValid() bool {
+	all := true
+	c.walk(func(g Geometry) {
+		if !g.IsValid() {
+			all = false
+		}
+	})
+	return all
+}

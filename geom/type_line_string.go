@@ -220,3 +220,9 @@ func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool 
 	c, ok := other.(curve)
 	return ok && curvesExactEqual(s, c, opts)
 }
+
+// IsValid checks if this LineString is valid
+func (s LineString) IsValid() bool {
+	_, err := NewLineStringC(s.Coordinates())
+	return err == nil
+}

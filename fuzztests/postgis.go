@@ -134,3 +134,7 @@ func (p PostGIS) Boundary(t *testing.T, g geom.Geometry) geom.Geometry {
 func (p PostGIS) ConvexHull(t *testing.T, g geom.Geometry) geom.Geometry {
 	return p.geomFunc(t, g, "ST_ConvexHull")
 }
+
+func (p PostGIS) IsValid(t *testing.T, g geom.Geometry) bool {
+	return p.boolFunc(t, g, "ST_IsValid")
+}
