@@ -43,7 +43,7 @@ func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 	}
 	env := envs[0]
 	for _, e := range envs[1:] {
-		env = env.Union(e)
+		env = env.ExpandToIncludeEnvelope(e)
 	}
 	return env, true
 }
@@ -94,9 +94,9 @@ func (e Envelope) Extend(point XY) Envelope {
 	}
 }
 
-// Union returns the smallest envelope that contains all of the points in this
-// envelope and another envelope.
-func (e Envelope) Union(other Envelope) Envelope {
+// ExpandToIncludeEnvelope returns the smallest envelope that contains all of
+// the points in this envelope and another envelope.
+func (e Envelope) ExpandToIncludeEnvelope(other Envelope) Envelope {
 	return Envelope{
 		min: XY{math.Min(e.min.X, other.min.X), math.Min(e.min.Y, other.min.Y)},
 		max: XY{math.Max(e.max.X, other.max.X), math.Max(e.max.Y, other.max.Y)},
