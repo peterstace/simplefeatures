@@ -83,3 +83,21 @@ func TestEnvelopeIntersects(t *testing.T) {
 		})
 	}
 }
+
+func TestEnvelopeCenter(t *testing.T) {
+	for i, tt := range []struct {
+		env  Envelope
+		want XY
+	}{
+		{env(2, 6, 1, 5), XY{1.5, 5.5}},
+		{env(4, 1, 4, -2), XY{4, -0.5}},
+		{env(-3, 10, -3, 10), XY{-3, 10}},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := tt.env.Center()
+			if got != tt.want {
+				t.Errorf("got=%v want=%v", got, tt.want)
+			}
+		})
+	}
+}

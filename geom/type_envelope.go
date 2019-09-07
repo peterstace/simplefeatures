@@ -26,6 +26,16 @@ func NewEnvelope(first XY, others ...XY) Envelope {
 	return env
 }
 
+// mustEnvelope gets the envelope from a Geometry. If it's not defined (because
+// the geometry is empty), then it panics.
+func mustEnvelope(g Geometry) Envelope {
+	env, ok := g.Envelope()
+	if !ok {
+		panic(fmt.Sprintf("mustEnvelope but envelope not defined: %s", string(g.AsText())))
+	}
+	return env
+}
+
 // EnvelopeFromGeoms returns the smallest envelope that contains all points
 // contained by the provided geometries, provided that at least one non-empty
 // geometry is given. If no non-empty geometries are given, then the returned
@@ -115,12 +125,7 @@ func (e Envelope) Intersects(o Envelope) bool {
 		(e.min.Y <= o.max.Y) && (e.max.Y >= o.min.Y)
 }
 
-// mustEnvelope gets the envelope from a Geometry. If it's not defined (because
-// the geometry is empty), then it panics.
-func mustEnvelope(g Geometry) Envelope {
-	env, ok := g.Envelope()
-	if !ok {
-		panic(fmt.Sprintf("mustEnvelope but envelope not defined: %s", string(g.AsText())))
-	}
-	return env
+// Center returns the center point of the envelope.
+func (e Envelope) Center() XY {
+	return e.min.Add(e.max).Scale(0.5)
 }
