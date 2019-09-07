@@ -21,7 +21,7 @@ func NewEnvelope(first XY, others ...XY) Envelope {
 		max: first,
 	}
 	for _, pt := range others {
-		env = env.Extend(pt)
+		env = env.ExtendToIncludePoint(pt)
 	}
 	return env
 }
@@ -85,9 +85,9 @@ func (e Envelope) Max() XY {
 	return e.max
 }
 
-// Extend returns the smallest envelope that contains all of the points in this
-// envelope along with the provided point.
-func (e Envelope) Extend(point XY) Envelope {
+// ExtendToIncludePoint returns the smallest envelope that contains all of the
+// points in this envelope along with the provided point.
+func (e Envelope) ExtendToIncludePoint(point XY) Envelope {
 	return Envelope{
 		min: XY{math.Min(e.min.X, point.X), math.Min(e.min.Y, point.Y)},
 		max: XY{math.Max(e.max.X, point.X), math.Max(e.max.Y, point.Y)},
