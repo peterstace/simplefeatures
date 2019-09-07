@@ -141,3 +141,20 @@ func (e Envelope) Covers(o Envelope) bool {
 		e.min.X <= o.min.X && e.min.Y <= o.min.Y &&
 		e.max.X >= o.max.X && e.max.Y >= o.max.Y
 }
+
+// Width returns the difference between the maximum and minimum X coordinates
+// of the envelope.
+func (e Envelope) Width() float64 {
+	return e.max.X - e.min.X
+}
+
+// Width returns the difference between the maximum and minimum Y coordinates
+// of the envelope.
+func (e Envelope) Height() float64 {
+	return e.max.Y - e.min.Y
+}
+
+// Area returns the area covered by the envelope.
+func (e Envelope) Area() float64 {
+	return (e.max.X - e.min.X) * (e.max.Y - e.min.Y)
+}

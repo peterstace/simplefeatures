@@ -122,3 +122,30 @@ func TestEnvelopeCovers(t *testing.T) {
 		})
 	}
 }
+
+func TestEnvelopeWidthHeightArea(t *testing.T) {
+	for i, tt := range []struct {
+		env     Envelope
+		w, h, a float64
+	}{
+		{env(0, 1, 7, 4), 7, 3, 21},
+		{env(4, 6, 4, 2), 0, 4, 0},
+		{env(6, 4, 2, 4), 4, 0, 0},
+	} {
+		t.Run("w"+strconv.Itoa(i), func(t *testing.T) {
+			if got := tt.env.Width(); got != tt.w {
+				t.Errorf("got=%v want=%v", got, tt.w)
+			}
+		})
+		t.Run("h"+strconv.Itoa(i), func(t *testing.T) {
+			if got := tt.env.Height(); got != tt.h {
+				t.Errorf("got=%v want=%v", got, tt.h)
+			}
+		})
+		t.Run("a"+strconv.Itoa(i), func(t *testing.T) {
+			if got := tt.env.Area(); got != tt.a {
+				t.Errorf("got=%v want=%v", got, tt.a)
+			}
+		})
+	}
+}
