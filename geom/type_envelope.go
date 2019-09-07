@@ -103,8 +103,8 @@ func (e Envelope) Union(other Envelope) Envelope {
 	}
 }
 
-// IntersectsPoint returns true iff this envelope contains the given point.
-func (e Envelope) IntersectsPoint(p XY) bool {
+// Contains returns true iff this envelope contains the given point.
+func (e Envelope) Contains(p XY) bool {
 	return p.X >= e.min.X && p.X <= e.max.X && p.Y >= e.min.Y && p.Y <= e.max.Y
 }
 

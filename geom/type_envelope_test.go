@@ -8,7 +8,7 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-func TestEnvelopeIntersectsPoint(t *testing.T) {
+func TestEnvelopeContains(t *testing.T) {
 	env := NewEnvelope(
 		XY{12, 4},
 		XY{14, 2},
@@ -18,7 +18,7 @@ func TestEnvelopeIntersectsPoint(t *testing.T) {
 			t.Run(fmt.Sprintf("%d_%d", x, y), func(t *testing.T) {
 				want := x >= 12 && x <= 14 && y >= 2 && y <= 4
 				pt := XY{float64(x), float64(y)}
-				got := env.IntersectsPoint(pt)
+				got := env.Contains(pt)
 				if got != want {
 					t.Errorf("want=%v got=%v", want, got)
 				}
