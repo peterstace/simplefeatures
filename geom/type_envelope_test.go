@@ -2,6 +2,7 @@ package geom_test
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"testing"
 
@@ -150,7 +151,7 @@ func TestEnvelopeWidthHeightArea(t *testing.T) {
 	}
 }
 
-func TestExpandBy(t *testing.T) {
+func TestEnvelopeExpandBy(t *testing.T) {
 	for i, tt := range []struct {
 		in      Envelope
 		x, y    float64
@@ -169,6 +170,31 @@ func TestExpandBy(t *testing.T) {
 			}
 			if ok && got != tt.wantEnv {
 				t.Errorf("got=%v want=%v", got, tt.wantEnv)
+			}
+		})
+	}
+}
+
+func TestEnvelopeDistance(t *testing.T) {
+	for i, tt := range []struct {
+		env1, env2 Envelope
+		want       float64
+	}{
+		{env(0, 0, 2, 2), env(1, 1, 3, 3), 0},
+		{env(0, 0, 1, 1), env(2, 0, 2, 1), 1},
+		{env(0, 0, 1, 1), env(0, 3, 1, 4), 2},
+		{env(0, 0, 1, 1), env(2, 2, 3, 3), math.Sqrt(2)},
+		{env(0, 2, 1, 3), env(2, 0, 3, 1), math.Sqrt(2)},
+		{env(0, 0, 1, 1), env(1, 1, 2, 2), 0},
+		{env(0, 1, 1, 2), env(1, 0, 2, 1), 0},
+		{env(0, 0, 1, 1), env(1, 0, 2, 1), 0},
+		{env(0, 0, 1, 1), env(0, 1, 1, 2), 0},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got1 := tt.env1.Distance(tt.env2)
+			got2 := tt.env2.Distance(tt.env1)
+			if got1 != tt.want || got2 != tt.want {
+				t.Errorf("got1=%v got2=%v want=%v", got1, got2, tt.want)
 			}
 		})
 	}

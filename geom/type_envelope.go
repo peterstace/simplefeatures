@@ -159,6 +159,10 @@ func (e Envelope) Area() float64 {
 	return (e.max.X - e.min.X) * (e.max.Y - e.min.Y)
 }
 
+// ExpandBy calculates an expanded version of this envelope. The expansion
+// amount can be controlled independently in the x and y dimensions (controlled
+// by the x and y parameters). Positive values increase the size of the
+// envelope and negative amounts decrease the size of the envelope.
 func (e Envelope) ExpandBy(x, y float64) (Envelope, bool) {
 	delta := XY{x, y}
 	env := Envelope{
@@ -169,4 +173,31 @@ func (e Envelope) ExpandBy(x, y float64) (Envelope, bool) {
 		return Envelope{}, false
 	}
 	return env, true
+}
+
+// Distance calculates the stortest distance between this envelope and another
+// envelope. If the envelopes intersect with each other, then the returned
+// distance is 0.
+func (e Envelope) Distance(o Envelope) float64 {
+	if e.Intersects(o) {
+		return 0
+	}
+
+	var distX float64
+	if e.max.X < o.min.X {
+		distX = o.min.X - e.max.X
+	}
+	if e.min.X > o.max.X {
+		distX = e.min.X - o.max.X
+	}
+
+	var distY float64
+	if e.max.Y < o.min.Y {
+		distY = o.min.Y - e.max.Y
+	}
+	if e.min.Y > o.max.Y {
+		distY = e.min.Y - o.max.Y
+	}
+
+	return math.Sqrt(distX*distX + distY*distY)
 }
