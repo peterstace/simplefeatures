@@ -5,11 +5,16 @@ import (
 	"math"
 )
 
+// Envelope is an axis-aligned rectangle (also known as an Axis Aligned
+// Bounding Box or Minimum Bounding Rectangle). It usually represents a 2D area
+// with non-zero width and height, but can also represent degenerate cases
+// where the width or height (or both) are zero.
 type Envelope struct {
 	min XY
 	max XY
 }
 
+// NewEnvelope returns the smallest envelope that contains all provided points.
 func NewEnvelope(first XY, others ...XY) Envelope {
 	env := Envelope{
 		min: first,
@@ -21,6 +26,10 @@ func NewEnvelope(first XY, others ...XY) Envelope {
 	return env
 }
 
+// EnvelopeFromGeoms returns the smallest envelope that contains all points
+// contained by the provided geometries, provided that at least one non-empty
+// geometry is given. If no non-empty geometries are given, then the returned
+// flag is set to false.
 func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 	envs := make([]Envelope, 0, len(geoms))
 	for _, g := range geoms {
@@ -66,14 +75,18 @@ func (e Envelope) AsGeometry() Geometry {
 	return g
 }
 
+// Min returns the point in the envelope with the minimum X and Y values.
 func (e Envelope) Min() XY {
 	return e.min
 }
 
+// Max returns the point in the envelope with the maximum X and Y values.
 func (e Envelope) Max() XY {
 	return e.max
 }
 
+// Extend returns the smallest envelope that contains all of the points in this
+// envelope along with the provided point.
 func (e Envelope) Extend(point XY) Envelope {
 	return Envelope{
 		min: XY{math.Min(e.min.X, point.X), math.Min(e.min.Y, point.Y)},
@@ -81,6 +94,8 @@ func (e Envelope) Extend(point XY) Envelope {
 	}
 }
 
+// Union returns the smallest envelope that contains all of the points in this
+// envelope and another envelope.
 func (e Envelope) Union(other Envelope) Envelope {
 	return Envelope{
 		min: XY{math.Min(e.min.X, other.min.X), math.Min(e.min.Y, other.min.Y)},
@@ -88,8 +103,16 @@ func (e Envelope) Union(other Envelope) Envelope {
 	}
 }
 
+// IntersectsPoint returns true iff this envelope contains the given point.
 func (e Envelope) IntersectsPoint(p XY) bool {
 	return p.X >= e.min.X && p.X <= e.max.X && p.Y >= e.min.Y && p.Y <= e.max.Y
+}
+
+// Intersects returns true iff this envelope has any points in common with
+// another envelope.
+func (e Envelope) Intersects(o Envelope) bool {
+	return (e.min.X <= o.max.X) && (e.max.X >= o.min.X) &&
+		(e.min.Y <= o.max.Y) && (e.max.Y >= o.min.Y)
 }
 
 // mustEnvelope gets the envelope from a Geometry. If it's not defined (because
