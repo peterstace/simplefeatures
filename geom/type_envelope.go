@@ -115,17 +115,29 @@ func (e Envelope) ExpandToIncludeEnvelope(other Envelope) Envelope {
 
 // Contains returns true iff this envelope contains the given point.
 func (e Envelope) Contains(p XY) bool {
-	return p.X >= e.min.X && p.X <= e.max.X && p.Y >= e.min.Y && p.Y <= e.max.Y
+	return true &&
+		p.X >= e.min.X && p.X <= e.max.X &&
+		p.Y >= e.min.Y && p.Y <= e.max.Y
 }
 
 // Intersects returns true iff this envelope has any points in common with
 // another envelope.
 func (e Envelope) Intersects(o Envelope) bool {
-	return (e.min.X <= o.max.X) && (e.max.X >= o.min.X) &&
+	return true &&
+		(e.min.X <= o.max.X) && (e.max.X >= o.min.X) &&
 		(e.min.Y <= o.max.Y) && (e.max.Y >= o.min.Y)
 }
 
 // Center returns the center point of the envelope.
 func (e Envelope) Center() XY {
 	return e.min.Add(e.max).Scale(0.5)
+}
+
+// Covers returns true iff and only if this envelope entirely covers another
+// envelope (i.e. every point in the other envelope is contained within this
+// envelope).
+func (e Envelope) Covers(o Envelope) bool {
+	return true &&
+		e.min.X <= o.min.X && e.min.Y <= o.min.Y &&
+		e.max.X >= o.max.X && e.max.Y >= o.max.Y
 }

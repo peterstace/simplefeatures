@@ -101,3 +101,24 @@ func TestEnvelopeCenter(t *testing.T) {
 		})
 	}
 }
+
+func TestEnvelopeCovers(t *testing.T) {
+	for i, tt := range []struct {
+		env1, env2 Envelope
+		want       bool
+	}{
+		{env(0, 0, 1, 1), env(2, 0, 3, 1), false},
+		{env(0, 0, 2, 2), env(1, 1, 3, 3), false},
+		{env(0, 0, 3, 3), env(1, 1, 2, 2), true},
+		{env(0, 0, 2, 2), env(1, 1, 2, 2), true},
+		{env(1, 1, 2, 2), env(0, 0, 3, 3), false},
+		{env(1, 1, 2, 2), env(0, 0, 2, 2), false},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := tt.env1.Covers(tt.env2)
+			if got != tt.want {
+				t.Errorf("got=%v want=%v", got, tt.want)
+			}
+		})
+	}
+}
