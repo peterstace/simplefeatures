@@ -158,3 +158,15 @@ func (e Envelope) Height() float64 {
 func (e Envelope) Area() float64 {
 	return (e.max.X - e.min.X) * (e.max.Y - e.min.Y)
 }
+
+func (e Envelope) ExpandBy(x, y float64) (Envelope, bool) {
+	delta := XY{x, y}
+	env := Envelope{
+		min: e.min.Sub(delta),
+		max: e.max.Add(delta),
+	}
+	if env.min.X > env.max.X || env.min.Y > env.max.Y {
+		return Envelope{}, false
+	}
+	return env, true
+}
