@@ -199,7 +199,7 @@ func (m MultiPolygon) Envelope() (Envelope, bool) {
 	}
 	env := mustEnvelope(m.polys[0])
 	for _, poly := range m.polys[1:] {
-		env = env.Union(mustEnvelope(poly))
+		env = env.ExpandToIncludeEnvelope(mustEnvelope(poly))
 	}
 	return env, true
 }
