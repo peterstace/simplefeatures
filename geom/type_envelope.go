@@ -159,10 +159,12 @@ func (e Envelope) Area() float64 {
 	return (e.max.X - e.min.X) * (e.max.Y - e.min.Y)
 }
 
-// ExpandBy calculates an expanded version of this envelope. The expansion
-// amount can be controlled independently in the x and y dimensions (controlled
-// by the x and y parameters). Positive values increase the size of the
-// envelope and negative amounts decrease the size of the envelope.
+// ExpandBy calculates a new version of this envelope that is expanded in the x
+// and y dimensions. Both the minimum and maximum points in the envelope are
+// expanded by the supplied x and y amounts. Positive values increase the size
+// of the envelope and negative amounts decrease the size of the envelope. If a
+// decrease in envelope size would result in an invalid envelope (where min is
+// greater than max), then false is returned and no envelope is calculated.
 func (e Envelope) ExpandBy(x, y float64) (Envelope, bool) {
 	delta := XY{x, y}
 	env := Envelope{
