@@ -182,22 +182,7 @@ func (e Envelope) Distance(o Envelope) float64 {
 	if e.Intersects(o) {
 		return 0
 	}
-
-	var distX float64
-	if e.max.X < o.min.X {
-		distX = o.min.X - e.max.X
-	}
-	if e.min.X > o.max.X {
-		distX = e.min.X - o.max.X
-	}
-
-	var distY float64
-	if e.max.Y < o.min.Y {
-		distY = o.min.Y - e.max.Y
-	}
-	if e.min.Y > o.max.Y {
-		distY = e.min.Y - o.max.Y
-	}
-
-	return math.Sqrt(distX*distX + distY*distY)
+	dx := math.Max(0, math.Max(o.min.X-e.max.X, e.min.X-o.max.X))
+	dy := math.Max(0, math.Max(o.min.Y-e.max.Y, e.min.Y-o.max.Y))
+	return math.Sqrt(dx*dx + dy*dy)
 }
