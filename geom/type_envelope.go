@@ -179,9 +179,6 @@ func (e Envelope) ExpandBy(x, y float64) (Envelope, bool) {
 // envelope. If the envelopes intersect with each other, then the returned
 // distance is 0.
 func (e Envelope) Distance(o Envelope) float64 {
-	if e.Intersects(o) {
-		return 0
-	}
 	dx := math.Max(0, math.Max(o.min.X-e.max.X, e.min.X-o.max.X))
 	dy := math.Max(0, math.Max(o.min.Y-e.max.Y, e.min.Y-o.max.Y))
 	return math.Sqrt(dx*dx + dy*dy)
