@@ -491,11 +491,8 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 
 func hasIntersectionPointWithLine(point Point, line Line) (intersects bool, dimension int) {
 	// Speed is O(1) using a bounding box check then a point-on-line check.
-	env, ok := line.Envelope()
-	if !ok {
-		panic("line must have envelope")
-	}
-	if !env.IntersectsPoint(point.coords.XY) {
+	env := mustEnvelope(line)
+	if !env.Contains(point.coords.XY) {
 		return false, 0 // No intersection
 	}
 	lhs := (point.coords.X - line.a.X) * (line.b.Y - line.a.Y)
