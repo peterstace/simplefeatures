@@ -111,7 +111,7 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 	}
 	env := NewEnvelope(m.pts[0].coords.XY)
 	for _, pt := range m.pts[1:] {
-		env = env.Extend(pt.coords.XY)
+		env = env.ExtendToIncludePoint(pt.coords.XY)
 	}
 	return env, true
 }

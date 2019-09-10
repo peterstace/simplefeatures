@@ -153,7 +153,7 @@ func (s LineString) Equals(other Geometry) bool {
 func (s LineString) Envelope() (Envelope, bool) {
 	env := NewEnvelope(s.lines[0].a.XY)
 	for _, line := range s.lines {
-		env = env.Extend(line.b.XY)
+		env = env.ExtendToIncludePoint(line.b.XY)
 	}
 	return env, true
 }
