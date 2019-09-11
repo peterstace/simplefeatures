@@ -35,13 +35,6 @@ func TestEqualsExact(t *testing.T) {
 		"ls_q": "LINESTRING(1 0,0 0,0 1,1 0)",
 		"ls_r": "LINESTRING(0 1,1 0,0 0,0 1)",
 
-		"lr_a": "LINEARRING(0 0,0 1,1 1,1 0,0 0)",
-		"lr_b": "LINEARRING(0 0,1 0,1 1,0 1,0 0)",
-		"lr_c": "LINESTRING(0 0,1 0,1 1,0 1,0 0)",
-
-		"lr_d": "LINEARRING(1 1,0 1,1 0,1 1)",
-		"lr_e": "LINEARRING(1 1,0 1,1 0.1,1 1)",
-
 		"p_empty": "POLYGON EMPTY",
 		"p_a":     "POLYGON((0 0,0 1,1 0,0 0))",
 		"p_b":     "POLYGON((0 0,1 0,0 1,0 0))",
@@ -125,9 +118,6 @@ func TestEqualsExact(t *testing.T) {
 
 		{"ls_a", "ls_b"},
 
-		{"lr_b", "lr_c"},
-		{"lr_d", "lr_e"},
-
 		{"mp_1_a", "mp_1_b"},
 		{"mp_2_a", "mp_2_b"},
 
@@ -155,10 +145,6 @@ func TestEqualsExact(t *testing.T) {
 		{"ls_p", "ls_q"},
 		{"ls_p", "ls_r"},
 		{"ls_q", "ls_r"},
-
-		{"lr_a", "lr_b"},
-		{"lr_b", "lr_c"},
-		{"lr_c", "lr_a"},
 
 		{"mp_2_c", "mp_2_d"},
 

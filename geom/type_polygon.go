@@ -11,7 +11,8 @@ import (
 //
 // Its assertions are:
 //
-// 1. The out ring and holes must be valid LinearRings.
+// 1. The outer ring and holes must be valid linear rings (i.e. be simple and
+//    closed LineStrings).
 //
 // 2. Each pair of rings must only intersect at a single point.
 //
@@ -20,60 +21,72 @@ import (
 // 4. The holes must be fully inside the outer ring.
 //
 type Polygon struct {
-	outer LinearRing
-	holes []LinearRing
+	outer LineString
+	holes []LineString
 }
 
 // NewPolygon creates a polygon given its outer and inner rings. No rings may
 // cross each other, and can only intersect each with each other at a point.
-func NewPolygon(outer LinearRing, holes []LinearRing, opts ...ConstructorOption) (Polygon, error) {
-	if doExpensiveValidations(opts) {
-		allRings := append(holes, outer)
-		nextInterVert := len(allRings)
-		interVerts := make(map[XY]int)
-		graph := newGraph()
-
-		// Rings may intersect, but only at a single point.
-		for i := 0; i < len(allRings); i++ {
-			for j := i + 1; j < len(allRings); j++ {
-				inter := allRings[i].Intersection(allRings[j])
-				env, has := inter.Envelope()
-				if !has {
-					continue // no intersection
-				}
-				if !env.Min().Equals(env.Max()) {
-					return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
-				}
-
-				interVert, ok := interVerts[env.Min()]
-				if !ok {
-					interVert = nextInterVert
-					nextInterVert++
-					interVerts[env.Min()] = interVert
-				}
-				graph.addEdge(interVert, i)
-				graph.addEdge(interVert, j)
-			}
+func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption) (Polygon, error) {
+	allRings := append(holes, outer)
+	for _, r := range allRings {
+		if doCheapValidations(opts) && !r.IsClosed() {
+			return Polygon{}, errors.New("polygon rings must be closed")
 		}
-
-		// All inner rings must be inside the outer ring.
-		for _, hole := range holes {
-			for _, line := range hole.ls.lines {
-				if pointRingSide(line.a.XY, outer) == exterior {
-					return Polygon{}, errors.New("hole must be inside outer ring")
-				}
-			}
-		}
-
-		// Connectedness check: a graph is created where the intersections and
-		// rings are modelled as vertices. Edges are added to the graph between an
-		// intersection vertex and a ring vertex if the ring participates in that
-		// intersection. The interior of the polygon is connected iff the graph
-		// does not contain a cycle.
-		if graph.hasCycle() {
-			return Polygon{}, errors.New("polygon interiors must be connected")
+		if doExpensiveValidations(opts) && !r.IsSimple() {
+			return Polygon{}, errors.New("polygon rings must be simple")
 		}
 	}
+
+	if !doExpensiveValidations(opts) {
+		return Polygon{outer, holes}, nil
+	}
+
+	nextInterVert := len(allRings)
+	interVerts := make(map[XY]int)
+	graph := newGraph()
+
+	// Rings may intersect, but only at a single point.
+	for i := 0; i < len(allRings); i++ {
+		for j := i + 1; j < len(allRings); j++ {
+			inter := allRings[i].Intersection(allRings[j])
+			env, has := inter.Envelope()
+			if !has {
+				continue // no intersection
+			}
+			if !env.Min().Equals(env.Max()) {
+				return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
+			}
+
+			interVert, ok := interVerts[env.Min()]
+			if !ok {
+				interVert = nextInterVert
+				nextInterVert++
+				interVerts[env.Min()] = interVert
+			}
+			graph.addEdge(interVert, i)
+			graph.addEdge(interVert, j)
+		}
+	}
+
+	// All inner rings must be inside the outer ring.
+	for _, hole := range holes {
+		for _, line := range hole.lines {
+			if pointRingSide(line.a.XY, outer) == exterior {
+				return Polygon{}, errors.New("hole must be inside outer ring")
+			}
+		}
+	}
+
+	// Connectedness check: a graph is created where the intersections and
+	// rings are modelled as vertices. Edges are added to the graph between an
+	// intersection vertex and a ring vertex if the ring participates in that
+	// intersection. The interior of the polygon is connected iff the graph
+	// does not contain a cycle.
+	if graph.hasCycle() {
+		return Polygon{}, errors.New("polygon interiors must be connected")
+	}
+
 	return Polygon{outer: outer, holes: holes}, nil
 }
 
@@ -84,23 +97,19 @@ func NewPolygonC(coords [][]Coordinates, opts ...ConstructorOption) (Polygon, er
 	if len(coords) == 0 {
 		return Polygon{}, errors.New("Polygon must have an outer ring")
 	}
-	outer, err := NewLinearRingC(coords[0], opts...)
-	if err != nil {
-		return Polygon{}, err
-	}
-	var holes []LinearRing
-	for _, holeCoords := range coords[1:] {
-		hole, err := NewLinearRingC(holeCoords, opts...)
+	rings := make([]LineString, len(coords))
+	for i := range rings {
+		var err error
+		rings[i], err = NewLineStringC(coords[i], opts...)
 		if err != nil {
 			return Polygon{}, err
 		}
-		holes = append(holes, hole)
 	}
-	return NewPolygon(outer, holes, opts...)
+	return NewPolygon(rings[0], rings[1:], opts...)
 }
 
 // ExteriorRing gives the exterior ring of the polygon boundary.
-func (p Polygon) ExteriorRing() LinearRing {
+func (p Polygon) ExteriorRing() LineString {
 	return p.outer
 }
 
@@ -112,7 +121,7 @@ func (p Polygon) NumInteriorRings() int {
 // InteriorRingN gives the nth (zero indexed) interior ring in the polygon
 // boundary. It will panic if n is out of bounds with respect to the number of
 // interior rings.
-func (p Polygon) InteriorRingN(n int) LinearRing {
+func (p Polygon) InteriorRingN(n int) LineString {
 	return p.holes[n]
 }
 
@@ -127,10 +136,10 @@ func (p Polygon) AppendWKT(dst []byte) []byte {
 
 func (p Polygon) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
-	dst = p.outer.ls.appendWKTBody(dst)
+	dst = p.outer.appendWKTBody(dst)
 	for _, h := range p.holes {
 		dst = append(dst, ',')
-		dst = h.ls.appendWKTBody(dst)
+		dst = h.appendWKTBody(dst)
 	}
 	return append(dst, ')')
 }
@@ -165,8 +174,8 @@ func (p Polygon) Envelope() (Envelope, bool) {
 	return p.outer.Envelope()
 }
 
-func (p Polygon) rings() []LinearRing {
-	rings := make([]LinearRing, 1+len(p.holes))
+func (p Polygon) rings() []LineString {
+	rings := make([]LineString, 1+len(p.holes))
 	rings[0] = p.outer
 	for i, h := range p.holes {
 		rings[1+i] = h
@@ -176,12 +185,12 @@ func (p Polygon) rings() []LinearRing {
 
 func (p Polygon) Boundary() Geometry {
 	if len(p.holes) == 0 {
-		return p.outer.ls
+		return p.outer
 	}
 	bounds := make([]LineString, 1+len(p.holes))
-	bounds[0] = p.outer.ls
+	bounds[0] = p.outer
 	for i, h := range p.holes {
-		bounds[1+i] = h.ls
+		bounds[1+i] = h
 	}
 	return NewMultiLineString(bounds)
 }

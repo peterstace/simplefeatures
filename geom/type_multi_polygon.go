@@ -56,13 +56,13 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 		// interior of the polygons intersect.
 		allPts := make(map[XY]struct{})
 		for _, r1 := range p1.rings() {
-			for _, line1 := range r1.ls.lines {
+			for _, line1 := range r1.lines {
 				// Collect boundary control points and intersection points.
 				linePts := make(map[XY]struct{})
 				linePts[line1.a.XY] = struct{}{}
 				linePts[line1.b.XY] = struct{}{}
 				for _, r2 := range p2.rings() {
-					for _, line2 := range r2.ls.lines {
+					for _, line2 := range r2.lines {
 						env, ok := line1.Intersection(line2).Envelope()
 						if !ok {
 							continue
@@ -215,9 +215,9 @@ func (m MultiPolygon) Boundary() Geometry {
 	}
 	var bounds []LineString
 	for _, poly := range m.polys {
-		bounds = append(bounds, poly.outer.ls)
+		bounds = append(bounds, poly.outer)
 		for _, inner := range poly.holes {
-			bounds = append(bounds, inner.ls)
+			bounds = append(bounds, inner)
 		}
 	}
 	return NewMultiLineString(bounds)

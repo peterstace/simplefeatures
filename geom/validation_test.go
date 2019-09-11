@@ -43,20 +43,6 @@ func TestLineStringValidation(t *testing.T) {
 	}
 }
 
-func TestLinearRingValidation(t *testing.T) {
-	for i, pts := range [][]Coordinates{
-		{xy(0, 0), xy(1, 1), xy(0, 1)},                     // not closed
-		{xy(0, 0), xy(1, 1), xy(0, 1), xy(1, 0), xy(0, 0)}, // not simple
-	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := NewLinearRingC(pts)
-			if err == nil {
-				t.Error("expected error")
-			}
-		})
-	}
-}
-
 func TestPolygonValidation(t *testing.T) {
 	for i, wkt := range []string{
 		"POLYGON((0 0,1 0,1 1,0 1,0 0))",
@@ -83,6 +69,12 @@ func TestPolygonValidation(t *testing.T) {
 		})
 	}
 	for i, wkt := range []string{
+		// not closed
+		"POLYGON((0 0,1 1,0 1))",
+
+		// not simple
+		"POLYGON((0 0,1 1,0 1,1 0,0 0))",
+
 		// intersect at a line
 		"POLYGON((0 0,3 0,3 3,0 3,0 0),(0 1,1 1,1 2,0 2,0 1))",
 

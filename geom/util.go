@@ -19,18 +19,16 @@ func rank(g Geometry) int {
 		return 3
 	case LineString:
 		return 4
-	case LinearRing:
-		return 5
 	case Polygon:
-		return 6
+		return 5
 	case MultiPoint:
-		return 7
+		return 6
 	case MultiLineString:
-		return 8
+		return 7
 	case MultiPolygon:
-		return 9
+		return 8
 	case GeometryCollection:
-		return 10
+		return 9
 	default:
 		panic(fmt.Sprintf("unknown geometry type: %T", g))
 	}

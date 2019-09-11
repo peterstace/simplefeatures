@@ -113,17 +113,6 @@ func TestIntersection(t *testing.T) {
 		// LineString/LineString -- most test cases covered by LR/LR
 		{"LINESTRING(0 0,1 0,1 1,0 1)", "LINESTRING(1 1,2 1,2 2,1 2)", "POINT(1 1)"},
 
-		// LineString/LinearRing -- most test cases covered by LR/LR
-		{"LINESTRING(0 0,1 0,1 1,0 1)", "LINEARRING(1 1,2 1,2 2,1 2,1 1)", "POINT(1 1)"},
-
-		// LinearRing/LinearRing
-		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(2 2,3 2,3 3,2 3,2 2)", "GEOMETRYCOLLECTION EMPTY"},
-		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(1 1,2 1,2 2,1 2,1 1)", "POINT(1 1)"},
-		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(1 0,2 0,2 1,1 1,1 0)", "LINESTRING(1 0,1 1)"},
-		{"LINEARRING(0 0,1 0,0 1,0 0)", "LINEARRING(1 0,1 1,0 1,1 0)", "LINESTRING(0 1,1 0)"},
-		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(0.5 0.5,1.5 0.5,1.5 1.5,0.5 1.5,0.5 0.5)", "MULTIPOINT((0.5 1),(1 0.5))"},
-		{"LINEARRING(0 0,1 0,1 1,0 1,0 0)", "LINEARRING(1 0,2 0,2 1,1 1,1.5 0.5,1 0.5,1 0)", "GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(1 0,1 0.5))"},
-
 		// MultiPoint/MultiPoint
 		{"MULTIPOINT EMPTY", "MULTIPOINT EMPTY", "MULTIPOINT EMPTY"},
 		{"MULTIPOINT EMPTY", "MULTIPOINT((1 2))", "MULTIPOINT EMPTY"},
@@ -156,7 +145,6 @@ func TestIntersection(t *testing.T) {
 
 		// MultiLineString with other lines  -- most test cases covered by LR/LR
 		{"MULTILINESTRING((0 0,1 0,1 1,0 1))", "LINESTRING(1 1,2 1,2 2,1 2,1 1)", "POINT(1 1)"},
-		{"MULTILINESTRING((0 0,1 0,1 1,0 1))", "LINEARRING(1 1,2 1,2 2,1 2,1 1)", "POINT(1 1)"},
 		{"MULTILINESTRING((0 0,1 0,1 1,0 1))", "MULTILINESTRING((1 1,2 1,2 2,1 2,1 1))", "POINT(1 1)"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {

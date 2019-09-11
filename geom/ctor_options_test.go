@@ -11,11 +11,11 @@ import (
 func TestDisableValidation(t *testing.T) {
 	for i, wkt := range []string{
 		// Point -- has no validations
-		"LINESTRING(1 2,1 2)",                 // same point
-		"LINESTRING(1 2,1 2,1 2)",             // same point
-		"LINEARRING(1 2,1 2,1 2)",             // same point
-		"LINEARRING(0 0,0 1,1 0)",             // not closed
-		"LINEARRING(0 0,2 0,2 1,1 0,0 1,0 0)", // not simple
+		"LINESTRING(1 2,1 2)",                // same point
+		"LINESTRING(1 2,1 2,1 2)",            // same point
+		"POLYGON((1 2,1 2,1 2))",             // same point
+		"POLYGON((0 0,0 1,1 0))",             // not closed
+		"POLYGON((0 0,2 0,2 1,1 0,0 1,0 0))", // not simple
 		// Exterior ring inside interior ring
 		`POLYGON(
 			(5 0,0 6,6 6,6 0,0 0),
