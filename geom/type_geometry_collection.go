@@ -60,6 +60,11 @@ func (c GeometryCollection) Intersection(g Geometry) Geometry {
 	return intersection(c, g)
 }
 
+func (c GeometryCollection) Intersects(g Geometry) bool {
+	has, _ := hasIntersection(c, g)
+	return has
+}
+
 func (c GeometryCollection) IsEmpty() bool {
 	for _, g := range c.geoms {
 		if !g.IsEmpty() {

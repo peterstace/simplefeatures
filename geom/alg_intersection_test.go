@@ -174,6 +174,10 @@ func TestIntersection(t *testing.T) {
 				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got.AsText())
 				}
+				intersects := in1g.Intersects(in2g)
+				if intersects == got.IsEmpty() {
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v\nintersects: %v", tt.in1, tt.in2, tt.out, got, intersects)
+				}
 			})
 
 			if in1g.IsEmpty() && in2g.IsEmpty() {
@@ -187,6 +191,10 @@ func TestIntersection(t *testing.T) {
 				got := in2g.Intersection(in1g)
 				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got.AsText())
+				}
+				intersects := in2g.Intersects(in1g)
+				if intersects == got.IsEmpty() {
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v\nintersects: %v", tt.in1, tt.in2, tt.out, got, intersects)
 				}
 			})
 		})
