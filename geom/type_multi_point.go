@@ -88,6 +88,11 @@ func (m MultiPoint) Intersection(g Geometry) Geometry {
 	return intersection(m, g)
 }
 
+func (m MultiPoint) Intersects(g Geometry) bool {
+	has, _ := hasIntersection(m, g)
+	return has
+}
+
 func (m MultiPoint) IsEmpty() bool {
 	return len(m.pts) == 0
 }
@@ -106,7 +111,7 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 	}
 	env := NewEnvelope(m.pts[0].coords.XY)
 	for _, pt := range m.pts[1:] {
-		env = env.Extend(pt.coords.XY)
+		env = env.ExtendToIncludePoint(pt.coords.XY)
 	}
 	return env, true
 }

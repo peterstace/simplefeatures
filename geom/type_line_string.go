@@ -133,6 +133,11 @@ func (s LineString) Intersection(g Geometry) Geometry {
 	return intersection(s, g)
 }
 
+func (s LineString) Intersects(g Geometry) bool {
+	has, _ := hasIntersection(s, g)
+	return has
+}
+
 func (s LineString) IsEmpty() bool {
 	return false
 }
@@ -148,7 +153,7 @@ func (s LineString) Equals(other Geometry) bool {
 func (s LineString) Envelope() (Envelope, bool) {
 	env := NewEnvelope(s.lines[0].a.XY)
 	for _, line := range s.lines {
-		env = env.Extend(line.b.XY)
+		env = env.ExtendToIncludePoint(line.b.XY)
 	}
 	return env, true
 }

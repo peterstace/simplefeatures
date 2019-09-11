@@ -96,6 +96,11 @@ func (m MultiLineString) Intersection(g Geometry) Geometry {
 	return intersection(m, g)
 }
 
+func (m MultiLineString) Intersects(g Geometry) bool {
+	has, _ := hasIntersection(m, g)
+	return has
+}
+
 func (m MultiLineString) IsEmpty() bool {
 	return len(m.lines) == 0
 }
@@ -115,7 +120,7 @@ func (m MultiLineString) Envelope() (Envelope, bool) {
 	env := mustEnvelope(m.lines[0])
 	for _, line := range m.lines[1:] {
 		e := mustEnvelope(line)
-		env = env.Union(e)
+		env = env.ExpandToIncludeEnvelope(e)
 	}
 	return env, true
 }

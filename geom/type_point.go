@@ -64,6 +64,11 @@ func (p Point) Intersection(g Geometry) Geometry {
 	return intersection(p, g)
 }
 
+func (p Point) Intersects(g Geometry) bool {
+	has, _ := hasIntersection(p, g)
+	return has
+}
+
 func (p Point) IsEmpty() bool {
 	return false
 }
