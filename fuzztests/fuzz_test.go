@@ -44,6 +44,7 @@ func TestFuzz(t *testing.T) {
 			CheckBoundary(t, pg, g)
 			CheckConvexHull(t, pg, g)
 			CheckIsValid(t, pg, g)
+			CheckIsRing(t, pg, g)
 		})
 	}
 

@@ -157,3 +157,9 @@ func (n Line) IsValid() bool {
 	_, err := NewLineC(n.a, n.b)
 	return err == nil
 }
+
+// IsRing always returns false for Lines because they are never rings. In
+// particular, they are never closed because they only contain two points.
+func (n Line) IsRing() bool {
+	return false
+}

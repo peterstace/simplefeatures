@@ -413,3 +413,24 @@ func TestTransformXY(t *testing.T) {
 		})
 	}
 }
+
+func TestIsRing(t *testing.T) {
+	for i, tt := range []struct {
+		wkt  string
+		want bool
+	}{
+		{"LINESTRING(0 1,2 3)", false},
+		{"LINESTRING(0 0,0 1,1 0,0 0)", true},
+		{"LINESTRING(0 0,1 1,1 0,0 1,0 0)", false}, // not simple
+		{"LINESTRING(0 0,1 0,1 1,0 1)", false},     // not closed
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g := geomFromWKT(t, tt.wkt)
+			got := g.(interface{ IsRing() bool }).IsRing()
+			if got != tt.want {
+				t.Logf("WKT: %v", g.AsText())
+				t.Errorf("got=%v want=%v", got, tt.want)
+			}
+		})
+	}
+}
