@@ -323,12 +323,12 @@ outer:
 	}
 }
 
-func hasIntersection(g1, g2 Geometry) (intersects bool, dimension int) {
+func hasIntersection(g1, g2 Geometry) (intersects bool, dimension int, err error) {
 	if g2.IsEmpty() {
-		return false, 0 // No intersection
+		return false, 0, nil // No intersection
 	}
 	if g1.IsEmpty() {
-		return false, 0 // No intersection
+		return false, 0, nil // No intersection
 	}
 
 	if rank(g1) > rank(g2) {
@@ -385,10 +385,10 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, dimension int) {
 		}
 	}
 
-	panic(fmt.Sprintf("not implemented: hasIntersection with %T and %T", g1, g2))
+	return false, 0, fmt.Errorf("not implemented: hasIntersection with %T and %T", g1, g2)
 }
 
-func hasIntersectionLineWithLine(n1, n2 Line) (intersects bool, dimension int) {
+func hasIntersectionLineWithLine(n1, n2 Line) (intersects bool, dimension int, err error) {
 	// Speed is O(1), but there are multiplications involved.
 	a := n1.a.XY
 	b := n1.b.XY
@@ -401,12 +401,12 @@ func hasIntersectionLineWithLine(n1, n2 Line) (intersects bool, dimension int) {
 	o4 := orientation(c, d, b)
 
 	if o1 != o2 && o3 != o4 {
-		return true, 0 // Point has dimension 0
+		return true, 0, nil // Point has dimension 0
 	}
 
 	if o1 == collinear && o2 == collinear {
 		if (!onSegment(a, b, c) && !onSegment(a, b, d)) && (!onSegment(c, d, a) && !onSegment(c, d, b)) {
-			return false, 0 // No intersection
+			return false, 0, nil // No intersection
 		}
 
 		// ---------------------
@@ -418,29 +418,33 @@ func hasIntersectionLineWithLine(n1, n2 Line) (intersects bool, dimension int) {
 		ltl := leftmostThenLowestIndex(pts)
 		pts = append(pts[:ltl], pts[ltl+1:]...)
 		if pts[0].Equals(pts[1]) {
-			return true, 0 // Point has dimension 0
+			return true, 0, nil // Point has dimension 0
 		}
 		//----------------------
 
-		return true, 1 // Line has dimension 1
+		return true, 1, nil // Line has dimension 1
 	}
 
-	return false, 0 // No intersection
+	return false, 0, nil // No intersection
 }
 
-func hasIntersectionLineWithMultiPoint(ln Line, mp MultiPoint) (intersects bool, dimension int) {
+func hasIntersectionLineWithMultiPoint(ln Line, mp MultiPoint) (intersects bool, dimension int, err error) {
 	// Worst case speed is O(n), n is the number of points.
 	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
-		if intersects, _ := hasIntersectionPointWithLine(pt, ln); intersects {
-			return true, 0 // Point and MultiPoint both have dimension 0
+		intersects, _, err := hasIntersectionPointWithLine(pt, ln)
+		if err != nil {
+			return false, 0, err
+		}
+		if intersects {
+			return true, 0, nil // Point and MultiPoint both have dimension 0
 		}
 	}
-	return false, 0 // No intersection
+	return false, 0, nil // No intersection
 }
 
-func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (intersects bool, dimension int) {
+func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (intersects bool, dimension int, err error) {
 	// Speed is O(n * m) where n, m are the number of lines in each input.
 	// This may be the best case, because we must visit all combinations in case
 	// any colinear line overlaps exist which would raise the dimensionality.
@@ -448,7 +452,11 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 		for _, ln1 := range ls1.lines {
 			for _, ls2 := range mls2.lines {
 				for _, ln2 := range ls2.lines {
-					if inter, dim := hasIntersectionLineWithLine(ln1, ln2); inter {
+					inter, dim, err := hasIntersectionLineWithLine(ln1, ln2)
+					if err != nil {
+						return false, 0, err
+					}
+					if inter {
 						intersects = true
 						if dim > dimension {
 							dimension = dim
@@ -458,86 +466,98 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 			}
 		}
 	}
-	return intersects, dimension
+	return intersects, dimension, nil
 }
 
-func hasIntersectionPointWithLine(point Point, line Line) (intersects bool, dimension int) {
+func hasIntersectionPointWithLine(point Point, line Line) (intersects bool, dimension int, err error) {
 	// Speed is O(1) using a bounding box check then a point-on-line check.
 	env := mustEnvelope(line)
 	if !env.Contains(point.coords.XY) {
-		return false, 0 // No intersection
+		return false, 0, nil // No intersection
 	}
 	lhs := (point.coords.X - line.a.X) * (line.b.Y - line.a.Y)
 	rhs := (point.coords.Y - line.a.Y) * (line.b.X - line.a.X)
 	if lhs == rhs {
-		return true, 0 // Point has dimension 0
+		return true, 0, nil // Point has dimension 0
 	}
-	return false, 0 // No intersection
+	return false, 0, nil // No intersection
 }
 
-func hasIntersectionPointWithLineString(pt Point, ls LineString) (intersects bool, dimension int) {
+func hasIntersectionPointWithLineString(pt Point, ls LineString) (intersects bool, dimension int, err error) {
 	// Worst case speed is O(n), n is the number of lines.
 	for _, ln := range ls.lines {
-		if intersects, dimension = hasIntersectionPointWithLine(pt, ln); intersects {
-			return true, 0 // Point has dimension 0
+		intersects, dimension, err = hasIntersectionPointWithLine(pt, ln)
+		if err != nil {
+			return false, 0, err
+		}
+		if intersects {
+			return true, 0, nil // Point has dimension 0
 		}
 	}
-	return false, 0 // No intersection
+	return false, 0, nil // No intersection
 }
 
-func hasIntersectionMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (intersects bool, dimension int) {
+func hasIntersectionMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (intersects bool, dimension int, err error) {
 	// To do: improve the speed efficiency, it's currently O(n1*n2)
 	for _, pt := range mp1.pts {
-		if intersects, dimension = hasIntersectionPointWithMultiPoint(pt, mp2); intersects {
-			return true, 0 // Point and MultiPoint both have dimension 0
+		intersects, dimension, err = hasIntersectionPointWithMultiPoint(pt, mp2)
+		if err != nil {
+			return false, 0, err
+		}
+		if intersects {
+			return true, 0, nil // Point and MultiPoint both have dimension 0
 		}
 	}
-	return false, 0 // No intersection
+	return false, 0, nil // No intersection
 }
 
-func hasIntersectionPointWithMultiPoint(point Point, mp MultiPoint) (intersects bool, dimension int) {
+func hasIntersectionPointWithMultiPoint(point Point, mp MultiPoint) (intersects bool, dimension int, err error) {
 	// Worst case speed is O(n) but that's optimal because mp is not sorted.
 	for _, pt := range mp.pts {
 		if pt.Equals(point) {
-			return true, 0 // Point and MultiPoint both have dimension 0
+			return true, 0, nil // Point and MultiPoint both have dimension 0
 		}
 	}
-	return false, 0 // No intersection
+	return false, 0, nil // No intersection
 }
 
-func hasIntersectionPointWithPoint(pt1, pt2 Point) (intersects bool, dimension int) {
+func hasIntersectionPointWithPoint(pt1, pt2 Point) (intersects bool, dimension int, err error) {
 	// Speed is O(1).
 	if pt1.Equals(pt2) {
-		return true, 0 // Point has dimension 0
+		return true, 0, nil // Point has dimension 0
 	}
-	return false, 0 // No intersection
+	return false, 0, nil // No intersection
 }
 
-func hasIntersectionPointWithPolygon(pt Point, p Polygon) (intersects bool, dimension int) {
+func hasIntersectionPointWithPolygon(pt Point, p Polygon) (intersects bool, dimension int, err error) {
 	// Speed is O(m), m is the number of holes in the polygon.
 	m := p.NumInteriorRings()
 
 	if pointRingSide(pt.XY(), p.ExteriorRing()) == exterior {
-		return false, 0 // No intersection (outside the exterior)
+		return false, 0, nil // No intersection (outside the exterior)
 	}
 	for j := 0; j < m; j++ {
 		ring := p.InteriorRingN(j)
 		if pointRingSide(pt.XY(), ring) == interior {
-			return false, 0 // No intersection (inside a hole)
+			return false, 0, nil // No intersection (inside a hole)
 		}
 	}
-	return true, 0 // Point has dimension 0
+	return true, 0, nil // Point has dimension 0
 }
 
-func hasIntersectionMultiPointWithPolygon(mp MultiPoint, p Polygon) (intersects bool, dimension int) {
+func hasIntersectionMultiPointWithPolygon(mp MultiPoint, p Polygon) (intersects bool, dimension int, err error) {
 	// Speed is O(n*m), n is the number of points, m is the number of holes in the polygon.
 	n := mp.NumPoints()
 
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
-		if intersects, dimension = hasIntersectionPointWithPolygon(pt, p); intersects {
-			return // Point and MultiPoint have dimension 0
+		intersects, dimension, err = hasIntersectionPointWithPolygon(pt, p)
+		if err != nil {
+			return false, 0, err
+		}
+		if intersects {
+			return true, dimension, nil // Point and MultiPoint have dimension 0
 		}
 	}
-	return false, 0 // No intersection
+	return false, 0, nil // No intersection
 }

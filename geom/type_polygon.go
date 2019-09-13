@@ -153,9 +153,9 @@ func (p Polygon) Intersection(g Geometry) (Geometry, error) {
 	return intersection(p, g)
 }
 
-func (p Polygon) Intersects(g Geometry) bool {
-	has, _ := hasIntersection(p, g)
-	return has
+func (p Polygon) Intersects(g Geometry) (bool, error) {
+	has, _, err := hasIntersection(p, g)
+	return has, err
 }
 
 func (p Polygon) IsEmpty() bool {

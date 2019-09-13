@@ -133,9 +133,9 @@ func (s LineString) Intersection(g Geometry) (Geometry, error) {
 	return intersection(s, g)
 }
 
-func (s LineString) Intersects(g Geometry) bool {
-	has, _ := hasIntersection(s, g)
-	return has
+func (s LineString) Intersects(g Geometry) (bool, error) {
+	has, _, err := hasIntersection(s, g)
+	return has, err
 }
 
 func (s LineString) IsEmpty() bool {

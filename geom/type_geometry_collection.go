@@ -60,9 +60,9 @@ func (c GeometryCollection) Intersection(g Geometry) (Geometry, error) {
 	return intersection(c, g)
 }
 
-func (c GeometryCollection) Intersects(g Geometry) bool {
-	has, _ := hasIntersection(c, g)
-	return has
+func (c GeometryCollection) Intersects(g Geometry) (bool, error) {
+	has, _, err := hasIntersection(c, g)
+	return has, err
 }
 
 func (c GeometryCollection) IsEmpty() bool {

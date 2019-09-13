@@ -177,9 +177,9 @@ func (m MultiPolygon) IsSimple() bool {
 	return true
 }
 
-func (m MultiPolygon) Intersects(g Geometry) bool {
-	has, _ := hasIntersection(m, g)
-	return has
+func (m MultiPolygon) Intersects(g Geometry) (bool, error) {
+	has, _, err := hasIntersection(m, g)
+	return has, err
 }
 
 func (m MultiPolygon) Intersection(g Geometry) (Geometry, error) {
