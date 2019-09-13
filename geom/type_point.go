@@ -60,7 +60,7 @@ func (p Point) IsSimple() bool {
 	return true
 }
 
-func (p Point) Intersection(g Geometry) Geometry {
+func (p Point) Intersection(g Geometry) (Geometry, error) {
 	return intersection(p, g)
 }
 

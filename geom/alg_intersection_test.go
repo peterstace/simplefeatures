@@ -158,7 +158,10 @@ func TestIntersection(t *testing.T) {
 			}
 
 			t.Run("forward", func(t *testing.T) {
-				got := in1g.Intersection(in2g)
+				got, err := in1g.Intersection(in2g)
+				if err != nil {
+					t.Fatal(err)
+				}
 				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got.AsText())
 				}
@@ -176,7 +179,10 @@ func TestIntersection(t *testing.T) {
 				return
 			}
 			t.Run("reversed", func(t *testing.T) {
-				got := in2g.Intersection(in1g)
+				got, err := in2g.Intersection(in1g)
+				if err != nil {
+					t.Fatal(err)
+				}
 				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got.AsText())
 				}

@@ -39,7 +39,7 @@ func (e EmptySet) IsSimple() bool {
 	return true
 }
 
-func (e EmptySet) Intersection(g Geometry) Geometry {
+func (e EmptySet) Intersection(g Geometry) (Geometry, error) {
 	return intersection(e, g)
 }
 

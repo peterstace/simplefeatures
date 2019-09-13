@@ -91,7 +91,7 @@ func (s LineString) IsSimple() bool {
 	n := len(s.lines)
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
-			intersection := s.lines[i].Intersection(s.lines[j])
+			intersection := mustIntersection(s.lines[i], s.lines[j])
 			if intersection.IsEmpty() {
 				continue
 			}
@@ -129,7 +129,7 @@ func (s LineString) IsClosed() bool {
 	return s.lines[0].a.XY.Equals(s.lines[len(s.lines)-1].b.XY)
 }
 
-func (s LineString) Intersection(g Geometry) Geometry {
+func (s LineString) Intersection(g Geometry) (Geometry, error) {
 	return intersection(s, g)
 }
 

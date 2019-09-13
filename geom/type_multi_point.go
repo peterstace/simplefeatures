@@ -84,7 +84,7 @@ func (m MultiPoint) IsSimple() bool {
 	return true
 }
 
-func (m MultiPoint) Intersection(g Geometry) Geometry {
+func (m MultiPoint) Intersection(g Geometry) (Geometry, error) {
 	return intersection(m, g)
 }
 

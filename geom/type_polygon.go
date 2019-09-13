@@ -49,7 +49,7 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 	// Rings may intersect, but only at a single point.
 	for i := 0; i < len(allRings); i++ {
 		for j := i + 1; j < len(allRings); j++ {
-			inter := allRings[i].Intersection(allRings[j])
+			inter := mustIntersection(allRings[i], allRings[j])
 			env, has := inter.Envelope()
 			if !has {
 				continue // no intersection
@@ -149,7 +149,7 @@ func (p Polygon) IsSimple() bool {
 	return true
 }
 
-func (p Polygon) Intersection(g Geometry) Geometry {
+func (p Polygon) Intersection(g Geometry) (Geometry, error) {
 	return intersection(p, g)
 }
 

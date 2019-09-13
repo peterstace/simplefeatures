@@ -71,7 +71,7 @@ func (n Line) IsSimple() bool {
 	return true
 }
 
-func (n Line) Intersection(g Geometry) Geometry {
+func (n Line) Intersection(g Geometry) (Geometry, error) {
 	return intersection(n, g)
 }
 

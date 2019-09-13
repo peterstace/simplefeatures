@@ -82,9 +82,9 @@ func (m MultiLineString) IsSimple() bool {
 	}
 	for i := 0; i < len(m.lines); i++ {
 		for j := i + 1; j < len(m.lines); j++ {
-			inter := m.lines[i].Intersection(m.lines[j])
-			bound := m.lines[i].Boundary().Intersection(m.lines[j].Boundary())
-			if !inter.Equals(inter.Intersection(bound)) {
+			inter := mustIntersection(m.lines[i], m.lines[j])
+			bound := mustIntersection(m.lines[i].Boundary(), m.lines[j].Boundary())
+			if !inter.Equals(mustIntersection(inter, bound)) {
 				return false
 			}
 		}
@@ -92,7 +92,7 @@ func (m MultiLineString) IsSimple() bool {
 	return true
 }
 
-func (m MultiLineString) Intersection(g Geometry) Geometry {
+func (m MultiLineString) Intersection(g Geometry) (Geometry, error) {
 	return intersection(m, g)
 }
 

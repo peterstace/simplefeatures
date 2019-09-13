@@ -6,12 +6,20 @@ import (
 	"sort"
 )
 
-func intersection(g1, g2 Geometry) Geometry {
+func mustIntersection(g1, g2 Geometry) Geometry {
+	g, err := intersection(g1, g2)
+	if err != nil {
+		panic(err)
+	}
+	return g
+}
+
+func intersection(g1, g2 Geometry) (Geometry, error) {
 	if g2.IsEmpty() {
-		return g2
+		return g2, nil
 	}
 	if g1.IsEmpty() {
-		return g1
+		return g1, nil
 	}
 
 	if rank(g1) > rank(g2) {
@@ -21,22 +29,22 @@ func intersection(g1, g2 Geometry) Geometry {
 	case Point:
 		switch g2 := g2.(type) {
 		case Point:
-			return intersectPointWithPoint(g1, g2)
+			return intersectPointWithPoint(g1, g2), nil
 		case Line:
-			return intersectPointWithLine(g1, g2)
+			return intersectPointWithLine(g1, g2), nil
 		case LineString:
-			return intersectPointWithLineString(g1, g2)
+			return intersectPointWithLineString(g1, g2), nil
 		case Polygon:
-			return intersectMultiPointWithPolygon(NewMultiPoint([]Point{g1}), g2)
+			return intersectMultiPointWithPolygon(NewMultiPoint([]Point{g1}), g2), nil
 		case MultiPoint:
-			return intersectPointWithMultiPoint(g1, g2)
+			return intersectPointWithMultiPoint(g1, g2), nil
 		}
 	case Line:
 		switch g2 := g2.(type) {
 		case Line:
-			return intersectLineWithLine(g1, g2)
+			return intersectLineWithLine(g1, g2), nil
 		case MultiPoint:
-			return intersectLineWithMultiPoint(g1, g2)
+			return intersectLineWithMultiPoint(g1, g2), nil
 		}
 	case LineString:
 		switch g2 := g2.(type) {
@@ -44,31 +52,31 @@ func intersection(g1, g2 Geometry) Geometry {
 			return intersectMultiLineStringWithMultiLineString(
 				NewMultiLineString([]LineString{g1}),
 				NewMultiLineString([]LineString{g2}),
-			)
+			), nil
 		case MultiLineString:
 			return intersectMultiLineStringWithMultiLineString(
 				NewMultiLineString([]LineString{g1}),
 				g2,
-			)
+			), nil
 		}
 	case Polygon:
 		switch g2 := g2.(type) {
 		case MultiPoint:
-			return intersectMultiPointWithPolygon(g2, g1)
+			return intersectMultiPointWithPolygon(g2, g1), nil
 		}
 	case MultiPoint:
 		switch g2 := g2.(type) {
 		case MultiPoint:
-			return intersectMultiPointWithMultiPoint(g1, g2)
+			return intersectMultiPointWithMultiPoint(g1, g2), nil
 		}
 	case MultiLineString:
 		switch g2 := g2.(type) {
 		case MultiLineString:
-			return intersectMultiLineStringWithMultiLineString(g1, g2)
+			return intersectMultiLineStringWithMultiLineString(g1, g2), nil
 		}
 	}
 
-	panic(fmt.Sprintf("not implemented: intersection with %T and %T", g1, g2))
+	return nil, fmt.Errorf("not implemented: intersection with %T and %T", g1, g2)
 }
 
 func intersectLineWithLine(n1, n2 Line) Geometry {
@@ -133,7 +141,7 @@ func intersectLineWithMultiPoint(ln Line, mp MultiPoint) Geometry {
 	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
-		if !pt.Intersection(ln).IsEmpty() {
+		if !mustIntersection(pt, ln).IsEmpty() {
 			pts = append(pts, pt)
 		}
 	}
@@ -153,7 +161,7 @@ func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) Geo
 		for _, ln1 := range ls1.lines {
 			for _, ls2 := range mls2.lines {
 				for _, ln2 := range ls2.lines {
-					inter := ln1.Intersection(ln2)
+					inter := mustIntersection(ln1, ln2)
 					if !inter.IsEmpty() {
 						collection = append(collection, inter)
 					}

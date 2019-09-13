@@ -56,7 +56,7 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-func (c GeometryCollection) Intersection(g Geometry) Geometry {
+func (c GeometryCollection) Intersection(g Geometry) (Geometry, error) {
 	return intersection(c, g)
 }
 
