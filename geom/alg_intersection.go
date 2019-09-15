@@ -441,8 +441,7 @@ func hasIntersectionLineWithMultiPoint(ln Line, mp MultiPoint) (intersects bool,
 	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
-		intersects, _ = hasIntersectionPointWithLine(pt, ln)
-		if intersects {
+		if intersects, _ = hasIntersectionPointWithLine(pt, ln); intersects {
 			return true, 0 // Point and MultiPoint both have dimension 0
 		}
 	}
@@ -457,8 +456,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 		for _, ln1 := range ls1.lines {
 			for _, ls2 := range mls2.lines {
 				for _, ln2 := range ls2.lines {
-					inter, dim := hasIntersectionLineWithLine(ln1, ln2)
-					if inter {
+					if inter, dim := hasIntersectionLineWithLine(ln1, ln2); inter {
 						intersects = true
 						if dim > dimension {
 							dimension = dim
@@ -488,8 +486,7 @@ func hasIntersectionPointWithLine(point Point, line Line) (intersects bool, dime
 func hasIntersectionPointWithLineString(pt Point, ls LineString) (intersects bool, dimension int) {
 	// Worst case speed is O(n), n is the number of lines.
 	for _, ln := range ls.lines {
-		intersects, _ = hasIntersectionPointWithLine(pt, ln)
-		if intersects {
+		if intersects, _ = hasIntersectionPointWithLine(pt, ln); intersects {
 			return true, 0 // Point has dimension 0
 		}
 	}
@@ -547,8 +544,7 @@ func hasIntersectionMultiPointWithPolygon(mp MultiPoint, p Polygon) (intersects 
 
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
-		intersects, _ = hasIntersectionPointWithPolygon(pt, p)
-		if intersects {
+		if intersects, _ = hasIntersectionPointWithPolygon(pt, p); intersects {
 			return true, 0 // Point and MultiPoint have dimension 0
 		}
 	}
