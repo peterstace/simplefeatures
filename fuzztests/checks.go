@@ -323,3 +323,16 @@ func CheckIsValid(t *testing.T, pg PostGIS, g geom.Geometry) {
 		}
 	})
 }
+
+func CheckIsRing(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckIsRing", func(t *testing.T) {
+		ringer, ok := g.(interface{ IsRing() bool })
+		got := ok && ringer.IsRing()
+		want := pg.IsRing(t, g)
+		if got != want {
+			t.Logf("got:  %t", got)
+			t.Logf("want: %t", want)
+			t.Error("mismatch")
+		}
+	})
+}

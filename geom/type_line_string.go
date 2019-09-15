@@ -231,3 +231,9 @@ func (s LineString) IsValid() bool {
 	_, err := NewLineStringC(s.Coordinates())
 	return err == nil
 }
+
+// IsRing returns true iff this LineString is both simple and closed (i.e. is a
+// linear ring).
+func (s LineString) IsRing() bool {
+	return s.IsSimple() && s.IsClosed()
+}
