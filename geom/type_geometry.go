@@ -46,9 +46,12 @@ type Geometry interface {
 	// in which case the returned flag will be false.
 	Envelope() (Envelope, bool)
 
-	// Equals checks if this geometry is equal to another geometrie. Two
+	// Equals checks if this geometry is equal to another geometry. Two
 	// geometries are equal if they contain exactly the same points.
-	Equals(Geometry) bool
+	//
+	// It is not implemented for all possible pairs of geometries, and returns
+	// an error in those cases.
+	Equals(Geometry) (bool, error)
 
 	// Boundary returns the Geometry representing the limit of this geometry.
 	Boundary() Geometry

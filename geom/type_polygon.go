@@ -166,7 +166,7 @@ func (p Polygon) Dimension() int {
 	return 2
 }
 
-func (p Polygon) Equals(other Geometry) bool {
+func (p Polygon) Equals(other Geometry) (bool, error) {
 	return equals(p, other)
 }
 

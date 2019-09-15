@@ -83,7 +83,7 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 
 // IsSimple returns true iff the curve defined by the LineString doesn't pass
 // through the same point twice (with the possible exception of the two
-// endpoints).
+// endpoints being coincident).
 func (s LineString) IsSimple() bool {
 	// 1. Check for pairwise intersection.
 	//  a. Point is allowed if lines adjacent.
@@ -112,7 +112,7 @@ func (s LineString) IsSimple() bool {
 				// ring).
 				aPt := NewPointC(s.lines[i].a)
 				bPt := NewPointC(s.lines[j].b)
-				if !intersection.Equals(aPt) || !intersection.Equals(bPt) {
+				if !intersection.EqualsExact(aPt) || !intersection.EqualsExact(bPt) {
 					return false
 				}
 			} else {
@@ -146,7 +146,7 @@ func (s LineString) Dimension() int {
 	return 1
 }
 
-func (s LineString) Equals(other Geometry) bool {
+func (s LineString) Equals(other Geometry) (bool, error) {
 	return equals(s, other)
 }
 

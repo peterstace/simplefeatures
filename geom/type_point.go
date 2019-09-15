@@ -77,7 +77,7 @@ func (p Point) Dimension() int {
 	return 0
 }
 
-func (p Point) Equals(other Geometry) bool {
+func (p Point) Equals(other Geometry) (bool, error) {
 	return equals(p, other)
 }
 

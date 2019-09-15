@@ -88,7 +88,7 @@ func (n Line) Dimension() int {
 	return 1
 }
 
-func (n Line) Equals(other Geometry) bool {
+func (n Line) Equals(other Geometry) (bool, error) {
 	return equals(n, other)
 }
 

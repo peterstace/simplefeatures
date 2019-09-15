@@ -39,9 +39,9 @@ func pointRingSide(pt XY, ring LineString) side {
 		}
 		ep1 := NewPointC(seg.a)
 		ep2 := NewPointC(seg.b)
-		if inter.Equals(ep1) || inter.Equals(ep2) {
+		if inter.EqualsExact(ep1) || inter.EqualsExact(ep2) {
 			otherY := ep1.coords.Y
-			if inter.Equals(ep1) {
+			if inter.EqualsExact(ep1) {
 				otherY = ep2.coords.Y
 			}
 			if otherY < pt.Y {

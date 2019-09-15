@@ -236,7 +236,7 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
 		return mp
 	}
 	for _, pt := range mp.pts {
-		if pt.Equals(point) {
+		if pt.EqualsExact(point) {
 			return NewPointXY(point.coords.XY)
 		}
 	}
@@ -244,7 +244,7 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
 }
 
 func intersectPointWithPoint(pt1, pt2 Point) Geometry {
-	if pt1.Equals(pt2) {
+	if pt1.EqualsExact(pt2) {
 		return NewPointXY(pt1.coords.XY)
 	}
 	return NewGeometryCollection(nil)
@@ -514,7 +514,7 @@ func hasIntersectionMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (intersects bo
 func hasIntersectionPointWithMultiPoint(point Point, mp MultiPoint) (intersects bool, dimension int, err error) {
 	// Worst case speed is O(n) but that's optimal because mp is not sorted.
 	for _, pt := range mp.pts {
-		if pt.Equals(point) {
+		if pt.EqualsExact(point) {
 			return true, 0, nil // Point and MultiPoint both have dimension 0
 		}
 	}
@@ -523,7 +523,7 @@ func hasIntersectionPointWithMultiPoint(point Point, mp MultiPoint) (intersects 
 
 func hasIntersectionPointWithPoint(pt1, pt2 Point) (intersects bool, dimension int, err error) {
 	// Speed is O(1).
-	if pt1.Equals(pt2) {
+	if pt1.EqualsExact(pt2) {
 		return true, 0, nil // Point has dimension 0
 	}
 	return false, 0, nil // No intersection

@@ -101,7 +101,7 @@ func (m MultiPoint) Dimension() int {
 	return 0
 }
 
-func (m MultiPoint) Equals(other Geometry) bool {
+func (m MultiPoint) Equals(other Geometry) (bool, error) {
 	return equals(m, other)
 }
 

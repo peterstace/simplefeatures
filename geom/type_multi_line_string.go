@@ -84,7 +84,11 @@ func (m MultiLineString) IsSimple() bool {
 		for j := i + 1; j < len(m.lines); j++ {
 			inter := mustIntersection(m.lines[i], m.lines[j])
 			bound := mustIntersection(m.lines[i].Boundary(), m.lines[j].Boundary())
-			if !inter.Equals(mustIntersection(inter, bound)) {
+			eq, err := inter.Equals(mustIntersection(inter, bound))
+			if err != nil {
+				panic(err) // Equals is implemented for all of the required types here.
+			}
+			if !eq {
 				return false
 			}
 		}
@@ -109,7 +113,7 @@ func (m MultiLineString) Dimension() int {
 	return 1
 }
 
-func (m MultiLineString) Equals(other Geometry) bool {
+func (m MultiLineString) Equals(other Geometry) (bool, error) {
 	return equals(m, other)
 }
 

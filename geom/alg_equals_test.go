@@ -35,7 +35,11 @@ func TestNotEquals(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if g1.Equals(g2) {
+				eq, err := g1.Equals(g2)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if eq {
 					t.Errorf("expected not be be equal")
 				}
 			})
@@ -75,7 +79,11 @@ func TestEquals(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-					if !g1.Equals(g2) {
+					eq, err := g1.Equals(g2)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if !eq {
 						t.Errorf("expected to be equal")
 					}
 				})

@@ -56,7 +56,7 @@ func (e EmptySet) Dimension() int {
 	return e.dimension
 }
 
-func (e EmptySet) Equals(other Geometry) bool {
+func (e EmptySet) Equals(other Geometry) (bool, error) {
 	return equals(e, other)
 }
 

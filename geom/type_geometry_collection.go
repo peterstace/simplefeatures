@@ -82,7 +82,7 @@ func (c GeometryCollection) Dimension() int {
 	return dim
 }
 
-func (c GeometryCollection) Equals(other Geometry) bool {
+func (c GeometryCollection) Equals(other Geometry) (bool, error) {
 	return equals(c, other)
 }
 
