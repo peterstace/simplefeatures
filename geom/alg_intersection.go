@@ -151,10 +151,6 @@ func intersectLineWithMultiPoint(ln Line, mp MultiPoint) Geometry {
 	return NewMultiPoint(pts)
 }
 
-type bbox struct {
-	min, max XY
-}
-
 func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) Geometry {
 	var collection []Geometry
 	for _, ls1 := range mls1.lines {
