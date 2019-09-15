@@ -89,6 +89,15 @@ func (p PostGIS) intFunc(t *testing.T, g geom.Geometry, stFunc string) int {
 	return i
 }
 
+func (p PostGIS) stringFunc(t *testing.T, g geom.Geometry, stFunc string) string {
+	var str string
+	if err := p.db.QueryRow(
+		"SELECT "+stFunc+"(ST_GeomFromWKB($1))", g,
+	).Scan(&str); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return str
+}
 func (p PostGIS) bytesFunc(t *testing.T, g geom.Geometry, stFunc string) []byte {
 	var bytes []byte
 	if err := p.db.QueryRow(
@@ -137,4 +146,10 @@ func (p PostGIS) ConvexHull(t *testing.T, g geom.Geometry) geom.Geometry {
 
 func (p PostGIS) IsValid(t *testing.T, g geom.Geometry) bool {
 	return p.boolFunc(t, g, "ST_IsValid")
+}
+
+func (p PostGIS) IsRing(t *testing.T, g geom.Geometry) bool {
+	// ST_IsRing returns an error whenever it gets anything other than an ST_LineString.
+	return p.stringFunc(t, g, "ST_GeometryType") == "ST_LineString" &&
+		p.boolFunc(t, g, "ST_IsRing")
 }
