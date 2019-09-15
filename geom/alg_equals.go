@@ -5,15 +5,15 @@ import (
 	"reflect"
 )
 
-func equals(g1, g2 Geometry) bool {
+func equals(g1, g2 Geometry) (bool, error) {
 	if g1.IsEmpty() && g2.IsEmpty() {
-		return true
+		return true, nil
 	}
 	if g1.IsEmpty() || g2.IsEmpty() {
-		return false
+		return false, nil
 	}
 	if g1.Dimension() != g2.Dimension() {
-		return false
+		return false, nil
 	}
 
 	if rank(g1) > rank(g2) {
@@ -23,18 +23,18 @@ func equals(g1, g2 Geometry) bool {
 	case Point:
 		switch g2 := g2.(type) {
 		case Point:
-			return g1.coords.XY.Equals(g2.coords.XY)
+			return g1.coords.XY.Equals(g2.coords.XY), nil
 		case MultiPoint:
 			g1Set := NewMultiPoint([]Point{g1})
-			return equalsMultiPointAndMultiPoint(g1Set, g2)
+			return equalsMultiPointAndMultiPoint(g1Set, g2), nil
 		}
 	case MultiPoint:
 		switch g2 := g2.(type) {
 		case MultiPoint:
-			return equalsMultiPointAndMultiPoint(g1, g2)
+			return equalsMultiPointAndMultiPoint(g1, g2), nil
 		}
 	}
-	panic(fmt.Sprintf("not implemented: equals with %T and %T", g1, g2))
+	return false, fmt.Errorf("not implemented: equals with %T and %T", g1, g2)
 }
 
 func equalsMultiPointAndMultiPoint(mp1, mp2 MultiPoint) bool {

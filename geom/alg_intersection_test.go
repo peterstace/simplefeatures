@@ -158,11 +158,17 @@ func TestIntersection(t *testing.T) {
 			}
 
 			t.Run("forward", func(t *testing.T) {
-				got := in1g.Intersection(in2g)
+				got, err := in1g.Intersection(in2g)
+				if err != nil {
+					t.Fatal(err)
+				}
 				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got.AsText())
 				}
-				intersects := in1g.Intersects(in2g)
+				intersects, err := in1g.Intersects(in2g)
+				if err != nil {
+					t.Fatal(err)
+				}
 				if intersects == got.IsEmpty() {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v\nintersects: %v", tt.in1, tt.in2, tt.out, got, intersects)
 				}
@@ -176,11 +182,17 @@ func TestIntersection(t *testing.T) {
 				return
 			}
 			t.Run("reversed", func(t *testing.T) {
-				got := in2g.Intersection(in1g)
+				got, err := in2g.Intersection(in1g)
+				if err != nil {
+					t.Fatal(err)
+				}
 				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got.AsText())
 				}
-				intersects := in2g.Intersects(in1g)
+				intersects, err := in2g.Intersects(in1g)
+				if err != nil {
+					t.Fatal(err)
+				}
 				if intersects == got.IsEmpty() {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v\nintersects: %v", tt.in1, tt.in2, tt.out, got, intersects)
 				}

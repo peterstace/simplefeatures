@@ -83,7 +83,7 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 
 // IsSimple returns true iff the curve defined by the LineString doesn't pass
 // through the same point twice (with the possible exception of the two
-// endpoints).
+// endpoints being coincident).
 func (s LineString) IsSimple() bool {
 	// 1. Check for pairwise intersection.
 	//  a. Point is allowed if lines adjacent.
@@ -91,7 +91,7 @@ func (s LineString) IsSimple() bool {
 	n := len(s.lines)
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
-			intersection := s.lines[i].Intersection(s.lines[j])
+			intersection := mustIntersection(s.lines[i], s.lines[j])
 			if intersection.IsEmpty() {
 				continue
 			}
@@ -112,7 +112,7 @@ func (s LineString) IsSimple() bool {
 				// ring).
 				aPt := NewPointC(s.lines[i].a)
 				bPt := NewPointC(s.lines[j].b)
-				if !intersection.Equals(aPt) || !intersection.Equals(bPt) {
+				if !intersection.EqualsExact(aPt) || !intersection.EqualsExact(bPt) {
 					return false
 				}
 			} else {
@@ -129,13 +129,13 @@ func (s LineString) IsClosed() bool {
 	return s.lines[0].a.XY.Equals(s.lines[len(s.lines)-1].b.XY)
 }
 
-func (s LineString) Intersection(g Geometry) Geometry {
+func (s LineString) Intersection(g Geometry) (Geometry, error) {
 	return intersection(s, g)
 }
 
-func (s LineString) Intersects(g Geometry) bool {
-	has, _ := hasIntersection(s, g)
-	return has
+func (s LineString) Intersects(g Geometry) (bool, error) {
+	has, _, err := hasIntersection(s, g)
+	return has, err
 }
 
 func (s LineString) IsEmpty() bool {
@@ -146,7 +146,7 @@ func (s LineString) Dimension() int {
 	return 1
 }
 
-func (s LineString) Equals(other Geometry) bool {
+func (s LineString) Equals(other Geometry) (bool, error) {
 	return equals(s, other)
 }
 

@@ -60,13 +60,13 @@ func (p Point) IsSimple() bool {
 	return true
 }
 
-func (p Point) Intersection(g Geometry) Geometry {
+func (p Point) Intersection(g Geometry) (Geometry, error) {
 	return intersection(p, g)
 }
 
-func (p Point) Intersects(g Geometry) bool {
-	has, _ := hasIntersection(p, g)
-	return has
+func (p Point) Intersects(g Geometry) (bool, error) {
+	has, _, err := hasIntersection(p, g)
+	return has, err
 }
 
 func (p Point) IsEmpty() bool {
@@ -77,7 +77,7 @@ func (p Point) Dimension() int {
 	return 0
 }
 
-func (p Point) Equals(other Geometry) bool {
+func (p Point) Equals(other Geometry) (bool, error) {
 	return equals(p, other)
 }
 

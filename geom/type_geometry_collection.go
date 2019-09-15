@@ -56,13 +56,13 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-func (c GeometryCollection) Intersection(g Geometry) Geometry {
+func (c GeometryCollection) Intersection(g Geometry) (Geometry, error) {
 	return intersection(c, g)
 }
 
-func (c GeometryCollection) Intersects(g Geometry) bool {
-	has, _ := hasIntersection(c, g)
-	return has
+func (c GeometryCollection) Intersects(g Geometry) (bool, error) {
+	has, _, err := hasIntersection(c, g)
+	return has, err
 }
 
 func (c GeometryCollection) IsEmpty() bool {
@@ -82,7 +82,7 @@ func (c GeometryCollection) Dimension() int {
 	return dim
 }
 
-func (c GeometryCollection) Equals(other Geometry) bool {
+func (c GeometryCollection) Equals(other Geometry) (bool, error) {
 	return equals(c, other)
 }
 

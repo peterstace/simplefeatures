@@ -39,13 +39,13 @@ func (e EmptySet) IsSimple() bool {
 	return true
 }
 
-func (e EmptySet) Intersection(g Geometry) Geometry {
+func (e EmptySet) Intersection(g Geometry) (Geometry, error) {
 	return intersection(e, g)
 }
 
-func (e EmptySet) Intersects(g Geometry) bool {
-	has, _ := hasIntersection(e, g)
-	return has
+func (e EmptySet) Intersects(g Geometry) (bool, error) {
+	has, _, err := hasIntersection(e, g)
+	return has, err
 }
 
 func (e EmptySet) IsEmpty() bool {
@@ -56,7 +56,7 @@ func (e EmptySet) Dimension() int {
 	return e.dimension
 }
 
-func (e EmptySet) Equals(other Geometry) bool {
+func (e EmptySet) Equals(other Geometry) (bool, error) {
 	return equals(e, other)
 }
 

@@ -21,11 +21,17 @@ type Geometry interface {
 
 	// Intersection returns a geometric object that represents the point set
 	// intersection of this geometry with another geometry.
-	Intersection(Geometry) Geometry
+	//
+	// It is not implemented for all possible pairs of geometries, and returns
+	// an error in those cases.
+	Intersection(Geometry) (Geometry, error)
 
 	// Intersects returns true if the intersection of this gemoetry with the
 	// specified other geometry is not empty, or false if it is empty.
-	Intersects(Geometry) bool
+	//
+	// It is not implemented for all possible pairs of geometries, and returns
+	// an error in those cases.
+	Intersects(Geometry) (bool, error)
 
 	// IsEmpty returns true if this object an empty geometry.
 	IsEmpty() bool
@@ -40,9 +46,12 @@ type Geometry interface {
 	// in which case the returned flag will be false.
 	Envelope() (Envelope, bool)
 
-	// Equals checks if this geometry is equal to another geometrie. Two
+	// Equals checks if this geometry is equal to another geometry. Two
 	// geometries are equal if they contain exactly the same points.
-	Equals(Geometry) bool
+	//
+	// It is not implemented for all possible pairs of geometries, and returns
+	// an error in those cases.
+	Equals(Geometry) (bool, error)
 
 	// Boundary returns the Geometry representing the limit of this geometry.
 	Boundary() Geometry

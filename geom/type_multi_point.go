@@ -84,13 +84,13 @@ func (m MultiPoint) IsSimple() bool {
 	return true
 }
 
-func (m MultiPoint) Intersection(g Geometry) Geometry {
+func (m MultiPoint) Intersection(g Geometry) (Geometry, error) {
 	return intersection(m, g)
 }
 
-func (m MultiPoint) Intersects(g Geometry) bool {
-	has, _ := hasIntersection(m, g)
-	return has
+func (m MultiPoint) Intersects(g Geometry) (bool, error) {
+	has, _, err := hasIntersection(m, g)
+	return has, err
 }
 
 func (m MultiPoint) IsEmpty() bool {
@@ -101,7 +101,7 @@ func (m MultiPoint) Dimension() int {
 	return 0
 }
 
-func (m MultiPoint) Equals(other Geometry) bool {
+func (m MultiPoint) Equals(other Geometry) (bool, error) {
 	return equals(m, other)
 }
 
