@@ -223,7 +223,7 @@ func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geom
 // EqualsExact checks if this LineString is exactly equal to another curve.
 func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	c, ok := other.(curve)
-	return ok && curvesExactEqual(s, c, opts)
+	return ok && other.Dimension() == 1 && curvesExactEqual(s, c, opts)
 }
 
 // IsValid checks if this LineString is valid

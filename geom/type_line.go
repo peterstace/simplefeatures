@@ -149,7 +149,7 @@ func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, 
 // EqualsExact checks if this Line is exactly equal to another curve.
 func (n Line) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	c, ok := other.(curve)
-	return ok && curvesExactEqual(n, c, opts)
+	return ok && other.Dimension() == 1 && curvesExactEqual(n, c, opts)
 }
 
 // IsValid checks if this Line is valid

@@ -98,6 +98,7 @@ func (p PostGIS) stringFunc(t *testing.T, g geom.Geometry, stFunc string) string
 	}
 	return str
 }
+
 func (p PostGIS) bytesFunc(t *testing.T, g geom.Geometry, stFunc string) []byte {
 	var bytes []byte
 	if err := p.db.QueryRow(
@@ -106,6 +107,21 @@ func (p PostGIS) bytesFunc(t *testing.T, g geom.Geometry, stFunc string) []byte 
 		t.Fatalf("pg error: %v", err)
 	}
 	return bytes
+}
+
+func (p PostGIS) binary(t *testing.T, g1, g2 geom.Geometry, stFunc string, dest interface{}) {
+	if err := p.db.QueryRow(
+		"SELECT "+stFunc+"(ST_GeomFromWKB($1), ST_GeomFromWKB($2))",
+		g1, g2,
+	).Scan(dest); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+}
+
+func (p PostGIS) boolBinary(t *testing.T, g1, g2 geom.Geometry, stFunc string) bool {
+	var b bool
+	p.binary(t, g1, g2, stFunc, &b)
+	return b
 }
 
 func (p PostGIS) AsText(t *testing.T, g geom.Geometry) string {
@@ -152,4 +168,8 @@ func (p PostGIS) IsRing(t *testing.T, g geom.Geometry) bool {
 	// ST_IsRing returns an error whenever it gets anything other than an ST_LineString.
 	return p.stringFunc(t, g, "ST_GeometryType") == "ST_LineString" &&
 		p.boolFunc(t, g, "ST_IsRing")
+}
+
+func (p PostGIS) OrderingEquals(t *testing.T, g1, g2 geom.Geometry) bool {
+	return p.boolBinary(t, g1, g2, "ST_OrderingEquals")
 }

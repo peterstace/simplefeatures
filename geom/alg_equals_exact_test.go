@@ -104,6 +104,10 @@ func TestEqualsExact(t *testing.T) {
 		"g_2_b":   "GEOMETRYCOLLECTION(LINESTRING(1 2,3 4),POINT(1 3))",
 		"g_2_c":   "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 5),LINESTRING(1 2,3 4)))",
 		"g_2_d":   "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(LINESTRING(1 2,3 4),POINT(1 5)))",
+
+		// Reproduces bugs from fuzz tests:
+		"b_1": "LINESTRING(0 0,1 1)",
+		"b_2": "MULTIPOINT(0 0,1 1)",
 	}
 
 	type pair struct{ keyA, keyB string }

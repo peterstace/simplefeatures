@@ -336,3 +336,15 @@ func CheckIsRing(t *testing.T, pg PostGIS, g geom.Geometry) {
 		}
 	})
 }
+
+func CheckEqualsExact(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
+	t.Run("CheckEqualsExact", func(t *testing.T) {
+		got := g1.EqualsExact(g2)
+		want := pg.OrderingEquals(t, g1, g2)
+		if got != want {
+			t.Logf("got:  %t", got)
+			t.Logf("want: %t", want)
+			t.Error("mismatch")
+		}
+	})
+}
