@@ -47,6 +47,13 @@ func TestFuzz(t *testing.T) {
 			CheckIsRing(t, pg, g)
 		})
 	}
+	for i, g1 := range geoms {
+		for j, g2 := range geoms {
+			t.Run(fmt.Sprintf("geom_%d_%d_", i, j), func(t *testing.T) {
+				CheckEqualsExact(t, pg, g1, g2)
+			})
+		}
+	}
 
 	// TODO: Intersection
 	// TODO: Equals
