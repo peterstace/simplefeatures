@@ -384,3 +384,20 @@ func CheckIntersects(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 		}
 	})
 }
+
+func CheckIntersection(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
+	t.Run("CheckIntersection", func(t *testing.T) {
+		got, err := g1.Intersection(g2)
+		if err != nil {
+			return // operation not implemented
+		}
+		want := pg.Intersection(t, g1, g2)
+		if !got.EqualsExact(want, geom.IgnoreOrder, geom.Tolerance(0.000001)) {
+			t.Logf("g1:   %s", g1.AsText())
+			t.Logf("g2:   %s", g2.AsText())
+			t.Logf("got:  %s", got.AsText())
+			t.Logf("want: %s", want.AsText())
+			t.Error("mismatch")
+		}
+	})
+}

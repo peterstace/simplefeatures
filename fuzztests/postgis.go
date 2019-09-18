@@ -124,6 +124,17 @@ func (p PostGIS) boolBinary(t *testing.T, g1, g2 geom.Geometry, stFunc string) b
 	return b
 }
 
+func (p PostGIS) geomBinary(t *testing.T, g1, g2 geom.Geometry, stFunc string) geom.Geometry {
+	var ag geom.AnyGeometry
+	if err := p.db.QueryRow(
+		"SELECT ST_AsBinary("+stFunc+"(ST_GeomFromWKB($1), ST_GeomFromWKB($2)))",
+		g1, g2,
+	).Scan(&ag); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return ag.Geom
+}
+
 func (p PostGIS) AsText(t *testing.T, g geom.Geometry) string {
 	return string(p.bytesFunc(t, g, "ST_AsText"))
 }
@@ -180,4 +191,8 @@ func (p PostGIS) Equals(t *testing.T, g1, g2 geom.Geometry) bool {
 
 func (p PostGIS) Intersects(t *testing.T, g1, g2 geom.Geometry) bool {
 	return p.boolBinary(t, g1, g2, "ST_Intersects")
+}
+
+func (p PostGIS) Intersection(t *testing.T, g1, g2 geom.Geometry) geom.Geometry {
+	return p.geomBinary(t, g1, g2, "ST_Intersection")
 }

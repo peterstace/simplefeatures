@@ -53,7 +53,7 @@ func TestFuzz(t *testing.T) {
 				CheckEqualsExact(t, pg, g1, g2)
 				CheckEquals(t, pg, g1, g2)
 				CheckIntersects(t, pg, g1, g2)
-				// TODO: Intersection
+				CheckIntersection(t, pg, g1, g2)
 			})
 		}
 	}
