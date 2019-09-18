@@ -173,3 +173,7 @@ func (p PostGIS) IsRing(t *testing.T, g geom.Geometry) bool {
 func (p PostGIS) OrderingEquals(t *testing.T, g1, g2 geom.Geometry) bool {
 	return p.boolBinary(t, g1, g2, "ST_OrderingEquals")
 }
+
+func (p PostGIS) Equals(t *testing.T, g1, g2 geom.Geometry) bool {
+	return p.boolBinary(t, g1, g2, "ST_Equals")
+}

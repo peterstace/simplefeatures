@@ -348,3 +348,24 @@ func CheckEqualsExact(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 		}
 	})
 }
+
+func CheckEquals(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
+	t.Run("CheckEquals", func(t *testing.T) {
+		_, g1GC := g1.(geom.GeometryCollection)
+		_, g2GC := g2.(geom.GeometryCollection)
+		if g1GC || g2GC {
+			// PostGIS cannot calculate Equals for geometry collections.
+			return
+		}
+		got, err := g1.Equals(g2)
+		if err != nil {
+			return // operation not implemented
+		}
+		want := pg.Equals(t, g1, g2)
+		if got != want {
+			t.Logf("got:  %t", got)
+			t.Logf("want: %t", want)
+			t.Error("mismatch")
+		}
+	})
+}
