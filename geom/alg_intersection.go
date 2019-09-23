@@ -15,6 +15,7 @@ func mustIntersection(g1, g2 Geometry) Geometry {
 }
 
 func intersection(g1, g2 Geometry) (Geometry, error) {
+	// Matches PostGIS behaviour for empty geometries.
 	if g2.IsEmpty() {
 		if _, ok := g2.(GeometryCollection); ok {
 			return NewGeometryCollection(nil), nil
@@ -41,7 +42,7 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 		case LineString:
 			return intersectPointWithLineString(g1, g2), nil
 		case Polygon:
-			return intersectMultiPointWithPolygon(NewMultiPoint([]Point{g1}), g2), nil
+			return intersectMultiPointWithPolygon(NewMultiPoint([]Point{g1}), g2)
 		case MultiPoint:
 			return intersectPointWithMultiPoint(g1, g2), nil
 		}
@@ -77,14 +78,11 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 	case Polygon:
 		switch g2 := g2.(type) {
 		case MultiPoint:
-			return intersectMultiPointWithPolygon(g2, g1), nil
+			return intersectMultiPointWithPolygon(g2, g1)
 		}
 	case MultiPoint:
 		switch g2 := g2.(type) {
 		case MultiPoint:
-			if g1.NumPoints() == 1 && g2.NumPoints() == 1 {
-				return intersectPointWithPoint(g1.PointN(0), g2.PointN(0)), nil
-			}
 			return intersectMultiPointWithMultiPoint(g1, g2)
 		}
 	case MultiLineString:
@@ -185,6 +183,8 @@ func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (Ge
 						points = append(points, inter)
 					case Line:
 						lines = append(lines, inter)
+					default:
+						return nil, fmt.Errorf("unhandled intersection result type: %T", inter)
 					}
 				}
 			}
@@ -313,7 +313,7 @@ func onSegment(p XY, q XY, r XY) bool {
 		r.Y >= math.Min(p.Y, q.Y)
 }
 
-func intersectMultiPointWithPolygon(mp MultiPoint, p Polygon) Geometry {
+func intersectMultiPointWithPolygon(mp MultiPoint, p Polygon) (Geometry, error) {
 	pts := make(map[XY]Point)
 	n := mp.NumPoints()
 outer:
@@ -336,15 +336,7 @@ outer:
 	for _, pt := range pts {
 		ptsSlice = append(ptsSlice, pt)
 	}
-
-	switch len(ptsSlice) {
-	case 0:
-		return NewGeometryCollection(nil)
-	case 1:
-		return ptsSlice[0]
-	default:
-		return NewMultiPoint(ptsSlice)
-	}
+	return canonicalPointsAndLines(ptsSlice, nil)
 }
 
 func hasIntersection(g1, g2 Geometry) (intersects bool, dimension int, err error) {

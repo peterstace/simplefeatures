@@ -158,10 +158,15 @@ func TestIntersection(t *testing.T) {
 		{"LINESTRING(1 2,4 5)", "MULTIPOINT((7 6),(3 3),(3 3))", "GEOMETRYCOLLECTION EMPTY"},
 		{"MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))", "MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))", "MULTILINESTRING((0 1,2 3),(4 5,6 7),(6 7,8 9))"},
 		{"MULTILINESTRING((0 1,2 3,4 5))", "LINESTRING(1 2,3 4,5 6)", "MULTILINESTRING((1 2,2 3),(2 3,3 4),(3 4,4 5))"},
-
 		{"LINESTRING(0 0,1 1)", "LINESTRING(0 0,1 1,0 0)", "LINESTRING(0 0,1 1)"},
 		{"LINESTRING(0 0,1 0,0 1,0 0)", "LINESTRING(0 0,1 0,1 1,0 1)", "GEOMETRYCOLLECTION(POINT(0 1),LINESTRING(0 0,1 0))"},
 		{"LINESTRING(0 0,1 0,0 1,0 0)", "MULTILINESTRING((0 0,0 1,1 1),(0 1,0 0,1 0))", "MULTILINESTRING((0 0,1 0),(0 1,0 0))"},
+
+		// The following two test cases were fonud using fuzz, however they
+		// currently don't pass. The difference in the result is cosmetic --
+		// the difference between "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))"
+		// and "LINESTRING(0 0,1 1)".
+		//
 		//{"LINESTRING(0 0,1 1)", "LINESTRING(0 0,1 1,0 1,1 0)", "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))"},
 		//{"LINESTRING(0 0,0 1,1 0,0 0)", "LINESTRING(0 0,1 1,0 1,0 0,1 1)", "GEOMETRYCOLLECTION(POINT(0.5 0.5),LINESTRING(0 0,0 1))"},
 	} {
