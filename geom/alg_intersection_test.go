@@ -29,16 +29,16 @@ func TestIntersection(t *testing.T) {
 		{"POINT(0 0)", "LINESTRING(0 0,2 2)", "POINT(0 0)"},
 		{"POINT(1 1)", "LINESTRING(0 0,2 2)", "POINT(1 1)"},
 		{"POINT(2 2)", "LINESTRING(0 0,2 2)", "POINT(2 2)"},
-		{"POINT(3 3)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
-		{"POINT(-1 -1)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
-		{"POINT(0 2)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
-		{"POINT(2 0)", "LINESTRING(0 0,2 2)", "POINT EMPTY"},
+		{"POINT(3 3)", "LINESTRING(0 0,2 2)", "GEOMETRYCOLLECTION EMPTY"},
+		{"POINT(-1 -1)", "LINESTRING(0 0,2 2)", "GEOMETRYCOLLECTION EMPTY"},
+		{"POINT(0 2)", "LINESTRING(0 0,2 2)", "GEOMETRYCOLLECTION EMPTY"},
+		{"POINT(2 0)", "LINESTRING(0 0,2 2)", "GEOMETRYCOLLECTION EMPTY"},
 		{"POINT(0 3.14)", "LINESTRING(0 0,0 4)", "POINT(0 3.14)"},
 		{"POINT(1 0.25)", "LINESTRING(0 0,4 1)", "POINT(1 0.25)"},
 		{"POINT(2 0.5)", "LINESTRING(0 0,4 1)", "POINT(2 0.5)"},
 
 		// Point/LineString
-		{"POINT(0 0)", "LINESTRING(1 0,2 1,3 0)", "POINT EMPTY"},
+		{"POINT(0 0)", "LINESTRING(1 0,2 1,3 0)", "GEOMETRYCOLLECTION EMPTY"},
 		{"POINT(1 0)", "LINESTRING(1 0,2 1,3 0)", "POINT(1 0)"},
 		{"POINT(2 1)", "LINESTRING(1 0,2 1,3 0)", "POINT(2 1)"},
 		{"POINT(1.5 0.5)", "LINESTRING(1 0,2 1,3 0)", "POINT(1.5 0.5)"},
@@ -103,8 +103,8 @@ func TestIntersection(t *testing.T) {
 
 		// Line/MultiPoint
 		{"LINESTRING(0 0,1 1)", "MULTIPOINT EMPTY", "MULTIPOINT EMPTY"},
-		{"LINESTRING(0 0,1 1)", "MULTIPOINT(1 0)", "MULTIPOINT EMPTY"},
-		{"LINESTRING(0 0,1 1)", "MULTIPOINT(1 0,0 1)", "MULTIPOINT EMPTY"},
+		{"LINESTRING(0 0,1 1)", "MULTIPOINT(1 0)", "GEOMETRYCOLLECTION EMPTY"},
+		{"LINESTRING(0 0,1 1)", "MULTIPOINT(1 0,0 1)", "GEOMETRYCOLLECTION EMPTY"},
 		{"LINESTRING(0 0,1 1)", "MULTIPOINT(0.5 0.5)", "POINT(0.5 0.5)"},
 		{"LINESTRING(0 0,1 1)", "MULTIPOINT(0 0)", "POINT(0 0)"},
 		{"LINESTRING(0 0,1 1)", "MULTIPOINT(0.5 0.5,1 0)", "POINT(0.5 0.5)"},
@@ -120,7 +120,7 @@ func TestIntersection(t *testing.T) {
 		{"MULTIPOINT((1 2))", "MULTIPOINT((1 2),(1 2))", "POINT(1 2)"},
 		{"MULTIPOINT((1 2))", "MULTIPOINT((1 2),(3 4))", "POINT(1 2)"},
 		{"MULTIPOINT((3 4),(1 2))", "MULTIPOINT((1 2),(3 4))", "MULTIPOINT((1 2),(3 4))"},
-		{"MULTIPOINT((3 4),(1 2))", "MULTIPOINT((1 4),(2 2))", "MULTIPOINT EMPTY"},
+		{"MULTIPOINT((3 4),(1 2))", "MULTIPOINT((1 4),(2 2))", "GEOMETRYCOLLECTION EMPTY"},
 
 		// MultiPoint/Point
 		{"MULTIPOINT EMPTY", "POINT(1 2)", "MULTIPOINT EMPTY"},
@@ -146,6 +146,29 @@ func TestIntersection(t *testing.T) {
 		// MultiLineString with other lines  -- most test cases covered by LR/LR
 		{"MULTILINESTRING((0 0,1 0,1 1,0 1))", "LINESTRING(1 1,2 1,2 2,1 2,1 1)", "POINT(1 1)"},
 		{"MULTILINESTRING((0 0,1 0,1 1,0 1))", "MULTILINESTRING((1 1,2 1,2 2,1 2,1 1))", "POINT(1 1)"},
+
+		// Test cases found from fuzz:
+		{"POLYGON EMPTY", "GEOMETRYCOLLECTION(POLYGON EMPTY)", "GEOMETRYCOLLECTION EMPTY"},
+		{"MULTIPOINT((1 2))", "MULTIPOINT((4 8))", "GEOMETRYCOLLECTION EMPTY"},
+		{"POINT(1 2)", "LINESTRING(0 0,0 4)", "GEOMETRYCOLLECTION EMPTY"},
+		{"POLYGON((0 0,4 0,0 4,0 0),(1 1,2 1,1 2,1 1))", "MULTIPOINT((2 1),(1 2),(2 1))", "MULTIPOINT((1 2),(2 1))"},
+		{"POLYGON((0 0,4 0,0 4,0 0),(1 1,2 1,1 2,1 1))", "MULTIPOINT((2 1),(3 6),(2 1))", "POINT(2 1)"},
+		{"MULTIPOINT((1 2))", "MULTIPOINT((7 6),(3 3),(3 3))", "GEOMETRYCOLLECTION EMPTY"},
+		{"MULTIPOINT((1 2))", "LINESTRING(2 1,3 6)", "GEOMETRYCOLLECTION EMPTY"},
+		{"LINESTRING(1 2,4 5)", "MULTIPOINT((7 6),(3 3),(3 3))", "GEOMETRYCOLLECTION EMPTY"},
+		{"MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))", "MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))", "MULTILINESTRING((0 1,2 3),(4 5,6 7),(6 7,8 9))"},
+		{"MULTILINESTRING((0 1,2 3,4 5))", "LINESTRING(1 2,3 4,5 6)", "MULTILINESTRING((1 2,2 3),(2 3,3 4),(3 4,4 5))"},
+		{"LINESTRING(0 0,1 1)", "LINESTRING(0 0,1 1,0 0)", "LINESTRING(0 0,1 1)"},
+		{"LINESTRING(0 0,1 0,0 1,0 0)", "LINESTRING(0 0,1 0,1 1,0 1)", "GEOMETRYCOLLECTION(POINT(0 1),LINESTRING(0 0,1 0))"},
+		{"LINESTRING(0 0,1 0,0 1,0 0)", "MULTILINESTRING((0 0,0 1,1 1),(0 1,0 0,1 0))", "MULTILINESTRING((0 0,1 0),(0 1,0 0))"},
+
+		// The following two test cases were fonud using fuzz, however they
+		// currently don't pass. The difference in the result is cosmetic --
+		// the difference between "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))"
+		// and "LINESTRING(0 0,1 1)".
+		//
+		//{"LINESTRING(0 0,1 1)", "LINESTRING(0 0,1 1,0 1,1 0)", "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))"},
+		//{"LINESTRING(0 0,0 1,1 0,0 0)", "LINESTRING(0 0,1 1,0 1,0 0,1 1)", "GEOMETRYCOLLECTION(POINT(0.5 0.5),LINESTRING(0 0,0 1))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in1g, err := UnmarshalWKT(strings.NewReader(tt.in1))
