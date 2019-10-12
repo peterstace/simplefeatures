@@ -434,3 +434,24 @@ func TestIsRing(t *testing.T) {
 		})
 	}
 }
+
+func TestArea(t *testing.T) {
+	for i, tt := range []struct {
+		wkt  string
+		want float64
+	}{
+		{"POLYGON((0 0,1 1,0 1,0 0))", 0.5},
+		{"POLYGON((0 0,0 1,1 1,0 0))", 0.5},
+		{"POLYGON((0 0,0 1,1 1,1 0,0 0))", 1.0},
+		{"POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1))", 8.0},
+		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((2 1,1 1,2 0,2 1)))", 1.0},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g := geomFromWKT(t, tt.wkt).(interface{ Area() float64 })
+			got := g.Area()
+			if got != tt.want {
+				t.Errorf("got=%v want=%v", got, tt.want)
+			}
+		})
+	}
+}
