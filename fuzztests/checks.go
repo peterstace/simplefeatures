@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -380,6 +381,24 @@ func CheckIntersects(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 		if got != want {
 			t.Logf("got:  %t", got)
 			t.Logf("want: %t", want)
+			t.Error("mismatch")
+		}
+	})
+}
+
+func CheckArea(t *testing.T, pg PostGIS, g geom.Geometry) {
+	switch g.(type) {
+	case geom.Polygon, geom.MultiPolygon:
+	default:
+		return
+	}
+	t.Run("CheckArea", func(t *testing.T) {
+		got := g.(interface{ Area() float64 }).Area()
+		want := pg.Area(t, g)
+		const eps = 0.000000001
+		if math.Abs(got-want) > eps {
+			t.Logf("got:  %v", got)
+			t.Logf("want: %v", want)
 			t.Error("mismatch")
 		}
 	})
