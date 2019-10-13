@@ -455,3 +455,50 @@ func TestArea(t *testing.T) {
 		})
 	}
 }
+
+func TestCentroidPolygon(t *testing.T) {
+	for i, tt := range []struct {
+		wkt  string
+		want XY
+	}{
+		{"POLYGON((0 0,1 1,0 1,0 0))", XY{1.0 / 3, 2.0 / 3}},
+		{"POLYGON((0 0,0 1,1 1,0 0))", XY{1.0 / 3, 2.0 / 3}},
+		{"POLYGON((0 0,1 0,1 1,0 1,0 0))", XY{0.5, 0.5}},
+		{"POLYGON((0 0,0 1,1 1,1 0,0 0))", XY{0.5, 0.5}},
+		{"POLYGON((0 0,2 0,2 1,0 1,0 0))", XY{1, 0.5}},
+		{"POLYGON((0 0,4 0,4 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))", XY{2 + 1.0/22, 1.5}},
+		{"POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1))", XY{1.5, 1.5}},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g := geomFromWKT(t, tt.wkt).(interface{ Centroid() Point })
+			got := g.Centroid()
+			wantPt := NewPointXY(tt.want)
+			if !wantPt.EqualsExact(got, Tolerance(0.00000001)) {
+				t.Log(tt.wkt)
+				t.Errorf("got=%v want=%v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCentroidMultiPolygon(t *testing.T) {
+	for i, tt := range []struct {
+		wkt  string
+		want XY
+	}{
+		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((2 0,4 0,4 2,2 2,2 0)))", XY{2.7037037037037, 0.925925925925926}},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g := geomFromWKT(t, tt.wkt).(interface{ Centroid() (Point, bool) })
+			got, ok := g.Centroid()
+			if !ok {
+				t.Fatal("could not generate centroid")
+			}
+			wantPt := NewPointXY(tt.want)
+			if !wantPt.EqualsExact(got, Tolerance(0.00000001)) {
+				t.Log(tt.wkt)
+				t.Errorf("got=%v want=%v", got, tt.want)
+			}
+		})
+	}
+}

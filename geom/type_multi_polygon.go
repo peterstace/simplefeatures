@@ -308,3 +308,27 @@ func (m MultiPolygon) Area() float64 {
 	}
 	return area
 }
+
+// Centroid returns the multi polygon's centroid point. It returns false if the
+// multi polygon is empty (in which case, there is no sensible definition for a
+// centroid).
+func (m MultiPolygon) Centroid() (Point, bool) {
+	if m.IsEmpty() {
+		return Point{}, false
+	}
+
+	n := m.NumPolygons()
+	centroids := make([]XY, n)
+	areas := make([]float64, n)
+	var totalArea float64
+	for i := 0; i < n; i++ {
+		centroids[i], areas[i] = centroidAndAreaOfPolygon(m.PolygonN(i))
+		totalArea += areas[i]
+	}
+	var avg XY
+	for i := range centroids {
+		avg = avg.Add(centroids[i].Scale(areas[i]))
+	}
+	avg = avg.Scale(1.0 / totalArea)
+	return NewPointXY(avg), true
+}
