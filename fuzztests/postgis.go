@@ -99,6 +99,16 @@ func (p PostGIS) stringFunc(t *testing.T, g geom.Geometry, stFunc string) string
 	return str
 }
 
+func (p PostGIS) float64Func(t *testing.T, g geom.Geometry, stFunc string) float64 {
+	var f float64
+	if err := p.db.QueryRow(
+		"SELECT "+stFunc+"(ST_GeomFromWKB($1))", g,
+	).Scan(&f); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return f
+}
+
 func (p PostGIS) bytesFunc(t *testing.T, g geom.Geometry, stFunc string) []byte {
 	var bytes []byte
 	if err := p.db.QueryRow(
@@ -180,4 +190,8 @@ func (p PostGIS) Equals(t *testing.T, g1, g2 geom.Geometry) bool {
 
 func (p PostGIS) Intersects(t *testing.T, g1, g2 geom.Geometry) bool {
 	return p.boolBinary(t, g1, g2, "ST_Intersects")
+}
+
+func (p PostGIS) Area(t *testing.T, g geom.Geometry) float64 {
+	return p.float64Func(t, g, "ST_Area")
 }

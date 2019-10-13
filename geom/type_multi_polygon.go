@@ -298,3 +298,13 @@ func (m MultiPolygon) IsValid() bool {
 	_, err := NewMultiPolygonC(m.Coordinates())
 	return err == nil
 }
+
+// Area gives the area of the multi polygon.
+func (m MultiPolygon) Area() float64 {
+	var area float64
+	n := m.NumPolygons()
+	for i := 0; i < n; i++ {
+		area += m.PolygonN(i).Area()
+	}
+	return area
+}

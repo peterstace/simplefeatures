@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"io"
+	"math"
 )
 
 // Polygon is a planar surface, defined by 1 exiterior boundary and 0 or more
@@ -263,4 +264,26 @@ func (p Polygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 func (p Polygon) IsValid() bool {
 	_, err := NewPolygonC(p.Coordinates())
 	return err == nil
+}
+
+// Area gives the area of the polygon.
+func (p Polygon) Area() float64 {
+	area := areaOfLinearRing(p.ExteriorRing())
+	n := p.NumInteriorRings()
+	for i := 0; i < n; i++ {
+		area -= areaOfLinearRing(p.InteriorRingN(i))
+	}
+	return area
+}
+
+func areaOfLinearRing(lr LineString) float64 {
+	// This is the "Shoelace Formula".
+	var sum float64
+	n := lr.NumPoints()
+	for i := 0; i < n; i++ {
+		pt0 := lr.PointN(i).XY()
+		pt1 := lr.PointN((i + 1) % n).XY()
+		sum += (pt1.X + pt0.X) * (pt1.Y - pt0.Y)
+	}
+	return math.Abs(sum / 2)
 }
