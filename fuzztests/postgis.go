@@ -195,3 +195,7 @@ func (p PostGIS) Intersects(t *testing.T, g1, g2 geom.Geometry) bool {
 func (p PostGIS) Area(t *testing.T, g geom.Geometry) float64 {
 	return p.float64Func(t, g, "ST_Area")
 }
+
+func (p PostGIS) Centroid(t *testing.T, g geom.Geometry) geom.Geometry {
+	return p.geomFunc(t, g, "ST_Centroid")
+}
