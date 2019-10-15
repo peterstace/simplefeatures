@@ -1,6 +1,7 @@
 package geom_test
 
 import (
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -429,6 +430,27 @@ func TestIsRing(t *testing.T) {
 			got := g.(interface{ IsRing() bool }).IsRing()
 			if got != tt.want {
 				t.Logf("WKT: %v", g.AsText())
+				t.Errorf("got=%v want=%v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestLength(t *testing.T) {
+	for i, tt := range []struct {
+		wkt  string
+		want float64
+	}{
+		{"LINESTRING(0 0,1 0)", 1},
+		{"LINESTRING(5 8,4 9)", math.Sqrt(2)},
+		{"LINESTRING(0 0,0 1,1 3)", 1 + math.Sqrt(5)},
+		{"MULTILINESTRING((4 2,5 1),(9 2,7 1))", math.Sqrt(2) + math.Sqrt(5)},
+		{"MULTILINESTRING((0 0,2 0),(1 0,3 0))", 4},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g := geomFromWKT(t, tt.wkt)
+			got := g.(interface{ Length() float64 }).Length()
+			if math.Abs(tt.want-got) > 1e-6 {
 				t.Errorf("got=%v want=%v", got, tt.want)
 			}
 		})

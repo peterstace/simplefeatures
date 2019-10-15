@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"io"
+	"math"
 )
 
 // Line is a single line segment between two points.
@@ -162,4 +163,10 @@ func (n Line) IsValid() bool {
 // particular, they are never closed because they only contain two points.
 func (n Line) IsRing() bool {
 	return false
+}
+
+// Length gives the length of the line.
+func (n Line) Length() float64 {
+	delta := n.a.XY.Sub(n.b.XY)
+	return math.Sqrt(delta.Dot(delta))
 }
