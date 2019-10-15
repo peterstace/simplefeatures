@@ -287,3 +287,48 @@ func areaOfLinearRing(lr LineString) float64 {
 	}
 	return math.Abs(sum / 2)
 }
+
+// Centroid returns the polygon's centroid point.
+func (p Polygon) Centroid() Point {
+	c, _ := centroidAndAreaOfPolygon(p)
+	return NewPointXY(c)
+}
+
+func centroidAndAreaOfPolygon(p Polygon) (XY, float64) {
+	n := p.NumInteriorRings()
+	areas := make([]float64, n+1)
+	centroids := make([]XY, n+1)
+	centroids[0], areas[0] = centroidAndAreaOfLinearRing(p.ExteriorRing())
+	totalArea := areas[0]
+	for i := 0; i < n; i++ {
+		r := p.InteriorRingN(i)
+		centroids[i+1], areas[i+1] = centroidAndAreaOfLinearRing(r)
+		totalArea -= areas[i+1]
+	}
+
+	// Calculate weighted average (negative weights for holes).
+	var avg XY
+	for i, c := range centroids {
+		c = c.Scale(areas[i])
+		if i != 0 {
+			c = c.Scale(-1)
+		}
+		avg = avg.Add(c)
+	}
+	return avg.Scale(1.0 / totalArea), totalArea
+}
+
+func centroidAndAreaOfLinearRing(lr LineString) (XY, float64) {
+	n := lr.NumPoints()
+	var x, y float64
+	var area float64
+	for i := 0; i < n; i++ {
+		pt0 := lr.PointN(i).XY()
+		pt1 := lr.PointN((i + 1) % n).XY()
+		x += (pt0.X + pt1.X) * (pt0.X*pt1.Y - pt1.X*pt0.Y)
+		y += (pt0.Y + pt1.Y) * (pt0.X*pt1.Y - pt1.X*pt0.Y)
+		area += pt0.X*pt1.Y - pt1.X*pt0.Y
+	}
+	area /= 2
+	return XY{x / 6 / area, y / 6 / area}, math.Abs(area)
+}

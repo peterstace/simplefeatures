@@ -420,3 +420,35 @@ func CheckArea(t *testing.T, pg PostGIS, g geom.Geometry) {
 		}
 	})
 }
+
+func CheckCentroid(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckCentroid", func(t *testing.T) {
+		var got geom.Point
+		var empty bool
+		switch g := g.(type) {
+		case geom.Polygon:
+			got = g.Centroid()
+		case geom.MultiPolygon:
+			var ok bool
+			got, ok = g.Centroid()
+			empty = !ok
+		default:
+			return
+		}
+		want := pg.Centroid(t, g)
+
+		if empty {
+			if !want.IsEmpty() {
+				t.Log("got:  empty", got)
+				t.Logf("want: %v", want)
+				t.Error("mismatch")
+			}
+		} else {
+			if !got.EqualsExact(want, geom.Tolerance(0.000000001)) {
+				t.Logf("got:  %v", got)
+				t.Logf("want: %v", want)
+				t.Error("mismatch")
+			}
+		}
+	})
+}

@@ -47,6 +47,7 @@ func TestFuzz(t *testing.T) {
 			CheckIsRing(t, pg, g)
 			CheckLength(t, pg, g)
 			CheckArea(t, pg, g)
+			CheckCentroid(t, pg, g)
 		})
 	}
 	for i, g1 := range geoms {

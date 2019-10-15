@@ -199,3 +199,7 @@ func (p PostGIS) Length(t *testing.T, g geom.Geometry) float64 {
 func (p PostGIS) Area(t *testing.T, g geom.Geometry) float64 {
 	return p.float64Func(t, g, "ST_Area")
 }
+
+func (p PostGIS) Centroid(t *testing.T, g geom.Geometry) geom.Geometry {
+	return p.geomFunc(t, g, "ST_Centroid")
+}
