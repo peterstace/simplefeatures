@@ -192,6 +192,10 @@ func (p PostGIS) Intersects(t *testing.T, g1, g2 geom.Geometry) bool {
 	return p.boolBinary(t, g1, g2, "ST_Intersects")
 }
 
+func (p PostGIS) Length(t *testing.T, g geom.Geometry) float64 {
+	return p.float64Func(t, g, "ST_Length")
+}
+
 func (p PostGIS) Area(t *testing.T, g geom.Geometry) float64 {
 	return p.float64Func(t, g, "ST_Area")
 }

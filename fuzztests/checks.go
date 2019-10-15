@@ -338,6 +338,23 @@ func CheckIsRing(t *testing.T, pg PostGIS, g geom.Geometry) {
 	})
 }
 
+func CheckLength(t *testing.T, pg PostGIS, g geom.Geometry) {
+	switch g.(type) {
+	case geom.Line, geom.LineString, geom.MultiLineString:
+	default:
+		return
+	}
+	t.Run("CheckLength", func(t *testing.T) {
+		got := g.(interface{ Length() float64 }).Length()
+		want := pg.Length(t, g)
+		if math.Abs(got-want) > 1e-6 {
+			t.Logf("got:  %v", got)
+			t.Logf("want: %v", want)
+			t.Error("mismatch")
+		}
+	})
+}
+
 func CheckEqualsExact(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 	t.Run("CheckEqualsExact", func(t *testing.T) {
 		got := g1.EqualsExact(g2)
