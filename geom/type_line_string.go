@@ -237,3 +237,12 @@ func (s LineString) IsValid() bool {
 func (s LineString) IsRing() bool {
 	return s.IsSimple() && s.IsClosed()
 }
+
+// Length gives the length of the line string.
+func (s LineString) Length() float64 {
+	var sum float64
+	for _, ln := range s.lines {
+		sum += ln.Length()
+	}
+	return sum
+}

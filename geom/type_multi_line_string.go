@@ -232,3 +232,13 @@ func (m MultiLineString) IsValid() bool {
 	_, err := NewMultiLineStringC(m.Coordinates())
 	return err == nil
 }
+
+// Length gives the sum of the lengths of the constituent members of the multi
+// line string.
+func (m MultiLineString) Length() float64 {
+	var sum float64
+	for _, ln := range m.lines {
+		sum += ln.Length()
+	}
+	return sum
+}
