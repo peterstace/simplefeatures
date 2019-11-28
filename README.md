@@ -77,5 +77,5 @@ much longer to run, and are designed to be used as a final double check for
 correctness. They can be run using:
 
 ```
-docker-compose -f docker-compose-all.yml up --abort-on-container-exit
+docker-compose -f docker-compose-full.yml up --abort-on-container-exit
 ```

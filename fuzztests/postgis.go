@@ -128,10 +128,36 @@ func (p PostGIS) binary(t *testing.T, g1, g2 geom.Geometry, stFunc string, dest 
 	}
 }
 
+// TolerantEquals checks if the two geometries are equal, accounting for some
+// numeric tolerance and ignoring ordering.
+func (p PostGIS) TolerantEquals(t *testing.T, g1, g2 geom.Geometry) bool {
+	var eq bool
+	if err := p.db.QueryRow(`
+		SELECT ST_Equals(
+			ST_SnapToGrid(ST_GeomFromWKB($1), 0, 0, 0.00001, 0.00001),
+			ST_SnapToGrid(ST_GeomFromWKB($2), 0, 0, 0.00001, 0.00001)
+		)`, g1, g2,
+	).Scan(&eq); err != nil {
+		t.Fatalf("pg err: %v", err)
+	}
+	return eq
+}
+
 func (p PostGIS) boolBinary(t *testing.T, g1, g2 geom.Geometry, stFunc string) bool {
 	var b bool
 	p.binary(t, g1, g2, stFunc, &b)
 	return b
+}
+
+func (p PostGIS) geomBinary(t *testing.T, g1, g2 geom.Geometry, stFunc string) geom.Geometry {
+	var ag geom.AnyGeometry
+	if err := p.db.QueryRow(
+		"SELECT ST_AsBinary("+stFunc+"(ST_GeomFromWKB($1), ST_GeomFromWKB($2)))",
+		g1, g2,
+	).Scan(&ag); err != nil {
+		t.Fatalf("pg error: %v", err)
+	}
+	return ag.Geom
 }
 
 func (p PostGIS) AsText(t *testing.T, g geom.Geometry) string {
@@ -190,6 +216,10 @@ func (p PostGIS) Equals(t *testing.T, g1, g2 geom.Geometry) bool {
 
 func (p PostGIS) Intersects(t *testing.T, g1, g2 geom.Geometry) bool {
 	return p.boolBinary(t, g1, g2, "ST_Intersects")
+}
+
+func (p PostGIS) Intersection(t *testing.T, g1, g2 geom.Geometry) geom.Geometry {
+	return p.geomBinary(t, g1, g2, "ST_Intersection")
 }
 
 func (p PostGIS) Length(t *testing.T, g geom.Geometry) float64 {
