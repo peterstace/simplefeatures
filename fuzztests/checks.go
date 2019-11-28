@@ -410,7 +410,24 @@ func CheckIntersection(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 			return // operation not implemented
 		}
 		want := pg.Intersection(t, g1, g2)
-		if !got.EqualsExact(want, geom.IgnoreOrder, geom.Tolerance(0.000001)) {
+
+		if got.IsEmpty() && want.IsEmpty() {
+			return // Both empty, so they match.
+		}
+
+		_, gotIsGC := got.(geom.GeometryCollection)
+		_, wantIsGC := want.(geom.GeometryCollection)
+		if gotIsGC || wantIsGC {
+			// GeometryCollections are not supported by ST_Equals. So there's
+			// not much that we can do here.
+			return
+		}
+
+		// PostGIS TolerantEquals (a chain of ST_SnapToGrid and ST_Equals) is
+		// used rather than in memory ExactEquals because simplefeatures does
+		// not implement intersect in exactly the same way as PostGIS.
+
+		if !pg.TolerantEquals(t, got, want) {
 			t.Logf("g1:   %s", g1.AsText())
 			t.Logf("g2:   %s", g2.AsText())
 			t.Logf("got:  %s", got.AsText())
