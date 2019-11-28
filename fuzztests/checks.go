@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -337,6 +338,23 @@ func CheckIsRing(t *testing.T, pg PostGIS, g geom.Geometry) {
 	})
 }
 
+func CheckLength(t *testing.T, pg PostGIS, g geom.Geometry) {
+	switch g.(type) {
+	case geom.Line, geom.LineString, geom.MultiLineString:
+	default:
+		return
+	}
+	t.Run("CheckLength", func(t *testing.T) {
+		got := g.(interface{ Length() float64 }).Length()
+		want := pg.Length(t, g)
+		if math.Abs(got-want) > 1e-6 {
+			t.Logf("got:  %v", got)
+			t.Logf("want: %v", want)
+			t.Error("mismatch")
+		}
+	})
+}
+
 func CheckEqualsExact(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 	t.Run("CheckEqualsExact", func(t *testing.T) {
 		got := g1.EqualsExact(g2)
@@ -398,6 +416,56 @@ func CheckIntersection(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 			t.Logf("got:  %s", got.AsText())
 			t.Logf("want: %s", want.AsText())
 			t.Error("mismatch")
+		}
+	})
+}
+
+func CheckArea(t *testing.T, pg PostGIS, g geom.Geometry) {
+	switch g.(type) {
+	case geom.Polygon, geom.MultiPolygon:
+	default:
+		return
+	}
+	t.Run("CheckArea", func(t *testing.T) {
+		got := g.(interface{ Area() float64 }).Area()
+		want := pg.Area(t, g)
+		const eps = 0.000000001
+		if math.Abs(got-want) > eps {
+			t.Logf("got:  %v", got)
+			t.Logf("want: %v", want)
+			t.Error("mismatch")
+		}
+	})
+}
+
+func CheckCentroid(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckCentroid", func(t *testing.T) {
+		var got geom.Point
+		var empty bool
+		switch g := g.(type) {
+		case geom.Polygon:
+			got = g.Centroid()
+		case geom.MultiPolygon:
+			var ok bool
+			got, ok = g.Centroid()
+			empty = !ok
+		default:
+			return
+		}
+		want := pg.Centroid(t, g)
+
+		if empty {
+			if !want.IsEmpty() {
+				t.Log("got:  empty", got)
+				t.Logf("want: %v", want)
+				t.Error("mismatch")
+			}
+		} else {
+			if !got.EqualsExact(want, geom.Tolerance(0.000000001)) {
+				t.Logf("got:  %v", got)
+				t.Logf("want: %v", want)
+				t.Error("mismatch")
+			}
 		}
 	})
 }
