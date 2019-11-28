@@ -24,6 +24,11 @@ func NewLineC(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
 	return Line{a, b}, nil
 }
 
+// NewLineXY creates a line segment given the XYs of its two endpoints.
+func NewLineXY(a, b XY, opts ...ConstructorOption) (Line, error) {
+	return NewLineC(Coordinates{a}, Coordinates{b}, opts...)
+}
+
 // StartPoint gives the first point of the line.
 func (n Line) StartPoint() Point {
 	return NewPointC(n.a)

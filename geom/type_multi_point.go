@@ -43,6 +43,11 @@ func NewMultiPointC(coords []Coordinates, opts ...ConstructorOption) MultiPoint 
 	return NewMultiPoint(pts, opts...)
 }
 
+// NewMultiPointXY creates a new MultiPoint consisting of a point for each XY.
+func NewMultiPointXY(pts []XY, opts ...ConstructorOption) MultiPoint {
+	return NewMultiPointC(oneDimXYToCoords(pts))
+}
+
 // NumPoints gives the number of element points making up the MultiPoint.
 func (m MultiPoint) NumPoints() int {
 	return len(m.pts)

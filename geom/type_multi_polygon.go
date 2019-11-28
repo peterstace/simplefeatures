@@ -20,7 +20,7 @@ type MultiPolygon struct {
 	polys []Polygon
 }
 
-// NewMultiPolygon creates a MultiPolygon from its constintuent Polygons. It
+// NewMultiPolygon creates a MultiPolygon from its constituent Polygons. It
 // gives an error if any of the MultiPolygon assertions are not maintained.
 func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
 	if !doExpensiveValidations(opts) {
@@ -40,6 +40,27 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 		}
 	}
 	return MultiPolygon{polys}, nil
+}
+
+// NewMultiPolygonC creates a new MultiPolygon from its constituent Coordinate values.
+func NewMultiPolygonC(coords [][][]Coordinates, opts ...ConstructorOption) (MultiPolygon, error) {
+	var polys []Polygon
+	for _, c := range coords {
+		if len(c) == 0 {
+			continue
+		}
+		poly, err := NewPolygonC(c, opts...)
+		if err != nil {
+			return MultiPolygon{}, err
+		}
+		polys = append(polys, poly)
+	}
+	return NewMultiPolygon(polys, opts...)
+}
+
+// NewMultiPolygonXY creates a new MultiPolygon from its constituent XY values.
+func NewMultiPolygonXY(pts [][][]XY, opts ...ConstructorOption) (MultiPolygon, error) {
+	return NewMultiPolygonC(threeDimXYToCoords(pts), opts...)
 }
 
 func polyInteriorsIntersect(p1, p2 Polygon) bool {
@@ -125,22 +146,6 @@ func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
 		}
 	}
 	return true
-}
-
-// NewMultiPolygonC creates a new MultiPolygon from its constituent Coordinate values.
-func NewMultiPolygonC(coords [][][]Coordinates, opts ...ConstructorOption) (MultiPolygon, error) {
-	var polys []Polygon
-	for _, c := range coords {
-		if len(c) == 0 {
-			continue
-		}
-		poly, err := NewPolygonC(c, opts...)
-		if err != nil {
-			return MultiPolygon{}, err
-		}
-		polys = append(polys, poly)
-	}
-	return NewMultiPolygon(polys, opts...)
 }
 
 // NumPolygons gives the number of Polygon elements in the MultiPolygon.
