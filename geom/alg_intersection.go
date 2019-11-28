@@ -6,6 +6,10 @@ import (
 	"sort"
 )
 
+func noImpl(t1, t2 interface{}) error {
+	return fmt.Errorf("operation not implemented for type pair %T and %T", t1, t2)
+}
+
 func mustIntersection(g1, g2 Geometry) Geometry {
 	g, err := intersection(g1, g2)
 	if err != nil {
@@ -45,6 +49,12 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 			return intersectMultiPointWithPolygon(NewMultiPoint([]Point{g1}), g2)
 		case MultiPoint:
 			return intersectPointWithMultiPoint(g1, g2), nil
+		case MultiLineString:
+			return nil, noImpl(g1, g2)
+		case MultiPolygon:
+			return nil, noImpl(g1, g2)
+		case GeometryCollection:
+			return nil, noImpl(g1, g2)
 		}
 	case Line:
 		switch g2 := g2.(type) {
@@ -59,8 +69,16 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 				NewMultiLineString([]LineString{ls}),
 				NewMultiLineString([]LineString{g2}),
 			)
+		case Polygon:
+			return nil, noImpl(g1, g2)
 		case MultiPoint:
 			return intersectLineWithMultiPoint(g1, g2)
+		case MultiLineString:
+			return nil, noImpl(g1, g2)
+		case MultiPolygon:
+			return nil, noImpl(g1, g2)
+		case GeometryCollection:
+			return nil, noImpl(g1, g2)
 		}
 	case LineString:
 		switch g2 := g2.(type) {
@@ -69,30 +87,68 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 				NewMultiLineString([]LineString{g1}),
 				NewMultiLineString([]LineString{g2}),
 			)
+		case Polygon:
+			return nil, noImpl(g1, g2)
+		case MultiPoint:
+			return nil, noImpl(g1, g2)
 		case MultiLineString:
 			return intersectMultiLineStringWithMultiLineString(
 				NewMultiLineString([]LineString{g1}),
 				g2,
 			)
+		case MultiPolygon:
+			return nil, noImpl(g1, g2)
+		case GeometryCollection:
+			return nil, noImpl(g1, g2)
 		}
 	case Polygon:
 		switch g2 := g2.(type) {
+		case Polygon:
+			return nil, noImpl(g1, g2)
 		case MultiPoint:
 			return intersectMultiPointWithPolygon(g2, g1)
+		case MultiLineString:
+			return nil, noImpl(g1, g2)
+		case MultiPolygon:
+			return nil, noImpl(g1, g2)
+		case GeometryCollection:
+			return nil, noImpl(g1, g2)
 		}
 	case MultiPoint:
 		switch g2 := g2.(type) {
 		case MultiPoint:
 			return intersectMultiPointWithMultiPoint(g1, g2)
+		case MultiLineString:
+			return nil, noImpl(g1, g2)
+		case MultiPolygon:
+			return nil, noImpl(g1, g2)
+		case GeometryCollection:
+			return nil, noImpl(g1, g2)
 		}
 	case MultiLineString:
 		switch g2 := g2.(type) {
 		case MultiLineString:
 			return intersectMultiLineStringWithMultiLineString(g1, g2)
+		case MultiPolygon:
+			return nil, noImpl(g1, g2)
+		case GeometryCollection:
+			return nil, noImpl(g1, g2)
+		}
+	case MultiPolygon:
+		switch g2 := g2.(type) {
+		case MultiPolygon:
+			return nil, noImpl(g1, g2)
+		case GeometryCollection:
+			return nil, noImpl(g1, g2)
+		}
+	case GeometryCollection:
+		switch g2 := g2.(type) {
+		case GeometryCollection:
+			return nil, noImpl(g1, g2)
 		}
 	}
 
-	return nil, fmt.Errorf("not implemented: intersection with %T and %T", g1, g2)
+	panic(fmt.Sprintf("implementation error: unhandled geometry types %T and %T", g1, g2))
 }
 
 func intersectLineWithLine(n1, n2 Line) Geometry {
@@ -368,6 +424,12 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, dimension int, err error
 		case MultiPoint:
 			intersects, dimension = hasIntersectionPointWithMultiPoint(g1, g2)
 			return intersects, dimension, nil
+		case MultiLineString:
+			return false, 0, noImpl(g1, g2)
+		case MultiPolygon:
+			return false, 0, noImpl(g1, g2)
+		case GeometryCollection:
+			return false, 0, noImpl(g1, g2)
 		}
 	case Line:
 		switch g2 := g2.(type) {
@@ -384,9 +446,17 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, dimension int, err error
 				NewMultiLineString([]LineString{g2}),
 			)
 			return intersects, dimension, nil
+		case Polygon:
+			return false, 0, noImpl(g1, g2)
 		case MultiPoint:
 			intersects, dimension = hasIntersectionLineWithMultiPoint(g1, g2)
 			return intersects, dimension, nil
+		case MultiLineString:
+			return false, 0, noImpl(g1, g2)
+		case MultiPolygon:
+			return false, 0, noImpl(g1, g2)
+		case GeometryCollection:
+			return false, 0, noImpl(g1, g2)
 		}
 	case LineString:
 		switch g2 := g2.(type) {
@@ -396,34 +466,72 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, dimension int, err error
 				NewMultiLineString([]LineString{g2}),
 			)
 			return intersects, dimension, nil
+		case Polygon:
+			return false, 0, noImpl(g1, g2)
+		case MultiPoint:
+			return false, 0, noImpl(g1, g2)
 		case MultiLineString:
 			intersects, dimension = hasIntersectionMultiLineStringWithMultiLineString(
 				NewMultiLineString([]LineString{g1}),
 				g2,
 			)
 			return intersects, dimension, nil
+		case MultiPolygon:
+			return false, 0, noImpl(g1, g2)
+		case GeometryCollection:
+			return false, 0, noImpl(g1, g2)
 		}
 	case Polygon:
 		switch g2 := g2.(type) {
+		case Polygon:
+			return false, 0, noImpl(g1, g2)
 		case MultiPoint:
 			intersects, dimension = hasIntersectionMultiPointWithPolygon(g2, g1)
 			return intersects, dimension, nil
+		case MultiLineString:
+			return false, 0, noImpl(g1, g2)
+		case MultiPolygon:
+			return false, 0, noImpl(g1, g2)
+		case GeometryCollection:
+			return false, 0, noImpl(g1, g2)
 		}
 	case MultiPoint:
 		switch g2 := g2.(type) {
 		case MultiPoint:
 			intersects, dimension = hasIntersectionMultiPointWithMultiPoint(g1, g2)
 			return intersects, dimension, nil
+		case MultiLineString:
+			return false, 0, noImpl(g1, g2)
+		case MultiPolygon:
+			return false, 0, noImpl(g1, g2)
+		case GeometryCollection:
+			return false, 0, noImpl(g1, g2)
 		}
 	case MultiLineString:
 		switch g2 := g2.(type) {
 		case MultiLineString:
 			intersects, dimension = hasIntersectionMultiLineStringWithMultiLineString(g1, g2)
 			return intersects, dimension, nil
+		case MultiPolygon:
+			return false, 0, noImpl(g1, g2)
+		case GeometryCollection:
+			return false, 0, noImpl(g1, g2)
+		}
+	case MultiPolygon:
+		switch g2 := g2.(type) {
+		case MultiPolygon:
+			return false, 0, noImpl(g1, g2)
+		case GeometryCollection:
+			return false, 0, noImpl(g1, g2)
+		}
+	case GeometryCollection:
+		switch g2 := g2.(type) {
+		case GeometryCollection:
+			return false, 0, noImpl(g1, g2)
 		}
 	}
 
-	return false, 0, fmt.Errorf("not implemented: hasIntersection with %T and %T", g1, g2)
+	panic(fmt.Sprintf("implementation error: unhandled geometry types %T and %T", g1, g2))
 }
 
 func hasIntersectionLineWithLine(n1, n2 Line) (intersects bool, dimension int) {
