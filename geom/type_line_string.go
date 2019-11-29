@@ -33,6 +33,11 @@ func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, e
 	return LineString{lines}, nil
 }
 
+// NewLineStringXY creates a line string from the XYs defining its points.
+func NewLineStringXY(pts []XY, opts ...ConstructorOption) (LineString, error) {
+	return NewLineStringC(oneDimXYToCoords(pts), opts...)
+}
+
 // StartPoint gives the first point of the line string.
 func (s LineString) StartPoint() Point {
 	return s.lines[0].StartPoint()

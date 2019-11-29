@@ -22,7 +22,7 @@ func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLine
 
 // NewMultiLineStringC creates a MultiLineString from its coordinates. The
 // first dimension of the coordinates slice indicates the LineString, and the
-// second dimension indiates the Coordinate within a LineString.
+// second dimension indicates the Coordinate within a LineString.
 func NewMultiLineStringC(coords [][]Coordinates, opts ...ConstructorOption) (MultiLineString, error) {
 	var lines []LineString
 	for _, c := range coords {
@@ -36,6 +36,13 @@ func NewMultiLineStringC(coords [][]Coordinates, opts ...ConstructorOption) (Mul
 		lines = append(lines, line)
 	}
 	return MultiLineString{lines}, nil
+}
+
+// NewMultiLineStringXY creates a MultiLineString from its XYs. The
+// first dimension of the XYs slice indicates the LineString, and the
+// second dimension indicates the XY within a LineString.
+func NewMultiLineStringXY(pts [][]XY, opts ...ConstructorOption) (MultiLineString, error) {
+	return NewMultiLineStringC(twoDimXYToCoords(pts))
 }
 
 // NumLineStrings gives the number of LineString elements in the

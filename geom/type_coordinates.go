@@ -5,6 +5,30 @@ type Coordinates struct {
 	// TODO: Put optional Z and M here.
 }
 
+func oneDimXYToCoords(pts []XY) []Coordinates {
+	coords := make([]Coordinates, len(pts))
+	for i, pt := range pts {
+		coords[i] = Coordinates{pt}
+	}
+	return coords
+}
+
+func twoDimXYToCoords(xys [][]XY) [][]Coordinates {
+	coords := make([][]Coordinates, len(xys))
+	for i, pts := range xys {
+		coords[i] = oneDimXYToCoords(pts)
+	}
+	return coords
+}
+
+func threeDimXYToCoords(xys [][][]XY) [][][]Coordinates {
+	coords := make([][][]Coordinates, len(xys))
+	for i, pts := range xys {
+		coords[i] = twoDimXYToCoords(pts)
+	}
+	return coords
+}
+
 type OptionalCoordinates struct {
 	Empty bool
 	Value Coordinates

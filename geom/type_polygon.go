@@ -109,6 +109,13 @@ func NewPolygonC(coords [][]Coordinates, opts ...ConstructorOption) (Polygon, er
 	return NewPolygon(rings[0], rings[1:], opts...)
 }
 
+// NewPolygonXY creates a new polygon from its XYs. The first dimension of the
+// XYs slice is the ring number, and the second dimension of the Coordinates
+// slice is the position within the ring.
+func NewPolygonXY(pts [][]XY, opts ...ConstructorOption) (Polygon, error) {
+	return NewPolygonC(twoDimXYToCoords(pts), opts...)
+}
+
 // ExteriorRing gives the exterior ring of the polygon boundary.
 func (p Polygon) ExteriorRing() LineString {
 	return p.outer

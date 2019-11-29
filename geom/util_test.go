@@ -5,8 +5,18 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/peterstace/simplefeatures/geom"
 	. "github.com/peterstace/simplefeatures/geom"
 )
+
+func must(t *testing.T) func(geom.Geometry, error) geom.Geometry {
+	return func(g geom.Geometry, err error) geom.Geometry {
+		if err != nil {
+			t.Fatalf("must have no error but got: %v", err)
+		}
+		return g
+	}
+}
 
 func geomFromWKT(t *testing.T, wkt string) Geometry {
 	t.Helper()
