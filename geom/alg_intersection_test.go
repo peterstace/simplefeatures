@@ -318,6 +318,21 @@ func TestIntersects(t *testing.T) {
 			(3 1,4 1,4 2,3 2,3 1)
 		)`, false},
 
+		// Point/MultiLineString
+		{"POINT(0 0)", "MULTILINESTRING((1 0,2 1,3 0))", false},
+		{"POINT(1 0)", "MULTILINESTRING((1 0,2 1,3 0))", true},
+		{"POINT(0 0)", "MULTILINESTRING((0 0,1 1),(1 1,2 1))", true},
+		{"POINT(1 1)", "MULTILINESTRING((0 0,1 1),(1 1,2 1))", true},
+		{"POINT(2 1)", "MULTILINESTRING((0 0,1 1),(1 1,2 1))", true},
+		{"POINT(3 1)", "MULTILINESTRING((0 0,1 1),(1 1,2 1))", false},
+
+		// Point/MultiPolygon
+		{"POINT(0 0)", "MULTIPOLYGON(((0 0,1 0,1 1,0 0)))", true},
+		{"POINT(1 1)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)))", true},
+		{"POINT(1 1)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((3 0,5 0,5 2,3 2,3 0)))", true},
+		{"POINT(4 1)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((3 0,5 0,5 2,3 2,3 0)))", true},
+		{"POINT(6 1)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((3 0,5 0,5 2,3 2,3 0)))", false},
+
 		// Line/Line
 		{"LINESTRING(0 0,0 1)", "LINESTRING(0 0,1 0)", true},
 		{"LINESTRING(0 1,1 1)", "LINESTRING(1 0,1 1)", true},

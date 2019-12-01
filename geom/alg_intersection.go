@@ -425,9 +425,11 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, dimension int, err error
 			intersects, dimension = hasIntersectionPointWithMultiPoint(g1, g2)
 			return intersects, dimension, nil
 		case MultiLineString:
-			return false, 0, noImpl(g1, g2)
+			intersects, dimension = hasIntersectionPointWithMultiLineString(g1, g2)
+			return intersects, dimension, nil
 		case MultiPolygon:
-			return false, 0, noImpl(g1, g2)
+			intersects, dimension = hasIntersectionPointWithMultiPolygon(g1, g2)
+			return intersects, dimension, nil
 		case GeometryCollection:
 			return false, 0, noImpl(g1, g2)
 		}
@@ -650,6 +652,32 @@ func hasIntersectionPointWithMultiPoint(point Point, mp MultiPoint) (intersects 
 		}
 	}
 	return false, 0 // No intersection
+}
+
+func hasIntersectionPointWithMultiLineString(point Point, mls MultiLineString) (intersects bool, dimension int) {
+	n := mls.NumLineStrings()
+	for i := 0; i < n; i++ {
+		intersects, dimension = hasIntersectionPointWithLineString(point, mls.LineStringN(i))
+		if intersects {
+			// There will never be higher dimensionality, so no point in
+			// continuing to check other line strings.
+			return true, dimension
+		}
+	}
+	return false, 0
+}
+
+func hasIntersectionPointWithMultiPolygon(pt Point, mp MultiPolygon) (intersects bool, dimension int) {
+	n := mp.NumPolygons()
+	for i := 0; i < n; i++ {
+		intersects, dimension = hasIntersectionPointWithPolygon(pt, mp.PolygonN(i))
+		if intersects {
+			// There will never be higher dimensionality, so no point in
+			// continuing to check other line strings.
+			return true, dimension
+		}
+	}
+	return false, 0
 }
 
 func hasIntersectionPointWithPoint(pt1, pt2 Point) (intersects bool, dimension int) {
