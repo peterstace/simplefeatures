@@ -13,6 +13,10 @@ geometries. This is the same access and storage model used by libraries such as
 [JTS](https://locationtech.github.io/jts/), and
 [PostGIS](https://postgis.net/).
 
+#### Changelog
+
+The changelog can be found [here](CHANGELOG.md).
+
 #### Supported Features
 
 - Marshalling/unmarshalling:
