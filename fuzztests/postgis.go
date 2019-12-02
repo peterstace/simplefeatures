@@ -131,7 +131,22 @@ func (p PostGIS) binary(t *testing.T, g1, g2 geom.Geometry, stFunc string, dest 
 // TolerantEquals checks if the two geometries are equal, accounting for some
 // numeric tolerance and ignoring ordering.
 func (p PostGIS) TolerantEquals(t *testing.T, g1, g2 geom.Geometry) bool {
+	// The snap to grid can sometimes mess up the equality check if the
+	// geometry is split different in the two forms. Try without snap to grid
+	// first.
 	var eq bool
+	if err := p.db.QueryRow(`
+		SELECT ST_Equals(
+			ST_GeomFromWKB($1),
+			ST_GeomFromWKB($2)
+		)`, g1, g2,
+	).Scan(&eq); err != nil {
+		t.Fatalf("pg err: %v", err)
+	}
+	if eq {
+		return true
+	}
+
 	if err := p.db.QueryRow(`
 		SELECT ST_Equals(
 			ST_SnapToGrid(ST_GeomFromWKB($1), 0, 0, 0.00001, 0.00001),
