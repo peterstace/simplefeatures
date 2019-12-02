@@ -454,7 +454,14 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 			intersects = hasIntersectionLineWithMultiPoint(g1, g2)
 			return intersects, nil
 		case MultiLineString:
-			return false, noImpl(g1, g2)
+			ln, err := NewLineStringC(g1.Coordinates())
+			if err != nil {
+				return false, err
+			}
+			intersects = hasIntersectionMultiLineStringWithMultiLineString(
+				NewMultiLineString([]LineString{ln}), g2,
+			)
+			return intersects, nil
 		case MultiPolygon:
 			return false, noImpl(g1, g2)
 		case GeometryCollection:
