@@ -94,7 +94,7 @@ func (m MultiPoint) Intersection(g Geometry) (Geometry, error) {
 }
 
 func (m MultiPoint) Intersects(g Geometry) (bool, error) {
-	has, _, err := hasIntersection(m, g)
+	has, err := hasIntersection(m, g)
 	return has, err
 }
 
