@@ -463,7 +463,7 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 			)
 			return intersects, nil
 		case MultiPolygon:
-			return false, noImpl(g1, g2)
+			return hasIntersectionLineWithMultiPolygon(g1, g2)
 		case GeometryCollection:
 			return false, noImpl(g1, g2)
 		}
@@ -619,6 +619,21 @@ func hasIntersectionLineWithPolygon(line Line, poly Polygon) (bool, error) {
 		return true, nil
 	}
 	return hasIntersection(line, poly.Boundary())
+}
+
+func hasIntersectionLineWithMultiPolygon(line Line, mp MultiPolygon) (bool, error) {
+	n := mp.NumPolygons()
+	for i := 0; i < n; i++ {
+		p := mp.PolygonN(i)
+		inter, err := hasIntersectionLineWithPolygon(line, p)
+		if err != nil {
+			return false, err
+		}
+		if inter {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func hasIntersectionPointWithLine(point Point, line Line) bool {
