@@ -449,7 +449,16 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 			)
 			return intersects, nil
 		case Polygon:
-			return hasIntersectionLineWithPolygon(g1, g2)
+			ls, err := NewLineStringC(g1.Coordinates())
+			if err != nil {
+				return false, err
+			}
+			mls := NewMultiLineString([]LineString{ls})
+			mp, err := NewMultiPolygon([]Polygon{g2})
+			if err != nil {
+				return false, err
+			}
+			return hasIntersectionMultiLineStringWithMultiPolygon(mls, mp)
 		case MultiPoint:
 			intersects = hasIntersectionLineWithMultiPoint(g1, g2)
 			return intersects, nil
@@ -463,7 +472,13 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 			)
 			return intersects, nil
 		case MultiPolygon:
-			return hasIntersectionLineWithMultiPolygon(g1, g2)
+			ls, err := NewLineStringC(g1.Coordinates())
+			if err != nil {
+				return false, err
+			}
+			return hasIntersectionMultiLineStringWithMultiPolygon(
+				NewMultiLineString([]LineString{ls}), g2,
+			)
 		case GeometryCollection:
 			return false, noImpl(g1, g2)
 		}
@@ -522,7 +537,7 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 			intersects = hasIntersectionMultiLineStringWithMultiLineString(g1, g2)
 			return intersects, nil
 		case MultiPolygon:
-			return false, noImpl(g1, g2)
+			return hasIntersectionMultiLineStringWithMultiPolygon(g1, g2)
 		case GeometryCollection:
 			return false, noImpl(g1, g2)
 		}
@@ -613,24 +628,24 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 	return false
 }
 
-func hasIntersectionLineWithPolygon(line Line, poly Polygon) (bool, error) {
-	if hasIntersectionPointWithPolygon(line.StartPoint(), poly) ||
-		hasIntersectionPointWithPolygon(line.EndPoint(), poly) {
+func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp MultiPolygon) (bool, error) {
+	inter, err := hasIntersection(mls, mp.Boundary())
+	if err != nil {
+		return false, err
+	}
+	if inter {
 		return true, nil
 	}
-	return hasIntersection(line, poly.Boundary())
-}
 
-func hasIntersectionLineWithMultiPolygon(line Line, mp MultiPolygon) (bool, error) {
-	n := mp.NumPolygons()
-	for i := 0; i < n; i++ {
-		p := mp.PolygonN(i)
-		inter, err := hasIntersectionLineWithPolygon(line, p)
-		if err != nil {
-			return false, err
-		}
-		if inter {
-			return true, nil
+	// Because there is no intersection of the MultiLineString with the
+	// boundary of the MultiPolygon, the MultiLineString is either fully
+	// contained within the MultiPolygon, or fully outside of it. So we just
+	// have to check any control point of the MultiLineString to see if it
+	// falls inside or outside of the MultiPolygon.
+	for i := 0; i < mls.NumLineStrings(); i++ {
+		for j := 0; j < mls.LineStringN(i).NumPoints(); j++ {
+			pt := mls.LineStringN(i).PointN(j)
+			return hasIntersectionPointWithMultiPolygon(pt, mp), nil
 		}
 	}
 	return false, nil
