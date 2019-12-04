@@ -491,7 +491,13 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 			)
 			return intersects, nil
 		case Polygon:
-			return false, noImpl(g1, g2)
+			mp, err := NewMultiPolygon([]Polygon{g2})
+			if err != nil {
+				return false, err
+			}
+			return hasIntersectionMultiLineStringWithMultiPolygon(
+				NewMultiLineString([]LineString{g1}), mp,
+			)
 		case MultiPoint:
 			return false, noImpl(g1, g2)
 		case MultiLineString:
@@ -501,7 +507,9 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 			)
 			return intersects, nil
 		case MultiPolygon:
-			return false, noImpl(g1, g2)
+			return hasIntersectionMultiLineStringWithMultiPolygon(
+				NewMultiLineString([]LineString{g1}), g2,
+			)
 		case GeometryCollection:
 			return false, noImpl(g1, g2)
 		}
