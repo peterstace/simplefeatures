@@ -499,7 +499,9 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 				NewMultiLineString([]LineString{g1}), mp,
 			)
 		case MultiPoint:
-			return false, noImpl(g1, g2)
+			return hasIntersectionMultiPointWithMultiLineString(
+				g2, NewMultiLineString([]LineString{g1}),
+			), nil
 		case MultiLineString:
 			intersects = hasIntersectionMultiLineStringWithMultiLineString(
 				NewMultiLineString([]LineString{g1}),
@@ -616,6 +618,32 @@ func hasIntersectionLineWithMultiPoint(ln Line, mp MultiPoint) bool {
 		}
 	}
 	return false // No intersection
+}
+
+func hasIntersectionMultiPointWithMultiLineString(mp MultiPoint, mls MultiLineString) bool {
+	numPts := mp.NumPoints()
+	for i := 0; i < numPts; i++ {
+		pt := mp.PointN(i)
+		numLSs := mls.NumLineStrings()
+		for j := 0; j < numLSs; j++ {
+			ls := mls.LineStringN(j)
+			numLSPts := ls.NumPoints()
+			for k := 0; k < numLSPts-1; k++ {
+				ln, err := NewLineC(
+					ls.PointN(k).Coordinates(),
+					ls.PointN(k+1).Coordinates(),
+				)
+				if err != nil {
+					// Should never occur due to construction.
+					panic(err)
+				}
+				if hasIntersectionPointWithLine(pt, ln) {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) bool {
