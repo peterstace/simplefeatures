@@ -162,7 +162,7 @@ func (p Polygon) Intersection(g Geometry) (Geometry, error) {
 }
 
 func (p Polygon) Intersects(g Geometry) (bool, error) {
-	has, _, err := hasIntersection(p, g)
+	has, err := hasIntersection(p, g)
 	return has, err
 }
 

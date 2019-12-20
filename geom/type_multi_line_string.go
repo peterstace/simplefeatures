@@ -108,7 +108,7 @@ func (m MultiLineString) Intersection(g Geometry) (Geometry, error) {
 }
 
 func (m MultiLineString) Intersects(g Geometry) (bool, error) {
-	has, _, err := hasIntersection(m, g)
+	has, err := hasIntersection(m, g)
 	return has, err
 }
 

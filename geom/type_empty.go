@@ -44,7 +44,7 @@ func (e EmptySet) Intersection(g Geometry) (Geometry, error) {
 }
 
 func (e EmptySet) Intersects(g Geometry) (bool, error) {
-	has, _, err := hasIntersection(e, g)
+	has, err := hasIntersection(e, g)
 	return has, err
 }
 

@@ -139,7 +139,7 @@ func (s LineString) Intersection(g Geometry) (Geometry, error) {
 }
 
 func (s LineString) Intersects(g Geometry) (bool, error) {
-	has, _, err := hasIntersection(s, g)
+	has, err := hasIntersection(s, g)
 	return has, err
 }
 
