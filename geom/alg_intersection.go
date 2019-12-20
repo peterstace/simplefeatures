@@ -518,14 +518,28 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 	case Polygon:
 		switch g2 := g2.(type) {
 		case Polygon:
-			return false, noImpl(g1, g2)
+			return hasIntersectionPolygonWithPolygon(g1, g2)
 		case MultiPoint:
 			intersects = hasIntersectionMultiPointWithPolygon(g2, g1)
 			return intersects, nil
 		case MultiLineString:
-			return false, noImpl(g1, g2)
+			mp, err := NewMultiPolygon([]Polygon{g1})
+			if err != nil {
+				// Cannot occur due to construction. A valid polygon will
+				// always form a valid multipolygon when it is the only
+				// element.
+				panic(err)
+			}
+			return hasIntersectionMultiLineStringWithMultiPolygon(g2, mp)
 		case MultiPolygon:
-			return false, noImpl(g1, g2)
+			mp, err := NewMultiPolygon([]Polygon{g1})
+			if err != nil {
+				// Cannot occur due to construction. A valid polygon will
+				// always form a valid multipolygon when it is the only
+				// element.
+				panic(err)
+			}
+			return hasIntersectionMultiPolygonWithMultiPolygon(mp, g2)
 		case GeometryCollection:
 			return false, noImpl(g1, g2)
 		}
@@ -535,9 +549,9 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 			intersects = hasIntersectionMultiPointWithMultiPoint(g1, g2)
 			return intersects, nil
 		case MultiLineString:
-			return false, noImpl(g1, g2)
+			return hasIntersectionMultiPointWithMultiLineString(g1, g2), nil
 		case MultiPolygon:
-			return false, noImpl(g1, g2)
+			return hasIntersectionMultiPointWithMultiPolygon(g1, g2), nil
 		case GeometryCollection:
 			return false, noImpl(g1, g2)
 		}
@@ -554,7 +568,7 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 	case MultiPolygon:
 		switch g2 := g2.(type) {
 		case MultiPolygon:
-			return false, noImpl(g1, g2)
+			return hasIntersectionMultiPolygonWithMultiPolygon(g1, g2)
 		case GeometryCollection:
 			return false, noImpl(g1, g2)
 		}
@@ -786,6 +800,61 @@ func hasIntersectionMultiPointWithPolygon(mp MultiPoint, p Polygon) bool {
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
 		if hasIntersectionPointWithPolygon(pt, p) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasIntersectionPolygonWithPolygon(p1, p2 Polygon) (bool, error) {
+	// Check if the boundaries intersect. If so, then the polygons must
+	// intersect.
+	b1 := p1.Boundary()
+	b2 := p2.Boundary()
+	intersect, err := b1.Intersects(b2)
+	if err != nil {
+		return false, err
+	}
+	if intersect {
+		return true, nil
+	}
+
+	// Other check to see if an arbitrary point from each polygon is inside the
+	// other polygon.
+	intersect, err = p1.ExteriorRing().StartPoint().Intersects(p2)
+	if err != nil {
+		return false, err
+	}
+	if intersect {
+		return true, nil
+	}
+	intersect, err = p2.ExteriorRing().StartPoint().Intersects(p1)
+	if err != nil {
+		return false, err
+	}
+	return intersect, nil
+}
+
+func hasIntersectionMultiPolygonWithMultiPolygon(mp1, mp2 MultiPolygon) (bool, error) {
+	n := mp1.NumPolygons()
+	for i := 0; i < n; i++ {
+		p1 := mp1.PolygonN(i)
+		m := mp2.NumPolygons()
+		for j := 0; j < m; j++ {
+			p2 := mp2.PolygonN(j)
+			if intersects, err := p1.Intersects(p2); err != nil || intersects {
+				return intersects, err
+			}
+		}
+	}
+	return false, nil
+}
+
+func hasIntersectionMultiPointWithMultiPolygon(pts MultiPoint, polys MultiPolygon) bool {
+	n := pts.NumPoints()
+	for i := 0; i < n; i++ {
+		pt := pts.PointN(i)
+		if hasIntersectionPointWithMultiPolygon(pt, polys) {
 			return true
 		}
 	}
