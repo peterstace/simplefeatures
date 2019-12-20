@@ -397,10 +397,10 @@ outer:
 
 func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 	if g2.IsEmpty() {
-		return false, nil // No intersection
+		return false, nil
 	}
 	if g1.IsEmpty() {
-		return false, nil // No intersection
+		return false, nil
 	}
 
 	if rank(g1) > rank(g2) {
@@ -581,12 +581,12 @@ func hasIntersectionLineWithLine(n1, n2 Line) bool {
 	o4 := orientation(c, d, b)
 
 	if o1 != o2 && o3 != o4 {
-		return true // Point has dimension 0
+		return true
 	}
 
 	if o1 == collinear && o2 == collinear {
 		if (!onSegment(a, b, c) && !onSegment(a, b, d)) && (!onSegment(c, d, a) && !onSegment(c, d, b)) {
-			return false // No intersection
+			return false
 		}
 
 		// ---------------------
@@ -598,14 +598,14 @@ func hasIntersectionLineWithLine(n1, n2 Line) bool {
 		ltl := leftmostThenLowestIndex(pts)
 		pts = append(pts[:ltl], pts[ltl+1:]...)
 		if pts[0].Equals(pts[1]) {
-			return true // Point has dimension 0
+			return true
 		}
 		//----------------------
 
-		return true // Line has dimension 1
+		return true
 	}
 
-	return false // No intersection
+	return false
 }
 
 func hasIntersectionLineWithMultiPoint(ln Line, mp MultiPoint) bool {
@@ -614,10 +614,10 @@ func hasIntersectionLineWithMultiPoint(ln Line, mp MultiPoint) bool {
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
 		if hasIntersectionPointWithLine(pt, ln) {
-			return true // Point and MultiPoint both have dimension 0
+			return true
 		}
 	}
-	return false // No intersection
+	return false
 }
 
 func hasIntersectionMultiPointWithMultiLineString(mp MultiPoint, mls MultiLineString) bool {
@@ -691,24 +691,24 @@ func hasIntersectionPointWithLine(point Point, line Line) bool {
 	// Speed is O(1) using a bounding box check then a point-on-line check.
 	env := mustEnvelope(line)
 	if !env.Contains(point.coords.XY) {
-		return false // No intersection
+		return false
 	}
 	lhs := (point.coords.X - line.a.X) * (line.b.Y - line.a.Y)
 	rhs := (point.coords.Y - line.a.Y) * (line.b.X - line.a.X)
 	if lhs == rhs {
-		return true // Point has dimension 0
+		return true
 	}
-	return false // No intersection
+	return false
 }
 
 func hasIntersectionPointWithLineString(pt Point, ls LineString) bool {
 	// Worst case speed is O(n), n is the number of lines.
 	for _, ln := range ls.lines {
 		if hasIntersectionPointWithLine(pt, ln) {
-			return true // Point has dimension 0
+			return true
 		}
 	}
-	return false // No intersection
+	return false
 }
 
 func hasIntersectionMultiPointWithMultiPoint(mp1, mp2 MultiPoint) bool {
@@ -718,17 +718,17 @@ func hasIntersectionMultiPointWithMultiPoint(mp1, mp2 MultiPoint) bool {
 			return true // Point and MultiPoint both have dimension 0
 		}
 	}
-	return false // No intersection
+	return false
 }
 
 func hasIntersectionPointWithMultiPoint(point Point, mp MultiPoint) bool {
 	// Worst case speed is O(n) but that's optimal because mp is not sorted.
 	for _, pt := range mp.pts {
 		if pt.EqualsExact(point) {
-			return true // Point and MultiPoint both have dimension 0
+			return true
 		}
 	}
-	return false // No intersection
+	return false
 }
 
 func hasIntersectionPointWithMultiLineString(point Point, mls MultiLineString) bool {
@@ -758,9 +758,9 @@ func hasIntersectionPointWithMultiPolygon(pt Point, mp MultiPolygon) bool {
 func hasIntersectionPointWithPoint(pt1, pt2 Point) bool {
 	// Speed is O(1).
 	if pt1.EqualsExact(pt2) {
-		return true // Point has dimension 0
+		return true
 	}
-	return false // No intersection
+	return false
 }
 
 func hasIntersectionPointWithPolygon(pt Point, p Polygon) bool {
@@ -768,15 +768,15 @@ func hasIntersectionPointWithPolygon(pt Point, p Polygon) bool {
 	m := p.NumInteriorRings()
 
 	if pointRingSide(pt.XY(), p.ExteriorRing()) == exterior {
-		return false // No intersection (outside the exterior)
+		return false
 	}
 	for j := 0; j < m; j++ {
 		ring := p.InteriorRingN(j)
 		if pointRingSide(pt.XY(), ring) == interior {
-			return false // No intersection (inside a hole)
+			return false
 		}
 	}
-	return true // Point has dimension 0
+	return true
 }
 
 func hasIntersectionMultiPointWithPolygon(mp MultiPoint, p Polygon) bool {
@@ -786,8 +786,8 @@ func hasIntersectionMultiPointWithPolygon(mp MultiPoint, p Polygon) bool {
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
 		if hasIntersectionPointWithPolygon(pt, p) {
-			return true // Point and MultiPoint have dimension 0
+			return true
 		}
 	}
-	return false // No intersection
+	return false
 }
