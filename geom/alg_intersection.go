@@ -654,7 +654,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 		for _, ln1 := range ls1.lines {
 			for _, ls2 := range mls2.lines {
 				for _, ln2 := range ls2.lines {
-					if inter := hasIntersectionLineWithLine(ln1, ln2); inter {
+					if hasIntersectionLineWithLine(ln1, ln2) {
 						return true
 					}
 				}
