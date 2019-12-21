@@ -13,6 +13,18 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 	if rank(g1) > rank(g2) {
 		g1, g2 = g2, g1
 	}
+
+	if gc, ok := g2.(GeometryCollection); ok {
+		n := gc.NumGeometries()
+		for i := 0; i < n; i++ {
+			g := gc.GeometryN(i)
+			if intersects, err := g1.Intersects(g); err != nil || intersects {
+				return intersects, err
+			}
+		}
+		return false, nil
+	}
+
 	switch g1 := g1.(type) {
 	case Point:
 		switch g2 := g2.(type) {
@@ -37,8 +49,6 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 		case MultiPolygon:
 			intersects = hasIntersectionPointWithMultiPolygon(g1, g2)
 			return intersects, nil
-		case GeometryCollection:
-			return false, noImpl(g1, g2)
 		}
 	case Line:
 		switch g2 := g2.(type) {
@@ -86,8 +96,6 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 			return hasIntersectionMultiLineStringWithMultiPolygon(
 				NewMultiLineString([]LineString{ls}), g2,
 			)
-		case GeometryCollection:
-			return false, noImpl(g1, g2)
 		}
 	case LineString:
 		switch g2 := g2.(type) {
@@ -119,8 +127,6 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 			return hasIntersectionMultiLineStringWithMultiPolygon(
 				NewMultiLineString([]LineString{g1}), g2,
 			)
-		case GeometryCollection:
-			return false, noImpl(g1, g2)
 		}
 	case Polygon:
 		switch g2 := g2.(type) {
@@ -147,8 +153,6 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 				panic(err)
 			}
 			return hasIntersectionMultiPolygonWithMultiPolygon(mp, g2)
-		case GeometryCollection:
-			return false, noImpl(g1, g2)
 		}
 	case MultiPoint:
 		switch g2 := g2.(type) {
@@ -159,8 +163,6 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 			return hasIntersectionMultiPointWithMultiLineString(g1, g2), nil
 		case MultiPolygon:
 			return hasIntersectionMultiPointWithMultiPolygon(g1, g2), nil
-		case GeometryCollection:
-			return false, noImpl(g1, g2)
 		}
 	case MultiLineString:
 		switch g2 := g2.(type) {
@@ -169,20 +171,11 @@ func hasIntersection(g1, g2 Geometry) (intersects bool, err error) {
 			return intersects, nil
 		case MultiPolygon:
 			return hasIntersectionMultiLineStringWithMultiPolygon(g1, g2)
-		case GeometryCollection:
-			return false, noImpl(g1, g2)
 		}
 	case MultiPolygon:
 		switch g2 := g2.(type) {
 		case MultiPolygon:
 			return hasIntersectionMultiPolygonWithMultiPolygon(g1, g2)
-		case GeometryCollection:
-			return false, noImpl(g1, g2)
-		}
-	case GeometryCollection:
-		switch g2 := g2.(type) {
-		case GeometryCollection:
-			return false, noImpl(g1, g2)
 		}
 	}
 

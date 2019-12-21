@@ -10,7 +10,7 @@ services:
   tests:
     image: golang:1
     working_dir: /go/src/github.com/peterstace/simplefeatures
-    entrypoint: go test -test.count=1 -test.run=. ./...
+    entrypoint: go test -test.count=1 -test.timeout=30m -test.run=. ./...
     volumes:
       - .:/go/src/github.com/peterstace/simplefeatures
     environment:
