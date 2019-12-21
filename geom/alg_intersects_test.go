@@ -3,6 +3,8 @@ package geom_test
 import (
 	"strconv"
 	"testing"
+
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestIntersects(t *testing.T) {
@@ -267,7 +269,7 @@ func TestIntersects(t *testing.T) {
 		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((1 1,1 -1,2 -1,2 1,1 1)))", true},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			runTest := func(g1, g2 Geometry) func(t *testing.T) {
+			runTest := func(g1, g2 geom.Geometry) func(t *testing.T) {
 				return func(t *testing.T) {
 					got, err := g1.Intersects(g2)
 					if err != nil {
