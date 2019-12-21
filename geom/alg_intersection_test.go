@@ -416,6 +416,11 @@ func TestIntersects(t *testing.T) {
 		{"LINESTRING(3 0,3 1,3 2)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)))", false},
 		{"LINESTRING(1 1,2 1, 3 1)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)))", true},
 
+		// Polygon/Polygon
+		{"POLYGON((0 0,1 0,1 1,0 1,0 0))", "POLYGON((2 0,3 0,3 1,2 1,2 0))", false},
+		{"POLYGON((0 0,2 0,2 2,0 2,0 0))", "POLYGON((1 1,3 1,3 3,1 3,1 1))", true},
+		{"POLYGON((0 0,4 0,4 4,0 4,0 0))", "POLYGON((1 1,3 1,3 3,1 3,1 1))", true},
+
 		// Polygon/MultiPoint
 		{
 			`POLYGON(
@@ -446,6 +451,14 @@ func TestIntersects(t *testing.T) {
 			true,
 		},
 
+		// Polygon/MultiLineString
+		{"POLYGON((0 0,0 2,2 2,2 0,0 0))", "MULTILINESTRING((-1 1,-1 3),(1 -1,1 3))", true},
+		{"POLYGON((0 0,0 2,2 2,2 0,0 0))", "MULTILINESTRING((-1 1,-1 3),(3 -1,3 3))", false},
+
+		// Polygon/MultiPolygon
+		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "POLYGON((8 1,9 1,9 2,8 2,8 1))", false},
+		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "POLYGON((6 1,7.5 1,7.5 -1,6 -1,6 1))", true},
+
 		// MultiPoint/MultiPoint
 		{"MULTIPOINT EMPTY", "MULTIPOINT EMPTY", false},
 		{"MULTIPOINT EMPTY", "MULTIPOINT((1 2))", false},
@@ -466,6 +479,14 @@ func TestIntersects(t *testing.T) {
 		{"MULTIPOINT((3 4),(1 2))", "POINT(1 2)", true},
 		{"MULTIPOINT((5 6),(7 8))", "POINT(1 2)", false},
 
+		// MultiPoint/MultiLineString
+		{"MULTIPOINT(0 0,1 0)", "MULTILINESTRING((0 1,1 1),(1 0,2 -1))", true},
+		{"MULTIPOINT(0 0,1 0)", "MULTILINESTRING((0 1,1 1),(1 0.5,2 -0.5))", false},
+
+		// MultiPoint/MultiPolygon
+		{"MULTIPOINT((1 1))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)))", true},
+		{"MULTIPOINT((3 3))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)))", false},
+
 		// MultiLineString/MultiLineString
 		{"MULTILINESTRING((0 0,1 0,1 1,0 1))", "MULTILINESTRING((1 1,2 1,2 2,1 2,1 1))", true},
 		{"MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))", "MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))", true},
@@ -475,6 +496,13 @@ func TestIntersects(t *testing.T) {
 		{"MULTILINESTRING((3 3,3 5))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
 		{"MULTILINESTRING((1 1,3 1))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
 		{"MULTILINESTRING((0 2,2 4))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
+
+		// MultiPolygon/MultiPolygon
+		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((8 1,9 1,9 2,8 2,8 1)))", false},
+		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((6 1,7.5 1,7.5 -1,6 -1,6 1)))", true},
+		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((5 1,6 1,6 2,5 2,5 1)))", false},
+		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((1 1,1 2,2 2,2 1,1 1)))", true},
+		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((1 1,1 -1,2 -1,2 1,1 1)))", true},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			runTest := func(g1, g2 Geometry) func(t *testing.T) {
