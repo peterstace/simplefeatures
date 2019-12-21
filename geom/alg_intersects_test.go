@@ -267,6 +267,16 @@ func TestIntersects(t *testing.T) {
 		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((5 1,6 1,6 2,5 2,5 1)))", false},
 		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((1 1,1 2,2 2,2 1,1 1)))", true},
 		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((1 1,1 -1,2 -1,2 1,1 1)))", true},
+
+		// GeometryCollection/OtherTypes
+		{"GEOMETRYCOLLECTION(POINT(1 2))", "POINT(1 2)", true},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", "POINT(1 3)", false},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", "LINESTRING(0 2,2 2)", true},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", "LINESTRING(0 3,2 3)", false},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", "LINESTRING(0 2,2 2,3 3)", true},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", "LINESTRING(0 3,2 3,3 3)", false},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", "POLYGON((0.5 1.5,1.5 1.5,1.5 2.5,0.5 2.5, 0.5 1.5))", true},
+		{"GEOMETRYCOLLECTION(POINT(5 5))", "POLYGON((0.5 1.5,1.5 1.5,1.5 2.5,0.5 2.5, 0.5 1.5))", false},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			runTest := func(g1, g2 geom.Geometry) func(t *testing.T) {
