@@ -524,3 +524,12 @@ func TestCentroidMultiPolygon(t *testing.T) {
 		})
 	}
 }
+
+func TestMultiLineString(t *testing.T) {
+	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").(LineString)
+	got := ls.AsMultiLineString()
+	want := geomFromWKT(t, "MULTILINESTRING((1 2,3 4,5 6))")
+	if !got.EqualsExact(want) {
+		t.Errorf("want=%v got=%v", want, got)
+	}
+}

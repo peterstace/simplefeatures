@@ -53,8 +53,8 @@ func hasIntersection(g1, g2 Geometry) bool {
 				return false
 			}
 			return hasIntersectionMultiLineStringWithMultiLineString(
-				NewMultiLineString([]LineString{ln}),
-				NewMultiLineString([]LineString{g2}),
+				ln.AsMultiLineString(),
+				g2.AsMultiLineString(),
 			)
 		case Polygon:
 			ls, err := NewLineStringC(g1.Coordinates())
@@ -63,14 +63,16 @@ func hasIntersection(g1, g2 Geometry) bool {
 				// be a valid linestring.
 				panic(err)
 			}
-			mls := NewMultiLineString([]LineString{ls})
 			mp, err := NewMultiPolygon([]Polygon{g2})
 			if err != nil {
 				// Cannot occur due to construction. A valid polygon will
 				// always be a valid multipolygon.
 				panic(err)
 			}
-			return hasIntersectionMultiLineStringWithMultiPolygon(mls, mp)
+			return hasIntersectionMultiLineStringWithMultiPolygon(
+				ls.AsMultiLineString(),
+				mp,
+			)
 		case MultiPoint:
 			return hasIntersectionLineWithMultiPoint(g1, g2)
 		case MultiLineString:
@@ -80,7 +82,7 @@ func hasIntersection(g1, g2 Geometry) bool {
 				panic(err)
 			}
 			return hasIntersectionMultiLineStringWithMultiLineString(
-				NewMultiLineString([]LineString{ln}), g2,
+				ln.AsMultiLineString(), g2,
 			)
 		case MultiPolygon:
 			ls, err := NewLineStringC(g1.Coordinates())
@@ -89,15 +91,15 @@ func hasIntersection(g1, g2 Geometry) bool {
 				panic(err)
 			}
 			return hasIntersectionMultiLineStringWithMultiPolygon(
-				NewMultiLineString([]LineString{ls}), g2,
+				ls.AsMultiLineString(), g2,
 			)
 		}
 	case LineString:
 		switch g2 := g2.(type) {
 		case LineString:
 			return hasIntersectionMultiLineStringWithMultiLineString(
-				NewMultiLineString([]LineString{g1}),
-				NewMultiLineString([]LineString{g2}),
+				g1.AsMultiLineString(),
+				g2.AsMultiLineString(),
 			)
 		case Polygon:
 			mp, err := NewMultiPolygon([]Polygon{g2})
@@ -106,20 +108,20 @@ func hasIntersection(g1, g2 Geometry) bool {
 				panic(err)
 			}
 			return hasIntersectionMultiLineStringWithMultiPolygon(
-				NewMultiLineString([]LineString{g1}), mp,
+				g1.AsMultiLineString(), mp,
 			)
 		case MultiPoint:
 			return hasIntersectionMultiPointWithMultiLineString(
-				g2, NewMultiLineString([]LineString{g1}),
+				g2, g1.AsMultiLineString(),
 			)
 		case MultiLineString:
 			return hasIntersectionMultiLineStringWithMultiLineString(
-				NewMultiLineString([]LineString{g1}),
+				g1.AsMultiLineString(),
 				g2,
 			)
 		case MultiPolygon:
 			return hasIntersectionMultiLineStringWithMultiPolygon(
-				NewMultiLineString([]LineString{g1}), g2,
+				g1.AsMultiLineString(), g2,
 			)
 		}
 	case Polygon:

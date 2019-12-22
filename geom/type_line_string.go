@@ -250,3 +250,9 @@ func (s LineString) Length() float64 {
 	}
 	return sum
 }
+
+// AsMultiLineString is a convinience function that converts this LineString
+// into a MultiLineString.
+func (s LineString) AsMultiLineString() MultiLineString {
+	return NewMultiLineString([]LineString{s})
+}
