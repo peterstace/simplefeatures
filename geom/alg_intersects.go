@@ -61,7 +61,6 @@ func hasIntersection(g1, g2 Geometry) bool {
 			}
 			return hasIntersectionMultiLineStringWithMultiPolygon(
 				g1.AsLineString().AsMultiLineString(),
-				ls.AsMultiLineString(),
 				mp,
 			)
 		case MultiPoint:
