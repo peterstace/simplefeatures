@@ -81,9 +81,8 @@ func (n Line) Intersection(g Geometry) (Geometry, error) {
 	return intersection(n, g)
 }
 
-func (n Line) Intersects(g Geometry) (bool, error) {
-	has, err := hasIntersection(n, g)
-	return has, err
+func (n Line) Intersects(g Geometry) bool {
+	return hasIntersection(n, g)
 }
 
 func (n Line) IsEmpty() bool {

@@ -28,10 +28,7 @@ type Geometry interface {
 
 	// Intersects returns true if the intersection of this gemoetry with the
 	// specified other geometry is not empty, or false if it is empty.
-	//
-	// It is not implemented for all possible pairs of geometries, and returns
-	// an error in those cases.
-	Intersects(Geometry) (bool, error)
+	Intersects(Geometry) bool
 
 	// IsEmpty returns true if this object an empty geometry.
 	IsEmpty() bool

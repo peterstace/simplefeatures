@@ -201,10 +201,7 @@ func TestIntersection(t *testing.T) {
 				// the assumption that for every pair of geometries that
 				// Intersection implements, that pair is also implemented for
 				// Intersects.
-				intersects, err := in1g.Intersects(in2g)
-				if err != nil {
-					t.Fatal(err)
-				}
+				intersects := in1g.Intersects(in2g)
 				if intersects == got.IsEmpty() {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v\nintersects: %v", tt.in1, tt.in2, tt.out, got, intersects)
 				}
@@ -231,10 +228,7 @@ func TestIntersection(t *testing.T) {
 				// the assumption that for every pair of geometries that
 				// Intersection implements, that pair is also implemented for
 				// Intersects.
-				intersects, err := in2g.Intersects(in1g)
-				if err != nil {
-					t.Fatal(err)
-				}
+				intersects := in2g.Intersects(in1g)
 				if intersects == got.IsEmpty() {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v\nintersects: %v", tt.in1, tt.in2, tt.out, got, intersects)
 				}
