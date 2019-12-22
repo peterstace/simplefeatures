@@ -48,21 +48,11 @@ func hasIntersection(g1, g2 Geometry) bool {
 		case Line:
 			return hasIntersectionLineWithLine(g1, g2)
 		case LineString:
-			ln, err := NewLineStringC(g1.Coordinates())
-			if err != nil {
-				return false
-			}
 			return hasIntersectionMultiLineStringWithMultiLineString(
-				ln.AsMultiLineString(),
+				g1.AsLineString().AsMultiLineString(),
 				g2.AsMultiLineString(),
 			)
 		case Polygon:
-			ls, err := NewLineStringC(g1.Coordinates())
-			if err != nil {
-				// Cannot occur due to construction. A valid line will always
-				// be a valid linestring.
-				panic(err)
-			}
 			mp, err := NewMultiPolygon([]Polygon{g2})
 			if err != nil {
 				// Cannot occur due to construction. A valid polygon will
@@ -70,28 +60,19 @@ func hasIntersection(g1, g2 Geometry) bool {
 				panic(err)
 			}
 			return hasIntersectionMultiLineStringWithMultiPolygon(
+				g1.AsLineString().AsMultiLineString(),
 				ls.AsMultiLineString(),
 				mp,
 			)
 		case MultiPoint:
 			return hasIntersectionLineWithMultiPoint(g1, g2)
 		case MultiLineString:
-			ln, err := NewLineStringC(g1.Coordinates())
-			if err != nil {
-				// Cannot occur due to construction.
-				panic(err)
-			}
 			return hasIntersectionMultiLineStringWithMultiLineString(
-				ln.AsMultiLineString(), g2,
+				g1.AsLineString().AsMultiLineString(), g2,
 			)
 		case MultiPolygon:
-			ls, err := NewLineStringC(g1.Coordinates())
-			if err != nil {
-				// Cannot occur due to construction.
-				panic(err)
-			}
 			return hasIntersectionMultiLineStringWithMultiPolygon(
-				ls.AsMultiLineString(), g2,
+				g1.AsLineString().AsMultiLineString(), g2,
 			)
 		}
 	case LineString:
