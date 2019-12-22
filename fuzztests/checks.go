@@ -390,10 +390,7 @@ func CheckEquals(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 
 func CheckIntersects(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 	t.Run("CheckIntersects", func(t *testing.T) {
-		got, err := g1.Intersects(g2)
-		if err != nil {
-			return // operation not implemented
-		}
+		got := g1.Intersects(g2)
 		want := pg.Intersects(t, g1, g2)
 		if got != want {
 			t.Logf("got:  %t", got)
