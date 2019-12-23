@@ -53,15 +53,9 @@ func hasIntersection(g1, g2 Geometry) bool {
 				g2.AsMultiLineString(),
 			)
 		case Polygon:
-			mp, err := NewMultiPolygon([]Polygon{g2})
-			if err != nil {
-				// Cannot occur due to construction. A valid polygon will
-				// always be a valid multipolygon.
-				panic(err)
-			}
 			return hasIntersectionMultiLineStringWithMultiPolygon(
 				g1.AsLineString().AsMultiLineString(),
-				mp,
+				g2.AsMultiPolygon(),
 			)
 		case MultiPoint:
 			return hasIntersectionLineWithMultiPoint(g1, g2)
@@ -82,13 +76,9 @@ func hasIntersection(g1, g2 Geometry) bool {
 				g2.AsMultiLineString(),
 			)
 		case Polygon:
-			mp, err := NewMultiPolygon([]Polygon{g2})
-			if err != nil {
-				// Cannot occur due to construction.
-				panic(err)
-			}
 			return hasIntersectionMultiLineStringWithMultiPolygon(
-				g1.AsMultiLineString(), mp,
+				g1.AsMultiLineString(),
+				g2.AsMultiPolygon(),
 			)
 		case MultiPoint:
 			return hasIntersectionMultiPointWithMultiLineString(
@@ -111,23 +101,13 @@ func hasIntersection(g1, g2 Geometry) bool {
 		case MultiPoint:
 			return hasIntersectionMultiPointWithPolygon(g2, g1)
 		case MultiLineString:
-			mp, err := NewMultiPolygon([]Polygon{g1})
-			if err != nil {
-				// Cannot occur due to construction. A valid polygon will
-				// always form a valid multipolygon when it is the only
-				// element.
-				panic(err)
-			}
-			return hasIntersectionMultiLineStringWithMultiPolygon(g2, mp)
+			return hasIntersectionMultiLineStringWithMultiPolygon(
+				g2, g1.AsMultiPolygon(),
+			)
 		case MultiPolygon:
-			mp, err := NewMultiPolygon([]Polygon{g1})
-			if err != nil {
-				// Cannot occur due to construction. A valid polygon will
-				// always form a valid multipolygon when it is the only
-				// element.
-				panic(err)
-			}
-			return hasIntersectionMultiPolygonWithMultiPolygon(mp, g2)
+			return hasIntersectionMultiPolygonWithMultiPolygon(
+				g1.AsMultiPolygon(), g2,
+			)
 		}
 	case MultiPoint:
 		switch g2 := g2.(type) {

@@ -338,3 +338,14 @@ func centroidAndAreaOfLinearRing(lr LineString) (XY, float64) {
 	area /= 2
 	return XY{x / 6 / area, y / 6 / area}, math.Abs(area)
 }
+
+// AsMultiPolygon is a helper that converts this Polygon into a MultiPolygon.
+func (p Polygon) AsMultiPolygon() MultiPolygon {
+	mp, err := NewMultiPolygon([]Polygon{p})
+	if err != nil {
+		// Cannot occur due to construction. A valid polygon will always be a
+		// valid multipolygon.
+		panic(err)
+	}
+	return mp
+}

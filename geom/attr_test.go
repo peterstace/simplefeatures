@@ -547,3 +547,11 @@ func TestLineToLineString(t *testing.T) {
 		t.Errorf("want start point 3,4 but got %v", got.EndPoint().XY())
 	}
 }
+
+func TestPolygonToMultiPolygon(t *testing.T) {
+	p := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))").(Polygon)
+	mp := p.AsMultiPolygon()
+	if mp.AsText() != "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))" {
+		t.Errorf("got %v", mp.AsText())
+	}
+}
