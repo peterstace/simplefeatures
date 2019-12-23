@@ -81,9 +81,8 @@ func (n Line) Intersection(g Geometry) (Geometry, error) {
 	return intersection(n, g)
 }
 
-func (n Line) Intersects(g Geometry) (bool, error) {
-	has, err := hasIntersection(n, g)
-	return has, err
+func (n Line) Intersects(g Geometry) bool {
+	return hasIntersection(n, g)
 }
 
 func (n Line) IsEmpty() bool {
@@ -174,4 +173,17 @@ func (n Line) IsRing() bool {
 func (n Line) Length() float64 {
 	delta := n.a.XY.Sub(n.b.XY)
 	return math.Sqrt(delta.Dot(delta))
+}
+
+// AsLineString is a helper function that converts this Line into a LineString.
+func (n Line) AsLineString() LineString {
+	ls, err := NewLineStringC(n.Coordinates(), DisableAllValidations)
+	if err != nil {
+		// Cannot occur due to construction. A valid Line will always be a
+		// valid LineString.
+		msg := fmt.Sprintf("implementation error: Could not convert "+
+			"Line to LineString. Line=%v, Err=%v.", n, err)
+		panic(msg)
+	}
+	return ls
 }

@@ -524,3 +524,34 @@ func TestCentroidMultiPolygon(t *testing.T) {
 		})
 	}
 }
+
+func TestLineStringToMultiLineString(t *testing.T) {
+	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").(LineString)
+	got := ls.AsMultiLineString()
+	want := geomFromWKT(t, "MULTILINESTRING((1 2,3 4,5 6))")
+	if !got.EqualsExact(want) {
+		t.Errorf("want=%v got=%v", want, got)
+	}
+}
+
+func TestLineToLineString(t *testing.T) {
+	ln := geomFromWKT(t, "LINESTRING(1 2,3 4)").(Line)
+	got := ln.AsLineString()
+	if got.NumPoints() != 2 {
+		t.Errorf("want num points 2 but got %v", got.NumPoints())
+	}
+	if got.StartPoint().XY() != (XY{1, 2}) {
+		t.Errorf("want start point 1,2 but got %v", got.StartPoint().XY())
+	}
+	if got.EndPoint().XY() != (XY{3, 4}) {
+		t.Errorf("want start point 3,4 but got %v", got.EndPoint().XY())
+	}
+}
+
+func TestPolygonToMultiPolygon(t *testing.T) {
+	p := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))").(Polygon)
+	mp := p.AsMultiPolygon()
+	if mp.AsText() != "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))" {
+		t.Errorf("got %v", mp.AsText())
+	}
+}

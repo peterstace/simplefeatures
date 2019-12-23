@@ -29,21 +29,22 @@ The changelog can be found [here](CHANGELOG.md).
 	- Dimensionality check
 	- Bounding box calculation
 	- Emptiness check
-	- Boudary calculation
+	- Boundary calculation
 
 - Spatial analysis:
 	- Convex Hull calculation
+	- Intersects check
+	- Length calculation
+	- Closed geometry calculation
+	- Ring property calculation
+	- Area calculation
+	- Centroid calculation
 
 #### In the works
 
 - Spatial analysis:
 	- Intersection calculation
 	- Spatially equality calculation
-	- Length calculation
-	- Closed geometry calculation
-	- Ring property calculation
-	- Area calculation
-	- Centroid calculation
 	- Point on surface calculation
 
 #### Features Not Planned Yet
@@ -54,7 +55,6 @@ The changelog can be found [here](CHANGELOG.md).
 - Spatial analysis:
 	- Geometry buffering
 	- Disjoint check
-	- Intersects check
 	- Touches check
 	- Crosses check
 	- Within check

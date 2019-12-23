@@ -138,9 +138,8 @@ func (s LineString) Intersection(g Geometry) (Geometry, error) {
 	return intersection(s, g)
 }
 
-func (s LineString) Intersects(g Geometry) (bool, error) {
-	has, err := hasIntersection(s, g)
-	return has, err
+func (s LineString) Intersects(g Geometry) bool {
+	return hasIntersection(s, g)
 }
 
 func (s LineString) IsEmpty() bool {
@@ -250,4 +249,10 @@ func (s LineString) Length() float64 {
 		sum += ln.Length()
 	}
 	return sum
+}
+
+// AsMultiLineString is a convinience function that converts this LineString
+// into a MultiLineString.
+func (s LineString) AsMultiLineString() MultiLineString {
+	return NewMultiLineString([]LineString{s})
 }
