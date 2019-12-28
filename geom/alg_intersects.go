@@ -3,6 +3,7 @@ package geom
 import (
 	"container/heap"
 	"fmt"
+	"math"
 	"sort"
 )
 
@@ -238,73 +239,77 @@ func (h *lineHeap) Swap(i, j int) {
 }
 
 func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) bool {
-	extractSegments := func(mls MultiLineString) []Line {
-		var lines []Line
-		for _, ls := range mls.lines {
+	// A Sweep-Line-Algorithm approach is used to reduce the number of raw line
+	// segment intersection tests that must be performed. A vertical sweep line
+	// is swept across the plane from left to right. Two 'active' sets of
+	// segments are maintained for each multi line string, corresponding to the
+	// segments that intersect with the sweep line. Only segments in the active
+	// sets need to be considered when checking to see if the multi line
+	// strings intersect with each other.
+
+	type side struct {
+		mls         MultiLineString
+		unprocessed []Line
+		active      lineHeap
+		newSegments []Line
+	}
+	var sides [2]*side
+	sides[0] = &side{mls: mls1}
+	sides[1] = &side{mls: mls2}
+
+	// Create a list of line segments from each MultiLineString, in ascending
+	// order by X coordinate.
+	for _, side := range sides {
+		for _, ls := range side.mls.lines {
 			for _, ln := range ls.lines {
 				if ln.StartPoint().XY().X > ln.EndPoint().XY().X {
 					// TODO: Use ST_Reverse
 					ln.a, ln.b = ln.b, ln.a
 				}
-				lines = append(lines, ln)
+				side.unprocessed = append(side.unprocessed, ln)
 			}
 		}
-		sort.Slice(lines, func(i, j int) bool {
-			return lines[i].StartPoint().XY().X < lines[j].StartPoint().XY().X
+		sort.Slice(side.unprocessed, func(i, j int) bool {
+			ix := side.unprocessed[i].StartPoint().XY().X
+			jx := side.unprocessed[j].StartPoint().XY().X
+			return ix < jx
 		})
-		return lines
 	}
-	unprocessed1 := extractSegments(mls1)
-	unprocessed2 := extractSegments(mls2)
 
-	var active1, active2 lineHeap
-	var toCheck1, toCheck2 []Line
-
-	for len(unprocessed1) > 0 || len(unprocessed2) > 0 {
-		var status float64
-		switch {
-		case len(unprocessed1) == 0:
-			status = unprocessed2[0].StartPoint().XY().X
-		case len(unprocessed2) == 0:
-			status = unprocessed1[0].StartPoint().XY().X
-		case unprocessed1[0].StartPoint().XY().X < unprocessed2[0].StartPoint().XY().X:
-			status = unprocessed1[0].StartPoint().XY().X
-		default:
-			status = unprocessed2[0].StartPoint().XY().X
-		}
-
-		for len(active1) > 0 && active1[0].EndPoint().XY().X < status {
-			heap.Pop(&active1)
-		}
-		for len(active2) > 0 && active2[0].EndPoint().XY().X < status {
-			heap.Pop(&active2)
-		}
-
-		toCheck1 = toCheck1[:0]
-		toCheck2 = toCheck2[:0]
-
-		for len(unprocessed1) > 0 && unprocessed1[0].StartPoint().XY().X == status {
-			toCheck1 = append(toCheck1, unprocessed1[0])
-			heap.Push(&active1, unprocessed1[0])
-			unprocessed1 = unprocessed1[1:]
-		}
-		for len(unprocessed2) > 0 && unprocessed2[0].StartPoint().XY().X == status {
-			toCheck2 = append(toCheck2, unprocessed2[0])
-			heap.Push(&active2, unprocessed2[0])
-			unprocessed2 = unprocessed2[1:]
-		}
-
-		for _, checkLine := range toCheck1 {
-			for _, ln := range active2 {
-				if ln.Intersects(checkLine) {
-					return true
-				}
+	for len(sides[0].unprocessed)+len(sides[1].unprocessed) > 0 {
+		// Calculate the X coordinate of the next line segment(s) that will be
+		// processed when sweeping left to right.
+		sweepX := math.Inf(+1)
+		for _, side := range sides {
+			if len(side.unprocessed) > 0 {
+				sweepX = math.Min(sweepX, side.unprocessed[0].StartPoint().XY().X)
 			}
 		}
-		for _, checkLine := range toCheck2 {
-			for _, ln := range active1 {
-				if ln.Intersects(checkLine) {
-					return true
+
+		// Update the active line segment sets by throwing away any line
+		// segments that can no longer possibly intersect with any unprocessed
+		// line segments, and adding any new line segments to the active sets.
+		for _, side := range sides {
+			for len(side.active) > 0 && side.active[0].EndPoint().XY().X < sweepX {
+				heap.Pop(&side.active)
+			}
+			side.newSegments = side.newSegments[:0]
+			for len(side.unprocessed) > 0 && side.unprocessed[0].StartPoint().XY().X == sweepX {
+				side.newSegments = append(side.newSegments, side.unprocessed[0])
+				heap.Push(&side.active, side.unprocessed[0])
+				side.unprocessed = side.unprocessed[1:]
+			}
+		}
+
+		// Check for intersection between any new line segments, and segments
+		// in the opposing active set.
+		for i, side := range sides {
+			other := sides[1-i]
+			for _, checkLine := range side.newSegments {
+				for _, ln := range other.active {
+					if ln.Intersects(checkLine) {
+						return true
+					}
 				}
 			}
 		}
