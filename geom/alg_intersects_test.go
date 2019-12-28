@@ -297,3 +297,29 @@ func TestIntersects(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkIntersectsLineStringWithLineString(b *testing.B) {
+	const sz = 1000
+	xys1 := make([]geom.XY, sz)
+	xys2 := make([]geom.XY, sz)
+	for i := 0; i < sz; i++ {
+		x := float64(i) / float64(sz)
+		xys1[i] = geom.XY{X: x, Y: 1}
+		xys2[i] = geom.XY{X: x, Y: 2}
+	}
+	ls1, err := geom.NewLineStringXY(xys1)
+	if err != nil {
+		b.Fatal(err)
+	}
+	ls2, err := geom.NewLineStringXY(xys2)
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		if ls1.Intersects(ls2) {
+			b.Fatal("should not intersect")
+		}
+	}
+}
