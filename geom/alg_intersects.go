@@ -1,6 +1,10 @@
 package geom
 
-import "fmt"
+import (
+	"container/heap"
+	"fmt"
+	"sort"
+)
 
 func hasIntersection(g1, g2 Geometry) bool {
 	if g2.IsEmpty() {
@@ -213,17 +217,94 @@ func hasIntersectionMultiPointWithMultiLineString(mp MultiPoint, mls MultiLineSt
 	return false
 }
 
+type lineHeap []Line
+
+func (h *lineHeap) Push(x interface{}) {
+	*h = append(*h, x.(Line))
+}
+func (h *lineHeap) Pop() interface{} {
+	e := (*h)[len(*h)-1]
+	*h = (*h)[:len(*h)-1]
+	return e
+}
+func (h *lineHeap) Len() int {
+	return len(*h)
+}
+func (h *lineHeap) Less(i, j int) bool {
+	return (*h)[i].EndPoint().XY().X < (*h)[j].EndPoint().XY().X
+}
+func (h *lineHeap) Swap(i, j int) {
+	(*h)[i], (*h)[j] = (*h)[j], (*h)[i]
+}
+
 func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) bool {
-	// Speed is O(n * m) where n, m are the number of lines in each input.
-	// This may be the best case, because we must visit all combinations in case
-	// any colinear line overlaps exist which would raise the dimensionality.
-	for _, ls1 := range mls1.lines {
-		for _, ln1 := range ls1.lines {
-			for _, ls2 := range mls2.lines {
-				for _, ln2 := range ls2.lines {
-					if hasIntersectionLineWithLine(ln1, ln2) {
-						return true
-					}
+	extractSegments := func(mls MultiLineString) []Line {
+		var lines []Line
+		for _, ls := range mls.lines {
+			for _, ln := range ls.lines {
+				if ln.StartPoint().XY().X > ln.EndPoint().XY().X {
+					// TODO: Use ST_Reverse
+					ln.a, ln.b = ln.b, ln.a
+				}
+				lines = append(lines, ln)
+			}
+		}
+		sort.Slice(lines, func(i, j int) bool {
+			return lines[i].StartPoint().XY().X < lines[j].StartPoint().XY().X
+		})
+		return lines
+	}
+	unprocessed1 := extractSegments(mls1)
+	unprocessed2 := extractSegments(mls2)
+
+	var active1, active2 lineHeap
+	var toCheck1, toCheck2 []Line
+
+	for len(unprocessed1) > 0 || len(unprocessed2) > 0 {
+		var status float64
+		switch {
+		case len(unprocessed1) == 0:
+			status = unprocessed2[0].StartPoint().XY().X
+		case len(unprocessed2) == 0:
+			status = unprocessed1[0].StartPoint().XY().X
+		case unprocessed1[0].StartPoint().XY().X < unprocessed2[0].StartPoint().XY().X:
+			status = unprocessed1[0].StartPoint().XY().X
+		default:
+			status = unprocessed2[0].StartPoint().XY().X
+		}
+
+		for len(active1) > 0 && active1[0].EndPoint().XY().X < status {
+			heap.Pop(&active1)
+		}
+		for len(active2) > 0 && active2[0].EndPoint().XY().X < status {
+			heap.Pop(&active2)
+		}
+
+		toCheck1 = toCheck1[:0]
+		toCheck2 = toCheck2[:0]
+
+		for len(unprocessed1) > 0 && unprocessed1[0].StartPoint().XY().X == status {
+			toCheck1 = append(toCheck1, unprocessed1[0])
+			heap.Push(&active1, unprocessed1[0])
+			unprocessed1 = unprocessed1[1:]
+		}
+		for len(unprocessed2) > 0 && unprocessed2[0].StartPoint().XY().X == status {
+			toCheck2 = append(toCheck2, unprocessed2[0])
+			heap.Push(&active2, unprocessed2[0])
+			unprocessed2 = unprocessed2[1:]
+		}
+
+		for _, checkLine := range toCheck1 {
+			for _, ln := range active2 {
+				if ln.Intersects(checkLine) {
+					return true
+				}
+			}
+		}
+		for _, checkLine := range toCheck2 {
+			for _, ln := range active1 {
+				if ln.Intersects(checkLine) {
+					return true
 				}
 			}
 		}
