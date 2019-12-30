@@ -1,6 +1,11 @@
 package geom
 
-import "fmt"
+import (
+	"container/heap"
+	"fmt"
+	"math"
+	"sort"
+)
 
 func hasIntersection(g1, g2 Geometry) bool {
 	if g2.IsEmpty() {
@@ -213,15 +218,96 @@ func hasIntersectionMultiPointWithMultiLineString(mp MultiPoint, mls MultiLineSt
 	return false
 }
 
+type lineHeap []Line
+
+func (h *lineHeap) Push(x interface{}) {
+	*h = append(*h, x.(Line))
+}
+func (h *lineHeap) Pop() interface{} {
+	e := (*h)[len(*h)-1]
+	*h = (*h)[:len(*h)-1]
+	return e
+}
+func (h *lineHeap) Len() int {
+	return len(*h)
+}
+func (h *lineHeap) Less(i, j int) bool {
+	return (*h)[i].EndPoint().XY().X < (*h)[j].EndPoint().XY().X
+}
+func (h *lineHeap) Swap(i, j int) {
+	(*h)[i], (*h)[j] = (*h)[j], (*h)[i]
+}
+
 func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) bool {
-	// Speed is O(n * m) where n, m are the number of lines in each input.
-	// This may be the best case, because we must visit all combinations in case
-	// any colinear line overlaps exist which would raise the dimensionality.
-	for _, ls1 := range mls1.lines {
-		for _, ln1 := range ls1.lines {
-			for _, ls2 := range mls2.lines {
-				for _, ln2 := range ls2.lines {
-					if hasIntersectionLineWithLine(ln1, ln2) {
+	// A Sweep-Line-Algorithm approach is used to reduce the number of raw line
+	// segment intersection tests that must be performed. A vertical sweep line
+	// is swept across the plane from left to right. Two 'active' sets of
+	// segments are maintained for each multi line string, corresponding to the
+	// segments that intersect with the sweep line. Only segments in the active
+	// sets need to be considered when checking to see if the multi line
+	// strings intersect with each other.
+
+	type side struct {
+		mls         MultiLineString
+		unprocessed []Line
+		active      lineHeap
+		newSegments []Line
+	}
+	var sides [2]*side
+	sides[0] = &side{mls: mls1}
+	sides[1] = &side{mls: mls2}
+
+	// Create a list of line segments from each MultiLineString, in ascending
+	// order by X coordinate.
+	for _, side := range sides {
+		for _, ls := range side.mls.lines {
+			for _, ln := range ls.lines {
+				if ln.StartPoint().XY().X > ln.EndPoint().XY().X {
+					// TODO: Use ST_Reverse
+					ln.a, ln.b = ln.b, ln.a
+				}
+				side.unprocessed = append(side.unprocessed, ln)
+			}
+		}
+		sort.Slice(side.unprocessed, func(i, j int) bool {
+			ix := side.unprocessed[i].StartPoint().XY().X
+			jx := side.unprocessed[j].StartPoint().XY().X
+			return ix < jx
+		})
+	}
+
+	for len(sides[0].unprocessed)+len(sides[1].unprocessed) > 0 {
+		// Calculate the X coordinate of the next line segment(s) that will be
+		// processed when sweeping left to right.
+		sweepX := math.Inf(+1)
+		for _, side := range sides {
+			if len(side.unprocessed) > 0 {
+				sweepX = math.Min(sweepX, side.unprocessed[0].StartPoint().XY().X)
+			}
+		}
+
+		// Update the active line segment sets by throwing away any line
+		// segments that can no longer possibly intersect with any unprocessed
+		// line segments, and adding any new line segments to the active sets.
+		for _, side := range sides {
+			for len(side.active) > 0 && side.active[0].EndPoint().XY().X < sweepX {
+				heap.Pop(&side.active)
+			}
+			side.newSegments = side.newSegments[:0]
+			for len(side.unprocessed) > 0 && side.unprocessed[0].StartPoint().XY().X == sweepX {
+				side.newSegments = append(side.newSegments, side.unprocessed[0])
+				heap.Push(&side.active, side.unprocessed[0])
+				side.unprocessed = side.unprocessed[1:]
+			}
+		}
+
+		// Check for intersection between any new line segments, and segments
+		// in the opposing active set.
+		for i, side := range sides {
+			other := sides[1-i]
+			for _, checkLine := range side.newSegments {
+				for _, ln := range other.active {
+					if ln.Intersects(checkLine) {
 						return true
 					}
 				}
