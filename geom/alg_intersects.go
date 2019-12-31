@@ -233,11 +233,8 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 		newSegments []Line
 	}
 	var sides [2]*side
-	less := func(a, b Line) bool {
-		return a.EndPoint().XY().X < b.EndPoint().XY().X
-	}
-	sides[0] = &side{mls: mls1, active: lineHeap{less: less}}
-	sides[1] = &side{mls: mls2, active: lineHeap{less: less}}
+	sides[0] = &side{mls: mls1}
+	sides[1] = &side{mls: mls2}
 
 	// Create a list of line segments from each MultiLineString, in ascending
 	// order by X coordinate.
@@ -277,7 +274,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 		// segments that can no longer possibly intersect with any unprocessed
 		// line segments, and adding any new line segments to the active sets.
 		for _, side := range sides {
-			for !side.active.empty() && side.active.peek().EndPoint().XY().X < sweepX {
+			for len(side.active) != 0 && side.active[0].EndPoint().XY().X < sweepX {
 				side.active.pop()
 			}
 			side.newSegments = side.newSegments[:0]
@@ -293,7 +290,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 		for i, side := range sides {
 			other := sides[1-i]
 			for _, checkLine := range side.newSegments {
-				for _, ln := range other.active.data {
+				for _, ln := range other.active {
 					if hasIntersectionLineWithLine(ln, checkLine) {
 						return true
 					}
