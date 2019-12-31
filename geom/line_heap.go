@@ -31,9 +31,15 @@ func (h *lineHeap) pop() {
 		childB := 2*i + 2
 		switch {
 		case childA < len((*h)) && childB < len((*h)):
-			swapWith = childA
-			if h.less(childB, childA) {
-				swapWith = childB
+			if h.less(i, childA) {
+				if h.less(childB, i) {
+					swapWith = childB
+				}
+			} else {
+				swapWith = childA
+				if h.less(childB, childA) {
+					swapWith = childB
+				}
 			}
 		case childA < len((*h)):
 			if h.less(childA, i) {
