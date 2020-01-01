@@ -47,13 +47,13 @@ func TestIsEmptyDimension(t *testing.T) {
 				t.Fatal(err)
 			}
 			t.Run("IsEmpty_"+tt.wkt, func(t *testing.T) {
-				gotEmpty := geom.IsEmpty()
+				gotEmpty := geom.AsGeometryX().IsEmpty()
 				if gotEmpty != tt.wantEmpty {
 					t.Errorf("want=%v got=%v", tt.wantEmpty, gotEmpty)
 				}
 			})
 			t.Run("Dimension_"+tt.wkt, func(t *testing.T) {
-				gotDim := geom.Dimension()
+				gotDim := geom.AsGeometryX().Dimension()
 				if gotDim != tt.wantDim {
 					t.Errorf("want=%v got=%v", tt.wantDim, gotDim)
 				}

@@ -3,6 +3,7 @@ package geom
 import (
 	"database/sql/driver"
 	"io"
+	"unsafe"
 )
 
 // MultiPoint is a 0-dimensional geometric collection of points. The points are
@@ -46,6 +47,11 @@ func NewMultiPointC(coords []Coordinates, opts ...ConstructorOption) MultiPoint 
 // NewMultiPointXY creates a new MultiPoint consisting of a point for each XY.
 func NewMultiPointXY(pts []XY, opts ...ConstructorOption) MultiPoint {
 	return NewMultiPointC(oneDimXYToCoords(pts))
+}
+
+// AsGeometry converts this MultiPoint into a Geometry.
+func (m MultiPoint) AsGeometry() Geometry {
+	return Geometry{multiPointTag, unsafe.Pointer(&m)}
 }
 
 // NumPoints gives the number of element points making up the MultiPoint.

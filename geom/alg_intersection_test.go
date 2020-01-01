@@ -178,14 +178,16 @@ func TestIntersection(t *testing.T) {
 		//{"LINESTRING(0 0,0 1,1 0,0 0)", "LINESTRING(0 0,1 1,0 1,0 0,1 1)", "GEOMETRYCOLLECTION(POINT(0.5 0.5),LINESTRING(0 0,0 1))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			in1g, err := UnmarshalWKT(strings.NewReader(tt.in1))
+			in1gSum, err := UnmarshalWKT(strings.NewReader(tt.in1))
 			if err != nil {
 				t.Fatalf("could not unmarshal wkt: %v", err)
 			}
-			in2g, err := UnmarshalWKT(strings.NewReader(tt.in2))
+			in2gSum, err := UnmarshalWKT(strings.NewReader(tt.in2))
 			if err != nil {
 				t.Fatalf("could not unmarshal wkt: %v", err)
 			}
+			in1g := in1gSum.AsGeometryX()
+			in2g := in2gSum.AsGeometryX()
 
 			t.Run("forward", func(t *testing.T) {
 				got, err := in1g.Intersection(in2g)

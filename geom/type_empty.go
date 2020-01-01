@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"math"
+	"unsafe"
 )
 
 // EmptySet is a 0-dimensional geometry that represents the empty pointset.
@@ -25,6 +26,11 @@ func NewEmptyLineString(opts ...ConstructorOption) EmptySet {
 
 func NewEmptyPolygon(opts ...ConstructorOption) EmptySet {
 	return EmptySet{"POLYGON EMPTY", wkbGeomTypePolygon, "Polygon", 2}
+}
+
+// AsGeometry converts this EmptySet into a Geometry.
+func (e EmptySet) AsGeometry() Geometry {
+	return Geometry{emptySetTag, unsafe.Pointer(&e)}
 }
 
 func (e EmptySet) AsText() string {

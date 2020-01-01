@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"io"
+	"unsafe"
 )
 
 // LineString is a curve defined by linear interpolation between a finite set
@@ -36,6 +37,11 @@ func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, e
 // NewLineStringXY creates a line string from the XYs defining its points.
 func NewLineStringXY(pts []XY, opts ...ConstructorOption) (LineString, error) {
 	return NewLineStringC(oneDimXYToCoords(pts), opts...)
+}
+
+// AsGeometry converts this LineString into a Geometry.
+func (s LineString) AsGeometry() Geometry {
+	return Geometry{lineStringTag, unsafe.Pointer(&s)}
 }
 
 // StartPoint gives the first point of the line string.

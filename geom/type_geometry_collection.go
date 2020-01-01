@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"io"
+	"unsafe"
 )
 
 // GeometryCollection is a collection of geometries.
@@ -25,6 +26,11 @@ func NewGeometryCollection(geoms []GeometryX, opts ...ConstructorOption) Geometr
 		geoms = nil
 	}
 	return GeometryCollection{geoms}
+}
+
+// AsGeometry converts this GeometryCollection into a Geometry.
+func (c GeometryCollection) AsGeometry() Geometry {
+	return Geometry{geometryCollectionTag, unsafe.Pointer(&c)}
 }
 
 // NumGeometries gives the number of Geomety elements is the GeometryCollection.

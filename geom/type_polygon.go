@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"math"
+	"unsafe"
 )
 
 // Polygon is a planar surface, defined by 1 exiterior boundary and 0 or more
@@ -114,6 +115,11 @@ func NewPolygonC(coords [][]Coordinates, opts ...ConstructorOption) (Polygon, er
 // slice is the position within the ring.
 func NewPolygonXY(pts [][]XY, opts ...ConstructorOption) (Polygon, error) {
 	return NewPolygonC(twoDimXYToCoords(pts), opts...)
+}
+
+// AsGeometry converts this Polygon into a Geometry.
+func (p Polygon) AsGeometry() Geometry {
+	return Geometry{polygonTag, unsafe.Pointer(&p)}
 }
 
 // ExteriorRing gives the exterior ring of the polygon boundary.

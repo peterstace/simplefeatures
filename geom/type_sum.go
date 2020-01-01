@@ -144,3 +144,56 @@ func (g Geometry) AsMultiPolygon() MultiPolygon {
 	g.check(multiPolygonTag)
 	return *(*MultiPolygon)(g.ptr)
 }
+
+// AsText returns the WKT representation of the geometry.
+func (g Geometry) AsText() string {
+	switch g.tag {
+	case geometryCollectionTag:
+		return (*GeometryCollection)(g.ptr).AsText()
+	case emptySetTag:
+		return (*EmptySet)(g.ptr).AsText()
+	case pointTag:
+		return (*Point)(g.ptr).AsText()
+	case lineTag:
+		return (*Line)(g.ptr).AsText()
+	case lineStringTag:
+		return (*LineString)(g.ptr).AsText()
+	case polygonTag:
+		return (*Polygon)(g.ptr).AsText()
+	case multiPointTag:
+		return (*MultiPoint)(g.ptr).AsText()
+	case multiLineStringTag:
+		return (*MultiLineString)(g.ptr).AsText()
+	case multiPolygonTag:
+		return (*MultiPolygon)(g.ptr).AsText()
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}
+
+// AsGeometryX is a temporary helper function to convert to the
+// soon-to-be-deleted GeometryX type.
+func (g Geometry) AsGeometryX() GeometryX {
+	switch g.tag {
+	case geometryCollectionTag:
+		return *(*GeometryCollection)(g.ptr)
+	case emptySetTag:
+		return *(*EmptySet)(g.ptr)
+	case pointTag:
+		return *(*Point)(g.ptr)
+	case lineTag:
+		return *(*Line)(g.ptr)
+	case lineStringTag:
+		return *(*LineString)(g.ptr)
+	case polygonTag:
+		return *(*Polygon)(g.ptr)
+	case multiPointTag:
+		return *(*MultiPoint)(g.ptr)
+	case multiLineStringTag:
+		return *(*MultiLineString)(g.ptr)
+	case multiPolygonTag:
+		return *(*MultiPolygon)(g.ptr)
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}

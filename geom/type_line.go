@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"unsafe"
 )
 
 // Line is a single line segment between two points.
@@ -27,6 +28,11 @@ func NewLineC(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
 // NewLineXY creates a line segment given the XYs of its two endpoints.
 func NewLineXY(a, b XY, opts ...ConstructorOption) (Line, error) {
 	return NewLineC(Coordinates{a}, Coordinates{b}, opts...)
+}
+
+// AsGeometry converts this Line into a Geometry.
+func (n Line) AsGeometry() Geometry {
+	return Geometry{lineTag, unsafe.Pointer(&n)}
 }
 
 // StartPoint gives the first point of the line.

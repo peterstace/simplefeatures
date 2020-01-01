@@ -15,13 +15,13 @@ import (
 // next production in the grammar.
 
 // UnmarshalWKT parses a Well Known Text (WKT), and returns the corresponding
-// GeometryX.
-func UnmarshalWKT(r io.Reader, opts ...ConstructorOption) (GeometryX, error) {
+// Geometry.
+func UnmarshalWKT(r io.Reader, opts ...ConstructorOption) (Geometry, error) {
 	p := newParser(r, opts)
-	geom := p.nextGeometryXTaggedText()
+	geom := p.nextGeometryTaggedText()
 	p.checkEOF()
 	if p.err != nil {
-		return nil, p.err
+		return Geometry{}, p.err
 	}
 	return geom, nil
 }
@@ -71,56 +71,56 @@ func (p *parser) checkEOF() {
 	}
 }
 
-func (p *parser) nextGeometryXTaggedText() GeometryX {
+func (p *parser) nextGeometryTaggedText() Geometry {
 	switch tok := p.nextToken(); strings.ToUpper(tok) {
 	case "POINT":
 		coords := p.nextPointText()
 		if coords.Empty {
-			return NewEmptyPoint(p.opts...)
+			return NewEmptyPoint(p.opts...).AsGeometry()
 		} else {
-			return NewPointC(coords.Value, p.opts...)
+			return NewPointC(coords.Value, p.opts...).AsGeometry()
 		}
 	case "LINESTRING":
 		coords := p.nextLineStringText()
 		switch len(coords) {
 		case 0:
-			return NewEmptyLineString(p.opts...)
+			return NewEmptyLineString(p.opts...).AsGeometry()
 		case 2:
 			ln, err := NewLineC(coords[0], coords[1], p.opts...)
 			p.check(err)
-			return ln
+			return ln.AsGeometry()
 		default:
 			ls, err := NewLineStringC(coords, p.opts...)
 			p.check(err)
-			return ls
+			return ls.AsGeometry()
 		}
 	case "POLYGON":
 		coords := p.nextPolygonText()
 		if len(coords) == 0 {
-			return NewEmptyPolygon(p.opts...)
+			return NewEmptyPolygon(p.opts...).AsGeometry()
 		} else {
 			poly, err := NewPolygonC(coords, p.opts...)
 			p.check(err)
-			return poly
+			return poly.AsGeometry()
 		}
 	case "MULTIPOINT":
 		coords := p.nextMultiPointText()
-		return NewMultiPointOC(coords, p.opts...)
+		return NewMultiPointOC(coords, p.opts...).AsGeometry()
 	case "MULTILINESTRING":
 		coords := p.nextPolygonText() // same production as polygon
 		mls, err := NewMultiLineStringC(coords, p.opts...)
 		p.check(err)
-		return mls
+		return mls.AsGeometry()
 	case "MULTIPOLYGON":
 		coords := p.nextMultiPolygonText()
 		mp, err := NewMultiPolygonC(coords, p.opts...)
 		p.check(err)
-		return mp
+		return mp.AsGeometry()
 	case "GEOMETRYCOLLECTION":
 		return p.nextGeometryCollectionText()
 	default:
 		p.errorf("unexpected token: %v", tok)
-		return nil
+		return Geometry{}
 	}
 }
 
@@ -279,21 +279,22 @@ func (p *parser) nextMultiPolygonText() [][][]Coordinates {
 	return polys
 }
 
-func (p *parser) nextGeometryCollectionText() GeometryX {
+func (p *parser) nextGeometryCollectionText() Geometry {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
-		return NewGeometryCollection(nil, p.opts...)
+		return NewGeometryCollection(nil, p.opts...).AsGeometry()
 	}
-	geom := p.nextGeometryXTaggedText()
-	geoms := []GeometryX{geom}
+	geoms := []GeometryX{
+		p.nextGeometryTaggedText().AsGeometryX(),
+	}
 	for {
 		tok := p.nextCommaOrRightParen()
 		if tok == "," {
-			geom := p.nextGeometryXTaggedText()
+			geom := p.nextGeometryTaggedText().AsGeometryX()
 			geoms = append(geoms, geom)
 		} else {
 			break
 		}
 	}
-	return NewGeometryCollection(geoms, p.opts...)
+	return NewGeometryCollection(geoms, p.opts...).AsGeometry()
 }

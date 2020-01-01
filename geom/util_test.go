@@ -24,7 +24,7 @@ func geomFromWKT(t *testing.T, wkt string) GeometryX {
 	if err != nil {
 		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 	}
-	return geom
+	return geom.AsGeometryX()
 }
 
 func expectDeepEqual(t *testing.T, got, want interface{}) {

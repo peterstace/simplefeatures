@@ -3,6 +3,7 @@ package geom
 import (
 	"database/sql/driver"
 	"io"
+	"unsafe"
 )
 
 // Point is a 0-dimensional geometry, and represents a single location in a
@@ -27,6 +28,11 @@ func NewPointF(x, y float64, _ ...ConstructorOption) Point {
 // NewPointC creates a new point gives its Coordinates.
 func NewPointC(c Coordinates, _ ...ConstructorOption) Point {
 	return Point{coords: c}
+}
+
+// AsGeometry converts this Point into a Geometry.
+func (p Point) AsGeometry() Geometry {
+	return Geometry{pointTag, unsafe.Pointer(&p)}
 }
 
 // XY gives the XY location of the point.

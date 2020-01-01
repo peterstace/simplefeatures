@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"sort"
+	"unsafe"
 )
 
 // MultiPolygon is a multi surface whose elements are polygons.
@@ -146,6 +147,11 @@ func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
 		}
 	}
 	return true
+}
+
+// AsGeometry converts this MultiPolygon into a Geometry.
+func (m MultiPolygon) AsGeometry() Geometry {
+	return Geometry{multiPolygonTag, unsafe.Pointer(&m)}
 }
 
 // NumPolygons gives the number of Polygon elements in the MultiPolygon.

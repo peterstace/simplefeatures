@@ -3,6 +3,7 @@ package geom
 import (
 	"database/sql/driver"
 	"io"
+	"unsafe"
 )
 
 // MultiLineString is a multicurve whose elements are LineStrings.
@@ -43,6 +44,11 @@ func NewMultiLineStringC(coords [][]Coordinates, opts ...ConstructorOption) (Mul
 // second dimension indicates the XY within a LineString.
 func NewMultiLineStringXY(pts [][]XY, opts ...ConstructorOption) (MultiLineString, error) {
 	return NewMultiLineStringC(twoDimXYToCoords(pts))
+}
+
+// AsGeometry converts this MultiLineString into a Geometry.
+func (m MultiLineString) AsGeometry() Geometry {
+	return Geometry{multiLineStringTag, unsafe.Pointer(&m)}
 }
 
 // NumLineStrings gives the number of LineString elements in the
