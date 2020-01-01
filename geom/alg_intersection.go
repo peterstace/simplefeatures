@@ -10,7 +10,7 @@ func noImpl(t1, t2 interface{}) error {
 	return fmt.Errorf("operation not implemented for type pair %T and %T", t1, t2)
 }
 
-func mustIntersection(g1, g2 Geometry) Geometry {
+func mustIntersection(g1, g2 GeometryX) GeometryX {
 	g, err := intersection(g1, g2)
 	if err != nil {
 		panic(err)
@@ -18,7 +18,7 @@ func mustIntersection(g1, g2 Geometry) Geometry {
 	return g
 }
 
-func intersection(g1, g2 Geometry) (Geometry, error) {
+func intersection(g1, g2 GeometryX) (GeometryX, error) {
 	// Matches PostGIS behaviour for empty geometries.
 	if g2.IsEmpty() {
 		if _, ok := g2.(GeometryCollection); ok {
@@ -151,7 +151,7 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 	panic(fmt.Sprintf("implementation error: unhandled geometry types %T and %T", g1, g2))
 }
 
-func intersectLineWithLine(n1, n2 Line) Geometry {
+func intersectLineWithLine(n1, n2 Line) GeometryX {
 	a := n1.a.XY
 	b := n1.b.XY
 	c := n2.a.XY
@@ -208,7 +208,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	return NewGeometryCollection(nil)
 }
 
-func intersectLineWithMultiPoint(ln Line, mp MultiPoint) (Geometry, error) {
+func intersectLineWithMultiPoint(ln Line, mp MultiPoint) (GeometryX, error) {
 	var pts []Point
 	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
@@ -220,7 +220,7 @@ func intersectLineWithMultiPoint(ln Line, mp MultiPoint) (Geometry, error) {
 	return canonicalPointsAndLines(pts, nil)
 }
 
-func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (Geometry, error) {
+func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (GeometryX, error) {
 	var points []Point
 	var lines []Line
 	for _, ls1 := range mls1.lines {
@@ -249,7 +249,7 @@ func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (Ge
 	return canonicalPointsAndLines(points, lines)
 }
 
-func intersectPointWithLine(point Point, line Line) Geometry {
+func intersectPointWithLine(point Point, line Line) GeometryX {
 	env := mustEnvelope(line)
 	if !env.Contains(point.coords.XY) {
 		return NewGeometryCollection(nil)
@@ -262,7 +262,7 @@ func intersectPointWithLine(point Point, line Line) Geometry {
 	return NewGeometryCollection(nil)
 }
 
-func intersectPointWithLineString(pt Point, ls LineString) Geometry {
+func intersectPointWithLineString(pt Point, ls LineString) GeometryX {
 	for _, ln := range ls.lines {
 		g := intersectPointWithLine(pt, ln)
 		if !g.IsEmpty() {
@@ -272,7 +272,7 @@ func intersectPointWithLineString(pt Point, ls LineString) Geometry {
 	return NewGeometryCollection(nil)
 }
 
-func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (Geometry, error) {
+func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (GeometryX, error) {
 	mp1Set := make(map[XY]struct{})
 	for _, pt := range mp1.pts {
 		mp1Set[pt.Coordinates().XY] = struct{}{}
@@ -305,7 +305,7 @@ func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (Geometry, error) {
 	return canonicalPointsAndLines(intersection, nil)
 }
 
-func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
+func intersectPointWithMultiPoint(point Point, mp MultiPoint) GeometryX {
 	if mp.IsEmpty() {
 		return mp
 	}
@@ -317,7 +317,7 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
 	return NewGeometryCollection(nil)
 }
 
-func intersectPointWithPoint(pt1, pt2 Point) Geometry {
+func intersectPointWithPoint(pt1, pt2 Point) GeometryX {
 	if pt1.EqualsExact(pt2) {
 		return NewPointXY(pt1.coords.XY)
 	}
@@ -369,7 +369,7 @@ func onSegment(p XY, q XY, r XY) bool {
 		r.Y >= math.Min(p.Y, q.Y)
 }
 
-func intersectMultiPointWithPolygon(mp MultiPoint, p Polygon) (Geometry, error) {
+func intersectMultiPointWithPolygon(mp MultiPoint, p Polygon) (GeometryX, error) {
 	pts := make(map[XY]Point)
 	n := mp.NumPoints()
 outer:

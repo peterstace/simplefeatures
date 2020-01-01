@@ -12,8 +12,8 @@ import (
 // coordinate types inside compound geometries.
 
 // UnmarshalWKB reads the Well Known Binary (WKB), and returns the
-// corresponding Geometry.
-func UnmarshalWKB(r io.Reader, opts ...ConstructorOption) (Geometry, error) {
+// corresponding GeometryX.
+func UnmarshalWKB(r io.Reader, opts ...ConstructorOption) (GeometryX, error) {
 	p := wkbParser{r: r, opts: opts}
 	p.parseByteOrder()
 	p.parseGeomType()
@@ -92,7 +92,7 @@ const (
 	wkbGeomTypeGeometryCollection = uint32(7)
 )
 
-func (p *wkbParser) parseGeomRoot() Geometry {
+func (p *wkbParser) parseGeomRoot() GeometryX {
 	switch p.geomType {
 	case wkbGeomTypePoint:
 		coords := p.parsePoint()
@@ -269,7 +269,7 @@ func (p *wkbParser) parseMultiPolygon() MultiPolygon {
 
 func (p *wkbParser) parseGeometryCollection() GeometryCollection {
 	n := p.parseUint32()
-	var geoms []Geometry
+	var geoms []GeometryX
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
 		p.setErr(err)

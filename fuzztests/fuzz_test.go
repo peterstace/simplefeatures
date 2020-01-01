@@ -119,8 +119,8 @@ func extractStringsFromSource(t *testing.T) []string {
 	return strs
 }
 
-func convertToGeometries(t *testing.T, candidates []string) []geom.Geometry {
-	var geoms []geom.Geometry
+func convertToGeometries(t *testing.T, candidates []string) []geom.GeometryX {
+	var geoms []geom.GeometryX
 	for _, c := range candidates {
 		g, err := geom.UnmarshalWKT(strings.NewReader(c))
 		if err == nil {

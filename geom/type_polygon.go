@@ -157,11 +157,11 @@ func (p Polygon) IsSimple() bool {
 	return true
 }
 
-func (p Polygon) Intersection(g Geometry) (Geometry, error) {
+func (p Polygon) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(p, g)
 }
 
-func (p Polygon) Intersects(g Geometry) bool {
+func (p Polygon) Intersects(g GeometryX) bool {
 	return hasIntersection(p, g)
 }
 
@@ -173,7 +173,7 @@ func (p Polygon) Dimension() int {
 	return 2
 }
 
-func (p Polygon) Equals(other Geometry) (bool, error) {
+func (p Polygon) Equals(other GeometryX) (bool, error) {
 	return equals(p, other)
 }
 
@@ -190,7 +190,7 @@ func (p Polygon) rings() []LineString {
 	return rings
 }
 
-func (p Polygon) Boundary() Geometry {
+func (p Polygon) Boundary() GeometryX {
 	if len(p.holes) == 0 {
 		return p.outer
 	}
@@ -226,7 +226,7 @@ func (p Polygon) AsBinary(w io.Writer) error {
 
 // ConvexHull returns the convex hull of the Polygon, which is always another
 // Polygon.
-func (p Polygon) ConvexHull() Geometry {
+func (p Polygon) ConvexHull() GeometryX {
 	return convexHull(p)
 }
 
@@ -254,14 +254,14 @@ func (p Polygon) Coordinates() [][]Coordinates {
 }
 
 // TransformXY transforms this Polygon into another Polygon according to fn.
-func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
 	coords := p.Coordinates()
 	transform2dCoords(coords, fn)
 	return NewPolygonC(coords, opts...)
 }
 
 // EqualsExact checks if this Polygon is exactly equal to another Polygon.
-func (p Polygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+func (p Polygon) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
 	o, ok := other.(Polygon)
 	return ok && polygonExactEqual(p, o, opts)
 }

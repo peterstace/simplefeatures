@@ -14,12 +14,12 @@ import (
 //
 // 2. It must contain zero or more geometries.
 type GeometryCollection struct {
-	geoms []Geometry
+	geoms []GeometryX
 }
 
 // NewGeometryCollection creates a potentially heterogenous collection of
 // geometries. There are no constraints on the collection.
-func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) GeometryCollection {
+func NewGeometryCollection(geoms []GeometryX, opts ...ConstructorOption) GeometryCollection {
 	if len(geoms) == 0 {
 		// Store empty geoms as nil to make testing easier.
 		geoms = nil
@@ -32,8 +32,8 @@ func (c GeometryCollection) NumGeometries() int {
 	return len(c.geoms)
 }
 
-// GeometryN gives the nth (zero based) Geometry in the GeometryCollection.
-func (c GeometryCollection) GeometryN(n int) Geometry {
+// GeometryN gives the nth (zero based) GeometryX in the GeometryCollection.
+func (c GeometryCollection) GeometryN(n int) GeometryX {
 	return c.geoms[n]
 }
 
@@ -56,11 +56,11 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-func (c GeometryCollection) Intersection(g Geometry) (Geometry, error) {
+func (c GeometryCollection) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(c, g)
 }
 
-func (c GeometryCollection) Intersects(g Geometry) bool {
+func (c GeometryCollection) Intersects(g GeometryX) bool {
 	return hasIntersection(c, g)
 }
 
@@ -81,13 +81,13 @@ func (c GeometryCollection) Dimension() int {
 	return dim
 }
 
-func (c GeometryCollection) Equals(other Geometry) (bool, error) {
+func (c GeometryCollection) Equals(other GeometryX) (bool, error) {
 	return equals(c, other)
 }
 
 // walk traverses a tree of GeometryCollections, triggering a callback at each
-// non-Geometry collection leaf.
-func (c GeometryCollection) walk(fn func(Geometry)) {
+// non-GeometryX collection leaf.
+func (c GeometryCollection) walk(fn func(GeometryX)) {
 	for _, g := range c.geoms {
 		if col, ok := g.(GeometryCollection); ok {
 			col.walk(fn)
@@ -97,9 +97,9 @@ func (c GeometryCollection) walk(fn func(Geometry)) {
 	}
 }
 
-func (c GeometryCollection) flatten() []Geometry {
-	var geoms []Geometry
-	c.walk(func(g Geometry) {
+func (c GeometryCollection) flatten() []GeometryX {
+	var geoms []GeometryX
+	c.walk(func(g GeometryX) {
 		geoms = append(geoms, g)
 	})
 	return geoms
@@ -109,11 +109,11 @@ func (c GeometryCollection) Envelope() (Envelope, bool) {
 	return EnvelopeFromGeoms(c.flatten()...)
 }
 
-func (c GeometryCollection) Boundary() Geometry {
+func (c GeometryCollection) Boundary() GeometryX {
 	if c.IsEmpty() {
 		return c
 	}
-	var bounds []Geometry
+	var bounds []GeometryX
 	for _, g := range c.geoms {
 		bound := g.Boundary()
 		if !bound.IsEmpty() {
@@ -140,7 +140,7 @@ func (c GeometryCollection) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
-func (c GeometryCollection) ConvexHull() Geometry {
+func (c GeometryCollection) ConvexHull() GeometryX {
 	return convexHull(c)
 }
 
@@ -158,7 +158,7 @@ func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 	buf := []byte(`{"type":"GeometryCollection","geometries":`)
 	var geoms = c.geoms
 	if geoms == nil {
-		geoms = []Geometry{}
+		geoms = []GeometryX{}
 	}
 	geomsJSON, err := json.Marshal(geoms)
 	if err != nil {
@@ -170,8 +170,8 @@ func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 }
 
 // TransformXY transforms this GeometryCollection into another GeometryCollection according to fn.
-func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
-	transformed := make([]Geometry, len(c.geoms))
+func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
+	transformed := make([]GeometryX, len(c.geoms))
 	for i := range c.geoms {
 		var err error
 		transformed[i], err = c.geoms[i].TransformXY(fn, opts...)
@@ -183,7 +183,7 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 }
 
 // EqualsExact checks if this GeometryCollection is exactly equal to another GeometryCollection.
-func (c GeometryCollection) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+func (c GeometryCollection) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
 	o, ok := other.(GeometryCollection)
 	return ok && geometryCollectionExactEqual(c, o, opts)
 }
@@ -192,7 +192,7 @@ func (c GeometryCollection) EqualsExact(other Geometry, opts ...EqualsExactOptio
 // constraints on it, so this function always returns true
 func (c GeometryCollection) IsValid() bool {
 	all := true
-	c.walk(func(g Geometry) {
+	c.walk(func(g GeometryX) {
 		if !g.IsValid() {
 			all = false
 		}

@@ -5,9 +5,9 @@ import (
 	"io"
 )
 
-// Geometry is the most general type of geometry supported, and exposes common
+// GeometryX is the most general type of geometry supported, and exposes common
 // behaviour. All geometry types implement this interface.
-type Geometry interface {
+type GeometryX interface {
 	// AsText returns the WKT representation of the geometry.
 	AsText() string
 
@@ -24,11 +24,11 @@ type Geometry interface {
 	//
 	// It is not implemented for all possible pairs of geometries, and returns
 	// an error in those cases.
-	Intersection(Geometry) (Geometry, error)
+	Intersection(GeometryX) (GeometryX, error)
 
 	// Intersects returns true if the intersection of this gemoetry with the
 	// specified other geometry is not empty, or false if it is empty.
-	Intersects(Geometry) bool
+	Intersects(GeometryX) bool
 
 	// IsEmpty returns true if this object an empty geometry.
 	IsEmpty() bool
@@ -48,26 +48,26 @@ type Geometry interface {
 	//
 	// It is not implemented for all possible pairs of geometries, and returns
 	// an error in those cases.
-	Equals(Geometry) (bool, error)
+	Equals(GeometryX) (bool, error)
 
-	// Boundary returns the Geometry representing the limit of this geometry.
-	Boundary() Geometry
+	// Boundary returns the GeometryX representing the limit of this geometry.
+	Boundary() GeometryX
 
-	// Convex hull returns a Geometry that represents the smallest convex set
+	// Convex hull returns a GeometryX that represents the smallest convex set
 	// that contains this geometry.
-	ConvexHull() Geometry
+	ConvexHull() GeometryX
 
 	// convexHullPointset returns the list of points that must be considered
 	// when finding the convex hull.
 	convexHullPointSet() []XY
 
-	// TransformXY transforms this Geometry into another geometry according the
+	// TransformXY transforms this GeometryX into another geometry according the
 	// mapping provided by the XY function. Some classes of mappings (such as
-	// affine transformations) will preserve the validity this Geometry in the
-	// transformed Geometry, in which case no error will be returned. Other
+	// affine transformations) will preserve the validity this GeometryX in the
+	// transformed GeometryX, in which case no error will be returned. Other
 	// types of transformations may result in a validation error if their
-	// mapping results in an invalid Geometry.
-	TransformXY(func(XY) XY, ...ConstructorOption) (Geometry, error)
+	// mapping results in an invalid GeometryX.
+	TransformXY(func(XY) XY, ...ConstructorOption) (GeometryX, error)
 
 	// EqualsExact checks if this geometry is equal to another geometry from a
 	// structural pointwise equality perspective. Geometries that are
@@ -76,7 +76,7 @@ type Geometry interface {
 	// represent the same point set), they may not be defined by exactly the
 	// same way. Ordering differences and numeric tolerances can be accounted
 	// for using options.
-	EqualsExact(Geometry, ...EqualsExactOption) bool
+	EqualsExact(GeometryX, ...EqualsExactOption) bool
 
 	// IsValid returns if the current geometry is valid. It is useful to use when
 	// validation is disabled at constructing, for example, json.Unmarshal

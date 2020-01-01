@@ -1,6 +1,6 @@
 package geom
 
-func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
+func canonicalPointsAndLines(points []Point, lines []Line) (GeometryX, error) {
 	// Deduplicate.
 	points = dedupPoints(points)
 	lines = dedupLines(lines)
@@ -45,7 +45,7 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 		}
 		return NewMultiPoint(points), nil
 	default:
-		all := make([]Geometry, len(points)+len(lines))
+		all := make([]GeometryX, len(points)+len(lines))
 		for i, pt := range points {
 			all[i] = pt
 		}

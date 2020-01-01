@@ -7,7 +7,7 @@ import (
 	"io"
 )
 
-func wkbAsBytes(g Geometry) (driver.Value, error) {
+func wkbAsBytes(g GeometryX) (driver.Value, error) {
 	var buf bytes.Buffer
 	err := g.AsBinary(&buf)
 	return buf.Bytes(), err

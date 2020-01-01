@@ -9,8 +9,8 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-func must(t *testing.T) func(geom.Geometry, error) geom.Geometry {
-	return func(g geom.Geometry, err error) geom.Geometry {
+func must(t *testing.T) func(geom.GeometryX, error) geom.GeometryX {
+	return func(g geom.GeometryX, err error) geom.GeometryX {
 		if err != nil {
 			t.Fatalf("must have no error but got: %v", err)
 		}
@@ -18,7 +18,7 @@ func must(t *testing.T) func(geom.Geometry, error) geom.Geometry {
 	}
 }
 
-func geomFromWKT(t *testing.T, wkt string) Geometry {
+func geomFromWKT(t *testing.T, wkt string) GeometryX {
 	t.Helper()
 	geom, err := UnmarshalWKT(strings.NewReader(wkt))
 	if err != nil {
@@ -37,12 +37,12 @@ expected to be equal, but aren't:
 	want: %+v
 `
 		// Special cases for geometries:
-		gotGeom, okGot := got.(Geometry)
+		gotGeom, okGot := got.(GeometryX)
 		if okGot {
 			format += "    got  (WKT): %s\n"
 			args = append(args, gotGeom.AsText())
 		}
-		wantGeom, okWant := want.(Geometry)
+		wantGeom, okWant := want.(GeometryX)
 		if okWant {
 			format += "    want (WKT): %s\n"
 			args = append(args, wantGeom.AsText())

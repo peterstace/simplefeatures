@@ -10,11 +10,11 @@ import (
 	"strings"
 )
 
-// AnyGeometry is a concrete type that holds any Geometry value. It exists as a
+// AnyGeometry is a concrete type that holds any GeometryX value. It exists as a
 // helper to make SQL and JSON interactions easier.
 type AnyGeometry struct {
 	// Geom is the destination into which scanned geometries are stored.
-	Geom Geometry
+	Geom GeometryX
 
 	// Options control the way that geometries are constructed.
 	Options []ConstructorOption

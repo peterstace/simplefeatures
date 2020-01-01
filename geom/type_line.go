@@ -77,11 +77,11 @@ func (n Line) IsSimple() bool {
 	return true
 }
 
-func (n Line) Intersection(g Geometry) (Geometry, error) {
+func (n Line) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(n, g)
 }
 
-func (n Line) Intersects(g Geometry) bool {
+func (n Line) Intersects(g GeometryX) bool {
 	return hasIntersection(n, g)
 }
 
@@ -93,7 +93,7 @@ func (n Line) Dimension() int {
 	return 1
 }
 
-func (n Line) Equals(other Geometry) (bool, error) {
+func (n Line) Equals(other GeometryX) (bool, error) {
 	return equals(n, other)
 }
 
@@ -101,7 +101,7 @@ func (n Line) Envelope() (Envelope, bool) {
 	return NewEnvelope(n.a.XY, n.b.XY), true
 }
 
-func (n Line) Boundary() Geometry {
+func (n Line) Boundary() GeometryX {
 	return NewMultiPoint([]Point{
 		NewPointXY(n.a.XY),
 		NewPointXY(n.b.XY),
@@ -124,7 +124,7 @@ func (n Line) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
-func (n Line) ConvexHull() Geometry {
+func (n Line) ConvexHull() GeometryX {
 	return convexHull(n)
 }
 
@@ -145,14 +145,14 @@ func (n Line) Coordinates() []Coordinates {
 }
 
 // TransformXY transforms this Line into another Line according to fn.
-func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
 	coords := n.Coordinates()
 	transform1dCoords(coords, fn)
 	return NewLineC(coords[0], coords[1], opts...)
 }
 
 // EqualsExact checks if this Line is exactly equal to another curve.
-func (n Line) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+func (n Line) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
 	c, ok := other.(curve)
 	return ok && other.Dimension() == 1 && curvesExactEqual(n, c, opts)
 }

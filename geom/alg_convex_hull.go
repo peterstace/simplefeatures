@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-func convexHull(g Geometry) Geometry {
+func convexHull(g GeometryX) GeometryX {
 	if g.IsEmpty() {
 		// Any empty geometry could be returned here to to give correct
 		// behaviour. However, to replicate PostGIS behaviour, we always return

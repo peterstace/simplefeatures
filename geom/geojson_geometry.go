@@ -8,7 +8,7 @@ import (
 	"math"
 )
 
-func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error) {
+func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (GeometryX, error) {
 	var firstPass struct {
 		Type string `json:"type"`
 	}
@@ -101,7 +101,7 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 		if err := json.NewDecoder(bytes.NewReader(input)).Decode(&secondPass); err != nil {
 			return nil, err
 		}
-		geoms := make([]Geometry, len(secondPass.Geometries))
+		geoms := make([]GeometryX, len(secondPass.Geometries))
 		for i := range geoms {
 			geoms[i] = secondPass.Geometries[i].Geom
 		}

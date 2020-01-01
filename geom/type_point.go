@@ -60,11 +60,11 @@ func (p Point) IsSimple() bool {
 	return true
 }
 
-func (p Point) Intersection(g Geometry) (Geometry, error) {
+func (p Point) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(p, g)
 }
 
-func (p Point) Intersects(g Geometry) bool {
+func (p Point) Intersects(g GeometryX) bool {
 	return hasIntersection(p, g)
 }
 
@@ -76,7 +76,7 @@ func (p Point) Dimension() int {
 	return 0
 }
 
-func (p Point) Equals(other Geometry) (bool, error) {
+func (p Point) Equals(other GeometryX) (bool, error) {
 	return equals(p, other)
 }
 
@@ -84,7 +84,7 @@ func (p Point) Envelope() (Envelope, bool) {
 	return NewEnvelope(p.coords.XY), true
 }
 
-func (p Point) Boundary() Geometry {
+func (p Point) Boundary() GeometryX {
 	return NewGeometryCollection(nil)
 }
 
@@ -103,7 +103,7 @@ func (p Point) AsBinary(w io.Writer) error {
 
 // ConvexHull returns the convex hull of this Point, which is always the same
 // point.
-func (p Point) ConvexHull() Geometry {
+func (p Point) ConvexHull() GeometryX {
 	return convexHull(p)
 }
 
@@ -116,14 +116,14 @@ func (p Point) MarshalJSON() ([]byte, error) {
 }
 
 // TransformXY transforms this Point into another Point according to fn.
-func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
 	coords := p.Coordinates()
 	coords.XY = fn(coords.XY)
 	return NewPointC(coords, opts...), nil
 }
 
 // EqualsExact checks if this Point is exactly equal to another Point.
-func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+func (p Point) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
 	o, ok := other.(Point)
 	if !ok {
 		return false

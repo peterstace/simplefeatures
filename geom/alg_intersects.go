@@ -7,7 +7,7 @@ import (
 	"sort"
 )
 
-func hasIntersection(g1, g2 Geometry) bool {
+func hasIntersection(g1, g2 GeometryX) bool {
 	if g2.IsEmpty() {
 		return false
 	}

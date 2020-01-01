@@ -182,11 +182,11 @@ func (m MultiPolygon) IsSimple() bool {
 	return true
 }
 
-func (m MultiPolygon) Intersects(g Geometry) bool {
+func (m MultiPolygon) Intersects(g GeometryX) bool {
 	return hasIntersection(m, g)
 }
 
-func (m MultiPolygon) Intersection(g Geometry) (Geometry, error) {
+func (m MultiPolygon) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(m, g)
 }
 
@@ -198,7 +198,7 @@ func (m MultiPolygon) Dimension() int {
 	return 2
 }
 
-func (m MultiPolygon) Equals(other Geometry) (bool, error) {
+func (m MultiPolygon) Equals(other GeometryX) (bool, error) {
 	return equals(m, other)
 }
 
@@ -213,7 +213,7 @@ func (m MultiPolygon) Envelope() (Envelope, bool) {
 	return env, true
 }
 
-func (m MultiPolygon) Boundary() Geometry {
+func (m MultiPolygon) Boundary() GeometryX {
 	if m.IsEmpty() {
 		return m
 	}
@@ -244,7 +244,7 @@ func (m MultiPolygon) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
-func (m MultiPolygon) ConvexHull() Geometry {
+func (m MultiPolygon) ConvexHull() GeometryX {
 	return convexHull(m)
 }
 
@@ -285,14 +285,14 @@ func (m MultiPolygon) Coordinates() [][][]Coordinates {
 }
 
 // TransformXY transforms this MultiPolygon into another MultiPolygon according to fn.
-func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
 	coords := m.Coordinates()
 	transform3dCoords(coords, fn)
 	return NewMultiPolygonC(coords, opts...)
 }
 
 // EqualsExact checks if this MultiPolygon is exactly equal to another MultiPolygon.
-func (m MultiPolygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+func (m MultiPolygon) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
 	o, ok := other.(MultiPolygon)
 	return ok && multiPolygonExactEqual(m, o, opts)
 }

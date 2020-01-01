@@ -134,11 +134,11 @@ func (s LineString) IsClosed() bool {
 	return s.lines[0].a.XY.Equals(s.lines[len(s.lines)-1].b.XY)
 }
 
-func (s LineString) Intersection(g Geometry) (Geometry, error) {
+func (s LineString) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(s, g)
 }
 
-func (s LineString) Intersects(g Geometry) bool {
+func (s LineString) Intersects(g GeometryX) bool {
 	return hasIntersection(s, g)
 }
 
@@ -150,7 +150,7 @@ func (s LineString) Dimension() int {
 	return 1
 }
 
-func (s LineString) Equals(other Geometry) (bool, error) {
+func (s LineString) Equals(other GeometryX) (bool, error) {
 	return equals(s, other)
 }
 
@@ -162,7 +162,7 @@ func (s LineString) Envelope() (Envelope, bool) {
 	return env, true
 }
 
-func (s LineString) Boundary() Geometry {
+func (s LineString) Boundary() GeometryX {
 	if s.IsClosed() {
 		// Same behaviour as Postgis, but could instead be any other empty set.
 		return NewMultiPoint(nil)
@@ -190,7 +190,7 @@ func (s LineString) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
-func (s LineString) ConvexHull() Geometry {
+func (s LineString) ConvexHull() GeometryX {
 	return convexHull(s)
 }
 
@@ -218,14 +218,14 @@ func (s LineString) Coordinates() []Coordinates {
 }
 
 // TransformXY transforms this LineString into another LineString according to fn.
-func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
 	coords := s.Coordinates()
 	transform1dCoords(coords, fn)
 	return NewLineStringC(coords, opts...)
 }
 
 // EqualsExact checks if this LineString is exactly equal to another curve.
-func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+func (s LineString) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
 	c, ok := other.(curve)
 	return ok && other.Dimension() == 1 && curvesExactEqual(s, c, opts)
 }

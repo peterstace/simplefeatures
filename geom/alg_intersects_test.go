@@ -281,7 +281,7 @@ func TestIntersects(t *testing.T) {
 		{"GEOMETRYCOLLECTION(POINT(5 5))", "POLYGON((0.5 1.5,1.5 1.5,1.5 2.5,0.5 2.5, 0.5 1.5))", false},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			runTest := func(g1, g2 geom.Geometry) func(t *testing.T) {
+			runTest := func(g1, g2 geom.GeometryX) func(t *testing.T) {
 				return func(t *testing.T) {
 					got := g1.Intersects(g2)
 					if got != tt.want {

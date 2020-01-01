@@ -15,10 +15,10 @@ import (
 // next production in the grammar.
 
 // UnmarshalWKT parses a Well Known Text (WKT), and returns the corresponding
-// Geometry.
-func UnmarshalWKT(r io.Reader, opts ...ConstructorOption) (Geometry, error) {
+// GeometryX.
+func UnmarshalWKT(r io.Reader, opts ...ConstructorOption) (GeometryX, error) {
 	p := newParser(r, opts)
-	geom := p.nextGeometryTaggedText()
+	geom := p.nextGeometryXTaggedText()
 	p.checkEOF()
 	if p.err != nil {
 		return nil, p.err
@@ -71,7 +71,7 @@ func (p *parser) checkEOF() {
 	}
 }
 
-func (p *parser) nextGeometryTaggedText() Geometry {
+func (p *parser) nextGeometryXTaggedText() GeometryX {
 	switch tok := p.nextToken(); strings.ToUpper(tok) {
 	case "POINT":
 		coords := p.nextPointText()
@@ -279,17 +279,17 @@ func (p *parser) nextMultiPolygonText() [][][]Coordinates {
 	return polys
 }
 
-func (p *parser) nextGeometryCollectionText() Geometry {
+func (p *parser) nextGeometryCollectionText() GeometryX {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
 		return NewGeometryCollection(nil, p.opts...)
 	}
-	geom := p.nextGeometryTaggedText()
-	geoms := []Geometry{geom}
+	geom := p.nextGeometryXTaggedText()
+	geoms := []GeometryX{geom}
 	for {
 		tok := p.nextCommaOrRightParen()
 		if tok == "," {
-			geom := p.nextGeometryTaggedText()
+			geom := p.nextGeometryXTaggedText()
 			geoms = append(geoms, geom)
 		} else {
 			break

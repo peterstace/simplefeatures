@@ -9,7 +9,7 @@ import (
 
 func TestXYConstructors(t *testing.T) {
 	for i, tt := range []struct {
-		Geom geom.Geometry
+		Geom geom.GeometryX
 		WKT  string
 	}{
 		{

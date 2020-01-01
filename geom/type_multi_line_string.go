@@ -103,11 +103,11 @@ func (m MultiLineString) IsSimple() bool {
 	return true
 }
 
-func (m MultiLineString) Intersection(g Geometry) (Geometry, error) {
+func (m MultiLineString) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(m, g)
 }
 
-func (m MultiLineString) Intersects(g Geometry) bool {
+func (m MultiLineString) Intersects(g GeometryX) bool {
 	return hasIntersection(m, g)
 }
 
@@ -119,7 +119,7 @@ func (m MultiLineString) Dimension() int {
 	return 1
 }
 
-func (m MultiLineString) Equals(other Geometry) (bool, error) {
+func (m MultiLineString) Equals(other GeometryX) (bool, error) {
 	return equals(m, other)
 }
 
@@ -134,7 +134,7 @@ func (m MultiLineString) Envelope() (Envelope, bool) {
 	}
 	return env, true
 }
-func (m MultiLineString) Boundary() Geometry {
+func (m MultiLineString) Boundary() GeometryX {
 	if m.IsEmpty() {
 		// Postgis behaviour (but any other empty set would be ok).
 		return NewMultiLineString(nil)
@@ -184,7 +184,7 @@ func (m MultiLineString) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
-func (m MultiLineString) ConvexHull() Geometry {
+func (m MultiLineString) ConvexHull() GeometryX {
 	return convexHull(m)
 }
 
@@ -221,14 +221,14 @@ func (m MultiLineString) Coordinates() [][]Coordinates {
 }
 
 // TransformXY transforms this MultiLineString into another MultiLineString according to fn.
-func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
 	coords := m.Coordinates()
 	transform2dCoords(coords, fn)
 	return NewMultiLineStringC(coords, opts...)
 }
 
 // EqualsExact checks if this MultiLineString is exactly equal to another MultiLineString.
-func (m MultiLineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+func (m MultiLineString) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
 	o, ok := other.(MultiLineString)
 	return ok && multiLineStringExactEqual(m, o, opts)
 }

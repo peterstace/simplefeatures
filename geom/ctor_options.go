@@ -1,6 +1,6 @@
 package geom
 
-// ConstructorOption allows the behaviour of Geometry constructor functions to be modified.
+// ConstructorOption allows the behaviour of GeometryX constructor functions to be modified.
 type ConstructorOption func(o *ctorOptionSet)
 
 // DisableAllValidations causes geometry constructors to skip all validations.

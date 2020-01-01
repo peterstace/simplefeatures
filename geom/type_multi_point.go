@@ -89,11 +89,11 @@ func (m MultiPoint) IsSimple() bool {
 	return true
 }
 
-func (m MultiPoint) Intersection(g Geometry) (Geometry, error) {
+func (m MultiPoint) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(m, g)
 }
 
-func (m MultiPoint) Intersects(g Geometry) bool {
+func (m MultiPoint) Intersects(g GeometryX) bool {
 	return hasIntersection(m, g)
 }
 
@@ -105,7 +105,7 @@ func (m MultiPoint) Dimension() int {
 	return 0
 }
 
-func (m MultiPoint) Equals(other Geometry) (bool, error) {
+func (m MultiPoint) Equals(other GeometryX) (bool, error) {
 	return equals(m, other)
 }
 
@@ -120,7 +120,7 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 	return env, true
 }
 
-func (m MultiPoint) Boundary() Geometry {
+func (m MultiPoint) Boundary() GeometryX {
 	// This is a little bit more complicated than it really has to be (it just
 	// has to always return an empty set). However, this is the behavour of
 	// Postgis.
@@ -149,7 +149,7 @@ func (m MultiPoint) AsBinary(w io.Writer) error {
 
 // ConvexHull finds the convex hull of the set of points. This may either be
 // the empty set, a single point, a line, or a polygon.
-func (m MultiPoint) ConvexHull() Geometry {
+func (m MultiPoint) ConvexHull() GeometryX {
 	return convexHull(m)
 }
 
@@ -177,14 +177,14 @@ func (m MultiPoint) Coordinates() []Coordinates {
 }
 
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
-func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
 	coords := m.Coordinates()
 	transform1dCoords(coords, fn)
 	return NewMultiPointC(coords, opts...), nil
 }
 
 // EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.
-func (m MultiPoint) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+func (m MultiPoint) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
 	o, ok := other.(MultiPoint)
 	return ok && multiPointExactEqual(m, o, opts)
 }

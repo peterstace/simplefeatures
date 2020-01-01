@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-func equals(g1, g2 Geometry) (bool, error) {
+func equals(g1, g2 GeometryX) (bool, error) {
 	if g1.IsEmpty() && g2.IsEmpty() {
 		return true, nil
 	}

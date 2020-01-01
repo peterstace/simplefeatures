@@ -9,7 +9,7 @@ func max(a, b int) int {
 	return b
 }
 
-func rank(g Geometry) int {
+func rank(g GeometryX) int {
 	switch g.(type) {
 	case EmptySet:
 		return 1
@@ -34,7 +34,7 @@ func rank(g Geometry) int {
 	}
 }
 
-func must(x Geometry, err error) Geometry {
+func must(x GeometryX, err error) GeometryX {
 	if err != nil {
 		panic(err)
 	}

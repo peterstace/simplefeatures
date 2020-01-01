@@ -39,11 +39,11 @@ func (e EmptySet) IsSimple() bool {
 	return true
 }
 
-func (e EmptySet) Intersection(g Geometry) (Geometry, error) {
+func (e EmptySet) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(e, g)
 }
 
-func (e EmptySet) Intersects(g Geometry) bool {
+func (e EmptySet) Intersects(g GeometryX) bool {
 	return hasIntersection(e, g)
 }
 
@@ -55,7 +55,7 @@ func (e EmptySet) Dimension() int {
 	return e.dimension
 }
 
-func (e EmptySet) Equals(other Geometry) (bool, error) {
+func (e EmptySet) Equals(other GeometryX) (bool, error) {
 	return equals(e, other)
 }
 
@@ -63,7 +63,7 @@ func (e EmptySet) Envelope() (Envelope, bool) {
 	return Envelope{}, false
 }
 
-func (e EmptySet) Boundary() Geometry {
+func (e EmptySet) Boundary() GeometryX {
 	return e
 }
 
@@ -89,7 +89,7 @@ func (e EmptySet) AsBinary(w io.Writer) error {
 
 // ConvexHull returns the convex hull of this geometry. The convex hull of an
 // empty set is always an empty set.
-func (e EmptySet) ConvexHull() Geometry {
+func (e EmptySet) ConvexHull() GeometryX {
 	return convexHull(e)
 }
 
@@ -103,13 +103,13 @@ func (e EmptySet) MarshalJSON() ([]byte, error) {
 
 // TransformXY transforms this EmptySet into another EmptySet according to
 // fn. It does this by ignoring fn and returning itself.
-func (e EmptySet) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (e EmptySet) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
 	return e, nil
 }
 
 // EqualsExact checks if this EmptySet is exactly equal to another geometry
 // by checking if the other geometry is an empty set of the same type.
-func (e EmptySet) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+func (e EmptySet) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
 	o, ok := other.(EmptySet)
 	return ok && e.wkbType == o.wkbType
 }

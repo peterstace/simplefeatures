@@ -26,9 +26,9 @@ func NewEnvelope(first XY, others ...XY) Envelope {
 	return env
 }
 
-// mustEnvelope gets the envelope from a Geometry. If it's not defined (because
+// mustEnvelope gets the envelope from a GeometryX. If it's not defined (because
 // the geometry is empty), then it panics.
-func mustEnvelope(g Geometry) Envelope {
+func mustEnvelope(g GeometryX) Envelope {
 	env, ok := g.Envelope()
 	if !ok {
 		panic(fmt.Sprintf("mustEnvelope but envelope not defined: %s", string(g.AsText())))
@@ -40,7 +40,7 @@ func mustEnvelope(g Geometry) Envelope {
 // contained by the provided geometries, provided that at least one non-empty
 // geometry is given. If no non-empty geometries are given, then the returned
 // flag is set to false.
-func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
+func EnvelopeFromGeoms(geoms ...GeometryX) (Envelope, bool) {
 	envs := make([]Envelope, 0, len(geoms))
 	for _, g := range geoms {
 		env, ok := g.Envelope()
@@ -58,16 +58,16 @@ func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 	return env, true
 }
 
-// AsGeometry returns the envelope as a Geometry. In the regular case where the
+// AsGeometry returns the envelope as a GeometryX. In the regular case where the
 // envelope covers some area, then a Polygon geometry is returned. In
 // degenerate cases where the envelope only covers a line or a point, a
 // Line or Point geometry is returned.
-func (e Envelope) AsGeometry() Geometry {
+func (e Envelope) AsGeometry() GeometryX {
 	if e.min.Equals(e.max) {
 		return NewPointXY(e.min)
 	}
 	var err error
-	var g Geometry
+	var g GeometryX
 	if e.min.X == e.max.X || e.min.Y == e.max.Y {
 		g, err = NewLineC(Coordinates{XY: e.min}, Coordinates{XY: e.max})
 	} else {
