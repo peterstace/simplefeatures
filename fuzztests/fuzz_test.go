@@ -124,7 +124,7 @@ func convertToGeometries(t *testing.T, candidates []string) []geom.GeometryX {
 	for _, c := range candidates {
 		g, err := geom.UnmarshalWKT(strings.NewReader(c))
 		if err == nil {
-			geoms = append(geoms, g)
+			geoms = append(geoms, g.AsGeometryX())
 		}
 	}
 	if len(geoms) == 0 {

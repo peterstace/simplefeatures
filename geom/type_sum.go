@@ -176,23 +176,23 @@ func (g Geometry) AsText() string {
 func (g Geometry) AsGeometryX() GeometryX {
 	switch g.tag {
 	case geometryCollectionTag:
-		return *(*GeometryCollection)(g.ptr)
+		return g.AsGeometryCollection()
 	case emptySetTag:
-		return *(*EmptySet)(g.ptr)
+		return g.AsEmptySet()
 	case pointTag:
-		return *(*Point)(g.ptr)
+		return g.AsPoint()
 	case lineTag:
-		return *(*Line)(g.ptr)
+		return g.AsLine()
 	case lineStringTag:
-		return *(*LineString)(g.ptr)
+		return g.AsLineString()
 	case polygonTag:
-		return *(*Polygon)(g.ptr)
+		return g.AsPolygon()
 	case multiPointTag:
-		return *(*MultiPoint)(g.ptr)
+		return g.AsMultiPoint()
 	case multiLineStringTag:
-		return *(*MultiLineString)(g.ptr)
+		return g.AsMultiLineString()
 	case multiPolygonTag:
-		return *(*MultiPolygon)(g.ptr)
+		return g.AsMultiPolygon()
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}
