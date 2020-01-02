@@ -224,3 +224,28 @@ func ToGeometry(g GeometryX) Geometry {
 		panic(fmt.Sprintf("unknown type: %T", g))
 	}
 }
+
+func (g Geometry) appendWKT(dst []byte) []byte {
+	switch g.tag {
+	case geometryCollectionTag:
+		return (*GeometryCollection)(g.ptr).AppendWKT(dst)
+	case emptySetTag:
+		return (*EmptySet)(g.ptr).AppendWKT(dst)
+	case pointTag:
+		return (*Point)(g.ptr).AppendWKT(dst)
+	case lineTag:
+		return (*Line)(g.ptr).AppendWKT(dst)
+	case lineStringTag:
+		return (*LineString)(g.ptr).AppendWKT(dst)
+	case polygonTag:
+		return (*Polygon)(g.ptr).AppendWKT(dst)
+	case multiPointTag:
+		return (*MultiPoint)(g.ptr).AppendWKT(dst)
+	case multiLineStringTag:
+		return (*MultiLineString)(g.ptr).AppendWKT(dst)
+	case multiPolygonTag:
+		return (*MultiPolygon)(g.ptr).AppendWKT(dst)
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}

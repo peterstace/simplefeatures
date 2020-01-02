@@ -54,7 +54,7 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	}
 	dst = append(dst, '(')
 	for i, geom := range c.geoms {
-		dst = geom.AppendWKT(dst)
+		dst = ToGeometry(geom).appendWKT(dst)
 		if i != len(c.geoms)-1 {
 			dst = append(dst, ',')
 		}
