@@ -119,12 +119,12 @@ func extractStringsFromSource(t *testing.T) []string {
 	return strs
 }
 
-func convertToGeometries(t *testing.T, candidates []string) []geom.GeometryX {
-	var geoms []geom.GeometryX
+func convertToGeometries(t *testing.T, candidates []string) []geom.Geometry {
+	var geoms []geom.Geometry
 	for _, c := range candidates {
 		g, err := geom.UnmarshalWKT(strings.NewReader(c))
 		if err == nil {
-			geoms = append(geoms, g.AsGeometryX())
+			geoms = append(geoms, g)
 		}
 	}
 	if len(geoms) == 0 {
@@ -139,7 +139,7 @@ func convertToGeometries(t *testing.T, candidates []string) []geom.GeometryX {
 		}
 		g, err := geom.UnmarshalWKB(bytes.NewReader(buf))
 		if err == nil {
-			geoms = append(geoms, g)
+			geoms = append(geoms, geom.ToGeometry(g))
 		}
 	}
 	if oldCount == len(geoms) {
@@ -150,7 +150,7 @@ func convertToGeometries(t *testing.T, candidates []string) []geom.GeometryX {
 	for _, c := range candidates {
 		g, err := geom.UnmarshalGeoJSON([]byte(c))
 		if err == nil {
-			geoms = append(geoms, g)
+			geoms = append(geoms, geom.ToGeometry(g))
 		}
 	}
 	if oldCount == len(geoms) {

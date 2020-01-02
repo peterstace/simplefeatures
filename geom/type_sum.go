@@ -1,8 +1,11 @@
 package geom
 
 import (
+	"bytes"
+	"database/sql/driver"
 	"fmt"
 	"io"
+	"strings"
 	"unsafe"
 )
 
@@ -278,6 +281,45 @@ func (g Geometry) AsBinary(w io.Writer) error {
 	}
 }
 
+// Value implements the database/sql/driver.Valuer interface by returning the
+// WKB (Well Known Binary) representation of this Geometry.
+func (g Geometry) Value() (driver.Value, error) {
+	var buf bytes.Buffer
+	err := g.AsBinary(&buf)
+	return buf.Bytes(), err
+}
+
+// Scan implements the database/sql.Scanner interface by parsing the src value
+// as WKB (Well Known Binary).
+func (g *Geometry) Scan(src interface{}) error {
+	var r io.Reader
+	switch src := src.(type) {
+	case []byte:
+		r = bytes.NewReader(src)
+	case string:
+		r = strings.NewReader(src)
+	default:
+		// nil is specifically not supported. It _could_ map to an empty
+		// geometry, however then the caller wouldn't be able to differentiate
+		// between a real empty geometry and a NULL. Instead, we should
+		// additionally provide a NullableGeometry type with an IsValid flag.
+		return fmt.Errorf("unsupported src type in Scan: %T", src)
+	}
+
+	// TODO: This approach has the major drawback that it's not possible to
+	// psas in any construction options. A way around this could be to add a
+	// method called WKBValuerScanner that accepts construction options. The
+	// result of that method would have a pointer to this geometry and hold the
+	// construction arguments.
+
+	unmarshalled, err := UnmarshalWKB(r)
+	if err != nil {
+		return err
+	}
+	*g = ToGeometry(unmarshalled)
+	return nil
+}
+
 // Dimension returns the dimension of the Geometry. This is  0 for points, 1
 // for curves, and 2 for surfaces (regardless of whether or not they are
 // empty). For GeometryCollections it is the maximum dimension over the
@@ -297,4 +339,81 @@ func (g Geometry) Dimension() int {
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}
+}
+
+// IsEmpty returns true if this object an empty geometry.
+func (g Geometry) IsEmpty() bool {
+	// TODO
+	return g.AsGeometryX().IsEmpty()
+}
+
+// Envelope returns the axis aligned bounding box that most tightly
+// surrounds the geometry. Envelopes are not defined for empty geometries,
+// in which case the returned flag will be false.
+func (g Geometry) Envelope() (Envelope, bool) {
+	// TODO
+	return g.AsGeometryX().Envelope()
+}
+
+// Boundary returns the GeometryX representing the limit of this geometry.
+func (g Geometry) Boundary() Geometry {
+	// TODO
+	return ToGeometry(g.AsGeometryX().Boundary())
+}
+
+// EqualsExact checks if this geometry is equal to another geometry from a
+// structural pointwise equality perspective. Geometries that are
+// structurally equal are defined by exactly same control points in the
+// same order. Note that even if two geometries are spatially equal (i.e.
+// represent the same point set), they may not be defined by exactly the
+// same way. Ordering differences and numeric tolerances can be accounted
+// for using options.
+func (g Geometry) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	// TODO
+	return g.AsGeometryX().EqualsExact(other.AsGeometryX(), opts...)
+}
+
+// Equals checks if this geometry is equal to another geometry. Two
+// geometries are equal if they contain exactly the same points.
+//
+// It is not implemented for all possible pairs of geometries, and returns
+// an error in those cases.
+func (g Geometry) Equals(other Geometry) (bool, error) {
+	// TODO
+	return g.AsGeometryX().Equals(other.AsGeometryX())
+}
+
+// Convex hull returns a GeometryX that represents the smallest convex set
+// that contains this geometry.
+func (g Geometry) ConvexHull() Geometry {
+	// TODO
+	return ToGeometry(g.AsGeometryX().ConvexHull())
+}
+
+// IsValid returns if the current geometry is valid. It is useful to use when
+// validation is disabled at constructing, for example, json.Unmarshal
+func (g Geometry) IsValid() bool {
+	// TODO
+	return g.AsGeometryX().IsValid()
+}
+
+// Intersects returns true if the intersection of this gemoetry with the
+// specified other geometry is not empty, or false if it is empty.
+func (g Geometry) Intersects(other Geometry) bool {
+	// TODO
+	return g.AsGeometryX().Intersects(other.AsGeometryX())
+}
+
+// Intersection returns a geometric object that represents the point set
+// intersection of this geometry with another geometry.
+//
+// It is not implemented for all possible pairs of geometries, and returns an
+// error in those cases.
+func (g Geometry) Intersection(other Geometry) (Geometry, error) {
+	// TODO
+	result, err := g.AsGeometryX().Intersection(other.AsGeometryX())
+	if err != nil {
+		return Geometry{}, err
+	}
+	return ToGeometry(result), nil
 }
