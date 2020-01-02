@@ -150,7 +150,7 @@ func convertToGeometries(t *testing.T, candidates []string) []geom.Geometry {
 	for _, c := range candidates {
 		g, err := geom.UnmarshalGeoJSON([]byte(c))
 		if err == nil {
-			geoms = append(geoms, geom.ToGeometry(g))
+			geoms = append(geoms, g)
 		}
 	}
 	if oldCount == len(geoms) {

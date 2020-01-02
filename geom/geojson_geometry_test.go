@@ -553,17 +553,9 @@ func TestGeoJSONMarshal(t *testing.T) {
 }
 
 func TestGeoJSONMarshalAnyGeometryPopulated(t *testing.T) {
-	any := AnyGeometry{Geom: geomFromWKT(t, "POINT(1 2)")}
-	got, err := json.Marshal(any)
+	g := gFromWKT(t, "POINT(1 2)")
+	got, err := json.Marshal(g)
 	expectNoErr(t, err)
 	const want = `{"type":"Point","coordinates":[1,2]}`
-	expectDeepEqual(t, string(got), want)
-}
-
-func TestGeoJSONMarshalAnyGeometryNil(t *testing.T) {
-	var any AnyGeometry
-	got, err := json.Marshal(any)
-	expectNoErr(t, err)
-	const want = `null`
 	expectDeepEqual(t, string(got), want)
 }

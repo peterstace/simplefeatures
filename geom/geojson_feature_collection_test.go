@@ -64,11 +64,11 @@ func TestGeoJSONFeatureCollectionValidUnmarshal(t *testing.T) {
 
 	expectDeepEqual(t, f0.ID, "id0")
 	expectDeepEqual(t, f0.Properties, map[string]interface{}{"prop0": "value0", "prop1": "value1"})
-	expectDeepEqual(t, f0.GeometryX, geomFromWKT(t, "LINESTRING(102 0,103 1,104 0,105 1)"))
+	expectDeepEqual(t, f0.Geometry, gFromWKT(t, "LINESTRING(102 0,103 1,104 0,105 1)"))
 
 	expectDeepEqual(t, f1.ID, "id1")
 	expectDeepEqual(t, f1.Properties, map[string]interface{}{"prop0": "value2", "prop1": "value3"})
-	expectDeepEqual(t, f1.GeometryX, geomFromWKT(t, "POLYGON((100 0,101 0,101 1,100 1,100 0))"))
+	expectDeepEqual(t, f1.Geometry, gFromWKT(t, "POLYGON((100 0,101 0,101 1,100 1,100 0))"))
 }
 
 func TestGeoJSONFeatureCollectionInvalidUnmarshal(t *testing.T) {
@@ -149,14 +149,14 @@ func TestGeoJSONFeatureCollectionNilGeometryX(t *testing.T) {
 }
 
 func TestGeoJSONFeatureCollectionAndPropertiesNil(t *testing.T) {
-	out, err := json.Marshal(GeoJSONFeatureCollection{{GeometryX: geomFromWKT(t, "POINT(1 2)")}})
+	out, err := json.Marshal(GeoJSONFeatureCollection{{Geometry: gFromWKT(t, "POINT(1 2)")}})
 	expectNoErr(t, err)
 	expectDeepEqual(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"properties":{}}]}`)
 }
 
 func TestGeoJSONFeatureCollectionAndPropertiesSet(t *testing.T) {
 	out, err := json.Marshal(GeoJSONFeatureCollection{{
-		GeometryX: geomFromWKT(t, "POINT(1 2)"),
+		Geometry: gFromWKT(t, "POINT(1 2)"),
 		ID:       "myid",
 		Properties: map[string]interface{}{
 			"foo": "bar",

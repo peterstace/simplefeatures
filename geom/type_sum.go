@@ -214,7 +214,7 @@ func (g *Geometry) UnmarshalJSON(p []byte) error {
 	if err != nil {
 		return err
 	}
-	*g = ToGeometry(geom)
+	*g = geom
 	return nil
 }
 

@@ -31,6 +31,10 @@ func TestZeroGeometry(t *testing.T) {
 	z = Geometry{}
 
 	z.AsBinary(ioutil.Discard) // Doesn't crash
+
+	_, err = z.Value()
+	expectNoErr(t, err)
+
 	expectDeepEqual(t, z.Dimension(), 0)
 
 	// TODO: continue further tests

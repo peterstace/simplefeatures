@@ -10,8 +10,8 @@ import (
 )
 
 func TestValuerAny(t *testing.T) {
-	any := AnyGeometry{Geom: geomFromWKT(t, "POINT(1 2)")}
-	val, err := any.Value()
+	g := gFromWKT(t, "POINT(1 2)")
+	val, err := g.Value()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -19,34 +19,27 @@ func TestValuerAny(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectDeepEqual(t, any.Geom, geom)
-}
-
-func TestValuerAnyZero(t *testing.T) {
-	var any AnyGeometry
-	if _, err := any.Value(); err == nil {
-		t.Fatal("expected an error")
-	}
+	expectDeepEqual(t, g, geom)
 }
 
 func TestScanner(t *testing.T) {
 	const wkt = "POINT(2 3)"
 	var wkb bytes.Buffer
 	expectNoErr(t, gFromWKT(t, wkt).AsBinary(&wkb))
-	var any AnyGeometry
+	var g Geometry
 	check := func(t *testing.T, err error) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		expectDeepEqual(t, any.Geom, geomFromWKT(t, wkt))
+		expectDeepEqual(t, g, geomFromWKT(t, wkt))
 	}
 	t.Run("string", func(t *testing.T) {
-		any = AnyGeometry{}
-		check(t, any.Scan(string(wkb.Bytes())))
+		g = Geometry{}
+		check(t, g.Scan(string(wkb.Bytes())))
 	})
 	t.Run("byte", func(t *testing.T) {
-		any = AnyGeometry{}
-		check(t, any.Scan([]byte(wkb.Bytes())))
+		g = Geometry{}
+		check(t, g.Scan([]byte(wkb.Bytes())))
 	})
 }
 

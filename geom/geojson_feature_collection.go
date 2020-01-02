@@ -9,9 +9,8 @@ import (
 // GeoJSONFeature represents a GeometryX with associated free-form properties.
 // GeoJSONFeature values have a one to one correspondence with GeoJSON Features.
 type GeoJSONFeature struct {
-	// GeometryX is the GeometryX that is associated with the Feature. It must be
-	// populated.
-	GeometryX GeometryX
+	// Geometry is the geometry that is associated with the Feature.
+	Geometry Geometry
 
 	// ID is an identifier to refer to the feature. If an identifier isn't
 	// applicable, ID can be left as nil. If it's set, then its value should
@@ -29,7 +28,7 @@ type GeoJSONFeature struct {
 func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 	var topLevel struct {
 		Type       string                 `json:"type"`
-		GeometryX   AnyGeometry            `json:"geometry"`
+		Geometry   *Geometry              `json:"geometry"`
 		ID         interface{}            `json:"id,omitempty"`
 		Properties map[string]interface{} `json:"properties,omitempty"`
 	}
@@ -47,10 +46,10 @@ func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 	f.ID = topLevel.ID
 	f.Properties = topLevel.Properties
 
-	if topLevel.GeometryX.Geom == nil {
+	if topLevel.Geometry == nil {
 		return fmt.Errorf("geometry field missing or empty")
 	}
-	f.GeometryX = topLevel.GeometryX.Geom
+	f.Geometry = *topLevel.Geometry
 
 	return nil
 }
@@ -58,9 +57,6 @@ func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 // MarshalJSON implements the encoding/json Marshaler interface by marshalling
 // into a GeoJSON FeatureCollection object.
 func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
-	if f.GeometryX == nil {
-		return nil, errors.New("GeometryX field not set")
-	}
 	props := f.Properties
 	if props == nil {
 		// As per the GeoJSON spec, the properties field must be an object (not null).
@@ -68,12 +64,12 @@ func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(struct {
 		Type       string                 `json:"type"`
-		GeometryX   GeometryX               `json:"geometry"`
+		Geometry   Geometry               `json:"geometry"`
 		ID         interface{}            `json:"id,omitempty"`
 		Properties map[string]interface{} `json:"properties"`
 	}{
 		"Feature",
-		f.GeometryX,
+		f.Geometry,
 		f.ID,
 		props,
 	})
