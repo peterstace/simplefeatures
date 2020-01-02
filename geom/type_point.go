@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"io"
 	"unsafe"
@@ -95,7 +96,9 @@ func (p Point) Boundary() GeometryX {
 }
 
 func (p Point) Value() (driver.Value, error) {
-	return wkbAsBytes(p)
+	var buf bytes.Buffer
+	err := p.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (p Point) AsBinary(w io.Writer) error {

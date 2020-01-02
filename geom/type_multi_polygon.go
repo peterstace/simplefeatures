@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"errors"
 	"io"
@@ -234,7 +235,9 @@ func (m MultiPolygon) Boundary() GeometryX {
 }
 
 func (m MultiPolygon) Value() (driver.Value, error) {
-	return wkbAsBytes(m)
+	var buf bytes.Buffer
+	err := m.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (m MultiPolygon) AsBinary(w io.Writer) error {

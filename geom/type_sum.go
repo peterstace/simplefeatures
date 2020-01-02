@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"io"
 	"unsafe"
 )
 
@@ -245,6 +246,31 @@ func (g Geometry) appendWKT(dst []byte) []byte {
 		return (*MultiLineString)(g.ptr).AppendWKT(dst)
 	case multiPolygonTag:
 		return (*MultiPolygon)(g.ptr).AppendWKT(dst)
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}
+
+func (g Geometry) AsBinary(w io.Writer) error {
+	switch g.tag {
+	case geometryCollectionTag:
+		return (*GeometryCollection)(g.ptr).AsBinary(w)
+	case emptySetTag:
+		return (*EmptySet)(g.ptr).AsBinary(w)
+	case pointTag:
+		return (*Point)(g.ptr).AsBinary(w)
+	case lineTag:
+		return (*Line)(g.ptr).AsBinary(w)
+	case lineStringTag:
+		return (*LineString)(g.ptr).AsBinary(w)
+	case polygonTag:
+		return (*Polygon)(g.ptr).AsBinary(w)
+	case multiPointTag:
+		return (*MultiPoint)(g.ptr).AsBinary(w)
+	case multiLineStringTag:
+		return (*MultiLineString)(g.ptr).AsBinary(w)
+	case multiPolygonTag:
+		return (*MultiPolygon)(g.ptr).AsBinary(w)
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}

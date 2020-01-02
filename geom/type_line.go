@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"fmt"
 	"io"
@@ -115,7 +116,9 @@ func (n Line) Boundary() GeometryX {
 }
 
 func (n Line) Value() (driver.Value, error) {
-	return wkbAsBytes(n)
+	var buf bytes.Buffer
+	err := n.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (n Line) AsBinary(w io.Writer) error {

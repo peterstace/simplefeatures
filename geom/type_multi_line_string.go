@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"io"
 	"unsafe"
@@ -174,7 +175,9 @@ func (m MultiLineString) Boundary() GeometryX {
 }
 
 func (m MultiLineString) Value() (driver.Value, error) {
-	return wkbAsBytes(m)
+	var buf bytes.Buffer
+	err := m.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (m MultiLineString) AsBinary(w io.Writer) error {

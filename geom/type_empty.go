@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"errors"
 	"io"
@@ -74,7 +75,9 @@ func (e EmptySet) Boundary() GeometryX {
 }
 
 func (e EmptySet) Value() (driver.Value, error) {
-	return wkbAsBytes(e)
+	var buf bytes.Buffer
+	err := e.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (e EmptySet) AsBinary(w io.Writer) error {

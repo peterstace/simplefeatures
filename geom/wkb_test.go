@@ -492,7 +492,7 @@ func TestWKBMarshalValid(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			geom := geomFromWKT(t, wkt)
 			var buf bytes.Buffer
-			err := geom.AsBinary(&buf)
+			err := ToGeometry(geom).AsBinary(&buf)
 			expectNoErr(t, err)
 			readBackGeom, err := UnmarshalWKB(&buf)
 			expectNoErr(t, err)

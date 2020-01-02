@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+// TODO: Remove this type.
+
 // AnyGeometry is a concrete type that holds any GeometryX value. It exists as a
 // helper to make SQL and JSON interactions easier.
 type AnyGeometry struct {
@@ -33,7 +35,7 @@ func (a AnyGeometry) Value() (driver.Value, error) {
 		return nil, errors.New("no geometry set")
 	}
 	var buf bytes.Buffer
-	err := a.Geom.AsBinary(&buf)
+	err := ToGeometry(a.Geom).AsBinary(&buf)
 	return buf.Bytes(), err
 }
 

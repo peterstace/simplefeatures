@@ -32,7 +32,7 @@ func TestValuerAnyZero(t *testing.T) {
 func TestScanner(t *testing.T) {
 	const wkt = "POINT(2 3)"
 	var wkb bytes.Buffer
-	expectNoErr(t, geomFromWKT(t, wkt).AsBinary(&wkb))
+	expectNoErr(t, gFromWKT(t, wkt).AsBinary(&wkb))
 	var any AnyGeometry
 	check := func(t *testing.T, err error) {
 		if err != nil {

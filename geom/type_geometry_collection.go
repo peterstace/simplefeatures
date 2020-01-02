@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"encoding/json"
 	"io"
@@ -130,7 +131,9 @@ func (c GeometryCollection) Boundary() GeometryX {
 }
 
 func (c GeometryCollection) Value() (driver.Value, error) {
-	return wkbAsBytes(c)
+	var buf bytes.Buffer
+	err := c.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (c GeometryCollection) AsBinary(w io.Writer) error {
@@ -141,7 +144,7 @@ func (c GeometryCollection) AsBinary(w io.Writer) error {
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {
 		geom := c.GeometryN(i)
-		marsh.setErr(geom.AsBinary(w))
+		marsh.setErr(ToGeometry(geom).AsBinary(w))
 	}
 	return marsh.err
 }
