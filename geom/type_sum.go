@@ -202,6 +202,22 @@ func (g Geometry) MarshalJSON() ([]byte, error) {
 	}
 }
 
+// UnmarshalJSON implements the encoding/json.Unmarshaller interface by
+// parsing the JSON stream as GeoJSON geometry object.
+//
+// It constructs the resultant geometry with no ConstructionOptions. If
+// ConstructionOptions are needed, then the value should be unmarshalled into a
+// json.RawMessage value and then UnmarshalJSON called manually (passing in the
+// ConstructionOptions as desired).
+func (g *Geometry) UnmarshalJSON(p []byte) error {
+	geom, err := UnmarshalGeoJSON(p)
+	if err != nil {
+		return err
+	}
+	*g = ToGeometry(geom)
+	return nil
+}
+
 // AsGeometryX is a temporary helper function to convert to the
 // soon-to-be-deleted GeometryX type.
 func (g Geometry) AsGeometryX() GeometryX {
@@ -317,10 +333,12 @@ func (g Geometry) Value() (driver.Value, error) {
 }
 
 // Scan implements the database/sql.Scanner interface by parsing the src value
-// as WKB (Well Known Binary). It constructs the resultant geometry with no
-// ConstructionOptions. If ConstructionOptions are needed, then the value
-// should be scanned into a byte slice and then UnmarshalWKB called manually
-// (passing in the ConstructionOptions as desired).
+// as WKB (Well Known Binary).
+//
+// It constructs the resultant geometry with no ConstructionOptions. If
+// ConstructionOptions are needed, then the value should be scanned into a byte
+// slice and then UnmarshalWKB called manually (passing in the
+// ConstructionOptions as desired).
 func (g *Geometry) Scan(src interface{}) error {
 	var r io.Reader
 	switch src := src.(type) {
