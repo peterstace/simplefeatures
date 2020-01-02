@@ -287,7 +287,7 @@ func TestIntersects(t *testing.T) {
 					if got != tt.want {
 						t.Errorf(
 							"\ninput1: %s\ninput2: %s\ngot:  %v\nwant: %v\n",
-							g1.AsText(), g2.AsText(), got, tt.want,
+							geom.ToGeometry(g1).AsText(), geom.ToGeometry(g2).AsText(), got, tt.want,
 						)
 					}
 				}

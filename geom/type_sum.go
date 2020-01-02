@@ -197,3 +197,30 @@ func (g Geometry) AsGeometryX() GeometryX {
 		panic("unknown geometry: " + g.tag.String())
 	}
 }
+
+// ToGeometry is a temporary helper function to convert the soon-to-be deleted
+// GeometryX type to Geometry.
+func ToGeometry(g GeometryX) Geometry {
+	switch g := g.(type) {
+	case GeometryCollection:
+		return Geometry{tag: geometryCollectionTag, ptr: unsafe.Pointer(&g)}
+	case EmptySet:
+		return Geometry{tag: emptySetTag, ptr: unsafe.Pointer(&g)}
+	case Point:
+		return Geometry{tag: pointTag, ptr: unsafe.Pointer(&g)}
+	case Line:
+		return Geometry{tag: lineTag, ptr: unsafe.Pointer(&g)}
+	case LineString:
+		return Geometry{tag: lineStringTag, ptr: unsafe.Pointer(&g)}
+	case Polygon:
+		return Geometry{tag: polygonTag, ptr: unsafe.Pointer(&g)}
+	case MultiPoint:
+		return Geometry{tag: multiPointTag, ptr: unsafe.Pointer(&g)}
+	case MultiLineString:
+		return Geometry{tag: multiLineStringTag, ptr: unsafe.Pointer(&g)}
+	case MultiPolygon:
+		return Geometry{tag: multiPolygonTag, ptr: unsafe.Pointer(&g)}
+	default:
+		panic(fmt.Sprintf("unknown type: %T", g))
+	}
+}

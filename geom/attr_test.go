@@ -270,8 +270,8 @@ func TestBoundary(t *testing.T) {
 			want := geomFromWKT(t, tt.boundary)
 			got := geomFromWKT(t, tt.wkt).Boundary()
 			if !reflect.DeepEqual(got, want) {
-				t.Logf("want: %s", string(want.AsText()))
-				t.Logf("got:  %s", string(got.AsText()))
+				t.Logf("want: %s", string(ToGeometry(want).AsText()))
+				t.Logf("got:  %s", string(ToGeometry(got).AsText()))
 				t.Errorf("mismatch")
 			}
 		})
@@ -429,7 +429,7 @@ func TestIsRing(t *testing.T) {
 			g := geomFromWKT(t, tt.wkt)
 			got := g.(interface{ IsRing() bool }).IsRing()
 			if got != tt.want {
-				t.Logf("WKT: %v", g.AsText())
+				t.Logf("WKT: %v", ToGeometry(g).AsText())
 				t.Errorf("got=%v want=%v", got, tt.want)
 			}
 		})

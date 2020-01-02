@@ -31,7 +31,7 @@ func NewEnvelope(first XY, others ...XY) Envelope {
 func mustEnvelope(g GeometryX) Envelope {
 	env, ok := g.Envelope()
 	if !ok {
-		panic(fmt.Sprintf("mustEnvelope but envelope not defined: %s", string(g.AsText())))
+		panic(fmt.Sprintf("mustEnvelope but envelope not defined: %s", ToGeometry(g).AsText()))
 	}
 	return env
 }

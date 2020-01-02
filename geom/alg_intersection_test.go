@@ -195,7 +195,7 @@ func TestIntersection(t *testing.T) {
 					t.Fatal(err)
 				}
 				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
-					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got.AsText())
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, ToGeometry(got).AsText())
 				}
 
 				// We can infer the desired result for Intersects, which gives
@@ -222,7 +222,7 @@ func TestIntersection(t *testing.T) {
 					t.Fatal(err)
 				}
 				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
-					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got.AsText())
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, ToGeometry(got).AsText())
 				}
 
 				// We can infer the desired result for Intersects, which gives

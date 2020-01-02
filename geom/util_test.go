@@ -40,12 +40,12 @@ expected to be equal, but aren't:
 		gotGeom, okGot := got.(GeometryX)
 		if okGot {
 			format += "    got  (WKT): %s\n"
-			args = append(args, gotGeom.AsText())
+			args = append(args, ToGeometry(gotGeom).AsText())
 		}
 		wantGeom, okWant := want.(GeometryX)
 		if okWant {
 			format += "    want (WKT): %s\n"
-			args = append(args, wantGeom.AsText())
+			args = append(args, ToGeometry(wantGeom).AsText())
 		}
 		t.Errorf(format, args...)
 	}
