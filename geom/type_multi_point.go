@@ -108,10 +108,6 @@ func (m MultiPoint) IsEmpty() bool {
 	return len(m.pts) == 0
 }
 
-func (m MultiPoint) Dimension() int {
-	return 0
-}
-
 func (m MultiPoint) Equals(other GeometryX) (bool, error) {
 	return equals(m, other)
 }

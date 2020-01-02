@@ -79,10 +79,6 @@ func (p Point) IsEmpty() bool {
 	return false
 }
 
-func (p Point) Dimension() int {
-	return 0
-}
-
 func (p Point) Equals(other GeometryX) (bool, error) {
 	return equals(p, other)
 }

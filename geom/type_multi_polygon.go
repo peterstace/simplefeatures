@@ -33,7 +33,7 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 			bound1 := polys[i].Boundary()
 			bound2 := polys[j].Boundary()
 			inter := mustIntersection(bound1, bound2)
-			if inter.Dimension() > 0 {
+			if ToGeometry(inter).Dimension() > 0 {
 				return MultiPolygon{}, errors.New("the boundaries of the polygon elements of multipolygons must only intersect at points")
 			}
 			if polyInteriorsIntersect(polys[i], polys[j]) {
@@ -199,10 +199,6 @@ func (m MultiPolygon) Intersection(g GeometryX) (GeometryX, error) {
 
 func (m MultiPolygon) IsEmpty() bool {
 	return len(m.polys) == 0
-}
-
-func (m MultiPolygon) Dimension() int {
-	return 2
 }
 
 func (m MultiPolygon) Equals(other GeometryX) (bool, error) {

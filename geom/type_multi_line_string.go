@@ -122,10 +122,6 @@ func (m MultiLineString) IsEmpty() bool {
 	return len(m.lines) == 0
 }
 
-func (m MultiLineString) Dimension() int {
-	return 1
-}
-
 func (m MultiLineString) Equals(other GeometryX) (bool, error) {
 	return equals(m, other)
 }

@@ -107,7 +107,7 @@ func (s LineString) IsSimple() bool {
 			if intersection.IsEmpty() {
 				continue
 			}
-			if intersection.Dimension() >= 1 {
+			if ToGeometry(intersection).Dimension() >= 1 {
 				// two overlapping line segments
 				return false
 			}
@@ -151,10 +151,6 @@ func (s LineString) Intersects(g GeometryX) bool {
 
 func (s LineString) IsEmpty() bool {
 	return false
-}
-
-func (s LineString) Dimension() int {
-	return 1
 }
 
 func (s LineString) Equals(other GeometryX) (bool, error) {
@@ -236,7 +232,7 @@ func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geom
 // EqualsExact checks if this LineString is exactly equal to another curve.
 func (s LineString) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
 	c, ok := other.(curve)
-	return ok && other.Dimension() == 1 && curvesExactEqual(s, c, opts)
+	return ok && ToGeometry(other).Dimension() == 1 && curvesExactEqual(s, c, opts)
 }
 
 // IsValid checks if this LineString is valid

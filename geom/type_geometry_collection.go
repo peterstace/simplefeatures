@@ -83,7 +83,7 @@ func (c GeometryCollection) IsEmpty() bool {
 func (c GeometryCollection) Dimension() int {
 	dim := 0
 	for _, g := range c.geoms {
-		dim = max(dim, g.Dimension())
+		dim = max(dim, ToGeometry(g).Dimension())
 	}
 	return dim
 }

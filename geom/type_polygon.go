@@ -176,10 +176,6 @@ func (p Polygon) IsEmpty() bool {
 	return false
 }
 
-func (p Polygon) Dimension() int {
-	return 2
-}
-
 func (p Polygon) Equals(other GeometryX) (bool, error) {
 	return equals(p, other)
 }

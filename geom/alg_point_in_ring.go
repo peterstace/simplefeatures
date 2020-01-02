@@ -34,7 +34,7 @@ func pointRingSide(pt XY, ring LineString) side {
 		if inter.IsEmpty() {
 			continue
 		}
-		if inter.Dimension() == 1 {
+		if ToGeometry(inter).Dimension() == 1 {
 			continue
 		}
 		ep1 := NewPointC(seg.a)

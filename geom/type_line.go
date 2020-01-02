@@ -96,10 +96,6 @@ func (n Line) IsEmpty() bool {
 	return false
 }
 
-func (n Line) Dimension() int {
-	return 1
-}
-
 func (n Line) Equals(other GeometryX) (bool, error) {
 	return equals(n, other)
 }
@@ -163,7 +159,7 @@ func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX,
 // EqualsExact checks if this Line is exactly equal to another curve.
 func (n Line) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
 	c, ok := other.(curve)
-	return ok && other.Dimension() == 1 && curvesExactEqual(n, c, opts)
+	return ok && ToGeometry(other).Dimension() == 1 && curvesExactEqual(n, c, opts)
 }
 
 // IsValid checks if this Line is valid

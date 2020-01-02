@@ -53,7 +53,7 @@ func TestIsEmptyDimension(t *testing.T) {
 				}
 			})
 			t.Run("Dimension_"+tt.wkt, func(t *testing.T) {
-				gotDim := geom.AsGeometryX().Dimension()
+				gotDim := geom.Dimension()
 				if gotDim != tt.wantDim {
 					t.Errorf("want=%v got=%v", tt.wantDim, gotDim)
 				}

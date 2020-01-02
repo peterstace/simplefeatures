@@ -150,23 +150,23 @@ func (g Geometry) AsMultiPolygon() MultiPolygon {
 func (g Geometry) AsText() string {
 	switch g.tag {
 	case geometryCollectionTag:
-		return (*GeometryCollection)(g.ptr).AsText()
+		return g.AsGeometryCollection().AsText()
 	case emptySetTag:
-		return (*EmptySet)(g.ptr).AsText()
+		return g.AsEmptySet().AsText()
 	case pointTag:
-		return (*Point)(g.ptr).AsText()
+		return g.AsPoint().AsText()
 	case lineTag:
-		return (*Line)(g.ptr).AsText()
+		return g.AsLine().AsText()
 	case lineStringTag:
-		return (*LineString)(g.ptr).AsText()
+		return g.AsLineString().AsText()
 	case polygonTag:
-		return (*Polygon)(g.ptr).AsText()
+		return g.AsPolygon().AsText()
 	case multiPointTag:
-		return (*MultiPoint)(g.ptr).AsText()
+		return g.AsMultiPoint().AsText()
 	case multiLineStringTag:
-		return (*MultiLineString)(g.ptr).AsText()
+		return g.AsMultiLineString().AsText()
 	case multiPolygonTag:
-		return (*MultiPolygon)(g.ptr).AsText()
+		return g.AsMultiPolygon().AsText()
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}
@@ -251,26 +251,49 @@ func (g Geometry) appendWKT(dst []byte) []byte {
 	}
 }
 
+// AsBinary writes the WKB (Well Known Binary) representation of the geometry
+// to the writer.
 func (g Geometry) AsBinary(w io.Writer) error {
 	switch g.tag {
 	case geometryCollectionTag:
-		return (*GeometryCollection)(g.ptr).AsBinary(w)
+		return g.AsGeometryCollection().AsBinary(w)
 	case emptySetTag:
-		return (*EmptySet)(g.ptr).AsBinary(w)
+		return g.AsEmptySet().AsBinary(w)
 	case pointTag:
-		return (*Point)(g.ptr).AsBinary(w)
+		return g.AsPoint().AsBinary(w)
 	case lineTag:
-		return (*Line)(g.ptr).AsBinary(w)
+		return g.AsLine().AsBinary(w)
 	case lineStringTag:
-		return (*LineString)(g.ptr).AsBinary(w)
+		return g.AsLineString().AsBinary(w)
 	case polygonTag:
-		return (*Polygon)(g.ptr).AsBinary(w)
+		return g.AsPolygon().AsBinary(w)
 	case multiPointTag:
-		return (*MultiPoint)(g.ptr).AsBinary(w)
+		return g.AsMultiPoint().AsBinary(w)
 	case multiLineStringTag:
-		return (*MultiLineString)(g.ptr).AsBinary(w)
+		return g.AsMultiLineString().AsBinary(w)
 	case multiPolygonTag:
-		return (*MultiPolygon)(g.ptr).AsBinary(w)
+		return g.AsMultiPolygon().AsBinary(w)
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}
+
+// Dimension returns the dimension of the Geometry. This is  0 for points, 1
+// for curves, and 2 for surfaces (regardless of whether or not they are
+// empty). For GeometryCollections it is the maximum dimension over the
+// collection (or 0 if the collection is the empty collection).
+func (g Geometry) Dimension() int {
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().Dimension()
+	case emptySetTag:
+		return g.AsEmptySet().Dimension()
+	case pointTag, multiPointTag:
+		return 0
+	case lineTag, lineStringTag, multiLineStringTag:
+		return 1
+	case polygonTag, multiPolygonTag:
+		return 2
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}

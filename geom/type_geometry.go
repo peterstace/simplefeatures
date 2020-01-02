@@ -21,11 +21,6 @@ type GeometryX interface {
 	// IsEmpty returns true if this object an empty geometry.
 	IsEmpty() bool
 
-	// Dimension returns the dimension of the geometry. This is 0 for empty
-	// geometries, 0 for points, 1 for curves, and 2 for surfaces. For mixed
-	// geometries, it is the maximum dimension over the collection.
-	Dimension() int
-
 	// Envelope returns the axis aligned bounding box that most tightly
 	// surrounds the geometry. Envelopes are not defined for empty geometries,
 	// in which case the returned flag will be false.

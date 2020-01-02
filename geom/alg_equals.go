@@ -12,7 +12,7 @@ func equals(g1, g2 GeometryX) (bool, error) {
 	if g1.IsEmpty() || g2.IsEmpty() {
 		return false, nil
 	}
-	if g1.Dimension() != g2.Dimension() {
+	if ToGeometry(g1).Dimension() != ToGeometry(g2).Dimension() {
 		return false, nil
 	}
 
