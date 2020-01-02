@@ -178,24 +178,22 @@ func TestIntersection(t *testing.T) {
 		//{"LINESTRING(0 0,0 1,1 0,0 0)", "LINESTRING(0 0,1 1,0 1,0 0,1 1)", "GEOMETRYCOLLECTION(POINT(0.5 0.5),LINESTRING(0 0,0 1))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			in1gSum, err := UnmarshalWKT(strings.NewReader(tt.in1))
+			in1g, err := UnmarshalWKT(strings.NewReader(tt.in1))
 			if err != nil {
 				t.Fatalf("could not unmarshal wkt: %v", err)
 			}
-			in2gSum, err := UnmarshalWKT(strings.NewReader(tt.in2))
+			in2g, err := UnmarshalWKT(strings.NewReader(tt.in2))
 			if err != nil {
 				t.Fatalf("could not unmarshal wkt: %v", err)
 			}
-			in1g := in1gSum.AsGeometryX()
-			in2g := in2gSum.AsGeometryX()
 
 			t.Run("forward", func(t *testing.T) {
 				got, err := in1g.Intersection(in2g)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
-					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, ToGeometry(got).AsText())
+				if !got.EqualsExact(gFromWKT(t, tt.out), IgnoreOrder) {
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got.AsText())
 				}
 
 				// We can infer the desired result for Intersects, which gives
@@ -221,8 +219,8 @@ func TestIntersection(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
-					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, ToGeometry(got).AsText())
+				if !got.EqualsExact(gFromWKT(t, tt.out), IgnoreOrder) {
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got.AsText())
 				}
 
 				// We can infer the desired result for Intersects, which gives

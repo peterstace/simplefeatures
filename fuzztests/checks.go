@@ -186,7 +186,7 @@ func CheckGeoJSON(t *testing.T, pg PostGIS, g geom.Geometry) {
 			}
 		}
 
-		got, err := g.AsGeometryX().MarshalJSON()
+		got, err := g.MarshalJSON()
 		if err != nil {
 			t.Fatalf("could not convert to geojson: %v", err)
 		}

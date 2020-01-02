@@ -175,6 +175,33 @@ func (g Geometry) AsText() string {
 	}
 }
 
+// MarshalJSON implements the encoding/json.Marshaller interface by returning a
+// GeoJSON geometry object.
+func (g Geometry) MarshalJSON() ([]byte, error) {
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().MarshalJSON()
+	case emptySetTag:
+		return g.AsEmptySet().MarshalJSON()
+	case pointTag:
+		return g.AsPoint().MarshalJSON()
+	case lineTag:
+		return g.AsLine().MarshalJSON()
+	case lineStringTag:
+		return g.AsLineString().MarshalJSON()
+	case polygonTag:
+		return g.AsPolygon().MarshalJSON()
+	case multiPointTag:
+		return g.AsMultiPoint().MarshalJSON()
+	case multiLineStringTag:
+		return g.AsMultiLineString().MarshalJSON()
+	case multiPolygonTag:
+		return g.AsMultiPolygon().MarshalJSON()
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}
+
 // AsGeometryX is a temporary helper function to convert to the
 // soon-to-be-deleted GeometryX type.
 func (g Geometry) AsGeometryX() GeometryX {
@@ -290,7 +317,10 @@ func (g Geometry) Value() (driver.Value, error) {
 }
 
 // Scan implements the database/sql.Scanner interface by parsing the src value
-// as WKB (Well Known Binary).
+// as WKB (Well Known Binary). It constructs the resultant geometry with no
+// ConstructionOptions. If ConstructionOptions are needed, then the value
+// should be scanned into a byte slice and then UnmarshalWKB called manually
+// (passing in the ConstructionOptions as desired).
 func (g *Geometry) Scan(src interface{}) error {
 	var r io.Reader
 	switch src := src.(type) {
@@ -305,12 +335,6 @@ func (g *Geometry) Scan(src interface{}) error {
 		// additionally provide a NullableGeometry type with an IsValid flag.
 		return fmt.Errorf("unsupported src type in Scan: %T", src)
 	}
-
-	// TODO: This approach has the major drawback that it's not possible to
-	// psas in any construction options. A way around this could be to add a
-	// method called WKBValuerScanner that accepts construction options. The
-	// result of that method would have a pointer to this geometry and hold the
-	// construction arguments.
 
 	unmarshalled, err := UnmarshalWKB(r)
 	if err != nil {
@@ -410,8 +434,7 @@ func (g Geometry) Intersects(other Geometry) bool {
 // It is not implemented for all possible pairs of geometries, and returns an
 // error in those cases.
 func (g Geometry) Intersection(other Geometry) (Geometry, error) {
-	// TODO
-	result, err := g.AsGeometryX().Intersection(other.AsGeometryX())
+	result, err := intersection(g.AsGeometryX(), other.AsGeometryX())
 	if err != nil {
 		return Geometry{}, err
 	}

@@ -12,6 +12,11 @@ func TestZeroGeometry(t *testing.T) {
 	expectDeepEqual(t, z.IsGeometryCollection(), true)
 	z.AsGeometryCollection() // Doesn't crash.
 	expectDeepEqual(t, z.AsText(), "GEOMETRYCOLLECTION EMPTY")
+
+	json, err := z.MarshalJSON()
+	expectNoErr(t, err)
+	expectDeepEqual(t, string(json), `{"type":"GeometryCollection","geometries":[]}`)
+
 	z.AsBinary(ioutil.Discard) // Doesn't crash
 	expectDeepEqual(t, z.Dimension(), 0)
 

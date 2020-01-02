@@ -1,19 +1,8 @@
 package geom
 
-import (
-	"encoding/json"
-)
-
 // GeometryX is the most general type of geometry supported, and exposes common
 // behaviour. All geometry types implement this interface.
 type GeometryX interface {
-	// Intersection returns a geometric object that represents the point set
-	// intersection of this geometry with another geometry.
-	//
-	// It is not implemented for all possible pairs of geometries, and returns
-	// an error in those cases.
-	Intersection(GeometryX) (GeometryX, error)
-
 	// Intersects returns true if the intersection of this gemoetry with the
 	// specified other geometry is not empty, or false if it is empty.
 	Intersects(GeometryX) bool
@@ -64,6 +53,4 @@ type GeometryX interface {
 	// IsValid returns if the current geometry is valid. It is useful to use when
 	// validation is disabled at constructing, for example, json.Unmarshal
 	IsValid() bool
-
-	json.Marshaler
 }
