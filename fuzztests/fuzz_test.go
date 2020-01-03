@@ -139,7 +139,7 @@ func convertToGeometries(t *testing.T, candidates []string) []geom.Geometry {
 		}
 		g, err := geom.UnmarshalWKB(bytes.NewReader(buf))
 		if err == nil {
-			geoms = append(geoms, geom.ToGeometry(g))
+			geoms = append(geoms, g)
 		}
 	}
 	if oldCount == len(geoms) {

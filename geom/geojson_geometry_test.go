@@ -435,8 +435,8 @@ func TestGeoJSONUnmarshalValid(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got, err := UnmarshalGeoJSON([]byte(tt.geojson))
 			expectNoErr(t, err)
-			want := geomFromWKT(t, tt.wkt)
-			expectDeepEqual(t, got, want)
+			want := gFromWKT(t, tt.wkt)
+			expectGeomEq(t, got, want)
 		})
 	}
 }
@@ -557,5 +557,5 @@ func TestGeoJSONMarshalAnyGeometryPopulated(t *testing.T) {
 	got, err := json.Marshal(g)
 	expectNoErr(t, err)
 	const want = `{"type":"Point","coordinates":[1,2]}`
-	expectDeepEqual(t, string(got), want)
+	expectStringEq(t, string(got), want)
 }

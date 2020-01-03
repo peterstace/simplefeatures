@@ -31,13 +31,13 @@ func TestIntegrationValuerScanner(t *testing.T) {
 		if err := db.QueryRow("SELECT ST_AsBinary(ST_GeomFromWKB($1))", input).Scan(&output); err != nil {
 			t.Fatal(err)
 		}
-		expectDeepEqual(t, output, input)
+		expectGeomEq(t, output, input)
 	})
 	t.Run("input is AnyGeometry pointer to struct", func(t *testing.T) {
 		var output Geometry
 		if err := db.QueryRow("SELECT ST_AsBinary(ST_GeomFromWKB($1))", &input).Scan(&output); err != nil {
 			t.Fatal(err)
 		}
-		expectDeepEqual(t, output, input)
+		expectGeomEq(t, output, input)
 	})
 }

@@ -2,7 +2,6 @@ package geom_test
 
 import (
 	"bytes"
-	"database/sql/driver"
 	"strconv"
 	"testing"
 
@@ -19,7 +18,7 @@ func TestValuerAny(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectDeepEqual(t, g, geom)
+	expectGeomEq(t, g, geom)
 }
 
 func TestScanner(t *testing.T) {
@@ -31,7 +30,7 @@ func TestScanner(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		expectDeepEqual(t, g, geomFromWKT(t, wkt))
+		expectGeomEq(t, g, gFromWKT(t, wkt))
 	}
 	t.Run("string", func(t *testing.T) {
 		g = Geometry{}
@@ -58,12 +57,12 @@ func TestValuerConcrete(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log(wkt)
-			geom := geomFromWKT(t, wkt).(driver.Valuer)
+			geom := gFromWKT(t, wkt)
 			val, err := geom.Value()
 			expectNoErr(t, err)
 			g, err := UnmarshalWKB(bytes.NewReader(val.([]byte)))
 			expectNoErr(t, err)
-			expectDeepEqual(t, geom, g)
+			expectGeomEq(t, g, geom)
 		})
 	}
 }

@@ -358,7 +358,7 @@ func (g *Geometry) Scan(src interface{}) error {
 	if err != nil {
 		return err
 	}
-	*g = ToGeometry(unmarshalled)
+	*g = unmarshalled
 	return nil
 }
 

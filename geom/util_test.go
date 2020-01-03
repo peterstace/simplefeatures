@@ -76,3 +76,24 @@ func expectNoErr(t *testing.T, err error) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func expectGeomEq(t *testing.T, got, want Geometry, opts ...EqualsExactOption) {
+	t.Helper()
+	if !got.EqualsExact(want, opts...) {
+		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+	}
+}
+
+func expectStringEq(t *testing.T, got, want string) {
+	t.Helper()
+	if got != want {
+		t.Errorf("\ngot:  %q\nwant: %q\n", got, want)
+	}
+}
+
+func expectIntEq(t *testing.T, got, want int) {
+	t.Helper()
+	if got != want {
+		t.Errorf("\ngot:  %d\nwant: %d\n", got, want)
+	}
+}
