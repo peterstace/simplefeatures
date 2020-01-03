@@ -39,7 +39,7 @@ func (c GeometryCollection) NumGeometries() int {
 	return len(c.geoms)
 }
 
-// GeometryN gives the nth (zero based) GeometryX in the GeometryCollection.
+// GeometryN gives the nth (zero based) Geometry in the GeometryCollection.
 func (c GeometryCollection) GeometryN(n int) Geometry {
 	return c.geoms[n]
 }
@@ -63,8 +63,8 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-func (c GeometryCollection) Intersection(g GeometryX) (GeometryX, error) {
-	return intersection(c, g)
+func (c GeometryCollection) Intersection(g Geometry) (Geometry, error) {
+	return intersection(c.AsGeometry(), g)
 }
 
 func (c GeometryCollection) Intersects(g Geometry) bool {
@@ -88,12 +88,12 @@ func (c GeometryCollection) Dimension() int {
 	return dim
 }
 
-func (c GeometryCollection) Equals(other GeometryX) (bool, error) {
-	return equals(c, other)
+func (c GeometryCollection) Equals(other Geometry) (bool, error) {
+	return equals(c.AsGeometry(), other)
 }
 
 // walk traverses a tree of GeometryCollections, triggering a callback at each
-// non-GeometryX collection leaf.
+// non-Geometry collection leaf.
 func (c GeometryCollection) walk(fn func(Geometry)) {
 	for _, g := range c.geoms {
 		if g.IsGeometryCollection() {

@@ -46,8 +46,8 @@ func (e EmptySet) IsSimple() bool {
 	return true
 }
 
-func (e EmptySet) Intersection(g GeometryX) (GeometryX, error) {
-	return intersection(e, g)
+func (e EmptySet) Intersection(g Geometry) (Geometry, error) {
+	return intersection(e.AsGeometry(), g)
 }
 
 func (e EmptySet) Intersects(g Geometry) bool {
@@ -58,8 +58,8 @@ func (e EmptySet) Dimension() int {
 	return e.dimension
 }
 
-func (e EmptySet) Equals(other GeometryX) (bool, error) {
-	return equals(e, other)
+func (e EmptySet) Equals(other Geometry) (bool, error) {
+	return equals(e.AsGeometry(), other)
 }
 
 func (e EmptySet) Envelope() (Envelope, bool) {

@@ -35,7 +35,7 @@ func TestNotEquals(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				eq, err := g1.AsGeometryX().Equals(g2.AsGeometryX())
+				eq, err := g1.Equals(g2)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -79,7 +79,7 @@ func TestEquals(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-					eq, err := g1.AsGeometryX().Equals(g2.AsGeometryX())
+					eq, err := g1.Equals(g2)
 					if err != nil {
 						t.Fatal(err)
 					}

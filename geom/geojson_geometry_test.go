@@ -540,7 +540,7 @@ func TestGeoJSONMarshal(t *testing.T) {
 		},
 	} {
 		t.Run(tt.wkt, func(t *testing.T) {
-			geom := geomFromWKT(t, tt.wkt)
+			geom := gFromWKT(t, tt.wkt)
 			gotJSON, err := json.Marshal(geom)
 			expectNoErr(t, err)
 			if string(gotJSON) != tt.want {

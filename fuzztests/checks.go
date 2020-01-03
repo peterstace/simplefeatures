@@ -236,7 +236,7 @@ func CheckEnvelope(t *testing.T, pg PostGIS, g geom.Geometry) {
 			// We just checked IsEmpty, so this should never happen.
 			panic("could not get envelope")
 		}
-		got := geom.ToGeometry(env.AsGeometry())
+		got := env.AsGeometry()
 		want := pg.Envelope(t, g)
 
 		if !got.EqualsExact(want) {
@@ -249,12 +249,28 @@ func CheckEnvelope(t *testing.T, pg PostGIS, g geom.Geometry) {
 
 func CheckIsSimple(t *testing.T, pg PostGIS, g geom.Geometry) {
 	t.Run("CheckIsSimple", func(t *testing.T) {
-		s, ok := g.AsGeometryX().(interface{ IsSimple() bool })
-		if !ok {
-			if !g.IsGeometryCollection() {
-				t.Fatalf("GeometryCollection is the only type that doesn't implement IsSimple")
-			}
-			return
+		var got bool
+		switch {
+		case g.IsGeometryCollection():
+			return // GeometryCollection doesn't have IsSimple
+		case g.IsEmptySet():
+			got = g.AsEmptySet().IsSimple()
+		case g.IsPoint():
+			got = g.AsPoint().IsSimple()
+		case g.IsLine():
+			got = g.AsLine().IsSimple()
+		case g.IsLineString():
+			got = g.AsLineString().IsSimple()
+		case g.IsPolygon():
+			got = g.AsPolygon().IsSimple()
+		case g.IsMultiPoint():
+			got = g.AsMultiPoint().IsSimple()
+		case g.IsMultiLineString():
+			got = g.AsMultiLineString().IsSimple()
+		case g.IsMultiPolygon():
+			got = g.AsMultiPolygon().IsSimple()
+		default:
+			panic(g)
 		}
 
 		// PostGIS doesn't treat MultiLineStrings containing duplicated
@@ -275,7 +291,6 @@ func CheckIsSimple(t *testing.T, pg PostGIS, g geom.Geometry) {
 			}
 		}
 
-		got := s.IsSimple()
 		want := pg.IsSimple(t, g)
 		if got != want {
 			t.Logf("got:  %v", got)
@@ -328,8 +343,10 @@ func CheckIsValid(t *testing.T, pg PostGIS, g geom.Geometry) {
 
 func CheckIsRing(t *testing.T, pg PostGIS, g geom.Geometry) {
 	t.Run("CheckIsRing", func(t *testing.T) {
-		ringer, ok := g.AsGeometryX().(interface{ IsRing() bool })
-		got := ok && ringer.IsRing()
+		var got bool
+		if g.IsLineString() {
+			got = g.AsLineString().IsRing()
+		}
 		want := pg.IsRing(t, g)
 		if got != want {
 			t.Logf("got:  %t", got)
@@ -341,10 +358,16 @@ func CheckIsRing(t *testing.T, pg PostGIS, g geom.Geometry) {
 
 func CheckLength(t *testing.T, pg PostGIS, g geom.Geometry) {
 	if !g.IsLine() && !g.IsLineString() && !g.IsMultiLineString() {
+		if _, ok := g.Length(); ok {
+			t.Error("didn't expect to be able to get length but could")
+		}
 		return
 	}
 	t.Run("CheckLength", func(t *testing.T) {
-		got := g.AsGeometryX().(interface{ Length() float64 }).Length()
+		got, ok := g.Length()
+		if !ok {
+			t.Error("could not get length")
+		}
 		want := pg.Length(t, g)
 		if math.Abs(got-want) > 1e-6 {
 			t.Logf("got:  %v", got)
@@ -368,9 +391,7 @@ func CheckEqualsExact(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 
 func CheckEquals(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 	t.Run("CheckEquals", func(t *testing.T) {
-		_, g1GC := g1.AsGeometryX().(geom.GeometryCollection)
-		_, g2GC := g2.AsGeometryX().(geom.GeometryCollection)
-		if g1GC || g2GC {
+		if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
 			// PostGIS cannot calculate Equals for geometry collections.
 			return
 		}
@@ -436,7 +457,15 @@ func CheckArea(t *testing.T, pg PostGIS, g geom.Geometry) {
 		return
 	}
 	t.Run("CheckArea", func(t *testing.T) {
-		got := g.AsGeometryX().(interface{ Area() float64 }).Area()
+		var got float64
+		switch {
+		case g.IsPolygon():
+			got = g.AsPolygon().Area()
+		case g.IsMultiPolygon():
+			got = g.AsMultiPolygon().Area()
+		default:
+			panic(g)
+		}
 		want := pg.Area(t, g)
 		const eps = 0.000000001
 		if math.Abs(got-want) > eps {

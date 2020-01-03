@@ -26,7 +26,11 @@ func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, e
 		if pts[i].XY.Equals(pts[i+1].XY) {
 			continue
 		}
-		ln := must(NewLineC(pts[i], pts[i+1], opts...)).(Line)
+		ln, err := NewLineC(pts[i], pts[i+1], opts...)
+		if err != nil {
+			// Already checked to ensure pts[i] and pts[i+1] are not equal.
+			panic(err)
+		}
 		lines = append(lines, ln)
 	}
 	if doCheapValidations(opts) && len(lines) == 0 {
@@ -103,7 +107,7 @@ func (s LineString) IsSimple() bool {
 	n := len(s.lines)
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
-			intersection := ToGeometry(mustIntersection(s.lines[i], s.lines[j]))
+			intersection := mustIntersection(s.lines[i].AsGeometry(), s.lines[j].AsGeometry())
 			if intersection.IsEmpty() {
 				continue
 			}
@@ -141,8 +145,8 @@ func (s LineString) IsClosed() bool {
 	return s.lines[0].a.XY.Equals(s.lines[len(s.lines)-1].b.XY)
 }
 
-func (s LineString) Intersection(g GeometryX) (GeometryX, error) {
-	return intersection(s, g)
+func (s LineString) Intersection(g Geometry) (Geometry, error) {
+	return intersection(s.AsGeometry(), g)
 }
 
 func (s LineString) Intersects(g Geometry) bool {
@@ -153,8 +157,8 @@ func (s LineString) IsEmpty() bool {
 	return false
 }
 
-func (s LineString) Equals(other GeometryX) (bool, error) {
-	return equals(s, other)
+func (s LineString) Equals(other Geometry) (bool, error) {
+	return equals(s.AsGeometry(), other)
 }
 
 func (s LineString) Envelope() (Envelope, bool) {

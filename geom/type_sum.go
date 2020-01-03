@@ -218,60 +218,6 @@ func (g *Geometry) UnmarshalJSON(p []byte) error {
 	return nil
 }
 
-// AsGeometryX is a temporary helper function to convert to the
-// soon-to-be-deleted GeometryX type.
-func (g Geometry) AsGeometryX() GeometryX {
-	switch g.tag {
-	case geometryCollectionTag:
-		return g.AsGeometryCollection()
-	case emptySetTag:
-		return g.AsEmptySet()
-	case pointTag:
-		return g.AsPoint()
-	case lineTag:
-		return g.AsLine()
-	case lineStringTag:
-		return g.AsLineString()
-	case polygonTag:
-		return g.AsPolygon()
-	case multiPointTag:
-		return g.AsMultiPoint()
-	case multiLineStringTag:
-		return g.AsMultiLineString()
-	case multiPolygonTag:
-		return g.AsMultiPolygon()
-	default:
-		panic("unknown geometry: " + g.tag.String())
-	}
-}
-
-// ToGeometry is a temporary helper function to convert the soon-to-be deleted
-// GeometryX type to Geometry.
-func ToGeometry(g GeometryX) Geometry {
-	switch g := g.(type) {
-	case GeometryCollection:
-		return Geometry{tag: geometryCollectionTag, ptr: unsafe.Pointer(&g)}
-	case EmptySet:
-		return Geometry{tag: emptySetTag, ptr: unsafe.Pointer(&g)}
-	case Point:
-		return Geometry{tag: pointTag, ptr: unsafe.Pointer(&g)}
-	case Line:
-		return Geometry{tag: lineTag, ptr: unsafe.Pointer(&g)}
-	case LineString:
-		return Geometry{tag: lineStringTag, ptr: unsafe.Pointer(&g)}
-	case Polygon:
-		return Geometry{tag: polygonTag, ptr: unsafe.Pointer(&g)}
-	case MultiPoint:
-		return Geometry{tag: multiPointTag, ptr: unsafe.Pointer(&g)}
-	case MultiLineString:
-		return Geometry{tag: multiLineStringTag, ptr: unsafe.Pointer(&g)}
-	case MultiPolygon:
-		return Geometry{tag: multiPolygonTag, ptr: unsafe.Pointer(&g)}
-	default:
-		panic(fmt.Sprintf("unknown type: %T", g))
-	}
-}
-
 func (g Geometry) appendWKT(dst []byte) []byte {
 	switch g.tag {
 	case geometryCollectionTag:
@@ -431,7 +377,7 @@ func (g Geometry) Envelope() (Envelope, bool) {
 	}
 }
 
-// Boundary returns the GeometryX representing the limit of this geometry.
+// Boundary returns the Geometry representing the limit of this geometry.
 func (g Geometry) Boundary() Geometry {
 	switch g.tag {
 	case geometryCollectionTag:
@@ -495,11 +441,31 @@ func (g Geometry) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 // It is not implemented for all possible pairs of geometries, and returns
 // an error in those cases.
 func (g Geometry) Equals(other Geometry) (bool, error) {
-	// TODO
-	return g.AsGeometryX().Equals(other.AsGeometryX())
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().Equals(other)
+	case emptySetTag:
+		return g.AsEmptySet().Equals(other)
+	case pointTag:
+		return g.AsPoint().Equals(other)
+	case lineTag:
+		return g.AsLine().Equals(other)
+	case lineStringTag:
+		return g.AsLineString().Equals(other)
+	case polygonTag:
+		return g.AsPolygon().Equals(other)
+	case multiPointTag:
+		return g.AsMultiPoint().Equals(other)
+	case multiLineStringTag:
+		return g.AsMultiLineString().Equals(other)
+	case multiPolygonTag:
+		return g.AsMultiPolygon().Equals(other)
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
 }
 
-// Convex hull returns a GeometryX that represents the smallest convex set
+// Convex hull returns a Geometry that represents the smallest convex set
 // that contains this geometry.
 func (g Geometry) ConvexHull() Geometry {
 	return convexHull(g)
@@ -544,19 +510,19 @@ func (g Geometry) Intersects(other Geometry) bool {
 // It is not implemented for all possible pairs of geometries, and returns an
 // error in those cases.
 func (g Geometry) Intersection(other Geometry) (Geometry, error) {
-	result, err := intersection(g.AsGeometryX(), other.AsGeometryX())
+	result, err := intersection(g, other)
 	if err != nil {
 		return Geometry{}, err
 	}
-	return ToGeometry(result), nil
+	return result, nil
 }
 
-// TransformXY transforms this GeometryX into another geometry according the
+// TransformXY transforms this Geometry into another geometry according the
 // mapping provided by the XY function. Some classes of mappings (such as
-// affine transformations) will preserve the validity this GeometryX in the
-// transformed GeometryX, in which case no error will be returned. Other
+// affine transformations) will preserve the validity this Geometry in the
+// transformed Geometry, in which case no error will be returned. Other
 // types of transformations may result in a validation error if their
-// mapping results in an invalid GeometryX.
+// mapping results in an invalid Geometry.
 func (g Geometry) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	switch g.tag {
 	case geometryCollectionTag:
@@ -577,6 +543,89 @@ func (g Geometry) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geomet
 		return g.AsMultiLineString().TransformXY(fn, opts...)
 	case multiPolygonTag:
 		return g.AsMultiPolygon().TransformXY(fn, opts...)
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}
+
+// Length gives the length of the geometry, if defined.. It is only defined for
+// Lines, LineStrings, and MultiLineStrings. The returned flag indicates if the
+// length is defined.
+//
+// TODO: what about empty LineStrings? Loop back to this... And change fuzz
+// test to check this behaviour as well.
+//
+// TODO: add tests
+func (g Geometry) Length() (float64, bool) {
+	switch {
+	case g.IsLine():
+		return g.AsLine().Length(), true
+	case g.IsLineString():
+		return g.AsLineString().Length(), true
+	case g.IsMultiLineString():
+		return g.AsMultiLineString().Length(), true
+	default:
+		return 0, false
+	}
+}
+
+// Centroid returns the Polygon or MultiPolygon's centroid point. If the
+// Geometry is not a non-empty Polygon or MultiPolygon, then false is returned.
+//
+// TODO: Add tests
+// TODO: Check fuzz tests
+func (g Geometry) Centroid() (Point, bool) {
+	switch {
+	case g.IsPolygon():
+		return g.AsPolygon().Centroid(), true
+	case g.IsMultiPolygon():
+		return g.AsMultiPolygon().Centroid()
+	default:
+		return Point{}, false
+	}
+}
+
+// Area gives the area of the Polygon or MultiPolygon. If the Geometry is not a
+// Polygon or MultiPolygon, then false is returned.
+//
+// TODO: Add tests
+// TODO: Check fuzz tests
+// TODO: What about empty polygon?
+func (g Geometry) Area() (float64, bool) {
+	switch {
+	case g.IsPolygon():
+		return g.AsPolygon().Area(), true
+	case g.IsMultiPolygon():
+		return g.AsMultiPolygon().Area(), true
+	default:
+		return 0, false
+	}
+}
+
+// TODO: Add tests
+// TODO: check fuzz
+// TODO: empties?
+// TODO: doc comment
+func (g Geometry) IsSimple() (isSimple bool, wellDefined bool) {
+	switch g.tag {
+	case geometryCollectionTag:
+		return false, false
+	case emptySetTag:
+		return g.AsEmptySet().IsSimple(), true
+	case pointTag:
+		return g.AsPoint().IsSimple(), true
+	case lineTag:
+		return g.AsLine().IsSimple(), true
+	case lineStringTag:
+		return g.AsLineString().IsSimple(), true
+	case polygonTag:
+		return g.AsPolygon().IsSimple(), true
+	case multiPointTag:
+		return g.AsMultiPoint().IsSimple(), true
+	case multiLineStringTag:
+		return g.AsMultiLineString().IsSimple(), true
+	case multiPolygonTag:
+		return g.AsMultiPolygon().IsSimple(), true
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}

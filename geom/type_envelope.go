@@ -48,26 +48,30 @@ func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 	return env, true
 }
 
-// AsGeometry returns the envelope as a GeometryX. In the regular case where the
+// AsGeometry returns the envelope as a Geometry. In the regular case where the
 // envelope covers some area, then a Polygon geometry is returned. In
 // degenerate cases where the envelope only covers a line or a point, a
 // Line or Point geometry is returned.
-func (e Envelope) AsGeometry() GeometryX {
+func (e Envelope) AsGeometry() Geometry {
 	if e.min.Equals(e.max) {
-		return NewPointXY(e.min)
+		return NewPointXY(e.min).AsGeometry()
 	}
 	var err error
-	var g GeometryX
+	var g Geometry
 	if e.min.X == e.max.X || e.min.Y == e.max.Y {
-		g, err = NewLineC(Coordinates{XY: e.min}, Coordinates{XY: e.max})
+		var ln Line
+		ln, err = NewLineC(Coordinates{XY: e.min}, Coordinates{XY: e.max})
+		g = ln.AsGeometry()
 	} else {
-		g, err = NewPolygonC([][]Coordinates{{
+		var poly Polygon
+		poly, err = NewPolygonC([][]Coordinates{{
 			{XY: XY{e.min.X, e.min.Y}},
 			{XY: XY{e.min.X, e.max.Y}},
 			{XY: XY{e.max.X, e.max.Y}},
 			{XY: XY{e.max.X, e.min.Y}},
 			{XY: XY{e.min.X, e.min.Y}},
 		}})
+		g = poly.AsGeometry()
 	}
 	if err != nil {
 		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))

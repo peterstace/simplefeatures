@@ -34,7 +34,7 @@ func rank(g Geometry) int {
 	}
 }
 
-func must(x GeometryX, err error) GeometryX {
+func must(x Geometry, err error) Geometry {
 	if err != nil {
 		panic(err)
 	}

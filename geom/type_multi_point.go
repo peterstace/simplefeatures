@@ -96,8 +96,8 @@ func (m MultiPoint) IsSimple() bool {
 	return true
 }
 
-func (m MultiPoint) Intersection(g GeometryX) (GeometryX, error) {
-	return intersection(m, g)
+func (m MultiPoint) Intersection(g Geometry) (Geometry, error) {
+	return intersection(m.AsGeometry(), g)
 }
 
 func (m MultiPoint) Intersects(g Geometry) bool {
@@ -108,8 +108,8 @@ func (m MultiPoint) IsEmpty() bool {
 	return len(m.pts) == 0
 }
 
-func (m MultiPoint) Equals(other GeometryX) (bool, error) {
-	return equals(m, other)
+func (m MultiPoint) Equals(other Geometry) (bool, error) {
+	return equals(m.AsGeometry(), other)
 }
 
 func (m MultiPoint) Envelope() (Envelope, bool) {

@@ -127,7 +127,7 @@ func TestPointInRing(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		ring := ringGeom.AsGeometryX().(LineString)
+		ring := ringGeom.AsLineString()
 		if !ring.IsClosed() || !ring.IsSimple() {
 			t.Fatalf("test ring is either not closed or not simple: %s", ringGeom.AsText())
 		}
@@ -138,7 +138,7 @@ func TestPointInRing(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				point := pointGeom.AsGeometryX().(Point)
+				point := pointGeom.AsPoint()
 				got := pointRingSide(point.coords.XY, ring) != exterior
 				t.Log(tc.ringWKT)
 				t.Log(st.pointWKT)

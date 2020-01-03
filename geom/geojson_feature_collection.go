@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-// GeoJSONFeature represents a GeometryX with associated free-form properties.
+// GeoJSONFeature represents a Geometry with associated free-form properties.
 // GeoJSONFeature values have a one to one correspondence with GeoJSON Features.
 type GeoJSONFeature struct {
 	// Geometry is the geometry that is associated with the Feature.

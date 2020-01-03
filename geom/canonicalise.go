@@ -1,6 +1,6 @@
 package geom
 
-func canonicalPointsAndLines(points []Point, lines []Line) (GeometryX, error) {
+func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 	// Deduplicate.
 	points = dedupPoints(points)
 	lines = dedupLines(lines)
@@ -23,27 +23,27 @@ func canonicalPointsAndLines(points []Point, lines []Line) (GeometryX, error) {
 
 	switch {
 	case len(points) == 0 && len(lines) == 0:
-		return NewGeometryCollection(nil), nil
+		return NewGeometryCollection(nil).AsGeometry(), nil
 	case len(points) == 0:
 		// Lines only.
 		if len(lines) == 1 {
-			return lines[0], nil
+			return lines[0].AsGeometry(), nil
 		}
 		var lineStrings []LineString
 		for _, ln := range lines {
 			lnStr, err := NewLineStringC(ln.Coordinates())
 			if err != nil {
-				return nil, err
+				return Geometry{}, err
 			}
 			lineStrings = append(lineStrings, lnStr)
 		}
-		return NewMultiLineString(lineStrings), nil
+		return NewMultiLineString(lineStrings).AsGeometry(), nil
 	case len(lines) == 0:
 		// Points only.
 		if len(points) == 1 {
-			return points[0], nil
+			return points[0].AsGeometry(), nil
 		}
-		return NewMultiPoint(points), nil
+		return NewMultiPoint(points).AsGeometry(), nil
 	default:
 		all := make([]Geometry, len(points)+len(lines))
 		for i, pt := range points {
@@ -52,7 +52,7 @@ func canonicalPointsAndLines(points []Point, lines []Line) (GeometryX, error) {
 		for i, ln := range lines {
 			all[len(points)+i] = ln.AsGeometry()
 		}
-		return NewGeometryCollection(all), nil
+		return NewGeometryCollection(all).AsGeometry(), nil
 	}
 }
 

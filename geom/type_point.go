@@ -67,16 +67,16 @@ func (p Point) IsSimple() bool {
 	return true
 }
 
-func (p Point) Intersection(g GeometryX) (GeometryX, error) {
-	return intersection(p, g)
+func (p Point) Intersection(g Geometry) (Geometry, error) {
+	return intersection(p.AsGeometry(), g)
 }
 
 func (p Point) Intersects(g Geometry) bool {
 	return hasIntersection(p.AsGeometry(), g)
 }
 
-func (p Point) Equals(other GeometryX) (bool, error) {
-	return equals(p, other)
+func (p Point) Equals(other Geometry) (bool, error) {
+	return equals(p.AsGeometry(), other)
 }
 
 func (p Point) Envelope() (Envelope, bool) {

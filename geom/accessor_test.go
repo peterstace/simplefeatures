@@ -7,7 +7,7 @@ import (
 )
 
 func TestPointAccessor(t *testing.T) {
-	pt := geomFromWKT(t, "POINT(1 2)").(Point)
+	pt := gFromWKT(t, "POINT(1 2)").AsPoint()
 	want := XY{1, 2}
 	got := pt.XY()
 	if !want.Equals(got) {
@@ -16,7 +16,7 @@ func TestPointAccessor(t *testing.T) {
 }
 
 func TestLineAccessor(t *testing.T) {
-	line := geomFromWKT(t, "LINESTRING(1 2,3 4)").(Line)
+	line := gFromWKT(t, "LINESTRING(1 2,3 4)").AsLine()
 	t.Run("start", func(t *testing.T) {
 		got := line.StartPoint().AsGeometry()
 		want := gFromWKT(t, "POINT(1 2)")
@@ -55,7 +55,7 @@ func TestLineAccessor(t *testing.T) {
 }
 
 func TestLineStringAccessor(t *testing.T) {
-	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").(LineString)
+	ls := gFromWKT(t, "LINESTRING(1 2,3 4,5 6)").AsLineString()
 	pt12 := gFromWKT(t, "POINT(1 2)")
 	pt34 := gFromWKT(t, "POINT(3 4)")
 	pt56 := gFromWKT(t, "POINT(5 6)")

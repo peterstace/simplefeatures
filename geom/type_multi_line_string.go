@@ -96,13 +96,9 @@ func (m MultiLineString) IsSimple() bool {
 	}
 	for i := 0; i < len(m.lines); i++ {
 		for j := i + 1; j < len(m.lines); j++ {
-			inter := mustIntersection(m.lines[i], m.lines[j])
-			bound := mustIntersection(m.lines[i].Boundary().AsGeometryX(), m.lines[j].Boundary().AsGeometryX())
-			eq, err := inter.Equals(mustIntersection(inter, bound))
-			if err != nil {
-				panic(err) // Equals is implemented for all of the required types here.
-			}
-			if !eq {
+			inter := mustIntersection(m.lines[i].AsGeometry(), m.lines[j].AsGeometry())
+			bound := mustIntersection(m.lines[i].Boundary(), m.lines[j].Boundary())
+			if !inter.EqualsExact(mustIntersection(inter, bound)) {
 				return false
 			}
 		}
@@ -110,8 +106,8 @@ func (m MultiLineString) IsSimple() bool {
 	return true
 }
 
-func (m MultiLineString) Intersection(g GeometryX) (GeometryX, error) {
-	return intersection(m, g)
+func (m MultiLineString) Intersection(g Geometry) (Geometry, error) {
+	return intersection(m.AsGeometry(), g)
 }
 
 func (m MultiLineString) Intersects(g Geometry) bool {
@@ -122,8 +118,8 @@ func (m MultiLineString) IsEmpty() bool {
 	return len(m.lines) == 0
 }
 
-func (m MultiLineString) Equals(other GeometryX) (bool, error) {
-	return equals(m, other)
+func (m MultiLineString) Equals(other Geometry) (bool, error) {
+	return equals(m.AsGeometry(), other)
 }
 
 func (m MultiLineString) Envelope() (Envelope, bool) {

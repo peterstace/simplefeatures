@@ -27,15 +27,6 @@ func gFromWKT(t *testing.T, wkt string) Geometry {
 	return geom
 }
 
-func geomFromWKT(t *testing.T, wkt string) GeometryX {
-	t.Helper()
-	geom, err := UnmarshalWKT(strings.NewReader(wkt))
-	if err != nil {
-		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
-	}
-	return geom.AsGeometryX()
-}
-
 func expectDeepEqual(t *testing.T, got, want interface{}) {
 	t.Helper()
 	if !reflect.DeepEqual(got, want) {
@@ -46,15 +37,15 @@ expected to be equal, but aren't:
 	want: %+v
 `
 		// Special cases for geometries:
-		gotGeom, okGot := got.(GeometryX)
+		gotGeom, okGot := got.(Geometry)
 		if okGot {
 			format += "    got  (WKT): %s\n"
-			args = append(args, ToGeometry(gotGeom).AsText())
+			args = append(args, gotGeom.AsText())
 		}
-		wantGeom, okWant := want.(GeometryX)
+		wantGeom, okWant := want.(Geometry)
 		if okWant {
 			format += "    want (WKT): %s\n"
-			args = append(args, ToGeometry(wantGeom).AsText())
+			args = append(args, wantGeom.AsText())
 		}
 		t.Errorf(format, args...)
 	}

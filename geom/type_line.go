@@ -84,16 +84,16 @@ func (n Line) IsSimple() bool {
 	return true
 }
 
-func (n Line) Intersection(g GeometryX) (GeometryX, error) {
-	return intersection(n, g)
+func (n Line) Intersection(g Geometry) (Geometry, error) {
+	return intersection(n.AsGeometry(), g)
 }
 
 func (n Line) Intersects(g Geometry) bool {
 	return hasIntersection(n.AsGeometry(), g)
 }
 
-func (n Line) Equals(other GeometryX) (bool, error) {
-	return equals(n, other)
+func (n Line) Equals(other Geometry) (bool, error) {
+	return equals(n.AsGeometry(), other)
 }
 
 func (n Line) Envelope() (Envelope, bool) {
@@ -164,12 +164,6 @@ func (n Line) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 func (n Line) IsValid() bool {
 	_, err := NewLineC(n.a, n.b)
 	return err == nil
-}
-
-// IsRing always returns false for Lines because they are never rings. In
-// particular, they are never closed because they only contain two points.
-func (n Line) IsRing() bool {
-	return false
 }
 
 // Length gives the length of the line.

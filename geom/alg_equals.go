@@ -5,33 +5,33 @@ import (
 	"reflect"
 )
 
-func equals(g1, g2 GeometryX) (bool, error) {
-	if ToGeometry(g1).IsEmpty() && ToGeometry(g2).IsEmpty() {
+func equals(g1, g2 Geometry) (bool, error) {
+	if g1.IsEmpty() && g2.IsEmpty() {
 		return true, nil
 	}
-	if ToGeometry(g1).IsEmpty() || ToGeometry(g2).IsEmpty() {
+	if g1.IsEmpty() || g2.IsEmpty() {
 		return false, nil
 	}
-	if ToGeometry(g1).Dimension() != ToGeometry(g2).Dimension() {
+	if g1.Dimension() != g2.Dimension() {
 		return false, nil
 	}
 
-	if rank(ToGeometry(g1)) > rank(ToGeometry(g2)) {
+	if rank(g1) > rank(g2) {
 		g1, g2 = g2, g1
 	}
-	switch g1 := g1.(type) {
-	case Point:
-		switch g2 := g2.(type) {
-		case Point:
-			return g1.coords.XY.Equals(g2.coords.XY), nil
-		case MultiPoint:
-			g1Set := NewMultiPoint([]Point{g1})
-			return equalsMultiPointAndMultiPoint(g1Set, g2), nil
+	switch {
+	case g1.IsPoint():
+		switch {
+		case g2.IsPoint():
+			return g1.AsPoint().coords.XY.Equals(g2.AsPoint().coords.XY), nil
+		case g2.IsMultiPoint():
+			g1Set := NewMultiPoint([]Point{g1.AsPoint()})
+			return equalsMultiPointAndMultiPoint(g1Set, g2.AsMultiPoint()), nil
 		}
-	case MultiPoint:
-		switch g2 := g2.(type) {
-		case MultiPoint:
-			return equalsMultiPointAndMultiPoint(g1, g2), nil
+	case g1.IsMultiPoint():
+		switch {
+		case g2.IsMultiPoint():
+			return equalsMultiPointAndMultiPoint(g1.AsMultiPoint(), g2.AsMultiPoint()), nil
 		}
 	}
 	return false, fmt.Errorf("not implemented: equals with %T and %T", g1, g2)

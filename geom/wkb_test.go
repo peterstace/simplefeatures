@@ -457,7 +457,7 @@ func TestWKBParseValid(t *testing.T) {
 	}
 }
 
-func TestWKBParserInvalidGeometryXType(t *testing.T) {
+func TestWKBParserInvalidGeometryType(t *testing.T) {
 	// Same as POINT(1 2), but with the geometry type byte set to 0xff.
 	const wkb = "01ff000000000000000000f03f0000000000000040"
 	_, err := UnmarshalWKB(bytes.NewReader(hexStringToBytes(t, wkb)))

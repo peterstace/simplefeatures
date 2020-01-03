@@ -32,8 +32,8 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 		for j := i + 1; j < len(polys); j++ {
 			bound1 := polys[i].Boundary()
 			bound2 := polys[j].Boundary()
-			inter := mustIntersection(bound1.AsGeometryX(), bound2.AsGeometryX())
-			if ToGeometry(inter).Dimension() > 0 {
+			inter := mustIntersection(bound1, bound2)
+			if inter.Dimension() > 0 {
 				return MultiPolygon{}, errors.New("the boundaries of the polygon elements of multipolygons must only intersect at points")
 			}
 			if polyInteriorsIntersect(polys[i], polys[j]) {
@@ -86,7 +86,7 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 				linePts[line1.b.XY] = struct{}{}
 				for _, r2 := range p2.rings() {
 					for _, line2 := range r2.lines {
-						env, ok := ToGeometry(mustIntersection(line1, line2)).Envelope()
+						env, ok := mustIntersection(line1.AsGeometry(), line2.AsGeometry()).Envelope()
 						if !ok {
 							continue
 						}
@@ -193,16 +193,16 @@ func (m MultiPolygon) Intersects(g Geometry) bool {
 	return hasIntersection(m.AsGeometry(), g)
 }
 
-func (m MultiPolygon) Intersection(g GeometryX) (GeometryX, error) {
-	return intersection(m, g)
+func (m MultiPolygon) Intersection(g Geometry) (Geometry, error) {
+	return intersection(m.AsGeometry(), g)
 }
 
 func (m MultiPolygon) IsEmpty() bool {
 	return len(m.polys) == 0
 }
 
-func (m MultiPolygon) Equals(other GeometryX) (bool, error) {
-	return equals(m, other)
+func (m MultiPolygon) Equals(other Geometry) (bool, error) {
+	return equals(m.AsGeometry(), other)
 }
 
 func (m MultiPolygon) Envelope() (Envelope, bool) {

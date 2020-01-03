@@ -39,7 +39,7 @@ func TestEnvelopeAsGeometry(t *testing.T) {
 		{NewEnvelope(XY{3, 4}, XY{8, 0}), "POLYGON((3 0,3 4,8 4,8 0,3 0))"},
 	} {
 		got := tt.env.AsGeometry()
-		expectDeepEqual(t, got, geomFromWKT(t, tt.wantWKT))
+		expectDeepEqual(t, got, gFromWKT(t, tt.wantWKT))
 	}
 }
 

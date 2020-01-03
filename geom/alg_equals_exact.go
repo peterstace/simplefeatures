@@ -1,7 +1,7 @@
 package geom
 
 // EqualsExactOption allows the behaviour of the EqualsExact method in the
-// GeometryX interface to be modified.
+// Geometry interface to be modified.
 type EqualsExactOption func(s *equalsExactOptionSet)
 
 type equalsExactOptionSet struct {
