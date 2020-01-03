@@ -465,8 +465,28 @@ func (g Geometry) Boundary() Geometry {
 // same way. Ordering differences and numeric tolerances can be accounted
 // for using options.
 func (g Geometry) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	// TODO
-	return g.AsGeometryX().EqualsExact(other.AsGeometryX(), opts...)
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().EqualsExact(other, opts...)
+	case emptySetTag:
+		return g.AsEmptySet().EqualsExact(other, opts...)
+	case pointTag:
+		return g.AsPoint().EqualsExact(other, opts...)
+	case lineTag:
+		return g.AsLine().EqualsExact(other, opts...)
+	case lineStringTag:
+		return g.AsLineString().EqualsExact(other, opts...)
+	case polygonTag:
+		return g.AsPolygon().EqualsExact(other, opts...)
+	case multiPointTag:
+		return g.AsMultiPoint().EqualsExact(other, opts...)
+	case multiLineStringTag:
+		return g.AsMultiLineString().EqualsExact(other, opts...)
+	case multiPolygonTag:
+		return g.AsMultiPolygon().EqualsExact(other, opts...)
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
 }
 
 // Equals checks if this geometry is equal to another geometry. Two

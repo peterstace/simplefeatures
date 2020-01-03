@@ -220,9 +220,9 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 }
 
 // EqualsExact checks if this MultiLineString is exactly equal to another MultiLineString.
-func (m MultiLineString) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
-	o, ok := other.(MultiLineString)
-	return ok && multiLineStringExactEqual(m, o, opts)
+func (m MultiLineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return other.IsMultiLineString() &&
+		multiLineStringExactEqual(m, other.AsMultiLineString(), opts)
 }
 
 // IsValid checks if this MultiLineString is valid

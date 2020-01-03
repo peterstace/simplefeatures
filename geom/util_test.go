@@ -9,8 +9,8 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-func must(t *testing.T) func(geom.GeometryX, error) geom.GeometryX {
-	return func(g geom.GeometryX, err error) geom.GeometryX {
+func must(t *testing.T) func(geom.Geometry, error) geom.Geometry {
+	return func(g geom.Geometry, err error) geom.Geometry {
 		if err != nil {
 			t.Fatalf("must have no error but got: %v", err)
 		}

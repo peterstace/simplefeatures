@@ -30,18 +30,18 @@ func pointRingSide(pt XY, ring LineString) side {
 	ray := must(NewLineC(Coordinates{pt}, Coordinates{XY{maxX + 1, pt.Y}})).(Line)
 	var count int
 	for _, seg := range ring.lines {
-		inter := mustIntersection(seg, ray)
-		if ToGeometry(inter).IsEmpty() {
+		inter := ToGeometry(mustIntersection(seg, ray))
+		if inter.IsEmpty() {
 			continue
 		}
-		if ToGeometry(inter).Dimension() == 1 {
+		if inter.Dimension() == 1 {
 			continue
 		}
 		ep1 := NewPointC(seg.a)
 		ep2 := NewPointC(seg.b)
-		if inter.EqualsExact(ep1) || inter.EqualsExact(ep2) {
+		if inter.EqualsExact(ep1.AsGeometry()) || inter.EqualsExact(ep2.AsGeometry()) {
 			otherY := ep1.coords.Y
-			if inter.EqualsExact(ep1) {
+			if inter.EqualsExact(ep1.AsGeometry()) {
 				otherY = ep2.coords.Y
 			}
 			if otherY < pt.Y {

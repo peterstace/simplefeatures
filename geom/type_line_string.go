@@ -103,11 +103,11 @@ func (s LineString) IsSimple() bool {
 	n := len(s.lines)
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
-			intersection := mustIntersection(s.lines[i], s.lines[j])
-			if ToGeometry(intersection).IsEmpty() {
+			intersection := ToGeometry(mustIntersection(s.lines[i], s.lines[j]))
+			if intersection.IsEmpty() {
 				continue
 			}
-			if ToGeometry(intersection).Dimension() >= 1 {
+			if intersection.Dimension() >= 1 {
 				// two overlapping line segments
 				return false
 			}
@@ -122,8 +122,8 @@ func (s LineString) IsSimple() bool {
 				// point, so long as that point is the start of the first
 				// segment and the end of the last segment (i.e. a linear
 				// ring).
-				aPt := NewPointC(s.lines[i].a)
-				bPt := NewPointC(s.lines[j].b)
+				aPt := NewPointC(s.lines[i].a).AsGeometry()
+				bPt := NewPointC(s.lines[j].b).AsGeometry()
 				if !intersection.EqualsExact(aPt) || !intersection.EqualsExact(bPt) {
 					return false
 				}
@@ -221,9 +221,17 @@ func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geom
 }
 
 // EqualsExact checks if this LineString is exactly equal to another curve.
-func (s LineString) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
-	c, ok := other.(curve)
-	return ok && ToGeometry(other).Dimension() == 1 && curvesExactEqual(s, c, opts)
+func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	var c curve
+	switch {
+	case other.IsLine():
+		c = other.AsLine()
+	case other.IsLineString():
+		c = other.AsLineString()
+	default:
+		return false
+	}
+	return curvesExactEqual(s, c, opts)
 }
 
 // IsValid checks if this LineString is valid

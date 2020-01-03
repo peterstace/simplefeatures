@@ -402,7 +402,7 @@ func hasIntersectionMultiPointWithMultiPoint(mp1, mp2 MultiPoint) bool {
 func hasIntersectionPointWithMultiPoint(point Point, mp MultiPoint) bool {
 	// Worst case speed is O(n) but that's optimal because mp is not sorted.
 	for _, pt := range mp.pts {
-		if pt.EqualsExact(point) {
+		if pt.EqualsExact(point.AsGeometry()) {
 			return true
 		}
 	}
@@ -435,7 +435,7 @@ func hasIntersectionPointWithMultiPolygon(pt Point, mp MultiPolygon) bool {
 
 func hasIntersectionPointWithPoint(pt1, pt2 Point) bool {
 	// Speed is O(1).
-	if pt1.EqualsExact(pt2) {
+	if pt1.EqualsExact(pt2.AsGeometry()) {
 		return true
 	}
 	return false

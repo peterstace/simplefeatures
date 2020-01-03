@@ -129,7 +129,7 @@ func TestPointInRing(t *testing.T) {
 		}
 		ring := ringGeom.AsGeometryX().(LineString)
 		if !ring.IsClosed() || !ring.IsSimple() {
-			t.Fatal("test ring is either not closed or not simple")
+			t.Fatalf("test ring is either not closed or not simple: %s", ringGeom.AsText())
 		}
 
 		for j, st := range tc.subTests {

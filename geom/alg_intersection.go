@@ -310,7 +310,7 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) GeometryX {
 		return mp
 	}
 	for _, pt := range mp.pts {
-		if pt.EqualsExact(point) {
+		if pt.EqualsExact(point.AsGeometry()) {
 			return NewPointXY(point.coords.XY)
 		}
 	}
@@ -318,7 +318,7 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) GeometryX {
 }
 
 func intersectPointWithPoint(pt1, pt2 Point) GeometryX {
-	if pt1.EqualsExact(pt2) {
+	if pt1.EqualsExact(pt2.AsGeometry()) {
 		return NewPointXY(pt1.coords.XY)
 	}
 	return NewGeometryCollection(nil)

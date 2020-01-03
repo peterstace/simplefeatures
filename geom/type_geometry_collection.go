@@ -182,9 +182,9 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 }
 
 // EqualsExact checks if this GeometryCollection is exactly equal to another GeometryCollection.
-func (c GeometryCollection) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
-	o, ok := other.(GeometryCollection)
-	return ok && geometryCollectionExactEqual(c, o, opts)
+func (c GeometryCollection) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return other.IsGeometryCollection() &&
+		geometryCollectionExactEqual(c, other.AsGeometryCollection(), opts)
 }
 
 // IsValid checks if this GeometryCollection is valid. However, there is no

@@ -120,13 +120,9 @@ func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX
 }
 
 // EqualsExact checks if this Point is exactly equal to another Point.
-func (p Point) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
-	o, ok := other.(Point)
-	if !ok {
-		return false
-	}
-	eq := newEqualsExactOptionSet(opts).eq
-	return eq(p.XY(), o.XY())
+func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return other.IsPoint() &&
+		newEqualsExactOptionSet(opts).eq(p.XY(), other.AsPoint().XY())
 }
 
 // IsValid checks if this Point is valid, but there is not way to indicate if

@@ -110,9 +110,8 @@ func (e EmptySet) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geomet
 
 // EqualsExact checks if this EmptySet is exactly equal to another geometry
 // by checking if the other geometry is an empty set of the same type.
-func (e EmptySet) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
-	o, ok := other.(EmptySet)
-	return ok && e.wkbType == o.wkbType
+func (e EmptySet) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return other.IsEmptySet() && e.wkbType == other.AsEmptySet().wkbType
 }
 
 // IsValid checks if this EmptySet is valid. However, this is no constraints on

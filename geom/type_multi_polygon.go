@@ -284,9 +284,9 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Ge
 }
 
 // EqualsExact checks if this MultiPolygon is exactly equal to another MultiPolygon.
-func (m MultiPolygon) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
-	o, ok := other.(MultiPolygon)
-	return ok && multiPolygonExactEqual(m, o, opts)
+func (m MultiPolygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return other.IsMultiPolygon() &&
+		multiPolygonExactEqual(m, other.AsMultiPolygon(), opts)
 }
 
 // IsValid checks if this MultiPolygon is valid

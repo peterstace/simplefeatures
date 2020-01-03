@@ -180,9 +180,9 @@ func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geom
 }
 
 // EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.
-func (m MultiPoint) EqualsExact(other GeometryX, opts ...EqualsExactOption) bool {
-	o, ok := other.(MultiPoint)
-	return ok && multiPointExactEqual(m, o, opts)
+func (m MultiPoint) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
+	return other.IsMultiPoint() &&
+		multiPointExactEqual(m, other.AsMultiPoint(), opts)
 }
 
 // IsValid checks if this MultiPoint is valid. However, there is no way to indicate

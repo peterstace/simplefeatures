@@ -490,7 +490,7 @@ func TestCentroidPolygon(t *testing.T) {
 			g := geomFromWKT(t, tt.wkt).(interface{ Centroid() Point })
 			got := g.Centroid()
 			wantPt := NewPointXY(tt.want)
-			if !wantPt.EqualsExact(got, Tolerance(0.00000001)) {
+			if !wantPt.EqualsExact(got.AsGeometry(), Tolerance(0.00000001)) {
 				t.Log(tt.wkt)
 				t.Errorf("got=%v want=%v", got, tt.want)
 			}
@@ -512,7 +512,7 @@ func TestCentroidMultiPolygon(t *testing.T) {
 				t.Fatal("could not generate centroid")
 			}
 			wantPt := NewPointXY(tt.want)
-			if !wantPt.EqualsExact(got, Tolerance(0.00000001)) {
+			if !wantPt.EqualsExact(got.AsGeometry(), Tolerance(0.00000001)) {
 				t.Log(tt.wkt)
 				t.Errorf("got=%v want=%v", got, tt.want)
 			}
@@ -523,7 +523,7 @@ func TestCentroidMultiPolygon(t *testing.T) {
 func TestLineStringToMultiLineString(t *testing.T) {
 	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").(LineString)
 	got := ls.AsMultiLineString()
-	want := geomFromWKT(t, "MULTILINESTRING((1 2,3 4,5 6))")
+	want := gFromWKT(t, "MULTILINESTRING((1 2,3 4,5 6))")
 	if !got.EqualsExact(want) {
 		t.Errorf("want=%v got=%v", want, got)
 	}

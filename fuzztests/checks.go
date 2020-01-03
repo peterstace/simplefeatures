@@ -268,7 +268,7 @@ func CheckIsSimple(t *testing.T, pg PostGIS, g geom.Geometry) {
 			n := mls.NumLineStrings()
 			for i := 0; i < n; i++ {
 				for j := 0; j < n; j++ {
-					if mls.LineStringN(i).EqualsExact(mls.LineStringN(j)) {
+					if mls.LineStringN(i).EqualsExact(mls.LineStringN(j).AsGeometry()) {
 						return
 					}
 				}
@@ -470,7 +470,7 @@ func CheckCentroid(t *testing.T, pg PostGIS, g geom.Geometry) {
 				t.Error("mismatch")
 			}
 		} else {
-			if !got.EqualsExact(want.AsGeometryX(), geom.Tolerance(0.000000001)) {
+			if !got.EqualsExact(want, geom.Tolerance(0.000000001)) {
 				t.Logf("got:  %v", got)
 				t.Logf("want: %v", want)
 				t.Error("mismatch")
