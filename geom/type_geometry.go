@@ -3,11 +3,6 @@ package geom
 // GeometryX is the most general type of geometry supported, and exposes common
 // behaviour. All geometry types implement this interface.
 type GeometryX interface {
-	// Envelope returns the axis aligned bounding box that most tightly
-	// surrounds the geometry. Envelopes are not defined for empty geometries,
-	// in which case the returned flag will be false.
-	Envelope() (Envelope, bool)
-
 	// Equals checks if this geometry is equal to another geometry. Two
 	// geometries are equal if they contain exactly the same points.
 	//

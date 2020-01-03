@@ -367,7 +367,7 @@ func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp Mult
 
 func hasIntersectionPointWithLine(point Point, line Line) bool {
 	// Speed is O(1) using a bounding box check then a point-on-line check.
-	env := mustEnvelope(line)
+	env := mustEnv(line.Envelope())
 	if !env.Contains(point.coords.XY) {
 		return false
 	}

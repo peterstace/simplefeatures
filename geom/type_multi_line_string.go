@@ -130,9 +130,9 @@ func (m MultiLineString) Envelope() (Envelope, bool) {
 	if len(m.lines) == 0 {
 		return Envelope{}, false
 	}
-	env := mustEnvelope(m.lines[0])
+	env := mustEnv(m.lines[0].Envelope())
 	for _, line := range m.lines[1:] {
-		e := mustEnvelope(line)
+		e := mustEnv(line.Envelope())
 		env = env.ExpandToIncludeEnvelope(e)
 	}
 	return env, true

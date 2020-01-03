@@ -26,16 +26,6 @@ func NewEnvelope(first XY, others ...XY) Envelope {
 	return env
 }
 
-// mustEnvelope gets the envelope from a GeometryX. If it's not defined (because
-// the geometry is empty), then it panics.
-func mustEnvelope(g GeometryX) Envelope {
-	env, ok := g.Envelope()
-	if !ok {
-		panic(fmt.Sprintf("mustEnvelope but envelope not defined: %s", ToGeometry(g).AsText()))
-	}
-	return env
-}
-
 // EnvelopeFromGeoms returns the smallest envelope that contains all points
 // contained by the provided geometries, provided that at least one non-empty
 // geometry is given. If no non-empty geometries are given, then the returned
@@ -43,7 +33,7 @@ func mustEnvelope(g GeometryX) Envelope {
 func EnvelopeFromGeoms(geoms ...GeometryX) (Envelope, bool) {
 	envs := make([]Envelope, 0, len(geoms))
 	for _, g := range geoms {
-		env, ok := g.Envelope()
+		env, ok := ToGeometry(g).Envelope()
 		if ok {
 			envs = append(envs, env)
 		}

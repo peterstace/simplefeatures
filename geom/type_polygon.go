@@ -53,7 +53,7 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 	for i := 0; i < len(allRings); i++ {
 		for j := i + 1; j < len(allRings); j++ {
 			inter := mustIntersection(allRings[i], allRings[j])
-			env, has := inter.Envelope()
+			env, has := ToGeometry(inter).Envelope()
 			if !has {
 				continue // no intersection
 			}

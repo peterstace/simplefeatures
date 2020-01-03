@@ -250,7 +250,7 @@ func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (Ge
 }
 
 func intersectPointWithLine(point Point, line Line) GeometryX {
-	env := mustEnvelope(line)
+	env := mustEnv(line.Envelope())
 	if !env.Contains(point.coords.XY) {
 		return NewGeometryCollection(nil)
 	}

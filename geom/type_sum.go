@@ -403,12 +403,32 @@ func (g Geometry) IsEmpty() bool {
 	}
 }
 
-// Envelope returns the axis aligned bounding box that most tightly
-// surrounds the geometry. Envelopes are not defined for empty geometries,
-// in which case the returned flag will be false.
+// Envelope returns the axis aligned bounding box that most tightly surrounds
+// the geometry. Envelopes are not defined for empty geometries, in which case
+// the returned flag will be false.
 func (g Geometry) Envelope() (Envelope, bool) {
-	// TODO
-	return g.AsGeometryX().Envelope()
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().Envelope()
+	case emptySetTag:
+		return g.AsEmptySet().Envelope()
+	case pointTag:
+		return g.AsPoint().Envelope()
+	case lineTag:
+		return g.AsLine().Envelope()
+	case lineStringTag:
+		return g.AsLineString().Envelope()
+	case polygonTag:
+		return g.AsPolygon().Envelope()
+	case multiPointTag:
+		return g.AsMultiPoint().Envelope()
+	case multiLineStringTag:
+		return g.AsMultiLineString().Envelope()
+	case multiPolygonTag:
+		return g.AsMultiPolygon().Envelope()
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
 }
 
 // Boundary returns the GeometryX representing the limit of this geometry.

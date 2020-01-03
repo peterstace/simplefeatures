@@ -86,7 +86,7 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 				linePts[line1.b.XY] = struct{}{}
 				for _, r2 := range p2.rings() {
 					for _, line2 := range r2.lines {
-						env, ok := mustIntersection(line1, line2).Envelope()
+						env, ok := ToGeometry(mustIntersection(line1, line2)).Envelope()
 						if !ok {
 							continue
 						}
@@ -209,9 +209,9 @@ func (m MultiPolygon) Envelope() (Envelope, bool) {
 	if len(m.polys) == 0 {
 		return Envelope{}, false
 	}
-	env := mustEnvelope(m.polys[0])
+	env := mustEnv(m.polys[0].Envelope())
 	for _, poly := range m.polys[1:] {
-		env = env.ExpandToIncludeEnvelope(mustEnvelope(poly))
+		env = env.ExpandToIncludeEnvelope(mustEnv(poly.Envelope()))
 	}
 	return env, true
 }

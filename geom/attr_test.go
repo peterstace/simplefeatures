@@ -85,7 +85,7 @@ func TestEnvelope(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("wkt:", tt.wkt)
-			g := geomFromWKT(t, tt.wkt)
+			g := gFromWKT(t, tt.wkt)
 			env, have := g.Envelope()
 			if !have {
 				t.Fatalf("expected to have envelope but didn't")
@@ -110,7 +110,7 @@ func TestNoEnvelope(t *testing.T) {
 		"GEOMETRYCOLLECTION(POINT EMPTY)",
 	} {
 		t.Run(wkt, func(t *testing.T) {
-			g := geomFromWKT(t, wkt)
+			g := gFromWKT(t, wkt)
 			if _, have := g.Envelope(); have {
 				t.Errorf("have envelope but expected not to")
 			}

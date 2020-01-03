@@ -40,3 +40,10 @@ func must(x GeometryX, err error) GeometryX {
 	}
 	return x
 }
+
+func mustEnv(env Envelope, ok bool) Envelope {
+	if !ok {
+		panic("not ok")
+	}
+	return env
+}
