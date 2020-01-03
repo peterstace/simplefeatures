@@ -100,8 +100,8 @@ func (m MultiPoint) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(m, g)
 }
 
-func (m MultiPoint) Intersects(g GeometryX) bool {
-	return hasIntersection(m, g)
+func (m MultiPoint) Intersects(g Geometry) bool {
+	return hasIntersection(m.AsGeometry(), g)
 }
 
 func (m MultiPoint) IsEmpty() bool {

@@ -33,7 +33,7 @@ func intersection(g1, g2 GeometryX) (GeometryX, error) {
 		return g1, nil
 	}
 
-	if rank(g1) > rank(g2) {
+	if rank(ToGeometry(g1)) > rank(ToGeometry(g2)) {
 		g1, g2 = g2, g1
 	}
 	switch g1 := g1.(type) {

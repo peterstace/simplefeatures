@@ -67,8 +67,8 @@ func (c GeometryCollection) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(c, g)
 }
 
-func (c GeometryCollection) Intersects(g GeometryX) bool {
-	return hasIntersection(c, g)
+func (c GeometryCollection) Intersects(g Geometry) bool {
+	return hasIntersection(c.AsGeometry(), g)
 }
 
 func (c GeometryCollection) IsEmpty() bool {

@@ -145,8 +145,8 @@ func (s LineString) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(s, g)
 }
 
-func (s LineString) Intersects(g GeometryX) bool {
-	return hasIntersection(s, g)
+func (s LineString) Intersects(g Geometry) bool {
+	return hasIntersection(s.AsGeometry(), g)
 }
 
 func (s LineString) IsEmpty() bool {

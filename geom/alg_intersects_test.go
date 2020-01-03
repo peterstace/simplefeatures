@@ -281,19 +281,19 @@ func TestIntersects(t *testing.T) {
 		{"GEOMETRYCOLLECTION(POINT(5 5))", "POLYGON((0.5 1.5,1.5 1.5,1.5 2.5,0.5 2.5, 0.5 1.5))", false},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			runTest := func(g1, g2 geom.GeometryX) func(t *testing.T) {
+			runTest := func(g1, g2 geom.Geometry) func(t *testing.T) {
 				return func(t *testing.T) {
 					got := g1.Intersects(g2)
 					if got != tt.want {
 						t.Errorf(
 							"\ninput1: %s\ninput2: %s\ngot:  %v\nwant: %v\n",
-							geom.ToGeometry(g1).AsText(), geom.ToGeometry(g2).AsText(), got, tt.want,
+							g1.AsText(), g2.AsText(), got, tt.want,
 						)
 					}
 				}
 			}
-			g1 := geomFromWKT(t, tt.in1)
-			g2 := geomFromWKT(t, tt.in2)
+			g1 := gFromWKT(t, tt.in1)
+			g2 := gFromWKT(t, tt.in2)
 			t.Run("fwd", runTest(g1, g2))
 			t.Run("rev", runTest(g2, g1))
 		})
@@ -319,9 +319,10 @@ func BenchmarkIntersectsLineStringWithLineString(b *testing.B) {
 				b.Fatal(err)
 			}
 			b.ResetTimer()
+			ls2g := ls2.AsGeometry()
 
 			for i := 0; i < b.N; i++ {
-				if ls1.Intersects(ls2) {
+				if ls1.Intersects(ls2g) {
 					b.Fatal("should not intersect")
 				}
 			}

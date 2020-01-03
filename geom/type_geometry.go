@@ -3,10 +3,6 @@ package geom
 // GeometryX is the most general type of geometry supported, and exposes common
 // behaviour. All geometry types implement this interface.
 type GeometryX interface {
-	// Intersects returns true if the intersection of this gemoetry with the
-	// specified other geometry is not empty, or false if it is empty.
-	Intersects(GeometryX) bool
-
 	// IsEmpty returns true if this object an empty geometry.
 	IsEmpty() bool
 

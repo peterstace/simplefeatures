@@ -442,8 +442,7 @@ func (g Geometry) IsValid() bool {
 // Intersects returns true if the intersection of this gemoetry with the
 // specified other geometry is not empty, or false if it is empty.
 func (g Geometry) Intersects(other Geometry) bool {
-	// TODO
-	return g.AsGeometryX().Intersects(other.AsGeometryX())
+	return hasIntersection(g, other)
 }
 
 // Intersection returns a geometric object that represents the point set

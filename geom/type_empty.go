@@ -50,8 +50,8 @@ func (e EmptySet) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(e, g)
 }
 
-func (e EmptySet) Intersects(g GeometryX) bool {
-	return hasIntersection(e, g)
+func (e EmptySet) Intersects(g Geometry) bool {
+	return hasIntersection(e.AsGeometry(), g)
 }
 
 func (e EmptySet) IsEmpty() bool {

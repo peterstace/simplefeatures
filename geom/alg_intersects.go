@@ -7,7 +7,7 @@ import (
 	"sort"
 )
 
-func hasIntersection(g1, g2 GeometryX) bool {
+func hasIntersection(g1, g2 Geometry) bool {
 	if g2.IsEmpty() {
 		return false
 	}
@@ -19,121 +19,150 @@ func hasIntersection(g1, g2 GeometryX) bool {
 		g1, g2 = g2, g1
 	}
 
-	if gc, ok := g2.(GeometryCollection); ok {
+	if g2.IsGeometryCollection() {
+		gc := g2.AsGeometryCollection()
 		n := gc.NumGeometries()
 		for i := 0; i < n; i++ {
 			g := gc.GeometryN(i)
-			if g1.Intersects(g) {
+			if g1.Intersects(ToGeometry(g)) {
 				return true
 			}
 		}
 		return false
 	}
 
-	switch g1 := g1.(type) {
-	case Point:
-		switch g2 := g2.(type) {
-		case Point:
-			return hasIntersectionPointWithPoint(g1, g2)
-		case Line:
-			return hasIntersectionPointWithLine(g1, g2)
-		case LineString:
-			return hasIntersectionPointWithLineString(g1, g2)
-		case Polygon:
-			return hasIntersectionPointWithPolygon(g1, g2)
-		case MultiPoint:
-			return hasIntersectionPointWithMultiPoint(g1, g2)
-		case MultiLineString:
-			return hasIntersectionPointWithMultiLineString(g1, g2)
-		case MultiPolygon:
-			return hasIntersectionPointWithMultiPolygon(g1, g2)
+	switch {
+	case g1.IsPoint():
+		switch {
+		case g2.IsPoint():
+			return hasIntersectionPointWithPoint(g1.AsPoint(), g2.AsPoint())
+		case g2.IsLine():
+			return hasIntersectionPointWithLine(g1.AsPoint(), g2.AsLine())
+		case g2.IsLineString():
+			return hasIntersectionPointWithLineString(g1.AsPoint(), g2.AsLineString())
+		case g2.IsPolygon():
+			return hasIntersectionPointWithPolygon(g1.AsPoint(), g2.AsPolygon())
+		case g2.IsMultiPoint():
+			return hasIntersectionPointWithMultiPoint(g1.AsPoint(), g2.AsMultiPoint())
+		case g2.IsMultiLineString():
+			return hasIntersectionPointWithMultiLineString(g1.AsPoint(), g2.AsMultiLineString())
+		case g2.IsMultiPolygon():
+			return hasIntersectionPointWithMultiPolygon(g1.AsPoint(), g2.AsMultiPolygon())
 		}
-	case Line:
-		switch g2 := g2.(type) {
-		case Line:
-			return hasIntersectionLineWithLine(g1, g2)
-		case LineString:
+	case g1.IsLine():
+		switch {
+		case g2.IsLine():
+			return hasIntersectionLineWithLine(g1.AsLine(), g2.AsLine())
+		case g2.IsLineString():
+			return hasIntersectionMultiLineStringWithMultiLineString(
+				g1.AsLine().AsLineString().AsMultiLineString(),
+				g2.AsLineString().AsMultiLineString(),
+			)
+		case g2.IsPolygon():
+			return hasIntersectionMultiLineStringWithMultiPolygon(
+				g1.AsLine().AsLineString().AsMultiLineString(),
+				g2.AsPolygon().AsMultiPolygon(),
+			)
+		case g2.IsMultiPoint():
+			return hasIntersectionLineWithMultiPoint(g1.AsLine(), g2.AsMultiPoint())
+		case g2.IsMultiLineString():
+			return hasIntersectionMultiLineStringWithMultiLineString(
+				g1.AsLine().AsLineString().AsMultiLineString(), g2.AsMultiLineString(),
+			)
+		case g2.IsMultiPolygon():
+			return hasIntersectionMultiLineStringWithMultiPolygon(
+				g1.AsLine().AsLineString().AsMultiLineString(), g2.AsMultiPolygon(),
+			)
+		}
+	case g1.IsLineString():
+		switch {
+		case g2.IsLineString():
 			return hasIntersectionMultiLineStringWithMultiLineString(
 				g1.AsLineString().AsMultiLineString(),
-				g2.AsMultiLineString(),
+				g2.AsLineString().AsMultiLineString(),
 			)
-		case Polygon:
+		case g2.IsPolygon():
 			return hasIntersectionMultiLineStringWithMultiPolygon(
 				g1.AsLineString().AsMultiLineString(),
-				g2.AsMultiPolygon(),
+				g2.AsPolygon().AsMultiPolygon(),
 			)
-		case MultiPoint:
-			return hasIntersectionLineWithMultiPoint(g1, g2)
-		case MultiLineString:
-			return hasIntersectionMultiLineStringWithMultiLineString(
-				g1.AsLineString().AsMultiLineString(), g2,
-			)
-		case MultiPolygon:
-			return hasIntersectionMultiLineStringWithMultiPolygon(
-				g1.AsLineString().AsMultiLineString(), g2,
-			)
-		}
-	case LineString:
-		switch g2 := g2.(type) {
-		case LineString:
-			return hasIntersectionMultiLineStringWithMultiLineString(
-				g1.AsMultiLineString(),
-				g2.AsMultiLineString(),
-			)
-		case Polygon:
-			return hasIntersectionMultiLineStringWithMultiPolygon(
-				g1.AsMultiLineString(),
-				g2.AsMultiPolygon(),
-			)
-		case MultiPoint:
+		case g2.IsMultiPoint():
 			return hasIntersectionMultiPointWithMultiLineString(
-				g2, g1.AsMultiLineString(),
+				g2.AsMultiPoint(),
+				g1.AsLineString().AsMultiLineString(),
 			)
-		case MultiLineString:
+		case g2.IsMultiLineString():
+			return hasIntersectionMultiLineStringWithMultiLineString(
+				g1.AsLineString().AsMultiLineString(),
+				g2.AsMultiLineString(),
+			)
+		case g2.IsMultiPolygon():
+			return hasIntersectionMultiLineStringWithMultiPolygon(
+				g1.AsLineString().AsMultiLineString(),
+				g2.AsMultiPolygon(),
+			)
+		}
+	case g1.IsPolygon():
+		switch {
+		case g2.IsPolygon():
+			return hasIntersectionPolygonWithPolygon(
+				g1.AsPolygon(),
+				g2.AsPolygon(),
+			)
+		case g2.IsMultiPoint():
+			return hasIntersectionMultiPointWithPolygon(
+				g2.AsMultiPoint(),
+				g1.AsPolygon(),
+			)
+		case g2.IsMultiLineString():
+			return hasIntersectionMultiLineStringWithMultiPolygon(
+				g2.AsMultiLineString(),
+				g1.AsPolygon().AsMultiPolygon(),
+			)
+		case g2.IsMultiPolygon():
+			return hasIntersectionMultiPolygonWithMultiPolygon(
+				g1.AsPolygon().AsMultiPolygon(),
+				g2.AsMultiPolygon(),
+			)
+		}
+	case g1.IsMultiPoint():
+		switch {
+		case g2.IsMultiPoint():
+			return hasIntersectionMultiPointWithMultiPoint(
+				g1.AsMultiPoint(),
+				g2.AsMultiPoint(),
+			)
+		case g2.IsMultiLineString():
+			return hasIntersectionMultiPointWithMultiLineString(
+				g1.AsMultiPoint(),
+				g2.AsMultiLineString(),
+			)
+		case g2.IsMultiPolygon():
+			return hasIntersectionMultiPointWithMultiPolygon(
+				g1.AsMultiPoint(),
+				g2.AsMultiPolygon(),
+			)
+		}
+	case g1.IsMultiLineString():
+		switch {
+		case g2.IsMultiLineString():
 			return hasIntersectionMultiLineStringWithMultiLineString(
 				g1.AsMultiLineString(),
-				g2,
+				g2.AsMultiLineString(),
 			)
-		case MultiPolygon:
+		case g2.IsMultiPolygon():
 			return hasIntersectionMultiLineStringWithMultiPolygon(
-				g1.AsMultiLineString(), g2,
+				g1.AsMultiLineString(),
+				g2.AsMultiPolygon(),
 			)
 		}
-	case Polygon:
-		switch g2 := g2.(type) {
-		case Polygon:
-			return hasIntersectionPolygonWithPolygon(g1, g2)
-		case MultiPoint:
-			return hasIntersectionMultiPointWithPolygon(g2, g1)
-		case MultiLineString:
-			return hasIntersectionMultiLineStringWithMultiPolygon(
-				g2, g1.AsMultiPolygon(),
-			)
-		case MultiPolygon:
+	case g1.IsMultiPolygon():
+		switch {
+		case g2.IsMultiPolygon():
 			return hasIntersectionMultiPolygonWithMultiPolygon(
-				g1.AsMultiPolygon(), g2,
+				g1.AsMultiPolygon(),
+				g2.AsMultiPolygon(),
 			)
-		}
-	case MultiPoint:
-		switch g2 := g2.(type) {
-		case MultiPoint:
-			return hasIntersectionMultiPointWithMultiPoint(g1, g2)
-		case MultiLineString:
-			return hasIntersectionMultiPointWithMultiLineString(g1, g2)
-		case MultiPolygon:
-			return hasIntersectionMultiPointWithMultiPolygon(g1, g2)
-		}
-	case MultiLineString:
-		switch g2 := g2.(type) {
-		case MultiLineString:
-			return hasIntersectionMultiLineStringWithMultiLineString(g1, g2)
-		case MultiPolygon:
-			return hasIntersectionMultiLineStringWithMultiPolygon(g1, g2)
-		}
-	case MultiPolygon:
-		switch g2 := g2.(type) {
-		case MultiPolygon:
-			return hasIntersectionMultiPolygonWithMultiPolygon(g1, g2)
 		}
 	}
 
@@ -307,7 +336,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 			other := sides[1-i]
 			for _, checkLine := range side.newSegments {
 				for _, ln := range other.active {
-					if ln.Intersects(checkLine) {
+					if hasIntersectionLineWithLine(ln, checkLine) {
 						return true
 					}
 				}
@@ -318,7 +347,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 }
 
 func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp MultiPolygon) bool {
-	if hasIntersection(mls, mp.Boundary()) {
+	if mls.Intersects(ToGeometry(mp.Boundary())) {
 		return true
 	}
 
@@ -444,16 +473,16 @@ func hasIntersectionMultiPointWithPolygon(mp MultiPoint, p Polygon) bool {
 func hasIntersectionPolygonWithPolygon(p1, p2 Polygon) bool {
 	// Check if the boundaries intersect. If so, then the polygons must
 	// intersect.
-	b1 := p1.Boundary()
-	b2 := p2.Boundary()
+	b1 := ToGeometry(p1.Boundary())
+	b2 := ToGeometry(p2.Boundary())
 	if b1.Intersects(b2) {
 		return true
 	}
 
 	// Other check to see if an arbitrary point from each polygon is inside the
 	// other polygon.
-	return p1.ExteriorRing().StartPoint().Intersects(p2) ||
-		p2.ExteriorRing().StartPoint().Intersects(p1)
+	return hasIntersectionPointWithPolygon(p1.ExteriorRing().StartPoint(), p2) ||
+		hasIntersectionPointWithPolygon(p2.ExteriorRing().StartPoint(), p1)
 }
 
 func hasIntersectionMultiPolygonWithMultiPolygon(mp1, mp2 MultiPolygon) bool {
@@ -463,7 +492,7 @@ func hasIntersectionMultiPolygonWithMultiPolygon(mp1, mp2 MultiPolygon) bool {
 		m := mp2.NumPolygons()
 		for j := 0; j < m; j++ {
 			p2 := mp2.PolygonN(j)
-			if p1.Intersects(p2) {
+			if hasIntersectionPolygonWithPolygon(p1, p2) {
 				return true
 			}
 		}

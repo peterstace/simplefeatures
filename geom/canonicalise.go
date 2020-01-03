@@ -10,7 +10,7 @@ func canonicalPointsAndLines(points []Point, lines []Line) (GeometryX, error) {
 	for _, pt := range points {
 		hasInter := false
 		for _, ln := range lines {
-			if pt.Intersects(ln) {
+			if pt.Intersects(ln.AsGeometry()) {
 				hasInter = true
 				break
 			}

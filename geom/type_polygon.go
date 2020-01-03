@@ -168,8 +168,8 @@ func (p Polygon) Intersection(g GeometryX) (GeometryX, error) {
 	return intersection(p, g)
 }
 
-func (p Polygon) Intersects(g GeometryX) bool {
-	return hasIntersection(p, g)
+func (p Polygon) Intersects(g Geometry) bool {
+	return hasIntersection(p.AsGeometry(), g)
 }
 
 func (p Polygon) IsEmpty() bool {
