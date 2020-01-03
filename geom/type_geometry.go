@@ -3,9 +3,6 @@ package geom
 // GeometryX is the most general type of geometry supported, and exposes common
 // behaviour. All geometry types implement this interface.
 type GeometryX interface {
-	// IsEmpty returns true if this object an empty geometry.
-	IsEmpty() bool
-
 	// Envelope returns the axis aligned bounding box that most tightly
 	// surrounds the geometry. Envelopes are not defined for empty geometries,
 	// in which case the returned flag will be false.

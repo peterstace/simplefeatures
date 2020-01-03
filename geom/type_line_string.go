@@ -104,7 +104,7 @@ func (s LineString) IsSimple() bool {
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
 			intersection := mustIntersection(s.lines[i], s.lines[j])
-			if intersection.IsEmpty() {
+			if ToGeometry(intersection).IsEmpty() {
 				continue
 			}
 			if ToGeometry(intersection).Dimension() >= 1 {

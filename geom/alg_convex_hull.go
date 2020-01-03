@@ -6,7 +6,7 @@ import (
 )
 
 func convexHull(g GeometryX) GeometryX {
-	if g.IsEmpty() {
+	if ToGeometry(g).IsEmpty() {
 		// Any empty geometry could be returned here to to give correct
 		// behaviour. However, to replicate PostGIS behaviour, we always return
 		// an empty geometry of the original type. For GeometryCollections, a

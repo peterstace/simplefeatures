@@ -385,8 +385,22 @@ func (g Geometry) Dimension() int {
 
 // IsEmpty returns true if this object an empty geometry.
 func (g Geometry) IsEmpty() bool {
-	// TODO
-	return g.AsGeometryX().IsEmpty()
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().IsEmpty()
+	case emptySetTag:
+		return true
+	case pointTag, lineTag, lineStringTag, polygonTag:
+		return false
+	case multiPointTag:
+		return g.AsMultiPoint().IsEmpty()
+	case multiLineStringTag:
+		return g.AsMultiLineString().IsEmpty()
+	case multiPolygonTag:
+		return g.AsMultiPolygon().IsEmpty()
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
 }
 
 // Envelope returns the axis aligned bounding box that most tightly

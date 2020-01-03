@@ -92,10 +92,6 @@ func (n Line) Intersects(g Geometry) bool {
 	return hasIntersection(n.AsGeometry(), g)
 }
 
-func (n Line) IsEmpty() bool {
-	return false
-}
-
 func (n Line) Equals(other GeometryX) (bool, error) {
 	return equals(n, other)
 }

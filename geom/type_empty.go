@@ -54,10 +54,6 @@ func (e EmptySet) Intersects(g Geometry) bool {
 	return hasIntersection(e.AsGeometry(), g)
 }
 
-func (e EmptySet) IsEmpty() bool {
-	return true
-}
-
 func (e EmptySet) Dimension() int {
 	return e.dimension
 }

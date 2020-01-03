@@ -201,7 +201,7 @@ func CheckGeoJSON(t *testing.T, pg PostGIS, g geom.Geometry) {
 
 func CheckIsEmpty(t *testing.T, pg PostGIS, g geom.Geometry) {
 	t.Run("CheckIsEmpty", func(t *testing.T) {
-		got := g.AsGeometryX().IsEmpty()
+		got := g.IsEmpty()
 		want := pg.IsEmpty(t, g)
 		if got != want {
 			t.Logf("got:  %v", got)

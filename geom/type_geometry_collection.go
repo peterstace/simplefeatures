@@ -73,7 +73,7 @@ func (c GeometryCollection) Intersects(g Geometry) bool {
 
 func (c GeometryCollection) IsEmpty() bool {
 	for _, g := range c.geoms {
-		if !g.IsEmpty() {
+		if !ToGeometry(g).IsEmpty() {
 			return false
 		}
 	}
@@ -123,7 +123,7 @@ func (c GeometryCollection) Boundary() GeometryX {
 	var bounds []GeometryX
 	for _, g := range c.geoms {
 		bound := g.Boundary()
-		if !bound.IsEmpty() {
+		if !ToGeometry(bound).IsEmpty() {
 			bounds = append(bounds, bound)
 		}
 	}

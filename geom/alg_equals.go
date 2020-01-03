@@ -6,10 +6,10 @@ import (
 )
 
 func equals(g1, g2 GeometryX) (bool, error) {
-	if g1.IsEmpty() && g2.IsEmpty() {
+	if ToGeometry(g1).IsEmpty() && ToGeometry(g2).IsEmpty() {
 		return true, nil
 	}
-	if g1.IsEmpty() || g2.IsEmpty() {
+	if ToGeometry(g1).IsEmpty() || ToGeometry(g2).IsEmpty() {
 		return false, nil
 	}
 	if ToGeometry(g1).Dimension() != ToGeometry(g2).Dimension() {

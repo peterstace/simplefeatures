@@ -20,13 +20,13 @@ func mustIntersection(g1, g2 GeometryX) GeometryX {
 
 func intersection(g1, g2 GeometryX) (GeometryX, error) {
 	// Matches PostGIS behaviour for empty geometries.
-	if g2.IsEmpty() {
+	if ToGeometry(g2).IsEmpty() {
 		if _, ok := g2.(GeometryCollection); ok {
 			return NewGeometryCollection(nil), nil
 		}
 		return g2, nil
 	}
-	if g1.IsEmpty() {
+	if ToGeometry(g1).IsEmpty() {
 		if _, ok := g1.(GeometryCollection); ok {
 			return NewGeometryCollection(nil), nil
 		}
@@ -213,7 +213,7 @@ func intersectLineWithMultiPoint(ln Line, mp MultiPoint) (GeometryX, error) {
 	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
-		if !mustIntersection(pt, ln).IsEmpty() {
+		if !ToGeometry(mustIntersection(pt, ln)).IsEmpty() {
 			pts = append(pts, pt)
 		}
 	}
@@ -231,7 +231,7 @@ func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (Ge
 					if err != nil {
 						return nil, err
 					}
-					if inter.IsEmpty() {
+					if ToGeometry(inter).IsEmpty() {
 						continue
 					}
 					switch inter := inter.(type) {
@@ -265,7 +265,7 @@ func intersectPointWithLine(point Point, line Line) GeometryX {
 func intersectPointWithLineString(pt Point, ls LineString) GeometryX {
 	for _, ln := range ls.lines {
 		g := intersectPointWithLine(pt, ln)
-		if !g.IsEmpty() {
+		if !ToGeometry(g).IsEmpty() {
 			return g
 		}
 	}
