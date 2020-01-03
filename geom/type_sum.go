@@ -550,3 +550,34 @@ func (g Geometry) Intersection(other Geometry) (Geometry, error) {
 	}
 	return ToGeometry(result), nil
 }
+
+// TransformXY transforms this GeometryX into another geometry according the
+// mapping provided by the XY function. Some classes of mappings (such as
+// affine transformations) will preserve the validity this GeometryX in the
+// transformed GeometryX, in which case no error will be returned. Other
+// types of transformations may result in a validation error if their
+// mapping results in an invalid GeometryX.
+func (g Geometry) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().TransformXY(fn, opts...)
+	case emptySetTag:
+		return g.AsEmptySet().TransformXY(fn, opts...)
+	case pointTag:
+		return g.AsPoint().TransformXY(fn, opts...)
+	case lineTag:
+		return g.AsLine().TransformXY(fn, opts...)
+	case lineStringTag:
+		return g.AsLineString().TransformXY(fn, opts...)
+	case polygonTag:
+		return g.AsPolygon().TransformXY(fn, opts...)
+	case multiPointTag:
+		return g.AsMultiPoint().TransformXY(fn, opts...)
+	case multiLineStringTag:
+		return g.AsMultiLineString().TransformXY(fn, opts...)
+	case multiPolygonTag:
+		return g.AsMultiPolygon().TransformXY(fn, opts...)
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}

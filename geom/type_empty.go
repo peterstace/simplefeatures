@@ -104,8 +104,8 @@ func (e EmptySet) MarshalJSON() ([]byte, error) {
 
 // TransformXY transforms this EmptySet into another EmptySet according to
 // fn. It does this by ignoring fn and returning itself.
-func (e EmptySet) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
-	return e, nil
+func (e EmptySet) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+	return e.AsGeometry(), nil
 }
 
 // EqualsExact checks if this EmptySet is exactly equal to another geometry

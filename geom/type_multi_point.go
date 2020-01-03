@@ -173,10 +173,10 @@ func (m MultiPoint) Coordinates() []Coordinates {
 }
 
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
-func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
+func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := m.Coordinates()
 	transform1dCoords(coords, fn)
-	return NewMultiPointC(coords, opts...), nil
+	return NewMultiPointC(coords, opts...).AsGeometry(), nil
 }
 
 // EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.

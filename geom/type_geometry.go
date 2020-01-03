@@ -9,12 +9,4 @@ type GeometryX interface {
 	// It is not implemented for all possible pairs of geometries, and returns
 	// an error in those cases.
 	Equals(GeometryX) (bool, error)
-
-	// TransformXY transforms this GeometryX into another geometry according the
-	// mapping provided by the XY function. Some classes of mappings (such as
-	// affine transformations) will preserve the validity this GeometryX in the
-	// transformed GeometryX, in which case no error will be returned. Other
-	// types of transformations may result in a validation error if their
-	// mapping results in an invalid GeometryX.
-	TransformXY(func(XY) XY, ...ConstructorOption) (GeometryX, error)
 }

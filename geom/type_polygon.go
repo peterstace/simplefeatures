@@ -255,10 +255,11 @@ func (p Polygon) Coordinates() [][]Coordinates {
 }
 
 // TransformXY transforms this Polygon into another Polygon according to fn.
-func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
+func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := p.Coordinates()
 	transform2dCoords(coords, fn)
-	return NewPolygonC(coords, opts...)
+	poly, err := NewPolygonC(coords, opts...)
+	return poly.AsGeometry(), err
 }
 
 // EqualsExact checks if this Polygon is exactly equal to another Polygon.

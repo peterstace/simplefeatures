@@ -213,10 +213,11 @@ func (m MultiLineString) Coordinates() [][]Coordinates {
 }
 
 // TransformXY transforms this MultiLineString into another MultiLineString according to fn.
-func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
+func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := m.Coordinates()
 	transform2dCoords(coords, fn)
-	return NewMultiLineStringC(coords, opts...)
+	mls, err := NewMultiLineStringC(coords, opts...)
+	return mls.AsGeometry(), err
 }
 
 // EqualsExact checks if this MultiLineString is exactly equal to another MultiLineString.
