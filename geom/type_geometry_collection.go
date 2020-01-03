@@ -149,18 +149,8 @@ func (c GeometryCollection) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
-func (c GeometryCollection) ConvexHull() GeometryX {
-	return convexHull(c)
-}
-
-func (c GeometryCollection) convexHullPointSet() []XY {
-	var points []XY
-	n := c.NumGeometries()
-	for i := 0; i < n; i++ {
-		g := c.GeometryN(i)
-		points = append(points, g.convexHullPointSet()...)
-	}
-	return points
+func (c GeometryCollection) ConvexHull() Geometry {
+	return convexHull(c.AsGeometry())
 }
 
 func (c GeometryCollection) MarshalJSON() ([]byte, error) {

@@ -442,8 +442,7 @@ func (g Geometry) Equals(other Geometry) (bool, error) {
 // Convex hull returns a GeometryX that represents the smallest convex set
 // that contains this geometry.
 func (g Geometry) ConvexHull() Geometry {
-	// TODO
-	return ToGeometry(g.AsGeometryX().ConvexHull())
+	return convexHull(g)
 }
 
 // IsValid returns if the current geometry is valid. It is useful to use when

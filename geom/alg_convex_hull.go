@@ -5,25 +5,25 @@ import (
 	"sort"
 )
 
-func convexHull(g GeometryX) GeometryX {
-	if ToGeometry(g).IsEmpty() {
+func convexHull(g Geometry) Geometry {
+	if g.IsEmpty() {
 		// Any empty geometry could be returned here to to give correct
 		// behaviour. However, to replicate PostGIS behaviour, we always return
 		// an empty geometry of the original type. For GeometryCollections, a
 		// new geometry is created to eleminate any empty constituent
 		// geometries.
-		if _, ok := g.(GeometryCollection); ok {
-			return NewGeometryCollection(nil)
+		if g.IsGeometryCollection() {
+			return NewGeometryCollection(nil).AsGeometry()
 		}
 		return g
 	}
-	pts := g.convexHullPointSet()
+	pts := convexHullPointSet(g)
 	hull := grahamScan(pts)
 	switch len(hull) {
 	case 0:
-		return NewGeometryCollection(nil)
+		return NewGeometryCollection(nil).AsGeometry()
 	case 1:
-		return NewPointXY(hull[0])
+		return NewPointXY(hull[0]).AsGeometry()
 	case 2:
 		ln, err := NewLineC(
 			Coordinates{hull[0]},
@@ -32,7 +32,7 @@ func convexHull(g GeometryX) GeometryX {
 		if err != nil {
 			panic("bug in grahamScan routine - output 2 coincident points")
 		}
-		return ln
+		return ln.AsGeometry()
 	default:
 		coords := [][]Coordinates{make([]Coordinates, len(hull))}
 		for i := range hull {
@@ -42,7 +42,78 @@ func convexHull(g GeometryX) GeometryX {
 		if err != nil {
 			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid polygon: %v", err))
 		}
-		return poly
+		return poly.AsGeometry()
+	}
+}
+
+func convexHullPointSet(g Geometry) []XY {
+	switch g.tag {
+	case geometryCollectionTag:
+		var points []XY
+		c := g.AsGeometryCollection()
+		n := c.NumGeometries()
+		for i := 0; i < n; i++ {
+			points = append(
+				points,
+				convexHullPointSet(ToGeometry(c.GeometryN(i)))...,
+			)
+		}
+		return points
+	case emptySetTag:
+		return nil
+	case pointTag:
+		return []XY{g.AsPoint().XY()}
+	case lineTag:
+		n := g.AsLine()
+		return []XY{
+			n.StartPoint().XY(),
+			n.EndPoint().XY(),
+		}
+	case lineStringTag:
+		ls := g.AsLineString()
+		n := ls.NumPoints()
+		points := make([]XY, n)
+		for i := 0; i < n; i++ {
+			points[i] = ls.PointN(i).XY()
+		}
+		return points
+	case polygonTag:
+		p := g.AsPolygon()
+		return convexHullPointSet(p.ExteriorRing().AsGeometry())
+	case multiPointTag:
+		m := g.AsMultiPoint()
+		n := m.NumPoints()
+		points := make([]XY, n)
+		for i := 0; i < n; i++ {
+			points[i] = m.PointN(i).XY()
+		}
+		return points
+	case multiLineStringTag:
+		m := g.AsMultiLineString()
+		var points []XY
+		n := m.NumLineStrings()
+		for i := 0; i < n; i++ {
+			line := m.LineStringN(i)
+			m := line.NumPoints()
+			for j := 0; j < m; j++ {
+				points = append(points, line.PointN(j).XY())
+			}
+		}
+		return points
+	case multiPolygonTag:
+		m := g.AsMultiPolygon()
+		var points []XY
+		numPolys := m.NumPolygons()
+		for i := 0; i < numPolys; i++ {
+			ring := m.PolygonN(i).ExteriorRing()
+			numPts := ring.NumPoints()
+			for j := 0; j < numPts; j++ {
+				points = append(points, ring.PointN(j).XY())
+			}
+		}
+		return points
+	default:
+		panic("unknown geometry: " + g.tag.String())
 	}
 }
 

@@ -125,15 +125,8 @@ func (n Line) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
-func (n Line) ConvexHull() GeometryX {
-	return convexHull(n)
-}
-
-func (n Line) convexHullPointSet() []XY {
-	return []XY{
-		n.StartPoint().XY(),
-		n.EndPoint().XY(),
-	}
+func (n Line) ConvexHull() Geometry {
+	return convexHull(n.AsGeometry())
 }
 
 func (n Line) MarshalJSON() ([]byte, error) {

@@ -231,12 +231,8 @@ func (p Polygon) AsBinary(w io.Writer) error {
 
 // ConvexHull returns the convex hull of the Polygon, which is always another
 // Polygon.
-func (p Polygon) ConvexHull() GeometryX {
-	return convexHull(p)
-}
-
-func (p Polygon) convexHullPointSet() []XY {
-	return p.ExteriorRing().convexHullPointSet()
+func (p Polygon) ConvexHull() Geometry {
+	return convexHull(p.AsGeometry())
 }
 
 func (p Polygon) MarshalJSON() ([]byte, error) {

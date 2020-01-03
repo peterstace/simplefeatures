@@ -18,14 +18,6 @@ type GeometryX interface {
 	// Boundary returns the GeometryX representing the limit of this geometry.
 	Boundary() GeometryX
 
-	// Convex hull returns a GeometryX that represents the smallest convex set
-	// that contains this geometry.
-	ConvexHull() GeometryX
-
-	// convexHullPointset returns the list of points that must be considered
-	// when finding the convex hull.
-	convexHullPointSet() []XY
-
 	// TransformXY transforms this GeometryX into another geometry according the
 	// mapping provided by the XY function. Some classes of mappings (such as
 	// affine transformations) will preserve the validity this GeometryX in the

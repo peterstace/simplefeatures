@@ -94,12 +94,8 @@ func (e EmptySet) AsBinary(w io.Writer) error {
 
 // ConvexHull returns the convex hull of this geometry. The convex hull of an
 // empty set is always an empty set.
-func (e EmptySet) ConvexHull() GeometryX {
-	return convexHull(e)
-}
-
-func (e EmptySet) convexHullPointSet() []XY {
-	return nil
+func (e EmptySet) ConvexHull() Geometry {
+	return convexHull(e.AsGeometry())
 }
 
 func (e EmptySet) MarshalJSON() ([]byte, error) {
