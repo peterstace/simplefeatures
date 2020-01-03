@@ -17,8 +17,4 @@ type GeometryX interface {
 	// types of transformations may result in a validation error if their
 	// mapping results in an invalid GeometryX.
 	TransformXY(func(XY) XY, ...ConstructorOption) (GeometryX, error)
-
-	// IsValid returns if the current geometry is valid. It is useful to use when
-	// validation is disabled at constructing, for example, json.Unmarshal
-	IsValid() bool
 }

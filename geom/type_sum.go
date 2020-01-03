@@ -508,8 +508,28 @@ func (g Geometry) ConvexHull() Geometry {
 // IsValid returns if the current geometry is valid. It is useful to use when
 // validation is disabled at constructing, for example, json.Unmarshal
 func (g Geometry) IsValid() bool {
-	// TODO
-	return g.AsGeometryX().IsValid()
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().IsValid()
+	case emptySetTag:
+		return g.AsEmptySet().IsValid()
+	case pointTag:
+		return g.AsPoint().IsValid()
+	case lineTag:
+		return g.AsLine().IsValid()
+	case lineStringTag:
+		return g.AsLineString().IsValid()
+	case polygonTag:
+		return g.AsPolygon().IsValid()
+	case multiPointTag:
+		return g.AsMultiPoint().IsValid()
+	case multiLineStringTag:
+		return g.AsMultiLineString().IsValid()
+	case multiPolygonTag:
+		return g.AsMultiPolygon().IsValid()
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
 }
 
 // Intersects returns true if the intersection of this gemoetry with the
