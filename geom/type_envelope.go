@@ -30,10 +30,10 @@ func NewEnvelope(first XY, others ...XY) Envelope {
 // contained by the provided geometries, provided that at least one non-empty
 // geometry is given. If no non-empty geometries are given, then the returned
 // flag is set to false.
-func EnvelopeFromGeoms(geoms ...GeometryX) (Envelope, bool) {
+func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 	envs := make([]Envelope, 0, len(geoms))
 	for _, g := range geoms {
-		env, ok := ToGeometry(g).Envelope()
+		env, ok := g.Envelope()
 		if ok {
 			envs = append(envs, env)
 		}

@@ -193,16 +193,16 @@ func (p Polygon) rings() []LineString {
 	return rings
 }
 
-func (p Polygon) Boundary() GeometryX {
+func (p Polygon) Boundary() Geometry {
 	if len(p.holes) == 0 {
-		return p.outer
+		return p.outer.AsGeometry()
 	}
 	bounds := make([]LineString, 1+len(p.holes))
 	bounds[0] = p.outer
 	for i, h := range p.holes {
 		bounds[1+i] = h
 	}
-	return NewMultiLineString(bounds)
+	return NewMultiLineString(bounds).AsGeometry()
 }
 
 func (p Polygon) Value() (driver.Value, error) {

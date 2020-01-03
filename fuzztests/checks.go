@@ -180,7 +180,7 @@ func CheckGeoJSON(t *testing.T, pg PostGIS, g geom.Geometry) {
 		if g.IsGeometryCollection() {
 			gc := g.AsGeometryCollection()
 			for i := 0; i < gc.NumGeometries(); i++ {
-				if _, ok := gc.GeometryN(i).(geom.GeometryCollection); ok {
+				if gc.GeometryN(i).IsGeometryCollection() {
 					return
 				}
 			}

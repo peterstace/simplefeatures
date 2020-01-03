@@ -433,8 +433,28 @@ func (g Geometry) Envelope() (Envelope, bool) {
 
 // Boundary returns the GeometryX representing the limit of this geometry.
 func (g Geometry) Boundary() Geometry {
-	// TODO
-	return ToGeometry(g.AsGeometryX().Boundary())
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().Boundary()
+	case emptySetTag:
+		return g.AsEmptySet().Boundary()
+	case pointTag:
+		return g.AsPoint().Boundary()
+	case lineTag:
+		return g.AsLine().Boundary()
+	case lineStringTag:
+		return g.AsLineString().Boundary()
+	case polygonTag:
+		return g.AsPolygon().Boundary()
+	case multiPointTag:
+		return g.AsMultiPoint().Boundary()
+	case multiLineStringTag:
+		return g.AsMultiLineString().Boundary()
+	case multiPolygonTag:
+		return g.AsMultiPolygon().Boundary()
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
 }
 
 // EqualsExact checks if this geometry is equal to another geometry from a

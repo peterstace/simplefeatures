@@ -10,9 +10,6 @@ type GeometryX interface {
 	// an error in those cases.
 	Equals(GeometryX) (bool, error)
 
-	// Boundary returns the GeometryX representing the limit of this geometry.
-	Boundary() GeometryX
-
 	// TransformXY transforms this GeometryX into another geometry according the
 	// mapping provided by the XY function. Some classes of mappings (such as
 	// affine transformations) will preserve the validity this GeometryX in the

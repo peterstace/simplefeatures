@@ -55,7 +55,7 @@ func convexHullPointSet(g Geometry) []XY {
 		for i := 0; i < n; i++ {
 			points = append(
 				points,
-				convexHullPointSet(ToGeometry(c.GeometryN(i)))...,
+				convexHullPointSet(c.GeometryN(i))...,
 			)
 		}
 		return points

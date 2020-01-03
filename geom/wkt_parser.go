@@ -284,13 +284,13 @@ func (p *parser) nextGeometryCollectionText() Geometry {
 	if tok == "EMPTY" {
 		return NewGeometryCollection(nil, p.opts...).AsGeometry()
 	}
-	geoms := []GeometryX{
-		p.nextGeometryTaggedText().AsGeometryX(),
+	geoms := []Geometry{
+		p.nextGeometryTaggedText(),
 	}
 	for {
 		tok := p.nextCommaOrRightParen()
 		if tok == "," {
-			geom := p.nextGeometryTaggedText().AsGeometryX()
+			geom := p.nextGeometryTaggedText()
 			geoms = append(geoms, geom)
 		} else {
 			break

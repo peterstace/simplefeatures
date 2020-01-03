@@ -24,7 +24,7 @@ func hasIntersection(g1, g2 Geometry) bool {
 		n := gc.NumGeometries()
 		for i := 0; i < n; i++ {
 			g := gc.GeometryN(i)
-			if g1.Intersects(ToGeometry(g)) {
+			if g1.Intersects(g) {
 				return true
 			}
 		}
@@ -347,7 +347,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 }
 
 func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp MultiPolygon) bool {
-	if mls.Intersects(ToGeometry(mp.Boundary())) {
+	if mls.Intersects(mp.Boundary()) {
 		return true
 	}
 
@@ -473,8 +473,8 @@ func hasIntersectionMultiPointWithPolygon(mp MultiPoint, p Polygon) bool {
 func hasIntersectionPolygonWithPolygon(p1, p2 Polygon) bool {
 	// Check if the boundaries intersect. If so, then the polygons must
 	// intersect.
-	b1 := ToGeometry(p1.Boundary())
-	b2 := ToGeometry(p2.Boundary())
+	b1 := p1.Boundary()
+	b2 := p2.Boundary()
 	if b1.Intersects(b2) {
 		return true
 	}

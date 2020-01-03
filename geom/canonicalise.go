@@ -45,12 +45,12 @@ func canonicalPointsAndLines(points []Point, lines []Line) (GeometryX, error) {
 		}
 		return NewMultiPoint(points), nil
 	default:
-		all := make([]GeometryX, len(points)+len(lines))
+		all := make([]Geometry, len(points)+len(lines))
 		for i, pt := range points {
-			all[i] = pt
+			all[i] = pt.AsGeometry()
 		}
 		for i, ln := range lines {
-			all[len(points)+i] = ln
+			all[len(points)+i] = ln.AsGeometry()
 		}
 		return NewGeometryCollection(all), nil
 	}

@@ -268,11 +268,11 @@ func (p *wkbParser) parseMultiPolygon() MultiPolygon {
 
 func (p *wkbParser) parseGeometryCollection() GeometryCollection {
 	n := p.parseUint32()
-	var geoms []GeometryX
+	var geoms []Geometry
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
 		p.setErr(err)
-		geoms = append(geoms, geom.AsGeometryX())
+		geoms = append(geoms, geom)
 	}
 	return NewGeometryCollection(geoms, p.opts...)
 }

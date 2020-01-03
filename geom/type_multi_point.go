@@ -123,14 +123,14 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 	return env, true
 }
 
-func (m MultiPoint) Boundary() GeometryX {
+func (m MultiPoint) Boundary() Geometry {
 	// This is a little bit more complicated than it really has to be (it just
 	// has to always return an empty set). However, this is the behavour of
 	// Postgis.
 	if m.IsEmpty() {
-		return m
+		return m.AsGeometry()
 	}
-	return NewGeometryCollection(nil)
+	return NewGeometryCollection(nil).AsGeometry()
 }
 
 func (m MultiPoint) Value() (driver.Value, error) {

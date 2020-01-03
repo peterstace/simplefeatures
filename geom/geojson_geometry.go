@@ -121,9 +121,9 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 		if err := json.NewDecoder(bytes.NewReader(input)).Decode(&secondPass); err != nil {
 			return Geometry{}, err
 		}
-		geoms := make([]GeometryX, len(secondPass.Geometries))
+		geoms := make([]Geometry, len(secondPass.Geometries))
 		for i := range geoms {
-			geoms[i] = secondPass.Geometries[i].AsGeometryX()
+			geoms[i] = secondPass.Geometries[i]
 		}
 		return NewGeometryCollection(geoms, opts...).AsGeometry(), nil
 	case "":

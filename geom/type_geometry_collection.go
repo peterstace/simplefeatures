@@ -16,12 +16,12 @@ import (
 //
 // 2. It must contain zero or more geometries.
 type GeometryCollection struct {
-	geoms []GeometryX
+	geoms []Geometry
 }
 
 // NewGeometryCollection creates a potentially heterogenous collection of
 // geometries. There are no constraints on the collection.
-func NewGeometryCollection(geoms []GeometryX, opts ...ConstructorOption) GeometryCollection {
+func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) GeometryCollection {
 	if len(geoms) == 0 {
 		// Store empty geoms as nil to make testing easier.
 		geoms = nil
@@ -40,7 +40,7 @@ func (c GeometryCollection) NumGeometries() int {
 }
 
 // GeometryN gives the nth (zero based) GeometryX in the GeometryCollection.
-func (c GeometryCollection) GeometryN(n int) GeometryX {
+func (c GeometryCollection) GeometryN(n int) Geometry {
 	return c.geoms[n]
 }
 
@@ -55,7 +55,7 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	}
 	dst = append(dst, '(')
 	for i, geom := range c.geoms {
-		dst = ToGeometry(geom).appendWKT(dst)
+		dst = geom.appendWKT(dst)
 		if i != len(c.geoms)-1 {
 			dst = append(dst, ',')
 		}
@@ -73,7 +73,7 @@ func (c GeometryCollection) Intersects(g Geometry) bool {
 
 func (c GeometryCollection) IsEmpty() bool {
 	for _, g := range c.geoms {
-		if !ToGeometry(g).IsEmpty() {
+		if !g.IsEmpty() {
 			return false
 		}
 	}
@@ -83,7 +83,7 @@ func (c GeometryCollection) IsEmpty() bool {
 func (c GeometryCollection) Dimension() int {
 	dim := 0
 	for _, g := range c.geoms {
-		dim = max(dim, ToGeometry(g).Dimension())
+		dim = max(dim, g.Dimension())
 	}
 	return dim
 }
@@ -94,19 +94,19 @@ func (c GeometryCollection) Equals(other GeometryX) (bool, error) {
 
 // walk traverses a tree of GeometryCollections, triggering a callback at each
 // non-GeometryX collection leaf.
-func (c GeometryCollection) walk(fn func(GeometryX)) {
+func (c GeometryCollection) walk(fn func(Geometry)) {
 	for _, g := range c.geoms {
-		if col, ok := g.(GeometryCollection); ok {
-			col.walk(fn)
+		if g.IsGeometryCollection() {
+			g.AsGeometryCollection().walk(fn)
 		} else {
 			fn(g)
 		}
 	}
 }
 
-func (c GeometryCollection) flatten() []GeometryX {
-	var geoms []GeometryX
-	c.walk(func(g GeometryX) {
+func (c GeometryCollection) flatten() []Geometry {
+	var geoms []Geometry
+	c.walk(func(g Geometry) {
 		geoms = append(geoms, g)
 	})
 	return geoms
@@ -116,18 +116,18 @@ func (c GeometryCollection) Envelope() (Envelope, bool) {
 	return EnvelopeFromGeoms(c.flatten()...)
 }
 
-func (c GeometryCollection) Boundary() GeometryX {
+func (c GeometryCollection) Boundary() Geometry {
 	if c.IsEmpty() {
-		return c
+		return c.AsGeometry()
 	}
-	var bounds []GeometryX
+	var bounds []Geometry
 	for _, g := range c.geoms {
 		bound := g.Boundary()
-		if !ToGeometry(bound).IsEmpty() {
+		if !bound.IsEmpty() {
 			bounds = append(bounds, bound)
 		}
 	}
-	return NewGeometryCollection(bounds)
+	return NewGeometryCollection(bounds).AsGeometry()
 }
 
 func (c GeometryCollection) Value() (driver.Value, error) {
@@ -144,7 +144,7 @@ func (c GeometryCollection) AsBinary(w io.Writer) error {
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {
 		geom := c.GeometryN(i)
-		marsh.setErr(ToGeometry(geom).AsBinary(w))
+		marsh.setErr(geom.AsBinary(w))
 	}
 	return marsh.err
 }
@@ -157,7 +157,7 @@ func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 	buf := []byte(`{"type":"GeometryCollection","geometries":`)
 	var geoms = c.geoms
 	if geoms == nil {
-		geoms = []GeometryX{}
+		geoms = []Geometry{}
 	}
 	geomsJSON, err := json.Marshal(geoms)
 	if err != nil {
@@ -170,13 +170,13 @@ func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 
 // TransformXY transforms this GeometryCollection into another GeometryCollection according to fn.
 func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryX, error) {
-	transformed := make([]GeometryX, len(c.geoms))
+	transformed := make([]Geometry, len(c.geoms))
 	for i := range c.geoms {
-		var err error
-		transformed[i], err = c.geoms[i].TransformXY(fn, opts...)
+		transf, err := c.geoms[i].AsGeometryX().TransformXY(fn, opts...)
 		if err != nil {
 			return nil, err
 		}
+		transformed[i] = ToGeometry(transf)
 	}
 	return NewGeometryCollection(transformed), nil
 }
@@ -191,7 +191,7 @@ func (c GeometryCollection) EqualsExact(other GeometryX, opts ...EqualsExactOpti
 // constraints on it, so this function always returns true
 func (c GeometryCollection) IsValid() bool {
 	all := true
-	c.walk(func(g GeometryX) {
+	c.walk(func(g Geometry) {
 		if !g.IsValid() {
 			all = false
 		}

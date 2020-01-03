@@ -2,7 +2,6 @@ package geom_test
 
 import (
 	"math"
-	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -267,13 +266,9 @@ func TestBoundary(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			want := geomFromWKT(t, tt.boundary)
-			got := geomFromWKT(t, tt.wkt).Boundary()
-			if !reflect.DeepEqual(got, want) {
-				t.Logf("want: %s", string(ToGeometry(want).AsText()))
-				t.Logf("got:  %s", string(ToGeometry(got).AsText()))
-				t.Errorf("mismatch")
-			}
+			want := gFromWKT(t, tt.boundary)
+			got := gFromWKT(t, tt.wkt).Boundary()
+			expectGeomEq(t, got, want)
 		})
 	}
 }
@@ -409,8 +404,8 @@ func TestTransformXY(t *testing.T) {
 			g := geomFromWKT(t, tt.wktIn)
 			got, err := g.TransformXY(transform)
 			expectNoErr(t, err)
-			want := geomFromWKT(t, tt.wktOut)
-			expectDeepEqual(t, got, want)
+			want := gFromWKT(t, tt.wktOut)
+			expectGeomEq(t, ToGeometry(got), want)
 		})
 	}
 }
