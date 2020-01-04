@@ -9,6 +9,12 @@ import (
 	"unsafe"
 )
 
+// GeometryBuilder abstracts objects that can build Geometries or can be
+// otherwise converted to Geometries.
+type GeometryBuilder interface {
+	AsGeometry() Geometry
+}
+
 // Geometry is a single geometry of any type. It's zero value is valid and is
 // an empty GeometryCollection.
 type Geometry struct {
@@ -47,6 +53,9 @@ func (t geometryTag) String() string {
 	}
 	return s
 }
+
+// AsGeometry implements the GeometryBuilder interface by returning itself.
+func (g Geometry) AsGeometry() Geometry { return g }
 
 // IsGeometryCollection return true iff the Geometry is a GeometryCollection geometry.
 func (g Geometry) IsGeometryCollection() bool { return g.tag == geometryCollectionTag }

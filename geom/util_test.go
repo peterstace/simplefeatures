@@ -1,22 +1,11 @@
 package geom_test
 
 import (
-	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/peterstace/simplefeatures/geom"
 	. "github.com/peterstace/simplefeatures/geom"
 )
-
-func must(t *testing.T) func(geom.Geometry, error) geom.Geometry {
-	return func(g geom.Geometry, err error) geom.Geometry {
-		if err != nil {
-			t.Fatalf("must have no error but got: %v", err)
-		}
-		return g
-	}
-}
 
 func geomFromWKT(t *testing.T, wkt string) Geometry {
 	t.Helper()
@@ -25,30 +14,6 @@ func geomFromWKT(t *testing.T, wkt string) Geometry {
 		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 	}
 	return geom
-}
-
-func expectDeepEqual(t *testing.T, got, want interface{}) {
-	t.Helper()
-	if !reflect.DeepEqual(got, want) {
-		args := []interface{}{got, want}
-		format := `
-expected to be equal, but aren't:
-	got:  %+v
-	want: %+v
-`
-		// Special cases for geometries:
-		gotGeom, okGot := got.(Geometry)
-		if okGot {
-			format += "    got  (WKT): %s\n"
-			args = append(args, gotGeom.AsText())
-		}
-		wantGeom, okWant := want.(Geometry)
-		if okWant {
-			format += "    want (WKT): %s\n"
-			args = append(args, wantGeom.AsText())
-		}
-		t.Errorf(format, args...)
-	}
 }
 
 func expectPanics(t *testing.T, fn func()) {
@@ -68,9 +33,9 @@ func expectNoErr(t *testing.T, err error) {
 	}
 }
 
-func expectGeomEq(t *testing.T, got, want Geometry, opts ...EqualsExactOption) {
+func expectGeomEq(t *testing.T, got, want GeometryBuilder, opts ...EqualsExactOption) {
 	t.Helper()
-	if !got.EqualsExact(want, opts...) {
+	if !got.AsGeometry().EqualsExact(want.AsGeometry(), opts...) {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }

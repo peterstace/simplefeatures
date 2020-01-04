@@ -12,22 +12,22 @@ import (
 
 func TestZeroGeometry(t *testing.T) {
 	var z Geometry
-	expectDeepEqual(t, z.IsGeometryCollection(), true)
+	expectBoolEq(t, z.IsGeometryCollection(), true)
 	z.AsGeometryCollection() // Doesn't crash.
-	expectDeepEqual(t, z.AsText(), "GEOMETRYCOLLECTION EMPTY")
+	expectStringEq(t, z.AsText(), "GEOMETRYCOLLECTION EMPTY")
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(z)
 	expectNoErr(t, err)
-	expectDeepEqual(t, strings.TrimSpace(buf.String()), `{"type":"GeometryCollection","geometries":[]}`)
+	expectStringEq(t, strings.TrimSpace(buf.String()), `{"type":"GeometryCollection","geometries":[]}`)
 
 	z = NewPointF(1, 2).AsGeometry() // Set away from zero value
-	expectDeepEqual(t, z.IsPoint(), true)
+	expectBoolEq(t, z.IsPoint(), true)
 	err = json.NewDecoder(&buf).Decode(&z)
 	expectNoErr(t, err)
-	expectDeepEqual(t, z.IsPoint(), false)
-	expectDeepEqual(t, z.IsGeometryCollection(), true)
-	expectDeepEqual(t, z.IsEmpty(), true)
+	expectBoolEq(t, z.IsPoint(), false)
+	expectBoolEq(t, z.IsGeometryCollection(), true)
+	expectBoolEq(t, z.IsEmpty(), true)
 	z = Geometry{}
 
 	z.AsBinary(ioutil.Discard) // Doesn't crash
@@ -35,7 +35,5 @@ func TestZeroGeometry(t *testing.T) {
 	_, err = z.Value()
 	expectNoErr(t, err)
 
-	expectDeepEqual(t, z.Dimension(), 0)
-
-	// TODO: continue further tests
+	expectIntEq(t, z.Dimension(), 0)
 }

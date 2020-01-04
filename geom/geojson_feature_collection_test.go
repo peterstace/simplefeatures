@@ -2,6 +2,7 @@ package geom_test
 
 import (
 	"encoding/json"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -63,11 +64,11 @@ func TestGeoJSONFeatureCollectionValidUnmarshal(t *testing.T) {
 	f1 := fc[1]
 
 	expectStringEq(t, f0.ID.(string), "id0")
-	expectDeepEqual(t, f0.Properties, map[string]interface{}{"prop0": "value0", "prop1": "value1"})
+	expectBoolEq(t, reflect.DeepEqual(f0.Properties, map[string]interface{}{"prop0": "value0", "prop1": "value1"}), true)
 	expectGeomEq(t, f0.Geometry, geomFromWKT(t, "LINESTRING(102 0,103 1,104 0,105 1)"))
 
-	expectDeepEqual(t, f1.ID, "id1")
-	expectDeepEqual(t, f1.Properties, map[string]interface{}{"prop0": "value2", "prop1": "value3"})
+	expectStringEq(t, f1.ID.(string), "id1")
+	expectBoolEq(t, reflect.DeepEqual(f1.Properties, map[string]interface{}{"prop0": "value2", "prop1": "value3"}), true)
 	expectGeomEq(t, f1.Geometry, geomFromWKT(t, "POLYGON((100 0,101 0,101 1,100 1,100 0))"))
 }
 

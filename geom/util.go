@@ -10,27 +10,27 @@ func max(a, b int) int {
 }
 
 func rank(g Geometry) int {
-	switch {
-	case g.IsEmptySet():
+	switch g.tag {
+	case emptySetTag:
 		return 1
-	case g.IsPoint():
+	case pointTag:
 		return 2
-	case g.IsLine():
+	case lineTag:
 		return 3
-	case g.IsLineString():
+	case lineStringTag:
 		return 4
-	case g.IsPolygon():
+	case polygonTag:
 		return 5
-	case g.IsMultiPoint():
+	case multiPointTag:
 		return 6
-	case g.IsMultiLineString():
+	case multiLineStringTag:
 		return 7
-	case g.IsMultiPolygon():
+	case multiPolygonTag:
 		return 8
-	case g.IsGeometryCollection():
+	case geometryCollectionTag:
 		return 9
 	default:
-		panic(fmt.Sprintf("unknown geometry type: %s", g.tag))
+		panic(fmt.Sprintf("unknown geometry tag: %s", g.tag))
 	}
 }
 

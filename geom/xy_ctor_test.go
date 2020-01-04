@@ -9,22 +9,22 @@ import (
 
 func TestXYConstructors(t *testing.T) {
 	must := func(t *testing.T) func(
-		ctor interface{ AsGeometry() Geometry },
+		ctor GeometryBuilder,
 		err error,
-	) Geometry {
-		return func(ctor interface{ AsGeometry() Geometry }, err error) Geometry {
+	) GeometryBuilder {
+		return func(ctor GeometryBuilder, err error) GeometryBuilder {
 			if err != nil {
 				t.Fatal(err)
 			}
-			return ctor.AsGeometry()
+			return ctor
 		}
 	}
 	for i, tt := range []struct {
-		Geom Geometry
+		Geom GeometryBuilder
 		WKT  string
 	}{
 		{
-			NewPointXY(XY{X: 1, Y: 2}).AsGeometry(),
+			NewPointXY(XY{X: 1, Y: 2}),
 			"POINT(1 2)",
 		},
 		{
@@ -43,7 +43,7 @@ func TestXYConstructors(t *testing.T) {
 			"POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))",
 		},
 		{
-			NewMultiPointXY([]XY{{1, 2}, {3, 4}, {5, 6}}).AsGeometry(),
+			NewMultiPointXY([]XY{{1, 2}, {3, 4}, {5, 6}}),
 			"MULTIPOINT(1 2,3 4,5 6)",
 		},
 		{
@@ -72,9 +72,7 @@ func TestXYConstructors(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			want := geomFromWKT(t, tt.WKT)
-			if !tt.Geom.EqualsExact(want) {
-				t.Errorf("mismatch: got=%v want=%v", tt.Geom, tt.WKT)
-			}
+			expectGeomEq(t, tt.Geom, want)
 		})
 	}
 }
