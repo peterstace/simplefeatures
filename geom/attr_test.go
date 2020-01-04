@@ -174,6 +174,11 @@ func TestIsSimple(t *testing.T) {
 	}
 }
 
+func TestIsSimpleGeometryCollection(t *testing.T) {
+	_, defined := gFromWKT(t, "GEOMETRYCOLLECTION(POINT(1 2))").IsSimple()
+	expectBoolEq(t, defined, false)
+}
+
 func TestBoundary(t *testing.T) {
 	for i, tt := range []struct {
 		wkt, boundary string

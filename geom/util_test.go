@@ -88,3 +88,10 @@ func expectIntEq(t *testing.T, got, want int) {
 		t.Errorf("\ngot:  %d\nwant: %d\n", got, want)
 	}
 }
+
+func expectBoolEq(t *testing.T, got, want bool) {
+	t.Helper()
+	if got != want {
+		t.Errorf("\ngot:  %t\nwant: %t\n", got, want)
+	}
+}

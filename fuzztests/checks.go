@@ -249,28 +249,12 @@ func CheckEnvelope(t *testing.T, pg PostGIS, g geom.Geometry) {
 
 func CheckIsSimple(t *testing.T, pg PostGIS, g geom.Geometry) {
 	t.Run("CheckIsSimple", func(t *testing.T) {
-		var got bool
-		switch {
-		case g.IsGeometryCollection():
-			return // GeometryCollection doesn't have IsSimple
-		case g.IsEmptySet():
-			got = g.AsEmptySet().IsSimple()
-		case g.IsPoint():
-			got = g.AsPoint().IsSimple()
-		case g.IsLine():
-			got = g.AsLine().IsSimple()
-		case g.IsLineString():
-			got = g.AsLineString().IsSimple()
-		case g.IsPolygon():
-			got = g.AsPolygon().IsSimple()
-		case g.IsMultiPoint():
-			got = g.AsMultiPoint().IsSimple()
-		case g.IsMultiLineString():
-			got = g.AsMultiLineString().IsSimple()
-		case g.IsMultiPolygon():
-			got = g.AsMultiPolygon().IsSimple()
-		default:
-			panic(g)
+		got, ok := g.IsSimple()
+		if ok == g.IsGeometryCollection() {
+			t.Error("Expected not to have IsSimple defined for GC")
+		}
+		if !ok {
+			return
 		}
 
 		// PostGIS doesn't treat MultiLineStrings containing duplicated
