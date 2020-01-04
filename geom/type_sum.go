@@ -548,14 +548,12 @@ func (g Geometry) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geomet
 	}
 }
 
-// Length gives the length of the geometry, if defined.. It is only defined for
+// Length gives the length of the geometry, if defined. It is only defined for
 // Lines, LineStrings, and MultiLineStrings. The returned flag indicates if the
 // length is defined.
 //
-// TODO: what about empty LineStrings? Loop back to this... And change fuzz
-// test to check this behaviour as well.
-//
-// TODO: add tests
+// TODO: This doesn't match PostGIS behaviour. See
+// https://github.com/peterstace/simplefeatures/issues/86
 func (g Geometry) Length() (float64, bool) {
 	switch {
 	case g.IsLine():
@@ -588,9 +586,9 @@ func (g Geometry) Centroid() (Point, bool) {
 // Area gives the area of the Polygon or MultiPolygon. If the Geometry is not a
 // Polygon or MultiPolygon, then false is returned.
 //
-// TODO: Add tests
-// TODO: Check fuzz tests
-// TODO: What about empty polygon?
+// TODO: This is not in live with the behaviour of PostGIS. Instead, the area
+// should be returned as zero for non polygonal geometries. See
+// https://github.com/peterstace/simplefeatures/issues/84
 func (g Geometry) Area() (float64, bool) {
 	switch {
 	case g.IsPolygon():

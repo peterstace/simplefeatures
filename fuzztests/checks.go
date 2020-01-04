@@ -441,14 +441,9 @@ func CheckArea(t *testing.T, pg PostGIS, g geom.Geometry) {
 		return
 	}
 	t.Run("CheckArea", func(t *testing.T) {
-		var got float64
-		switch {
-		case g.IsPolygon():
-			got = g.AsPolygon().Area()
-		case g.IsMultiPolygon():
-			got = g.AsMultiPolygon().Area()
-		default:
-			panic(g)
+		got, ok := g.Area()
+		if !ok {
+			t.Fatal("could not get area")
 		}
 		want := pg.Area(t, g)
 		const eps = 0.000000001

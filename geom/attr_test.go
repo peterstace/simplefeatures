@@ -476,6 +476,20 @@ func TestArea(t *testing.T) {
 	}
 }
 
+func TestNoArea(t *testing.T) {
+	for i, wkt := range []string{
+		"POINT(1 2)",
+		"LINESTRING(1 2,3 4)",
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			_, defined := gFromWKT(t, wkt).Area()
+			if defined {
+				t.Errorf("expected area not to be defined, but was")
+			}
+		})
+	}
+}
+
 func TestCentroid(t *testing.T) {
 	for i, tt := range []struct {
 		wkt  string
