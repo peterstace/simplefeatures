@@ -469,16 +469,16 @@ func CheckCentroid(t *testing.T, pg PostGIS, g geom.Geometry) {
 		got, ok := g.Centroid()
 		want := pg.Centroid(t, g)
 
-		if ok {
+		if !ok {
 			if !want.IsEmpty() {
-				t.Log("got:  empty", got)
-				t.Logf("want: %v", want)
+				t.Log("got:  undefined")
+				t.Logf("want: %v", want.AsText())
 				t.Error("mismatch")
 			}
 		} else {
 			if !got.EqualsExact(want, geom.Tolerance(0.000000001)) {
-				t.Logf("got:  %v", got)
-				t.Logf("want: %v", want)
+				t.Logf("got:  %v", got.AsText())
+				t.Logf("want: %v", want.AsText())
 				t.Error("mismatch")
 			}
 		}
