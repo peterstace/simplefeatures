@@ -18,7 +18,7 @@ func must(t *testing.T) func(geom.Geometry, error) geom.Geometry {
 	}
 }
 
-func gFromWKT(t *testing.T, wkt string) Geometry {
+func geomFromWKT(t *testing.T, wkt string) Geometry {
 	t.Helper()
 	geom, err := UnmarshalWKT(strings.NewReader(wkt))
 	if err != nil {

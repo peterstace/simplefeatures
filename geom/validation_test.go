@@ -127,7 +127,7 @@ func TestMultiPolygonValidation(t *testing.T) {
 		)`,
 	} {
 		t.Run(fmt.Sprintf("valid_%d", i), func(t *testing.T) {
-			gFromWKT(t, wkt)
+			geomFromWKT(t, wkt)
 		})
 	}
 	for i, wkt := range []string{

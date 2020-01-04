@@ -143,8 +143,7 @@ func CheckWKB(t *testing.T, pg PostGIS, g geom.Geometry) {
 			// compatible) representations of NaN.
 			return
 		}
-		// TODO: Use g.IsEmpty() instead of g.AsGeometryCollection().IsEmpty()
-		if g.IsGeometryCollection() && g.AsGeometryCollection().IsEmpty() {
+		if g.IsGeometryCollection() && g.IsEmpty() {
 			// The behaviour for GeometryCollections in Postgis is to just
 			// give 'GEOMETRYCOLLECTION EMPTY' whenever the contents of a
 			// geometry collection are all empty geometries. This doesn't

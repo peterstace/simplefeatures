@@ -84,7 +84,7 @@ func TestEnvelope(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("wkt:", tt.wkt)
-			g := gFromWKT(t, tt.wkt)
+			g := geomFromWKT(t, tt.wkt)
 			env, have := g.Envelope()
 			if !have {
 				t.Fatalf("expected to have envelope but didn't")
@@ -109,7 +109,7 @@ func TestNoEnvelope(t *testing.T) {
 		"GEOMETRYCOLLECTION(POINT EMPTY)",
 	} {
 		t.Run(wkt, func(t *testing.T) {
-			g := gFromWKT(t, wkt)
+			g := geomFromWKT(t, wkt)
 			if _, have := g.Envelope(); have {
 				t.Errorf("have envelope but expected not to")
 			}
@@ -162,7 +162,7 @@ func TestIsSimple(t *testing.T) {
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)))", true},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, defined := gFromWKT(t, tt.wkt).IsSimple()
+			got, defined := geomFromWKT(t, tt.wkt).IsSimple()
 			if !defined {
 				t.Fatal("not defined")
 			}
@@ -175,7 +175,7 @@ func TestIsSimple(t *testing.T) {
 }
 
 func TestIsSimpleGeometryCollection(t *testing.T) {
-	_, defined := gFromWKT(t, "GEOMETRYCOLLECTION(POINT(1 2))").IsSimple()
+	_, defined := geomFromWKT(t, "GEOMETRYCOLLECTION(POINT(1 2))").IsSimple()
 	expectBoolEq(t, defined, false)
 }
 
@@ -273,8 +273,8 @@ func TestBoundary(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			want := gFromWKT(t, tt.boundary)
-			got := gFromWKT(t, tt.wkt).Boundary()
+			want := geomFromWKT(t, tt.boundary)
+			got := geomFromWKT(t, tt.wkt).Boundary()
 			expectGeomEq(t, got, want)
 		})
 	}
@@ -315,34 +315,34 @@ func TestCoordinates(t *testing.T) {
 	}
 	t.Run("Point", func(t *testing.T) {
 		cmp0d(t,
-			gFromWKT(t, "POINT(1 2)").AsPoint().Coordinates(),
+			geomFromWKT(t, "POINT(1 2)").AsPoint().Coordinates(),
 			[2]float64{1, 2},
 		)
 	})
 	t.Run("Line-LineString-MultiPoint", func(t *testing.T) {
 		cmp1d(t,
-			gFromWKT(t, "LINESTRING(0 1,2 3)").AsLine().Coordinates(),
+			geomFromWKT(t, "LINESTRING(0 1,2 3)").AsLine().Coordinates(),
 			[][2]float64{{0, 1}, {2, 3}},
 		)
 		cmp1d(t,
-			gFromWKT(t, "LINESTRING(0 1,2 3,4 5)").AsLineString().Coordinates(),
+			geomFromWKT(t, "LINESTRING(0 1,2 3,4 5)").AsLineString().Coordinates(),
 			[][2]float64{{0, 1}, {2, 3}, {4, 5}},
 		)
 		cmp1d(t,
-			gFromWKT(t, "MULTIPOINT(0 1,2 3,4 5)").AsMultiPoint().Coordinates(),
+			geomFromWKT(t, "MULTIPOINT(0 1,2 3,4 5)").AsMultiPoint().Coordinates(),
 			[][2]float64{{0, 1}, {2, 3}, {4, 5}},
 		)
 	})
 	t.Run("Polygon-MultiLineString", func(t *testing.T) {
 		cmp2d(t,
-			gFromWKT(t, "POLYGON((0 0,0 10,10 0,0 0),(2 2,2 7,7 2,2 2))").AsPolygon().Coordinates(),
+			geomFromWKT(t, "POLYGON((0 0,0 10,10 0,0 0),(2 2,2 7,7 2,2 2))").AsPolygon().Coordinates(),
 			[][][2]float64{
 				{{0, 0}, {0, 10}, {10, 0}, {0, 0}},
 				{{2, 2}, {2, 7}, {7, 2}, {2, 2}},
 			},
 		)
 		cmp2d(t,
-			gFromWKT(t, "MULTILINESTRING((0 0,0 10,10 0,0 0),(2 2,2 8,8 2,2 2))").AsMultiLineString().Coordinates(),
+			geomFromWKT(t, "MULTILINESTRING((0 0,0 10,10 0,0 0),(2 2,2 8,8 2,2 2))").AsMultiLineString().Coordinates(),
 			[][][2]float64{
 				{{0, 0}, {0, 10}, {10, 0}, {0, 0}},
 				{{2, 2}, {2, 8}, {8, 2}, {2, 2}},
@@ -351,7 +351,7 @@ func TestCoordinates(t *testing.T) {
 	})
 	t.Run("MultiPolygon", func(t *testing.T) {
 		cmp3d(t,
-			gFromWKT(t, `
+			geomFromWKT(t, `
 				MULTIPOLYGON(
 					(
 						(0 0,0 10,10 0,0 0),
@@ -402,10 +402,10 @@ func TestTransformXY(t *testing.T) {
 		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 2)))", "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1.5 2)))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := gFromWKT(t, tt.wktIn)
+			g := geomFromWKT(t, tt.wktIn)
 			got, err := g.TransformXY(transform)
 			expectNoErr(t, err)
-			want := gFromWKT(t, tt.wktOut)
+			want := geomFromWKT(t, tt.wktOut)
 			expectGeomEq(t, got, want)
 		})
 	}
@@ -421,7 +421,7 @@ func TestIsRing(t *testing.T) {
 		{"LINESTRING(0 0,1 0,1 1,0 1)", false},     // not closed
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := gFromWKT(t, tt.wkt).AsLineString().IsRing()
+			got := geomFromWKT(t, tt.wkt).AsLineString().IsRing()
 			if got != tt.want {
 				t.Logf("WKT: %v", tt.wkt)
 				t.Errorf("got=%v want=%v", got, tt.want)
@@ -442,7 +442,7 @@ func TestLength(t *testing.T) {
 		{"MULTILINESTRING((0 0,2 0),(1 0,3 0))", 4},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, ok := gFromWKT(t, tt.wkt).Length()
+			got, ok := geomFromWKT(t, tt.wkt).Length()
 			if !ok {
 				t.Fatal("could not calculate length")
 			}
@@ -465,7 +465,7 @@ func TestArea(t *testing.T) {
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((2 1,1 1,2 0,2 1)))", 1.0},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, ok := gFromWKT(t, tt.wkt).Area()
+			got, ok := geomFromWKT(t, tt.wkt).Area()
 			if !ok {
 				t.Fatal("could not calculate area")
 			}
@@ -482,7 +482,7 @@ func TestNoArea(t *testing.T) {
 		"LINESTRING(1 2,3 4)",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, defined := gFromWKT(t, wkt).Area()
+			_, defined := geomFromWKT(t, wkt).Area()
 			if defined {
 				t.Errorf("expected area not to be defined, but was")
 			}
@@ -505,7 +505,7 @@ func TestCentroid(t *testing.T) {
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((2 0,4 0,4 2,2 2,2 0)))", XY{2.7037037037037, 0.925925925925926}},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, ok := gFromWKT(t, tt.wkt).Centroid()
+			got, ok := geomFromWKT(t, tt.wkt).Centroid()
 			if !ok {
 				t.Fatal("could not generate centroid")
 			}
@@ -527,7 +527,7 @@ func TestNoCentroid(t *testing.T) {
 		"LINESTRING(4 3,2 7)",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, defined := gFromWKT(t, wkt).Centroid()
+			_, defined := geomFromWKT(t, wkt).Centroid()
 			if defined {
 				t.Errorf("expected centroid not to be defined, but was")
 			}
@@ -536,16 +536,16 @@ func TestNoCentroid(t *testing.T) {
 }
 
 func TestLineStringToMultiLineString(t *testing.T) {
-	ls := gFromWKT(t, "LINESTRING(1 2,3 4,5 6)").AsLineString()
+	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").AsLineString()
 	got := ls.AsMultiLineString()
-	want := gFromWKT(t, "MULTILINESTRING((1 2,3 4,5 6))")
+	want := geomFromWKT(t, "MULTILINESTRING((1 2,3 4,5 6))")
 	if !got.EqualsExact(want) {
 		t.Errorf("want=%v got=%v", want, got)
 	}
 }
 
 func TestLineToLineString(t *testing.T) {
-	ln := gFromWKT(t, "LINESTRING(1 2,3 4)").AsLine()
+	ln := geomFromWKT(t, "LINESTRING(1 2,3 4)").AsLine()
 	got := ln.AsLineString()
 	if got.NumPoints() != 2 {
 		t.Errorf("want num points 2 but got %v", got.NumPoints())
@@ -559,7 +559,7 @@ func TestLineToLineString(t *testing.T) {
 }
 
 func TestPolygonToMultiPolygon(t *testing.T) {
-	p := gFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))").AsPolygon()
+	p := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))").AsPolygon()
 	mp := p.AsMultiPolygon()
 	if mp.AsText() != "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))" {
 		t.Errorf("got %v", mp.AsText())

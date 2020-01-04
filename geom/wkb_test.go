@@ -452,7 +452,7 @@ func TestWKBParseValid(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			geom, err := UnmarshalWKB(bytes.NewReader(hexStringToBytes(t, tt.wkb)))
 			expectNoErr(t, err)
-			expectGeomEq(t, geom, gFromWKT(t, tt.wkt))
+			expectGeomEq(t, geom, geomFromWKT(t, tt.wkt))
 		})
 	}
 }
@@ -490,7 +490,7 @@ func TestWKBMarshalValid(t *testing.T) {
 		"GEOMETRYCOLLECTION(POINT(1 2),LINESTRING(1 2,3 4))",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			geom := gFromWKT(t, wkt)
+			geom := geomFromWKT(t, wkt)
 			var buf bytes.Buffer
 			err := geom.AsBinary(&buf)
 			expectNoErr(t, err)

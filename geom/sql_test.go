@@ -9,7 +9,7 @@ import (
 )
 
 func TestValuerAny(t *testing.T) {
-	g := gFromWKT(t, "POINT(1 2)")
+	g := geomFromWKT(t, "POINT(1 2)")
 	val, err := g.Value()
 	if err != nil {
 		t.Fatal(err)
@@ -24,13 +24,13 @@ func TestValuerAny(t *testing.T) {
 func TestScanner(t *testing.T) {
 	const wkt = "POINT(2 3)"
 	var wkb bytes.Buffer
-	expectNoErr(t, gFromWKT(t, wkt).AsBinary(&wkb))
+	expectNoErr(t, geomFromWKT(t, wkt).AsBinary(&wkb))
 	var g Geometry
 	check := func(t *testing.T, err error) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		expectGeomEq(t, g, gFromWKT(t, wkt))
+		expectGeomEq(t, g, geomFromWKT(t, wkt))
 	}
 	t.Run("string", func(t *testing.T) {
 		g = Geometry{}
@@ -57,7 +57,7 @@ func TestValuerConcrete(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log(wkt)
-			geom := gFromWKT(t, wkt)
+			geom := geomFromWKT(t, wkt)
 			val, err := geom.Value()
 			expectNoErr(t, err)
 			g, err := UnmarshalWKB(bytes.NewReader(val.([]byte)))

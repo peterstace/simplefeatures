@@ -71,7 +71,7 @@ func TestXYConstructors(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			want := gFromWKT(t, tt.WKT)
+			want := geomFromWKT(t, tt.WKT)
 			if !tt.Geom.EqualsExact(want) {
 				t.Errorf("mismatch: got=%v want=%v", tt.Geom, tt.WKT)
 			}

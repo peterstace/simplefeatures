@@ -71,8 +71,8 @@ func TestMarshalUnmarshalWKT(t *testing.T) {
 		"GEOMETRYCOLLECTION(POINT(4 6),LINESTRING(4 6,7 10))",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g1 := gFromWKT(t, wkt)
-			g2 := gFromWKT(t, string(g1.AsText()))
+			g1 := geomFromWKT(t, wkt)
+			g2 := geomFromWKT(t, string(g1.AsText()))
 			expectGeomEq(t, g1, g2)
 		})
 	}

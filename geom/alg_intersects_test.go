@@ -292,8 +292,8 @@ func TestIntersects(t *testing.T) {
 					}
 				}
 			}
-			g1 := gFromWKT(t, tt.in1)
-			g2 := gFromWKT(t, tt.in2)
+			g1 := geomFromWKT(t, tt.in1)
+			g2 := geomFromWKT(t, tt.in2)
 			t.Run("fwd", runTest(g1, g2))
 			t.Run("rev", runTest(g2, g1))
 		})
