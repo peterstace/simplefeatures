@@ -462,21 +462,14 @@ func CheckArea(t *testing.T, pg PostGIS, g geom.Geometry) {
 
 func CheckCentroid(t *testing.T, pg PostGIS, g geom.Geometry) {
 	t.Run("CheckCentroid", func(t *testing.T) {
-		var got geom.Point
-		var empty bool
-		switch {
-		case g.IsPolygon():
-			got = g.AsPolygon().Centroid()
-		case g.IsMultiPolygon():
-			var ok bool
-			got, ok = g.AsMultiPolygon().Centroid()
-			empty = !ok
-		default:
+		if !g.IsPolygon() && !g.IsMultiPolygon() {
 			return
 		}
+
+		got, ok := g.Centroid()
 		want := pg.Centroid(t, g)
 
-		if empty {
+		if ok {
 			if !want.IsEmpty() {
 				t.Log("got:  empty", got)
 				t.Logf("want: %v", want)

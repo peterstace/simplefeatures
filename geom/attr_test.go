@@ -504,6 +504,23 @@ func TestCentroid(t *testing.T) {
 	}
 }
 
+func TestNoCentroid(t *testing.T) {
+	for i, wkt := range []string{
+		"POLYGON EMPTY",
+		"MULTIPOLYGON EMPTY",
+		"POINT(1 2)",
+		"LINESTRING(1 2,3 4)",
+		"LINESTRING(4 3,2 7)",
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			_, defined := gFromWKT(t, wkt).Centroid()
+			if defined {
+				t.Errorf("expected centroid not to be defined, but was")
+			}
+		})
+	}
+}
+
 func TestLineStringToMultiLineString(t *testing.T) {
 	ls := gFromWKT(t, "LINESTRING(1 2,3 4,5 6)").AsLineString()
 	got := ls.AsMultiLineString()

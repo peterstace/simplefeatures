@@ -572,8 +572,8 @@ func (g Geometry) Length() (float64, bool) {
 // Centroid returns the Polygon or MultiPolygon's centroid point. If the
 // Geometry is not a non-empty Polygon or MultiPolygon, then false is returned.
 //
-// TODO: Add tests
-// TODO: Check fuzz tests
+// TODO: This is not in line with the behaviour of ST_Centroid. See
+// https://github.com/peterstace/simplefeatures/issues/83
 func (g Geometry) Centroid() (Point, bool) {
 	switch {
 	case g.IsPolygon():
