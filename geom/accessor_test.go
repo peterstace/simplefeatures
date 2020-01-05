@@ -20,12 +20,12 @@ func TestLineAccessor(t *testing.T) {
 	t.Run("start", func(t *testing.T) {
 		got := line.StartPoint()
 		want := geomFromWKT(t, "POINT(1 2)")
-		expectGeomEq(t, got, want)
+		expectGeomEq(t, got.AsGeometry(), want)
 	})
 	t.Run("end", func(t *testing.T) {
 		got := line.EndPoint()
 		want := geomFromWKT(t, "POINT(3 4)")
-		expectGeomEq(t, got, want)
+		expectGeomEq(t, got.AsGeometry(), want)
 	})
 	t.Run("num points", func(t *testing.T) {
 		if line.NumPoints() != 2 {
@@ -35,12 +35,12 @@ func TestLineAccessor(t *testing.T) {
 	t.Run("point 0", func(t *testing.T) {
 		got := line.PointN(0)
 		want := geomFromWKT(t, "POINT(1 2)")
-		expectGeomEq(t, got, want)
+		expectGeomEq(t, got.AsGeometry(), want)
 	})
 	t.Run("point 1", func(t *testing.T) {
 		got := line.PointN(1)
 		want := geomFromWKT(t, "POINT(3 4)")
-		expectGeomEq(t, got, want)
+		expectGeomEq(t, got.AsGeometry(), want)
 	})
 	t.Run("point 2", func(t *testing.T) {
 		expectPanics(t, func() {
@@ -61,19 +61,19 @@ func TestLineStringAccessor(t *testing.T) {
 	pt56 := geomFromWKT(t, "POINT(5 6)")
 
 	t.Run("start", func(t *testing.T) {
-		expectGeomEq(t, ls.StartPoint(), pt12)
+		expectGeomEq(t, ls.StartPoint().AsGeometry(), pt12)
 	})
 	t.Run("end", func(t *testing.T) {
-		expectGeomEq(t, ls.EndPoint(), pt56)
+		expectGeomEq(t, ls.EndPoint().AsGeometry(), pt56)
 	})
 	t.Run("num points", func(t *testing.T) {
 		expectIntEq(t, ls.NumPoints(), 3)
 	})
 	t.Run("point n", func(t *testing.T) {
 		expectPanics(t, func() { ls.PointN(-1) })
-		expectGeomEq(t, ls.PointN(0), pt12)
-		expectGeomEq(t, ls.PointN(1), pt34)
-		expectGeomEq(t, ls.PointN(2), pt56)
+		expectGeomEq(t, ls.PointN(0).AsGeometry(), pt12)
+		expectGeomEq(t, ls.PointN(1).AsGeometry(), pt34)
+		expectGeomEq(t, ls.PointN(2).AsGeometry(), pt56)
 		expectPanics(t, func() { ls.PointN(3) })
 	})
 }
@@ -84,11 +84,11 @@ func TestPolygonAccessor(t *testing.T) {
 	inner0 := geomFromWKT(t, "LINESTRING(1 1,2 1,2 2,1 2,1 1)")
 	inner1 := geomFromWKT(t, "LINESTRING(3 1,4 1,4 2,3 2,3 1)")
 
-	expectGeomEq(t, poly.ExteriorRing(), outer)
+	expectGeomEq(t, poly.ExteriorRing().AsGeometry(), outer)
 	expectIntEq(t, poly.NumInteriorRings(), 2)
 	expectPanics(t, func() { poly.InteriorRingN(-1) })
-	expectGeomEq(t, poly.InteriorRingN(0), inner0)
-	expectGeomEq(t, poly.InteriorRingN(1), inner1)
+	expectGeomEq(t, poly.InteriorRingN(0).AsGeometry(), inner0)
+	expectGeomEq(t, poly.InteriorRingN(1).AsGeometry(), inner1)
 	expectPanics(t, func() { poly.InteriorRingN(2) })
 }
 
@@ -100,9 +100,9 @@ func TestMultiPointAccessor(t *testing.T) {
 
 	expectIntEq(t, mp.NumPoints(), 3)
 	expectPanics(t, func() { mp.PointN(-1) })
-	expectGeomEq(t, mp.PointN(0), pt0)
-	expectGeomEq(t, mp.PointN(1), pt1)
-	expectGeomEq(t, mp.PointN(2), pt2)
+	expectGeomEq(t, mp.PointN(0).AsGeometry(), pt0)
+	expectGeomEq(t, mp.PointN(1).AsGeometry(), pt1)
+	expectGeomEq(t, mp.PointN(2).AsGeometry(), pt2)
 	expectPanics(t, func() { mp.PointN(3) })
 }
 
@@ -113,8 +113,8 @@ func TestMultiLineStringAccessors(t *testing.T) {
 
 	expectIntEq(t, mls.NumLineStrings(), 2)
 	expectPanics(t, func() { mls.LineStringN(-1) })
-	expectGeomEq(t, mls.LineStringN(0), ls0)
-	expectGeomEq(t, mls.LineStringN(1), ls1)
+	expectGeomEq(t, mls.LineStringN(0).AsGeometry(), ls0)
+	expectGeomEq(t, mls.LineStringN(1).AsGeometry(), ls1)
 	expectPanics(t, func() { mls.LineStringN(2) })
 }
 
@@ -125,8 +125,8 @@ func TestMultiPolygonAccessors(t *testing.T) {
 
 	expectIntEq(t, polys.NumPolygons(), 2)
 	expectPanics(t, func() { polys.PolygonN(-1) })
-	expectGeomEq(t, polys.PolygonN(0), poly0)
-	expectGeomEq(t, polys.PolygonN(1), poly1)
+	expectGeomEq(t, polys.PolygonN(0).AsGeometry(), poly0)
+	expectGeomEq(t, polys.PolygonN(1).AsGeometry(), poly1)
 	expectPanics(t, func() { polys.PolygonN(2) })
 }
 

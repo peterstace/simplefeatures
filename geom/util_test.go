@@ -33,9 +33,9 @@ func expectNoErr(t *testing.T, err error) {
 	}
 }
 
-func expectGeomEq(t *testing.T, got, want GeometryBuilder, opts ...EqualsExactOption) {
+func expectGeomEq(t *testing.T, got, want Geometry, opts ...EqualsExactOption) {
 	t.Helper()
-	if !got.AsGeometry().EqualsExact(want.AsGeometry(), opts...) {
+	if !got.EqualsExact(want, opts...) {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }

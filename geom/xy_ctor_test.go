@@ -8,11 +8,14 @@ import (
 )
 
 func TestXYConstructors(t *testing.T) {
+	type geometer interface {
+		AsGeometry() Geometry
+	}
 	must := func(t *testing.T) func(
-		ctor GeometryBuilder,
+		ctor geometer,
 		err error,
-	) GeometryBuilder {
-		return func(ctor GeometryBuilder, err error) GeometryBuilder {
+	) geometer {
+		return func(ctor geometer, err error) geometer {
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -20,7 +23,7 @@ func TestXYConstructors(t *testing.T) {
 		}
 	}
 	for i, tt := range []struct {
-		Geom GeometryBuilder
+		Geom geometer
 		WKT  string
 	}{
 		{
@@ -72,7 +75,7 @@ func TestXYConstructors(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			want := geomFromWKT(t, tt.WKT)
-			expectGeomEq(t, tt.Geom, want)
+			expectGeomEq(t, tt.Geom.AsGeometry(), want)
 		})
 	}
 }
