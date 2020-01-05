@@ -51,7 +51,7 @@ func (t geometryTag) String() string {
 // IsGeometryCollection return true iff the Geometry is a GeometryCollection geometry.
 func (g Geometry) IsGeometryCollection() bool { return g.tag == geometryCollectionTag }
 
-// IsEmptySet return true iff the Geometry is a EmptySet geometry.
+// IsEmptySet return true iff the Geometry is an EmptySet geometry.
 func (g Geometry) IsEmptySet() bool { return g.tag == emptySetTag }
 
 // IsPoint return true iff the Geometry is a Point geometry.
@@ -93,8 +93,8 @@ func (g Geometry) AsGeometryCollection() GeometryCollection {
 	return *(*GeometryCollection)(g.ptr)
 }
 
-// AsEmptySet returns the geometry as a EmptySet. It panics if the geometry is
-// not a EmptySet.
+// AsEmptySet returns the geometry as an EmptySet. It panics if the geometry is
+// not an EmptySet.
 func (g Geometry) AsEmptySet() EmptySet {
 	g.check(emptySetTag)
 	return *(*EmptySet)(g.ptr)

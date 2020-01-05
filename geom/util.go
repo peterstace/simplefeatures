@@ -34,13 +34,6 @@ func rank(g Geometry) int {
 	}
 }
 
-func must(x Geometry, err error) Geometry {
-	if err != nil {
-		panic(err)
-	}
-	return x
-}
-
 func mustEnv(env Envelope, ok bool) Envelope {
 	if !ok {
 		panic("not ok")

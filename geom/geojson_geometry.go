@@ -50,16 +50,10 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 				return NewEmptyLineString(opts...).AsGeometry(), nil
 			case 2:
 				ln, err := NewLineC(coords[0], coords[1], opts...)
-				if err != nil {
-					return Geometry{}, err
-				}
-				return ln.AsGeometry(), nil
+				return ln.AsGeometry(), err
 			default:
 				ls, err := NewLineStringC(coords, opts...)
-				if err != nil {
-					return Geometry{}, err
-				}
-				return ls.AsGeometry(), nil
+				return ls.AsGeometry(), err
 			}
 		case "MultiPoint":
 			return NewMultiPointC(coords, opts...).AsGeometry(), nil
@@ -84,17 +78,11 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 				return NewEmptyPolygon(opts...).AsGeometry(), nil
 			default:
 				poly, err := NewPolygonC(coords, opts...)
-				if err != nil {
-					return Geometry{}, err
-				}
-				return poly.AsGeometry(), nil
+				return poly.AsGeometry(), err
 			}
 		case "MultiLineString":
 			mls, err := NewMultiLineStringC(coords, opts...)
-			if err != nil {
-				return Geometry{}, err
-			}
-			return mls.AsGeometry(), nil
+			return mls.AsGeometry(), err
 		default:
 			panic("switch case bug")
 		}
@@ -110,10 +98,7 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 			return Geometry{}, err
 		}
 		mp, err := NewMultiPolygonC(coords, opts...)
-		if err != nil {
-			return Geometry{}, err
-		}
-		return mp.AsGeometry(), nil
+		return mp.AsGeometry(), err
 	case "GeometryCollection":
 		var secondPass struct {
 			Geometries []Geometry `json:"geometries"`

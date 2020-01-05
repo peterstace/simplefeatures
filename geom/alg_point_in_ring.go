@@ -19,7 +19,7 @@ func pointRingSide(pt XY, ring LineString) side {
 	maxX := ring.lines[0].a.X
 	for _, ln := range ring.lines {
 		maxX = math.Max(maxX, ln.b.X)
-		if !mustIntersection(ln.AsGeometry(), ptg.AsGeometry()).IsEmpty() {
+		if hasIntersectionPointWithLine(ptg, ln) {
 			return boundary
 		}
 	}

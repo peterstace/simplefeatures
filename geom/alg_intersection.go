@@ -204,7 +204,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 
 		ln, err := NewLineC(Coordinates{pts[0]}, Coordinates{pts[1]})
 		if err != nil {
-			// Cannot occur because we hae already checked that pts[0] and
+			// Cannot occur because we have already checked that pts[0] and
 			// pts[1] are not equal.
 			panic(err)
 		}
@@ -219,7 +219,7 @@ func intersectLineWithMultiPoint(ln Line, mp MultiPoint) (Geometry, error) {
 	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
-		if !mustIntersection(pt.AsGeometry(), ln.AsGeometry()).IsEmpty() {
+		if hasIntersectionPointWithLine(pt, ln) {
 			pts = append(pts, pt)
 		}
 	}
