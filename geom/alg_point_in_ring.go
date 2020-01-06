@@ -19,7 +19,7 @@ func pointRingSide(pt XY, ring LineString) side {
 	maxX := ring.lines[0].a.X
 	for _, ln := range ring.lines {
 		maxX = math.Max(maxX, ln.b.X)
-		if !mustIntersection(ln, ptg).IsEmpty() {
+		if hasIntersectionPointWithLine(ptg, ln) {
 			return boundary
 		}
 	}
@@ -27,10 +27,15 @@ func pointRingSide(pt XY, ring LineString) side {
 		return exterior
 	}
 
-	ray := must(NewLineC(Coordinates{pt}, Coordinates{XY{maxX + 1, pt.Y}})).(Line)
+	ray, err := NewLineC(Coordinates{pt}, Coordinates{XY{maxX + 1, pt.Y}})
+	if err != nil {
+		// Cannot occur because X coordinates are different.
+		panic(err)
+	}
+
 	var count int
 	for _, seg := range ring.lines {
-		inter := mustIntersection(seg, ray)
+		inter := mustIntersection(seg.AsGeometry(), ray.AsGeometry())
 		if inter.IsEmpty() {
 			continue
 		}
@@ -39,9 +44,9 @@ func pointRingSide(pt XY, ring LineString) side {
 		}
 		ep1 := NewPointC(seg.a)
 		ep2 := NewPointC(seg.b)
-		if inter.EqualsExact(ep1) || inter.EqualsExact(ep2) {
+		if inter.EqualsExact(ep1.AsGeometry()) || inter.EqualsExact(ep2.AsGeometry()) {
 			otherY := ep1.coords.Y
-			if inter.EqualsExact(ep1) {
+			if inter.EqualsExact(ep1.AsGeometry()) {
 				otherY = ep2.coords.Y
 			}
 			if otherY < pt.Y {

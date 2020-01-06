@@ -1,9 +1,11 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"encoding/json"
 	"io"
+	"unsafe"
 )
 
 // GeometryCollection is a collection of geometries.
@@ -27,6 +29,11 @@ func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) Geometry
 	return GeometryCollection{geoms}
 }
 
+// AsGeometry converts this GeometryCollection into a Geometry.
+func (c GeometryCollection) AsGeometry() Geometry {
+	return Geometry{geometryCollectionTag, unsafe.Pointer(&c)}
+}
+
 // NumGeometries gives the number of Geomety elements is the GeometryCollection.
 func (c GeometryCollection) NumGeometries() int {
 	return len(c.geoms)
@@ -48,7 +55,7 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	}
 	dst = append(dst, '(')
 	for i, geom := range c.geoms {
-		dst = geom.AppendWKT(dst)
+		dst = geom.appendWKT(dst)
 		if i != len(c.geoms)-1 {
 			dst = append(dst, ',')
 		}
@@ -57,11 +64,11 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 }
 
 func (c GeometryCollection) Intersection(g Geometry) (Geometry, error) {
-	return intersection(c, g)
+	return intersection(c.AsGeometry(), g)
 }
 
 func (c GeometryCollection) Intersects(g Geometry) bool {
-	return hasIntersection(c, g)
+	return hasIntersection(c.AsGeometry(), g)
 }
 
 func (c GeometryCollection) IsEmpty() bool {
@@ -82,15 +89,15 @@ func (c GeometryCollection) Dimension() int {
 }
 
 func (c GeometryCollection) Equals(other Geometry) (bool, error) {
-	return equals(c, other)
+	return equals(c.AsGeometry(), other)
 }
 
 // walk traverses a tree of GeometryCollections, triggering a callback at each
 // non-Geometry collection leaf.
 func (c GeometryCollection) walk(fn func(Geometry)) {
 	for _, g := range c.geoms {
-		if col, ok := g.(GeometryCollection); ok {
-			col.walk(fn)
+		if g.IsGeometryCollection() {
+			g.AsGeometryCollection().walk(fn)
 		} else {
 			fn(g)
 		}
@@ -111,7 +118,7 @@ func (c GeometryCollection) Envelope() (Envelope, bool) {
 
 func (c GeometryCollection) Boundary() Geometry {
 	if c.IsEmpty() {
-		return c
+		return c.AsGeometry()
 	}
 	var bounds []Geometry
 	for _, g := range c.geoms {
@@ -120,11 +127,13 @@ func (c GeometryCollection) Boundary() Geometry {
 			bounds = append(bounds, bound)
 		}
 	}
-	return NewGeometryCollection(bounds)
+	return NewGeometryCollection(bounds).AsGeometry()
 }
 
 func (c GeometryCollection) Value() (driver.Value, error) {
-	return wkbAsBytes(c)
+	var buf bytes.Buffer
+	err := c.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (c GeometryCollection) AsBinary(w io.Writer) error {
@@ -141,17 +150,7 @@ func (c GeometryCollection) AsBinary(w io.Writer) error {
 }
 
 func (c GeometryCollection) ConvexHull() Geometry {
-	return convexHull(c)
-}
-
-func (c GeometryCollection) convexHullPointSet() []XY {
-	var points []XY
-	n := c.NumGeometries()
-	for i := 0; i < n; i++ {
-		g := c.GeometryN(i)
-		points = append(points, g.convexHullPointSet()...)
-	}
-	return points
+	return convexHull(c.AsGeometry())
 }
 
 func (c GeometryCollection) MarshalJSON() ([]byte, error) {
@@ -176,16 +175,16 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 		var err error
 		transformed[i], err = c.geoms[i].TransformXY(fn, opts...)
 		if err != nil {
-			return nil, err
+			return Geometry{}, err
 		}
 	}
-	return NewGeometryCollection(transformed), nil
+	return NewGeometryCollection(transformed).AsGeometry(), nil
 }
 
 // EqualsExact checks if this GeometryCollection is exactly equal to another GeometryCollection.
 func (c GeometryCollection) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	o, ok := other.(GeometryCollection)
-	return ok && geometryCollectionExactEqual(c, o, opts)
+	return other.IsGeometryCollection() &&
+		geometryCollectionExactEqual(c, other.AsGeometryCollection(), opts)
 }
 
 // IsValid checks if this GeometryCollection is valid. However, there is no

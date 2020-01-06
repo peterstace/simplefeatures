@@ -1,8 +1,10 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"io"
+	"unsafe"
 )
 
 // MultiLineString is a multicurve whose elements are LineStrings.
@@ -43,6 +45,11 @@ func NewMultiLineStringC(coords [][]Coordinates, opts ...ConstructorOption) (Mul
 // second dimension indicates the XY within a LineString.
 func NewMultiLineStringXY(pts [][]XY, opts ...ConstructorOption) (MultiLineString, error) {
 	return NewMultiLineStringC(twoDimXYToCoords(pts))
+}
+
+// AsGeometry converts this MultiLineString into a Geometry.
+func (m MultiLineString) AsGeometry() Geometry {
+	return Geometry{multiLineStringTag, unsafe.Pointer(&m)}
 }
 
 // NumLineStrings gives the number of LineString elements in the
@@ -89,13 +96,9 @@ func (m MultiLineString) IsSimple() bool {
 	}
 	for i := 0; i < len(m.lines); i++ {
 		for j := i + 1; j < len(m.lines); j++ {
-			inter := mustIntersection(m.lines[i], m.lines[j])
+			inter := mustIntersection(m.lines[i].AsGeometry(), m.lines[j].AsGeometry())
 			bound := mustIntersection(m.lines[i].Boundary(), m.lines[j].Boundary())
-			eq, err := inter.Equals(mustIntersection(inter, bound))
-			if err != nil {
-				panic(err) // Equals is implemented for all of the required types here.
-			}
-			if !eq {
+			if !inter.EqualsExact(mustIntersection(inter, bound)) {
 				return false
 			}
 		}
@@ -104,32 +107,28 @@ func (m MultiLineString) IsSimple() bool {
 }
 
 func (m MultiLineString) Intersection(g Geometry) (Geometry, error) {
-	return intersection(m, g)
+	return intersection(m.AsGeometry(), g)
 }
 
 func (m MultiLineString) Intersects(g Geometry) bool {
-	return hasIntersection(m, g)
+	return hasIntersection(m.AsGeometry(), g)
 }
 
 func (m MultiLineString) IsEmpty() bool {
 	return len(m.lines) == 0
 }
 
-func (m MultiLineString) Dimension() int {
-	return 1
-}
-
 func (m MultiLineString) Equals(other Geometry) (bool, error) {
-	return equals(m, other)
+	return equals(m.AsGeometry(), other)
 }
 
 func (m MultiLineString) Envelope() (Envelope, bool) {
 	if len(m.lines) == 0 {
 		return Envelope{}, false
 	}
-	env := mustEnvelope(m.lines[0])
+	env := mustEnv(m.lines[0].Envelope())
 	for _, line := range m.lines[1:] {
-		e := mustEnvelope(line)
+		e := mustEnv(line.Envelope())
 		env = env.ExpandToIncludeEnvelope(e)
 	}
 	return env, true
@@ -137,7 +136,7 @@ func (m MultiLineString) Envelope() (Envelope, bool) {
 func (m MultiLineString) Boundary() Geometry {
 	if m.IsEmpty() {
 		// Postgis behaviour (but any other empty set would be ok).
-		return NewMultiLineString(nil)
+		return NewMultiLineString(nil).AsGeometry()
 	}
 
 	counts := make(map[XY]int)
@@ -164,11 +163,13 @@ func (m MultiLineString) Boundary() Geometry {
 			bound = append(bound, pt)
 		}
 	}
-	return NewMultiPoint(bound)
+	return NewMultiPoint(bound).AsGeometry()
 }
 
 func (m MultiLineString) Value() (driver.Value, error) {
-	return wkbAsBytes(m)
+	var buf bytes.Buffer
+	err := m.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (m MultiLineString) AsBinary(w io.Writer) error {
@@ -185,20 +186,7 @@ func (m MultiLineString) AsBinary(w io.Writer) error {
 }
 
 func (m MultiLineString) ConvexHull() Geometry {
-	return convexHull(m)
-}
-
-func (m MultiLineString) convexHullPointSet() []XY {
-	var points []XY
-	n := m.NumLineStrings()
-	for i := 0; i < n; i++ {
-		line := m.LineStringN(i)
-		m := line.NumPoints()
-		for j := 0; j < m; j++ {
-			points = append(points, line.PointN(j).XY())
-		}
-	}
-	return points
+	return convexHull(m.AsGeometry())
 }
 
 func (m MultiLineString) MarshalJSON() ([]byte, error) {
@@ -224,13 +212,14 @@ func (m MultiLineString) Coordinates() [][]Coordinates {
 func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := m.Coordinates()
 	transform2dCoords(coords, fn)
-	return NewMultiLineStringC(coords, opts...)
+	mls, err := NewMultiLineStringC(coords, opts...)
+	return mls.AsGeometry(), err
 }
 
 // EqualsExact checks if this MultiLineString is exactly equal to another MultiLineString.
 func (m MultiLineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	o, ok := other.(MultiLineString)
-	return ok && multiLineStringExactEqual(m, o, opts)
+	return other.IsMultiLineString() &&
+		multiLineStringExactEqual(m, other.AsMultiLineString(), opts)
 }
 
 // IsValid checks if this MultiLineString is valid

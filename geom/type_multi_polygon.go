@@ -1,10 +1,12 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"errors"
 	"io"
 	"sort"
+	"unsafe"
 )
 
 // MultiPolygon is a multi surface whose elements are polygons.
@@ -84,7 +86,7 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 				linePts[line1.b.XY] = struct{}{}
 				for _, r2 := range p2.rings() {
 					for _, line2 := range r2.lines {
-						env, ok := mustIntersection(line1, line2).Envelope()
+						env, ok := mustIntersection(line1.AsGeometry(), line2.AsGeometry()).Envelope()
 						if !ok {
 							continue
 						}
@@ -148,6 +150,11 @@ func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
 	return true
 }
 
+// AsGeometry converts this MultiPolygon into a Geometry.
+func (m MultiPolygon) AsGeometry() Geometry {
+	return Geometry{multiPolygonTag, unsafe.Pointer(&m)}
+}
+
 // NumPolygons gives the number of Polygon elements in the MultiPolygon.
 func (m MultiPolygon) NumPolygons() int {
 	return len(m.polys)
@@ -183,39 +190,35 @@ func (m MultiPolygon) IsSimple() bool {
 }
 
 func (m MultiPolygon) Intersects(g Geometry) bool {
-	return hasIntersection(m, g)
+	return hasIntersection(m.AsGeometry(), g)
 }
 
 func (m MultiPolygon) Intersection(g Geometry) (Geometry, error) {
-	return intersection(m, g)
+	return intersection(m.AsGeometry(), g)
 }
 
 func (m MultiPolygon) IsEmpty() bool {
 	return len(m.polys) == 0
 }
 
-func (m MultiPolygon) Dimension() int {
-	return 2
-}
-
 func (m MultiPolygon) Equals(other Geometry) (bool, error) {
-	return equals(m, other)
+	return equals(m.AsGeometry(), other)
 }
 
 func (m MultiPolygon) Envelope() (Envelope, bool) {
 	if len(m.polys) == 0 {
 		return Envelope{}, false
 	}
-	env := mustEnvelope(m.polys[0])
+	env := mustEnv(m.polys[0].Envelope())
 	for _, poly := range m.polys[1:] {
-		env = env.ExpandToIncludeEnvelope(mustEnvelope(poly))
+		env = env.ExpandToIncludeEnvelope(mustEnv(poly.Envelope()))
 	}
 	return env, true
 }
 
 func (m MultiPolygon) Boundary() Geometry {
 	if m.IsEmpty() {
-		return m
+		return m.AsGeometry()
 	}
 	var bounds []LineString
 	for _, poly := range m.polys {
@@ -224,11 +227,13 @@ func (m MultiPolygon) Boundary() Geometry {
 			bounds = append(bounds, inner)
 		}
 	}
-	return NewMultiLineString(bounds)
+	return NewMultiLineString(bounds).AsGeometry()
 }
 
 func (m MultiPolygon) Value() (driver.Value, error) {
-	return wkbAsBytes(m)
+	var buf bytes.Buffer
+	err := m.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (m MultiPolygon) AsBinary(w io.Writer) error {
@@ -245,20 +250,7 @@ func (m MultiPolygon) AsBinary(w io.Writer) error {
 }
 
 func (m MultiPolygon) ConvexHull() Geometry {
-	return convexHull(m)
-}
-
-func (m MultiPolygon) convexHullPointSet() []XY {
-	var points []XY
-	numPolys := m.NumPolygons()
-	for i := 0; i < numPolys; i++ {
-		ring := m.PolygonN(i).ExteriorRing()
-		numPts := ring.NumPoints()
-		for j := 0; j < numPts; j++ {
-			points = append(points, ring.PointN(j).XY())
-		}
-	}
-	return points
+	return convexHull(m.AsGeometry())
 }
 
 func (m MultiPolygon) MarshalJSON() ([]byte, error) {
@@ -288,13 +280,14 @@ func (m MultiPolygon) Coordinates() [][][]Coordinates {
 func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := m.Coordinates()
 	transform3dCoords(coords, fn)
-	return NewMultiPolygonC(coords, opts...)
+	mp, err := NewMultiPolygonC(coords, opts...)
+	return mp.AsGeometry(), err
 }
 
 // EqualsExact checks if this MultiPolygon is exactly equal to another MultiPolygon.
 func (m MultiPolygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	o, ok := other.(MultiPolygon)
-	return ok && multiPolygonExactEqual(m, o, opts)
+	return other.IsMultiPolygon() &&
+		multiPolygonExactEqual(m, other.AsMultiPolygon(), opts)
 }
 
 // IsValid checks if this MultiPolygon is valid

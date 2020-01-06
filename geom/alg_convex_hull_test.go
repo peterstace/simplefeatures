@@ -184,7 +184,7 @@ func TestConvexHull(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Logf("input: %s", tt.input)
 			got := geomFromWKT(t, tt.input).ConvexHull()
-			expectDeepEqual(t, got, geomFromWKT(t, tt.output))
+			expectGeomEq(t, got, geomFromWKT(t, tt.output))
 		})
 	}
 }

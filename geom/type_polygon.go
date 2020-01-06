@@ -1,10 +1,12 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"errors"
 	"io"
 	"math"
+	"unsafe"
 )
 
 // Polygon is a planar surface, defined by 1 exiterior boundary and 0 or more
@@ -50,7 +52,7 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 	// Rings may intersect, but only at a single point.
 	for i := 0; i < len(allRings); i++ {
 		for j := i + 1; j < len(allRings); j++ {
-			inter := mustIntersection(allRings[i], allRings[j])
+			inter := mustIntersection(allRings[i].AsGeometry(), allRings[j].AsGeometry())
 			env, has := inter.Envelope()
 			if !has {
 				continue // no intersection
@@ -116,6 +118,11 @@ func NewPolygonXY(pts [][]XY, opts ...ConstructorOption) (Polygon, error) {
 	return NewPolygonC(twoDimXYToCoords(pts), opts...)
 }
 
+// AsGeometry converts this Polygon into a Geometry.
+func (p Polygon) AsGeometry() Geometry {
+	return Geometry{polygonTag, unsafe.Pointer(&p)}
+}
+
 // ExteriorRing gives the exterior ring of the polygon boundary.
 func (p Polygon) ExteriorRing() LineString {
 	return p.outer
@@ -158,23 +165,19 @@ func (p Polygon) IsSimple() bool {
 }
 
 func (p Polygon) Intersection(g Geometry) (Geometry, error) {
-	return intersection(p, g)
+	return intersection(p.AsGeometry(), g)
 }
 
 func (p Polygon) Intersects(g Geometry) bool {
-	return hasIntersection(p, g)
+	return hasIntersection(p.AsGeometry(), g)
 }
 
 func (p Polygon) IsEmpty() bool {
 	return false
 }
 
-func (p Polygon) Dimension() int {
-	return 2
-}
-
 func (p Polygon) Equals(other Geometry) (bool, error) {
-	return equals(p, other)
+	return equals(p.AsGeometry(), other)
 }
 
 func (p Polygon) Envelope() (Envelope, bool) {
@@ -192,18 +195,20 @@ func (p Polygon) rings() []LineString {
 
 func (p Polygon) Boundary() Geometry {
 	if len(p.holes) == 0 {
-		return p.outer
+		return p.outer.AsGeometry()
 	}
 	bounds := make([]LineString, 1+len(p.holes))
 	bounds[0] = p.outer
 	for i, h := range p.holes {
 		bounds[1+i] = h
 	}
-	return NewMultiLineString(bounds)
+	return NewMultiLineString(bounds).AsGeometry()
 }
 
 func (p Polygon) Value() (driver.Value, error) {
-	return wkbAsBytes(p)
+	var buf bytes.Buffer
+	err := p.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (p Polygon) AsBinary(w io.Writer) error {
@@ -227,11 +232,7 @@ func (p Polygon) AsBinary(w io.Writer) error {
 // ConvexHull returns the convex hull of the Polygon, which is always another
 // Polygon.
 func (p Polygon) ConvexHull() Geometry {
-	return convexHull(p)
-}
-
-func (p Polygon) convexHullPointSet() []XY {
-	return p.ExteriorRing().convexHullPointSet()
+	return convexHull(p.AsGeometry())
 }
 
 func (p Polygon) MarshalJSON() ([]byte, error) {
@@ -257,13 +258,14 @@ func (p Polygon) Coordinates() [][]Coordinates {
 func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := p.Coordinates()
 	transform2dCoords(coords, fn)
-	return NewPolygonC(coords, opts...)
+	poly, err := NewPolygonC(coords, opts...)
+	return poly.AsGeometry(), err
 }
 
 // EqualsExact checks if this Polygon is exactly equal to another Polygon.
 func (p Polygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	o, ok := other.(Polygon)
-	return ok && polygonExactEqual(p, o, opts)
+	return other.IsPolygon() &&
+		polygonExactEqual(p, other.AsPolygon(), opts)
 }
 
 // IsValid checks if this Polygon is valid

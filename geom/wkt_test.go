@@ -1,7 +1,6 @@
 package geom_test
 
 import (
-	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -74,12 +73,7 @@ func TestMarshalUnmarshalWKT(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, wkt)
 			g2 := geomFromWKT(t, string(g1.AsText()))
-			if !reflect.DeepEqual(g1, g2) {
-				t.Log("wkt", wkt)
-				t.Logf("g1 %#v", g1)
-				t.Logf("g2 %#v", g2)
-				t.Errorf("not equal")
-			}
+			expectGeomEq(t, g1, g2)
 		})
 	}
 }

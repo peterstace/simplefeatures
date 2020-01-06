@@ -436,7 +436,7 @@ func TestGeoJSONUnmarshalValid(t *testing.T) {
 			got, err := UnmarshalGeoJSON([]byte(tt.geojson))
 			expectNoErr(t, err)
 			want := geomFromWKT(t, tt.wkt)
-			expectDeepEqual(t, got, want)
+			expectGeomEq(t, got, want)
 		})
 	}
 }
@@ -553,17 +553,9 @@ func TestGeoJSONMarshal(t *testing.T) {
 }
 
 func TestGeoJSONMarshalAnyGeometryPopulated(t *testing.T) {
-	any := AnyGeometry{Geom: geomFromWKT(t, "POINT(1 2)")}
-	got, err := json.Marshal(any)
+	g := geomFromWKT(t, "POINT(1 2)")
+	got, err := json.Marshal(g)
 	expectNoErr(t, err)
 	const want = `{"type":"Point","coordinates":[1,2]}`
-	expectDeepEqual(t, string(got), want)
-}
-
-func TestGeoJSONMarshalAnyGeometryNil(t *testing.T) {
-	var any AnyGeometry
-	got, err := json.Marshal(any)
-	expectNoErr(t, err)
-	const want = `null`
-	expectDeepEqual(t, string(got), want)
+	expectStringEq(t, string(got), want)
 }

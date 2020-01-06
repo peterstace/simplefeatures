@@ -57,9 +57,7 @@ func ignoreOrder(opts []EqualsExactOption) bool {
 	return newEqualsExactOptionSet(opts).ignoreOrder
 }
 
-// curve abstracts Line, LineString, and LinearRing. TODO: There is a plan to
-// remove the Line and LinearRing types (see #22 and #23), at which point this
-// interface can be removed.
+// curve abstracts Line and LineString.
 type curve interface {
 	NumPoints() int
 	PointN(int) Point

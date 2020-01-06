@@ -13,7 +13,7 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 		Type string `json:"type"`
 	}
 	if err := json.NewDecoder(bytes.NewReader(input)).Decode(&firstPass); err != nil {
-		return nil, err
+		return Geometry{}, err
 	}
 
 	switch firstPass.Type {
@@ -22,39 +22,41 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 			Coords []float64 `json:"coordinates"`
 		}
 		if err := json.NewDecoder(bytes.NewReader(input)).Decode(&secondPass); err != nil {
-			return nil, err
+			return Geometry{}, err
 		}
 		if len(secondPass.Coords) == 0 {
-			return NewEmptyPoint(opts...), nil
+			return NewEmptyPoint(opts...).AsGeometry(), nil
 		}
 		coords, err := oneDimFloat64sToCoordinates(secondPass.Coords)
 		if err != nil {
-			return nil, err
+			return Geometry{}, err
 		}
-		return NewPointC(coords, opts...), nil
+		return NewPointC(coords, opts...).AsGeometry(), nil
 	case "LineString", "MultiPoint":
 		var secondPass struct {
 			Coords [][]float64 `json:"coordinates"`
 		}
 		if err := json.NewDecoder(bytes.NewReader(input)).Decode(&secondPass); err != nil {
-			return nil, err
+			return Geometry{}, err
 		}
 		coords, err := twoDimFloat64sToCoordinates(secondPass.Coords)
 		if err != nil {
-			return nil, err
+			return Geometry{}, err
 		}
 		switch firstPass.Type {
 		case "LineString":
 			switch len(coords) {
 			case 0:
-				return NewEmptyLineString(opts...), nil
+				return NewEmptyLineString(opts...).AsGeometry(), nil
 			case 2:
-				return NewLineC(coords[0], coords[1], opts...)
+				ln, err := NewLineC(coords[0], coords[1], opts...)
+				return ln.AsGeometry(), err
 			default:
-				return NewLineStringC(coords, opts...)
+				ls, err := NewLineStringC(coords, opts...)
+				return ls.AsGeometry(), err
 			}
 		case "MultiPoint":
-			return NewMultiPointC(coords, opts...), nil
+			return NewMultiPointC(coords, opts...).AsGeometry(), nil
 		default:
 			panic("switch case bug")
 		}
@@ -63,22 +65,24 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 			Coords [][][]float64 `json:"coordinates"`
 		}
 		if err := json.NewDecoder(bytes.NewReader(input)).Decode(&secondPass); err != nil {
-			return nil, err
+			return Geometry{}, err
 		}
 		coords, err := threeDimFloat64sToCoordinates(secondPass.Coords)
 		if err != nil {
-			return nil, err
+			return Geometry{}, err
 		}
 		switch firstPass.Type {
 		case "Polygon":
 			switch len(coords) {
 			case 0:
-				return NewEmptyPolygon(opts...), nil
+				return NewEmptyPolygon(opts...).AsGeometry(), nil
 			default:
-				return NewPolygonC(coords, opts...)
+				poly, err := NewPolygonC(coords, opts...)
+				return poly.AsGeometry(), err
 			}
 		case "MultiLineString":
-			return NewMultiLineStringC(coords, opts...)
+			mls, err := NewMultiLineStringC(coords, opts...)
+			return mls.AsGeometry(), err
 		default:
 			panic("switch case bug")
 		}
@@ -87,29 +91,30 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 			Coords [][][][]float64 `json:"coordinates"`
 		}
 		if err := json.NewDecoder(bytes.NewReader(input)).Decode(&secondPass); err != nil {
-			return nil, err
+			return Geometry{}, err
 		}
 		coords, err := fourDimFloat64sToCoordinates(secondPass.Coords)
 		if err != nil {
-			return nil, err
+			return Geometry{}, err
 		}
-		return NewMultiPolygonC(coords, opts...)
+		mp, err := NewMultiPolygonC(coords, opts...)
+		return mp.AsGeometry(), err
 	case "GeometryCollection":
 		var secondPass struct {
-			Geometries []AnyGeometry `json:"geometries"`
+			Geometries []Geometry `json:"geometries"`
 		}
 		if err := json.NewDecoder(bytes.NewReader(input)).Decode(&secondPass); err != nil {
-			return nil, err
+			return Geometry{}, err
 		}
 		geoms := make([]Geometry, len(secondPass.Geometries))
 		for i := range geoms {
-			geoms[i] = secondPass.Geometries[i].Geom
+			geoms[i] = secondPass.Geometries[i]
 		}
-		return NewGeometryCollection(geoms, opts...), nil
+		return NewGeometryCollection(geoms, opts...).AsGeometry(), nil
 	case "":
-		return nil, errors.New("type field missing or empty")
+		return Geometry{}, errors.New("type field missing or empty")
 	default:
-		return nil, fmt.Errorf("unknown geojson type: %s", firstPass.Type)
+		return Geometry{}, fmt.Errorf("unknown geojson type: %s", firstPass.Type)
 	}
 }
 

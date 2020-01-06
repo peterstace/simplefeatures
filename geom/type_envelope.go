@@ -26,16 +26,6 @@ func NewEnvelope(first XY, others ...XY) Envelope {
 	return env
 }
 
-// mustEnvelope gets the envelope from a Geometry. If it's not defined (because
-// the geometry is empty), then it panics.
-func mustEnvelope(g Geometry) Envelope {
-	env, ok := g.Envelope()
-	if !ok {
-		panic(fmt.Sprintf("mustEnvelope but envelope not defined: %s", string(g.AsText())))
-	}
-	return env
-}
-
 // EnvelopeFromGeoms returns the smallest envelope that contains all points
 // contained by the provided geometries, provided that at least one non-empty
 // geometry is given. If no non-empty geometries are given, then the returned
@@ -64,20 +54,24 @@ func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 // Line or Point geometry is returned.
 func (e Envelope) AsGeometry() Geometry {
 	if e.min.Equals(e.max) {
-		return NewPointXY(e.min)
+		return NewPointXY(e.min).AsGeometry()
 	}
 	var err error
 	var g Geometry
 	if e.min.X == e.max.X || e.min.Y == e.max.Y {
-		g, err = NewLineC(Coordinates{XY: e.min}, Coordinates{XY: e.max})
+		var ln Line
+		ln, err = NewLineC(Coordinates{XY: e.min}, Coordinates{XY: e.max})
+		g = ln.AsGeometry()
 	} else {
-		g, err = NewPolygonC([][]Coordinates{{
+		var poly Polygon
+		poly, err = NewPolygonC([][]Coordinates{{
 			{XY: XY{e.min.X, e.min.Y}},
 			{XY: XY{e.min.X, e.max.Y}},
 			{XY: XY{e.max.X, e.max.Y}},
 			{XY: XY{e.max.X, e.min.Y}},
 			{XY: XY{e.min.X, e.min.Y}},
 		}})
+		g = poly.AsGeometry()
 	}
 	if err != nil {
 		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))

@@ -97,44 +97,44 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 	case wkbGeomTypePoint:
 		coords := p.parsePoint()
 		if coords.Empty {
-			return NewEmptyPoint(p.opts...)
+			return NewEmptyPoint(p.opts...).AsGeometry()
 		} else {
-			return NewPointC(coords.Value, p.opts...)
+			return NewPointC(coords.Value, p.opts...).AsGeometry()
 		}
 	case wkbGeomTypeLineString:
 		coords := p.parseLineString()
 		switch len(coords) {
 		case 0:
-			return NewEmptyLineString(p.opts...)
+			return NewEmptyLineString(p.opts...).AsGeometry()
 		case 2:
 			ln, err := NewLineC(coords[0], coords[1], p.opts...)
 			p.setErr(err)
-			return ln
+			return ln.AsGeometry()
 		default:
 			ls, err := NewLineStringC(coords, p.opts...)
 			p.setErr(err)
-			return ls
+			return ls.AsGeometry()
 		}
 	case wkbGeomTypePolygon:
 		coords := p.parsePolygon()
 		if len(coords) == 0 {
-			return NewEmptyPolygon(p.opts...)
+			return NewEmptyPolygon(p.opts...).AsGeometry()
 		} else {
 			poly, err := NewPolygonC(coords, p.opts...)
 			p.setErr(err)
-			return poly
+			return poly.AsGeometry()
 		}
 	case wkbGeomTypeMultiPoint:
-		return p.parseMultiPoint()
+		return p.parseMultiPoint().AsGeometry()
 	case wkbGeomTypeMultiLineString:
-		return p.parseMultiLineString()
+		return p.parseMultiLineString().AsGeometry()
 	case wkbGeomTypeMultiPolygon:
-		return p.parseMultiPolygon()
+		return p.parseMultiPolygon().AsGeometry()
 	case wkbGeomTypeGeometryCollection:
-		return p.parseGeometryCollection()
+		return p.parseGeometryCollection().AsGeometry()
 	default:
 		p.setErr(fmt.Errorf("unknown geometry type: %d", p.geomType))
-		return nil
+		return Geometry{}
 	}
 }
 
@@ -210,14 +210,13 @@ func (p *wkbParser) parseMultiPoint() MultiPoint {
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
 		p.setErr(err)
-		if geom != nil && geom.IsEmpty() {
+		if geom.IsEmpty() {
 			continue
 		}
-		pt, ok := geom.(Point)
-		if !ok {
+		if !geom.IsPoint() {
 			p.setErr(errors.New("non-Point found in MultiPoint"))
 		}
-		pts = append(pts, pt)
+		pts = append(pts, geom.AsPoint())
 	}
 	return NewMultiPoint(pts, p.opts...)
 }
@@ -228,15 +227,16 @@ func (p *wkbParser) parseMultiLineString() MultiLineString {
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
 		p.setErr(err)
-		if geom != nil && geom.IsEmpty() {
+		if geom.IsEmpty() {
 			continue
 		}
-		switch geom := geom.(type) {
-		case LineString:
-			lss = append(lss, geom)
-		case Line:
-			c1 := geom.StartPoint().Coordinates()
-			c2 := geom.EndPoint().Coordinates()
+		switch {
+		case geom.IsLineString():
+			lss = append(lss, geom.AsLineString())
+		case geom.IsLine():
+			ln := geom.AsLine()
+			c1 := ln.StartPoint().Coordinates()
+			c2 := ln.EndPoint().Coordinates()
 			ls, err := NewLineStringC([]Coordinates{c1, c2}, p.opts...)
 			p.setErr(err)
 			lss = append(lss, ls)
@@ -253,14 +253,13 @@ func (p *wkbParser) parseMultiPolygon() MultiPolygon {
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
 		p.setErr(err)
-		if geom != nil && geom.IsEmpty() {
+		if geom.IsEmpty() {
 			continue
 		}
-		poly, ok := geom.(Polygon)
-		if !ok {
+		if !geom.IsPolygon() {
 			p.setErr(errors.New("non-Polygon found in MultiPolygon"))
 		}
-		polys = append(polys, poly)
+		polys = append(polys, geom.AsPolygon())
 	}
 	mpoly, err := NewMultiPolygon(polys, p.opts...)
 	p.setErr(err)

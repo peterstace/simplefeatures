@@ -1,9 +1,11 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"errors"
 	"io"
+	"unsafe"
 )
 
 // LineString is a curve defined by linear interpolation between a finite set
@@ -24,7 +26,11 @@ func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, e
 		if pts[i].XY.Equals(pts[i+1].XY) {
 			continue
 		}
-		ln := must(NewLineC(pts[i], pts[i+1], opts...)).(Line)
+		ln, err := NewLineC(pts[i], pts[i+1], opts...)
+		if err != nil {
+			// Already checked to ensure pts[i] and pts[i+1] are not equal.
+			panic(err)
+		}
 		lines = append(lines, ln)
 	}
 	if doCheapValidations(opts) && len(lines) == 0 {
@@ -36,6 +42,11 @@ func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, e
 // NewLineStringXY creates a line string from the XYs defining its points.
 func NewLineStringXY(pts []XY, opts ...ConstructorOption) (LineString, error) {
 	return NewLineStringC(oneDimXYToCoords(pts), opts...)
+}
+
+// AsGeometry converts this LineString into a Geometry.
+func (s LineString) AsGeometry() Geometry {
+	return Geometry{lineStringTag, unsafe.Pointer(&s)}
 }
 
 // StartPoint gives the first point of the line string.
@@ -96,7 +107,7 @@ func (s LineString) IsSimple() bool {
 	n := len(s.lines)
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
-			intersection := mustIntersection(s.lines[i], s.lines[j])
+			intersection := mustIntersection(s.lines[i].AsGeometry(), s.lines[j].AsGeometry())
 			if intersection.IsEmpty() {
 				continue
 			}
@@ -115,8 +126,8 @@ func (s LineString) IsSimple() bool {
 				// point, so long as that point is the start of the first
 				// segment and the end of the last segment (i.e. a linear
 				// ring).
-				aPt := NewPointC(s.lines[i].a)
-				bPt := NewPointC(s.lines[j].b)
+				aPt := NewPointC(s.lines[i].a).AsGeometry()
+				bPt := NewPointC(s.lines[j].b).AsGeometry()
 				if !intersection.EqualsExact(aPt) || !intersection.EqualsExact(bPt) {
 					return false
 				}
@@ -135,23 +146,19 @@ func (s LineString) IsClosed() bool {
 }
 
 func (s LineString) Intersection(g Geometry) (Geometry, error) {
-	return intersection(s, g)
+	return intersection(s.AsGeometry(), g)
 }
 
 func (s LineString) Intersects(g Geometry) bool {
-	return hasIntersection(s, g)
+	return hasIntersection(s.AsGeometry(), g)
 }
 
 func (s LineString) IsEmpty() bool {
 	return false
 }
 
-func (s LineString) Dimension() int {
-	return 1
-}
-
 func (s LineString) Equals(other Geometry) (bool, error) {
-	return equals(s, other)
+	return equals(s.AsGeometry(), other)
 }
 
 func (s LineString) Envelope() (Envelope, bool) {
@@ -165,16 +172,18 @@ func (s LineString) Envelope() (Envelope, bool) {
 func (s LineString) Boundary() Geometry {
 	if s.IsClosed() {
 		// Same behaviour as Postgis, but could instead be any other empty set.
-		return NewMultiPoint(nil)
+		return NewMultiPoint(nil).AsGeometry()
 	}
 	return NewMultiPoint([]Point{
 		NewPointXY(s.lines[0].a.XY),
 		NewPointXY(s.lines[len(s.lines)-1].b.XY),
-	})
+	}).AsGeometry()
 }
 
 func (s LineString) Value() (driver.Value, error) {
-	return wkbAsBytes(s)
+	var buf bytes.Buffer
+	err := s.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (s LineString) AsBinary(w io.Writer) error {
@@ -191,16 +200,7 @@ func (s LineString) AsBinary(w io.Writer) error {
 }
 
 func (s LineString) ConvexHull() Geometry {
-	return convexHull(s)
-}
-
-func (s LineString) convexHullPointSet() []XY {
-	n := s.NumPoints()
-	points := make([]XY, n)
-	for i := 0; i < n; i++ {
-		points[i] = s.PointN(i).XY()
-	}
-	return points
+	return convexHull(s.AsGeometry())
 }
 
 func (s LineString) MarshalJSON() ([]byte, error) {
@@ -221,13 +221,22 @@ func (s LineString) Coordinates() []Coordinates {
 func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := s.Coordinates()
 	transform1dCoords(coords, fn)
-	return NewLineStringC(coords, opts...)
+	ls, err := NewLineStringC(coords, opts...)
+	return ls.AsGeometry(), err
 }
 
 // EqualsExact checks if this LineString is exactly equal to another curve.
 func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	c, ok := other.(curve)
-	return ok && other.Dimension() == 1 && curvesExactEqual(s, c, opts)
+	var c curve
+	switch {
+	case other.IsLine():
+		c = other.AsLine()
+	case other.IsLineString():
+		c = other.AsLineString()
+	default:
+		return false
+	}
+	return curvesExactEqual(s, c, opts)
 }
 
 // IsValid checks if this LineString is valid

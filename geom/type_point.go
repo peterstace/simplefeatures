@@ -1,8 +1,10 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"io"
+	"unsafe"
 )
 
 // Point is a 0-dimensional geometry, and represents a single location in a
@@ -27,6 +29,11 @@ func NewPointF(x, y float64, _ ...ConstructorOption) Point {
 // NewPointC creates a new point gives its Coordinates.
 func NewPointC(c Coordinates, _ ...ConstructorOption) Point {
 	return Point{coords: c}
+}
+
+// AsGeometry converts this Point into a Geometry.
+func (p Point) AsGeometry() Geometry {
+	return Geometry{pointTag, unsafe.Pointer(&p)}
 }
 
 // XY gives the XY location of the point.
@@ -61,23 +68,15 @@ func (p Point) IsSimple() bool {
 }
 
 func (p Point) Intersection(g Geometry) (Geometry, error) {
-	return intersection(p, g)
+	return intersection(p.AsGeometry(), g)
 }
 
 func (p Point) Intersects(g Geometry) bool {
-	return hasIntersection(p, g)
-}
-
-func (p Point) IsEmpty() bool {
-	return false
-}
-
-func (p Point) Dimension() int {
-	return 0
+	return hasIntersection(p.AsGeometry(), g)
 }
 
 func (p Point) Equals(other Geometry) (bool, error) {
-	return equals(p, other)
+	return equals(p.AsGeometry(), other)
 }
 
 func (p Point) Envelope() (Envelope, bool) {
@@ -85,11 +84,13 @@ func (p Point) Envelope() (Envelope, bool) {
 }
 
 func (p Point) Boundary() Geometry {
-	return NewGeometryCollection(nil)
+	return NewGeometryCollection(nil).AsGeometry()
 }
 
 func (p Point) Value() (driver.Value, error) {
-	return wkbAsBytes(p)
+	var buf bytes.Buffer
+	err := p.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (p Point) AsBinary(w io.Writer) error {
@@ -104,11 +105,7 @@ func (p Point) AsBinary(w io.Writer) error {
 // ConvexHull returns the convex hull of this Point, which is always the same
 // point.
 func (p Point) ConvexHull() Geometry {
-	return convexHull(p)
-}
-
-func (p Point) convexHullPointSet() []XY {
-	return []XY{p.XY()}
+	return convexHull(p.AsGeometry())
 }
 
 func (p Point) MarshalJSON() ([]byte, error) {
@@ -119,17 +116,13 @@ func (p Point) MarshalJSON() ([]byte, error) {
 func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := p.Coordinates()
 	coords.XY = fn(coords.XY)
-	return NewPointC(coords, opts...), nil
+	return NewPointC(coords, opts...).AsGeometry(), nil
 }
 
 // EqualsExact checks if this Point is exactly equal to another Point.
 func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	o, ok := other.(Point)
-	if !ok {
-		return false
-	}
-	eq := newEqualsExactOptionSet(opts).eq
-	return eq(p.XY(), o.XY())
+	return other.IsPoint() &&
+		newEqualsExactOptionSet(opts).eq(p.XY(), other.AsPoint().XY())
 }
 
 // IsValid checks if this Point is valid, but there is not way to indicate if

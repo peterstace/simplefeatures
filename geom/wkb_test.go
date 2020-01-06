@@ -452,7 +452,7 @@ func TestWKBParseValid(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			geom, err := UnmarshalWKB(bytes.NewReader(hexStringToBytes(t, tt.wkb)))
 			expectNoErr(t, err)
-			expectDeepEqual(t, geom, geomFromWKT(t, tt.wkt))
+			expectGeomEq(t, geom, geomFromWKT(t, tt.wkt))
 		})
 	}
 }
@@ -496,7 +496,7 @@ func TestWKBMarshalValid(t *testing.T) {
 			expectNoErr(t, err)
 			readBackGeom, err := UnmarshalWKB(&buf)
 			expectNoErr(t, err)
-			expectDeepEqual(t, readBackGeom, geom)
+			expectGeomEq(t, readBackGeom, geom)
 		})
 	}
 }

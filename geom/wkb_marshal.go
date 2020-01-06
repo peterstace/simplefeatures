@@ -1,17 +1,9 @@
 package geom
 
 import (
-	"bytes"
-	"database/sql/driver"
 	"encoding/binary"
 	"io"
 )
-
-func wkbAsBytes(g Geometry) (driver.Value, error) {
-	var buf bytes.Buffer
-	err := g.AsBinary(&buf)
-	return buf.Bytes(), err
-}
 
 type wkbMarshaller struct {
 	w   io.Writer

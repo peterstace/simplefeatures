@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -138,13 +137,13 @@ func CheckWKT(t *testing.T, pg PostGIS, g geom.Geometry) {
 
 func CheckWKB(t *testing.T, pg PostGIS, g geom.Geometry) {
 	t.Run("CheckWKB", func(t *testing.T) {
-		if _, ok := g.(geom.EmptySet); ok && g.AsText() == "POINT EMPTY" {
+		if g.IsEmptySet() && g.AsText() == "POINT EMPTY" {
 			// Empty point WKB use NaN as part of their representation.
 			// Go's math.NaN() and Postgis use slightly different (but
 			// compatible) representations of NaN.
 			return
 		}
-		if _, ok := g.(geom.GeometryCollection); ok && g.IsEmpty() {
+		if g.IsGeometryCollection() && g.IsEmpty() {
 			// The behaviour for GeometryCollections in Postgis is to just
 			// give 'GEOMETRYCOLLECTION EMPTY' whenever the contents of a
 			// geometry collection are all empty geometries. This doesn't
@@ -177,9 +176,10 @@ func CheckGeoJSON(t *testing.T, pg PostGIS, g geom.Geometry) {
 		// SHOULD be avoided when that single part or a single object of
 		// multipart type (MultiPoint, MultiLineString, or MultiPolygon)
 		// could be used instead.
-		if gc, ok := g.(geom.GeometryCollection); ok {
+		if g.IsGeometryCollection() {
+			gc := g.AsGeometryCollection()
 			for i := 0; i < gc.NumGeometries(); i++ {
-				if _, ok := gc.GeometryN(i).(geom.GeometryCollection); ok {
+				if gc.GeometryN(i).IsGeometryCollection() {
 					return
 				}
 			}
@@ -238,7 +238,7 @@ func CheckEnvelope(t *testing.T, pg PostGIS, g geom.Geometry) {
 		got := env.AsGeometry()
 		want := pg.Envelope(t, g)
 
-		if !reflect.DeepEqual(got, want) {
+		if !got.EqualsExact(want) {
 			t.Logf("got:  %v", got.AsText())
 			t.Logf("want: %v", want.AsText())
 			t.Error("mismatch")
@@ -248,12 +248,11 @@ func CheckEnvelope(t *testing.T, pg PostGIS, g geom.Geometry) {
 
 func CheckIsSimple(t *testing.T, pg PostGIS, g geom.Geometry) {
 	t.Run("CheckIsSimple", func(t *testing.T) {
-		s, ok := g.(interface{ IsSimple() bool })
+		got, ok := g.IsSimple()
+		if ok == g.IsGeometryCollection() {
+			t.Error("Expected not to have IsSimple defined for GC")
+		}
 		if !ok {
-			_, ok := g.(geom.GeometryCollection)
-			if !ok {
-				t.Fatalf("GeometryCollection is the only type that doesn't implement IsSimple")
-			}
 			return
 		}
 
@@ -263,18 +262,18 @@ func CheckIsSimple(t *testing.T, pg PostGIS, g geom.Geometry) {
 		// deduplicating the LineStrings before checking simplicity. This
 		// library doesn't do that, so skip any LineStrings that contain
 		// duplicates.
-		if mls, ok := g.(geom.MultiLineString); ok {
+		if g.IsMultiLineString() {
+			mls := g.AsMultiLineString()
 			n := mls.NumLineStrings()
 			for i := 0; i < n; i++ {
 				for j := 0; j < n; j++ {
-					if reflect.DeepEqual(mls.LineStringN(i), mls.LineStringN(j)) {
+					if mls.LineStringN(i).EqualsExact(mls.LineStringN(j).AsGeometry()) {
 						return
 					}
 				}
 			}
 		}
 
-		got := s.IsSimple()
 		want := pg.IsSimple(t, g)
 		if got != want {
 			t.Logf("got:  %v", got)
@@ -286,7 +285,7 @@ func CheckIsSimple(t *testing.T, pg PostGIS, g geom.Geometry) {
 
 func CheckBoundary(t *testing.T, pg PostGIS, g geom.Geometry) {
 	t.Run("CheckBoundary", func(t *testing.T) {
-		if _, ok := g.(geom.GeometryCollection); ok {
+		if g.IsGeometryCollection() {
 			// PostGIS cannot calculate the boundary of GeometryCollections.
 			// Some other libraries can, so simplefeatures does as well.
 			return
@@ -327,8 +326,10 @@ func CheckIsValid(t *testing.T, pg PostGIS, g geom.Geometry) {
 
 func CheckIsRing(t *testing.T, pg PostGIS, g geom.Geometry) {
 	t.Run("CheckIsRing", func(t *testing.T) {
-		ringer, ok := g.(interface{ IsRing() bool })
-		got := ok && ringer.IsRing()
+		var got bool
+		if g.IsLineString() {
+			got = g.AsLineString().IsRing()
+		}
 		want := pg.IsRing(t, g)
 		if got != want {
 			t.Logf("got:  %t", got)
@@ -339,13 +340,17 @@ func CheckIsRing(t *testing.T, pg PostGIS, g geom.Geometry) {
 }
 
 func CheckLength(t *testing.T, pg PostGIS, g geom.Geometry) {
-	switch g.(type) {
-	case geom.Line, geom.LineString, geom.MultiLineString:
-	default:
+	if !g.IsLine() && !g.IsLineString() && !g.IsMultiLineString() {
+		if _, ok := g.Length(); ok {
+			t.Error("didn't expect to be able to get length but could")
+		}
 		return
 	}
 	t.Run("CheckLength", func(t *testing.T) {
-		got := g.(interface{ Length() float64 }).Length()
+		got, ok := g.Length()
+		if !ok {
+			t.Error("could not get length")
+		}
 		want := pg.Length(t, g)
 		if math.Abs(got-want) > 1e-6 {
 			t.Logf("got:  %v", got)
@@ -369,9 +374,7 @@ func CheckEqualsExact(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 
 func CheckEquals(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 	t.Run("CheckEquals", func(t *testing.T) {
-		_, g1GC := g1.(geom.GeometryCollection)
-		_, g2GC := g2.(geom.GeometryCollection)
-		if g1GC || g2GC {
+		if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
 			// PostGIS cannot calculate Equals for geometry collections.
 			return
 		}
@@ -412,9 +415,7 @@ func CheckIntersection(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 			return // Both empty, so they match.
 		}
 
-		_, gotIsGC := got.(geom.GeometryCollection)
-		_, wantIsGC := want.(geom.GeometryCollection)
-		if gotIsGC || wantIsGC {
+		if got.IsGeometryCollection() || want.IsGeometryCollection() {
 			// GeometryCollections are not supported by ST_Equals. So there's
 			// not much that we can do here.
 			return
@@ -435,13 +436,14 @@ func CheckIntersection(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 }
 
 func CheckArea(t *testing.T, pg PostGIS, g geom.Geometry) {
-	switch g.(type) {
-	case geom.Polygon, geom.MultiPolygon:
-	default:
+	if !g.IsPolygon() && !g.IsMultiPolygon() {
 		return
 	}
 	t.Run("CheckArea", func(t *testing.T) {
-		got := g.(interface{ Area() float64 }).Area()
+		got, ok := g.Area()
+		if !ok {
+			t.Fatal("could not get area")
+		}
 		want := pg.Area(t, g)
 		const eps = 0.000000001
 		if math.Abs(got-want) > eps {
@@ -454,30 +456,23 @@ func CheckArea(t *testing.T, pg PostGIS, g geom.Geometry) {
 
 func CheckCentroid(t *testing.T, pg PostGIS, g geom.Geometry) {
 	t.Run("CheckCentroid", func(t *testing.T) {
-		var got geom.Point
-		var empty bool
-		switch g := g.(type) {
-		case geom.Polygon:
-			got = g.Centroid()
-		case geom.MultiPolygon:
-			var ok bool
-			got, ok = g.Centroid()
-			empty = !ok
-		default:
+		if !g.IsPolygon() && !g.IsMultiPolygon() {
 			return
 		}
+
+		got, ok := g.Centroid()
 		want := pg.Centroid(t, g)
 
-		if empty {
+		if !ok {
 			if !want.IsEmpty() {
-				t.Log("got:  empty", got)
-				t.Logf("want: %v", want)
+				t.Log("got:  undefined")
+				t.Logf("want: %v", want.AsText())
 				t.Error("mismatch")
 			}
 		} else {
 			if !got.EqualsExact(want, geom.Tolerance(0.000000001)) {
-				t.Logf("got:  %v", got)
-				t.Logf("want: %v", want)
+				t.Logf("got:  %v", got.AsText())
+				t.Logf("want: %v", want.AsText())
 				t.Error("mismatch")
 			}
 		}

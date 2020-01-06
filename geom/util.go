@@ -10,33 +10,33 @@ func max(a, b int) int {
 }
 
 func rank(g Geometry) int {
-	switch g.(type) {
-	case EmptySet:
+	switch g.tag {
+	case emptySetTag:
 		return 1
-	case Point:
+	case pointTag:
 		return 2
-	case Line:
+	case lineTag:
 		return 3
-	case LineString:
+	case lineStringTag:
 		return 4
-	case Polygon:
+	case polygonTag:
 		return 5
-	case MultiPoint:
+	case multiPointTag:
 		return 6
-	case MultiLineString:
+	case multiLineStringTag:
 		return 7
-	case MultiPolygon:
+	case multiPolygonTag:
 		return 8
-	case GeometryCollection:
+	case geometryCollectionTag:
 		return 9
 	default:
-		panic(fmt.Sprintf("unknown geometry type: %T", g))
+		panic(fmt.Sprintf("unknown geometry tag: %s", g.tag))
 	}
 }
 
-func must(x Geometry, err error) Geometry {
-	if err != nil {
-		panic(err)
+func mustEnv(env Envelope, ok bool) Envelope {
+	if !ok {
+		panic("not ok")
 	}
-	return x
+	return env
 }

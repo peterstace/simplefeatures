@@ -9,8 +9,7 @@ import (
 // GeoJSONFeature represents a Geometry with associated free-form properties.
 // GeoJSONFeature values have a one to one correspondence with GeoJSON Features.
 type GeoJSONFeature struct {
-	// Geometry is the Geometry that is associated with the Feature. It must be
-	// populated.
+	// Geometry is the geometry that is associated with the Feature.
 	Geometry Geometry
 
 	// ID is an identifier to refer to the feature. If an identifier isn't
@@ -29,7 +28,7 @@ type GeoJSONFeature struct {
 func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 	var topLevel struct {
 		Type       string                 `json:"type"`
-		Geometry   AnyGeometry            `json:"geometry"`
+		Geometry   *Geometry              `json:"geometry"`
 		ID         interface{}            `json:"id,omitempty"`
 		Properties map[string]interface{} `json:"properties,omitempty"`
 	}
@@ -47,10 +46,10 @@ func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 	f.ID = topLevel.ID
 	f.Properties = topLevel.Properties
 
-	if topLevel.Geometry.Geom == nil {
+	if topLevel.Geometry == nil {
 		return fmt.Errorf("geometry field missing or empty")
 	}
-	f.Geometry = topLevel.Geometry.Geom
+	f.Geometry = *topLevel.Geometry
 
 	return nil
 }
@@ -58,9 +57,6 @@ func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 // MarshalJSON implements the encoding/json Marshaler interface by marshalling
 // into a GeoJSON FeatureCollection object.
 func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
-	if f.Geometry == nil {
-		return nil, errors.New("Geometry field not set")
-	}
 	props := f.Properties
 	if props == nil {
 		// As per the GeoJSON spec, the properties field must be an object (not null).

@@ -1,10 +1,12 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"fmt"
 	"io"
 	"math"
+	"unsafe"
 )
 
 // Line is a single line segment between two points.
@@ -27,6 +29,11 @@ func NewLineC(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
 // NewLineXY creates a line segment given the XYs of its two endpoints.
 func NewLineXY(a, b XY, opts ...ConstructorOption) (Line, error) {
 	return NewLineC(Coordinates{a}, Coordinates{b}, opts...)
+}
+
+// AsGeometry converts this Line into a Geometry.
+func (n Line) AsGeometry() Geometry {
+	return Geometry{lineTag, unsafe.Pointer(&n)}
 }
 
 // StartPoint gives the first point of the line.
@@ -78,23 +85,15 @@ func (n Line) IsSimple() bool {
 }
 
 func (n Line) Intersection(g Geometry) (Geometry, error) {
-	return intersection(n, g)
+	return intersection(n.AsGeometry(), g)
 }
 
 func (n Line) Intersects(g Geometry) bool {
-	return hasIntersection(n, g)
-}
-
-func (n Line) IsEmpty() bool {
-	return false
-}
-
-func (n Line) Dimension() int {
-	return 1
+	return hasIntersection(n.AsGeometry(), g)
 }
 
 func (n Line) Equals(other Geometry) (bool, error) {
-	return equals(n, other)
+	return equals(n.AsGeometry(), other)
 }
 
 func (n Line) Envelope() (Envelope, bool) {
@@ -105,11 +104,13 @@ func (n Line) Boundary() Geometry {
 	return NewMultiPoint([]Point{
 		NewPointXY(n.a.XY),
 		NewPointXY(n.b.XY),
-	})
+	}).AsGeometry()
 }
 
 func (n Line) Value() (driver.Value, error) {
-	return wkbAsBytes(n)
+	var buf bytes.Buffer
+	err := n.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (n Line) AsBinary(w io.Writer) error {
@@ -125,14 +126,7 @@ func (n Line) AsBinary(w io.Writer) error {
 }
 
 func (n Line) ConvexHull() Geometry {
-	return convexHull(n)
-}
-
-func (n Line) convexHullPointSet() []XY {
-	return []XY{
-		n.StartPoint().XY(),
-		n.EndPoint().XY(),
-	}
+	return convexHull(n.AsGeometry())
 }
 
 func (n Line) MarshalJSON() ([]byte, error) {
@@ -148,25 +142,28 @@ func (n Line) Coordinates() []Coordinates {
 func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := n.Coordinates()
 	transform1dCoords(coords, fn)
-	return NewLineC(coords[0], coords[1], opts...)
+	ln, err := NewLineC(coords[0], coords[1], opts...)
+	return ln.AsGeometry(), err
 }
 
 // EqualsExact checks if this Line is exactly equal to another curve.
 func (n Line) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	c, ok := other.(curve)
-	return ok && other.Dimension() == 1 && curvesExactEqual(n, c, opts)
+	var c curve
+	switch {
+	case other.IsLine():
+		c = other.AsLine()
+	case other.IsLineString():
+		c = other.AsLineString()
+	default:
+		return false
+	}
+	return curvesExactEqual(n, c, opts)
 }
 
 // IsValid checks if this Line is valid
 func (n Line) IsValid() bool {
 	_, err := NewLineC(n.a, n.b)
 	return err == nil
-}
-
-// IsRing always returns false for Lines because they are never rings. In
-// particular, they are never closed because they only contain two points.
-func (n Line) IsRing() bool {
-	return false
 }
 
 // Length gives the length of the line.

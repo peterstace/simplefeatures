@@ -60,13 +60,13 @@ func (p PostGIS) GeoJSONIsValidWithReason(t *testing.T, geojson string) (bool, s
 }
 
 func (p PostGIS) geomFunc(t *testing.T, g geom.Geometry, stFunc string) geom.Geometry {
-	var ag geom.AnyGeometry
+	var result geom.Geometry
 	if err := p.db.QueryRow(
 		"SELECT ST_AsBinary("+stFunc+"(ST_GeomFromWKB($1)))", g,
-	).Scan(&ag); err != nil {
+	).Scan(&result); err != nil {
 		t.Fatalf("pg error: %v", err)
 	}
-	return ag.Geom
+	return result
 }
 
 func (p PostGIS) boolFunc(t *testing.T, g geom.Geometry, stFunc string) bool {
@@ -165,14 +165,14 @@ func (p PostGIS) boolBinary(t *testing.T, g1, g2 geom.Geometry, stFunc string) b
 }
 
 func (p PostGIS) geomBinary(t *testing.T, g1, g2 geom.Geometry, stFunc string) geom.Geometry {
-	var ag geom.AnyGeometry
+	var result geom.Geometry
 	if err := p.db.QueryRow(
 		"SELECT ST_AsBinary("+stFunc+"(ST_GeomFromWKB($1), ST_GeomFromWKB($2)))",
 		g1, g2,
-	).Scan(&ag); err != nil {
+	).Scan(&result); err != nil {
 		t.Fatalf("pg error: %v", err)
 	}
-	return ag.Geom
+	return result
 }
 
 func (p PostGIS) AsText(t *testing.T, g geom.Geometry) string {

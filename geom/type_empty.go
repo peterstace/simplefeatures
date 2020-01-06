@@ -1,10 +1,12 @@
 package geom
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"errors"
 	"io"
 	"math"
+	"unsafe"
 )
 
 // EmptySet is a 0-dimensional geometry that represents the empty pointset.
@@ -27,6 +29,11 @@ func NewEmptyPolygon(opts ...ConstructorOption) EmptySet {
 	return EmptySet{"POLYGON EMPTY", wkbGeomTypePolygon, "Polygon", 2}
 }
 
+// AsGeometry converts this EmptySet into a Geometry.
+func (e EmptySet) AsGeometry() Geometry {
+	return Geometry{emptySetTag, unsafe.Pointer(&e)}
+}
+
 func (e EmptySet) AsText() string {
 	return e.wkt
 }
@@ -40,15 +47,11 @@ func (e EmptySet) IsSimple() bool {
 }
 
 func (e EmptySet) Intersection(g Geometry) (Geometry, error) {
-	return intersection(e, g)
+	return intersection(e.AsGeometry(), g)
 }
 
 func (e EmptySet) Intersects(g Geometry) bool {
-	return hasIntersection(e, g)
-}
-
-func (e EmptySet) IsEmpty() bool {
-	return true
+	return hasIntersection(e.AsGeometry(), g)
 }
 
 func (e EmptySet) Dimension() int {
@@ -56,7 +59,7 @@ func (e EmptySet) Dimension() int {
 }
 
 func (e EmptySet) Equals(other Geometry) (bool, error) {
-	return equals(e, other)
+	return equals(e.AsGeometry(), other)
 }
 
 func (e EmptySet) Envelope() (Envelope, bool) {
@@ -64,11 +67,13 @@ func (e EmptySet) Envelope() (Envelope, bool) {
 }
 
 func (e EmptySet) Boundary() Geometry {
-	return e
+	return e.AsGeometry()
 }
 
 func (e EmptySet) Value() (driver.Value, error) {
-	return wkbAsBytes(e)
+	var buf bytes.Buffer
+	err := e.AsBinary(&buf)
+	return buf.Bytes(), err
 }
 
 func (e EmptySet) AsBinary(w io.Writer) error {
@@ -90,11 +95,7 @@ func (e EmptySet) AsBinary(w io.Writer) error {
 // ConvexHull returns the convex hull of this geometry. The convex hull of an
 // empty set is always an empty set.
 func (e EmptySet) ConvexHull() Geometry {
-	return convexHull(e)
-}
-
-func (e EmptySet) convexHullPointSet() []XY {
-	return nil
+	return convexHull(e.AsGeometry())
 }
 
 func (e EmptySet) MarshalJSON() ([]byte, error) {
@@ -104,14 +105,13 @@ func (e EmptySet) MarshalJSON() ([]byte, error) {
 // TransformXY transforms this EmptySet into another EmptySet according to
 // fn. It does this by ignoring fn and returning itself.
 func (e EmptySet) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
-	return e, nil
+	return e.AsGeometry(), nil
 }
 
 // EqualsExact checks if this EmptySet is exactly equal to another geometry
 // by checking if the other geometry is an empty set of the same type.
 func (e EmptySet) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	o, ok := other.(EmptySet)
-	return ok && e.wkbType == o.wkbType
+	return other.IsEmptySet() && e.wkbType == other.AsEmptySet().wkbType
 }
 
 // IsValid checks if this EmptySet is valid. However, this is no constraints on
