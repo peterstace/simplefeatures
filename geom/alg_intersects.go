@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"container/heap"
 	"fmt"
 	"math"
 	"sort"
@@ -218,26 +217,6 @@ func hasIntersectionMultiPointWithMultiLineString(mp MultiPoint, mls MultiLineSt
 	return false
 }
 
-type lineHeap []Line
-
-func (h *lineHeap) Push(x interface{}) {
-	*h = append(*h, x.(Line))
-}
-func (h *lineHeap) Pop() interface{} {
-	e := (*h)[len(*h)-1]
-	*h = (*h)[:len(*h)-1]
-	return e
-}
-func (h *lineHeap) Len() int {
-	return len(*h)
-}
-func (h *lineHeap) Less(i, j int) bool {
-	return (*h)[i].EndPoint().XY().X < (*h)[j].EndPoint().XY().X
-}
-func (h *lineHeap) Swap(i, j int) {
-	(*h)[i], (*h)[j] = (*h)[j], (*h)[i]
-}
-
 func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) bool {
 	// A Sweep-Line-Algorithm approach is used to reduce the number of raw line
 	// segment intersection tests that must be performed. A vertical sweep line
@@ -260,6 +239,11 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 	// Create a list of line segments from each MultiLineString, in ascending
 	// order by X coordinate.
 	for _, side := range sides {
+		var n int
+		for _, ls := range side.mls.lines {
+			n += ls.NumPoints() - 1
+		}
+		side.unprocessed = make([]Line, 0, n)
 		for _, ls := range side.mls.lines {
 			for _, ln := range ls.lines {
 				if ln.StartPoint().XY().X > ln.EndPoint().XY().X {
@@ -290,13 +274,13 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 		// segments that can no longer possibly intersect with any unprocessed
 		// line segments, and adding any new line segments to the active sets.
 		for _, side := range sides {
-			for len(side.active) > 0 && side.active[0].EndPoint().XY().X < sweepX {
-				heap.Pop(&side.active)
+			for len(side.active) != 0 && side.active[0].EndPoint().XY().X < sweepX {
+				side.active.pop()
 			}
 			side.newSegments = side.newSegments[:0]
 			for len(side.unprocessed) > 0 && side.unprocessed[0].StartPoint().XY().X == sweepX {
 				side.newSegments = append(side.newSegments, side.unprocessed[0])
-				heap.Push(&side.active, side.unprocessed[0])
+				side.active.push(side.unprocessed[0])
 				side.unprocessed = side.unprocessed[1:]
 			}
 		}
@@ -307,7 +291,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 			other := sides[1-i]
 			for _, checkLine := range side.newSegments {
 				for _, ln := range other.active {
-					if ln.Intersects(checkLine) {
+					if hasIntersectionLineWithLine(ln, checkLine) {
 						return true
 					}
 				}
