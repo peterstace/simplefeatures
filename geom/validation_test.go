@@ -2,6 +2,7 @@ package geom_test
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"testing"
@@ -160,6 +161,28 @@ func TestMultiPolygonValidation(t *testing.T) {
 			_, err := UnmarshalWKT(strings.NewReader(wkt))
 			if err == nil {
 				t.Error("expected error")
+			}
+		})
+	}
+}
+
+func BenchmarkPolygonSingleRingValidation(b *testing.B) {
+	for _, sz := range []int{10, 100, 1000, 10000} {
+		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+			coords := [][]Coordinates{{}}
+			coords[0] = make([]Coordinates, sz+1)
+			for i := 0; i < sz; i++ {
+				angle := float64(i) / float64(sz) * 2 * math.Pi
+				coords[0][i].X = math.Cos(angle)
+				coords[0][i].Y = math.Sin(angle)
+			}
+			coords[0][sz] = coords[0][0]
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				if _, err := NewPolygonC(coords); err != nil {
+					b.Fatal(err)
+				}
 			}
 		})
 	}
