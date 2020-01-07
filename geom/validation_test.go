@@ -3,6 +3,7 @@ package geom_test
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"strconv"
 	"strings"
 	"testing"
@@ -181,6 +182,38 @@ func BenchmarkPolygonSingleRingValidation(b *testing.B) {
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				if _, err := NewPolygonC(coords); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
+func BenchmarkPolygonMultipleRingsValidation(b *testing.B) {
+	for _, sz := range []int{2, 6, 20, 64} {
+		b.Run(fmt.Sprintf("n=%d", sz*sz), func(b *testing.B) {
+			rnd := rand.New(rand.NewSource(0))
+			coords := make([][]XY, sz*sz+1)
+			coords[0] = []XY{XY{0, 0}, XY{0, 1}, XY{1, 1}, XY{1, 0}, XY{0, 0}}
+			for i := 0; i < sz*sz; i++ {
+				center := XY{
+					X: (0.5 + float64(i/sz)) / float64(sz),
+					Y: (0.5 + float64(i%sz)) / float64(sz),
+				}
+				dx := rnd.Float64() * 0.5 / float64(sz)
+				dy := rnd.Float64() * 0.5 / float64(sz)
+				coords[1+i] = []XY{
+					center.Add(XY{-dx, -dy}),
+					center.Add(XY{dx, -dy}),
+					center.Add(XY{dx, dy}),
+					center.Add(XY{-dx, dy}),
+					center.Add(XY{-dx, -dy}),
+				}
+			}
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				if _, err := NewPolygonXY(coords); err != nil {
 					b.Fatal(err)
 				}
 			}
