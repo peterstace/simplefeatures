@@ -28,6 +28,31 @@ type Polygon struct {
 	holes []LineString
 }
 
+type lineStringWithMaxX struct {
+	ls   LineString
+	maxX float64
+}
+
+type lineStringHeap []lineStringWithMaxX
+
+func (h *lineStringHeap) Len() int {
+	return len(*h)
+}
+func (h *lineStringHeap) Less(i, j int) bool {
+	return (*h)[i].maxX < (*h)[j].maxX
+}
+func (h *lineStringHeap) Swap(i, j int) {
+	(*h)[i], (*h)[j] = (*h)[j], (*h)[i]
+}
+func (h *lineStringHeap) Push(x interface{}) {
+	*h = append(*h, x.(lineStringWithMaxX))
+}
+func (h *lineStringHeap) Pop() interface{} {
+	e := (*h)[len(*h)-1]
+	*h = (*h)[:len(*h)-1]
+	return e
+}
+
 // NewPolygon creates a polygon given its outer and inner rings. No rings may
 // cross each other, and can only intersect each with each other at a point.
 func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption) (Polygon, error) {
@@ -48,6 +73,17 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 	nextInterVert := len(allRings)
 	interVerts := make(map[XY]int)
 	graph := newGraph()
+
+	// TODO: Is there a test case for 3 nested rings?
+
+	// Overview:
+	//
+	// 1. Create slice of all rings, ordered by min X coordinate.
+	// 2. Loop over each ring.
+	//    a. Remove any ring from the heap that has max X coordinate less than
+	//       the min X of the current ring.
+	//    b. Check to see if the current ring intersects with any in the heap.
+	//    c. Insert the current ring into the heap.
 
 	// Rings may intersect, but only at a single point.
 	for i := 0; i < len(allRings); i++ {
