@@ -9,6 +9,13 @@ func max(a, b int) int {
 	return b
 }
 
+func abs(i int) int {
+	if i < 0 {
+		return -i
+	}
+	return i
+}
+
 func rank(g Geometry) int {
 	switch g.tag {
 	case emptySetTag:
