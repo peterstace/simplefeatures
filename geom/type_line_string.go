@@ -137,11 +137,16 @@ func maxX(ln Line) float64 {
 // through the same point twice (with the possible exception of the two
 // endpoints being coincident).
 func (s LineString) IsSimple() bool {
-	// 1. Create slice of segments along with their index.
+	// A line sweep algorithm is used, where a vertical line is swept over X
+	// values (from lowest to highest). We only have consider line segments
+	// that have overlapping X values when performing pairwise intersection
+	// tests.
+	//
+	// 1. Create slice of segments, sorted by their max X coordinate.
 	// 2. Loop over each segment.
 	//    a. Remove any elements from the heap that have their max X less than the minX of the current segment.
 	//    b. Check to see if the new element intersects with any elements in the heap.
-	//    c. Insert the element into the heap.
+	//    c. Insert the current element into the heap.
 
 	n := len(s.lines)
 	unprocessed := make([]lineWithIndex, n)
@@ -164,20 +169,22 @@ func (s LineString) IsSimple() bool {
 				continue
 			}
 			if intersection.Dimension() >= 1 {
-				// two overlapping line segments
+				// Two overlapping line segments.
 				return false
 			}
-			// The intersection must be a single point.
+
+			// The dimension must be 1. Since the intersection is between two
+			// Lines, the intersection must be a *single* point.
+
 			if abs(current.idx-other.idx) == 1 {
 				// Adjacent lines will intersect at a point due to
 				// construction, so this case is okay.
 				continue
 			}
 
-			// The first and last segment are allowed to intersect at a
-			// point, so long as that point is the start of the first
-			// segment and the end of the last segment (i.e. a linear
-			// ring).
+			// The first and last segment are allowed to intersect at a point,
+			// so long as that point is the start of the first segment and the
+			// end of the last segment (i.e. the line string is closed).
 			if (current.idx == 0 && other.idx == n-1) || (current.idx == n-1 && other.idx == 0) {
 				if s.IsClosed() {
 					continue
