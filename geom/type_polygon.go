@@ -88,6 +88,20 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 	// Rings may intersect, but only at a single point.
 	for i := 0; i < len(allRings); i++ {
 		for j := i + 1; j < len(allRings); j++ {
+			if isOuter := j == len(holes); !isOuter {
+				nestInner := pointRingSide(
+					allRings[i].StartPoint().XY(),
+					allRings[j],
+				) == interior
+				nestOuter := pointRingSide(
+					allRings[j].StartPoint().XY(),
+					allRings[i],
+				) == interior
+				if nestInner || nestOuter {
+					return Polygon{}, errors.New("polygon must not have nested rings")
+				}
+			}
+
 			inter := mustIntersection(allRings[i].AsGeometry(), allRings[j].AsGeometry())
 			env, has := inter.Envelope()
 			if !has {
