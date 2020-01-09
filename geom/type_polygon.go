@@ -59,6 +59,10 @@ func (h *lineStringHeap) Pop() interface{} {
 // NewPolygon creates a polygon given its outer and inner rings. No rings may
 // cross each other, and can only intersect each with each other at a point.
 func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption) (Polygon, error) {
+	if !doCheapValidations(opts) && !doExpensiveValidations(opts) {
+		return Polygon{outer, holes}, nil
+	}
+
 	allRings := make([]lineStringWithMaxX, 1+len(holes))
 	outerEnv, ok := outer.Envelope()
 	if !ok {
