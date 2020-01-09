@@ -4,7 +4,7 @@ services:
     image: mdillon/postgis
     healthcheck:
       test: "pg_isready -U postgres"
-      interval: '100ms'
+      interval: '10ms'
       timeout: '1s'
       retries: 50
   tests:
