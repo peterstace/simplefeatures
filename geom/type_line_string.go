@@ -2,9 +2,12 @@ package geom
 
 import (
 	"bytes"
+	"container/heap"
 	"database/sql/driver"
 	"errors"
 	"io"
+	"math"
+	"sort"
 	"unsafe"
 )
 
@@ -97,46 +100,104 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 	return append(dst, ')')
 }
 
+type lineWithIndex struct {
+	ln  Line
+	idx int
+}
+
+type lineWithIndexHeap []lineWithIndex
+
+func (h *lineWithIndexHeap) Len() int {
+	return len(*h)
+}
+func (h *lineWithIndexHeap) Less(i, j int) bool {
+	return maxX((*h)[i].ln) < maxX((*h)[j].ln)
+}
+func (h *lineWithIndexHeap) Swap(i, j int) {
+	(*h)[i], (*h)[j] = (*h)[j], (*h)[i]
+}
+func (h *lineWithIndexHeap) Push(x interface{}) {
+	*h = append(*h, x.(lineWithIndex))
+}
+func (h *lineWithIndexHeap) Pop() interface{} {
+	e := (*h)[len(*h)-1]
+	*h = (*h)[:len(*h)-1]
+	return e
+}
+
+func minX(ln Line) float64 {
+	return math.Min(ln.StartPoint().XY().X, ln.EndPoint().XY().X)
+}
+
+func maxX(ln Line) float64 {
+	return math.Max(ln.StartPoint().XY().X, ln.EndPoint().XY().X)
+}
+
 // IsSimple returns true iff the curve defined by the LineString doesn't pass
 // through the same point twice (with the possible exception of the two
 // endpoints being coincident).
 func (s LineString) IsSimple() bool {
-	// 1. Check for pairwise intersection.
-	//  a. Point is allowed if lines adjacent.
-	//  b. Start to end is allowed if first and last line.
+	// A line sweep algorithm is used, where a vertical line is swept over X
+	// values (from lowest to highest). We only have consider line segments
+	// that have overlapping X values when performing pairwise intersection
+	// tests.
+	//
+	// 1. Create slice of segments, sorted by their max X coordinate.
+	// 2. Loop over each segment.
+	//    a. Remove any elements from the heap that have their max X less than the minX of the current segment.
+	//    b. Check to see if the new element intersects with any elements in the heap.
+	//    c. Insert the current element into the heap.
+
 	n := len(s.lines)
-	for i := 0; i < n; i++ {
-		for j := i + 1; j < n; j++ {
-			intersection := mustIntersection(s.lines[i].AsGeometry(), s.lines[j].AsGeometry())
+	unprocessed := make([]lineWithIndex, n)
+	for i, ln := range s.lines {
+		unprocessed[i] = lineWithIndex{ln, i}
+	}
+	sort.Slice(unprocessed, func(i, j int) bool {
+		return maxX(unprocessed[i].ln) < maxX(unprocessed[j].ln)
+	})
+
+	var active lineWithIndexHeap
+	for _, current := range unprocessed {
+		currentX := minX(current.ln)
+		for len(active) != 0 && maxX(active[0].ln) < currentX {
+			heap.Pop(&active)
+		}
+		for _, other := range active {
+			intersection := mustIntersection(current.ln.AsGeometry(), other.ln.AsGeometry())
 			if intersection.IsEmpty() {
 				continue
 			}
 			if intersection.Dimension() >= 1 {
-				// two overlapping line segments
+				// Two overlapping line segments.
 				return false
 			}
-			// The intersection must be a single point.
-			if i+1 == j {
+
+			// The dimension must be 1. Since the intersection is between two
+			// Lines, the intersection must be a *single* point.
+
+			if abs(current.idx-other.idx) == 1 {
 				// Adjacent lines will intersect at a point due to
 				// construction, so this case is okay.
 				continue
 			}
-			if i == 0 && j == n-1 {
-				// The first and last segment are allowed to intersect at a
-				// point, so long as that point is the start of the first
-				// segment and the end of the last segment (i.e. a linear
-				// ring).
-				aPt := NewPointC(s.lines[i].a).AsGeometry()
-				bPt := NewPointC(s.lines[j].b).AsGeometry()
-				if !intersection.EqualsExact(aPt) || !intersection.EqualsExact(bPt) {
+
+			// The first and last segment are allowed to intersect at a point,
+			// so long as that point is the start of the first segment and the
+			// end of the last segment (i.e. the line string is closed).
+			if (current.idx == 0 && other.idx == n-1) || (current.idx == n-1 && other.idx == 0) {
+				if s.IsClosed() {
+					continue
+				} else {
 					return false
 				}
-			} else {
-				// Any other point intersection (e.g. looping back on
-				// itself at a point) is disallowed for simple linestrings.
-				return false
 			}
+
+			// Any other point intersection (e.g. looping back on
+			// itself at a point) is disallowed for simple linestrings.
+			return false
 		}
+		heap.Push(&active, current)
 	}
 	return true
 }
