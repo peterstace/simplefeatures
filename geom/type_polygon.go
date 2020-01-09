@@ -2,10 +2,12 @@ package geom
 
 import (
 	"bytes"
+	"container/heap"
 	"database/sql/driver"
 	"errors"
 	"io"
 	"math"
+	"sort"
 	"unsafe"
 )
 
@@ -29,8 +31,9 @@ type Polygon struct {
 }
 
 type lineStringWithMaxX struct {
-	ls   LineString
-	maxX float64
+	ls  LineString
+	env Envelope
+	idx int
 }
 
 type lineStringHeap []lineStringWithMaxX
@@ -39,7 +42,7 @@ func (h *lineStringHeap) Len() int {
 	return len(*h)
 }
 func (h *lineStringHeap) Less(i, j int) bool {
-	return (*h)[i].maxX < (*h)[j].maxX
+	return (*h)[i].env.Max().X < (*h)[j].env.Max().X
 }
 func (h *lineStringHeap) Swap(i, j int) {
 	(*h)[i], (*h)[j] = (*h)[j], (*h)[i]
@@ -56,12 +59,25 @@ func (h *lineStringHeap) Pop() interface{} {
 // NewPolygon creates a polygon given its outer and inner rings. No rings may
 // cross each other, and can only intersect each with each other at a point.
 func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption) (Polygon, error) {
-	allRings := append(holes, outer)
+	allRings := make([]lineStringWithMaxX, 1+len(holes))
+	outerEnv, ok := outer.Envelope()
+	if !ok {
+		return Polygon{}, errors.New("polygon outer ring must not be empty")
+	}
+	allRings[0] = lineStringWithMaxX{outer, outerEnv, 0}
+	for i := range holes {
+		innerEnv, ok := holes[i].Envelope()
+		if !ok {
+			return Polygon{}, errors.New("polygon inner rings must not be empty")
+		}
+		allRings[1+i] = lineStringWithMaxX{holes[i], innerEnv, 1 + i}
+	}
+
 	for _, r := range allRings {
-		if doCheapValidations(opts) && !r.IsClosed() {
+		if doCheapValidations(opts) && !r.ls.IsClosed() {
 			return Polygon{}, errors.New("polygon rings must be closed")
 		}
-		if doExpensiveValidations(opts) && !r.IsSimple() {
+		if doExpensiveValidations(opts) && !r.ls.IsSimple() {
 			return Polygon{}, errors.New("polygon rings must be simple")
 		}
 	}
@@ -74,8 +90,6 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 	interVerts := make(map[XY]int)
 	graph := newGraph()
 
-	// TODO: Is there a test case for 3 nested rings?
-
 	// Overview:
 	//
 	// 1. Create slice of all rings, ordered by min X coordinate.
@@ -85,24 +99,34 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 	//    b. Check to see if the current ring intersects with any in the heap.
 	//    c. Insert the current ring into the heap.
 
-	// Rings may intersect, but only at a single point.
-	for i := 0; i < len(allRings); i++ {
-		for j := i + 1; j < len(allRings); j++ {
-			if isOuter := j == len(holes); !isOuter {
+	sort.Slice(allRings, func(i, j int) bool {
+		return allRings[i].env.Min().X < allRings[j].env.Min().X
+	})
+
+	var h lineStringHeap
+
+	for _, current := range allRings {
+		currentX := current.env.Min().X
+		for len(h) > 0 && h[0].env.Max().X < currentX {
+			heap.Pop(&h)
+		}
+		for _, other := range h {
+			if current.idx != 0 && other.idx != 0 {
+				// Check if skipped if the outer ring is involved.
 				nestInner := pointRingSide(
-					allRings[i].StartPoint().XY(),
-					allRings[j],
+					current.ls.StartPoint().XY(),
+					other.ls,
 				) == interior
 				nestOuter := pointRingSide(
-					allRings[j].StartPoint().XY(),
-					allRings[i],
+					other.ls.StartPoint().XY(),
+					current.ls,
 				) == interior
 				if nestInner || nestOuter {
 					return Polygon{}, errors.New("polygon must not have nested rings")
 				}
 			}
 
-			inter := mustIntersection(allRings[i].AsGeometry(), allRings[j].AsGeometry())
+			inter := mustIntersection(current.ls.AsGeometry(), other.ls.AsGeometry())
 			env, has := inter.Envelope()
 			if !has {
 				continue // no intersection
@@ -117,9 +141,10 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 				nextInterVert++
 				interVerts[env.Min()] = interVert
 			}
-			graph.addEdge(interVert, i)
-			graph.addEdge(interVert, j)
+			graph.addEdge(interVert, current.idx)
+			graph.addEdge(interVert, other.idx)
 		}
+		heap.Push(&h, current)
 	}
 
 	// All inner rings must be inside the outer ring.
