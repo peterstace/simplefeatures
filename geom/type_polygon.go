@@ -30,13 +30,13 @@ type Polygon struct {
 	holes []LineString
 }
 
-type lineStringWithMaxX struct {
+type lineStringWithEnv struct {
 	ls  LineString
 	env Envelope
 	idx int
 }
 
-type lineStringHeap []lineStringWithMaxX
+type lineStringHeap []lineStringWithEnv
 
 func (h *lineStringHeap) Len() int {
 	return len(*h)
@@ -48,7 +48,7 @@ func (h *lineStringHeap) Swap(i, j int) {
 	(*h)[i], (*h)[j] = (*h)[j], (*h)[i]
 }
 func (h *lineStringHeap) Push(x interface{}) {
-	*h = append(*h, x.(lineStringWithMaxX))
+	*h = append(*h, x.(lineStringWithEnv))
 }
 func (h *lineStringHeap) Pop() interface{} {
 	e := (*h)[len(*h)-1]
@@ -63,18 +63,27 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 		return Polygon{outer, holes}, nil
 	}
 
-	allRings := make([]lineStringWithMaxX, 1+len(holes))
+	// Overview:
+	//
+	// 1. Create slice of all rings, ordered by min X coordinate.
+	// 2. Loop over each ring.
+	//    a. Remove any ring from the heap that has max X coordinate less than
+	//       the min X of the current ring.
+	//    b. Check to see if the current ring intersects with any in the heap.
+	//    c. Insert the current ring into the heap.
+
+	allRings := make([]lineStringWithEnv, 1+len(holes))
 	outerEnv, ok := outer.Envelope()
 	if !ok {
 		return Polygon{}, errors.New("polygon outer ring must not be empty")
 	}
-	allRings[0] = lineStringWithMaxX{outer, outerEnv, 0}
+	allRings[0] = lineStringWithEnv{outer, outerEnv, 0}
 	for i := range holes {
 		innerEnv, ok := holes[i].Envelope()
 		if !ok {
 			return Polygon{}, errors.New("polygon inner rings must not be empty")
 		}
-		allRings[1+i] = lineStringWithMaxX{holes[i], innerEnv, 1 + i}
+		allRings[1+i] = lineStringWithEnv{holes[i], innerEnv, 1 + i}
 	}
 
 	for _, r := range allRings {
@@ -90,22 +99,13 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 		return Polygon{outer, holes}, nil
 	}
 
-	nextInterVert := len(allRings)
-	interVerts := make(map[XY]int)
-	graph := newGraph()
-
-	// Overview:
-	//
-	// 1. Create slice of all rings, ordered by min X coordinate.
-	// 2. Loop over each ring.
-	//    a. Remove any ring from the heap that has max X coordinate less than
-	//       the min X of the current ring.
-	//    b. Check to see if the current ring intersects with any in the heap.
-	//    c. Insert the current ring into the heap.
-
 	sort.Slice(allRings, func(i, j int) bool {
 		return allRings[i].env.Min().X < allRings[j].env.Min().X
 	})
+
+	nextInterVert := len(allRings)
+	interVerts := make(map[XY]int)
+	graph := newGraph()
 
 	var h lineStringHeap
 
@@ -116,16 +116,16 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 		}
 		for _, other := range h {
 			if current.idx != 0 && other.idx != 0 {
-				// Check if skipped if the outer ring is involved.
-				nestInner := pointRingSide(
+				// Check is skipped if the outer ring is involved.
+				nestedFwd := pointRingSide(
 					current.ls.StartPoint().XY(),
 					other.ls,
 				) == interior
-				nestOuter := pointRingSide(
+				nestedRev := pointRingSide(
 					other.ls.StartPoint().XY(),
 					current.ls,
 				) == interior
-				if nestInner || nestOuter {
+				if nestedFwd || nestedRev {
 					return Polygon{}, errors.New("polygon must not have nested rings")
 				}
 			}
@@ -135,7 +135,7 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 			if !has {
 				continue // no intersection
 			}
-			if !env.Min().Equals(env.Max()) {
+			if env.Min() != env.Max() {
 				return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
 			}
 
