@@ -51,7 +51,8 @@ func hasIntersection(g1, g2 Geometry) bool {
 	case g1.IsLine():
 		switch {
 		case g2.IsLine():
-			return hasIntersectionLineWithLine(g1.AsLine(), g2.AsLine())
+			has, _ := hasIntersectionLineWithLine(g1.AsLine(), g2.AsLine())
+			return has
 		case g2.IsLineString():
 			return hasIntersectionMultiLineStringWithMultiLineString(
 				g1.AsLine().AsLineString().AsMultiLineString(),
@@ -168,7 +169,7 @@ func hasIntersection(g1, g2 Geometry) bool {
 	panic(fmt.Sprintf("implementation error: unhandled geometry types %T and %T", g1, g2))
 }
 
-func hasIntersectionLineWithLine(n1, n2 Line) bool {
+func hasIntersectionLineWithLine(n1, n2 Line) (intersects bool, dimension int) {
 	// Speed is O(1), but there are multiplications involved.
 	a := n1.a.XY
 	b := n1.b.XY
@@ -181,12 +182,12 @@ func hasIntersectionLineWithLine(n1, n2 Line) bool {
 	o4 := orientation(c, d, b)
 
 	if o1 != o2 && o3 != o4 {
-		return true
+		return true, 0 // Point has dimension 0
 	}
 
 	if o1 == collinear && o2 == collinear {
 		if (!onSegment(a, b, c) && !onSegment(a, b, d)) && (!onSegment(c, d, a) && !onSegment(c, d, b)) {
-			return false
+			return false, 0 // No intersection
 		}
 
 		// ---------------------
@@ -198,14 +199,14 @@ func hasIntersectionLineWithLine(n1, n2 Line) bool {
 		ltl := leftmostThenLowestIndex(pts)
 		pts = append(pts[:ltl], pts[ltl+1:]...)
 		if pts[0].Equals(pts[1]) {
-			return true
+			return true, 0 // Point has dimension 0
 		}
 		//----------------------
 
-		return true
+		return true, 1 // Line has dimension 1
 	}
 
-	return false
+	return false, 0 // No intersection.
 }
 
 func hasIntersectionLineWithMultiPoint(ln Line, mp MultiPoint) bool {
@@ -320,7 +321,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineStrin
 			other := sides[1-i]
 			for _, checkLine := range side.newSegments {
 				for _, ln := range other.active {
-					if hasIntersectionLineWithLine(ln, checkLine) {
+					if has, _ := hasIntersectionLineWithLine(ln, checkLine); has {
 						return true
 					}
 				}

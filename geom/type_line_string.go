@@ -164,11 +164,11 @@ func (s LineString) IsSimple() bool {
 			heap.Pop(&active)
 		}
 		for _, other := range active {
-			intersection := mustIntersection(current.ln.AsGeometry(), other.ln.AsGeometry())
-			if intersection.IsEmpty() {
+			intersects, dim := hasIntersectionLineWithLine(current.ln, other.ln)
+			if !intersects {
 				continue
 			}
-			if intersection.Dimension() >= 1 {
+			if dim >= 1 {
 				// Two overlapping line segments.
 				return false
 			}
