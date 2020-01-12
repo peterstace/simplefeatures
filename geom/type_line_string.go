@@ -2,7 +2,6 @@ package geom
 
 import (
 	"bytes"
-	"container/heap"
 	"database/sql/driver"
 	"errors"
 	"io"
@@ -105,26 +104,6 @@ type lineWithIndex struct {
 	idx int
 }
 
-type lineWithIndexHeap []lineWithIndex
-
-func (h *lineWithIndexHeap) Len() int {
-	return len(*h)
-}
-func (h *lineWithIndexHeap) Less(i, j int) bool {
-	return maxX((*h)[i].ln) < maxX((*h)[j].ln)
-}
-func (h *lineWithIndexHeap) Swap(i, j int) {
-	(*h)[i], (*h)[j] = (*h)[j], (*h)[i]
-}
-func (h *lineWithIndexHeap) Push(x interface{}) {
-	*h = append(*h, x.(lineWithIndex))
-}
-func (h *lineWithIndexHeap) Pop() interface{} {
-	e := (*h)[len(*h)-1]
-	*h = (*h)[:len(*h)-1]
-	return e
-}
-
 func minX(ln Line) float64 {
 	return math.Min(ln.StartPoint().XY().X, ln.EndPoint().XY().X)
 }
@@ -142,29 +121,29 @@ func (s LineString) IsSimple() bool {
 	// that have overlapping X values when performing pairwise intersection
 	// tests.
 	//
-	// 1. Create slice of segments, sorted by their max X coordinate.
+	// 1. Create slice of segments, sorted by their min X coordinate.
 	// 2. Loop over each segment.
 	//    a. Remove any elements from the heap that have their max X less than the minX of the current segment.
 	//    b. Check to see if the new element intersects with any elements in the heap.
 	//    c. Insert the current element into the heap.
 
 	n := len(s.lines)
-	unprocessed := make([]lineWithIndex, n)
-	for i, ln := range s.lines {
-		unprocessed[i] = lineWithIndex{ln, i}
-	}
+	unprocessed := seq(n)
 	sort.Slice(unprocessed, func(i, j int) bool {
-		return maxX(unprocessed[i].ln) < maxX(unprocessed[j].ln)
+		return minX(s.lines[unprocessed[i]]) < minX(s.lines[unprocessed[j]])
 	})
 
-	var active lineWithIndexHeap
+	active := intHeap{less: func(i, j int) bool {
+		return maxX(s.lines[i]) < maxX(s.lines[j])
+	}}
+
 	for _, current := range unprocessed {
-		currentX := minX(current.ln)
-		for len(active) != 0 && maxX(active[0].ln) < currentX {
-			heap.Pop(&active)
+		currentX := minX(s.lines[current])
+		for len(active.data) != 0 && maxX(s.lines[active.data[0]]) < currentX {
+			active.pop()
 		}
-		for _, other := range active {
-			intersects, dim := hasIntersectionLineWithLine(current.ln, other.ln)
+		for _, other := range active.data {
+			intersects, dim := hasIntersectionLineWithLine(s.lines[current], s.lines[other])
 			if !intersects {
 				continue
 			}
@@ -176,7 +155,7 @@ func (s LineString) IsSimple() bool {
 			// The dimension must be 1. Since the intersection is between two
 			// Lines, the intersection must be a *single* point.
 
-			if abs(current.idx-other.idx) == 1 {
+			if abs(current-other) == 1 {
 				// Adjacent lines will intersect at a point due to
 				// construction, so this case is okay.
 				continue
@@ -185,7 +164,7 @@ func (s LineString) IsSimple() bool {
 			// The first and last segment are allowed to intersect at a point,
 			// so long as that point is the start of the first segment and the
 			// end of the last segment (i.e. the line string is closed).
-			if (current.idx == 0 && other.idx == n-1) || (current.idx == n-1 && other.idx == 0) {
+			if (current == 0 && other == n-1) || (current == n-1 && other == 0) {
 				if s.IsClosed() {
 					continue
 				} else {
@@ -197,7 +176,7 @@ func (s LineString) IsSimple() bool {
 			// itself at a point) is disallowed for simple linestrings.
 			return false
 		}
-		heap.Push(&active, current)
+		active.push(current)
 	}
 	return true
 }
