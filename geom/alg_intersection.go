@@ -152,6 +152,34 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 }
 
 func intersectLineWithLine(n1, n2 Line) Geometry {
+	result := intersectLineWithLineNoAlloc(n1, n2)
+	switch {
+	case result.empty:
+		return NewGeometryCollection(nil).AsGeometry()
+	case result.ptA == result.ptB:
+		return NewPointXY(result.ptA).AsGeometry()
+	default:
+		ln, err := NewLineXY(result.ptA, result.ptB)
+		if err != nil {
+			// Cannot occur because the case where ptA and ptB are equal is
+			// already handled.
+			panic(err)
+		}
+		return ln.AsGeometry()
+	}
+}
+
+// lineWithLineIntersection represents the result of intersecting two line
+// segments together. It can either be empty (flag set), a single point (both
+// points set the same), or a line segment (defined by the two points).
+type lineWithLineIntersection struct {
+	empty    bool
+	ptA, ptB XY
+}
+
+// intersectLineWithLine calculates the intersection between two line segments
+// without performing any heap allocations.
+func intersectLineWithLineNoAlloc(n1, n2 Line) lineWithLineIntersection {
 	a := n1.a.XY
 	b := n1.b.XY
 	c := n2.a.XY
@@ -164,16 +192,16 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 
 	if o1 != o2 && o3 != o4 {
 		if o1 == collinear {
-			return NewPointXY(c).AsGeometry()
+			return lineWithLineIntersection{false, c, c}
 		}
 		if o2 == collinear {
-			return NewPointXY(d).AsGeometry()
+			return lineWithLineIntersection{false, d, d}
 		}
 		if o3 == collinear {
-			return NewPointXY(a).AsGeometry()
+			return lineWithLineIntersection{false, a, a}
 		}
 		if o4 == collinear {
-			return NewPointXY(b).AsGeometry()
+			return lineWithLineIntersection{false, b, b}
 		}
 
 		e := (c.Y-d.Y)*(a.X-c.X) + (d.X-c.X)*(a.Y-c.Y)
@@ -181,12 +209,13 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		// Division by zero is not possible, since the lines are not parallel.
 		p := e / f
 
-		return NewPointXY(b.Sub(a).Scale(p).Add(a)).AsGeometry()
+		pt := b.Sub(a).Scale(p).Add(a)
+		return lineWithLineIntersection{false, pt, pt}
 	}
 
 	if o1 == collinear && o2 == collinear {
 		if (!onSegment(a, b, c) && !onSegment(a, b, d)) && (!onSegment(c, d, a) && !onSegment(c, d, b)) {
-			return NewGeometryCollection(nil).AsGeometry()
+			return lineWithLineIntersection{empty: true}
 		}
 
 		// ---------------------
@@ -197,21 +226,12 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 		pts = append(pts[:rth], pts[rth+1:]...)
 		ltl := leftmostThenLowestIndex(pts)
 		pts = append(pts[:ltl], pts[ltl+1:]...)
-		if pts[0].Equals(pts[1]) {
-			return NewPointXY(pts[0]).AsGeometry()
-		}
+		// pts[0] and pts[1] _may_ be coincident, but that's ok.
+		return lineWithLineIntersection{false, pts[0], pts[1]}
 		//----------------------
-
-		ln, err := NewLineC(Coordinates{pts[0]}, Coordinates{pts[1]})
-		if err != nil {
-			// Cannot occur because we have already checked that pts[0] and
-			// pts[1] are not equal.
-			panic(err)
-		}
-		return ln.AsGeometry()
 	}
 
-	return NewGeometryCollection(nil).AsGeometry()
+	return lineWithLineIntersection{empty: true}
 }
 
 func intersectLineWithMultiPoint(ln Line, mp MultiPoint) (Geometry, error) {
