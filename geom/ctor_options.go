@@ -37,6 +37,12 @@ type ctorOptionSet struct {
 }
 
 func newOptionSet(opts []ConstructorOption) ctorOptionSet {
+	// Optimise the case where there are no options. This prevents the `cos`
+	// variable escaping to the heap.
+	if len(opts) == 0 {
+		return ctorOptionSet{}
+	}
+
 	var cos ctorOptionSet
 	for _, opt := range opts {
 		opt(&cos)
