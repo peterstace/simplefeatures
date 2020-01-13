@@ -116,20 +116,23 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 				}
 			}
 
-			inter := mustIntersection(currentRing.AsGeometry(), otherRing.AsGeometry())
-			env, has := inter.Envelope()
-			if !has {
-				continue // no intersection
+			intersects, ext := hasIntersectionMultiLineStringWithMultiLineString(
+				currentRing.AsMultiLineString(),
+				otherRing.AsMultiLineString(),
+				true,
+			)
+			if !intersects {
+				continue
 			}
-			if env.Min() != env.Max() {
+			if ext.multiplePoints {
 				return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
 			}
 
-			interVert, ok := interVerts[env.Min()]
+			interVert, ok := interVerts[ext.singlePoint]
 			if !ok {
 				interVert = nextInterVert
 				nextInterVert++
-				interVerts[env.Min()] = interVert
+				interVerts[ext.singlePoint] = interVert
 			}
 			graph.addEdge(interVert, current)
 			graph.addEdge(interVert, other)
