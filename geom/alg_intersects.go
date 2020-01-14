@@ -300,16 +300,20 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		side.lines = make([]Line, 0, n)
 		for _, ls := range side.mls.lines {
 			for _, ln := range ls.lines {
+				if ln.StartPoint().XY().X > ln.EndPoint().XY().X {
+					// TODO: Use ST_Reverse
+					ln.a, ln.b = ln.b, ln.a
+				}
 				side.lines = append(side.lines, ln)
 			}
 		}
 		sort.Slice(side.lines, func(i, j int) bool {
-			return minX(side.lines[i]) < minX(side.lines[j])
+			return side.lines[i].StartPoint().XY().X < side.lines[j].StartPoint().XY().X
 		})
 		sideCopy := side // copy because we're using anon func
 		side.active.less = func(i, j int) bool {
-			ix := maxX(sideCopy.lines[i])
-			jx := maxX(sideCopy.lines[j])
+			ix := sideCopy.lines[i].EndPoint().XY().X
+			jx := sideCopy.lines[j].EndPoint().XY().X
 			return ix < jx
 		}
 	}
@@ -322,7 +326,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		sweepX := math.Inf(+1)
 		for _, side := range sides {
 			if side.next < len(side.lines) {
-				sweepX = math.Min(sweepX, minX(side.lines[side.next]))
+				sweepX = math.Min(sweepX, side.lines[side.next].StartPoint().XY().X)
 			}
 		}
 
@@ -330,11 +334,11 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		// segments that can no longer possibly intersect with any unprocessed
 		// line segments, and adding any new line segments to the active sets.
 		for _, side := range sides {
-			for len(side.active.data) != 0 && maxX(side.lines[side.active.data[0]]) < sweepX {
+			for len(side.active.data) != 0 && side.lines[side.active.data[0]].EndPoint().XY().X < sweepX {
 				side.active.pop()
 			}
 			side.newSegments = side.newSegments[:0]
-			for side.next < len(side.lines) && minX(side.lines[side.next]) == sweepX {
+			for side.next < len(side.lines) && side.lines[side.next].StartPoint().XY().X == sweepX {
 				side.newSegments = append(side.newSegments, side.next)
 				side.active.push(side.next)
 				side.next++
