@@ -5,7 +5,6 @@ import (
 	"database/sql/driver"
 	"errors"
 	"io"
-	"math"
 	"sort"
 	"unsafe"
 )
@@ -102,14 +101,6 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 type lineWithIndex struct {
 	ln  Line
 	idx int
-}
-
-func minX(ln Line) float64 {
-	return math.Min(ln.StartPoint().XY().X, ln.EndPoint().XY().X)
-}
-
-func maxX(ln Line) float64 {
-	return math.Max(ln.StartPoint().XY().X, ln.EndPoint().XY().X)
 }
 
 // IsSimple returns true iff the curve defined by the LineString doesn't pass

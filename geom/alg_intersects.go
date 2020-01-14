@@ -283,47 +283,46 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 
 	type side struct {
 		mls         MultiLineString
-		unprocessed []Line
-		active      lineHeap
-		newSegments []Line
+		lines       []Line  // all lines from the MLS
+		next        int     // index into lines
+		active      intHeap // indexes into lines
+		newSegments []int   // indexes into lines
 	}
 	var sides [2]*side
 	sides[0] = &side{mls: mls1}
 	sides[1] = &side{mls: mls2}
 
-	// Create a list of line segments from each MultiLineString, in ascending
-	// order by X coordinate.
 	for _, side := range sides {
 		var n int
 		for _, ls := range side.mls.lines {
-			n += ls.NumPoints() - 1
+			n += len(ls.lines)
 		}
-		side.unprocessed = make([]Line, 0, n)
+		side.lines = make([]Line, 0, n)
 		for _, ls := range side.mls.lines {
 			for _, ln := range ls.lines {
-				if ln.StartPoint().XY().X > ln.EndPoint().XY().X {
-					// TODO: Use ST_Reverse
-					ln.a, ln.b = ln.b, ln.a
-				}
-				side.unprocessed = append(side.unprocessed, ln)
+				side.lines = append(side.lines, ln)
 			}
 		}
-		sort.Slice(side.unprocessed, func(i, j int) bool {
-			ix := side.unprocessed[i].StartPoint().XY().X
-			jx := side.unprocessed[j].StartPoint().XY().X
-			return ix < jx
+		sort.Slice(side.lines, func(i, j int) bool {
+			return minX(side.lines[i]) < minX(side.lines[j])
 		})
+		sideCopy := side // copy because we're using anon func
+		side.active.less = func(i, j int) bool {
+			ix := maxX(sideCopy.lines[i])
+			jx := maxX(sideCopy.lines[j])
+			return ix < jx
+		}
 	}
 
 	var env Envelope
 	var envPopulated bool
-	for len(sides[0].unprocessed)+len(sides[1].unprocessed) > 0 {
+	for sides[0].next < len(sides[0].lines) || sides[1].next < len(sides[1].lines) {
 		// Calculate the X coordinate of the next line segment(s) that will be
 		// processed when sweeping left to right.
 		sweepX := math.Inf(+1)
 		for _, side := range sides {
-			if len(side.unprocessed) > 0 {
-				sweepX = math.Min(sweepX, side.unprocessed[0].StartPoint().XY().X)
+			if side.next < len(side.lines) {
+				sweepX = math.Min(sweepX, minX(side.lines[side.next]))
 			}
 		}
 
@@ -331,14 +330,14 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		// segments that can no longer possibly intersect with any unprocessed
 		// line segments, and adding any new line segments to the active sets.
 		for _, side := range sides {
-			for len(side.active) != 0 && side.active[0].EndPoint().XY().X < sweepX {
+			for len(side.active.data) != 0 && maxX(side.lines[side.active.data[0]]) < sweepX {
 				side.active.pop()
 			}
 			side.newSegments = side.newSegments[:0]
-			for len(side.unprocessed) > 0 && side.unprocessed[0].StartPoint().XY().X == sweepX {
-				side.newSegments = append(side.newSegments, side.unprocessed[0])
-				side.active.push(side.unprocessed[0])
-				side.unprocessed = side.unprocessed[1:]
+			for side.next < len(side.lines) && minX(side.lines[side.next]) == sweepX {
+				side.newSegments = append(side.newSegments, side.next)
+				side.active.push(side.next)
+				side.next++
 			}
 		}
 
@@ -346,9 +345,11 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		// in the opposing active set.
 		for i, side := range sides {
 			other := sides[1-i]
-			for _, checkLine := range side.newSegments {
-				for _, ln := range other.active {
-					inter := intersectLineWithLineNoAlloc(ln, checkLine)
+			for _, lnIdxA := range side.newSegments {
+				lnA := side.lines[lnIdxA]
+				for _, lnIdxB := range other.active.data {
+					lnB := other.lines[lnIdxB]
+					inter := intersectLineWithLineNoAlloc(lnA, lnB)
 					if inter.empty {
 						continue
 					}

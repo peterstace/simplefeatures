@@ -1,6 +1,9 @@
 package geom
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 func max(a, b int) int {
 	if a > b {
@@ -46,4 +49,12 @@ func mustEnv(env Envelope, ok bool) Envelope {
 		panic("not ok")
 	}
 	return env
+}
+
+func minX(ln Line) float64 {
+	return math.Min(ln.StartPoint().XY().X, ln.EndPoint().XY().X)
+}
+
+func maxX(ln Line) float64 {
+	return math.Max(ln.StartPoint().XY().X, ln.EndPoint().XY().X)
 }
