@@ -28,8 +28,38 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 	if !doExpensiveValidations(opts) {
 		return MultiPolygon{polys}, nil
 	}
-	for i := 0; i < len(polys); i++ {
-		for j := i + 1; j < len(polys); j++ {
+
+	type interval struct {
+		minX, maxX float64
+	}
+	intervals := make([]interval, len(polys))
+	for i := range intervals {
+		env, ok := polys[i].Envelope()
+		if !ok {
+			return MultiPolygon{}, errors.New("polygon in multiploygon not allowed to be empty")
+		}
+		intervals[i].minX = env.Min().X
+		intervals[i].maxX = env.Max().X
+	}
+	indexes := seq(len(polys))
+	sort.Slice(indexes, func(i, j int) bool {
+		xi := intervals[indexes[i]].minX
+		xj := intervals[indexes[j]].minX
+		return xi < xj
+	})
+
+	active := intHeap{less: func(i, j int) bool {
+		xi := intervals[i].maxX
+		xj := intervals[j].maxX
+		return xi < xj
+	}}
+
+	for _, i := range indexes {
+		currentX := intervals[i].minX
+		for len(active.data) > 0 && intervals[active.data[0]].maxX < currentX {
+			active.pop()
+		}
+		for _, j := range active.data {
 			bound1 := polys[i].Boundary()
 			bound2 := polys[j].Boundary()
 			inter := mustIntersection(bound1, bound2)
@@ -40,7 +70,9 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 				return MultiPolygon{}, errors.New("polygon interiors must not intersect")
 			}
 		}
+		active.push(i)
 	}
+
 	return MultiPolygon{polys}, nil
 }
 
