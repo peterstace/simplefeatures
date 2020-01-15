@@ -232,3 +232,34 @@ func BenchmarkPolygonMultipleRingsValidation(b *testing.B) {
 		})
 	}
 }
+
+func BenchmarkMultipolygonValidation(b *testing.B) {
+	for _, sz := range []int{1, 2, 4, 8, 16, 32} {
+		b.Run(fmt.Sprintf("n=%d", sz*sz), func(b *testing.B) {
+			rnd := rand.New(rand.NewSource(0))
+			coords := make([][][]XY, sz*sz)
+			for i := 0; i < sz*sz; i++ {
+				center := XY{
+					X: (0.5 + float64(i/sz)) / float64(sz),
+					Y: (0.5 + float64(i%sz)) / float64(sz),
+				}
+				dx := rnd.Float64() * 0.5 / float64(sz)
+				dy := rnd.Float64() * 0.5 / float64(sz)
+				coords[i] = [][]XY{{
+					center.Add(XY{-dx, -dy}),
+					center.Add(XY{dx, -dy}),
+					center.Add(XY{dx, dy}),
+					center.Add(XY{-dx, dy}),
+					center.Add(XY{-dx, -dy}),
+				}}
+			}
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				if _, err := NewMultiPolygonXY(coords); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
