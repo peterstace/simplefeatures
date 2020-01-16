@@ -118,16 +118,15 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 				linePts[line1.b.XY] = struct{}{}
 				for _, r2 := range p2.rings() {
 					for _, line2 := range r2.lines {
-						env, ok := mustIntersection(line1.AsGeometry(), line2.AsGeometry()).Envelope()
-						if !ok {
+						inter := intersectLineWithLineNoAlloc(line1, line2)
+						if inter.empty {
 							continue
 						}
-						if !env.Min().Equals(env.Max()) {
+						if inter.ptA != inter.ptB {
 							continue
 						}
-						inter := env.Min()
-						if !inter.Equals(line1.a.XY) && !inter.Equals(line1.b.XY) {
-							linePts[inter] = struct{}{}
+						if inter.ptA != line1.StartPoint().XY() && inter.ptA != line1.EndPoint().XY() {
+							linePts[inter.ptA] = struct{}{}
 						}
 					}
 				}
