@@ -109,14 +109,16 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 		// then each midpoint between those points. These are enough points
 		// that one of the points will be inside the other polygon iff the
 		// interior of the polygons intersect.
+		var p2rings []LineString
 		allPts := make(map[XY]struct{})
-		for _, r1 := range p1.rings() {
+		for _, r1 := range p1.appendRings(nil) {
 			for _, line1 := range r1.lines {
 				// Collect boundary control points and intersection points.
 				linePts := make(map[XY]struct{})
 				linePts[line1.a.XY] = struct{}{}
 				linePts[line1.b.XY] = struct{}{}
-				for _, r2 := range p2.rings() {
+				p2rings = p2.appendRings(p2rings[:0])
+				for _, r2 := range p2rings {
 					for _, line2 := range r2.lines {
 						inter := intersectLineWithLineNoAlloc(line1, line2)
 						if inter.empty {
@@ -294,7 +296,7 @@ func (m MultiPolygon) Coordinates() [][][]Coordinates {
 	numPolys := m.NumPolygons()
 	coords := make([][][]Coordinates, numPolys)
 	for i := 0; i < numPolys; i++ {
-		rings := m.PolygonN(i).rings()
+		rings := m.PolygonN(i).appendRings(nil)
 		coords[i] = make([][]Coordinates, len(rings))
 		for j, r := range rings {
 			n := r.NumPoints()

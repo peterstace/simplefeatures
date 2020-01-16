@@ -252,13 +252,15 @@ func (p Polygon) Envelope() (Envelope, bool) {
 	return p.outer.Envelope()
 }
 
-func (p Polygon) rings() []LineString {
-	rings := make([]LineString, 1+len(p.holes))
-	rings[0] = p.outer
-	for i, h := range p.holes {
-		rings[1+i] = h
+func (p Polygon) appendRings(dst []LineString) []LineString {
+	if len(dst) == 0 && cap(dst) == 0 {
+		// Optimise for the exact length if it looks like the caller isn't
+		// re-using a LineString buffer.
+		dst = make([]LineString, 0, 1+len(p.holes))
 	}
-	return rings
+	dst = append(dst, p.outer)
+	dst = append(dst, p.holes...)
+	return dst
 }
 
 func (p Polygon) Boundary() Geometry {
@@ -283,7 +285,7 @@ func (p Polygon) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(wkbGeomTypePolygon)
-	rings := p.rings()
+	rings := p.appendRings(nil)
 	marsh.writeCount(len(rings))
 	for _, ring := range rings {
 		numPts := ring.NumPoints()
@@ -310,7 +312,7 @@ func (p Polygon) MarshalJSON() ([]byte, error) {
 // Coordinates returns the coordinates of the rings making up the Polygon
 // (external ring first, then internal rings after).
 func (p Polygon) Coordinates() [][]Coordinates {
-	rings := p.rings()
+	rings := p.appendRings(nil)
 	coords := make([][]Coordinates, len(rings))
 	for i, r := range rings {
 		n := r.NumPoints()
