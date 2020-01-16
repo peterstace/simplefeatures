@@ -111,7 +111,7 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 		// interior of the polygons intersect.
 		var p2rings []LineString
 		allPts := make(map[XY]struct{})
-		for _, r1 := range p1.appendRings(nil) {
+		for _, r1 := range p1.rings() {
 			for _, line1 := range r1.lines {
 				// Collect boundary control points and intersection points.
 				linePts := make(map[XY]struct{})
@@ -296,7 +296,7 @@ func (m MultiPolygon) Coordinates() [][][]Coordinates {
 	numPolys := m.NumPolygons()
 	coords := make([][][]Coordinates, numPolys)
 	for i := 0; i < numPolys; i++ {
-		rings := m.PolygonN(i).appendRings(nil)
+		rings := m.PolygonN(i).rings()
 		coords[i] = make([][]Coordinates, len(rings))
 		for j, r := range rings {
 			n := r.NumPoints()
