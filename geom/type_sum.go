@@ -584,19 +584,29 @@ func (g Geometry) Centroid() (Point, bool) {
 }
 
 // Area gives the area of the Polygon or MultiPolygon. If the Geometry is not a
-// Polygon or MultiPolygon, then false is returned.
-//
-// TODO: This is not in live with the behaviour of PostGIS. Instead, the area
-// should be returned as zero for non polygonal geometries. See
-// https://github.com/peterstace/simplefeatures/issues/84
-func (g Geometry) Area() (float64, bool) {
+// Polygon or MultiPolygon, then 0 is returned.
+func (g Geometry) Area() float64 {
 	switch {
+	case g.IsEmpty():
+		return 0
+	case g.IsGeometryCollection():
+		return g.AsGeometryCollection().Area()
+	case g.IsLine():
+		return 0
+	case g.IsLineString():
+		return 0
+	case g.IsMultiLineString():
+		return 0
+	case g.IsPoint():
+		return 0
+	case g.IsMultiPoint():
+		return 0
 	case g.IsPolygon():
-		return g.AsPolygon().Area(), true
+		return g.AsPolygon().Area()
 	case g.IsMultiPolygon():
-		return g.AsMultiPolygon().Area(), true
+		return g.AsMultiPolygon().Area()
 	default:
-		return 0, false
+		return 0
 	}
 }
 

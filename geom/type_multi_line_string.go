@@ -228,11 +228,6 @@ func (m MultiLineString) IsValid() bool {
 	return err == nil
 }
 
-// Area in the case of a MultiLineString is zero.
-func (m MultiLineString) Area() float64 {
-	return 0
-}
-
 // Length gives the sum of the lengths of the constituent members of the multi
 // line string.
 func (m MultiLineString) Length() float64 {

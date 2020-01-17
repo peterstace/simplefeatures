@@ -205,9 +205,7 @@ func (c GeometryCollection) Area() float64 {
 	n := c.NumGeometries()
 	for i := 0; i < n; i++ {
 		geom := c.GeometryN(i)
-		if area, nonzero := geom.Area(); nonzero {
-			sum += area
-		}
+		sum += geom.Area()
 	}
 	return sum
 }

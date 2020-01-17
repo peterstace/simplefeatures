@@ -166,11 +166,6 @@ func (n Line) IsValid() bool {
 	return err == nil
 }
 
-// Area in the case of a Line is zero.
-func (n Line) Area() float64 {
-	return 0
-}
-
 // Length gives the length of the line.
 func (n Line) Length() float64 {
 	delta := n.a.XY.Sub(n.b.XY)

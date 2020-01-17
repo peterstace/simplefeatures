@@ -276,11 +276,6 @@ func (s LineString) IsValid() bool {
 	return err == nil
 }
 
-// Area in the case of a LineString is zero.
-func (s LineString) Area() float64 {
-	return 0
-}
-
 // IsRing returns true iff this LineString is both simple and closed (i.e. is a
 // linear ring).
 func (s LineString) IsRing() bool {

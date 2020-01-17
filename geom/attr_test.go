@@ -2,7 +2,6 @@ package geom_test
 
 import (
 	"math"
-	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -459,17 +458,35 @@ func TestArea(t *testing.T) {
 		wkt  string
 		want float64
 	}{
+		{"GEOMETRYCOLLECTION EMPTY", 0},
+		{"LINESTRING(1 1,5 5)", 0},
+		{"LINESTRING(5 8,4 9)", 0},
+		{"LINESTRING(0 0,0 1,1 3)", 0},
+		{"MULTILINESTRING((4 2,5 1),(9 2,7 1))", 0},
+		{"MULTILINESTRING((0 0,2 0),(1 0,3 0))", 0},
+		{"POINT(1 3)", 0},
+		{"MULTIPOINT(0 0,0 1,1 0,0 0)", 0},
 		{"POLYGON((0 0,1 1,0 1,0 0))", 0.5},
 		{"POLYGON((0 0,0 1,1 1,0 0))", 0.5},
 		{"POLYGON((0 0,0 1,1 1,1 0,0 0))", 1.0},
 		{"POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1))", 8.0},
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((2 1,1 1,2 0,2 1)))", 1.0},
+		{"GEOMETRYCOLLECTION(POINT EMPTY)", 0},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", 0},
+		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 2)))", 0},
+		{`GEOMETRYCOLLECTION(
+			LINESTRING(1 0,0 5,5 2),
+			POINT(2 3),
+			POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1))
+		)`, 8.0},
+		{`GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(
+			LINESTRING(1 0,0 5,5 2),
+			POINT(2 3),
+			MULTIPOLYGON(((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1)))
+		))`, 8.0},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, ok := geomFromWKT(t, tt.wkt).Area()
-			if !ok {
-				t.Fatal("could not calculate area")
-			}
+			got := geomFromWKT(t, tt.wkt).Area()
 			if got != tt.want {
 				t.Errorf("got=%v want=%v", got, tt.want)
 			}
@@ -525,7 +542,7 @@ func TestSignedArea(t *testing.T) {
 			case geom.IsMultiPolygon():
 				got = geom.AsMultiPolygon().SignedArea()
 			default:
-				t.Errorf("expected: Polygon or MultiPolygon, got: %s", reflect.TypeOf(geom).Name())
+				t.Errorf("expected: Polygon or MultiPolygon but got a different type")
 			}
 			if got != tc.expected {
 				t.Errorf("expected: %f, got: %f", tc.expected, got)
@@ -533,20 +550,6 @@ func TestSignedArea(t *testing.T) {
 		})
 	}
 
-}
-
-func TestNoArea(t *testing.T) {
-	for i, wkt := range []string{
-		"POINT(1 2)",
-		"LINESTRING(1 2,3 4)",
-	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, defined := geomFromWKT(t, wkt).Area()
-			if defined {
-				t.Errorf("expected area not to be defined, but was")
-			}
-		})
-	}
 }
 
 func TestCentroid(t *testing.T) {
