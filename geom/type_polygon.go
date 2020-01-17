@@ -352,7 +352,11 @@ func (p Polygon) Area() float64 {
 	return area
 }
 
-// SignedArea returns a positive value only for polygons with a counterclockwise winding order.
+// SignedArea gives the positive area of the polygon when the outer rings are
+// wound CCW and any inner rings are wound CW, and the negative area of the
+// polygon when the outer rings are wound CW and any inner rings are wound CCW.
+// If the windings of the inner and outer rings are the same, then the area
+// will be inconsistent.
 func (p Polygon) SignedArea() float64 {
 	signedArea := signedAreaOfLinearRing(p.ExteriorRing())
 	n := p.NumInteriorRings()
