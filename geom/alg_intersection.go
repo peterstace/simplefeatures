@@ -253,20 +253,20 @@ func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (Ge
 		for _, ln1 := range ls1.lines {
 			for _, ls2 := range mls2.lines {
 				for _, ln2 := range ls2.lines {
-					inter, err := ln1.Intersection(ln2.AsGeometry())
-					if err != nil {
-						return Geometry{}, err
-					}
-					if inter.IsEmpty() {
-						continue
-					}
+					inter := intersectLineWithLineNoAlloc(ln1, ln2)
 					switch {
-					case inter.IsPoint():
-						points = append(points, inter.AsPoint())
-					case inter.IsLine():
-						lines = append(lines, inter.AsLine())
+					case inter.empty:
+						continue
+					case inter.ptA == inter.ptB:
+						points = append(points, NewPointXY(inter.ptA))
 					default:
-						return Geometry{}, fmt.Errorf("unhandled intersection result type: %T", inter)
+						ln, err := NewLineXY(inter.ptA, inter.ptB)
+						if err != nil {
+							// The case where ptA and ptB are coincident
+							// has already been handled.
+							panic(err)
+						}
+						lines = append(lines, ln)
 					}
 				}
 			}

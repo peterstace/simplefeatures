@@ -22,7 +22,11 @@ type LineString struct {
 // NewLineStringC creates a line string from the coordinates defining its
 // points.
 func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, error) {
-	var lines []Line
+	// Fewer lines than len(pts)-1 _may_ be used, however the normal case is
+	// for there to be no coincident control points, so the full capacity would
+	// be utilised.
+	lines := make([]Line, 0, len(pts)-1)
+
 	for i := 0; i < len(pts)-1; i++ {
 		if pts[i].XY.Equals(pts[i+1].XY) {
 			continue
