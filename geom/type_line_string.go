@@ -24,7 +24,7 @@ type LineString struct {
 // NewLineStringC creates a line string from the coordinates defining its
 // points.
 func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, error) {
-	segments := make([]int, len(pts)-1)
+	segments := make([]int, 0, len(pts)-1)
 	coords := make([]Coordinates, len(pts))
 	copy(coords, pts)
 
