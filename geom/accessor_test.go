@@ -78,6 +78,25 @@ func TestLineStringAccessor(t *testing.T) {
 	})
 }
 
+func TestLineStringAccessorWithDuplicates(t *testing.T) {
+	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,3 4,5 6)").AsLineString()
+	pt12 := geomFromWKT(t, "POINT(1 2)")
+	pt34 := geomFromWKT(t, "POINT(3 4)")
+	pt56 := geomFromWKT(t, "POINT(5 6)")
+
+	t.Run("num points", func(t *testing.T) {
+		expectIntEq(t, ls.NumPoints(), 4)
+	})
+	t.Run("point n", func(t *testing.T) {
+		expectPanics(t, func() { ls.PointN(-1) })
+		expectGeomEq(t, ls.PointN(0).AsGeometry(), pt12)
+		expectGeomEq(t, ls.PointN(1).AsGeometry(), pt34)
+		expectGeomEq(t, ls.PointN(2).AsGeometry(), pt34)
+		expectGeomEq(t, ls.PointN(3).AsGeometry(), pt56)
+		expectPanics(t, func() { ls.PointN(4) })
+	})
+}
+
 func TestPolygonAccessor(t *testing.T) {
 	poly := geomFromWKT(t, "POLYGON((0 0,5 0,5 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1),(3 1,4 1,4 2,3 2,3 1))").AsPolygon()
 	outer := geomFromWKT(t, "LINESTRING(0 0,5 0,5 3,0 3,0 0)")

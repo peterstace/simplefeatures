@@ -112,14 +112,16 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 		var p2rings []LineString
 		allPts := make(map[XY]struct{})
 		for _, r1 := range p1.rings() {
-			for _, line1 := range r1.lines {
+			for ln1 := 0; ln1 < r1.NumLines(); ln1++ {
+				line1 := r1.LineN(ln1)
 				// Collect boundary control points and intersection points.
 				linePts := make(map[XY]struct{})
 				linePts[line1.a.XY] = struct{}{}
 				linePts[line1.b.XY] = struct{}{}
 				p2rings = appendRings(p2rings[:0], p2)
 				for _, r2 := range p2rings {
-					for _, line2 := range r2.lines {
+					for ln2 := 0; ln2 < r2.NumLines(); ln2++ {
+						line2 := r2.LineN(ln2)
 						inter := intersectLineWithLineNoAlloc(line1, line2)
 						if inter.empty {
 							continue

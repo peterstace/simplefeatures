@@ -16,9 +16,10 @@ func pointRingSide(pt XY, ring LineString) side {
 	ptg := NewPointC(Coordinates{pt})
 	// find max x coordinate
 	// TODO: should be able to use envelope for this
-	maxX := ring.lines[0].a.X
-	for _, ln := range ring.lines {
-		maxX = math.Max(maxX, ln.b.X)
+	maxX := ring.LineN(0).StartPoint().XY().X
+	for i := 0; i < ring.NumLines(); i++ {
+		ln := ring.LineN(i)
+		maxX = math.Max(maxX, ln.EndPoint().XY().X)
 		if hasIntersectionPointWithLine(ptg, ln) {
 			return boundary
 		}
@@ -34,7 +35,8 @@ func pointRingSide(pt XY, ring LineString) side {
 	}
 
 	var count int
-	for _, seg := range ring.lines {
+	for i := 0; i < ring.NumLines(); i++ {
+		seg := ring.LineN(i)
 		inter := intersectLineWithLineNoAlloc(seg, ray)
 		if inter.empty {
 			continue

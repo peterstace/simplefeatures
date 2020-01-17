@@ -146,8 +146,8 @@ func (m MultiLineString) Boundary() Geometry {
 			continue
 		}
 		for _, pt := range [2]Point{
-			NewPointC(ls.lines[0].a),
-			NewPointC(ls.lines[len(ls.lines)-1].b),
+			ls.StartPoint(),
+			ls.EndPoint(),
 		} {
 			_, seen := counts[pt.coords.XY]
 			if !seen {

@@ -142,8 +142,9 @@ func NewPolygon(outer LineString, holes []LineString, opts ...ConstructorOption)
 
 	// All inner rings must be inside the outer ring.
 	for _, hole := range holes {
-		for _, line := range hole.lines {
-			if pointRingSide(line.a.XY, outer) == exterior {
+		for i := 0; i < hole.NumPoints(); i++ {
+			pt := hole.PointN(i)
+			if pointRingSide(pt.XY(), outer) == exterior {
 				return Polygon{}, errors.New("hole must be inside outer ring")
 			}
 		}
