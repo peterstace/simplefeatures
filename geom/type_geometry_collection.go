@@ -198,3 +198,17 @@ func (c GeometryCollection) IsValid() bool {
 	})
 	return all
 }
+
+// Reverse in the case of GeometryCollection reverses each component and
+// also returns them in reversed order.
+func (c GeometryCollection) Reverse() Geometry {
+	var geoms []Geometry
+	for n := 0; n < c.NumGeometries(); n++ {
+		geoms = append(geoms, c.GeometryN(n).Reverse())
+	}
+	// Reverse the geometry slice.
+	for left, right := 0, len(geoms)-1; left < right; left, right = left+1, right-1 {
+		geoms[left], geoms[right] = geoms[right], geoms[left]
+	}
+	return NewGeometryCollection(geoms).AsGeometry()
+}

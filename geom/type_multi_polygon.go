@@ -329,3 +329,17 @@ func (m MultiPolygon) Centroid() (Point, bool) {
 	avg = avg.Scale(1.0 / totalArea)
 	return NewPointXY(avg), true
 }
+
+// Reverse in the case of MultiPolygon outputs the reversed polygons in reverse order.
+func (m MultiPolygon) Reverse() Geometry {
+	polys := make([]Polygon, len(m.polys))
+	// Form the reversed slice.
+	for i := 0; i < len(m.polys); i++ {
+		polys[i] = m.polys[len(m.polys)-1-i].Reverse().AsPolygon()
+	}
+	if m2, err := NewMultiPolygon(polys); err != nil {
+		panic("Reverse of an existing MultiPolygon should not fail")
+	} else {
+		return m2.AsGeometry()
+	}
+}

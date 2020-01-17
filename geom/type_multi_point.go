@@ -190,3 +190,13 @@ func (m MultiPoint) EqualsExact(other Geometry, opts ...EqualsExactOption) bool 
 func (m MultiPoint) IsValid() bool {
 	return true
 }
+
+// Reverse in the case of MultiPoint outputs the same points in reverse order.
+func (m MultiPoint) Reverse() Geometry {
+	coords := make([]Coordinates, len(m.pts))
+	// Form the reversed slice.
+	for i := 0; i < len(m.pts); i++ {
+		coords[i] = m.pts[len(m.pts)-1-i].Coordinates()
+	}
+	return NewMultiPointC(coords).AsGeometry()
+}
