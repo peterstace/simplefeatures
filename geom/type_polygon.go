@@ -254,10 +254,10 @@ func (p Polygon) Envelope() (Envelope, bool) {
 
 func (p Polygon) rings() []LineString {
 	dst := make([]LineString, 0, 1+len(p.holes))
-	return p.appendRings(dst)
+	return appendRings(dst, p)
 }
 
-func (p Polygon) appendRings(dst []LineString) []LineString {
+func appendRings(dst []LineString, p Polygon) []LineString {
 	dst = append(dst, p.outer)
 	dst = append(dst, p.holes...)
 	return dst

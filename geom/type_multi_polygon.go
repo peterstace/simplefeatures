@@ -117,7 +117,7 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 				linePts := make(map[XY]struct{})
 				linePts[line1.a.XY] = struct{}{}
 				linePts[line1.b.XY] = struct{}{}
-				p2rings = p2.appendRings(p2rings[:0])
+				p2rings = appendRings(p2rings[:0], p2)
 				for _, r2 := range p2rings {
 					for _, line2 := range r2.lines {
 						inter := intersectLineWithLineNoAlloc(line1, line2)
