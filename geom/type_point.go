@@ -93,6 +93,11 @@ func (p Point) Value() (driver.Value, error) {
 	return buf.Bytes(), err
 }
 
+// Area in the case of a Point is zero.
+func (p Point) Area() float64 {
+	return 0
+}
+
 func (p Point) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()

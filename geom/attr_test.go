@@ -2,6 +2,7 @@ package geom_test
 
 import (
 	"math"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -474,6 +475,64 @@ func TestArea(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSignedArea(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    string
+		expected float64
+	}{
+		{
+			name:     "when a polygon is the unit square",
+			input:    "POLYGON((0 0,1 0,1 1,0 1,0 0))",
+			expected: 1,
+		},
+		{
+			name:     "when a polygon is the unit square wound clockwise",
+			input:    "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			expected: -1,
+		},
+		{
+			name: "when a polygon has holes",
+			input: `POLYGON(
+						(0 0,5 0,5 3,0 3,0 0),
+						(1 1,1 2,2 2,2 1,1 1),
+						(3 1,3 2,4 2,4 1,3 1)
+					)`,
+			expected: 13,
+		},
+		{
+			name:     "when a polygon is angular",
+			input:    `POLYGON((3 4,5 6,9 5,12 8,5 11,3 4))`,
+			expected: 30,
+		},
+		{
+			name:     "when a multipolygon has two polygons",
+			input:    `MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)),((3 4,5 6,9 5,12 8,5 11,3 4)))`,
+			expected: 31,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Logf("input: %s", tc.input)
+			geom := geomFromWKT(t, tc.input)
+			var got float64
+			switch {
+			case geom.IsPolygon():
+				got = geom.AsPolygon().SignedArea()
+			case geom.IsMultiPolygon():
+				got = geom.AsMultiPolygon().SignedArea()
+			default:
+				t.Errorf("expected: Polygon or MultiPolygon, got: %s", reflect.TypeOf(geom).Name())
+			}
+			if got != tc.expected {
+				t.Errorf("expected: %f, got: %f", tc.expected, got)
+			}
+		})
+	}
+
 }
 
 func TestNoArea(t *testing.T) {

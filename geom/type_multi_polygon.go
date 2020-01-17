@@ -296,7 +296,7 @@ func (m MultiPolygon) IsValid() bool {
 	return err == nil
 }
 
-// Area gives the area of the multi polygon.
+// Area in the case of a MultiPolygon is the sum of the areas of its polygons.
 func (m MultiPolygon) Area() float64 {
 	var area float64
 	n := m.NumPolygons()
@@ -304,6 +304,16 @@ func (m MultiPolygon) Area() float64 {
 		area += m.PolygonN(i).Area()
 	}
 	return area
+}
+
+// SignedArea returns the sum of the signed areas of the constituent polygons.
+func (m MultiPolygon) SignedArea() float64 {
+	var signedArea float64
+	n := m.NumPolygons()
+	for i := 0; i < n; i++ {
+		signedArea += m.PolygonN(i).SignedArea()
+	}
+	return signedArea
 }
 
 // Centroid returns the multi polygon's centroid point. It returns false if the

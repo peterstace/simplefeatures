@@ -119,3 +119,8 @@ func (e EmptySet) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 func (e EmptySet) IsValid() bool {
 	return true
 }
+
+// Area in the case of the EmptySet is zero.
+func (e EmptySet) Area() float64 {
+	return 0
+}

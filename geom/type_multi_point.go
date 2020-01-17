@@ -190,3 +190,8 @@ func (m MultiPoint) EqualsExact(other Geometry, opts ...EqualsExactOption) bool 
 func (m MultiPoint) IsValid() bool {
 	return true
 }
+
+// Area in the case of a MultiPoint is zero.
+func (m MultiPoint) Area() float64 {
+	return 0
+}
