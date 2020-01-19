@@ -233,22 +233,12 @@ func hasIntersectionLineWithMultiPoint(ln Line, mp MultiPoint) bool {
 }
 
 func hasIntersectionMultiPointWithMultiLineString(mp MultiPoint, mls MultiLineString) bool {
-	numPts := mp.NumPoints()
-	for i := 0; i < numPts; i++ {
+	for i := 0; i < mp.NumPoints(); i++ {
 		pt := mp.PointN(i)
-		numLSs := mls.NumLineStrings()
-		for j := 0; j < numLSs; j++ {
+		for j := 0; j < mls.NumLineStrings(); j++ {
 			ls := mls.LineStringN(j)
-			numLSPts := ls.NumPoints()
-			for k := 0; k < numLSPts-1; k++ {
-				ln, err := NewLineC(
-					ls.PointN(k).Coordinates(),
-					ls.PointN(k+1).Coordinates(),
-				)
-				if err != nil {
-					// Should never occur due to construction.
-					panic(err)
-				}
+			for k := 0; k < ls.NumLines(); k++ {
+				ln := ls.LineN(k)
 				if hasIntersectionPointWithLine(pt, ln) {
 					return true
 				}

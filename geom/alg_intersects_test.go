@@ -248,6 +248,7 @@ func TestIntersects(t *testing.T) {
 		// MultiPoint/MultiLineString
 		{"MULTIPOINT(0 0,1 0)", "MULTILINESTRING((0 1,1 1),(1 0,2 -1))", true},
 		{"MULTIPOINT(0 0,1 0)", "MULTILINESTRING((0 1,1 1),(1 0.5,2 -0.5))", false},
+		{"MULTIPOINT(0.5 0.5)", "MULTILINESTRING((0 0,0 0,1 1))", true},
 
 		// MultiPoint/MultiPolygon
 		{"MULTIPOINT((1 1))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)))", true},
