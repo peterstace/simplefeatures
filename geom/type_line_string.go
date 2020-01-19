@@ -75,15 +75,14 @@ func (s LineString) NumLines() int {
 }
 
 func (s LineString) LineN(n int) Line {
-	ln, err := NewLineC(
-		s.coords[s.segments[n]],
-		s.coords[s.segments[n]+1],
-	)
-	if err != nil {
-		// Cannot occur due to the way that the segments array is constructed.
-		panic(err)
-	}
-	return ln
+	// Line is constructed directly here, rather than via NewLineC. This is
+	// because LineN is called in a tight loop in many places, and skipping the
+	// constructor significantly speeds up the benchmarks.
+	//
+	// The two coordinates are guarenteed to not be conincident due to the way
+	// that the segments slice is constructed, so this is safe.
+	i := s.segments[n]
+	return Line{s.coords[i], s.coords[i+1]}
 }
 
 func (s LineString) AsText() string {
