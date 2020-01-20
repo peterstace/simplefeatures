@@ -243,7 +243,7 @@ func (m MultiLineString) Reverse() MultiLineString {
 	linestrings := make([]LineString, len(m.lines))
 	// Form the reversed slice.
 	for i := 0; i < len(m.lines); i++ {
-		linestrings[i] = m.lines[len(m.lines)-1-i].Reverse()
+		linestrings[i] = m.lines[i].Reverse()
 	}
 	return NewMultiLineString(linestrings)
 }

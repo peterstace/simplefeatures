@@ -483,7 +483,7 @@ func CheckReverse(t *testing.T, pg PostGIS, g geom.Geometry) {
 	t.Run("CheckReverse", func(t *testing.T) {
 		got := g.Reverse()
 		want := pg.Reverse(t, g)
-		if got != want {
+		if !got.EqualsExact(want) {
 			t.Logf("got:  %v", got.AsText())
 			t.Logf("want: %v", want.AsText())
 			t.Error("mismatch")

@@ -429,7 +429,7 @@ func (p Polygon) Reverse() Polygon {
 	holes := make([]LineString, len(p.holes))
 	// Form the reversed slice.
 	for i := 0; i < len(p.holes); i++ {
-		holes[i] = p.holes[len(p.holes)-1-i].Reverse()
+		holes[i] = p.holes[i].Reverse()
 	}
 	p2, err := NewPolygon(outer, holes)
 	if err != nil {

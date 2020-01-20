@@ -204,11 +204,11 @@ func (c GeometryCollection) IsValid() bool {
 func (c GeometryCollection) Reverse() GeometryCollection {
 	var geoms []Geometry
 	for n := 0; n < c.NumGeometries(); n++ {
-		geoms = append(geoms, c.GeometryN(n).Reverse())
-	}
-	// Reverse the slice.
-	for left, right := 0, len(geoms)-1; left < right; left, right = left+1, right-1 {
-		geoms[left], geoms[right] = geoms[right], geoms[left]
+		rev := c.GeometryN(n).Reverse()
+		if rev.IsEmpty() {
+			continue // Omit empty sub-geometries.
+		}
+		geoms = append(geoms, rev)
 	}
 	return NewGeometryCollection(geoms)
 }

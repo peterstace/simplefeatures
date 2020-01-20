@@ -196,7 +196,7 @@ func (m MultiPoint) Reverse() MultiPoint {
 	coords := make([]Coordinates, len(m.pts))
 	// Form the reversed slice.
 	for i := 0; i < len(m.pts); i++ {
-		coords[i] = m.pts[len(m.pts)-1-i].Coordinates()
+		coords[i] = m.pts[i].Coordinates()
 	}
 	return NewMultiPointC(coords)
 }

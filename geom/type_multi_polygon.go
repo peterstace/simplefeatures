@@ -368,7 +368,7 @@ func (m MultiPolygon) Reverse() MultiPolygon {
 	polys := make([]Polygon, len(m.polys))
 	// Form the reversed slice.
 	for i := 0; i < len(m.polys); i++ {
-		polys[i] = m.polys[len(m.polys)-1-i].Reverse()
+		polys[i] = m.polys[i].Reverse()
 	}
 	m2, err := NewMultiPolygon(polys)
 	if err != nil {
