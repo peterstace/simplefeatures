@@ -300,3 +300,17 @@ func (s LineString) Length() float64 {
 func (s LineString) AsMultiLineString() MultiLineString {
 	return NewMultiLineString([]LineString{s})
 }
+
+// Reverse in the case of LineString outputs the coordinates in reverse order.
+func (s LineString) Reverse() LineString {
+	coords := s.Coordinates()
+	// Reverse the slice.
+	for left, right := 0, len(coords)-1; left < right; left, right = left+1, right-1 {
+		coords[left], coords[right] = coords[right], coords[left]
+	}
+	s2, err := NewLineStringC(coords)
+	if err != nil {
+		panic("Reverse of an existing LineString should not fail")
+	}
+	return s2
+}

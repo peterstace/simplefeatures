@@ -565,3 +565,77 @@ func TestPolygonToMultiPolygon(t *testing.T) {
 		t.Errorf("got %v", mp.AsText())
 	}
 }
+
+func TestReverse(t *testing.T) {
+	for i, tt := range []struct {
+		wkt, boundary string
+	}{
+		{"POINT EMPTY", "POINT EMPTY"},
+		{"LINESTRING EMPTY", "LINESTRING EMPTY"},
+		{"POLYGON EMPTY", "POLYGON EMPTY"},
+		{"MULTIPOINT EMPTY", "MULTIPOINT EMPTY"},
+		{"MULTILINESTRING EMPTY", "MULTILINESTRING EMPTY"},
+		{"MULTIPOLYGON EMPTY", "MULTIPOLYGON EMPTY"},
+
+		{"POINT(1 2)", "POINT(1 2)"},
+		{"LINESTRING(1 2,3 4)", "LINESTRING(3 4,1 2)"},
+		{"LINESTRING(1 2,3 4,5 6)", "LINESTRING(5 6,3 4,1 2)"},
+		{"LINESTRING(1 2,3 4,5 6,7 8)", "LINESTRING(7 8,5 6,3 4,1 2)"},
+		{"LINESTRING(0 0,1 0,0 1,0 0)", "LINESTRING(0 0,0 1,1 0,0 0)"},
+
+		{"POLYGON((0 0,1 0,1 1,0 1,0 0))", "POLYGON((0 0,0 1,1 1,1 0,0 0))"},
+		{"POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))", "POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1))"},
+
+		{"MULTIPOINT((1 2))", "MULTIPOINT((1 2))"},
+		{"MULTIPOINT((1 2),(3 4))", "MULTIPOINT((1 2),(3 4))"},
+
+		{
+			"MULTILINESTRING((0 0,1 1))",
+			"MULTILINESTRING((1 1,0 0))",
+		},
+		{
+			"MULTILINESTRING((0 0,1 0),(0 1,1 1))",
+			"MULTILINESTRING((1 0,0 0),(1 1,0 1))",
+		},
+		{
+			"MULTILINESTRING((0 0,1 0,1 1),(0 0,0 1,1 1))",
+			"MULTILINESTRING((1 1,1 0,0 0),(1 1,0 1,0 0))",
+		},
+
+		{
+			"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1)),((4 0,5 0,5 1,4 1,4 0)))",
+			"MULTIPOLYGON(((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1)),((4 0,4 1,5 1,5 0,4 0)))",
+		},
+
+		{
+			"GEOMETRYCOLLECTION EMPTY",
+			"GEOMETRYCOLLECTION EMPTY",
+		},
+		{
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY)",
+			"GEOMETRYCOLLECTION EMPTY",
+		},
+		{
+			"GEOMETRYCOLLECTION(POINT(1 1))",
+			"GEOMETRYCOLLECTION(POINT(1 1))",
+		},
+		{
+			`GEOMETRYCOLLECTION(
+				LINESTRING(1 0,0 5,5 2),
+				POINT(2 3),
+				POLYGON((0 0,1 0,0 1,0 0))
+			)`,
+			`GEOMETRYCOLLECTION(
+				LINESTRING(5 2,0 5,1 0),
+				POINT(2 3),
+				POLYGON((0 0,0 1,1 0,0 0))
+			)`,
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			want := geomFromWKT(t, tt.boundary)
+			got := geomFromWKT(t, tt.wkt).Reverse()
+			expectGeomEq(t, got, want)
+		})
+	}
+}
