@@ -583,8 +583,8 @@ func (g Geometry) Centroid() (Point, bool) {
 	}
 }
 
-// Area gives the area of the Polygon or MultiPolygon. If the Geometry is not a
-// Polygon or MultiPolygon, then 0 is returned.
+// Area gives the area of the Polygon or MultiPolygon or GeometryCollection.
+// If the Geometry is none of those types, then 0 is returned.
 func (g Geometry) Area() float64 {
 	switch {
 	case g.IsEmpty():

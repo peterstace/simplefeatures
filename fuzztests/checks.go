@@ -436,14 +436,8 @@ func CheckIntersection(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 }
 
 func CheckArea(t *testing.T, pg PostGIS, g geom.Geometry) {
-	if !g.IsPolygon() && !g.IsMultiPolygon() {
-		return
-	}
 	t.Run("CheckArea", func(t *testing.T) {
-		got, ok := g.Area()
-		if !ok {
-			t.Fatal("could not get area")
-		}
+		got := g.Area()
 		want := pg.Area(t, g)
 		const eps = 0.000000001
 		if math.Abs(got-want) > eps {
