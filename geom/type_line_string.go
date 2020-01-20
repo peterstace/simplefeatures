@@ -22,7 +22,11 @@ type LineString struct {
 // NewLineStringC creates a line string from the coordinates defining its
 // points.
 func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, error) {
-	var lines []Line
+	// Fewer lines than len(pts)-1 _may_ be used, however the normal case is
+	// for there to be no coincident control points, so the full capacity would
+	// be utilised.
+	lines := make([]Line, 0, len(pts)-1)
+
 	for i := 0; i < len(pts)-1; i++ {
 		if pts[i].XY.Equals(pts[i+1].XY) {
 			continue
@@ -295,4 +299,18 @@ func (s LineString) Length() float64 {
 // into a MultiLineString.
 func (s LineString) AsMultiLineString() MultiLineString {
 	return NewMultiLineString([]LineString{s})
+}
+
+// Reverse in the case of LineString outputs the coordinates in reverse order.
+func (s LineString) Reverse() LineString {
+	coords := s.Coordinates()
+	// Reverse the slice.
+	for left, right := 0, len(coords)-1; left < right; left, right = left+1, right-1 {
+		coords[left], coords[right] = coords[right], coords[left]
+	}
+	s2, err := NewLineStringC(coords)
+	if err != nil {
+		panic("Reverse of an existing LineString should not fail")
+	}
+	return s2
 }

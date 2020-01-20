@@ -199,6 +199,20 @@ func (c GeometryCollection) IsValid() bool {
 	return all
 }
 
+// Reverse in the case of GeometryCollection reverses each component and
+// also returns them in the original order. It also omits empty components.
+func (c GeometryCollection) Reverse() GeometryCollection {
+	var geoms []Geometry
+	for n := 0; n < c.NumGeometries(); n++ {
+		rev := c.GeometryN(n).Reverse()
+		if rev.IsEmpty() {
+			continue // Omit empty sub-geometries.
+		}
+		geoms = append(geoms, rev)
+	}
+	return NewGeometryCollection(geoms)
+}
+
 // Area in the case of a GeometryCollection is the sum of the areas of its parts.
 func (c GeometryCollection) Area() float64 {
 	var sum float64

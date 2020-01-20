@@ -48,6 +48,7 @@ func TestFuzz(t *testing.T) {
 			CheckLength(t, pg, g)
 			CheckArea(t, pg, g)
 			CheckCentroid(t, pg, g)
+			CheckReverse(t, pg, g)
 		})
 	}
 	for i, g1 := range geoms {

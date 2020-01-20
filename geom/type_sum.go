@@ -639,3 +639,31 @@ func (g Geometry) IsSimple() (isSimple bool, wellDefined bool) {
 		panic("unknown geometry: " + g.tag.String())
 	}
 }
+
+// Reverse returns a new geometry containing coordinates listed in reverse order.
+// Multi component geometries do not reverse the order of their components,
+// but merely reverse each component's coordinates in place.
+func (g Geometry) Reverse() Geometry {
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().Reverse().AsGeometry()
+	case emptySetTag:
+		return g.AsEmptySet().Reverse().AsGeometry()
+	case pointTag:
+		return g.AsPoint().Reverse().AsGeometry()
+	case lineTag:
+		return g.AsLine().Reverse().AsGeometry()
+	case lineStringTag:
+		return g.AsLineString().Reverse().AsGeometry()
+	case polygonTag:
+		return g.AsPolygon().Reverse().AsGeometry()
+	case multiPointTag:
+		return g.AsMultiPoint().Reverse().AsGeometry()
+	case multiLineStringTag:
+		return g.AsMultiLineString().Reverse().AsGeometry()
+	case multiPolygonTag:
+		return g.AsMultiPolygon().Reverse().AsGeometry()
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}

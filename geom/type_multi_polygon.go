@@ -28,8 +28,38 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 	if !doExpensiveValidations(opts) {
 		return MultiPolygon{polys}, nil
 	}
-	for i := 0; i < len(polys); i++ {
-		for j := i + 1; j < len(polys); j++ {
+
+	type interval struct {
+		minX, maxX float64
+	}
+	intervals := make([]interval, len(polys))
+	for i := range intervals {
+		env, ok := polys[i].Envelope()
+		if !ok {
+			return MultiPolygon{}, errors.New("polygon in multiploygon not allowed to be empty")
+		}
+		intervals[i].minX = env.Min().X
+		intervals[i].maxX = env.Max().X
+	}
+	indexes := seq(len(polys))
+	sort.Slice(indexes, func(i, j int) bool {
+		xi := intervals[indexes[i]].minX
+		xj := intervals[indexes[j]].minX
+		return xi < xj
+	})
+
+	active := intHeap{less: func(i, j int) bool {
+		xi := intervals[i].maxX
+		xj := intervals[j].maxX
+		return xi < xj
+	}}
+
+	for _, i := range indexes {
+		currentX := intervals[i].minX
+		for len(active.data) > 0 && intervals[active.data[0]].maxX < currentX {
+			active.pop()
+		}
+		for _, j := range active.data {
 			bound1 := polys[i].Boundary()
 			bound2 := polys[j].Boundary()
 			inter := mustIntersection(bound1, bound2)
@@ -40,7 +70,9 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 				return MultiPolygon{}, errors.New("polygon interiors must not intersect")
 			}
 		}
+		active.push(i)
 	}
+
 	return MultiPolygon{polys}, nil
 }
 
@@ -77,6 +109,7 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 		// then each midpoint between those points. These are enough points
 		// that one of the points will be inside the other polygon iff the
 		// interior of the polygons intersect.
+		var p2rings []LineString
 		allPts := make(map[XY]struct{})
 		for _, r1 := range p1.rings() {
 			for _, line1 := range r1.lines {
@@ -84,18 +117,18 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 				linePts := make(map[XY]struct{})
 				linePts[line1.a.XY] = struct{}{}
 				linePts[line1.b.XY] = struct{}{}
-				for _, r2 := range p2.rings() {
+				p2rings = appendRings(p2rings[:0], p2)
+				for _, r2 := range p2rings {
 					for _, line2 := range r2.lines {
-						env, ok := mustIntersection(line1.AsGeometry(), line2.AsGeometry()).Envelope()
-						if !ok {
+						inter := intersectLineWithLineNoAlloc(line1, line2)
+						if inter.empty {
 							continue
 						}
-						if !env.Min().Equals(env.Max()) {
+						if inter.ptA != inter.ptB {
 							continue
 						}
-						inter := env.Min()
-						if !inter.Equals(line1.a.XY) && !inter.Equals(line1.b.XY) {
-							linePts[inter] = struct{}{}
+						if inter.ptA != line1.StartPoint().XY() && inter.ptA != line1.EndPoint().XY() {
+							linePts[inter.ptA] = struct{}{}
 						}
 					}
 				}
@@ -338,4 +371,19 @@ func (m MultiPolygon) Centroid() (Point, bool) {
 	}
 	avg = avg.Scale(1.0 / totalArea)
 	return NewPointXY(avg), true
+}
+
+// Reverse in the case of MultiPolygon outputs the component polygons in their original order,
+// each individually reversed.
+func (m MultiPolygon) Reverse() MultiPolygon {
+	polys := make([]Polygon, len(m.polys))
+	// Form the reversed slice.
+	for i := 0; i < len(m.polys); i++ {
+		polys[i] = m.polys[i].Reverse()
+	}
+	m2, err := NewMultiPolygon(polys)
+	if err != nil {
+		panic("Reverse of an existing MultiPolygon should not fail")
+	}
+	return m2
 }

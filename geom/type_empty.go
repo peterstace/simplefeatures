@@ -119,3 +119,8 @@ func (e EmptySet) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 func (e EmptySet) IsValid() bool {
 	return true
 }
+
+// Reverse in the case of EmptySet produces no changes.
+func (e EmptySet) Reverse() EmptySet {
+	return e
+}

@@ -253,12 +253,14 @@ func (p Polygon) Envelope() (Envelope, bool) {
 }
 
 func (p Polygon) rings() []LineString {
-	rings := make([]LineString, 1+len(p.holes))
-	rings[0] = p.outer
-	for i, h := range p.holes {
-		rings[1+i] = h
-	}
-	return rings
+	dst := make([]LineString, 0, 1+len(p.holes))
+	return appendRings(dst, p)
+}
+
+func appendRings(dst []LineString, p Polygon) []LineString {
+	dst = append(dst, p.outer)
+	dst = append(dst, p.holes...)
+	return dst
 }
 
 func (p Polygon) Boundary() Geometry {
@@ -432,4 +434,20 @@ func (p Polygon) AsMultiPolygon() MultiPolygon {
 		panic(err)
 	}
 	return mp
+}
+
+// Reverse in the case of Polygon outputs the coordinates of each ring in reverse order,
+// but note the order of the inner rings is unchanged.
+func (p Polygon) Reverse() Polygon {
+	outer := p.outer.Reverse()
+	holes := make([]LineString, len(p.holes))
+	// Form the reversed slice.
+	for i := 0; i < len(p.holes); i++ {
+		holes[i] = p.holes[i].Reverse()
+	}
+	p2, err := NewPolygon(outer, holes)
+	if err != nil {
+		panic("Reverse of an existing Polygon should not fail")
+	}
+	return p2
 }

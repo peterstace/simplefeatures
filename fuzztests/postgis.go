@@ -248,3 +248,7 @@ func (p PostGIS) Area(t *testing.T, g geom.Geometry) float64 {
 func (p PostGIS) Centroid(t *testing.T, g geom.Geometry) geom.Geometry {
 	return p.geomFunc(t, g, "ST_Centroid")
 }
+
+func (p PostGIS) Reverse(t *testing.T, g geom.Geometry) geom.Geometry {
+	return p.geomFunc(t, g, "ST_Reverse")
+}
