@@ -1,11 +1,20 @@
 # Changelog
 
+## v0.6.0
+
+- Adds `Reverse` methods, which reverses the order of each geometry's control
+  points.
+
+- Adds `SignedArea` methods, which calculate the signed area of geometries. The
+  signed area takes into consideration winding order, and produces either a
+negative or positive result for non-empty areal geometries.
+
 ## v0.5.0
 
 - Fixes a bug where polygons with nested rings would erroneously be reported as
   valid.
 
-- Performance improvements have been made to Polygon and MultiPolygon
+- Performance improvements have been made to `Polygon` and `MultiPolygon`
   validation. The algorithms used now have sub-quadratic time complexity, and
 memory allocations have been significantly reduced.
 
