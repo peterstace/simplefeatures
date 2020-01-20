@@ -633,23 +633,23 @@ func (g Geometry) IsSimple() (isSimple bool, wellDefined bool) {
 func (g Geometry) Reverse() Geometry {
 	switch g.tag {
 	case geometryCollectionTag:
-		return g.AsGeometryCollection().Reverse()
+		return g.AsGeometryCollection().Reverse().AsGeometry()
 	case emptySetTag:
-		return g
+		return g.AsEmptySet().Reverse().AsGeometry()
 	case pointTag:
-		return g.AsPoint().Reverse()
+		return g.AsPoint().Reverse().AsGeometry()
 	case lineTag:
-		return g.AsLine().Reverse()
+		return g.AsLine().Reverse().AsGeometry()
 	case lineStringTag:
-		return g.AsLineString().Reverse()
+		return g.AsLineString().Reverse().AsGeometry()
 	case polygonTag:
-		return g.AsPolygon().Reverse()
+		return g.AsPolygon().Reverse().AsGeometry()
 	case multiPointTag:
-		return g.AsMultiPoint().Reverse()
+		return g.AsMultiPoint().Reverse().AsGeometry()
 	case multiLineStringTag:
-		return g.AsMultiLineString().Reverse()
+		return g.AsMultiLineString().Reverse().AsGeometry()
 	case multiPolygonTag:
-		return g.AsMultiPolygon().Reverse()
+		return g.AsMultiPolygon().Reverse().AsGeometry()
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}

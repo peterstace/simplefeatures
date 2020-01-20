@@ -192,11 +192,11 @@ func (m MultiPoint) IsValid() bool {
 }
 
 // Reverse in the case of MultiPoint outputs the same points in reverse order.
-func (m MultiPoint) Reverse() Geometry {
+func (m MultiPoint) Reverse() MultiPoint {
 	coords := make([]Coordinates, len(m.pts))
 	// Form the reversed slice.
 	for i := 0; i < len(m.pts); i++ {
 		coords[i] = m.pts[len(m.pts)-1-i].Coordinates()
 	}
-	return NewMultiPointC(coords).AsGeometry()
+	return NewMultiPointC(coords)
 }

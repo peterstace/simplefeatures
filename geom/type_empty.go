@@ -121,6 +121,6 @@ func (e EmptySet) IsValid() bool {
 }
 
 // Reverse in the case of EmptySet produces no changes.
-func (e EmptySet) Reverse() Geometry {
-	return e.AsGeometry()
+func (e EmptySet) Reverse() EmptySet {
+	return e
 }

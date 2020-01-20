@@ -186,6 +186,6 @@ func (n Line) AsLineString() LineString {
 }
 
 // Reverse in the case of Line outputs the coordinates in reverse order.
-func (n Line) Reverse() Geometry {
-	return Line{n.b, n.a}.AsGeometry()
+func (n Line) Reverse() Line {
+	return Line{n.b, n.a}
 }

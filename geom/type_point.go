@@ -132,6 +132,6 @@ func (p Point) IsValid() bool {
 }
 
 // Reverse in the case of Point outputs the same point.
-func (p Point) Reverse() Geometry {
-	return Point{p.coords}.AsGeometry()
+func (p Point) Reverse() Point {
+	return Point{p.coords}
 }

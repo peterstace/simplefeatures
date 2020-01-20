@@ -331,15 +331,15 @@ func (m MultiPolygon) Centroid() (Point, bool) {
 }
 
 // Reverse in the case of MultiPolygon outputs the reversed polygons in reverse order.
-func (m MultiPolygon) Reverse() Geometry {
+func (m MultiPolygon) Reverse() MultiPolygon {
 	polys := make([]Polygon, len(m.polys))
 	// Form the reversed slice.
 	for i := 0; i < len(m.polys); i++ {
-		polys[i] = m.polys[len(m.polys)-1-i].Reverse().AsPolygon()
+		polys[i] = m.polys[len(m.polys)-1-i].Reverse()
 	}
-	if m2, err := NewMultiPolygon(polys); err != nil {
+	m2, err := NewMultiPolygon(polys)
+	if err != nil {
 		panic("Reverse of an existing MultiPolygon should not fail")
-	} else {
-		return m2.AsGeometry()
 	}
+	return m2
 }

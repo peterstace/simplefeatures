@@ -239,11 +239,11 @@ func (m MultiLineString) Length() float64 {
 }
 
 // Reverse in the case of MultiLineString outputs the coordinates in reverse order.
-func (m MultiLineString) Reverse() Geometry {
+func (m MultiLineString) Reverse() MultiLineString {
 	linestrings := make([]LineString, len(m.lines))
 	// Form the reversed slice.
 	for i := 0; i < len(m.lines); i++ {
-		linestrings[i] = m.lines[len(m.lines)-1-i].Reverse().AsLineString()
+		linestrings[i] = m.lines[len(m.lines)-1-i].Reverse()
 	}
-	return NewMultiLineString(linestrings).AsGeometry()
+	return NewMultiLineString(linestrings)
 }
