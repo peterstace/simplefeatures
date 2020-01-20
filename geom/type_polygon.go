@@ -344,17 +344,31 @@ func (p Polygon) IsValid() bool {
 	return err == nil
 }
 
-// Area gives the area of the polygon.
+// Area of a Polygon is the outer ring's area minus the areas of all inner rings.
 func (p Polygon) Area() float64 {
-	area := areaOfLinearRing(p.ExteriorRing())
+	area := math.Abs(signedAreaOfLinearRing(p.ExteriorRing()))
 	n := p.NumInteriorRings()
 	for i := 0; i < n; i++ {
-		area -= areaOfLinearRing(p.InteriorRingN(i))
+		area -= math.Abs(signedAreaOfLinearRing(p.InteriorRingN(i)))
 	}
 	return area
 }
 
-func areaOfLinearRing(lr LineString) float64 {
+// SignedArea gives the positive area of the polygon when the outer rings are
+// wound CCW and any inner rings are wound CW, and the negative area of the
+// polygon when the outer rings are wound CW and any inner rings are wound CCW.
+// If the windings of the inner and outer rings are the same, then the area
+// will be inconsistent.
+func (p Polygon) SignedArea() float64 {
+	signedArea := signedAreaOfLinearRing(p.ExteriorRing())
+	n := p.NumInteriorRings()
+	for i := 0; i < n; i++ {
+		signedArea += signedAreaOfLinearRing(p.InteriorRingN(i))
+	}
+	return signedArea
+}
+
+func signedAreaOfLinearRing(lr LineString) float64 {
 	// This is the "Shoelace Formula".
 	var sum float64
 	n := lr.NumPoints()
@@ -363,7 +377,7 @@ func areaOfLinearRing(lr LineString) float64 {
 		pt1 := lr.PointN((i + 1) % n).XY()
 		sum += (pt1.X + pt0.X) * (pt1.Y - pt0.Y)
 	}
-	return math.Abs(sum / 2)
+	return sum / 2
 }
 
 // Centroid returns the polygon's centroid point.

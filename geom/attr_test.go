@@ -458,17 +458,35 @@ func TestArea(t *testing.T) {
 		wkt  string
 		want float64
 	}{
+		{"GEOMETRYCOLLECTION EMPTY", 0},
+		{"LINESTRING(1 1,5 5)", 0},
+		{"LINESTRING(5 8,4 9)", 0},
+		{"LINESTRING(0 0,0 1,1 3)", 0},
+		{"MULTILINESTRING((4 2,5 1),(9 2,7 1))", 0},
+		{"MULTILINESTRING((0 0,2 0),(1 0,3 0))", 0},
+		{"POINT(1 3)", 0},
+		{"MULTIPOINT(0 0,0 1,1 0,0 0)", 0},
 		{"POLYGON((0 0,1 1,0 1,0 0))", 0.5},
 		{"POLYGON((0 0,0 1,1 1,0 0))", 0.5},
 		{"POLYGON((0 0,0 1,1 1,1 0,0 0))", 1.0},
 		{"POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1))", 8.0},
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((2 1,1 1,2 0,2 1)))", 1.0},
+		{"GEOMETRYCOLLECTION(POINT EMPTY)", 0},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", 0},
+		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 2)))", 0},
+		{`GEOMETRYCOLLECTION(
+			LINESTRING(1 0,0 5,5 2),
+			POINT(2 3),
+			POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1))
+		)`, 8.0},
+		{`GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(
+			LINESTRING(1 0,0 5,5 2),
+			POINT(2 3),
+			MULTIPOLYGON(((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1)))
+		))`, 8.0},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, ok := geomFromWKT(t, tt.wkt).Area()
-			if !ok {
-				t.Fatal("could not calculate area")
-			}
+			got := geomFromWKT(t, tt.wkt).Area()
 			if got != tt.want {
 				t.Errorf("got=%v want=%v", got, tt.want)
 			}
@@ -476,18 +494,62 @@ func TestArea(t *testing.T) {
 	}
 }
 
-func TestNoArea(t *testing.T) {
-	for i, wkt := range []string{
-		"POINT(1 2)",
-		"LINESTRING(1 2,3 4)",
-	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, defined := geomFromWKT(t, wkt).Area()
-			if defined {
-				t.Errorf("expected area not to be defined, but was")
+func TestSignedArea(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    string
+		expected float64
+	}{
+		{
+			name:     "when a polygon is the unit square",
+			input:    "POLYGON((0 0,1 0,1 1,0 1,0 0))",
+			expected: 1,
+		},
+		{
+			name:     "when a polygon is the unit square wound clockwise",
+			input:    "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			expected: -1,
+		},
+		{
+			name: "when a polygon has holes",
+			input: `POLYGON(
+						(0 0,5 0,5 3,0 3,0 0),
+						(1 1,1 2,2 2,2 1,1 1),
+						(3 1,3 2,4 2,4 1,3 1)
+					)`,
+			expected: 13,
+		},
+		{
+			name:     "when a polygon is angular",
+			input:    `POLYGON((3 4,5 6,9 5,12 8,5 11,3 4))`,
+			expected: 30,
+		},
+		{
+			name:     "when a multipolygon has two polygons",
+			input:    `MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)),((3 4,5 6,9 5,12 8,5 11,3 4)))`,
+			expected: 31,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Logf("input: %s", tc.input)
+			geom := geomFromWKT(t, tc.input)
+			var got float64
+			switch {
+			case geom.IsPolygon():
+				got = geom.AsPolygon().SignedArea()
+			case geom.IsMultiPolygon():
+				got = geom.AsMultiPolygon().SignedArea()
+			default:
+				t.Errorf("expected: Polygon or MultiPolygon but got a different type")
+			}
+			if got != tc.expected {
+				t.Errorf("expected: %f, got: %f", tc.expected, got)
 			}
 		})
 	}
+
 }
 
 func TestCentroid(t *testing.T) {
