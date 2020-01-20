@@ -253,12 +253,14 @@ func (p Polygon) Envelope() (Envelope, bool) {
 }
 
 func (p Polygon) rings() []LineString {
-	rings := make([]LineString, 1+len(p.holes))
-	rings[0] = p.outer
-	for i, h := range p.holes {
-		rings[1+i] = h
-	}
-	return rings
+	dst := make([]LineString, 0, 1+len(p.holes))
+	return appendRings(dst, p)
+}
+
+func appendRings(dst []LineString, p Polygon) []LineString {
+	dst = append(dst, p.outer)
+	dst = append(dst, p.holes...)
+	return dst
 }
 
 func (p Polygon) Boundary() Geometry {
