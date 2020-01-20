@@ -238,7 +238,8 @@ func (m MultiLineString) Length() float64 {
 	return sum
 }
 
-// Reverse in the case of MultiLineString outputs the coordinates in reverse order.
+// Reverse in the case of MultiLineString outputs each component line string in their
+// original order, each individually reversed.
 func (m MultiLineString) Reverse() MultiLineString {
 	linestrings := make([]LineString, len(m.lines))
 	// Form the reversed slice.

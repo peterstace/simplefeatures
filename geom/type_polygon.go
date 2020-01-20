@@ -423,7 +423,7 @@ func (p Polygon) AsMultiPolygon() MultiPolygon {
 }
 
 // Reverse in the case of Polygon outputs the coordinates of each ring in reverse order,
-// and the order of the inner rings are also reversed.
+// but note the order of the inner rings is unchanged.
 func (p Polygon) Reverse() Polygon {
 	outer := p.outer.Reverse()
 	holes := make([]LineString, len(p.holes))

@@ -191,7 +191,7 @@ func (m MultiPoint) IsValid() bool {
 	return true
 }
 
-// Reverse in the case of MultiPoint outputs the same points in reverse order.
+// Reverse in the case of MultiPoint outputs each component point in their original order.
 func (m MultiPoint) Reverse() MultiPoint {
 	coords := make([]Coordinates, len(m.pts))
 	// Form the reversed slice.

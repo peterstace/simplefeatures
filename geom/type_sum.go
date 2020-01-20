@@ -630,6 +630,9 @@ func (g Geometry) IsSimple() (isSimple bool, wellDefined bool) {
 	}
 }
 
+// Reverse returns a new geometry containing coordinates listed in reverse order.
+// Multi component geometries do not reverse the order of their components,
+// but merely reverse each component's coordinates in place.
 func (g Geometry) Reverse() Geometry {
 	switch g.tag {
 	case geometryCollectionTag:

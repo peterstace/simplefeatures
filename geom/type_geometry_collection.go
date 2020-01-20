@@ -200,7 +200,7 @@ func (c GeometryCollection) IsValid() bool {
 }
 
 // Reverse in the case of GeometryCollection reverses each component and
-// also returns them in reversed order.
+// also returns them in the original order. It also omits empty components.
 func (c GeometryCollection) Reverse() GeometryCollection {
 	var geoms []Geometry
 	for n := 0; n < c.NumGeometries(); n++ {

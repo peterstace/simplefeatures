@@ -363,7 +363,8 @@ func (m MultiPolygon) Centroid() (Point, bool) {
 	return NewPointXY(avg), true
 }
 
-// Reverse in the case of MultiPolygon outputs the reversed polygons in reverse order.
+// Reverse in the case of MultiPolygon outputs the component polygons in their original order,
+// each individually reversed.
 func (m MultiPolygon) Reverse() MultiPolygon {
 	polys := make([]Polygon, len(m.polys))
 	// Form the reversed slice.
