@@ -478,3 +478,15 @@ func CheckCentroid(t *testing.T, pg PostGIS, g geom.Geometry) {
 		}
 	})
 }
+
+func CheckReverse(t *testing.T, pg PostGIS, g geom.Geometry) {
+	t.Run("CheckReverse", func(t *testing.T) {
+		got := g.Reverse()
+		want := pg.Reverse(t, g)
+		if got != want {
+			t.Logf("got:  %v", got.AsText())
+			t.Logf("want: %v", want.AsText())
+			t.Error("mismatch")
+		}
+	})
+}
