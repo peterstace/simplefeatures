@@ -79,7 +79,7 @@ func (s LineString) LineN(n int) Line {
 	// because LineN is called in a tight loop in many places, and skipping the
 	// constructor significantly speeds up the benchmarks.
 	//
-	// The two coordinates are guarenteed to not be conincident due to the way
+	// The two coordinates are guaranteed to not be coincident due to the way
 	// that the segments slice is constructed, so this is safe.
 	i := s.segments[n]
 	return Line{s.coords[i], s.coords[i+1]}
