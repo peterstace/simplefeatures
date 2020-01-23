@@ -17,26 +17,32 @@ import (
 //
 // 1. It must contain at least 2 distinct points.
 type LineString struct {
-	segments []int // index into coords
-	coords   []Coordinates
+	// coords have been deduplicated such that no two consecutive coordinates
+	// are coincident. This allows quick calculation of Line segments.
+	coords []Coordinates
+
+	// points are indexes into coords, and retain consecutive coincident
+	// points. This is so that information about the original points making up
+	// the LineString are retained.
+	points []int
 }
 
 // NewLineStringC creates a line string from the coordinates defining its
 // points.
 func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, error) {
-	segments := make([]int, 0, len(pts)-1)
-	coords := make([]Coordinates, len(pts))
-	copy(coords, pts)
+	coords := make([]Coordinates, 0, len(pts)) // may not use full capacity
+	points := make([]int, len(pts))
 
-	for i := range coords {
-		if i+1 < len(coords) && coords[i].XY != coords[i+1].XY {
-			segments = append(segments, i)
+	for i := range pts {
+		if len(coords) == 0 || pts[i].XY != coords[len(coords)-1].XY {
+			coords = append(coords, pts[i])
 		}
+		points[i] = len(coords) - 1
 	}
-	if doCheapValidations(opts) && len(segments) == 0 {
+	if doCheapValidations(opts) && len(coords) <= 1 {
 		return LineString{}, errors.New("LineString must contain at least two distinct points")
 	}
-	return LineString{segments, coords}, nil
+	return LineString{coords, points}, nil
 }
 
 // NewLineStringXY creates a line string from the XYs defining its points.
@@ -51,27 +57,27 @@ func (s LineString) AsGeometry() Geometry {
 
 // StartPoint gives the first point of the line string.
 func (s LineString) StartPoint() Point {
-	return NewPointC(s.coords[0])
+	return NewPointC(s.coords[s.points[0]])
 }
 
 // EndPoint gives the last point of the line string.
 func (s LineString) EndPoint() Point {
-	return NewPointC(s.coords[len(s.coords)-1])
+	return NewPointC(s.coords[s.points[len(s.points)-1]])
 }
 
 // NumPoints gives the number of control points in the line string.
 func (s LineString) NumPoints() int {
-	return len(s.coords)
+	return len(s.points)
 }
 
 // PointN gives the nth (zero indexed) point in the line string. Panics if n is
 // out of range with respect to the number of points.
 func (s LineString) PointN(n int) Point {
-	return NewPointC(s.coords[n])
+	return NewPointC(s.coords[s.points[n]])
 }
 
 func (s LineString) NumLines() int {
-	return len(s.segments)
+	return len(s.coords) - 1
 }
 
 func (s LineString) LineN(n int) Line {
@@ -80,9 +86,8 @@ func (s LineString) LineN(n int) Line {
 	// constructor significantly speeds up the benchmarks.
 	//
 	// The two coordinates are guaranteed to not be coincident due to the way
-	// that the segments slice is constructed, so this is safe.
-	i := s.segments[n]
-	return Line{s.coords[i], s.coords[i+1]}
+	// that the coords slice is constructed, so this is safe.
+	return Line{s.coords[n], s.coords[n+1]}
 }
 
 func (s LineString) AsText() string {
@@ -96,10 +101,11 @@ func (s LineString) AppendWKT(dst []byte) []byte {
 
 func (s LineString) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
-	for i, c := range s.coords {
+	for i, ptIdx := range s.points {
 		if i > 0 {
 			dst = append(dst, ',')
 		}
+		c := s.coords[ptIdx]
 		dst = appendFloat(dst, c.X)
 		dst = append(dst, ' ')
 		dst = appendFloat(dst, c.Y)
