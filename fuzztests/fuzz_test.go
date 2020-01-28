@@ -34,21 +34,25 @@ func TestFuzz(t *testing.T) {
 	}
 	for i, g := range geoms {
 		t.Run(fmt.Sprintf("geom_%d_", i), func(t *testing.T) {
-			CheckWKT(t, pg, g)
-			CheckWKB(t, pg, g)
-			CheckGeoJSON(t, pg, g)
-			CheckIsEmpty(t, pg, g)
-			CheckDimension(t, pg, g)
-			CheckEnvelope(t, pg, g)
-			CheckIsSimple(t, pg, g)
-			CheckBoundary(t, pg, g)
-			CheckConvexHull(t, pg, g)
-			CheckIsValid(t, pg, g)
-			CheckIsRing(t, pg, g)
-			CheckLength(t, pg, g)
-			CheckArea(t, pg, g)
-			CheckCentroid(t, pg, g)
-			CheckReverse(t, pg, g)
+			got, err := PG{pg.db}.Unary(g)
+			if err != nil {
+				t.Fatalf("could not get result from postgis: %v", err)
+			}
+			CheckWKT(t, got, g)
+			CheckWKB(t, got, g)
+			CheckGeoJSON(t, got, g)
+			CheckIsEmpty(t, got, g)
+			CheckDimension(t, got, g)
+			CheckEnvelope(t, got, g)
+			CheckIsSimple(t, got, g)
+			CheckBoundary(t, got, g)
+			CheckConvexHull(t, got, g)
+			CheckIsValid(t, got, g)
+			CheckIsRing(t, got, g)
+			CheckLength(t, got, g)
+			CheckArea(t, got, g)
+			CheckCentroid(t, got, g)
+			CheckReverse(t, got, g)
 		})
 	}
 	for i, g1 := range geoms {
