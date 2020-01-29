@@ -33,6 +33,7 @@ func TestFuzz(t *testing.T) {
 		fmt.Printf("index=%d WKT=%v\n", i, g.AsText())
 	}
 	for i, g := range geoms {
+		//fmt.Printf("unary %d/%d\n", i+1, len(geoms))
 		t.Run(fmt.Sprintf("geom_%d_", i), func(t *testing.T) {
 			got, err := PG{pg.db}.Unary(g)
 			if err != nil {
@@ -55,16 +56,17 @@ func TestFuzz(t *testing.T) {
 			CheckReverse(t, got, g)
 		})
 	}
-	for i, g1 := range geoms {
-		for j, g2 := range geoms {
-			t.Run(fmt.Sprintf("geom_%d_%d_", i, j), func(t *testing.T) {
-				CheckEqualsExact(t, pg, g1, g2)
-				CheckEquals(t, pg, g1, g2)
-				CheckIntersects(t, pg, g1, g2)
-				CheckIntersection(t, pg, g1, g2)
-			})
-		}
-	}
+	//for i, g1 := range geoms {
+	//	for j, g2 := range geoms {
+	//		//fmt.Printf("binary %d/%d\n", (i*len(geoms) + j + 1), len(geoms)*len(geoms))
+	//		t.Run(fmt.Sprintf("geom_%d_%d_", i, j), func(t *testing.T) {
+	//			CheckEqualsExact(t, pg, g1, g2)
+	//			CheckEquals(t, pg, g1, g2)
+	//			CheckIntersects(t, pg, g1, g2)
+	//			CheckIntersection(t, pg, g1, g2)
+	//		})
+	//	}
+	//}
 
 }
 

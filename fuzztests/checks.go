@@ -165,34 +165,14 @@ func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 
 func CheckGeoJSON(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckGeoJSON", func(t *testing.T) {
-
-		// PostGIS cannot convert to geojson in the case where it has
-		// nested geometry collections. That seems to be based on the
-		// following section of https://tools.ietf.org/html/rfc7946:
-		//
-		// To maximize interoperability, implementations SHOULD avoid
-		// nested GeometryCollections.  Furthermore, GeometryCollections
-		// composed of a single part or a number of parts of a single type
-		// SHOULD be avoided when that single part or a single object of
-		// multipart type (MultiPoint, MultiLineString, or MultiPolygon)
-		// could be used instead.
-		if g.IsGeometryCollection() {
-			gc := g.AsGeometryCollection()
-			for i := 0; i < gc.NumGeometries(); i++ {
-				if gc.GeometryN(i).IsGeometryCollection() {
-					return
-				}
-			}
-		}
-
 		got, err := g.MarshalJSON()
 		if err != nil {
 			t.Fatalf("could not convert to geojson: %v", err)
 		}
 		want := want.AsGeoJSON
-		if !bytes.Equal(got, want) {
+		if want.Valid && string(got) != want.String {
 			t.Logf("got:  %v", string(got))
-			t.Logf("want: %v", string(want))
+			t.Logf("want: %v", want)
 			t.Error("mismatch")
 		}
 	})
@@ -249,10 +229,11 @@ func CheckEnvelope(t *testing.T, want UnaryResult, g geom.Geometry) {
 func CheckIsSimple(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckIsSimple", func(t *testing.T) {
 		got, ok := g.IsSimple()
-		if ok == g.IsGeometryCollection() {
-			t.Error("Expected not to have IsSimple defined for GC")
+		if ok != want.IsSimple.Valid {
+			t.Fatalf("Unexpected IsSimple validity, want "+
+				"valid %v, got valid %v", want.IsSimple.Valid, ok)
 		}
-		if !ok {
+		if !want.IsSimple.Valid {
 			return
 		}
 
@@ -274,7 +255,7 @@ func CheckIsSimple(t *testing.T, want UnaryResult, g geom.Geometry) {
 			}
 		}
 
-		want := want.IsSimple
+		want := want.IsSimple.Bool // want.IsSimple.Valid already checked
 		if got != want {
 			t.Logf("got:  %v", got)
 			t.Logf("want: %v", want)
@@ -285,16 +266,20 @@ func CheckIsSimple(t *testing.T, want UnaryResult, g geom.Geometry) {
 
 func CheckBoundary(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckBoundary", func(t *testing.T) {
-		if g.IsGeometryCollection() {
-			// PostGIS cannot calculate the boundary of GeometryCollections.
-			// Some other libraries can, so simplefeatures does as well.
+		if g.IsGeometryCollection() == want.Boundary.Valid {
+			t.Fatal("Unexpected boundary: "+
+				"IsGeometryCollection=%v WantBoundaryValid=%v",
+				g.IsGeometryCollection(), want.Boundary.Valid)
+		}
+		if !want.Boundary.Valid {
 			return
 		}
+
 		got := g.Boundary()
 		want := want.Boundary
-		if !got.EqualsExact(want, geom.IgnoreOrder) {
+		if !got.EqualsExact(want.Geometry, geom.IgnoreOrder) {
 			t.Logf("got:  %v", got.AsText())
-			t.Logf("want: %v", want.AsText())
+			t.Logf("want: %v", want.Geometry.AsText())
 			t.Error("mismatch")
 		}
 	})
@@ -326,11 +311,15 @@ func CheckIsValid(t *testing.T, want UnaryResult, g geom.Geometry) {
 
 func CheckIsRing(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckIsRing", func(t *testing.T) {
-		var got bool
-		if g.IsLineString() {
-			got = g.AsLineString().IsRing()
+		if want.IsRing.Valid != g.IsLineString() {
+			t.Fatal("Unexpected IsString definition: IsLineString=%v "+
+				"PostGISDefined=%v", g.IsLineString(), want.IsRing.Valid)
 		}
-		want := want.IsRing
+		if !want.IsRing.Valid {
+			return
+		}
+		got := g.AsLineString().IsRing()
+		want := want.IsRing.Bool
 		if got != want {
 			t.Logf("got:  %t", got)
 			t.Logf("want: %t", want)
