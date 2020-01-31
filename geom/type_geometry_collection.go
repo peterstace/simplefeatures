@@ -116,9 +116,9 @@ func (c GeometryCollection) Envelope() (Envelope, bool) {
 	return EnvelopeFromGeoms(c.flatten()...)
 }
 
-func (c GeometryCollection) Boundary() Geometry {
+func (c GeometryCollection) Boundary() GeometryCollection {
 	if c.IsEmpty() {
-		return c.AsGeometry()
+		return c
 	}
 	var bounds []Geometry
 	for _, g := range c.geoms {
@@ -127,7 +127,7 @@ func (c GeometryCollection) Boundary() Geometry {
 			bounds = append(bounds, bound)
 		}
 	}
-	return NewGeometryCollection(bounds).AsGeometry()
+	return NewGeometryCollection(bounds)
 }
 
 func (c GeometryCollection) Value() (driver.Value, error) {

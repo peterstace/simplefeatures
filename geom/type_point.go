@@ -83,8 +83,8 @@ func (p Point) Envelope() (Envelope, bool) {
 	return NewEnvelope(p.coords.XY), true
 }
 
-func (p Point) Boundary() Geometry {
-	return NewGeometryCollection(nil).AsGeometry()
+func (p Point) Boundary() GeometryCollection {
+	return NewGeometryCollection(nil)
 }
 
 func (p Point) Value() (driver.Value, error) {
