@@ -250,9 +250,11 @@ func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (Ge
 	var points []Point
 	var lines []Line
 	for _, ls1 := range mls1.lines {
-		for _, ln1 := range ls1.lines {
+		for i := 0; i < ls1.NumLines(); i++ {
+			ln1 := ls1.LineN(i)
 			for _, ls2 := range mls2.lines {
-				for _, ln2 := range ls2.lines {
+				for j := 0; j < ls2.NumLines(); j++ {
+					ln2 := ls2.LineN(j)
 					inter := intersectLineWithLineNoAlloc(ln1, ln2)
 					switch {
 					case inter.empty:
@@ -289,7 +291,8 @@ func intersectPointWithLine(point Point, line Line) Geometry {
 }
 
 func intersectPointWithLineString(pt Point, ls LineString) Geometry {
-	for _, ln := range ls.lines {
+	for i := 0; i < ls.NumLines(); i++ {
+		ln := ls.LineN(i)
 		g := intersectPointWithLine(pt, ln)
 		if !g.IsEmpty() {
 			return g

@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.7.0
+
+- Fixes a deficiency where `LineString` would not retain coincident adjacent
+  points.
+
+- Adds two new methods to `LineString`. `NumLines` gives the number of `Line`
+  segments making up the `LineString`, and `LineN` allows access to those
+`Line` segments.
+
+- Reduces the memory required to store a `LineString`.
+
 ## v0.6.0
 
 - Adds `Reverse` methods, which reverses the order of each geometry's control

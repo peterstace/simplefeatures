@@ -17,6 +17,7 @@ func geomFromWKT(t *testing.T, wkt string) Geometry {
 }
 
 func expectPanics(t *testing.T, fn func()) {
+	t.Helper()
 	defer func() {
 		if r := recover(); r != nil {
 			return
@@ -36,7 +37,7 @@ func expectNoErr(t *testing.T, err error) {
 func expectGeomEq(t *testing.T, got, want Geometry, opts ...EqualsExactOption) {
 	t.Helper()
 	if !got.EqualsExact(want, opts...) {
-		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+		t.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
 	}
 }
 

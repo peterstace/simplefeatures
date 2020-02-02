@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"io"
+	"math"
 	"sort"
 	"unsafe"
 )
@@ -16,32 +17,32 @@ import (
 //
 // 1. It must contain at least 2 distinct points.
 type LineString struct {
-	lines []Line
+	// coords have been deduplicated such that no two consecutive coordinates
+	// are coincident. This allows quick calculation of Line segments.
+	coords []Coordinates
+
+	// points are indexes into coords, and retain consecutive coincident
+	// points. This is so that information about the original points making up
+	// the LineString are retained.
+	points []int
 }
 
 // NewLineStringC creates a line string from the coordinates defining its
 // points.
 func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, error) {
-	// Fewer lines than len(pts)-1 _may_ be used, however the normal case is
-	// for there to be no coincident control points, so the full capacity would
-	// be utilised.
-	lines := make([]Line, 0, len(pts)-1)
+	coords := make([]Coordinates, 0, len(pts)) // may not use full capacity
+	points := make([]int, len(pts))
 
-	for i := 0; i < len(pts)-1; i++ {
-		if pts[i].XY.Equals(pts[i+1].XY) {
-			continue
+	for i := range pts {
+		if len(coords) == 0 || pts[i].XY != coords[len(coords)-1].XY {
+			coords = append(coords, pts[i])
 		}
-		ln, err := NewLineC(pts[i], pts[i+1], opts...)
-		if err != nil {
-			// Already checked to ensure pts[i] and pts[i+1] are not equal.
-			panic(err)
-		}
-		lines = append(lines, ln)
+		points[i] = len(coords) - 1
 	}
-	if doCheapValidations(opts) && len(lines) == 0 {
+	if doCheapValidations(opts) && len(coords) <= 1 {
 		return LineString{}, errors.New("LineString must contain at least two distinct points")
 	}
-	return LineString{lines}, nil
+	return LineString{coords, points}, nil
 }
 
 // NewLineStringXY creates a line string from the XYs defining its points.
@@ -56,26 +57,37 @@ func (s LineString) AsGeometry() Geometry {
 
 // StartPoint gives the first point of the line string.
 func (s LineString) StartPoint() Point {
-	return s.lines[0].StartPoint()
+	return NewPointC(s.coords[s.points[0]])
 }
 
 // EndPoint gives the last point of the line string.
 func (s LineString) EndPoint() Point {
-	return s.lines[len(s.lines)-1].EndPoint()
+	return NewPointC(s.coords[s.points[len(s.points)-1]])
 }
 
 // NumPoints gives the number of control points in the line string.
 func (s LineString) NumPoints() int {
-	return len(s.lines) + 1
+	return len(s.points)
 }
 
 // PointN gives the nth (zero indexed) point in the line string. Panics if n is
 // out of range with respect to the number of points.
 func (s LineString) PointN(n int) Point {
-	if n == s.NumPoints()-1 {
-		return s.EndPoint()
-	}
-	return s.lines[n].StartPoint()
+	return NewPointC(s.coords[s.points[n]])
+}
+
+func (s LineString) NumLines() int {
+	return len(s.coords) - 1
+}
+
+func (s LineString) LineN(n int) Line {
+	// Line is constructed directly here, rather than via NewLineC. This is
+	// because LineN is called in a tight loop in many places, and skipping the
+	// constructor significantly speeds up the benchmarks.
+	//
+	// The two coordinates are guaranteed to not be coincident due to the way
+	// that the coords slice is constructed, so this is safe.
+	return Line{s.coords[n], s.coords[n+1]}
 }
 
 func (s LineString) AsText() string {
@@ -89,16 +101,15 @@ func (s LineString) AppendWKT(dst []byte) []byte {
 
 func (s LineString) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
-	for _, ln := range s.lines {
-		dst = appendFloat(dst, ln.a.X)
+	for i, ptIdx := range s.points {
+		if i > 0 {
+			dst = append(dst, ',')
+		}
+		c := s.coords[ptIdx]
+		dst = appendFloat(dst, c.X)
 		dst = append(dst, ' ')
-		dst = appendFloat(dst, ln.a.Y)
-		dst = append(dst, ',')
+		dst = appendFloat(dst, c.Y)
 	}
-	last := s.lines[len(s.lines)-1].b
-	dst = appendFloat(dst, last.X)
-	dst = append(dst, ' ')
-	dst = appendFloat(dst, last.Y)
 	return append(dst, ')')
 }
 
@@ -122,23 +133,23 @@ func (s LineString) IsSimple() bool {
 	//    b. Check to see if the new element intersects with any elements in the heap.
 	//    c. Insert the current element into the heap.
 
-	n := len(s.lines)
+	n := s.NumLines()
 	unprocessed := seq(n)
 	sort.Slice(unprocessed, func(i, j int) bool {
-		return minX(s.lines[unprocessed[i]]) < minX(s.lines[unprocessed[j]])
+		return minX(s.LineN(unprocessed[i])) < minX(s.LineN(unprocessed[j]))
 	})
 
 	active := intHeap{less: func(i, j int) bool {
-		return maxX(s.lines[i]) < maxX(s.lines[j])
+		return maxX(s.LineN(i)) < maxX(s.LineN(j))
 	}}
 
 	for _, current := range unprocessed {
-		currentX := minX(s.lines[current])
-		for len(active.data) != 0 && maxX(s.lines[active.data[0]]) < currentX {
+		currentX := minX(s.LineN(current))
+		for len(active.data) != 0 && maxX(s.LineN(active.data[0])) < currentX {
 			active.pop()
 		}
 		for _, other := range active.data {
-			intersects, dim := hasIntersectionLineWithLine(s.lines[current], s.lines[other])
+			intersects, dim := hasIntersectionLineWithLine(s.LineN(current), s.LineN(other))
 			if !intersects {
 				continue
 			}
@@ -177,7 +188,7 @@ func (s LineString) IsSimple() bool {
 }
 
 func (s LineString) IsClosed() bool {
-	return s.lines[0].a.XY.Equals(s.lines[len(s.lines)-1].b.XY)
+	return s.StartPoint().XY() == s.EndPoint().XY()
 }
 
 func (s LineString) Intersection(g Geometry) (Geometry, error) {
@@ -197,22 +208,19 @@ func (s LineString) Equals(other Geometry) (bool, error) {
 }
 
 func (s LineString) Envelope() (Envelope, bool) {
-	env := NewEnvelope(s.lines[0].a.XY)
-	for _, line := range s.lines {
-		env = env.ExtendToIncludePoint(line.b.XY)
+	env := NewEnvelope(s.coords[0].XY)
+	for i := 1; i < len(s.coords); i++ {
+		env = env.ExtendToIncludePoint(s.coords[i].XY)
 	}
 	return env, true
 }
 
 func (s LineString) Boundary() Geometry {
-	if s.IsClosed() {
-		// Same behaviour as Postgis, but could instead be any other empty set.
-		return NewMultiPoint(nil).AsGeometry()
+	var pts []Point
+	if !s.IsClosed() {
+		pts = append(pts, s.StartPoint(), s.EndPoint())
 	}
-	return NewMultiPoint([]Point{
-		NewPointXY(s.lines[0].a.XY),
-		NewPointXY(s.lines[len(s.lines)-1].b.XY),
-	}).AsGeometry()
+	return NewMultiPoint(pts).AsGeometry()
 }
 
 func (s LineString) Value() (driver.Value, error) {
@@ -289,8 +297,10 @@ func (s LineString) IsRing() bool {
 // Length gives the length of the line string.
 func (s LineString) Length() float64 {
 	var sum float64
-	for _, ln := range s.lines {
-		sum += ln.Length()
+	for i := 0; i+1 < len(s.coords); i++ {
+		dx := s.coords[i].X - s.coords[i+1].X
+		dy := s.coords[i].Y - s.coords[i+1].Y
+		sum += math.Sqrt(dx*dx + dy*dy)
 	}
 	return sum
 }

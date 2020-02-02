@@ -233,22 +233,12 @@ func hasIntersectionLineWithMultiPoint(ln Line, mp MultiPoint) bool {
 }
 
 func hasIntersectionMultiPointWithMultiLineString(mp MultiPoint, mls MultiLineString) bool {
-	numPts := mp.NumPoints()
-	for i := 0; i < numPts; i++ {
+	for i := 0; i < mp.NumPoints(); i++ {
 		pt := mp.PointN(i)
-		numLSs := mls.NumLineStrings()
-		for j := 0; j < numLSs; j++ {
+		for j := 0; j < mls.NumLineStrings(); j++ {
 			ls := mls.LineStringN(j)
-			numLSPts := ls.NumPoints()
-			for k := 0; k < numLSPts-1; k++ {
-				ln, err := NewLineC(
-					ls.PointN(k).Coordinates(),
-					ls.PointN(k+1).Coordinates(),
-				)
-				if err != nil {
-					// Should never occur due to construction.
-					panic(err)
-				}
+			for k := 0; k < ls.NumLines(); k++ {
+				ln := ls.LineN(k)
 				if hasIntersectionPointWithLine(pt, ln) {
 					return true
 				}
@@ -295,11 +285,12 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 	for _, side := range sides {
 		var n int
 		for _, ls := range side.mls.lines {
-			n += len(ls.lines)
+			n += ls.NumLines()
 		}
 		side.lines = make([]Line, 0, n)
 		for _, ls := range side.mls.lines {
-			for _, ln := range ls.lines {
+			for i := 0; i < ls.NumLines(); i++ {
+				ln := ls.LineN(i)
 				if ln.StartPoint().XY().X > ln.EndPoint().XY().X {
 					// TODO: Use ST_Reverse
 					ln.a, ln.b = ln.b, ln.a
@@ -423,8 +414,8 @@ func hasIntersectionPointWithLine(point Point, line Line) bool {
 
 func hasIntersectionPointWithLineString(pt Point, ls LineString) bool {
 	// Worst case speed is O(n), n is the number of lines.
-	for _, ln := range ls.lines {
-		if hasIntersectionPointWithLine(pt, ln) {
+	for i := 0; i < ls.NumLines(); i++ {
+		if hasIntersectionPointWithLine(pt, ls.LineN(i)) {
 			return true
 		}
 	}
