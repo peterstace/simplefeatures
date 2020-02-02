@@ -213,6 +213,17 @@ func (c GeometryCollection) Reverse() GeometryCollection {
 	return NewGeometryCollection(geoms)
 }
 
+// Length of a GeometryCollection is the sum of the lengths of its parts.
+func (c GeometryCollection) Length() float64 {
+	var sum float64
+	n := c.NumGeometries()
+	for i := 0; i < n; i++ {
+		geom := c.GeometryN(i)
+		sum += geom.Length()
+	}
+	return sum
+}
+
 // Area in the case of a GeometryCollection is the sum of the areas of its parts.
 func (c GeometryCollection) Area() float64 {
 	var sum float64

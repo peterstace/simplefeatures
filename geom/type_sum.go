@@ -563,22 +563,31 @@ func (g Geometry) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geomet
 	}
 }
 
-// Length gives the length of the geometry, if defined. It is only defined for
-// Lines, LineStrings, and MultiLineStrings. The returned flag indicates if the
-// length is defined.
-//
-// TODO: This doesn't match PostGIS behaviour. See
-// https://github.com/peterstace/simplefeatures/issues/86
-func (g Geometry) Length() (float64, bool) {
+// Length gives the length of a Line, LineString, or MultiLineString
+// or the sum of the lengths of the components of a GeometryCollection.
+// Other Geometries are defined to return a length of zero.
+func (g Geometry) Length() float64 {
 	switch {
+	case g.IsEmpty():
+		return 0
+	case g.IsGeometryCollection():
+		return g.AsGeometryCollection().Length()
 	case g.IsLine():
-		return g.AsLine().Length(), true
+		return g.AsLine().Length()
 	case g.IsLineString():
-		return g.AsLineString().Length(), true
+		return g.AsLineString().Length()
 	case g.IsMultiLineString():
-		return g.AsMultiLineString().Length(), true
+		return g.AsMultiLineString().Length()
+	case g.IsPoint():
+		return 0
+	case g.IsMultiPoint():
+		return 0
+	case g.IsPolygon():
+		return 0
+	case g.IsMultiPolygon():
+		return 0
 	default:
-		return 0, false
+		return 0
 	}
 }
 
