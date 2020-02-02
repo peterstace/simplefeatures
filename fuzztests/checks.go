@@ -340,17 +340,8 @@ func CheckIsRing(t *testing.T, pg PostGIS, g geom.Geometry) {
 }
 
 func CheckLength(t *testing.T, pg PostGIS, g geom.Geometry) {
-	if !g.IsLine() && !g.IsLineString() && !g.IsMultiLineString() {
-		if _, ok := g.Length(); ok {
-			t.Error("didn't expect to be able to get length but could")
-		}
-		return
-	}
 	t.Run("CheckLength", func(t *testing.T) {
-		got, ok := g.Length()
-		if !ok {
-			t.Error("could not get length")
-		}
+		got := g.Length()
 		want := pg.Length(t, g)
 		if math.Abs(got-want) > 1e-6 {
 			t.Logf("got:  %v", got)
