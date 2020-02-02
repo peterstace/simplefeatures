@@ -100,11 +100,11 @@ func (n Line) Envelope() (Envelope, bool) {
 	return NewEnvelope(n.a.XY, n.b.XY), true
 }
 
-func (n Line) Boundary() Geometry {
+func (n Line) Boundary() MultiPoint {
 	return NewMultiPoint([]Point{
 		NewPointXY(n.a.XY),
 		NewPointXY(n.b.XY),
-	}).AsGeometry()
+	})
 }
 
 func (n Line) Value() (driver.Value, error) {

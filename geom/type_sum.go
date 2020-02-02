@@ -381,23 +381,38 @@ func (g Geometry) Envelope() (Envelope, bool) {
 func (g Geometry) Boundary() Geometry {
 	switch g.tag {
 	case geometryCollectionTag:
-		return g.AsGeometryCollection().Boundary()
+		return g.AsGeometryCollection().Boundary().AsGeometry()
 	case emptySetTag:
-		return g.AsEmptySet().Boundary()
+		return g.AsEmptySet().Boundary().AsGeometry()
 	case pointTag:
-		return g.AsPoint().Boundary()
+		return g.AsPoint().Boundary().AsGeometry()
 	case lineTag:
-		return g.AsLine().Boundary()
+		return g.AsLine().Boundary().AsGeometry()
 	case lineStringTag:
-		return g.AsLineString().Boundary()
+		return g.AsLineString().Boundary().AsGeometry()
 	case polygonTag:
-		return g.AsPolygon().Boundary()
+		mls := g.AsPolygon().Boundary()
+		// Ensure holeless polygons return a LineString boundary.
+		if mls.NumLineStrings() == 1 {
+			return mls.LineStringN(0).AsGeometry()
+		}
+		return mls.AsGeometry()
 	case multiPointTag:
-		return g.AsMultiPoint().Boundary()
+		if g.AsMultiPoint().IsEmpty() { // Match Postgis behaviour.
+			return g
+		}
+		return g.AsMultiPoint().Boundary().AsGeometry()
 	case multiLineStringTag:
-		return g.AsMultiLineString().Boundary()
+		if g.AsMultiLineString().IsEmpty() { // Match Postgis behaviour.
+			return g
+			//return NewMultiLineString(nil).AsGeometry()
+		}
+		return g.AsMultiLineString().Boundary().AsGeometry()
 	case multiPolygonTag:
-		return g.AsMultiPolygon().Boundary()
+		if g.AsMultiPolygon().IsEmpty() { // Match Postgis behaviour.
+			return g
+		}
+		return g.AsMultiPolygon().Boundary().AsGeometry()
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}

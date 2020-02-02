@@ -380,7 +380,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 }
 
 func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp MultiPolygon) bool {
-	if mls.Intersects(mp.Boundary()) {
+	if has, _ := hasIntersectionMultiLineStringWithMultiLineString(mls, mp.Boundary(), false); has {
 		return true
 	}
 
@@ -508,7 +508,7 @@ func hasIntersectionPolygonWithPolygon(p1, p2 Polygon) bool {
 	// intersect.
 	b1 := p1.Boundary()
 	b2 := p2.Boundary()
-	if b1.Intersects(b2) {
+	if has, _ := hasIntersectionMultiLineStringWithMultiLineString(b1, b2, false); has {
 		return true
 	}
 
