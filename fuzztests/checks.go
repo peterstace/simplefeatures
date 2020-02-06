@@ -311,14 +311,21 @@ func CheckIsValid(t *testing.T, want UnaryResult, g geom.Geometry) {
 
 func CheckIsRing(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckIsRing", func(t *testing.T) {
-		if want.IsRing.Valid != g.IsLineString() {
-			t.Fatal("Unexpected IsString definition: IsLineString=%v "+
-				"PostGISDefined=%v", g.IsLineString(), want.IsRing.Valid)
+		isDefined := g.IsLine() ||
+			g.IsLineString() ||
+			(g.IsEmptySet() && g.AsEmptySet().AsText() == "LINESTRING EMPTY")
+		if want.IsRing.Valid != isDefined {
+			t.Fatalf("Unexpected IsString definition: "+
+				"IsLineString=%v PostGISDefined=%v",
+				isDefined, want.IsRing.Valid)
 		}
 		if !want.IsRing.Valid {
 			return
 		}
-		got := g.AsLineString().IsRing()
+		var got bool
+		if g.IsLineString() {
+			got = g.AsLineString().IsRing()
+		}
 		want := want.IsRing.Bool
 		if got != want {
 			t.Logf("got:  %t", got)

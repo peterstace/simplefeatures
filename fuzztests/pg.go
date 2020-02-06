@@ -73,8 +73,9 @@ func (p PG) Unary(g geom.Geometry) (UnaryResult, error) {
 		ST_AsBinary(ST_ConvexHull(ST_GeomFromWKB($1))),
 		ST_IsValid(ST_GeomFromWKB($1)),
 
+		-- IsRing only defined for LineStrings.
 		CASE
-			WHEN ST_GeometryType(ST_GeomFromWKB($1)) = 'ST_LineString'
+			WHEN ST_GeometryType(ST_GeomFromWKB($1)) != 'ST_LineString'
 			THEN NULL
 			ELSE ST_IsRing(ST_GeomFromWKB($1))
 		END,
