@@ -3,7 +3,8 @@ package geom
 import "database/sql/driver"
 
 // NullGeometry represents a Geometry that may be NULL. It implements the
-// database/sql.Scanner interface, so may be used as a scan destination.
+// database/sql.Scanner and database/sql.Valuer interfaces, so may be used as a
+// scan destination or query argument in SQL queries.
 type NullGeometry struct {
 	Geometry Geometry
 	Valid    bool // Valid is true iff Geometry is not NULL
