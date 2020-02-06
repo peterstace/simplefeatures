@@ -33,32 +33,30 @@ func TestFuzz(t *testing.T) {
 		fmt.Printf("index=%d WKT=%v\n", i, g.AsText())
 	}
 	for i, g := range geoms {
-		//fmt.Printf("unary %d/%d\n", i+1, len(geoms))
 		t.Run(fmt.Sprintf("geom_%d_", i), func(t *testing.T) {
-			got, err := PG{pg.db}.Unary(g)
+			want, err := BatchPostGIS{pg.db}.Unary(g)
 			if err != nil {
 				t.Fatalf("could not get result from postgis: %v", err)
 			}
-			CheckWKT(t, got, g)
-			CheckWKB(t, got, g)
-			CheckGeoJSON(t, got, g)
-			CheckIsEmpty(t, got, g)
-			CheckDimension(t, got, g)
-			CheckEnvelope(t, got, g)
-			CheckIsSimple(t, got, g)
-			CheckBoundary(t, got, g)
-			CheckConvexHull(t, got, g)
-			CheckIsValid(t, got, g)
-			CheckIsRing(t, got, g)
-			CheckLength(t, got, g)
-			CheckArea(t, got, g)
-			CheckCentroid(t, got, g)
-			CheckReverse(t, got, g)
+			CheckWKT(t, want, g)
+			CheckWKB(t, want, g)
+			CheckGeoJSON(t, want, g)
+			CheckIsEmpty(t, want, g)
+			CheckDimension(t, want, g)
+			CheckEnvelope(t, want, g)
+			CheckIsSimple(t, want, g)
+			CheckBoundary(t, want, g)
+			CheckConvexHull(t, want, g)
+			CheckIsValid(t, want, g)
+			CheckIsRing(t, want, g)
+			CheckLength(t, want, g)
+			CheckArea(t, want, g)
+			CheckCentroid(t, want, g)
+			CheckReverse(t, want, g)
 		})
 	}
 	for i, g1 := range geoms {
 		for j, g2 := range geoms {
-			//fmt.Printf("binary %d/%d\n", (i*len(geoms) + j + 1), len(geoms)*len(geoms))
 			t.Run(fmt.Sprintf("geom_%d_%d_", i, j), func(t *testing.T) {
 				CheckEqualsExact(t, pg, g1, g2)
 				CheckEquals(t, pg, g1, g2)

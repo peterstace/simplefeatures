@@ -6,7 +6,7 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-type PG struct {
+type BatchPostGIS struct {
 	db *sql.DB
 }
 
@@ -28,7 +28,7 @@ type UnaryResult struct {
 	Reverse    geom.Geometry
 }
 
-func (p PG) Unary(g geom.Geometry) (UnaryResult, error) {
+func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 	var result UnaryResult
 	err := p.db.QueryRow(`
 		SELECT
