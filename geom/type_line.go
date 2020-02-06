@@ -172,6 +172,10 @@ func (n Line) Length() float64 {
 	return math.Sqrt(delta.Dot(delta))
 }
 
+func (n Line) Centroid() Point {
+	return NewPointF((n.a.XY.X+n.b.XY.X)/2, (n.a.XY.Y+n.b.XY.Y)/2)
+}
+
 // AsLineString is a helper function that converts this Line into a LineString.
 func (n Line) AsLineString() LineString {
 	ls, err := NewLineStringC(n.Coordinates(), DisableAllValidations)

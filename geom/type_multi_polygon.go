@@ -351,9 +351,10 @@ func (m MultiPolygon) SignedArea() float64 {
 	return signedArea
 }
 
-// Centroid returns the multi polygon's centroid point. It returns false if the
-// multi polygon is empty (in which case, there is no sensible definition for a
-// centroid).
+// Centroid returns the multi polygon's centroid point.
+// It returns true iff the centroid is well defined.
+// It returns false if the multi polygon is empty (in which case,
+// there is no sensible definition for a centroid).
 func (m MultiPolygon) Centroid() (Point, bool) {
 	if m.IsEmpty() {
 		return Point{}, false

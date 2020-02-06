@@ -567,13 +567,24 @@ func (g Geometry) Length() (float64, bool) {
 	}
 }
 
-// Centroid returns the Polygon or MultiPolygon's centroid point. If the
-// Geometry is not a non-empty Polygon or MultiPolygon, then false is returned.
-//
-// TODO: This is not in line with the behaviour of ST_Centroid. See
-// https://github.com/peterstace/simplefeatures/issues/83
+// Centroid returns a default point and false if the geometry is empty,
+// otherwise returns the centroid and true.
 func (g Geometry) Centroid() (Point, bool) {
 	switch {
+	case g.IsEmpty():
+		return Point{}, false
+	case g.IsGeometryCollection():
+		return g.AsGeometryCollection().Centroid()
+	case g.IsLine():
+		return g.AsLine().Centroid(), true
+	case g.IsLineString():
+		return g.AsLineString().Centroid()
+	case g.IsMultiLineString():
+		return g.AsMultiLineString().Centroid()
+	case g.IsPoint():
+		return g.AsPoint().Centroid(), true
+	case g.IsMultiPoint():
+		return g.AsMultiPoint().Centroid()
 	case g.IsPolygon():
 		return g.AsPolygon().Centroid(), true
 	case g.IsMultiPolygon():

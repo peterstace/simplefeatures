@@ -191,6 +191,22 @@ func (m MultiPoint) IsValid() bool {
 	return true
 }
 
+// Centroid gives the centroid of the coordinates of the multi line string.
+// It returns true iff the centroid is well defined.
+func (m MultiPoint) Centroid() (Point, bool) {
+	n := m.NumPoints()
+	if n == 0 {
+		return Point{}, false
+	}
+	var sumX, sumY float64
+	for i := 0; i < n; i++ {
+		p := m.PointN(i)
+		sumX += p.XY().X
+		sumY += p.XY().Y
+	}
+	return NewPointF(sumX/float64(n), sumY/float64(n)), true
+}
+
 // Reverse in the case of MultiPoint outputs each component point in their original order.
 func (m MultiPoint) Reverse() MultiPoint {
 	coords := make([]Coordinates, len(m.pts))

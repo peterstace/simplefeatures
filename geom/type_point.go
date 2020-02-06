@@ -131,6 +131,11 @@ func (p Point) IsValid() bool {
 	return true
 }
 
+// Centroid of a point it that point.
+func (p Point) Centroid() Point {
+	return NewPointC(p.coords)
+}
+
 // Reverse in the case of Point outputs the same point.
 func (p Point) Reverse() Point {
 	return Point{p.coords}
