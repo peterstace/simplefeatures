@@ -264,16 +264,16 @@ func appendRings(dst []LineString, p Polygon) []LineString {
 	return dst
 }
 
-func (p Polygon) Boundary() Geometry {
+func (p Polygon) Boundary() MultiLineString {
 	if len(p.holes) == 0 {
-		return p.outer.AsGeometry()
+		return p.outer.AsMultiLineString()
 	}
 	bounds := make([]LineString, 1+len(p.holes))
 	bounds[0] = p.outer
 	for i, h := range p.holes {
 		bounds[1+i] = h
 	}
-	return NewMultiLineString(bounds).AsGeometry()
+	return NewMultiLineString(bounds)
 }
 
 func (p Polygon) Value() (driver.Value, error) {

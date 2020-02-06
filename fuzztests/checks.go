@@ -336,21 +336,11 @@ func CheckIsRing(t *testing.T, want UnaryResult, g geom.Geometry) {
 }
 
 func CheckLength(t *testing.T, want UnaryResult, g geom.Geometry) {
-	if !g.IsLine() && !g.IsLineString() && !g.IsMultiLineString() {
-		if _, ok := g.Length(); ok {
-			t.Error("didn't expect to be able to get length but could")
-		}
-		return
-	}
 	t.Run("CheckLength", func(t *testing.T) {
-		got, ok := g.Length()
-		if !ok {
-			t.Error("could not get length")
-		}
-		want := want.Length
-		if math.Abs(got-want) > 1e-6 {
+		got := g.Length()
+		if math.Abs(got-want.Length) > 1e-6 {
 			t.Logf("got:  %v", got)
-			t.Logf("want: %v", want)
+			t.Logf("want: %v", want.Length)
 			t.Error("mismatch")
 		}
 	})

@@ -66,8 +66,8 @@ func (e EmptySet) Envelope() (Envelope, bool) {
 	return Envelope{}, false
 }
 
-func (e EmptySet) Boundary() Geometry {
-	return e.AsGeometry()
+func (e EmptySet) Boundary() EmptySet {
+	return e
 }
 
 func (e EmptySet) Value() (driver.Value, error) {

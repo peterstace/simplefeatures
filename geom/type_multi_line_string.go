@@ -97,7 +97,7 @@ func (m MultiLineString) IsSimple() bool {
 	for i := 0; i < len(m.lines); i++ {
 		for j := i + 1; j < len(m.lines); j++ {
 			inter := mustIntersection(m.lines[i].AsGeometry(), m.lines[j].AsGeometry())
-			bound := mustIntersection(m.lines[i].Boundary(), m.lines[j].Boundary())
+			bound := mustIntersection(m.lines[i].Boundary().AsGeometry(), m.lines[j].Boundary().AsGeometry())
 			if !inter.EqualsExact(mustIntersection(inter, bound)) {
 				return false
 			}
@@ -133,12 +133,7 @@ func (m MultiLineString) Envelope() (Envelope, bool) {
 	}
 	return env, true
 }
-func (m MultiLineString) Boundary() Geometry {
-	if m.IsEmpty() {
-		// Postgis behaviour (but any other empty set would be ok).
-		return NewMultiLineString(nil).AsGeometry()
-	}
-
+func (m MultiLineString) Boundary() MultiPoint {
 	counts := make(map[XY]int)
 	var uniqueEndpoints []Point
 	for _, ls := range m.lines {
@@ -163,7 +158,7 @@ func (m MultiLineString) Boundary() Geometry {
 			bound = append(bound, pt)
 		}
 	}
-	return NewMultiPoint(bound).AsGeometry()
+	return NewMultiPoint(bound)
 }
 
 func (m MultiLineString) Value() (driver.Value, error) {

@@ -62,7 +62,7 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 		for _, j := range active.data {
 			bound1 := polys[i].Boundary()
 			bound2 := polys[j].Boundary()
-			inter := mustIntersection(bound1, bound2)
+			inter := mustIntersection(bound1.AsGeometry(), bound2.AsGeometry())
 			if inter.Dimension() > 0 {
 				return MultiPolygon{}, errors.New("the boundaries of the polygon elements of multipolygons must only intersect at points")
 			}
@@ -251,10 +251,7 @@ func (m MultiPolygon) Envelope() (Envelope, bool) {
 	return env, true
 }
 
-func (m MultiPolygon) Boundary() Geometry {
-	if m.IsEmpty() {
-		return m.AsGeometry()
-	}
+func (m MultiPolygon) Boundary() MultiLineString {
 	var bounds []LineString
 	for _, poly := range m.polys {
 		bounds = append(bounds, poly.outer)
@@ -262,7 +259,7 @@ func (m MultiPolygon) Boundary() Geometry {
 			bounds = append(bounds, inner)
 		}
 	}
-	return NewMultiLineString(bounds).AsGeometry()
+	return NewMultiLineString(bounds)
 }
 
 func (m MultiPolygon) Value() (driver.Value, error) {
