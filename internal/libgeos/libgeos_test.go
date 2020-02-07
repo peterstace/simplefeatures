@@ -13,7 +13,10 @@ func TestAsText(t *testing.T) {
 	if err != nil {
 		t.Fatal("could not unmarshal WKT")
 	}
-	wkt, err := libgeos.AsText(g)
+
+	h := libgeos.NewHandle()
+	defer h.Close()
+	wkt, err := h.AsText(g)
 	if err != nil {
 		t.Fatal("could not convert to text")
 	}
