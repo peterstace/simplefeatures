@@ -157,7 +157,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 	if wkb == nil {
 		return geom.Geometry{}, h.err()
 	}
-	defer C.free(unsafe.Pointer(wkb))
+	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
 
 	return geom.UnmarshalWKB(bytes.NewReader(cBytesAsSlice(wkb, size)))
 }
@@ -178,7 +178,7 @@ func (h *Handle) AsText(g geom.Geometry) (string, error) {
 	if wkt == nil {
 		return "", h.err()
 	}
-	defer C.free(unsafe.Pointer(wkt))
+	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkt))
 	return C.GoString(wkt), nil
 }
 
@@ -199,7 +199,7 @@ func (h *Handle) AsBinary(g geom.Geometry) ([]byte, error) {
 	if wkb == nil {
 		return nil, h.err()
 	}
-	defer C.free(unsafe.Pointer(wkb))
+	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
 	return copyBytes(wkb, size), nil
 }
 
