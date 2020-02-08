@@ -42,7 +42,6 @@ type Handle struct {
 
 // NewHandle creates a new handle.
 func NewHandle() (*Handle, error) {
-	// TODO: error handling
 	h := &Handle{}
 	h.context = C.sf_init(unsafe.Pointer(&h.errBuf))
 	if h.context == nil {
@@ -109,6 +108,7 @@ func (h *Handle) intToErr(i C.int) error {
 	}
 }
 
+// TODO: should be possible to use C.GoBytes
 func copyBytes(byts *C.uchar, size C.size_t) []byte {
 	src := cBytesAsSlice(byts, size)
 	dest := make([]byte, size)
@@ -180,6 +180,24 @@ func (h *Handle) AsText(g geom.Geometry) (string, error) {
 	}
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkt))
 	return C.GoString(wkt), nil
+}
+
+func (h *Handle) FromText(wkt string) (geom.Geometry, error) {
+	reader := C.GEOSWKTReader_create_r(h.context)
+	if reader == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSWKTReader_destroy_r(h.context, reader)
+
+	cwkt := C.CString(wkt)
+	defer C.free(unsafe.Pointer(cwkt))
+
+	gh := C.GEOSWKTReader_read_r(h.context, reader, cwkt)
+	if gh == nil {
+		return geom.Geometry{}, h.err()
+	}
+
+	return h.decodeGeomHandle(gh)
 }
 
 func (h *Handle) AsBinary(g geom.Geometry) ([]byte, error) {
