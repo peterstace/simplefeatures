@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/peterstace/simplefeatures/geom"
 	"github.com/peterstace/simplefeatures/internal/libgeos"
@@ -27,7 +28,22 @@ func main() {
 
 	geoms = deduplicateGeometries(geoms)
 
-	h := libgeos.NewHandle()
+	g, err := geom.UnmarshalWKT(strings.NewReader("POLYGON((0 0,0 1,1 0))"), geom.DisableAllValidations)
+	if err != nil {
+		panic(err)
+	}
+
+	g0, err := geom.UnmarshalWKT(strings.NewReader("POLYGON((0 0,0 1,1 0,0 0))"), geom.DisableAllValidations)
+	if err != nil {
+		panic(err)
+	}
+
+	geoms = []geom.Geometry{g0, g}
+
+	h, err := libgeos.NewHandle()
+	if err != nil {
+		panic(err)
+	}
 	defer h.Close()
 
 	for _, g := range geoms {
