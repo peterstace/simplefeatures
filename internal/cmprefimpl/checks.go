@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
@@ -26,6 +27,12 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry) error {
 	//Reverse    geom.Geometry
 
 	// TODO: Check is valid before doing anything at all.
+
+	if valid, err := checkIsValid(h, g); err != nil {
+		return err
+	} else if !valid {
+		return nil
+	}
 
 	if err := checkAsTextForward(h, g); err != nil {
 		return err
@@ -54,6 +61,33 @@ func (e mismatchError) Error() string {
 	fmt.Fprintf(&buf, "\twant: %s\n", e.want)
 	fmt.Fprintf(&buf, "\tgot:  %s\n", e.got)
 	return buf.String()
+}
+
+func checkIsValid(h *libgeos.Handle, g geom.Geometry) (bool, error) {
+	var wkb bytes.Buffer
+	if err := g.AsBinary(&wkb); err != nil {
+		return false, err
+	}
+	var validAsPerSimpleFeatures bool
+	if _, err := geom.UnmarshalWKB(&wkb); err == nil {
+		validAsPerSimpleFeatures = true
+	}
+
+	validAsPerLibgeos, err := h.IsValid(g)
+	if err != nil {
+		// The geometry is _so_ invalid that libgeos can't even tell if it's
+		// invalid or not.
+		validAsPerLibgeos = false
+	}
+
+	if validAsPerLibgeos != validAsPerSimpleFeatures {
+		return false, fmt.Errorf("validAsPerLibgeos:%v "+
+			"validAsPerSimpleFeatures:%v",
+			validAsPerLibgeos,
+			validAsPerSimpleFeatures,
+		)
+	}
+	return validAsPerSimpleFeatures, nil
 }
 
 func checkAsTextForward(h *libgeos.Handle, g geom.Geometry) error {
