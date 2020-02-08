@@ -35,6 +35,7 @@ import "C"
 type Handle struct {
 	context   C.GEOSContextHandle_t
 	wkbReader *C.GEOSWKBReader
+	wkbWriter *C.GEOSWKBWriter
 	wkbBuf    []byte
 	errBuf    [1024]byte
 }
@@ -50,12 +51,17 @@ func NewHandle() (*Handle, error) {
 	if h.wkbReader == nil {
 		return nil, h.err()
 	}
+	h.wkbWriter = C.GEOSWKBWriter_create_r(h.context)
+	if h.wkbWriter == nil {
+		return nil, h.err()
+	}
 	return h, nil
 }
 
 // Close cleans up memory resources associated with the handle. If Close is not
 // called, then a memory leak will occurr.
 func (h *Handle) Close() {
+	C.GEOSWKBWriter_destroy_r(h.context, h.wkbWriter)
 	C.GEOSWKBReader_destroy_r(h.context, h.wkbReader)
 	C.GEOS_finish_r(h.context)
 }
@@ -127,20 +133,12 @@ func (h *Handle) createGeomHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
 }
 
 func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
-	// TODO: writer should be stored on the handle.
-	writer := C.GEOSWKBWriter_create_r(h.context)
-	if writer == nil {
-		return geom.Geometry{}, h.err()
-	}
-	defer C.GEOSWKBWriter_destroy_r(h.context, writer)
-
 	var size C.size_t
-	wkb := C.GEOSWKBWriter_write_r(h.context, writer, gh, &size)
+	wkb := C.GEOSWKBWriter_write_r(h.context, h.wkbWriter, gh, &size)
 	if wkb == nil {
 		return geom.Geometry{}, h.err()
 	}
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
-
 	return geom.UnmarshalWKB(bytes.NewReader(C.GoBytes(unsafe.Pointer(wkb), C.int(size))))
 }
 
