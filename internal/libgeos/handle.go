@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"reflect"
 	"unsafe"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -108,23 +107,6 @@ func (h *Handle) intToErr(i C.int) error {
 	}
 }
 
-// TODO: should be possible to use C.GoBytes
-func copyBytes(byts *C.uchar, size C.size_t) []byte {
-	src := cBytesAsSlice(byts, size)
-	dest := make([]byte, size)
-	copy(dest, src)
-	return dest
-}
-
-func cBytesAsSlice(byts *C.uchar, size C.size_t) []byte {
-	var slice []byte
-	ptr := (*reflect.SliceHeader)(unsafe.Pointer(&slice))
-	ptr.Data = uintptr(unsafe.Pointer(byts))
-	ptr.Len = int(size)
-	ptr.Cap = int(size)
-	return slice
-}
-
 func (h *Handle) createGeomHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
 	wkb := bytes.NewBuffer(h.wkbBuf)
 	if err := g.AsBinary(wkb); err != nil {
@@ -159,7 +141,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 	}
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
 
-	return geom.UnmarshalWKB(bytes.NewReader(cBytesAsSlice(wkb, size)))
+	return geom.UnmarshalWKB(bytes.NewReader(C.GoBytes(unsafe.Pointer(wkb), C.int(size))))
 }
 
 func (h *Handle) AsText(g geom.Geometry) (string, error) {
@@ -218,7 +200,7 @@ func (h *Handle) AsBinary(g geom.Geometry) ([]byte, error) {
 		return nil, h.err()
 	}
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
-	return copyBytes(wkb, size), nil
+	return C.GoBytes(unsafe.Pointer(wkb), C.int(size)), nil
 }
 
 func (h *Handle) IsEmpty(g geom.Geometry) (bool, error) {
