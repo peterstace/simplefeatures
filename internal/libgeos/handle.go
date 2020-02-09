@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"strings"
 	"unsafe"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -133,13 +134,49 @@ func (h *Handle) createGeomHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
 }
 
 func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
-	var size C.size_t
-	wkb := C.GEOSWKBWriter_write_r(h.context, h.wkbWriter, gh, &size)
-	if wkb == nil {
-		return geom.Geometry{}, h.err()
+	// TODO: Does this empty point check work for things like
+	// GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT EMPTY,POINT(1 2)))?
+	isEmptyPoint, err := h.isEmptyPoint(gh)
+	if err != nil {
+		return geom.Geometry{}, err
 	}
-	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
-	return geom.UnmarshalWKB(bytes.NewReader(C.GoBytes(unsafe.Pointer(wkb), C.int(size))))
+	if isEmptyPoint {
+		writer := C.GEOSWKTWriter_create_r(h.context)
+		if writer == nil {
+			return geom.Geometry{}, h.err()
+		}
+		defer C.GEOSWKTWriter_destroy_r(h.context, writer)
+		C.GEOSWKTWriter_setTrim_r(h.context, writer, C.char(1))
+		wkt := C.GEOSWKTWriter_write_r(h.context, writer, gh)
+		if wkt == nil {
+			return geom.Geometry{}, h.err()
+		}
+		defer C.GEOSFree_r(h.context, unsafe.Pointer(wkt))
+		return geom.UnmarshalWKT(strings.NewReader(C.GoString(wkt)))
+	} else {
+		var size C.size_t
+		wkb := C.GEOSWKBWriter_write_r(h.context, h.wkbWriter, gh, &size)
+		if wkb == nil {
+			return geom.Geometry{}, fmt.Errorf("writing wkb: %v", h.err())
+		}
+		defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
+		reader := bytes.NewReader(C.GoBytes(unsafe.Pointer(wkb), C.int(size)))
+		return geom.UnmarshalWKB(reader)
+	}
+}
+
+func (h *Handle) isEmptyPoint(gh *C.GEOSGeometry) (bool, error) {
+	if isEmpty, err := h.boolErr(C.GEOSisEmpty_r(h.context, gh)); err != nil {
+		return false, err
+	} else if isEmpty {
+		return true, nil
+	}
+
+	geomType := C.GEOSGeomType_r(h.context, gh)
+	if geomType == nil {
+		return false, h.err()
+	}
+	return C.GoString(geomType) == "Point", nil
 }
 
 func (h *Handle) AsText(g geom.Geometry) (string, error) {
@@ -155,6 +192,7 @@ func (h *Handle) AsText(g geom.Geometry) (string, error) {
 	}
 	defer C.GEOSWKTWriter_destroy_r(h.context, writer)
 	C.GEOSWKTWriter_setTrim_r(h.context, writer, C.char(1))
+
 	wkt := C.GEOSWKTWriter_write_r(h.context, writer, gh)
 	if wkt == nil {
 		return "", h.err()
@@ -166,7 +204,7 @@ func (h *Handle) AsText(g geom.Geometry) (string, error) {
 func (h *Handle) FromText(wkt string) (geom.Geometry, error) {
 	reader := C.GEOSWKTReader_create_r(h.context)
 	if reader == nil {
-		return geom.Geometry{}, h.err()
+		return geom.Geometry{}, fmt.Errorf("creating wkt reader: %v", h.err())
 	}
 	defer C.GEOSWKTReader_destroy_r(h.context, reader)
 
@@ -175,7 +213,7 @@ func (h *Handle) FromText(wkt string) (geom.Geometry, error) {
 
 	gh := C.GEOSWKTReader_read_r(h.context, reader, cwkt)
 	if gh == nil {
-		return geom.Geometry{}, h.err()
+		return geom.Geometry{}, fmt.Errorf("reading: %v", h.err())
 	}
 
 	return h.decodeGeomHandle(gh)

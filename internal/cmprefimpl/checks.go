@@ -119,15 +119,32 @@ func checkFromText(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 }
 
 func checkAsBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	var wantDefined bool
 	want, err := h.AsBinary(g)
-	if err != nil {
-		return err
+	if err == nil {
+		wantDefined = true
 	}
+	isPointEmpty := g.AsText() == "POINT EMPTY"
+	if !wantDefined && !isPointEmpty {
+		return errors.New("AsBinary wasn't defined by libgeos and " +
+			"the test is NOT for a POINT EMPTY, which is unexpected",
+		)
+	}
+	if !wantDefined {
+		// Skip the test, since we don't have a WKB from libgeos to compare to.
+		// This is only for the POINT EMPTY case. Simplefeatures _does_ produce
+		// a WKB for POINT EMPTY although this is strictly an extension to the
+		// spec.
+		return nil
+	}
+
 	var got bytes.Buffer
 	if err := g.AsBinary(&got); err != nil {
 		return err
 	}
 	if bytes.Compare(want, got.Bytes()) != 0 {
+		log.Printf("want: %v", want)
+		log.Printf("got:  %v", got)
 		return errors.New("mismatch")
 	}
 	return nil
