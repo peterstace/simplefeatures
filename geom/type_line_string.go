@@ -311,14 +311,16 @@ func (s LineString) Centroid() (Point, bool) {
 	if s.NumPoints() == 0 {
 		return Point{}, false
 	}
-	cent, _ := centroidAndLengthOfLineString(s)
-	return NewPointXY(cent), true
+	sumX, sumY, sumLength := centroidAndLengthOfLineString(s)
+	if sumLength == 0 {
+		return Point{}, false
+	}
+	return NewPointF(sumX/sumLength, sumY/sumLength), true
 }
 
-func centroidAndLengthOfLineString(s LineString) (XY, float64) {
-	var sumX, sumY, sumLength float64
+func centroidAndLengthOfLineString(s LineString) (sumX float64, sumY float64, sumLength float64) {
 	if s.NumPoints() == 0 {
-		return XY{}, 0
+		return 0, 0, 0
 	}
 	n := s.NumLines()
 	for i := 0; i < n; i++ {
@@ -330,7 +332,7 @@ func centroidAndLengthOfLineString(s LineString) (XY, float64) {
 		sumY += xy.Y
 		sumLength += length
 	}
-	return XY{sumX / float64(sumLength), sumY / float64(sumLength)}, sumLength
+	return sumX, sumY, sumLength
 }
 
 // AsMultiLineString is a convinience function that converts this LineString

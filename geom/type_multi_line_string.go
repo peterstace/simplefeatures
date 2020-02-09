@@ -248,10 +248,9 @@ func (m MultiLineString) Centroid() (Point, bool) {
 	var sumX, sumY, sumLength float64
 	for i := 0; i < n; i++ {
 		ls := m.LineStringN(i)
-		cent, length := centroidAndLengthOfLineString(ls)
-		xy := cent.Scale(length)
-		sumX += xy.X
-		sumY += xy.Y
+		x, y, length := centroidAndLengthOfLineString(ls)
+		sumX += x
+		sumY += y
 		sumLength += length
 	}
 	if sumLength == 0 {

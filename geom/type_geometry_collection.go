@@ -277,35 +277,28 @@ func (c GeometryCollection) computeCentroid() (highestDim, numPoints int, sumLen
 	}
 
 	highestDim = highestDimensionIgnoreEmpties(c.AsGeometry())
-	//fmt.Fprintf(os.Stdout, "c: %s\n", c.AsText())
-	//fmt.Fprintf(os.Stdout, "highestDim: %v\n", highestDim)
 
 	for i := 0; i < n; i++ {
 		geom := c.GeometryN(i)
-		//fmt.Fprintf(os.Stdout, "\tgeom: %v\n", geom.AsText())
 		if highestDimensionIgnoreEmpties(geom) != highestDim {
-			//fmt.Fprintf(os.Stdout, "\tIgnoring, dimensionality too low\n")
 			continue
 		}
 		switch {
 		case geom.IsPoint():
 			pt := geom.AsPoint()
-			//fmt.Fprintf(os.Stdout, "\t\tExamining Point\n")
 			sumX += pt.XY().X
 			sumY += pt.XY().Y
-			numPoints += 1
+			numPoints++
 		case geom.IsMultiPoint():
 			mp := geom.AsMultiPoint()
-			//fmt.Fprintf(os.Stdout, "\t\tExamining MultiPoint with %d points\n", mp.NumPoints())
 			for m := 0; m < mp.NumPoints(); m++ {
 				pt := mp.PointN(m)
 				sumX += pt.XY().X
 				sumY += pt.XY().Y
-				numPoints += 1
+				numPoints++
 			}
 		case geom.IsLine():
 			line := geom.AsLine()
-			//fmt.Fprintf(os.Stdout, "\t\tExamining Line\n")
 			cent := line.Centroid()
 			length := line.Length()
 			sumX += cent.Coordinates().Scale(length).X
@@ -313,44 +306,35 @@ func (c GeometryCollection) computeCentroid() (highestDim, numPoints int, sumLen
 			sumLength += length
 		case geom.IsLineString():
 			ls := geom.AsLineString()
-			//fmt.Fprintf(os.Stdout, "\t\tExamining LineString\n")
-			cent, length := centroidAndLengthOfLineString(ls)
-			xy := cent.Scale(length)
-			sumX += xy.X
-			sumY += xy.Y
+			x, y, length := centroidAndLengthOfLineString(ls)
+			sumX += x
+			sumY += y
 			sumLength += length
 		case geom.IsMultiLineString():
 			mls := geom.AsMultiLineString()
-			//fmt.Fprintf(os.Stdout, "\t\tExamining MultiLineString with %d points\n", mls.NumLineStrings())
 			for m := 0; m < mls.NumLineStrings(); m++ {
 				ls := mls.LineStringN(m)
-				cent, length := centroidAndLengthOfLineString(ls)
-				xy := cent.Scale(length)
-				sumX += xy.X
-				sumY += xy.Y
+				x, y, length := centroidAndLengthOfLineString(ls)
+				sumX += x
+				sumY += y
 				sumLength += length
 			}
 		case geom.IsPolygon():
 			poly := geom.AsPolygon()
-			//fmt.Fprintf(os.Stdout, "\t\tExamining Polygon\n")
-			cent, area := centroidAndAreaOfPolygon(poly)
-			xy := cent.Scale(area)
-			sumX += xy.X
-			sumY += xy.Y
+			x, y, area := centroidAndAreaOfPolygon(poly)
+			sumX += x
+			sumY += y
 			sumArea += area
 		case geom.IsMultiPolygon():
 			mp := geom.AsMultiPolygon()
-			//fmt.Fprintf(os.Stdout, "\t\tExamining MultiPolygon\n")
 			for p := 0; p < mp.NumPolygons(); p++ {
 				poly := mp.PolygonN(p)
-				cent, area := centroidAndAreaOfPolygon(poly)
-				xy := cent.Scale(area)
-				sumX += xy.X
-				sumY += xy.Y
+				x, y, area := centroidAndAreaOfPolygon(poly)
+				sumX += x
+				sumY += y
 				sumArea += area
 			}
 		case geom.IsGeometryCollection():
-			//fmt.Fprintf(os.Stdout, "\t\tExamining GeometryCollection\n")
 			dim, n, length, area, x, y, valid := geom.AsGeometryCollection().computeCentroid()
 			if !valid {
 				continue
@@ -367,7 +351,6 @@ func (c GeometryCollection) computeCentroid() (highestDim, numPoints int, sumLen
 			panic("unknown geometry type in centroid computation")
 		}
 	}
-	//fmt.Fprintf(os.Stdout, "Centroid: highestDim %d, numPoints %d, sumLength %f, sumArea %f ,sumX %f, sumY %f\n", highestDim, numPoints, sumLength, sumArea, sumX, sumY)
 	valid = true
 	return
 }

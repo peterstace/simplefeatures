@@ -360,20 +360,18 @@ func (m MultiPolygon) Centroid() (Point, bool) {
 		return Point{}, false
 	}
 
+	var sumX, sumY, sumArea float64
 	n := m.NumPolygons()
-	centroids := make([]XY, n)
-	areas := make([]float64, n)
-	var totalArea float64
 	for i := 0; i < n; i++ {
-		centroids[i], areas[i] = centroidAndAreaOfPolygon(m.PolygonN(i))
-		totalArea += areas[i]
+		x, y, area := centroidAndAreaOfPolygon(m.PolygonN(i))
+		sumX += x
+		sumY += y
+		sumArea += area
 	}
-	var avg XY
-	for i := range centroids {
-		avg = avg.Add(centroids[i].Scale(areas[i]))
+	if sumArea == 0 {
+		return Point{}, false
 	}
-	avg = avg.Scale(1.0 / totalArea)
-	return NewPointXY(avg), true
+	return NewPointF(sumX/sumArea, sumY/sumArea), true
 }
 
 // Reverse in the case of MultiPolygon outputs the component polygons in their original order,

@@ -586,7 +586,7 @@ func (g Geometry) Centroid() (Point, bool) {
 	case g.IsMultiPoint():
 		return g.AsMultiPoint().Centroid()
 	case g.IsPolygon():
-		return g.AsPolygon().Centroid(), true
+		return g.AsPolygon().Centroid()
 	case g.IsMultiPolygon():
 		return g.AsMultiPolygon().Centroid()
 	default:
