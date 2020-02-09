@@ -201,6 +201,20 @@ func (h *Handle) AsBinary(g geom.Geometry) ([]byte, error) {
 	return C.GoBytes(unsafe.Pointer(wkb), C.int(size)), nil
 }
 
+func (h *Handle) FromBinary(wkb []byte) (geom.Geometry, error) {
+	gh := C.GEOSWKBReader_read_r(
+		h.context,
+		h.wkbReader,
+		(*C.uchar)(&wkb[0]),
+		C.ulong(len(wkb)),
+	)
+	if gh == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy_r(h.context, gh)
+	return h.decodeGeomHandle(gh)
+}
+
 func (h *Handle) IsEmpty(g geom.Geometry) (bool, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {

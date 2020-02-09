@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -10,21 +11,6 @@ import (
 )
 
 func unaryChecks(h *libgeos.Handle, g geom.Geometry) error {
-	//AsText     string
-	//AsBinary   []byte
-	//AsGeoJSON  sql.NullString
-	//IsEmpty    bool
-	//Dimension  int
-	//Envelope   geom.Geometry
-	//IsSimple   sql.NullBool
-	//Boundary   geom.NullGeometry
-	//ConvexHull geom.Geometry
-	//IsValid    bool
-	//IsRing     sql.NullBool
-	//Length     float64
-	//Area       float64
-	//Cetroid    geom.Geometry
-	//Reverse    geom.Geometry
 
 	// TODO: Check is valid before doing anything at all.
 
@@ -40,7 +26,28 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry) error {
 	if err := checkAsTextReverse(h, g); err != nil {
 		return err
 	}
+	if err := checkAsBinary(h, g); err != nil {
+		return err
+	}
+	if err := checkFromBinary(h, g); err != nil {
+		return err
+	}
 	return nil
+
+	//AsBinary   []byte
+	//AsGeoJSON  sql.NullString
+	//IsEmpty    bool
+	//Dimension  int
+	//Envelope   geom.Geometry
+	//IsSimple   sql.NullBool
+	//Boundary   geom.NullGeometry
+	//ConvexHull geom.Geometry
+	//IsValid    bool
+	//IsRing     sql.NullBool
+	//Length     float64
+	//Area       float64
+	//Cetroid    geom.Geometry
+	//Reverse    geom.Geometry
 }
 
 type mismatchError struct {
@@ -123,6 +130,43 @@ func checkAsTextReverse(h *libgeos.Handle, g geom.Geometry) error {
 			want:      g.AsText(),
 			got:       gWKT.AsText(),
 		}
+	}
+	return nil
+}
+
+func checkAsBinary(h *libgeos.Handle, g geom.Geometry) error {
+	want, err := h.AsBinary(g)
+	if err != nil {
+		return err
+	}
+	var got bytes.Buffer
+	if err := g.AsBinary(&got); err != nil {
+		return err
+	}
+	if bytes.Compare(want, got.Bytes()) != 0 {
+		return errors.New("mismatch")
+	}
+	return nil
+}
+
+func checkFromBinary(h *libgeos.Handle, g geom.Geometry) error {
+	var wkb bytes.Buffer
+	if err := g.AsBinary(&wkb); err != nil {
+		return err
+	}
+
+	want, err := h.FromBinary(wkb.Bytes())
+	if err != nil {
+		return err
+	}
+
+	got, err := geom.UnmarshalWKB(bytes.NewReader(wkb.Bytes()))
+	if err != nil {
+		return err
+	}
+
+	if !want.EqualsExact(got) {
+		return errors.New("mismatch")
 	}
 	return nil
 }
