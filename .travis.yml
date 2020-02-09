@@ -1,2 +1,3 @@
 script:
+  - docker-compose -f docker-compose-unit.yml up --abort-on-container-exit
   - docker-compose -f docker-compose-full.yml up --abort-on-container-exit

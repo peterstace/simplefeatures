@@ -154,6 +154,7 @@ func (h *Handle) AsText(g geom.Geometry) (string, error) {
 		return "", h.err()
 	}
 	defer C.GEOSWKTWriter_destroy_r(h.context, writer)
+	C.GEOSWKTWriter_setTrim_r(h.context, writer, C.char(1))
 	wkt := C.GEOSWKTWriter_write_r(h.context, writer, gh)
 	if wkt == nil {
 		return "", h.err()

@@ -38,7 +38,6 @@ func TestFuzz(t *testing.T) {
 			if err != nil {
 				t.Fatalf("could not get result from postgis: %v", err)
 			}
-			CheckWKT(t, want, g)
 			CheckWKB(t, want, g)
 			CheckGeoJSON(t, want, g)
 			CheckIsEmpty(t, want, g)

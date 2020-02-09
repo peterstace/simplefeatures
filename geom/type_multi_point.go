@@ -76,7 +76,9 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 	}
 	dst = append(dst, '(')
 	for i, pt := range m.pts {
-		dst = pt.appendWKTBody(dst)
+		dst = appendFloat(dst, pt.coords.X)
+		dst = append(dst, ' ')
+		dst = appendFloat(dst, pt.coords.Y)
 		if i != len(m.pts)-1 {
 			dst = append(dst, ',')
 		}

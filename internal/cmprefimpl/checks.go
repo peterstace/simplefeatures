@@ -17,12 +17,12 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	log.Println("checking AsText forward")
-	if err := checkAsTextForward(h, g, log); err != nil {
+	log.Println("checking AsText")
+	if err := checkAsText(h, g, log); err != nil {
 		return err
 	}
-	log.Println("checking AsText reverse")
-	if err := checkAsTextReverse(h, g, log); err != nil {
+	log.Println("checking FromText")
+	if err := checkFromText(h, g, log); err != nil {
 		return err
 	}
 	log.Println("checking AsBinary")
@@ -78,31 +78,41 @@ func checkIsValid(h *libgeos.Handle, g geom.Geometry, log *log.Logger) (bool, er
 	return validAsPerSimpleFeatures, nil
 }
 
-func checkAsTextForward(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
-	wkt := g.AsText()
-	gWKT, err := h.FromText(wkt)
+func checkAsText(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	want, err := h.AsText(g)
 	if err != nil {
 		return err
 	}
-	log.Printf("libgeos FromText: %v", gWKT.AsText())
-	if !gWKT.EqualsExact(g) {
+
+	// Account for acceptable spacing differeneces between libgeos and simplefeatures.
+	want = strings.ReplaceAll(want, " (", "(")
+	want = strings.ReplaceAll(want, ", ", ",")
+
+	got := g.AsText()
+	if got != want {
+		log.Printf("want: %v", want)
+		log.Printf("got:  %v", got)
 		return mismatchErr
 	}
 	return nil
 }
 
-func checkAsTextReverse(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
-	wkt, err := h.AsText(g)
+func checkFromText(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	wkt := g.AsText()
+
+	want, err := h.FromText(wkt)
 	if err != nil {
 		return err
 	}
-	log.Printf("libgeos AsText: %v", wkt)
-	gWKT, err := geom.UnmarshalWKT(strings.NewReader(wkt))
+
+	got, err := geom.UnmarshalWKT(strings.NewReader(wkt))
 	if err != nil {
 		return err
 	}
-	log.Printf("unmarshalled geom via simplefeatures: %v", gWKT.AsText())
-	if !gWKT.EqualsExact(g) {
+
+	if !got.EqualsExact(want) {
+		log.Printf("want: %v", want.AsText())
+		log.Printf("got:  %v", got.AsText())
 		return mismatchErr
 	}
 	return nil
