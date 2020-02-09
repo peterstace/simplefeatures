@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"sort"
@@ -34,10 +36,16 @@ func main() {
 	defer h.Close()
 
 	for _, g := range geoms {
-		fmt.Println(g.AsText())
-		err := unaryChecks(h, g)
+		var buf bytes.Buffer
+		lg := log.New(&buf, "", log.Lshortfile)
+		lg.Printf("========================== START ===========================")
+		lg.Printf("WKT: %v", g.AsText())
+		err := unaryChecks(h, g, lg)
+		lg.Printf("=========================== END ============================")
 		if err != nil {
-			fmt.Printf("err: %v\n", err)
+			fmt.Printf("Check failed: %v\n", err)
+			io.Copy(os.Stdout, &buf)
+			fmt.Println()
 		}
 	}
 }

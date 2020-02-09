@@ -3,33 +3,34 @@ package main
 import (
 	"bytes"
 	"errors"
-	"fmt"
+	"log"
 	"strings"
 
 	"github.com/peterstace/simplefeatures/geom"
 	"github.com/peterstace/simplefeatures/internal/libgeos"
 )
 
-func unaryChecks(h *libgeos.Handle, g geom.Geometry) error {
-
-	// TODO: Check is valid before doing anything at all.
-
-	if valid, err := checkIsValid(h, g); err != nil {
+func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	if valid, err := checkIsValid(h, g, log); err != nil {
 		return err
 	} else if !valid {
 		return nil
 	}
 
-	if err := checkAsTextForward(h, g); err != nil {
+	log.Println("checking AsText forward")
+	if err := checkAsTextForward(h, g, log); err != nil {
 		return err
 	}
-	if err := checkAsTextReverse(h, g); err != nil {
+	log.Println("checking AsText reverse")
+	if err := checkAsTextReverse(h, g, log); err != nil {
 		return err
 	}
-	if err := checkAsBinary(h, g); err != nil {
+	log.Println("checking AsBinary")
+	if err := checkAsBinary(h, g, log); err != nil {
 		return err
 	}
-	if err := checkFromBinary(h, g); err != nil {
+	log.Println("checking FromBinary")
+	if err := checkFromBinary(h, g, log); err != nil {
 		return err
 	}
 	return nil
@@ -50,27 +51,9 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry) error {
 	//Reverse    geom.Geometry
 }
 
-type mismatchError struct {
-	operation string
-	operands  []interface{}
-	want      interface{}
-	got       interface{}
-}
+var mismatchErr = errors.New("mismatch")
 
-func (e mismatchError) Error() string {
-	var buf strings.Builder
-	buf.WriteByte('\n')
-	fmt.Fprintf(&buf, "\toperation: %v\n", e.operation)
-	fmt.Fprintf(&buf, "\toperands: %d\n", len(e.operands))
-	for i, o := range e.operands {
-		fmt.Fprintf(&buf, "\t\t[%d]: %v\n", i, o)
-	}
-	fmt.Fprintf(&buf, "\twant: %s\n", e.want)
-	fmt.Fprintf(&buf, "\tgot:  %s\n", e.got)
-	return buf.String()
-}
-
-func checkIsValid(h *libgeos.Handle, g geom.Geometry) (bool, error) {
+func checkIsValid(h *libgeos.Handle, g geom.Geometry, log *log.Logger) (bool, error) {
 	var wkb bytes.Buffer
 	if err := g.AsBinary(&wkb); err != nil {
 		return false, err
@@ -79,6 +62,7 @@ func checkIsValid(h *libgeos.Handle, g geom.Geometry) (bool, error) {
 	if _, err := geom.UnmarshalWKB(&wkb); err == nil {
 		validAsPerSimpleFeatures = true
 	}
+	log.Printf("Valid as per simplefeatures: %v", validAsPerSimpleFeatures)
 
 	validAsPerLibgeos, err := h.IsValid(g)
 	if err != nil {
@@ -86,55 +70,45 @@ func checkIsValid(h *libgeos.Handle, g geom.Geometry) (bool, error) {
 		// invalid or not.
 		validAsPerLibgeos = false
 	}
+	log.Printf("Valid as per libgeos: %v", validAsPerLibgeos)
 
 	if validAsPerLibgeos != validAsPerSimpleFeatures {
-		return false, fmt.Errorf("validAsPerLibgeos:%v "+
-			"validAsPerSimpleFeatures:%v",
-			validAsPerLibgeos,
-			validAsPerSimpleFeatures,
-		)
+		return false, mismatchErr
 	}
 	return validAsPerSimpleFeatures, nil
 }
 
-func checkAsTextForward(h *libgeos.Handle, g geom.Geometry) error {
+func checkAsTextForward(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	wkt := g.AsText()
 	gWKT, err := h.FromText(wkt)
 	if err != nil {
 		return err
 	}
+	log.Printf("libgeos FromText: %v", gWKT.AsText())
 	if !gWKT.EqualsExact(g) {
-		return mismatchError{
-			operation: "AsText_Forward",
-			operands:  []interface{}{g},
-			want:      wkt,
-			got:       gWKT.AsText(),
-		}
+		return mismatchErr
 	}
 	return nil
 }
 
-func checkAsTextReverse(h *libgeos.Handle, g geom.Geometry) error {
+func checkAsTextReverse(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	wkt, err := h.AsText(g)
 	if err != nil {
 		return err
 	}
+	log.Printf("libgeos AsText: %v", wkt)
 	gWKT, err := geom.UnmarshalWKT(strings.NewReader(wkt))
 	if err != nil {
 		return err
 	}
+	log.Printf("unmarshalled geom via simplefeatures: %v", gWKT.AsText())
 	if !gWKT.EqualsExact(g) {
-		return mismatchError{
-			operation: "AsText_Reverse",
-			operands:  []interface{}{g},
-			want:      g.AsText(),
-			got:       gWKT.AsText(),
-		}
+		return mismatchErr
 	}
 	return nil
 }
 
-func checkAsBinary(h *libgeos.Handle, g geom.Geometry) error {
+func checkAsBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	want, err := h.AsBinary(g)
 	if err != nil {
 		return err
@@ -149,7 +123,7 @@ func checkAsBinary(h *libgeos.Handle, g geom.Geometry) error {
 	return nil
 }
 
-func checkFromBinary(h *libgeos.Handle, g geom.Geometry) error {
+func checkFromBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	var wkb bytes.Buffer
 	if err := g.AsBinary(&wkb); err != nil {
 		return err
