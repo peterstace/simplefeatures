@@ -10,6 +10,9 @@ import (
 	"github.com/peterstace/simplefeatures/internal/libgeos"
 )
 
+// TODO: These are additional geometries. Needs something a bit more robust...
+const _ = "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT EMPTY,POINT(1 2)))"
+
 func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if valid, err := checkIsValid(h, g, log); err != nil {
 		return err

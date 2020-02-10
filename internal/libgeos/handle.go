@@ -134,8 +134,6 @@ func (h *Handle) createGeomHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
 }
 
 func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
-	// TODO: Does this empty point check work for things like
-	// GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT EMPTY,POINT(1 2)))?
 	isEmptyPoint, err := h.isEmptyPoint(gh)
 	if err != nil {
 		return geom.Geometry{}, err

@@ -35,6 +35,7 @@ func main() {
 	}
 	defer h.Close()
 
+	var failures int
 	for _, g := range geoms {
 		var buf bytes.Buffer
 		lg := log.New(&buf, "", log.Lshortfile)
@@ -46,7 +47,13 @@ func main() {
 			fmt.Printf("Check failed: %v\n", err)
 			io.Copy(os.Stdout, &buf)
 			fmt.Println()
+			failures++
 		}
+	}
+	fmt.Printf("finished unary checks on %d geometries\n", len(geoms))
+	fmt.Printf("failures: %d\n", failures)
+	if failures > 0 {
+		os.Exit(1)
 	}
 }
 
