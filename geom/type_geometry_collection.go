@@ -203,11 +203,17 @@ func (c GeometryCollection) IsValid() bool {
 // also returns them in the original order. It also omits empty components.
 func (c GeometryCollection) Reverse() GeometryCollection {
 	var geoms []Geometry
+	var numEmpty int
+	for n := 0; n < c.NumGeometries(); n++ {
+		if c.GeometryN(n).IsEmpty() {
+			numEmpty++
+		}
+	}
+	if numEmpty == c.NumGeometries() {
+		return NewGeometryCollection(geoms)
+	}
 	for n := 0; n < c.NumGeometries(); n++ {
 		rev := c.GeometryN(n).Reverse()
-		if rev.IsEmpty() {
-			continue // Omit empty sub-geometries.
-		}
 		geoms = append(geoms, rev)
 	}
 	return NewGeometryCollection(geoms)
