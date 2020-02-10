@@ -166,17 +166,19 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 }
 
 func (h *Handle) isEmptyPoint(gh *C.GEOSGeometry) (bool, error) {
-	if isEmpty, err := h.boolErr(C.GEOSisEmpty_r(h.context, gh)); err != nil {
+	isEmpty, err := h.boolErr(C.GEOSisEmpty_r(h.context, gh))
+	if err != nil {
 		return false, err
-	} else if isEmpty {
-		return true, nil
+	}
+	if !isEmpty {
+		return false, nil
 	}
 
 	geomType := C.GEOSGeomType_r(h.context, gh)
 	if geomType == nil {
 		return false, h.err()
 	}
-	return C.GoString(geomType) == "Point", nil
+	return C.GoString(geomType) == "Point" && isEmpty, nil
 }
 
 func (h *Handle) AsText(g geom.Geometry) (string, error) {
