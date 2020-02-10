@@ -381,23 +381,38 @@ func (g Geometry) Envelope() (Envelope, bool) {
 func (g Geometry) Boundary() Geometry {
 	switch g.tag {
 	case geometryCollectionTag:
-		return g.AsGeometryCollection().Boundary()
+		return g.AsGeometryCollection().Boundary().AsGeometry()
 	case emptySetTag:
-		return g.AsEmptySet().Boundary()
+		return g.AsEmptySet().Boundary().AsGeometry()
 	case pointTag:
-		return g.AsPoint().Boundary()
+		return g.AsPoint().Boundary().AsGeometry()
 	case lineTag:
-		return g.AsLine().Boundary()
+		return g.AsLine().Boundary().AsGeometry()
 	case lineStringTag:
-		return g.AsLineString().Boundary()
+		return g.AsLineString().Boundary().AsGeometry()
 	case polygonTag:
-		return g.AsPolygon().Boundary()
+		mls := g.AsPolygon().Boundary()
+		// Ensure holeless polygons return a LineString boundary.
+		if mls.NumLineStrings() == 1 {
+			return mls.LineStringN(0).AsGeometry()
+		}
+		return mls.AsGeometry()
 	case multiPointTag:
-		return g.AsMultiPoint().Boundary()
+		if g.AsMultiPoint().IsEmpty() { // Match Postgis behaviour.
+			return g
+		}
+		return g.AsMultiPoint().Boundary().AsGeometry()
 	case multiLineStringTag:
-		return g.AsMultiLineString().Boundary()
+		if g.AsMultiLineString().IsEmpty() { // Match Postgis behaviour.
+			return g
+			//return NewMultiLineString(nil).AsGeometry()
+		}
+		return g.AsMultiLineString().Boundary().AsGeometry()
 	case multiPolygonTag:
-		return g.AsMultiPolygon().Boundary()
+		if g.AsMultiPolygon().IsEmpty() { // Match Postgis behaviour.
+			return g
+		}
+		return g.AsMultiPolygon().Boundary().AsGeometry()
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}
@@ -548,22 +563,31 @@ func (g Geometry) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geomet
 	}
 }
 
-// Length gives the length of the geometry, if defined. It is only defined for
-// Lines, LineStrings, and MultiLineStrings. The returned flag indicates if the
-// length is defined.
-//
-// TODO: This doesn't match PostGIS behaviour. See
-// https://github.com/peterstace/simplefeatures/issues/86
-func (g Geometry) Length() (float64, bool) {
+// Length gives the length of a Line, LineString, or MultiLineString
+// or the sum of the lengths of the components of a GeometryCollection.
+// Other Geometries are defined to return a length of zero.
+func (g Geometry) Length() float64 {
 	switch {
+	case g.IsEmpty():
+		return 0
+	case g.IsGeometryCollection():
+		return g.AsGeometryCollection().Length()
 	case g.IsLine():
-		return g.AsLine().Length(), true
+		return g.AsLine().Length()
 	case g.IsLineString():
-		return g.AsLineString().Length(), true
+		return g.AsLineString().Length()
 	case g.IsMultiLineString():
-		return g.AsMultiLineString().Length(), true
+		return g.AsMultiLineString().Length()
+	case g.IsPoint():
+		return 0
+	case g.IsMultiPoint():
+		return 0
+	case g.IsPolygon():
+		return 0
+	case g.IsMultiPolygon():
+		return 0
 	default:
-		return 0, false
+		return 0
 	}
 }
 

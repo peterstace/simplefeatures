@@ -215,12 +215,12 @@ func (s LineString) Envelope() (Envelope, bool) {
 	return env, true
 }
 
-func (s LineString) Boundary() Geometry {
+func (s LineString) Boundary() MultiPoint {
 	var pts []Point
 	if !s.IsClosed() {
 		pts = append(pts, s.StartPoint(), s.EndPoint())
 	}
-	return NewMultiPoint(pts).AsGeometry()
+	return NewMultiPoint(pts)
 }
 
 func (s LineString) Value() (driver.Value, error) {

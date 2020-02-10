@@ -116,9 +116,9 @@ func (c GeometryCollection) Envelope() (Envelope, bool) {
 	return EnvelopeFromGeoms(c.flatten()...)
 }
 
-func (c GeometryCollection) Boundary() Geometry {
+func (c GeometryCollection) Boundary() GeometryCollection {
 	if c.IsEmpty() {
-		return c.AsGeometry()
+		return c
 	}
 	var bounds []Geometry
 	for _, g := range c.geoms {
@@ -127,7 +127,7 @@ func (c GeometryCollection) Boundary() Geometry {
 			bounds = append(bounds, bound)
 		}
 	}
-	return NewGeometryCollection(bounds).AsGeometry()
+	return NewGeometryCollection(bounds)
 }
 
 func (c GeometryCollection) Value() (driver.Value, error) {
@@ -217,6 +217,17 @@ func (c GeometryCollection) Reverse() GeometryCollection {
 		geoms = append(geoms, rev)
 	}
 	return NewGeometryCollection(geoms)
+}
+
+// Length of a GeometryCollection is the sum of the lengths of its parts.
+func (c GeometryCollection) Length() float64 {
+	var sum float64
+	n := c.NumGeometries()
+	for i := 0; i < n; i++ {
+		geom := c.GeometryN(i)
+		sum += geom.Length()
+	}
+	return sum
 }
 
 // Area in the case of a GeometryCollection is the sum of the areas of its parts.
