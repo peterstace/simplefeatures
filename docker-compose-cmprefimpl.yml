@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+  cmprefimpl:
+    build:
+      context: .
+      dockerfile: cmprefimpl.Dockerfile
+    working_dir: /go/src/github.com/peterstace/simplefeatures
+    entrypoint: sh -c "go install ./internal/cmprefimpl && cmprefimpl"
+    volumes:
+      - .:/go/src/github.com/peterstace/simplefeatures
+    environment:
+      - GO111MODULE=on
