@@ -256,17 +256,17 @@ func (c GeometryCollection) Centroid() (Point, bool) {
 	switch highestDim {
 	case 0:
 		if numPoints == 0 {
-			panic("Invalid centroid, highestDim is 0 and numPoints is 0\n")
+			return Point{}, false // Invalid centroid, highestDim is 0 and numPoints is 0
 		}
 		xy = XY{sumX / float64(numPoints), sumY / float64(numPoints)}
 	case 1:
 		if sumLength == 0 {
-			panic("Invalid centroid, highestDim is 1 and sumLength is 0\n")
+			return Point{}, false // Invalid centroid, highestDim is 1 and sumLength is 0
 		}
 		xy = XY{sumX / sumLength, sumY / sumLength}
 	case 2:
 		if sumArea == 0 {
-			panic("Invalid centroid, highestDim is 2 and sumArea is 0\n")
+			return Point{}, false // Invalid centroid, highestDim is 2 and sumArea is 0
 		}
 		xy = XY{sumX / sumArea, sumY / sumArea}
 	default:
