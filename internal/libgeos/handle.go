@@ -134,11 +134,11 @@ func (h *Handle) createGeomHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
 }
 
 func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
-	isEmptyPoint, err := h.isEmptyPoint(gh)
+	hasEmptyPoint, err := h.containsEmptyPoint(gh)
 	if err != nil {
 		return geom.Geometry{}, err
 	}
-	if isEmptyPoint {
+	if hasEmptyPoint {
 		writer := C.GEOSWKTWriter_create_r(h.context)
 		if writer == nil {
 			return geom.Geometry{}, h.err()
@@ -163,20 +163,38 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 	}
 }
 
-func (h *Handle) isEmptyPoint(gh *C.GEOSGeometry) (bool, error) {
-	isEmpty, err := h.boolErr(C.GEOSisEmpty_r(h.context, gh))
-	if err != nil {
-		return false, err
-	}
-	if !isEmpty {
-		return false, nil
-	}
-
+func (h *Handle) containsEmptyPoint(gh *C.GEOSGeometry) (bool, error) {
 	geomType := C.GEOSGeomType_r(h.context, gh)
 	if geomType == nil {
 		return false, h.err()
 	}
-	return C.GoString(geomType) == "Point" && isEmpty, nil
+	switch C.GoString(geomType) {
+	case "Point":
+		isEmpty, err := h.boolErr(C.GEOSisEmpty_r(h.context, gh))
+		if err != nil {
+			return false, err
+		}
+		return isEmpty, nil
+	case "MultiPoint", "GeometryCollection":
+		n := C.GEOSGetNumGeometries_r(h.context, gh)
+		if n == -1 {
+			return false, h.err()
+		}
+		for i := 0; i < int(n); i++ {
+			sub := C.GEOSGetGeometryN_r(h.context, gh, C.int(i))
+			if sub == nil {
+				return false, h.err()
+			}
+			if has, err := h.containsEmptyPoint(sub); err != nil {
+				return false, err
+			} else if has {
+				return true, nil
+			}
+		}
+		return false, nil
+	default:
+		return false, nil
+	}
 }
 
 func (h *Handle) AsText(g geom.Geometry) (string, error) {

@@ -12,6 +12,12 @@ import (
 	"github.com/peterstace/simplefeatures/internal/libgeos"
 )
 
+// TODO: These are additional geometries. Needs something a bit more robust...
+const (
+	_ = "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT EMPTY,POINT(1 2)))"
+	_ = "MULTIPOINT((1 2),(2 3),EMPTY)"
+)
+
 func main() {
 	dir, err := os.Getwd()
 	if err != nil {

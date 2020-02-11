@@ -10,9 +10,6 @@ import (
 	"github.com/peterstace/simplefeatures/internal/libgeos"
 )
 
-// TODO: These are additional geometries. Needs something a bit more robust...
-const _ = "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT EMPTY,POINT(1 2)))"
-
 func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if valid, err := checkIsValid(h, g, log); err != nil {
 		return err
@@ -127,10 +124,10 @@ func checkAsBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err == nil {
 		wantDefined = true
 	}
-	isPointEmpty := g.AsText() == "POINT EMPTY"
-	if !wantDefined && !isPointEmpty {
-		return errors.New("AsBinary wasn't defined by libgeos and " +
-			"the test is NOT for a POINT EMPTY, which is unexpected",
+	hasPointEmpty := hasEmptyPoint(g)
+	if !wantDefined && !hasPointEmpty {
+		return errors.New("AsBinary wasn't defined by libgeos and the test is " +
+			"NOT for a geometry containing a POINT EMPTY, which is unexpected",
 		)
 	}
 	if !wantDefined {
@@ -151,6 +148,23 @@ func checkAsBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 		return errors.New("mismatch")
 	}
 	return nil
+}
+
+func hasEmptyPoint(g geom.Geometry) bool {
+	if g.AsText() == "POINT EMPTY" {
+		return true
+	}
+	// TODO: Should also support MultiPoints here. However, simplefeatures
+	// doesn't support empty points in multipoint collections. We'll need to
+	// update this when we add support for that.
+	if !g.IsGeometryCollection() {
+		return false
+	}
+	gc := g.AsGeometryCollection()
+	for i := 0; i < gc.NumGeometries(); i++ {
+		return hasEmptyPoint(gc.GeometryN(i))
+	}
+	return false
 }
 
 func checkFromBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
