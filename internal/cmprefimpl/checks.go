@@ -162,7 +162,9 @@ func hasEmptyPoint(g geom.Geometry) bool {
 	}
 	gc := g.AsGeometryCollection()
 	for i := 0; i < gc.NumGeometries(); i++ {
-		return hasEmptyPoint(gc.GeometryN(i))
+		if hasEmptyPoint(gc.GeometryN(i)) {
+			return true
+		}
 	}
 	return false
 }
