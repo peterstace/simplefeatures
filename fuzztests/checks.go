@@ -154,7 +154,9 @@ func containsEmptyPoint(g geom.Geometry) bool {
 	}
 	gc := g.AsGeometryCollection()
 	for i := 0; i < gc.NumGeometries(); i++ {
-		return containsEmptyPoint(gc.GeometryN(i))
+		if containsEmptyPoint(gc.GeometryN(i)) {
+			return true
+		}
 	}
 	return false
 }
