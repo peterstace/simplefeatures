@@ -137,7 +137,7 @@ func CheckWKT(t *testing.T, want UnaryResult, g geom.Geometry) {
 
 func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckWKB", func(t *testing.T) {
-		if g.IsEmptySet() && g.AsText() == "POINT EMPTY" {
+		if containsEmptyPoint(g) {
 			// Empty point WKB use NaN as part of their representation.
 			// Go's math.NaN() and Postgis use slightly different (but
 			// compatible) representations of NaN.
@@ -161,6 +161,20 @@ func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 			t.Error("mismatch")
 		}
 	})
+}
+
+func containsEmptyPoint(g geom.Geometry) bool {
+	if g.IsEmptySet() && g.AsText() == "POINT EMPTY" {
+		return true
+	}
+	if !g.IsGeometryCollection() {
+		return false
+	}
+	gc := g.AsGeometryCollection()
+	for i := 0; i < gc.NumGeometries(); i++ {
+		return containsEmptyPoint(gc.GeometryN(i))
+	}
+	return false
 }
 
 func CheckGeoJSON(t *testing.T, want UnaryResult, g geom.Geometry) {
