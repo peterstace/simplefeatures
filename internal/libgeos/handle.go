@@ -378,14 +378,25 @@ func (h *Handle) Envelope(g geom.Geometry) (geom.Envelope, bool, error) {
 	return sfEnv, true, nil
 }
 
-func (h *Handle) IsSimple(g geom.Geometry) (bool, error) {
+func (h *Handle) IsSimple(g geom.Geometry) (isSimple bool, defined bool, err error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
-		return false, err
+		return false, false, err
 	}
 	defer C.GEOSGeom_destroy(gh)
 
-	return h.boolErr(C.GEOSisSimple_r(h.context, gh))
+	// IsSimple is not defined for GeometryCollections.
+	geomType := C.GEOSGeomType_r(h.context, gh)
+	if geomType == nil {
+		return false, false, h.err()
+	}
+	defer C.free(unsafe.Pointer(geomType))
+	if C.GoString(geomType) == "GeometryCollection" {
+		return false, false, nil
+	}
+
+	isSimple, err = h.boolErr(C.GEOSisSimple_r(h.context, gh))
+	return isSimple, true, err
 }
 
 func (h *Handle) Boundary(g geom.Geometry) (geom.Geometry, error) {

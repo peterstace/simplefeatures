@@ -97,6 +97,9 @@ func (m MultiLineString) IsSimple() bool {
 	for i := 0; i < len(m.lines); i++ {
 		for j := i + 1; j < len(m.lines); j++ {
 			inter := mustIntersection(m.lines[i].AsGeometry(), m.lines[j].AsGeometry())
+			if inter.IsEmpty() {
+				continue
+			}
 			bound := mustIntersection(m.lines[i].Boundary().AsGeometry(), m.lines[j].Boundary().AsGeometry())
 			if !inter.EqualsExact(mustIntersection(inter, bound)) {
 				return false

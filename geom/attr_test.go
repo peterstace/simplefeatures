@@ -158,6 +158,7 @@ func TestIsSimple(t *testing.T) {
 		{"MULTILINESTRING((0 0,0 1,1 1),(0 1,0 0,1 0))", false}, // reproduced a bug
 		{"MULTILINESTRING((0 0,1 0),(0 1,1 1))", true},          // reproduced a bug
 		{"MULTILINESTRING((1 1,2 2),(1 1,2 2))", false},
+		{"MULTILINESTRING((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))", true}, // reproduced a bug
 
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)))", true},
 	} {

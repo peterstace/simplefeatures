@@ -45,6 +45,10 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkEnvelope(h, g, log); err != nil {
 		return err
 	}
+	log.Println("checking IsSimple")
+	if err := checkIsSimple(h, g, log); err != nil {
+		return err
+	}
 	return nil
 
 	//AsGeoJSON  sql.NullString
@@ -257,6 +261,29 @@ func checkEnvelope(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if want.Min() != got.Min() || want.Max() != got.Max() {
 		log.Printf("want: %v", want.AsGeometry().AsText())
 		log.Printf("got:  %v", got.AsGeometry().AsText())
+		return errors.New("mismatch")
+	}
+	return nil
+}
+
+func checkIsSimple(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	want, wantDefined, err := h.IsSimple(g)
+	if err != nil {
+		return err
+	}
+	got, gotDefined := g.IsSimple()
+
+	if wantDefined != gotDefined {
+		log.Printf("want defined: %v", wantDefined)
+		log.Printf("got defined: %v", gotDefined)
+		return errors.New("mismatch")
+	}
+	if !gotDefined {
+		return nil
+	}
+	if want != got {
+		log.Printf("want: %v", want)
+		log.Printf("got:  %v", got)
 		return errors.New("mismatch")
 	}
 	return nil
