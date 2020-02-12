@@ -33,11 +33,13 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkFromBinary(h, g, log); err != nil {
 		return err
 	}
+	log.Println("checking IsEmpty")
+	if err := checkIsEmpty(h, g, log); err != nil {
+		return err
+	}
 	return nil
 
-	//AsBinary   []byte
 	//AsGeoJSON  sql.NullString
-	//IsEmpty    bool
 	//Dimension  int
 	//Envelope   geom.Geometry
 	//IsSimple   sql.NullBool
@@ -186,6 +188,21 @@ func checkFromBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error 
 	}
 
 	if !want.EqualsExact(got) {
+		return errors.New("mismatch")
+	}
+	return nil
+}
+
+func checkIsEmpty(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	want, err := h.IsEmpty(g)
+	if err != nil {
+		return err
+	}
+	got := g.IsEmpty()
+
+	if want != got {
+		log.Printf("want: %v", want)
+		log.Printf("got: %v", got)
 		return errors.New("mismatch")
 	}
 	return nil
