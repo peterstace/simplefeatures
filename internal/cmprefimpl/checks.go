@@ -41,10 +41,13 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkDimension(h, g, log); err != nil {
 		return err
 	}
+	log.Println("checking Envelope")
+	if err := checkEnvelope(h, g, log); err != nil {
+		return err
+	}
 	return nil
 
 	//AsGeoJSON  sql.NullString
-	//Envelope   geom.Geometry
 	//IsSimple   sql.NullBool
 	//Boundary   geom.NullGeometry
 	//ConvexHull geom.Geometry
@@ -229,6 +232,31 @@ func checkDimension(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if want != got {
 		log.Printf("want: %v", want)
 		log.Printf("got: %v", got)
+		return errors.New("mismatch")
+	}
+	return nil
+}
+
+func checkEnvelope(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	want, wantDefined, err := h.Envelope(g)
+	if err != nil {
+		return err
+	}
+	got, gotDefined := g.Envelope()
+
+	if wantDefined != gotDefined {
+		log.Println("disagreement about envelope being defined")
+		log.Printf("simplefeatures: %v", gotDefined)
+		log.Printf("libgeos: %v", wantDefined)
+		return errors.New("mismatch")
+	}
+
+	if !wantDefined {
+		return nil
+	}
+	if want.Min() != got.Min() || want.Max() != got.Max() {
+		log.Printf("want: %v", want.AsGeometry().AsText())
+		log.Printf("got:  %v", got.AsGeometry().AsText())
 		return errors.New("mismatch")
 	}
 	return nil

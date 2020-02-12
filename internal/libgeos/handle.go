@@ -168,6 +168,7 @@ func (h *Handle) containsEmptyPoint(gh *C.GEOSGeometry) (bool, error) {
 	if geomType == nil {
 		return false, h.err()
 	}
+	defer C.free(unsafe.Pointer(geomType))
 	switch C.GoString(geomType) {
 	case "Point":
 		isEmpty, err := h.boolErr(C.GEOSisEmpty_r(h.context, gh))
@@ -296,20 +297,85 @@ func (h *Handle) Dimension(g geom.Geometry) (int, error) {
 	return dim, nil
 }
 
-func (h *Handle) Envelope(g geom.Geometry) (geom.Geometry, error) {
+func (h *Handle) Envelope(g geom.Geometry) (geom.Envelope, bool, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
-		return geom.Geometry{}, err
+		return geom.Envelope{}, false, err
 	}
 	defer C.GEOSGeom_destroy(gh)
 
 	env := C.GEOSEnvelope_r(h.context, gh)
 	if env == nil {
-		return geom.Geometry{}, h.err()
+		return geom.Envelope{}, false, h.err()
 	}
 	defer C.GEOSGeom_destroy_r(h.context, env)
 
-	return h.decodeGeomHandle(env)
+	if isEmpty, err := h.boolErr(C.GEOSisEmpty_r(h.context, env)); err != nil {
+		return geom.Envelope{}, false, err
+	} else if isEmpty {
+		return geom.Envelope{}, false, nil
+	}
+
+	// libgeos will return either a Point or a Polygon. In the case where the
+	// envelope has a width but no height or a height but no width, then an
+	// invalid Polygon is returned.
+	geomType := C.GEOSGeomType_r(h.context, env)
+	if geomType == nil {
+		return geom.Envelope{}, false, h.err()
+	}
+	defer C.free(unsafe.Pointer(geomType))
+	if C.GoString(geomType) == "Point" {
+		var x C.double
+		if C.GEOSGeomGetX_r(h.context, env, &x) == 0 {
+			return geom.Envelope{}, false, h.err()
+		}
+		var y C.double
+		if C.GEOSGeomGetY_r(h.context, env, &y) == 0 {
+			return geom.Envelope{}, false, h.err()
+		}
+		return geom.NewEnvelope(geom.XY{X: float64(x), Y: float64(y)}), true, nil
+	}
+
+	ring := C.GEOSGetExteriorRing_r(h.context, env)
+	if ring == nil {
+		return geom.Envelope{}, false, h.err()
+	}
+	// ring belongs to env, so doesn't need to be destroyed.
+
+	seq := C.GEOSGeom_getCoordSeq_r(h.context, ring)
+	if seq == nil {
+		return geom.Envelope{}, false, h.err()
+	}
+	// seq belongs to ring, so doesn't need to be destroyed.
+
+	var size C.uint
+	if C.GEOSCoordSeq_getSize_r(h.context, seq, &size) == 0 {
+		return geom.Envelope{}, false, h.err()
+	}
+	if size == 0 {
+		return geom.Envelope{}, false, errors.New(
+			"coordinate sequence doesn't contain any points")
+	}
+
+	var sfEnv geom.Envelope
+	for i := C.uint(0); i < size; i++ {
+		var x C.double
+		if C.GEOSCoordSeq_getX_r(h.context, seq, i, &x) == 0 {
+			return geom.Envelope{}, false, h.err()
+		}
+		var y C.double
+		if C.GEOSCoordSeq_getY_r(h.context, seq, i, &y) == 0 {
+			return geom.Envelope{}, false, h.err()
+		}
+		xy := geom.XY{X: float64(x), Y: float64(y)}
+		if i == 0 {
+			sfEnv = geom.NewEnvelope(xy)
+		} else {
+			sfEnv = sfEnv.ExtendToIncludePoint(xy)
+		}
+	}
+
+	return sfEnv, true, nil
 }
 
 func (h *Handle) IsSimple(g geom.Geometry) (bool, error) {
