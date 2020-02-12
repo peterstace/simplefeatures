@@ -37,10 +37,13 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkIsEmpty(h, g, log); err != nil {
 		return err
 	}
+	log.Println("checking Dimension")
+	if err := checkDimension(h, g, log); err != nil {
+		return err
+	}
 	return nil
 
 	//AsGeoJSON  sql.NullString
-	//Dimension  int
 	//Envelope   geom.Geometry
 	//IsSimple   sql.NullBool
 	//Boundary   geom.NullGeometry
@@ -199,6 +202,29 @@ func checkIsEmpty(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 		return err
 	}
 	got := g.IsEmpty()
+
+	if want != got {
+		log.Printf("want: %v", want)
+		log.Printf("got: %v", got)
+		return errors.New("mismatch")
+	}
+	return nil
+}
+
+func checkDimension(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	var want int
+	if !(g.IsGeometryCollection() &&
+		g.AsGeometryCollection().NumGeometries() == 0) {
+		// Libgeos gives -1 dimension for GeometryCollections with zero
+		// elements. This is very weird behaviour, and the dimension should
+		// actually be zero. So we don't get 'want' from libgeos in that case.
+		var err error
+		want, err = h.Dimension(g)
+		if err != nil {
+			return err
+		}
+	}
+	got := g.Dimension()
 
 	if want != got {
 		log.Printf("want: %v", want)
