@@ -440,12 +440,24 @@ func TestLength(t *testing.T) {
 		{"LINESTRING(0 0,0 1,1 3)", 1 + math.Sqrt(5)},
 		{"MULTILINESTRING((4 2,5 1),(9 2,7 1))", math.Sqrt(2) + math.Sqrt(5)},
 		{"MULTILINESTRING((0 0,2 0),(1 0,3 0))", 4},
+		{"POINT(1 3)", 0},
+		{"MULTIPOINT(0 0,0 1,1 0,0 0)", 0},
+		{"POLYGON((0 0,1 1,0 1,0 0))", 0},
+		{"POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1))", 0},
+		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((2 1,1 1,2 0,2 1)))", 0},
+		{"GEOMETRYCOLLECTION EMPTY", 0},
+		{"GEOMETRYCOLLECTION(POINT EMPTY)", 0},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", 0},
+		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 2)))", 0},
+		{`GEOMETRYCOLLECTION(
+			LINESTRING(0 0,0 1,1 3),
+			POINT(2 3),
+			MULTILINESTRING((4 2,5 1),(9 2,7 1)),
+			POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1))
+		)`, 1 + math.Sqrt(5) + math.Sqrt(2) + math.Sqrt(5)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, ok := geomFromWKT(t, tt.wkt).Length()
-			if !ok {
-				t.Fatal("could not calculate length")
-			}
+			got := geomFromWKT(t, tt.wkt).Length()
 			if math.Abs(tt.want-got) > 1e-6 {
 				t.Errorf("got=%v want=%v", got, tt.want)
 			}
