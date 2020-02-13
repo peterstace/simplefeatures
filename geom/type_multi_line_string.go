@@ -245,18 +245,18 @@ func (m MultiLineString) Centroid() (Point, bool) {
 	if n == 0 {
 		return Point{}, false
 	}
-	var sumX, sumY, sumLength float64
+	var sumXY XY
+	var sumLength float64
 	for i := 0; i < n; i++ {
 		ls := m.LineStringN(i)
-		x, y, length := centroidAndLengthOfLineString(ls)
-		sumX += x
-		sumY += y
+		xy, length := sumCentroidAndLengthOfLineString(ls)
+		sumXY = sumXY.Add(xy)
 		sumLength += length
 	}
 	if sumLength == 0 {
 		return Point{}, false
 	}
-	return NewPointF(sumX/float64(sumLength), sumY/float64(sumLength)), true
+	return NewPointXY(sumXY.Scale(1.0 / sumLength)), true
 }
 
 // Reverse in the case of MultiLineString outputs each component line string in their
