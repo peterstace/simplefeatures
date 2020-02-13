@@ -96,12 +96,27 @@ func (m MultiLineString) IsSimple() bool {
 	}
 	for i := 0; i < len(m.lines); i++ {
 		for j := i + 1; j < len(m.lines); j++ {
-			inter := mustIntersection(m.lines[i].AsGeometry(), m.lines[j].AsGeometry())
+			// Ignore any intersections if the lines are *exactly* the same
+			// (ignoring order). This is to match PostGIS and libgeos
+			// behaviour. The OGC spec is ambiguous around this case, so it's
+			// just easier to follow other implementations for better
+			// interoperability.
+			if m.lines[i].EqualsExact(m.lines[j].AsGeometry(), IgnoreOrder) {
+				continue
+			}
+
+			inter := mustIntersection(
+				m.lines[i].AsGeometry(),
+				m.lines[j].AsGeometry(),
+			)
 			if inter.IsEmpty() {
 				continue
 			}
-			bound := mustIntersection(m.lines[i].Boundary().AsGeometry(), m.lines[j].Boundary().AsGeometry())
-			if !inter.EqualsExact(mustIntersection(inter, bound)) {
+			bound := mustIntersection(
+				m.lines[i].Boundary().AsGeometry(),
+				m.lines[j].Boundary().AsGeometry(),
+			)
+			if !inter.EqualsExact(mustIntersection(inter, bound), IgnoreOrder) {
 				return false
 			}
 		}

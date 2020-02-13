@@ -155,10 +155,20 @@ func TestIsSimple(t *testing.T) {
 		{"MULTILINESTRING((0 0,1 1,2 2),(0 2,1 1,2 0))", false},
 		{"MULTILINESTRING((0 0,2 1,4 2),(4 2,2 3,0 4))", true},
 		{"MULTILINESTRING((0 0,2 0,4 0),(2 0,2 1))", false},
-		{"MULTILINESTRING((0 0,0 1,1 1),(0 1,0 0,1 0))", false}, // reproduced a bug
-		{"MULTILINESTRING((0 0,1 0),(0 1,1 1))", true},          // reproduced a bug
-		{"MULTILINESTRING((1 1,2 2),(1 1,2 2))", false},
-		{"MULTILINESTRING((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))", true}, // reproduced a bug
+
+		// Cases for reproducing bugs.
+		{"MULTILINESTRING((0 0,0 1,1 1),(0 1,0 0,1 0))", false},
+		{"MULTILINESTRING((0 0,1 0),(0 1,1 1))", true},
+		{"MULTILINESTRING((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))", true},
+		{"MULTILINESTRING((1 1,1 0,0 0),(1 1,0 1,0 0))", true},
+
+		// Cases for behaviour around duplicated lines. These cases are to
+		// match PostGIS and libgeos behaviour (the OGC spec is unclear about
+		// what the behaviour should be).
+		{"MULTILINESTRING((1 1,2 2),(1 1,2 2))", true},
+		{"MULTILINESTRING((1 1,2 2),(2 2,1 1))", true},
+		{"MULTILINESTRING((1 1,2 2),(1 1,2 2,3 3))", false},
+		{"MULTILINESTRING((1 1,2 2),(2 2,1 1,3 1))", false},
 
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)))", true},
 	} {
