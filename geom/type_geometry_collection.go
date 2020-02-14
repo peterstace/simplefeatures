@@ -336,15 +336,15 @@ func (c GeometryCollection) sumCentroidCalc() (result centroidCalc, valid bool) 
 			}
 		case g.IsPolygon():
 			poly := g.AsPolygon()
-			x, y, area := centroidAndAreaOfPolygon(poly)
-			result.sumXY = result.sumXY.Add(XY{x, y})
+			xy, area := sumCentroidAndAreaOfPolygon(poly)
+			result.sumXY = result.sumXY.Add(xy)
 			result.sumArea += area
 		case g.IsMultiPolygon():
 			mp := g.AsMultiPolygon()
 			for p := 0; p < mp.NumPolygons(); p++ {
 				poly := mp.PolygonN(p)
-				x, y, area := centroidAndAreaOfPolygon(poly)
-				result.sumXY = result.sumXY.Add(XY{x, y})
+				xy, area := sumCentroidAndAreaOfPolygon(poly)
+				result.sumXY = result.sumXY.Add(xy)
 				result.sumArea += area
 			}
 		case g.IsGeometryCollection():

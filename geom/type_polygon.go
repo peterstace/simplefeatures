@@ -384,14 +384,14 @@ func signedAreaOfLinearRing(lr LineString) float64 {
 // Centroid returns the polygon's centroid point.
 // Returns true iff the polygon has a non-zero area, and thus the centroid is well defined.
 func (p Polygon) Centroid() (Point, bool) {
-	sumX, sumY, sumArea := centroidAndAreaOfPolygon(p)
+	sumXY, sumArea := sumCentroidAndAreaOfPolygon(p)
 	if sumArea == 0 {
 		return Point{}, false
 	}
-	return NewPointF(sumX/sumArea, sumY/sumArea), true
+	return NewPointXY(sumXY.Scale(1.0 / sumArea)), true
 }
 
-func centroidAndAreaOfPolygon(p Polygon) (sumX float64, sumY float64, sumArea float64) {
+func sumCentroidAndAreaOfPolygon(p Polygon) (sumXY XY, sumArea float64) {
 	n := p.NumInteriorRings()
 	areas := make([]float64, n+1)
 	centroids := make([]XY, n+1)
@@ -404,15 +404,14 @@ func centroidAndAreaOfPolygon(p Polygon) (sumX float64, sumY float64, sumArea fl
 	}
 
 	// Calculate weighted average (negative weights for holes).
-	var avg XY
 	for i, c := range centroids {
 		c = c.Scale(areas[i])
 		if i != 0 {
 			c = c.Scale(-1)
 		}
-		avg = avg.Add(c)
+		sumXY = sumXY.Add(c)
 	}
-	return avg.X, avg.Y, totalArea
+	return sumXY, totalArea
 }
 
 func centroidAndAreaOfLinearRing(lr LineString) (XY, float64) {

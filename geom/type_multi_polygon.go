@@ -357,18 +357,18 @@ func (m MultiPolygon) Centroid() (Point, bool) {
 		return Point{}, false
 	}
 
-	var sumX, sumY, sumArea float64
+	var sumArea float64
+	var sumXY XY
 	n := m.NumPolygons()
 	for i := 0; i < n; i++ {
-		x, y, area := centroidAndAreaOfPolygon(m.PolygonN(i))
-		sumX += x
-		sumY += y
+		xy, area := sumCentroidAndAreaOfPolygon(m.PolygonN(i))
+		sumXY = sumXY.Add(xy)
 		sumArea += area
 	}
 	if sumArea == 0 {
 		return Point{}, false
 	}
-	return NewPointF(sumX/sumArea, sumY/sumArea), true
+	return NewPointXY(sumXY.Scale(1.0 / sumArea)), true
 }
 
 // Reverse in the case of MultiPolygon outputs the component polygons in their original order,
