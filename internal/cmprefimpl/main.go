@@ -61,6 +61,43 @@ func main() {
 	if failures > 0 {
 		os.Exit(1)
 	}
+
+	var skipped, tested int
+	for _, g1 := range geoms {
+		// Non-empty GeometryCollections are not supported for binary operations by libgeos.
+		if g1.IsGeometryCollection() && !g1.IsEmpty() {
+			skipped += len(geoms)
+			continue
+		}
+		for _, g2 := range geoms {
+			if g2.IsGeometryCollection() && !g2.IsEmpty() {
+				skipped++
+				continue
+			}
+			tested++
+			var buf bytes.Buffer
+			lg := log.New(&buf, "", log.Lshortfile)
+			lg.Printf("========================== START ===========================")
+			lg.Printf("WKT1: %v", g1.AsText())
+			lg.Printf("WKT2: %v", g2.AsText())
+			err := binaryChecks(h, g1, g2, lg)
+			lg.Printf("=========================== END ============================")
+			if err != nil {
+				fmt.Printf("Check failed: %v\n", err)
+				io.Copy(os.Stdout, &buf)
+				fmt.Println()
+				failures++
+			}
+		}
+	}
+	fmt.Printf("total binary combinations: %d\n", len(geoms)*len(geoms))
+	fmt.Printf("tested combinations:       %d\n", tested)
+	fmt.Printf("skipped combinations:      %d\n", skipped)
+	fmt.Printf("failures:                  %d\n", failures)
+
+	if failures > 0 {
+		os.Exit(1)
+	}
 }
 
 func deduplicateGeometries(geoms []geom.Geometry) []geom.Geometry {

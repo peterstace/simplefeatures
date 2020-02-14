@@ -171,7 +171,7 @@ func checkAsBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if bytes.Compare(want, got.Bytes()) != 0 {
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
-		return errors.New("mismatch")
+		return mismatchErr
 	}
 	return nil
 }
@@ -212,7 +212,7 @@ func checkFromBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error 
 	}
 
 	if !want.EqualsExact(got) {
-		return errors.New("mismatch")
+		return mismatchErr
 	}
 	return nil
 }
@@ -227,7 +227,7 @@ func checkIsEmpty(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if want != got {
 		log.Printf("want: %v", want)
 		log.Printf("got: %v", got)
-		return errors.New("mismatch")
+		return mismatchErr
 	}
 	return nil
 }
@@ -250,7 +250,7 @@ func checkDimension(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if want != got {
 		log.Printf("want: %v", want)
 		log.Printf("got: %v", got)
-		return errors.New("mismatch")
+		return mismatchErr
 	}
 	return nil
 }
@@ -266,7 +266,7 @@ func checkEnvelope(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 		log.Println("disagreement about envelope being defined")
 		log.Printf("simplefeatures: %v", gotDefined)
 		log.Printf("libgeos: %v", wantDefined)
-		return errors.New("mismatch")
+		return mismatchErr
 	}
 
 	if !wantDefined {
@@ -275,7 +275,7 @@ func checkEnvelope(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if want.Min() != got.Min() || want.Max() != got.Max() {
 		log.Printf("want: %v", want.AsGeometry().AsText())
 		log.Printf("got:  %v", got.AsGeometry().AsText())
-		return errors.New("mismatch")
+		return mismatchErr
 	}
 	return nil
 }
@@ -290,7 +290,7 @@ func checkIsSimple(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if wantDefined != gotDefined {
 		log.Printf("want defined: %v", wantDefined)
 		log.Printf("got defined: %v", gotDefined)
-		return errors.New("mismatch")
+		return mismatchErr
 	}
 	if !gotDefined {
 		return nil
@@ -298,7 +298,7 @@ func checkIsSimple(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if want != got {
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
-		return errors.New("mismatch")
+		return mismatchErr
 	}
 	return nil
 }
@@ -329,7 +329,7 @@ func checkBoundary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if !want.EqualsExact(got, geom.IgnoreOrder) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
-		return errors.New("mismatch")
+		return mismatchErr
 	}
 	return nil
 }
@@ -351,7 +351,7 @@ func checkConvexHull(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error 
 	if !want.EqualsExact(got, geom.IgnoreOrder) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
-		return errors.New("mismatch")
+		return mismatchErr
 	}
 	return nil
 }
@@ -366,7 +366,7 @@ func checkIsRing(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if want != got {
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
-		return errors.New("mismatch")
+		return mismatchErr
 	}
 	return nil
 }
@@ -388,7 +388,7 @@ func checkLength(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if math.Abs(want-got) > 1e-6 {
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
-		return errors.New("mismatch")
+		return mismatchErr
 	}
 	return nil
 }
@@ -418,7 +418,37 @@ func checkArea(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if math.Abs(want-got) > 1e-6 {
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
-		return errors.New("mismatch")
+		return mismatchErr
+	}
+	return nil
+}
+
+func binaryChecks(h *libgeos.Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+	for _, g := range []geom.Geometry{g1, g2} {
+		if valid, err := checkIsValid(h, g, log); err != nil {
+			return err
+		} else if !valid {
+			return nil
+		}
+	}
+
+	if err := checkIntersects(h, g1, g2, log); err != nil {
+		return err
+	}
+	return nil
+}
+
+func checkIntersects(h *libgeos.Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+	want, err := h.Intersects(g1, g2)
+	if err != nil {
+		return err
+	}
+	got := g1.Intersects(g2)
+
+	if want != got {
+		log.Printf("want: %v", want)
+		log.Printf("got:  %v", got)
+		return mismatchErr
 	}
 	return nil
 }
