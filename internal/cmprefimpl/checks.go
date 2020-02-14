@@ -57,10 +57,12 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkConvexHull(h, g, log); err != nil {
 		return err
 	}
+	log.Println("checking IsRing")
+	if err := checkIsRing(h, g, log); err != nil {
+		return err
+	}
 	return nil
 
-	//AsGeoJSON  sql.NullString
-	//IsValid    bool
 	//IsRing     sql.NullBool
 	//Length     float64
 	//Area       float64
@@ -342,6 +344,21 @@ func checkConvexHull(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error 
 	if !want.EqualsExact(got, geom.IgnoreOrder) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
+		return errors.New("mismatch")
+	}
+	return nil
+}
+
+func checkIsRing(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	want, err := h.IsRing(g)
+	if err != nil {
+		return err
+	}
+	got := g.IsLineString() && g.AsLineString().IsRing()
+
+	if want != got {
+		log.Printf("want: %v", want)
+		log.Printf("got:  %v", got)
 		return errors.New("mismatch")
 	}
 	return nil
