@@ -86,8 +86,8 @@ func (m MultiLineString) AppendWKT(dst []byte) []byte {
 //
 // 1. Each element (a LineString) is simple.
 //
-// 2. The intersection between any two elements occurs at points that are on
-// the boundaries of both elements.
+// 2. The intersection between any two distinct elements occurs at points that
+// are on the boundaries of both elements.
 func (m MultiLineString) IsSimple() bool {
 	for _, ls := range m.lines {
 		if !ls.IsSimple() {
@@ -96,9 +96,27 @@ func (m MultiLineString) IsSimple() bool {
 	}
 	for i := 0; i < len(m.lines); i++ {
 		for j := i + 1; j < len(m.lines); j++ {
-			inter := mustIntersection(m.lines[i].AsGeometry(), m.lines[j].AsGeometry())
-			bound := mustIntersection(m.lines[i].Boundary().AsGeometry(), m.lines[j].Boundary().AsGeometry())
-			if !inter.EqualsExact(mustIntersection(inter, bound)) {
+			// Ignore any intersections if the lines are *exactly* the same
+			// (ignoring order). This is to match PostGIS and libgeos
+			// behaviour. The OGC spec is ambiguous around this case, so it's
+			// just easier to follow other implementations for better
+			// interoperability.
+			if m.lines[i].EqualsExact(m.lines[j].AsGeometry(), IgnoreOrder) {
+				continue
+			}
+
+			inter := mustIntersection(
+				m.lines[i].AsGeometry(),
+				m.lines[j].AsGeometry(),
+			)
+			if inter.IsEmpty() {
+				continue
+			}
+			bound := mustIntersection(
+				m.lines[i].Boundary().AsGeometry(),
+				m.lines[j].Boundary().AsGeometry(),
+			)
+			if !inter.EqualsExact(mustIntersection(inter, bound), IgnoreOrder) {
 				return false
 			}
 		}

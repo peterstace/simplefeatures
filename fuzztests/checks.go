@@ -236,25 +236,6 @@ func CheckIsSimple(t *testing.T, want UnaryResult, g geom.Geometry) {
 		if !want.IsSimple.Valid {
 			return
 		}
-
-		// PostGIS doesn't treat MultiLineStrings containing duplicated
-		// LineStrings as non-simple, e.g. MULTILINESTRING((0 0,1 1),(0 0,1
-		// 1)). This doesn't seem like correct behaviour to me. It must be
-		// deduplicating the LineStrings before checking simplicity. This
-		// library doesn't do that, so skip any LineStrings that contain
-		// duplicates.
-		if g.IsMultiLineString() {
-			mls := g.AsMultiLineString()
-			n := mls.NumLineStrings()
-			for i := 0; i < n; i++ {
-				for j := 0; j < n; j++ {
-					if mls.LineStringN(i).EqualsExact(mls.LineStringN(j).AsGeometry()) {
-						return
-					}
-				}
-			}
-		}
-
 		want := want.IsSimple.Bool // want.IsSimple.Valid already checked
 		if got != want {
 			t.Logf("got:  %v", got)
