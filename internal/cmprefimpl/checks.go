@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"log"
+	"math"
 	"strings"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -65,11 +66,15 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkLength(h, g, log); err != nil {
 		return err
 	}
+	log.Println("checking Area")
+	if err := checkArea(h, g, log); err != nil {
+		return err
+	}
 	return nil
 
-	//Area       float64
-	//Cetroid    geom.Geometry
-	//Reverse    geom.Geometry
+	// TODO: leaving theses for now:
+	// - Cetroid
+	// - Reverse
 }
 
 var mismatchErr = errors.New("mismatch")
@@ -380,7 +385,7 @@ func checkLength(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	if want != got {
+	if math.Abs(want-got) > 1e-6 {
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
 		return errors.New("mismatch")
@@ -401,4 +406,19 @@ func isArealGeometry(g geom.Geometry) bool {
 		}
 	}
 	return false
+}
+
+func checkArea(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	want, err := h.Area(g)
+	if err != nil {
+		return err
+	}
+	got := g.Area()
+
+	if math.Abs(want-got) > 1e-6 {
+		log.Printf("want: %v", want)
+		log.Printf("got:  %v", got)
+		return errors.New("mismatch")
+	}
+	return nil
 }
