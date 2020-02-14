@@ -53,10 +53,13 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkBoundary(h, g, log); err != nil {
 		return err
 	}
+	log.Println("checking ConvexHull")
+	if err := checkConvexHull(h, g, log); err != nil {
+		return err
+	}
 	return nil
 
 	//AsGeoJSON  sql.NullString
-	//ConvexHull geom.Geometry
 	//IsValid    bool
 	//IsRing     sql.NullBool
 	//Length     float64
@@ -310,6 +313,28 @@ func checkBoundary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	// PostGIS and libgeos have different behaviour for Boundary.
 	// Simplefeatures currently uses the PostGIS behaviour (the difference in
 	// behaviour has to do with the geometry type of empty geometries).
+	if got.IsEmpty() && want.IsEmpty() {
+		return nil
+	}
+
+	if !want.EqualsExact(got, geom.IgnoreOrder) {
+		log.Printf("want: %v", want.AsText())
+		log.Printf("got:  %v", got.AsText())
+		return errors.New("mismatch")
+	}
+	return nil
+}
+
+func checkConvexHull(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	want, err := h.ConvexHull(g)
+	if err != nil {
+		return err
+	}
+	got := g.ConvexHull()
+
+	// libgeos and PostGIS have slightly different behaviour when the result is
+	// empty (different geometry types). Simplefeatures matches PostGIS
+	// behaviour right now.
 	if got.IsEmpty() && want.IsEmpty() {
 		return nil
 	}
