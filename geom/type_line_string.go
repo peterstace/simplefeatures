@@ -56,6 +56,11 @@ func NewLineStringXY(pts []XY, opts ...ConstructorOption) (LineString, error) {
 	return NewLineStringC(oneDimXYToCoords(pts), opts...)
 }
 
+// Type return type string for LineString
+func (s LineString) Type() string {
+	return lineStringType
+}
+
 // AsGeometry converts this LineString into a Geometry.
 func (s LineString) AsGeometry() Geometry {
 	return Geometry{lineStringTag, unsafe.Pointer(&s)}

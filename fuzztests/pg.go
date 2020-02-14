@@ -25,10 +25,14 @@ type UnaryResult struct {
 	IsRing     sql.NullBool
 	Length     float64
 	Area       float64
-	Cetroid    geom.Geometry
+	Centroid   geom.Geometry
 	Reverse    geom.Geometry
+	Type string
 }
 
+const (
+	postgisTypePrefix = "ST_"
+)
 func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 	// WKB and WKB forms returned from PostGIS don't _always_ give the same
 	// result (usually differences around empty geometries). In the case of
@@ -92,7 +96,8 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		ST_Length(ST_GeomFromWKB($1)),
 		ST_Area(ST_GeomFromWKB($1)),
 		ST_AsBinary(ST_Centroid(ST_GeomFromWKB($1))),
-		ST_AsText(ST_Reverse(ST_GeomFromText($3)))
+		ST_AsText(ST_Reverse(ST_GeomFromText($3))),
+		ST_GeometryType(ST_GeomFromWKB($1))
 		`, g, isNestedGeometryCollection(g), g.AsText(),
 	).Scan(
 		&result.AsText,
@@ -108,8 +113,9 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		&result.IsRing,
 		&result.Length,
 		&result.Area,
-		&result.Cetroid,
+		&result.Centroid,
 		&reverseWKT,
+		&result.Type,
 	)
 	if err != nil {
 		return result, err
@@ -139,6 +145,8 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		return result, err
 	}
 
+	// remove ST_ prefix that ST_GeometryType returned, since we don't want ST_ prefix in our type
+	result.Type = strings.TrimPrefix(result.Type, postgisTypePrefix)
 	return result, nil
 }
 
