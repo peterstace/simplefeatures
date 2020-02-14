@@ -61,10 +61,12 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkIsRing(h, g, log); err != nil {
 		return err
 	}
+	log.Println("checking Length")
+	if err := checkLength(h, g, log); err != nil {
+		return err
+	}
 	return nil
 
-	//IsRing     sql.NullBool
-	//Length     float64
 	//Area       float64
 	//Cetroid    geom.Geometry
 	//Reverse    geom.Geometry
@@ -362,4 +364,41 @@ func checkIsRing(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 		return errors.New("mismatch")
 	}
 	return nil
+}
+
+func checkLength(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	want, err := h.Length(g)
+	if err != nil {
+		return err
+	}
+	got := g.Length()
+
+	// libgeos and PostGIS disagree on the definition of length for areal
+	// geometries.  PostGIS always gives zero, while libgeos gives the length
+	// of the boundary. Simplefeatures follows the PostGIS behaviour.
+	if isArealGeometry(g) {
+		return nil
+	}
+
+	if want != got {
+		log.Printf("want: %v", want)
+		log.Printf("got:  %v", got)
+		return errors.New("mismatch")
+	}
+	return nil
+}
+
+func isArealGeometry(g geom.Geometry) bool {
+	switch {
+	case g.IsPolygon() || g.IsMultiPolygon():
+		return true
+	case g.IsGeometryCollection():
+		gc := g.AsGeometryCollection()
+		for i := 0; i < gc.NumGeometries(); i++ {
+			if isArealGeometry(gc.GeometryN(i)) {
+				return true
+			}
+		}
+	}
+	return false
 }
