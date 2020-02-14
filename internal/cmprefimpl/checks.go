@@ -435,6 +435,9 @@ func binaryChecks(h *libgeos.Handle, g1, g2 geom.Geometry, log *log.Logger) erro
 	if err := checkIntersects(h, g1, g2, log); err != nil {
 		return err
 	}
+	if err := checkEqualsExact(h, g1, g2, log); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -444,6 +447,21 @@ func checkIntersects(h *libgeos.Handle, g1, g2 geom.Geometry, log *log.Logger) e
 		return err
 	}
 	got := g1.Intersects(g2)
+
+	if want != got {
+		log.Printf("want: %v", want)
+		log.Printf("got:  %v", got)
+		return mismatchErr
+	}
+	return nil
+}
+
+func checkEqualsExact(h *libgeos.Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+	want, err := h.EqualsExact(g1, g2)
+	if err != nil {
+		return err
+	}
+	got := g1.EqualsExact(g2)
 
 	if want != got {
 		log.Printf("want: %v", want)

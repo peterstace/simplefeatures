@@ -536,6 +536,25 @@ func (h *Handle) Intersects(g1, g2 geom.Geometry) (bool, error) {
 	return h.boolErr(C.GEOSIntersects_r(h.context, gh1, gh2))
 }
 
+func (h *Handle) EqualsExact(g1, g2 geom.Geometry) (bool, error) {
+	if isNonEmptyGeometryCollection(g1) || isNonEmptyGeometryCollection(g2) {
+		return false, NonEmptyGeometryCollectionNotSupportedError
+	}
+
+	gh1, err := h.createGeomHandle(g1)
+	if err != nil {
+		return false, h.err()
+	}
+	defer C.GEOSGeom_destroy(gh1)
+	gh2, err := h.createGeomHandle(g2)
+	if err != nil {
+		return false, h.err()
+	}
+	defer C.GEOSGeom_destroy(gh2)
+
+	return h.boolErr(C.GEOSEqualsExact_r(h.context, gh1, gh2, 0.0))
+}
+
 func isNonEmptyGeometryCollection(g geom.Geometry) bool {
 	return g.IsGeometryCollection() && !g.IsEmpty()
 }
