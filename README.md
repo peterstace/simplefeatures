@@ -82,7 +82,7 @@ final double check for correctness. They can be run using the following
 commands:
 
 ```
-docker-compose -f docker-compose-full.yml up --abort-on-container-exit
+docker-compose -f docker-compose-postgis.yml up --abort-on-container-exit
 ```
 
 ```
