@@ -399,20 +399,30 @@ func (h *Handle) IsSimple(g geom.Geometry) (isSimple bool, defined bool, err err
 	return isSimple, true, err
 }
 
-func (h *Handle) Boundary(g geom.Geometry) (geom.Geometry, error) {
+func (h *Handle) Boundary(g geom.Geometry) (geom.Geometry, bool, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
-		return geom.Geometry{}, err
+		return geom.Geometry{}, false, err
 	}
 	defer C.GEOSGeom_destroy(gh)
 
-	env := C.GEOSBoundary_r(h.context, gh)
-	if env == nil {
-		return geom.Geometry{}, h.err()
+	geomType := C.GEOSGeomType_r(h.context, gh)
+	if geomType == nil {
+		return geom.Geometry{}, false, h.err()
 	}
-	defer C.GEOSGeom_destroy_r(h.context, env)
+	defer C.free(unsafe.Pointer(geomType))
+	if C.GoString(geomType) == "GeometryCollection" {
+		return geom.Geometry{}, false, nil
+	}
 
-	return h.decodeGeomHandle(env)
+	bound := C.GEOSBoundary_r(h.context, gh)
+	if bound == nil {
+		return geom.Geometry{}, false, h.err()
+	}
+	defer C.GEOSGeom_destroy_r(h.context, bound)
+
+	sfBound, err := h.decodeGeomHandle(bound)
+	return sfBound, true, err
 }
 
 func (h *Handle) ConvexHull(g geom.Geometry) (geom.Geometry, error) {

@@ -49,11 +49,13 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkIsSimple(h, g, log); err != nil {
 		return err
 	}
+	log.Println("checking Boundary")
+	if err := checkBoundary(h, g, log); err != nil {
+		return err
+	}
 	return nil
 
 	//AsGeoJSON  sql.NullString
-	//IsSimple   sql.NullBool
-	//Boundary   geom.NullGeometry
 	//ConvexHull geom.Geometry
 	//IsValid    bool
 	//IsRing     sql.NullBool
@@ -284,6 +286,37 @@ func checkIsSimple(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if want != got {
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
+		return errors.New("mismatch")
+	}
+	return nil
+}
+
+func checkBoundary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	want, wantDefined, err := h.Boundary(g)
+	if err != nil {
+		return err
+	}
+
+	if !wantDefined && !g.IsGeometryCollection() {
+		return errors.New("boundary not defined by libgeos, but " +
+			"input is not a geometry collection (this is unexpected)")
+	}
+	if !wantDefined {
+		return nil
+	}
+
+	got := g.Boundary()
+
+	// PostGIS and libgeos have different behaviour for Boundary.
+	// Simplefeatures currently uses the PostGIS behaviour (the difference in
+	// behaviour has to do with the geometry type of empty geometries).
+	if got.IsEmpty() && want.IsEmpty() {
+		return nil
+	}
+
+	if !want.EqualsExact(got, geom.IgnoreOrder) {
+		log.Printf("want: %v", want.AsText())
+		log.Printf("got:  %v", got.AsText())
 		return errors.New("mismatch")
 	}
 	return nil
