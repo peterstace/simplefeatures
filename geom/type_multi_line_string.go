@@ -86,8 +86,8 @@ func (m MultiLineString) AppendWKT(dst []byte) []byte {
 //
 // 1. Each element (a LineString) is simple.
 //
-// 2. The intersection between any two elements occurs at points that are on
-// the boundaries of both elements.
+// 2. The intersection between any two distinct elements occurs at points that
+// are on the boundaries of both elements.
 func (m MultiLineString) IsSimple() bool {
 	for _, ls := range m.lines {
 		if !ls.IsSimple() {
