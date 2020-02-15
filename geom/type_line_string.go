@@ -11,11 +11,11 @@ import (
 )
 
 // LineString is a curve defined by linear interpolation between a finite set
-// of points. Each consecutive pair of points defines a line segment.
+// of points. Its zero value is the empty line string.
 //
-// Its assertions are:
-//
-// 1. It must contain at least 2 distinct points.
+// Each consecutive pair of points defines a line segment. It must contain
+// either zero points (i.e. is the empty LineString) or it must contain at
+// least 2 distinct points.
 type LineString struct {
 	// coords have been deduplicated such that no two consecutive coordinates
 	// are coincident. This allows quick calculation of Line segments.
@@ -25,6 +25,12 @@ type LineString struct {
 	// points. This is so that information about the original points making up
 	// the LineString are retained.
 	points []int
+}
+
+// NewEmptyLineString gives the empty LineString. It is equivalent to calling
+// NewLineStringC with a zero length coordinates argument.
+func NewEmptyLineString() LineString {
+	return LineString{}
 }
 
 // NewLineStringC creates a line string from the coordinates defining its
@@ -39,8 +45,8 @@ func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, e
 		}
 		points[i] = len(coords) - 1
 	}
-	if doCheapValidations(opts) && len(coords) <= 1 {
-		return LineString{}, errors.New("LineString must contain at least two distinct points")
+	if doCheapValidations(opts) && len(coords) == 1 {
+		return LineString{}, errors.New("LineString must either contain zero points or at least two distinct points")
 	}
 	return LineString{coords, points}, nil
 }
@@ -55,13 +61,21 @@ func (s LineString) AsGeometry() Geometry {
 	return Geometry{lineStringTag, unsafe.Pointer(&s)}
 }
 
-// StartPoint gives the first point of the line string.
+// StartPoint gives the first point of the LineString. If the LineString is
+// empty then it returns the empty Point.
 func (s LineString) StartPoint() Point {
+	if s.IsEmpty() {
+		return NewEmptyPoint()
+	}
 	return NewPointC(s.coords[s.points[0]])
 }
 
-// EndPoint gives the last point of the line string.
+// EndPoint gives the last point of the LineString. If the LineString is empty
+// then it returns the empty Point.
 func (s LineString) EndPoint() Point {
+	if s.IsEmpty() {
+		return NewEmptyPoint()
+	}
 	return NewPointC(s.coords[s.points[len(s.points)-1]])
 }
 
@@ -70,16 +84,19 @@ func (s LineString) NumPoints() int {
 	return len(s.points)
 }
 
-// PointN gives the nth (zero indexed) point in the line string. Panics if n is
-// out of range with respect to the number of points.
-func (s LineString) PointN(n int) Point {
-	return NewPointC(s.coords[s.points[n]])
+// PointN gives the coordinates of the nth (zero indexed) point in the line
+// string. Panics if n is out of range with respect to the number of points.
+func (s LineString) PointN(n int) Coordinates {
+	return s.coords[s.points[n]]
 }
 
+// NumLines gives the number of Line segments that make up the LineString.
 func (s LineString) NumLines() int {
-	return len(s.coords) - 1
+	return max(0, len(s.coords)-1)
 }
 
+// LineN gives the nth (zero indexed) Line in the LineString. Panics if n is
+// out of range with respect to the number of lines.
 func (s LineString) LineN(n int) Line {
 	// Line is constructed directly here, rather than via NewLineC. This is
 	// because LineN is called in a tight loop in many places, and skipping the
@@ -95,11 +112,18 @@ func (s LineString) AsText() string {
 }
 
 func (s LineString) AppendWKT(dst []byte) []byte {
-	dst = append(dst, []byte("LINESTRING")...)
+	dst = append(dst, "LINESTRING"...)
+	if s.IsEmpty() {
+		dst = append(dst, ' ')
+	}
 	return s.appendWKTBody(dst)
 }
 
 func (s LineString) appendWKTBody(dst []byte) []byte {
+	if s.IsEmpty() {
+		return append(dst, "EMPTY"...)
+	}
+
 	dst = append(dst, '(')
 	for i, ptIdx := range s.points {
 		if i > 0 {
@@ -123,7 +147,7 @@ type lineWithIndex struct {
 // endpoints being coincident).
 func (s LineString) IsSimple() bool {
 	// A line sweep algorithm is used, where a vertical line is swept over X
-	// values (from lowest to highest). We only have consider line segments
+	// values (from lowest to highest). We only have to consider line segments
 	// that have overlapping X values when performing pairwise intersection
 	// tests.
 	//
@@ -188,7 +212,7 @@ func (s LineString) IsSimple() bool {
 }
 
 func (s LineString) IsClosed() bool {
-	return s.StartPoint().XY() == s.EndPoint().XY()
+	return !s.IsEmpty() && s.StartPoint().XY() == s.EndPoint().XY()
 }
 
 func (s LineString) Intersection(g Geometry) (Geometry, error) {
@@ -200,7 +224,7 @@ func (s LineString) Intersects(g Geometry) bool {
 }
 
 func (s LineString) IsEmpty() bool {
-	return false
+	return len(s.coords) == 0
 }
 
 func (s LineString) Equals(other Geometry) (bool, error) {
@@ -208,9 +232,12 @@ func (s LineString) Equals(other Geometry) (bool, error) {
 }
 
 func (s LineString) Envelope() (Envelope, bool) {
+	if s.IsEmpty() {
+		return Envelope{}, false
+	}
 	env := NewEnvelope(s.coords[0].XY)
-	for i := 1; i < len(s.coords); i++ {
-		env = env.ExtendToIncludePoint(s.coords[i].XY)
+	for _, c := range s.coords[1:] {
+		env = env.ExtendToIncludePoint(c.XY)
 	}
 	return env, true
 }
@@ -236,8 +263,8 @@ func (s LineString) AsBinary(w io.Writer) error {
 	n := s.NumPoints()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {
-		marsh.writeFloat64(s.PointN(i).XY().X)
-		marsh.writeFloat64(s.PointN(i).XY().Y)
+		marsh.writeFloat64(s.PointN(i).X)
+		marsh.writeFloat64(s.PointN(i).Y)
 	}
 	return marsh.err
 }
@@ -252,12 +279,9 @@ func (s LineString) MarshalJSON() ([]byte, error) {
 
 // Coordinates returns the coordinates of each point along the LineString.
 func (s LineString) Coordinates() []Coordinates {
-	n := s.NumPoints()
-	coords := make([]Coordinates, n)
-	for i := range coords {
-		coords[i] = s.PointN(i).Coordinates()
-	}
-	return coords
+	tmp := make([]Coordinates, len(s.coords))
+	copy(tmp, s.coords)
+	return tmp
 }
 
 // TransformXY transforms this LineString into another LineString according to fn.
@@ -291,7 +315,7 @@ func (s LineString) IsValid() bool {
 // IsRing returns true iff this LineString is both simple and closed (i.e. is a
 // linear ring).
 func (s LineString) IsRing() bool {
-	return s.IsSimple() && s.IsClosed()
+	return s.IsClosed() && s.IsSimple()
 }
 
 // Length gives the length of the line string.

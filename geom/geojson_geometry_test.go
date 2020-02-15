@@ -511,6 +511,10 @@ func TestGeoJSONMarshal(t *testing.T) {
 			want: `{"type":"MultiPoint","coordinates":[[1,2],[3,4]]}`,
 		},
 		{
+			wkt:  "MULTIPOINT(1 2,EMPTY,3 4)",
+			want: `{"type":"MultiPoint","coordinates":[[1,2],[],[3,4]]}`,
+		},
+		{
 			wkt:  "MULTILINESTRING EMPTY",
 			want: `{"type":"MultiLineString","coordinates":[]}`,
 		},
@@ -521,6 +525,10 @@ func TestGeoJSONMarshal(t *testing.T) {
 		{
 			wkt:  "MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))",
 			want: `{"type":"MultiLineString","coordinates":[[[0,1],[2,3]],[[4,5],[6,7],[8,9]]]}`,
+		},
+		{
+			wkt:  "MULTILINESTRING((0 1,2 3),EMPTY,(4 5,6 7,8 9))",
+			want: `{"type":"MultiLineString","coordinates":[[[0,1],[2,3]],[],[[4,5],[6,7],[8,9]]]}`,
 		},
 		{
 			wkt:  "MULTIPOLYGON EMPTY",

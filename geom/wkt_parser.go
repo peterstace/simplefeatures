@@ -76,15 +76,13 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 	case "POINT":
 		coords := p.nextPointText()
 		if coords.Empty {
-			return NewEmptyPoint(p.opts...).AsGeometry()
+			return NewEmptyPoint().AsGeometry()
 		} else {
 			return NewPointC(coords.Value, p.opts...).AsGeometry()
 		}
 	case "LINESTRING":
 		coords := p.nextLineStringText()
 		switch len(coords) {
-		case 0:
-			return NewEmptyLineString(p.opts...).AsGeometry()
 		case 2:
 			ln, err := NewLineC(coords[0], coords[1], p.opts...)
 			p.check(err)
@@ -96,13 +94,9 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		}
 	case "POLYGON":
 		coords := p.nextPolygonText()
-		if len(coords) == 0 {
-			return NewEmptyPolygon(p.opts...).AsGeometry()
-		} else {
-			poly, err := NewPolygonC(coords, p.opts...)
-			p.check(err)
-			return poly.AsGeometry()
-		}
+		poly, err := NewPolygonC(coords, p.opts...)
+		p.check(err)
+		return poly.AsGeometry()
 	case "MULTIPOINT":
 		coords := p.nextMultiPointText()
 		return NewMultiPointOC(coords, p.opts...).AsGeometry()

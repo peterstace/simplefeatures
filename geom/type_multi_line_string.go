@@ -28,9 +28,6 @@ func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLine
 func NewMultiLineStringC(coords [][]Coordinates, opts ...ConstructorOption) (MultiLineString, error) {
 	var lines []LineString
 	for _, c := range coords {
-		if len(c) == 0 {
-			continue
-		}
 		line, err := NewLineStringC(c, opts...)
 		if err != nil {
 			return MultiLineString{}, err
@@ -68,9 +65,9 @@ func (m MultiLineString) AsText() string {
 }
 
 func (m MultiLineString) AppendWKT(dst []byte) []byte {
-	dst = append(dst, []byte("MULTILINESTRING")...)
+	dst = append(dst, "MULTILINESTRING"...)
 	if len(m.lines) == 0 {
-		return append(dst, []byte(" EMPTY")...)
+		return append(dst, " EMPTY"...)
 	}
 	dst = append(dst, '(')
 	for i, line := range m.lines {
@@ -133,7 +130,12 @@ func (m MultiLineString) Intersects(g Geometry) bool {
 }
 
 func (m MultiLineString) IsEmpty() bool {
-	return len(m.lines) == 0
+	for _, ls := range m.lines {
+		if !ls.IsEmpty() {
+			return false
+		}
+	}
+	return true
 }
 
 func (m MultiLineString) Equals(other Geometry) (bool, error) {
@@ -212,11 +214,7 @@ func (m MultiLineString) Coordinates() [][]Coordinates {
 	numLines := m.NumLineStrings()
 	coords := make([][]Coordinates, numLines)
 	for i := 0; i < numLines; i++ {
-		numPts := m.LineStringN(i).NumPoints()
-		coords[i] = make([]Coordinates, numPts)
-		for j := 0; j < numPts; j++ {
-			coords[i][j] = m.LineStringN(i).PointN(j).Coordinates()
-		}
+		coords[i] = m.LineStringN(i).Coordinates()
 	}
 	return coords
 }

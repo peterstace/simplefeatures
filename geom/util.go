@@ -12,6 +12,13 @@ func max(a, b int) int {
 	return b
 }
 
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 func abs(i int) int {
 	if i < 0 {
 		return -i
@@ -21,24 +28,22 @@ func abs(i int) int {
 
 func rank(g Geometry) int {
 	switch g.tag {
-	case emptySetTag:
-		return 1
 	case pointTag:
-		return 2
+		return 1
 	case lineTag:
-		return 3
+		return 2
 	case lineStringTag:
-		return 4
+		return 3
 	case polygonTag:
-		return 5
+		return 4
 	case multiPointTag:
-		return 6
+		return 5
 	case multiLineStringTag:
-		return 7
+		return 6
 	case multiPolygonTag:
-		return 8
+		return 7
 	case geometryCollectionTag:
-		return 9
+		return 8
 	default:
 		panic(fmt.Sprintf("unknown geometry tag: %s", g.tag))
 	}
@@ -52,9 +57,9 @@ func mustEnv(env Envelope, ok bool) Envelope {
 }
 
 func minX(ln Line) float64 {
-	return math.Min(ln.StartPoint().XY().X, ln.EndPoint().XY().X)
+	return math.Min(ln.StartPoint().X, ln.EndPoint().X)
 }
 
 func maxX(ln Line) float64 {
-	return math.Max(ln.StartPoint().XY().X, ln.EndPoint().XY().X)
+	return math.Max(ln.StartPoint().X, ln.EndPoint().X)
 }

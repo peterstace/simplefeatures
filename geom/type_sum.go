@@ -20,7 +20,6 @@ type geometryTag int
 
 const (
 	geometryCollectionTag geometryTag = iota
-	emptySetTag
 	pointTag
 	lineTag
 	lineStringTag
@@ -33,7 +32,6 @@ const (
 func (t geometryTag) String() string {
 	s, ok := map[geometryTag]string{
 		geometryCollectionTag: "GeometryCollection",
-		emptySetTag:           "EmptySet",
 		pointTag:              "Point",
 		lineTag:               "Line",
 		lineStringTag:         "LineString",
@@ -50,9 +48,6 @@ func (t geometryTag) String() string {
 
 // IsGeometryCollection return true iff the Geometry is a GeometryCollection geometry.
 func (g Geometry) IsGeometryCollection() bool { return g.tag == geometryCollectionTag }
-
-// IsEmptySet return true iff the Geometry is an EmptySet geometry.
-func (g Geometry) IsEmptySet() bool { return g.tag == emptySetTag }
 
 // IsPoint return true iff the Geometry is a Point geometry.
 func (g Geometry) IsPoint() bool { return g.tag == pointTag }
@@ -91,13 +86,6 @@ func (g Geometry) AsGeometryCollection() GeometryCollection {
 		return NewGeometryCollection(nil)
 	}
 	return *(*GeometryCollection)(g.ptr)
-}
-
-// AsEmptySet returns the geometry as an EmptySet. It panics if the geometry is
-// not an EmptySet.
-func (g Geometry) AsEmptySet() EmptySet {
-	g.check(emptySetTag)
-	return *(*EmptySet)(g.ptr)
 }
 
 // AsPoint returns the geometry as a Point. It panics if the geometry is not a
@@ -154,8 +142,6 @@ func (g Geometry) AsText() string {
 	switch g.tag {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().AsText()
-	case emptySetTag:
-		return g.AsEmptySet().AsText()
 	case pointTag:
 		return g.AsPoint().AsText()
 	case lineTag:
@@ -181,8 +167,6 @@ func (g Geometry) MarshalJSON() ([]byte, error) {
 	switch g.tag {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().MarshalJSON()
-	case emptySetTag:
-		return g.AsEmptySet().MarshalJSON()
 	case pointTag:
 		return g.AsPoint().MarshalJSON()
 	case lineTag:
@@ -222,8 +206,6 @@ func (g Geometry) appendWKT(dst []byte) []byte {
 	switch g.tag {
 	case geometryCollectionTag:
 		return (*GeometryCollection)(g.ptr).AppendWKT(dst)
-	case emptySetTag:
-		return (*EmptySet)(g.ptr).AppendWKT(dst)
 	case pointTag:
 		return (*Point)(g.ptr).AppendWKT(dst)
 	case lineTag:
@@ -249,8 +231,6 @@ func (g Geometry) AsBinary(w io.Writer) error {
 	switch g.tag {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().AsBinary(w)
-	case emptySetTag:
-		return g.AsEmptySet().AsBinary(w)
 	case pointTag:
 		return g.AsPoint().AsBinary(w)
 	case lineTag:
@@ -316,8 +296,6 @@ func (g Geometry) Dimension() int {
 	switch g.tag {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().Dimension()
-	case emptySetTag:
-		return g.AsEmptySet().Dimension()
 	case pointTag, multiPointTag:
 		return 0
 	case lineTag, lineStringTag, multiLineStringTag:
@@ -334,10 +312,14 @@ func (g Geometry) IsEmpty() bool {
 	switch g.tag {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().IsEmpty()
-	case emptySetTag:
-		return true
-	case pointTag, lineTag, lineStringTag, polygonTag:
+	case pointTag:
+		return g.AsPoint().IsEmpty()
+	case lineTag:
 		return false
+	case lineStringTag:
+		return g.AsLineString().IsEmpty()
+	case polygonTag:
+		return g.AsPolygon().IsEmpty()
 	case multiPointTag:
 		return g.AsMultiPoint().IsEmpty()
 	case multiLineStringTag:
@@ -356,8 +338,6 @@ func (g Geometry) Envelope() (Envelope, bool) {
 	switch g.tag {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().Envelope()
-	case emptySetTag:
-		return g.AsEmptySet().Envelope()
 	case pointTag:
 		return g.AsPoint().Envelope()
 	case lineTag:
@@ -379,11 +359,16 @@ func (g Geometry) Envelope() (Envelope, bool) {
 
 // Boundary returns the Geometry representing the limit of this geometry.
 func (g Geometry) Boundary() Geometry {
+	// TODO: Investigate to see if the behaviour from libgeos would make more
+	// sense to use here.
+	if g.IsEmpty() {
+		// Match PostGIS behaviour.
+		return g
+	}
+
 	switch g.tag {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().Boundary().AsGeometry()
-	case emptySetTag:
-		return g.AsEmptySet().Boundary().AsGeometry()
 	case pointTag:
 		return g.AsPoint().Boundary().AsGeometry()
 	case lineTag:
@@ -398,20 +383,10 @@ func (g Geometry) Boundary() Geometry {
 		}
 		return mls.AsGeometry()
 	case multiPointTag:
-		if g.AsMultiPoint().IsEmpty() { // Match Postgis behaviour.
-			return g
-		}
 		return g.AsMultiPoint().Boundary().AsGeometry()
 	case multiLineStringTag:
-		if g.AsMultiLineString().IsEmpty() { // Match Postgis behaviour.
-			return g
-			//return NewMultiLineString(nil).AsGeometry()
-		}
 		return g.AsMultiLineString().Boundary().AsGeometry()
 	case multiPolygonTag:
-		if g.AsMultiPolygon().IsEmpty() { // Match Postgis behaviour.
-			return g
-		}
 		return g.AsMultiPolygon().Boundary().AsGeometry()
 	default:
 		panic("unknown geometry: " + g.tag.String())
@@ -429,8 +404,6 @@ func (g Geometry) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	switch g.tag {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().EqualsExact(other, opts...)
-	case emptySetTag:
-		return g.AsEmptySet().EqualsExact(other, opts...)
 	case pointTag:
 		return g.AsPoint().EqualsExact(other, opts...)
 	case lineTag:
@@ -459,8 +432,6 @@ func (g Geometry) Equals(other Geometry) (bool, error) {
 	switch g.tag {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().Equals(other)
-	case emptySetTag:
-		return g.AsEmptySet().Equals(other)
 	case pointTag:
 		return g.AsPoint().Equals(other)
 	case lineTag:
@@ -492,8 +463,6 @@ func (g Geometry) IsValid() bool {
 	switch g.tag {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().IsValid()
-	case emptySetTag:
-		return g.AsEmptySet().IsValid()
 	case pointTag:
 		return g.AsPoint().IsValid()
 	case lineTag:
@@ -542,8 +511,6 @@ func (g Geometry) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geomet
 	switch g.tag {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().TransformXY(fn, opts...)
-	case emptySetTag:
-		return g.AsEmptySet().TransformXY(fn, opts...)
 	case pointTag:
 		return g.AsPoint().TransformXY(fn, opts...)
 	case lineTag:
@@ -591,19 +558,20 @@ func (g Geometry) Length() float64 {
 	}
 }
 
-// Centroid returns the Polygon or MultiPolygon's centroid point. If the
-// Geometry is not a non-empty Polygon or MultiPolygon, then false is returned.
+// Centroid returns the Polygon or MultiPolygon's centroid Point. If the
+// Geometry is not a non-empty Polygon or MultiPolygon, then an empty Point is
+// returned.
 //
 // TODO: This is not in line with the behaviour of ST_Centroid. See
 // https://github.com/peterstace/simplefeatures/issues/83
-func (g Geometry) Centroid() (Point, bool) {
+func (g Geometry) Centroid() Point {
 	switch {
 	case g.IsPolygon():
-		return g.AsPolygon().Centroid(), true
+		return g.AsPolygon().Centroid()
 	case g.IsMultiPolygon():
 		return g.AsMultiPolygon().Centroid()
 	default:
-		return Point{}, false
+		return NewEmptyPoint()
 	}
 }
 
@@ -643,8 +611,6 @@ func (g Geometry) IsSimple() (isSimple bool, wellDefined bool) {
 	switch g.tag {
 	case geometryCollectionTag:
 		return false, false
-	case emptySetTag:
-		return g.AsEmptySet().IsSimple(), true
 	case pointTag:
 		return g.AsPoint().IsSimple(), true
 	case lineTag:
@@ -671,8 +637,6 @@ func (g Geometry) Reverse() Geometry {
 	switch g.tag {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().Reverse().AsGeometry()
-	case emptySetTag:
-		return g.AsEmptySet().Reverse().AsGeometry()
 	case pointTag:
 		return g.AsPoint().Reverse().AsGeometry()
 	case lineTag:

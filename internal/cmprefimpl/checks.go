@@ -18,20 +18,20 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	log.Println("checking AsText")
-	if err := checkAsText(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking FromText")
-	if err := checkFromText(h, g, log); err != nil {
-		return err
-	}
 	log.Println("checking AsBinary")
 	if err := checkAsBinary(h, g, log); err != nil {
 		return err
 	}
 	log.Println("checking FromBinary")
 	if err := checkFromBinary(h, g, log); err != nil {
+		return err
+	}
+	log.Println("checking AsText")
+	if err := checkAsText(h, g, log); err != nil {
+		return err
+	}
+	log.Println("checking FromText")
+	if err := checkFromText(h, g, log); err != nil {
 		return err
 	}
 	log.Println("checking IsEmpty")

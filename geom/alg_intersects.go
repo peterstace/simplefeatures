@@ -291,20 +291,19 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		for _, ls := range side.mls.lines {
 			for i := 0; i < ls.NumLines(); i++ {
 				ln := ls.LineN(i)
-				if ln.StartPoint().XY().X > ln.EndPoint().XY().X {
-					// TODO: Use ST_Reverse
-					ln.a, ln.b = ln.b, ln.a
+				if ln.StartPoint().X > ln.EndPoint().X {
+					ln = ln.Reverse()
 				}
 				side.lines = append(side.lines, ln)
 			}
 		}
 		sort.Slice(side.lines, func(i, j int) bool {
-			return side.lines[i].StartPoint().XY().X < side.lines[j].StartPoint().XY().X
+			return side.lines[i].StartPoint().X < side.lines[j].StartPoint().X
 		})
 		sideCopy := side // copy because we're using anon func
 		side.active.less = func(i, j int) bool {
-			ix := sideCopy.lines[i].EndPoint().XY().X
-			jx := sideCopy.lines[j].EndPoint().XY().X
+			ix := sideCopy.lines[i].EndPoint().X
+			jx := sideCopy.lines[j].EndPoint().X
 			return ix < jx
 		}
 	}
@@ -317,7 +316,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		sweepX := math.Inf(+1)
 		for _, side := range sides {
 			if side.next < len(side.lines) {
-				sweepX = math.Min(sweepX, side.lines[side.next].StartPoint().XY().X)
+				sweepX = math.Min(sweepX, side.lines[side.next].StartPoint().X)
 			}
 		}
 
@@ -325,11 +324,11 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		// segments that can no longer possibly intersect with any unprocessed
 		// line segments, and adding any new line segments to the active sets.
 		for _, side := range sides {
-			for len(side.active.data) != 0 && side.lines[side.active.data[0]].EndPoint().XY().X < sweepX {
+			for len(side.active.data) != 0 && side.lines[side.active.data[0]].EndPoint().X < sweepX {
 				side.active.pop()
 			}
 			side.newSegments = side.newSegments[:0]
-			for side.next < len(side.lines) && side.lines[side.next].StartPoint().XY().X == sweepX {
+			for side.next < len(side.lines) && side.lines[side.next].StartPoint().X == sweepX {
 				side.newSegments = append(side.newSegments, side.next)
 				side.active.push(side.next)
 				side.next++
@@ -384,6 +383,10 @@ func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp Mult
 		return true
 	}
 
+	// TODO: Pretty sure there's a bug here... What if part of the
+	// MultiLineString is inside the MultiPolygon, and part of it is outside
+	// the MultiPolygon?
+
 	// Because there is no intersection of the MultiLineString with the
 	// boundary of the MultiPolygon, the MultiLineString is either fully
 	// contained within the MultiPolygon, or fully outside of it. So we just
@@ -391,7 +394,7 @@ func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp Mult
 	// falls inside or outside of the MultiPolygon.
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		for j := 0; j < mls.LineStringN(i).NumPoints(); j++ {
-			pt := mls.LineStringN(i).PointN(j)
+			pt := NewPointC(mls.LineStringN(i).PointN(j))
 			return hasIntersectionPointWithMultiPolygon(pt, mp)
 		}
 	}

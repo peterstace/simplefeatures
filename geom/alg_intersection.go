@@ -304,11 +304,17 @@ func intersectPointWithLineString(pt Point, ls LineString) Geometry {
 func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (Geometry, error) {
 	mp1Set := make(map[XY]struct{})
 	for _, pt := range mp1.pts {
-		mp1Set[pt.Coordinates().XY] = struct{}{}
+		c := pt.Coordinates()
+		if !c.Empty {
+			mp1Set[c.Value.XY] = struct{}{}
+		}
 	}
 	mp2Set := make(map[XY]struct{})
 	for _, pt := range mp2.pts {
-		mp2Set[pt.Coordinates().XY] = struct{}{}
+		c := pt.Coordinates()
+		if !c.Empty {
+			mp2Set[c.Value.XY] = struct{}{}
+		}
 	}
 
 	seen := make(map[XY]bool)

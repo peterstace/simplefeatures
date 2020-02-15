@@ -17,6 +17,12 @@ func TestPointInRing(t *testing.T) {
 	}
 	for i, tc := range []testCase{
 		{
+			ringWKT: "LINESTRING(1 0,2 0,1 3,1 0)",
+			subTests: []subTestCase{
+				{"POINT(1.25 1.4166666666666667)", true},
+			},
+		},
+		{
 			ringWKT: "LINESTRING(0 0,2 0,2 2,0 2,0 0)",
 			subTests: []subTestCase{
 				{"POINT(1 1)", true},

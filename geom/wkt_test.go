@@ -38,9 +38,13 @@ func TestUnmarshalWKTInvalidGrammar(t *testing.T) {
 		{"left unbalanced point", "point ( 1 2"},
 		{"right unbalanced point", "point 1 2 )"},
 		{"point no parens", "point 1 1"},
+		{"point no coords", "point ( )"},
 
 		{"mixed empty", "LINESTRING(0 0, EMPTY, 2 2)"},
 		{"foo internal point", "LINESTRING(0 0, foo, 2 2)"},
+		{"line string no coords", "LINESTRING()"},
+
+		{"polygon no coords", "POLYGON()"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := UnmarshalWKT(strings.NewReader(tt.wkt))
@@ -55,25 +59,90 @@ func TestUnmarshalWKTInvalidGrammar(t *testing.T) {
 
 func TestMarshalUnmarshalWKT(t *testing.T) {
 	for i, wkt := range []string{
-		"GEOMETRYCOLLECTION(LINESTRING(0 0,1 1))",
-		"MULTIPOINT ((10 40),(40 30),(20 20),(30 10))",
-		"MULTIPOINT (10 40,40 30,20 20,30 10)",
-		"MULTIPOINT (10 40,(40 30), EMPTY)",
 		"POINT (30 10)",
 		"POINT (-30 -10)",
 		"POINT EMPTY",
+
 		"LINESTRING(30 10,10 30,40 40)",
+
 		"POLYGON((30 10,40 40,20 40,10 20,30 10))",
 		"POLYGON((35 10,45 45,15 40,10 20,35 10),(20 30,35 35,30 20,20 30))",
+
+		"MULTIPOINT ((10 40),(40 30),(20 20),(30 10))",
+		"MULTIPOINT (10 40,40 30,20 20,30 10)",
+		"MULTIPOINT (10 40,(40 30), EMPTY)",
+
 		"MULTILINESTRING((10 10,20 20,10 40),(40 40,30 30,40 20,30 10))",
+		"MULTILINESTRING((1 2,3 4,5 6),EMPTY)",
+
 		"MULTIPOLYGON(((30 20,45 40,10 40,30 20)),((15 5,40 10,10 20,5 10,15 5)))",
 		"MULTIPOLYGON(((40 40,20 45,45 30,40 40)),((20 35,10 30,10 10,30 5,45 20,20 35),(30 20,20 15,20 25,30 20)))",
+		"MULTIPOLYGON(EMPTY,((20 35,10 30,10 10,30 5,45 20,20 35),(30 20,20 15,20 25,30 20)))",
+
+		"GEOMETRYCOLLECTION(LINESTRING(0 0,1 1))",
 		"GEOMETRYCOLLECTION(POINT(4 6),LINESTRING(4 6,7 10))",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, wkt)
 			g2 := geomFromWKT(t, string(g1.AsText()))
 			expectGeomEq(t, g1, g2)
+		})
+	}
+}
+
+func TestUnmarshalWKT(t *testing.T) {
+	t.Run("multi line string containing an empty line string", func(t *testing.T) {
+		g := geomFromWKT(t, "MULTILINESTRING((1 2,3 4),EMPTY,(5 6,7 8))")
+		mls := g.AsMultiLineString()
+		expectIntEq(t, mls.NumLineStrings(), 3)
+		expectGeomEq(t,
+			mls.LineStringN(0).AsGeometry(),
+			geomFromWKT(t, "LINESTRING(1 2,3 4)"),
+		)
+		expectGeomEq(t,
+			mls.LineStringN(1).AsGeometry(),
+			geomFromWKT(t, "LINESTRING EMPTY"),
+		)
+		expectGeomEq(t,
+			mls.LineStringN(2).AsGeometry(),
+			geomFromWKT(t, "LINESTRING(5 6,7 8)"),
+		)
+	})
+}
+
+func TestAsTextEmpty(t *testing.T) {
+	for i, tt := range []struct {
+		fn   func() Geometry
+		want string
+	}{
+		{
+			func() Geometry { return NewEmptyPoint().AsGeometry() },
+			"POINT EMPTY",
+		},
+		{
+			func() Geometry { return NewEmptyLineString().AsGeometry() },
+			"LINESTRING EMPTY",
+		},
+		{
+			func() Geometry { return NewEmptyPolygon().AsGeometry() },
+			"POLYGON EMPTY",
+		},
+		{
+			func() Geometry { return NewMultiPoint(nil).AsGeometry() },
+			"MULTIPOINT EMPTY",
+		},
+		{
+			func() Geometry { return NewMultiLineString(nil).AsGeometry() },
+			"MULTILINESTRING EMPTY",
+		},
+		{
+			func() Geometry { return NewEmptyMultiPolygon().AsGeometry() },
+			"MULTIPOLYGON EMPTY",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := tt.fn().AsText()
+			expectStringEq(t, got, tt.want)
 		})
 	}
 }

@@ -36,14 +36,14 @@ func (n Line) AsGeometry() Geometry {
 	return Geometry{lineTag, unsafe.Pointer(&n)}
 }
 
-// StartPoint gives the first point of the line.
-func (n Line) StartPoint() Point {
-	return NewPointC(n.a)
+// StartPoint gives the coordinates of the first control point of the line.
+func (n Line) StartPoint() Coordinates {
+	return n.a
 }
 
-// EndPoint gives the second (last) point of the line.
-func (n Line) EndPoint() Point {
-	return NewPointC(n.b)
+// EndPoint gives the coordinates of the second (last) control point of the line.
+func (n Line) EndPoint() Coordinates {
+	return n.b
 }
 
 // NumPoints always returns 2.
@@ -51,9 +51,9 @@ func (Line) NumPoints() int {
 	return 2
 }
 
-// PointN returns the first point when n is 0, and the second point when n is
-// 1. It panics if n is any other value.
-func (ln Line) PointN(n int) Point {
+// PointN returns the coordinates of the first point when n is 0, and the
+// second point when n is 1. It panics if n is any other value.
+func (ln Line) PointN(n int) Coordinates {
 	switch n {
 	case 0:
 		return ln.StartPoint()
@@ -69,7 +69,7 @@ func (n Line) AsText() string {
 }
 
 func (n Line) AppendWKT(dst []byte) []byte {
-	dst = append(dst, []byte("LINESTRING(")...)
+	dst = append(dst, "LINESTRING("...)
 	dst = appendFloat(dst, n.a.X)
 	dst = append(dst, ' ')
 	dst = appendFloat(dst, n.a.Y)
@@ -118,10 +118,10 @@ func (n Line) AsBinary(w io.Writer) error {
 	marsh.writeByteOrder()
 	marsh.writeGeomType(wkbGeomTypeLineString)
 	marsh.writeCount(2)
-	marsh.writeFloat64(n.StartPoint().XY().X)
-	marsh.writeFloat64(n.StartPoint().XY().Y)
-	marsh.writeFloat64(n.EndPoint().XY().X)
-	marsh.writeFloat64(n.EndPoint().XY().Y)
+	marsh.writeFloat64(n.StartPoint().X)
+	marsh.writeFloat64(n.StartPoint().Y)
+	marsh.writeFloat64(n.EndPoint().X)
+	marsh.writeFloat64(n.EndPoint().Y)
 	return marsh.err
 }
 

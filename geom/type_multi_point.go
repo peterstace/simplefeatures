@@ -26,10 +26,7 @@ func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 func NewMultiPointOC(coords []OptionalCoordinates, opts ...ConstructorOption) MultiPoint {
 	var pts []Point
 	for _, c := range coords {
-		if c.Empty {
-			continue
-		}
-		pt := NewPointC(c.Value, opts...)
+		pt := NewPointOC(c, opts...)
 		pts = append(pts, pt)
 	}
 	return NewMultiPoint(pts, opts...)
@@ -70,9 +67,9 @@ func (m MultiPoint) AsText() string {
 }
 
 func (m MultiPoint) AppendWKT(dst []byte) []byte {
-	dst = append(dst, []byte("MULTIPOINT")...)
+	dst = append(dst, "MULTIPOINT"...)
 	if len(m.pts) == 0 {
-		return append(dst, []byte(" EMPTY")...)
+		return append(dst, " EMPTY"...)
 	}
 	dst = append(dst, '(')
 	for i, pt := range m.pts {
@@ -160,8 +157,8 @@ func (m MultiPoint) MarshalJSON() ([]byte, error) {
 
 // Coordinates returns the coordinates of the points represented by the
 // MultiPoint.
-func (m MultiPoint) Coordinates() []Coordinates {
-	coords := make([]Coordinates, len(m.pts))
+func (m MultiPoint) Coordinates() []OptionalCoordinates {
+	coords := make([]OptionalCoordinates, len(m.pts))
 	for i := range coords {
 		coords[i] = m.pts[i].Coordinates()
 	}
@@ -171,8 +168,8 @@ func (m MultiPoint) Coordinates() []Coordinates {
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
 func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := m.Coordinates()
-	transform1dCoords(coords, fn)
-	return NewMultiPointC(coords, opts...).AsGeometry(), nil
+	transformOptional1dCoords(coords, fn)
+	return NewMultiPointOC(coords, opts...).AsGeometry(), nil
 }
 
 // EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.
@@ -187,12 +184,8 @@ func (m MultiPoint) IsValid() bool {
 	return true
 }
 
-// Reverse in the case of MultiPoint outputs each component point in their original order.
+// Reverse in the case of MultiPoint outputs each component point in their
+// original order.
 func (m MultiPoint) Reverse() MultiPoint {
-	coords := make([]Coordinates, len(m.pts))
-	// Form the reversed slice.
-	for i := 0; i < len(m.pts); i++ {
-		coords[i] = m.pts[i].Coordinates()
-	}
-	return NewMultiPointC(coords)
+	return m
 }

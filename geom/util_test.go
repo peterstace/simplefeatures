@@ -41,6 +41,13 @@ func expectGeomEq(t *testing.T, got, want Geometry, opts ...EqualsExactOption) {
 	}
 }
 
+func expectCoordsEq(t *testing.T, got, want Coordinates) {
+	t.Helper()
+	if got != want {
+		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+	}
+}
+
 func expectStringEq(t *testing.T, got, want string) {
 	t.Helper()
 	if got != want {

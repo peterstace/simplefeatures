@@ -25,7 +25,7 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 			return Geometry{}, err
 		}
 		if len(secondPass.Coords) == 0 {
-			return NewEmptyPoint(opts...).AsGeometry(), nil
+			return NewEmptyPoint().AsGeometry(), nil
 		}
 		coords, err := oneDimFloat64sToCoordinates(secondPass.Coords)
 		if err != nil {
@@ -46,8 +46,6 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 		switch firstPass.Type {
 		case "LineString":
 			switch len(coords) {
-			case 0:
-				return NewEmptyLineString(opts...).AsGeometry(), nil
 			case 2:
 				ln, err := NewLineC(coords[0], coords[1], opts...)
 				return ln.AsGeometry(), err
@@ -73,13 +71,8 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 		}
 		switch firstPass.Type {
 		case "Polygon":
-			switch len(coords) {
-			case 0:
-				return NewEmptyPolygon(opts...).AsGeometry(), nil
-			default:
-				poly, err := NewPolygonC(coords, opts...)
-				return poly.AsGeometry(), err
-			}
+			poly, err := NewPolygonC(coords, opts...)
+			return poly.AsGeometry(), err
 		case "MultiLineString":
 			mls, err := NewMultiLineStringC(coords, opts...)
 			return mls.AsGeometry(), err

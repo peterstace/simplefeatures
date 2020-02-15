@@ -22,6 +22,14 @@ type MultiPolygon struct {
 	polys []Polygon
 }
 
+// TODO: think about what happens when any of the Polys are empty.
+
+// NewEmptyMultiPolygon returns the empty MultiPolygon. It is equivalent to
+// calling NewMultiPolygon with a zero length polygon slice.
+func NewEmptyMultiPolygon() MultiPolygon {
+	return MultiPolygon{}
+}
+
 // NewMultiPolygon creates a MultiPolygon from its constituent Polygons. It
 // gives an error if any of the MultiPolygon assertions are not maintained.
 func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
@@ -109,17 +117,15 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 		// then each midpoint between those points. These are enough points
 		// that one of the points will be inside the other polygon iff the
 		// interior of the polygons intersect.
-		var p2rings []LineString
 		allPts := make(map[XY]struct{})
-		for _, r1 := range p1.rings() {
+		for _, r1 := range p1.rings {
 			for ln1 := 0; ln1 < r1.NumLines(); ln1++ {
 				line1 := r1.LineN(ln1)
 				// Collect boundary control points and intersection points.
 				linePts := make(map[XY]struct{})
 				linePts[line1.a.XY] = struct{}{}
 				linePts[line1.b.XY] = struct{}{}
-				p2rings = appendRings(p2rings[:0], p2)
-				for _, r2 := range p2rings {
+				for _, r2 := range p2.rings {
 					for ln2 := 0; ln2 < r2.NumLines(); ln2++ {
 						line2 := r2.LineN(ln2)
 						inter := intersectLineWithLineNoAlloc(line1, line2)
@@ -129,7 +135,7 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 						if inter.ptA != inter.ptB {
 							continue
 						}
-						if inter.ptA != line1.StartPoint().XY() && inter.ptA != line1.EndPoint().XY() {
+						if inter.ptA != line1.StartPoint().XY && inter.ptA != line1.EndPoint().XY {
 							linePts[inter.ptA] = struct{}{}
 						}
 					}
@@ -173,11 +179,15 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 	return false
 }
 
+// isPointInteriorToPolygon returns true iff the pt is strictly inside the
+// polygon (i.e. is not outside the polygon or on its boundary).
+//
+// A precondition to this function is that the Polygon is not empty.
 func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
-	if pointRingSide(pt, poly.outer) != interior {
+	if pointRingSide(pt, poly.rings[0]) != interior {
 		return false
 	}
-	for _, hole := range poly.holes {
+	for _, hole := range poly.rings[1:] {
 		if pointRingSide(pt, hole) != exterior {
 			return false
 		}
@@ -205,9 +215,9 @@ func (m MultiPolygon) AsText() string {
 }
 
 func (m MultiPolygon) AppendWKT(dst []byte) []byte {
-	dst = append(dst, []byte("MULTIPOLYGON")...)
+	dst = append(dst, "MULTIPOLYGON"...)
 	if len(m.polys) == 0 {
-		return append(dst, []byte(" EMPTY")...)
+		return append(dst, " EMPTY"...)
 	}
 	dst = append(dst, '(')
 	for i, poly := range m.polys {
@@ -252,12 +262,15 @@ func (m MultiPolygon) Envelope() (Envelope, bool) {
 }
 
 func (m MultiPolygon) Boundary() MultiLineString {
-	var bounds []LineString
-	for _, poly := range m.polys {
-		bounds = append(bounds, poly.outer)
-		for _, inner := range poly.holes {
-			bounds = append(bounds, inner)
-		}
+	var n int
+	for _, p := range m.polys {
+		n += len(p.rings)
+	}
+	bounds := make([]LineString, n)
+	var i int
+	for _, p := range m.polys {
+		copy(bounds[i:], p.rings)
+		i += len(p.rings)
 	}
 	return NewMultiLineString(bounds)
 }
@@ -295,15 +308,7 @@ func (m MultiPolygon) Coordinates() [][][]Coordinates {
 	numPolys := m.NumPolygons()
 	coords := make([][][]Coordinates, numPolys)
 	for i := 0; i < numPolys; i++ {
-		rings := m.PolygonN(i).rings()
-		coords[i] = make([][]Coordinates, len(rings))
-		for j, r := range rings {
-			n := r.NumPoints()
-			coords[i][j] = make([]Coordinates, n)
-			for k := 0; k < n; k++ {
-				coords[i][j][k] = r.PointN(k).Coordinates()
-			}
-		}
+		coords[i] = m.PolygonN(i).Coordinates()
 	}
 	return coords
 }
@@ -348,16 +353,15 @@ func (m MultiPolygon) SignedArea() float64 {
 	return signedArea
 }
 
-// Centroid returns the multi polygon's centroid point. It returns false if the
-// multi polygon is empty (in which case, there is no sensible definition for a
-// centroid).
-func (m MultiPolygon) Centroid() (Point, bool) {
+// Centroid returns the multi polygon's centroid point. It returns the empty
+// Point if the multi polygon is empty.
+func (m MultiPolygon) Centroid() Point {
 	if m.IsEmpty() {
-		return Point{}, false
+		return NewEmptyPoint()
 	}
 
 	n := m.NumPolygons()
-	centroids := make([]XY, n)
+	centroids := make([]Point, n)
 	areas := make([]float64, n)
 	var totalArea float64
 	for i := 0; i < n; i++ {
@@ -365,11 +369,14 @@ func (m MultiPolygon) Centroid() (Point, bool) {
 		totalArea += areas[i]
 	}
 	var avg XY
-	for i := range centroids {
-		avg = avg.Add(centroids[i].Scale(areas[i]))
+	for i, c := range centroids {
+		if c.IsEmpty() {
+			continue
+		}
+		avg = avg.Add(c.XY().Scale(areas[i]))
 	}
 	avg = avg.Scale(1.0 / totalArea)
-	return NewPointXY(avg), true
+	return NewPointXY(avg)
 }
 
 // Reverse in the case of MultiPolygon outputs the component polygons in their original order,

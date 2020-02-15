@@ -50,6 +50,10 @@ func TestConvexHull(t *testing.T) {
 			output: "MULTIPOINT EMPTY",
 		},
 		{
+			input:  "MULTIPOINT(1 2,3 4,EMPTY)",
+			output: "LINESTRING(1 2,3 4)",
+		},
+		{
 			input:  "MULTILINESTRING EMPTY",
 			output: "MULTILINESTRING EMPTY",
 		},
@@ -71,6 +75,10 @@ func TestConvexHull(t *testing.T) {
 		},
 		{
 			input:  "GEOMETRYCOLLECTION(POINT(1 2))",
+			output: "POINT(1 2)",
+		},
+		{
+			input:  "GEOMETRYCOLLECTION(POINT EMPTY,POINT(1 2))",
 			output: "POINT(1 2)",
 		},
 		{

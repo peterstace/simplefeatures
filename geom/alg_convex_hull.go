@@ -47,8 +47,8 @@ func convexHull(g Geometry) Geometry {
 }
 
 func convexHullPointSet(g Geometry) []XY {
-	switch g.tag {
-	case geometryCollectionTag:
+	switch {
+	case g.IsGeometryCollection():
 		var points []XY
 		c := g.AsGeometryCollection()
 		n := c.NumGeometries()
@@ -59,36 +59,40 @@ func convexHullPointSet(g Geometry) []XY {
 			)
 		}
 		return points
-	case emptySetTag:
-		return nil
-	case pointTag:
+	case g.IsPoint():
+		if g.IsEmpty() {
+			return nil
+		}
 		return []XY{g.AsPoint().XY()}
-	case lineTag:
+	case g.IsLine():
 		n := g.AsLine()
 		return []XY{
-			n.StartPoint().XY(),
-			n.EndPoint().XY(),
+			n.StartPoint().XY,
+			n.EndPoint().XY,
 		}
-	case lineStringTag:
+	case g.IsLineString():
 		ls := g.AsLineString()
 		n := ls.NumPoints()
 		points := make([]XY, n)
 		for i := 0; i < n; i++ {
-			points[i] = ls.PointN(i).XY()
+			points[i] = ls.PointN(i).XY
 		}
 		return points
-	case polygonTag:
+	case g.IsPolygon():
 		p := g.AsPolygon()
 		return convexHullPointSet(p.ExteriorRing().AsGeometry())
-	case multiPointTag:
+	case g.IsMultiPoint():
 		m := g.AsMultiPoint()
 		n := m.NumPoints()
-		points := make([]XY, n)
+		points := make([]XY, 0, n)
 		for i := 0; i < n; i++ {
-			points[i] = m.PointN(i).XY()
+			pt := m.PointN(i)
+			if !pt.IsEmpty() {
+				points = append(points, pt.XY())
+			}
 		}
 		return points
-	case multiLineStringTag:
+	case g.IsMultiLineString():
 		m := g.AsMultiLineString()
 		var points []XY
 		n := m.NumLineStrings()
@@ -96,11 +100,11 @@ func convexHullPointSet(g Geometry) []XY {
 			line := m.LineStringN(i)
 			m := line.NumPoints()
 			for j := 0; j < m; j++ {
-				points = append(points, line.PointN(j).XY())
+				points = append(points, line.PointN(j).XY)
 			}
 		}
 		return points
-	case multiPolygonTag:
+	case g.IsMultiPolygon():
 		m := g.AsMultiPolygon()
 		var points []XY
 		numPolys := m.NumPolygons()
@@ -108,7 +112,7 @@ func convexHullPointSet(g Geometry) []XY {
 			ring := m.PolygonN(i).ExteriorRing()
 			numPts := ring.NumPoints()
 			for j := 0; j < numPts; j++ {
-				points = append(points, ring.PointN(j).XY())
+				points = append(points, ring.PointN(j).XY)
 			}
 		}
 		return points

@@ -49,9 +49,9 @@ func (c GeometryCollection) AsText() string {
 }
 
 func (c GeometryCollection) AppendWKT(dst []byte) []byte {
-	dst = append(dst, []byte("GEOMETRYCOLLECTION")...)
+	dst = append(dst, "GEOMETRYCOLLECTION"...)
 	if c.IsEmpty() {
-		return append(dst, []byte(" EMPTY")...)
+		return append(dst, " EMPTY"...)
 	}
 	dst = append(dst, '(')
 	for i, geom := range c.geoms {
