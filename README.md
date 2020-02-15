@@ -86,5 +86,5 @@ docker-compose -f docker-compose-postgis.yml up --abort-on-container-exit
 ```
 
 ```
-docker-compose -f docker-compose-cmprefimpl.yml up
+docker-compose -f docker-compose-cmprefimpl.yml up --abort-on-container-exit
 ```
