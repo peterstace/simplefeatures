@@ -256,7 +256,7 @@ func highestDimensionIgnoreEmpties(g Geometry) int {
 // Centroid of a GeometryCollection is the centroid of its parts' centroids.
 // It returns true iff the centroid is well defined.
 func (c GeometryCollection) Centroid() (Point, bool) {
-	result, valid := c.sumCentroidCalc()
+	result := c.sumCentroidCalc()
 	var xy XY
 	switch result.highestDim {
 	case 0:
@@ -278,7 +278,7 @@ func (c GeometryCollection) Centroid() (Point, bool) {
 		panic("Invalid dimensionality in centroid calculation.")
 	}
 
-	return NewPointXY(xy), valid
+	return NewPointXY(xy), true
 }
 
 type centroidCalc struct {
@@ -289,11 +289,12 @@ type centroidCalc struct {
 	sumXY      XY
 }
 
-func (c GeometryCollection) sumCentroidCalc() (result centroidCalc, valid bool) {
+func (c GeometryCollection) sumCentroidCalc() centroidCalc {
+	var result centroidCalc
+
 	n := c.NumGeometries()
 	if n == 0 {
-		valid = false
-		return
+		return result
 	}
 
 	result.highestDim = highestDimensionIgnoreEmpties(c.AsGeometry())
@@ -348,10 +349,7 @@ func (c GeometryCollection) sumCentroidCalc() (result centroidCalc, valid bool) 
 				result.sumArea += area
 			}
 		case g.IsGeometryCollection():
-			child, valid := g.AsGeometryCollection().sumCentroidCalc()
-			if !valid {
-				continue
-			}
+			child := g.AsGeometryCollection().sumCentroidCalc()
 			if child.highestDim != result.highestDim {
 				continue // ignore
 			}
@@ -363,6 +361,6 @@ func (c GeometryCollection) sumCentroidCalc() (result centroidCalc, valid bool) 
 			panic("unknown geometry type in centroid computation")
 		}
 	}
-	valid = true
-	return
+
+	return result
 }
