@@ -401,14 +401,18 @@ func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp Mult
 	return false
 }
 
-func hasIntersectionPointWithLine(point Point, line Line) bool {
+func hasIntersectionPointWithLine(pt Point, ln Line) bool {
 	// Speed is O(1) using a bounding box check then a point-on-line check.
-	env := mustEnv(line.Envelope())
-	if !env.Contains(point.coords.XY) {
+	env := ln.Envelope()
+	xy, ok := pt.XY()
+	if !ok {
 		return false
 	}
-	lhs := (point.coords.X - line.a.X) * (line.b.Y - line.a.Y)
-	rhs := (point.coords.Y - line.a.Y) * (line.b.X - line.a.X)
+	if !env.Contains(xy) {
+		return false
+	}
+	lhs := (xy.X - ln.a.X) * (ln.b.Y - ln.a.Y)
+	rhs := (xy.Y - ln.a.Y) * (ln.b.X - ln.a.X)
 	if lhs == rhs {
 		return true
 	}
@@ -479,14 +483,18 @@ func hasIntersectionPointWithPoint(pt1, pt2 Point) bool {
 
 func hasIntersectionPointWithPolygon(pt Point, p Polygon) bool {
 	// Speed is O(m), m is the number of holes in the polygon.
-	m := p.NumInteriorRings()
-
-	if pointRingSide(pt.XY(), p.ExteriorRing()) == exterior {
+	xy, ok := pt.XY()
+	if !ok {
 		return false
 	}
-	for j := 0; j < m; j++ {
-		ring := p.InteriorRingN(j)
-		if pointRingSide(pt.XY(), ring) == interior {
+
+	if pointRingSide(xy, p.ExteriorRing()) == exterior {
+		return false
+	}
+	m := p.NumInteriorRings()
+	for i := 0; i < m; i++ {
+		ring := p.InteriorRingN(i)
+		if pointRingSide(xy, ring) == interior {
 			return false
 		}
 	}

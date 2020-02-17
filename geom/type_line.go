@@ -96,8 +96,8 @@ func (n Line) Equals(other Geometry) (bool, error) {
 	return equals(n.AsGeometry(), other)
 }
 
-func (n Line) Envelope() (Envelope, bool) {
-	return NewEnvelope(n.a.XY, n.b.XY), true
+func (n Line) Envelope() Envelope {
+	return NewEnvelope(n.a.XY, n.b.XY)
 }
 
 func (n Line) Boundary() MultiPoint {

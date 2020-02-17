@@ -370,10 +370,11 @@ func (m MultiPolygon) Centroid() Point {
 	}
 	var avg XY
 	for i, c := range centroids {
-		if c.IsEmpty() {
+		cxy, ok := c.XY()
+		if !ok {
 			continue
 		}
-		avg = avg.Add(c.XY().Scale(areas[i]))
+		avg = avg.Add(cxy.Scale(areas[i]))
 	}
 	avg = avg.Scale(1.0 / totalArea)
 	return NewPointXY(avg)

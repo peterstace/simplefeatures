@@ -23,7 +23,11 @@ func equals(g1, g2 Geometry) (bool, error) {
 	case g1.IsPoint():
 		switch {
 		case g2.IsPoint():
-			return g1.AsPoint().coords.XY.Equals(g2.AsPoint().coords.XY), nil
+			// Already checked if the point is empty, so it's safe to ignore
+			// the bool flags.
+			xy1, _ := g1.AsPoint().XY()
+			xy2, _ := g2.AsPoint().XY()
+			return xy1 == xy2, nil
 		case g2.IsMultiPoint():
 			g1Set := NewMultiPoint([]Point{g1.AsPoint()})
 			return equalsMultiPointAndMultiPoint(g1Set, g2.AsMultiPoint()), nil
@@ -41,10 +45,16 @@ func equalsMultiPointAndMultiPoint(mp1, mp2 MultiPoint) bool {
 	s1 := make(map[XY]struct{})
 	s2 := make(map[XY]struct{})
 	for _, p := range mp1.pts {
-		s1[p.coords.XY] = struct{}{}
+		xy, ok := p.XY()
+		if ok {
+			s1[xy] = struct{}{}
+		}
 	}
 	for _, p := range mp2.pts {
-		s2[p.coords.XY] = struct{}{}
+		xy, ok := p.XY()
+		if ok {
+			s2[xy] = struct{}{}
+		}
 	}
 	return reflect.DeepEqual(s1, s2)
 }

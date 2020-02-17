@@ -73,9 +73,14 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 	}
 	dst = append(dst, '(')
 	for i, pt := range m.pts {
-		dst = appendFloat(dst, pt.coords.X)
-		dst = append(dst, ' ')
-		dst = appendFloat(dst, pt.coords.Y)
+		xy, ok := pt.XY()
+		if ok {
+			dst = appendFloat(dst, xy.X)
+			dst = append(dst, ' ')
+			dst = appendFloat(dst, xy.Y)
+		} else {
+			dst = append(dst, "EMPTY"...)
+		}
 		if i != len(m.pts)-1 {
 			dst = append(dst, ',')
 		}
@@ -87,10 +92,14 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 func (m MultiPoint) IsSimple() bool {
 	seen := make(map[XY]bool)
 	for _, p := range m.pts {
-		if seen[p.coords.XY] {
+		xy, ok := p.XY()
+		if !ok {
+			continue
+		}
+		if seen[xy] {
 			return false
 		}
-		seen[p.coords.XY] = true
+		seen[xy] = true
 	}
 	return true
 }
@@ -112,14 +121,21 @@ func (m MultiPoint) Equals(other Geometry) (bool, error) {
 }
 
 func (m MultiPoint) Envelope() (Envelope, bool) {
-	if len(m.pts) == 0 {
-		return Envelope{}, false
+	var has bool
+	var env Envelope
+	for _, pt := range m.pts {
+		xy, ok := pt.XY()
+		if !ok {
+			continue
+		}
+		if has {
+			env = env.ExtendToIncludePoint(xy)
+		} else {
+			env = NewEnvelope(xy)
+			has = true
+		}
 	}
-	env := NewEnvelope(m.pts[0].coords.XY)
-	for _, pt := range m.pts[1:] {
-		env = env.ExtendToIncludePoint(pt.coords.XY)
-	}
-	return env, true
+	return env, has
 }
 
 func (m MultiPoint) Boundary() GeometryCollection {

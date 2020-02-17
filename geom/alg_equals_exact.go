@@ -126,9 +126,15 @@ func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
 	}
 	os := newEqualsExactOptionSet(opts)
 	ptsEq := func(i, j int) bool {
-		ptA := mp1.PointN(i).XY()
-		ptB := mp2.PointN(j).XY()
-		return os.eq(ptA, ptB)
+		xyA, okA := mp1.PointN(i).XY()
+		xyB, okB := mp2.PointN(j).XY()
+		if okA != okB {
+			return false // one empty, but not the other
+		}
+		if !okA {
+			return true // both empty
+		}
+		return os.eq(xyA, xyB)
 	}
 	return structureEqual(n, ptsEq, os.ignoreOrder)
 }

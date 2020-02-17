@@ -60,10 +60,11 @@ func convexHullPointSet(g Geometry) []XY {
 		}
 		return points
 	case g.IsPoint():
-		if g.IsEmpty() {
+		xy, ok := g.AsPoint().XY()
+		if !ok {
 			return nil
 		}
-		return []XY{g.AsPoint().XY()}
+		return []XY{xy}
 	case g.IsLine():
 		n := g.AsLine()
 		return []XY{
@@ -86,9 +87,9 @@ func convexHullPointSet(g Geometry) []XY {
 		n := m.NumPoints()
 		points := make([]XY, 0, n)
 		for i := 0; i < n; i++ {
-			pt := m.PointN(i)
-			if !pt.IsEmpty() {
-				points = append(points, pt.XY())
+			xy, ok := m.PointN(i).XY()
+			if ok {
+				points = append(points, xy)
 			}
 		}
 		return points

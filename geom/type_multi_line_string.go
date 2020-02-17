@@ -164,17 +164,22 @@ func (m MultiLineString) Boundary() MultiPoint {
 			ls.StartPoint(),
 			ls.EndPoint(),
 		} {
-			_, seen := counts[pt.coords.XY]
+			xy, ok := pt.XY()
+			if !ok {
+				continue
+			}
+			_, seen := counts[xy]
 			if !seen {
 				uniqueEndpoints = append(uniqueEndpoints, pt)
 			}
-			counts[pt.coords.XY]++
+			counts[xy]++
 		}
 	}
 
 	var bound []Point
 	for _, pt := range uniqueEndpoints {
-		if counts[pt.coords.XY]%2 == 1 {
+		xy, ok := pt.XY()
+		if ok && counts[xy]%2 == 1 {
 			bound = append(bound, pt)
 		}
 	}

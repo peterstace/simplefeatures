@@ -277,15 +277,16 @@ func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (Ge
 	return canonicalPointsAndLines(points, lines)
 }
 
-func intersectPointWithLine(point Point, line Line) Geometry {
-	env := mustEnv(line.Envelope())
-	if !env.Contains(point.coords.XY) {
+func intersectPointWithLine(pt Point, ln Line) Geometry {
+	env := ln.Envelope()
+	ptXY, ok := pt.XY()
+	if !ok || !env.Contains(ptXY) {
 		return NewGeometryCollection(nil).AsGeometry()
 	}
-	lhs := (point.coords.X - line.a.X) * (line.b.Y - line.a.Y)
-	rhs := (point.coords.Y - line.a.Y) * (line.b.X - line.a.X)
+	lhs := (ptXY.X - ln.StartPoint().X) * (ln.EndPoint().Y - ln.StartPoint().Y)
+	rhs := (ptXY.Y - ln.StartPoint().Y) * (ln.EndPoint().X - ln.StartPoint().X)
 	if lhs == rhs {
-		return point.AsGeometry()
+		return pt.AsGeometry()
 	}
 	return NewGeometryCollection(nil).AsGeometry()
 }
@@ -334,7 +335,11 @@ func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (Geometry, error) {
 
 	// Sort in order to give deterministic output.
 	sort.Slice(intersection, func(i, j int) bool {
-		return intersection[i].coords.XY.Less(intersection[j].coords.XY)
+		// Because only non-empty Points are added to the intersection slice,
+		// we don't need to check the flags returned from XY().
+		xyi, _ := intersection[i].XY()
+		xyj, _ := intersection[j].XY()
+		return xyi.Less(xyj)
 	})
 
 	return canonicalPointsAndLines(intersection, nil)
@@ -346,7 +351,11 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
 	}
 	for _, pt := range mp.pts {
 		if pt.EqualsExact(point.AsGeometry()) {
-			return NewPointXY(point.coords.XY).AsGeometry()
+			xy, ok := point.XY()
+			if !ok {
+				return NewEmptyPoint().AsGeometry()
+			}
+			return NewPointXY(xy).AsGeometry()
 		}
 	}
 	return NewGeometryCollection(nil).AsGeometry()
@@ -354,7 +363,11 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
 
 func intersectPointWithPoint(pt1, pt2 Point) Geometry {
 	if pt1.EqualsExact(pt2.AsGeometry()) {
-		return NewPointXY(pt1.coords.XY).AsGeometry()
+		xy, ok := pt1.XY()
+		if !ok {
+			return NewEmptyPoint().AsGeometry()
+		}
+		return NewPointXY(xy).AsGeometry()
 	}
 	return NewGeometryCollection(nil).AsGeometry()
 }
@@ -410,17 +423,21 @@ func intersectMultiPointWithPolygon(mp MultiPoint, p Polygon) (Geometry, error) 
 outer:
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
-		if pointRingSide(pt.XY(), p.ExteriorRing()) == exterior {
+		xy, ok := pt.XY()
+		if !ok {
+			continue
+		}
+		if pointRingSide(xy, p.ExteriorRing()) == exterior {
 			continue
 		}
 		m := p.NumInteriorRings()
 		for j := 0; j < m; j++ {
 			ring := p.InteriorRingN(j)
-			if pointRingSide(pt.XY(), ring) == interior {
+			if pointRingSide(xy, ring) == interior {
 				continue outer
 			}
 		}
-		pts[pt.XY()] = pt
+		pts[xy] = pt
 	}
 
 	ptsSlice := make([]Point, 0, len(pts))

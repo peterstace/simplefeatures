@@ -212,7 +212,10 @@ func (s LineString) IsSimple() bool {
 }
 
 func (s LineString) IsClosed() bool {
-	return !s.IsEmpty() && s.StartPoint().XY() == s.EndPoint().XY()
+	if s.IsEmpty() {
+		return false
+	}
+	return s.coords[0].XY == s.coords[len(s.coords)-1].XY
 }
 
 func (s LineString) Intersection(g Geometry) (Geometry, error) {
