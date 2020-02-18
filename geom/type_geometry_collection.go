@@ -54,8 +54,8 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 		return append(dst, []byte(" EMPTY")...)
 	}
 	dst = append(dst, '(')
-	for i, geom := range c.geoms {
-		dst = geom.appendWKT(dst)
+	for i, g := range c.geoms {
+		dst = g.appendWKT(dst)
 		if i != len(c.geoms)-1 {
 			dst = append(dst, ',')
 		}
@@ -143,8 +143,8 @@ func (c GeometryCollection) AsBinary(w io.Writer) error {
 	n := c.NumGeometries()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {
-		geom := c.GeometryN(i)
-		marsh.setErr(geom.AsBinary(w))
+		g := c.GeometryN(i)
+		marsh.setErr(g.AsBinary(w))
 	}
 	return marsh.err
 }
@@ -208,6 +208,9 @@ func (c GeometryCollection) Reverse() GeometryCollection {
 		return NewGeometryCollection(nil)
 	}
 	var geoms []Geometry
+	if c.IsEmpty() {
+		return NewGeometryCollection(geoms)
+	}
 	for n := 0; n < c.NumGeometries(); n++ {
 		rev := c.GeometryN(n).Reverse()
 		geoms = append(geoms, rev)
@@ -231,8 +234,138 @@ func (c GeometryCollection) Area() float64 {
 	var sum float64
 	n := c.NumGeometries()
 	for i := 0; i < n; i++ {
-		geom := c.GeometryN(i)
-		sum += geom.Area()
+		g := c.GeometryN(i)
+		sum += g.Area()
 	}
 	return sum
+}
+
+func highestDimensionIgnoreEmpties(g Geometry) int {
+	// We could simply use Dimension() instead of this function
+	// except for the fact empties can have different dimensionalities.
+	// This function thus exists to treat empties as dimensionality 0.
+	if g.IsEmpty() {
+		return 0
+	}
+	if !g.IsGeometryCollection() {
+		return g.Dimension()
+	}
+	c := g.AsGeometryCollection()
+	highestDim := 0
+	for _, g2 := range c.geoms {
+		highestDim = max(highestDim, highestDimensionIgnoreEmpties(g2))
+	}
+	return highestDim
+}
+
+// Centroid of a GeometryCollection is the centroid of its parts' centroids.
+// It returns true iff the centroid is well defined.
+func (c GeometryCollection) Centroid() (Point, bool) {
+	result := c.sumCentroidCalc()
+	var xy XY
+	switch result.highestDim {
+	case 0:
+		if result.numPoints == 0 {
+			return Point{}, false // Invalid centroid, highestDim is 0 and numPoints is 0
+		}
+		xy = result.sumXY.Scale(1.0 / float64(result.numPoints))
+	case 1:
+		if result.sumLength == 0 {
+			return Point{}, false // Invalid centroid, highestDim is 1 and sumLength is 0
+		}
+		xy = result.sumXY.Scale(1.0 / result.sumLength)
+	case 2:
+		if result.sumArea == 0 {
+			return Point{}, false // Invalid centroid, highestDim is 2 and sumArea is 0
+		}
+		xy = result.sumXY.Scale(1.0 / result.sumArea)
+	default:
+		panic("Invalid dimensionality in centroid calculation.")
+	}
+
+	return NewPointXY(xy), true
+}
+
+type centroidCalc struct {
+	highestDim int
+	numPoints  int
+	sumLength  float64
+	sumArea    float64
+	sumXY      XY
+}
+
+func (c GeometryCollection) sumCentroidCalc() centroidCalc {
+	var result centroidCalc
+
+	n := c.NumGeometries()
+	if n == 0 {
+		return result
+	}
+
+	result.highestDim = highestDimensionIgnoreEmpties(c.AsGeometry())
+
+	for i := 0; i < n; i++ {
+		g := c.GeometryN(i)
+		if highestDimensionIgnoreEmpties(g) != result.highestDim {
+			continue
+		}
+		switch {
+		case g.IsPoint():
+			pt := g.AsPoint()
+			result.sumXY = result.sumXY.Add(pt.XY())
+			result.numPoints++
+		case g.IsMultiPoint():
+			mp := g.AsMultiPoint()
+			for m := 0; m < mp.NumPoints(); m++ {
+				pt := mp.PointN(m)
+				result.sumXY = result.sumXY.Add(pt.XY())
+				result.numPoints++
+			}
+		case g.IsLine():
+			line := g.AsLine()
+			cent := line.Centroid()
+			length := line.Length()
+			result.sumXY = result.sumXY.Add(cent.Coordinates().Scale(length))
+			result.sumLength += length
+		case g.IsLineString():
+			ls := g.AsLineString()
+			xy, length := sumCentroidAndLengthOfLineString(ls)
+			result.sumXY = result.sumXY.Add(xy)
+			result.sumLength += length
+		case g.IsMultiLineString():
+			mls := g.AsMultiLineString()
+			for m := 0; m < mls.NumLineStrings(); m++ {
+				ls := mls.LineStringN(m)
+				xy, length := sumCentroidAndLengthOfLineString(ls)
+				result.sumXY = result.sumXY.Add(xy)
+				result.sumLength += length
+			}
+		case g.IsPolygon():
+			poly := g.AsPolygon()
+			xy, area := sumCentroidAndAreaOfPolygon(poly)
+			result.sumXY = result.sumXY.Add(xy)
+			result.sumArea += area
+		case g.IsMultiPolygon():
+			mp := g.AsMultiPolygon()
+			for p := 0; p < mp.NumPolygons(); p++ {
+				poly := mp.PolygonN(p)
+				xy, area := sumCentroidAndAreaOfPolygon(poly)
+				result.sumXY = result.sumXY.Add(xy)
+				result.sumArea += area
+			}
+		case g.IsGeometryCollection():
+			child := g.AsGeometryCollection().sumCentroidCalc()
+			if child.highestDim != result.highestDim {
+				continue // ignore
+			}
+			result.sumXY = result.sumXY.Add(child.sumXY)
+			result.numPoints += child.numPoints
+			result.sumLength += child.sumLength
+			result.sumArea += child.sumArea
+		default:
+			panic("unknown geometry type in centroid computation")
+		}
+	}
+
+	return result
 }

@@ -348,28 +348,27 @@ func (m MultiPolygon) SignedArea() float64 {
 	return signedArea
 }
 
-// Centroid returns the multi polygon's centroid point. It returns false if the
-// multi polygon is empty (in which case, there is no sensible definition for a
-// centroid).
+// Centroid returns the multi polygon's centroid point.
+// It returns true iff the centroid is well defined.
+// It returns false if the multi polygon is empty (in which case,
+// there is no sensible definition for a centroid).
 func (m MultiPolygon) Centroid() (Point, bool) {
 	if m.IsEmpty() {
 		return Point{}, false
 	}
 
+	var sumArea float64
+	var sumXY XY
 	n := m.NumPolygons()
-	centroids := make([]XY, n)
-	areas := make([]float64, n)
-	var totalArea float64
 	for i := 0; i < n; i++ {
-		centroids[i], areas[i] = centroidAndAreaOfPolygon(m.PolygonN(i))
-		totalArea += areas[i]
+		xy, area := sumCentroidAndAreaOfPolygon(m.PolygonN(i))
+		sumXY = sumXY.Add(xy)
+		sumArea += area
 	}
-	var avg XY
-	for i := range centroids {
-		avg = avg.Add(centroids[i].Scale(areas[i]))
+	if sumArea == 0 {
+		return Point{}, false
 	}
-	avg = avg.Scale(1.0 / totalArea)
-	return NewPointXY(avg), true
+	return NewPointXY(sumXY.Scale(1.0 / sumArea)), true
 }
 
 // Reverse in the case of MultiPolygon outputs the component polygons in their original order,

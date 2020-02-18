@@ -415,21 +415,19 @@ func CheckArea(t *testing.T, want UnaryResult, g geom.Geometry) {
 
 func CheckCentroid(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckCentroid", func(t *testing.T) {
-		if !g.IsPolygon() && !g.IsMultiPolygon() {
-			return
-		}
-
 		got, ok := g.Centroid()
 		want := want.Cetroid
 
 		if !ok {
 			if !want.IsEmpty() {
+				t.Logf("g:  %v", g.AsText())
 				t.Log("got:  undefined")
 				t.Logf("want: %v", want.AsText())
 				t.Error("mismatch")
 			}
 		} else {
 			if !got.EqualsExact(want, geom.Tolerance(0.000000001)) {
+				t.Logf("g:  %v", g.AsText())
 				t.Logf("got:  %v", got.AsText())
 				t.Logf("want: %v", want.AsText())
 				t.Error("mismatch")

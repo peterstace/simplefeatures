@@ -305,6 +305,32 @@ func (s LineString) Length() float64 {
 	return sum
 }
 
+// Centroid gives the centroid of the coordinates of the line string.
+// It returns true iff the centroid is well defined.
+func (s LineString) Centroid() (Point, bool) {
+	sumXY, sumLength := sumCentroidAndLengthOfLineString(s)
+	if sumLength == 0 {
+		return Point{}, false
+	}
+	return NewPointXY(sumXY.Scale(1.0 / sumLength)), true
+}
+
+func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64) {
+	if s.NumPoints() == 0 {
+		return XY{0, 0}, 0
+	}
+	n := s.NumLines()
+	for i := 0; i < n; i++ {
+		line := s.LineN(i)
+		length := line.Length()
+		cent := line.Centroid()
+		xy := cent.Coordinates().Scale(length)
+		sumXY = sumXY.Add(xy)
+		sumLength += length
+	}
+	return sumXY, sumLength
+}
+
 // AsMultiLineString is a convinience function that converts this LineString
 // into a MultiLineString.
 func (s LineString) AsMultiLineString() MultiLineString {
