@@ -580,6 +580,16 @@ func TestCentroid(t *testing.T) {
 		wkt  string
 		want XY
 	}{
+		{"GEOMETRYCOLLECTION(LINESTRING(1 0,0 5,5 2),POINT(2 3),POLYGON((0 0,1 0,0 1,0 0)))", XY{1.0 / 3, 1.0 / 3}},
+		{"GEOMETRYCOLLECTION(POLYGON((0 0,1 0,0 1,0 0)),POLYGON((2 0,4 0,4 2,2 2,2 0)))", XY{2.7037037037037, 0.925925925925926}},
+		{"GEOMETRYCOLLECTION(LINESTRING(1 0,0 5,5 2),POINT(2 3),MULTIPOLYGON EMPTY)", XY{1.5669656263407472, 3.033482813170374}},
+		{"GEOMETRYCOLLECTION(POINT(1 3),MULTIPOINT(1 1,2 2,3 3))", XY{7.0 / 4, 9.0 / 4}},
+		{"GEOMETRYCOLLECTION(LINESTRING(0 0,1 1))", XY{1.0 / 2, 1.0 / 2}},
+		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(LINESTRING(1 2,3 4),POINT(1 5)))", XY{4.0 / 2, 6.0 / 2}},
+		{"POINT(1 2)", XY{1.0, 2.0}},
+		{"LINESTRING(1 2,3 4)", XY{4.0 / 2, 6.0 / 2}},
+		{"LINESTRING(4 3,2 7)", XY{6.0 / 2, 10.0 / 2}},
+		{"LINESTRING(0 0,0 1,1 0,0 0)", XY{0.35355339059327373, 0.35355339059327373}},
 		{"POLYGON((0 0,1 1,0 1,0 0))", XY{1.0 / 3, 2.0 / 3}},
 		{"POLYGON((0 0,0 1,1 1,0 0))", XY{1.0 / 3, 2.0 / 3}},
 		{"POLYGON((0 0,1 0,1 1,0 1,0 0))", XY{0.5, 0.5}},
@@ -587,6 +597,7 @@ func TestCentroid(t *testing.T) {
 		{"POLYGON((0 0,2 0,2 1,0 1,0 0))", XY{1, 0.5}},
 		{"POLYGON((0 0,4 0,4 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))", XY{2 + 1.0/22, 1.5}},
 		{"POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1))", XY{1.5, 1.5}},
+		{"MULTIPOINT(-1 0,-1 2,-1 3,-1 4,-1 7,0 1,0 3,1 1,2 0,6 0,7 8,9 8,10 6)", XY{2.30769230769231, 3.30769230769231}},
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((2 0,4 0,4 2,2 2,2 0)))", XY{2.7037037037037, 0.925925925925926}},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -605,11 +616,12 @@ func TestCentroid(t *testing.T) {
 
 func TestNoCentroid(t *testing.T) {
 	for i, wkt := range []string{
-		"POLYGON EMPTY",
+		"GEOMETRYCOLLECTION EMPTY",
+		"LINESTRING EMPTY",
+		"MULTILINESTRING EMPTY",
+		"MULTIPOINT EMPTY",
 		"MULTIPOLYGON EMPTY",
-		"POINT(1 2)",
-		"LINESTRING(1 2,3 4)",
-		"LINESTRING(4 3,2 7)",
+		"POLYGON EMPTY",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			_, defined := geomFromWKT(t, wkt).Centroid()
@@ -701,6 +713,10 @@ func TestReverse(t *testing.T) {
 			"GEOMETRYCOLLECTION EMPTY",
 		},
 		{
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY,MULTIPOLYGON EMPTY,GEOMETRYCOLLECTION EMPTY)",
+			"GEOMETRYCOLLECTION EMPTY",
+		},
+		{
 			"GEOMETRYCOLLECTION(POINT(1 1))",
 			"GEOMETRYCOLLECTION(POINT(1 1))",
 		},
@@ -714,6 +730,18 @@ func TestReverse(t *testing.T) {
 				LINESTRING(5 2,0 5,1 0),
 				POINT(2 3),
 				POLYGON((0 0,0 1,1 0,0 0))
+			)`,
+		},
+		{
+			`GEOMETRYCOLLECTION(
+				LINESTRING(1 0,0 5,5 2),
+				POINT(2 3),
+				MULTIPOLYGON EMPTY
+			)`,
+			`GEOMETRYCOLLECTION(
+				LINESTRING(5 2,0 5,1 0),
+				POINT(2 3),
+				MULTIPOLYGON EMPTY
 			)`,
 		},
 	} {
