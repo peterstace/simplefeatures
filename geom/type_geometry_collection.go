@@ -305,6 +305,8 @@ func (c GeometryCollection) sumCentroidCalc() centroidCalc {
 			continue
 		}
 		switch {
+		case g.IsEmptySet():
+			// do nothing
 		case g.IsPoint():
 			pt := g.AsPoint()
 			result.sumXY = result.sumXY.Add(pt.XY())
