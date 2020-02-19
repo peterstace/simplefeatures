@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.8.0
+
+- Adds a `Length` implementation for the `Geometry` type.
+
+- Modifies the `Boundary` for concrete geometry types to return a concrete
+  geometry type (rather than the generic `Geometry` type).
+
+- Modifies the Fuzz Tests to use batching.
+
+- Fixes a bug in the `IsSimple` method for `MultiLineString`.
+
+- Adds `Centroid` implementations for all geometry types.
+
+- Adds a new suite of reference implementation tests using `libgeos`.
+
 ## v0.7.0
 
 - Fixes a deficiency where `LineString` would not retain coincident adjacent
