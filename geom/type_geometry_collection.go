@@ -204,9 +204,6 @@ func (c GeometryCollection) IsValid() bool {
 // GeometryCollection has no elements or only contains empty elements, then the
 // returned GeometryCollection doesn't contain any elements.
 func (c GeometryCollection) Reverse() GeometryCollection {
-	if c.IsEmpty() {
-		return NewGeometryCollection(nil)
-	}
 	var geoms []Geometry
 	if c.IsEmpty() {
 		return NewGeometryCollection(geoms)
