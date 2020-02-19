@@ -68,3 +68,10 @@ func expectBoolEq(t *testing.T, got, want bool) {
 		t.Errorf("\ngot:  %t\nwant: %t\n", got, want)
 	}
 }
+
+func expectXYEq(t *testing.T, got, want XY) {
+	t.Helper()
+	if got != want {
+		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+	}
+}

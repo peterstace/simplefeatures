@@ -140,12 +140,15 @@ func TestPointInRing(t *testing.T) {
 
 		for j, st := range tc.subTests {
 			t.Run(fmt.Sprintf("%d_%d", i, j), func(t *testing.T) {
-				pointGeom, err := UnmarshalWKT(strings.NewReader(st.pointWKT))
+				pt, err := UnmarshalWKT(strings.NewReader(st.pointWKT))
 				if err != nil {
 					t.Fatal(err)
 				}
-				point := pointGeom.AsPoint()
-				got := pointRingSide(point.coords.XY, ring) != exterior
+				xy, ok := pt.AsPoint().XY()
+				if !ok {
+					panic("point empty not expected in this test")
+				}
+				got := pointRingSide(xy, ring) != exterior
 				t.Log(tc.ringWKT)
 				t.Log(st.pointWKT)
 				if got != st.inside {

@@ -341,7 +341,7 @@ func (g Geometry) Envelope() (Envelope, bool) {
 	case pointTag:
 		return g.AsPoint().Envelope()
 	case lineTag:
-		return g.AsLine().Envelope()
+		return g.AsLine().Envelope(), true
 	case lineStringTag:
 		return g.AsLineString().Envelope()
 	case polygonTag:

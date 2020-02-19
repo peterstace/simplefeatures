@@ -143,16 +143,23 @@ func (m MultiLineString) Equals(other Geometry) (bool, error) {
 }
 
 func (m MultiLineString) Envelope() (Envelope, bool) {
-	if len(m.lines) == 0 {
-		return Envelope{}, false
+	var env Envelope
+	var has bool
+	for _, ls := range m.lines {
+		e, ok := ls.Envelope()
+		if !ok {
+			continue
+		}
+		if has {
+			env = env.ExpandToIncludeEnvelope(e)
+		} else {
+			env = e
+			has = true
+		}
 	}
-	env := mustEnv(m.lines[0].Envelope())
-	for _, line := range m.lines[1:] {
-		e := mustEnv(line.Envelope())
-		env = env.ExpandToIncludeEnvelope(e)
-	}
-	return env, true
+	return env, has
 }
+
 func (m MultiLineString) Boundary() MultiPoint {
 	counts := make(map[XY]int)
 	var uniqueEndpoints []Point

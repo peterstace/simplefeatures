@@ -118,14 +118,12 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 			otherRing := ring(other)
 			if current > 0 && other > 0 {
 				// Check is skipped if the outer ring is involved.
-				nestedFwd := pointRingSide(
-					currentRing.StartPoint().XY(),
-					otherRing,
-				) == interior
-				nestedRev := pointRingSide(
-					otherRing.StartPoint().XY(),
-					currentRing,
-				) == interior
+				startXY, ok := currentRing.StartPoint().XY()
+				if !ok {
+					panic("already checked that all rings are non-empty")
+				}
+				nestedFwd := pointRingSide(startXY, otherRing) == interior
+				nestedRev := pointRingSide(startXY, currentRing) == interior
 				if nestedFwd || nestedRev {
 					return Polygon{}, errors.New("polygon must not have nested rings")
 				}

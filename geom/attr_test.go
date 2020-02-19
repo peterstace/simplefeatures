@@ -79,9 +79,10 @@ func TestEnvelope(t *testing.T) {
 		{"POLYGON((1 1,3 1,2 2,2 4,1 1))", xy(1, 1), xy(3, 4)},
 		{"MULTIPOINT(1 1,3 1,2 2,2 4,1 1)", xy(1, 1), xy(3, 4)},
 		{"MULTIPOINT(1 1,EMPTY,3 4)", xy(1, 1), xy(3, 4)},
-		{"MULTIPOINT(EMTPY,1 1,EMPTY,3 4)", xy(1, 1), xy(3, 4)},
+		{"MULTIPOINT(EMPTY,1 1,EMPTY,3 4)", xy(1, 1), xy(3, 4)},
 		{"MULTILINESTRING((1 1,3 1,2 2,2 4,1 1),(4 1,4 2))", xy(1, 1), xy(4, 4)},
 		{"MULTILINESTRING((4 1,4 2),(1 1,3 1,2 2,2 4,1 1))", xy(1, 1), xy(4, 4)},
+		{"MULTILINESTRING((4 1,4 2),EMPTY,(1 1,3 1,2 2,2 4,1 1))", xy(1, 1), xy(4, 4)},
 		{"MULTIPOLYGON(((4 1,4 2,3 2,4 1)),((1 1,3 1,2 2,2 4,1 1)))", xy(1, 1), xy(4, 4)},
 		{"GEOMETRYCOLLECTION(POINT(4 1),POINT(2 3))", xy(2, 1), xy(4, 3)},
 		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(4 1),POINT(2 3)))", xy(2, 1), xy(4, 3)},
@@ -681,15 +682,9 @@ func TestLineStringToMultiLineString(t *testing.T) {
 func TestLineToLineString(t *testing.T) {
 	ln := geomFromWKT(t, "LINESTRING(1 2,3 4)").AsLine()
 	got := ln.AsLineString()
-	if got.NumPoints() != 2 {
-		t.Errorf("want num points 2 but got %v", got.NumPoints())
-	}
-	if got.StartPoint().XY() != (XY{1, 2}) {
-		t.Errorf("want start point 1,2 but got %v", got.StartPoint().XY())
-	}
-	if got.EndPoint().XY() != (XY{3, 4}) {
-		t.Errorf("want start point 3,4 but got %v", got.EndPoint().XY())
-	}
+	expectIntEq(t, got.NumPoints(), 2)
+	expectGeomEq(t, got.StartPoint().AsGeometry(), geomFromWKT(t, "POINT(1 2)"))
+	expectGeomEq(t, got.EndPoint().AsGeometry(), geomFromWKT(t, "POINT(3 4)"))
 }
 
 func TestPolygonToMultiPolygon(t *testing.T) {

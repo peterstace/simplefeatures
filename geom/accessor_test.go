@@ -6,13 +6,15 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-func TestPointAccessor(t *testing.T) {
-	pt := geomFromWKT(t, "POINT(1 2)").AsPoint()
-	want := XY{1, 2}
-	got := pt.XY()
-	if !want.Equals(got) {
-		t.Errorf("got=%v want=%v", got, want)
-	}
+func TestPointAccessorNonEmpty(t *testing.T) {
+	xy, ok := geomFromWKT(t, "POINT(1 2)").AsPoint().XY()
+	expectBoolEq(t, ok, true)
+	expectXYEq(t, xy, XY{1, 2})
+}
+
+func TestPointAccessorEmpty(t *testing.T) {
+	_, ok := geomFromWKT(t, "POINT EMPTY").AsPoint().XY()
+	expectBoolEq(t, ok, false)
 }
 
 func TestLineAccessor(t *testing.T) {
