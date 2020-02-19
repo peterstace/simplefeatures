@@ -52,10 +52,6 @@ func (p Point) AsText() string {
 
 func (p Point) AppendWKT(dst []byte) []byte {
 	dst = append(dst, []byte("POINT")...)
-	return p.appendWKTBody(dst)
-}
-
-func (p Point) appendWKTBody(dst []byte) []byte {
 	dst = append(dst, '(')
 	dst = appendFloat(dst, p.coords.X)
 	dst = append(dst, ' ')

@@ -74,12 +74,17 @@ locally, it's easier to run the tests using docker-compose:
 docker-compose up --abort-on-container-exit
 ```
 
-There is also an additional suite of tests utilising an automatically generated
-test corpus. This test suite tests every function against every input
-combination exhaustively, and compares the result against PostGIS.  These take
-much longer to run, and are designed to be used as a final double check for
-correctness. They can be run using:
+There are two additional suite of test suits utilising an automatically
+generated test corpus. The test suite test every function against every input
+combination exhaustively, and compare the result against a reference
+implementation. They take much longer to run, and are designed to be used as a
+final double check for correctness. They can be run using the following
+commands:
 
 ```
-docker-compose -f docker-compose-full.yml up --abort-on-container-exit
+docker-compose -f docker-compose-postgis.yml up --abort-on-container-exit
+```
+
+```
+docker-compose -f docker-compose-cmprefimpl.yml up --abort-on-container-exit
 ```

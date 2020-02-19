@@ -118,24 +118,6 @@ func CheckGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
 	}
 }
 
-func CheckWKT(t *testing.T, want UnaryResult, g geom.Geometry) {
-	t.Run("CheckWKT", func(t *testing.T) {
-		got := g.AsText()
-		if strings.Contains(got, "MULTIPOINT") {
-			// Skip Multipoints. This is because Postgis doesn't follow the SFA
-			// spec by not including parenthesis around each individual point.
-			// The simplefeatures library follows the spec correctly.
-			return
-		}
-		want := want.AsText
-		if want != got {
-			t.Logf("got:  %v", got)
-			t.Logf("want: %v", want)
-			t.Error("mismatch")
-		}
-	})
-}
-
 func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckWKB", func(t *testing.T) {
 		if g.IsGeometryCollection() && g.IsEmpty() {

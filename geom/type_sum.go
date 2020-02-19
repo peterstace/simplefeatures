@@ -645,11 +645,11 @@ func (g Geometry) Area() float64 {
 	}
 }
 
-// IsSimple calculates whether or not the geometry contains any anomolous
-// geometric ponits such as self intersection or self tangency. For details
+// IsSimple calculates whether or not the geometry contains any anomalous
+// geometric points such as self intersection or self tangency. For details
 // about the precise definition for each type of geometry, see the IsSimple
 // method documentation on that type. It is not defined for
-// GeometryCollections, in which case fales is returned.
+// GeometryCollections, in which case false is returned.
 func (g Geometry) IsSimple() (isSimple bool, wellDefined bool) {
 	switch g.tag {
 	case geometryCollectionTag:

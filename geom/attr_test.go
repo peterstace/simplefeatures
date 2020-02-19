@@ -748,6 +748,40 @@ func TestReverse(t *testing.T) {
 				MULTIPOLYGON EMPTY
 			)`,
 		},
+		{
+			`GEOMETRYCOLLECTION(
+				POINT(1 2),
+				POINT EMPTY,
+				LINESTRING(1 2,3 4),
+				GEOMETRYCOLLECTION(
+					POINT EMPTY,
+					LINESTRING(5 6,7 8),
+					GEOMETRYCOLLECTION(POINT EMPTY, POINT(5 6)),
+					POINT(3 4)
+				),
+				GEOMETRYCOLLECTION(
+					GEOMETRYCOLLECTION(POINT(9 10), POINT EMPTY),
+					POINT(11 12),
+					POINT EMPTY
+				)
+			) `,
+			`GEOMETRYCOLLECTION(
+				POINT(1 2),
+				POINT EMPTY,
+				LINESTRING(3 4,1 2),
+				GEOMETRYCOLLECTION(
+					POINT EMPTY,
+					LINESTRING(7 8,5 6),
+					GEOMETRYCOLLECTION(POINT EMPTY,POINT(5 6)),
+					POINT(3 4)
+				),
+				GEOMETRYCOLLECTION(
+					GEOMETRYCOLLECTION(POINT(9 10), POINT EMPTY),
+					POINT(11 12),
+					POINT EMPTY
+				)
+			)`,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			want := geomFromWKT(t, tt.boundary)

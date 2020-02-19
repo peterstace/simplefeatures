@@ -50,7 +50,7 @@ func (c GeometryCollection) AsText() string {
 
 func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	dst = append(dst, []byte("GEOMETRYCOLLECTION")...)
-	if len(c.geoms) == 0 {
+	if c.IsEmpty() {
 		return append(dst, []byte(" EMPTY")...)
 	}
 	dst = append(dst, '(')
@@ -199,8 +199,10 @@ func (c GeometryCollection) IsValid() bool {
 	return all
 }
 
-// Reverse in the case of GeometryCollection reverses each component and
-// also returns them in the original order. It also omits empty components.
+// Reverse in the case of GeometryCollection reverses each component and also
+// returns them in the original order. As a special case, if the input
+// GeometryCollection has no elements or only contains empty elements, then the
+// returned GeometryCollection doesn't contain any elements.
 func (c GeometryCollection) Reverse() GeometryCollection {
 	var geoms []Geometry
 	if c.IsEmpty() {
