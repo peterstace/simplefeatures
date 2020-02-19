@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math"
@@ -137,12 +138,6 @@ func CheckWKT(t *testing.T, want UnaryResult, g geom.Geometry) {
 
 func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckWKB", func(t *testing.T) {
-		if g.IsEmptySet() && g.AsText() == "POINT EMPTY" {
-			// Empty point WKB use NaN as part of their representation.
-			// Go's math.NaN() and Postgis use slightly different (but
-			// compatible) representations of NaN.
-			return
-		}
 		if g.IsGeometryCollection() && g.IsEmpty() {
 			// The behaviour for GeometryCollections in Postgis is to just
 			// give 'GEOMETRYCOLLECTION EMPTY' whenever the contents of a
@@ -154,10 +149,19 @@ func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 		if err := g.AsBinary(&got); err != nil {
 			t.Fatalf("writing wkb: %v", err)
 		}
-		want := want.AsBinary
+
+		// PostGIS and SimpleFeatures use slightly different (but compatible)
+		// representations of NaN. Account for this by converting the PostGIS
+		// NaN into the one that SimpleFeatures uses before the WKB comparison.
+		want := bytes.ReplaceAll(want.AsBinary,
+			[]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f},
+			[]byte{0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f},
+		)
+
 		if !bytes.Equal(got.Bytes(), want) {
-			t.Logf("got:  %v", got.Bytes())
-			t.Logf("want: %v", want)
+			t.Logf("wkt: %v", g.AsText())
+			t.Logf("got:\n%s", hex.Dump(got.Bytes()))
+			t.Logf("want:\n%s", hex.Dump(want))
 			t.Error("mismatch")
 		}
 	})
