@@ -105,6 +105,18 @@ func checkIsValid(h *libgeos.Handle, g geom.Geometry, log *log.Logger) (bool, er
 }
 
 func checkAsText(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	// Skip any MultiPoints that contain empty Points. Libgeos seems has
+	// trouble handling these.
+	if g.IsMultiPoint() {
+		mp := g.AsMultiPoint()
+		n := mp.NumPoints()
+		for i := 0; i < n; i++ {
+			if mp.PointN(i).IsEmpty() {
+				return nil
+			}
+		}
+	}
+
 	want, err := h.AsText(g)
 	if err != nil {
 		return err
@@ -177,19 +189,24 @@ func checkAsBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 }
 
 func hasEmptyPoint(g geom.Geometry) bool {
-	if g.AsText() == "POINT EMPTY" {
-		return true
-	}
-	// TODO: Should also support MultiPoints here. However, simplefeatures
-	// doesn't support empty points in multipoint collections. We'll need to
-	// update this when we add support for that.
-	if !g.IsGeometryCollection() {
-		return false
-	}
-	gc := g.AsGeometryCollection()
-	for i := 0; i < gc.NumGeometries(); i++ {
-		if hasEmptyPoint(gc.GeometryN(i)) {
-			return true
+	switch {
+	case g.IsPoint():
+		return g.IsEmpty()
+	case g.IsMultiPoint():
+		mp := g.AsMultiPoint()
+		n := mp.NumPoints()
+		for i := 0; i < n; i++ {
+			if mp.PointN(i).IsEmpty() {
+				return true
+			}
+		}
+	case g.IsGeometryCollection():
+		gc := g.AsGeometryCollection()
+		n := gc.NumGeometries()
+		for i := 0; i < n; i++ {
+			if hasEmptyPoint(gc.GeometryN(i)) {
+				return true
+			}
 		}
 	}
 	return false
@@ -199,6 +216,18 @@ func checkFromBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error 
 	var wkb bytes.Buffer
 	if err := g.AsBinary(&wkb); err != nil {
 		return err
+	}
+
+	// Skip any MultiPoints that contain empty Points. Libgeos seems has
+	// trouble handling these.
+	if g.IsMultiPoint() {
+		mp := g.AsMultiPoint()
+		n := mp.NumPoints()
+		for i := 0; i < n; i++ {
+			if mp.PointN(i).IsEmpty() {
+				return nil
+			}
+		}
 	}
 
 	want, err := h.FromBinary(wkb.Bytes())

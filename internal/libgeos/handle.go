@@ -75,7 +75,7 @@ func (h *Handle) err() error {
 		msg = "libgeos internal error"
 	}
 	h.errBuf = [1024]byte{} // Reset the buffer for the next error message.
-	return errors.New(msg)
+	return errors.New(strings.TrimSpace(msg))
 }
 
 func (h *Handle) errMsg() string {
