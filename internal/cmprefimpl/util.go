@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"strings"
 	"text/scanner"
 
@@ -69,9 +68,8 @@ func containsOnlyGeometryCollections(g geom.Geometry) bool {
 func tokenizeWKT(wkt string) []string {
 	var scn scanner.Scanner
 	scn.Init(strings.NewReader(wkt))
-	var scnErr error
 	scn.Error = func(_ *scanner.Scanner, msg string) {
-		scnErr = errors.New(msg)
+		panic(msg)
 	}
 	var tokens []string
 	for tok := scn.Scan(); tok != scanner.EOF; tok = scn.Scan() {

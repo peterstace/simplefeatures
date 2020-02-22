@@ -513,13 +513,7 @@ func checkCentroid(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err != nil {
 		return err
 	}
-	var got geom.Geometry
-	centroidPoint, ok := g.Centroid()
-	if ok {
-		got = centroidPoint.AsGeometry()
-	} else {
-		got = geom.NewEmptyPoint().AsGeometry()
-	}
+	got := g.Centroid().AsGeometry()
 
 	if !want.EqualsExact(got, geom.Tolerance(1e-9)) {
 		log.Printf("want: %v", want.AsText())
