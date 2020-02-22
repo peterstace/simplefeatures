@@ -50,7 +50,7 @@ func (c GeometryCollection) AsText() string {
 
 func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	dst = append(dst, "GEOMETRYCOLLECTION"...)
-	if c.IsEmpty() {
+	if len(c.geoms) == 0 {
 		return append(dst, " EMPTY"...)
 	}
 	dst = append(dst, '(')

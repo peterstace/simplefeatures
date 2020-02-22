@@ -204,9 +204,6 @@ func (p *wkbParser) parseMultiPoint() MultiPoint {
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
 		p.setErr(err)
-		if geom.IsEmpty() {
-			continue
-		}
 		if !geom.IsPoint() {
 			p.setErr(errors.New("non-Point found in MultiPoint"))
 		}
@@ -221,9 +218,6 @@ func (p *wkbParser) parseMultiLineString() MultiLineString {
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
 		p.setErr(err)
-		if geom.IsEmpty() {
-			continue
-		}
 		switch {
 		case geom.IsLineString():
 			lss = append(lss, geom.AsLineString())

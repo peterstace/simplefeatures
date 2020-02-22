@@ -75,9 +75,11 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 	for i, pt := range m.pts {
 		xy, ok := pt.XY()
 		if ok {
+			dst = append(dst, '(')
 			dst = appendFloat(dst, xy.X)
 			dst = append(dst, ' ')
 			dst = appendFloat(dst, xy.Y)
+			dst = append(dst, ')')
 		} else {
 			dst = append(dst, "EMPTY"...)
 		}
@@ -113,7 +115,12 @@ func (m MultiPoint) Intersects(g Geometry) bool {
 }
 
 func (m MultiPoint) IsEmpty() bool {
-	return len(m.pts) == 0
+	for _, pt := range m.pts {
+		if !pt.IsEmpty() {
+			return false
+		}
+	}
+	return true
 }
 
 func (m MultiPoint) Equals(other Geometry) (bool, error) {
