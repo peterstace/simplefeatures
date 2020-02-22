@@ -72,11 +72,14 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkArea(h, g, log); err != nil {
 		return err
 	}
+	log.Println("checking Centroid")
+	if err := checkCentroid(h, g, log); err != nil {
+		return err
+	}
 	return nil
 
-	// TODO: leaving theses for now:
-	// - Cetroid
-	// - Reverse
+	// TODO: Reverse isn't checked yet. There is some significant behaviour
+	// differences between libgeos and PostGIS.
 }
 
 var mismatchErr = errors.New("mismatch")
@@ -500,6 +503,27 @@ func checkArea(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if math.Abs(want-got) > 1e-6 {
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
+		return mismatchErr
+	}
+	return nil
+}
+
+func checkCentroid(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	want, err := h.Centroid(g)
+	if err != nil {
+		return err
+	}
+	var got geom.Geometry
+	centroidPoint, ok := g.Centroid()
+	if ok {
+		got = centroidPoint.AsGeometry()
+	} else {
+		got = geom.NewEmptyPoint().AsGeometry()
+	}
+
+	if !want.EqualsExact(got, geom.Tolerance(1e-9)) {
+		log.Printf("want: %v", want.AsText())
+		log.Printf("got:  %v", got.AsText())
 		return mismatchErr
 	}
 	return nil

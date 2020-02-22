@@ -207,6 +207,22 @@ func (m MultiPoint) IsValid() bool {
 	return true
 }
 
+// Centroid gives the centroid of the coordinates of the MultiPoint.
+func (m MultiPoint) Centroid() Point {
+	n := m.NumPoints()
+	if n == 0 {
+		return NewEmptyPoint()
+	}
+	var sum XY
+	for i := 0; i < n; i++ {
+		xy, ok := m.PointN(i).XY()
+		if ok {
+			sum = sum.Add(xy)
+		}
+	}
+	return NewPointXY(sum.Scale(1 / float64(n)))
+}
+
 // Reverse in the case of MultiPoint outputs each component point in their
 // original order.
 func (m MultiPoint) Reverse() MultiPoint {

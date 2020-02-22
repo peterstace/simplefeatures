@@ -261,6 +261,26 @@ func (m MultiLineString) Length() float64 {
 	return sum
 }
 
+// Centroid gives the centroid of the coordinates of the multi line string.
+func (m MultiLineString) Centroid() Point {
+	n := m.NumLineStrings()
+	if n == 0 {
+		return NewEmptyPoint()
+	}
+	var sumXY XY
+	var sumLength float64
+	for i := 0; i < n; i++ {
+		ls := m.LineStringN(i)
+		xy, length := sumCentroidAndLengthOfLineString(ls)
+		sumXY = sumXY.Add(xy)
+		sumLength += length
+	}
+	if sumLength == 0 {
+		return NewEmptyPoint()
+	}
+	return NewPointXY(sumXY.Scale(1.0 / sumLength))
+}
+
 // Reverse in the case of MultiLineString outputs each component line string in their
 // original order, each individually reversed.
 func (m MultiLineString) Reverse() MultiLineString {

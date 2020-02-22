@@ -558,47 +558,53 @@ func (g Geometry) Length() float64 {
 	}
 }
 
-// Centroid returns the Polygon or MultiPolygon's centroid Point. If the
-// Geometry is not a non-empty Polygon or MultiPolygon, then an empty Point is
-// returned.
-//
-// TODO: This is not in line with the behaviour of ST_Centroid. See
-// https://github.com/peterstace/simplefeatures/issues/83
+// Centroid returns the geometry's centroid Point. If the Geometry is empty,
+// then an empty Point is returned.
 func (g Geometry) Centroid() Point {
-	switch {
-	case g.IsPolygon():
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().Centroid()
+	case pointTag:
+		return g.AsPoint().Centroid()
+	case lineTag:
+		return g.AsLine().Centroid()
+	case lineStringTag:
+		return g.AsLineString().Centroid()
+	case polygonTag:
 		return g.AsPolygon().Centroid()
-	case g.IsMultiPolygon():
+	case multiPointTag:
+		return g.AsMultiPoint().Centroid()
+	case multiLineStringTag:
+		return g.AsMultiLineString().Centroid()
+	case multiPolygonTag:
 		return g.AsMultiPolygon().Centroid()
 	default:
-		return NewEmptyPoint()
+		panic("unknown geometry: " + g.tag.String())
 	}
 }
 
 // Area gives the area of the Polygon or MultiPolygon or GeometryCollection.
 // If the Geometry is none of those types, then 0 is returned.
 func (g Geometry) Area() float64 {
-	switch {
-	case g.IsEmpty():
-		return 0
-	case g.IsGeometryCollection():
+	switch g.tag {
+	case geometryCollectionTag:
 		return g.AsGeometryCollection().Area()
-	case g.IsLine():
+	case pointTag:
 		return 0
-	case g.IsLineString():
+	case lineTag:
 		return 0
-	case g.IsMultiLineString():
+	case lineStringTag:
 		return 0
-	case g.IsPoint():
-		return 0
-	case g.IsMultiPoint():
-		return 0
-	case g.IsPolygon():
+	case polygonTag:
 		return g.AsPolygon().Area()
-	case g.IsMultiPolygon():
+	case multiPointTag:
+		return 0
+	case multiLineStringTag:
+		return 0
+	case multiPolygonTag:
 		return g.AsMultiPolygon().Area()
 	default:
-		return 0
+		panic("unknown geometry: " + g.tag.String())
 	}
 }
 

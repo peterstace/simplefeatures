@@ -389,43 +389,49 @@ func signedAreaOfLinearRing(lr LineString) float64 {
 	return sum / 2
 }
 
-// Centroid returns the polygon's centroid point.
+// Centroid returns the polygon's centroid point. If returns an empty Point if
+// the Polygon is empty.
 func (p Polygon) Centroid() Point {
-	c, _ := centroidAndAreaOfPolygon(p)
-	return c
+	sumXY, sumArea := sumCentroidAndAreaOfPolygon(p)
+	if sumArea == 0 {
+		return NewEmptyPoint()
+	}
+	return NewPointXY(sumXY.Scale(1.0 / sumArea))
 }
 
-func centroidAndAreaOfPolygon(p Polygon) (Point, float64) {
-	if p.IsEmpty() {
-		return NewEmptyPoint(), 0
+func sumCentroidAndAreaOfPolygon(p Polygon) (sumXY XY, sumArea float64) {
+	n := p.NumInteriorRings()
+	xy, area := sumCentroidAndAreaOfLinearRing(p.ExteriorRing())
+	if area > 0 {
+		sumXY = sumXY.Add(xy)
+		sumArea += area // Define exterior ring as having positive area.
+	} else {
+		sumXY = sumXY.Sub(xy)
+		sumArea -= area // Define exterior ring as having positive area.
 	}
-
-	n := len(p.rings)
-	areas := make([]float64, n)
-	centroids := make([]XY, n)
-	var totalArea float64
-	for i, r := range p.rings {
-		centroids[i], areas[i] = centroidAndAreaOfLinearRing(r)
-		if i == 0 {
-			totalArea += areas[i]
+	for i := 0; i < n; i++ {
+		r := p.InteriorRingN(i)
+		xy, area = sumCentroidAndAreaOfLinearRing(r)
+		if area > 0 {
+			sumXY = sumXY.Sub(xy)
+			sumArea -= area // Holes have negative area.
 		} else {
-			totalArea -= areas[i]
+			sumXY = sumXY.Add(xy)
+			sumArea += area // Holes have negative area.
 		}
 	}
-
-	// Calculate weighted average (negative weights for holes).
-	var avg XY
-	for i, c := range centroids {
-		c = c.Scale(areas[i])
-		if i != 0 {
-			c = c.Scale(-1)
-		}
-		avg = avg.Add(c)
-	}
-	return NewPointXY(avg.Scale(1.0 / totalArea)), totalArea
+	return sumXY, sumArea
 }
 
 func centroidAndAreaOfLinearRing(lr LineString) (XY, float64) {
+	xy, area := sumCentroidAndAreaOfLinearRing(lr)
+	if area == 0 {
+		return XY{}, 0
+	}
+	return XY{xy.X / area, xy.Y / area}, math.Abs(area)
+}
+
+func sumCentroidAndAreaOfLinearRing(lr LineString) (XY, float64) {
 	n := lr.NumPoints()
 	var x, y float64
 	var area float64
@@ -437,7 +443,7 @@ func centroidAndAreaOfLinearRing(lr LineString) (XY, float64) {
 		area += pt0.X*pt1.Y - pt1.X*pt0.Y
 	}
 	area /= 2
-	return XY{x / 6 / area, y / 6 / area}, math.Abs(area)
+	return XY{x / 6, y / 6}, area
 }
 
 // AsMultiPolygon is a helper that converts this Polygon into a MultiPolygon.
