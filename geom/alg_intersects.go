@@ -7,6 +7,8 @@ import (
 )
 
 func hasIntersection(g1, g2 Geometry) bool {
+	// TODO: Remove these early returns if possible... Doing so would force the
+	// pairwise intersection functions to properly handle empty geometries.
 	if g2.IsEmpty() {
 		return false
 	}
@@ -209,7 +211,7 @@ func hasIntersectionLineWithLine(n1, n2 Line) (intersects bool, dimension int) {
 		pts = append(pts[:rth], pts[rth+1:]...)
 		ltl := leftmostThenLowestIndex(pts)
 		pts = append(pts[:ltl], pts[ltl+1:]...)
-		if pts[0].Equals(pts[1]) {
+		if pts[0] == pts[1] {
 			return true, 0 // Point has dimension 0
 		}
 		//----------------------
@@ -442,7 +444,7 @@ func hasIntersectionMultiPointWithMultiPoint(mp1, mp2 MultiPoint) bool {
 func hasIntersectionPointWithMultiPoint(point Point, mp MultiPoint) bool {
 	// Worst case speed is O(n) but that's optimal because mp is not sorted.
 	for _, pt := range mp.pts {
-		if pt.EqualsExact(point.AsGeometry()) {
+		if hasIntersectionPointWithPoint(point, pt) {
 			return true
 		}
 	}
@@ -475,10 +477,7 @@ func hasIntersectionPointWithMultiPolygon(pt Point, mp MultiPolygon) bool {
 
 func hasIntersectionPointWithPoint(pt1, pt2 Point) bool {
 	// Speed is O(1).
-	if pt1.EqualsExact(pt2.AsGeometry()) {
-		return true
-	}
-	return false
+	return !pt1.IsEmpty() && !pt2.IsEmpty() && pt1.EqualsExact(pt2.AsGeometry())
 }
 
 func hasIntersectionPointWithPolygon(pt Point, p Polygon) bool {

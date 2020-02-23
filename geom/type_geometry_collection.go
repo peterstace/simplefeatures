@@ -200,14 +200,12 @@ func (c GeometryCollection) IsValid() bool {
 }
 
 // Reverse in the case of GeometryCollection reverses each component and also
-// returns them in the original order. As a special case, if the input
-// GeometryCollection has no elements or only contains empty elements, then the
-// returned GeometryCollection doesn't contain any elements.
+// returns them in the original order.
 func (c GeometryCollection) Reverse() GeometryCollection {
-	var geoms []Geometry
 	if c.IsEmpty() {
-		return NewGeometryCollection(geoms)
+		return c
 	}
+	var geoms []Geometry
 	for n := 0; n < c.NumGeometries(); n++ {
 		rev := c.GeometryN(n).Reverse()
 		geoms = append(geoms, rev)

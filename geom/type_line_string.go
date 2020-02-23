@@ -282,8 +282,10 @@ func (s LineString) MarshalJSON() ([]byte, error) {
 
 // Coordinates returns the coordinates of each point along the LineString.
 func (s LineString) Coordinates() []Coordinates {
-	tmp := make([]Coordinates, len(s.coords))
-	copy(tmp, s.coords)
+	tmp := make([]Coordinates, len(s.points))
+	for i := range tmp {
+		tmp[i] = s.coords[s.points[i]]
+	}
 	return tmp
 }
 

@@ -386,6 +386,10 @@ func TestCoordinates(t *testing.T) {
 			geomFromWKT(t, "LINESTRING(0 1,2 3,4 5)").AsLineString().Coordinates(),
 			[][2]float64{{0, 1}, {2, 3}, {4, 5}},
 		)
+		cmp1d(t,
+			geomFromWKT(t, "LINESTRING(1 5,5 2,5 2,4 9)").AsLineString().Coordinates(),
+			[][2]float64{{1, 5}, {5, 2}, {5, 2}, {4, 9}},
+		)
 		cmp1dOpt(t,
 			geomFromWKT(t, "MULTIPOINT(0 1,2 3,EMPTY,4 5)").AsMultiPoint().Coordinates(),
 			[][]float64{{0, 1}, {2, 3}, {}, {4, 5}},
@@ -771,11 +775,11 @@ func TestReverse(t *testing.T) {
 		},
 		{
 			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY)",
-			"GEOMETRYCOLLECTION EMPTY",
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY)",
 		},
 		{
 			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY,MULTIPOLYGON EMPTY,GEOMETRYCOLLECTION EMPTY)",
-			"GEOMETRYCOLLECTION EMPTY",
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY,MULTIPOLYGON EMPTY,GEOMETRYCOLLECTION EMPTY)",
 		},
 		{
 			"GEOMETRYCOLLECTION(POINT(1 1))",

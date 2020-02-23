@@ -9,12 +9,7 @@ func convexHull(g Geometry) Geometry {
 	if g.IsEmpty() {
 		// Any empty geometry could be returned here to to give correct
 		// behaviour. However, to replicate PostGIS behaviour, we always return
-		// an empty geometry of the original type. For GeometryCollections, a
-		// new geometry is created to eleminate any empty constituent
-		// geometries.
-		if g.IsGeometryCollection() {
-			return NewGeometryCollection(nil).AsGeometry()
-		}
+		// the original geometry.
 		return g
 	}
 	pts := convexHullPointSet(g)

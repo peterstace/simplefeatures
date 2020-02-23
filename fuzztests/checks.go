@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"text/scanner"
 
 	"github.com/peterstace/simplefeatures/geom"
 )
@@ -120,11 +121,13 @@ func CheckGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
 
 func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckWKB", func(t *testing.T) {
-		if g.IsGeometryCollection() && g.IsEmpty() {
-			// The behaviour for GeometryCollections in Postgis is to just
-			// give 'GEOMETRYCOLLECTION EMPTY' whenever the contents of a
-			// geometry collection are all empty geometries. This doesn't
-			// seem like correct behaviour, so these cases are skipped.
+		if g.IsEmpty() && ((g.IsGeometryCollection() && g.AsGeometryCollection().NumGeometries() > 0) ||
+			(g.IsMultiPoint() && g.AsMultiPoint().NumPoints() > 0) ||
+			(g.IsMultiLineString() && g.AsMultiLineString().NumLineStrings() > 0)) {
+			// The behaviour for collections in PostGIS is to just give the
+			// collection with zero elements (even if there are some empty
+			// elements). This doesn't seem like correct behaviour, so these
+			// cases are skipped.
 			return
 		}
 		var got bytes.Buffer
@@ -151,17 +154,62 @@ func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 
 func CheckGeoJSON(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckGeoJSON", func(t *testing.T) {
+		if containsMultiPointContainingEmptyPoint(g) {
+			// PostGIS gives completely wrong GeoJSON in this case (it's not
+			// even valid JSON, let alone valid GeoJSON).
+			return
+		}
 		got, err := g.MarshalJSON()
 		if err != nil {
 			t.Fatalf("could not convert to geojson: %v", err)
 		}
 		want := want.AsGeoJSON
-		if want.Valid && string(got) != want.String {
+		if !want.Valid {
+			return
+		}
+		if err := geojsonEqual(string(got), want.String); err != nil {
+			t.Logf("err:  %v", err)
 			t.Logf("got:  %v", string(got))
-			t.Logf("want: %v", want)
+			t.Logf("want: %v", want.String)
 			t.Error("mismatch")
 		}
 	})
+}
+
+func geojsonEqual(gj1, gj2 string) error {
+	ts1 := tokenize(gj1)
+	ts2 := tokenize(gj2)
+	if len(ts1) != len(ts2) {
+		return fmt.Errorf("token sequence length mismatch: %d vs %d", len(ts1), len(ts2))
+	}
+	for i, t1 := range ts1 {
+		t2 := ts2[i]
+		f1, err1 := strconv.ParseFloat(t1, 64)
+		f2, err2 := strconv.ParseFloat(t2, 64)
+		var eq bool
+		if err1 == nil && err2 == nil {
+			eq = math.Abs(f1-f2) <= 1e-6*math.Max(math.Abs(f1), math.Abs(f2))
+		} else {
+			eq = t1 == t2
+		}
+		if !eq {
+			return fmt.Errorf("token mismatch in position %d: %s vs %s", i, t1, t2)
+		}
+	}
+	return nil
+}
+
+func tokenize(str string) []string {
+	var scn scanner.Scanner
+	scn.Init(strings.NewReader(str))
+	scn.Error = func(_ *scanner.Scanner, msg string) {
+		panic(msg)
+	}
+	var tokens []string
+	for tok := scn.Scan(); tok != scanner.EOF; tok = scn.Scan() {
+		tokens = append(tokens, scn.TokenText())
+	}
+	return tokens
 }
 
 func CheckIsEmpty(t *testing.T, want UnaryResult, g geom.Geometry) {
@@ -256,7 +304,7 @@ func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckConvexHull", func(t *testing.T) {
 		got := g.ConvexHull()
 		want := want.ConvexHull
-		if !got.EqualsExact(want, geom.IgnoreOrder) {
+		if !got.EqualsExact(want, geom.IgnoreOrder, geom.Tolerance(1e-9)) {
 			t.Logf("got:  %v", got.AsText())
 			t.Logf("want: %v", want.AsText())
 			t.Error("mismatch")
@@ -344,6 +392,11 @@ func CheckEquals(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 
 func CheckIntersects(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 	t.Run("CheckIntersects", func(t *testing.T) {
+		if containsMultiPointContainingEmptyPoint(g1) || containsMultiPointContainingEmptyPoint(g2) {
+			// PostGIS gives the incorrect result for these geometries (it says
+			// that they always intersect).
+			return
+		}
 		got := g1.Intersects(g2)
 		want := pg.Intersects(t, g1, g2)
 		if got != want {
@@ -352,6 +405,26 @@ func CheckIntersects(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
 			t.Error("mismatch")
 		}
 	})
+}
+
+func containsMultiPointContainingEmptyPoint(g geom.Geometry) bool {
+	switch {
+	case g.IsMultiPoint():
+		mp := g.AsMultiPoint()
+		for i := 0; i < mp.NumPoints(); i++ {
+			if mp.PointN(i).IsEmpty() {
+				return true
+			}
+		}
+	case g.IsGeometryCollection():
+		gc := g.AsGeometryCollection()
+		for i := 0; i < gc.NumGeometries(); i++ {
+			if containsMultiPointContainingEmptyPoint(gc.GeometryN(i)) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func CheckIntersection(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
@@ -417,7 +490,7 @@ func CheckReverse(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckReverse", func(t *testing.T) {
 		got := g.Reverse()
 		want := want.Reverse
-		if !got.EqualsExact(want) {
+		if !got.EqualsExact(want, geom.Tolerance(1e-9)) {
 			t.Logf("got:  %v", got.AsText())
 			t.Logf("want: %v", want.AsText())
 			t.Error("mismatch")

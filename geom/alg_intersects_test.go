@@ -13,21 +13,14 @@ func TestIntersects(t *testing.T) {
 		in1, in2 string
 		want     bool
 	}{
-		// Empty/ANY
-		{"POINT EMPTY", "POINT(2 3)", false},
-		{"POLYGON EMPTY", "POINT(2 3)", false},
-		{"LINESTRING EMPTY", "POINT(2 3)", false},
-
-		// Empty/Empty
-		{"POINT EMPTY", "LINESTRING EMPTY", false},
-		{"POLYGON EMPTY", "GEOMETRYCOLLECTION EMPTY", false},
-		{"POLYGON EMPTY", "GEOMETRYCOLLECTION(POLYGON EMPTY)", false},
-
 		// Point/Point
+		{"POINT EMPTY", "POINT EMPTY", false},
+		{"POINT EMPTY", "POINT(10 10)", false},
 		{"POINT(1 2)", "POINT(1 2)", true},
 		{"POINT(1 2)", "POINT(2 1)", false},
 
 		// Point/Line
+		{"POINT EMPTY", "LINESTRING(0 0,1 1)", false},
 		{"POINT(0 0)", "LINESTRING(0 0,2 2)", true},
 		{"POINT(1 1)", "LINESTRING(0 0,2 2)", true},
 		{"POINT(2 2)", "LINESTRING(0 0,2 2)", true},
@@ -40,6 +33,9 @@ func TestIntersects(t *testing.T) {
 		{"POINT(2 0.5)", "LINESTRING(0 0,4 1)", true},
 
 		// Point/LineString
+		{"POINT EMPTY", "LINESTRING EMPTY", false},
+		{"POINT EMPTY", "LINESTRING(0 0,1 1,2 2)", false},
+		{"POINT(1 3)", "LINESTRING EMPTY", false},
 		{"POINT(0 0)", "LINESTRING(1 0,2 1,3 0)", false},
 		{"POINT(1 0)", "LINESTRING(1 0,2 1,3 0)", true},
 		{"POINT(2 1)", "LINESTRING(1 0,2 1,3 0)", true},
@@ -47,6 +43,9 @@ func TestIntersects(t *testing.T) {
 		{"POINT(1 2)", "LINESTRING(0 0,0 4)", false},
 
 		// Point/Polygon
+		{"POLYGON EMPTY", "POINT EMPTY", false},
+		{"POLYGON EMPTY", "POINT(2 3)", false},
+		{"POINT EMPTY", "POLYGON((0 0,1 0,0 1,0 0))", false},
 		{`POINT(1 2)`, `POLYGON(
 			(0 0,5 0,5 3,0 3,0 0),
 			(1 1,2 1,2 2,1 2,1 1),
@@ -84,6 +83,11 @@ func TestIntersects(t *testing.T) {
 		)`, false},
 
 		// Point/MultiLineString
+		{"POINT EMPTY", "MULTILINESTRING EMPTY", false},
+		{"POINT EMPTY", "MULTILINESTRING(EMPTY)", false},
+		{"POINT EMPTY", "MULTILINESTRING((0 0,1 1))", false},
+		{"POINT(1 1)", "MULTILINESTRING EMPTY", false},
+		{"POINT(1 1)", "MULTILINESTRING(EMPTY)", false},
 		{"POINT(0 0)", "MULTILINESTRING((1 0,2 1,3 0))", false},
 		{"POINT(1 0)", "MULTILINESTRING((1 0,2 1,3 0))", true},
 		{"POINT(0 0)", "MULTILINESTRING((0 0,1 1),(1 1,2 1))", true},
@@ -92,6 +96,9 @@ func TestIntersects(t *testing.T) {
 		{"POINT(3 1)", "MULTILINESTRING((0 0,1 1),(1 1,2 1))", false},
 
 		// Point/MultiPolygon
+		{"POINT EMPTY", "MULTIPOLYGON EMPTY", false},
+		{"POINT EMPTY", "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", false},
+		{"POINT(2 1)", "MULTIPOLYGON EMPTY", false},
 		{"POINT(0 0)", "MULTIPOLYGON(((0 0,1 0,1 1,0 0)))", true},
 		{"POINT(1 1)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)))", true},
 		{"POINT(1 1)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((3 0,5 0,5 2,3 2,3 0)))", true},
@@ -120,10 +127,12 @@ func TestIntersects(t *testing.T) {
 		{"LINESTRING(3 1,2 2)", "LINESTRING(1 3,2 2)", true},
 
 		// Line/LineString
+		{"LINESTRING(0 0,1 1)", "LINESTRING EMPTY", false},
 		{"LINESTRING(0 0,1 1)", "LINESTRING(0 0,1 1,0 0)", true},
 		{"LINESTRING(0 0,1 1)", "LINESTRING(0 0,1 1,0 1,1 0)", true},
 
 		// Line/Polygon
+		{"POLYGON EMPTY", "LINESTRING(0 0,1 1)", false},
 		{"POLYGON((0 0,2 0,2 2,0 2,0 0))", "LINESTRING(3 0,3 2)", false},
 		{"POLYGON((0 0,2 0,2 2,0 2,0 0))", "LINESTRING(1 2.1,2.1 1)", true},
 		{"POLYGON((0 0,2 0,2 2,0 2,0 0))", "LINESTRING(1 -1,1 1)", true},
@@ -133,6 +142,7 @@ func TestIntersects(t *testing.T) {
 
 		// Line/MultiPoint
 		{"LINESTRING(0 0,1 1)", "MULTIPOINT EMPTY", false},
+		{"LINESTRING(0 0,1 1)", "MULTIPOINT(EMPTY)", false},
 		{"LINESTRING(0 0,1 1)", "MULTIPOINT(1 0)", false},
 		{"LINESTRING(0 0,1 1)", "MULTIPOINT(1 0,0 1)", false},
 		{"LINESTRING(0 0,1 1)", "MULTIPOINT(0.5 0.5)", true},
@@ -143,16 +153,21 @@ func TestIntersects(t *testing.T) {
 		{"LINESTRING(2 1,3 6)", "MULTIPOINT((1 2))", false},
 
 		// Line/MultiLineString
+		{"LINESTRING(0 0,1 1)", "MULTILINESTRING EMPTY", false},
+		{"LINESTRING(0 0,1 1)", "MULTILINESTRING(EMPTY)", false},
 		{"LINESTRING(0 0,1 1)", "MULTILINESTRING((0 0.5,1 0.5,1 -0.5),(2 0.5,2 -0.5))", true},
 		{"LINESTRING(0 1,1 2)", "MULTILINESTRING((0 0.5,1 0.5,1 -0.5),(2 0.5,2 -0.5))", false},
 
 		// Line/MultiPolygon
+		{"LINESTRING(0 0,1 1)", "MULTIPOLYGON EMPTY", false},
 		{"LINESTRING(5 2,5 4)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", false},
 		{"LINESTRING(3 3,3 5)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
 		{"LINESTRING(1 1,3 1)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
 		{"LINESTRING(0 2,2 4)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
 
 		// LineString/LineString
+		{"LINESTRING EMPTY", "LINESTRING EMPTY", false},
+		{"LINESTRING EMPTY", "LINESTRING(0 0,1 1,2 2)", false},
 		{"LINESTRING(0 0,1 0,1 1,0 1)", "LINESTRING(1 1,2 1,2 2,1 2)", true},
 		{"LINESTRING(0 0,0 1,1 0,0 0)", "LINESTRING(0 0,1 1,0 1,0 0,1 1)", true},
 		{"LINESTRING(0 0,1 0,0 1,0 0)", "LINESTRING(0 0,1 0,1 1,0 1)", true},
@@ -166,28 +181,50 @@ func TestIntersects(t *testing.T) {
 		{"LINESTRING(-1 1,1 -1)", "LINESTRING(0 0,2 0,2 2,0 2,0 0)", true},
 
 		// LineString/Polygon
+		{"LINESTRING EMPTY", "POLYGON EMPTY", false},
+		{"LINESTRING EMPTY", "POLYGON((0 0,0 1,1 0,0 0))", false},
+		{"LINESTRING(0 0,1 1,2 2) ", "POLYGON EMPTY", false},
 		{"LINESTRING(3 0,3 1,3 2)", "POLYGON((0 0,2 0,2 2,0 2,0 0))", false},
 		{"LINESTRING(1 1,2 1, 3 1)", "POLYGON((0 0,2 0,2 2,0 2,0 0))", true},
 
 		// LineString/MultiPoint
+		{"LINESTRING EMPTY", "MULTIPOINT EMPTY", false},
+		{"LINESTRING EMPTY", "MULTIPOINT(EMPTY)", false},
+		{"LINESTRING(0 0,1 1,2 2)", "MULTIPOINT EMPTY", false},
+		{"LINESTRING(0 0,1 1,2 2)", "MULTIPOINT(EMPTY)", false},
+		{"LINESTRING EMPTY", "MULTIPOINT(1 1)", false},
 		{"LINESTRING(1 0,2 1,3 0)", "MULTIPOINT((0 0))", false},
 		{"LINESTRING(1 0,2 1,3 0)", "MULTIPOINT((1 0))", true},
 
 		// LineString/MultiLineString
+		{"LINESTRING EMPTY", "MULTILINESTRING EMPTY", false},
+		{"LINESTRING EMPTY", "MULTILINESTRING(EMPTY)", false},
+		{"LINESTRING EMPTY", "MULTILINESTRING((0 0,1 1,2 2))", false},
+		{"LINESTRING(0 0,1 1,2 2)", "MULTILINESTRING EMPTY", false},
+		{"LINESTRING(0 0,1 1,2 2)", "MULTILINESTRING(EMPTY)", false},
 		{"LINESTRING(0 0,1 0,0 1,0 0)", "MULTILINESTRING((0 0,0 1,1 1),(0 1,0 0,1 0))", true},
 		{"LINESTRING(1 1,2 1,2 2,1 2,1 1)", "MULTILINESTRING((0 0,1 0,1 1,0 1))", true},
 		{"LINESTRING(1 2,3 4,5 6)", "MULTILINESTRING((0 1,2 3,4 5))", true},
 
 		// LineString/MultiPolygon
+		{"LINESTRING EMPTY", "MULTIPOLYGON EMPTY", false},
+		{"LINESTRING EMPTY", "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", false},
 		{"LINESTRING(3 0,3 1,3 2)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)))", false},
 		{"LINESTRING(1 1,2 1, 3 1)", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)))", true},
 
 		// Polygon/Polygon
+		{"POLYGON EMPTY", "POLYGON EMPTY", false},
+		{"POLYGON EMPTY", "POLYGON((0 0,1 0,0 1,0 0))", false},
 		{"POLYGON((0 0,1 0,1 1,0 1,0 0))", "POLYGON((2 0,3 0,3 1,2 1,2 0))", false},
 		{"POLYGON((0 0,2 0,2 2,0 2,0 0))", "POLYGON((1 1,3 1,3 3,1 3,1 1))", true},
 		{"POLYGON((0 0,4 0,4 4,0 4,0 0))", "POLYGON((1 1,3 1,3 3,1 3,1 1))", true},
 
 		// Polygon/MultiPoint
+		{"POLYGON EMPTY", "MULTIPOINT EMPTY", false},
+		{"POLYGON EMPTY", "MULTIPOINT(EMPTY)", false},
+		{"POLYGON EMPTY", "MULTIPOINT(1 1)", false},
+		{"POLYGON((0 0,0 1,1 0,0 0))", "MULTIPOINT EMPTY", false},
+		{"POLYGON((0 0,0 1,1 0,0 0))", "MULTIPOINT(EMPTY)", false},
 		{
 			`POLYGON(
 				(0 0,5 0,5 3,0 3,0 0),
@@ -218,16 +255,29 @@ func TestIntersects(t *testing.T) {
 		},
 
 		// Polygon/MultiLineString
+		{"POLYGON EMPTY", "MULTILINESTRING EMPTY", false},
+		{"POLYGON EMPTY", "MULTILINESTRING(EMPTY)", false},
+		{"POLYGON EMPTY", "MULTILINESTRING((0 0,1 1,2 2))", false},
+		{"POLYGON((0 0,0 1,1 0,0 0))", "MULTILINESTRING EMPTY", false},
+		{"POLYGON((0 0,0 1,1 0,0 0))", "MULTILINESTRING(EMPTY)", false},
 		{"POLYGON((0 0,0 2,2 2,2 0,0 0))", "MULTILINESTRING((-1 1,-1 3),(1 -1,1 3))", true},
 		{"POLYGON((0 0,0 2,2 2,2 0,0 0))", "MULTILINESTRING((-1 1,-1 3),(3 -1,3 3))", false},
 
 		// Polygon/MultiPolygon
+		{"MULTIPOLYGON EMPTY", "POLYGON EMPTY", false},
+		{"MULTIPOLYGON(EMPTY)", "POLYGON EMPTY", false},
+		{"MULTIPOLYGON EMPTY", "POLYGON((0 0,1 0,0 1,0 0))", false},
+		{"MULTIPOLYGON(EMPTY)", "POLYGON((0 0,1 0,0 1,0 0))", false},
+		{"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", "POLYGON EMPTY", false},
 		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "POLYGON((8 1,9 1,9 2,8 2,8 1))", false},
 		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "POLYGON((6 1,7.5 1,7.5 -1,6 -1,6 1))", true},
 
 		// MultiPoint/MultiPoint
 		{"MULTIPOINT EMPTY", "MULTIPOINT EMPTY", false},
+		{"MULTIPOINT EMPTY", "MULTIPOINT(EMPTY)", false},
+		{"MULTIPOINT(EMPTY)", "MULTIPOINT EMPTY", false},
 		{"MULTIPOINT EMPTY", "MULTIPOINT((1 2))", false},
+		{"MULTIPOINT(EMPTY)", "MULTIPOINT((1 2))", false},
 		{"MULTIPOINT((1 2))", "MULTIPOINT((1 2))", true},
 		{"MULTIPOINT((1 2))", "MULTIPOINT((1 2),(1 2))", true},
 		{"MULTIPOINT((1 2))", "MULTIPOINT((1 2),(3 4))", true},
@@ -235,9 +285,14 @@ func TestIntersects(t *testing.T) {
 		{"MULTIPOINT((3 4),(1 2))", "MULTIPOINT((1 4),(2 2))", false},
 		{"MULTIPOINT((1 2))", "MULTIPOINT((4 8))", false},
 		{"MULTIPOINT((1 2))", "MULTIPOINT((7 6),(3 3),(3 3))", false},
+		{"MULTIPOINT((10 40),(40 30),EMPTY)", "MULTIPOINT((1 2),(2 3),EMPTY)", false},
 
 		// MultiPoint/Point
+		{"MULTIPOINT EMPTY", "POINT EMPTY", false},
+		{"MULTIPOINT(EMPTY)", "POINT EMPTY", false},
 		{"MULTIPOINT EMPTY", "POINT(1 2)", false},
+		{"MULTIPOINT(EMPTY)", "POINT(1 2)", false},
+		{"MULTIPOINT((2 1))", "POINT EMPTY", false},
 		{"MULTIPOINT((2 1))", "POINT(1 2)", false},
 		{"MULTIPOINT((1 2))", "POINT(1 2)", true},
 		{"MULTIPOINT((1 2),(1 2))", "POINT(1 2)", true},
@@ -246,25 +301,50 @@ func TestIntersects(t *testing.T) {
 		{"MULTIPOINT((5 6),(7 8))", "POINT(1 2)", false},
 
 		// MultiPoint/MultiLineString
+		{"MULTIPOINT EMPTY", "MULTILINESTRING EMPTY", false},
+		{"MULTIPOINT(EMPTY)", "MULTILINESTRING EMPTY", false},
+		{"MULTIPOINT EMPTY", "MULTILINESTRING(EMPTY)", false},
+		{"MULTIPOINT(EMPTY)", "MULTILINESTRING(EMPTY)", false},
+		{"MULTIPOINT EMPTY", "MULTILINESTRING((0 0,1 1,2 2))", false},
+		{"MULTIPOINT(EMPTY)", "MULTILINESTRING((0 0,1 1,2 2))", false},
+		{"MULTIPOINT((1 2))", "MULTILINESTRING EMPTY", false},
+		{"MULTIPOINT((1 2))", "MULTILINESTRING(EMPTY)", false},
 		{"MULTIPOINT(0 0,1 0)", "MULTILINESTRING((0 1,1 1),(1 0,2 -1))", true},
 		{"MULTIPOINT(0 0,1 0)", "MULTILINESTRING((0 1,1 1),(1 0.5,2 -0.5))", false},
 		{"MULTIPOINT(0.5 0.5)", "MULTILINESTRING((0 0,0 0,1 1))", true},
 
 		// MultiPoint/MultiPolygon
+		{"MULTIPOINT EMPTY", "MULTIPOLYGON EMPTY", false},
+		{"MULTIPOINT(EMPTY)", "MULTIPOLYGON EMPTY", false},
+		{"MULTIPOINT EMPTY", "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", false},
+		{"MULTIPOINT(EMPTY)", "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", false},
+		{"MULTIPOINT((1 1))", "MULTIPOLYGON EMPTY", false},
 		{"MULTIPOINT((1 1))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)))", true},
 		{"MULTIPOINT((3 3))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)))", false},
+		{"MULTIPOINT((1 2),(2 3),EMPTY)", "MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((2 0,4 0,4 2,2 2,2 0)))", false},
 
 		// MultiLineString/MultiLineString
+		{"MULTILINESTRING EMPTY", "MULTILINESTRING EMPTY", false},
+		{"MULTILINESTRING EMPTY", "MULTILINESTRING(EMPTY)", false},
+		{"MULTILINESTRING EMPTY", "MULTILINESTRING((0 0,1 1,2 2))", false},
+		{"MULTILINESTRING(EMPTY)", "MULTILINESTRING((0 0,1 1,2 2))", false},
 		{"MULTILINESTRING((0 0,1 0,1 1,0 1))", "MULTILINESTRING((1 1,2 1,2 2,1 2,1 1))", true},
 		{"MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))", "MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))", true},
 
 		// MultiLineString/MultiPolygon
+		{"MULTILINESTRING EMPTY", "MULTIPOLYGON EMPTY", false},
+		{"MULTILINESTRING(EMPTY)", "MULTIPOLYGON EMPTY", false},
+		{"MULTILINESTRING EMPTY", "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", false},
+		{"MULTILINESTRING(EMPTY)", "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", false},
+		{"MULTILINESTRING((5 2,5 4))", "MULTIPOLYGON EMPTY", false},
 		{"MULTILINESTRING((5 2,5 4))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", false},
 		{"MULTILINESTRING((3 3,3 5))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
 		{"MULTILINESTRING((1 1,3 1))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
 		{"MULTILINESTRING((0 2,2 4))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
 
 		// MultiPolygon/MultiPolygon
+		{"MULTIPOLYGON EMPTY", "MULTIPOLYGON EMPTY", false},
+		{"MULTIPOLYGON EMPTY", "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", false},
 		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((8 1,9 1,9 2,8 2,8 1)))", false},
 		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((6 1,7.5 1,7.5 -1,6 -1,6 1)))", true},
 		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((5 1,6 1,6 2,5 2,5 1)))", false},
@@ -272,6 +352,11 @@ func TestIntersects(t *testing.T) {
 		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((1 1,1 -1,2 -1,2 1,1 1)))", true},
 
 		// GeometryCollection/OtherTypes
+		{"GEOMETRYCOLLECTION EMPTY", "POINT EMPTY", false},
+		{"GEOMETRYCOLLECTION EMPTY", "POINT(1 2)", false},
+		{"GEOMETRYCOLLECTION(POINT EMPTY)", "POINT EMPTY", false},
+		{"GEOMETRYCOLLECTION(POINT EMPTY)", "POINT(1 2)", false},
+		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY)", "POINT EMPTY", false},
 		{"GEOMETRYCOLLECTION(POINT(1 2))", "POINT(1 2)", true},
 		{"GEOMETRYCOLLECTION(POINT(1 2))", "POINT(1 3)", false},
 		{"GEOMETRYCOLLECTION(POINT(1 2))", "LINESTRING(0 2,2 2)", true},
