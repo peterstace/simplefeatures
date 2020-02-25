@@ -418,6 +418,9 @@ func onSegment(p XY, q XY, r XY) bool {
 }
 
 func intersectMultiPointWithPolygon(mp MultiPoint, p Polygon) (Geometry, error) {
+	if p.IsEmpty() {
+		return p.AsGeometry(), nil
+	}
 	pts := make(map[XY]Point)
 	n := mp.NumPoints()
 outer:

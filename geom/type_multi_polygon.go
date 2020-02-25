@@ -184,10 +184,11 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 //
 // A precondition to this function is that the Polygon is not empty.
 func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
-	if pointRingSide(pt, poly.rings[0]) != interior {
+	if poly.IsEmpty() || pointRingSide(pt, poly.ExteriorRing()) != interior {
 		return false
 	}
-	for _, hole := range poly.rings[1:] {
+	for i := 0; i < poly.NumInteriorRings(); i++ {
+		hole := poly.InteriorRingN(i)
 		if pointRingSide(pt, hole) != exterior {
 			return false
 		}
