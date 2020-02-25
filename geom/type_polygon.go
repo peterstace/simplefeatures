@@ -448,7 +448,11 @@ func sumCentroidAndAreaOfLinearRing(lr LineString) (XY, float64) {
 
 // AsMultiPolygon is a helper that converts this Polygon into a MultiPolygon.
 func (p Polygon) AsMultiPolygon() MultiPolygon {
-	mp, err := NewMultiPolygon([]Polygon{p})
+	var polys []Polygon
+	if !p.IsEmpty() {
+		polys = []Polygon{p}
+	}
+	mp, err := NewMultiPolygon(polys)
 	if err != nil {
 		// Cannot occur due to construction. A valid polygon will always be a
 		// valid multipolygon.

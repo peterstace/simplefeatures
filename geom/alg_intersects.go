@@ -7,15 +7,6 @@ import (
 )
 
 func hasIntersection(g1, g2 Geometry) bool {
-	// TODO: Remove these early returns if possible... Doing so would force the
-	// pairwise intersection functions to properly handle empty geometries.
-	if g2.IsEmpty() {
-		return false
-	}
-	if g1.IsEmpty() {
-		return false
-	}
-
 	if rank(g1) > rank(g2) {
 		g1, g2 = g2, g1
 	}
@@ -485,6 +476,9 @@ func hasIntersectionPointWithPolygon(pt Point, p Polygon) bool {
 		return false
 	}
 
+	if p.IsEmpty() {
+		return false
+	}
 	if pointRingSide(xy, p.ExteriorRing()) == exterior {
 		return false
 	}
