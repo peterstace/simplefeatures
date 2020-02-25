@@ -262,6 +262,8 @@ func TestIntersects(t *testing.T) {
 		{"POLYGON((0 0,0 1,1 0,0 0))", "MULTILINESTRING(EMPTY)", false},
 		{"POLYGON((0 0,0 2,2 2,2 0,0 0))", "MULTILINESTRING((-1 1,-1 3),(1 -1,1 3))", true},
 		{"POLYGON((0 0,0 2,2 2,2 0,0 0))", "MULTILINESTRING((-1 1,-1 3),(3 -1,3 3))", false},
+		{"POLYGON((0 0,0 2,2 2,2 0,0 0))", "MULTILINESTRING((0.5 0.5,1.5 1.5),(2.5 2.5,3.5 3.5))", true},
+		{"POLYGON((0 0,0 2,2 2,2 0,0 0))", "MULTILINESTRING((2.5 2.5,3.5 3.5),(0.5 0.5,1.5 1.5))", true},
 
 		// Polygon/MultiPolygon
 		{"MULTIPOLYGON EMPTY", "POLYGON EMPTY", false},
@@ -341,6 +343,8 @@ func TestIntersects(t *testing.T) {
 		{"MULTILINESTRING((3 3,3 5))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
 		{"MULTILINESTRING((1 1,3 1))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
 		{"MULTILINESTRING((0 2,2 4))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
+		{"MULTILINESTRING((0.5 0.5,1.5 1.5),(2.5 2.5,3.5 3.5))", "MULTIPOLYGON(((0 0,0 2,2 2,2 0,0 0)))", true},
+		{"MULTILINESTRING((2.5 2.5,3.5 3.5),(0.5 0.5,1.5 1.5))", "MULTIPOLYGON(((0 0,0 2,2 2,2 0,0 0)))", true},
 
 		// MultiPolygon/MultiPolygon
 		{"MULTIPOLYGON EMPTY", "MULTIPOLYGON EMPTY", false},

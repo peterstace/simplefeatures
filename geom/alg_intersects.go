@@ -385,19 +385,17 @@ func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp Mult
 		return true
 	}
 
-	// TODO: Pretty sure there's a bug here... What if part of the
-	// MultiLineString is inside the MultiPolygon, and part of it is outside
-	// the MultiPolygon?
-
 	// Because there is no intersection of the MultiLineString with the
-	// boundary of the MultiPolygon, the MultiLineString is either fully
-	// contained within the MultiPolygon, or fully outside of it. So we just
-	// have to check any control point of the MultiLineString to see if it
-	// falls inside or outside of the MultiPolygon.
+	// boundary of the MultiPolygon, then each LineString inside the
+	// MultiLineString is either fully contained within the MultiPolygon, or
+	// fully outside of it. So we just have to check any control point of each
+	// LineString to see if it falls inside or outside of the MultiPolygon.
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		for j := 0; j < mls.LineStringN(i).NumPoints(); j++ {
 			pt := NewPointC(mls.LineStringN(i).PointN(j))
-			return hasIntersectionPointWithMultiPolygon(pt, mp)
+			if hasIntersectionPointWithMultiPolygon(pt, mp) {
+				return true
+			}
 		}
 	}
 	return false
