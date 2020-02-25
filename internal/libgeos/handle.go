@@ -124,69 +124,83 @@ func (h *Handle) intToErr(i C.int) error {
 func (h *Handle) createGeomHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
 	switch {
 	case g.IsPoint():
-		if !g.IsEmpty() {
-			return h.createGeomHandleUsingWKB(g)
-		}
-		gh := C.GEOSGeom_createEmptyPoint_r(h.context)
-		if gh == nil {
-			return nil, h.err()
-		}
-		return gh, nil
+		return h.createGeomHandleForPoint(g.AsPoint())
 	case g.IsMultiPoint():
-		mp := g.AsMultiPoint()
-		n := mp.NumPoints()
-		points := make([]*C.GEOSGeometry, n)
-		for i := 0; i < n; i++ {
-			pt := mp.PointN(i)
-			if pt.IsEmpty() {
-				points[i] = C.GEOSGeom_createEmptyPoint_r(h.context)
-				if points[i] == nil {
-					return nil, h.err()
-				}
-			} else {
-				var err error
-				points[i], err = h.createGeomHandleUsingWKB(pt.AsGeometry())
-				if err != nil {
-					return nil, err
-				}
-			}
-		}
-		var geomsPtr **C.GEOSGeometry
-		if len(points) > 0 {
-			geomsPtr = &points[0]
-		}
-		gh := C.GEOSGeom_createCollection_r(
-			h.context, C.GEOS_MULTIPOINT, geomsPtr, C.uint(n),
-		)
-		if gh == nil {
-			return nil, h.err()
-		}
-		return gh, nil
+		return h.createGeomHandleForMultiPoint(g.AsMultiPoint())
 	case g.IsGeometryCollection():
-		gc := g.AsGeometryCollection()
-		n := gc.NumGeometries()
-		geoms := make([]*C.GEOSGeometry, n)
-		for i := 0; i < n; i++ {
-			var err error
-			geoms[i], err = h.createGeomHandle(gc.GeometryN(i))
-			if err != nil {
-				return nil, h.err()
-			}
-		}
-		var geomsPtr **C.GEOSGeometry
-		if len(geoms) > 0 {
-			geomsPtr = &geoms[0]
-		}
-		gh := C.GEOSGeom_createCollection_r(
-			h.context, C.GEOS_GEOMETRYCOLLECTION, geomsPtr, C.uint(n),
-		)
-		if gh == nil {
-			return nil, h.err()
-		}
-		return gh, nil
+		return h.createGeomHandleForGeometryCollection(g.AsGeometryCollection())
 	default:
 		return h.createGeomHandleUsingWKB(g)
 	}
+}
+
+func (h *Handle) createGeomHandleForPoint(pt geom.Point) (*C.GEOSGeometry, error) {
+	if !pt.IsEmpty() {
+		return h.createGeomHandleUsingWKB(pt.AsGeometry())
+	}
+	// Empty Points cannot officially be represented in WKB, so construct
+	// manually.
+	gh := C.GEOSGeom_createEmptyPoint_r(h.context)
+	if gh == nil {
+		return nil, h.err()
+	}
+	return gh, nil
+}
+
+func (h *Handle) createGeomHandleForMultiPoint(mp geom.MultiPoint) (*C.GEOSGeometry, error) {
+	n := mp.NumPoints()
+	points := make([]*C.GEOSGeometry, n)
+	for i := 0; i < n; i++ {
+		var err error
+		points[i], err = h.createGeomHandleForPoint(mp.PointN(i))
+		if err != nil {
+			for _, gh := range points {
+				if gh != nil {
+					C.GEOSGeom_destroy_r(h.context, gh)
+				}
+			}
+			return nil, err
+		}
+	}
+	var geomsPtr **C.GEOSGeometry
+	if len(points) > 0 {
+		geomsPtr = &points[0]
+	}
+	gh := C.GEOSGeom_createCollection_r(
+		h.context, C.GEOS_MULTIPOINT, geomsPtr, C.uint(n),
+	)
+	if gh == nil {
+		return nil, h.err()
+	}
+	return gh, nil
+}
+
+func (h *Handle) createGeomHandleForGeometryCollection(gc geom.GeometryCollection) (*C.GEOSGeometry, error) {
+	n := gc.NumGeometries()
+	geoms := make([]*C.GEOSGeometry, n)
+	for i := 0; i < n; i++ {
+		var err error
+		geoms[i], err = h.createGeomHandle(gc.GeometryN(i))
+		if err != nil {
+			for _, gh := range geoms {
+				if gh != nil {
+					C.GEOSGeom_destroy_r(h.context, gh)
+				}
+			}
+			return nil, err
+		}
+	}
+	var geomsPtr **C.GEOSGeometry
+	if len(geoms) > 0 {
+		geomsPtr = &geoms[0]
+	}
+	gh := C.GEOSGeom_createCollection_r(
+		h.context, C.GEOS_GEOMETRYCOLLECTION, geomsPtr, C.uint(n),
+	)
+	if gh == nil {
+		return nil, h.err()
+	}
+	return gh, nil
 }
 
 func (h *Handle) createGeomHandleUsingWKB(g geom.Geometry) (*C.GEOSGeometry, error) {
@@ -273,8 +287,10 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 			}
 		}
 		return geom.NewGeometryCollection(subGeoms).AsGeometry(), nil
-	default:
+	case "LineString", "Polygon", "MultiLineString", "MultiPolygon":
 		return h.decodeGeomHandleUsingWKB(gh)
+	default:
+		return geom.Geometry{}, fmt.Errorf("unexpected geometry type: %s", C.GoString(geomType))
 	}
 }
 
@@ -287,42 +303,6 @@ func (h *Handle) decodeGeomHandleUsingWKB(gh *C.GEOSGeometry) (geom.Geometry, er
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
 	reader := bytes.NewReader(C.GoBytes(unsafe.Pointer(wkb), C.int(size)))
 	return geom.UnmarshalWKB(reader)
-}
-
-// TODO: Can remove this?
-func (h *Handle) containsEmptyPoint(gh *C.GEOSGeometry) (bool, error) {
-	geomType := C.GEOSGeomType_r(h.context, gh)
-	if geomType == nil {
-		return false, h.err()
-	}
-	defer C.free(unsafe.Pointer(geomType))
-	switch C.GoString(geomType) {
-	case "Point":
-		isEmpty, err := h.boolErr(C.GEOSisEmpty_r(h.context, gh))
-		if err != nil {
-			return false, err
-		}
-		return isEmpty, nil
-	case "MultiPoint", "GeometryCollection":
-		n := C.GEOSGetNumGeometries_r(h.context, gh)
-		if n == -1 {
-			return false, h.err()
-		}
-		for i := 0; i < int(n); i++ {
-			sub := C.GEOSGetGeometryN_r(h.context, gh, C.int(i))
-			if sub == nil {
-				return false, h.err()
-			}
-			if has, err := h.containsEmptyPoint(sub); err != nil {
-				return false, err
-			} else if has {
-				return true, nil
-			}
-		}
-		return false, nil
-	default:
-		return false, nil
-	}
 }
 
 func (h *Handle) AsText(g geom.Geometry) (string, error) {

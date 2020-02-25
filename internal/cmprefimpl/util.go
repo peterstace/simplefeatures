@@ -39,6 +39,7 @@ func containsCollectionWithOnlyEmptyElements(g geom.Geometry) bool {
 				return true
 			}
 		}
+		return false
 	case g.IsMultiPoint():
 		mp := g.AsMultiPoint()
 		return mp.IsEmpty() && mp.NumPoints() > 0
@@ -48,8 +49,9 @@ func containsCollectionWithOnlyEmptyElements(g geom.Geometry) bool {
 	case g.IsMultiPolygon():
 		mp := g.AsMultiPolygon()
 		return mp.IsEmpty() && mp.NumPolygons() > 0
+	default:
+		return false
 	}
-	return false
 }
 
 func containsOnlyGeometryCollections(g geom.Geometry) bool {
