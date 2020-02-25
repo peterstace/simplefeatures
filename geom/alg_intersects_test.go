@@ -220,6 +220,8 @@ func TestIntersects(t *testing.T) {
 		// Polygon/MultiLineString
 		{"POLYGON((0 0,0 2,2 2,2 0,0 0))", "MULTILINESTRING((-1 1,-1 3),(1 -1,1 3))", true},
 		{"POLYGON((0 0,0 2,2 2,2 0,0 0))", "MULTILINESTRING((-1 1,-1 3),(3 -1,3 3))", false},
+		{"POLYGON((0 0,0 2,2 2,2 0,0 0))", "MULTILINESTRING((0.5 0.5,1.5 1.5),(2.5 2.5,3.5 3.5))", true},
+		{"POLYGON((0 0,0 2,2 2,2 0,0 0))", "MULTILINESTRING((2.5 2.5,3.5 3.5),(0.5 0.5,1.5 1.5))", true},
 
 		// Polygon/MultiPolygon
 		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "POLYGON((8 1,9 1,9 2,8 2,8 1))", false},
@@ -263,6 +265,8 @@ func TestIntersects(t *testing.T) {
 		{"MULTILINESTRING((3 3,3 5))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
 		{"MULTILINESTRING((1 1,3 1))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
 		{"MULTILINESTRING((0 2,2 4))", "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0)),((2 2,2 4,4 4,4 2,2 2)))", true},
+		{"MULTILINESTRING((0.5 0.5,1.5 1.5),(2.5 2.5,3.5 3.5))", "MULTIPOLYGON(((0 0,0 2,2 2,2 0,0 0)))", true},
+		{"MULTILINESTRING((2.5 2.5,3.5 3.5),(0.5 0.5,1.5 1.5))", "MULTIPOLYGON(((0 0,0 2,2 2,2 0,0 0)))", true},
 
 		// MultiPolygon/MultiPolygon
 		{"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0)),((4 0,7 0,7 3,4 3,4 0),(4.1 0.1,6.9 0.1,6.9 2.9,4.1 2.9,4.1 0.1)))", "MULTIPOLYGON(((8 1,9 1,9 2,8 2,8 1)))", false},
