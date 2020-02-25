@@ -44,7 +44,7 @@ func (c Coordinates) MarshalJSON() ([]byte, error) {
 }
 
 func (c Coordinates) Equals(other Coordinates) bool {
-	return c.XY.Equals(other.XY)
+	return c.XY == other.XY
 }
 
 func (oc OptionalCoordinates) MarshalJSON() ([]byte, error) {

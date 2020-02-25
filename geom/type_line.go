@@ -20,7 +20,7 @@ type Line struct {
 
 // NewLineC creates a line segment given the Coordinates of its two endpoints.
 func NewLineC(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
-	if doCheapValidations(opts) && a.XY.Equals(b.XY) {
+	if doCheapValidations(opts) && a.XY == b.XY {
 		return Line{}, fmt.Errorf("line endpoints must be distinct: %v", a.XY)
 	}
 	return Line{a, b}, nil

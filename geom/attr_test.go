@@ -98,10 +98,10 @@ func TestEnvelope(t *testing.T) {
 			if !have {
 				t.Fatalf("expected to have envelope but didn't")
 			}
-			if !env.Min().Equals(tt.min) {
+			if env.Min() != tt.min {
 				t.Errorf("min: got=%v want=%v", env.Min(), tt.min)
 			}
-			if !env.Max().Equals(tt.max) {
+			if env.Max() != tt.max {
 				t.Errorf("max: got=%v want=%v", env.Max(), tt.max)
 			}
 		})

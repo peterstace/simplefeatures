@@ -156,7 +156,7 @@ func grahamScan(ps []XY) []XY {
 	stack.push(ps[0])
 	i++
 	for i < len(ps) && len(stack) < 2 {
-		if !stack.top().Equals(ps[i]) {
+		if stack.top() != ps[i] {
 			stack.push(ps[i])
 		}
 		i++
@@ -205,10 +205,10 @@ func sortByPolarAngle(ps []XY) {
 		// If any point is equal to the anchor point, then always put it first.
 		// This allows those duplicated points to be removed when the results
 		// stack is initiated.
-		if anchor.Equals(ps[i]) {
+		if anchor == ps[i] {
 			return true
 		}
-		if anchor.Equals(ps[j]) {
+		if anchor == ps[j] {
 			return false
 		}
 		// In the normal case, check which order the points are in relative to
