@@ -36,22 +36,61 @@ func NewEmptyPolygon() Polygon {
 	return Polygon{}
 }
 
-// TODO: Are Polygon rings allowed to be empty? Right now, that is enforced.
-// But need to double check the spec.
-
 // NewPolygon creates a polygon given its rings. The outer ring is first, and
 // any inner rings follow. No rings may cross each other, and can only
 // intersect each with each other at a point. If no rings are provided, then
 // the returned Polygon is the empty Polygon.
 func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
-	if len(rings) == 0 {
-		return NewEmptyPolygon(), nil
+	if err := validatePolygon(rings, opts...); err != nil {
+		return Polygon{}, err
 	}
+	tmp := make([]LineString, len(rings))
+	copy(tmp, rings)
+	return Polygon{rings}, nil
+}
 
+// NewPolygonC creates a new polygon from its Coordinates. The first dimension
+// of the Coordinates slice is the ring number, and the second dimension of the
+// Coordinates slice is the position within the ring.
+func NewPolygonC(coords [][]Coordinates, opts ...ConstructorOption) (Polygon, error) {
+	rings := make([]LineString, len(coords))
+	for i := range rings {
+		var err error
+		rings[i], err = NewLineStringC(coords[i], opts...)
+		if err != nil {
+			return Polygon{}, err
+		}
+	}
+	if err := validatePolygon(rings, opts...); err != nil {
+		return Polygon{}, err
+	}
+	return Polygon{rings}, nil
+}
+
+// NewPolygonXY creates a new polygon from its XYs. The first dimension of the
+// XYs slice is the ring number, and the second dimension of the XYs slice is
+// the position within the ring.
+func NewPolygonXY(pts [][]XY, opts ...ConstructorOption) (Polygon, error) {
+	rings := make([]LineString, len(pts))
+	for i := range rings {
+		var err error
+		rings[i], err = NewLineStringXY(pts[i], opts...)
+		if err != nil {
+			return Polygon{}, err
+		}
+	}
+	if err := validatePolygon(rings, opts...); err != nil {
+		return Polygon{}, err
+	}
+	return Polygon{rings}, nil
+}
+
+func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
+	if len(rings) == 0 {
+		return nil
+	}
 	if !doCheapValidations(opts) && !doExpensiveValidations(opts) {
-		tmp := make([]LineString, len(rings))
-		copy(tmp, rings)
-		return Polygon{tmp}, nil
+		return nil
 	}
 
 	// Overview:
@@ -68,32 +107,26 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 		minX, maxX float64
 	}
 	intervals := make([]interval, len(orderedRings))
-	ring := func(i int) LineString {
-		return rings[i]
-	}
 	for i := range intervals {
-		env, ok := ring(i).Envelope()
+		env, ok := rings[i].Envelope()
 		if !ok {
-			return Polygon{}, errors.New("polygon rings must not be empty")
+			return errors.New("polygon rings must not be empty")
 		}
 		intervals[i].minX = env.Min().X
 		intervals[i].maxX = env.Max().X
 	}
 
-	for _, i := range orderedRings {
-		r := ring(i)
+	for _, r := range rings {
 		if doCheapValidations(opts) && !r.IsClosed() {
-			return Polygon{}, errors.New("polygon rings must be closed")
+			return errors.New("polygon rings must be closed")
 		}
 		if doExpensiveValidations(opts) && !r.IsSimple() {
-			return Polygon{}, errors.New("polygon rings must be simple")
+			return errors.New("polygon rings must be simple")
 		}
 	}
 
 	if !doExpensiveValidations(opts) {
-		tmp := make([]LineString, len(rings))
-		copy(tmp, rings)
-		return Polygon{tmp}, nil
+		return nil
 	}
 
 	sort.Slice(orderedRings, func(i, j int) bool {
@@ -109,13 +142,13 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 	}}
 
 	for _, current := range orderedRings {
-		currentRing := ring(current)
+		currentRing := rings[current]
 		currentX := intervals[current].minX
 		for len(h.data) > 0 && intervals[h.data[0]].maxX < currentX {
 			h.pop()
 		}
 		for _, other := range h.data {
-			otherRing := ring(other)
+			otherRing := rings[other]
 			if current > 0 && other > 0 {
 				// Check is skipped if the outer ring is involved.
 				startXY, ok := currentRing.StartPoint().XY()
@@ -125,7 +158,7 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 				nestedFwd := pointRingSide(startXY, otherRing) == interior
 				nestedRev := pointRingSide(startXY, currentRing) == interior
 				if nestedFwd || nestedRev {
-					return Polygon{}, errors.New("polygon must not have nested rings")
+					return errors.New("polygon must not have nested rings")
 				}
 			}
 
@@ -138,7 +171,7 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 				continue
 			}
 			if ext.multiplePoints {
-				return Polygon{}, errors.New("polygon rings must not intersect at multiple points")
+				return errors.New("polygon rings must not intersect at multiple points")
 			}
 
 			interVert, ok := interVerts[ext.singlePoint]
@@ -158,7 +191,7 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 		for i := 0; i < hole.NumPoints(); i++ {
 			pt := hole.PointN(i)
 			if pointRingSide(pt.XY, rings[0]) == exterior {
-				return Polygon{}, errors.New("hole must be inside outer ring")
+				return errors.New("hole must be inside outer ring")
 			}
 		}
 	}
@@ -169,34 +202,9 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 	// intersection. The interior of the polygon is connected iff the graph
 	// does not contain a cycle.
 	if graph.hasCycle() {
-		return Polygon{}, errors.New("polygon interiors must be connected")
+		return errors.New("polygon interiors must be connected")
 	}
-
-	tmp := make([]LineString, len(rings))
-	copy(tmp, rings)
-	return Polygon{rings}, nil
-}
-
-// NewPolygonC creates a new polygon from its Coordinates. The first dimension
-// of the Coordinates slice is the ring number, and the second dimension of the
-// Coordinates slice is the position within the ring.
-func NewPolygonC(coords [][]Coordinates, opts ...ConstructorOption) (Polygon, error) {
-	rings := make([]LineString, len(coords))
-	for i := range rings {
-		var err error
-		rings[i], err = NewLineStringC(coords[i], opts...)
-		if err != nil {
-			return Polygon{}, err
-		}
-	}
-	return NewPolygon(rings, opts...)
-}
-
-// NewPolygonXY creates a new polygon from its XYs. The first dimension of the
-// XYs slice is the ring number, and the second dimension of the Coordinates
-// slice is the position within the ring.
-func NewPolygonXY(pts [][]XY, opts ...ConstructorOption) (Polygon, error) {
-	return NewPolygonC(twoDimXYToCoords(pts), opts...)
+	return nil
 }
 
 // AsGeometry converts this Polygon into a Geometry.
@@ -208,7 +216,7 @@ func (p Polygon) AsGeometry() Geometry {
 // is empty, then it returns the empty LineString.
 func (p Polygon) ExteriorRing() LineString {
 	if p.IsEmpty() {
-		return LineString{}
+		return NewEmptyLineString()
 	}
 	return p.rings[0]
 }
@@ -278,16 +286,11 @@ func (p Polygon) Equals(other Geometry) (bool, error) {
 }
 
 func (p Polygon) Envelope() (Envelope, bool) {
-	if p.IsEmpty() {
-		return Envelope{}, false
-	}
-	return p.rings[0].Envelope()
+	return p.ExteriorRing().Envelope()
 }
 
 func (p Polygon) Boundary() MultiLineString {
-	bound := make([]LineString, len(p.rings))
-	copy(bound, p.rings)
-	return NewMultiLineString(bound)
+	return NewMultiLineString(p.rings)
 }
 
 func (p Polygon) Value() (driver.Value, error) {
