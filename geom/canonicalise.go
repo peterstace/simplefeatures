@@ -64,8 +64,7 @@ func dedupPoints(pts []Point) []Point {
 		xy, ok := pt.XY()
 		if !ok {
 			haveEmpty = true
-		}
-		if !seen[xy] {
+		} else if !seen[xy] {
 			dedup = append(dedup, pt)
 			seen[xy] = true
 		}

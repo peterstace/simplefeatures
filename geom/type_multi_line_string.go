@@ -175,8 +175,7 @@ func (m MultiLineString) Boundary() MultiPoint {
 			if !ok {
 				continue
 			}
-			_, seen := counts[xy]
-			if !seen {
+			if counts[xy] == 0 {
 				uniqueEndpoints = append(uniqueEndpoints, pt)
 			}
 			counts[xy]++
@@ -263,13 +262,9 @@ func (m MultiLineString) Length() float64 {
 
 // Centroid gives the centroid of the coordinates of the multi line string.
 func (m MultiLineString) Centroid() Point {
-	n := m.NumLineStrings()
-	if n == 0 {
-		return NewEmptyPoint()
-	}
 	var sumXY XY
 	var sumLength float64
-	for i := 0; i < n; i++ {
+	for i := 0; i < m.NumLineStrings(); i++ {
 		ls := m.LineStringN(i)
 		xy, length := sumCentroidAndLengthOfLineString(ls)
 		sumXY = sumXY.Add(xy)

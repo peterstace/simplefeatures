@@ -22,8 +22,6 @@ type MultiPolygon struct {
 	polys []Polygon
 }
 
-// TODO: think about what happens when any of the Polys are empty.
-
 // NewEmptyMultiPolygon returns the empty MultiPolygon. It is equivalent to
 // calling NewMultiPolygon with a zero length polygon slice.
 func NewEmptyMultiPolygon() MultiPolygon {
@@ -181,8 +179,6 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 
 // isPointInteriorToPolygon returns true iff the pt is strictly inside the
 // polygon (i.e. is not outside the polygon or on its boundary).
-//
-// A precondition to this function is that the Polygon is not empty.
 func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
 	if poly.IsEmpty() || pointRingSide(pt, poly.ExteriorRing()) != interior {
 		return false
@@ -357,10 +353,6 @@ func (m MultiPolygon) SignedArea() float64 {
 // Centroid returns the multi polygon's centroid point. It returns the empty
 // Point if the multi polygon is empty.
 func (m MultiPolygon) Centroid() Point {
-	if m.IsEmpty() {
-		return NewEmptyPoint()
-	}
-
 	var sumArea float64
 	var sumXY XY
 	n := m.NumPolygons()
