@@ -127,36 +127,36 @@ func TestUnmarshalWKT(t *testing.T) {
 
 func TestAsTextEmpty(t *testing.T) {
 	for i, tt := range []struct {
-		fn   func() Geometry
+		g    Geometry
 		want string
 	}{
 		{
-			func() Geometry { return NewEmptyPoint().AsGeometry() },
+			NewEmptyPoint().AsGeometry(),
 			"POINT EMPTY",
 		},
 		{
-			func() Geometry { return NewEmptyLineString().AsGeometry() },
+			NewEmptyLineString().AsGeometry(),
 			"LINESTRING EMPTY",
 		},
 		{
-			func() Geometry { return NewEmptyPolygon().AsGeometry() },
+			NewEmptyPolygon().AsGeometry(),
 			"POLYGON EMPTY",
 		},
 		{
-			func() Geometry { return NewMultiPoint(nil).AsGeometry() },
+			NewMultiPoint(nil).AsGeometry(),
 			"MULTIPOINT EMPTY",
 		},
 		{
-			func() Geometry { return NewMultiLineString(nil).AsGeometry() },
+			NewMultiLineString(nil).AsGeometry(),
 			"MULTILINESTRING EMPTY",
 		},
 		{
-			func() Geometry { return NewEmptyMultiPolygon().AsGeometry() },
+			NewEmptyMultiPolygon().AsGeometry(),
 			"MULTIPOLYGON EMPTY",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := tt.fn().AsText()
+			got := tt.g.AsText()
 			expectStringEq(t, got, tt.want)
 		})
 	}

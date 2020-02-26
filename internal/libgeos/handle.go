@@ -486,16 +486,10 @@ func (h *Handle) Envelope(g geom.Geometry) (geom.Envelope, bool, error) {
 }
 
 func (h *Handle) IsSimple(g geom.Geometry) (isSimple bool, defined bool, err error) {
-	// libgeos crashes when simple is called with MultiPoints containing empty
-	// Points.
-	if g.IsMultiPoint() {
-		mp := g.AsMultiPoint()
-		n := mp.NumPoints()
-		for i := 0; i < n; i++ {
-			if mp.PointN(i).IsEmpty() {
-				return false, false, LibgeosCrashError
-			}
-		}
+	// libgeos crashes when GEOSisSimple_r is called with MultiPoints
+	// containing empty Points.
+	if containsMultiPointWithEmptyPoint(g) {
+		return false, false, LibgeosCrashError
 	}
 
 	gh, err := h.createGeomHandle(g)
@@ -640,6 +634,8 @@ func (h *Handle) Intersects(g1, g2 geom.Geometry) (bool, error) {
 	if isNonEmptyGeometryCollection(g1) || isNonEmptyGeometryCollection(g2) {
 		return false, NonEmptyGeometryCollectionNotSupportedError
 	}
+	// libgeos crashes when GEOSIntersects_r is called with MultiPoints
+	// containing empty Points.
 	if containsMultiPointWithEmptyPoint(g1) || containsMultiPointWithEmptyPoint(g2) {
 		return false, LibgeosCrashError
 	}
