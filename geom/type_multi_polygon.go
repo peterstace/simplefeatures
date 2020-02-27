@@ -13,7 +13,7 @@ import (
 //
 // Its assertions are:
 //
-// 1. It must be made up of zero or more valid Polygons.
+// 1. It must be made up of zero or more valid Polygons (any of which may be empty).
 //
 // 2. The interiors of any two polygons must not intersect.
 //
@@ -41,14 +41,14 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 	intervals := make([]interval, len(polys))
 	for i := range intervals {
 		env, ok := polys[i].Envelope()
-		if !ok {
-			return MultiPolygon{}, errors.New("polygon in multiploygon not allowed to be empty")
+		if ok {
+			intervals[i].minX = env.Min().X
+			intervals[i].maxX = env.Max().X
 		}
-		intervals[i].minX = env.Min().X
-		intervals[i].maxX = env.Max().X
 	}
 	indexes := seq(len(polys))
 	sort.Slice(indexes, func(i, j int) bool {
+		// Empty Polygons with have an interval of (0, 0).
 		xi := intervals[indexes[i]].minX
 		xj := intervals[indexes[j]].minX
 		return xi < xj
@@ -61,11 +61,17 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 	}}
 
 	for _, i := range indexes {
+		if polys[i].IsEmpty() {
+			continue
+		}
 		currentX := intervals[i].minX
 		for len(active.data) > 0 && intervals[active.data[0]].maxX < currentX {
 			active.pop()
 		}
 		for _, j := range active.data {
+			if polys[j].IsEmpty() {
+				continue
+			}
 			bound1 := polys[i].Boundary()
 			bound2 := polys[j].Boundary()
 			inter := mustIntersection(bound1.AsGeometry(), bound2.AsGeometry())
@@ -86,9 +92,6 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 func NewMultiPolygonC(coords [][][]Coordinates, opts ...ConstructorOption) (MultiPolygon, error) {
 	var polys []Polygon
 	for _, c := range coords {
-		if len(c) == 0 {
-			continue
-		}
 		poly, err := NewPolygonC(c, opts...)
 		if err != nil {
 			return MultiPolygon{}, err
@@ -240,7 +243,12 @@ func (m MultiPolygon) Intersection(g Geometry) (Geometry, error) {
 }
 
 func (m MultiPolygon) IsEmpty() bool {
-	return len(m.polys) == 0
+	for _, p := range m.polys {
+		if !p.IsEmpty() {
+			return false
+		}
+	}
+	return true
 }
 
 func (m MultiPolygon) Equals(other Geometry) (bool, error) {
