@@ -17,6 +17,12 @@ func TestPointInRing(t *testing.T) {
 	}
 	for i, tc := range []testCase{
 		{
+			ringWKT: "LINESTRING(1 0,2 0,1 3,1 0)",
+			subTests: []subTestCase{
+				{"POINT(1.25 1.4166666666666667)", true},
+			},
+		},
+		{
 			ringWKT: "LINESTRING(0 0,2 0,2 2,0 2,0 0)",
 			subTests: []subTestCase{
 				{"POINT(1 1)", true},
@@ -134,12 +140,15 @@ func TestPointInRing(t *testing.T) {
 
 		for j, st := range tc.subTests {
 			t.Run(fmt.Sprintf("%d_%d", i, j), func(t *testing.T) {
-				pointGeom, err := UnmarshalWKT(strings.NewReader(st.pointWKT))
+				pt, err := UnmarshalWKT(strings.NewReader(st.pointWKT))
 				if err != nil {
 					t.Fatal(err)
 				}
-				point := pointGeom.AsPoint()
-				got := pointRingSide(point.coords.XY, ring) != exterior
+				xy, ok := pt.AsPoint().XY()
+				if !ok {
+					panic("point empty not expected in this test")
+				}
+				got := pointRingSide(xy, ring) != exterior
 				t.Log(tc.ringWKT)
 				t.Log(st.pointWKT)
 				if got != st.inside {

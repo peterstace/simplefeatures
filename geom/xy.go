@@ -4,10 +4,6 @@ type XY struct {
 	X, Y float64
 }
 
-func (w XY) Equals(o XY) bool {
-	return w.X == o.X && w.Y == o.Y
-}
-
 func (w XY) Sub(o XY) XY {
 	return XY{
 		w.X - o.X,

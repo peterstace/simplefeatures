@@ -53,7 +53,7 @@ func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 // degenerate cases where the envelope only covers a line or a point, a
 // Line or Point geometry is returned.
 func (e Envelope) AsGeometry() Geometry {
-	if e.min.Equals(e.max) {
+	if e.min == e.max {
 		return NewPointXY(e.min).AsGeometry()
 	}
 	var err error

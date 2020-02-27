@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"strings"
 
 	"github.com/peterstace/simplefeatures/geom"
 )
@@ -29,6 +30,14 @@ type UnaryResult struct {
 }
 
 func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
+	// WKB and WKB forms returned from PostGIS don't _always_ give the same
+	// result (usually differences around empty geometries). In the case of
+	// boundary, convex hull, and reverse, they are different enough that it's
+	// advantageous to use the WKT form.
+	var boundaryWKT sql.NullString
+	var convexHullWKT string
+	var reverseWKT string
+
 	var result UnaryResult
 	err := p.db.QueryRow(`
 		SELECT
@@ -67,10 +76,10 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		CASE
 			WHEN ST_GeometryType(ST_GeomFromWKB($1)) = 'ST_GeometryCollection'
 			THEN NULL
-			ELSE ST_AsBinary(ST_Boundary(ST_GeomFromWKB($1)))
+			ELSE ST_AsText(ST_Boundary(ST_GeomFromText($3)))
 		END,
 
-		ST_AsBinary(ST_ConvexHull(ST_GeomFromWKB($1))),
+		ST_AsText(ST_ConvexHull(ST_GeomFromText($3))),
 		ST_IsValid(ST_GeomFromWKB($1)),
 
 		-- IsRing only defined for LineStrings.
@@ -83,8 +92,8 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		ST_Length(ST_GeomFromWKB($1)),
 		ST_Area(ST_GeomFromWKB($1)),
 		ST_AsBinary(ST_Centroid(ST_GeomFromWKB($1))),
-		ST_AsBinary(ST_Reverse(ST_GeomFromWKB($1)))
-		`, g, isNestedGeometryCollection(g),
+		ST_AsText(ST_Reverse(ST_GeomFromText($3)))
+		`, g, isNestedGeometryCollection(g), g.AsText(),
 	).Scan(
 		&result.AsText,
 		&result.AsBinary,
@@ -93,16 +102,44 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		&result.Dimension,
 		&result.Envelope,
 		&result.IsSimple,
-		&result.Boundary,
-		&result.ConvexHull,
+		&boundaryWKT,
+		&convexHullWKT,
 		&result.IsValid,
 		&result.IsRing,
 		&result.Length,
 		&result.Area,
 		&result.Cetroid,
-		&result.Reverse,
+		&reverseWKT,
 	)
-	return result, err
+	if err != nil {
+		return result, err
+	}
+
+	if boundaryWKT.Valid {
+		result.Boundary.Valid = true
+		result.Boundary.Geometry, err = geom.UnmarshalWKT(
+			strings.NewReader(boundaryWKT.String),
+		)
+		if err != nil {
+			return result, err
+		}
+	}
+
+	result.ConvexHull, err = geom.UnmarshalWKT(
+		strings.NewReader(convexHullWKT),
+	)
+	if err != nil {
+		return result, err
+	}
+
+	result.Reverse, err = geom.UnmarshalWKT(
+		strings.NewReader(reverseWKT),
+	)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
 }
 
 func isNestedGeometryCollection(g geom.Geometry) bool {

@@ -59,12 +59,18 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 func dedupPoints(pts []Point) []Point {
 	var dedup []Point
 	seen := make(map[XY]bool)
+	var haveEmpty bool
 	for _, pt := range pts {
-		xy := pt.XY()
-		if !seen[xy] {
+		xy, ok := pt.XY()
+		if !ok {
+			haveEmpty = true
+		} else if !seen[xy] {
 			dedup = append(dedup, pt)
 			seen[xy] = true
 		}
+	}
+	if haveEmpty {
+		dedup = append(dedup, NewEmptyPoint())
 	}
 	return dedup
 }

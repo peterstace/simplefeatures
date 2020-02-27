@@ -47,6 +47,7 @@ func TestLineStringValidation(t *testing.T) {
 
 func TestPolygonValidation(t *testing.T) {
 	for i, wkt := range []string{
+		"POLYGON EMPTY",
 		"POLYGON((0 0,1 0,1 1,0 1,0 0))",
 		"POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))",
 		`POLYGON(
@@ -122,6 +123,7 @@ func TestPolygonValidation(t *testing.T) {
 
 func TestMultiPolygonValidation(t *testing.T) {
 	for i, wkt := range []string{
+		`MULTIPOLYGON EMPTY`,
 		`MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))`,
 		`MULTIPOLYGON(
 			((0 0,1 0,1 1,0 1,0 0)),
@@ -173,6 +175,7 @@ func TestMultiPolygonValidation(t *testing.T) {
 		t.Run(fmt.Sprintf("invalid_%d", i), func(t *testing.T) {
 			_, err := UnmarshalWKT(strings.NewReader(wkt))
 			if err == nil {
+				t.Log(wkt)
 				t.Error("expected error")
 			}
 		})

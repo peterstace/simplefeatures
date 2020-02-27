@@ -28,9 +28,6 @@ func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLine
 func NewMultiLineStringC(coords [][]Coordinates, opts ...ConstructorOption) (MultiLineString, error) {
 	var lines []LineString
 	for _, c := range coords {
-		if len(c) == 0 {
-			continue
-		}
 		line, err := NewLineStringC(c, opts...)
 		if err != nil {
 			return MultiLineString{}, err
@@ -68,9 +65,9 @@ func (m MultiLineString) AsText() string {
 }
 
 func (m MultiLineString) AppendWKT(dst []byte) []byte {
-	dst = append(dst, []byte("MULTILINESTRING")...)
+	dst = append(dst, "MULTILINESTRING"...)
 	if len(m.lines) == 0 {
-		return append(dst, []byte(" EMPTY")...)
+		return append(dst, " EMPTY"...)
 	}
 	dst = append(dst, '(')
 	for i, line := range m.lines {
@@ -133,7 +130,12 @@ func (m MultiLineString) Intersects(g Geometry) bool {
 }
 
 func (m MultiLineString) IsEmpty() bool {
-	return len(m.lines) == 0
+	for _, ls := range m.lines {
+		if !ls.IsEmpty() {
+			return false
+		}
+	}
+	return true
 }
 
 func (m MultiLineString) Equals(other Geometry) (bool, error) {
@@ -141,16 +143,23 @@ func (m MultiLineString) Equals(other Geometry) (bool, error) {
 }
 
 func (m MultiLineString) Envelope() (Envelope, bool) {
-	if len(m.lines) == 0 {
-		return Envelope{}, false
+	var env Envelope
+	var has bool
+	for _, ls := range m.lines {
+		e, ok := ls.Envelope()
+		if !ok {
+			continue
+		}
+		if has {
+			env = env.ExpandToIncludeEnvelope(e)
+		} else {
+			env = e
+			has = true
+		}
 	}
-	env := mustEnv(m.lines[0].Envelope())
-	for _, line := range m.lines[1:] {
-		e := mustEnv(line.Envelope())
-		env = env.ExpandToIncludeEnvelope(e)
-	}
-	return env, true
+	return env, has
 }
+
 func (m MultiLineString) Boundary() MultiPoint {
 	counts := make(map[XY]int)
 	var uniqueEndpoints []Point
@@ -162,17 +171,21 @@ func (m MultiLineString) Boundary() MultiPoint {
 			ls.StartPoint(),
 			ls.EndPoint(),
 		} {
-			_, seen := counts[pt.coords.XY]
-			if !seen {
+			xy, ok := pt.XY()
+			if !ok {
+				continue
+			}
+			if counts[xy] == 0 {
 				uniqueEndpoints = append(uniqueEndpoints, pt)
 			}
-			counts[pt.coords.XY]++
+			counts[xy]++
 		}
 	}
 
 	var bound []Point
 	for _, pt := range uniqueEndpoints {
-		if counts[pt.coords.XY]%2 == 1 {
+		xy, ok := pt.XY()
+		if ok && counts[xy]%2 == 1 {
 			bound = append(bound, pt)
 		}
 	}
@@ -212,11 +225,7 @@ func (m MultiLineString) Coordinates() [][]Coordinates {
 	numLines := m.NumLineStrings()
 	coords := make([][]Coordinates, numLines)
 	for i := 0; i < numLines; i++ {
-		numPts := m.LineStringN(i).NumPoints()
-		coords[i] = make([]Coordinates, numPts)
-		for j := 0; j < numPts; j++ {
-			coords[i][j] = m.LineStringN(i).PointN(j).Coordinates()
-		}
+		coords[i] = m.LineStringN(i).Coordinates()
 	}
 	return coords
 }
@@ -252,24 +261,19 @@ func (m MultiLineString) Length() float64 {
 }
 
 // Centroid gives the centroid of the coordinates of the multi line string.
-// It returns true iff the centroid is well defined.
-func (m MultiLineString) Centroid() (Point, bool) {
-	n := m.NumLineStrings()
-	if n == 0 {
-		return Point{}, false
-	}
+func (m MultiLineString) Centroid() Point {
 	var sumXY XY
 	var sumLength float64
-	for i := 0; i < n; i++ {
+	for i := 0; i < m.NumLineStrings(); i++ {
 		ls := m.LineStringN(i)
 		xy, length := sumCentroidAndLengthOfLineString(ls)
 		sumXY = sumXY.Add(xy)
 		sumLength += length
 	}
 	if sumLength == 0 {
-		return Point{}, false
+		return NewEmptyPoint()
 	}
-	return NewPointXY(sumXY.Scale(1.0 / sumLength)), true
+	return NewPointXY(sumXY.Scale(1.0 / sumLength))
 }
 
 // Reverse in the case of MultiLineString outputs each component line string in their

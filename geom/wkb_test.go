@@ -2,6 +2,7 @@ package geom_test
 
 import (
 	"bytes"
+	"encoding/hex"
 	"strconv"
 	"strings"
 	"testing"
@@ -481,9 +482,13 @@ func TestWKBMarshalValid(t *testing.T) {
 		"MULTIPOINT EMPTY",
 		"MULTIPOINT(1 2)",
 		"MULTIPOINT(1 2,3 4)",
+		"MULTIPOINT(EMPTY,1 2)",
+		"MULTIPOINT(1 2,EMPTY)",
 		"MULTILINESTRING EMPTY",
 		"MULTILINESTRING((0 1,2 3,4 5))",
 		"MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))",
+		"MULTILINESTRING(EMPTY,(0 1,2 3,4 5))",
+		"MULTILINESTRING((0 1,2 3,4 5),EMPTY)",
 		"MULTIPOLYGON EMPTY",
 		"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((1 0,2 0,1 1,1 0)))",
 		"GEOMETRYCOLLECTION EMPTY",
@@ -498,5 +503,18 @@ func TestWKBMarshalValid(t *testing.T) {
 			expectNoErr(t, err)
 			expectGeomEq(t, readBackGeom, geom)
 		})
+	}
+}
+
+func TestWKBMarshalEmptyPoint(t *testing.T) {
+	g := geomFromWKT(t, "POINT EMPTY")
+	var buf bytes.Buffer
+	err := g.AsBinary(&buf)
+	expectNoErr(t, err)
+	want := hexStringToBytes(t, "0101000000010000000000f87f010000000000f87f")
+	if !bytes.Equal(want, buf.Bytes()) {
+		t.Logf("want:\n%v", hex.Dump(want))
+		t.Logf("got:\n%v", hex.Dump(buf.Bytes()))
+		t.Errorf("mismatch")
 	}
 }

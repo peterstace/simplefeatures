@@ -7,13 +7,6 @@ import (
 )
 
 func hasIntersection(g1, g2 Geometry) bool {
-	if g2.IsEmpty() {
-		return false
-	}
-	if g1.IsEmpty() {
-		return false
-	}
-
 	if rank(g1) > rank(g2) {
 		g1, g2 = g2, g1
 	}
@@ -209,7 +202,7 @@ func hasIntersectionLineWithLine(n1, n2 Line) (intersects bool, dimension int) {
 		pts = append(pts[:rth], pts[rth+1:]...)
 		ltl := leftmostThenLowestIndex(pts)
 		pts = append(pts[:ltl], pts[ltl+1:]...)
-		if pts[0].Equals(pts[1]) {
+		if pts[0] == pts[1] {
 			return true, 0 // Point has dimension 0
 		}
 		//----------------------
@@ -291,20 +284,19 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		for _, ls := range side.mls.lines {
 			for i := 0; i < ls.NumLines(); i++ {
 				ln := ls.LineN(i)
-				if ln.StartPoint().XY().X > ln.EndPoint().XY().X {
-					// TODO: Use ST_Reverse
-					ln.a, ln.b = ln.b, ln.a
+				if ln.StartPoint().X > ln.EndPoint().X {
+					ln = ln.Reverse()
 				}
 				side.lines = append(side.lines, ln)
 			}
 		}
 		sort.Slice(side.lines, func(i, j int) bool {
-			return side.lines[i].StartPoint().XY().X < side.lines[j].StartPoint().XY().X
+			return side.lines[i].StartPoint().X < side.lines[j].StartPoint().X
 		})
 		sideCopy := side // copy because we're using anon func
 		side.active.less = func(i, j int) bool {
-			ix := sideCopy.lines[i].EndPoint().XY().X
-			jx := sideCopy.lines[j].EndPoint().XY().X
+			ix := sideCopy.lines[i].EndPoint().X
+			jx := sideCopy.lines[j].EndPoint().X
 			return ix < jx
 		}
 	}
@@ -317,7 +309,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		sweepX := math.Inf(+1)
 		for _, side := range sides {
 			if side.next < len(side.lines) {
-				sweepX = math.Min(sweepX, side.lines[side.next].StartPoint().XY().X)
+				sweepX = math.Min(sweepX, side.lines[side.next].StartPoint().X)
 			}
 		}
 
@@ -325,11 +317,11 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		// segments that can no longer possibly intersect with any unprocessed
 		// line segments, and adding any new line segments to the active sets.
 		for _, side := range sides {
-			for len(side.active.data) != 0 && side.lines[side.active.data[0]].EndPoint().XY().X < sweepX {
+			for len(side.active.data) != 0 && side.lines[side.active.data[0]].EndPoint().X < sweepX {
 				side.active.pop()
 			}
 			side.newSegments = side.newSegments[:0]
-			for side.next < len(side.lines) && side.lines[side.next].StartPoint().XY().X == sweepX {
+			for side.next < len(side.lines) && side.lines[side.next].StartPoint().X == sweepX {
 				side.newSegments = append(side.newSegments, side.next)
 				side.active.push(side.next)
 				side.next++
@@ -391,7 +383,7 @@ func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp Mult
 	// LineString to see if it falls inside or outside of the MultiPolygon.
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		for j := 0; j < mls.LineStringN(i).NumPoints(); j++ {
-			pt := mls.LineStringN(i).PointN(j)
+			pt := NewPointC(mls.LineStringN(i).PointN(j))
 			if hasIntersectionPointWithMultiPolygon(pt, mp) {
 				return true
 			}
@@ -400,14 +392,18 @@ func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp Mult
 	return false
 }
 
-func hasIntersectionPointWithLine(point Point, line Line) bool {
+func hasIntersectionPointWithLine(pt Point, ln Line) bool {
 	// Speed is O(1) using a bounding box check then a point-on-line check.
-	env := mustEnv(line.Envelope())
-	if !env.Contains(point.coords.XY) {
+	env := ln.Envelope()
+	xy, ok := pt.XY()
+	if !ok {
 		return false
 	}
-	lhs := (point.coords.X - line.a.X) * (line.b.Y - line.a.Y)
-	rhs := (point.coords.Y - line.a.Y) * (line.b.X - line.a.X)
+	if !env.Contains(xy) {
+		return false
+	}
+	lhs := (xy.X - ln.a.X) * (ln.b.Y - ln.a.Y)
+	rhs := (xy.Y - ln.a.Y) * (ln.b.X - ln.a.X)
 	if lhs == rhs {
 		return true
 	}
@@ -437,7 +433,7 @@ func hasIntersectionMultiPointWithMultiPoint(mp1, mp2 MultiPoint) bool {
 func hasIntersectionPointWithMultiPoint(point Point, mp MultiPoint) bool {
 	// Worst case speed is O(n) but that's optimal because mp is not sorted.
 	for _, pt := range mp.pts {
-		if pt.EqualsExact(point.AsGeometry()) {
+		if hasIntersectionPointWithPoint(point, pt) {
 			return true
 		}
 	}
@@ -470,22 +466,26 @@ func hasIntersectionPointWithMultiPolygon(pt Point, mp MultiPolygon) bool {
 
 func hasIntersectionPointWithPoint(pt1, pt2 Point) bool {
 	// Speed is O(1).
-	if pt1.EqualsExact(pt2.AsGeometry()) {
-		return true
-	}
-	return false
+	return !pt1.IsEmpty() && !pt2.IsEmpty() && pt1.EqualsExact(pt2.AsGeometry())
 }
 
 func hasIntersectionPointWithPolygon(pt Point, p Polygon) bool {
 	// Speed is O(m), m is the number of holes in the polygon.
-	m := p.NumInteriorRings()
-
-	if pointRingSide(pt.XY(), p.ExteriorRing()) == exterior {
+	xy, ok := pt.XY()
+	if !ok {
 		return false
 	}
-	for j := 0; j < m; j++ {
-		ring := p.InteriorRingN(j)
-		if pointRingSide(pt.XY(), ring) == interior {
+
+	if p.IsEmpty() {
+		return false
+	}
+	if pointRingSide(xy, p.ExteriorRing()) == exterior {
+		return false
+	}
+	m := p.NumInteriorRings()
+	for i := 0; i < m; i++ {
+		ring := p.InteriorRingN(i)
+		if pointRingSide(xy, ring) == interior {
 			return false
 		}
 	}

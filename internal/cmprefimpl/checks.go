@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"math"
+	"strconv"
 	"strings"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -18,20 +20,20 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	log.Println("checking AsText")
-	if err := checkAsText(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking FromText")
-	if err := checkFromText(h, g, log); err != nil {
-		return err
-	}
 	log.Println("checking AsBinary")
 	if err := checkAsBinary(h, g, log); err != nil {
 		return err
 	}
 	log.Println("checking FromBinary")
 	if err := checkFromBinary(h, g, log); err != nil {
+		return err
+	}
+	log.Println("checking AsText")
+	if err := checkAsText(h, g, log); err != nil {
+		return err
+	}
+	log.Println("checking FromText")
+	if err := checkFromText(h, g, log); err != nil {
 		return err
 	}
 	log.Println("checking IsEmpty")
@@ -108,17 +110,34 @@ func checkIsValid(h *libgeos.Handle, g geom.Geometry, log *log.Logger) (bool, er
 }
 
 func checkAsText(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	// Skip any geometries that have a non-empty Point within a MultiPoint.
+	// Libgeos erroneously produces WKT with missing parenthesis around each
+	// non-empty point.
+	if containsNonEmptyPointInMultiPoint(g) {
+		return nil
+	}
+
+	// Skip any geometries that are collections or contain collections that
+	// only contain empty geometries. Libgeos will render WKT for these
+	// collections as being EMPTY, however this isn't correct behaviour.
+	if containsCollectionWithOnlyEmptyElements(g) {
+		return nil
+	}
+
 	want, err := h.AsText(g)
 	if err != nil {
 		return err
 	}
 
-	// Account for acceptable spacing differeneces between libgeos and simplefeatures.
+	// Account for easy-to-adjust for acceptable spacing differeneces between
+	// libgeos and simplefeatures.
 	want = strings.ReplaceAll(want, " (", "(")
 	want = strings.ReplaceAll(want, ", ", ",")
 
 	got := g.AsText()
-	if got != want {
+
+	if err := wktsEqual(got, want); err != nil {
+		log.Printf("WKTs not equal: %v", err)
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
 		return mismatchErr
@@ -126,9 +145,50 @@ func checkAsText(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkFromText(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
-	wkt := g.AsText()
+func wktsEqual(wktA, wktB string) error {
+	toksA := tokenizeWKT(wktA)
+	toksB := tokenizeWKT(wktB)
+	if len(toksA) != len(toksB) {
+		return fmt.Errorf(
+			"token lengths differ: %d vs %d",
+			len(toksA), len(toksB),
+		)
+	}
+	for i, tokA := range toksA {
+		tokB := toksB[i]
+		fA, errA := strconv.ParseFloat(tokA, 64)
+		fB, errB := strconv.ParseFloat(tokA, 64)
+		var eq bool
+		if errA == nil && errB == nil {
+			// If this check gives false negatives (e.g. libgeos and
+			// simplefeatures may use slightly different precision), then we
+			// can always check a relative difference here instead of a strict
+			// ==.
+			eq = fA == fB
+		} else {
+			eq = tokA == tokB
+		}
+		if !eq {
+			return fmt.Errorf(
+				"tokens at position %d differ: %s vs %s",
+				i, tokA, tokB,
+			)
+		}
+	}
+	return nil
+}
 
+func checkFromText(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	// libgeos is unable to parse MultiPoints if the *first* Point is empty. It
+	// gives the following error: ParseException: Unexpected token: WORD EMPTY.
+	// Skip the check in that case.
+	if g.IsMultiPoint() &&
+		g.AsMultiPoint().NumPoints() > 0 &&
+		g.AsMultiPoint().PointN(0).IsEmpty() {
+		return nil
+	}
+
+	wkt := g.AsText()
 	want, err := h.FromText(wkt)
 	if err != nil {
 		return err
@@ -180,19 +240,24 @@ func checkAsBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 }
 
 func hasEmptyPoint(g geom.Geometry) bool {
-	if g.AsText() == "POINT EMPTY" {
-		return true
-	}
-	// TODO: Should also support MultiPoints here. However, simplefeatures
-	// doesn't support empty points in multipoint collections. We'll need to
-	// update this when we add support for that.
-	if !g.IsGeometryCollection() {
-		return false
-	}
-	gc := g.AsGeometryCollection()
-	for i := 0; i < gc.NumGeometries(); i++ {
-		if hasEmptyPoint(gc.GeometryN(i)) {
-			return true
+	switch {
+	case g.IsPoint():
+		return g.IsEmpty()
+	case g.IsMultiPoint():
+		mp := g.AsMultiPoint()
+		n := mp.NumPoints()
+		for i := 0; i < n; i++ {
+			if mp.PointN(i).IsEmpty() {
+				return true
+			}
+		}
+	case g.IsGeometryCollection():
+		gc := g.AsGeometryCollection()
+		n := gc.NumGeometries()
+		for i := 0; i < n; i++ {
+			if hasEmptyPoint(gc.GeometryN(i)) {
+				return true
+			}
 		}
 	}
 	return false
@@ -202,6 +267,18 @@ func checkFromBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error 
 	var wkb bytes.Buffer
 	if err := g.AsBinary(&wkb); err != nil {
 		return err
+	}
+
+	// Skip any MultiPoints that contain empty Points. Libgeos seems has
+	// trouble handling these.
+	if g.IsMultiPoint() {
+		mp := g.AsMultiPoint()
+		n := mp.NumPoints()
+		for i := 0; i < n; i++ {
+			if mp.PointN(i).IsEmpty() {
+				return nil
+			}
+		}
 	}
 
 	want, err := h.FromBinary(wkb.Bytes())
@@ -237,11 +314,12 @@ func checkIsEmpty(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 
 func checkDimension(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	var want int
-	if !(g.IsGeometryCollection() &&
-		g.AsGeometryCollection().NumGeometries() == 0) {
-		// Libgeos gives -1 dimension for GeometryCollections with zero
-		// elements. This is very weird behaviour, and the dimension should
-		// actually be zero. So we don't get 'want' from libgeos in that case.
+	if !containsOnlyGeometryCollections(g) {
+		// Libgeos gives -1 dimension for GeometryCollection trees that only
+		// contain other GeometryCollections (all the way to the leaf nodes).
+		// This is weird behaviour, and the dimension should actually be zero.
+		// So we don't get 'want' from libgeos in that case (and allow want to
+		// default to 0).
 		var err error
 		want, err = h.Dimension(g)
 		if err != nil {
@@ -286,6 +364,10 @@ func checkEnvelope(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 func checkIsSimple(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	want, wantDefined, err := h.IsSimple(g)
 	if err != nil {
+		if err == libgeos.LibgeosCrashError {
+			// Skip any tests that would cause libgeos to crash.
+			return nil
+		}
 		return err
 	}
 	got, gotDefined := g.IsSimple()
@@ -431,13 +513,7 @@ func checkCentroid(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	if err != nil {
 		return err
 	}
-	var got geom.Geometry
-	centroidPoint, ok := g.Centroid()
-	if ok {
-		got = centroidPoint.AsGeometry()
-	} else {
-		got = geom.NewEmptyPoint().AsGeometry()
-	}
+	got := g.Centroid().AsGeometry()
 
 	if !want.EqualsExact(got, geom.Tolerance(1e-9)) {
 		log.Printf("want: %v", want.AsText())
@@ -468,6 +544,9 @@ func binaryChecks(h *libgeos.Handle, g1, g2 geom.Geometry, log *log.Logger) erro
 func checkIntersects(h *libgeos.Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	want, err := h.Intersects(g1, g2)
 	if err != nil {
+		if err == libgeos.LibgeosCrashError {
+			return nil
+		}
 		return err
 	}
 	got := g1.Intersects(g2)

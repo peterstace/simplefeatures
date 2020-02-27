@@ -49,9 +49,9 @@ func (c GeometryCollection) AsText() string {
 }
 
 func (c GeometryCollection) AppendWKT(dst []byte) []byte {
-	dst = append(dst, []byte("GEOMETRYCOLLECTION")...)
-	if c.IsEmpty() {
-		return append(dst, []byte(" EMPTY")...)
+	dst = append(dst, "GEOMETRYCOLLECTION"...)
+	if len(c.geoms) == 0 {
+		return append(dst, " EMPTY"...)
 	}
 	dst = append(dst, '(')
 	for i, g := range c.geoms {
@@ -200,14 +200,12 @@ func (c GeometryCollection) IsValid() bool {
 }
 
 // Reverse in the case of GeometryCollection reverses each component and also
-// returns them in the original order. As a special case, if the input
-// GeometryCollection has no elements or only contains empty elements, then the
-// returned GeometryCollection doesn't contain any elements.
+// returns them in the original order.
 func (c GeometryCollection) Reverse() GeometryCollection {
-	var geoms []Geometry
 	if c.IsEmpty() {
-		return NewGeometryCollection(geoms)
+		return c
 	}
+	var geoms []Geometry
 	for n := 0; n < c.NumGeometries(); n++ {
 		rev := c.GeometryN(n).Reverse()
 		geoms = append(geoms, rev)
@@ -256,31 +254,30 @@ func highestDimensionIgnoreEmpties(g Geometry) int {
 }
 
 // Centroid of a GeometryCollection is the centroid of its parts' centroids.
-// It returns true iff the centroid is well defined.
-func (c GeometryCollection) Centroid() (Point, bool) {
+func (c GeometryCollection) Centroid() Point {
 	result := c.sumCentroidCalc()
 	var xy XY
 	switch result.highestDim {
 	case 0:
 		if result.numPoints == 0 {
-			return Point{}, false // Invalid centroid, highestDim is 0 and numPoints is 0
+			return NewEmptyPoint() // Invalid centroid, highestDim is 0 and numPoints is 0
 		}
 		xy = result.sumXY.Scale(1.0 / float64(result.numPoints))
 	case 1:
 		if result.sumLength == 0 {
-			return Point{}, false // Invalid centroid, highestDim is 1 and sumLength is 0
+			return NewEmptyPoint() // Invalid centroid, highestDim is 1 and sumLength is 0
 		}
 		xy = result.sumXY.Scale(1.0 / result.sumLength)
 	case 2:
 		if result.sumArea == 0 {
-			return Point{}, false // Invalid centroid, highestDim is 2 and sumArea is 0
+			return NewEmptyPoint() // Invalid centroid, highestDim is 2 and sumArea is 0
 		}
 		xy = result.sumXY.Scale(1.0 / result.sumArea)
 	default:
 		panic("Invalid dimensionality in centroid calculation.")
 	}
 
-	return NewPointXY(xy), true
+	return NewPointXY(xy)
 }
 
 type centroidCalc struct {
@@ -307,25 +304,29 @@ func (c GeometryCollection) sumCentroidCalc() centroidCalc {
 			continue
 		}
 		switch {
-		case g.IsEmptySet():
-			// do nothing
 		case g.IsPoint():
-			pt := g.AsPoint()
-			result.sumXY = result.sumXY.Add(pt.XY())
-			result.numPoints++
+			xy, ok := g.AsPoint().XY()
+			if ok {
+				result.sumXY = result.sumXY.Add(xy)
+				result.numPoints++
+			}
 		case g.IsMultiPoint():
 			mp := g.AsMultiPoint()
 			for m := 0; m < mp.NumPoints(); m++ {
-				pt := mp.PointN(m)
-				result.sumXY = result.sumXY.Add(pt.XY())
-				result.numPoints++
+				xy, ok := mp.PointN(i).XY()
+				if ok {
+					result.sumXY = result.sumXY.Add(xy)
+					result.numPoints++
+				}
 			}
 		case g.IsLine():
 			line := g.AsLine()
-			cent := line.Centroid()
-			length := line.Length()
-			result.sumXY = result.sumXY.Add(cent.Coordinates().Scale(length))
-			result.sumLength += length
+			cent, ok := line.Centroid().XY()
+			if ok {
+				length := line.Length()
+				result.sumXY = result.sumXY.Add(cent.Scale(length))
+				result.sumLength += length
+			}
 		case g.IsLineString():
 			ls := g.AsLineString()
 			xy, length := sumCentroidAndLengthOfLineString(ls)

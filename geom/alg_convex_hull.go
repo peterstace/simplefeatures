@@ -9,12 +9,7 @@ func convexHull(g Geometry) Geometry {
 	if g.IsEmpty() {
 		// Any empty geometry could be returned here to to give correct
 		// behaviour. However, to replicate PostGIS behaviour, we always return
-		// an empty geometry of the original type. For GeometryCollections, a
-		// new geometry is created to eleminate any empty constituent
-		// geometries.
-		if g.IsGeometryCollection() {
-			return NewGeometryCollection(nil).AsGeometry()
-		}
+		// the original geometry.
 		return g
 	}
 	pts := convexHullPointSet(g)
@@ -47,8 +42,8 @@ func convexHull(g Geometry) Geometry {
 }
 
 func convexHullPointSet(g Geometry) []XY {
-	switch g.tag {
-	case geometryCollectionTag:
+	switch {
+	case g.IsGeometryCollection():
 		var points []XY
 		c := g.AsGeometryCollection()
 		n := c.NumGeometries()
@@ -59,36 +54,41 @@ func convexHullPointSet(g Geometry) []XY {
 			)
 		}
 		return points
-	case emptySetTag:
-		return nil
-	case pointTag:
-		return []XY{g.AsPoint().XY()}
-	case lineTag:
+	case g.IsPoint():
+		xy, ok := g.AsPoint().XY()
+		if !ok {
+			return nil
+		}
+		return []XY{xy}
+	case g.IsLine():
 		n := g.AsLine()
 		return []XY{
-			n.StartPoint().XY(),
-			n.EndPoint().XY(),
+			n.StartPoint().XY,
+			n.EndPoint().XY,
 		}
-	case lineStringTag:
+	case g.IsLineString():
 		ls := g.AsLineString()
 		n := ls.NumPoints()
 		points := make([]XY, n)
 		for i := 0; i < n; i++ {
-			points[i] = ls.PointN(i).XY()
+			points[i] = ls.PointN(i).XY
 		}
 		return points
-	case polygonTag:
+	case g.IsPolygon():
 		p := g.AsPolygon()
 		return convexHullPointSet(p.ExteriorRing().AsGeometry())
-	case multiPointTag:
+	case g.IsMultiPoint():
 		m := g.AsMultiPoint()
 		n := m.NumPoints()
-		points := make([]XY, n)
+		points := make([]XY, 0, n)
 		for i := 0; i < n; i++ {
-			points[i] = m.PointN(i).XY()
+			xy, ok := m.PointN(i).XY()
+			if ok {
+				points = append(points, xy)
+			}
 		}
 		return points
-	case multiLineStringTag:
+	case g.IsMultiLineString():
 		m := g.AsMultiLineString()
 		var points []XY
 		n := m.NumLineStrings()
@@ -96,11 +96,11 @@ func convexHullPointSet(g Geometry) []XY {
 			line := m.LineStringN(i)
 			m := line.NumPoints()
 			for j := 0; j < m; j++ {
-				points = append(points, line.PointN(j).XY())
+				points = append(points, line.PointN(j).XY)
 			}
 		}
 		return points
-	case multiPolygonTag:
+	case g.IsMultiPolygon():
 		m := g.AsMultiPolygon()
 		var points []XY
 		numPolys := m.NumPolygons()
@@ -108,7 +108,7 @@ func convexHullPointSet(g Geometry) []XY {
 			ring := m.PolygonN(i).ExteriorRing()
 			numPts := ring.NumPoints()
 			for j := 0; j < numPts; j++ {
-				points = append(points, ring.PointN(j).XY())
+				points = append(points, ring.PointN(j).XY)
 			}
 		}
 		return points
@@ -156,7 +156,7 @@ func grahamScan(ps []XY) []XY {
 	stack.push(ps[0])
 	i++
 	for i < len(ps) && len(stack) < 2 {
-		if !stack.top().Equals(ps[i]) {
+		if stack.top() != ps[i] {
 			stack.push(ps[i])
 		}
 		i++
@@ -205,10 +205,10 @@ func sortByPolarAngle(ps []XY) {
 		// If any point is equal to the anchor point, then always put it first.
 		// This allows those duplicated points to be removed when the results
 		// stack is initiated.
-		if anchor.Equals(ps[i]) {
+		if anchor == ps[i] {
 			return true
 		}
-		if anchor.Equals(ps[j]) {
+		if anchor == ps[j] {
 			return false
 		}
 		// In the normal case, check which order the points are in relative to

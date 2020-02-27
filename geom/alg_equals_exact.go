@@ -60,7 +60,7 @@ func ignoreOrder(opts []EqualsExactOption) bool {
 // curve abstracts Line and LineString.
 type curve interface {
 	NumPoints() int
-	PointN(int) Point
+	PointN(int) Coordinates
 }
 
 func curvesExactEqual(c1, c2 curve, opts []EqualsExactOption) bool {
@@ -76,8 +76,8 @@ func curvesExactEqual(c1, c2 curve, opts []EqualsExactOption) bool {
 	type curveMapping func(int) int
 	sameCurve := func(m1, m2 curveMapping) bool {
 		for i := 0; i < n; i++ {
-			pt1 := c1.PointN(m1(i)).XY()
-			pt2 := c2.PointN(m2(i)).XY()
+			pt1 := c1.PointN(m1(i)).XY
+			pt2 := c2.PointN(m2(i)).XY
 			if !os.eq(pt1, pt2) {
 				return false
 			}
@@ -116,7 +116,7 @@ func curvesExactEqual(c1, c2 curve, opts []EqualsExactOption) bool {
 func isRing(c curve) bool {
 	ptA := c.PointN(0)
 	ptB := c.PointN(c.NumPoints() - 1)
-	return ptA.XY().Equals(ptB.XY())
+	return ptA.XY == ptB.XY
 }
 
 func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
@@ -126,9 +126,15 @@ func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
 	}
 	os := newEqualsExactOptionSet(opts)
 	ptsEq := func(i, j int) bool {
-		ptA := mp1.PointN(i).XY()
-		ptB := mp2.PointN(j).XY()
-		return os.eq(ptA, ptB)
+		xyA, okA := mp1.PointN(i).XY()
+		xyB, okB := mp2.PointN(j).XY()
+		if okA != okB {
+			return false // one empty, but not the other
+		}
+		if !okA {
+			return true // both empty
+		}
+		return os.eq(xyA, xyB)
 	}
 	return structureEqual(n, ptsEq, os.ignoreOrder)
 }

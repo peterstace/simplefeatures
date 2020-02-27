@@ -26,10 +26,7 @@ func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 func NewMultiPointOC(coords []OptionalCoordinates, opts ...ConstructorOption) MultiPoint {
 	var pts []Point
 	for _, c := range coords {
-		if c.Empty {
-			continue
-		}
-		pt := NewPointC(c.Value, opts...)
+		pt := NewPointOC(c, opts...)
 		pts = append(pts, pt)
 	}
 	return NewMultiPoint(pts, opts...)
@@ -70,15 +67,22 @@ func (m MultiPoint) AsText() string {
 }
 
 func (m MultiPoint) AppendWKT(dst []byte) []byte {
-	dst = append(dst, []byte("MULTIPOINT")...)
+	dst = append(dst, "MULTIPOINT"...)
 	if len(m.pts) == 0 {
-		return append(dst, []byte(" EMPTY")...)
+		return append(dst, " EMPTY"...)
 	}
 	dst = append(dst, '(')
 	for i, pt := range m.pts {
-		dst = appendFloat(dst, pt.coords.X)
-		dst = append(dst, ' ')
-		dst = appendFloat(dst, pt.coords.Y)
+		xy, ok := pt.XY()
+		if ok {
+			dst = append(dst, '(')
+			dst = appendFloat(dst, xy.X)
+			dst = append(dst, ' ')
+			dst = appendFloat(dst, xy.Y)
+			dst = append(dst, ')')
+		} else {
+			dst = append(dst, "EMPTY"...)
+		}
 		if i != len(m.pts)-1 {
 			dst = append(dst, ',')
 		}
@@ -90,10 +94,14 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 func (m MultiPoint) IsSimple() bool {
 	seen := make(map[XY]bool)
 	for _, p := range m.pts {
-		if seen[p.coords.XY] {
+		xy, ok := p.XY()
+		if !ok {
+			continue
+		}
+		if seen[xy] {
 			return false
 		}
-		seen[p.coords.XY] = true
+		seen[xy] = true
 	}
 	return true
 }
@@ -107,7 +115,12 @@ func (m MultiPoint) Intersects(g Geometry) bool {
 }
 
 func (m MultiPoint) IsEmpty() bool {
-	return len(m.pts) == 0
+	for _, pt := range m.pts {
+		if !pt.IsEmpty() {
+			return false
+		}
+	}
+	return true
 }
 
 func (m MultiPoint) Equals(other Geometry) (bool, error) {
@@ -115,14 +128,21 @@ func (m MultiPoint) Equals(other Geometry) (bool, error) {
 }
 
 func (m MultiPoint) Envelope() (Envelope, bool) {
-	if len(m.pts) == 0 {
-		return Envelope{}, false
+	var has bool
+	var env Envelope
+	for _, pt := range m.pts {
+		xy, ok := pt.XY()
+		if !ok {
+			continue
+		}
+		if has {
+			env = env.ExtendToIncludePoint(xy)
+		} else {
+			env = NewEnvelope(xy)
+			has = true
+		}
 	}
-	env := NewEnvelope(m.pts[0].coords.XY)
-	for _, pt := range m.pts[1:] {
-		env = env.ExtendToIncludePoint(pt.coords.XY)
-	}
-	return env, true
+	return env, has
 }
 
 func (m MultiPoint) Boundary() GeometryCollection {
@@ -160,8 +180,8 @@ func (m MultiPoint) MarshalJSON() ([]byte, error) {
 
 // Coordinates returns the coordinates of the points represented by the
 // MultiPoint.
-func (m MultiPoint) Coordinates() []Coordinates {
-	coords := make([]Coordinates, len(m.pts))
+func (m MultiPoint) Coordinates() []OptionalCoordinates {
+	coords := make([]OptionalCoordinates, len(m.pts))
 	for i := range coords {
 		coords[i] = m.pts[i].Coordinates()
 	}
@@ -171,8 +191,8 @@ func (m MultiPoint) Coordinates() []Coordinates {
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
 func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := m.Coordinates()
-	transform1dCoords(coords, fn)
-	return NewMultiPointC(coords, opts...).AsGeometry(), nil
+	transformOptional1dCoords(coords, fn)
+	return NewMultiPointOC(coords, opts...).AsGeometry(), nil
 }
 
 // EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.
@@ -187,28 +207,25 @@ func (m MultiPoint) IsValid() bool {
 	return true
 }
 
-// Centroid gives the centroid of the coordinates of the multi line string.
-// It returns true iff the centroid is well defined.
-func (m MultiPoint) Centroid() (Point, bool) {
-	n := m.NumPoints()
+// Centroid gives the centroid of the coordinates of the MultiPoint.
+func (m MultiPoint) Centroid() Point {
+	var sum XY
+	var n int
+	for i := 0; i < m.NumPoints(); i++ {
+		xy, ok := m.PointN(i).XY()
+		if ok {
+			sum = sum.Add(xy)
+			n++
+		}
+	}
 	if n == 0 {
-		return Point{}, false
+		return NewEmptyPoint()
 	}
-	var sumX, sumY float64
-	for i := 0; i < n; i++ {
-		p := m.PointN(i)
-		sumX += p.XY().X
-		sumY += p.XY().Y
-	}
-	return NewPointF(sumX/float64(n), sumY/float64(n)), true
+	return NewPointXY(sum.Scale(1 / float64(n)))
 }
 
-// Reverse in the case of MultiPoint outputs each component point in their original order.
+// Reverse in the case of MultiPoint outputs each component point in their
+// original order.
 func (m MultiPoint) Reverse() MultiPoint {
-	coords := make([]Coordinates, len(m.pts))
-	// Form the reversed slice.
-	for i := 0; i < len(m.pts); i++ {
-		coords[i] = m.pts[i].Coordinates()
-	}
-	return NewMultiPointC(coords)
+	return m
 }
