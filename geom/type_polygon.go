@@ -86,10 +86,7 @@ func NewPolygonXY(pts [][]XY, opts ...ConstructorOption) (Polygon, error) {
 }
 
 func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
-	if len(rings) == 0 {
-		return nil
-	}
-	if !doCheapValidations(opts) && !doExpensiveValidations(opts) {
+	if len(rings) == 0 || skipValidations(opts) {
 		return nil
 	}
 
@@ -117,16 +114,12 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 	}
 
 	for _, r := range rings {
-		if doCheapValidations(opts) && !r.IsClosed() {
+		if !r.IsClosed() {
 			return errors.New("polygon rings must be closed")
 		}
-		if doExpensiveValidations(opts) && !r.IsSimple() {
+		if !r.IsSimple() {
 			return errors.New("polygon rings must be simple")
 		}
-	}
-
-	if !doExpensiveValidations(opts) {
-		return nil
 	}
 
 	sort.Slice(orderedRings, func(i, j int) bool {
