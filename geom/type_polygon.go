@@ -18,7 +18,7 @@ import (
 // Its assertions are:
 //
 // 1. The rings (outer and inner) must be valid linear rings (i.e. be simple
-// and closed LineStrings).
+// and closed LineStrings). This implies that the rings cannot be empty.
 //
 // 2. Each pair of rings must only intersect at a single point.
 //
@@ -200,6 +200,11 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 	return nil
 }
 
+// Type return type string for Polygon
+func (p Polygon) Type() string {
+	return polygonType
+}
+
 // AsGeometry converts this Polygon into a Geometry.
 func (p Polygon) AsGeometry() Geometry {
 	return Geometry{polygonTag, unsafe.Pointer(&p)}
@@ -271,6 +276,8 @@ func (p Polygon) Intersects(g Geometry) bool {
 }
 
 func (p Polygon) IsEmpty() bool {
+	// Rings are not allowed to be empty, so we don't have to check IsEmpty on
+	// each ring.
 	return len(p.rings) == 0
 }
 

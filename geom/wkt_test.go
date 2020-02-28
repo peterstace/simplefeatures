@@ -59,8 +59,8 @@ func TestUnmarshalWKTInvalidGrammar(t *testing.T) {
 
 func TestMarshalUnmarshalWKT(t *testing.T) {
 	for i, wkt := range []string{
-		"POINT (30 10)",
-		"POINT (-30 -10)",
+		"POINT(30 10)",
+		"POINT(-30 -10)",
 		"POINT EMPTY",
 
 		"LINESTRING(30 10,10 30,40 40)",
@@ -70,9 +70,8 @@ func TestMarshalUnmarshalWKT(t *testing.T) {
 		"POLYGON((35 10,45 45,15 40,10 20,35 10),(20 30,35 35,30 20,20 30))",
 		"POLYGON EMPTY",
 
-		"MULTIPOINT ((10 40),(40 30),(20 20),(30 10))",
-		"MULTIPOINT (10 40,40 30,20 20,30 10)",
-		"MULTIPOINT (10 40,(40 30), EMPTY)",
+		"MULTIPOINT((10 40),(40 30),(20 20),(30 10))",
+		"MULTIPOINT((10 40),(40 30),EMPTY)",
 		"MULTIPOINT EMPTY",
 		"MULTIPOINT(EMPTY)",
 
@@ -85,6 +84,7 @@ func TestMarshalUnmarshalWKT(t *testing.T) {
 		"MULTIPOLYGON(((30 20,45 40,10 40,30 20)),((15 5,40 10,10 20,5 10,15 5)))",
 		"MULTIPOLYGON(((40 40,20 45,45 30,40 40)),((20 35,10 30,10 10,30 5,45 20,20 35),(30 20,20 15,20 25,30 20)))",
 		"MULTIPOLYGON(EMPTY,((20 35,10 30,10 10,30 5,45 20,20 35),(30 20,20 15,20 25,30 20)))",
+		`MULTIPOLYGON(EMPTY)`,
 
 		"GEOMETRYCOLLECTION EMPTY",
 		"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION EMPTY)",
@@ -98,9 +98,8 @@ func TestMarshalUnmarshalWKT(t *testing.T) {
 		"GEOMETRYCOLLECTION(POINT(4 6),LINESTRING(4 6,7 10))",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g1 := geomFromWKT(t, wkt)
-			g2 := geomFromWKT(t, string(g1.AsText()))
-			expectGeomEq(t, g1, g2)
+			got := geomFromWKT(t, wkt).AsText()
+			expectStringEq(t, got, wkt)
 		})
 	}
 }
@@ -122,6 +121,11 @@ func TestUnmarshalWKT(t *testing.T) {
 			mls.LineStringN(2).AsGeometry(),
 			geomFromWKT(t, "LINESTRING(5 6,7 8)"),
 		)
+	})
+	t.Run("multipoints with and without parenthesised points", func(t *testing.T) {
+		g1 := geomFromWKT(t, "MULTIPOINT((10 40),(40 30),(20 20),(30 10))")
+		g2 := geomFromWKT(t, "MULTIPOINT(10 40,40 30,20 20,30 10)")
+		expectGeomEq(t, g1, g2)
 	})
 }
 
