@@ -29,6 +29,11 @@ func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) Geometry
 	return GeometryCollection{geoms}
 }
 
+// Type return type string for GeometryCollection
+func (c GeometryCollection) Type() string {
+	return geometryCollectionType
+}
+
 // AsGeometry converts this GeometryCollection into a Geometry.
 func (c GeometryCollection) AsGeometry() Geometry {
 	return Geometry{geometryCollectionTag, unsafe.Pointer(&c)}

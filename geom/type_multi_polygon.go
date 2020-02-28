@@ -192,6 +192,11 @@ func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
 	return true
 }
 
+// Type return type string for MultiPolygon
+func (m MultiPolygon) Type() string {
+	return multiPolygonType
+}
+
 // AsGeometry converts this MultiPolygon into a Geometry.
 func (m MultiPolygon) AsGeometry() Geometry {
 	return Geometry{multiPolygonTag, unsafe.Pointer(&m)}

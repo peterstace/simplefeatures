@@ -207,6 +207,11 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 	return nil
 }
 
+// Type return type string for Polygon
+func (p Polygon) Type() string {
+	return polygonType
+}
+
 // AsGeometry converts this Polygon into a Geometry.
 func (p Polygon) AsGeometry() Geometry {
 	return Geometry{polygonTag, unsafe.Pointer(&p)}
