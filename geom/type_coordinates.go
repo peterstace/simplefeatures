@@ -43,10 +43,6 @@ func (c Coordinates) MarshalJSON() ([]byte, error) {
 	return buf, nil
 }
 
-func (c Coordinates) Equals(other Coordinates) bool {
-	return c.XY == other.XY
-}
-
 func (oc OptionalCoordinates) MarshalJSON() ([]byte, error) {
 	buf := []byte{'['}
 	if !oc.Empty {
