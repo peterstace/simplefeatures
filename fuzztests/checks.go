@@ -123,7 +123,8 @@ func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckWKB", func(t *testing.T) {
 		if g.IsEmpty() && ((g.IsGeometryCollection() && g.AsGeometryCollection().NumGeometries() > 0) ||
 			(g.IsMultiPoint() && g.AsMultiPoint().NumPoints() > 0) ||
-			(g.IsMultiLineString() && g.AsMultiLineString().NumLineStrings() > 0)) {
+			(g.IsMultiLineString() && g.AsMultiLineString().NumLineStrings() > 0) ||
+			(g.IsMultiPolygon() && g.AsMultiPolygon().NumPolygons() > 0)) {
 			// The behaviour for collections in PostGIS is to just give the
 			// collection with zero elements (even if there are some empty
 			// elements). This doesn't seem like correct behaviour, so these
