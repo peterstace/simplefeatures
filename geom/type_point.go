@@ -92,10 +92,6 @@ func (p Point) Intersects(g Geometry) bool {
 	return hasIntersection(p.AsGeometry(), g)
 }
 
-func (p Point) Equals(other Geometry) (bool, error) {
-	return equals(p.AsGeometry(), other)
-}
-
 func (p Point) Envelope() (Envelope, bool) {
 	xy, ok := p.XY()
 	if !ok {

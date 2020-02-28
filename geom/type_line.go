@@ -92,10 +92,6 @@ func (n Line) Intersects(g Geometry) bool {
 	return hasIntersection(n.AsGeometry(), g)
 }
 
-func (n Line) Equals(other Geometry) (bool, error) {
-	return equals(n.AsGeometry(), other)
-}
-
 func (n Line) Envelope() Envelope {
 	return NewEnvelope(n.a.XY, n.b.XY)
 }

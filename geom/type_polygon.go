@@ -281,10 +281,6 @@ func (p Polygon) IsEmpty() bool {
 	return len(p.rings) == 0
 }
 
-func (p Polygon) Equals(other Geometry) (bool, error) {
-	return equals(p.AsGeometry(), other)
-}
-
 func (p Polygon) Envelope() (Envelope, bool) {
 	return p.ExteriorRing().Envelope()
 }

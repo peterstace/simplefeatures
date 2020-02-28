@@ -58,7 +58,6 @@ func TestFuzz(t *testing.T) {
 		for j, g2 := range geoms {
 			t.Run(fmt.Sprintf("geom_%d_%d_", i, j), func(t *testing.T) {
 				CheckEqualsExact(t, pg, g1, g2)
-				CheckEquals(t, pg, g1, g2)
 				CheckIntersects(t, pg, g1, g2)
 				CheckIntersection(t, pg, g1, g2)
 			})

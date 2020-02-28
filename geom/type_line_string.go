@@ -227,10 +227,6 @@ func (s LineString) IsEmpty() bool {
 	return len(s.coords) == 0
 }
 
-func (s LineString) Equals(other Geometry) (bool, error) {
-	return equals(s.AsGeometry(), other)
-}
-
 func (s LineString) Envelope() (Envelope, bool) {
 	if s.IsEmpty() {
 		return Envelope{}, false

@@ -243,10 +243,6 @@ func (m MultiPolygon) IsEmpty() bool {
 	return len(m.polys) == 0
 }
 
-func (m MultiPolygon) Equals(other Geometry) (bool, error) {
-	return equals(m.AsGeometry(), other)
-}
-
 func (m MultiPolygon) Envelope() (Envelope, bool) {
 	if len(m.polys) == 0 {
 		return Envelope{}, false

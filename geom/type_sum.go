@@ -423,34 +423,6 @@ func (g Geometry) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	}
 }
 
-// Equals checks if this geometry is equal to another geometry. Two
-// geometries are equal if they contain exactly the same points.
-//
-// It is not implemented for all possible pairs of geometries, and returns
-// an error in those cases.
-func (g Geometry) Equals(other Geometry) (bool, error) {
-	switch g.tag {
-	case geometryCollectionTag:
-		return g.AsGeometryCollection().Equals(other)
-	case pointTag:
-		return g.AsPoint().Equals(other)
-	case lineTag:
-		return g.AsLine().Equals(other)
-	case lineStringTag:
-		return g.AsLineString().Equals(other)
-	case polygonTag:
-		return g.AsPolygon().Equals(other)
-	case multiPointTag:
-		return g.AsMultiPoint().Equals(other)
-	case multiLineStringTag:
-		return g.AsMultiLineString().Equals(other)
-	case multiPolygonTag:
-		return g.AsMultiPolygon().Equals(other)
-	default:
-		panic("unknown geometry: " + g.tag.String())
-	}
-}
-
 // Convex hull returns a Geometry that represents the smallest convex set
 // that contains this geometry.
 func (g Geometry) ConvexHull() Geometry {
