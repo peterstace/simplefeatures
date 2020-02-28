@@ -67,6 +67,85 @@ func containsOnlyGeometryCollections(g geom.Geometry) bool {
 	return true
 }
 
+func containsMultiPolygonWithEmptyPolygon(g geom.Geometry) bool {
+	switch {
+	case g.IsMultiPolygon():
+		mp := g.AsMultiPolygon()
+		for i := 0; i < mp.NumPolygons(); i++ {
+			if mp.PolygonN(i).IsEmpty() {
+				return true
+			}
+		}
+		return false
+	case g.IsGeometryCollection():
+		gc := g.AsGeometryCollection()
+		for i := 0; i < gc.NumGeometries(); i++ {
+			if containsMultiPolygonWithEmptyPolygon(gc.GeometryN(i)) {
+				return true
+			}
+		}
+		return false
+	default:
+		return false
+	}
+}
+
+func hasEmptyRing(g geom.Geometry) bool {
+	// NOTE: Valid geometries _don't_ have empty rings. This function gets
+	// called with invalid geometries.
+	switch {
+	case g.IsPolygon():
+		p := g.AsPolygon()
+		if p.ExteriorRing().IsEmpty() {
+			return true
+		}
+		for i := 0; i < p.NumInteriorRings(); i++ {
+			if p.InteriorRingN(i).IsEmpty() {
+				return true
+			}
+		}
+	case g.IsMultiPolygon():
+		mp := g.AsMultiPolygon()
+		for i := 0; i < mp.NumPolygons(); i++ {
+			if hasEmptyRing(mp.PolygonN(i).AsGeometry()) {
+				return true
+			}
+		}
+	case g.IsGeometryCollection():
+		gc := g.AsGeometryCollection()
+		for i := 0; i < gc.NumGeometries(); i++ {
+			if hasEmptyRing(gc.GeometryN(i)) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func hasEmptyPoint(g geom.Geometry) bool {
+	switch {
+	case g.IsPoint():
+		return g.IsEmpty()
+	case g.IsMultiPoint():
+		mp := g.AsMultiPoint()
+		n := mp.NumPoints()
+		for i := 0; i < n; i++ {
+			if mp.PointN(i).IsEmpty() {
+				return true
+			}
+		}
+	case g.IsGeometryCollection():
+		gc := g.AsGeometryCollection()
+		n := gc.NumGeometries()
+		for i := 0; i < n; i++ {
+			if hasEmptyPoint(gc.GeometryN(i)) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func tokenizeWKT(wkt string) []string {
 	var scn scanner.Scanner
 	scn.Init(strings.NewReader(wkt))

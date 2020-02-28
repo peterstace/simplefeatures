@@ -88,6 +88,7 @@ func TestEnvelope(t *testing.T) {
 		{"MULTILINESTRING((4 1,4 2),(1 1,3 1,2 2,2 4,1 1))", xy(1, 1), xy(4, 4)},
 		{"MULTILINESTRING((4 1,4 2),EMPTY,(1 1,3 1,2 2,2 4,1 1))", xy(1, 1), xy(4, 4)},
 		{"MULTIPOLYGON(((4 1,4 2,3 2,4 1)),((1 1,3 1,2 2,2 4,1 1)))", xy(1, 1), xy(4, 4)},
+		{"MULTIPOLYGON(EMPTY,((0 0,0 1,1 0,0 0)))", xy(0, 0), xy(1, 1)},
 		{"GEOMETRYCOLLECTION(POINT(4 1),POINT(2 3))", xy(2, 1), xy(4, 3)},
 		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(4 1),POINT(2 3)))", xy(2, 1), xy(4, 3)},
 	} {
@@ -120,6 +121,8 @@ func TestNoEnvelope(t *testing.T) {
 		"MULTILINESTRING(EMPTY)",
 		"MULTILINESTRING(EMPTY,EMPTY)",
 		"MULTIPOLYGON EMPTY",
+		"MULTIPOLYGON(EMPTY)",
+		"MULTIPOLYGON(EMPTY,EMPTY)",
 		"GEOMETRYCOLLECTION EMPTY",
 		"GEOMETRYCOLLECTION(POINT EMPTY)",
 	} {
