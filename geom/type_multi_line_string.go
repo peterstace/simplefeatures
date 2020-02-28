@@ -143,10 +143,6 @@ func (m MultiLineString) IsEmpty() bool {
 	return true
 }
 
-func (m MultiLineString) Equals(other Geometry) (bool, error) {
-	return equals(m.AsGeometry(), other)
-}
-
 func (m MultiLineString) Envelope() (Envelope, bool) {
 	var env Envelope
 	var has bool

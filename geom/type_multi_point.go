@@ -128,10 +128,6 @@ func (m MultiPoint) IsEmpty() bool {
 	return true
 }
 
-func (m MultiPoint) Equals(other Geometry) (bool, error) {
-	return equals(m.AsGeometry(), other)
-}
-
 func (m MultiPoint) Envelope() (Envelope, bool) {
 	var has bool
 	var env Envelope

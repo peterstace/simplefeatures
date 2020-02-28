@@ -93,10 +93,6 @@ func (c GeometryCollection) Dimension() int {
 	return dim
 }
 
-func (c GeometryCollection) Equals(other Geometry) (bool, error) {
-	return equals(c.AsGeometry(), other)
-}
-
 // walk traverses a tree of GeometryCollections, triggering a callback at each
 // non-Geometry collection leaf.
 func (c GeometryCollection) walk(fn func(Geometry)) {

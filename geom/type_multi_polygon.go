@@ -256,10 +256,6 @@ func (m MultiPolygon) IsEmpty() bool {
 	return true
 }
 
-func (m MultiPolygon) Equals(other Geometry) (bool, error) {
-	return equals(m.AsGeometry(), other)
-}
-
 func (m MultiPolygon) Envelope() (Envelope, bool) {
 	var env Envelope
 	var has bool

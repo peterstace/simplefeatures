@@ -142,11 +142,6 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-type lineWithIndex struct {
-	ln  Line
-	idx int
-}
-
 // IsSimple returns true iff the curve defined by the LineString doesn't pass
 // through the same point twice (with the possible exception of the two
 // endpoints being coincident).
@@ -230,10 +225,6 @@ func (s LineString) Intersects(g Geometry) bool {
 
 func (s LineString) IsEmpty() bool {
 	return len(s.coords) == 0
-}
-
-func (s LineString) Equals(other Geometry) (bool, error) {
-	return equals(s.AsGeometry(), other)
 }
 
 func (s LineString) Envelope() (Envelope, bool) {

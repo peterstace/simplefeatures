@@ -225,10 +225,6 @@ func (p PostGIS) OrderingEquals(t *testing.T, g1, g2 geom.Geometry) bool {
 	return p.boolBinary(t, g1, g2, "ST_OrderingEquals")
 }
 
-func (p PostGIS) Equals(t *testing.T, g1, g2 geom.Geometry) bool {
-	return p.boolBinary(t, g1, g2, "ST_Equals")
-}
-
 func (p PostGIS) Intersects(t *testing.T, g1, g2 geom.Geometry) bool {
 	return p.boolBinary(t, g1, g2, "ST_Intersects")
 }
