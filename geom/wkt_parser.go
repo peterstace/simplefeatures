@@ -75,7 +75,7 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 	switch tok := p.nextToken(); strings.ToUpper(tok) {
 	case "POINT":
 		coords := p.nextPointText()
-		if coords.Empty {
+		if !coords.Present {
 			return NewEmptyPoint().AsGeometry()
 		} else {
 			return NewPointC(coords.Value, p.opts...).AsGeometry()
@@ -170,11 +170,11 @@ func (p *parser) nextSignedNumericLiteral() float64 {
 func (p *parser) nextPointText() OptionalCoordinates {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
-		return OptionalCoordinates{Empty: true}
+		return OptionalCoordinates{}
 	}
 	pt := p.nextPoint()
 	p.nextRightParen()
-	return OptionalCoordinates{Value: pt}
+	return OptionalCoordinates{Present: true, Value: pt}
 }
 
 func (p *parser) nextLineStringText() []Coordinates {
@@ -240,7 +240,7 @@ func (p *parser) nextMultiPointStylePoint() OptionalCoordinates {
 	tok := p.peekToken()
 	if tok == "EMPTY" {
 		p.nextToken()
-		return OptionalCoordinates{Empty: true}
+		return OptionalCoordinates{}
 	}
 	var useParens bool
 	if tok == "(" {
@@ -251,7 +251,7 @@ func (p *parser) nextMultiPointStylePoint() OptionalCoordinates {
 	if useParens {
 		p.nextRightParen()
 	}
-	return OptionalCoordinates{Value: pt}
+	return OptionalCoordinates{Present: true, Value: pt}
 }
 
 func (p *parser) nextMultiPolygonText() [][][]Coordinates {

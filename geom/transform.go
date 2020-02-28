@@ -2,7 +2,7 @@ package geom
 
 func transformOptional1dCoords(coords []OptionalCoordinates, fn func(XY) XY) {
 	for i := range coords {
-		if !coords[i].Empty {
+		if coords[i].Present {
 			coords[i].Value.XY = fn(coords[i].Value.XY)
 		}
 	}

@@ -345,11 +345,11 @@ func TestCoordinates(t *testing.T) {
 	cmp0dOpt := func(t *testing.T, got OptionalCoordinates, want []float64) {
 		switch len(want) {
 		case 0:
-			if !got.Empty {
+			if got.Present {
 				t.Fatalf("empty mismatch: want empty but didn't get empty")
 			}
 		case 2:
-			if got.Empty {
+			if !got.Present {
 				t.Fatalf("empty mismatch: want non-empty but got empty")
 			}
 			var w [2]float64

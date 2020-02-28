@@ -96,7 +96,7 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 	switch p.geomType {
 	case wkbGeomTypePoint:
 		coords := p.parsePoint()
-		if coords.Empty {
+		if !coords.Present {
 			return NewEmptyPoint().AsGeometry()
 		} else {
 			return NewPointC(coords.Value, p.opts...).AsGeometry()
@@ -164,8 +164,8 @@ func (p *wkbParser) parsePoint() OptionalCoordinates {
 	}
 
 	if math.IsNaN(x) && math.IsNaN(y) {
-		// Empty points are represented as NaN,NaN is WKB.
-		return OptionalCoordinates{Empty: true}
+		// Empty points are represented as NaN,NaN in WKB.
+		return OptionalCoordinates{}
 	}
 	if math.IsNaN(x) || math.IsNaN(y) {
 		p.setErr(errors.New("point contains mixed NaN values"))
@@ -174,7 +174,7 @@ func (p *wkbParser) parsePoint() OptionalCoordinates {
 
 	// Only XY is supported so far.
 	_, _ = z, m
-	return OptionalCoordinates{Value: Coordinates{XY{x, y}}}
+	return OptionalCoordinates{Present: true, Value: Coordinates{XY{x, y}}}
 }
 
 func (p *wkbParser) parseLineString() []Coordinates {
@@ -182,7 +182,7 @@ func (p *wkbParser) parseLineString() []Coordinates {
 	coords := make([]Coordinates, 0, n)
 	for i := uint32(0); i < n; i++ {
 		pt := p.parsePoint()
-		if !pt.Empty {
+		if pt.Present {
 			coords = append(coords, pt.Value)
 		}
 	}

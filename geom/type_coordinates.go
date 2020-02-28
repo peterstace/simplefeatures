@@ -30,8 +30,8 @@ func threeDimXYToCoords(xys [][][]XY) [][][]Coordinates {
 }
 
 type OptionalCoordinates struct {
-	Empty bool
-	Value Coordinates
+	Present bool
+	Value   Coordinates
 }
 
 func (c Coordinates) MarshalJSON() ([]byte, error) {
@@ -49,7 +49,7 @@ func (c Coordinates) Equals(other Coordinates) bool {
 
 func (oc OptionalCoordinates) MarshalJSON() ([]byte, error) {
 	buf := []byte{'['}
-	if !oc.Empty {
+	if oc.Present {
 		buf = appendFloat(buf, oc.Value.X)
 		buf = append(buf, ',')
 		buf = appendFloat(buf, oc.Value.Y)
