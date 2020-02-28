@@ -239,7 +239,6 @@ func (h *Handle) createGeomHandleUsingWKB(g geom.Geometry) (*C.GEOSGeometry, err
 		return nil, err
 	}
 	h.wkbBuf = wkb.Bytes()
-	//fmt.Println(hex.Dump(wkb.Bytes()))
 	gh := C.GEOSWKBReader_read_r(
 		h.context,
 		h.wkbReader,
