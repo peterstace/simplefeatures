@@ -56,7 +56,7 @@ const (
 	multiPolygonType       = "MultiPolygon"
 )
 
-// IsGeometryCollection return true iff the Geometry is a GeometryCollection geometry.
+// Type returns a string representation of the geometry's type.
 func (g Geometry) Type() string {
 	switch g.tag {
 	case geometryCollectionTag:

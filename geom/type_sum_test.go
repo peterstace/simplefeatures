@@ -49,6 +49,7 @@ func TestGeometryType(t *testing.T) {
 		{"MULTIPOINT EMPTY", "MultiPoint"},
 		{"MULTIPOINT ((10 40), (40 30), (20 20), (30 10))", "MultiPoint"},
 		{"LINESTRING(1 2,3 4)", "LineString"},
+		{"LINESTRING(1 2,3 4,5 6)", "LineString"},
 		{"LINESTRING EMPTY", "LineString"},
 		{"MULTILINESTRING ((10 10, 20 20, 10 40),(40 40, 30 30, 40 20, 30 10))", "MultiLineString"},
 		{"MULTILINESTRING EMPTY", "MultiLineString"},
@@ -58,6 +59,7 @@ func TestGeometryType(t *testing.T) {
 		{"MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20)))", "MultiPolygon"},
 		{"MULTIPOLYGON EMPTY", "MultiPolygon"},
 		{"MULTIPOLYGON(EMPTY)", "MultiPolygon"},
+		{"GEOMETRYCOLLECTION EMPTY", "GeometryCollection"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("wkt:", tt.wkt)
