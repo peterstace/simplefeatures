@@ -43,6 +43,11 @@ func NewPointOC(oc OptionalCoordinates, _ ...ConstructorOption) Point {
 	return Point{coords: oc}
 }
 
+// Type return type string for Point
+func (p Point) Type() string {
+	return pointType
+}
+
 // AsGeometry converts this Point into a Geometry.
 func (p Point) AsGeometry() Geometry {
 	return Geometry{pointTag, unsafe.Pointer(&p)}

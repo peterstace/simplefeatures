@@ -44,6 +44,11 @@ func NewMultiLineStringXY(pts [][]XY, opts ...ConstructorOption) (MultiLineStrin
 	return NewMultiLineStringC(twoDimXYToCoords(pts))
 }
 
+// Type return type string for MultiLineString
+func (m MultiLineString) Type() string {
+	return multiLineStringType
+}
+
 // AsGeometry converts this MultiLineString into a Geometry.
 func (m MultiLineString) AsGeometry() Geometry {
 	return Geometry{multiLineStringTag, unsafe.Pointer(&m)}

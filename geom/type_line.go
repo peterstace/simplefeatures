@@ -31,6 +31,12 @@ func NewLineXY(a, b XY, opts ...ConstructorOption) (Line, error) {
 	return NewLineC(Coordinates{a}, Coordinates{b}, opts...)
 }
 
+// Type return type string for Line
+func (n Line) Type() string {
+	// Line is not a standard type, use LineString as its type
+	return lineStringType
+}
+
 // AsGeometry converts this Line into a Geometry.
 func (n Line) AsGeometry() Geometry {
 	return Geometry{lineTag, unsafe.Pointer(&n)}
@@ -47,20 +53,20 @@ func (n Line) EndPoint() Coordinates {
 }
 
 // NumPoints always returns 2.
-func (Line) NumPoints() int {
+func (n Line) NumPoints() int {
 	return 2
 }
 
-// PointN returns the coordinates of the first point when n is 0, and the
-// second point when n is 1. It panics if n is any other value.
-func (ln Line) PointN(n int) Coordinates {
-	switch n {
+// PointN returns the coordinates of the first point when i is 0, and the
+// second point when i is 1. It panics if i is any other value.
+func (n Line) PointN(i int) Coordinates {
+	switch i {
 	case 0:
-		return ln.StartPoint()
+		return n.StartPoint()
 	case 1:
-		return ln.EndPoint()
+		return n.EndPoint()
 	default:
-		panic("n must be 0 or 1")
+		panic("i must be 0 or 1")
 	}
 }
 
