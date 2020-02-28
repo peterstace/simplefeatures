@@ -103,7 +103,11 @@ func checkIsValid(h *libgeos.Handle, g geom.Geometry, log *log.Logger) (bool, er
 	}
 	log.Printf("Valid as per libgeos: %v", validAsPerLibgeos)
 
-	if validAsPerLibgeos != validAsPerSimpleFeatures {
+	// libgeos allows empty rings in Polygons, however simplefeatures doesn't
+	// (it follows the PostGIS behaviour of disallowing empty rings).
+	ignoreMismatch := hasEmptyRing(g)
+
+	if !ignoreMismatch && validAsPerLibgeos != validAsPerSimpleFeatures {
 		return false, mismatchErr
 	}
 	return validAsPerSimpleFeatures, nil
@@ -239,31 +243,12 @@ func checkAsBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func hasEmptyPoint(g geom.Geometry) bool {
-	switch {
-	case g.IsPoint():
-		return g.IsEmpty()
-	case g.IsMultiPoint():
-		mp := g.AsMultiPoint()
-		n := mp.NumPoints()
-		for i := 0; i < n; i++ {
-			if mp.PointN(i).IsEmpty() {
-				return true
-			}
-		}
-	case g.IsGeometryCollection():
-		gc := g.AsGeometryCollection()
-		n := gc.NumGeometries()
-		for i := 0; i < n; i++ {
-			if hasEmptyPoint(gc.GeometryN(i)) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 func checkFromBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
+	if containsMultiPolygonWithEmptyPolygon(g) {
+		// libgeos omits the empty Polygon, but simplefeatures doesn't.
+		return nil
+	}
+
 	var wkb bytes.Buffer
 	if err := g.AsBinary(&wkb); err != nil {
 		return err

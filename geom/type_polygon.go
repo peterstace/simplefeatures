@@ -278,6 +278,8 @@ func (p Polygon) Intersects(g Geometry) bool {
 }
 
 func (p Polygon) IsEmpty() bool {
+	// Rings are now allowed to be empty, so we don't have to check IsEmpty on
+	// each ring.
 	return len(p.rings) == 0
 }
 

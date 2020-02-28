@@ -256,14 +256,21 @@ func (m MultiPolygon) Equals(other Geometry) (bool, error) {
 }
 
 func (m MultiPolygon) Envelope() (Envelope, bool) {
-	if len(m.polys) == 0 {
-		return Envelope{}, false
+	var env Envelope
+	var has bool
+	for _, poly := range m.polys {
+		e, ok := poly.Envelope()
+		if !ok {
+			continue
+		}
+		if has {
+			env = env.ExpandToIncludeEnvelope(e)
+		} else {
+			env = e
+			has = true
+		}
 	}
-	env := mustEnv(m.polys[0].Envelope())
-	for _, poly := range m.polys[1:] {
-		env = env.ExpandToIncludeEnvelope(mustEnv(poly.Envelope()))
-	}
-	return env, true
+	return env, has
 }
 
 func (m MultiPolygon) Boundary() MultiLineString {
