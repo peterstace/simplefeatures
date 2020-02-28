@@ -39,10 +39,9 @@ func TestZeroGeometry(t *testing.T) {
 	expectIntEq(t, z.Dimension(), 0)
 }
 
-
 func TestGeometryType(t *testing.T) {
 	for i, tt := range []struct {
-		wkt string
+		wkt     string
 		geoType string
 	}{
 		{"POINT(1 1)", "Point"},

@@ -48,12 +48,12 @@ func (t geometryTag) String() string {
 
 const (
 	geometryCollectionType = "GeometryCollection"
-	pointType =              "Point"
-	lineStringType =          "LineString"
-	polygonType =             "Polygon"
-	multiPointType =          "MultiPoint"
-	multiLineStringType =     "MultiLineString"
-	multiPolygonType =        "MultiPolygon"
+	pointType              = "Point"
+	lineStringType         = "LineString"
+	polygonType            = "Polygon"
+	multiPointType         = "MultiPoint"
+	multiLineStringType    = "MultiLineString"
+	multiPolygonType       = "MultiPolygon"
 )
 
 // IsGeometryCollection return true iff the Geometry is a GeometryCollection geometry.

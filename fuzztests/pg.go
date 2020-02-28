@@ -27,12 +27,13 @@ type UnaryResult struct {
 	Area       float64
 	Centroid   geom.Geometry
 	Reverse    geom.Geometry
-	Type string
+	Type       string
 }
 
 const (
 	postgisTypePrefix = "ST_"
 )
+
 func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 	// WKB and WKB forms returned from PostGIS don't _always_ give the same
 	// result (usually differences around empty geometries). In the case of

@@ -57,7 +57,6 @@ func (n Line) NumPoints() int {
 	return 2
 }
 
-
 // PointN returns the coordinates of the first point when i is 0, and the
 // second point when i is 1. It panics if i is any other value.
 func (n Line) PointN(i int) Coordinates {
