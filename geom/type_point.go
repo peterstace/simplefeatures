@@ -13,8 +13,6 @@ import (
 //
 // The Point may be empty.
 //
-// The zero value of the Point is the empty Point.
-//
 // There aren't any assertions about what constitutes a valid point.
 type Point struct {
 	coords OptionalCoordinates
@@ -22,7 +20,7 @@ type Point struct {
 
 // NewEmptyPoint creates a Point that is empty.
 func NewEmptyPoint() Point {
-	return Point{}
+	return Point{OptionalCoordinates{Empty: true}}
 }
 
 // NewPointXY creates a new point from an XY.
@@ -37,7 +35,7 @@ func NewPointF(x, y float64, _ ...ConstructorOption) Point {
 
 // NewPointC creates a new point gives its Coordinates.
 func NewPointC(c Coordinates, _ ...ConstructorOption) Point {
-	return Point{coords: OptionalCoordinates{Present: true, Value: c}}
+	return Point{coords: OptionalCoordinates{Value: c}}
 }
 
 // NewPointOC creates a new point given its OptionalCoordinates.
@@ -53,7 +51,7 @@ func (p Point) AsGeometry() Geometry {
 // XY gives the XY location of the point. The returned flag is set to true if
 // and only if the point is non-empty.
 func (p Point) XY() (XY, bool) {
-	return p.coords.Value.XY, p.coords.Present
+	return p.coords.Value.XY, !p.coords.Empty
 }
 
 // Coordinates returns the coordinates of the point.
@@ -79,7 +77,7 @@ func (p Point) AppendWKT(dst []byte) []byte {
 }
 
 func (p Point) IsEmpty() bool {
-	return !p.coords.Present
+	return p.coords.Empty
 }
 
 func (p Point) IsSimple() bool {
@@ -144,7 +142,7 @@ func (p Point) MarshalJSON() ([]byte, error) {
 // TransformXY transforms this Point into another Point according to fn.
 func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	coords := p.Coordinates()
-	if coords.Present {
+	if !coords.Empty {
 		coords.Value.XY = fn(coords.Value.XY)
 	}
 	return NewPointOC(coords, opts...).AsGeometry(), nil

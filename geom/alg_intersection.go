@@ -306,14 +306,14 @@ func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (Geometry, error) {
 	mp1Set := make(map[XY]struct{})
 	for _, pt := range mp1.pts {
 		c := pt.Coordinates()
-		if c.Present {
+		if !c.Empty {
 			mp1Set[c.Value.XY] = struct{}{}
 		}
 	}
 	mp2Set := make(map[XY]struct{})
 	for _, pt := range mp2.pts {
 		c := pt.Coordinates()
-		if c.Present {
+		if !c.Empty {
 			mp2Set[c.Value.XY] = struct{}{}
 		}
 	}
