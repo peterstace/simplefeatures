@@ -31,7 +31,7 @@ func NewEmptyMultiPolygon() MultiPolygon {
 // NewMultiPolygon creates a MultiPolygon from its constituent Polygons. It
 // gives an error if any of the MultiPolygon assertions are not maintained.
 func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
-	if !doExpensiveValidations(opts) {
+	if skipValidations(opts) {
 		return MultiPolygon{polys}, nil
 	}
 
