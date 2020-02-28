@@ -52,6 +52,7 @@ func TestFuzz(t *testing.T) {
 			CheckArea(t, want, g)
 			CheckCentroid(t, want, g)
 			CheckReverse(t, want, g)
+			CheckType(t, want, g)
 		})
 	}
 	for i, g1 := range geoms {
@@ -63,7 +64,6 @@ func TestFuzz(t *testing.T) {
 			})
 		}
 	}
-
 }
 
 func setupDB(t *testing.T) PostGIS {

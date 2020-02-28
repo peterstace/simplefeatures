@@ -45,7 +45,7 @@ func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, e
 		}
 		points[i] = len(coords) - 1
 	}
-	if doCheapValidations(opts) && len(coords) == 1 {
+	if !skipValidations(opts) && len(coords) == 1 {
 		return LineString{}, errors.New("LineString must either contain zero points or at least two distinct points")
 	}
 	return LineString{coords, points}, nil
@@ -54,6 +54,11 @@ func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, e
 // NewLineStringXY creates a line string from the XYs defining its points.
 func NewLineStringXY(pts []XY, opts ...ConstructorOption) (LineString, error) {
 	return NewLineStringC(oneDimXYToCoords(pts), opts...)
+}
+
+// Type return type string for LineString
+func (s LineString) Type() string {
+	return lineStringType
 }
 
 // AsGeometry converts this LineString into a Geometry.

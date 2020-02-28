@@ -111,6 +111,11 @@ func TestPolygonValidation(t *testing.T) {
 			(2 2,3 2,3 3,2 3,2 2),
 			(1 1,4 1,4 4,1 4,1 1)
 		)`,
+
+		// Contains empty rings.
+		`POLYGON(EMPTY)`,
+		`POLYGON(EMPTY,(0 0,0 1,1 0,0 0))`,
+		`POLYGON((0 0,0 1,1 0,0 0),EMPTY)`,
 	} {
 		t.Run("invalid_"+strconv.Itoa(i), func(t *testing.T) {
 			_, err := UnmarshalWKT(strings.NewReader(wkt))
@@ -141,6 +146,11 @@ func TestMultiPolygonValidation(t *testing.T) {
 			((0 0,5 0,5 5,0 5,0 0),(1 1,4 1,4 4,1 4,1 1)),
 			((2 2,3 2,3 3,2 3,2 2))
 		)`,
+
+		// Child polygons can be empty.
+		`MULTIPOLYGON(EMPTY)`,
+		`MULTIPOLYGON(((0 0,0 1,1 0,0 0)),EMPTY)`,
+		`MULTIPOLYGON(EMPTY,((0 0,0 1,1 0,0 0)))`,
 	} {
 		t.Run(fmt.Sprintf("valid_%d", i), func(t *testing.T) {
 			geomFromWKT(t, wkt)

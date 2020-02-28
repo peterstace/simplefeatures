@@ -127,6 +127,8 @@ func (h *Handle) createGeomHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
 		return h.createGeomHandleForPoint(g.AsPoint())
 	case g.IsMultiPoint():
 		return h.createGeomHandleForMultiPoint(g.AsMultiPoint())
+	case g.IsMultiPolygon():
+		return h.createGeomHandleForMultiPolygon(g.AsMultiPolygon())
 	case g.IsGeometryCollection():
 		return h.createGeomHandleForGeometryCollection(g.AsGeometryCollection())
 	default:
@@ -168,6 +170,34 @@ func (h *Handle) createGeomHandleForMultiPoint(mp geom.MultiPoint) (*C.GEOSGeome
 	}
 	gh := C.GEOSGeom_createCollection_r(
 		h.context, C.GEOS_MULTIPOINT, geomsPtr, C.uint(n),
+	)
+	if gh == nil {
+		return nil, h.err()
+	}
+	return gh, nil
+}
+
+func (h *Handle) createGeomHandleForMultiPolygon(mp geom.MultiPolygon) (*C.GEOSGeometry, error) {
+	n := mp.NumPolygons()
+	polys := make([]*C.GEOSGeometry, n)
+	for i := 0; i < n; i++ {
+		var err error
+		polys[i], err = h.createGeomHandle(mp.PolygonN(i).AsGeometry())
+		if err != nil {
+			for _, gh := range polys {
+				if gh != nil {
+					C.GEOSGeom_destroy_r(h.context, gh)
+				}
+			}
+			return nil, err
+		}
+	}
+	var geomsPtr **C.GEOSGeometry
+	if len(polys) > 0 {
+		geomsPtr = &polys[0]
+	}
+	gh := C.GEOSGeom_createCollection_r(
+		h.context, C.GEOS_MULTIPOLYGON, geomsPtr, C.uint(n),
 	)
 	if gh == nil {
 		return nil, h.err()
@@ -269,6 +299,32 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 			}
 		}
 		return geom.NewMultiPoint(subPoints).AsGeometry(), nil
+	case "MultiPolygon":
+		n := C.GEOSGetNumGeometries_r(h.context, gh)
+		if n == -1 {
+			return geom.Geometry{}, h.err()
+		}
+		subPolys := make([]geom.Polygon, n)
+		for i := 0; i < int(n); i++ {
+			sub := C.GEOSGetGeometryN_r(h.context, gh, C.int(i))
+			if sub == nil {
+				return geom.Geometry{}, h.err()
+			}
+			subPolyAsGeom, err := h.decodeGeomHandleUsingWKB(sub)
+			if err != nil {
+				return geom.Geometry{}, err
+			}
+			if !subPolyAsGeom.IsPolygon() {
+				return geom.Geometry{}, errors.New(
+					"internal error: expected polygon")
+			}
+			subPolys[i] = subPolyAsGeom.AsPolygon()
+		}
+		mp, err := geom.NewMultiPolygon(subPolys)
+		if err != nil {
+			return geom.Geometry{}, err
+		}
+		return mp.AsGeometry(), nil
 	case "GeometryCollection":
 		n := C.GEOSGetNumGeometries_r(h.context, gh)
 		if n == -1 {
@@ -287,7 +343,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 			}
 		}
 		return geom.NewGeometryCollection(subGeoms).AsGeometry(), nil
-	case "LineString", "Polygon", "MultiLineString", "MultiPolygon":
+	case "LineString", "Polygon", "MultiLineString":
 		return h.decodeGeomHandleUsingWKB(gh)
 	default:
 		return geom.Geometry{}, fmt.Errorf("unexpected geometry type: %s", C.GoString(geomType))

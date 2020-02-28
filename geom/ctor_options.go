@@ -11,29 +11,17 @@ type ConstructorOption func(o *ctorOptionSet)
 //    from the geometry may be invalid.
 //
 // 2. If the geometry is invalid, then invoking geometric calculations may
-//    cause a panic or infinite loop (this is a theoretical concern that
-//    hasn't yet been observed in practice).
+//    cause a panic or infinite loop.
 //
 // This option should be used with caution. It is most useful when invalid
 // geometries need to be loaded, but no geometric calculations will be
 // performed.
 func DisableAllValidations(o *ctorOptionSet) {
-	o.skipAllValidations = true
-}
-
-// DisableExpensiveValidations gives a hint that geometry constructors may opt
-// to skip any expensive validations. All of the caveats that come with the
-// DisableAllValidations option also come with this option.
-//
-// This option should be used with caution, but can safely be used with
-// geometries that are known to be valid a priori.
-func DisableExpensiveValidations(o *ctorOptionSet) {
-	o.skipExpensiveValidations = true
+	o.skipValidations = true
 }
 
 type ctorOptionSet struct {
-	skipExpensiveValidations bool
-	skipAllValidations       bool
+	skipValidations bool
 }
 
 func newOptionSet(opts []ConstructorOption) ctorOptionSet {
@@ -50,11 +38,7 @@ func newOptionSet(opts []ConstructorOption) ctorOptionSet {
 	return cos
 }
 
-func doExpensiveValidations(opts []ConstructorOption) bool {
+func skipValidations(opts []ConstructorOption) bool {
 	os := newOptionSet(opts)
-	return !os.skipExpensiveValidations && !os.skipAllValidations
-}
-
-func doCheapValidations(opts []ConstructorOption) bool {
-	return !newOptionSet(opts).skipAllValidations
+	return os.skipValidations
 }

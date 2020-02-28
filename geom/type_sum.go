@@ -46,6 +46,40 @@ func (t geometryTag) String() string {
 	return s
 }
 
+const (
+	geometryCollectionType = "GeometryCollection"
+	pointType              = "Point"
+	lineStringType         = "LineString"
+	polygonType            = "Polygon"
+	multiPointType         = "MultiPoint"
+	multiLineStringType    = "MultiLineString"
+	multiPolygonType       = "MultiPolygon"
+)
+
+// Type returns a string representation of the geometry's type.
+func (g Geometry) Type() string {
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().Type()
+	case pointTag:
+		return g.AsPoint().Type()
+	case lineTag:
+		return g.AsLine().Type()
+	case lineStringTag:
+		return g.AsLineString().Type()
+	case polygonTag:
+		return g.AsPolygon().Type()
+	case multiPointTag:
+		return g.AsMultiPoint().Type()
+	case multiLineStringTag:
+		return g.AsMultiLineString().Type()
+	case multiPolygonTag:
+		return g.AsMultiPolygon().Type()
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}
+
 // IsGeometryCollection return true iff the Geometry is a GeometryCollection geometry.
 func (g Geometry) IsGeometryCollection() bool { return g.tag == geometryCollectionTag }
 

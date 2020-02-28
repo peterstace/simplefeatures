@@ -47,6 +47,11 @@ func NewMultiPointXY(pts []XY, opts ...ConstructorOption) MultiPoint {
 	return NewMultiPointC(oneDimXYToCoords(pts))
 }
 
+// Type return type string for MultiPoint
+func (m MultiPoint) Type() string {
+	return multiPointType
+}
+
 // AsGeometry converts this MultiPoint into a Geometry.
 func (m MultiPoint) AsGeometry() Geometry {
 	return Geometry{multiPointTag, unsafe.Pointer(&m)}

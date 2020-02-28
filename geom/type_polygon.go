@@ -18,7 +18,7 @@ import (
 // Its assertions are:
 //
 // 1. The rings (outer and inner) must be valid linear rings (i.e. be simple
-// and closed LineStrings).
+// and closed LineStrings). This implies that the rings cannot be empty.
 //
 // 2. Each pair of rings must only intersect at a single point.
 //
@@ -86,10 +86,7 @@ func NewPolygonXY(pts [][]XY, opts ...ConstructorOption) (Polygon, error) {
 }
 
 func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
-	if len(rings) == 0 {
-		return nil
-	}
-	if !doCheapValidations(opts) && !doExpensiveValidations(opts) {
+	if len(rings) == 0 || skipValidations(opts) {
 		return nil
 	}
 
@@ -117,16 +114,12 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 	}
 
 	for _, r := range rings {
-		if doCheapValidations(opts) && !r.IsClosed() {
+		if !r.IsClosed() {
 			return errors.New("polygon rings must be closed")
 		}
-		if doExpensiveValidations(opts) && !r.IsSimple() {
+		if !r.IsSimple() {
 			return errors.New("polygon rings must be simple")
 		}
-	}
-
-	if !doExpensiveValidations(opts) {
-		return nil
 	}
 
 	sort.Slice(orderedRings, func(i, j int) bool {
@@ -207,6 +200,11 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 	return nil
 }
 
+// Type return type string for Polygon
+func (p Polygon) Type() string {
+	return polygonType
+}
+
 // AsGeometry converts this Polygon into a Geometry.
 func (p Polygon) AsGeometry() Geometry {
 	return Geometry{polygonTag, unsafe.Pointer(&p)}
@@ -278,6 +276,8 @@ func (p Polygon) Intersects(g Geometry) bool {
 }
 
 func (p Polygon) IsEmpty() bool {
+	// Rings are not allowed to be empty, so we don't have to check IsEmpty on
+	// each ring.
 	return len(p.rings) == 0
 }
 

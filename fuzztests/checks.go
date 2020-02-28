@@ -123,7 +123,8 @@ func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckWKB", func(t *testing.T) {
 		if g.IsEmpty() && ((g.IsGeometryCollection() && g.AsGeometryCollection().NumGeometries() > 0) ||
 			(g.IsMultiPoint() && g.AsMultiPoint().NumPoints() > 0) ||
-			(g.IsMultiLineString() && g.AsMultiLineString().NumLineStrings() > 0)) {
+			(g.IsMultiLineString() && g.AsMultiLineString().NumLineStrings() > 0) ||
+			(g.IsMultiPolygon() && g.AsMultiPolygon().NumPolygons() > 0)) {
 			// The behaviour for collections in PostGIS is to just give the
 			// collection with zero elements (even if there are some empty
 			// elements). This doesn't seem like correct behaviour, so these
@@ -456,7 +457,7 @@ func CheckArea(t *testing.T, want UnaryResult, g geom.Geometry) {
 func CheckCentroid(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckCentroid", func(t *testing.T) {
 		got := g.Centroid()
-		want := want.Cetroid
+		want := want.Centroid
 
 		if !got.EqualsExact(want, geom.Tolerance(0.000000001)) {
 			t.Logf("g:  %v", g.AsText())
@@ -474,6 +475,19 @@ func CheckReverse(t *testing.T, want UnaryResult, g geom.Geometry) {
 		if !got.EqualsExact(want, geom.Tolerance(1e-9)) {
 			t.Logf("got:  %v", got.AsText())
 			t.Logf("want: %v", want.AsText())
+			t.Error("mismatch")
+		}
+	})
+}
+
+func CheckType(t *testing.T, want UnaryResult, g geom.Geometry) {
+	t.Run("CheckType", func(t *testing.T) {
+		got := g.Type()
+		want := want.Type
+
+		if got != want {
+			t.Logf("got:  %s", got)
+			t.Logf("want: %v", want)
 			t.Error("mismatch")
 		}
 	})
