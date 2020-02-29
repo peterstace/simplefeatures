@@ -135,27 +135,27 @@ func TestAsTextEmpty(t *testing.T) {
 		want string
 	}{
 		{
-			NewEmptyPoint().AsGeometry(),
+			NewEmptyPoint(XYOnly).AsGeometry(),
 			"POINT EMPTY",
 		},
 		{
-			NewEmptyLineString().AsGeometry(),
+			NewEmptyLineString(XYOnly).AsGeometry(),
 			"LINESTRING EMPTY",
 		},
 		{
-			NewEmptyPolygon().AsGeometry(),
+			NewEmptyPolygon(XYOnly).AsGeometry(),
 			"POLYGON EMPTY",
 		},
 		{
-			NewMultiPoint(nil).AsGeometry(),
+			NewEmptyMultiPoint(XYOnly).AsGeometry(),
 			"MULTIPOINT EMPTY",
 		},
 		{
-			NewMultiLineString(nil).AsGeometry(),
+			NewEmptyMultiLineString(XYOnly).AsGeometry(),
 			"MULTILINESTRING EMPTY",
 		},
 		{
-			NewEmptyMultiPolygon().AsGeometry(),
+			NewEmptyMultiPolygon(XYOnly).AsGeometry(),
 			"MULTIPOLYGON EMPTY",
 		},
 	} {

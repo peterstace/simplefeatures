@@ -15,17 +15,19 @@ import (
 //
 // There aren't any assertions about what constitutes a valid point.
 type Point struct {
-	coords OptionalCoordinates
+	coords Coordinates
+	full   bool
+	ctype  CoordinatesType
 }
 
 // NewEmptyPoint creates a Point that is empty.
-func NewEmptyPoint() Point {
-	return Point{OptionalCoordinates{Empty: true}}
+func NewEmptyPoint(ctype CoordinatesType) Point {
+	return Point{Coordinates{}, false, XYOnly}
 }
 
 // NewPointXY creates a new point from an XY.
 func NewPointXY(xy XY, _ ...ConstructorOption) Point {
-	return NewPointC(Coordinates{XY: xy})
+	return Point{Coordinates{XY: xy}, true, XYOnly}
 }
 
 // NewPointF creates a new point from float64 x and y values.
@@ -34,13 +36,8 @@ func NewPointF(x, y float64, _ ...ConstructorOption) Point {
 }
 
 // NewPointC creates a new point gives its Coordinates.
-func NewPointC(c Coordinates, _ ...ConstructorOption) Point {
-	return Point{coords: OptionalCoordinates{Value: c}}
-}
-
-// NewPointOC creates a new point given its OptionalCoordinates.
-func NewPointOC(oc OptionalCoordinates, _ ...ConstructorOption) Point {
-	return Point{coords: oc}
+func NewPointC(c Coordinates, ctype CoordinatesType, _ ...ConstructorOption) Point {
+	return Point{c, true, ctype}
 }
 
 // Type return type string for Point
@@ -56,12 +53,13 @@ func (p Point) AsGeometry() Geometry {
 // XY gives the XY location of the point. The returned flag is set to true if
 // and only if the point is non-empty.
 func (p Point) XY() (XY, bool) {
-	return p.coords.Value.XY, !p.coords.Empty
+	return p.coords.XY, p.full
 }
 
-// Coordinates returns the coordinates of the point.
-func (p Point) Coordinates() OptionalCoordinates {
-	return p.coords
+// Coordinates returns the coordinates of the point. The returned flag is set
+// to true if and only if the point is non-empty.
+func (p Point) Coordinates() (Coordinates, bool) {
+	return p.coords, p.full
 }
 
 func (p Point) AsText() string {
@@ -82,7 +80,7 @@ func (p Point) AppendWKT(dst []byte) []byte {
 }
 
 func (p Point) IsEmpty() bool {
-	return p.coords.Empty
+	return !p.full
 }
 
 func (p Point) IsSimple() bool {
@@ -137,16 +135,20 @@ func (p Point) ConvexHull() Geometry {
 }
 
 func (p Point) MarshalJSON() ([]byte, error) {
-	return marshalGeoJSON("Point", p.Coordinates())
+	var dst []byte
+	dst = append(dst, `{"type":"Point","coordinates":`...)
+	dst = appendGeoJSONCoordinate(dst, p.ctype, p.coords, !p.full)
+	return append(dst, '}'), nil
 }
 
 // TransformXY transforms this Point into another Point according to fn.
 func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
-	coords := p.Coordinates()
-	if !coords.Empty {
-		coords.Value.XY = fn(coords.Value.XY)
+	if !p.full {
+		return p.AsGeometry(), nil
 	}
-	return NewPointOC(coords, opts...).AsGeometry(), nil
+	newC := p.coords
+	newC.XY = fn(newC.XY)
+	return NewPointC(newC, p.ctype, opts...).AsGeometry(), nil
 }
 
 // EqualsExact checks if this Point is exactly equal to another Point.
@@ -180,5 +182,35 @@ func (p Point) Centroid() Point {
 
 // Reverse in the case of Point outputs the same point.
 func (p Point) Reverse() Point {
+	return p
+}
+
+// AsMultiPoint is a convenience function that converts this Point into a
+// MultiPoint.
+func (p Point) AsMultiPoint() MultiPoint {
+	var empty BitSet
+	floats := make([]float64, 2, 4)
+	if p.full {
+		floats[0] = p.coords.X
+		floats[1] = p.coords.Y
+	}
+	if p.full && p.ctype.Is3D() {
+		floats = append(floats, p.coords.Z)
+	}
+	if p.full && p.ctype.IsMeasured() {
+		floats = append(floats, p.coords.M)
+	}
+	seq := NewSequenceNoCopy(floats, p.CoordinatesType())
+	return NewMultiPointFromSequence(seq, empty)
+}
+
+func (p Point) CoordinatesType() CoordinatesType {
+	return p.ctype
+}
+
+func (p Point) Force2D() Point {
+	p.coords.Z = 0
+	p.coords.M = 0
+	p.ctype = XYOnly
 	return p
 }

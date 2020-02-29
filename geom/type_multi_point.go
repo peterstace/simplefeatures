@@ -14,37 +14,66 @@ import (
 //
 // 1. It must be made up of 0 or more valid Points.
 type MultiPoint struct {
-	pts []Point
+	seq   Sequence
+	empty BitSet
 }
 
-func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
-	return MultiPoint{pts}
+func NewEmptyMultiPoint(ctype CoordinatesType) MultiPoint {
+	return MultiPoint{NewSequence(nil, ctype), BitSet{}}
 }
 
-// NewMultiPointOC creates a new MultiPoint consisting of a Point for each
-// non-empty OptionalCoordinate.
-func NewMultiPointOC(coords []OptionalCoordinates, opts ...ConstructorOption) MultiPoint {
-	var pts []Point
-	for _, c := range coords {
-		pt := NewPointOC(c, opts...)
-		pts = append(pts, pt)
+func NewMultiPoint(pts []Point, opts ...ConstructorOption) (MultiPoint, error) {
+	var agg coordinateTypeAggregator
+	for _, p := range pts {
+		agg.add(p.CoordinatesType())
 	}
-	return NewMultiPoint(pts, opts...)
+	if agg.err != nil {
+		return MultiPoint{}, agg.err
+	}
+
+	var empty BitSet
+	var floats []float64
+	for i, pt := range pts {
+		c, ok := pt.Coordinates()
+		if !ok {
+			empty.Set(i)
+		}
+		floats = append(floats, c.X, c.Y)
+		switch agg.ctype {
+		case XYZ:
+			floats = append(floats, c.Z)
+		case XYM:
+			floats = append(floats, c.M)
+		case XYZM:
+			floats = append(floats, c.Z, c.M)
+		}
+	}
+	seq := NewSequenceNoCopy(floats, agg.ctype)
+	return MultiPoint{seq, empty}, nil
 }
 
-// NewMultiPointC creates a new MultiPoint consisting of a point for each coordinate.
-func NewMultiPointC(coords []Coordinates, opts ...ConstructorOption) MultiPoint {
-	var pts []Point
-	for _, c := range coords {
-		pt := NewPointC(c, opts...)
-		pts = append(pts, pt)
+// NewMultiPointFromSequence creates a new MultiPoint from a sequence of
+// coordinates. If there are any positions set in the bit set, then these are
+// used to indicate that the corresponding point in the sequence is an empty
+// point.
+func NewMultiPointFromSequence(seq Sequence, empty BitSet, opts ...ConstructorOption) MultiPoint {
+	return MultiPoint{
+		seq,
+		empty.Clone(), // clone so that the caller doesn't have access to the interal empty set
 	}
-	return NewMultiPoint(pts, opts...)
 }
 
 // NewMultiPointXY creates a new MultiPoint consisting of a point for each XY.
-func NewMultiPointXY(pts []XY, opts ...ConstructorOption) MultiPoint {
-	return NewMultiPointC(oneDimXYToCoords(pts))
+func NewMultiPointXY(xys []XY, opts ...ConstructorOption) MultiPoint {
+	floats := make([]float64, 2*len(xys))
+	for i, xy := range xys {
+		floats[2*i] = xy.X
+		floats[2*i+1] = xy.Y
+	}
+	return NewMultiPointFromSequence(
+		NewSequenceNoCopy(floats, XYOnly),
+		BitSet{},
+	)
 }
 
 // Type return type string for MultiPoint
@@ -59,12 +88,17 @@ func (m MultiPoint) AsGeometry() Geometry {
 
 // NumPoints gives the number of element points making up the MultiPoint.
 func (m MultiPoint) NumPoints() int {
-	return len(m.pts)
+	return m.seq.Length()
 }
 
 // PointN gives the nth (zero indexed) Point.
 func (m MultiPoint) PointN(n int) Point {
-	return m.pts[n]
+	if m.empty.Get(n) {
+		return NewEmptyPoint(XYOnly)
+	} else {
+		c := m.seq.Get(n)
+		return NewPointC(c, m.CoordinatesType())
+	}
 }
 
 func (m MultiPoint) AsText() string {
@@ -73,22 +107,22 @@ func (m MultiPoint) AsText() string {
 
 func (m MultiPoint) AppendWKT(dst []byte) []byte {
 	dst = append(dst, "MULTIPOINT"...)
-	if len(m.pts) == 0 {
+	if m.NumPoints() == 0 {
 		return append(dst, " EMPTY"...)
 	}
 	dst = append(dst, '(')
-	for i, pt := range m.pts {
-		xy, ok := pt.XY()
+	for i := 0; i < m.NumPoints(); i++ {
+		c, ok := m.PointN(i).Coordinates()
 		if ok {
 			dst = append(dst, '(')
-			dst = appendFloat(dst, xy.X)
+			dst = appendFloat(dst, c.X)
 			dst = append(dst, ' ')
-			dst = appendFloat(dst, xy.Y)
+			dst = appendFloat(dst, c.Y)
 			dst = append(dst, ')')
 		} else {
 			dst = append(dst, "EMPTY"...)
 		}
-		if i != len(m.pts)-1 {
+		if i != m.NumPoints()-1 {
 			dst = append(dst, ',')
 		}
 	}
@@ -98,8 +132,8 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 // IsSimple returns true iff no two of its points are equal.
 func (m MultiPoint) IsSimple() bool {
 	seen := make(map[XY]bool)
-	for _, p := range m.pts {
-		xy, ok := p.XY()
+	for i := 0; i < m.NumPoints(); i++ {
+		xy, ok := m.PointN(i).XY()
 		if !ok {
 			continue
 		}
@@ -120,8 +154,8 @@ func (m MultiPoint) Intersects(g Geometry) bool {
 }
 
 func (m MultiPoint) IsEmpty() bool {
-	for _, pt := range m.pts {
-		if !pt.IsEmpty() {
+	for i := 0; i < m.NumPoints(); i++ {
+		if !m.empty.Get(i) {
 			return false
 		}
 	}
@@ -131,11 +165,11 @@ func (m MultiPoint) IsEmpty() bool {
 func (m MultiPoint) Envelope() (Envelope, bool) {
 	var has bool
 	var env Envelope
-	for _, pt := range m.pts {
-		xy, ok := pt.XY()
-		if !ok {
+	for i := 0; i < m.NumPoints(); i++ {
+		if m.empty.Get(i) {
 			continue
 		}
+		xy := m.seq.GetXY(i)
 		if has {
 			env = env.ExtendToIncludePoint(xy)
 		} else {
@@ -176,24 +210,25 @@ func (m MultiPoint) ConvexHull() Geometry {
 }
 
 func (m MultiPoint) MarshalJSON() ([]byte, error) {
-	return marshalGeoJSON("MultiPoint", m.Coordinates())
+	var dst []byte
+	dst = append(dst, `{"type":"MultiPoint","coordinates":`...)
+	dst = appendGeoJSONSequence(dst, m.seq, m.empty)
+	dst = append(dst, '}')
+	return dst, nil
 }
 
 // Coordinates returns the coordinates of the points represented by the
-// MultiPoint.
-func (m MultiPoint) Coordinates() []OptionalCoordinates {
-	coords := make([]OptionalCoordinates, len(m.pts))
-	for i := range coords {
-		coords[i] = m.pts[i].Coordinates()
-	}
-	return coords
+// MultiPoint. If a point has its corresponding bit set to true in the BitSet,
+// then that point is empty.
+func (m MultiPoint) Coordinates() (seq Sequence, empty BitSet) {
+	// TODO: If we had a read-only BitSet, then we could avoid the clone here.
+	return m.seq, m.empty.Clone()
 }
 
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
 func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
-	coords := m.Coordinates()
-	transformOptional1dCoords(coords, fn)
-	return NewMultiPointOC(coords, opts...).AsGeometry(), nil
+	transformed := transformSequence(m.seq, fn)
+	return NewMultiPointFromSequence(transformed, m.empty, opts...).AsGeometry(), nil
 }
 
 // EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.
@@ -220,7 +255,7 @@ func (m MultiPoint) Centroid() Point {
 		}
 	}
 	if n == 0 {
-		return NewEmptyPoint()
+		return NewEmptyPoint(XYOnly)
 	}
 	return NewPointXY(sum.Scale(1 / float64(n)))
 }
@@ -229,4 +264,8 @@ func (m MultiPoint) Centroid() Point {
 // original order.
 func (m MultiPoint) Reverse() MultiPoint {
 	return m
+}
+
+func (m MultiPoint) CoordinatesType() CoordinatesType {
+	return m.seq.CoordinatesType()
 }

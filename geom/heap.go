@@ -1,6 +1,7 @@
 package geom
 
-func seq(n int) []int {
+// TODO rename to intSequence
+func intSequence(n int) []int {
 	s := make([]int, n)
 	for i := range s {
 		s[i] = i

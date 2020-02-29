@@ -15,20 +15,23 @@ import (
 //
 // 1. The two points must be distinct.
 type Line struct {
-	a, b Coordinates
+	// Uses 2 Coordinates variables rather than a Sequence to avoid the
+	// indirection involved with a Sequence.
+	a, b  Coordinates
+	ctype CoordinatesType
 }
 
 // NewLineC creates a line segment given the Coordinates of its two endpoints.
-func NewLineC(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
+func NewLineC(a, b Coordinates, ctype CoordinatesType, opts ...ConstructorOption) (Line, error) {
 	if !skipValidations(opts) && a.XY == b.XY {
-		return Line{}, fmt.Errorf("line endpoints must be distinct: %v", a.XY)
+		return Line{}, ValidationError{"Line endpoints must be distinct"}
 	}
-	return Line{a, b}, nil
+	return Line{a, b, ctype}, nil
 }
 
 // NewLineXY creates a line segment given the XYs of its two endpoints.
 func NewLineXY(a, b XY, opts ...ConstructorOption) (Line, error) {
-	return NewLineC(Coordinates{a}, Coordinates{b}, opts...)
+	return NewLineC(Coordinates{XY: a}, Coordinates{XY: b}, XYOnly, opts...)
 }
 
 // Type return type string for Line
@@ -103,10 +106,7 @@ func (n Line) Envelope() Envelope {
 }
 
 func (n Line) Boundary() MultiPoint {
-	return NewMultiPoint([]Point{
-		NewPointXY(n.a.XY),
-		NewPointXY(n.b.XY),
-	})
+	return NewMultiPointXY([]XY{n.a.XY, n.b.XY})
 }
 
 func (n Line) Value() (driver.Value, error) {
@@ -132,39 +132,55 @@ func (n Line) ConvexHull() Geometry {
 }
 
 func (n Line) MarshalJSON() ([]byte, error) {
-	return marshalGeoJSON("LineString", n.Coordinates())
+	var dst []byte
+	dst = append(dst, `{"type":"LineString","coordinates":[`...)
+	dst = appendGeoJSONCoordinate(dst, n.ctype, n.a, false)
+	dst = append(dst, ',')
+	dst = appendGeoJSONCoordinate(dst, n.ctype, n.b, false)
+	dst = append(dst, "]}"...)
+	return dst, nil
 }
 
 // Coordinates returns the coordinates of the start and end point of the Line.
-func (n Line) Coordinates() []Coordinates {
-	return []Coordinates{n.a, n.b}
+func (n Line) Coordinates() Sequence {
+	floats := make([]float64, 0, 2*n.ctype.Dimension())
+	for _, c := range [2]Coordinates{n.a, n.b} {
+		floats = append(floats, c.X, c.Y)
+		if n.ctype.Is3D() {
+			floats = append(floats, c.Z)
+		}
+		if n.ctype.IsMeasured() {
+			floats = append(floats, c.M)
+		}
+	}
+	return NewSequenceNoCopy(floats, n.ctype)
 }
 
 // TransformXY transforms this Line into another Line according to fn.
 func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
-	coords := n.Coordinates()
-	transform1dCoords(coords, fn)
-	ln, err := NewLineC(coords[0], coords[1], opts...)
+	n.a.XY = fn(n.a.XY)
+	n.b.XY = fn(n.b.XY)
+	ln, err := NewLineC(n.a, n.b, n.ctype, opts...)
 	return ln.AsGeometry(), err
 }
 
 // EqualsExact checks if this Line is exactly equal to another curve.
 func (n Line) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	var c curve
+	var otherSeq Sequence
 	switch {
 	case other.IsLine():
-		c = other.AsLine()
+		otherSeq = other.AsLine().Coordinates()
 	case other.IsLineString():
-		c = other.AsLineString()
+		otherSeq = other.AsLineString().Coordinates()
 	default:
 		return false
 	}
-	return curvesExactEqual(n, c, opts)
+	return curvesExactEqual(n.Coordinates(), otherSeq, opts)
 }
 
 // IsValid checks if this Line is valid
 func (n Line) IsValid() bool {
-	_, err := NewLineC(n.a, n.b)
+	_, err := NewLineC(n.a, n.b, n.ctype)
 	return err == nil
 }
 
@@ -180,7 +196,7 @@ func (n Line) Centroid() Point {
 
 // AsLineString is a helper function that converts this Line into a LineString.
 func (n Line) AsLineString() LineString {
-	ls, err := NewLineStringC(n.Coordinates(), DisableAllValidations)
+	ls, err := NewLineStringFromSequence(n.Coordinates(), DisableAllValidations)
 	if err != nil {
 		// Cannot occur due to construction. A valid Line will always be a
 		// valid LineString.
@@ -193,5 +209,9 @@ func (n Line) AsLineString() LineString {
 
 // Reverse in the case of Line outputs the coordinates in reverse order.
 func (n Line) Reverse() Line {
-	return Line{n.b, n.a}
+	return Line{n.b, n.a, n.ctype}
+}
+
+func (n Line) CoordinatesType() CoordinatesType {
+	return n.ctype
 }

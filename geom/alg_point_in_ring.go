@@ -20,29 +20,37 @@ func pointRingSide(pt XY, ring LineString) side {
 		panic("pointRingSide called with non-closed ring")
 	}
 
-	ptg := NewPointC(Coordinates{pt})
+	seq := ring.Coordinates()
+	n := seq.Length()
+
 	// find max x coordinate
-	maxX := ring.LineN(0).StartPoint().X
-	for i := 0; i < ring.NumLines(); i++ {
-		ln := ring.LineN(i)
-		maxX = math.Max(maxX, ln.EndPoint().X)
-		if hasIntersectionPointWithLine(ptg, ln) {
-			return boundary
-		}
+	maxX := math.Inf(-1)
+	for i := 0; i < n; i++ {
+		maxX = math.Max(maxX, seq.GetXY(i).X)
 	}
 	if pt.X > maxX {
 		return exterior
 	}
 
-	ray, err := NewLineC(Coordinates{pt}, Coordinates{XY{maxX + 1, pt.Y}})
+	ptg := NewPointXY(pt)
+	iter := newLineStringIterator(ring)
+	for iter.next() {
+		ln := iter.line()
+		if hasIntersectionPointWithLine(ptg, ln) {
+			return boundary
+		}
+	}
+
+	ray, err := NewLineXY(pt, XY{maxX + 1, pt.Y})
 	if err != nil {
 		// Cannot occur because X coordinates are different.
 		panic(err)
 	}
 
 	var count int
-	for i := 0; i < ring.NumLines(); i++ {
-		seg := ring.LineN(i)
+	iter = newLineStringIterator(ring)
+	for iter.next() {
+		seg := iter.line()
 		inter := intersectLineWithLineNoAlloc(seg, ray)
 		if inter.empty {
 			continue

@@ -2,13 +2,14 @@ package geom
 
 type Coordinates struct {
 	XY
-	// TODO: Put optional Z and M here.
+	Z float64
+	M float64
 }
 
 func oneDimXYToCoords(pts []XY) []Coordinates {
 	coords := make([]Coordinates, len(pts))
 	for i, pt := range pts {
-		coords[i] = Coordinates{pt}
+		coords[i] = Coordinates{XY: pt}
 	}
 	return coords
 }
@@ -29,27 +30,13 @@ func threeDimXYToCoords(xys [][][]XY) [][][]Coordinates {
 	return coords
 }
 
-type OptionalCoordinates struct {
-	Empty bool
-	Value Coordinates
-}
-
+// TODO: Add Z and M values
+// TODO: Want to have these methods removed.
 func (c Coordinates) MarshalJSON() ([]byte, error) {
 	buf := []byte{'['}
 	buf = appendFloat(buf, c.XY.X)
 	buf = append(buf, ',')
 	buf = appendFloat(buf, c.XY.Y)
-	buf = append(buf, ']')
-	return buf, nil
-}
-
-func (oc OptionalCoordinates) MarshalJSON() ([]byte, error) {
-	buf := []byte{'['}
-	if !oc.Empty {
-		buf = appendFloat(buf, oc.Value.X)
-		buf = append(buf, ',')
-		buf = appendFloat(buf, oc.Value.Y)
-	}
 	buf = append(buf, ']')
 	return buf, nil
 }

@@ -261,17 +261,17 @@ func (c GeometryCollection) Centroid() Point {
 	switch result.highestDim {
 	case 0:
 		if result.numPoints == 0 {
-			return NewEmptyPoint() // Invalid centroid, highestDim is 0 and numPoints is 0
+			return NewEmptyPoint(XYOnly) // Invalid centroid, highestDim is 0 and numPoints is 0
 		}
 		xy = result.sumXY.Scale(1.0 / float64(result.numPoints))
 	case 1:
 		if result.sumLength == 0 {
-			return NewEmptyPoint() // Invalid centroid, highestDim is 1 and sumLength is 0
+			return NewEmptyPoint(XYOnly) // Invalid centroid, highestDim is 1 and sumLength is 0
 		}
 		xy = result.sumXY.Scale(1.0 / result.sumLength)
 	case 2:
 		if result.sumArea == 0 {
-			return NewEmptyPoint() // Invalid centroid, highestDim is 2 and sumArea is 0
+			return NewEmptyPoint(XYOnly) // Invalid centroid, highestDim is 2 and sumArea is 0
 		}
 		xy = result.sumXY.Scale(1.0 / result.sumArea)
 	default:

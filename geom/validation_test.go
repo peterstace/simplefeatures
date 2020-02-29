@@ -2,8 +2,6 @@ package geom_test
 
 import (
 	"fmt"
-	"math"
-	"math/rand"
 	"strconv"
 	"strings"
 	"testing"
@@ -21,7 +19,7 @@ func TestLineValidation(t *testing.T) {
 		{xy(-1, -1), xy(-1, -1)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := NewLineC(pts[0], pts[1])
+			_, err := NewLineC(pts[0], pts[1], XYOnly)
 			if err == nil {
 				t.Error("expected error")
 			}
@@ -30,14 +28,15 @@ func TestLineValidation(t *testing.T) {
 }
 
 func TestLineStringValidation(t *testing.T) {
-	for i, pts := range [][]Coordinates{
-		{xy(0, 0)},
-		{xy(1, 1)},
-		{xy(0, 0), xy(0, 0)},
-		{xy(1, 1), xy(1, 1)},
+	for i, pts := range [][]float64{
+		[]float64{0, 0},
+		[]float64{1, 1},
+		[]float64{0, 0, 0, 0},
+		[]float64{1, 1, 1, 1},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := NewLineStringC(pts)
+			seq := NewSequenceNoCopy(pts, XYOnly)
+			_, err := NewLineStringFromSequence(seq)
 			if err == nil {
 				t.Error("expected error")
 			}
@@ -192,87 +191,87 @@ func TestMultiPolygonValidation(t *testing.T) {
 	}
 }
 
-func BenchmarkPolygonSingleRingValidation(b *testing.B) {
-	for _, sz := range []int{10, 100, 1000, 10000} {
-		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
-			coords := [][]Coordinates{{}}
-			coords[0] = make([]Coordinates, sz+1)
-			for i := 0; i < sz; i++ {
-				angle := float64(i) / float64(sz) * 2 * math.Pi
-				coords[0][i].X = math.Cos(angle)
-				coords[0][i].Y = math.Sin(angle)
-			}
-			coords[0][sz] = coords[0][0]
+//func BenchmarkPolygonSingleRingValidation(b *testing.B) {
+//	for _, sz := range []int{10, 100, 1000, 10000} {
+//		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+//			coords := [][]Coordinates{{}}
+//			coords[0] = make([]Coordinates, sz+1)
+//			for i := 0; i < sz; i++ {
+//				angle := float64(i) / float64(sz) * 2 * math.Pi
+//				coords[0][i].X = math.Cos(angle)
+//				coords[0][i].Y = math.Sin(angle)
+//			}
+//			coords[0][sz] = coords[0][0]
+//
+//			b.ResetTimer()
+//			for i := 0; i < b.N; i++ {
+//				if _, err := NewPolygonC(coords); err != nil {
+//					b.Fatal(err)
+//				}
+//			}
+//		})
+//	}
+//}
 
-			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
-				if _, err := NewPolygonC(coords); err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-	}
-}
+//func BenchmarkPolygonMultipleRingsValidation(b *testing.B) {
+//	for _, sz := range []int{2, 6, 20, 64} {
+//		b.Run(fmt.Sprintf("n=%d", sz*sz), func(b *testing.B) {
+//			rnd := rand.New(rand.NewSource(0))
+//			coords := make([][]XY, sz*sz+1)
+//			coords[0] = []XY{XY{0, 0}, XY{0, 1}, XY{1, 1}, XY{1, 0}, XY{0, 0}}
+//			for i := 0; i < sz*sz; i++ {
+//				center := XY{
+//					X: (0.5 + float64(i/sz)) / float64(sz),
+//					Y: (0.5 + float64(i%sz)) / float64(sz),
+//				}
+//				dx := rnd.Float64() * 0.5 / float64(sz)
+//				dy := rnd.Float64() * 0.5 / float64(sz)
+//				coords[1+i] = []XY{
+//					center.Add(XY{-dx, -dy}),
+//					center.Add(XY{dx, -dy}),
+//					center.Add(XY{dx, dy}),
+//					center.Add(XY{-dx, dy}),
+//					center.Add(XY{-dx, -dy}),
+//				}
+//			}
+//
+//			b.ResetTimer()
+//			for i := 0; i < b.N; i++ {
+//				if _, err := NewPolygonXY(coords); err != nil {
+//					b.Fatal(err)
+//				}
+//			}
+//		})
+//	}
+//}
 
-func BenchmarkPolygonMultipleRingsValidation(b *testing.B) {
-	for _, sz := range []int{2, 6, 20, 64} {
-		b.Run(fmt.Sprintf("n=%d", sz*sz), func(b *testing.B) {
-			rnd := rand.New(rand.NewSource(0))
-			coords := make([][]XY, sz*sz+1)
-			coords[0] = []XY{XY{0, 0}, XY{0, 1}, XY{1, 1}, XY{1, 0}, XY{0, 0}}
-			for i := 0; i < sz*sz; i++ {
-				center := XY{
-					X: (0.5 + float64(i/sz)) / float64(sz),
-					Y: (0.5 + float64(i%sz)) / float64(sz),
-				}
-				dx := rnd.Float64() * 0.5 / float64(sz)
-				dy := rnd.Float64() * 0.5 / float64(sz)
-				coords[1+i] = []XY{
-					center.Add(XY{-dx, -dy}),
-					center.Add(XY{dx, -dy}),
-					center.Add(XY{dx, dy}),
-					center.Add(XY{-dx, dy}),
-					center.Add(XY{-dx, -dy}),
-				}
-			}
-
-			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
-				if _, err := NewPolygonXY(coords); err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-	}
-}
-
-func BenchmarkMultipolygonValidation(b *testing.B) {
-	for _, sz := range []int{1, 2, 4, 8, 16, 32} {
-		b.Run(fmt.Sprintf("n=%d", sz*sz), func(b *testing.B) {
-			rnd := rand.New(rand.NewSource(0))
-			coords := make([][][]XY, sz*sz)
-			for i := 0; i < sz*sz; i++ {
-				center := XY{
-					X: (0.5 + float64(i/sz)) / float64(sz),
-					Y: (0.5 + float64(i%sz)) / float64(sz),
-				}
-				dx := rnd.Float64() * 0.5 / float64(sz)
-				dy := rnd.Float64() * 0.5 / float64(sz)
-				coords[i] = [][]XY{{
-					center.Add(XY{-dx, -dy}),
-					center.Add(XY{dx, -dy}),
-					center.Add(XY{dx, dy}),
-					center.Add(XY{-dx, dy}),
-					center.Add(XY{-dx, -dy}),
-				}}
-			}
-
-			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
-				if _, err := NewMultiPolygonXY(coords); err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-	}
-}
+//func BenchmarkMultipolygonValidation(b *testing.B) {
+//	for _, sz := range []int{1, 2, 4, 8, 16, 32} {
+//		b.Run(fmt.Sprintf("n=%d", sz*sz), func(b *testing.B) {
+//			rnd := rand.New(rand.NewSource(0))
+//			coords := make([][][]XY, sz*sz)
+//			for i := 0; i < sz*sz; i++ {
+//				center := XY{
+//					X: (0.5 + float64(i/sz)) / float64(sz),
+//					Y: (0.5 + float64(i%sz)) / float64(sz),
+//				}
+//				dx := rnd.Float64() * 0.5 / float64(sz)
+//				dy := rnd.Float64() * 0.5 / float64(sz)
+//				coords[i] = [][]XY{{
+//					center.Add(XY{-dx, -dy}),
+//					center.Add(XY{dx, -dy}),
+//					center.Add(XY{dx, dy}),
+//					center.Add(XY{-dx, dy}),
+//					center.Add(XY{-dx, -dy}),
+//				}}
+//			}
+//
+//			b.ResetTimer()
+//			for i := 0; i < b.N; i++ {
+//				if _, err := NewMultiPolygonXY(coords); err != nil {
+//					b.Fatal(err)
+//				}
+//			}
+//		})
+//	}
+//}

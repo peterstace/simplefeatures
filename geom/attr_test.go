@@ -312,133 +312,118 @@ func TestBoundary(t *testing.T) {
 	}
 }
 
-func TestCoordinates(t *testing.T) {
-	cmp0d := func(t *testing.T, got Coordinates, want [2]float64) {
-		if got.XY.X != want[0] {
-			t.Errorf("coordinate mismatch: got=%v want=%v", got, want)
-		}
-		if got.XY.Y != want[1] {
-			t.Errorf("coordinate mismatch: got=%v want=%v", got, want)
-		}
-	}
-	cmp1d := func(t *testing.T, got []Coordinates, want [][2]float64) {
-		if len(got) != len(want) {
-			t.Errorf("length mismatch: got=%v want=%v", len(got), len(want))
-		}
-		for i := range got {
-			cmp0d(t, got[i], want[i])
-		}
-	}
-	cmp2d := func(t *testing.T, got [][]Coordinates, want [][][2]float64) {
-		if len(got) != len(want) {
-			t.Errorf("length mismatch: got=%v want=%v", len(got), len(want))
-		}
-		for i := range got {
-			cmp1d(t, got[i], want[i])
-		}
-	}
-	cmp3d := func(t *testing.T, got [][][]Coordinates, want [][][][2]float64) {
-		if len(got) != len(want) {
-			t.Errorf("length mismatch: got=%v want=%v", len(got), len(want))
-		}
-		for i := range got {
-			cmp2d(t, got[i], want[i])
-		}
-	}
-	cmp0dOpt := func(t *testing.T, got OptionalCoordinates, want []float64) {
-		switch len(want) {
-		case 0:
-			if !got.Empty {
-				t.Fatalf("empty mismatch: want empty but didn't get empty")
-			}
-		case 2:
-			if got.Empty {
-				t.Fatalf("empty mismatch: want non-empty but got empty")
-			}
-			var w [2]float64
-			copy(w[:], want)
-			cmp0d(t, got.Value, w)
-		default:
-			panic(want)
-		}
-	}
-	cmp1dOpt := func(t *testing.T, got []OptionalCoordinates, want [][]float64) {
-		if len(got) != len(want) {
-			t.Errorf("length mismatch: got=%v want=%v", len(got), len(want))
-		}
-		for i := range got {
-			cmp0dOpt(t, got[i], want[i])
-		}
-	}
-	t.Run("Point", func(t *testing.T) {
-		cmp0dOpt(t,
-			geomFromWKT(t, "POINT(1 2)").AsPoint().Coordinates(),
-			[]float64{1, 2},
-		)
-		cmp0dOpt(t,
-			geomFromWKT(t, "POINT EMPTY").AsPoint().Coordinates(),
-			[]float64{},
-		)
+func TestCoordinatesSequence(t *testing.T) {
+	t.Run("point", func(t *testing.T) {
+		t.Run("populated", func(t *testing.T) {
+			c, ok := geomFromWKT(t, "POINT(1 2)").AsPoint().Coordinates()
+			expectBoolEq(t, ok, true)
+			expectXYEq(t, c.XY, XY{1, 2})
+		})
+		t.Run("empty", func(t *testing.T) {
+			_, ok := geomFromWKT(t, "POINT EMPTY").AsPoint().Coordinates()
+			expectBoolEq(t, ok, false)
+		})
 	})
-	t.Run("Line-LineString-MultiPoint", func(t *testing.T) {
-		cmp1d(t,
-			geomFromWKT(t, "LINESTRING(0 1,2 3)").AsLine().Coordinates(),
-			[][2]float64{{0, 1}, {2, 3}},
-		)
-		cmp1d(t,
-			geomFromWKT(t, "LINESTRING(0 1,2 3,4 5)").AsLineString().Coordinates(),
-			[][2]float64{{0, 1}, {2, 3}, {4, 5}},
-		)
-		cmp1d(t,
-			geomFromWKT(t, "LINESTRING(1 5,5 2,5 2,4 9)").AsLineString().Coordinates(),
-			[][2]float64{{1, 5}, {5, 2}, {5, 2}, {4, 9}},
-		)
-		cmp1dOpt(t,
-			geomFromWKT(t, "MULTIPOINT(0 1,2 3,EMPTY,4 5)").AsMultiPoint().Coordinates(),
-			[][]float64{{0, 1}, {2, 3}, {}, {4, 5}},
-		)
+	t.Run("line", func(t *testing.T) {
+		seq := geomFromWKT(t, "LINESTRING(0 1,2 3)").AsLine().Coordinates()
+		expectIntEq(t, seq.Length(), 2)
+		expectXYEq(t, seq.GetXY(0), XY{0, 1})
+		expectXYEq(t, seq.GetXY(1), XY{2, 3})
 	})
-	t.Run("Polygon-MultiLineString", func(t *testing.T) {
-		cmp2d(t,
-			geomFromWKT(t, "POLYGON((0 0,0 10,10 0,0 0),(2 2,2 7,7 2,2 2))").AsPolygon().Coordinates(),
-			[][][2]float64{
-				{{0, 0}, {0, 10}, {10, 0}, {0, 0}},
-				{{2, 2}, {2, 7}, {7, 2}, {2, 2}},
-			},
-		)
-		cmp2d(t,
-			geomFromWKT(t, "MULTILINESTRING((0 0,0 10,10 0,0 0),(2 2,2 8,8 2,2 2))").AsMultiLineString().Coordinates(),
-			[][][2]float64{
-				{{0, 0}, {0, 10}, {10, 0}, {0, 0}},
-				{{2, 2}, {2, 8}, {8, 2}, {2, 2}},
-			},
-		)
+	t.Run("linestring", func(t *testing.T) {
+		seq := geomFromWKT(t, "LINESTRING(0 1,2 3,4 5)").AsLineString().Coordinates()
+		expectIntEq(t, seq.Length(), 3)
+		expectXYEq(t, seq.GetXY(0), XY{0, 1})
+		expectXYEq(t, seq.GetXY(1), XY{2, 3})
+		expectXYEq(t, seq.GetXY(2), XY{4, 5})
 	})
-	t.Run("MultiPolygon", func(t *testing.T) {
-		cmp3d(t,
-			geomFromWKT(t, `
-				MULTIPOLYGON(
-					(
-						(0 0,0 10,10 0,0 0),
-						(2 2,2 7,7 2,2 2)
-					),
-					(
-						(100 100,100 110,110 100,100 100),
-						(102 102,102 107,107 102,102 102)
-					)
-				)`,
-			).AsMultiPolygon().Coordinates(),
-			[][][][2]float64{
-				{
-					{{0, 0}, {0, 10}, {10, 0}, {0, 0}},
-					{{2, 2}, {2, 7}, {7, 2}, {2, 2}},
-				},
-				{
-					{{100, 100}, {100, 110}, {110, 100}, {100, 100}},
-					{{102, 102}, {102, 107}, {107, 102}, {102, 102}},
-				},
-			},
-		)
+	t.Run("linestring with dupe", func(t *testing.T) {
+		seq := geomFromWKT(t, "LINESTRING(1 5,5 2,5 2,4 9)").AsLineString().Coordinates()
+		expectIntEq(t, seq.Length(), 4)
+		expectXYEq(t, seq.GetXY(0), XY{1, 5})
+		expectXYEq(t, seq.GetXY(1), XY{5, 2})
+		expectXYEq(t, seq.GetXY(2), XY{5, 2})
+		expectXYEq(t, seq.GetXY(3), XY{4, 9})
+	})
+	t.Run("polygon", func(t *testing.T) {
+		seq := geomFromWKT(t, "POLYGON((0 0,0 10,10 0,0 0),(2 2,2 7,7 2,2 2))").AsPolygon().Coordinates()
+		expectIntEq(t, len(seq), 2)
+		expectIntEq(t, seq[0].Length(), 4)
+		expectXYEq(t, seq[0].GetXY(0), XY{0, 0})
+		expectXYEq(t, seq[0].GetXY(1), XY{0, 10})
+		expectXYEq(t, seq[0].GetXY(2), XY{10, 0})
+		expectXYEq(t, seq[0].GetXY(3), XY{0, 0})
+		expectIntEq(t, seq[1].Length(), 4)
+		expectXYEq(t, seq[1].GetXY(0), XY{2, 2})
+		expectXYEq(t, seq[1].GetXY(1), XY{2, 7})
+		expectXYEq(t, seq[1].GetXY(2), XY{7, 2})
+		expectXYEq(t, seq[1].GetXY(3), XY{2, 2})
+
+	})
+	t.Run("multipoint", func(t *testing.T) {
+		seq, empty := geomFromWKT(t, "MULTIPOINT(0 1,2 3,EMPTY,4 5)").AsMultiPoint().Coordinates()
+		expectIntEq(t, seq.Length(), 4)
+		expectXYEq(t, seq.GetXY(0), XY{0, 1})
+		expectXYEq(t, seq.GetXY(1), XY{2, 3})
+		expectXYEq(t, seq.GetXY(2), XY{0, 0})
+		expectXYEq(t, seq.GetXY(3), XY{4, 5})
+		expectBoolEq(t, empty.Get(0), false)
+		expectBoolEq(t, empty.Get(1), false)
+		expectBoolEq(t, empty.Get(2), true)
+		expectBoolEq(t, empty.Get(3), false)
+	})
+	t.Run("multilinestring", func(t *testing.T) {
+		seq := geomFromWKT(t, "MULTILINESTRING((0 0,0 10,10 0,0 0),(2 2,2 8,8 2,2 2))").AsMultiLineString().Coordinates()
+		expectIntEq(t, len(seq), 2)
+		expectIntEq(t, seq[0].Length(), 4)
+		expectXYEq(t, seq[0].GetXY(0), XY{0, 0})
+		expectXYEq(t, seq[0].GetXY(1), XY{0, 10})
+		expectXYEq(t, seq[0].GetXY(2), XY{10, 0})
+		expectXYEq(t, seq[0].GetXY(3), XY{0, 0})
+		expectIntEq(t, seq[1].Length(), 4)
+		expectXYEq(t, seq[1].GetXY(0), XY{2, 2})
+		expectXYEq(t, seq[1].GetXY(1), XY{2, 8})
+		expectXYEq(t, seq[1].GetXY(2), XY{8, 2})
+		expectXYEq(t, seq[1].GetXY(3), XY{2, 2})
+	})
+	t.Run("multipolygon", func(t *testing.T) {
+		seq := geomFromWKT(t, `
+			MULTIPOLYGON(
+				(
+					(0 0,0 10,10 0,0 0),
+					(2 2,2 7,7 2,2 2)
+				),
+				(
+					(100 100,100 110,110 100,100 100),
+					(102 102,102 107,107 102,102 102)
+				)
+			)`,
+		).AsMultiPolygon().Coordinates()
+		expectIntEq(t, len(seq), 2)
+
+		expectIntEq(t, len(seq[0]), 2)
+		expectIntEq(t, seq[0][0].Length(), 4)
+		expectXYEq(t, seq[0][0].GetXY(0), XY{0, 0})
+		expectXYEq(t, seq[0][0].GetXY(1), XY{0, 10})
+		expectXYEq(t, seq[0][0].GetXY(2), XY{10, 0})
+		expectXYEq(t, seq[0][0].GetXY(3), XY{0, 0})
+		expectIntEq(t, seq[0][1].Length(), 4)
+		expectXYEq(t, seq[0][1].GetXY(0), XY{2, 2})
+		expectXYEq(t, seq[0][1].GetXY(1), XY{2, 7})
+		expectXYEq(t, seq[0][1].GetXY(2), XY{7, 2})
+		expectXYEq(t, seq[0][1].GetXY(3), XY{2, 2})
+
+		expectIntEq(t, len(seq[1]), 2)
+		expectIntEq(t, seq[1][0].Length(), 4)
+		expectXYEq(t, seq[1][0].GetXY(0), XY{100, 100})
+		expectXYEq(t, seq[1][0].GetXY(1), XY{100, 110})
+		expectXYEq(t, seq[1][0].GetXY(2), XY{110, 100})
+		expectXYEq(t, seq[1][0].GetXY(3), XY{100, 100})
+		expectIntEq(t, seq[1][1].Length(), 4)
+		expectXYEq(t, seq[1][1].GetXY(0), XY{102, 102})
+		expectXYEq(t, seq[1][1].GetXY(1), XY{102, 107})
+		expectXYEq(t, seq[1][1].GetXY(2), XY{107, 102})
+		expectXYEq(t, seq[1][1].GetXY(3), XY{102, 102})
 	})
 }
 
@@ -718,9 +703,9 @@ func TestLineStringToMultiLineString(t *testing.T) {
 func TestLineToLineString(t *testing.T) {
 	ln := geomFromWKT(t, "LINESTRING(1 2,3 4)").AsLine()
 	got := ln.AsLineString()
-	expectIntEq(t, got.NumPoints(), 2)
-	expectGeomEq(t, got.StartPoint().AsGeometry(), geomFromWKT(t, "POINT(1 2)"))
-	expectGeomEq(t, got.EndPoint().AsGeometry(), geomFromWKT(t, "POINT(3 4)"))
+	want, err := NewLineStringFromSequence(NewSequenceNoCopy([]float64{1, 2, 3, 4}, XYOnly))
+	expectNoErr(t, err)
+	expectGeomEq(t, got.AsGeometry(), want.AsGeometry())
 }
 
 func TestPolygonToMultiPolygon(t *testing.T) {

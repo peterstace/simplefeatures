@@ -14,34 +14,24 @@ import (
 // 1. It must be made of up zero or more valid LineStrings.
 type MultiLineString struct {
 	lines []LineString
+	ctype CoordinatesType
 }
 
 // NewMultiLineString creates a MultiLineString from its constintuent
 // LineStrings.
-func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLineString {
-	return MultiLineString{lines}
-}
-
-// NewMultiLineStringC creates a MultiLineString from its coordinates. The
-// first dimension of the coordinates slice indicates the LineString, and the
-// second dimension indicates the Coordinate within a LineString.
-func NewMultiLineStringC(coords [][]Coordinates, opts ...ConstructorOption) (MultiLineString, error) {
-	var lines []LineString
-	for _, c := range coords {
-		line, err := NewLineStringC(c, opts...)
-		if err != nil {
-			return MultiLineString{}, err
-		}
-		lines = append(lines, line)
+func NewMultiLineString(lines []LineString, opts ...ConstructorOption) (MultiLineString, error) {
+	var agg coordinateTypeAggregator
+	for _, ls := range lines {
+		agg.add(ls.CoordinatesType())
 	}
-	return MultiLineString{lines}, nil
+	if agg.err != nil {
+		return MultiLineString{}, agg.err
+	}
+	return MultiLineString{lines, agg.ctype}, nil
 }
 
-// NewMultiLineStringXY creates a MultiLineString from its XYs. The
-// first dimension of the XYs slice indicates the LineString, and the
-// second dimension indicates the XY within a LineString.
-func NewMultiLineStringXY(pts [][]XY, opts ...ConstructorOption) (MultiLineString, error) {
-	return NewMultiLineStringC(twoDimXYToCoords(pts))
+func NewEmptyMultiLineString(ctype CoordinatesType) MultiLineString {
+	return MultiLineString{nil, ctype}
 }
 
 // Type return type string for MultiLineString
@@ -163,7 +153,7 @@ func (m MultiLineString) Envelope() (Envelope, bool) {
 
 func (m MultiLineString) Boundary() MultiPoint {
 	counts := make(map[XY]int)
-	var uniqueEndpoints []Point
+	var uniqueEndpoints []XY
 	for _, ls := range m.lines {
 		if ls.IsClosed() {
 			continue
@@ -177,20 +167,19 @@ func (m MultiLineString) Boundary() MultiPoint {
 				continue
 			}
 			if counts[xy] == 0 {
-				uniqueEndpoints = append(uniqueEndpoints, pt)
+				uniqueEndpoints = append(uniqueEndpoints, xy)
 			}
 			counts[xy]++
 		}
 	}
 
-	var bound []Point
-	for _, pt := range uniqueEndpoints {
-		xy, ok := pt.XY()
-		if ok && counts[xy]%2 == 1 {
-			bound = append(bound, pt)
+	var bound []XY
+	for _, xy := range uniqueEndpoints {
+		if counts[xy]%2 == 1 {
+			bound = append(bound, xy)
 		}
 	}
-	return NewMultiPoint(bound)
+	return NewMultiPointXY(bound)
 }
 
 func (m MultiLineString) Value() (driver.Value, error) {
@@ -217,25 +206,39 @@ func (m MultiLineString) ConvexHull() Geometry {
 }
 
 func (m MultiLineString) MarshalJSON() ([]byte, error) {
-	return marshalGeoJSON("MultiLineString", m.Coordinates())
+	var dst []byte
+	dst = append(dst, `{"type":"MultiLineString","coordinates":`...)
+	dst = appendGeoJSONSequences(dst, m.Coordinates())
+	dst = append(dst, '}')
+	return dst, nil
 }
 
 // Coordinates returns the coordinates of each constintuent LineString in the
 // MultiLineString.
-func (m MultiLineString) Coordinates() [][]Coordinates {
-	numLines := m.NumLineStrings()
-	coords := make([][]Coordinates, numLines)
-	for i := 0; i < numLines; i++ {
-		coords[i] = m.LineStringN(i).Coordinates()
+func (m MultiLineString) Coordinates() []Sequence {
+	n := m.NumLineStrings()
+	seqs := make([]Sequence, n)
+	for i := 0; i < n; i++ {
+		seqs[i] = m.LineStringN(i).Coordinates()
 	}
-	return coords
+	return seqs
 }
 
 // TransformXY transforms this MultiLineString into another MultiLineString according to fn.
 func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
-	coords := m.Coordinates()
-	transform2dCoords(coords, fn)
-	mls, err := NewMultiLineStringC(coords, opts...)
+	n := m.NumLineStrings()
+	transformed := make([]LineString, n)
+	for i := 0; i < n; i++ {
+		var err error
+		transformed[i], err = NewLineStringFromSequence(
+			transformSequence(m.LineStringN(i).Coordinates(), fn),
+			opts...,
+		)
+		if err != nil {
+			return Geometry{}, err
+		}
+	}
+	mls, err := NewMultiLineString(transformed, opts...)
 	return mls.AsGeometry(), err
 }
 
@@ -247,8 +250,12 @@ func (m MultiLineString) EqualsExact(other Geometry, opts ...EqualsExactOption) 
 
 // IsValid checks if this MultiLineString is valid
 func (m MultiLineString) IsValid() bool {
-	_, err := NewMultiLineStringC(m.Coordinates())
-	return err == nil
+	for _, ls := range m.lines {
+		if !ls.IsValid() {
+			return false
+		}
+	}
+	return true
 }
 
 // Length gives the sum of the lengths of the constituent members of the multi
@@ -272,7 +279,7 @@ func (m MultiLineString) Centroid() Point {
 		sumLength += length
 	}
 	if sumLength == 0 {
-		return NewEmptyPoint()
+		return NewEmptyPoint(XYOnly)
 	}
 	return NewPointXY(sumXY.Scale(1.0 / sumLength))
 }
@@ -285,5 +292,9 @@ func (m MultiLineString) Reverse() MultiLineString {
 	for i := 0; i < len(m.lines); i++ {
 		linestrings[i] = m.lines[i].Reverse()
 	}
-	return NewMultiLineString(linestrings)
+	return MultiLineString{linestrings, m.ctype}
+}
+
+func (m MultiLineString) CoordinatesType() CoordinatesType {
+	return m.ctype
 }

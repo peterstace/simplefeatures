@@ -1,13 +1,6 @@
 package geom
 
-func transformOptional1dCoords(coords []OptionalCoordinates, fn func(XY) XY) {
-	for i := range coords {
-		if !coords[i].Empty {
-			coords[i].Value.XY = fn(coords[i].Value.XY)
-		}
-	}
-}
-
+// TODO: Remove the transformXdCoords functions once they are no longer used.
 func transform1dCoords(coords []Coordinates, fn func(XY) XY) {
 	for i := range coords {
 		coords[i].XY = fn(coords[i].XY)
@@ -24,4 +17,27 @@ func transform3dCoords(coords [][][]Coordinates, fn func(XY) XY) {
 	for i := range coords {
 		transform2dCoords(coords[i], fn)
 	}
+}
+
+func transformSequence(seq Sequence, fn func(XY) XY) Sequence {
+	floats := make([]float64, 0, seq.CoordinatesType().Dimension()*seq.Length())
+	n := seq.Length()
+	ctype := seq.CoordinatesType()
+	for i := 0; i < n; i++ {
+		c := seq.Get(i)
+		c.XY = fn(c.XY)
+		switch ctype {
+		case XYOnly:
+			floats = append(floats, c.X, c.Y)
+		case XYZ:
+			floats = append(floats, c.X, c.Y, c.Z)
+		case XYM:
+			floats = append(floats, c.X, c.Y, c.M)
+		case XYZM:
+			floats = append(floats, c.X, c.Y, c.Z, c.M)
+		default:
+			panic(ctype)
+		}
+	}
+	return NewSequenceNoCopy(floats, ctype)
 }

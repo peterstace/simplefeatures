@@ -21,21 +21,12 @@ func UnmarshalWKB(r io.Reader, opts ...ConstructorOption) (Geometry, error) {
 	return geom, p.err
 }
 
-type coordType byte
-
-const (
-	coordTypeXY coordType = 1 + iota
-	coordTypeXYZ
-	coordTypeXYM
-	coordTypeXYZM
-)
-
 type wkbParser struct {
 	err       error
 	r         io.Reader
 	bo        binary.ByteOrder
 	geomType  uint32
-	coordType coordType
+	coordType CoordinatesType
 	opts      []ConstructorOption
 }
 
@@ -70,13 +61,13 @@ func (p *wkbParser) parseGeomType() {
 	p.geomType = geomCode % 1000
 	switch geomCode / 1000 {
 	case 0:
-		p.coordType = coordTypeXY
+		p.coordType = XYOnly
 	case 1:
-		p.coordType = coordTypeXYZ
+		p.coordType = XYZ
 	case 2:
-		p.coordType = coordTypeXYM
+		p.coordType = XYM
 	case 3:
-		p.coordType = coordTypeXYZM
+		p.coordType = XYZM
 	default:
 		p.setErr(errors.New("cannot determine coordinate type"))
 	}
@@ -95,29 +86,23 @@ const (
 func (p *wkbParser) parseGeomRoot() Geometry {
 	switch p.geomType {
 	case wkbGeomTypePoint:
-		coords := p.parsePoint()
-		if coords.Empty {
-			return NewEmptyPoint().AsGeometry()
+		c, ok := p.parsePoint()
+		if !ok {
+			return NewEmptyPoint(p.coordType).AsGeometry()
 		} else {
-			return NewPointC(coords.Value, p.opts...).AsGeometry()
+			return NewPointC(c, p.coordType, p.opts...).AsGeometry()
 		}
 	case wkbGeomTypeLineString:
-		coords := p.parseLineString()
-		switch len(coords) {
-		case 2:
-			ln, err := NewLineC(coords[0], coords[1], p.opts...)
+		ls := p.parseLineString()
+		seq := ls.Coordinates()
+		if seq.Length() == 2 {
+			ln, err := NewLineC(seq.Get(0), seq.Get(1), p.coordType, p.opts...)
 			p.setErr(err)
 			return ln.AsGeometry()
-		default:
-			ls, err := NewLineStringC(coords, p.opts...)
-			p.setErr(err)
-			return ls.AsGeometry()
 		}
+		return ls.AsGeometry()
 	case wkbGeomTypePolygon:
-		coords := p.parsePolygon()
-		poly, err := NewPolygonC(coords, p.opts...)
-		p.setErr(err)
-		return poly.AsGeometry()
+		return p.parsePolygon().AsGeometry()
 	case wkbGeomTypeMultiPoint:
 		return p.parseMultiPoint().AsGeometry()
 	case wkbGeomTypeMultiLineString:
@@ -145,57 +130,66 @@ func (p *wkbParser) parseFloat64() float64 {
 	return f
 }
 
-func (p *wkbParser) parsePoint() OptionalCoordinates {
-	x := p.parseFloat64()
-	y := p.parseFloat64()
-	var z, m float64
+func (p *wkbParser) parsePoint() (Coordinates, bool) {
+	var c Coordinates
+	c.X = p.parseFloat64()
+	c.Y = p.parseFloat64()
 	switch p.coordType {
-	case coordTypeXY:
-	case coordTypeXYZ:
-		z = p.parseFloat64()
-	case coordTypeXYM:
-		m = p.parseFloat64()
-	case coordTypeXYZM:
-		z = p.parseFloat64()
-		m = p.parseFloat64()
+	case XYOnly:
+	case XYZ:
+		c.Z = p.parseFloat64()
+	case XYM:
+		c.M = p.parseFloat64()
+	case XYZM:
+		c.Z = p.parseFloat64()
+		c.M = p.parseFloat64()
 	default:
 		p.setErr(errors.New("unknown coord type"))
-		return OptionalCoordinates{}
+		return Coordinates{}, false
 	}
 
-	if math.IsNaN(x) && math.IsNaN(y) {
+	if math.IsNaN(c.X) && math.IsNaN(c.Y) {
 		// Empty points are represented as NaN,NaN is WKB.
-		return OptionalCoordinates{Empty: true}
+		return Coordinates{}, false
 	}
-	if math.IsNaN(x) || math.IsNaN(y) {
+	if math.IsNaN(c.X) || math.IsNaN(c.Y) {
 		p.setErr(errors.New("point contains mixed NaN values"))
-		return OptionalCoordinates{}
+		return Coordinates{}, false
 	}
-
-	// Only XY is supported so far.
-	_, _ = z, m
-	return OptionalCoordinates{Value: Coordinates{XY{x, y}}}
+	return c, true
 }
 
-func (p *wkbParser) parseLineString() []Coordinates {
+func (p *wkbParser) parseLineString() LineString {
 	n := p.parseUint32()
-	coords := make([]Coordinates, 0, n)
+	floats := make([]float64, 0, int(n)*p.coordType.Dimension())
 	for i := uint32(0); i < n; i++ {
-		pt := p.parsePoint()
-		if !pt.Empty {
-			coords = append(coords, pt.Value)
+		c, ok := p.parsePoint()
+		if !ok {
+			p.setErr(errors.New("empty point not allowed in LineString"))
+		}
+		floats = append(floats, c.X, c.Y)
+		if p.coordType.Is3D() {
+			floats = append(floats, c.Z)
+		}
+		if p.coordType.IsMeasured() {
+			floats = append(floats, c.M)
 		}
 	}
-	return coords
+	seq := NewSequenceNoCopy(floats, p.coordType)
+	poly, err := NewLineStringFromSequence(seq, p.opts...)
+	p.setErr(err)
+	return poly
 }
 
-func (p *wkbParser) parsePolygon() [][]Coordinates {
+func (p *wkbParser) parsePolygon() Polygon {
 	n := p.parseUint32()
-	coords := make([][]Coordinates, n)
-	for i := range coords {
-		coords[i] = p.parseLineString()
+	rings := make([]LineString, n)
+	for i := range rings {
+		rings[i] = p.parseLineString()
 	}
-	return coords
+	poly, err := NewPolygon(rings, p.opts...)
+	p.setErr(err)
+	return poly
 }
 
 func (p *wkbParser) parseMultiPoint() MultiPoint {
@@ -209,7 +203,9 @@ func (p *wkbParser) parseMultiPoint() MultiPoint {
 		}
 		pts = append(pts, geom.AsPoint())
 	}
-	return NewMultiPoint(pts, p.opts...)
+	mp, err := NewMultiPoint(pts, p.opts...)
+	p.setErr(err)
+	return mp
 }
 
 func (p *wkbParser) parseMultiLineString() MultiLineString {
@@ -229,7 +225,9 @@ func (p *wkbParser) parseMultiLineString() MultiLineString {
 			p.setErr(errors.New("non-LineString found in MultiLineString"))
 		}
 	}
-	return NewMultiLineString(lss, p.opts...)
+	mls, err := NewMultiLineString(lss, p.opts...)
+	p.setErr(err)
+	return mls
 }
 
 func (p *wkbParser) parseMultiPolygon() MultiPolygon {

@@ -57,16 +57,10 @@ func ignoreOrder(opts []EqualsExactOption) bool {
 	return newEqualsExactOptionSet(opts).ignoreOrder
 }
 
-// curve abstracts Line and LineString.
-type curve interface {
-	NumPoints() int
-	PointN(int) Coordinates
-}
-
-func curvesExactEqual(c1, c2 curve, opts []EqualsExactOption) bool {
+func curvesExactEqual(c1, c2 Sequence, opts []EqualsExactOption) bool {
 	// Must have the same number of points.
-	n := c1.NumPoints()
-	if n != c2.NumPoints() {
+	n := c1.Length()
+	if n != c2.Length() {
 		return false
 	}
 
@@ -76,8 +70,8 @@ func curvesExactEqual(c1, c2 curve, opts []EqualsExactOption) bool {
 	type curveMapping func(int) int
 	sameCurve := func(m1, m2 curveMapping) bool {
 		for i := 0; i < n; i++ {
-			pt1 := c1.PointN(m1(i)).XY
-			pt2 := c2.PointN(m2(i)).XY
+			pt1 := c1.GetXY(m1(i))
+			pt2 := c2.GetXY(m2(i))
 			if !os.eq(pt1, pt2) {
 				return false
 			}
@@ -111,12 +105,10 @@ func curvesExactEqual(c1, c2 curve, opts []EqualsExactOption) bool {
 	return false
 }
 
-// TODO: All curves should have an IsRing function. Once that exists, then this
-// can be removed.
-func isRing(c curve) bool {
-	ptA := c.PointN(0)
-	ptB := c.PointN(c.NumPoints() - 1)
-	return ptA.XY == ptB.XY
+func isRing(c Sequence) bool {
+	ptA := c.GetXY(0)
+	ptB := c.GetXY(c.Length() - 1)
+	return ptA == ptB
 }
 
 func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
@@ -144,13 +136,21 @@ func polygonExactEqual(p1, p2 Polygon, opts []EqualsExactOption) bool {
 	if n != p2.NumInteriorRings() {
 		return false
 	}
-	if !curvesExactEqual(p1.ExteriorRing(), p2.ExteriorRing(), opts) {
+	if !curvesExactEqual(
+		p1.ExteriorRing().Coordinates(),
+		p2.ExteriorRing().Coordinates(),
+		opts,
+	) {
 		return false
 	}
 	ringsEq := func(i, j int) bool {
 		ringA := p1.InteriorRingN(i)
 		ringB := p2.InteriorRingN(j)
-		return curvesExactEqual(ringA, ringB, opts)
+		return curvesExactEqual(
+			ringA.Coordinates(),
+			ringB.Coordinates(),
+			opts,
+		)
 	}
 	return structureEqual(n, ringsEq, ignoreOrder(opts))
 }
@@ -163,7 +163,7 @@ func multiLineStringExactEqual(mls1, mls2 MultiLineString, opts []EqualsExactOpt
 	lsEq := func(i, j int) bool {
 		lsA := mls1.LineStringN(i)
 		lsB := mls2.LineStringN(j)
-		return curvesExactEqual(lsA, lsB, opts)
+		return curvesExactEqual(lsA.Coordinates(), lsB.Coordinates(), opts)
 	}
 	return structureEqual(n, lsEq, ignoreOrder(opts))
 }
