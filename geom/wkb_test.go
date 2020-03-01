@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
-	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func hexStringToBytes(t *testing.T, s string) []byte {
@@ -453,8 +452,8 @@ func TestWKBParseValid(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			geom, err := UnmarshalWKB(bytes.NewReader(hexStringToBytes(t, tt.wkb)))
-			ExpectNoErr(t, err)
-			ExpectGeomEq(t, geom, GeomFromWKT(t, tt.wkt))
+			expectNoErr(t, err)
+			expectGeomEq(t, geom, geomFromWKT(t, tt.wkt))
 		})
 	}
 }
@@ -496,22 +495,22 @@ func TestWKBMarshalValid(t *testing.T) {
 		"GEOMETRYCOLLECTION(POINT(1 2),LINESTRING(1 2,3 4))",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			geom := GeomFromWKT(t, wkt)
+			geom := geomFromWKT(t, wkt)
 			var buf bytes.Buffer
 			err := geom.AsBinary(&buf)
-			ExpectNoErr(t, err)
+			expectNoErr(t, err)
 			readBackGeom, err := UnmarshalWKB(&buf)
-			ExpectNoErr(t, err)
-			ExpectGeomEq(t, readBackGeom, geom)
+			expectNoErr(t, err)
+			expectGeomEq(t, readBackGeom, geom)
 		})
 	}
 }
 
 func TestWKBMarshalEmptyPoint(t *testing.T) {
-	g := GeomFromWKT(t, "POINT EMPTY")
+	g := geomFromWKT(t, "POINT EMPTY")
 	var buf bytes.Buffer
 	err := g.AsBinary(&buf)
-	ExpectNoErr(t, err)
+	expectNoErr(t, err)
 	want := hexStringToBytes(t, "0101000000010000000000f87f010000000000f87f")
 	if !bytes.Equal(want, buf.Bytes()) {
 		t.Logf("want:\n%v", hex.Dump(want))

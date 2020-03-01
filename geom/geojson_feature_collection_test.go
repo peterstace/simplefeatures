@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
-	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func TestGeoJSONFeatureCollectionValidUnmarshal(t *testing.T) {
@@ -58,19 +57,19 @@ func TestGeoJSONFeatureCollectionValidUnmarshal(t *testing.T) {
 
 	var fc GeoJSONFeatureCollection
 	err := json.NewDecoder(strings.NewReader(input)).Decode(&fc)
-	ExpectNoErr(t, err)
+	expectNoErr(t, err)
 
-	ExpectIntEq(t, len(fc), 2)
+	expectIntEq(t, len(fc), 2)
 	f0 := fc[0]
 	f1 := fc[1]
 
-	ExpectStringEq(t, f0.ID.(string), "id0")
-	ExpectBoolEq(t, reflect.DeepEqual(f0.Properties, map[string]interface{}{"prop0": "value0", "prop1": "value1"}), true)
-	ExpectGeomEq(t, f0.Geometry, GeomFromWKT(t, "LINESTRING(102 0,103 1,104 0,105 1)"))
+	expectStringEq(t, f0.ID.(string), "id0")
+	expectBoolEq(t, reflect.DeepEqual(f0.Properties, map[string]interface{}{"prop0": "value0", "prop1": "value1"}), true)
+	expectGeomEq(t, f0.Geometry, geomFromWKT(t, "LINESTRING(102 0,103 1,104 0,105 1)"))
 
-	ExpectStringEq(t, f1.ID.(string), "id1")
-	ExpectBoolEq(t, reflect.DeepEqual(f1.Properties, map[string]interface{}{"prop0": "value2", "prop1": "value3"}), true)
-	ExpectGeomEq(t, f1.Geometry, GeomFromWKT(t, "POLYGON((100 0,101 0,101 1,100 1,100 0))"))
+	expectStringEq(t, f1.ID.(string), "id1")
+	expectBoolEq(t, reflect.DeepEqual(f1.Properties, map[string]interface{}{"prop0": "value2", "prop1": "value3"}), true)
+	expectGeomEq(t, f1.Geometry, geomFromWKT(t, "POLYGON((100 0,101 0,101 1,100 1,100 0))"))
 }
 
 func TestGeoJSONFeatureCollectionInvalidUnmarshal(t *testing.T) {
@@ -115,7 +114,7 @@ func TestGeoJSONFeatureCollectionInvalidUnmarshal(t *testing.T) {
 			// what the other test cases are based on.
 			var fc GeoJSONFeatureCollection
 			r := strings.NewReader(tt.input)
-			ExpectNoErr(t, json.NewDecoder(r).Decode(&fc))
+			expectNoErr(t, json.NewDecoder(r).Decode(&fc))
 			continue
 		}
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -134,30 +133,30 @@ func TestGeoJSONFeatureCollectionInvalidUnmarshal(t *testing.T) {
 
 func TestGeoJSONFeatureCollectionEmpty(t *testing.T) {
 	out, err := json.Marshal(GeoJSONFeatureCollection{})
-	ExpectNoErr(t, err)
-	ExpectStringEq(t, string(out), `{"type":"FeatureCollection","features":[]}`)
+	expectNoErr(t, err)
+	expectStringEq(t, string(out), `{"type":"FeatureCollection","features":[]}`)
 }
 
 func TestGeoJSONFeatureCollectionNil(t *testing.T) {
 	out, err := json.Marshal(GeoJSONFeatureCollection(nil))
-	ExpectNoErr(t, err)
-	ExpectStringEq(t, string(out), `{"type":"FeatureCollection","features":[]}`)
+	expectNoErr(t, err)
+	expectStringEq(t, string(out), `{"type":"FeatureCollection","features":[]}`)
 }
 
 func TestGeoJSONFeatureCollectionAndPropertiesNil(t *testing.T) {
-	out, err := json.Marshal(GeoJSONFeatureCollection{{Geometry: GeomFromWKT(t, "POINT(1 2)")}})
-	ExpectNoErr(t, err)
-	ExpectStringEq(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"properties":{}}]}`)
+	out, err := json.Marshal(GeoJSONFeatureCollection{{Geometry: geomFromWKT(t, "POINT(1 2)")}})
+	expectNoErr(t, err)
+	expectStringEq(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"properties":{}}]}`)
 }
 
 func TestGeoJSONFeatureCollectionAndPropertiesSet(t *testing.T) {
 	out, err := json.Marshal(GeoJSONFeatureCollection{{
-		Geometry: GeomFromWKT(t, "POINT(1 2)"),
+		Geometry: geomFromWKT(t, "POINT(1 2)"),
 		ID:       "myid",
 		Properties: map[string]interface{}{
 			"foo": "bar",
 		},
 	}})
-	ExpectNoErr(t, err)
-	ExpectStringEq(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"id":"myid","properties":{"foo":"bar"}}]}`)
+	expectNoErr(t, err)
+	expectStringEq(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"id":"myid","properties":{"foo":"bar"}}]}`)
 }

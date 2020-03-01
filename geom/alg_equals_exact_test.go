@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
-	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func TestEqualsExact(t *testing.T) {
@@ -197,7 +196,7 @@ func TestEqualsExact(t *testing.T) {
 	t.Run("reflexive", func(t *testing.T) {
 		for key, wkt := range wkts {
 			t.Run(key, func(t *testing.T) {
-				g := GeomFromWKT(t, wkt)
+				g := geomFromWKT(t, wkt)
 				t.Run("no options", func(t *testing.T) {
 					if !g.EqualsExact(g) {
 						t.Logf("WKT: %v", wkt)
@@ -221,8 +220,8 @@ func TestEqualsExact(t *testing.T) {
 							break
 						}
 					}
-					gA := GeomFromWKT(t, wkts[keyA])
-					gB := GeomFromWKT(t, wkts[keyB])
+					gA := geomFromWKT(t, wkts[keyA])
+					gB := geomFromWKT(t, wkts[keyB])
 					got := gA.EqualsExact(gB, geom.Tolerance(0.125))
 					if got != want {
 						t.Logf("WKT A: %v", wkts[keyA])
@@ -247,8 +246,8 @@ func TestEqualsExact(t *testing.T) {
 							break
 						}
 					}
-					gA := GeomFromWKT(t, wkts[keyA])
-					gB := GeomFromWKT(t, wkts[keyB])
+					gA := geomFromWKT(t, wkts[keyA])
+					gB := geomFromWKT(t, wkts[keyB])
 					got := gA.EqualsExact(gB, geom.IgnoreOrder)
 					if got != want {
 						t.Logf("WKT A: %v", wkts[keyA])

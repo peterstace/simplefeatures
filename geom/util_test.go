@@ -7,7 +7,7 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-func GeomFromWKT(t *testing.T, wkt string) Geometry {
+func geomFromWKT(t *testing.T, wkt string) Geometry {
 	t.Helper()
 	geom, err := UnmarshalWKT(strings.NewReader(wkt))
 	if err != nil {
@@ -16,7 +16,7 @@ func GeomFromWKT(t *testing.T, wkt string) Geometry {
 	return geom
 }
 
-func ExpectPanics(t *testing.T, fn func()) {
+func expectPanics(t *testing.T, fn func()) {
 	t.Helper()
 	defer func() {
 		if r := recover(); r != nil {
@@ -27,49 +27,49 @@ func ExpectPanics(t *testing.T, fn func()) {
 	fn()
 }
 
-func ExpectNoErr(t *testing.T, err error) {
+func expectNoErr(t *testing.T, err error) {
 	t.Helper()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
-func ExpectGeomEq(t *testing.T, got, want Geometry, opts ...EqualsExactOption) {
+func expectGeomEq(t *testing.T, got, want Geometry, opts ...EqualsExactOption) {
 	t.Helper()
 	if !got.EqualsExact(want, opts...) {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
 	}
 }
 
-func ExpectCoordsEq(t *testing.T, got, want Coordinates) {
+func expectCoordsEq(t *testing.T, got, want Coordinates) {
 	t.Helper()
 	if got != want {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
 
-func ExpectStringEq(t *testing.T, got, want string) {
+func expectStringEq(t *testing.T, got, want string) {
 	t.Helper()
 	if got != want {
 		t.Errorf("\ngot:  %q\nwant: %q\n", got, want)
 	}
 }
 
-func ExpectIntEq(t *testing.T, got, want int) {
+func expectIntEq(t *testing.T, got, want int) {
 	t.Helper()
 	if got != want {
 		t.Errorf("\ngot:  %d\nwant: %d\n", got, want)
 	}
 }
 
-func ExpectBoolEq(t *testing.T, got, want bool) {
+func expectBoolEq(t *testing.T, got, want bool) {
 	t.Helper()
 	if got != want {
 		t.Errorf("\ngot:  %t\nwant: %t\n", got, want)
 	}
 }
 
-func ExpectXYEq(t *testing.T, got, want XY) {
+func expectXYEq(t *testing.T, got, want XY) {
 	t.Helper()
 	if got != want {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)

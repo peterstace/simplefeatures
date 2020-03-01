@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
-	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func xy(x, y float64) Coordinates {
@@ -154,7 +153,7 @@ func TestMultiPolygonValidation(t *testing.T) {
 		`MULTIPOLYGON(EMPTY,((0 0,0 1,1 0,0 0)))`,
 	} {
 		t.Run(fmt.Sprintf("valid_%d", i), func(t *testing.T) {
-			GeomFromWKT(t, wkt)
+			geomFromWKT(t, wkt)
 		})
 	}
 	for i, wkt := range []string{

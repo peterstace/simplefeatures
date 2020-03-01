@@ -6,11 +6,10 @@ import (
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
-	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func TestValuerAny(t *testing.T) {
-	g := GeomFromWKT(t, "POINT(1 2)")
+	g := geomFromWKT(t, "POINT(1 2)")
 	val, err := g.Value()
 	if err != nil {
 		t.Fatal(err)
@@ -19,19 +18,19 @@ func TestValuerAny(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ExpectGeomEq(t, g, geom)
+	expectGeomEq(t, g, geom)
 }
 
 func TestScanner(t *testing.T) {
 	const wkt = "POINT(2 3)"
 	var wkb bytes.Buffer
-	ExpectNoErr(t, GeomFromWKT(t, wkt).AsBinary(&wkb))
+	expectNoErr(t, geomFromWKT(t, wkt).AsBinary(&wkb))
 	var g Geometry
 	check := func(t *testing.T, err error) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		ExpectGeomEq(t, g, GeomFromWKT(t, wkt))
+		expectGeomEq(t, g, geomFromWKT(t, wkt))
 	}
 	t.Run("string", func(t *testing.T) {
 		g = Geometry{}
@@ -58,12 +57,12 @@ func TestValuerConcrete(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log(wkt)
-			geom := GeomFromWKT(t, wkt)
+			geom := geomFromWKT(t, wkt)
 			val, err := geom.Value()
-			ExpectNoErr(t, err)
+			expectNoErr(t, err)
 			g, err := UnmarshalWKB(bytes.NewReader(val.([]byte)))
-			ExpectNoErr(t, err)
-			ExpectGeomEq(t, g, geom)
+			expectNoErr(t, err)
+			expectGeomEq(t, g, geom)
 		})
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
-	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func TestUnmarshalWKTValidGrammar(t *testing.T) {
@@ -99,34 +98,34 @@ func TestMarshalUnmarshalWKT(t *testing.T) {
 		"GEOMETRYCOLLECTION(POINT(4 6),LINESTRING(4 6,7 10))",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := GeomFromWKT(t, wkt).AsText()
-			ExpectStringEq(t, got, wkt)
+			got := geomFromWKT(t, wkt).AsText()
+			expectStringEq(t, got, wkt)
 		})
 	}
 }
 
 func TestUnmarshalWKT(t *testing.T) {
 	t.Run("multi line string containing an empty line string", func(t *testing.T) {
-		g := GeomFromWKT(t, "MULTILINESTRING((1 2,3 4),EMPTY,(5 6,7 8))")
+		g := geomFromWKT(t, "MULTILINESTRING((1 2,3 4),EMPTY,(5 6,7 8))")
 		mls := g.AsMultiLineString()
-		ExpectIntEq(t, mls.NumLineStrings(), 3)
-		ExpectGeomEq(t,
+		expectIntEq(t, mls.NumLineStrings(), 3)
+		expectGeomEq(t,
 			mls.LineStringN(0).AsGeometry(),
-			GeomFromWKT(t, "LINESTRING(1 2,3 4)"),
+			geomFromWKT(t, "LINESTRING(1 2,3 4)"),
 		)
-		ExpectGeomEq(t,
+		expectGeomEq(t,
 			mls.LineStringN(1).AsGeometry(),
-			GeomFromWKT(t, "LINESTRING EMPTY"),
+			geomFromWKT(t, "LINESTRING EMPTY"),
 		)
-		ExpectGeomEq(t,
+		expectGeomEq(t,
 			mls.LineStringN(2).AsGeometry(),
-			GeomFromWKT(t, "LINESTRING(5 6,7 8)"),
+			geomFromWKT(t, "LINESTRING(5 6,7 8)"),
 		)
 	})
 	t.Run("multipoints with and without parenthesised points", func(t *testing.T) {
-		g1 := GeomFromWKT(t, "MULTIPOINT((10 40),(40 30),(20 20),(30 10))")
-		g2 := GeomFromWKT(t, "MULTIPOINT(10 40,40 30,20 20,30 10)")
-		ExpectGeomEq(t, g1, g2)
+		g1 := geomFromWKT(t, "MULTIPOINT((10 40),(40 30),(20 20),(30 10))")
+		g2 := geomFromWKT(t, "MULTIPOINT(10 40,40 30,20 20,30 10)")
+		expectGeomEq(t, g1, g2)
 	})
 }
 
@@ -162,7 +161,7 @@ func TestAsTextEmpty(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := tt.g.AsText()
-			ExpectStringEq(t, got, tt.want)
+			expectStringEq(t, got, tt.want)
 		})
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
-	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func TestIntersects(t *testing.T) {
@@ -383,8 +382,8 @@ func TestIntersects(t *testing.T) {
 					}
 				}
 			}
-			g1 := GeomFromWKT(t, tt.in1)
-			g2 := GeomFromWKT(t, tt.in2)
+			g1 := geomFromWKT(t, tt.in1)
+			g2 := geomFromWKT(t, tt.in2)
 			t.Run("fwd", runTest(g1, g2))
 			t.Run("rev", runTest(g2, g1))
 		})
