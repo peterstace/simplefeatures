@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
+	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func TestEnvelopeContains(t *testing.T) {
@@ -39,7 +40,7 @@ func TestEnvelopeAsGeometry(t *testing.T) {
 		{NewEnvelope(XY{3, 4}, XY{8, 0}), "POLYGON((3 0,3 4,8 4,8 0,3 0))"},
 	} {
 		got := tt.env.AsGeometry()
-		expectGeomEq(t, got, geomFromWKT(t, tt.wantWKT))
+		ExpectGeomEq(t, got, GeomFromWKT(t, tt.wantWKT))
 	}
 }
 

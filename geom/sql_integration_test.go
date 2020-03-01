@@ -6,6 +6,7 @@ import (
 
 	_ "github.com/lib/pq"
 	. "github.com/peterstace/simplefeatures/geom"
+	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func newDB(t *testing.T) *sql.DB {
@@ -25,19 +26,19 @@ func TestIntegrationValuerScanner(t *testing.T) {
 	db := newDB(t)
 	defer db.Close()
 
-	input := geomFromWKT(t, "POINT(4 2)")
+	input := GeomFromWKT(t, "POINT(4 2)")
 	t.Run("input is AnyGeometry struct", func(t *testing.T) {
 		var output Geometry
 		if err := db.QueryRow("SELECT ST_AsBinary(ST_GeomFromWKB($1))", input).Scan(&output); err != nil {
 			t.Fatal(err)
 		}
-		expectGeomEq(t, output, input)
+		ExpectGeomEq(t, output, input)
 	})
 	t.Run("input is AnyGeometry pointer to struct", func(t *testing.T) {
 		var output Geometry
 		if err := db.QueryRow("SELECT ST_AsBinary(ST_GeomFromWKB($1))", &input).Scan(&output); err != nil {
 			t.Fatal(err)
 		}
-		expectGeomEq(t, output, input)
+		ExpectGeomEq(t, output, input)
 	})
 }

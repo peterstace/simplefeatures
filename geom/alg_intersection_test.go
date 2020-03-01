@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
+	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func TestIntersection(t *testing.T) {
@@ -192,7 +193,7 @@ func TestIntersection(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
+				if !got.EqualsExact(GeomFromWKT(t, tt.out), IgnoreOrder) {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got.AsText())
 				}
 
@@ -219,7 +220,7 @@ func TestIntersection(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
+				if !got.EqualsExact(GeomFromWKT(t, tt.out), IgnoreOrder) {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got.AsText())
 				}
 

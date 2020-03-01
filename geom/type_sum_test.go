@@ -9,34 +9,35 @@ import (
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
+	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func TestZeroGeometry(t *testing.T) {
 	var z Geometry
-	expectBoolEq(t, z.IsGeometryCollection(), true)
+	ExpectBoolEq(t, z.IsGeometryCollection(), true)
 	z.AsGeometryCollection() // Doesn't crash.
-	expectStringEq(t, z.AsText(), "GEOMETRYCOLLECTION EMPTY")
+	ExpectStringEq(t, z.AsText(), "GEOMETRYCOLLECTION EMPTY")
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(z)
-	expectNoErr(t, err)
-	expectStringEq(t, strings.TrimSpace(buf.String()), `{"type":"GeometryCollection","geometries":[]}`)
+	ExpectNoErr(t, err)
+	ExpectStringEq(t, strings.TrimSpace(buf.String()), `{"type":"GeometryCollection","geometries":[]}`)
 
 	z = NewPointF(1, 2).AsGeometry() // Set away from zero value
-	expectBoolEq(t, z.IsPoint(), true)
+	ExpectBoolEq(t, z.IsPoint(), true)
 	err = json.NewDecoder(&buf).Decode(&z)
-	expectNoErr(t, err)
-	expectBoolEq(t, z.IsPoint(), false)
-	expectBoolEq(t, z.IsGeometryCollection(), true)
-	expectBoolEq(t, z.IsEmpty(), true)
+	ExpectNoErr(t, err)
+	ExpectBoolEq(t, z.IsPoint(), false)
+	ExpectBoolEq(t, z.IsGeometryCollection(), true)
+	ExpectBoolEq(t, z.IsEmpty(), true)
 	z = Geometry{}
 
 	z.AsBinary(ioutil.Discard) // Doesn't crash
 
 	_, err = z.Value()
-	expectNoErr(t, err)
+	ExpectNoErr(t, err)
 
-	expectIntEq(t, z.Dimension(), 0)
+	ExpectIntEq(t, z.Dimension(), 0)
 }
 
 func TestGeometryType(t *testing.T) {
@@ -63,7 +64,7 @@ func TestGeometryType(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("wkt:", tt.wkt)
-			g := geomFromWKT(t, tt.wkt)
+			g := GeomFromWKT(t, tt.wkt)
 			if tt.geoType != g.Type() {
 				t.Errorf("expect: %s, got %s", tt.geoType, g.Type())
 			}
