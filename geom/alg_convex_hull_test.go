@@ -3,6 +3,8 @@ package geom_test
 import (
 	"strconv"
 	"testing"
+
+	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func TestConvexHull(t *testing.T) {
@@ -191,8 +193,8 @@ func TestConvexHull(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Logf("input: %s", tt.input)
-			got := geomFromWKT(t, tt.input).ConvexHull()
-			expectGeomEq(t, got, geomFromWKT(t, tt.output))
+			got := GeomFromWKT(t, tt.input).ConvexHull()
+			ExpectGeomEq(t, got, GeomFromWKT(t, tt.output))
 		})
 	}
 }

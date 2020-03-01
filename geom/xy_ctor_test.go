@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
+	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func TestXYConstructors(t *testing.T) {
@@ -74,8 +75,8 @@ func TestXYConstructors(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			want := geomFromWKT(t, tt.WKT)
-			expectGeomEq(t, tt.Geom.AsGeometry(), want)
+			want := GeomFromWKT(t, tt.WKT)
+			ExpectGeomEq(t, tt.Geom.AsGeometry(), want)
 		})
 	}
 }

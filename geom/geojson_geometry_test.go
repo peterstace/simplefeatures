@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
+	. "github.com/peterstace/simplefeatures/internal/geomtest"
 )
 
 func TestGeoJSONUnmarshalValid(t *testing.T) {
@@ -434,9 +435,9 @@ func TestGeoJSONUnmarshalValid(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got, err := UnmarshalGeoJSON([]byte(tt.geojson))
-			expectNoErr(t, err)
-			want := geomFromWKT(t, tt.wkt)
-			expectGeomEq(t, got, want)
+			ExpectNoErr(t, err)
+			want := GeomFromWKT(t, tt.wkt)
+			ExpectGeomEq(t, got, want)
 		})
 	}
 }
@@ -548,9 +549,9 @@ func TestGeoJSONMarshal(t *testing.T) {
 		},
 	} {
 		t.Run(tt.wkt, func(t *testing.T) {
-			geom := geomFromWKT(t, tt.wkt)
+			geom := GeomFromWKT(t, tt.wkt)
 			gotJSON, err := json.Marshal(geom)
-			expectNoErr(t, err)
+			ExpectNoErr(t, err)
 			if string(gotJSON) != tt.want {
 				t.Error("json doesn't match")
 				t.Logf("got:  %v", string(gotJSON))
@@ -561,9 +562,9 @@ func TestGeoJSONMarshal(t *testing.T) {
 }
 
 func TestGeoJSONMarshalAnyGeometryPopulated(t *testing.T) {
-	g := geomFromWKT(t, "POINT(1 2)")
+	g := GeomFromWKT(t, "POINT(1 2)")
 	got, err := json.Marshal(g)
-	expectNoErr(t, err)
+	ExpectNoErr(t, err)
 	const want = `{"type":"Point","coordinates":[1,2]}`
-	expectStringEq(t, string(got), want)
+	ExpectStringEq(t, string(got), want)
 }
