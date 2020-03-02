@@ -191,7 +191,7 @@ func (m MultiLineString) Value() (driver.Value, error) {
 func (m MultiLineString) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeMultiLineString)
+	marsh.writeGeomType(wkbGeomTypeMultiLineString, m.ctype)
 	n := m.NumLineStrings()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {

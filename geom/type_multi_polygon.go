@@ -295,7 +295,7 @@ func (m MultiPolygon) Value() (driver.Value, error) {
 func (m MultiPolygon) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeMultiPolygon)
+	marsh.writeGeomType(wkbGeomTypeMultiPolygon, m.ctype)
 	n := m.NumPolygons()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {

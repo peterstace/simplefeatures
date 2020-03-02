@@ -116,12 +116,10 @@ func (n Line) Value() (driver.Value, error) {
 func (n Line) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeLineString)
+	marsh.writeGeomType(wkbGeomTypeLineString, n.ctype)
 	marsh.writeCount(2)
-	marsh.writeFloat64(n.StartPoint().X)
-	marsh.writeFloat64(n.StartPoint().Y)
-	marsh.writeFloat64(n.EndPoint().X)
-	marsh.writeFloat64(n.EndPoint().Y)
+	marsh.writeCoordinates(n.a, n.ctype)
+	marsh.writeCoordinates(n.b, n.ctype)
 	return marsh.err
 }
 

@@ -93,11 +93,12 @@ func (m MultiPoint) NumPoints() int {
 
 // PointN gives the nth (zero indexed) Point.
 func (m MultiPoint) PointN(n int) Point {
+	ctype := m.CoordinatesType()
 	if m.empty.Get(n) {
-		return NewEmptyPoint(XYOnly)
+		return NewEmptyPoint(ctype)
 	} else {
 		c := m.seq.Get(n)
-		return NewPointC(c, m.CoordinatesType())
+		return NewPointC(c, ctype)
 	}
 }
 
@@ -177,7 +178,7 @@ func (m MultiPoint) Value() (driver.Value, error) {
 func (m MultiPoint) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeMultiPoint)
+	marsh.writeGeomType(wkbGeomTypeMultiPoint, m.CoordinatesType())
 	n := m.NumPoints()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {

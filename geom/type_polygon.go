@@ -275,18 +275,11 @@ func (p Polygon) Value() (driver.Value, error) {
 func (p Polygon) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypePolygon)
+	marsh.writeGeomType(wkbGeomTypePolygon, p.ctype)
 	marsh.writeCount(len(p.rings))
 	for _, ring := range p.rings {
 		seq := ring.Coordinates()
-		numPts := seq.Length()
-		marsh.writeCount(numPts)
-		for i := 0; i < numPts; i++ {
-			c := seq.Get(i)
-			marsh.writeFloat64(c.X)
-			marsh.writeFloat64(c.Y)
-			// TODO: Z, M
-		}
+		marsh.writeSequence(seq)
 	}
 	return marsh.err
 }

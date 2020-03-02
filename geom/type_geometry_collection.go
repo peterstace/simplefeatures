@@ -152,7 +152,7 @@ func (c GeometryCollection) Value() (driver.Value, error) {
 func (c GeometryCollection) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeGeometryCollection)
+	marsh.writeGeomType(wkbGeomTypeGeometryCollection, c.ctype)
 	n := c.NumGeometries()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {

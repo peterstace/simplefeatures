@@ -111,15 +111,14 @@ func (p Point) Value() (driver.Value, error) {
 func (p Point) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypePoint)
-	xy, ok := p.XY()
-	if !ok {
-		marsh.writeFloat64(math.NaN())
-		marsh.writeFloat64(math.NaN())
-	} else {
-		marsh.writeFloat64(xy.X)
-		marsh.writeFloat64(xy.Y)
+	marsh.writeGeomType(wkbGeomTypePoint, p.ctype)
+	if !p.full {
+		p.coords.X = math.NaN()
+		p.coords.Y = math.NaN()
+		p.coords.Z = 0
+		p.coords.M = 0
 	}
+	marsh.writeCoordinates(p.coords, p.ctype)
 	return marsh.err
 }
 

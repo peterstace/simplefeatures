@@ -217,15 +217,8 @@ func (s LineString) Value() (driver.Value, error) {
 func (s LineString) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeLineString)
-	n := s.seq.Length()
-	marsh.writeCount(n)
-	for i := 0; i < n; i++ {
-		// TODO: handle Z and M
-		c := s.seq.Get(i)
-		marsh.writeFloat64(c.X)
-		marsh.writeFloat64(c.Y)
-	}
+	marsh.writeGeomType(wkbGeomTypeLineString, s.CoordinatesType())
+	marsh.writeSequence(s.seq)
 	return marsh.err
 }
 

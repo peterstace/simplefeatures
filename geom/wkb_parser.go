@@ -26,7 +26,7 @@ type wkbParser struct {
 	r         io.Reader
 	bo        binary.ByteOrder
 	geomType  uint32
-	coordType CoordinatesType
+	coordType CoordinatesType // TODO: rename to ctype for consistency
 	opts      []ConstructorOption
 }
 
@@ -187,6 +187,9 @@ func (p *wkbParser) parsePolygon() Polygon {
 	for i := range rings {
 		rings[i] = p.parseLineString()
 	}
+	if len(rings) == 0 {
+		return NewEmptyPolygon(p.coordType)
+	}
 	poly, err := NewPolygon(rings, p.opts...)
 	p.setErr(err)
 	return poly
@@ -194,6 +197,9 @@ func (p *wkbParser) parsePolygon() Polygon {
 
 func (p *wkbParser) parseMultiPoint() MultiPoint {
 	n := p.parseUint32()
+	if n == 0 {
+		return NewEmptyMultiPoint(p.coordType)
+	}
 	var pts []Point
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
@@ -210,6 +216,9 @@ func (p *wkbParser) parseMultiPoint() MultiPoint {
 
 func (p *wkbParser) parseMultiLineString() MultiLineString {
 	n := p.parseUint32()
+	if n == 0 {
+		return NewEmptyMultiLineString(p.coordType)
+	}
 	var lss []LineString
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
@@ -232,13 +241,13 @@ func (p *wkbParser) parseMultiLineString() MultiLineString {
 
 func (p *wkbParser) parseMultiPolygon() MultiPolygon {
 	n := p.parseUint32()
+	if n == 0 {
+		return NewEmptyMultiPolygon(p.coordType)
+	}
 	var polys []Polygon
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
 		p.setErr(err)
-		if geom.IsEmpty() {
-			continue
-		}
 		if !geom.IsPolygon() {
 			p.setErr(errors.New("non-Polygon found in MultiPolygon"))
 		}
@@ -251,6 +260,9 @@ func (p *wkbParser) parseMultiPolygon() MultiPolygon {
 
 func (p *wkbParser) parseGeometryCollection() GeometryCollection {
 	n := p.parseUint32()
+	if n == 0 {
+		return NewEmptyGeometryCollection(p.coordType)
+	}
 	var geoms []Geometry
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
