@@ -283,11 +283,11 @@ func (s LineString) Coordinates() []Coordinates {
 }
 
 // TransformXY transforms this LineString into another LineString according to fn.
-func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (LineString, error) {
 	coords := s.Coordinates()
 	transform1dCoords(coords, fn)
 	ls, err := NewLineStringC(coords, opts...)
-	return ls.AsGeometry(), err
+	return ls, err
 }
 
 // EqualsExact checks if this LineString is exactly equal to another curve.

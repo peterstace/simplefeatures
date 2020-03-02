@@ -141,12 +141,12 @@ func (p Point) MarshalJSON() ([]byte, error) {
 }
 
 // TransformXY transforms this Point into another Point according to fn.
-func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, error) {
 	coords := p.Coordinates()
 	if !coords.Empty {
 		coords.Value.XY = fn(coords.Value.XY)
 	}
-	return NewPointOC(coords, opts...).AsGeometry(), nil
+	return NewPointOC(coords, opts...), nil
 }
 
 // EqualsExact checks if this Point is exactly equal to another Point.
