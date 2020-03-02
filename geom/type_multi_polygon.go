@@ -213,16 +213,16 @@ func (m MultiPolygon) AsText() string {
 }
 
 func (m MultiPolygon) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "MULTIPOLYGON"...)
+	dst = appendWKTHeader(dst, "MULTIPOLYGON", m.ctype)
 	if len(m.polys) == 0 {
-		return append(dst, " EMPTY"...)
+		return appendWKTEmpty(dst)
 	}
 	dst = append(dst, '(')
 	for i, poly := range m.polys {
-		dst = poly.appendWKTBody(dst)
-		if i != len(m.polys)-1 {
+		if i > 0 {
 			dst = append(dst, ',')
 		}
+		dst = poly.appendWKTBody(dst)
 	}
 	return append(dst, ')')
 }
@@ -409,4 +409,8 @@ func (m MultiPolygon) Reverse() MultiPolygon {
 		panic("Reverse of an existing MultiPolygon should not fail")
 	}
 	return m2
+}
+
+func (m MultiPolygon) CoordinatesType() CoordinatesType {
+	return m.ctype
 }

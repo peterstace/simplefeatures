@@ -23,7 +23,7 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 
 	switch {
 	case len(points) == 0 && len(lines) == 0:
-		return NewGeometryCollection(nil).AsGeometry(), nil
+		return NewEmptyGeometryCollection(XYOnly).AsGeometry(), nil
 	case len(points) == 0:
 		// Lines only.
 		if len(lines) == 1 {
@@ -57,7 +57,8 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 		for i, ln := range lines {
 			all[len(points)+i] = ln.AsGeometry()
 		}
-		return NewGeometryCollection(all).AsGeometry(), nil
+		gc, err := NewGeometryCollection(all)
+		return gc.AsGeometry(), err
 	}
 }
 

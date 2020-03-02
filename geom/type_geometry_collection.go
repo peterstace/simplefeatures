@@ -17,16 +17,24 @@ import (
 // 2. It must contain zero or more geometries.
 type GeometryCollection struct {
 	geoms []Geometry
+	ctype CoordinatesType
 }
 
 // NewGeometryCollection creates a potentially heterogenous collection of
 // geometries. There are no constraints on the collection.
-func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) GeometryCollection {
-	if len(geoms) == 0 {
-		// Store empty geoms as nil to make testing easier.
-		geoms = nil
+func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) (GeometryCollection, error) {
+	var agg coordinateTypeAggregator
+	for _, g := range geoms {
+		agg.add(g.CoordinatesType())
 	}
-	return GeometryCollection{geoms}
+	if agg.err != nil {
+		return GeometryCollection{}, agg.err
+	}
+	return GeometryCollection{geoms, agg.ctype}, nil
+}
+
+func NewEmptyGeometryCollection(ctype CoordinatesType) GeometryCollection {
+	return GeometryCollection{nil, ctype}
 }
 
 // Type return type string for GeometryCollection
@@ -54,16 +62,16 @@ func (c GeometryCollection) AsText() string {
 }
 
 func (c GeometryCollection) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "GEOMETRYCOLLECTION"...)
+	dst = appendWKTHeader(dst, "GEOMETRYCOLLECTION", c.ctype)
 	if len(c.geoms) == 0 {
-		return append(dst, " EMPTY"...)
+		return appendWKTEmpty(dst)
 	}
 	dst = append(dst, '(')
 	for i, g := range c.geoms {
-		dst = g.appendWKT(dst)
-		if i != len(c.geoms)-1 {
+		if i > 0 {
 			dst = append(dst, ',')
 		}
+		dst = g.appendWKT(dst)
 	}
 	return append(dst, ')')
 }
@@ -128,7 +136,11 @@ func (c GeometryCollection) Boundary() GeometryCollection {
 			bounds = append(bounds, bound)
 		}
 	}
-	return NewGeometryCollection(bounds)
+	bound, err := NewGeometryCollection(bounds)
+	if err != nil {
+		panic(err) // Cannot occur because of where we got the bounds from.
+	}
+	return bound
 }
 
 func (c GeometryCollection) Value() (driver.Value, error) {
@@ -179,7 +191,8 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 			return Geometry{}, err
 		}
 	}
-	return NewGeometryCollection(transformed).AsGeometry(), nil
+	gc, err := NewGeometryCollection(transformed)
+	return gc.AsGeometry(), err
 }
 
 // EqualsExact checks if this GeometryCollection is exactly equal to another GeometryCollection.
@@ -211,7 +224,7 @@ func (c GeometryCollection) Reverse() GeometryCollection {
 		rev := c.GeometryN(n).Reverse()
 		geoms = append(geoms, rev)
 	}
-	return NewGeometryCollection(geoms)
+	return GeometryCollection{geoms, c.ctype}
 }
 
 // Length of a GeometryCollection is the sum of the lengths of its parts.
@@ -369,4 +382,8 @@ func (c GeometryCollection) sumCentroidCalc() centroidCalc {
 	}
 
 	return result
+}
+
+func (c GeometryCollection) CoordinatesType() CoordinatesType {
+	return c.ctype
 }

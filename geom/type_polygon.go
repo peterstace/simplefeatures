@@ -216,18 +216,14 @@ func (p Polygon) AsText() string {
 }
 
 func (p Polygon) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "POLYGON"...)
-	if p.IsEmpty() {
-		dst = append(dst, ' ')
-	}
+	dst = appendWKTHeader(dst, "POLYGON", p.ctype)
 	return p.appendWKTBody(dst)
 }
 
 func (p Polygon) appendWKTBody(dst []byte) []byte {
 	if p.IsEmpty() {
-		return append(dst, "EMPTY"...)
+		return appendWKTEmpty(dst)
 	}
-
 	dst = append(dst, '(')
 	for i, r := range p.rings {
 		dst = r.appendWKTBody(dst)

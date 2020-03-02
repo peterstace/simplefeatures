@@ -72,9 +72,9 @@ func (p *parser) checkEOF() {
 }
 
 func (p *parser) nextGeometryTaggedText() Geometry {
-	switch tok := p.nextToken(); strings.ToUpper(tok) {
+	geomType, ctype := p.nextGeomTag()
+	switch geomType {
 	case "POINT":
-		ctype := XYOnly // TODO
 		c, ok := p.nextPointText(ctype)
 		if !ok {
 			return NewEmptyPoint(ctype).AsGeometry()
@@ -82,7 +82,6 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 			return NewPointC(c, ctype, p.opts...).AsGeometry()
 		}
 	case "LINESTRING":
-		ctype := XYOnly // TODO
 		ls := p.nextLineStringText(ctype)
 		seq := ls.Coordinates()
 		n := seq.Length()
@@ -93,18 +92,35 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		}
 		return ls.AsGeometry()
 	case "POLYGON":
-		return p.nextPolygonText(XYOnly /*TODO*/).AsGeometry()
+		return p.nextPolygonText(ctype).AsGeometry()
 	case "MULTIPOINT":
-		return p.nextMultiPointText(XYOnly /*TODO*/).AsGeometry()
+		return p.nextMultiPointText(ctype).AsGeometry()
 	case "MULTILINESTRING":
-		return p.nextMultiLineString(XYOnly /*TODO*/).AsGeometry()
+		return p.nextMultiLineString(ctype).AsGeometry()
 	case "MULTIPOLYGON":
-		return p.nextMultiPolygonText(XYOnly /*TODO*/).AsGeometry()
+		return p.nextMultiPolygonText(ctype).AsGeometry()
 	case "GEOMETRYCOLLECTION":
-		return p.nextGeometryCollectionText(XYOnly /*TODO*/)
+		return p.nextGeometryCollectionText(ctype)
 	default:
-		p.errorf("unexpected token: %v", tok)
+		p.errorf("unexpected token: %v", geomType)
 		return Geometry{}
+	}
+}
+
+func (p *parser) nextGeomTag() (string, CoordinatesType) {
+	geomType := strings.ToUpper(p.nextToken())
+	switch p.peekToken() {
+	case "Z":
+		p.nextToken()
+		return geomType, XYZ
+	case "M":
+		p.nextToken()
+		return geomType, XYM
+	case "ZM":
+		p.nextToken()
+		return geomType, XYZM
+	default:
+		return geomType, XYOnly
 	}
 }
 
@@ -132,10 +148,16 @@ func (p *parser) nextCommaOrRightParen() string {
 }
 
 func (p *parser) nextPoint(ctype CoordinatesType) Coordinates {
-	// TODO: handle z, m, and zm points.
-	x := p.nextSignedNumericLiteral()
-	y := p.nextSignedNumericLiteral()
-	return Coordinates{XY: XY{x, y}}
+	var c Coordinates
+	c.X = p.nextSignedNumericLiteral()
+	c.Y = p.nextSignedNumericLiteral()
+	if ctype.Is3D() {
+		c.Z = p.nextSignedNumericLiteral()
+	}
+	if ctype.IsMeasured() {
+		c.M = p.nextSignedNumericLiteral()
+	}
+	return c
 }
 
 func (p *parser) nextPointAppend(dst []float64, ctype CoordinatesType) []float64 {
@@ -302,7 +324,7 @@ func (p *parser) nextMultiPolygonText(ctype CoordinatesType) MultiPolygon {
 func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) Geometry {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
-		return NewGeometryCollection(nil, p.opts...).AsGeometry()
+		return NewEmptyGeometryCollection(ctype).AsGeometry()
 	}
 	geoms := []Geometry{
 		p.nextGeometryTaggedText(),
@@ -316,5 +338,7 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) Geometry {
 			break
 		}
 	}
-	return NewGeometryCollection(geoms, p.opts...).AsGeometry()
+	gc, err := NewGeometryCollection(geoms, p.opts...)
+	p.check(err)
+	return gc.AsGeometry()
 }

@@ -117,7 +117,7 @@ func (g Geometry) AsGeometryCollection() GeometryCollection {
 	if g.ptr == nil {
 		// Special case so that the zero Geometry value is interpreted as an
 		// empty GeometryCollection.
-		return NewGeometryCollection(nil)
+		return NewEmptyGeometryCollection(XYOnly)
 	}
 	return *(*GeometryCollection)(g.ptr)
 }
@@ -663,6 +663,29 @@ func (g Geometry) Reverse() Geometry {
 		return g.AsMultiLineString().Reverse().AsGeometry()
 	case multiPolygonTag:
 		return g.AsMultiPolygon().Reverse().AsGeometry()
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}
+
+func (g Geometry) CoordinatesType() CoordinatesType {
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().CoordinatesType()
+	case pointTag:
+		return g.AsPoint().CoordinatesType()
+	case lineTag:
+		return g.AsLine().CoordinatesType()
+	case lineStringTag:
+		return g.AsLineString().CoordinatesType()
+	case polygonTag:
+		return g.AsPolygon().CoordinatesType()
+	case multiPointTag:
+		return g.AsMultiPoint().CoordinatesType()
+	case multiLineStringTag:
+		return g.AsMultiLineString().CoordinatesType()
+	case multiPolygonTag:
+		return g.AsMultiPolygon().CoordinatesType()
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}

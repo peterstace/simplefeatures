@@ -77,31 +77,15 @@ func (s LineString) AsText() string {
 }
 
 func (s LineString) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "LINESTRING"...)
-	if s.IsEmpty() {
-		dst = append(dst, ' ')
-	}
+	dst = appendWKTHeader(dst, "LINESTRING", s.CoordinatesType())
 	return s.appendWKTBody(dst)
 }
 
 func (s LineString) appendWKTBody(dst []byte) []byte {
 	if s.IsEmpty() {
-		return append(dst, "EMPTY"...)
+		return appendWKTEmpty(dst)
 	}
-
-	dst = append(dst, '(')
-	n := s.seq.Length()
-	for i := 0; i < n; i++ {
-		if i > 0 {
-			dst = append(dst, ',')
-		}
-		c := s.seq.Get(i)
-		dst = appendFloat(dst, c.X)
-		dst = append(dst, ' ')
-		dst = appendFloat(dst, c.Y)
-		// TODO: Output M and Z
-	}
-	return append(dst, ')')
+	return appendWKTSequence(dst, s.seq, false, BitSet{})
 }
 
 // IsSimple returns true iff the curve defined by the LineString doesn't pass

@@ -257,5 +257,7 @@ func (p *wkbParser) parseGeometryCollection() GeometryCollection {
 		p.setErr(err)
 		geoms = append(geoms, geom)
 	}
-	return NewGeometryCollection(geoms, p.opts...)
+	gc, err := NewGeometryCollection(geoms, p.opts...)
+	p.setErr(err)
+	return gc
 }

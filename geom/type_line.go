@@ -78,15 +78,13 @@ func (n Line) AsText() string {
 }
 
 func (n Line) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "LINESTRING("...)
-	dst = appendFloat(dst, n.a.X)
-	dst = append(dst, ' ')
-	dst = appendFloat(dst, n.a.Y)
+	dst = appendWKTHeader(dst, "LINESTRING", n.ctype)
+	dst = append(dst, '(')
+	dst = appendWKTCoords(dst, n.a, n.ctype, false)
 	dst = append(dst, ',')
-	dst = appendFloat(dst, n.b.X)
-	dst = append(dst, ' ')
-	dst = appendFloat(dst, n.b.Y)
-	return append(dst, ')')
+	dst = appendWKTCoords(dst, n.b, n.ctype, false)
+	dst = append(dst, ')')
+	return dst
 }
 
 func (n Line) IsSimple() bool {

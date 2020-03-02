@@ -106,27 +106,11 @@ func (m MultiPoint) AsText() string {
 }
 
 func (m MultiPoint) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "MULTIPOINT"...)
+	dst = appendWKTHeader(dst, "MULTIPOINT", m.CoordinatesType())
 	if m.NumPoints() == 0 {
-		return append(dst, " EMPTY"...)
+		return appendWKTEmpty(dst)
 	}
-	dst = append(dst, '(')
-	for i := 0; i < m.NumPoints(); i++ {
-		c, ok := m.PointN(i).Coordinates()
-		if ok {
-			dst = append(dst, '(')
-			dst = appendFloat(dst, c.X)
-			dst = append(dst, ' ')
-			dst = appendFloat(dst, c.Y)
-			dst = append(dst, ')')
-		} else {
-			dst = append(dst, "EMPTY"...)
-		}
-		if i != m.NumPoints()-1 {
-			dst = append(dst, ',')
-		}
-	}
-	return append(dst, ')')
+	return appendWKTSequence(dst, m.seq, true, m.empty)
 }
 
 // IsSimple returns true iff no two of its points are equal.
@@ -181,7 +165,7 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 }
 
 func (m MultiPoint) Boundary() GeometryCollection {
-	return NewGeometryCollection(nil)
+	return NewEmptyGeometryCollection(XYOnly)
 }
 
 func (m MultiPoint) Value() (driver.Value, error) {

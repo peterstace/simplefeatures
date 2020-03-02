@@ -22,7 +22,7 @@ type Point struct {
 
 // NewEmptyPoint creates a Point that is empty.
 func NewEmptyPoint(ctype CoordinatesType) Point {
-	return Point{Coordinates{}, false, XYOnly}
+	return Point{Coordinates{}, false, ctype}
 }
 
 // NewPointXY creates a new point from an XY.
@@ -67,16 +67,11 @@ func (p Point) AsText() string {
 }
 
 func (p Point) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "POINT"...)
-	xy, ok := p.XY()
-	if !ok {
-		return append(dst, " EMPTY"...)
+	dst = appendWKTHeader(dst, "POINT", p.ctype)
+	if !p.full {
+		return appendWKTEmpty(dst)
 	}
-	dst = append(dst, '(')
-	dst = appendFloat(dst, xy.X)
-	dst = append(dst, ' ')
-	dst = appendFloat(dst, xy.Y)
-	return append(dst, ')')
+	return appendWKTCoords(dst, p.coords, p.ctype, true)
 }
 
 func (p Point) IsEmpty() bool {
@@ -104,7 +99,7 @@ func (p Point) Envelope() (Envelope, bool) {
 }
 
 func (p Point) Boundary() GeometryCollection {
-	return NewGeometryCollection(nil)
+	return NewEmptyGeometryCollection(XYOnly)
 }
 
 func (p Point) Value() (driver.Value, error) {

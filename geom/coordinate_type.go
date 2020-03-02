@@ -25,6 +25,10 @@ func (t CoordinatesType) IsMeasured() bool {
 	return (t & XYM) != 0
 }
 
+func (t CoordinatesType) wktModifier() string {
+	return [4]string{"", " Z ", " M ", " ZM "}[t]
+}
+
 type coordinateTypeAggregator struct {
 	ctype     CoordinatesType
 	populated bool

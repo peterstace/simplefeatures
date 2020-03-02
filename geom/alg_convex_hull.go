@@ -16,7 +16,7 @@ func convexHull(g Geometry) Geometry {
 	hull := grahamScan(pts)
 	switch len(hull) {
 	case 0:
-		return NewGeometryCollection(nil).AsGeometry()
+		return NewEmptyGeometryCollection(XYOnly).AsGeometry()
 	case 1:
 		return NewPointXY(hull[0]).AsGeometry()
 	case 2:

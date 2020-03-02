@@ -137,7 +137,8 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 		for i := range geoms {
 			geoms[i] = secondPass.Geometries[i]
 		}
-		return NewGeometryCollection(geoms, opts...).AsGeometry(), nil
+		gc, err := NewGeometryCollection(geoms, opts...)
+		return gc.AsGeometry(), err
 	case "":
 		return Geometry{}, errors.New("type field missing or empty")
 	default:

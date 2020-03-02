@@ -60,16 +60,16 @@ func (m MultiLineString) AsText() string {
 }
 
 func (m MultiLineString) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "MULTILINESTRING"...)
+	dst = appendWKTHeader(dst, "MULTILINESTRING", m.ctype)
 	if len(m.lines) == 0 {
-		return append(dst, " EMPTY"...)
+		return appendWKTEmpty(dst)
 	}
 	dst = append(dst, '(')
 	for i, line := range m.lines {
-		dst = line.appendWKTBody(dst)
-		if i != len(m.lines)-1 {
+		if i > 0 {
 			dst = append(dst, ',')
 		}
+		dst = line.appendWKTBody(dst)
 	}
 	return append(dst, ')')
 }
