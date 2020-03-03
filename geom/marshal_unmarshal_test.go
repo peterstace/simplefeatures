@@ -2,6 +2,8 @@ package geom_test
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"strconv"
 	"testing"
 
@@ -143,6 +145,10 @@ func TestMarshalUnmarshal(t *testing.T) {
 		"GEOMETRYCOLLECTION Z (MULTIPOLYGON Z EMPTY)",
 		"GEOMETRYCOLLECTION Z (LINESTRING Z (0 0 3,1 1 4))",
 		"GEOMETRYCOLLECTION Z (POINT Z (4 6 1),LINESTRING Z (4 6 5,7 10 11))",
+		"GEOMETRYCOLLECTION Z (POINT Z (1 2 3),MULTIPOLYGON Z EMPTY)",
+		"GEOMETRYCOLLECTION Z (POINT Z (1 2 3),POLYGON Z EMPTY)",
+		"GEOMETRYCOLLECTION Z (POINT Z (1 2 3),MULTILINESTRING Z EMPTY)",
+		"GEOMETRYCOLLECTION Z (POINT Z (1 2 3),GEOMETRYCOLLECTION Z EMPTY)",
 
 		"GEOMETRYCOLLECTION M EMPTY",
 		"GEOMETRYCOLLECTION M (GEOMETRYCOLLECTION M EMPTY)",
@@ -154,6 +160,10 @@ func TestMarshalUnmarshal(t *testing.T) {
 		"GEOMETRYCOLLECTION M (MULTIPOLYGON M EMPTY)",
 		"GEOMETRYCOLLECTION M (LINESTRING M (0 0 3,1 1 4))",
 		"GEOMETRYCOLLECTION M (POINT M (4 6 1),LINESTRING M (4 6 5,7 10 11))",
+		"GEOMETRYCOLLECTION M (POINT M (1 2 3),MULTIPOLYGON M EMPTY)",
+		"GEOMETRYCOLLECTION M (POINT M (1 2 3),POLYGON M EMPTY)",
+		"GEOMETRYCOLLECTION M (POINT M (1 2 3),MULTILINESTRING M EMPTY)",
+		"GEOMETRYCOLLECTION M (POINT M (1 2 3),GEOMETRYCOLLECTION M EMPTY)",
 
 		"GEOMETRYCOLLECTION ZM EMPTY",
 		"GEOMETRYCOLLECTION ZM (GEOMETRYCOLLECTION ZM EMPTY)",
@@ -165,6 +175,10 @@ func TestMarshalUnmarshal(t *testing.T) {
 		"GEOMETRYCOLLECTION ZM (MULTIPOLYGON ZM EMPTY)",
 		"GEOMETRYCOLLECTION ZM (LINESTRING ZM (0 0 3 1,1 1 4 2))",
 		"GEOMETRYCOLLECTION ZM (POINT ZM (4 6 1 8),LINESTRING ZM (4 6 5 7,7 10 11 0))",
+		"GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4),MULTIPOLYGON ZM EMPTY)",
+		"GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4),POLYGON ZM EMPTY)",
+		"GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4),MULTILINESTRING ZM EMPTY)",
+		"GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4),GEOMETRYCOLLECTION ZM EMPTY)",
 	}
 
 	t.Run("wkt", func(t *testing.T) {
@@ -190,5 +204,31 @@ func TestMarshalUnmarshal(t *testing.T) {
 		}
 	})
 
-	// TODO: Add a test for GeoJSON
+	t.Run("geojson", func(t *testing.T) {
+		for i, wkt := range wkts {
+			original := geomFromWKT(t, wkt)
+			if original.CoordinatesType().IsMeasured() {
+				// GeoJSON will drop Measures
+				continue
+			}
+			if original.IsEmpty() && original.CoordinatesType().Is3D() {
+				// When parsing GeoJSON, the "width" of each coordinate is used
+				// to infer XY vs XYZ geometry. If there are no coordinates,
+				// then XY is assumed.
+				continue
+			}
+			t.Run(strconv.Itoa(i), func(t *testing.T) {
+				geojson, err := json.Marshal(original)
+				expectNoErr(t, err)
+
+				fmt.Println(wkt)
+				fmt.Println(string(geojson))
+
+				var reconstructed geom.Geometry
+				expectNoErr(t, json.Unmarshal(geojson, &reconstructed))
+				reconstructedWKT := reconstructed.AsText()
+				expectStringEq(t, wkt, reconstructedWKT)
+			})
+		}
+	})
 }
