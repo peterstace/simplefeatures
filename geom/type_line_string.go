@@ -240,10 +240,10 @@ func (s LineString) Coordinates() Sequence {
 }
 
 // TransformXY transforms this LineString into another LineString according to fn.
-func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (LineString, error) {
 	transformed := transformSequence(s.seq, fn)
 	ls, err := NewLineStringFromSequence(transformed, opts...)
-	return ls.AsGeometry(), err
+	return ls, err
 }
 
 // EqualsExact checks if this LineString is exactly equal to another curve.

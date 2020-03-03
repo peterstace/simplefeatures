@@ -153,11 +153,11 @@ func (n Line) Coordinates() Sequence {
 }
 
 // TransformXY transforms this Line into another Line according to fn.
-func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Line, error) {
 	n.a.XY = fn(n.a.XY)
 	n.b.XY = fn(n.b.XY)
 	ln, err := NewLineC(n.a, n.b, n.ctype, opts...)
-	return ln.AsGeometry(), err
+	return ln, err
 }
 
 // EqualsExact checks if this Line is exactly equal to another curve.

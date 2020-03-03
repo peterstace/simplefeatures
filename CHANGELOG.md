@@ -1,6 +1,33 @@
 # Changelog
 
+## v0.9.0
+
+__Special thanks to Frank Sun and Peter Jones for contributing to this release.__
+
+- Fixes a bug in the intersects predicate between `MultiLineString` and
+  `MultiPolygon`.
+
+- Removes the `EmptySet` type. The `Point`, `LineString`, and `Polygon` types
+  can now represent empty geometries.
+
+- Adds the `GeometryType` method, which returns a string representation of the
+  geometry type (e.g. returns `"LineString"` for the `LineString` geometries).
+
+- Adds support to store empty `Point` geometries within `MultiPoint`
+  geometries.
+
+- Simplifies geometry constructor options by removing the
+  `DisableExpensiveValidations` option.
+
+- Removes the `Equals` predicate (which was only implemented for a small
+  proportion of geometry type pairs).
+
+- Modifies the `TransformXY` methods to return their own concrete geometry
+  type.
+
 ## v0.8.0
+
+__Special thanks to Lachlan Patrick for contributing to this release.__
 
 - Adds a `Length` implementation for the `Geometry` type.
 
@@ -27,6 +54,8 @@
 - Reduces the memory required to store a `LineString`.
 
 ## v0.6.0
+
+__Special thanks to Lachlan Patrick for contributing to this release.__
 
 - Adds `Reverse` methods, which reverses the order of each geometry's control
   points.
@@ -65,5 +94,7 @@ the computational complexity from quadratic time to linearithmic time.
 returned for unimplemented geometry pairs).
 
 ## v0.1.0
+
+__Special thanks to Lachlan Patrick and Den Tsou for contributing to this release.__
 
 Initial tagged version.

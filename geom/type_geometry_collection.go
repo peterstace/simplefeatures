@@ -182,17 +182,16 @@ func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 }
 
 // TransformXY transforms this GeometryCollection into another GeometryCollection according to fn.
-func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryCollection, error) {
 	transformed := make([]Geometry, len(c.geoms))
 	for i := range c.geoms {
 		var err error
 		transformed[i], err = c.geoms[i].TransformXY(fn, opts...)
 		if err != nil {
-			return Geometry{}, err
+			return GeometryCollection{}, err
 		}
 	}
-	gc, err := NewGeometryCollection(transformed)
-	return gc.AsGeometry(), err
+	return NewGeometryCollection(transformed)
 }
 
 // EqualsExact checks if this GeometryCollection is exactly equal to another GeometryCollection.

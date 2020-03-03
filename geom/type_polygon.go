@@ -309,7 +309,7 @@ func (p Polygon) Coordinates() []Sequence {
 }
 
 // TransformXY transforms this Polygon into another Polygon according to fn.
-func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon, error) {
 	n := len(p.rings)
 	transformed := make([]LineString, n)
 	for i, r := range p.rings {
@@ -319,11 +319,11 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometr
 			opts...,
 		)
 		if err != nil {
-			return Geometry{}, err
+			return Polygon{}, err
 		}
 	}
 	poly, err := NewPolygon(transformed, opts...)
-	return poly.AsGeometry(), err
+	return poly, err
 }
 
 // EqualsExact checks if this Polygon is exactly equal to another Polygon.

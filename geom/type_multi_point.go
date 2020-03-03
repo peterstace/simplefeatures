@@ -211,9 +211,9 @@ func (m MultiPoint) Coordinates() (seq Sequence, empty BitSet) {
 }
 
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
-func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPoint, error) {
 	transformed := transformSequence(m.seq, fn)
-	return NewMultiPointFromSequence(transformed, m.empty, opts...).AsGeometry(), nil
+	return NewMultiPointFromSequence(transformed, m.empty, opts...), nil
 }
 
 // EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.

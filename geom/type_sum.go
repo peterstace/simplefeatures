@@ -516,21 +516,29 @@ func (g Geometry) Intersection(other Geometry) (Geometry, error) {
 func (g Geometry) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
 	switch g.tag {
 	case geometryCollectionTag:
-		return g.AsGeometryCollection().TransformXY(fn, opts...)
+		gt, err := g.AsGeometryCollection().TransformXY(fn, opts...)
+		return gt.AsGeometry(), err
 	case pointTag:
-		return g.AsPoint().TransformXY(fn, opts...)
+		gt, err := g.AsPoint().TransformXY(fn, opts...)
+		return gt.AsGeometry(), err
 	case lineTag:
-		return g.AsLine().TransformXY(fn, opts...)
+		gt, err := g.AsLine().TransformXY(fn, opts...)
+		return gt.AsGeometry(), err
 	case lineStringTag:
-		return g.AsLineString().TransformXY(fn, opts...)
+		gt, err := g.AsLineString().TransformXY(fn, opts...)
+		return gt.AsGeometry(), err
 	case polygonTag:
-		return g.AsPolygon().TransformXY(fn, opts...)
+		gt, err := g.AsPolygon().TransformXY(fn, opts...)
+		return gt.AsGeometry(), err
 	case multiPointTag:
-		return g.AsMultiPoint().TransformXY(fn, opts...)
+		gt, err := g.AsMultiPoint().TransformXY(fn, opts...)
+		return gt.AsGeometry(), err
 	case multiLineStringTag:
-		return g.AsMultiLineString().TransformXY(fn, opts...)
+		gt, err := g.AsMultiLineString().TransformXY(fn, opts...)
+		return gt.AsGeometry(), err
 	case multiPolygonTag:
-		return g.AsMultiPolygon().TransformXY(fn, opts...)
+		gt, err := g.AsMultiPolygon().TransformXY(fn, opts...)
+		return gt.AsGeometry(), err
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}

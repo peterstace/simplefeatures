@@ -329,17 +329,17 @@ func (m MultiPolygon) Coordinates() [][]Sequence {
 }
 
 // TransformXY transforms this MultiPolygon into another MultiPolygon according to fn.
-func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPolygon, error) {
 	polys := make([]Polygon, m.NumPolygons())
 	for i := range polys {
 		transformed, err := m.PolygonN(i).TransformXY(fn, opts...)
 		if err != nil {
-			return Geometry{}, err
+			return MultiPolygon{}, err
 		}
-		polys[i] = transformed.AsPolygon()
+		polys[i] = transformed
 	}
 	mp, err := NewMultiPolygon(polys, opts...)
-	return mp.AsGeometry(), err
+	return mp, err
 }
 
 // EqualsExact checks if this MultiPolygon is exactly equal to another MultiPolygon.
