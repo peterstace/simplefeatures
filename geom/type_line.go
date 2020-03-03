@@ -141,11 +141,11 @@ func (n Line) Coordinates() []Coordinates {
 }
 
 // TransformXY transforms this Line into another Line according to fn.
-func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Line, error) {
 	coords := n.Coordinates()
 	transform1dCoords(coords, fn)
 	ln, err := NewLineC(coords[0], coords[1], opts...)
-	return ln.AsGeometry(), err
+	return ln, err
 }
 
 // EqualsExact checks if this Line is exactly equal to another curve.

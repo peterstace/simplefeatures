@@ -333,11 +333,11 @@ func (p Polygon) Coordinates() [][]Coordinates {
 }
 
 // TransformXY transforms this Polygon into another Polygon according to fn.
-func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon, error) {
 	coords := p.Coordinates()
 	transform2dCoords(coords, fn)
 	poly, err := NewPolygonC(coords, opts...)
-	return poly.AsGeometry(), err
+	return poly, err
 }
 
 // EqualsExact checks if this Polygon is exactly equal to another Polygon.

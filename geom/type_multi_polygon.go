@@ -327,11 +327,11 @@ func (m MultiPolygon) Coordinates() [][][]Coordinates {
 }
 
 // TransformXY transforms this MultiPolygon into another MultiPolygon according to fn.
-func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPolygon, error) {
 	coords := m.Coordinates()
 	transform3dCoords(coords, fn)
 	mp, err := NewMultiPolygonC(coords, opts...)
-	return mp.AsGeometry(), err
+	return mp, err
 }
 
 // EqualsExact checks if this MultiPolygon is exactly equal to another MultiPolygon.
