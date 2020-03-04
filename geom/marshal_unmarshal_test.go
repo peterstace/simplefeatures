@@ -3,7 +3,6 @@ package geom_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"testing"
 
@@ -217,13 +216,25 @@ func TestMarshalUnmarshal(t *testing.T) {
 				// then XY is assumed.
 				continue
 			}
+
+			// Empty Points within MultiPoint geometries cannot be represented
+			// in GeoJSON as per the spec.
+			if original.IsMultiPoint() {
+				var hasEmptyPointInMultiPoint bool
+				mp := original.AsMultiPoint()
+				for j := 0; j < mp.NumPoints(); j++ {
+					if mp.PointN(j).IsEmpty() {
+						hasEmptyPointInMultiPoint = true
+					}
+				}
+				if hasEmptyPointInMultiPoint {
+					continue
+				}
+			}
+
 			t.Run(strconv.Itoa(i), func(t *testing.T) {
 				geojson, err := json.Marshal(original)
 				expectNoErr(t, err)
-
-				fmt.Println(wkt)
-				fmt.Println(string(geojson))
-
 				var reconstructed geom.Geometry
 				expectNoErr(t, json.Unmarshal(geojson, &reconstructed))
 				reconstructedWKT := reconstructed.AsText()

@@ -130,9 +130,9 @@ func (n Line) ConvexHull() Geometry {
 func (n Line) MarshalJSON() ([]byte, error) {
 	var dst []byte
 	dst = append(dst, `{"type":"LineString","coordinates":[`...)
-	dst = appendGeoJSONCoordinate(dst, n.ctype, n.a, false)
+	dst = appendGeoJSONCoordinate(dst, n.ctype, n.a)
 	dst = append(dst, ',')
-	dst = appendGeoJSONCoordinate(dst, n.ctype, n.b, false)
+	dst = appendGeoJSONCoordinate(dst, n.ctype, n.b)
 	dst = append(dst, "]}"...)
 	return dst, nil
 }

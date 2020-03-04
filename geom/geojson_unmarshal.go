@@ -17,17 +17,8 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 	}
 
 	hasLength := make(map[int]bool)
-	detectCoordinatesLengths(rootObj, hasLength)
-
-	has2D := hasLength[2]
-	has3D := hasLength[3]
-	delete(hasLength, 0)
-	delete(hasLength, 2)
-	delete(hasLength, 3)
-
-	// If there are any lengths other than 0, 2, or 3, then an error is given.
-	for length := range hasLength {
-		return Geometry{}, GeoJSONInvalidCoordinatesLengthError{length}
+	if err := detectCoordinatesLengths(rootObj, hasLength); err != nil {
+		return Geometry{}, err
 	}
 
 	// We want to parse the geojson as a 3D geometry in the case where there is
@@ -47,6 +38,8 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 	// | true     | true  | false | XYOnly |
 	// | true     | true  | true  | XYOnly |
 	ctype := XYOnly
+	has2D := hasLength[2]
+	has3D := hasLength[3]
 	if !has2D && has3D {
 		ctype = XYZ
 	}
@@ -150,42 +143,76 @@ func extract4DimFloat64s(coords json.RawMessage) ([][][][]float64, error) {
 	return result, err
 }
 
-func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) {
+func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 	switch node := node.(type) {
 	case geojsonPoint:
-		hasLength[len(node.coords)] = true
+		n := len(node.coords)
+		hasLength[n] = true
+		if n != 0 && n != 2 && n != 3 {
+			return GeoJSONInvalidCoordinatesLengthError{n}
+		}
+		return nil
 	case geojsonLineString:
 		for _, c := range node.coords {
-			hasLength[len(c)] = true
+			n := len(c)
+			hasLength[n] = true
+			if n != 2 && n != 3 {
+				return GeoJSONInvalidCoordinatesLengthError{n}
+			}
 		}
+		return nil
 	case geojsonPolygon:
 		for _, outer := range node.coords {
 			for _, inner := range outer {
-				hasLength[len(inner)] = true
+				n := len(inner)
+				hasLength[n] = true
+				if n != 2 && n != 3 {
+					return GeoJSONInvalidCoordinatesLengthError{n}
+				}
 			}
 		}
+		return nil
 	case geojsonMultiPoint:
 		for _, c := range node.coords {
-			hasLength[len(c)] = true
+			// GeoJSON MultiPoints do not allow empty Points inside them.
+			n := len(c)
+			hasLength[n] = true
+			if n != 2 && n != 3 {
+				return GeoJSONInvalidCoordinatesLengthError{n}
+			}
 		}
+		return nil
 	case geojsonMultiLineString:
 		for _, outer := range node.coords {
 			for _, inner := range outer {
-				hasLength[len(inner)] = true
+				n := len(inner)
+				hasLength[n] = true
+				if n != 2 && n != 3 {
+					return GeoJSONInvalidCoordinatesLengthError{n}
+				}
 			}
 		}
+		return nil
 	case geojsonMultiPolygon:
 		for _, outer := range node.coords {
 			for _, middle := range outer {
 				for _, inner := range middle {
-					hasLength[len(inner)] = true
+					n := len(inner)
+					hasLength[n] = true
+					if n != 2 && n != 3 {
+						return GeoJSONInvalidCoordinatesLengthError{n}
+					}
 				}
 			}
 		}
+		return nil
 	case geojsonGeometryCollection:
 		for _, child := range node.geoms {
-			detectCoordinatesLengths(child, hasLength)
+			if err := detectCoordinatesLengths(child, hasLength); err != nil {
+				return err
+			}
 		}
+		return nil
 	default:
 		panic(fmt.Sprintf("unexpected node: %#v", node))
 	}
@@ -220,8 +247,9 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 		poly, err := NewPolygon(rings)
 		return poly.AsGeometry(), err
 	case geojsonMultiPoint:
-		seq, empty := twoDimFloat64sToOptionalSequence(node.coords, ctype)
-		return NewMultiPointFromSequence(seq, empty).AsGeometry(), nil
+		// GeoJSON MultiPoints cannot contain empty Points.
+		seq := twoDimFloat64sToSequence(node.coords, ctype)
+		return NewMultiPointFromSequence(seq, BitSet{}).AsGeometry(), nil
 	case geojsonMultiLineString:
 		lss := make([]LineString, len(node.coords))
 		for i, coords := range node.coords {
@@ -321,64 +349,4 @@ func twoDimFloat64sToOptionalSequence(outer [][]float64, ctype CoordinatesType) 
 		}
 	}
 	return NewSequenceNoCopy(floats, ctype), empty
-}
-
-func appendGeoJSONCoordinate(
-	dst []byte,
-	ctype CoordinatesType,
-	coords Coordinates,
-	empty bool,
-) []byte {
-	if empty {
-		return append(dst, "[]"...)
-	}
-	dst = append(dst, '[')
-	dst = appendFloat(dst, coords.X)
-	dst = append(dst, ',')
-	dst = appendFloat(dst, coords.Y)
-	if ctype.Is3D() {
-		dst = append(dst, ',')
-		dst = appendFloat(dst, coords.Z)
-	}
-	// GeoJSON explicitly prohibits including M values.
-	return append(dst, ']')
-}
-
-func appendGeoJSONSequence(dst []byte, seq Sequence, empty BitSet) []byte {
-	dst = append(dst, '[')
-	n := seq.Length()
-	for i := 0; i < n; i++ {
-		if i > 0 {
-			dst = append(dst, ',')
-		}
-		dst = appendGeoJSONCoordinate(
-			dst, seq.CoordinatesType(), seq.Get(i), empty.Get(i),
-		)
-	}
-	dst = append(dst, ']')
-	return dst
-}
-
-func appendGeoJSONSequences(dst []byte, seqs []Sequence) []byte {
-	dst = append(dst, '[')
-	for i, seq := range seqs {
-		if i > 0 {
-			dst = append(dst, ',')
-		}
-		dst = appendGeoJSONSequence(dst, seq, BitSet{})
-	}
-	dst = append(dst, ']')
-	return dst
-}
-
-func appendGeoJSONSequenceMatrix(dst []byte, matrix [][]Sequence) []byte {
-	dst = append(dst, '[')
-	for i, seqs := range matrix {
-		if i > 0 {
-			dst = append(dst, ',')
-		}
-		dst = appendGeoJSONSequences(dst, seqs)
-	}
-	dst = append(dst, ']')
-	return dst
 }

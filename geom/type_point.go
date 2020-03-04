@@ -131,7 +131,11 @@ func (p Point) ConvexHull() Geometry {
 func (p Point) MarshalJSON() ([]byte, error) {
 	var dst []byte
 	dst = append(dst, `{"type":"Point","coordinates":`...)
-	dst = appendGeoJSONCoordinate(dst, p.ctype, p.coords, !p.full)
+	if p.full {
+		dst = appendGeoJSONCoordinate(dst, p.ctype, p.coords)
+	} else {
+		dst = append(dst, '[', ']')
+	}
 	return append(dst, '}'), nil
 }
 
@@ -200,11 +204,4 @@ func (p Point) AsMultiPoint() MultiPoint {
 
 func (p Point) CoordinatesType() CoordinatesType {
 	return p.ctype
-}
-
-func (p Point) Force2D() Point {
-	p.coords.Z = 0
-	p.coords.M = 0
-	p.ctype = XYOnly
-	return p
 }

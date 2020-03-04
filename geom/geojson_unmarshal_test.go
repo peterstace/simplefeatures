@@ -3,11 +3,14 @@ package geom_test
 import (
 	"encoding/json"
 	"strconv"
+	"strings"
 	"testing"
 
+	"github.com/peterstace/simplefeatures/geom"
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
+// TODO: Need to update these tests to work with 3D geometries.
 func TestGeoJSONUnmarshalValid(t *testing.T) {
 	// Test data from the following query:
 	/*
@@ -441,129 +444,25 @@ func TestGeoJSONUnmarshalValid(t *testing.T) {
 	}
 }
 
-func TestGeoJSONMarshal(t *testing.T) {
-	// Test cases are from:
-	/*
-	   SELECT wkt, ST_AsGeoJSON(ST_GeomFromText(wkt)) AS geojson
-	   FROM (
-	           VALUES
-	           ('POINT EMPTY'),
-	           ('POINT(1 2)'),
-	           ('LINESTRING EMPTY'),
-	           ('LINESTRING(1 2,3 4)'),
-	           ('LINESTRING(1 2,3 4,5 6)'),
-	           ('POLYGON EMPTY'),
-	           ('POLYGON((0 0,4 0,0 4,0 0),(1 1,2 1,1 2,1 1))'),
-	           ('MULTIPOINT EMPTY'),
-	           ('MULTIPOINT(1 2)'),
-	           ('MULTIPOINT(1 2,3 4)'),
-	           ('MULTILINESTRING EMPTY'),
-	           ('MULTILINESTRING((0 1,2 3,4 5))'),
-	           ('MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))'),
-	           ('MULTIPOLYGON EMPTY'),
-	           ('MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((1 0,2 0,1 1,1 0)))'),
-	           ('GEOMETRYCOLLECTION EMPTY'),
-	           ('GEOMETRYCOLLECTION(POINT(1 2),POINT(3 4))')
-	   ) AS q (wkt);
-	*/
-	for _, tt := range []struct {
-		wkt  string
-		want string
-	}{
-		{
-			wkt:  "POINT EMPTY",
-			want: `{"type":"Point","coordinates":[]}`,
-		},
-		{
-			wkt:  "POINT(1 2)",
-			want: `{"type":"Point","coordinates":[1,2]}`,
-		},
-		{
-			wkt:  "LINESTRING EMPTY",
-			want: `{"type":"LineString","coordinates":[]}`,
-		},
-		{
-			wkt:  "LINESTRING(1 2,3 4)",
-			want: `{"type":"LineString","coordinates":[[1,2],[3,4]]}`,
-		},
-		{
-			wkt:  "LINESTRING(1 2,3 4,5 6)",
-			want: `{"type":"LineString","coordinates":[[1,2],[3,4],[5,6]]}`,
-		},
-		{
-			wkt:  "POLYGON EMPTY",
-			want: `{"type":"Polygon","coordinates":[]}`,
-		},
-		{
-			wkt:  "POLYGON((0 0,4 0,0 4,0 0),(1 1,2 1,1 2,1 1))",
-			want: `{"type":"Polygon","coordinates":[[[0,0],[4,0],[0,4],[0,0]],[[1,1],[2,1],[1,2],[1,1]]]}`,
-		},
-		{
-			wkt:  "MULTIPOINT EMPTY",
-			want: `{"type":"MultiPoint","coordinates":[]}`,
-		},
-		{
-			wkt:  "MULTIPOINT(1 2)",
-			want: `{"type":"MultiPoint","coordinates":[[1,2]]}`,
-		},
-		{
-			wkt:  "MULTIPOINT(1 2,3 4)",
-			want: `{"type":"MultiPoint","coordinates":[[1,2],[3,4]]}`,
-		},
-		{
-			wkt:  "MULTIPOINT(1 2,EMPTY,3 4)",
-			want: `{"type":"MultiPoint","coordinates":[[1,2],[],[3,4]]}`,
-		},
-		{
-			wkt:  "MULTILINESTRING EMPTY",
-			want: `{"type":"MultiLineString","coordinates":[]}`,
-		},
-		{
-			wkt:  "MULTILINESTRING((0 1,2 3,4 5))",
-			want: `{"type":"MultiLineString","coordinates":[[[0,1],[2,3],[4,5]]]}`,
-		},
-		{
-			wkt:  "MULTILINESTRING((0 1,2 3),(4 5,6 7,8 9))",
-			want: `{"type":"MultiLineString","coordinates":[[[0,1],[2,3]],[[4,5],[6,7],[8,9]]]}`,
-		},
-		{
-			wkt:  "MULTILINESTRING((0 1,2 3),EMPTY,(4 5,6 7,8 9))",
-			want: `{"type":"MultiLineString","coordinates":[[[0,1],[2,3]],[],[[4,5],[6,7],[8,9]]]}`,
-		},
-		{
-			wkt:  "MULTIPOLYGON EMPTY",
-			want: `{"type":"MultiPolygon","coordinates":[]}`,
-		},
-		{
-			wkt:  "MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((1 0,2 0,1 1,1 0)))",
-			want: `{"type":"MultiPolygon","coordinates":[[[[0,0],[1,0],[0,1],[0,0]]],[[[1,0],[2,0],[1,1],[1,0]]]]}`,
-		},
-		{
-			wkt:  "GEOMETRYCOLLECTION EMPTY",
-			want: `{"type":"GeometryCollection","geometries":[]}`,
-		},
-		{
-			wkt:  "GEOMETRYCOLLECTION(POINT(1 2),POINT(3 4))",
-			want: `{"type":"GeometryCollection","geometries":[{"type":"Point","coordinates":[1,2]},{"type":"Point","coordinates":[3,4]}]}`,
-		},
+func TestGeoJSONUnmarshalInvalid(t *testing.T) {
+	for i, geojson := range []string{
+		// GeoJSON cannot represent empty points in MultiPoints. When parsing,
+		// we should complain that the dimensionality cannot be zero.
+		`{"type":"MultiPoint","coordinates":[[0,1],[]]}`,
+		`{"type":"MultiPoint","coordinates":[[],[0,1]]}`,
+		`{"type":"MultiPoint","coordinates":[[]]}`,
+
+		// Coordinates (other than the first level) must have either 2 or 3 parts.
+		`{"type":"LineString","coordinates":[[0,1],[]]}`,
+		`{"type":"LineString","coordinates":[[0,1],[3]]}`,
+		`{"type":"LineString","coordinates":[[0,1],[2,3,4,5]]}`,
 	} {
-		t.Run(tt.wkt, func(t *testing.T) {
-			geom := geomFromWKT(t, tt.wkt)
-			gotJSON, err := json.Marshal(geom)
-			expectNoErr(t, err)
-			if string(gotJSON) != tt.want {
-				t.Error("json doesn't match")
-				t.Logf("got:  %v", string(gotJSON))
-				t.Logf("want: %v", tt.want)
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			var g geom.Geometry
+			err := json.NewDecoder(strings.NewReader(geojson)).Decode(&g)
+			if err == nil {
+				t.Error("expected error but got nil")
 			}
 		})
 	}
-}
-
-func TestGeoJSONMarshalAnyGeometryPopulated(t *testing.T) {
-	g := geomFromWKT(t, "POINT(1 2)")
-	got, err := json.Marshal(g)
-	expectNoErr(t, err)
-	const want = `{"type":"Point","coordinates":[1,2]}`
-	expectStringEq(t, string(got), want)
 }
