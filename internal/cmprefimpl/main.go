@@ -35,6 +35,7 @@ func main() {
 	}
 
 	geoms = deduplicateGeometries(geoms)
+	geoms = remove3DAndMeasureGeometries(geoms)
 
 	h, err := libgeos.NewHandle()
 	if err != nil {
@@ -114,4 +115,17 @@ func deduplicateGeometries(geoms []geom.Geometry) []geom.Geometry {
 		return geoms[i].AsText() < geoms[j].AsText()
 	})
 	return geoms
+}
+
+// 3D and Measure geometries are skipped because there are some outstanding
+// issues with the cmprefimple checks for these geometry types.
+func remove3DAndMeasureGeometries(geoms []geom.Geometry) []geom.Geometry {
+	var filtered []geom.Geometry
+	for _, g := range geoms {
+		if ct := g.CoordinatesType(); ct.Is3D() || ct.IsMeasured() {
+			continue
+		}
+		filtered = append(filtered, g)
+	}
+	return filtered
 }

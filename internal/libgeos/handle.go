@@ -346,7 +346,8 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 				return geom.Geometry{}, nil
 			}
 		}
-		return geom.NewGeometryCollection(subGeoms).AsGeometry(), nil
+		gc, err := geom.NewGeometryCollection(subGeoms)
+		return gc.AsGeometry(), err
 	case "LineString", "Polygon", "MultiLineString":
 		return h.decodeGeomHandleUsingWKB(gh)
 	default:
