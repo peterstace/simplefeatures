@@ -640,7 +640,13 @@ func TestCentroid(t *testing.T) {
 		output string
 	}{
 		{"POINT EMPTY", "POINT EMPTY"},
+		{"POINT Z EMPTY", "POINT EMPTY"},
+		{"POINT M EMPTY", "POINT EMPTY"},
+		{"POINT ZM EMPTY", "POINT EMPTY"},
 		{"POINT(1 2)", "POINT(1 2)"},
+		{"POINT Z (1 2 3)", "POINT(1 2)"},
+		{"POINT M (1 2 3)", "POINT(1 2)"},
+		{"POINT ZM (1 2 3 4)", "POINT(1 2)"},
 
 		{"LINESTRING EMPTY", "POINT EMPTY"},
 		{"LINESTRING(1 2,3 4)", "POINT(2 3)"},

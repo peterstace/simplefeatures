@@ -174,9 +174,9 @@ func (p Point) IsValid() bool {
 	return true
 }
 
-// Centroid of a point it that point.
+// Centroid of a point is that point.
 func (p Point) Centroid() Point {
-	return p
+	return p.Force2D()
 }
 
 // Reverse in the case of Point outputs the same point.
@@ -205,4 +205,13 @@ func (p Point) AsMultiPoint() MultiPoint {
 
 func (p Point) CoordinatesType() CoordinatesType {
 	return p.ctype
+}
+
+func (p Point) Force2D() Point {
+	xy, ok := p.XY()
+	if ok {
+		return NewPointXY(xy)
+	} else {
+		return NewEmptyPoint(XYOnly)
+	}
 }
