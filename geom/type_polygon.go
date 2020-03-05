@@ -460,11 +460,7 @@ func (p Polygon) Reverse() Polygon {
 	for i := range reversed {
 		reversed[i] = p.rings[i].Reverse()
 	}
-	p2, err := NewPolygon(reversed)
-	if err != nil {
-		panic("Reverse of an existing Polygon should not fail")
-	}
-	return p2
+	return Polygon{reversed, p.ctype}
 }
 
 func (p Polygon) CoordinatesType() CoordinatesType {

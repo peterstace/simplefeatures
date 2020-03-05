@@ -322,11 +322,7 @@ func (s LineString) AsMultiLineString() MultiLineString {
 
 // Reverse in the case of LineString outputs the coordinates in reverse order.
 func (s LineString) Reverse() LineString {
-	rev, err := NewLineStringFromSequence(s.seq.Reverse())
-	if err != nil {
-		panic("Reverse of an existing LineString should not fail")
-	}
-	return rev
+	return LineString{s.seq.Reverse()}
 }
 
 func (s LineString) CoordinatesType() CoordinatesType {

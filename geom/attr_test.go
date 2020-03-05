@@ -732,6 +732,15 @@ func TestReverse(t *testing.T) {
 		{"MULTIPOINT EMPTY", "MULTIPOINT EMPTY"},
 		{"MULTILINESTRING EMPTY", "MULTILINESTRING EMPTY"},
 		{"MULTIPOLYGON EMPTY", "MULTIPOLYGON EMPTY"},
+		{"GEOMETRYCOLLECTION EMPTY", "GEOMETRYCOLLECTION EMPTY"},
+
+		{"POINT ZM EMPTY", "POINT ZM EMPTY"},
+		{"LINESTRING ZM EMPTY", "LINESTRING ZM EMPTY"},
+		{"POLYGON ZM EMPTY", "POLYGON ZM EMPTY"},
+		{"MULTIPOINT ZM EMPTY", "MULTIPOINT ZM EMPTY"},
+		{"MULTILINESTRING ZM EMPTY", "MULTILINESTRING ZM EMPTY"},
+		{"MULTIPOLYGON ZM EMPTY", "MULTIPOLYGON ZM EMPTY"},
+		{"GEOMETRYCOLLECTION ZM EMPTY", "GEOMETRYCOLLECTION ZM EMPTY"},
 
 		{"POINT(1 2)", "POINT(1 2)"},
 		{"LINESTRING(1 2,3 4)", "LINESTRING(3 4,1 2)"},
@@ -761,6 +770,10 @@ func TestReverse(t *testing.T) {
 		{
 			"MULTIPOLYGON(((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1)),((4 0,5 0,5 1,4 1,4 0)))",
 			"MULTIPOLYGON(((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1)),((4 0,4 1,5 1,5 0,4 0)))",
+		},
+		{
+			"MULTIPOLYGON M (((0 0 4,1 0 2,0 1 8,0 0 9)),EMPTY)",
+			"MULTIPOLYGON M (((0 0 9,0 1 8,1 0 2,0 0 4)),EMPTY)",
 		},
 
 		{
@@ -839,6 +852,7 @@ func TestReverse(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			t.Log("Input", tt.wkt)
 			want := geomFromWKT(t, tt.boundary)
 			got := geomFromWKT(t, tt.wkt).Reverse()
 			expectGeomEq(t, got, want)

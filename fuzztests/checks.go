@@ -491,8 +491,9 @@ func CheckReverse(t *testing.T, want UnaryResult, g geom.Geometry) {
 		got := g.Reverse()
 		want := want.Reverse
 		if !got.EqualsExact(want, geom.Tolerance(1e-9)) {
-			t.Logf("got:  %v", got.AsText())
-			t.Logf("want: %v", want.AsText())
+			t.Logf("input: %v", g.AsText())
+			t.Logf("got:   %v", got.AsText())
+			t.Logf("want:  %v", want.AsText())
 			t.Error("mismatch")
 		}
 	})

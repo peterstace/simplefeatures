@@ -404,11 +404,7 @@ func (m MultiPolygon) Reverse() MultiPolygon {
 	for i := 0; i < len(m.polys); i++ {
 		polys[i] = m.polys[i].Reverse()
 	}
-	m2, err := NewMultiPolygon(polys)
-	if err != nil {
-		panic("Reverse of an existing MultiPolygon should not fail")
-	}
-	return m2
+	return MultiPolygon{polys, m.ctype}
 }
 
 func (m MultiPolygon) CoordinatesType() CoordinatesType {
