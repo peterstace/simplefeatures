@@ -254,3 +254,7 @@ func (m MultiPoint) Reverse() MultiPoint {
 func (m MultiPoint) CoordinatesType() CoordinatesType {
 	return m.seq.CoordinatesType()
 }
+
+func (m MultiPoint) Force2D() MultiPoint {
+	return MultiPoint{m.seq.Force2D(), m.empty}
+}

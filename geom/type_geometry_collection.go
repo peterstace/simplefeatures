@@ -386,3 +386,11 @@ func (c GeometryCollection) sumCentroidCalc() centroidCalc {
 func (c GeometryCollection) CoordinatesType() CoordinatesType {
 	return c.ctype
 }
+
+func (c GeometryCollection) Force2D() GeometryCollection {
+	gs := make([]Geometry, len(c.geoms))
+	for i := range c.geoms {
+		gs[i] = c.geoms[i].Force2D()
+	}
+	return GeometryCollection{gs, XYOnly}
+}

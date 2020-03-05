@@ -298,3 +298,11 @@ func (m MultiLineString) Reverse() MultiLineString {
 func (m MultiLineString) CoordinatesType() CoordinatesType {
 	return m.ctype
 }
+
+func (m MultiLineString) Force2D() MultiLineString {
+	flat := make([]LineString, len(m.lines))
+	for i := range m.lines {
+		flat[i] = m.lines[i].Force2D()
+	}
+	return MultiLineString{flat, XYOnly}
+}

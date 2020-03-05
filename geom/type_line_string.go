@@ -332,3 +332,7 @@ func (s LineString) Reverse() LineString {
 func (s LineString) CoordinatesType() CoordinatesType {
 	return s.seq.CoordinatesType()
 }
+
+func (s LineString) Force2D() LineString {
+	return LineString{s.seq.Force2D()}
+}

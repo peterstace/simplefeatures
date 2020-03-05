@@ -211,3 +211,12 @@ func (n Line) Reverse() Line {
 func (n Line) CoordinatesType() CoordinatesType {
 	return n.ctype
 }
+
+func (n Line) Force2D() Line {
+	n.a.Z = 0
+	n.a.M = 0
+	n.b.Z = 0
+	n.b.M = 0
+	n.ctype = XYOnly
+	return n
+}

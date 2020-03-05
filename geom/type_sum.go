@@ -698,3 +698,26 @@ func (g Geometry) CoordinatesType() CoordinatesType {
 		panic("unknown geometry: " + g.tag.String())
 	}
 }
+
+func (g Geometry) Force2D() Geometry {
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().Force2D().AsGeometry()
+	case pointTag:
+		return g.AsPoint().Force2D().AsGeometry()
+	case lineTag:
+		return g.AsLine().Force2D().AsGeometry()
+	case lineStringTag:
+		return g.AsLineString().Force2D().AsGeometry()
+	case polygonTag:
+		return g.AsPolygon().Force2D().AsGeometry()
+	case multiPointTag:
+		return g.AsMultiPoint().Force2D().AsGeometry()
+	case multiLineStringTag:
+		return g.AsMultiLineString().Force2D().AsGeometry()
+	case multiPolygonTag:
+		return g.AsMultiPolygon().Force2D().AsGeometry()
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}

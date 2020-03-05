@@ -305,9 +305,17 @@ func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckConvexHull", func(t *testing.T) {
 		got := g.ConvexHull()
 		want := want.ConvexHull
+
+		if g.CoordinatesType() != geom.XYOnly {
+			// PostGIS retains 3D and M coordinates for convex hull, which is
+			// incorrect according to the OGC spec.
+			want = want.Force2D()
+		}
+
 		if !got.EqualsExact(want, geom.IgnoreOrder, geom.Tolerance(1e-9)) {
-			t.Logf("got:  %v", got.AsText())
-			t.Logf("want: %v", want.AsText())
+			t.Logf("input: %v", g.AsText())
+			t.Logf("got:   %v", got.AsText())
+			t.Logf("want:  %v", want.AsText())
 			t.Error("mismatch")
 		}
 	})
@@ -470,9 +478,9 @@ func CheckCentroid(t *testing.T, want UnaryResult, g geom.Geometry) {
 		}
 
 		if !got.EqualsExact(want, geom.Tolerance(0.000000001)) {
-			t.Logf("g:  %v", g.AsText())
-			t.Logf("got:  %v", got.AsText())
-			t.Logf("want: %v", want.AsText())
+			t.Logf("input: %v", g.AsText())
+			t.Logf("got:   %v", got.AsText())
+			t.Logf("want:  %v", want.AsText())
 			t.Error("mismatch")
 		}
 	})

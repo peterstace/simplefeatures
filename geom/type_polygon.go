@@ -470,3 +470,11 @@ func (p Polygon) Reverse() Polygon {
 func (p Polygon) CoordinatesType() CoordinatesType {
 	return p.ctype
 }
+
+func (p Polygon) Force2D() Polygon {
+	flatRings := make([]LineString, len(p.rings))
+	for i := range p.rings {
+		flatRings[i] = p.rings[i].Force2D()
+	}
+	return Polygon{flatRings, XYOnly}
+}

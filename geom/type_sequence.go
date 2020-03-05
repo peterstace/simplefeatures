@@ -67,3 +67,18 @@ func (s Sequence) Reverse() Sequence {
 	}
 	return Sequence{s.ctype, reversed}
 }
+
+func (s Sequence) Force2D() Sequence {
+	// TODO: We could avoid all of this copying by storing both the coordinate
+	// type and the stride independently within a sequence. Then all we would
+	// need to do is return a shallow copy of the Sequence, but with just the
+	// coordinate type change to XYOnly (the stride would remain the same).
+	flat := make([]float64, 2*s.Length())
+	n := s.Length()
+	for i := 0; i < n; i++ {
+		xy := s.GetXY(i)
+		flat[2*i+0] = xy.X
+		flat[2*i+1] = xy.Y
+	}
+	return Sequence{XYOnly, flat}
+}

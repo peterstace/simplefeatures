@@ -414,3 +414,11 @@ func (m MultiPolygon) Reverse() MultiPolygon {
 func (m MultiPolygon) CoordinatesType() CoordinatesType {
 	return m.ctype
 }
+
+func (m MultiPolygon) Force2D() MultiPolygon {
+	flat := make([]Polygon, len(m.polys))
+	for i := range m.polys {
+		flat[i] = m.polys[i].Force2D()
+	}
+	return MultiPolygon{flat, XYOnly}
+}
