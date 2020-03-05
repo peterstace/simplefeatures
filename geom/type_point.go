@@ -154,6 +154,9 @@ func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	if !other.IsPoint() {
 		return false
 	}
+	if p.ctype != other.CoordinatesType() {
+		return false
+	}
 	if p.IsEmpty() != other.IsEmpty() {
 		return false
 	}
@@ -162,9 +165,7 @@ func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	}
 	// No need to check returned flag, since we know that both Points are
 	// non-empty.
-	xyA, _ := p.XY()
-	xyB, _ := other.AsPoint().XY()
-	return newEqualsExactOptionSet(opts).eq(xyA, xyB)
+	return newEqualsExactOptionSet(opts).eq(p.coords, other.AsPoint().coords, p.ctype)
 }
 
 // IsValid checks if this Point is valid, but there is not way to indicate if

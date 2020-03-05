@@ -15,6 +15,10 @@ func TestEqualsExact(t *testing.T) {
 		"pt_e": "POINT EMPTY",
 		"pt_f": "POINT(3.125 -1)",
 
+		"pt_a_z":  "POINT Z (2 3 4)",
+		"pt_a_m":  "POINT M (2 3 4)",
+		"pt_a_zm": "POINT ZM (2 3 4 5)",
+
 		"ln_a": "LINESTRING(1 2,3 4)",
 		"ln_b": "LINESTRING(1 2,3 3.9)",
 		"ln_c": "LINESTRING(1.1 2,3 4)",
