@@ -199,7 +199,7 @@ func TestGeoJSONUnmarshalValidAllowAdditionalCoordDimensions(t *testing.T) {
 		},
 		{
 			geojson: `{"type":"Polygon","coordinates":[[[0,0,0,0],[0,1,0,0],[1,0,0,0],[0,0,0,0]]]}`,
-			wkt:     "PLOYGON Z ((1 2 3,2 3 4,3 4 5))",
+			wkt:     "POLYGON Z ((0 0 0,0 1 0,1 0 0,0 0 0))",
 		},
 		{
 			geojson: `{"type":"MultiPoint","coordinates":[[1,2,3,4]]}`,
@@ -207,15 +207,15 @@ func TestGeoJSONUnmarshalValidAllowAdditionalCoordDimensions(t *testing.T) {
 		},
 		{
 			geojson: `{"type":"MultiLineString","coordinates":[[[1,2,3,4],[2,3,4,5]]]}`,
-			wkt:     "MULTILINESTRING Z (1 2 3,2 3 4)",
+			wkt:     "MULTILINESTRING Z ((1 2 3,2 3 4))",
 		},
 		{
 			geojson: `{"type":"MultiLineString","coordinates":[[[1,2,3,4],[2,3,4,5],[3,4,5,6,7]]]}`,
-			wkt:     "MULTILINESTRING Z (1 2 3,2 3 4,3 4 5)",
+			wkt:     "MULTILINESTRING Z ((1 2 3,2 3 4,3 4 5))",
 		},
 		{
 			geojson: `{"type":"MultiPolygon","coordinates":[[[[0,0,0,0],[0,1,0,0],[1,0,0,0],[0,0,0,0]]]]}`,
-			wkt:     "MULTIPLOYGON Z ((1 2 3,2 3 4,3 4 5))",
+			wkt:     "MULTIPOLYGON Z (((0 0 0,0 1 0,1 0 0,0 0 0)))",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
