@@ -272,11 +272,11 @@ func (m MultiPolygon) Boundary() MultiLineString {
 	for _, p := range m.polys {
 		n += len(p.rings)
 	}
-	bounds := make([]LineString, n)
-	var i int
+	bounds := make([]LineString, 0, n)
 	for _, p := range m.polys {
-		copy(bounds[i:], p.rings)
-		i += len(p.rings)
+		for _, r := range p.rings {
+			bounds = append(bounds, r.Force2D())
+		}
 	}
 	mls, err := NewMultiLineString(bounds)
 	if err != nil {

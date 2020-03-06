@@ -292,10 +292,18 @@ func CheckBoundary(t *testing.T, want UnaryResult, g geom.Geometry) {
 		}
 
 		got := g.Boundary()
+
 		want := want.Boundary
+
+		if want.Valid {
+			// Simplefeatures doesn't retain boundary Z values.
+			want.Geometry = want.Geometry.Force2D()
+		}
+
 		if !got.EqualsExact(want.Geometry, geom.IgnoreOrder) {
-			t.Logf("got:  %v", got.AsText())
-			t.Logf("want: %v", want.Geometry.AsText())
+			t.Logf("input: %v", g.AsText())
+			t.Logf("got:   %v", got.AsText())
+			t.Logf("want:  %v", want.Geometry.AsText())
 			t.Error("mismatch")
 		}
 	})

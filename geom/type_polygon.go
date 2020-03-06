@@ -263,7 +263,7 @@ func (p Polygon) Boundary() MultiLineString {
 		// Can't get a mixed coordinate type error due to the source of the bound.
 		panic(err)
 	}
-	return mls
+	return mls.Force2D()
 }
 
 func (p Polygon) Value() (driver.Value, error) {

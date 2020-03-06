@@ -394,10 +394,11 @@ func (g Geometry) Envelope() (Envelope, bool) {
 // Boundary returns the Geometry representing the limit of this geometry.
 func (g Geometry) Boundary() Geometry {
 	// TODO: Investigate to see if the behaviour from libgeos would make more
-	// sense to use here.
+	// sense to use here (which is to return the same geometry type that would
+	// normally be returned in the non-empty case).
 	if g.IsEmpty() {
 		// Match PostGIS behaviour.
-		return g
+		return g.Force2D()
 	}
 
 	switch g.tag {
