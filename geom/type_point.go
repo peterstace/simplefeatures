@@ -115,8 +115,8 @@ func (p Point) AsBinary(w io.Writer) error {
 	if !p.full {
 		p.coords.X = math.NaN()
 		p.coords.Y = math.NaN()
-		p.coords.Z = 0
-		p.coords.M = 0
+		p.coords.Z = math.NaN()
+		p.coords.M = math.NaN()
 	}
 	marsh.writeCoordinates(p.coords, p.ctype)
 	return marsh.err

@@ -12,6 +12,7 @@ import (
 
 func hexStringToBytes(t *testing.T, s string) []byte {
 	t.Helper()
+	s = strings.ReplaceAll(s, " ", "")
 	if len(s)%2 != 0 {
 		t.Fatal("hex string must have even length")
 	}
@@ -438,14 +439,83 @@ func TestWKBMarshalValid(t *testing.T) {
 }
 
 func TestWKBMarshalEmptyPoint(t *testing.T) {
-	g := geomFromWKT(t, "POINT EMPTY")
-	var buf bytes.Buffer
-	err := g.AsBinary(&buf)
-	expectNoErr(t, err)
-	want := hexStringToBytes(t, "0101000000010000000000f87f010000000000f87f")
-	if !bytes.Equal(want, buf.Bytes()) {
-		t.Logf("want:\n%v", hex.Dump(want))
-		t.Logf("got:\n%v", hex.Dump(buf.Bytes()))
-		t.Errorf("mismatch")
+	for i, tt := range []struct {
+		wkt string
+		hex string
+	}{
+		{
+			"POINT EMPTY",
+			"0101000000010000000000f87f010000000000f87f",
+		},
+		{
+			"POINT Z EMPTY",
+			"01e9030000010000000000f87f010000000000f87f010000000000f87f",
+		},
+		{
+			"POINT M EMPTY",
+			"01d1070000010000000000f87f010000000000f87f010000000000f87f",
+		},
+		{
+			"POINT ZM EMPTY",
+			"01b90b0000010000000000f87f010000000000f87f010000000000f87f010000000000f87f",
+		},
+		{
+			"MULTIPOINT(EMPTY)",
+			"01" +
+				"04000000" +
+				"01000000" +
+				"01" +
+				"01000000" +
+				"010000000000f87f" +
+				"010000000000f87f",
+		},
+		{
+			"MULTIPOINT Z (EMPTY)",
+			"01" +
+				"ec030000" +
+				"01000000" +
+				"01" +
+				"e9030000" +
+				"010000000000f87f" +
+				"010000000000f87f" +
+				"010000000000f87f",
+		},
+		{
+			"MULTIPOINT M (EMPTY)",
+			"01" +
+				"d4070000" +
+				"01000000" +
+				"01" +
+				"d1070000" +
+				"010000000000f87f" +
+				"010000000000f87f" +
+				"010000000000f87f",
+		},
+		{
+			"MULTIPOINT ZM (EMPTY)",
+			"01" +
+				"bc0b0000" +
+				"01000000" +
+				"01" +
+				"b90b0000" +
+				"010000000000f87f" +
+				"010000000000f87f" +
+				"010000000000f87f" +
+				"010000000000f87f",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g := geomFromWKT(t, tt.wkt)
+			var buf bytes.Buffer
+			err := g.AsBinary(&buf)
+			expectNoErr(t, err)
+			want := hexStringToBytes(t, tt.hex)
+			if !bytes.Equal(want, buf.Bytes()) {
+				t.Logf("wkt: %v", tt.wkt)
+				t.Logf("want:\n%v", hex.Dump(want))
+				t.Logf("got:\n%v", hex.Dump(buf.Bytes()))
+				t.Errorf("mismatch")
+			}
+		})
 	}
 }
