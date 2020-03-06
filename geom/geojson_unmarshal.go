@@ -37,9 +37,21 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 	// | true     | false | true  | XYZ    |
 	// | true     | true  | false | XYOnly |
 	// | true     | true  | true  | XYOnly |
+	var has2D, has3D bool
+	for length := range hasLength {
+		if length == 2 {
+			has2D = true
+		}
+
+		// The GeoJSON spec allows parsers to ignore any "extra" coordinate
+		// values in addition to the normal 3 coordinate values used to specify
+		// a 3D position. So having a length strictly greater than 3 is not an
+		// error.
+		if length >= 3 {
+			has3D = true
+		}
+	}
 	ctype := XYOnly
-	has2D := hasLength[2]
-	has3D := hasLength[3]
 	if !has2D && has3D {
 		ctype = XYZ
 	}
@@ -148,7 +160,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 	case geojsonPoint:
 		n := len(node.coords)
 		hasLength[n] = true
-		if n != 0 && n != 2 && n != 3 {
+		if n == 1 {
 			return GeoJSONInvalidCoordinatesLengthError{n}
 		}
 		return nil
@@ -156,7 +168,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 		for _, c := range node.coords {
 			n := len(c)
 			hasLength[n] = true
-			if n != 2 && n != 3 {
+			if n < 2 {
 				return GeoJSONInvalidCoordinatesLengthError{n}
 			}
 		}
@@ -166,7 +178,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 			for _, inner := range outer {
 				n := len(inner)
 				hasLength[n] = true
-				if n != 2 && n != 3 {
+				if n < 2 {
 					return GeoJSONInvalidCoordinatesLengthError{n}
 				}
 			}
@@ -177,7 +189,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 			// GeoJSON MultiPoints do not allow empty Points inside them.
 			n := len(c)
 			hasLength[n] = true
-			if n != 2 && n != 3 {
+			if n < 2 {
 				return GeoJSONInvalidCoordinatesLengthError{n}
 			}
 		}
@@ -187,7 +199,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 			for _, inner := range outer {
 				n := len(inner)
 				hasLength[n] = true
-				if n != 2 && n != 3 {
+				if n < 2 {
 					return GeoJSONInvalidCoordinatesLengthError{n}
 				}
 			}
@@ -199,7 +211,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 				for _, inner := range middle {
 					n := len(inner)
 					hasLength[n] = true
-					if n != 2 && n != 3 {
+					if n < 2 {
 						return GeoJSONInvalidCoordinatesLengthError{n}
 					}
 				}

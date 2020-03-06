@@ -10,7 +10,6 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-// TODO: Need to update these tests to work with 3D geometries.
 func TestGeoJSONUnmarshalValid(t *testing.T) {
 	// Test data from the following query:
 	/*
@@ -181,6 +180,53 @@ func TestGeoJSONUnmarshalValid(t *testing.T) {
 	}
 }
 
+func TestGeoJSONUnmarshalValidAllowAdditionalCoordDimensions(t *testing.T) {
+	for i, tt := range []struct {
+		geojson string
+		wkt     string
+	}{
+		{
+			geojson: `{"type":"Point","coordinates":[1,2,3,4]}`,
+			wkt:     "POINT Z (1 2 3)",
+		},
+		{
+			geojson: `{"type":"LineString","coordinates":[[1,2,3,4],[2,3,4,5]]}`,
+			wkt:     "LINESTRING Z (1 2 3,2 3 4)",
+		},
+		{
+			geojson: `{"type":"LineString","coordinates":[[1,2,3,4],[2,3,4,5],[3,4,5,6,7]]}`,
+			wkt:     "LINESTRING Z (1 2 3,2 3 4,3 4 5)",
+		},
+		{
+			geojson: `{"type":"Polygon","coordinates":[[[0,0,0,0],[0,1,0,0],[1,0,0,0],[0,0,0,0]]]}`,
+			wkt:     "PLOYGON Z ((1 2 3,2 3 4,3 4 5))",
+		},
+		{
+			geojson: `{"type":"MultiPoint","coordinates":[[1,2,3,4]]}`,
+			wkt:     "MULTIPOINT Z (1 2 3)",
+		},
+		{
+			geojson: `{"type":"MultiLineString","coordinates":[[[1,2,3,4],[2,3,4,5]]]}`,
+			wkt:     "MULTILINESTRING Z (1 2 3,2 3 4)",
+		},
+		{
+			geojson: `{"type":"MultiLineString","coordinates":[[[1,2,3,4],[2,3,4,5],[3,4,5,6,7]]]}`,
+			wkt:     "MULTILINESTRING Z (1 2 3,2 3 4,3 4 5)",
+		},
+		{
+			geojson: `{"type":"MultiPolygon","coordinates":[[[[0,0,0,0],[0,1,0,0],[1,0,0,0],[0,0,0,0]]]]}`,
+			wkt:     "MULTIPLOYGON Z ((1 2 3,2 3 4,3 4 5))",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got, err := UnmarshalGeoJSON([]byte(tt.geojson))
+			expectNoErr(t, err)
+			want := geomFromWKT(t, tt.wkt)
+			expectGeomEq(t, got, want)
+		})
+	}
+}
+
 func TestGeoJSONUnmarshalInvalid(t *testing.T) {
 	for i, geojson := range []string{
 		// GeoJSON cannot represent empty points in MultiPoints. When parsing,
@@ -189,10 +235,9 @@ func TestGeoJSONUnmarshalInvalid(t *testing.T) {
 		`{"type":"MultiPoint","coordinates":[[],[0,1]]}`,
 		`{"type":"MultiPoint","coordinates":[[]]}`,
 
-		// Coordinates (other than the first level) must have either 2 or 3 parts.
+		// Coordinates (other than the first level) must have either 2 or 3 (or more) parts.
 		`{"type":"LineString","coordinates":[[0,1],[]]}`,
 		`{"type":"LineString","coordinates":[[0,1],[3]]}`,
-		`{"type":"LineString","coordinates":[[0,1],[2,3,4,5]]}`,
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var g geom.Geometry
