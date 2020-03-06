@@ -468,7 +468,9 @@ func hasIntersectionPointWithMultiPolygon(pt Point, mp MultiPolygon) bool {
 
 func hasIntersectionPointWithPoint(pt1, pt2 Point) bool {
 	// Speed is O(1).
-	return !pt1.IsEmpty() && !pt2.IsEmpty() && pt1.EqualsExact(pt2.AsGeometry())
+	xy1, ok1 := pt1.XY()
+	xy2, ok2 := pt2.XY()
+	return ok1 && ok2 && xy1 == xy2
 }
 
 func hasIntersectionPointWithPolygon(pt Point, p Polygon) bool {

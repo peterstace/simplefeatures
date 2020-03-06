@@ -18,6 +18,7 @@ func TestIntersects(t *testing.T) {
 		{"POINT EMPTY", "POINT(10 10)", false},
 		{"POINT(1 2)", "POINT(1 2)", true},
 		{"POINT(1 2)", "POINT(2 1)", false},
+		{"POINT Z (1 2 3)", "POINT M (1 2 3)", true},
 
 		// Point/Line
 		{"POINT EMPTY", "LINESTRING(0 0,1 1)", false},
