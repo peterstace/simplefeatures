@@ -2,12 +2,12 @@ package geom
 
 import "fmt"
 
-type MixedCoordinateTypesError struct {
+type MixedCoordinatesTypesError struct {
 	First  CoordinatesType
 	Second CoordinatesType
 }
 
-func (e MixedCoordinateTypesError) Error() string {
+func (e MixedCoordinatesTypesError) Error() string {
 	return fmt.Sprintf("mixed coordinate types not "+
 		"allowed: %s and %s", e.First, e.Second)
 }

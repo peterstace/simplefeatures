@@ -232,8 +232,8 @@ func (p PostGIS) Intersects(t *testing.T, g1, g2 geom.Geometry) bool {
 func (p PostGIS) Intersection(t *testing.T, g1, g2 geom.Geometry) geom.Geometry {
 	// PostGIS returns an error if geometries with differing coordinate type
 	// are passed in (hence force to 2D).
-	g1 = g1.Force2D()
-	g2 = g2.Force2D()
+	g1 = g1.Force(geom.DimXY)
+	g2 = g2.Force(geom.DimXY)
 	return p.geomBinary(t, g1, g2, "ST_Intersection")
 }
 

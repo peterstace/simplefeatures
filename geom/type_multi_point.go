@@ -21,7 +21,7 @@ type MultiPoint struct {
 func NewMultiPoint(pts []Point, ctype CoordinatesType, opts ...ConstructorOption) (MultiPoint, error) {
 	for _, p := range pts {
 		if p.CoordinatesType() != ctype {
-			return MultiPoint{}, MixedCoordinateTypesError{p.CoordinatesType(), ctype}
+			return MultiPoint{}, MixedCoordinatesTypesError{p.CoordinatesType(), ctype}
 		}
 	}
 
@@ -249,6 +249,6 @@ func (m MultiPoint) CoordinatesType() CoordinatesType {
 	return m.seq.CoordinatesType()
 }
 
-func (m MultiPoint) Force2D() MultiPoint {
-	return MultiPoint{m.seq.Force2D(), m.empty}
+func (m MultiPoint) Force(newCType CoordinatesType) MultiPoint {
+	return MultiPoint{m.seq.Force(newCType), m.empty}
 }

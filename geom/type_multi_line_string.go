@@ -22,7 +22,7 @@ type MultiLineString struct {
 func NewMultiLineString(lines []LineString, ctype CoordinatesType, opts ...ConstructorOption) (MultiLineString, error) {
 	for _, ls := range lines {
 		if ls.CoordinatesType() != ctype {
-			return MultiLineString{}, MixedCoordinateTypesError{ls.CoordinatesType(), ctype}
+			return MultiLineString{}, MixedCoordinatesTypesError{ls.CoordinatesType(), ctype}
 		}
 	}
 	return MultiLineString{lines, ctype}, nil
@@ -293,10 +293,10 @@ func (m MultiLineString) CoordinatesType() CoordinatesType {
 	return m.ctype
 }
 
-func (m MultiLineString) Force2D() MultiLineString {
+func (m MultiLineString) Force(newCType CoordinatesType) MultiLineString {
 	flat := make([]LineString, len(m.lines))
 	for i := range m.lines {
-		flat[i] = m.lines[i].Force2D()
+		flat[i] = m.lines[i].Force(newCType)
 	}
 	return MultiLineString{flat, DimXY}
 }

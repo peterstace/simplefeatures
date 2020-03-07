@@ -25,7 +25,7 @@ type GeometryCollection struct {
 func NewGeometryCollection(geoms []Geometry, ctype CoordinatesType, opts ...ConstructorOption) (GeometryCollection, error) {
 	for _, g := range geoms {
 		if g.CoordinatesType() != ctype {
-			return GeometryCollection{}, MixedCoordinateTypesError{g.CoordinatesType(), ctype}
+			return GeometryCollection{}, MixedCoordinatesTypesError{g.CoordinatesType(), ctype}
 		}
 	}
 	return GeometryCollection{geoms, ctype}, nil
@@ -125,7 +125,7 @@ func (c GeometryCollection) Boundary() GeometryCollection {
 	}
 	var bounds []Geometry
 	for _, g := range c.geoms {
-		bound := g.Boundary().Force2D()
+		bound := g.Boundary().Force(DimXY)
 		if !bound.IsEmpty() {
 			bounds = append(bounds, bound)
 		}
@@ -381,10 +381,10 @@ func (c GeometryCollection) CoordinatesType() CoordinatesType {
 	return c.ctype
 }
 
-func (c GeometryCollection) Force2D() GeometryCollection {
+func (c GeometryCollection) Force(newCType CoordinatesType) GeometryCollection {
 	gs := make([]Geometry, len(c.geoms))
 	for i := range c.geoms {
-		gs[i] = c.geoms[i].Force2D()
+		gs[i] = c.geoms[i].Force(newCType)
 	}
 	return GeometryCollection{gs, DimXY}
 }

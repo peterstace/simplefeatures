@@ -176,7 +176,7 @@ func (p Point) IsValid() bool {
 
 // Centroid of a point is that point.
 func (p Point) Centroid() Point {
-	return p.Force2D()
+	return p.Force(DimXY)
 }
 
 // Reverse in the case of Point outputs the same point.
@@ -207,7 +207,7 @@ func (p Point) CoordinatesType() CoordinatesType {
 	return p.ctype
 }
 
-func (p Point) Force2D() Point {
+func (p Point) Force(newCType CoordinatesType) Point {
 	xy, ok := p.XY()
 	if ok {
 		return NewPointXY(xy)

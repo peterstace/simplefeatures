@@ -398,7 +398,7 @@ func (g Geometry) Boundary() Geometry {
 	// normally be returned in the non-empty case).
 	if g.IsEmpty() {
 		// Match PostGIS behaviour.
-		return g.Force2D()
+		return g.Force(DimXY)
 	}
 
 	switch g.tag {
@@ -700,24 +700,24 @@ func (g Geometry) CoordinatesType() CoordinatesType {
 	}
 }
 
-func (g Geometry) Force2D() Geometry {
+func (g Geometry) Force(newCType CoordinatesType) Geometry {
 	switch g.tag {
 	case geometryCollectionTag:
-		return g.AsGeometryCollection().Force2D().AsGeometry()
+		return g.AsGeometryCollection().Force(newCType).AsGeometry()
 	case pointTag:
-		return g.AsPoint().Force2D().AsGeometry()
+		return g.AsPoint().Force(newCType).AsGeometry()
 	case lineTag:
-		return g.AsLine().Force2D().AsGeometry()
+		return g.AsLine().Force(newCType).AsGeometry()
 	case lineStringTag:
-		return g.AsLineString().Force2D().AsGeometry()
+		return g.AsLineString().Force(newCType).AsGeometry()
 	case polygonTag:
-		return g.AsPolygon().Force2D().AsGeometry()
+		return g.AsPolygon().Force(newCType).AsGeometry()
 	case multiPointTag:
-		return g.AsMultiPoint().Force2D().AsGeometry()
+		return g.AsMultiPoint().Force(newCType).AsGeometry()
 	case multiLineStringTag:
-		return g.AsMultiLineString().Force2D().AsGeometry()
+		return g.AsMultiLineString().Force(newCType).AsGeometry()
 	case multiPolygonTag:
-		return g.AsMultiPolygon().Force2D().AsGeometry()
+		return g.AsMultiPolygon().Force(newCType).AsGeometry()
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}

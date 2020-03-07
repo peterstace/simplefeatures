@@ -212,11 +212,15 @@ func (n Line) CoordinatesType() CoordinatesType {
 	return n.ctype
 }
 
-func (n Line) Force2D() Line {
-	n.a.Z = 0
-	n.a.M = 0
-	n.b.Z = 0
-	n.b.M = 0
-	n.ctype = DimXY
+func (n Line) Force(newCType CoordinatesType) Line {
+	if n.ctype.Is3D() != newCType.Is3D() {
+		n.a.Z = 0
+		n.b.Z = 0
+	}
+	if n.ctype.IsMeasured() != newCType.IsMeasured() {
+		n.a.M = 0
+		n.b.M = 0
+	}
+	n.ctype = newCType
 	return n
 }

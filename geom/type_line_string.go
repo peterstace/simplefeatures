@@ -328,6 +328,6 @@ func (s LineString) CoordinatesType() CoordinatesType {
 	return s.seq.CoordinatesType()
 }
 
-func (s LineString) Force2D() LineString {
-	return LineString{s.seq.Force2D()}
+func (s LineString) Force(newCType CoordinatesType) LineString {
+	return LineString{s.seq.Force(newCType)}
 }

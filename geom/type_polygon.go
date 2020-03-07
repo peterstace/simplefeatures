@@ -38,7 +38,7 @@ type Polygon struct {
 func NewPolygon(rings []LineString, ctype CoordinatesType, opts ...ConstructorOption) (Polygon, error) {
 	for _, r := range rings {
 		if ct := r.CoordinatesType(); ct != ctype {
-			return Polygon{}, MixedCoordinateTypesError{ct, ctype}
+			return Polygon{}, MixedCoordinatesTypesError{ct, ctype}
 		}
 	}
 
@@ -260,7 +260,7 @@ func (p Polygon) Boundary() MultiLineString {
 		// Can't get a mixed coordinate type error due to the source of the bound.
 		panic(err)
 	}
-	return mls.Force2D()
+	return mls.Force(DimXY)
 }
 
 func (p Polygon) Value() (driver.Value, error) {
@@ -464,10 +464,10 @@ func (p Polygon) CoordinatesType() CoordinatesType {
 	return p.ctype
 }
 
-func (p Polygon) Force2D() Polygon {
+func (p Polygon) Force(newCType CoordinatesType) Polygon {
 	flatRings := make([]LineString, len(p.rings))
 	for i := range p.rings {
-		flatRings[i] = p.rings[i].Force2D()
+		flatRings[i] = p.rings[i].Force(newCType)
 	}
 	return Polygon{flatRings, DimXY}
 }

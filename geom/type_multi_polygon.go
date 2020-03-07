@@ -28,7 +28,7 @@ type MultiPolygon struct {
 func NewMultiPolygon(polys []Polygon, ctype CoordinatesType, opts ...ConstructorOption) (MultiPolygon, error) {
 	for _, p := range polys {
 		if ct := p.CoordinatesType(); ct != ctype {
-			return MultiPolygon{}, MixedCoordinateTypesError{ct, ctype}
+			return MultiPolygon{}, MixedCoordinatesTypesError{ct, ctype}
 		}
 	}
 
@@ -273,7 +273,7 @@ func (m MultiPolygon) Boundary() MultiLineString {
 	bounds := make([]LineString, 0, n)
 	for _, p := range m.polys {
 		for _, r := range p.rings {
-			bounds = append(bounds, r.Force2D())
+			bounds = append(bounds, r.Force(DimXY))
 		}
 	}
 	mls, err := NewMultiLineString(bounds, DimXY)
@@ -409,10 +409,10 @@ func (m MultiPolygon) CoordinatesType() CoordinatesType {
 	return m.ctype
 }
 
-func (m MultiPolygon) Force2D() MultiPolygon {
+func (m MultiPolygon) Force(newCType CoordinatesType) MultiPolygon {
 	flat := make([]Polygon, len(m.polys))
 	for i := range m.polys {
-		flat[i] = m.polys[i].Force2D()
+		flat[i] = m.polys[i].Force(newCType)
 	}
 	return MultiPolygon{flat, DimXY}
 }

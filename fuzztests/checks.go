@@ -297,7 +297,7 @@ func CheckBoundary(t *testing.T, want UnaryResult, g geom.Geometry) {
 
 		if want.Valid {
 			// Simplefeatures doesn't retain boundary Z values.
-			want.Geometry = want.Geometry.Force2D()
+			want.Geometry = want.Geometry.Force(geom.DimXY)
 		}
 
 		if !got.EqualsExact(want.Geometry, geom.IgnoreOrder) {
@@ -317,7 +317,7 @@ func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 		if g.CoordinatesType() != geom.DimXY {
 			// PostGIS retains 3D and M coordinates for convex hull, which is
 			// incorrect according to the OGC spec.
-			want = want.Force2D()
+			want = want.Force(geom.DimXY)
 		}
 
 		if !got.EqualsExact(want, geom.IgnoreOrder, geom.Tolerance(1e-9)) {
