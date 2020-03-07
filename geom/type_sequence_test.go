@@ -71,82 +71,82 @@ func TestSequenceLengthAndGet(t *testing.T) {
 		{
 			geom.NewSequence([]float64{1, 2}, geom.DimXY),
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 1, Y: 2}},
+				{Type: geom.DimXY, XY: geom.XY{X: 1, Y: 2}},
 			},
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 1, Y: 2}},
+				{Type: geom.DimXY, XY: geom.XY{X: 1, Y: 2}},
 			},
 		},
 		{
 			geom.NewSequence([]float64{1, 2, 3}, geom.DimXYZ),
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 1, Y: 2}, Z: 3},
+				{Type: geom.DimXYZ, XY: geom.XY{X: 1, Y: 2}, Z: 3},
 			},
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 1, Y: 2}, Z: 3},
+				{Type: geom.DimXYZ, XY: geom.XY{X: 1, Y: 2}, Z: 3},
 			},
 		},
 		{
 			geom.NewSequence([]float64{1, 2, 3}, geom.DimXYM),
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 1, Y: 2}, M: 3},
+				{Type: geom.DimXYM, XY: geom.XY{X: 1, Y: 2}, M: 3},
 			},
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 1, Y: 2}, M: 3},
+				{Type: geom.DimXYM, XY: geom.XY{X: 1, Y: 2}, M: 3},
 			},
 		},
 		{
 			geom.NewSequence([]float64{1, 2, 3, 4}, geom.DimXYZM),
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 1, Y: 2}, Z: 3, M: 4},
+				{Type: geom.DimXYZM, XY: geom.XY{X: 1, Y: 2}, Z: 3, M: 4},
 			},
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 1, Y: 2}, Z: 3, M: 4},
+				{Type: geom.DimXYZM, XY: geom.XY{X: 1, Y: 2}, Z: 3, M: 4},
 			},
 		},
 
 		{
 			geom.NewSequence([]float64{1, 2, 3, 4}, geom.DimXY),
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 1, Y: 2}},
-				{XY: geom.XY{X: 3, Y: 4}},
+				{Type: geom.DimXY, XY: geom.XY{X: 1, Y: 2}},
+				{Type: geom.DimXY, XY: geom.XY{X: 3, Y: 4}},
 			},
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 3, Y: 4}},
-				{XY: geom.XY{X: 1, Y: 2}},
+				{Type: geom.DimXY, XY: geom.XY{X: 3, Y: 4}},
+				{Type: geom.DimXY, XY: geom.XY{X: 1, Y: 2}},
 			},
 		},
 		{
 			geom.NewSequence([]float64{1, 2, 3, 4, 5, 6}, geom.DimXYZ),
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 1, Y: 2}, Z: 3},
-				{XY: geom.XY{X: 4, Y: 5}, Z: 6},
+				{Type: geom.DimXYZ, XY: geom.XY{X: 1, Y: 2}, Z: 3},
+				{Type: geom.DimXYZ, XY: geom.XY{X: 4, Y: 5}, Z: 6},
 			},
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 4, Y: 5}, Z: 6},
-				{XY: geom.XY{X: 1, Y: 2}, Z: 3},
+				{Type: geom.DimXYZ, XY: geom.XY{X: 4, Y: 5}, Z: 6},
+				{Type: geom.DimXYZ, XY: geom.XY{X: 1, Y: 2}, Z: 3},
 			},
 		},
 		{
 			geom.NewSequence([]float64{1, 2, 3, 4, 5, 6}, geom.DimXYM),
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 1, Y: 2}, M: 3},
-				{XY: geom.XY{X: 4, Y: 5}, M: 6},
+				{Type: geom.DimXYM, XY: geom.XY{X: 1, Y: 2}, M: 3},
+				{Type: geom.DimXYM, XY: geom.XY{X: 4, Y: 5}, M: 6},
 			},
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 4, Y: 5}, M: 6},
-				{XY: geom.XY{X: 1, Y: 2}, M: 3},
+				{Type: geom.DimXYM, XY: geom.XY{X: 4, Y: 5}, M: 6},
+				{Type: geom.DimXYM, XY: geom.XY{X: 1, Y: 2}, M: 3},
 			},
 		},
 		{
 			geom.NewSequence([]float64{1, 2, 3, 4, 5, 6, 7, 8}, geom.DimXYZM),
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 1, Y: 2}, Z: 3, M: 4},
-				{XY: geom.XY{X: 5, Y: 6}, Z: 7, M: 8},
+				{Type: geom.DimXYZM, XY: geom.XY{X: 1, Y: 2}, Z: 3, M: 4},
+				{Type: geom.DimXYZM, XY: geom.XY{X: 5, Y: 6}, Z: 7, M: 8},
 			},
 			[]geom.Coordinates{
-				{XY: geom.XY{X: 5, Y: 6}, Z: 7, M: 8},
-				{XY: geom.XY{X: 1, Y: 2}, Z: 3, M: 4},
+				{Type: geom.DimXYZM, XY: geom.XY{X: 5, Y: 6}, Z: 7, M: 8},
+				{Type: geom.DimXYZM, XY: geom.XY{X: 1, Y: 2}, Z: 3, M: 4},
 			},
 		},
 	} {
@@ -163,6 +163,7 @@ func TestSequenceLengthAndGet(t *testing.T) {
 				t.Run(ct.String(), func(t *testing.T) {
 					var wantCoords []geom.Coordinates
 					for _, c := range tt.coords {
+						c.Type = ct
 						if !ct.Is3D() {
 							c.Z = 0
 						}

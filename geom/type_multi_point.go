@@ -87,12 +87,11 @@ func (m MultiPoint) NumPoints() int {
 
 // PointN gives the nth (zero indexed) Point.
 func (m MultiPoint) PointN(n int) Point {
-	ctype := m.CoordinatesType()
 	if m.empty.Get(n) {
-		return NewEmptyPoint(ctype)
+		return NewEmptyPoint(m.CoordinatesType())
 	} else {
 		c := m.seq.Get(n)
-		return NewPointC(c, ctype)
+		return NewPointC(c)
 	}
 }
 

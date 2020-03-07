@@ -21,12 +21,12 @@ func TestLineAccessor(t *testing.T) {
 	line := geomFromWKT(t, "LINESTRING(1 2,3 4)").AsLine()
 	t.Run("start", func(t *testing.T) {
 		got := line.StartPoint()
-		want := Coordinates{XY: XY{1, 2}}
+		want := Coordinates{XY: XY{1, 2}, Type: DimXY}
 		expectCoordsEq(t, got, want)
 	})
 	t.Run("end", func(t *testing.T) {
 		got := line.EndPoint()
-		want := Coordinates{XY: XY{3, 4}}
+		want := Coordinates{XY: XY{3, 4}, Type: DimXY}
 		expectCoordsEq(t, got, want)
 	})
 	t.Run("num points", func(t *testing.T) {
@@ -36,12 +36,12 @@ func TestLineAccessor(t *testing.T) {
 	})
 	t.Run("point 0", func(t *testing.T) {
 		got := line.PointN(0)
-		want := Coordinates{XY: XY{1, 2}}
+		want := Coordinates{XY: XY{1, 2}, Type: DimXY}
 		expectCoordsEq(t, got, want)
 	})
 	t.Run("point 1", func(t *testing.T) {
 		got := line.PointN(1)
-		want := Coordinates{XY: XY{3, 4}}
+		want := Coordinates{XY: XY{3, 4}, Type: DimXY}
 		expectCoordsEq(t, got, want)
 	})
 	t.Run("point 2", func(t *testing.T) {
@@ -59,15 +59,15 @@ func TestLineAccessor(t *testing.T) {
 func TestLineStringAccessor(t *testing.T) {
 	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").AsLineString()
 	seq := ls.Coordinates()
-	pt12 := Coordinates{XY: XY{1, 2}}
-	pt34 := Coordinates{XY: XY{3, 4}}
-	pt56 := Coordinates{XY: XY{5, 6}}
+	pt12 := Coordinates{XY: XY{1, 2}, Type: DimXY}
+	pt34 := Coordinates{XY: XY{3, 4}, Type: DimXY}
+	pt56 := Coordinates{XY: XY{5, 6}, Type: DimXY}
 
 	t.Run("start", func(t *testing.T) {
-		expectGeomEq(t, ls.StartPoint().AsGeometry(), NewPointC(pt12, DimXY).AsGeometry())
+		expectGeomEq(t, ls.StartPoint().AsGeometry(), NewPointC(pt12).AsGeometry())
 	})
 	t.Run("end", func(t *testing.T) {
-		expectGeomEq(t, ls.EndPoint().AsGeometry(), NewPointC(pt56, DimXY).AsGeometry())
+		expectGeomEq(t, ls.EndPoint().AsGeometry(), NewPointC(pt56).AsGeometry())
 	})
 	t.Run("num points", func(t *testing.T) {
 		expectIntEq(t, seq.Length(), 3)
@@ -105,9 +105,9 @@ func TestLineStringEmptyAccessor(t *testing.T) {
 func TestLineStringAccessorWithDuplicates(t *testing.T) {
 	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,3 4,5 6)").AsLineString()
 	seq := ls.Coordinates()
-	pt12 := Coordinates{XY: XY{1, 2}}
-	pt34 := Coordinates{XY: XY{3, 4}}
-	pt56 := Coordinates{XY: XY{5, 6}}
+	pt12 := Coordinates{XY: XY{1, 2}, Type: DimXY}
+	pt34 := Coordinates{XY: XY{3, 4}, Type: DimXY}
+	pt56 := Coordinates{XY: XY{5, 6}, Type: DimXY}
 
 	t.Run("num points", func(t *testing.T) {
 		expectIntEq(t, seq.Length(), 4)
@@ -125,9 +125,9 @@ func TestLineStringAccessorWithDuplicates(t *testing.T) {
 func TestLineStringAccessorWithMoreDuplicates(t *testing.T) {
 	ls := geomFromWKT(t, "LINESTRING(1 2,1 2,3 4,3 4,3 4,5 6,5 6)").AsLineString()
 	seq := ls.Coordinates()
-	pt12 := Coordinates{XY: XY{1, 2}}
-	pt34 := Coordinates{XY: XY{3, 4}}
-	pt56 := Coordinates{XY: XY{5, 6}}
+	pt12 := Coordinates{XY: XY{1, 2}, Type: DimXY}
+	pt34 := Coordinates{XY: XY{3, 4}, Type: DimXY}
+	pt56 := Coordinates{XY: XY{5, 6}, Type: DimXY}
 
 	t.Run("num points", func(t *testing.T) {
 		expectIntEq(t, seq.Length(), 7)

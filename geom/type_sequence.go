@@ -53,6 +53,7 @@ func (s Sequence) Get(i int) Coordinates {
 			s.floats[i*stride],
 			s.floats[i*stride+1],
 		},
+		Type: s.ctype,
 	}
 	switch s.ctype {
 	case DimXYZ:
@@ -116,17 +117,17 @@ func (s Sequence) Force(newCType CoordinatesType) Sequence {
 	return Sequence{newCType, flat}
 }
 
-// getLine extracts a line segment from a sequence by joining together adjacent
-// locations in the sequence. It is designed to be called with i equal to each
-// index in the sequence (from 0 to n-1). The flag indicates if the returned
-// line is valid.
+// getLine extracts a 2D line segment from a sequence by joining together
+// adjacent locations in the sequence. It is designed to be called with i equal
+// to each index in the sequence (from 0 to n-1). The flag indicates if the
+// returned line is valid.
 func getLine(seq Sequence, i int) (Line, bool) {
 	if i == 0 {
 		return Line{}, false
 	}
 	ln := Line{
-		a: Coordinates{XY: seq.GetXY(i - 1)},
-		b: Coordinates{XY: seq.GetXY(i)},
+		a: Coordinates{Type: DimXY, XY: seq.GetXY(i - 1)},
+		b: Coordinates{Type: DimXY, XY: seq.GetXY(i)},
 	}
 	return ln, ln.a.XY != ln.b.XY
 }

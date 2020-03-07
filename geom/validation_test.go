@@ -10,7 +10,7 @@ import (
 )
 
 func xy(x, y float64) Coordinates {
-	return Coordinates{XY: XY{x, y}}
+	return Coordinates{Type: DimXY, XY: XY{x, y}}
 }
 
 func TestLineValidation(t *testing.T) {
@@ -19,7 +19,7 @@ func TestLineValidation(t *testing.T) {
 		{xy(-1, -1), xy(-1, -1)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := NewLineC(pts[0], pts[1], DimXY)
+			_, err := NewLineC(pts[0], pts[1])
 			if err == nil {
 				t.Error("expected error")
 			}

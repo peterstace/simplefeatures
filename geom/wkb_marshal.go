@@ -48,13 +48,13 @@ func (m *wkbMarshaller) writeCount(n int) {
 	m.write(uint32(n))
 }
 
-func (m *wkbMarshaller) writeCoordinates(c Coordinates, ctype CoordinatesType) {
+func (m *wkbMarshaller) writeCoordinates(c Coordinates) {
 	m.writeFloat64(c.X)
 	m.writeFloat64(c.Y)
-	if ctype.Is3D() {
+	if c.Type.Is3D() {
 		m.writeFloat64(c.Z)
 	}
-	if ctype.IsMeasured() {
+	if c.Type.IsMeasured() {
 		m.writeFloat64(c.M)
 	}
 }
@@ -64,6 +64,6 @@ func (m *wkbMarshaller) writeSequence(seq Sequence) {
 	m.writeCount(n)
 	for i := 0; i < n; i++ {
 		c := seq.Get(i)
-		m.writeCoordinates(c, seq.ctype)
+		m.writeCoordinates(c)
 	}
 }

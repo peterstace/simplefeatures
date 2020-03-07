@@ -2,14 +2,13 @@ package geom
 
 func appendGeoJSONCoordinate(
 	dst []byte,
-	ctype CoordinatesType,
 	coords Coordinates,
 ) []byte {
 	dst = append(dst, '[')
 	dst = appendFloat(dst, coords.X)
 	dst = append(dst, ',')
 	dst = appendFloat(dst, coords.Y)
-	if ctype.Is3D() {
+	if coords.Type.Is3D() {
 		dst = append(dst, ',')
 		dst = appendFloat(dst, coords.Z)
 	}
@@ -28,7 +27,7 @@ func appendGeoJSONSequence(dst []byte, seq Sequence, empty BitSet) []byte {
 		if seenFirst {
 			dst = append(dst, ',')
 		}
-		dst = appendGeoJSONCoordinate(dst, seq.CoordinatesType(), seq.Get(i))
+		dst = appendGeoJSONCoordinate(dst, seq.Get(i))
 		seenFirst = true
 	}
 	dst = append(dst, ']')

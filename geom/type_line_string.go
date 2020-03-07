@@ -49,21 +49,19 @@ func (s LineString) AsGeometry() Geometry {
 // StartPoint gives the first point of the LineString. If the LineString is
 // empty then it returns the empty Point.
 func (s LineString) StartPoint() Point {
-	ctype := s.CoordinatesType()
 	if s.IsEmpty() {
-		return NewEmptyPoint(ctype)
+		return NewEmptyPoint(s.CoordinatesType())
 	}
-	return NewPointC(s.seq.Get(0), ctype)
+	return NewPointC(s.seq.Get(0))
 }
 
 // EndPoint gives the last point of the LineString. If the LineString is empty
 // then it returns the empty Point.
 func (s LineString) EndPoint() Point {
-	ctype := s.CoordinatesType()
 	if s.IsEmpty() {
-		return NewEmptyPoint(ctype)
+		return NewEmptyPoint(s.CoordinatesType())
 	}
-	return NewPointC(s.seq.Get(s.seq.Length()-1), ctype)
+	return NewPointC(s.seq.Get(s.seq.Length() - 1))
 }
 
 func (s LineString) AsText() string {

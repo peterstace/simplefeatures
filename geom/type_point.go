@@ -17,17 +17,16 @@ import (
 type Point struct {
 	coords Coordinates
 	full   bool
-	ctype  CoordinatesType
 }
 
 // NewEmptyPoint creates a Point that is empty.
 func NewEmptyPoint(ctype CoordinatesType) Point {
-	return Point{Coordinates{}, false, ctype}
+	return Point{Coordinates{Type: ctype}, false}
 }
 
 // NewPointXY creates a new point from an XY.
 func NewPointXY(xy XY, _ ...ConstructorOption) Point {
-	return Point{Coordinates{XY: xy}, true, DimXY}
+	return Point{Coordinates{XY: xy, Type: DimXY}, true}
 }
 
 // NewPointF creates a new point from float64 x and y values.
@@ -36,8 +35,8 @@ func NewPointF(x, y float64, _ ...ConstructorOption) Point {
 }
 
 // NewPointC creates a new point gives its Coordinates.
-func NewPointC(c Coordinates, ctype CoordinatesType, _ ...ConstructorOption) Point {
-	return Point{c, true, ctype}
+func NewPointC(c Coordinates, _ ...ConstructorOption) Point {
+	return Point{c, true}
 }
 
 // Type return type string for Point
@@ -67,11 +66,11 @@ func (p Point) AsText() string {
 }
 
 func (p Point) AppendWKT(dst []byte) []byte {
-	dst = appendWKTHeader(dst, "POINT", p.ctype)
+	dst = appendWKTHeader(dst, "POINT", p.coords.Type)
 	if !p.full {
 		return appendWKTEmpty(dst)
 	}
-	return appendWKTCoords(dst, p.coords, p.ctype, true)
+	return appendWKTCoords(dst, p.coords, true)
 }
 
 func (p Point) IsEmpty() bool {
@@ -111,14 +110,14 @@ func (p Point) Value() (driver.Value, error) {
 func (p Point) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypePoint, p.ctype)
+	marsh.writeGeomType(wkbGeomTypePoint, p.CoordinatesType())
 	if !p.full {
 		p.coords.X = math.NaN()
 		p.coords.Y = math.NaN()
 		p.coords.Z = math.NaN()
 		p.coords.M = math.NaN()
 	}
-	marsh.writeCoordinates(p.coords, p.ctype)
+	marsh.writeCoordinates(p.coords)
 	return marsh.err
 }
 
@@ -132,7 +131,7 @@ func (p Point) MarshalJSON() ([]byte, error) {
 	var dst []byte
 	dst = append(dst, `{"type":"Point","coordinates":`...)
 	if p.full {
-		dst = appendGeoJSONCoordinate(dst, p.ctype, p.coords)
+		dst = appendGeoJSONCoordinate(dst, p.coords)
 	} else {
 		dst = append(dst, '[', ']')
 	}
@@ -146,7 +145,7 @@ func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, er
 	}
 	newC := p.coords
 	newC.XY = fn(newC.XY)
-	return NewPointC(newC, p.ctype, opts...), nil
+	return NewPointC(newC, opts...), nil
 }
 
 // EqualsExact checks if this Point is exactly equal to another Point.
@@ -154,7 +153,7 @@ func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	if !other.IsPoint() {
 		return false
 	}
-	if p.ctype != other.CoordinatesType() {
+	if p.CoordinatesType() != other.CoordinatesType() {
 		return false
 	}
 	if p.IsEmpty() != other.IsEmpty() {
@@ -165,7 +164,7 @@ func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	}
 	// No need to check returned flag, since we know that both Points are
 	// non-empty.
-	return newEqualsExactOptionSet(opts).eq(p.coords, other.AsPoint().coords, p.ctype)
+	return newEqualsExactOptionSet(opts).eq(p.coords, other.AsPoint().coords)
 }
 
 // IsValid checks if this Point is valid, but there is not way to indicate if
@@ -193,10 +192,10 @@ func (p Point) AsMultiPoint() MultiPoint {
 		floats[0] = p.coords.X
 		floats[1] = p.coords.Y
 	}
-	if p.full && p.ctype.Is3D() {
+	if p.full && p.CoordinatesType().Is3D() {
 		floats = append(floats, p.coords.Z)
 	}
-	if p.full && p.ctype.IsMeasured() {
+	if p.full && p.CoordinatesType().IsMeasured() {
 		floats = append(floats, p.coords.M)
 	}
 	seq := NewSequence(floats, p.CoordinatesType())
@@ -204,7 +203,7 @@ func (p Point) AsMultiPoint() MultiPoint {
 }
 
 func (p Point) CoordinatesType() CoordinatesType {
-	return p.ctype
+	return p.coords.Type
 }
 
 func (p Point) Force(newCType CoordinatesType) Point {

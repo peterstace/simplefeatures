@@ -79,14 +79,14 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		if !ok {
 			return NewEmptyPoint(ctype).AsGeometry()
 		} else {
-			return NewPointC(c, ctype, p.opts...).AsGeometry()
+			return NewPointC(c, p.opts...).AsGeometry()
 		}
 	case "LINESTRING":
 		ls := p.nextLineStringText(ctype)
 		seq := ls.Coordinates()
 		n := seq.Length()
 		if n == 2 {
-			ln, err := NewLineC(seq.Get(0), seq.Get(1), ctype, p.opts...)
+			ln, err := NewLineC(seq.Get(0), seq.Get(1), p.opts...)
 			p.check(err)
 			return ln.AsGeometry()
 		}
@@ -149,6 +149,7 @@ func (p *parser) nextCommaOrRightParen() string {
 
 func (p *parser) nextPoint(ctype CoordinatesType) Coordinates {
 	var c Coordinates
+	c.Type = ctype
 	c.X = p.nextSignedNumericLiteral()
 	c.Y = p.nextSignedNumericLiteral()
 	if ctype.Is3D() {

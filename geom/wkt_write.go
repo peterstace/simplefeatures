@@ -6,18 +6,18 @@ func appendWKTHeader(dst []byte, geomType string, ctype CoordinatesType) []byte 
 	return dst
 }
 
-func appendWKTCoords(dst []byte, coords Coordinates, ctype CoordinatesType, parens bool) []byte {
+func appendWKTCoords(dst []byte, coords Coordinates, parens bool) []byte {
 	if parens {
 		dst = append(dst, '(')
 	}
 	dst = appendFloat(dst, coords.X)
 	dst = append(dst, ' ')
 	dst = appendFloat(dst, coords.Y)
-	if ctype.Is3D() {
+	if coords.Type.Is3D() {
 		dst = append(dst, ' ')
 		dst = appendFloat(dst, coords.Z)
 	}
-	if ctype.IsMeasured() {
+	if coords.Type.IsMeasured() {
 		dst = append(dst, ' ')
 		dst = appendFloat(dst, coords.M)
 	}
@@ -38,9 +38,7 @@ func appendWKTEmpty(dst []byte) []byte {
 	return append(dst, "EMPTY"...)
 }
 
-// TODO: Might need to pass in an empty BitSet for MultiPoints
 func appendWKTSequence(dst []byte, seq Sequence, parens bool, empty BitSet) []byte {
-	ctype := seq.CoordinatesType()
 	n := seq.Length()
 	dst = append(dst, '(')
 	for i := 0; i < n; i++ {
@@ -51,7 +49,7 @@ func appendWKTSequence(dst []byte, seq Sequence, parens bool, empty BitSet) []by
 			dst = appendWKTEmpty(dst)
 		} else {
 			c := seq.Get(i)
-			dst = appendWKTCoords(dst, c, ctype, parens)
+			dst = appendWKTCoords(dst, c, parens)
 		}
 	}
 	dst = append(dst, ')')

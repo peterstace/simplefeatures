@@ -26,15 +26,18 @@ func Tolerance(within float64) EqualsExactOption {
 	}
 }
 
-func (os equalsExactOptionSet) eq(a, b Coordinates, ctype CoordinatesType) bool {
+func (os equalsExactOptionSet) eq(a, b Coordinates) bool {
+	if a.Type != b.Type {
+		return false
+	}
 	asb := a.XY.Sub(b.XY)
 	if asb.Dot(asb) > os.toleranceSq {
 		return false
 	}
-	if ctype.Is3D() && a.Z != b.Z {
+	if a.Type.Is3D() && a.Z != b.Z {
 		return false
 	}
-	if ctype.IsMeasured() && a.M != b.M {
+	if a.Type.IsMeasured() && a.M != b.M {
 		return false
 	}
 	return true
@@ -72,8 +75,7 @@ func curvesExactEqual(c1, c2 Sequence, opts []EqualsExactOption) bool {
 	if n != c2.Length() {
 		return false
 	}
-	ctype := c1.CoordinatesType()
-	if ctype != c2.CoordinatesType() {
+	if c1.CoordinatesType() != c2.CoordinatesType() {
 		return false
 	}
 
@@ -85,7 +87,7 @@ func curvesExactEqual(c1, c2 Sequence, opts []EqualsExactOption) bool {
 		for i := 0; i < n; i++ {
 			c1 := c1.Get(m1(i))
 			c2 := c2.Get(m2(i))
-			if !os.eq(c1, c2, ctype) {
+			if !os.eq(c1, c2) {
 				return false
 			}
 		}
@@ -129,8 +131,7 @@ func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
 	if mp2.NumPoints() != n {
 		return false
 	}
-	ctype := mp1.CoordinatesType()
-	if ctype != mp2.CoordinatesType() {
+	if mp1.CoordinatesType() != mp2.CoordinatesType() {
 		return false
 	}
 	os := newEqualsExactOptionSet(opts)
@@ -143,7 +144,7 @@ func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
 		if !okA {
 			return true // both empty
 		}
-		return os.eq(cA, cB, ctype)
+		return os.eq(cA, cB)
 	}
 	return structureEqual(n, ptsEq, os.ignoreOrder)
 }

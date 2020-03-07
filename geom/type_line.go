@@ -17,21 +17,27 @@ import (
 type Line struct {
 	// Uses 2 Coordinates variables rather than a Sequence to avoid the
 	// indirection involved with a Sequence.
-	a, b  Coordinates
-	ctype CoordinatesType
+	a, b Coordinates
 }
 
 // NewLineC creates a line segment given the Coordinates of its two endpoints.
-func NewLineC(a, b Coordinates, ctype CoordinatesType, opts ...ConstructorOption) (Line, error) {
+func NewLineC(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
+	if a.Type != b.Type {
+		return Line{}, MixedCoordinatesTypesError{a.Type, b.Type}
+	}
 	if !skipValidations(opts) && a.XY == b.XY {
 		return Line{}, ValidationError{"Line endpoints must be distinct"}
 	}
-	return Line{a, b, ctype}, nil
+	return Line{a, b}, nil
 }
 
 // NewLineXY creates a line segment given the XYs of its two endpoints.
 func NewLineXY(a, b XY, opts ...ConstructorOption) (Line, error) {
-	return NewLineC(Coordinates{XY: a}, Coordinates{XY: b}, DimXY, opts...)
+	return NewLineC(
+		Coordinates{XY: a, Type: DimXY},
+		Coordinates{XY: b, Type: DimXY},
+		opts...,
+	)
 }
 
 // Type return type string for Line
@@ -78,11 +84,11 @@ func (n Line) AsText() string {
 }
 
 func (n Line) AppendWKT(dst []byte) []byte {
-	dst = appendWKTHeader(dst, "LINESTRING", n.ctype)
+	dst = appendWKTHeader(dst, "LINESTRING", n.a.Type)
 	dst = append(dst, '(')
-	dst = appendWKTCoords(dst, n.a, n.ctype, false)
+	dst = appendWKTCoords(dst, n.a, false)
 	dst = append(dst, ',')
-	dst = appendWKTCoords(dst, n.b, n.ctype, false)
+	dst = appendWKTCoords(dst, n.b, false)
 	dst = append(dst, ')')
 	return dst
 }
@@ -116,10 +122,10 @@ func (n Line) Value() (driver.Value, error) {
 func (n Line) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeLineString, n.ctype)
+	marsh.writeGeomType(wkbGeomTypeLineString, n.a.Type)
 	marsh.writeCount(2)
-	marsh.writeCoordinates(n.a, n.ctype)
-	marsh.writeCoordinates(n.b, n.ctype)
+	marsh.writeCoordinates(n.a)
+	marsh.writeCoordinates(n.b)
 	return marsh.err
 }
 
@@ -130,33 +136,34 @@ func (n Line) ConvexHull() Geometry {
 func (n Line) MarshalJSON() ([]byte, error) {
 	var dst []byte
 	dst = append(dst, `{"type":"LineString","coordinates":[`...)
-	dst = appendGeoJSONCoordinate(dst, n.ctype, n.a)
+	dst = appendGeoJSONCoordinate(dst, n.a)
 	dst = append(dst, ',')
-	dst = appendGeoJSONCoordinate(dst, n.ctype, n.b)
+	dst = appendGeoJSONCoordinate(dst, n.b)
 	dst = append(dst, "]}"...)
 	return dst, nil
 }
 
 // Coordinates returns the coordinates of the start and end point of the Line.
 func (n Line) Coordinates() Sequence {
-	floats := make([]float64, 0, 2*n.ctype.Dimension())
+	ctype := n.a.Type
+	floats := make([]float64, 0, 2*ctype.Dimension())
 	for _, c := range [2]Coordinates{n.a, n.b} {
 		floats = append(floats, c.X, c.Y)
-		if n.ctype.Is3D() {
+		if ctype.Is3D() {
 			floats = append(floats, c.Z)
 		}
-		if n.ctype.IsMeasured() {
+		if ctype.IsMeasured() {
 			floats = append(floats, c.M)
 		}
 	}
-	return NewSequence(floats, n.ctype)
+	return NewSequence(floats, ctype)
 }
 
 // TransformXY transforms this Line into another Line according to fn.
 func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Line, error) {
 	n.a.XY = fn(n.a.XY)
 	n.b.XY = fn(n.b.XY)
-	ln, err := NewLineC(n.a, n.b, n.ctype, opts...)
+	ln, err := NewLineC(n.a, n.b, opts...)
 	return ln, err
 }
 
@@ -176,7 +183,7 @@ func (n Line) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 
 // IsValid checks if this Line is valid
 func (n Line) IsValid() bool {
-	_, err := NewLineC(n.a, n.b, n.ctype)
+	_, err := NewLineC(n.a, n.b)
 	return err == nil
 }
 
@@ -205,22 +212,23 @@ func (n Line) AsLineString() LineString {
 
 // Reverse in the case of Line outputs the coordinates in reverse order.
 func (n Line) Reverse() Line {
-	return Line{n.b, n.a, n.ctype}
+	return Line{n.b, n.a}
 }
 
 func (n Line) CoordinatesType() CoordinatesType {
-	return n.ctype
+	return n.a.Type
 }
 
 func (n Line) Force(newCType CoordinatesType) Line {
-	if n.ctype.Is3D() != newCType.Is3D() {
+	if n.a.Type.Is3D() != newCType.Is3D() {
 		n.a.Z = 0
 		n.b.Z = 0
 	}
-	if n.ctype.IsMeasured() != newCType.IsMeasured() {
+	if n.a.Type.IsMeasured() != newCType.IsMeasured() {
 		n.a.M = 0
 		n.b.M = 0
 	}
-	n.ctype = newCType
+	n.a.Type = newCType
+	n.b.Type = newCType
 	return n
 }

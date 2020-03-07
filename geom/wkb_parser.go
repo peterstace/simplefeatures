@@ -8,9 +8,6 @@ import (
 	"math"
 )
 
-// TODO: When 3D/measure are supported, we will need to check for consistent
-// coordinate types inside compound geometries.
-
 // UnmarshalWKB reads the Well Known Binary (WKB), and returns the
 // corresponding Geometry.
 func UnmarshalWKB(r io.Reader, opts ...ConstructorOption) (Geometry, error) {
@@ -25,8 +22,8 @@ type wkbParser struct {
 	err       error
 	r         io.Reader
 	bo        binary.ByteOrder
-	geomType  uint32
-	coordType CoordinatesType // TODO: rename to ctype for consistency
+	geomType  uint32          // TODO: Remove me
+	coordType CoordinatesType // TODO: Remove (or rename) me.
 	opts      []ConstructorOption
 }
 
@@ -90,13 +87,13 @@ func (p *wkbParser) parseGeomRoot() Geometry {
 		if !ok {
 			return NewEmptyPoint(p.coordType).AsGeometry()
 		} else {
-			return NewPointC(c, p.coordType, p.opts...).AsGeometry()
+			return NewPointC(c, p.opts...).AsGeometry()
 		}
 	case wkbGeomTypeLineString:
 		ls := p.parseLineString()
 		seq := ls.Coordinates()
 		if seq.Length() == 2 {
-			ln, err := NewLineC(seq.Get(0), seq.Get(1), p.coordType, p.opts...)
+			ln, err := NewLineC(seq.Get(0), seq.Get(1), p.opts...)
 			p.setErr(err)
 			return ln.AsGeometry()
 		}
@@ -132,9 +129,10 @@ func (p *wkbParser) parseFloat64() float64 {
 
 func (p *wkbParser) parsePoint() (Coordinates, bool) {
 	var c Coordinates
+	c.Type = p.coordType
 	c.X = p.parseFloat64()
 	c.Y = p.parseFloat64()
-	switch p.coordType {
+	switch c.Type {
 	case DimXY:
 	case DimXYZ:
 		c.Z = p.parseFloat64()

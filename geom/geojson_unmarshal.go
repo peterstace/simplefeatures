@@ -235,7 +235,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 	case geojsonPoint:
 		coords, ok := oneDimFloat64sToCoordinates(node.coords, ctype)
 		if ok {
-			return NewPointC(coords, ctype).AsGeometry(), nil
+			return NewPointC(coords).AsGeometry(), nil
 		} else {
 			return NewEmptyPoint(ctype).AsGeometry(), nil
 		}
@@ -311,9 +311,10 @@ func oneDimFloat64sToCoordinates(fs []float64, ctype CoordinatesType) (Coordinat
 	if len(fs) == 0 {
 		return Coordinates{}, false
 	}
-	var coords Coordinates
-	coords.X = fs[0]
-	coords.Y = fs[1]
+	coords := Coordinates{
+		XY:   XY{fs[0], fs[1]},
+		Type: ctype,
+	}
 	if ctype.Is3D() {
 		coords.Z = fs[2]
 	}
