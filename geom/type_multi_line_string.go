@@ -289,10 +289,14 @@ func (m MultiLineString) Reverse() MultiLineString {
 	return MultiLineString{linestrings, m.ctype}
 }
 
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
 func (m MultiLineString) CoordinatesType() CoordinatesType {
 	return m.ctype
 }
 
+// Force returns a new MultiLineString with a different CoordinatesType. If a
+// dimension is added, then its values are populated with 0.
 func (m MultiLineString) Force(newCType CoordinatesType) MultiLineString {
 	flat := make([]LineString, len(m.lines))
 	for i := range m.lines {

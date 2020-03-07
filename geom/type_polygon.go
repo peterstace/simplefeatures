@@ -460,10 +460,14 @@ func (p Polygon) Reverse() Polygon {
 	return Polygon{reversed, p.ctype}
 }
 
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
 func (p Polygon) CoordinatesType() CoordinatesType {
 	return p.ctype
 }
 
+// Force returns a new Polygon with a different CoordinatesType. If a dimension
+// is added, then its values are populated with 0.
 func (p Polygon) Force(newCType CoordinatesType) Polygon {
 	flatRings := make([]LineString, len(p.rings))
 	for i := range p.rings {

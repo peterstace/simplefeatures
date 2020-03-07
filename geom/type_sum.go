@@ -677,6 +677,8 @@ func (g Geometry) Reverse() Geometry {
 	}
 }
 
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
 func (g Geometry) CoordinatesType() CoordinatesType {
 	switch g.tag {
 	case geometryCollectionTag:
@@ -700,6 +702,8 @@ func (g Geometry) CoordinatesType() CoordinatesType {
 	}
 }
 
+// Force returns a new Geometry with a different CoordinatesType. If a
+// dimension is added, then its values are populated with 0.
 func (g Geometry) Force(newCType CoordinatesType) Geometry {
 	switch g.tag {
 	case geometryCollectionTag:

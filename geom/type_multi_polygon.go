@@ -405,10 +405,14 @@ func (m MultiPolygon) Reverse() MultiPolygon {
 	return MultiPolygon{polys, m.ctype}
 }
 
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
 func (m MultiPolygon) CoordinatesType() CoordinatesType {
 	return m.ctype
 }
 
+// Force returns a new MultiPolygon with a different CoordinatesType. If a
+// dimension is added, then its values are populated with 0.
 func (m MultiPolygon) Force(newCType CoordinatesType) MultiPolygon {
 	flat := make([]Polygon, len(m.polys))
 	for i := range m.polys {

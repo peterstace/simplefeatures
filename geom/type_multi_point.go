@@ -244,10 +244,14 @@ func (m MultiPoint) Reverse() MultiPoint {
 	return m
 }
 
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
 func (m MultiPoint) CoordinatesType() CoordinatesType {
 	return m.seq.CoordinatesType()
 }
 
+// Force returns a new MultiPoint with a different CoordinatesType. If a
+// dimension is added, then its values are populated with 0.
 func (m MultiPoint) Force(newCType CoordinatesType) MultiPoint {
 	return MultiPoint{m.seq.Force(newCType), m.empty}
 }

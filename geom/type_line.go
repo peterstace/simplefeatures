@@ -215,10 +215,14 @@ func (n Line) Reverse() Line {
 	return Line{n.b, n.a}
 }
 
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
 func (n Line) CoordinatesType() CoordinatesType {
 	return n.a.Type
 }
 
+// Force returns a new Line with a different CoordinatesType. If a dimension is
+// added, then its values are populated with 0.
 func (n Line) Force(newCType CoordinatesType) Line {
 	if n.a.Type.Is3D() != newCType.Is3D() {
 		n.a.Z = 0

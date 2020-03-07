@@ -202,10 +202,13 @@ func (p Point) AsMultiPoint() MultiPoint {
 	return NewMultiPointFromSequence(seq, empty)
 }
 
+// CoordinatesType returns the CoordinatesType used to represent the Point.
 func (p Point) CoordinatesType() CoordinatesType {
 	return p.coords.Type
 }
 
+// Force returns a new Point with a different CoordinatesType. If a dimension
+// is added, then its value is populated with 0.
 func (p Point) Force(newCType CoordinatesType) Point {
 	xy, ok := p.XY()
 	if ok {

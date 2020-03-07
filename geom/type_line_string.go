@@ -322,10 +322,14 @@ func (s LineString) Reverse() LineString {
 	return LineString{s.seq.Reverse()}
 }
 
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
 func (s LineString) CoordinatesType() CoordinatesType {
 	return s.seq.CoordinatesType()
 }
 
+// Force returns a new LineString with a different CoordinatesType. If a
+// dimension is added, then its values are populated with 0.
 func (s LineString) Force(newCType CoordinatesType) LineString {
 	return LineString{s.seq.Force(newCType)}
 }

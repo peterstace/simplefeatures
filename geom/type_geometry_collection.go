@@ -377,10 +377,14 @@ func (c GeometryCollection) sumCentroidCalc() centroidCalc {
 	return result
 }
 
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
 func (c GeometryCollection) CoordinatesType() CoordinatesType {
 	return c.ctype
 }
 
+// Force returns a new GeometryCollection with a different CoordinatesType. If
+// a dimension is added, then its values are populated with 0.
 func (c GeometryCollection) Force(newCType CoordinatesType) GeometryCollection {
 	gs := make([]Geometry, len(c.geoms))
 	for i := range c.geoms {
