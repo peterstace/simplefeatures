@@ -31,7 +31,7 @@ func convexHull(g Geometry) Geometry {
 			floats[2*i+0] = hull[i].X
 			floats[2*i+1] = hull[i].Y
 		}
-		seq := NewSequenceNoCopy(floats, DimXY)
+		seq := NewSequence(floats, DimXY)
 		ring, err := NewLineStringFromSequence(seq)
 		if err != nil {
 			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid ring: %v", err))

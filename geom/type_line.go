@@ -149,7 +149,7 @@ func (n Line) Coordinates() Sequence {
 			floats = append(floats, c.M)
 		}
 	}
-	return NewSequenceNoCopy(floats, n.ctype)
+	return NewSequence(floats, n.ctype)
 }
 
 // TransformXY transforms this Line into another Line according to fn.

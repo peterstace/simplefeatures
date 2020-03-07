@@ -42,7 +42,7 @@ func NewMultiPoint(pts []Point, ctype CoordinatesType, opts ...ConstructorOption
 			floats = append(floats, c.Z, c.M)
 		}
 	}
-	seq := NewSequenceNoCopy(floats, ctype)
+	seq := NewSequence(floats, ctype)
 	return MultiPoint{seq, empty}, nil
 }
 
@@ -65,7 +65,7 @@ func NewMultiPointXY(xys []XY, opts ...ConstructorOption) MultiPoint {
 		floats[2*i+1] = xy.Y
 	}
 	return NewMultiPointFromSequence(
-		NewSequenceNoCopy(floats, DimXY),
+		NewSequence(floats, DimXY),
 		BitSet{},
 	)
 }

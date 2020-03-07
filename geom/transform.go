@@ -39,5 +39,5 @@ func transformSequence(seq Sequence, fn func(XY) XY) Sequence {
 			panic(ctype)
 		}
 	}
-	return NewSequenceNoCopy(floats, ctype)
+	return NewSequence(floats, ctype)
 }

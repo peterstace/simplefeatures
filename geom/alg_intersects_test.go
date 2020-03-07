@@ -400,8 +400,8 @@ func BenchmarkIntersectsLineStringWithLineString(b *testing.B) {
 				floats1 = append(floats1, x, 1)
 				floats2 = append(floats2, x, 2)
 			}
-			seq1 := geom.NewSequenceNoCopy(floats1, geom.DimXY)
-			seq2 := geom.NewSequenceNoCopy(floats2, geom.DimXY)
+			seq1 := geom.NewSequence(floats1, geom.DimXY)
+			seq2 := geom.NewSequence(floats2, geom.DimXY)
 			ls1, err := geom.NewLineStringFromSequence(seq1)
 			if err != nil {
 				b.Fatal(err)

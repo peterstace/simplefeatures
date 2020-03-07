@@ -35,7 +35,7 @@ func TestLineStringValidation(t *testing.T) {
 		[]float64{1, 1, 1, 1},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			seq := NewSequenceNoCopy(pts, DimXY)
+			seq := NewSequence(pts, DimXY)
 			_, err := NewLineStringFromSequence(seq)
 			if err == nil {
 				t.Error("expected error")

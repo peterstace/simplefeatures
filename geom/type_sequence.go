@@ -1,31 +1,51 @@
 package geom
 
+// Sequence represents a list of point locations.  It is immutable after
+// creation.  All locations in the Sequence are specified using the same
+// coordinates type.
+//
+// The zero value is an empty sequence of coordinate type DimXY.
 type Sequence struct {
 	ctype  CoordinatesType
 	floats []float64
 }
 
+// NewSequence creates a new Sequence from a raw slice of float64 coordinates.
+// The slice will be retained by the constructed Sequence and must NOT be
+// modified by the caller after the function returns.
+//
+// The CoordiantesType indicates what type of coordinates the Sequence will
+// store (i.e. just XY, XYZ, XYM, or XYZM).
+//
+// The coordinates in the passed slice should be interleaved. That is, all of
+// the coordinates for the first point come first, followed by all of the
+// coordinates for the second point etc. Coordinates must be in the order of X
+// followed by Y, then Z (if using XYZ or XYZM), then M (if using XYM or XYZM).
+//
+// The length of the coordinates slice must be a multiple of the dimensionality
+// of the coordiantes type. If the length is not a multiple, then this is a
+// programming error and the function will panic.
 func NewSequence(coordinates []float64, ctype CoordinatesType) Sequence {
-	tmp := make([]float64, len(coordinates))
-	copy(tmp, coordinates)
-	return NewSequenceNoCopy(tmp, ctype)
-}
-
-func NewSequenceNoCopy(coordinates []float64, ctype CoordinatesType) Sequence {
 	if len(coordinates)%ctype.Dimension() != 0 {
 		panic("invalid coordinates length: inconsistent with CoordinatesType")
 	}
 	return Sequence{ctype, coordinates}
 }
 
+// CoordinatesType returns the coordinates type used to represent point
+// locations in the Sequence.
 func (s Sequence) CoordinatesType() CoordinatesType {
 	return s.ctype
 }
 
+// Length returns the number of point locations represented by the Sequence.
 func (s Sequence) Length() int {
 	return len(s.floats) / s.ctype.Dimension()
 }
 
+// Get returns the Coordinates of the ith point location in the Sequence. It
+// panics if i is out of range with respect to the number of points in the
+// Sequence.
 func (s Sequence) Get(i int) Coordinates {
 	stride := s.ctype.Dimension()
 	c := Coordinates{
@@ -46,6 +66,8 @@ func (s Sequence) Get(i int) Coordinates {
 	return c
 }
 
+// GetXY returns the XY of the ith point location in the Sequence. It panics if
+// i is out of range with respect to the number of points in the Sequence.
 func (s Sequence) GetXY(i int) XY {
 	stride := s.ctype.Dimension()
 	return XY{
@@ -54,6 +76,8 @@ func (s Sequence) GetXY(i int) XY {
 	}
 }
 
+// Reverse returns a new Sequence containing the same point locations, but in
+// reversed order.
 func (s Sequence) Reverse() Sequence {
 	stride := s.ctype.Dimension()
 	n := s.Length()
@@ -68,11 +92,10 @@ func (s Sequence) Reverse() Sequence {
 	return Sequence{s.ctype, reversed}
 }
 
+// Force returns a new Sequence with a different CoordinatesType. If a
+// dimension is added, then its new value is set to zero for each point
+// location in the Sequence.
 func (s Sequence) Force(newCType CoordinatesType) Sequence {
-	// TODO: We could avoid all of this copying by storing both the coordinate
-	// type and the stride independently within a sequence. Then all we would
-	// need to do is return a shallow copy of the Sequence, but with just the
-	// coordinate type changed (the stride would remain the same).
 	stride := newCType.Dimension()
 	flat := make([]float64, stride*s.Length())
 	n := s.Length()
@@ -90,7 +113,7 @@ func (s Sequence) Force(newCType CoordinatesType) Sequence {
 			flat[stride*i+3] = c.M
 		}
 	}
-	return Sequence{DimXY, flat}
+	return Sequence{newCType, flat}
 }
 
 // getLine extracts a line segment from a sequence by joining together adjacent

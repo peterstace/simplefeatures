@@ -201,7 +201,7 @@ func (s LineString) Boundary() MultiPoint {
 			xy2.X, xy2.Y,
 		}
 	}
-	return NewMultiPointFromSequence(NewSequenceNoCopy(fs, DimXY), BitSet{})
+	return NewMultiPointFromSequence(NewSequence(fs, DimXY), BitSet{})
 }
 
 func (s LineString) Value() (driver.Value, error) {

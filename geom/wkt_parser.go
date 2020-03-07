@@ -210,7 +210,7 @@ func (p *parser) nextLineStringText(ctype CoordinatesType) LineString {
 			}
 		}
 	}
-	seq := NewSequenceNoCopy(floats, ctype)
+	seq := NewSequence(floats, ctype)
 	ls, err := NewLineStringFromSequence(seq, p.opts...)
 	p.check(err)
 	return ls
@@ -269,7 +269,7 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) MultiPoint {
 			}
 		}
 	}
-	seq := NewSequenceNoCopy(floats, ctype)
+	seq := NewSequence(floats, ctype)
 	return NewMultiPointFromSequence(seq, empty, p.opts...)
 }
 

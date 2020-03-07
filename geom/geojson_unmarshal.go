@@ -328,7 +328,7 @@ func twoDimFloat64sToSequence(input [][]float64, ctype CoordinatesType) Sequence
 			floats[stride*i+j] = c[j]
 		}
 	}
-	return NewSequenceNoCopy(floats, ctype)
+	return NewSequence(floats, ctype)
 }
 
 func twoDimFloat64sToOptionalSequence(outer [][]float64, ctype CoordinatesType) (Sequence, BitSet) {
@@ -344,5 +344,5 @@ func twoDimFloat64sToOptionalSequence(outer [][]float64, ctype CoordinatesType) 
 			floats[stride*i+j] = c[j]
 		}
 	}
-	return NewSequenceNoCopy(floats, ctype), empty
+	return NewSequence(floats, ctype), empty
 }

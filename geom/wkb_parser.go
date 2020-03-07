@@ -175,7 +175,7 @@ func (p *wkbParser) parseLineString() LineString {
 			floats = append(floats, c.M)
 		}
 	}
-	seq := NewSequenceNoCopy(floats, p.coordType)
+	seq := NewSequence(floats, p.coordType)
 	poly, err := NewLineStringFromSequence(seq, p.opts...)
 	p.setErr(err)
 	return poly

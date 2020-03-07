@@ -199,7 +199,7 @@ func (p Point) AsMultiPoint() MultiPoint {
 	if p.full && p.ctype.IsMeasured() {
 		floats = append(floats, p.coords.M)
 	}
-	seq := NewSequenceNoCopy(floats, p.CoordinatesType())
+	seq := NewSequence(floats, p.CoordinatesType())
 	return NewMultiPointFromSequence(seq, empty)
 }
 
