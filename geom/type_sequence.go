@@ -82,3 +82,18 @@ func (s Sequence) Force2D() Sequence {
 	}
 	return Sequence{XYOnly, flat}
 }
+
+// getLine extracts a line segment from a sequence by joining together adjacent
+// locations in the sequence. It is designed to be called with i equal to each
+// index in the sequence (from 0 to n-1). The flag indicates if the returned
+// line is valid.
+func getLine(seq Sequence, i int) (Line, bool) {
+	if i == 0 {
+		return Line{}, false
+	}
+	ln := Line{
+		a: Coordinates{XY: seq.GetXY(i - 1)},
+		b: Coordinates{XY: seq.GetXY(i)},
+	}
+	return ln, ln.a.XY != ln.b.XY
+}

@@ -229,10 +229,10 @@ func hasIntersectionMultiPointWithMultiLineString(mp MultiPoint, mls MultiLineSt
 	for i := 0; i < mp.NumPoints(); i++ {
 		pt := mp.PointN(i)
 		for j := 0; j < mls.NumLineStrings(); j++ {
-			iter := newLineStringIterator(mls.LineStringN(j))
-			for iter.next() {
-				ln := iter.line()
-				if hasIntersectionPointWithLine(pt, ln) {
+			seq := mls.LineStringN(j).Coordinates()
+			for k := 0; k < seq.Length(); k++ {
+				ln, ok := getLine(seq, k)
+				if ok && hasIntersectionPointWithLine(pt, ln) {
 					return true
 				}
 			}
@@ -282,9 +282,12 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		}
 		side.lines = make([]Line, 0, n)
 		for _, ls := range side.mls.lines {
-			iter := newLineStringIterator(ls)
-			for iter.next() {
-				ln := iter.line()
+			seq := ls.Coordinates()
+			for i := 0; i < seq.Length(); i++ {
+				ln, ok := getLine(seq, i)
+				if !ok {
+					continue
+				}
 				if ln.StartPoint().X > ln.EndPoint().X {
 					ln = ln.Reverse()
 				}
@@ -411,9 +414,10 @@ func hasIntersectionPointWithLine(pt Point, ln Line) bool {
 
 func hasIntersectionPointWithLineString(pt Point, ls LineString) bool {
 	// Worst case speed is O(n), n is the number of lines.
-	iter := newLineStringIterator(ls)
-	for iter.next() {
-		if hasIntersectionPointWithLine(pt, iter.line()) {
+	seq := ls.Coordinates()
+	for i := 0; i < seq.Length(); i++ {
+		ln, ok := getLine(seq, i)
+		if ok && hasIntersectionPointWithLine(pt, ln) {
 			return true
 		}
 	}

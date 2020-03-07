@@ -117,8 +117,8 @@ func deduplicateGeometries(geoms []geom.Geometry) []geom.Geometry {
 	return geoms
 }
 
-// 3D and Measure geometries are skipped because there are some outstanding
-// issues with the cmprefimple checks for these geometry types.
+// 3D and Measure geometries are skipped because the C bindings for libgeos
+// doesn't fully support Z and M value.
 func remove3DAndMeasureGeometries(geoms []geom.Geometry) []geom.Geometry {
 	var filtered []geom.Geometry
 	for _, g := range geoms {

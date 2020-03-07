@@ -108,9 +108,11 @@ func (s LineString) IsSimple() bool {
 	}
 
 	lines := make([]Line, 0, s.seq.Length()-1)
-	iter := newLineStringIterator(s)
-	for iter.next() {
-		lines = append(lines, iter.line())
+	for i := 0; i < s.seq.Length(); i++ {
+		ln, ok := getLine(s.seq, i)
+		if ok {
+			lines = append(lines, ln)
+		}
 	}
 
 	n := len(lines)
@@ -295,11 +297,14 @@ func (s LineString) Centroid() Point {
 }
 
 func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64) {
-	iter := newLineStringIterator(s)
-	for iter.next() {
-		line := iter.line()
-		length := line.Length()
-		cent, ok := line.Centroid().XY()
+	seq := s.Coordinates()
+	for i := 0; i < seq.Length(); i++ {
+		ln, ok := getLine(seq, i)
+		if !ok {
+			continue
+		}
+		length := ln.Length()
+		cent, ok := ln.Centroid().XY()
 		if ok {
 			sumXY = sumXY.Add(cent.Scale(length))
 			sumLength += length
