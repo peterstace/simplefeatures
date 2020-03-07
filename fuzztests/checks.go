@@ -314,7 +314,7 @@ func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 		got := g.ConvexHull()
 		want := want.ConvexHull
 
-		if g.CoordinatesType() != geom.XYOnly {
+		if g.CoordinatesType() != geom.DimXY {
 			// PostGIS retains 3D and M coordinates for convex hull, which is
 			// incorrect according to the OGC spec.
 			want = want.Force2D()
@@ -481,7 +481,7 @@ func CheckCentroid(t *testing.T, want UnaryResult, g geom.Geometry) {
 			// states that the results from spatial operations should not have
 			// Z and M values.
 			if want.IsEmpty() && want.IsPoint() {
-				want = geom.NewEmptyPoint(geom.XYOnly).AsGeometry()
+				want = geom.NewEmptyPoint(geom.DimXY).AsGeometry()
 			}
 		}
 

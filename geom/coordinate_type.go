@@ -3,10 +3,10 @@ package geom
 type CoordinatesType byte
 
 const (
-	XYOnly CoordinatesType = 0b00
-	XYZ    CoordinatesType = 0b01
-	XYM    CoordinatesType = 0b10
-	XYZM   CoordinatesType = 0b11
+	DimXY   CoordinatesType = 0b00
+	DimXYZ  CoordinatesType = 0b01
+	DimXYM  CoordinatesType = 0b10
+	DimXYZM CoordinatesType = 0b11
 )
 
 func (t CoordinatesType) String() string {
@@ -18,11 +18,11 @@ func (t CoordinatesType) Dimension() int {
 }
 
 func (t CoordinatesType) Is3D() bool {
-	return (t & XYZ) != 0
+	return (t & DimXYZ) != 0
 }
 
 func (t CoordinatesType) IsMeasured() bool {
-	return (t & XYM) != 0
+	return (t & DimXYM) != 0
 }
 
 func (t CoordinatesType) wktModifier() string {

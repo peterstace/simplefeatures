@@ -130,7 +130,7 @@ func (c GeometryCollection) Boundary() GeometryCollection {
 			bounds = append(bounds, bound)
 		}
 	}
-	bound, err := NewGeometryCollection(bounds, XYOnly)
+	bound, err := NewGeometryCollection(bounds, DimXY)
 	if err != nil {
 		panic(err) // Cannot occur because of where we got the bounds from.
 	}
@@ -267,17 +267,17 @@ func (c GeometryCollection) Centroid() Point {
 	switch result.highestDim {
 	case 0:
 		if result.numPoints == 0 {
-			return NewEmptyPoint(XYOnly) // Invalid centroid, highestDim is 0 and numPoints is 0
+			return NewEmptyPoint(DimXY) // Invalid centroid, highestDim is 0 and numPoints is 0
 		}
 		xy = result.sumXY.Scale(1.0 / float64(result.numPoints))
 	case 1:
 		if result.sumLength == 0 {
-			return NewEmptyPoint(XYOnly) // Invalid centroid, highestDim is 1 and sumLength is 0
+			return NewEmptyPoint(DimXY) // Invalid centroid, highestDim is 1 and sumLength is 0
 		}
 		xy = result.sumXY.Scale(1.0 / result.sumLength)
 	case 2:
 		if result.sumArea == 0 {
-			return NewEmptyPoint(XYOnly) // Invalid centroid, highestDim is 2 and sumArea is 0
+			return NewEmptyPoint(DimXY) // Invalid centroid, highestDim is 2 and sumArea is 0
 		}
 		xy = result.sumXY.Scale(1.0 / result.sumArea)
 	default:
@@ -386,5 +386,5 @@ func (c GeometryCollection) Force2D() GeometryCollection {
 	for i := range c.geoms {
 		gs[i] = c.geoms[i].Force2D()
 	}
-	return GeometryCollection{gs, XYOnly}
+	return GeometryCollection{gs, DimXY}
 }

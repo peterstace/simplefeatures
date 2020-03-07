@@ -19,7 +19,7 @@ func TestLineValidation(t *testing.T) {
 		{xy(-1, -1), xy(-1, -1)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := NewLineC(pts[0], pts[1], XYOnly)
+			_, err := NewLineC(pts[0], pts[1], DimXY)
 			if err == nil {
 				t.Error("expected error")
 			}
@@ -35,7 +35,7 @@ func TestLineStringValidation(t *testing.T) {
 		[]float64{1, 1, 1, 1},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			seq := NewSequenceNoCopy(pts, XYOnly)
+			seq := NewSequenceNoCopy(pts, DimXY)
 			_, err := NewLineStringFromSequence(seq)
 			if err == nil {
 				t.Error("expected error")

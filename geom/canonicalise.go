@@ -37,7 +37,7 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 			}
 			lineStrings = append(lineStrings, lnStr)
 		}
-		ctype := XYOnly
+		ctype := DimXY
 		if len(lineStrings) > 0 {
 			ctype = lineStrings[0].CoordinatesType()
 		}
@@ -48,7 +48,7 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 		if len(points) == 1 {
 			return points[0].AsGeometry(), nil
 		}
-		ctype := XYOnly
+		ctype := DimXY
 		if len(points) > 0 {
 			ctype = points[0].CoordinatesType()
 		}
@@ -62,7 +62,7 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 		for i, ln := range lines {
 			all[len(points)+i] = ln.AsGeometry()
 		}
-		ctype := XYOnly
+		ctype := DimXY
 		if len(all) > 0 {
 			ctype = all[0].CoordinatesType()
 		}
@@ -85,7 +85,7 @@ func dedupPoints(pts []Point) []Point {
 		}
 	}
 	if haveEmpty {
-		dedup = append(dedup, NewEmptyPoint(XYOnly))
+		dedup = append(dedup, NewEmptyPoint(DimXY))
 	}
 	return dedup
 }

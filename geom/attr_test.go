@@ -709,7 +709,7 @@ func TestLineStringToMultiLineString(t *testing.T) {
 func TestLineToLineString(t *testing.T) {
 	ln := geomFromWKT(t, "LINESTRING(1 2,3 4)").AsLine()
 	got := ln.AsLineString()
-	want, err := NewLineStringFromSequence(NewSequenceNoCopy([]float64{1, 2, 3, 4}, XYOnly))
+	want, err := NewLineStringFromSequence(NewSequenceNoCopy([]float64{1, 2, 3, 4}, DimXY))
 	expectNoErr(t, err)
 	expectGeomEq(t, got.AsGeometry(), want.AsGeometry())
 }

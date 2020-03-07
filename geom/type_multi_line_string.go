@@ -273,7 +273,7 @@ func (m MultiLineString) Centroid() Point {
 		sumLength += length
 	}
 	if sumLength == 0 {
-		return NewEmptyPoint(XYOnly)
+		return NewEmptyPoint(DimXY)
 	}
 	return NewPointXY(sumXY.Scale(1.0 / sumLength))
 }
@@ -298,5 +298,5 @@ func (m MultiLineString) Force2D() MultiLineString {
 	for i := range m.lines {
 		flat[i] = m.lines[i].Force2D()
 	}
-	return MultiLineString{flat, XYOnly}
+	return MultiLineString{flat, DimXY}
 }

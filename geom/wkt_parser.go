@@ -112,15 +112,15 @@ func (p *parser) nextGeomTag() (string, CoordinatesType) {
 	switch p.peekToken() {
 	case "Z":
 		p.nextToken()
-		return geomType, XYZ
+		return geomType, DimXYZ
 	case "M":
 		p.nextToken()
-		return geomType, XYM
+		return geomType, DimXYM
 	case "ZM":
 		p.nextToken()
-		return geomType, XYZM
+		return geomType, DimXYZM
 	default:
-		return geomType, XYOnly
+		return geomType, DimXY
 	}
 }
 

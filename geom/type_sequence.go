@@ -35,11 +35,11 @@ func (s Sequence) Get(i int) Coordinates {
 		},
 	}
 	switch s.ctype {
-	case XYZ:
+	case DimXYZ:
 		c.Z = s.floats[i*stride+2]
-	case XYM:
+	case DimXYM:
 		c.M = s.floats[i*stride+2]
-	case XYZM:
+	case DimXYZM:
 		c.Z = s.floats[i*stride+2]
 		c.M = s.floats[i*stride+3]
 	}
@@ -72,7 +72,7 @@ func (s Sequence) Force2D() Sequence {
 	// TODO: We could avoid all of this copying by storing both the coordinate
 	// type and the stride independently within a sequence. Then all we would
 	// need to do is return a shallow copy of the Sequence, but with just the
-	// coordinate type change to XYOnly (the stride would remain the same).
+	// coordinate type change to DimXY (the stride would remain the same).
 	flat := make([]float64, 2*s.Length())
 	n := s.Length()
 	for i := 0; i < n; i++ {
@@ -80,7 +80,7 @@ func (s Sequence) Force2D() Sequence {
 		flat[2*i+0] = xy.X
 		flat[2*i+1] = xy.Y
 	}
-	return Sequence{XYOnly, flat}
+	return Sequence{DimXY, flat}
 }
 
 // getLine extracts a line segment from a sequence by joining together adjacent

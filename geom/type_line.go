@@ -31,7 +31,7 @@ func NewLineC(a, b Coordinates, ctype CoordinatesType, opts ...ConstructorOption
 
 // NewLineXY creates a line segment given the XYs of its two endpoints.
 func NewLineXY(a, b XY, opts ...ConstructorOption) (Line, error) {
-	return NewLineC(Coordinates{XY: a}, Coordinates{XY: b}, XYOnly, opts...)
+	return NewLineC(Coordinates{XY: a}, Coordinates{XY: b}, DimXY, opts...)
 }
 
 // Type return type string for Line
@@ -217,6 +217,6 @@ func (n Line) Force2D() Line {
 	n.a.M = 0
 	n.b.Z = 0
 	n.b.M = 0
-	n.ctype = XYOnly
+	n.ctype = DimXY
 	return n
 }

@@ -382,7 +382,7 @@ func signedAreaOfLinearRing(lr LineString) float64 {
 func (p Polygon) Centroid() Point {
 	sumXY, sumArea := sumCentroidAndAreaOfPolygon(p)
 	if sumArea == 0 {
-		return NewEmptyPoint(XYOnly)
+		return NewEmptyPoint(DimXY)
 	}
 	return NewPointXY(sumXY.Scale(1.0 / sumArea))
 }
@@ -469,5 +469,5 @@ func (p Polygon) Force2D() Polygon {
 	for i := range p.rings {
 		flatRings[i] = p.rings[i].Force2D()
 	}
-	return Polygon{flatRings, XYOnly}
+	return Polygon{flatRings, DimXY}
 }

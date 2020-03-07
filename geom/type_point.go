@@ -27,7 +27,7 @@ func NewEmptyPoint(ctype CoordinatesType) Point {
 
 // NewPointXY creates a new point from an XY.
 func NewPointXY(xy XY, _ ...ConstructorOption) Point {
-	return Point{Coordinates{XY: xy}, true, XYOnly}
+	return Point{Coordinates{XY: xy}, true, DimXY}
 }
 
 // NewPointF creates a new point from float64 x and y values.
@@ -212,6 +212,6 @@ func (p Point) Force2D() Point {
 	if ok {
 		return NewPointXY(xy)
 	} else {
-		return NewEmptyPoint(XYOnly)
+		return NewEmptyPoint(DimXY)
 	}
 }

@@ -27,13 +27,13 @@ func transformSequence(seq Sequence, fn func(XY) XY) Sequence {
 		c := seq.Get(i)
 		c.XY = fn(c.XY)
 		switch ctype {
-		case XYOnly:
+		case DimXY:
 			floats = append(floats, c.X, c.Y)
-		case XYZ:
+		case DimXYZ:
 			floats = append(floats, c.X, c.Y, c.Z)
-		case XYM:
+		case DimXYM:
 			floats = append(floats, c.X, c.Y, c.M)
-		case XYZM:
+		case DimXYZM:
 			floats = append(floats, c.X, c.Y, c.Z, c.M)
 		default:
 			panic(ctype)

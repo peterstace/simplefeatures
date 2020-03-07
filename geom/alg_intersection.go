@@ -366,7 +366,7 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
 		if pt.EqualsExact(point.AsGeometry()) {
 			xy, ok := point.XY()
 			if !ok {
-				return NewEmptyPoint(XYOnly).AsGeometry()
+				return NewEmptyPoint(DimXY).AsGeometry()
 			}
 			return NewPointXY(xy).AsGeometry()
 		}
@@ -378,7 +378,7 @@ func intersectPointWithPoint(pt1, pt2 Point) Geometry {
 	if pt1.EqualsExact(pt2.AsGeometry()) {
 		xy, ok := pt1.XY()
 		if !ok {
-			return NewEmptyPoint(XYOnly).AsGeometry()
+			return NewEmptyPoint(DimXY).AsGeometry()
 		}
 		return NewPointXY(xy).AsGeometry()
 	}

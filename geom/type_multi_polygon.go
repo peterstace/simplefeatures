@@ -276,7 +276,7 @@ func (m MultiPolygon) Boundary() MultiLineString {
 			bounds = append(bounds, r.Force2D())
 		}
 	}
-	mls, err := NewMultiLineString(bounds, XYOnly)
+	mls, err := NewMultiLineString(bounds, DimXY)
 	if err != nil {
 		// Can't get a mixed coordinate type error due to the source of the bounds.
 		panic(err)
@@ -389,7 +389,7 @@ func (m MultiPolygon) Centroid() Point {
 		sumArea += area
 	}
 	if sumArea == 0 {
-		return NewEmptyPoint(XYOnly)
+		return NewEmptyPoint(DimXY)
 	}
 	return NewPointXY(sumXY.Scale(1.0 / sumArea))
 }
@@ -414,5 +414,5 @@ func (m MultiPolygon) Force2D() MultiPolygon {
 	for i := range m.polys {
 		flat[i] = m.polys[i].Force2D()
 	}
-	return MultiPolygon{flat, XYOnly}
+	return MultiPolygon{flat, DimXY}
 }

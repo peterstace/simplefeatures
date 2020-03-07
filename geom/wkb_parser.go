@@ -61,13 +61,13 @@ func (p *wkbParser) parseGeomType() {
 	p.geomType = geomCode % 1000
 	switch geomCode / 1000 {
 	case 0:
-		p.coordType = XYOnly
+		p.coordType = DimXY
 	case 1:
-		p.coordType = XYZ
+		p.coordType = DimXYZ
 	case 2:
-		p.coordType = XYM
+		p.coordType = DimXYM
 	case 3:
-		p.coordType = XYZM
+		p.coordType = DimXYZM
 	default:
 		p.setErr(errors.New("cannot determine coordinate type"))
 	}
@@ -135,12 +135,12 @@ func (p *wkbParser) parsePoint() (Coordinates, bool) {
 	c.X = p.parseFloat64()
 	c.Y = p.parseFloat64()
 	switch p.coordType {
-	case XYOnly:
-	case XYZ:
+	case DimXY:
+	case DimXYZ:
 		c.Z = p.parseFloat64()
-	case XYM:
+	case DimXYM:
 		c.M = p.parseFloat64()
-	case XYZM:
+	case DimXYZM:
 		c.Z = p.parseFloat64()
 		c.M = p.parseFloat64()
 	default:

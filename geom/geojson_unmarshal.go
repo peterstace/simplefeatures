@@ -29,14 +29,14 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 	//
 	// | hasEmpty | has2D | has3D | result |
 	// | ---      | ---   | ---   | ---    |
-	// | false    | false | false | XYOnly |
+	// | false    | false | false | DimXY  |
 	// | false    | false | true  | XYZ    |
-	// | false    | true  | false | XYOnly |
-	// | false    | true  | true  | XYOnly |
-	// | true     | false | false | XYOnly |
+	// | false    | true  | false | DimXY  |
+	// | false    | true  | true  | DimXY  |
+	// | true     | false | false | DimXY  |
 	// | true     | false | true  | XYZ    |
-	// | true     | true  | false | XYOnly |
-	// | true     | true  | true  | XYOnly |
+	// | true     | true  | false | DimXY  |
+	// | true     | true  | true  | DimXY  |
 	var has2D, has3D bool
 	for length := range hasLength {
 		if length == 2 {
@@ -51,9 +51,9 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 			has3D = true
 		}
 	}
-	ctype := XYOnly
+	ctype := DimXY
 	if !has2D && has3D {
-		ctype = XYZ
+		ctype = DimXYZ
 	}
 
 	return geojsonNodeToGeometry(rootObj, ctype)

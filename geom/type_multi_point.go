@@ -34,11 +34,11 @@ func NewMultiPoint(pts []Point, ctype CoordinatesType, opts ...ConstructorOption
 		}
 		floats = append(floats, c.X, c.Y)
 		switch ctype {
-		case XYZ:
+		case DimXYZ:
 			floats = append(floats, c.Z)
-		case XYM:
+		case DimXYM:
 			floats = append(floats, c.M)
-		case XYZM:
+		case DimXYZM:
 			floats = append(floats, c.Z, c.M)
 		}
 	}
@@ -65,7 +65,7 @@ func NewMultiPointXY(xys []XY, opts ...ConstructorOption) MultiPoint {
 		floats[2*i+1] = xy.Y
 	}
 	return NewMultiPointFromSequence(
-		NewSequenceNoCopy(floats, XYOnly),
+		NewSequenceNoCopy(floats, DimXY),
 		BitSet{},
 	)
 }
@@ -234,7 +234,7 @@ func (m MultiPoint) Centroid() Point {
 		}
 	}
 	if n == 0 {
-		return NewEmptyPoint(XYOnly)
+		return NewEmptyPoint(DimXY)
 	}
 	return NewPointXY(sum.Scale(1 / float64(n)))
 }

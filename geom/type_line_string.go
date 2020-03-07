@@ -201,7 +201,7 @@ func (s LineString) Boundary() MultiPoint {
 			xy2.X, xy2.Y,
 		}
 	}
-	return NewMultiPointFromSequence(NewSequenceNoCopy(fs, XYOnly), BitSet{})
+	return NewMultiPointFromSequence(NewSequenceNoCopy(fs, DimXY), BitSet{})
 }
 
 func (s LineString) Value() (driver.Value, error) {
@@ -285,7 +285,7 @@ func (s LineString) Length() float64 {
 func (s LineString) Centroid() Point {
 	sumXY, sumLength := sumCentroidAndLengthOfLineString(s)
 	if sumLength == 0 {
-		return NewEmptyPoint(XYOnly)
+		return NewEmptyPoint(DimXY)
 	}
 	return NewPointXY(sumXY.Scale(1.0 / sumLength))
 }

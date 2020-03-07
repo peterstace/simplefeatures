@@ -72,12 +72,12 @@ func (e Envelope) AsGeometry() Geometry {
 		e.max.X, e.min.Y,
 		e.min.X, e.min.Y,
 	}
-	seq := NewSequenceNoCopy(floats[:], XYOnly)
+	seq := NewSequenceNoCopy(floats[:], DimXY)
 	ls, err := NewLineStringFromSequence(seq)
 	if err != nil {
 		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
 	}
-	poly, err := NewPolygon([]LineString{ls}, XYOnly)
+	poly, err := NewPolygon([]LineString{ls}, DimXY)
 	if err != nil {
 		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
 	}
