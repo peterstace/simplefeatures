@@ -18,17 +18,11 @@ type MultiPoint struct {
 	empty BitSet
 }
 
-func NewEmptyMultiPoint(ctype CoordinatesType) MultiPoint {
-	return MultiPoint{NewSequence(nil, ctype), BitSet{}}
-}
-
-func NewMultiPoint(pts []Point, opts ...ConstructorOption) (MultiPoint, error) {
-	var agg coordinateTypeAggregator
+func NewMultiPoint(pts []Point, ctype CoordinatesType, opts ...ConstructorOption) (MultiPoint, error) {
 	for _, p := range pts {
-		agg.add(p.CoordinatesType())
-	}
-	if agg.err != nil {
-		return MultiPoint{}, agg.err
+		if p.CoordinatesType() != ctype {
+			return MultiPoint{}, MixedCoordinateTypesError{p.CoordinatesType(), ctype}
+		}
 	}
 
 	var empty BitSet
@@ -39,7 +33,7 @@ func NewMultiPoint(pts []Point, opts ...ConstructorOption) (MultiPoint, error) {
 			empty.Set(i)
 		}
 		floats = append(floats, c.X, c.Y)
-		switch agg.ctype {
+		switch ctype {
 		case XYZ:
 			floats = append(floats, c.Z)
 		case XYM:
@@ -48,7 +42,7 @@ func NewMultiPoint(pts []Point, opts ...ConstructorOption) (MultiPoint, error) {
 			floats = append(floats, c.Z, c.M)
 		}
 	}
-	seq := NewSequenceNoCopy(floats, agg.ctype)
+	seq := NewSequenceNoCopy(floats, ctype)
 	return MultiPoint{seq, empty}, nil
 }
 
@@ -166,7 +160,7 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 }
 
 func (m MultiPoint) Boundary() GeometryCollection {
-	return NewEmptyGeometryCollection(XYOnly)
+	return GeometryCollection{}
 }
 
 func (m MultiPoint) Value() (driver.Value, error) {

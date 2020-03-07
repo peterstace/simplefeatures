@@ -197,17 +197,17 @@ func (p *parser) nextPointText(ctype CoordinatesType) (Coordinates, bool) {
 }
 
 func (p *parser) nextLineStringText(ctype CoordinatesType) LineString {
+	var floats []float64
 	tok := p.nextEmptySetOrLeftParen()
-	if tok == "EMPTY" {
-		return NewEmptyLineString(ctype)
-	}
-	floats := p.nextPointAppend(nil, ctype)
-	for {
-		tok := p.nextCommaOrRightParen()
-		if tok == "," {
-			floats = p.nextPointAppend(floats, ctype)
-		} else {
-			break
+	if tok == "(" {
+		floats = p.nextPointAppend(floats, ctype)
+		for {
+			tok := p.nextCommaOrRightParen()
+			if tok == "," {
+				floats = p.nextPointAppend(floats, ctype)
+			} else {
+				break
+			}
 		}
 	}
 	seq := NewSequenceNoCopy(floats, ctype)
@@ -218,24 +218,16 @@ func (p *parser) nextLineStringText(ctype CoordinatesType) LineString {
 
 func (p *parser) nextPolygonText(ctype CoordinatesType) Polygon {
 	rings := p.nextPolygonOrMultiLineStringText(ctype)
-	if len(rings) == 0 {
-		return NewEmptyPolygon(ctype)
-	} else {
-		poly, err := NewPolygon(rings, p.opts...)
-		p.check(err)
-		return poly
-	}
+	poly, err := NewPolygon(rings, ctype, p.opts...)
+	p.check(err)
+	return poly
 }
 
 func (p *parser) nextMultiLineString(ctype CoordinatesType) MultiLineString {
 	lss := p.nextPolygonOrMultiLineStringText(ctype)
-	if len(lss) == 0 {
-		return NewEmptyMultiLineString(ctype)
-	} else {
-		mls, err := NewMultiLineString(lss, p.opts...)
-		p.check(err)
-		return mls
-	}
+	mls, err := NewMultiLineString(lss, ctype, p.opts...)
+	p.check(err)
+	return mls
 }
 
 func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType) []LineString {
@@ -257,26 +249,24 @@ func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType) []LineS
 }
 
 func (p *parser) nextMultiPointText(ctype CoordinatesType) MultiPoint {
-	tok := p.nextEmptySetOrLeftParen()
-	if tok == "EMPTY" {
-		return NewEmptyMultiPoint(ctype)
-	}
-
 	var floats []float64
 	var empty BitSet
-	for i := 0; true; i++ {
-		if p.peekToken() == "EMPTY" {
-			p.nextToken()
-			for j := 0; j < ctype.Dimension(); j++ {
-				floats = append(floats, 0)
+	tok := p.nextEmptySetOrLeftParen()
+	if tok == "(" {
+		for i := 0; true; i++ {
+			if p.peekToken() == "EMPTY" {
+				p.nextToken()
+				for j := 0; j < ctype.Dimension(); j++ {
+					floats = append(floats, 0)
+				}
+				empty.Set(i)
+			} else {
+				floats = p.nextMultiPointStylePointAppend(floats, ctype)
 			}
-			empty.Set(i)
-		} else {
-			floats = p.nextMultiPointStylePointAppend(floats, ctype)
-		}
-		tok := p.nextCommaOrRightParen()
-		if tok != "," {
-			break
+			tok := p.nextCommaOrRightParen()
+			if tok != "," {
+				break
+			}
 		}
 	}
 	seq := NewSequenceNoCopy(floats, ctype)
@@ -301,44 +291,37 @@ func (p *parser) nextMultiPointStylePointAppend(dst []float64, ctype Coordinates
 }
 
 func (p *parser) nextMultiPolygonText(ctype CoordinatesType) MultiPolygon {
+	var polys []Polygon
 	tok := p.nextEmptySetOrLeftParen()
-	if tok == "EMPTY" {
-		return NewEmptyMultiPolygon(ctype)
-	}
-	poly := p.nextPolygonText(ctype)
-	polys := []Polygon{poly}
-	for {
-		tok := p.nextCommaOrRightParen()
-		if tok == "," {
+	if tok == "(" {
+		for {
 			poly := p.nextPolygonText(ctype)
 			polys = append(polys, poly)
-		} else {
-			break
+			tok := p.nextCommaOrRightParen()
+			if tok == ")" {
+				break
+			}
 		}
 	}
-	mp, err := NewMultiPolygon(polys, p.opts...)
+	mp, err := NewMultiPolygon(polys, ctype, p.opts...)
 	p.check(err)
 	return mp
 }
 
 func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) Geometry {
+	var geoms []Geometry
 	tok := p.nextEmptySetOrLeftParen()
-	if tok == "EMPTY" {
-		return NewEmptyGeometryCollection(ctype).AsGeometry()
-	}
-	geoms := []Geometry{
-		p.nextGeometryTaggedText(),
-	}
-	for {
-		tok := p.nextCommaOrRightParen()
-		if tok == "," {
-			geom := p.nextGeometryTaggedText()
-			geoms = append(geoms, geom)
-		} else {
-			break
+	if tok == "(" {
+		for {
+			g := p.nextGeometryTaggedText()
+			geoms = append(geoms, g)
+			tok := p.nextCommaOrRightParen()
+			if tok == ")" {
+				break
+			}
 		}
 	}
-	gc, err := NewGeometryCollection(geoms, p.opts...)
+	gc, err := NewGeometryCollection(geoms, ctype, p.opts...)
 	p.check(err)
 	return gc.AsGeometry()
 }

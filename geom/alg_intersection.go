@@ -22,13 +22,13 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 	// Matches PostGIS behaviour for empty geometries.
 	if g2.IsEmpty() {
 		if g2.IsGeometryCollection() {
-			return NewEmptyGeometryCollection(XYOnly).AsGeometry(), nil
+			return GeometryCollection{}.AsGeometry(), nil
 		}
 		return g2, nil
 	}
 	if g1.IsEmpty() {
 		if g1.IsGeometryCollection() {
-			return NewEmptyGeometryCollection(XYOnly).AsGeometry(), nil
+			return GeometryCollection{}.AsGeometry(), nil
 		}
 		return g1, nil
 	}
@@ -155,7 +155,7 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	result := intersectLineWithLineNoAlloc(n1, n2)
 	switch {
 	case result.empty:
-		return NewEmptyGeometryCollection(XYOnly).AsGeometry()
+		return GeometryCollection{}.AsGeometry()
 	case result.ptA == result.ptB:
 		return NewPointXY(result.ptA).AsGeometry()
 	default:
@@ -289,14 +289,14 @@ func intersectPointWithLine(pt Point, ln Line) Geometry {
 	env := ln.Envelope()
 	ptXY, ok := pt.XY()
 	if !ok || !env.Contains(ptXY) {
-		return NewEmptyGeometryCollection(XYOnly).AsGeometry()
+		return GeometryCollection{}.AsGeometry()
 	}
 	lhs := (ptXY.X - ln.StartPoint().X) * (ln.EndPoint().Y - ln.StartPoint().Y)
 	rhs := (ptXY.Y - ln.StartPoint().Y) * (ln.EndPoint().X - ln.StartPoint().X)
 	if lhs == rhs {
 		return pt.AsGeometry()
 	}
-	return NewEmptyGeometryCollection(XYOnly).AsGeometry()
+	return GeometryCollection{}.AsGeometry()
 }
 
 func intersectPointWithLineString(pt Point, ls LineString) Geometry {
@@ -311,7 +311,7 @@ func intersectPointWithLineString(pt Point, ls LineString) Geometry {
 			return g
 		}
 	}
-	return NewEmptyGeometryCollection(XYOnly).AsGeometry()
+	return GeometryCollection{}.AsGeometry()
 }
 
 func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (Geometry, error) {
@@ -371,7 +371,7 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
 			return NewPointXY(xy).AsGeometry()
 		}
 	}
-	return NewEmptyGeometryCollection(XYOnly).AsGeometry()
+	return GeometryCollection{}.AsGeometry()
 }
 
 func intersectPointWithPoint(pt1, pt2 Point) Geometry {
@@ -382,7 +382,7 @@ func intersectPointWithPoint(pt1, pt2 Point) Geometry {
 		}
 		return NewPointXY(xy).AsGeometry()
 	}
-	return NewEmptyGeometryCollection(XYOnly).AsGeometry()
+	return GeometryCollection{}.AsGeometry()
 }
 
 // rightmostThenHighest finds the rightmost-then-highest point

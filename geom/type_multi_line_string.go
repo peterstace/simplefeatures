@@ -19,19 +19,13 @@ type MultiLineString struct {
 
 // NewMultiLineString creates a MultiLineString from its constintuent
 // LineStrings.
-func NewMultiLineString(lines []LineString, opts ...ConstructorOption) (MultiLineString, error) {
-	var agg coordinateTypeAggregator
+func NewMultiLineString(lines []LineString, ctype CoordinatesType, opts ...ConstructorOption) (MultiLineString, error) {
 	for _, ls := range lines {
-		agg.add(ls.CoordinatesType())
+		if ls.CoordinatesType() != ctype {
+			return MultiLineString{}, MixedCoordinateTypesError{ls.CoordinatesType(), ctype}
+		}
 	}
-	if agg.err != nil {
-		return MultiLineString{}, agg.err
-	}
-	return MultiLineString{lines, agg.ctype}, nil
-}
-
-func NewEmptyMultiLineString(ctype CoordinatesType) MultiLineString {
-	return MultiLineString{nil, ctype}
+	return MultiLineString{lines, ctype}, nil
 }
 
 // Type return type string for MultiLineString
@@ -238,7 +232,7 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 			return MultiLineString{}, err
 		}
 	}
-	mls, err := NewMultiLineString(transformed, opts...)
+	mls, err := NewMultiLineString(transformed, m.ctype, opts...)
 	return mls, err
 }
 

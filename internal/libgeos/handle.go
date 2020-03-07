@@ -298,7 +298,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 				subPoints[i] = subPointAsGeom.AsPoint()
 			}
 		}
-		mp, err := geom.NewMultiPoint(subPoints)
+		mp, err := geom.NewMultiPoint(subPoints, geom.XYOnly)
 		if err != nil {
 			return geom.Geometry{}, err
 		}
@@ -324,7 +324,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 			}
 			subPolys[i] = subPolyAsGeom.AsPolygon()
 		}
-		mp, err := geom.NewMultiPolygon(subPolys)
+		mp, err := geom.NewMultiPolygon(subPolys, geom.XYOnly)
 		if err != nil {
 			return geom.Geometry{}, err
 		}
@@ -346,7 +346,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 				return geom.Geometry{}, nil
 			}
 		}
-		gc, err := geom.NewGeometryCollection(subGeoms)
+		gc, err := geom.NewGeometryCollection(subGeoms, geom.XYOnly)
 		return gc.AsGeometry(), err
 	case "LineString", "Polygon", "MultiLineString":
 		return h.decodeGeomHandleUsingWKB(gh)

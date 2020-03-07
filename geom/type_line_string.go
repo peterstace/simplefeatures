@@ -19,12 +19,6 @@ type LineString struct {
 	seq Sequence
 }
 
-// NewEmptyLineString gives the empty LineString. It is equivalent to calling
-// NewLineStringC with a zero length coordinates argument.
-func NewEmptyLineString(ctype CoordinatesType) LineString {
-	return LineString{NewSequence(nil, ctype)}
-}
-
 func NewLineStringFromSequence(seq Sequence, opts ...ConstructorOption) (LineString, error) {
 	n := seq.Length()
 	if skipValidations(opts) || n == 0 {
@@ -316,7 +310,7 @@ func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64
 // AsMultiLineString is a convenience function that converts this LineString
 // into a MultiLineString.
 func (s LineString) AsMultiLineString() MultiLineString {
-	mls, err := NewMultiLineString([]LineString{s})
+	mls, err := NewMultiLineString([]LineString{s}, s.CoordinatesType())
 	if err != nil {
 		// Because there is only a single line string, this can't panic due to
 		// mixed coordinate type.

@@ -22,19 +22,13 @@ type GeometryCollection struct {
 
 // NewGeometryCollection creates a potentially heterogenous collection of
 // geometries. There are no constraints on the collection.
-func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) (GeometryCollection, error) {
-	var agg coordinateTypeAggregator
+func NewGeometryCollection(geoms []Geometry, ctype CoordinatesType, opts ...ConstructorOption) (GeometryCollection, error) {
 	for _, g := range geoms {
-		agg.add(g.CoordinatesType())
+		if g.CoordinatesType() != ctype {
+			return GeometryCollection{}, MixedCoordinateTypesError{g.CoordinatesType(), ctype}
+		}
 	}
-	if agg.err != nil {
-		return GeometryCollection{}, agg.err
-	}
-	return GeometryCollection{geoms, agg.ctype}, nil
-}
-
-func NewEmptyGeometryCollection(ctype CoordinatesType) GeometryCollection {
-	return GeometryCollection{nil, ctype}
+	return GeometryCollection{geoms, ctype}, nil
 }
 
 // Type return type string for GeometryCollection
@@ -131,12 +125,12 @@ func (c GeometryCollection) Boundary() GeometryCollection {
 	}
 	var bounds []Geometry
 	for _, g := range c.geoms {
-		bound := g.Boundary()
+		bound := g.Boundary().Force2D()
 		if !bound.IsEmpty() {
 			bounds = append(bounds, bound)
 		}
 	}
-	bound, err := NewGeometryCollection(bounds)
+	bound, err := NewGeometryCollection(bounds, XYOnly)
 	if err != nil {
 		panic(err) // Cannot occur because of where we got the bounds from.
 	}
@@ -191,7 +185,7 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 			return GeometryCollection{}, err
 		}
 	}
-	return NewGeometryCollection(transformed)
+	return NewGeometryCollection(transformed, c.ctype)
 }
 
 // EqualsExact checks if this GeometryCollection is exactly equal to another GeometryCollection.

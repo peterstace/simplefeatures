@@ -28,23 +28,3 @@ func (t CoordinatesType) IsMeasured() bool {
 func (t CoordinatesType) wktModifier() string {
 	return [4]string{"", " Z ", " M ", " ZM "}[t]
 }
-
-type coordinateTypeAggregator struct {
-	ctype     CoordinatesType
-	populated bool
-	err       error
-}
-
-func (a *coordinateTypeAggregator) add(ctype CoordinatesType) {
-	if a.err != nil {
-		return
-	}
-	if !a.populated {
-		a.ctype = ctype
-		a.populated = true
-		return
-	}
-	if a.ctype != ctype {
-		a.err = MixedCoordinateTypesError{a.ctype, ctype}
-	}
-}

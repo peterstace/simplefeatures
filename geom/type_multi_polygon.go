@@ -23,25 +23,17 @@ type MultiPolygon struct {
 	ctype CoordinatesType
 }
 
-// NewEmptyMultiPolygon returns the empty MultiPolygon. It is equivalent to
-// calling NewMultiPolygon with a zero length polygon slice.
-func NewEmptyMultiPolygon(ctype CoordinatesType) MultiPolygon {
-	return MultiPolygon{nil, ctype}
-}
-
 // NewMultiPolygon creates a MultiPolygon from its constituent Polygons. It
 // gives an error if any of the MultiPolygon assertions are not maintained.
-func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
-	var agg coordinateTypeAggregator
+func NewMultiPolygon(polys []Polygon, ctype CoordinatesType, opts ...ConstructorOption) (MultiPolygon, error) {
 	for _, p := range polys {
-		agg.add(p.CoordinatesType())
-	}
-	if agg.err != nil {
-		return MultiPolygon{}, agg.err
+		if ct := p.CoordinatesType(); ct != ctype {
+			return MultiPolygon{}, MixedCoordinateTypesError{ct, ctype}
+		}
 	}
 
 	if skipValidations(opts) {
-		return MultiPolygon{polys, agg.ctype}, nil
+		return MultiPolygon{polys, ctype}, nil
 	}
 
 	type interval struct {
@@ -94,7 +86,7 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 		active.push(i)
 	}
 
-	return MultiPolygon{polys, agg.ctype}, nil
+	return MultiPolygon{polys, ctype}, nil
 }
 
 func polyInteriorsIntersect(p1, p2 Polygon) bool {
@@ -284,7 +276,7 @@ func (m MultiPolygon) Boundary() MultiLineString {
 			bounds = append(bounds, r.Force2D())
 		}
 	}
-	mls, err := NewMultiLineString(bounds)
+	mls, err := NewMultiLineString(bounds, XYOnly)
 	if err != nil {
 		// Can't get a mixed coordinate type error due to the source of the bounds.
 		panic(err)
@@ -344,7 +336,7 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mu
 		}
 		polys[i] = transformed
 	}
-	mp, err := NewMultiPolygon(polys, opts...)
+	mp, err := NewMultiPolygon(polys, m.ctype, opts...)
 	return mp, err
 }
 
@@ -361,7 +353,7 @@ func (m MultiPolygon) IsValid() bool {
 			return false
 		}
 	}
-	_, err := NewMultiPolygon(m.polys)
+	_, err := NewMultiPolygon(m.polys, m.ctype)
 	return err == nil
 }
 

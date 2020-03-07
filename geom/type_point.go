@@ -99,7 +99,7 @@ func (p Point) Envelope() (Envelope, bool) {
 }
 
 func (p Point) Boundary() GeometryCollection {
-	return NewEmptyGeometryCollection(XYOnly)
+	return GeometryCollection{}
 }
 
 func (p Point) Value() (driver.Value, error) {

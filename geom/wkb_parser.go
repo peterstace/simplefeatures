@@ -187,19 +187,13 @@ func (p *wkbParser) parsePolygon() Polygon {
 	for i := range rings {
 		rings[i] = p.parseLineString()
 	}
-	if len(rings) == 0 {
-		return NewEmptyPolygon(p.coordType)
-	}
-	poly, err := NewPolygon(rings, p.opts...)
+	poly, err := NewPolygon(rings, p.coordType, p.opts...)
 	p.setErr(err)
 	return poly
 }
 
 func (p *wkbParser) parseMultiPoint() MultiPoint {
 	n := p.parseUint32()
-	if n == 0 {
-		return NewEmptyMultiPoint(p.coordType)
-	}
 	var pts []Point
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
@@ -209,16 +203,13 @@ func (p *wkbParser) parseMultiPoint() MultiPoint {
 		}
 		pts = append(pts, geom.AsPoint())
 	}
-	mp, err := NewMultiPoint(pts, p.opts...)
+	mp, err := NewMultiPoint(pts, p.coordType, p.opts...)
 	p.setErr(err)
 	return mp
 }
 
 func (p *wkbParser) parseMultiLineString() MultiLineString {
 	n := p.parseUint32()
-	if n == 0 {
-		return NewEmptyMultiLineString(p.coordType)
-	}
 	var lss []LineString
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
@@ -234,16 +225,13 @@ func (p *wkbParser) parseMultiLineString() MultiLineString {
 			p.setErr(errors.New("non-LineString found in MultiLineString"))
 		}
 	}
-	mls, err := NewMultiLineString(lss, p.opts...)
+	mls, err := NewMultiLineString(lss, p.coordType, p.opts...)
 	p.setErr(err)
 	return mls
 }
 
 func (p *wkbParser) parseMultiPolygon() MultiPolygon {
 	n := p.parseUint32()
-	if n == 0 {
-		return NewEmptyMultiPolygon(p.coordType)
-	}
 	var polys []Polygon
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
@@ -253,23 +241,20 @@ func (p *wkbParser) parseMultiPolygon() MultiPolygon {
 		}
 		polys = append(polys, geom.AsPolygon())
 	}
-	mpoly, err := NewMultiPolygon(polys, p.opts...)
+	mpoly, err := NewMultiPolygon(polys, p.coordType, p.opts...)
 	p.setErr(err)
 	return mpoly
 }
 
 func (p *wkbParser) parseGeometryCollection() GeometryCollection {
 	n := p.parseUint32()
-	if n == 0 {
-		return NewEmptyGeometryCollection(p.coordType)
-	}
 	var geoms []Geometry
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
 		p.setErr(err)
 		geoms = append(geoms, geom)
 	}
-	gc, err := NewGeometryCollection(geoms, p.opts...)
+	gc, err := NewGeometryCollection(geoms, p.coordType, p.opts...)
 	p.setErr(err)
 	return gc
 }

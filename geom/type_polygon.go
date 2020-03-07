@@ -31,32 +31,24 @@ type Polygon struct {
 	ctype CoordinatesType
 }
 
-// NewEmptyPolygon returns an empty Polygon. It is equivalent to calling
-// NewPolygon with a zero length rings argument.
-func NewEmptyPolygon(ctype CoordinatesType) Polygon {
-	return Polygon{nil, ctype}
-}
-
 // NewPolygon creates a polygon given its rings. The outer ring is first, and
 // any inner rings follow. No rings may cross each other, and can only
 // intersect each with each other at a point. If no rings are provided, then
 // the returned Polygon is the empty Polygon.
-func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
+func NewPolygon(rings []LineString, ctype CoordinatesType, opts ...ConstructorOption) (Polygon, error) {
+	for _, r := range rings {
+		if ct := r.CoordinatesType(); ct != ctype {
+			return Polygon{}, MixedCoordinateTypesError{ct, ctype}
+		}
+	}
+
 	if err := validatePolygon(rings, opts...); err != nil {
 		return Polygon{}, err
 	}
 
-	var agg coordinateTypeAggregator
-	for _, r := range rings {
-		agg.add(r.CoordinatesType())
-	}
-	if agg.err != nil {
-		return Polygon{}, agg.err
-	}
-
 	tmp := make([]LineString, len(rings))
 	copy(tmp, rings)
-	return Polygon{rings, agg.ctype}, nil
+	return Polygon{rings, ctype}, nil
 }
 
 func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
@@ -190,7 +182,12 @@ func (p Polygon) AsGeometry() Geometry {
 // is empty, then it returns the empty LineString.
 func (p Polygon) ExteriorRing() LineString {
 	if p.IsEmpty() {
-		return NewEmptyLineString(p.CoordinatesType())
+		empty, err := NewLineStringFromSequence(NewSequence(nil, p.ctype))
+		if err != nil {
+			// No points so can't panic.
+			panic(err)
+		}
+		return empty
 	}
 	return p.rings[0]
 }
@@ -258,7 +255,7 @@ func (p Polygon) Envelope() (Envelope, bool) {
 }
 
 func (p Polygon) Boundary() MultiLineString {
-	mls, err := NewMultiLineString(p.rings)
+	mls, err := NewMultiLineString(p.rings, p.ctype)
 	if err != nil {
 		// Can't get a mixed coordinate type error due to the source of the bound.
 		panic(err)
@@ -322,7 +319,7 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon
 			return Polygon{}, err
 		}
 	}
-	poly, err := NewPolygon(transformed, opts...)
+	poly, err := NewPolygon(transformed, p.ctype, opts...)
 	return poly, err
 }
 
@@ -339,7 +336,7 @@ func (p Polygon) IsValid() bool {
 			return false
 		}
 	}
-	_, err := NewPolygon(p.rings)
+	_, err := NewPolygon(p.rings, p.ctype)
 	return err == nil
 }
 
@@ -444,7 +441,7 @@ func (p Polygon) AsMultiPolygon() MultiPolygon {
 	if !p.IsEmpty() {
 		polys = []Polygon{p}
 	}
-	mp, err := NewMultiPolygon(polys)
+	mp, err := NewMultiPolygon(polys, p.ctype)
 	if err != nil {
 		// Cannot occur due to construction. A valid polygon will always be a
 		// valid multipolygon.

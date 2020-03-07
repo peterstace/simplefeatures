@@ -87,13 +87,13 @@ func TestAsTextEmpty(t *testing.T) {
 		want string
 		g    Geometry
 	}{
-		{"POINT EMPTY", NewEmptyPoint(XYOnly).AsGeometry()},
-		{"LINESTRING EMPTY", NewEmptyLineString(XYOnly).AsGeometry()},
-		{"POLYGON EMPTY", NewEmptyPolygon(XYOnly).AsGeometry()},
-		{"MULTIPOINT EMPTY", NewEmptyMultiPoint(XYOnly).AsGeometry()},
-		{"MULTILINESTRING EMPTY", NewEmptyMultiLineString(XYOnly).AsGeometry()},
-		{"MULTIPOLYGON EMPTY", NewEmptyMultiPolygon(XYOnly).AsGeometry()},
-		{"GEOMETRYCOLLECTION EMPTY", NewEmptyGeometryCollection(XYOnly).AsGeometry()},
+		{"POINT EMPTY", Point{}.AsGeometry()},
+		{"LINESTRING EMPTY", LineString{}.AsGeometry()},
+		{"POLYGON EMPTY", Polygon{}.AsGeometry()},
+		{"MULTIPOINT EMPTY", MultiPoint{}.AsGeometry()},
+		{"MULTILINESTRING EMPTY", MultiLineString{}.AsGeometry()},
+		{"MULTIPOLYGON EMPTY", MultiPolygon{}.AsGeometry()},
+		{"GEOMETRYCOLLECTION EMPTY", GeometryCollection{}.AsGeometry()},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := tt.g.AsText()

@@ -253,10 +253,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 				return Geometry{}, err
 			}
 		}
-		if len(rings) == 0 {
-			return NewEmptyPolygon(ctype).AsGeometry(), nil
-		}
-		poly, err := NewPolygon(rings)
+		poly, err := NewPolygon(rings, ctype)
 		return poly.AsGeometry(), err
 	case geojsonMultiPoint:
 		// GeoJSON MultiPoints cannot contain empty Points.
@@ -272,10 +269,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 				return Geometry{}, err
 			}
 		}
-		if len(lss) == 0 {
-			return NewEmptyMultiLineString(ctype).AsGeometry(), nil
-		}
-		poly, err := NewMultiLineString(lss)
+		poly, err := NewMultiLineString(lss, ctype)
 		return poly.AsGeometry(), err
 	case geojsonMultiPolygon:
 		polys := make([]Polygon, len(node.coords))
@@ -289,20 +283,13 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 					return Geometry{}, err
 				}
 			}
-			if len(rings) == 0 {
-				polys[i] = NewEmptyPolygon(ctype)
-			} else {
-				var err error
-				polys[i], err = NewPolygon(rings)
-				if err != nil {
-					return Geometry{}, err
-				}
+			var err error
+			polys[i], err = NewPolygon(rings, ctype)
+			if err != nil {
+				return Geometry{}, err
 			}
 		}
-		if len(polys) == 0 {
-			return NewEmptyMultiPolygon(ctype).AsGeometry(), nil
-		}
-		mp, err := NewMultiPolygon(polys)
+		mp, err := NewMultiPolygon(polys, ctype)
 		return mp.AsGeometry(), err
 	case geojsonGeometryCollection:
 		children := make([]Geometry, len(node.geoms))
@@ -313,10 +300,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 				return Geometry{}, err
 			}
 		}
-		if len(children) == 0 {
-			return NewEmptyGeometryCollection(ctype).AsGeometry(), nil
-		}
-		gc, err := NewGeometryCollection(children)
+		gc, err := NewGeometryCollection(children, ctype)
 		return gc.AsGeometry(), err
 	default:
 		panic(fmt.Sprintf("unexpected node: %#v", node))

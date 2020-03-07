@@ -117,7 +117,7 @@ func (g Geometry) AsGeometryCollection() GeometryCollection {
 	if g.ptr == nil {
 		// Special case so that the zero Geometry value is interpreted as an
 		// empty GeometryCollection.
-		return NewEmptyGeometryCollection(XYOnly)
+		return GeometryCollection{}
 	}
 	return *(*GeometryCollection)(g.ptr)
 }
