@@ -10,7 +10,7 @@ func convexHull(g Geometry) Geometry {
 		// Any empty geometry could be returned here to to give correct
 		// behaviour. However, to replicate PostGIS behaviour, we always return
 		// the original geometry.
-		return g.Force(DimXY)
+		return g.Force2D()
 	}
 	pts := convexHullPointSet(g)
 	hull := grahamScan(pts)
@@ -44,7 +44,6 @@ func convexHull(g Geometry) Geometry {
 	}
 }
 
-// TODO: This could just return a Sequence instead to avoid a bunch of copying.
 func convexHullPointSet(g Geometry) []XY {
 	switch {
 	case g.IsGeometryCollection():

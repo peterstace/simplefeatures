@@ -295,12 +295,17 @@ func (m MultiLineString) CoordinatesType() CoordinatesType {
 	return m.ctype
 }
 
-// Force returns a new MultiLineString with a different CoordinatesType. If a
+// ForceCoordinatesType returns a new MultiLineString with a different CoordinatesType. If a
 // dimension is added, then its values are populated with 0.
-func (m MultiLineString) Force(newCType CoordinatesType) MultiLineString {
+func (m MultiLineString) ForceCoordinatesType(newCType CoordinatesType) MultiLineString {
 	flat := make([]LineString, len(m.lines))
 	for i := range m.lines {
-		flat[i] = m.lines[i].Force(newCType)
+		flat[i] = m.lines[i].ForceCoordinatesType(newCType)
 	}
 	return MultiLineString{flat, DimXY}
+}
+
+// Force2D returns a copy of the MultiLineString with Z and M values removed.
+func (m MultiLineString) Force2D() MultiLineString {
+	return m.ForceCoordinatesType(DimXY)
 }

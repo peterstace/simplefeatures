@@ -172,7 +172,7 @@ func TestSequenceLengthAndGet(t *testing.T) {
 						}
 						wantCoords = append(wantCoords, c)
 					}
-					forced := tt.seq.Force(ct)
+					forced := tt.seq.ForceCoordinatesType(ct)
 					checkSequence(t, forced, wantCoords)
 					expectCoordinatesTypeEq(t, forced.CoordinatesType(), ct)
 				})

@@ -125,7 +125,7 @@ func (c GeometryCollection) Boundary() GeometryCollection {
 	}
 	var bounds []Geometry
 	for _, g := range c.geoms {
-		bound := g.Boundary().Force(DimXY)
+		bound := g.Boundary().Force2D()
 		if !bound.IsEmpty() {
 			bounds = append(bounds, bound)
 		}
@@ -383,12 +383,17 @@ func (c GeometryCollection) CoordinatesType() CoordinatesType {
 	return c.ctype
 }
 
-// Force returns a new GeometryCollection with a different CoordinatesType. If
+// ForceCoordinatesType returns a new GeometryCollection with a different CoordinatesType. If
 // a dimension is added, then its values are populated with 0.
-func (c GeometryCollection) Force(newCType CoordinatesType) GeometryCollection {
+func (c GeometryCollection) ForceCoordinatesType(newCType CoordinatesType) GeometryCollection {
 	gs := make([]Geometry, len(c.geoms))
 	for i := range c.geoms {
-		gs[i] = c.geoms[i].Force(newCType)
+		gs[i] = c.geoms[i].ForceCoordinatesType(newCType)
 	}
 	return GeometryCollection{gs, DimXY}
+}
+
+// Force2D returns a copy of the GeometryCollection with Z and M values removed.
+func (c GeometryCollection) Force2D() GeometryCollection {
+	return c.ForceCoordinatesType(DimXY)
 }

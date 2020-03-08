@@ -328,8 +328,13 @@ func (s LineString) CoordinatesType() CoordinatesType {
 	return s.seq.CoordinatesType()
 }
 
-// Force returns a new LineString with a different CoordinatesType. If a
+// ForceCoordinatesType returns a new LineString with a different CoordinatesType. If a
 // dimension is added, then its values are populated with 0.
-func (s LineString) Force(newCType CoordinatesType) LineString {
-	return LineString{s.seq.Force(newCType)}
+func (s LineString) ForceCoordinatesType(newCType CoordinatesType) LineString {
+	return LineString{s.seq.ForceCoordinatesType(newCType)}
+}
+
+// Force2D returns a copy of the LineString with Z and M values removed.
+func (s LineString) Force2D() LineString {
+	return s.ForceCoordinatesType(DimXY)
 }

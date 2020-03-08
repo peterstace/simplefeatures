@@ -273,7 +273,7 @@ func (m MultiPolygon) Boundary() MultiLineString {
 	bounds := make([]LineString, 0, n)
 	for _, p := range m.polys {
 		for _, r := range p.rings {
-			bounds = append(bounds, r.Force(DimXY))
+			bounds = append(bounds, r.Force2D())
 		}
 	}
 	mls, err := NewMultiLineString(bounds, DimXY)
@@ -411,12 +411,17 @@ func (m MultiPolygon) CoordinatesType() CoordinatesType {
 	return m.ctype
 }
 
-// Force returns a new MultiPolygon with a different CoordinatesType. If a
+// ForceCoordinatesType returns a new MultiPolygon with a different CoordinatesType. If a
 // dimension is added, then its values are populated with 0.
-func (m MultiPolygon) Force(newCType CoordinatesType) MultiPolygon {
+func (m MultiPolygon) ForceCoordinatesType(newCType CoordinatesType) MultiPolygon {
 	flat := make([]Polygon, len(m.polys))
 	for i := range m.polys {
-		flat[i] = m.polys[i].Force(newCType)
+		flat[i] = m.polys[i].ForceCoordinatesType(newCType)
 	}
 	return MultiPolygon{flat, DimXY}
+}
+
+// Force2D returns a copy of the MultiPolygon with Z and M values removed.
+func (m MultiPolygon) Force2D() MultiPolygon {
+	return m.ForceCoordinatesType(DimXY)
 }

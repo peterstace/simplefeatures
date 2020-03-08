@@ -93,10 +93,14 @@ func (s Sequence) Reverse() Sequence {
 	return Sequence{s.ctype, reversed}
 }
 
-// Force returns a new Sequence with a different CoordinatesType. If a
+// ForceCoordinatesType returns a new Sequence with a different CoordinatesType. If a
 // dimension is added, then its new value is set to zero for each point
 // location in the Sequence.
-func (s Sequence) Force(newCType CoordinatesType) Sequence {
+func (s Sequence) ForceCoordinatesType(newCType CoordinatesType) Sequence {
+	if s.ctype == newCType {
+		return s
+	}
+
 	stride := newCType.Dimension()
 	flat := make([]float64, stride*s.Length())
 	n := s.Length()
@@ -115,6 +119,11 @@ func (s Sequence) Force(newCType CoordinatesType) Sequence {
 		}
 	}
 	return Sequence{newCType, flat}
+}
+
+// Force2D returns a new Sequence with Z and M values removed (if present).
+func (s Sequence) Force2D() Sequence {
+	return s.ForceCoordinatesType(DimXY)
 }
 
 // getLine extracts a 2D line segment from a sequence by joining together

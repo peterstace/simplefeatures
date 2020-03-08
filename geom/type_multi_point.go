@@ -250,8 +250,13 @@ func (m MultiPoint) CoordinatesType() CoordinatesType {
 	return m.seq.CoordinatesType()
 }
 
-// Force returns a new MultiPoint with a different CoordinatesType. If a
+// ForceCoordinatesType returns a new MultiPoint with a different CoordinatesType. If a
 // dimension is added, then its values are populated with 0.
-func (m MultiPoint) Force(newCType CoordinatesType) MultiPoint {
-	return MultiPoint{m.seq.Force(newCType), m.empty}
+func (m MultiPoint) ForceCoordinatesType(newCType CoordinatesType) MultiPoint {
+	return MultiPoint{m.seq.ForceCoordinatesType(newCType), m.empty}
+}
+
+// Force2D returns a copy of the MultiPoint with Z and M values removed.
+func (m MultiPoint) Force2D() MultiPoint {
+	return m.ForceCoordinatesType(DimXY)
 }

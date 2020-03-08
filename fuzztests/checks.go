@@ -292,13 +292,8 @@ func CheckBoundary(t *testing.T, want UnaryResult, g geom.Geometry) {
 		}
 
 		got := g.Boundary()
-
-		want := want.Boundary
-
-		if want.Valid {
-			// Simplefeatures doesn't retain boundary Z values.
-			want.Geometry = want.Geometry.Force(geom.DimXY)
-		}
+		// Simplefeatures doesn't retain boundary Z values.
+		want := want.Boundary.Geometry.Force2D()
 
 		if !got.EqualsExact(want.Geometry, geom.IgnoreOrder) {
 			t.Logf("input: %v", g.AsText())
@@ -314,11 +309,9 @@ func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 		got := g.ConvexHull()
 		want := want.ConvexHull
 
-		if g.CoordinatesType() != geom.DimXY {
-			// PostGIS retains 3D and M coordinates for convex hull, which is
-			// incorrect according to the OGC spec.
-			want = want.Force(geom.DimXY)
-		}
+		// PostGIS retains 3D and M coordinates for convex hull, which is
+		// incorrect according to the OGC spec.
+		want = want.Force2D()
 
 		if !got.EqualsExact(want, geom.IgnoreOrder, geom.Tolerance(1e-9)) {
 			t.Logf("input: %v", g.AsText())

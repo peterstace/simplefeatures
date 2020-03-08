@@ -398,7 +398,7 @@ func (g Geometry) Boundary() Geometry {
 	// normally be returned in the non-empty case).
 	if g.IsEmpty() {
 		// Match PostGIS behaviour.
-		return g.Force(DimXY)
+		return g.Force2D()
 	}
 
 	switch g.tag {
@@ -702,27 +702,32 @@ func (g Geometry) CoordinatesType() CoordinatesType {
 	}
 }
 
-// Force returns a new Geometry with a different CoordinatesType. If a
+// ForceCoordinatesType returns a new Geometry with a different CoordinatesType. If a
 // dimension is added, then its values are populated with 0.
-func (g Geometry) Force(newCType CoordinatesType) Geometry {
+func (g Geometry) ForceCoordinatesType(newCType CoordinatesType) Geometry {
 	switch g.tag {
 	case geometryCollectionTag:
-		return g.AsGeometryCollection().Force(newCType).AsGeometry()
+		return g.AsGeometryCollection().ForceCoordinatesType(newCType).AsGeometry()
 	case pointTag:
-		return g.AsPoint().Force(newCType).AsGeometry()
+		return g.AsPoint().ForceCoordinatesType(newCType).AsGeometry()
 	case lineTag:
-		return g.AsLine().Force(newCType).AsGeometry()
+		return g.AsLine().ForceCoordinatesType(newCType).AsGeometry()
 	case lineStringTag:
-		return g.AsLineString().Force(newCType).AsGeometry()
+		return g.AsLineString().ForceCoordinatesType(newCType).AsGeometry()
 	case polygonTag:
-		return g.AsPolygon().Force(newCType).AsGeometry()
+		return g.AsPolygon().ForceCoordinatesType(newCType).AsGeometry()
 	case multiPointTag:
-		return g.AsMultiPoint().Force(newCType).AsGeometry()
+		return g.AsMultiPoint().ForceCoordinatesType(newCType).AsGeometry()
 	case multiLineStringTag:
-		return g.AsMultiLineString().Force(newCType).AsGeometry()
+		return g.AsMultiLineString().ForceCoordinatesType(newCType).AsGeometry()
 	case multiPolygonTag:
-		return g.AsMultiPolygon().Force(newCType).AsGeometry()
+		return g.AsMultiPolygon().ForceCoordinatesType(newCType).AsGeometry()
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}
+}
+
+// Force2D returns a copy of the geometry with Z and M values removed.
+func (g Geometry) Force2D() Geometry {
+	return g.ForceCoordinatesType(DimXY)
 }

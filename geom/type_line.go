@@ -221,9 +221,9 @@ func (n Line) CoordinatesType() CoordinatesType {
 	return n.a.Type
 }
 
-// Force returns a new Line with a different CoordinatesType. If a dimension is
+// ForceCoordinatesType returns a new Line with a different CoordinatesType. If a dimension is
 // added, then its values are populated with 0.
-func (n Line) Force(newCType CoordinatesType) Line {
+func (n Line) ForceCoordinatesType(newCType CoordinatesType) Line {
 	if n.a.Type.Is3D() != newCType.Is3D() {
 		n.a.Z = 0
 		n.b.Z = 0

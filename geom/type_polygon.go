@@ -260,7 +260,7 @@ func (p Polygon) Boundary() MultiLineString {
 		// Can't get a mixed coordinate type error due to the source of the bound.
 		panic(err)
 	}
-	return mls.Force(DimXY)
+	return mls.Force2D()
 }
 
 func (p Polygon) Value() (driver.Value, error) {
@@ -466,12 +466,17 @@ func (p Polygon) CoordinatesType() CoordinatesType {
 	return p.ctype
 }
 
-// Force returns a new Polygon with a different CoordinatesType. If a dimension
+// ForceCoordinatesType returns a new Polygon with a different CoordinatesType. If a dimension
 // is added, then its values are populated with 0.
-func (p Polygon) Force(newCType CoordinatesType) Polygon {
+func (p Polygon) ForceCoordinatesType(newCType CoordinatesType) Polygon {
 	flatRings := make([]LineString, len(p.rings))
 	for i := range p.rings {
-		flatRings[i] = p.rings[i].Force(newCType)
+		flatRings[i] = p.rings[i].ForceCoordinatesType(newCType)
 	}
 	return Polygon{flatRings, DimXY}
+}
+
+// Force2D returns a copy of the Polygon with Z and M values removed.
+func (p Polygon) Force2D() Polygon {
+	return p.ForceCoordinatesType(DimXY)
 }
