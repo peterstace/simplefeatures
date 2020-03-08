@@ -61,7 +61,7 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 		case g2.IsLine():
 			return intersectLineWithLine(g1.AsLine(), g2.AsLine()), nil
 		case g2.IsLineString():
-			ls, err := NewLineStringFromSequence(g1.AsLine().Coordinates())
+			ls, err := NewLineString(g1.AsLine().Coordinates())
 			if err != nil {
 				return Geometry{}, err
 			}

@@ -174,7 +174,7 @@ func (p *wkbParser) parseLineString(ctype CoordinatesType) LineString {
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	poly, err := NewLineStringFromSequence(seq, p.opts...)
+	poly, err := NewLineString(seq, p.opts...)
 	p.setErr(err)
 	return poly
 }

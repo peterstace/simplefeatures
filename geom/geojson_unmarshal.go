@@ -241,14 +241,14 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 		}
 	case geojsonLineString:
 		seq := twoDimFloat64sToSequence(node.coords, ctype)
-		ls, err := NewLineStringFromSequence(seq)
+		ls, err := NewLineString(seq)
 		return ls.AsGeometry(), err
 	case geojsonPolygon:
 		rings := make([]LineString, len(node.coords))
 		for i, coords := range node.coords {
 			seq := twoDimFloat64sToSequence(coords, ctype)
 			var err error
-			rings[i], err = NewLineStringFromSequence(seq)
+			rings[i], err = NewLineString(seq)
 			if err != nil {
 				return Geometry{}, err
 			}
@@ -264,7 +264,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 		for i, coords := range node.coords {
 			seq := twoDimFloat64sToSequence(coords, ctype)
 			var err error
-			lss[i], err = NewLineStringFromSequence(seq)
+			lss[i], err = NewLineString(seq)
 			if err != nil {
 				return Geometry{}, err
 			}
@@ -278,7 +278,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 			for j, coords := range coords {
 				seq := twoDimFloat64sToSequence(coords, ctype)
 				var err error
-				rings[j], err = NewLineStringFromSequence(seq)
+				rings[j], err = NewLineString(seq)
 				if err != nil {
 					return Geometry{}, err
 				}

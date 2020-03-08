@@ -7,17 +7,16 @@ import (
 	"unsafe"
 )
 
-// MultiPoint is a 0-dimensional geometric collection of points. The points are
-// not connected or ordered.
-//
-// Its assertions are:
-//
-// 1. It must be made up of 0 or more valid Points.
+// MultiPoint is a 0-dimensional geometry that is a collection of points. Its
+// zero value is the empty MultiPoint (i.e. a collection of zero points).
 type MultiPoint struct {
 	seq   Sequence
 	empty BitSet
 }
 
+// NewMultiPoint creates a MultiPoint from a list of Points. The coordinate
+// type of the Points must all match the CoordinatesType argument, otherwise an
+// error is returned.
 func NewMultiPoint(pts []Point, ctype CoordinatesType, opts ...ConstructorOption) (MultiPoint, error) {
 	for _, p := range pts {
 		if p.CoordinatesType() != ctype {
@@ -47,7 +46,7 @@ func NewMultiPoint(pts []Point, ctype CoordinatesType, opts ...ConstructorOption
 }
 
 // NewMultiPointFromSequence creates a new MultiPoint from a sequence of
-// coordinates. If there are any positions set in the bit set, then these are
+// coordinates. If there are any positions set in the BitSet, then these are
 // used to indicate that the corresponding point in the sequence is an empty
 // point.
 func NewMultiPointFromSequence(seq Sequence, empty BitSet, opts ...ConstructorOption) MultiPoint {

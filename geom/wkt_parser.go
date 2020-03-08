@@ -212,7 +212,7 @@ func (p *parser) nextLineStringText(ctype CoordinatesType) LineString {
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	ls, err := NewLineStringFromSequence(seq, p.opts...)
+	ls, err := NewLineString(seq, p.opts...)
 	p.check(err)
 	return ls
 }

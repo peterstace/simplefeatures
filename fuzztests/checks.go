@@ -466,17 +466,12 @@ func CheckArea(t *testing.T, want UnaryResult, g geom.Geometry) {
 func CheckCentroid(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckCentroid", func(t *testing.T) {
 		got := g.Centroid()
-		want := want.Centroid
 
-		if ct := g.CoordinatesType(); g.IsEmpty() && (ct.Is3D() || ct.IsMeasured()) {
-			// PostGIS gives empty Point results with Z and M values (if the
-			// input has Z or M values). This doesn't match the OGC spec, which
-			// states that the results from spatial operations should not have
-			// Z and M values.
-			if want.IsEmpty() && want.IsPoint() {
-				want = geom.NewEmptyPoint(geom.DimXY).AsGeometry()
-			}
-		}
+		// PostGIS gives empty Point results with Z and M values (if the input
+		// has Z or M values). This doesn't match the OGC spec, which states
+		// that the results from spatial operations should not have Z and M
+		// values.
+		want := want.Centroid.Force2D()
 
 		if !got.EqualsExact(want, geom.Tolerance(0.000000001)) {
 			t.Logf("input: %v", g.AsText())

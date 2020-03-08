@@ -9,9 +9,11 @@ import (
 	"unsafe"
 )
 
-// MultiPolygon is a multi surface whose elements are polygons.
+// MultiPolygon is a planar surface geometry that consists of a collection of
+// Polygons. The zero value is the empty MultiPolygon (i.e. the collection of
+// zero Polygons).
 //
-// Its assertions are:
+// For a MultiPolygon to be valid, the following assertions must hold:
 //
 // 1. It must be made up of zero or more valid Polygons (any of which may be empty).
 //

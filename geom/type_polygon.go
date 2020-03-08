@@ -10,19 +10,19 @@ import (
 	"unsafe"
 )
 
-// Polygon is a planar surface. Its zero value is the empty Polygon. When not
+// Polygon is a planar surface geometry. Its zero value is the empty Polygon. When not
 // empty, it is defined by one outer ring and zero or more interior rings. The
 // outer ring defines the exterior boundary of the Polygon, and each inner ring
 // defines a hole in the polygon.
 //
-// Its assertions are:
+// For a Polygon to be valid, the following assertions must hold:
 //
-// 1. The rings (outer and inner) must be valid linear rings (i.e. be simple
-// and closed LineStrings). This implies that the rings cannot be empty.
+// 1. The rings (outer and inner) must be valid linear rings. This means that
+//    they must be non-empty, simple, and closed.
 //
 // 2. Each pair of rings must only intersect at a single point.
 //
-// 3. The interior of the polygon is connected.
+// 3. The interior of the polygon must be connected.
 //
 // 4. The holes must be fully inside the outer ring.
 //
@@ -182,7 +182,7 @@ func (p Polygon) AsGeometry() Geometry {
 // is empty, then it returns the empty LineString.
 func (p Polygon) ExteriorRing() LineString {
 	if p.IsEmpty() {
-		empty, err := NewLineStringFromSequence(NewSequence(nil, p.ctype))
+		empty, err := NewLineString(NewSequence(nil, p.ctype))
 		if err != nil {
 			// No points so can't panic.
 			panic(err)
@@ -311,7 +311,7 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon
 	transformed := make([]LineString, n)
 	for i, r := range p.rings {
 		var err error
-		transformed[i], err = NewLineStringFromSequence(
+		transformed[i], err = NewLineString(
 			transformSequence(r.Coordinates(), fn),
 			opts...,
 		)

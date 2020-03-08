@@ -9,11 +9,8 @@ import (
 	"unsafe"
 )
 
-// Line is a single line segment between two points.
-//
-// Its assertions are:
-//
-// 1. The two points must be distinct.
+// Line is a linear geometry that represents a single line segment between two
+// points that have distinct XY values.
 type Line struct {
 	// Uses 2 Coordinates variables rather than a Sequence to avoid the
 	// indirection involved with a Sequence.
@@ -21,6 +18,8 @@ type Line struct {
 }
 
 // NewLineC creates a line segment given the Coordinates of its two endpoints.
+// An error is returned if the coordinate types of the two points don't match,
+// or if the points do not have distinct XY values.
 func NewLineC(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
 	if a.Type != b.Type {
 		return Line{}, MixedCoordinatesTypesError{a.Type, b.Type}
@@ -31,7 +30,8 @@ func NewLineC(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
 	return Line{a, b}, nil
 }
 
-// NewLineXY creates a line segment given the XYs of its two endpoints.
+// NewLineXY creates a line segment given the XYs of its two endpoints. An
+// error is returned if the XY values are not distinct.
 func NewLineXY(a, b XY, opts ...ConstructorOption) (Line, error) {
 	return NewLineC(
 		Coordinates{XY: a, Type: DimXY},
@@ -199,7 +199,7 @@ func (n Line) Centroid() Point {
 
 // AsLineString is a helper function that converts this Line into a LineString.
 func (n Line) AsLineString() LineString {
-	ls, err := NewLineStringFromSequence(n.Coordinates(), DisableAllValidations)
+	ls, err := NewLineString(n.Coordinates(), DisableAllValidations)
 	if err != nil {
 		// Cannot occur due to construction. A valid Line will always be a
 		// valid LineString.

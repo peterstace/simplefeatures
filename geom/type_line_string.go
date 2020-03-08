@@ -9,17 +9,19 @@ import (
 	"unsafe"
 )
 
-// LineString is a curve defined by linear interpolation between a finite set
-// of points. Its zero value is the empty line string.
+// LineString is a linear geometry defined by linear interpolation between a
+// finite set of points. Its zero value is the empty line string.
 //
-// Each consecutive pair of points defines a line segment. It must contain
-// either zero points (i.e. is the empty LineString) or it must contain at
-// least 2 distinct points.
+// A LineString must consist of either zero points (i.e. it is the empty line
+// string), or it must have at least 2 points with distinct XY values.
 type LineString struct {
 	seq Sequence
 }
 
-func NewLineStringFromSequence(seq Sequence, opts ...ConstructorOption) (LineString, error) {
+// NewLineString creates a new LineString from a Sequence of points. The
+// sequence must contain exactly 0 points, or at least 2 points with distinct
+// XY values (otherwise an error is returned).
+func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) {
 	n := seq.Length()
 	if skipValidations(opts) || n == 0 {
 		return LineString{seq}, nil
@@ -236,7 +238,7 @@ func (s LineString) Coordinates() Sequence {
 // TransformXY transforms this LineString into another LineString according to fn.
 func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (LineString, error) {
 	transformed := transformSequence(s.seq, fn)
-	ls, err := NewLineStringFromSequence(transformed, opts...)
+	ls, err := NewLineString(transformed, opts...)
 	return ls, err
 }
 
@@ -256,7 +258,7 @@ func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool 
 
 // IsValid checks if this LineString is valid
 func (s LineString) IsValid() bool {
-	_, err := NewLineStringFromSequence(s.Coordinates())
+	_, err := NewLineString(s.Coordinates())
 	return err == nil
 }
 

@@ -7,18 +7,17 @@ import (
 	"unsafe"
 )
 
-// MultiLineString is a multicurve whose elements are LineStrings.
-//
-// Its assertions are:
-//
-// 1. It must be made of up zero or more valid LineStrings.
+// MultiLineString is a linear geometry that consists of a collection of
+// LineStrings. It's zero value is the empty MultiLineString (i.e. the
+// collection of zero LineStrings).
 type MultiLineString struct {
 	lines []LineString
 	ctype CoordinatesType
 }
 
 // NewMultiLineString creates a MultiLineString from its constintuent
-// LineStrings.
+// LineStrings. The coordinate types of the LineStrings must match the
+// CoordinatesType argument, otherwise an error is returned.
 func NewMultiLineString(lines []LineString, ctype CoordinatesType, opts ...ConstructorOption) (MultiLineString, error) {
 	for _, ls := range lines {
 		if ls.CoordinatesType() != ctype {
@@ -224,7 +223,7 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 	transformed := make([]LineString, n)
 	for i := 0; i < n; i++ {
 		var err error
-		transformed[i], err = NewLineStringFromSequence(
+		transformed[i], err = NewLineString(
 			transformSequence(m.LineStringN(i).Coordinates(), fn),
 			opts...,
 		)

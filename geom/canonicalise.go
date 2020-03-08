@@ -31,7 +31,7 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 		}
 		var lineStrings []LineString
 		for _, ln := range lines {
-			lnStr, err := NewLineStringFromSequence(ln.Coordinates())
+			lnStr, err := NewLineString(ln.Coordinates())
 			if err != nil {
 				return Geometry{}, err
 			}

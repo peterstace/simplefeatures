@@ -402,11 +402,11 @@ func BenchmarkIntersectsLineStringWithLineString(b *testing.B) {
 			}
 			seq1 := geom.NewSequence(floats1, geom.DimXY)
 			seq2 := geom.NewSequence(floats2, geom.DimXY)
-			ls1, err := geom.NewLineStringFromSequence(seq1)
+			ls1, err := geom.NewLineString(seq1)
 			if err != nil {
 				b.Fatal(err)
 			}
-			ls2, err := geom.NewLineStringFromSequence(seq2)
+			ls2, err := geom.NewLineString(seq2)
 			if err != nil {
 				b.Fatal(err)
 			}

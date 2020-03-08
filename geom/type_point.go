@@ -8,12 +8,12 @@ import (
 	"unsafe"
 )
 
-// Point is a 0-dimensional geometry, and represents a single location in a
+// Point is a zero dimensional geometry that represents a single location in a
 // coordinate space.
 //
 // The Point may be empty.
 //
-// There aren't any assertions about what constitutes a valid point.
+// The zero value of Point is a 2D empty Point.
 type Point struct {
 	coords Coordinates
 	full   bool

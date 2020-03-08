@@ -8,20 +8,17 @@ import (
 	"unsafe"
 )
 
-// GeometryCollection is a collection of geometries.
-//
-// Its assertions are:
-//
-// 1. It must contain only valid geometries.
-//
-// 2. It must contain zero or more geometries.
+// GeometryCollection is a non-homogeneous collection of geometries. Its zero
+// value is the empty GeometryCollection (i.e. a collection of zero
+// geometries).
 type GeometryCollection struct {
 	geoms []Geometry
 	ctype CoordinatesType
 }
 
-// NewGeometryCollection creates a potentially heterogenous collection of
-// geometries. There are no constraints on the collection.
+// NewGeometryCollection creates a collection of geometries. Each geometry must
+// have the same coordinates type as the supplied coordinates type argument
+// (otherwise an error is returned).
 func NewGeometryCollection(geoms []Geometry, ctype CoordinatesType, opts ...ConstructorOption) (GeometryCollection, error) {
 	for _, g := range geoms {
 		if g.CoordinatesType() != ctype {
