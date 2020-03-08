@@ -1,6 +1,5 @@
 package geom
 
-// TODO rename to intSequence
 func intSequence(n int) []int {
 	s := make([]int, n)
 	for i := range s {

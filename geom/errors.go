@@ -2,33 +2,23 @@ package geom
 
 import "fmt"
 
-type MixedCoordinatesTypesError struct {
-	First  CoordinatesType
-	Second CoordinatesType
+type mixedCoordinatesTypeError struct {
+	first  CoordinatesType
+	second CoordinatesType
 }
 
-func (e MixedCoordinatesTypesError) Error() string {
+func (e mixedCoordinatesTypeError) Error() string {
 	return fmt.Sprintf("mixed coordinate types not "+
-		"allowed: %s and %s", e.First, e.Second)
+		"allowed: %s and %s", e.first, e.second)
 }
 
-type GeoJSONInvalidCoordinatesLengthError struct {
+type geojsonInvalidCoordinatesLengthError struct {
 	length int
 }
 
-func (e GeoJSONInvalidCoordinatesLengthError) Error() string {
+func (e geojsonInvalidCoordinatesLengthError) Error() string {
 	return fmt.Sprintf(
 		"invalid coordinates length in geojson: %d",
 		e.length,
 	)
-}
-
-var GeoJSONNaNOrInfErr = fmt.Errorf("coordinate is NaN or inf")
-
-type ValidationError struct {
-	reason string
-}
-
-func (e ValidationError) Error() string {
-	return e.reason
 }

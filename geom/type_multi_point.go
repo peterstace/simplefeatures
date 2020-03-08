@@ -8,7 +8,8 @@ import (
 )
 
 // MultiPoint is a 0-dimensional geometry that is a collection of points. Its
-// zero value is the empty MultiPoint (i.e. a collection of zero points).
+// zero value is the empty MultiPoint (i.e. a collection of zero points). It is
+// immutable after creation.
 type MultiPoint struct {
 	seq   Sequence
 	empty BitSet
@@ -20,25 +21,23 @@ type MultiPoint struct {
 func NewMultiPoint(pts []Point, ctype CoordinatesType, opts ...ConstructorOption) (MultiPoint, error) {
 	for _, p := range pts {
 		if p.CoordinatesType() != ctype {
-			return MultiPoint{}, MixedCoordinatesTypesError{p.CoordinatesType(), ctype}
+			return MultiPoint{}, mixedCoordinatesTypeError{p.CoordinatesType(), ctype}
 		}
 	}
 
 	var empty BitSet
-	var floats []float64
+	floats := make([]float64, 0, len(pts)*ctype.Dimension())
 	for i, pt := range pts {
 		c, ok := pt.Coordinates()
 		if !ok {
-			empty.Set(i)
+			empty.Set(i, true)
 		}
 		floats = append(floats, c.X, c.Y)
-		switch ctype {
-		case DimXYZ:
+		if ctype.Is3D() {
 			floats = append(floats, c.Z)
-		case DimXYM:
+		}
+		if ctype.IsMeasured() {
 			floats = append(floats, c.M)
-		case DimXYZM:
-			floats = append(floats, c.Z, c.M)
 		}
 	}
 	seq := NewSequence(floats, ctype)
@@ -54,19 +53,6 @@ func NewMultiPointFromSequence(seq Sequence, empty BitSet, opts ...ConstructorOp
 		seq,
 		empty.Clone(), // clone so that the caller doesn't have access to the interal empty set
 	}
-}
-
-// NewMultiPointXY creates a new MultiPoint consisting of a point for each XY.
-func NewMultiPointXY(xys []XY, opts ...ConstructorOption) MultiPoint {
-	floats := make([]float64, 2*len(xys))
-	for i, xy := range xys {
-		floats[2*i] = xy.X
-		floats[2*i+1] = xy.Y
-	}
-	return NewMultiPointFromSequence(
-		NewSequence(floats, DimXY),
-		BitSet{},
-	)
 }
 
 // Type return type string for MultiPoint
@@ -90,7 +76,7 @@ func (m MultiPoint) PointN(n int) Point {
 		return NewEmptyPoint(m.CoordinatesType())
 	} else {
 		c := m.seq.Get(n)
-		return NewPointC(c)
+		return NewPoint(c)
 	}
 }
 
@@ -143,10 +129,10 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 	var has bool
 	var env Envelope
 	for i := 0; i < m.NumPoints(); i++ {
-		if m.empty.Get(i) {
+		xy, ok := m.PointN(i).XY()
+		if !ok {
 			continue
 		}
-		xy := m.seq.GetXY(i)
 		if has {
 			env = env.ExtendToIncludePoint(xy)
 		} else {
@@ -250,7 +236,7 @@ func (m MultiPoint) CoordinatesType() CoordinatesType {
 }
 
 // ForceCoordinatesType returns a new MultiPoint with a different CoordinatesType. If a
-// dimension is added, then its values are populated with 0.
+// dimension is added, then new values are populated with 0.
 func (m MultiPoint) ForceCoordinatesType(newCType CoordinatesType) MultiPoint {
 	return MultiPoint{m.seq.ForceCoordinatesType(newCType), m.empty}
 }

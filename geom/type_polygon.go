@@ -10,10 +10,10 @@ import (
 	"unsafe"
 )
 
-// Polygon is a planar surface geometry. Its zero value is the empty Polygon. When not
-// empty, it is defined by one outer ring and zero or more interior rings. The
-// outer ring defines the exterior boundary of the Polygon, and each inner ring
-// defines a hole in the polygon.
+// Polygon is a planar surface geometry. Its zero value is the empty Polygon.
+// It is immutable after creation. When not empty, it is defined by one outer
+// ring and zero or more interior rings. The outer ring defines the exterior
+// boundary of the Polygon, and each inner ring defines a hole in the polygon.
 //
 // For a Polygon to be valid, the following assertions must hold:
 //
@@ -38,7 +38,7 @@ type Polygon struct {
 func NewPolygon(rings []LineString, ctype CoordinatesType, opts ...ConstructorOption) (Polygon, error) {
 	for _, r := range rings {
 		if ct := r.CoordinatesType(); ct != ctype {
-			return Polygon{}, MixedCoordinatesTypesError{ct, ctype}
+			return Polygon{}, mixedCoordinatesTypeError{ct, ctype}
 		}
 	}
 
@@ -319,8 +319,7 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon
 			return Polygon{}, err
 		}
 	}
-	poly, err := NewPolygon(transformed, p.ctype, opts...)
-	return poly, err
+	return NewPolygon(transformed, p.ctype, opts...)
 }
 
 // EqualsExact checks if this Polygon is exactly equal to another Polygon.
@@ -467,13 +466,13 @@ func (p Polygon) CoordinatesType() CoordinatesType {
 }
 
 // ForceCoordinatesType returns a new Polygon with a different CoordinatesType. If a dimension
-// is added, then its values are populated with 0.
+// is added, then new values are populated with 0.
 func (p Polygon) ForceCoordinatesType(newCType CoordinatesType) Polygon {
 	flatRings := make([]LineString, len(p.rings))
 	for i := range p.rings {
 		flatRings[i] = p.rings[i].ForceCoordinatesType(newCType)
 	}
-	return Polygon{flatRings, DimXY}
+	return Polygon{flatRings, newCType}
 }
 
 // Force2D returns a copy of the Polygon with Z and M values removed.

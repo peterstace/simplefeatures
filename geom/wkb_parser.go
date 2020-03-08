@@ -87,7 +87,7 @@ func (p *wkbParser) parseGeomRoot(gtype uint32, ctype CoordinatesType) Geometry 
 		if !ok {
 			return NewEmptyPoint(ctype).AsGeometry()
 		} else {
-			return NewPointC(c, p.opts...).AsGeometry()
+			return NewPoint(c, p.opts...).AsGeometry()
 		}
 	case wkbGeomTypeLineString:
 		ls := p.parseLineString(ctype)

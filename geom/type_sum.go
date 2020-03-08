@@ -10,7 +10,7 @@ import (
 )
 
 // Geometry is a single geometry of any type. It's zero value is valid and is
-// an empty GeometryCollection.
+// an empty GeometryCollection. It is immutable after creation.
 type Geometry struct {
 	tag geometryTag
 	ptr unsafe.Pointer
@@ -703,7 +703,7 @@ func (g Geometry) CoordinatesType() CoordinatesType {
 }
 
 // ForceCoordinatesType returns a new Geometry with a different CoordinatesType. If a
-// dimension is added, then its values are populated with 0.
+// dimension is added, then new values are populated with 0.
 func (g Geometry) ForceCoordinatesType(newCType CoordinatesType) Geometry {
 	switch g.tag {
 	case geometryCollectionTag:

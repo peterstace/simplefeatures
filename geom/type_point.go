@@ -9,7 +9,7 @@ import (
 )
 
 // Point is a zero dimensional geometry that represents a single location in a
-// coordinate space.
+// coordinate space. It is immutable after creation.
 //
 // The Point may be empty.
 //
@@ -17,6 +17,11 @@ import (
 type Point struct {
 	coords Coordinates
 	full   bool
+}
+
+// NewPoint creates a new point gives its Coordinates.
+func NewPoint(c Coordinates, _ ...ConstructorOption) Point {
+	return Point{c, true}
 }
 
 // NewEmptyPoint creates a Point that is empty.
@@ -27,16 +32,6 @@ func NewEmptyPoint(ctype CoordinatesType) Point {
 // NewPointXY creates a new point from an XY.
 func NewPointXY(xy XY, _ ...ConstructorOption) Point {
 	return Point{Coordinates{XY: xy, Type: DimXY}, true}
-}
-
-// NewPointF creates a new point from float64 x and y values.
-func NewPointF(x, y float64, _ ...ConstructorOption) Point {
-	return NewPointXY(XY{x, y})
-}
-
-// NewPointC creates a new point gives its Coordinates.
-func NewPointC(c Coordinates, _ ...ConstructorOption) Point {
-	return Point{c, true}
 }
 
 // Type return type string for Point
@@ -145,7 +140,7 @@ func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, er
 	}
 	newC := p.coords
 	newC.XY = fn(newC.XY)
-	return NewPointC(newC, opts...), nil
+	return NewPoint(newC, opts...), nil
 }
 
 // EqualsExact checks if this Point is exactly equal to another Point.
@@ -208,7 +203,7 @@ func (p Point) CoordinatesType() CoordinatesType {
 }
 
 // ForceCoordinatesType returns a new Point with a different CoordinatesType. If a dimension
-// is added, then its value is populated with 0.
+// is added, then new values are populated with 0.
 func (p Point) ForceCoordinatesType(newCType CoordinatesType) Point {
 	if !p.full {
 		return NewEmptyPoint(newCType)

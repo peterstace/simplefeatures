@@ -161,7 +161,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 		n := len(node.coords)
 		hasLength[n] = true
 		if n == 1 {
-			return GeoJSONInvalidCoordinatesLengthError{n}
+			return geojsonInvalidCoordinatesLengthError{n}
 		}
 		return nil
 	case geojsonLineString:
@@ -169,7 +169,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 			n := len(c)
 			hasLength[n] = true
 			if n < 2 {
-				return GeoJSONInvalidCoordinatesLengthError{n}
+				return geojsonInvalidCoordinatesLengthError{n}
 			}
 		}
 		return nil
@@ -179,7 +179,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 				n := len(inner)
 				hasLength[n] = true
 				if n < 2 {
-					return GeoJSONInvalidCoordinatesLengthError{n}
+					return geojsonInvalidCoordinatesLengthError{n}
 				}
 			}
 		}
@@ -190,7 +190,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 			n := len(c)
 			hasLength[n] = true
 			if n < 2 {
-				return GeoJSONInvalidCoordinatesLengthError{n}
+				return geojsonInvalidCoordinatesLengthError{n}
 			}
 		}
 		return nil
@@ -200,7 +200,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 				n := len(inner)
 				hasLength[n] = true
 				if n < 2 {
-					return GeoJSONInvalidCoordinatesLengthError{n}
+					return geojsonInvalidCoordinatesLengthError{n}
 				}
 			}
 		}
@@ -212,7 +212,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 					n := len(inner)
 					hasLength[n] = true
 					if n < 2 {
-						return GeoJSONInvalidCoordinatesLengthError{n}
+						return geojsonInvalidCoordinatesLengthError{n}
 					}
 				}
 			}
@@ -235,7 +235,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 	case geojsonPoint:
 		coords, ok := oneDimFloat64sToCoordinates(node.coords, ctype)
 		if ok {
-			return NewPointC(coords).AsGeometry(), nil
+			return NewPoint(coords).AsGeometry(), nil
 		} else {
 			return NewEmptyPoint(ctype).AsGeometry(), nil
 		}
@@ -330,20 +330,4 @@ func twoDimFloat64sToSequence(input [][]float64, ctype CoordinatesType) Sequence
 		}
 	}
 	return NewSequence(floats, ctype)
-}
-
-func twoDimFloat64sToOptionalSequence(outer [][]float64, ctype CoordinatesType) (Sequence, BitSet) {
-	var empty BitSet
-	stride := ctype.Dimension()
-	floats := make([]float64, stride*len(outer))
-	for i, c := range outer {
-		if len(c) == 0 {
-			empty.Set(i)
-			continue
-		}
-		for j := 0; j < stride; j++ {
-			floats[stride*i+j] = c[j]
-		}
-	}
-	return NewSequence(floats, ctype), empty
 }

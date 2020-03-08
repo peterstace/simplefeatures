@@ -1,9 +1,6 @@
 package geom
 
-func appendGeoJSONCoordinate(
-	dst []byte,
-	coords Coordinates,
-) []byte {
+func appendGeoJSONCoordinate(dst []byte, coords Coordinates) []byte {
 	dst = append(dst, '[')
 	dst = appendFloat(dst, coords.X)
 	dst = append(dst, ',')
@@ -22,6 +19,7 @@ func appendGeoJSONSequence(dst []byte, seq Sequence, empty BitSet) []byte {
 	var seenFirst bool
 	for i := 0; i < n; i++ {
 		if empty.Get(i) {
+			// GeoJSON doesn't support empty Points within MultiPoints.
 			continue
 		}
 		if seenFirst {

@@ -10,7 +10,7 @@ import (
 )
 
 // Line is a linear geometry that represents a single line segment between two
-// points that have distinct XY values.
+// points that have distinct XY values. It is immutable after creation.
 type Line struct {
 	// Uses 2 Coordinates variables rather than a Sequence to avoid the
 	// indirection involved with a Sequence.
@@ -22,10 +22,10 @@ type Line struct {
 // or if the points do not have distinct XY values.
 func NewLineC(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
 	if a.Type != b.Type {
-		return Line{}, MixedCoordinatesTypesError{a.Type, b.Type}
+		return Line{}, mixedCoordinatesTypeError{a.Type, b.Type}
 	}
 	if !skipValidations(opts) && a.XY == b.XY {
-		return Line{}, ValidationError{"Line endpoints must be distinct"}
+		return Line{}, fmt.Errorf("line endpoints must have distinct XY values: %v", a.XY)
 	}
 	return Line{a, b}, nil
 }
@@ -110,7 +110,13 @@ func (n Line) Envelope() Envelope {
 }
 
 func (n Line) Boundary() MultiPoint {
-	return NewMultiPointXY([]XY{n.a.XY, n.b.XY})
+	return NewMultiPointFromSequence(
+		NewSequence([]float64{
+			n.a.XY.X, n.a.XY.Y,
+			n.b.XY.X, n.b.XY.Y,
+		}, DimXY),
+		BitSet{},
+	)
 }
 
 func (n Line) Value() (driver.Value, error) {
@@ -161,10 +167,11 @@ func (n Line) Coordinates() Sequence {
 
 // TransformXY transforms this Line into another Line according to fn.
 func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Line, error) {
-	n.a.XY = fn(n.a.XY)
-	n.b.XY = fn(n.b.XY)
-	ln, err := NewLineC(n.a, n.b, opts...)
-	return ln, err
+	return NewLineXY(
+		fn(n.a.XY),
+		fn(n.b.XY),
+		opts...,
+	)
 }
 
 // EqualsExact checks if this Line is exactly equal to another curve.
@@ -194,7 +201,7 @@ func (n Line) Length() float64 {
 }
 
 func (n Line) Centroid() Point {
-	return NewPointF((n.a.XY.X+n.b.XY.X)/2, (n.a.XY.Y+n.b.XY.Y)/2)
+	return NewPointXY(n.a.XY.Add(n.b.XY).Scale(0.5))
 }
 
 // AsLineString is a helper function that converts this Line into a LineString.
@@ -222,7 +229,7 @@ func (n Line) CoordinatesType() CoordinatesType {
 }
 
 // ForceCoordinatesType returns a new Line with a different CoordinatesType. If a dimension is
-// added, then its values are populated with 0.
+// added, then new values are populated with 0.
 func (n Line) ForceCoordinatesType(newCType CoordinatesType) Line {
 	if n.a.Type.Is3D() != newCType.Is3D() {
 		n.a.Z = 0

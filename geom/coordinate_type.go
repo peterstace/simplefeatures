@@ -8,7 +8,7 @@ package geom
 type CoordinatesType byte
 
 const (
-	// DimXY coordinates only contain contain X and Y values.
+	// DimXY coordinates only contain X and Y values.
 	DimXY CoordinatesType = 0b00
 
 	// DimXYZ coordiantes contain X, Y, and Z (height) values.

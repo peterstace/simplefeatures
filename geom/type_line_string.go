@@ -3,6 +3,7 @@ package geom
 import (
 	"bytes"
 	"database/sql/driver"
+	"errors"
 	"io"
 	"math"
 	"sort"
@@ -10,7 +11,8 @@ import (
 )
 
 // LineString is a linear geometry defined by linear interpolation between a
-// finite set of points. Its zero value is the empty line string.
+// finite set of points. Its zero value is the empty line string. It is
+// immutable after creation.
 //
 // A LineString must consist of either zero points (i.e. it is the empty line
 // string), or it must have at least 2 points with distinct XY values.
@@ -34,8 +36,8 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 			return LineString{seq}, nil
 		}
 	}
-	return LineString{}, ValidationError{
-		"non-empty LineStrings must contain at least 2 distinct points"}
+	return LineString{}, errors.New("non-empty LineStrings " +
+		"must contain at least 2 points with distinct XY values")
 }
 
 // Type return type string for LineString
@@ -54,7 +56,7 @@ func (s LineString) StartPoint() Point {
 	if s.IsEmpty() {
 		return NewEmptyPoint(s.CoordinatesType())
 	}
-	return NewPointC(s.seq.Get(0))
+	return NewPoint(s.seq.Get(0))
 }
 
 // EndPoint gives the last point of the LineString. If the LineString is empty
@@ -63,7 +65,7 @@ func (s LineString) EndPoint() Point {
 	if s.IsEmpty() {
 		return NewEmptyPoint(s.CoordinatesType())
 	}
-	return NewPointC(s.seq.Get(s.seq.Length() - 1))
+	return NewPoint(s.seq.Get(s.seq.Length() - 1))
 }
 
 func (s LineString) AsText() string {
@@ -238,8 +240,7 @@ func (s LineString) Coordinates() Sequence {
 // TransformXY transforms this LineString into another LineString according to fn.
 func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (LineString, error) {
 	transformed := transformSequence(s.seq, fn)
-	ls, err := NewLineString(transformed, opts...)
-	return ls, err
+	return NewLineString(transformed, opts...)
 }
 
 // EqualsExact checks if this LineString is exactly equal to another curve.
@@ -331,7 +332,7 @@ func (s LineString) CoordinatesType() CoordinatesType {
 }
 
 // ForceCoordinatesType returns a new LineString with a different CoordinatesType. If a
-// dimension is added, then its values are populated with 0.
+// dimension is added, then new values are populated with 0.
 func (s LineString) ForceCoordinatesType(newCType CoordinatesType) LineString {
 	return LineString{s.seq.ForceCoordinatesType(newCType)}
 }

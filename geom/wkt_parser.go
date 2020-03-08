@@ -79,7 +79,7 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		if !ok {
 			return NewEmptyPoint(ctype).AsGeometry()
 		} else {
-			return NewPointC(c, p.opts...).AsGeometry()
+			return NewPoint(c, p.opts...).AsGeometry()
 		}
 	case "LINESTRING":
 		ls := p.nextLineStringText(ctype)
@@ -260,7 +260,7 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) MultiPoint {
 				for j := 0; j < ctype.Dimension(); j++ {
 					floats = append(floats, 0)
 				}
-				empty.Set(i)
+				empty.Set(i, true)
 			} else {
 				floats = p.nextMultiPointStylePointAppend(floats, ctype)
 			}

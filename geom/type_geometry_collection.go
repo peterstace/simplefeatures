@@ -22,7 +22,7 @@ type GeometryCollection struct {
 func NewGeometryCollection(geoms []Geometry, ctype CoordinatesType, opts ...ConstructorOption) (GeometryCollection, error) {
 	for _, g := range geoms {
 		if g.CoordinatesType() != ctype {
-			return GeometryCollection{}, MixedCoordinatesTypesError{g.CoordinatesType(), ctype}
+			return GeometryCollection{}, mixedCoordinatesTypeError{g.CoordinatesType(), ctype}
 		}
 	}
 	return GeometryCollection{geoms, ctype}, nil
@@ -127,11 +127,7 @@ func (c GeometryCollection) Boundary() GeometryCollection {
 			bounds = append(bounds, bound)
 		}
 	}
-	bound, err := NewGeometryCollection(bounds, DimXY)
-	if err != nil {
-		panic(err) // Cannot occur because of where we got the bounds from.
-	}
-	return bound
+	return GeometryCollection{bounds, DimXY}
 }
 
 func (c GeometryCollection) Value() (driver.Value, error) {
@@ -381,7 +377,7 @@ func (c GeometryCollection) CoordinatesType() CoordinatesType {
 }
 
 // ForceCoordinatesType returns a new GeometryCollection with a different CoordinatesType. If
-// a dimension is added, then its values are populated with 0.
+// a dimension is added, then new values are populated with 0.
 func (c GeometryCollection) ForceCoordinatesType(newCType CoordinatesType) GeometryCollection {
 	gs := make([]Geometry, len(c.geoms))
 	for i := range c.geoms {

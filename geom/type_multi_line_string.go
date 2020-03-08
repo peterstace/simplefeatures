@@ -9,19 +9,19 @@ import (
 
 // MultiLineString is a linear geometry that consists of a collection of
 // LineStrings. It's zero value is the empty MultiLineString (i.e. the
-// collection of zero LineStrings).
+// collection of zero LineStrings). It is immutable after creation.
 type MultiLineString struct {
 	lines []LineString
 	ctype CoordinatesType
 }
 
-// NewMultiLineString creates a MultiLineString from its constintuent
+// NewMultiLineString creates a MultiLineString from its constituent
 // LineStrings. The coordinate types of the LineStrings must match the
 // CoordinatesType argument, otherwise an error is returned.
 func NewMultiLineString(lines []LineString, ctype CoordinatesType, opts ...ConstructorOption) (MultiLineString, error) {
 	for _, ls := range lines {
 		if ls.CoordinatesType() != ctype {
-			return MultiLineString{}, MixedCoordinatesTypesError{ls.CoordinatesType(), ctype}
+			return MultiLineString{}, mixedCoordinatesTypeError{ls.CoordinatesType(), ctype}
 		}
 	}
 	return MultiLineString{lines, ctype}, nil
@@ -166,13 +166,14 @@ func (m MultiLineString) Boundary() MultiPoint {
 		}
 	}
 
-	var bound []XY
+	var floats []float64
 	for _, xy := range uniqueEndpoints {
 		if counts[xy]%2 == 1 {
-			bound = append(bound, xy)
+			floats = append(floats, xy.X, xy.Y)
 		}
 	}
-	return NewMultiPointXY(bound)
+	seq := NewSequence(floats, DimXY)
+	return NewMultiPointFromSequence(seq, BitSet{})
 }
 
 func (m MultiLineString) Value() (driver.Value, error) {
@@ -231,8 +232,7 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 			return MultiLineString{}, err
 		}
 	}
-	mls, err := NewMultiLineString(transformed, m.ctype, opts...)
-	return mls, err
+	return NewMultiLineString(transformed, m.ctype, opts...)
 }
 
 // EqualsExact checks if this MultiLineString is exactly equal to another MultiLineString.
@@ -295,13 +295,13 @@ func (m MultiLineString) CoordinatesType() CoordinatesType {
 }
 
 // ForceCoordinatesType returns a new MultiLineString with a different CoordinatesType. If a
-// dimension is added, then its values are populated with 0.
+// dimension is added, then new values are populated with 0.
 func (m MultiLineString) ForceCoordinatesType(newCType CoordinatesType) MultiLineString {
 	flat := make([]LineString, len(m.lines))
 	for i := range m.lines {
 		flat[i] = m.lines[i].ForceCoordinatesType(newCType)
 	}
-	return MultiLineString{flat, DimXY}
+	return MultiLineString{flat, newCType}
 }
 
 // Force2D returns a copy of the MultiLineString with Z and M values removed.

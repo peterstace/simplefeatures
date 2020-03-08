@@ -11,7 +11,7 @@ import (
 
 // MultiPolygon is a planar surface geometry that consists of a collection of
 // Polygons. The zero value is the empty MultiPolygon (i.e. the collection of
-// zero Polygons).
+// zero Polygons). It is immutable after creation.
 //
 // For a MultiPolygon to be valid, the following assertions must hold:
 //
@@ -30,7 +30,7 @@ type MultiPolygon struct {
 func NewMultiPolygon(polys []Polygon, ctype CoordinatesType, opts ...ConstructorOption) (MultiPolygon, error) {
 	for _, p := range polys {
 		if ct := p.CoordinatesType(); ct != ctype {
-			return MultiPolygon{}, MixedCoordinatesTypesError{ct, ctype}
+			return MultiPolygon{}, mixedCoordinatesTypeError{ct, ctype}
 		}
 	}
 
@@ -338,8 +338,7 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mu
 		}
 		polys[i] = transformed
 	}
-	mp, err := NewMultiPolygon(polys, m.ctype, opts...)
-	return mp, err
+	return NewMultiPolygon(polys, m.ctype, opts...)
 }
 
 // EqualsExact checks if this MultiPolygon is exactly equal to another MultiPolygon.
@@ -414,13 +413,13 @@ func (m MultiPolygon) CoordinatesType() CoordinatesType {
 }
 
 // ForceCoordinatesType returns a new MultiPolygon with a different CoordinatesType. If a
-// dimension is added, then its values are populated with 0.
+// dimension is added, then new values are populated with 0.
 func (m MultiPolygon) ForceCoordinatesType(newCType CoordinatesType) MultiPolygon {
 	flat := make([]Polygon, len(m.polys))
 	for i := range m.polys {
 		flat[i] = m.polys[i].ForceCoordinatesType(newCType)
 	}
-	return MultiPolygon{flat, DimXY}
+	return MultiPolygon{flat, newCType}
 }
 
 // Force2D returns a copy of the MultiPolygon with Z and M values removed.
