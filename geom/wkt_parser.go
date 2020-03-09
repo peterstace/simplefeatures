@@ -299,7 +299,7 @@ func (p *parser) nextMultiPolygonText(ctype CoordinatesType) MultiPolygon {
 			poly := p.nextPolygonText(ctype)
 			polys = append(polys, poly)
 			tok := p.nextCommaOrRightParen()
-			if tok == ")" {
+			if tok != "," {
 				break
 			}
 		}
@@ -317,7 +317,7 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) Geometry {
 			g := p.nextGeometryTaggedText()
 			geoms = append(geoms, g)
 			tok := p.nextCommaOrRightParen()
-			if tok == ")" {
+			if tok != "," {
 				break
 			}
 		}

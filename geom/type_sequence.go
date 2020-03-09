@@ -100,10 +100,13 @@ func (s Sequence) ForceCoordinatesType(newCType CoordinatesType) Sequence {
 	if s.ctype == newCType {
 		return s
 	}
+	if len(s.floats) == 0 {
+		return Sequence{newCType, nil}
+	}
 
-	stride := newCType.Dimension()
-	flat := make([]float64, stride*s.Length())
 	n := s.Length()
+	stride := newCType.Dimension()
+	flat := make([]float64, stride*n)
 	for i := 0; i < n; i++ {
 		c := s.Get(i)
 		flat[stride*i+0] = c.X

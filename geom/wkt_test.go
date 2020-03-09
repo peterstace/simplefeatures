@@ -38,13 +38,17 @@ func TestUnmarshalWKTInvalidGrammar(t *testing.T) {
 		{"left unbalanced point", "point ( 1 2"},
 		{"right unbalanced point", "point 1 2 )"},
 		{"point no parens", "point 1 1"},
-		{"point no coords", "point ( )"},
 
 		{"mixed empty", "LINESTRING(0 0, EMPTY, 2 2)"},
 		{"foo internal point", "LINESTRING(0 0, foo, 2 2)"},
-		{"line string no coords", "LINESTRING()"},
 
+		{"point no coords", "POINT()"},
+		{"line string no coords", "LINESTRING()"},
 		{"polygon no coords", "POLYGON()"},
+		{"multi point no coords", "MULTIPOINT()"},
+		{"multi linestring no coords", "MULTILINESTRING()"},
+		{"multi polygon no coords", "MULTIPOLYGON()"},
+		{"geometry collection no coords", "GEOMETRYCOLLECTION()"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := UnmarshalWKT(strings.NewReader(tt.wkt))

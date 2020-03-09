@@ -181,20 +181,12 @@ func (p Point) Reverse() Point {
 // AsMultiPoint is a convenience function that converts this Point into a
 // MultiPoint.
 func (p Point) AsMultiPoint() MultiPoint {
-	var empty BitSet
-	floats := make([]float64, 2, 4)
-	if p.full {
-		floats[0] = p.coords.X
-		floats[1] = p.coords.Y
+	mp, err := NewMultiPoint([]Point{p}, p.CoordinatesType())
+	if err != nil {
+		// Cannot occur due to construction.
+		panic(err)
 	}
-	if p.full && p.CoordinatesType().Is3D() {
-		floats = append(floats, p.coords.Z)
-	}
-	if p.full && p.CoordinatesType().IsMeasured() {
-		floats = append(floats, p.coords.M)
-	}
-	seq := NewSequence(floats, p.CoordinatesType())
-	return NewMultiPointFromSequence(seq, empty)
+	return mp
 }
 
 // CoordinatesType returns the CoordinatesType used to represent the Point.

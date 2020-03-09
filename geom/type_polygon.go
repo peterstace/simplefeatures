@@ -32,9 +32,8 @@ type Polygon struct {
 }
 
 // NewPolygon creates a polygon given its rings. The outer ring is first, and
-// any inner rings follow. No rings may cross each other, and can only
-// intersect each with each other at a point. If no rings are provided, then
-// the returned Polygon is the empty Polygon.
+// any inner rings follow. If no rings are provided, then the returned Polygon
+// is the empty Polygon.
 func NewPolygon(rings []LineString, ctype CoordinatesType, opts ...ConstructorOption) (Polygon, error) {
 	for _, r := range rings {
 		if ct := r.CoordinatesType(); ct != ctype {
@@ -45,10 +44,7 @@ func NewPolygon(rings []LineString, ctype CoordinatesType, opts ...ConstructorOp
 	if err := validatePolygon(rings, opts...); err != nil {
 		return Polygon{}, err
 	}
-
-	tmp := make([]LineString, len(rings))
-	copy(tmp, rings)
-	return Polygon{rings, ctype}, nil
+	return Polygon{append([]LineString(nil), rings...), ctype}, nil
 }
 
 func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
@@ -182,12 +178,7 @@ func (p Polygon) AsGeometry() Geometry {
 // is empty, then it returns the empty LineString.
 func (p Polygon) ExteriorRing() LineString {
 	if p.IsEmpty() {
-		empty, err := NewLineString(NewSequence(nil, p.ctype))
-		if err != nil {
-			// No points so can't panic.
-			panic(err)
-		}
-		return empty
+		return LineString{}.ForceCoordinatesType(p.ctype)
 	}
 	return p.rings[0]
 }
@@ -257,7 +248,7 @@ func (p Polygon) Envelope() (Envelope, bool) {
 func (p Polygon) Boundary() MultiLineString {
 	mls, err := NewMultiLineString(p.rings, p.ctype)
 	if err != nil {
-		// Can't get a mixed coordinate type error due to the source of the bound.
+		// Can't get a mixed coordinate type error due to construction.
 		panic(err)
 	}
 	return mls.Force2D()
