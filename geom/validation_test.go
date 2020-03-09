@@ -21,7 +21,7 @@ func TestLineValidation(t *testing.T) {
 		{xy(-1, -1), xy(-1, -1)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := NewLineC(pts[0], pts[1])
+			_, err := NewLine(pts[0], pts[1])
 			if err == nil {
 				t.Error("expected error")
 			}
@@ -212,7 +212,7 @@ func BenchmarkPolygonSingleRingValidation(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				if _, err := NewPolygon(rings, DimXY); err != nil {
+				if _, err := NewPolygonFromRings(rings, DimXY); err != nil {
 					b.Fatal(err)
 				}
 			}
@@ -251,7 +251,7 @@ func BenchmarkPolygonMultipleRingsValidation(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				if _, err := NewPolygon(rings, DimXY); err != nil {
+				if _, err := NewPolygonFromRings(rings, DimXY); err != nil {
 					b.Fatal(err)
 				}
 			}
@@ -279,7 +279,7 @@ func BenchmarkMultipolygonValidation(b *testing.B) {
 				if err != nil {
 					b.Fatal(err)
 				}
-				polys[i], err = NewPolygon([]LineString{ring}, DimXY)
+				polys[i], err = NewPolygonFromRings([]LineString{ring}, DimXY)
 				if err != nil {
 					b.Fatal(err)
 				}
@@ -287,7 +287,7 @@ func BenchmarkMultipolygonValidation(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				if _, err := NewMultiPolygon(polys, DimXY); err != nil {
+				if _, err := NewMultiPolygonFromPolygons(polys, DimXY); err != nil {
 					b.Fatal(err)
 				}
 			}

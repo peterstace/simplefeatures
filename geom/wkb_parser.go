@@ -93,7 +93,7 @@ func (p *wkbParser) parseGeomRoot(gtype uint32, ctype CoordinatesType) Geometry 
 		ls := p.parseLineString(ctype)
 		seq := ls.Coordinates()
 		if seq.Length() == 2 {
-			ln, err := NewLineC(seq.Get(0), seq.Get(1), p.opts...)
+			ln, err := NewLine(seq.Get(0), seq.Get(1), p.opts...)
 			p.setErr(err)
 			return ln.AsGeometry()
 		}
@@ -185,7 +185,7 @@ func (p *wkbParser) parsePolygon(ctype CoordinatesType) Polygon {
 	for i := range rings {
 		rings[i] = p.parseLineString(ctype)
 	}
-	poly, err := NewPolygon(rings, ctype, p.opts...)
+	poly, err := NewPolygonFromRings(rings, ctype, p.opts...)
 	p.setErr(err)
 	return poly
 }
@@ -201,7 +201,7 @@ func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) MultiPoint {
 		}
 		pts = append(pts, geom.AsPoint())
 	}
-	mp, err := NewMultiPoint(pts, ctype, p.opts...)
+	mp, err := NewMultiPointFromPoints(pts, ctype, p.opts...)
 	p.setErr(err)
 	return mp
 }
@@ -223,7 +223,7 @@ func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) MultiLineString 
 			p.setErr(errors.New("non-LineString found in MultiLineString"))
 		}
 	}
-	mls, err := NewMultiLineString(lss, ctype, p.opts...)
+	mls, err := NewMultiLineStringFromLineStrings(lss, ctype, p.opts...)
 	p.setErr(err)
 	return mls
 }
@@ -239,7 +239,7 @@ func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) MultiPolygon {
 		}
 		polys = append(polys, geom.AsPolygon())
 	}
-	mpoly, err := NewMultiPolygon(polys, ctype, p.opts...)
+	mpoly, err := NewMultiPolygonFromPolygons(polys, ctype, p.opts...)
 	p.setErr(err)
 	return mpoly
 }

@@ -25,9 +25,10 @@ type MultiPolygon struct {
 	ctype CoordinatesType
 }
 
-// NewMultiPolygon creates a MultiPolygon from its constituent Polygons. It
-// gives an error if any of the MultiPolygon assertions are not maintained.
-func NewMultiPolygon(polys []Polygon, ctype CoordinatesType, opts ...ConstructorOption) (MultiPolygon, error) {
+// NewMultiPolygonFromPolygons creates a MultiPolygon from its constituent
+// Polygons. It gives an error if any of the MultiPolygon assertions are not
+// maintained.
+func NewMultiPolygonFromPolygons(polys []Polygon, ctype CoordinatesType, opts ...ConstructorOption) (MultiPolygon, error) {
 	for _, p := range polys {
 		if ct := p.CoordinatesType(); ct != ctype {
 			return MultiPolygon{}, mixedCoordinatesTypeError{ct, ctype}
@@ -278,7 +279,7 @@ func (m MultiPolygon) Boundary() MultiLineString {
 			bounds = append(bounds, r.Force2D())
 		}
 	}
-	mls, err := NewMultiLineString(bounds, DimXY)
+	mls, err := NewMultiLineStringFromLineStrings(bounds, DimXY)
 	if err != nil {
 		// Can't get a mixed coordinate type error due to the source of the bounds.
 		panic(err)
@@ -338,7 +339,7 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mu
 		}
 		polys[i] = transformed
 	}
-	return NewMultiPolygon(polys, m.ctype, opts...)
+	return NewMultiPolygonFromPolygons(polys, m.ctype, opts...)
 }
 
 // EqualsExact checks if this MultiPolygon is exactly equal to another MultiPolygon.
@@ -354,7 +355,7 @@ func (m MultiPolygon) IsValid() bool {
 			return false
 		}
 	}
-	_, err := NewMultiPolygon(m.polys, m.ctype)
+	_, err := NewMultiPolygonFromPolygons(m.polys, m.ctype)
 	return err == nil
 }
 
@@ -392,7 +393,7 @@ func (m MultiPolygon) Centroid() Point {
 	if sumArea == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return NewPointXY(sumXY.Scale(1.0 / sumArea))
+	return NewPointFromXY(sumXY.Scale(1.0 / sumArea))
 }
 
 // Reverse in the case of MultiPolygon outputs the component polygons in their original order,

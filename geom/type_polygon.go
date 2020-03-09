@@ -31,10 +31,10 @@ type Polygon struct {
 	ctype CoordinatesType
 }
 
-// NewPolygon creates a polygon given its rings. The outer ring is first, and
-// any inner rings follow. If no rings are provided, then the returned Polygon
-// is the empty Polygon.
-func NewPolygon(rings []LineString, ctype CoordinatesType, opts ...ConstructorOption) (Polygon, error) {
+// NewPolygonFromRings creates a polygon given its rings. The outer ring is
+// first, and any inner rings follow. If no rings are provided, then the
+// returned Polygon is the empty Polygon.
+func NewPolygonFromRings(rings []LineString, ctype CoordinatesType, opts ...ConstructorOption) (Polygon, error) {
 	for _, r := range rings {
 		if ct := r.CoordinatesType(); ct != ctype {
 			return Polygon{}, mixedCoordinatesTypeError{ct, ctype}
@@ -246,7 +246,7 @@ func (p Polygon) Envelope() (Envelope, bool) {
 }
 
 func (p Polygon) Boundary() MultiLineString {
-	mls, err := NewMultiLineString(p.rings, p.ctype)
+	mls, err := NewMultiLineStringFromLineStrings(p.rings, p.ctype)
 	if err != nil {
 		// Can't get a mixed coordinate type error due to construction.
 		panic(err)
@@ -310,7 +310,7 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon
 			return Polygon{}, err
 		}
 	}
-	return NewPolygon(transformed, p.ctype, opts...)
+	return NewPolygonFromRings(transformed, p.ctype, opts...)
 }
 
 // EqualsExact checks if this Polygon is exactly equal to another Polygon.
@@ -326,7 +326,7 @@ func (p Polygon) IsValid() bool {
 			return false
 		}
 	}
-	_, err := NewPolygon(p.rings, p.ctype)
+	_, err := NewPolygonFromRings(p.rings, p.ctype)
 	return err == nil
 }
 
@@ -374,7 +374,7 @@ func (p Polygon) Centroid() Point {
 	if sumArea == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return NewPointXY(sumXY.Scale(1.0 / sumArea))
+	return NewPointFromXY(sumXY.Scale(1.0 / sumArea))
 }
 
 func sumCentroidAndAreaOfPolygon(p Polygon) (sumXY XY, sumArea float64) {
@@ -431,7 +431,7 @@ func (p Polygon) AsMultiPolygon() MultiPolygon {
 	if !p.IsEmpty() {
 		polys = []Polygon{p}
 	}
-	mp, err := NewMultiPolygon(polys, p.ctype)
+	mp, err := NewMultiPolygonFromPolygons(polys, p.ctype)
 	if err != nil {
 		// Cannot occur due to construction. A valid polygon will always be a
 		// valid multipolygon.

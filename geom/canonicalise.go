@@ -41,7 +41,7 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 		if len(lineStrings) > 0 {
 			ctype = lineStrings[0].CoordinatesType()
 		}
-		mls, err := NewMultiLineString(lineStrings, ctype)
+		mls, err := NewMultiLineStringFromLineStrings(lineStrings, ctype)
 		return mls.AsGeometry(), err
 	case len(lines) == 0:
 		// Points only.
@@ -52,7 +52,7 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 		if len(points) > 0 {
 			ctype = points[0].CoordinatesType()
 		}
-		mp, err := NewMultiPoint(points, ctype)
+		mp, err := NewMultiPointFromPoints(points, ctype)
 		return mp.AsGeometry(), err
 	default:
 		all := make([]Geometry, len(points)+len(lines))

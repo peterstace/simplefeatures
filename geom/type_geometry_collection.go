@@ -277,7 +277,7 @@ func (c GeometryCollection) Centroid() Point {
 		panic("Invalid dimensionality in centroid calculation.")
 	}
 
-	return NewPointXY(xy)
+	return NewPointFromXY(xy)
 }
 
 type centroidCalc struct {

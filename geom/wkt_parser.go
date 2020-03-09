@@ -86,7 +86,7 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		seq := ls.Coordinates()
 		n := seq.Length()
 		if n == 2 {
-			ln, err := NewLineC(seq.Get(0), seq.Get(1), p.opts...)
+			ln, err := NewLine(seq.Get(0), seq.Get(1), p.opts...)
 			p.check(err)
 			return ln.AsGeometry()
 		}
@@ -219,14 +219,14 @@ func (p *parser) nextLineStringText(ctype CoordinatesType) LineString {
 
 func (p *parser) nextPolygonText(ctype CoordinatesType) Polygon {
 	rings := p.nextPolygonOrMultiLineStringText(ctype)
-	poly, err := NewPolygon(rings, ctype, p.opts...)
+	poly, err := NewPolygonFromRings(rings, ctype, p.opts...)
 	p.check(err)
 	return poly
 }
 
 func (p *parser) nextMultiLineString(ctype CoordinatesType) MultiLineString {
 	lss := p.nextPolygonOrMultiLineStringText(ctype)
-	mls, err := NewMultiLineString(lss, ctype, p.opts...)
+	mls, err := NewMultiLineStringFromLineStrings(lss, ctype, p.opts...)
 	p.check(err)
 	return mls
 }
@@ -271,7 +271,7 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) MultiPoint {
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	return NewMultiPointFromSequence(seq, empty, p.opts...)
+	return NewMultiPoint(seq, empty, p.opts...)
 }
 
 func (p *parser) nextMultiPointStylePointAppend(dst []float64, ctype CoordinatesType) []float64 {
@@ -304,7 +304,7 @@ func (p *parser) nextMultiPolygonText(ctype CoordinatesType) MultiPolygon {
 			}
 		}
 	}
-	mp, err := NewMultiPolygon(polys, ctype, p.opts...)
+	mp, err := NewMultiPolygonFromPolygons(polys, ctype, p.opts...)
 	p.check(err)
 	return mp
 }

@@ -18,9 +18,9 @@ func convexHull(g Geometry) Geometry {
 	case 0:
 		return GeometryCollection{}.AsGeometry()
 	case 1:
-		return NewPointXY(hull[0]).AsGeometry()
+		return NewPointFromXY(hull[0]).AsGeometry()
 	case 2:
-		ln, err := NewLineXY(hull[0], hull[1])
+		ln, err := NewLineFromXY(hull[0], hull[1])
 		if err != nil {
 			panic("bug in grahamScan routine - output 2 coincident points")
 		}
@@ -36,7 +36,7 @@ func convexHull(g Geometry) Geometry {
 		if err != nil {
 			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid ring: %v", err))
 		}
-		poly, err := NewPolygon([]LineString{ring}, ring.CoordinatesType())
+		poly, err := NewPolygonFromRings([]LineString{ring}, ring.CoordinatesType())
 		if err != nil {
 			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid polygon: %v", err))
 		}

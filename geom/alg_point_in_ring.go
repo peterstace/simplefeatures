@@ -23,7 +23,7 @@ func pointRingSide(pt XY, ring LineString) side {
 	seq := ring.Coordinates()
 	n := seq.Length()
 
-	ptg := NewPointXY(pt)
+	ptg := NewPointFromXY(pt)
 	maxX := math.Inf(-1)
 	for i := 0; i < n; i++ {
 		maxX = math.Max(maxX, seq.GetXY(i).X)
@@ -36,7 +36,7 @@ func pointRingSide(pt XY, ring LineString) side {
 		return exterior
 	}
 
-	ray, err := NewLineXY(pt, XY{maxX + 1, pt.Y})
+	ray, err := NewLineFromXY(pt, XY{maxX + 1, pt.Y})
 	if err != nil {
 		// Cannot occur because X coordinates are different.
 		panic(err)

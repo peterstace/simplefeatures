@@ -17,10 +17,10 @@ type Line struct {
 	a, b Coordinates
 }
 
-// NewLineC creates a line segment given the Coordinates of its two endpoints.
+// NewLine creates a line segment given the Coordinates of its two endpoints.
 // An error is returned if the coordinate types of the two points don't match,
 // or if the points do not have distinct XY values.
-func NewLineC(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
+func NewLine(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
 	if a.Type != b.Type {
 		return Line{}, mixedCoordinatesTypeError{a.Type, b.Type}
 	}
@@ -30,10 +30,10 @@ func NewLineC(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
 	return Line{a, b}, nil
 }
 
-// NewLineXY creates a line segment given the XYs of its two endpoints. An
+// NewLineFromXY creates a line segment given the XYs of its two endpoints. An
 // error is returned if the XY values are not distinct.
-func NewLineXY(a, b XY, opts ...ConstructorOption) (Line, error) {
-	return NewLineC(
+func NewLineFromXY(a, b XY, opts ...ConstructorOption) (Line, error) {
+	return NewLine(
 		Coordinates{XY: a, Type: DimXY},
 		Coordinates{XY: b, Type: DimXY},
 		opts...,
@@ -110,7 +110,7 @@ func (n Line) Envelope() Envelope {
 }
 
 func (n Line) Boundary() MultiPoint {
-	return NewMultiPointFromSequence(
+	return NewMultiPoint(
 		NewSequence([]float64{
 			n.a.XY.X, n.a.XY.Y,
 			n.b.XY.X, n.b.XY.Y,
@@ -167,7 +167,7 @@ func (n Line) Coordinates() Sequence {
 
 // TransformXY transforms this Line into another Line according to fn.
 func (n Line) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Line, error) {
-	return NewLineXY(
+	return NewLineFromXY(
 		fn(n.a.XY),
 		fn(n.b.XY),
 		opts...,
@@ -190,7 +190,7 @@ func (n Line) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 
 // IsValid checks if this Line is valid
 func (n Line) IsValid() bool {
-	_, err := NewLineC(n.a, n.b)
+	_, err := NewLine(n.a, n.b)
 	return err == nil
 }
 
@@ -201,7 +201,7 @@ func (n Line) Length() float64 {
 }
 
 func (n Line) Centroid() Point {
-	return NewPointXY(n.a.XY.Add(n.b.XY).Scale(0.5))
+	return NewPointFromXY(n.a.XY.Add(n.b.XY).Scale(0.5))
 }
 
 // AsLineString is a helper function that converts this Line into a LineString.

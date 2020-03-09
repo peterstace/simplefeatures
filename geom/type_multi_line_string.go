@@ -15,10 +15,14 @@ type MultiLineString struct {
 	ctype CoordinatesType
 }
 
-// NewMultiLineString creates a MultiLineString from its constituent
-// LineStrings. The coordinate types of the LineStrings must match the
-// CoordinatesType argument, otherwise an error is returned.
-func NewMultiLineString(lines []LineString, ctype CoordinatesType, opts ...ConstructorOption) (MultiLineString, error) {
+// NewMultiLineStringFromLineStrings creates a MultiLineString from its
+// constituent LineStrings. The coordinate types of the LineStrings must match
+// the CoordinatesType argument, otherwise an error is returned.
+func NewMultiLineStringFromLineStrings(
+	lines []LineString,
+	ctype CoordinatesType,
+	opts ...ConstructorOption,
+) (MultiLineString, error) {
 	for _, ls := range lines {
 		if ls.CoordinatesType() != ctype {
 			return MultiLineString{}, mixedCoordinatesTypeError{ls.CoordinatesType(), ctype}
@@ -173,7 +177,7 @@ func (m MultiLineString) Boundary() MultiPoint {
 		}
 	}
 	seq := NewSequence(floats, DimXY)
-	return NewMultiPointFromSequence(seq, BitSet{})
+	return NewMultiPoint(seq, BitSet{})
 }
 
 func (m MultiLineString) Value() (driver.Value, error) {
@@ -232,7 +236,7 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 			return MultiLineString{}, err
 		}
 	}
-	return NewMultiLineString(transformed, m.ctype, opts...)
+	return NewMultiLineStringFromLineStrings(transformed, m.ctype, opts...)
 }
 
 // EqualsExact checks if this MultiLineString is exactly equal to another MultiLineString.
@@ -274,7 +278,7 @@ func (m MultiLineString) Centroid() Point {
 	if sumLength == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return NewPointXY(sumXY.Scale(1.0 / sumLength))
+	return NewPointFromXY(sumXY.Scale(1.0 / sumLength))
 }
 
 // Reverse in the case of MultiLineString outputs each component line string in their

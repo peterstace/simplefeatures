@@ -29,8 +29,8 @@ func NewEmptyPoint(ctype CoordinatesType) Point {
 	return Point{Coordinates{Type: ctype}, false}
 }
 
-// NewPointXY creates a new point from an XY.
-func NewPointXY(xy XY, _ ...ConstructorOption) Point {
+// NewPointFromXY creates a new point from an XY.
+func NewPointFromXY(xy XY, _ ...ConstructorOption) Point {
 	return Point{Coordinates{XY: xy, Type: DimXY}, true}
 }
 
@@ -181,7 +181,7 @@ func (p Point) Reverse() Point {
 // AsMultiPoint is a convenience function that converts this Point into a
 // MultiPoint.
 func (p Point) AsMultiPoint() MultiPoint {
-	mp, err := NewMultiPoint([]Point{p}, p.CoordinatesType())
+	mp, err := NewMultiPointFromPoints([]Point{p}, p.CoordinatesType())
 	if err != nil {
 		// Cannot occur due to construction.
 		panic(err)

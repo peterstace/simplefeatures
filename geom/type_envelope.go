@@ -54,11 +54,11 @@ func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 // Line or Point geometry is returned.
 func (e Envelope) AsGeometry() Geometry {
 	if e.min == e.max {
-		return NewPointXY(e.min).AsGeometry()
+		return NewPointFromXY(e.min).AsGeometry()
 	}
 
 	if e.min.X == e.max.X || e.min.Y == e.max.Y {
-		ln, err := NewLineXY(e.min, e.max)
+		ln, err := NewLineFromXY(e.min, e.max)
 		if err != nil {
 			panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
 		}
@@ -77,7 +77,7 @@ func (e Envelope) AsGeometry() Geometry {
 	if err != nil {
 		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
 	}
-	poly, err := NewPolygon([]LineString{ls}, DimXY)
+	poly, err := NewPolygonFromRings([]LineString{ls}, DimXY)
 	if err != nil {
 		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
 	}

@@ -203,7 +203,7 @@ func (s LineString) Boundary() MultiPoint {
 			xy2.X, xy2.Y,
 		}
 	}
-	return NewMultiPointFromSequence(NewSequence(fs, DimXY), BitSet{})
+	return NewMultiPoint(NewSequence(fs, DimXY), BitSet{})
 }
 
 func (s LineString) Value() (driver.Value, error) {
@@ -288,7 +288,7 @@ func (s LineString) Centroid() Point {
 	if sumLength == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return NewPointXY(sumXY.Scale(1.0 / sumLength))
+	return NewPointFromXY(sumXY.Scale(1.0 / sumLength))
 }
 
 func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64) {
@@ -311,7 +311,7 @@ func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64
 // AsMultiLineString is a convenience function that converts this LineString
 // into a MultiLineString.
 func (s LineString) AsMultiLineString() MultiLineString {
-	mls, err := NewMultiLineString([]LineString{s}, s.CoordinatesType())
+	mls, err := NewMultiLineStringFromLineStrings([]LineString{s}, s.CoordinatesType())
 	if err != nil {
 		// Because there is only a single line string, this can't panic due to
 		// mixed coordinate type.

@@ -15,10 +15,10 @@ type MultiPoint struct {
 	empty BitSet
 }
 
-// NewMultiPoint creates a MultiPoint from a list of Points. The coordinate
+// NewMultiPointFromPoints creates a MultiPoint from a list of Points. The coordinate
 // type of the Points must all match the CoordinatesType argument, otherwise an
 // error is returned.
-func NewMultiPoint(pts []Point, ctype CoordinatesType, opts ...ConstructorOption) (MultiPoint, error) {
+func NewMultiPointFromPoints(pts []Point, ctype CoordinatesType, opts ...ConstructorOption) (MultiPoint, error) {
 	for _, p := range pts {
 		if p.CoordinatesType() != ctype {
 			return MultiPoint{}, mixedCoordinatesTypeError{p.CoordinatesType(), ctype}
@@ -44,11 +44,10 @@ func NewMultiPoint(pts []Point, ctype CoordinatesType, opts ...ConstructorOption
 	return MultiPoint{seq, empty}, nil
 }
 
-// NewMultiPointFromSequence creates a new MultiPoint from a sequence of
-// coordinates. If there are any positions set in the BitSet, then these are
-// used to indicate that the corresponding point in the sequence is an empty
-// point.
-func NewMultiPointFromSequence(seq Sequence, empty BitSet, opts ...ConstructorOption) MultiPoint {
+// NewMultiPoint creates a new MultiPoint from a sequence of coordinates. If
+// there are any positions set in the BitSet, then these are used to indicate
+// that the corresponding point in the sequence is an empty point.
+func NewMultiPoint(seq Sequence, empty BitSet, opts ...ConstructorOption) MultiPoint {
 	return MultiPoint{
 		seq,
 		empty.Clone(), // clone so that the caller doesn't have access to the interal empty set
@@ -191,7 +190,7 @@ func (m MultiPoint) Coordinates() (seq Sequence, empty BitSet) {
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
 func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPoint, error) {
 	transformed := transformSequence(m.seq, fn)
-	return NewMultiPointFromSequence(transformed, m.empty, opts...), nil
+	return NewMultiPoint(transformed, m.empty, opts...), nil
 }
 
 // EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.
@@ -220,7 +219,7 @@ func (m MultiPoint) Centroid() Point {
 	if n == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return NewPointXY(sum.Scale(1 / float64(n)))
+	return NewPointFromXY(sum.Scale(1 / float64(n)))
 }
 
 // Reverse in the case of MultiPoint outputs each component point in their

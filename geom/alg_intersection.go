@@ -157,9 +157,9 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	case result.empty:
 		return GeometryCollection{}.AsGeometry()
 	case result.ptA == result.ptB:
-		return NewPointXY(result.ptA).AsGeometry()
+		return NewPointFromXY(result.ptA).AsGeometry()
 	default:
-		ln, err := NewLineXY(result.ptA, result.ptB)
+		ln, err := NewLineFromXY(result.ptA, result.ptB)
 		if err != nil {
 			// Cannot occur because the case where ptA and ptB are equal is
 			// already handled.
@@ -268,9 +268,9 @@ func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (Ge
 					case inter.empty:
 						continue
 					case inter.ptA == inter.ptB:
-						points = append(points, NewPointXY(inter.ptA))
+						points = append(points, NewPointFromXY(inter.ptA))
 					default:
-						ln, err := NewLineXY(inter.ptA, inter.ptB)
+						ln, err := NewLineFromXY(inter.ptA, inter.ptB)
 						if err != nil {
 							// The case where ptA and ptB are coincident
 							// has already been handled.
@@ -334,13 +334,13 @@ func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (Geometry, error) {
 	var intersection []Point
 	for pt := range mp1Set {
 		if _, ok := mp2Set[pt]; ok && !seen[pt] {
-			intersection = append(intersection, NewPointXY(pt))
+			intersection = append(intersection, NewPointFromXY(pt))
 			seen[pt] = true
 		}
 	}
 	for pt := range mp2Set {
 		if _, ok := mp1Set[pt]; ok && !seen[pt] {
-			intersection = append(intersection, NewPointXY(pt))
+			intersection = append(intersection, NewPointFromXY(pt))
 			seen[pt] = true
 		}
 	}
@@ -368,7 +368,7 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
 			if !ok {
 				return NewEmptyPoint(DimXY).AsGeometry()
 			}
-			return NewPointXY(xy).AsGeometry()
+			return NewPointFromXY(xy).AsGeometry()
 		}
 	}
 	return GeometryCollection{}.AsGeometry()
@@ -380,7 +380,7 @@ func intersectPointWithPoint(pt1, pt2 Point) Geometry {
 		if !ok {
 			return NewEmptyPoint(DimXY).AsGeometry()
 		}
-		return NewPointXY(xy).AsGeometry()
+		return NewPointFromXY(xy).AsGeometry()
 	}
 	return GeometryCollection{}.AsGeometry()
 }
