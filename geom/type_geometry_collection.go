@@ -383,7 +383,12 @@ func (c GeometryCollection) ForceCoordinatesType(newCType CoordinatesType) Geome
 	for i := range c.geoms {
 		gs[i] = c.geoms[i].ForceCoordinatesType(newCType)
 	}
-	return GeometryCollection{gs, DimXY}
+	gc, err := NewGeometryCollection(gs, newCType)
+	if err != nil {
+		// Should not occur because all geometries have the new coordinates type.
+		panic(err)
+	}
+	return gc
 }
 
 // Force2D returns a copy of the GeometryCollection with Z and M values removed.
