@@ -77,7 +77,7 @@ func (h *Handle) Close() {
 func (h *Handle) err() error {
 	msg := h.errMsg()
 	if msg == "" {
-		// No error stored, which indicatse that the error handler didn't get
+		// No error stored, which indicates that the error handler didn't get
 		// trigged. The best we can do is give a generic error.
 		msg = "libgeos internal error"
 	}
