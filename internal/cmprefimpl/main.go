@@ -34,8 +34,8 @@ func main() {
 		log.Fatalf("could not convert to geometries: %v", err)
 	}
 
+	forceTo2D(geoms)
 	geoms = deduplicateGeometries(geoms)
-	geoms = remove3DAndMeasureGeometries(geoms)
 
 	h, err := libgeos.NewHandle()
 	if err != nil {
@@ -117,15 +117,11 @@ func deduplicateGeometries(geoms []geom.Geometry) []geom.Geometry {
 	return geoms
 }
 
-// 3D and Measure geometries are skipped because the C bindings for libgeos
-// doesn't fully support Z and M value.
-func remove3DAndMeasureGeometries(geoms []geom.Geometry) []geom.Geometry {
-	var filtered []geom.Geometry
-	for _, g := range geoms {
-		if ct := g.CoordinatesType(); ct.Is3D() || ct.IsMeasured() {
-			continue
-		}
-		filtered = append(filtered, g)
+// forceTo2D converts all geometries to 2D geometries, dropping any Z and M
+// values. This is done because because the C bindings for libgeos don't fully
+// support Z and M value.
+func forceTo2D(geoms []geom.Geometry) {
+	for i := range geoms {
+		geoms[i] = geoms[i].Force2D()
 	}
-	return filtered
 }
