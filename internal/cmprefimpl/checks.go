@@ -501,7 +501,7 @@ func checkCentroid(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	}
 	got := g.Centroid().AsGeometry()
 
-	if !want.EqualsExact(got, geom.Tolerance(1e-9)) {
+	if !want.EqualsExact(got, geom.ToleranceXY(1e-9)) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
 		return mismatchErr
