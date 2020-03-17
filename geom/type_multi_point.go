@@ -8,21 +8,24 @@ import (
 )
 
 // MultiPoint is a 0-dimensional geometry that is a collection of points. Its
-// zero value is the empty MultiPoint (i.e. a collection of zero points). It is
-// immutable after creation.
+// zero value is the empty MultiPoint (i.e. a collection of zero points) with
+// 2D coordinates type. It is immutable after creation.
 type MultiPoint struct {
 	seq   Sequence
 	empty BitSet
 }
 
-// NewMultiPointFromPoints creates a MultiPoint from a list of Points. The coordinate
-// type of the Points must all match the CoordinatesType argument, otherwise an
-// error is returned.
-func NewMultiPointFromPoints(pts []Point, ctype CoordinatesType, opts ...ConstructorOption) (MultiPoint, error) {
+// NewMultiPointFromPoints creates a MultiPoint from a list of Points. The
+// coordinate type of the MultiPoint is the lowest common coordinates type of
+// its Points.
+func NewMultiPointFromPoints(pts []Point, opts ...ConstructorOption) MultiPoint {
+	if len(pts) == 0 {
+		return MultiPoint{}
+	}
+
+	ctype := DimXYZM
 	for _, p := range pts {
-		if p.CoordinatesType() != ctype {
-			return MultiPoint{}, mixedCoordinatesTypeError{p.CoordinatesType(), ctype}
-		}
+		ctype &= p.CoordinatesType()
 	}
 
 	var empty BitSet
@@ -41,7 +44,7 @@ func NewMultiPointFromPoints(pts []Point, ctype CoordinatesType, opts ...Constru
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	return MultiPoint{seq, empty}, nil
+	return NewMultiPoint(seq, empty, opts...)
 }
 
 // NewMultiPoint creates a new MultiPoint from a sequence of coordinates. If

@@ -16,16 +16,23 @@ type GeometryCollection struct {
 	ctype CoordinatesType
 }
 
-// NewGeometryCollection creates a collection of geometries. Each geometry must
-// have the same coordinates type as the supplied coordinates type argument
-// (otherwise an error is returned).
-func NewGeometryCollection(geoms []Geometry, ctype CoordinatesType, opts ...ConstructorOption) (GeometryCollection, error) {
-	for _, g := range geoms {
-		if g.CoordinatesType() != ctype {
-			return GeometryCollection{}, mixedCoordinatesTypeError{g.CoordinatesType(), ctype}
-		}
+// NewGeometryCollection creates a collection of geometries. The coordinates
+// type of the GeometryCollection is the lowest common coordinates type of its
+// child geometries.
+func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) GeometryCollection {
+	if len(geoms) == 0 {
+		return GeometryCollection{}
 	}
-	return GeometryCollection{geoms, ctype}, nil
+
+	ctype := DimXYZM
+	for _, g := range geoms {
+		ctype &= g.CoordinatesType()
+	}
+	geoms = append([]Geometry(nil), geoms...)
+	for i := range geoms {
+		geoms[i] = geoms[i].ForceCoordinatesType(ctype)
+	}
+	return GeometryCollection{geoms, ctype}
 }
 
 // Type return type string for GeometryCollection
@@ -178,7 +185,7 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 			return GeometryCollection{}, err
 		}
 	}
-	return NewGeometryCollection(transformed, c.ctype)
+	return GeometryCollection{transformed, c.ctype}, nil
 }
 
 // EqualsExact checks if this GeometryCollection is exactly equal to another GeometryCollection.
@@ -383,12 +390,7 @@ func (c GeometryCollection) ForceCoordinatesType(newCType CoordinatesType) Geome
 	for i := range c.geoms {
 		gs[i] = c.geoms[i].ForceCoordinatesType(newCType)
 	}
-	gc, err := NewGeometryCollection(gs, newCType)
-	if err != nil {
-		// Should not occur because all geometries have the new coordinates type.
-		panic(err)
-	}
-	return gc
+	return GeometryCollection{gs, newCType}
 }
 
 // Force2D returns a copy of the GeometryCollection with Z and M values removed.
