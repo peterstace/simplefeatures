@@ -7,44 +7,60 @@ import (
 	"unsafe"
 )
 
-// MultiPoint is a 0-dimensional geometric collection of points. The points are
-// not connected or ordered.
-//
-// Its assertions are:
-//
-// 1. It must be made up of 0 or more valid Points.
+// MultiPoint is a 0-dimensional geometry that is a collection of points. Its
+// zero value is the empty MultiPoint (i.e. a collection of zero points) with
+// 2D coordinates type. It is immutable after creation.
 type MultiPoint struct {
-	pts []Point
+	seq   Sequence
+	empty BitSet
 }
 
-func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
-	return MultiPoint{pts}
-}
-
-// NewMultiPointOC creates a new MultiPoint consisting of a Point for each
-// non-empty OptionalCoordinate.
-func NewMultiPointOC(coords []OptionalCoordinates, opts ...ConstructorOption) MultiPoint {
-	var pts []Point
-	for _, c := range coords {
-		pt := NewPointOC(c, opts...)
-		pts = append(pts, pt)
+// NewMultiPointFromPoints creates a MultiPoint from a list of Points. The
+// coordinate type of the MultiPoint is the lowest common coordinates type of
+// its Points.
+func NewMultiPointFromPoints(pts []Point, opts ...ConstructorOption) MultiPoint {
+	if len(pts) == 0 {
+		return MultiPoint{}
 	}
-	return NewMultiPoint(pts, opts...)
-}
 
-// NewMultiPointC creates a new MultiPoint consisting of a point for each coordinate.
-func NewMultiPointC(coords []Coordinates, opts ...ConstructorOption) MultiPoint {
-	var pts []Point
-	for _, c := range coords {
-		pt := NewPointC(c, opts...)
-		pts = append(pts, pt)
+	ctype := DimXYZM
+	for _, p := range pts {
+		ctype &= p.CoordinatesType()
 	}
-	return NewMultiPoint(pts, opts...)
+
+	var empty BitSet
+	floats := make([]float64, 0, len(pts)*ctype.Dimension())
+	for i, pt := range pts {
+		c, ok := pt.Coordinates()
+		if !ok {
+			empty.Set(i, true)
+		}
+		floats = append(floats, c.X, c.Y)
+		if ctype.Is3D() {
+			floats = append(floats, c.Z)
+		}
+		if ctype.IsMeasured() {
+			floats = append(floats, c.M)
+		}
+	}
+	seq := NewSequence(floats, ctype)
+	return NewMultiPointWithEmptyMask(seq, empty, opts...)
 }
 
-// NewMultiPointXY creates a new MultiPoint consisting of a point for each XY.
-func NewMultiPointXY(pts []XY, opts ...ConstructorOption) MultiPoint {
-	return NewMultiPointC(oneDimXYToCoords(pts))
+// NewMultiPoint creates a new MultiPoint from a sequence of Coordinates.
+func NewMultiPoint(seq Sequence, opts ...ConstructorOption) MultiPoint {
+	return MultiPoint{seq, BitSet{}}
+}
+
+// NewMultiPointWithEmptyMask creates a new MultiPoint from a sequence of
+// coordinates. If there are any positions set in the BitSet, then these are
+// used to indicate that the corresponding point in the sequence is an empty
+// point.
+func NewMultiPointWithEmptyMask(seq Sequence, empty BitSet, opts ...ConstructorOption) MultiPoint {
+	return MultiPoint{
+		seq,
+		empty.Clone(), // clone so that the caller doesn't have access to the interal empty set
+	}
 }
 
 // Type return type string for MultiPoint
@@ -59,12 +75,17 @@ func (m MultiPoint) AsGeometry() Geometry {
 
 // NumPoints gives the number of element points making up the MultiPoint.
 func (m MultiPoint) NumPoints() int {
-	return len(m.pts)
+	return m.seq.Length()
 }
 
 // PointN gives the nth (zero indexed) Point.
 func (m MultiPoint) PointN(n int) Point {
-	return m.pts[n]
+	if m.empty.Get(n) {
+		return NewEmptyPoint(m.CoordinatesType())
+	} else {
+		c := m.seq.Get(n)
+		return NewPoint(c)
+	}
 }
 
 func (m MultiPoint) AsText() string {
@@ -72,34 +93,18 @@ func (m MultiPoint) AsText() string {
 }
 
 func (m MultiPoint) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "MULTIPOINT"...)
-	if len(m.pts) == 0 {
-		return append(dst, " EMPTY"...)
+	dst = appendWKTHeader(dst, "MULTIPOINT", m.CoordinatesType())
+	if m.NumPoints() == 0 {
+		return appendWKTEmpty(dst)
 	}
-	dst = append(dst, '(')
-	for i, pt := range m.pts {
-		xy, ok := pt.XY()
-		if ok {
-			dst = append(dst, '(')
-			dst = appendFloat(dst, xy.X)
-			dst = append(dst, ' ')
-			dst = appendFloat(dst, xy.Y)
-			dst = append(dst, ')')
-		} else {
-			dst = append(dst, "EMPTY"...)
-		}
-		if i != len(m.pts)-1 {
-			dst = append(dst, ',')
-		}
-	}
-	return append(dst, ')')
+	return appendWKTSequence(dst, m.seq, true, m.empty)
 }
 
 // IsSimple returns true iff no two of its points are equal.
 func (m MultiPoint) IsSimple() bool {
 	seen := make(map[XY]bool)
-	for _, p := range m.pts {
-		xy, ok := p.XY()
+	for i := 0; i < m.NumPoints(); i++ {
+		xy, ok := m.PointN(i).XY()
 		if !ok {
 			continue
 		}
@@ -120,8 +125,8 @@ func (m MultiPoint) Intersects(g Geometry) bool {
 }
 
 func (m MultiPoint) IsEmpty() bool {
-	for _, pt := range m.pts {
-		if !pt.IsEmpty() {
+	for i := 0; i < m.NumPoints(); i++ {
+		if !m.empty.Get(i) {
 			return false
 		}
 	}
@@ -131,8 +136,8 @@ func (m MultiPoint) IsEmpty() bool {
 func (m MultiPoint) Envelope() (Envelope, bool) {
 	var has bool
 	var env Envelope
-	for _, pt := range m.pts {
-		xy, ok := pt.XY()
+	for i := 0; i < m.NumPoints(); i++ {
+		xy, ok := m.PointN(i).XY()
 		if !ok {
 			continue
 		}
@@ -147,7 +152,7 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 }
 
 func (m MultiPoint) Boundary() GeometryCollection {
-	return NewGeometryCollection(nil)
+	return GeometryCollection{}
 }
 
 func (m MultiPoint) Value() (driver.Value, error) {
@@ -159,7 +164,7 @@ func (m MultiPoint) Value() (driver.Value, error) {
 func (m MultiPoint) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeMultiPoint)
+	marsh.writeGeomType(wkbGeomTypeMultiPoint, m.CoordinatesType())
 	n := m.NumPoints()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {
@@ -176,24 +181,25 @@ func (m MultiPoint) ConvexHull() Geometry {
 }
 
 func (m MultiPoint) MarshalJSON() ([]byte, error) {
-	return marshalGeoJSON("MultiPoint", m.Coordinates())
+	var dst []byte
+	dst = append(dst, `{"type":"MultiPoint","coordinates":`...)
+	dst = appendGeoJSONSequence(dst, m.seq, m.empty)
+	dst = append(dst, '}')
+	return dst, nil
 }
 
 // Coordinates returns the coordinates of the points represented by the
-// MultiPoint.
-func (m MultiPoint) Coordinates() []OptionalCoordinates {
-	coords := make([]OptionalCoordinates, len(m.pts))
-	for i := range coords {
-		coords[i] = m.pts[i].Coordinates()
-	}
-	return coords
+// MultiPoint. If a point has its corresponding bit set to true in the BitSet,
+// then that point is empty.
+func (m MultiPoint) Coordinates() (seq Sequence, empty BitSet) {
+	// TODO: If we had a read-only BitSet, then we could avoid the clone here.
+	return m.seq, m.empty.Clone()
 }
 
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
 func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPoint, error) {
-	coords := m.Coordinates()
-	transformOptional1dCoords(coords, fn)
-	return NewMultiPointOC(coords, opts...), nil
+	transformed := transformSequence(m.seq, fn)
+	return NewMultiPointWithEmptyMask(transformed, m.empty, opts...), nil
 }
 
 // EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.
@@ -220,13 +226,30 @@ func (m MultiPoint) Centroid() Point {
 		}
 	}
 	if n == 0 {
-		return NewEmptyPoint()
+		return NewEmptyPoint(DimXY)
 	}
-	return NewPointXY(sum.Scale(1 / float64(n)))
+	return NewPointFromXY(sum.Scale(1 / float64(n)))
 }
 
 // Reverse in the case of MultiPoint outputs each component point in their
 // original order.
 func (m MultiPoint) Reverse() MultiPoint {
 	return m
+}
+
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
+func (m MultiPoint) CoordinatesType() CoordinatesType {
+	return m.seq.CoordinatesType()
+}
+
+// ForceCoordinatesType returns a new MultiPoint with a different CoordinatesType. If a
+// dimension is added, then new values are populated with 0.
+func (m MultiPoint) ForceCoordinatesType(newCType CoordinatesType) MultiPoint {
+	return MultiPoint{m.seq.ForceCoordinatesType(newCType), m.empty}
+}
+
+// Force2D returns a copy of the MultiPoint with Z and M values removed.
+func (m MultiPoint) Force2D() MultiPoint {
+	return m.ForceCoordinatesType(DimXY)
 }

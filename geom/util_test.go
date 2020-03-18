@@ -16,6 +16,10 @@ func geomFromWKT(t *testing.T, wkt string) Geometry {
 	return geom
 }
 
+func xyCoords(x, y float64) Coordinates {
+	return Coordinates{XY: XY{x, y}, Type: DimXY}
+}
+
 func expectPanics(t *testing.T, fn func()) {
 	t.Helper()
 	defer func() {
@@ -70,6 +74,13 @@ func expectBoolEq(t *testing.T, got, want bool) {
 }
 
 func expectXYEq(t *testing.T, got, want XY) {
+	t.Helper()
+	if got != want {
+		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+	}
+}
+
+func expectCoordinatesTypeEq(t *testing.T, got, want CoordinatesType) {
 	t.Helper()
 	if got != want {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)

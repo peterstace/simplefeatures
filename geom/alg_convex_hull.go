@@ -10,30 +10,33 @@ func convexHull(g Geometry) Geometry {
 		// Any empty geometry could be returned here to to give correct
 		// behaviour. However, to replicate PostGIS behaviour, we always return
 		// the original geometry.
-		return g
+		return g.Force2D()
 	}
 	pts := convexHullPointSet(g)
 	hull := grahamScan(pts)
 	switch len(hull) {
 	case 0:
-		return NewGeometryCollection(nil).AsGeometry()
+		return GeometryCollection{}.AsGeometry()
 	case 1:
-		return NewPointXY(hull[0]).AsGeometry()
+		return NewPointFromXY(hull[0]).AsGeometry()
 	case 2:
-		ln, err := NewLineC(
-			Coordinates{hull[0]},
-			Coordinates{hull[1]},
-		)
+		ln, err := NewLineFromXY(hull[0], hull[1])
 		if err != nil {
 			panic("bug in grahamScan routine - output 2 coincident points")
 		}
 		return ln.AsGeometry()
 	default:
-		coords := [][]Coordinates{make([]Coordinates, len(hull))}
+		floats := make([]float64, 2*len(hull))
 		for i := range hull {
-			coords[0][i] = Coordinates{XY: hull[i]}
+			floats[2*i+0] = hull[i].X
+			floats[2*i+1] = hull[i].Y
 		}
-		poly, err := NewPolygonC(coords)
+		seq := NewSequence(floats, DimXY)
+		ring, err := NewLineString(seq)
+		if err != nil {
+			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid ring: %v", err))
+		}
+		poly, err := NewPolygonFromRings([]LineString{ring})
 		if err != nil {
 			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid polygon: %v", err))
 		}
@@ -67,11 +70,11 @@ func convexHullPointSet(g Geometry) []XY {
 			n.EndPoint().XY,
 		}
 	case g.IsLineString():
-		ls := g.AsLineString()
-		n := ls.NumPoints()
+		cs := g.AsLineString().Coordinates()
+		n := cs.Length()
 		points := make([]XY, n)
 		for i := 0; i < n; i++ {
-			points[i] = ls.PointN(i).XY
+			points[i] = cs.GetXY(i)
 		}
 		return points
 	case g.IsPolygon():
@@ -93,10 +96,10 @@ func convexHullPointSet(g Geometry) []XY {
 		var points []XY
 		n := m.NumLineStrings()
 		for i := 0; i < n; i++ {
-			line := m.LineStringN(i)
-			m := line.NumPoints()
+			cs := m.LineStringN(i).Coordinates()
+			m := cs.Length()
 			for j := 0; j < m; j++ {
-				points = append(points, line.PointN(j).XY)
+				points = append(points, cs.GetXY(j))
 			}
 		}
 		return points
@@ -105,10 +108,10 @@ func convexHullPointSet(g Geometry) []XY {
 		var points []XY
 		numPolys := m.NumPolygons()
 		for i := 0; i < numPolys; i++ {
-			ring := m.PolygonN(i).ExteriorRing()
-			numPts := ring.NumPoints()
-			for j := 0; j < numPts; j++ {
-				points = append(points, ring.PointN(j).XY)
+			cs := m.PolygonN(i).ExteriorRing().Coordinates()
+			m := cs.Length()
+			for j := 0; j < m; j++ {
+				points = append(points, cs.GetXY(j))
 			}
 		}
 		return points

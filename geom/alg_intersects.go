@@ -229,10 +229,10 @@ func hasIntersectionMultiPointWithMultiLineString(mp MultiPoint, mls MultiLineSt
 	for i := 0; i < mp.NumPoints(); i++ {
 		pt := mp.PointN(i)
 		for j := 0; j < mls.NumLineStrings(); j++ {
-			ls := mls.LineStringN(j)
-			for k := 0; k < ls.NumLines(); k++ {
-				ln := ls.LineN(k)
-				if hasIntersectionPointWithLine(pt, ln) {
+			seq := mls.LineStringN(j).Coordinates()
+			for k := 0; k < seq.Length(); k++ {
+				ln, ok := getLine(seq, k)
+				if ok && hasIntersectionPointWithLine(pt, ln) {
 					return true
 				}
 			}
@@ -278,12 +278,16 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 	for _, side := range sides {
 		var n int
 		for _, ls := range side.mls.lines {
-			n += ls.NumLines()
+			n += ls.Coordinates().Length()
 		}
 		side.lines = make([]Line, 0, n)
 		for _, ls := range side.mls.lines {
-			for i := 0; i < ls.NumLines(); i++ {
-				ln := ls.LineN(i)
+			seq := ls.Coordinates()
+			for i := 0; i < seq.Length(); i++ {
+				ln, ok := getLine(seq, i)
+				if !ok {
+					continue
+				}
 				if ln.StartPoint().X > ln.EndPoint().X {
 					ln = ln.Reverse()
 				}
@@ -382,11 +386,9 @@ func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp Mult
 	// fully outside of it. So we just have to check any control point of each
 	// LineString to see if it falls inside or outside of the MultiPolygon.
 	for i := 0; i < mls.NumLineStrings(); i++ {
-		for j := 0; j < mls.LineStringN(i).NumPoints(); j++ {
-			pt := NewPointC(mls.LineStringN(i).PointN(j))
-			if hasIntersectionPointWithMultiPolygon(pt, mp) {
-				return true
-			}
+		ls := mls.LineStringN(i)
+		if hasIntersectionPointWithMultiPolygon(ls.StartPoint(), mp) {
+			return true
 		}
 	}
 	return false
@@ -412,8 +414,10 @@ func hasIntersectionPointWithLine(pt Point, ln Line) bool {
 
 func hasIntersectionPointWithLineString(pt Point, ls LineString) bool {
 	// Worst case speed is O(n), n is the number of lines.
-	for i := 0; i < ls.NumLines(); i++ {
-		if hasIntersectionPointWithLine(pt, ls.LineN(i)) {
+	seq := ls.Coordinates()
+	for i := 0; i < seq.Length(); i++ {
+		ln, ok := getLine(seq, i)
+		if ok && hasIntersectionPointWithLine(pt, ln) {
 			return true
 		}
 	}
@@ -422,7 +426,8 @@ func hasIntersectionPointWithLineString(pt Point, ls LineString) bool {
 
 func hasIntersectionMultiPointWithMultiPoint(mp1, mp2 MultiPoint) bool {
 	// To do: improve the speed efficiency, it's currently O(n1*n2)
-	for _, pt := range mp1.pts {
+	for i := 0; i < mp1.NumPoints(); i++ {
+		pt := mp1.PointN(i)
 		if hasIntersectionPointWithMultiPoint(pt, mp2) {
 			return true // Point and MultiPoint both have dimension 0
 		}
@@ -432,7 +437,8 @@ func hasIntersectionMultiPointWithMultiPoint(mp1, mp2 MultiPoint) bool {
 
 func hasIntersectionPointWithMultiPoint(point Point, mp MultiPoint) bool {
 	// Worst case speed is O(n) but that's optimal because mp is not sorted.
-	for _, pt := range mp.pts {
+	for i := 0; i < mp.NumPoints(); i++ {
+		pt := mp.PointN(i)
 		if hasIntersectionPointWithPoint(point, pt) {
 			return true
 		}
@@ -466,7 +472,9 @@ func hasIntersectionPointWithMultiPolygon(pt Point, mp MultiPolygon) bool {
 
 func hasIntersectionPointWithPoint(pt1, pt2 Point) bool {
 	// Speed is O(1).
-	return !pt1.IsEmpty() && !pt2.IsEmpty() && pt1.EqualsExact(pt2.AsGeometry())
+	xy1, ok1 := pt1.XY()
+	xy2, ok2 := pt2.XY()
+	return ok1 && ok2 && xy1 == xy2
 }
 
 func hasIntersectionPointWithPolygon(pt Point, p Polygon) bool {

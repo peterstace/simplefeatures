@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"log"
@@ -236,8 +237,8 @@ func checkAsBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 		return err
 	}
 	if bytes.Compare(want, got.Bytes()) != 0 {
-		log.Printf("want: %v", want)
-		log.Printf("got:  %v", got)
+		log.Printf("want:\n%s", hex.Dump(want))
+		log.Printf("got:\n%s", hex.Dump(got.Bytes()))
 		return mismatchErr
 	}
 	return nil
@@ -500,7 +501,7 @@ func checkCentroid(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 	}
 	got := g.Centroid().AsGeometry()
 
-	if !want.EqualsExact(got, geom.Tolerance(1e-9)) {
+	if !want.EqualsExact(got, geom.ToleranceXY(1e-9)) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
 		return mismatchErr

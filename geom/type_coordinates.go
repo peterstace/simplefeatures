@@ -1,55 +1,20 @@
 package geom
 
+// Coordinates represents a point location.
 type Coordinates struct {
+	// XY represents the XY position of the point location.
 	XY
-	// TODO: Put optional Z and M here.
-}
 
-func oneDimXYToCoords(pts []XY) []Coordinates {
-	coords := make([]Coordinates, len(pts))
-	for i, pt := range pts {
-		coords[i] = Coordinates{pt}
-	}
-	return coords
-}
+	// Z represents the height of the location. Its value is zero
+	// for non-3D coordinate types.
+	Z float64
 
-func twoDimXYToCoords(xys [][]XY) [][]Coordinates {
-	coords := make([][]Coordinates, len(xys))
-	for i, pts := range xys {
-		coords[i] = oneDimXYToCoords(pts)
-	}
-	return coords
-}
+	// M represents a user defined measure associated with the
+	// location. Its value is zero for non-measure coordinate
+	// types.
+	M float64
 
-func threeDimXYToCoords(xys [][][]XY) [][][]Coordinates {
-	coords := make([][][]Coordinates, len(xys))
-	for i, pts := range xys {
-		coords[i] = twoDimXYToCoords(pts)
-	}
-	return coords
-}
-
-type OptionalCoordinates struct {
-	Empty bool
-	Value Coordinates
-}
-
-func (c Coordinates) MarshalJSON() ([]byte, error) {
-	buf := []byte{'['}
-	buf = appendFloat(buf, c.XY.X)
-	buf = append(buf, ',')
-	buf = appendFloat(buf, c.XY.Y)
-	buf = append(buf, ']')
-	return buf, nil
-}
-
-func (oc OptionalCoordinates) MarshalJSON() ([]byte, error) {
-	buf := []byte{'['}
-	if !oc.Empty {
-		buf = appendFloat(buf, oc.Value.X)
-		buf = append(buf, ',')
-		buf = appendFloat(buf, oc.Value.Y)
-	}
-	buf = append(buf, ']')
-	return buf, nil
+	// Type indicates the coordinates type, and therefore whether
+	// or not Z and M are populated.
+	Type CoordinatesType
 }

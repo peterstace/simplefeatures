@@ -21,12 +21,12 @@ func TestLineAccessor(t *testing.T) {
 	line := geomFromWKT(t, "LINESTRING(1 2,3 4)").AsLine()
 	t.Run("start", func(t *testing.T) {
 		got := line.StartPoint()
-		want := Coordinates{XY{1, 2}}
+		want := xyCoords(1, 2)
 		expectCoordsEq(t, got, want)
 	})
 	t.Run("end", func(t *testing.T) {
 		got := line.EndPoint()
-		want := Coordinates{XY{3, 4}}
+		want := xyCoords(3, 4)
 		expectCoordsEq(t, got, want)
 	})
 	t.Run("num points", func(t *testing.T) {
@@ -36,12 +36,12 @@ func TestLineAccessor(t *testing.T) {
 	})
 	t.Run("point 0", func(t *testing.T) {
 		got := line.PointN(0)
-		want := Coordinates{XY{1, 2}}
+		want := xyCoords(1, 2)
 		expectCoordsEq(t, got, want)
 	})
 	t.Run("point 1", func(t *testing.T) {
 		got := line.PointN(1)
-		want := Coordinates{XY{3, 4}}
+		want := xyCoords(3, 4)
 		expectCoordsEq(t, got, want)
 	})
 	t.Run("point 2", func(t *testing.T) {
@@ -58,45 +58,32 @@ func TestLineAccessor(t *testing.T) {
 
 func TestLineStringAccessor(t *testing.T) {
 	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").AsLineString()
-	pt12 := Coordinates{XY{1, 2}}
-	pt34 := Coordinates{XY{3, 4}}
-	pt56 := Coordinates{XY{5, 6}}
+	seq := ls.Coordinates()
+	pt12 := xyCoords(1, 2)
+	pt34 := xyCoords(3, 4)
+	pt56 := xyCoords(5, 6)
 
 	t.Run("start", func(t *testing.T) {
-		expectGeomEq(t, ls.StartPoint().AsGeometry(), NewPointC(pt12).AsGeometry())
+		expectGeomEq(t, ls.StartPoint().AsGeometry(), NewPoint(pt12).AsGeometry())
 	})
 	t.Run("end", func(t *testing.T) {
-		expectGeomEq(t, ls.EndPoint().AsGeometry(), NewPointC(pt56).AsGeometry())
+		expectGeomEq(t, ls.EndPoint().AsGeometry(), NewPoint(pt56).AsGeometry())
 	})
 	t.Run("num points", func(t *testing.T) {
-		expectIntEq(t, ls.NumPoints(), 3)
+		expectIntEq(t, seq.Length(), 3)
 	})
 	t.Run("point n", func(t *testing.T) {
-		expectPanics(t, func() { ls.PointN(-1) })
-		expectCoordsEq(t, ls.PointN(0), pt12)
-		expectCoordsEq(t, ls.PointN(1), pt34)
-		expectCoordsEq(t, ls.PointN(2), pt56)
-		expectPanics(t, func() { ls.PointN(3) })
-	})
-	t.Run("num lines", func(t *testing.T) {
-		expectIntEq(t, ls.NumLines(), 2)
-	})
-	t.Run("line n", func(t *testing.T) {
-		expectPanics(t, func() { ls.LineN(-1) })
-		expectGeomEq(t,
-			ls.LineN(0).AsGeometry(),
-			geomFromWKT(t, "LINESTRING(1 2,3 4)"),
-		)
-		expectGeomEq(t,
-			ls.LineN(1).AsGeometry(),
-			geomFromWKT(t, "LINESTRING(3 4,5 6)"),
-		)
-		expectPanics(t, func() { ls.LineN(2) })
+		expectPanics(t, func() { seq.Get(-1) })
+		expectCoordsEq(t, seq.Get(0), pt12)
+		expectCoordsEq(t, seq.Get(1), pt34)
+		expectCoordsEq(t, seq.Get(2), pt56)
+		expectPanics(t, func() { seq.Get(3) })
 	})
 }
 
 func TestLineStringEmptyAccessor(t *testing.T) {
 	ls := geomFromWKT(t, "LINESTRING EMPTY").AsLineString()
+	seq := ls.Coordinates()
 	emptyPoint := geomFromWKT(t, "POINT EMPTY")
 
 	t.Run("start", func(t *testing.T) {
@@ -106,61 +93,55 @@ func TestLineStringEmptyAccessor(t *testing.T) {
 		expectGeomEq(t, ls.EndPoint().AsGeometry(), emptyPoint)
 	})
 	t.Run("num points", func(t *testing.T) {
-		expectIntEq(t, ls.NumPoints(), 0)
+		expectIntEq(t, seq.Length(), 0)
 	})
 	t.Run("point n", func(t *testing.T) {
-		expectPanics(t, func() { ls.PointN(-1) })
-		expectPanics(t, func() { ls.PointN(0) })
-		expectPanics(t, func() { ls.PointN(1) })
-	})
-	t.Run("num lines", func(t *testing.T) {
-		expectIntEq(t, ls.NumLines(), 0)
-	})
-	t.Run("line n", func(t *testing.T) {
-		expectPanics(t, func() { ls.LineN(-1) })
-		expectPanics(t, func() { ls.LineN(0) })
-		expectPanics(t, func() { ls.LineN(1) })
+		expectPanics(t, func() { seq.Get(-1) })
+		expectPanics(t, func() { seq.Get(0) })
+		expectPanics(t, func() { seq.Get(1) })
 	})
 }
 
 func TestLineStringAccessorWithDuplicates(t *testing.T) {
 	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,3 4,5 6)").AsLineString()
-	pt12 := Coordinates{XY{1, 2}}
-	pt34 := Coordinates{XY{3, 4}}
-	pt56 := Coordinates{XY{5, 6}}
+	seq := ls.Coordinates()
+	pt12 := xyCoords(1, 2)
+	pt34 := xyCoords(3, 4)
+	pt56 := xyCoords(5, 6)
 
 	t.Run("num points", func(t *testing.T) {
-		expectIntEq(t, ls.NumPoints(), 4)
+		expectIntEq(t, seq.Length(), 4)
 	})
 	t.Run("point n", func(t *testing.T) {
-		expectPanics(t, func() { ls.PointN(-1) })
-		expectCoordsEq(t, ls.PointN(0), pt12)
-		expectCoordsEq(t, ls.PointN(1), pt34)
-		expectCoordsEq(t, ls.PointN(2), pt34)
-		expectCoordsEq(t, ls.PointN(3), pt56)
-		expectPanics(t, func() { ls.PointN(4) })
+		expectPanics(t, func() { seq.Get(-1) })
+		expectCoordsEq(t, seq.Get(0), pt12)
+		expectCoordsEq(t, seq.Get(1), pt34)
+		expectCoordsEq(t, seq.Get(2), pt34)
+		expectCoordsEq(t, seq.Get(3), pt56)
+		expectPanics(t, func() { seq.Get(4) })
 	})
 }
 
 func TestLineStringAccessorWithMoreDuplicates(t *testing.T) {
 	ls := geomFromWKT(t, "LINESTRING(1 2,1 2,3 4,3 4,3 4,5 6,5 6)").AsLineString()
-	pt12 := Coordinates{XY{1, 2}}
-	pt34 := Coordinates{XY{3, 4}}
-	pt56 := Coordinates{XY{5, 6}}
+	seq := ls.Coordinates()
+	pt12 := xyCoords(1, 2)
+	pt34 := xyCoords(3, 4)
+	pt56 := xyCoords(5, 6)
 
 	t.Run("num points", func(t *testing.T) {
-		expectIntEq(t, ls.NumPoints(), 7)
+		expectIntEq(t, seq.Length(), 7)
 	})
 	t.Run("point n", func(t *testing.T) {
-		expectPanics(t, func() { ls.PointN(-1) })
-		expectCoordsEq(t, ls.PointN(0), pt12)
-		expectCoordsEq(t, ls.PointN(1), pt12)
-		expectCoordsEq(t, ls.PointN(2), pt34)
-		expectCoordsEq(t, ls.PointN(3), pt34)
-		expectCoordsEq(t, ls.PointN(4), pt34)
-		expectCoordsEq(t, ls.PointN(5), pt56)
-		expectCoordsEq(t, ls.PointN(6), pt56)
-		expectPanics(t, func() { ls.PointN(7) })
+		expectPanics(t, func() { seq.Get(-1) })
+		expectCoordsEq(t, seq.Get(0), pt12)
+		expectCoordsEq(t, seq.Get(1), pt12)
+		expectCoordsEq(t, seq.Get(2), pt34)
+		expectCoordsEq(t, seq.Get(3), pt34)
+		expectCoordsEq(t, seq.Get(4), pt34)
+		expectCoordsEq(t, seq.Get(5), pt56)
+		expectCoordsEq(t, seq.Get(6), pt56)
+		expectPanics(t, func() { seq.Get(7) })
 	})
 }
 

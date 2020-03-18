@@ -18,6 +18,7 @@ func TestIntersects(t *testing.T) {
 		{"POINT EMPTY", "POINT(10 10)", false},
 		{"POINT(1 2)", "POINT(1 2)", true},
 		{"POINT(1 2)", "POINT(2 1)", false},
+		{"POINT Z (1 2 3)", "POINT M (1 2 3)", true},
 
 		// Point/Line
 		{"POINT EMPTY", "LINESTRING(0 0,1 1)", false},
@@ -393,18 +394,19 @@ func TestIntersects(t *testing.T) {
 func BenchmarkIntersectsLineStringWithLineString(b *testing.B) {
 	for _, sz := range []int{10, 100, 1000, 10000} {
 		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
-			xys1 := make([]geom.XY, sz)
-			xys2 := make([]geom.XY, sz)
+			var floats1, floats2 []float64
 			for i := 0; i < sz; i++ {
 				x := float64(i) / float64(sz)
-				xys1[i] = geom.XY{X: x, Y: 1}
-				xys2[i] = geom.XY{X: x, Y: 2}
+				floats1 = append(floats1, x, 1)
+				floats2 = append(floats2, x, 2)
 			}
-			ls1, err := geom.NewLineStringXY(xys1)
+			seq1 := geom.NewSequence(floats1, geom.DimXY)
+			seq2 := geom.NewSequence(floats2, geom.DimXY)
+			ls1, err := geom.NewLineString(seq1)
 			if err != nil {
 				b.Fatal(err)
 			}
-			ls2, err := geom.NewLineStringXY(xys2)
+			ls2, err := geom.NewLineString(seq2)
 			if err != nil {
 				b.Fatal(err)
 			}

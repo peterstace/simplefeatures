@@ -6,8 +6,6 @@ import (
 	"text/scanner"
 )
 
-//TODO: make negative numbers work
-
 type wktLexer struct {
 	scn       scanner.Scanner
 	peeked    bool

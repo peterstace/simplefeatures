@@ -266,7 +266,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 			return geom.Geometry{}, err
 		}
 		if isEmpty {
-			return geom.NewEmptyPoint().AsGeometry(), nil
+			return geom.NewEmptyPoint(geom.DimXY).AsGeometry(), nil
 		}
 		return h.decodeGeomHandleUsingWKB(gh)
 	case "MultiPoint":
@@ -285,7 +285,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 				return geom.Geometry{}, err
 			}
 			if isEmpty {
-				subPoints[i] = geom.NewEmptyPoint()
+				subPoints[i] = geom.NewEmptyPoint(geom.DimXY)
 			} else {
 				subPointAsGeom, err := h.decodeGeomHandleUsingWKB(sub)
 				if err != nil {
@@ -298,7 +298,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 				subPoints[i] = subPointAsGeom.AsPoint()
 			}
 		}
-		return geom.NewMultiPoint(subPoints).AsGeometry(), nil
+		return geom.NewMultiPointFromPoints(subPoints).AsGeometry(), nil
 	case "MultiPolygon":
 		n := C.GEOSGetNumGeometries_r(h.context, gh)
 		if n == -1 {
@@ -320,11 +320,8 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 			}
 			subPolys[i] = subPolyAsGeom.AsPolygon()
 		}
-		mp, err := geom.NewMultiPolygon(subPolys)
-		if err != nil {
-			return geom.Geometry{}, err
-		}
-		return mp.AsGeometry(), nil
+		mp, err := geom.NewMultiPolygonFromPolygons(subPolys)
+		return mp.AsGeometry(), err
 	case "GeometryCollection":
 		n := C.GEOSGetNumGeometries_r(h.context, gh)
 		if n == -1 {

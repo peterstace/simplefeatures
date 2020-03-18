@@ -8,35 +8,21 @@ import (
 	"math"
 )
 
-// TODO: When 3D/measure are supported, we will need to check for consistent
-// coordinate types inside compound geometries.
-
 // UnmarshalWKB reads the Well Known Binary (WKB), and returns the
 // corresponding Geometry.
 func UnmarshalWKB(r io.Reader, opts ...ConstructorOption) (Geometry, error) {
 	p := wkbParser{r: r, opts: opts}
 	p.parseByteOrder()
-	p.parseGeomType()
-	geom := p.parseGeomRoot()
+	gtype, ctype := p.parseGeomAndCoordType()
+	geom := p.parseGeomRoot(gtype, ctype)
 	return geom, p.err
 }
 
-type coordType byte
-
-const (
-	coordTypeXY coordType = 1 + iota
-	coordTypeXYZ
-	coordTypeXYM
-	coordTypeXYZM
-)
-
 type wkbParser struct {
-	err       error
-	r         io.Reader
-	bo        binary.ByteOrder
-	geomType  uint32
-	coordType coordType
-	opts      []ConstructorOption
+	err  error
+	r    io.Reader
+	bo   binary.ByteOrder
+	opts []ConstructorOption
 }
 
 func (p *wkbParser) setErr(err error) {
@@ -65,21 +51,23 @@ func (p *wkbParser) parseUint32() uint32 {
 	return x
 }
 
-func (p *wkbParser) parseGeomType() {
+func (p *wkbParser) parseGeomAndCoordType() (uint32, CoordinatesType) {
 	geomCode := p.parseUint32()
-	p.geomType = geomCode % 1000
+	gtype := geomCode % 1000
+	var ctype CoordinatesType
 	switch geomCode / 1000 {
 	case 0:
-		p.coordType = coordTypeXY
+		ctype = DimXY
 	case 1:
-		p.coordType = coordTypeXYZ
+		ctype = DimXYZ
 	case 2:
-		p.coordType = coordTypeXYM
+		ctype = DimXYM
 	case 3:
-		p.coordType = coordTypeXYZM
+		ctype = DimXYZM
 	default:
 		p.setErr(errors.New("cannot determine coordinate type"))
 	}
+	return gtype, ctype
 }
 
 const (
@@ -92,42 +80,36 @@ const (
 	wkbGeomTypeGeometryCollection = uint32(7)
 )
 
-func (p *wkbParser) parseGeomRoot() Geometry {
-	switch p.geomType {
+func (p *wkbParser) parseGeomRoot(gtype uint32, ctype CoordinatesType) Geometry {
+	switch gtype {
 	case wkbGeomTypePoint:
-		coords := p.parsePoint()
-		if coords.Empty {
-			return NewEmptyPoint().AsGeometry()
+		c, ok := p.parsePoint(ctype)
+		if !ok {
+			return NewEmptyPoint(ctype).AsGeometry()
 		} else {
-			return NewPointC(coords.Value, p.opts...).AsGeometry()
+			return NewPoint(c, p.opts...).AsGeometry()
 		}
 	case wkbGeomTypeLineString:
-		coords := p.parseLineString()
-		switch len(coords) {
-		case 2:
-			ln, err := NewLineC(coords[0], coords[1], p.opts...)
+		ls := p.parseLineString(ctype)
+		seq := ls.Coordinates()
+		if seq.Length() == 2 {
+			ln, err := NewLine(seq.Get(0), seq.Get(1), p.opts...)
 			p.setErr(err)
 			return ln.AsGeometry()
-		default:
-			ls, err := NewLineStringC(coords, p.opts...)
-			p.setErr(err)
-			return ls.AsGeometry()
 		}
+		return ls.AsGeometry()
 	case wkbGeomTypePolygon:
-		coords := p.parsePolygon()
-		poly, err := NewPolygonC(coords, p.opts...)
-		p.setErr(err)
-		return poly.AsGeometry()
+		return p.parsePolygon(ctype).AsGeometry()
 	case wkbGeomTypeMultiPoint:
-		return p.parseMultiPoint().AsGeometry()
+		return p.parseMultiPoint(ctype).AsGeometry()
 	case wkbGeomTypeMultiLineString:
-		return p.parseMultiLineString().AsGeometry()
+		return p.parseMultiLineString(ctype).AsGeometry()
 	case wkbGeomTypeMultiPolygon:
-		return p.parseMultiPolygon().AsGeometry()
+		return p.parseMultiPolygon(ctype).AsGeometry()
 	case wkbGeomTypeGeometryCollection:
-		return p.parseGeometryCollection().AsGeometry()
+		return p.parseGeometryCollection(ctype).AsGeometry()
 	default:
-		p.setErr(fmt.Errorf("unknown geometry type: %d", p.geomType))
+		p.setErr(fmt.Errorf("unknown geometry type: %d", gtype))
 		return Geometry{}
 	}
 }
@@ -145,61 +127,77 @@ func (p *wkbParser) parseFloat64() float64 {
 	return f
 }
 
-func (p *wkbParser) parsePoint() OptionalCoordinates {
-	x := p.parseFloat64()
-	y := p.parseFloat64()
-	var z, m float64
-	switch p.coordType {
-	case coordTypeXY:
-	case coordTypeXYZ:
-		z = p.parseFloat64()
-	case coordTypeXYM:
-		m = p.parseFloat64()
-	case coordTypeXYZM:
-		z = p.parseFloat64()
-		m = p.parseFloat64()
+func (p *wkbParser) parsePoint(ctype CoordinatesType) (Coordinates, bool) {
+	var c Coordinates
+	c.Type = ctype
+	c.X = p.parseFloat64()
+	c.Y = p.parseFloat64()
+	switch c.Type {
+	case DimXY:
+	case DimXYZ:
+		c.Z = p.parseFloat64()
+	case DimXYM:
+		c.M = p.parseFloat64()
+	case DimXYZM:
+		c.Z = p.parseFloat64()
+		c.M = p.parseFloat64()
 	default:
 		p.setErr(errors.New("unknown coord type"))
-		return OptionalCoordinates{}
+		return Coordinates{}, false
 	}
 
-	if math.IsNaN(x) && math.IsNaN(y) {
+	if math.IsNaN(c.X) && math.IsNaN(c.Y) {
 		// Empty points are represented as NaN,NaN is WKB.
-		return OptionalCoordinates{Empty: true}
+		return Coordinates{}, false
 	}
-	if math.IsNaN(x) || math.IsNaN(y) {
+	if math.IsNaN(c.X) || math.IsNaN(c.Y) {
 		p.setErr(errors.New("point contains mixed NaN values"))
-		return OptionalCoordinates{}
+		return Coordinates{}, false
 	}
-
-	// Only XY is supported so far.
-	_, _ = z, m
-	return OptionalCoordinates{Value: Coordinates{XY{x, y}}}
+	return c, true
 }
 
-func (p *wkbParser) parseLineString() []Coordinates {
+func (p *wkbParser) parseLineString(ctype CoordinatesType) LineString {
 	n := p.parseUint32()
-	coords := make([]Coordinates, 0, n)
+	floats := make([]float64, 0, int(n)*ctype.Dimension())
 	for i := uint32(0); i < n; i++ {
-		pt := p.parsePoint()
-		if !pt.Empty {
-			coords = append(coords, pt.Value)
+		c, ok := p.parsePoint(ctype)
+		if !ok {
+			p.setErr(errors.New("empty point not allowed in LineString"))
+		}
+		floats = append(floats, c.X, c.Y)
+		if ctype.Is3D() {
+			floats = append(floats, c.Z)
+		}
+		if ctype.IsMeasured() {
+			floats = append(floats, c.M)
 		}
 	}
-	return coords
+	seq := NewSequence(floats, ctype)
+	poly, err := NewLineString(seq, p.opts...)
+	p.setErr(err)
+	return poly
 }
 
-func (p *wkbParser) parsePolygon() [][]Coordinates {
+func (p *wkbParser) parsePolygon(ctype CoordinatesType) Polygon {
 	n := p.parseUint32()
-	coords := make([][]Coordinates, n)
-	for i := range coords {
-		coords[i] = p.parseLineString()
+	if n == 0 {
+		return Polygon{}.ForceCoordinatesType(ctype)
 	}
-	return coords
+	rings := make([]LineString, n)
+	for i := range rings {
+		rings[i] = p.parseLineString(ctype)
+	}
+	poly, err := NewPolygonFromRings(rings, p.opts...)
+	p.setErr(err)
+	return poly
 }
 
-func (p *wkbParser) parseMultiPoint() MultiPoint {
+func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) MultiPoint {
 	n := p.parseUint32()
+	if n == 0 {
+		return MultiPoint{}.ForceCoordinatesType(ctype)
+	}
 	var pts []Point
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
@@ -209,11 +207,14 @@ func (p *wkbParser) parseMultiPoint() MultiPoint {
 		}
 		pts = append(pts, geom.AsPoint())
 	}
-	return NewMultiPoint(pts, p.opts...)
+	return NewMultiPointFromPoints(pts, p.opts...)
 }
 
-func (p *wkbParser) parseMultiLineString() MultiLineString {
+func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) MultiLineString {
 	n := p.parseUint32()
+	if n == 0 {
+		return MultiLineString{}.ForceCoordinatesType(ctype)
+	}
 	var lss []LineString
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
@@ -229,30 +230,33 @@ func (p *wkbParser) parseMultiLineString() MultiLineString {
 			p.setErr(errors.New("non-LineString found in MultiLineString"))
 		}
 	}
-	return NewMultiLineString(lss, p.opts...)
+	return NewMultiLineStringFromLineStrings(lss, p.opts...)
 }
 
-func (p *wkbParser) parseMultiPolygon() MultiPolygon {
+func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) MultiPolygon {
 	n := p.parseUint32()
+	if n == 0 {
+		return MultiPolygon{}.ForceCoordinatesType(ctype)
+	}
 	var polys []Polygon
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
 		p.setErr(err)
-		if geom.IsEmpty() {
-			continue
-		}
 		if !geom.IsPolygon() {
 			p.setErr(errors.New("non-Polygon found in MultiPolygon"))
 		}
 		polys = append(polys, geom.AsPolygon())
 	}
-	mpoly, err := NewMultiPolygon(polys, p.opts...)
+	mpoly, err := NewMultiPolygonFromPolygons(polys, p.opts...)
 	p.setErr(err)
 	return mpoly
 }
 
-func (p *wkbParser) parseGeometryCollection() GeometryCollection {
+func (p *wkbParser) parseGeometryCollection(ctype CoordinatesType) GeometryCollection {
 	n := p.parseUint32()
+	if n == 0 {
+		return GeometryCollection{}.ForceCoordinatesType(ctype)
+	}
 	var geoms []Geometry
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)

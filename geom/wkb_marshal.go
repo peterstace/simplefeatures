@@ -36,8 +36,8 @@ func (m *wkbMarshaller) writeByteOrder() {
 	m.write(littleEndian)
 }
 
-func (m *wkbMarshaller) writeGeomType(geomType uint32) {
-	m.write(geomType)
+func (m *wkbMarshaller) writeGeomType(geomType uint32, ctype CoordinatesType) {
+	m.write(uint32(ctype)*1000 + geomType)
 }
 
 func (m *wkbMarshaller) writeFloat64(f float64) {
@@ -46,4 +46,24 @@ func (m *wkbMarshaller) writeFloat64(f float64) {
 
 func (m *wkbMarshaller) writeCount(n int) {
 	m.write(uint32(n))
+}
+
+func (m *wkbMarshaller) writeCoordinates(c Coordinates) {
+	m.writeFloat64(c.X)
+	m.writeFloat64(c.Y)
+	if c.Type.Is3D() {
+		m.writeFloat64(c.Z)
+	}
+	if c.Type.IsMeasured() {
+		m.writeFloat64(c.M)
+	}
+}
+
+func (m *wkbMarshaller) writeSequence(seq Sequence) {
+	n := seq.Length()
+	m.writeCount(n)
+	for i := 0; i < n; i++ {
+		c := seq.Get(i)
+		m.writeCoordinates(c)
+	}
 }

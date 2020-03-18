@@ -23,7 +23,7 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 
 	switch {
 	case len(points) == 0 && len(lines) == 0:
-		return NewGeometryCollection(nil).AsGeometry(), nil
+		return GeometryCollection{}.AsGeometry(), nil
 	case len(points) == 0:
 		// Lines only.
 		if len(lines) == 1 {
@@ -31,19 +31,19 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 		}
 		var lineStrings []LineString
 		for _, ln := range lines {
-			lnStr, err := NewLineStringC(ln.Coordinates())
+			lnStr, err := NewLineString(ln.Coordinates())
 			if err != nil {
 				return Geometry{}, err
 			}
 			lineStrings = append(lineStrings, lnStr)
 		}
-		return NewMultiLineString(lineStrings).AsGeometry(), nil
+		return NewMultiLineStringFromLineStrings(lineStrings).AsGeometry(), nil
 	case len(lines) == 0:
 		// Points only.
 		if len(points) == 1 {
 			return points[0].AsGeometry(), nil
 		}
-		return NewMultiPoint(points).AsGeometry(), nil
+		return NewMultiPointFromPoints(points).AsGeometry(), nil
 	default:
 		all := make([]Geometry, len(points)+len(lines))
 		for i, pt := range points {
@@ -70,7 +70,7 @@ func dedupPoints(pts []Point) []Point {
 		}
 	}
 	if haveEmpty {
-		dedup = append(dedup, NewEmptyPoint())
+		dedup = append(dedup, NewEmptyPoint(DimXY))
 	}
 	return dedup
 }

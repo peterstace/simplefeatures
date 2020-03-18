@@ -54,29 +54,34 @@ func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 // Line or Point geometry is returned.
 func (e Envelope) AsGeometry() Geometry {
 	if e.min == e.max {
-		return NewPointXY(e.min).AsGeometry()
+		return NewPointFromXY(e.min).AsGeometry()
 	}
-	var err error
-	var g Geometry
+
 	if e.min.X == e.max.X || e.min.Y == e.max.Y {
-		var ln Line
-		ln, err = NewLineC(Coordinates{XY: e.min}, Coordinates{XY: e.max})
-		g = ln.AsGeometry()
-	} else {
-		var poly Polygon
-		poly, err = NewPolygonC([][]Coordinates{{
-			{XY: XY{e.min.X, e.min.Y}},
-			{XY: XY{e.min.X, e.max.Y}},
-			{XY: XY{e.max.X, e.max.Y}},
-			{XY: XY{e.max.X, e.min.Y}},
-			{XY: XY{e.min.X, e.min.Y}},
-		}})
-		g = poly.AsGeometry()
+		ln, err := NewLineFromXY(e.min, e.max)
+		if err != nil {
+			panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
+		}
+		return ln.AsGeometry()
 	}
+
+	floats := [...]float64{
+		e.min.X, e.min.Y,
+		e.min.X, e.max.Y,
+		e.max.X, e.max.Y,
+		e.max.X, e.min.Y,
+		e.min.X, e.min.Y,
+	}
+	seq := NewSequence(floats[:], DimXY)
+	ls, err := NewLineString(seq)
 	if err != nil {
 		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
 	}
-	return g
+	poly, err := NewPolygonFromRings([]LineString{ls})
+	if err != nil {
+		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
+	}
+	return poly.AsGeometry()
 }
 
 // Min returns the point in the envelope with the minimum X and Y values.

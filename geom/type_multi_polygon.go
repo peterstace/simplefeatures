@@ -9,9 +9,11 @@ import (
 	"unsafe"
 )
 
-// MultiPolygon is a multi surface whose elements are polygons.
+// MultiPolygon is a planar surface geometry that consists of a collection of
+// Polygons. The zero value is the empty MultiPolygon (i.e. the collection of
+// zero Polygons). It is immutable after creation.
 //
-// Its assertions are:
+// For a MultiPolygon to be valid, the following assertions must hold:
 //
 // 1. It must be made up of zero or more valid Polygons (any of which may be empty).
 //
@@ -20,19 +22,29 @@ import (
 // 3. The boundaries of any two polygons may touch only at a finite number of points.
 type MultiPolygon struct {
 	polys []Polygon
+	ctype CoordinatesType
 }
 
-// NewEmptyMultiPolygon returns the empty MultiPolygon. It is equivalent to
-// calling NewMultiPolygon with a zero length polygon slice.
-func NewEmptyMultiPolygon() MultiPolygon {
-	return MultiPolygon{}
-}
+// NewMultiPolygonFromPolygons creates a MultiPolygon from its constituent
+// Polygons. It gives an error if any of the MultiPolygon assertions are not
+// maintained. The coordinates type of the MultiPolygon is the lowest common
+// coordinates type its Polygons.
+func NewMultiPolygonFromPolygons(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
+	if len(polys) == 0 {
+		return MultiPolygon{}, nil
+	}
 
-// NewMultiPolygon creates a MultiPolygon from its constituent Polygons. It
-// gives an error if any of the MultiPolygon assertions are not maintained.
-func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
+	ctype := DimXYZM
+	for _, p := range polys {
+		ctype &= p.CoordinatesType()
+	}
+	polys = append([]Polygon(nil), polys...)
+	for i := range polys {
+		polys[i] = polys[i].ForceCoordinatesType(ctype)
+	}
+
 	if skipValidations(opts) {
-		return MultiPolygon{polys}, nil
+		return MultiPolygon{polys, ctype}, nil
 	}
 
 	type interval struct {
@@ -46,7 +58,7 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 			intervals[i].maxX = env.Max().X
 		}
 	}
-	indexes := seq(len(polys))
+	indexes := intSequence(len(polys))
 	sort.Slice(indexes, func(i, j int) bool {
 		// Empty Polygons with have an interval of (0, 0).
 		xi := intervals[indexes[i]].minX
@@ -85,25 +97,7 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 		active.push(i)
 	}
 
-	return MultiPolygon{polys}, nil
-}
-
-// NewMultiPolygonC creates a new MultiPolygon from its constituent Coordinate values.
-func NewMultiPolygonC(coords [][][]Coordinates, opts ...ConstructorOption) (MultiPolygon, error) {
-	var polys []Polygon
-	for _, c := range coords {
-		poly, err := NewPolygonC(c, opts...)
-		if err != nil {
-			return MultiPolygon{}, err
-		}
-		polys = append(polys, poly)
-	}
-	return NewMultiPolygon(polys, opts...)
-}
-
-// NewMultiPolygonXY creates a new MultiPolygon from its constituent XY values.
-func NewMultiPolygonXY(pts [][][]XY, opts ...ConstructorOption) (MultiPolygon, error) {
-	return NewMultiPolygonC(threeDimXYToCoords(pts), opts...)
+	return MultiPolygon{polys, ctype}, nil
 }
 
 func polyInteriorsIntersect(p1, p2 Polygon) bool {
@@ -120,15 +114,23 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 		// interior of the polygons intersect.
 		allPts := make(map[XY]struct{})
 		for _, r1 := range p1.rings {
-			for ln1 := 0; ln1 < r1.NumLines(); ln1++ {
-				line1 := r1.LineN(ln1)
+			seq1 := r1.Coordinates()
+			for idx1 := 0; idx1 < seq1.Length(); idx1++ {
+				line1, ok := getLine(seq1, idx1)
+				if !ok {
+					continue
+				}
 				// Collect boundary control points and intersection points.
 				linePts := make(map[XY]struct{})
 				linePts[line1.a.XY] = struct{}{}
 				linePts[line1.b.XY] = struct{}{}
 				for _, r2 := range p2.rings {
-					for ln2 := 0; ln2 < r2.NumLines(); ln2++ {
-						line2 := r2.LineN(ln2)
+					seq2 := r2.Coordinates()
+					for idx2 := 0; idx2 < seq2.Length(); idx2++ {
+						line2, ok := getLine(seq2, idx2)
+						if !ok {
+							continue
+						}
 						inter := intersectLineWithLineNoAlloc(line1, line2)
 						if inter.empty {
 							continue
@@ -220,16 +222,16 @@ func (m MultiPolygon) AsText() string {
 }
 
 func (m MultiPolygon) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "MULTIPOLYGON"...)
+	dst = appendWKTHeader(dst, "MULTIPOLYGON", m.ctype)
 	if len(m.polys) == 0 {
-		return append(dst, " EMPTY"...)
+		return appendWKTEmpty(dst)
 	}
 	dst = append(dst, '(')
 	for i, poly := range m.polys {
-		dst = poly.appendWKTBody(dst)
-		if i != len(m.polys)-1 {
+		if i > 0 {
 			dst = append(dst, ',')
 		}
+		dst = poly.appendWKTBody(dst)
 	}
 	return append(dst, ')')
 }
@@ -279,13 +281,13 @@ func (m MultiPolygon) Boundary() MultiLineString {
 	for _, p := range m.polys {
 		n += len(p.rings)
 	}
-	bounds := make([]LineString, n)
-	var i int
+	bounds := make([]LineString, 0, n)
 	for _, p := range m.polys {
-		copy(bounds[i:], p.rings)
-		i += len(p.rings)
+		for _, r := range p.rings {
+			bounds = append(bounds, r.Force2D())
+		}
 	}
-	return NewMultiLineString(bounds)
+	return NewMultiLineStringFromLineStrings(bounds)
 }
 
 func (m MultiPolygon) Value() (driver.Value, error) {
@@ -297,7 +299,7 @@ func (m MultiPolygon) Value() (driver.Value, error) {
 func (m MultiPolygon) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeMultiPolygon)
+	marsh.writeGeomType(wkbGeomTypeMultiPolygon, m.ctype)
 	n := m.NumPolygons()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {
@@ -312,14 +314,18 @@ func (m MultiPolygon) ConvexHull() Geometry {
 }
 
 func (m MultiPolygon) MarshalJSON() ([]byte, error) {
-	return marshalGeoJSON("MultiPolygon", m.Coordinates())
+	var dst []byte
+	dst = append(dst, `{"type":"MultiPolygon","coordinates":`...)
+	dst = appendGeoJSONSequenceMatrix(dst, m.Coordinates())
+	dst = append(dst, '}')
+	return dst, nil
 }
 
 // Coordinates returns the coordinates of each constituent Polygon of the
 // MultiPolygon.
-func (m MultiPolygon) Coordinates() [][][]Coordinates {
+func (m MultiPolygon) Coordinates() [][]Sequence {
 	numPolys := m.NumPolygons()
-	coords := make([][][]Coordinates, numPolys)
+	coords := make([][]Sequence, numPolys)
 	for i := 0; i < numPolys; i++ {
 		coords[i] = m.PolygonN(i).Coordinates()
 	}
@@ -328,10 +334,16 @@ func (m MultiPolygon) Coordinates() [][][]Coordinates {
 
 // TransformXY transforms this MultiPolygon into another MultiPolygon according to fn.
 func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPolygon, error) {
-	coords := m.Coordinates()
-	transform3dCoords(coords, fn)
-	mp, err := NewMultiPolygonC(coords, opts...)
-	return mp, err
+	polys := make([]Polygon, m.NumPolygons())
+	for i := range polys {
+		transformed, err := m.PolygonN(i).TransformXY(fn, opts...)
+		if err != nil {
+			return MultiPolygon{}, err
+		}
+		polys[i] = transformed
+	}
+	mp, err := NewMultiPolygonFromPolygons(polys, opts...)
+	return mp.ForceCoordinatesType(m.ctype), err
 }
 
 // EqualsExact checks if this MultiPolygon is exactly equal to another MultiPolygon.
@@ -342,7 +354,12 @@ func (m MultiPolygon) EqualsExact(other Geometry, opts ...EqualsExactOption) boo
 
 // IsValid checks if this MultiPolygon is valid
 func (m MultiPolygon) IsValid() bool {
-	_, err := NewMultiPolygonC(m.Coordinates())
+	for _, p := range m.polys {
+		if !p.IsValid() {
+			return false
+		}
+	}
+	_, err := NewMultiPolygonFromPolygons(m.polys)
 	return err == nil
 }
 
@@ -378,9 +395,9 @@ func (m MultiPolygon) Centroid() Point {
 		sumArea += area
 	}
 	if sumArea == 0 {
-		return NewEmptyPoint()
+		return NewEmptyPoint(DimXY)
 	}
-	return NewPointXY(sumXY.Scale(1.0 / sumArea))
+	return NewPointFromXY(sumXY.Scale(1.0 / sumArea))
 }
 
 // Reverse in the case of MultiPolygon outputs the component polygons in their original order,
@@ -391,9 +408,26 @@ func (m MultiPolygon) Reverse() MultiPolygon {
 	for i := 0; i < len(m.polys); i++ {
 		polys[i] = m.polys[i].Reverse()
 	}
-	m2, err := NewMultiPolygon(polys)
-	if err != nil {
-		panic("Reverse of an existing MultiPolygon should not fail")
+	return MultiPolygon{polys, m.ctype}
+}
+
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
+func (m MultiPolygon) CoordinatesType() CoordinatesType {
+	return m.ctype
+}
+
+// ForceCoordinatesType returns a new MultiPolygon with a different CoordinatesType. If a
+// dimension is added, then new values are populated with 0.
+func (m MultiPolygon) ForceCoordinatesType(newCType CoordinatesType) MultiPolygon {
+	flat := make([]Polygon, len(m.polys))
+	for i := range m.polys {
+		flat[i] = m.polys[i].ForceCoordinatesType(newCType)
 	}
-	return m2
+	return MultiPolygon{flat, newCType}
+}
+
+// Force2D returns a copy of the MultiPolygon with Z and M values removed.
+func (m MultiPolygon) Force2D() MultiPolygon {
+	return m.ForceCoordinatesType(DimXY)
 }

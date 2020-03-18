@@ -28,6 +28,10 @@ type UnaryResult struct {
 	Centroid   geom.Geometry
 	Reverse    geom.Geometry
 	Type       string
+	Force2D    geom.Geometry
+	Force3DZ   geom.Geometry
+	Force3DM   geom.Geometry
+	Force4D    geom.Geometry
 }
 
 const (
@@ -98,7 +102,13 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		ST_Area(ST_GeomFromWKB($1)),
 		ST_AsBinary(ST_Centroid(ST_GeomFromWKB($1))),
 		ST_AsText(ST_Reverse(ST_GeomFromText($3))),
-		ST_GeometryType(ST_GeomFromWKB($1))
+		ST_GeometryType(ST_GeomFromWKB($1)),
+
+		ST_AsBinary(ST_Force2D(ST_GeomFromWKB($1))),
+		ST_AsBinary(ST_Force3DZ(ST_GeomFromWKB($1))),
+		ST_AsBinary(ST_Force3DM(ST_GeomFromWKB($1))),
+		ST_AsBinary(ST_Force4D(ST_GeomFromWKB($1)))
+
 		`, g, isNestedGeometryCollection(g), g.AsText(),
 	).Scan(
 		&result.AsText,
@@ -117,6 +127,10 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		&result.Centroid,
 		&reverseWKT,
 		&result.Type,
+		&result.Force2D,
+		&result.Force3DZ,
+		&result.Force3DM,
+		&result.Force4D,
 	)
 	if err != nil {
 		return result, err

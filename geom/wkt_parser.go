@@ -72,49 +72,55 @@ func (p *parser) checkEOF() {
 }
 
 func (p *parser) nextGeometryTaggedText() Geometry {
-	switch tok := p.nextToken(); strings.ToUpper(tok) {
+	geomType, ctype := p.nextGeomTag()
+	switch geomType {
 	case "POINT":
-		coords := p.nextPointText()
-		if coords.Empty {
-			return NewEmptyPoint().AsGeometry()
+		c, ok := p.nextPointText(ctype)
+		if !ok {
+			return NewEmptyPoint(ctype).AsGeometry()
 		} else {
-			return NewPointC(coords.Value, p.opts...).AsGeometry()
+			return NewPoint(c, p.opts...).AsGeometry()
 		}
 	case "LINESTRING":
-		coords := p.nextLineStringText()
-		switch len(coords) {
-		case 2:
-			ln, err := NewLineC(coords[0], coords[1], p.opts...)
+		ls := p.nextLineStringText(ctype)
+		seq := ls.Coordinates()
+		n := seq.Length()
+		if n == 2 {
+			ln, err := NewLine(seq.Get(0), seq.Get(1), p.opts...)
 			p.check(err)
 			return ln.AsGeometry()
-		default:
-			ls, err := NewLineStringC(coords, p.opts...)
-			p.check(err)
-			return ls.AsGeometry()
 		}
+		return ls.AsGeometry()
 	case "POLYGON":
-		coords := p.nextPolygonText()
-		poly, err := NewPolygonC(coords, p.opts...)
-		p.check(err)
-		return poly.AsGeometry()
+		return p.nextPolygonText(ctype).AsGeometry()
 	case "MULTIPOINT":
-		coords := p.nextMultiPointText()
-		return NewMultiPointOC(coords, p.opts...).AsGeometry()
+		return p.nextMultiPointText(ctype).AsGeometry()
 	case "MULTILINESTRING":
-		coords := p.nextPolygonText() // same production as polygon
-		mls, err := NewMultiLineStringC(coords, p.opts...)
-		p.check(err)
-		return mls.AsGeometry()
+		return p.nextMultiLineString(ctype).AsGeometry()
 	case "MULTIPOLYGON":
-		coords := p.nextMultiPolygonText()
-		mp, err := NewMultiPolygonC(coords, p.opts...)
-		p.check(err)
-		return mp.AsGeometry()
+		return p.nextMultiPolygonText(ctype).AsGeometry()
 	case "GEOMETRYCOLLECTION":
-		return p.nextGeometryCollectionText()
+		return p.nextGeometryCollectionText(ctype).AsGeometry()
 	default:
-		p.errorf("unexpected token: %v", tok)
+		p.errorf("unexpected token: %v", geomType)
 		return Geometry{}
+	}
+}
+
+func (p *parser) nextGeomTag() (string, CoordinatesType) {
+	geomType := strings.ToUpper(p.nextToken())
+	switch p.peekToken() {
+	case "Z":
+		p.nextToken()
+		return geomType, DimXYZ
+	case "M":
+		p.nextToken()
+		return geomType, DimXYM
+	case "ZM":
+		p.nextToken()
+		return geomType, DimXYZM
+	default:
+		return geomType, DimXY
 	}
 }
 
@@ -141,11 +147,25 @@ func (p *parser) nextCommaOrRightParen() string {
 	return tok
 }
 
-func (p *parser) nextPoint() Coordinates {
-	// TODO: handle z, m, and zm points.
-	x := p.nextSignedNumericLiteral()
-	y := p.nextSignedNumericLiteral()
-	return Coordinates{XY{x, y}}
+func (p *parser) nextPoint(ctype CoordinatesType) Coordinates {
+	var c Coordinates
+	c.Type = ctype
+	c.X = p.nextSignedNumericLiteral()
+	c.Y = p.nextSignedNumericLiteral()
+	if ctype.Is3D() {
+		c.Z = p.nextSignedNumericLiteral()
+	}
+	if ctype.IsMeasured() {
+		c.M = p.nextSignedNumericLiteral()
+	}
+	return c
+}
+
+func (p *parser) nextPointAppend(dst []float64, ctype CoordinatesType) []float64 {
+	for i := 0; i < ctype.Dimension(); i++ {
+		dst = append(dst, p.nextSignedNumericLiteral())
+	}
+	return dst
 }
 
 func (p *parser) nextSignedNumericLiteral() float64 {
@@ -167,128 +187,150 @@ func (p *parser) nextSignedNumericLiteral() float64 {
 	return f
 }
 
-func (p *parser) nextPointText() OptionalCoordinates {
+func (p *parser) nextPointText(ctype CoordinatesType) (Coordinates, bool) {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
-		return OptionalCoordinates{Empty: true}
+		return Coordinates{}, false
 	}
-	pt := p.nextPoint()
+	c := p.nextPoint(ctype)
 	p.nextRightParen()
-	return OptionalCoordinates{Value: pt}
+	return c, true
 }
 
-func (p *parser) nextLineStringText() []Coordinates {
+func (p *parser) nextLineStringText(ctype CoordinatesType) LineString {
+	var floats []float64
+	tok := p.nextEmptySetOrLeftParen()
+	if tok == "(" {
+		floats = p.nextPointAppend(floats, ctype)
+		for {
+			tok := p.nextCommaOrRightParen()
+			if tok == "," {
+				floats = p.nextPointAppend(floats, ctype)
+			} else {
+				break
+			}
+		}
+	}
+	seq := NewSequence(floats, ctype)
+	ls, err := NewLineString(seq, p.opts...)
+	p.check(err)
+	return ls
+}
+
+func (p *parser) nextPolygonText(ctype CoordinatesType) Polygon {
+	rings := p.nextPolygonOrMultiLineStringText(ctype)
+	if len(rings) == 0 {
+		return Polygon{}.ForceCoordinatesType(ctype)
+	}
+	poly, err := NewPolygonFromRings(rings, p.opts...)
+	p.check(err)
+	return poly
+}
+
+func (p *parser) nextMultiLineString(ctype CoordinatesType) MultiLineString {
+	lss := p.nextPolygonOrMultiLineStringText(ctype)
+	if len(lss) == 0 {
+		return MultiLineString{}.ForceCoordinatesType(ctype)
+	}
+	return NewMultiLineStringFromLineStrings(lss, p.opts...)
+}
+
+func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType) []LineString {
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "EMPTY" {
 		return nil
 	}
-	pt := p.nextPoint()
-	pts := []Coordinates{pt}
+	ls := p.nextLineStringText(ctype)
+	lss := []LineString{ls}
 	for {
 		tok := p.nextCommaOrRightParen()
 		if tok == "," {
-			pts = append(pts, p.nextPoint())
+			lss = append(lss, p.nextLineStringText(ctype))
 		} else {
 			break
 		}
 	}
-	return pts
+	return lss
 }
 
-func (p *parser) nextPolygonText() [][]Coordinates {
+func (p *parser) nextMultiPointText(ctype CoordinatesType) MultiPoint {
+	var floats []float64
+	var empty BitSet
 	tok := p.nextEmptySetOrLeftParen()
-	if tok == "EMPTY" {
-		return nil
-	}
-	line := p.nextLineStringText()
-	lines := [][]Coordinates{line}
-	for {
-		tok := p.nextCommaOrRightParen()
-		if tok == "," {
-			lines = append(lines, p.nextLineStringText())
-		} else {
-			break
+	if tok == "(" {
+		for i := 0; true; i++ {
+			if p.peekToken() == "EMPTY" {
+				p.nextToken()
+				for j := 0; j < ctype.Dimension(); j++ {
+					floats = append(floats, 0)
+				}
+				empty.Set(i, true)
+			} else {
+				floats = p.nextMultiPointStylePointAppend(floats, ctype)
+			}
+			tok := p.nextCommaOrRightParen()
+			if tok != "," {
+				break
+			}
 		}
 	}
-	return lines
+	seq := NewSequence(floats, ctype)
+	return NewMultiPointWithEmptyMask(seq, empty, p.opts...)
 }
 
-func (p *parser) nextMultiPointText() []OptionalCoordinates {
-	tok := p.nextEmptySetOrLeftParen()
-	if tok == "EMPTY" {
-		return nil
-	}
-	pt := p.nextMultiPointStylePoint()
-	pts := []OptionalCoordinates{pt}
-	for {
-		tok := p.nextCommaOrRightParen()
-		if tok == "," {
-			pt := p.nextMultiPointStylePoint()
-			pts = append(pts, pt)
-		} else {
-			break
-		}
-	}
-	return pts
-}
-
-func (p *parser) nextMultiPointStylePoint() OptionalCoordinates {
+func (p *parser) nextMultiPointStylePointAppend(dst []float64, ctype CoordinatesType) []float64 {
 	// This is an extension of the spec, and is required to handle WKT output
 	// from non-complying implementations. In particular, PostGIS doesn't
 	// comply to the spec (it outputs points as part of a multipoint without
 	// their surrounding parentheses).
-	tok := p.peekToken()
-	if tok == "EMPTY" {
-		p.nextToken()
-		return OptionalCoordinates{Empty: true}
-	}
 	var useParens bool
-	if tok == "(" {
+	if p.peekToken() == "(" {
 		p.nextToken()
 		useParens = true
 	}
-	pt := p.nextPoint()
+	dst = p.nextPointAppend(dst, ctype)
 	if useParens {
 		p.nextRightParen()
 	}
-	return OptionalCoordinates{Value: pt}
+	return dst
 }
 
-func (p *parser) nextMultiPolygonText() [][][]Coordinates {
+func (p *parser) nextMultiPolygonText(ctype CoordinatesType) MultiPolygon {
+	var polys []Polygon
 	tok := p.nextEmptySetOrLeftParen()
-	if tok == "EMPTY" {
-		return nil
-	}
-	poly := p.nextPolygonText()
-	polys := [][][]Coordinates{poly}
-	for {
-		tok := p.nextCommaOrRightParen()
-		if tok == "," {
-			poly := p.nextPolygonText()
+	if tok == "(" {
+		for {
+			poly := p.nextPolygonText(ctype)
 			polys = append(polys, poly)
-		} else {
-			break
+			tok := p.nextCommaOrRightParen()
+			if tok != "," {
+				break
+			}
 		}
 	}
-	return polys
+	if len(polys) == 0 {
+		return MultiPolygon{}.ForceCoordinatesType(ctype)
+	}
+	mp, err := NewMultiPolygonFromPolygons(polys, p.opts...)
+	p.check(err)
+	return mp
 }
 
-func (p *parser) nextGeometryCollectionText() Geometry {
+func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) GeometryCollection {
+	var geoms []Geometry
 	tok := p.nextEmptySetOrLeftParen()
-	if tok == "EMPTY" {
-		return NewGeometryCollection(nil, p.opts...).AsGeometry()
-	}
-	geoms := []Geometry{
-		p.nextGeometryTaggedText(),
-	}
-	for {
-		tok := p.nextCommaOrRightParen()
-		if tok == "," {
-			geom := p.nextGeometryTaggedText()
-			geoms = append(geoms, geom)
-		} else {
-			break
+	if tok == "(" {
+		for {
+			g := p.nextGeometryTaggedText()
+			geoms = append(geoms, g)
+			tok := p.nextCommaOrRightParen()
+			if tok != "," {
+				break
+			}
 		}
 	}
-	return NewGeometryCollection(geoms, p.opts...).AsGeometry()
+	if len(geoms) == 0 {
+		return GeometryCollection{}.ForceCoordinatesType(ctype)
+	}
+	return NewGeometryCollection(geoms, p.opts...)
 }

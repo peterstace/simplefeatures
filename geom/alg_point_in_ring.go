@@ -20,13 +20,15 @@ func pointRingSide(pt XY, ring LineString) side {
 		panic("pointRingSide called with non-closed ring")
 	}
 
-	ptg := NewPointC(Coordinates{pt})
-	// find max x coordinate
-	maxX := ring.LineN(0).StartPoint().X
-	for i := 0; i < ring.NumLines(); i++ {
-		ln := ring.LineN(i)
-		maxX = math.Max(maxX, ln.EndPoint().X)
-		if hasIntersectionPointWithLine(ptg, ln) {
+	seq := ring.Coordinates()
+	n := seq.Length()
+
+	ptg := NewPointFromXY(pt)
+	maxX := math.Inf(-1)
+	for i := 0; i < n; i++ {
+		maxX = math.Max(maxX, seq.GetXY(i).X)
+		ln, ok := getLine(seq, i)
+		if ok && hasIntersectionPointWithLine(ptg, ln) {
 			return boundary
 		}
 	}
@@ -34,26 +36,29 @@ func pointRingSide(pt XY, ring LineString) side {
 		return exterior
 	}
 
-	ray, err := NewLineC(Coordinates{pt}, Coordinates{XY{maxX + 1, pt.Y}})
+	ray, err := NewLineFromXY(pt, XY{maxX + 1, pt.Y})
 	if err != nil {
 		// Cannot occur because X coordinates are different.
 		panic(err)
 	}
 
 	var count int
-	for i := 0; i < ring.NumLines(); i++ {
-		seg := ring.LineN(i)
-		inter := intersectLineWithLineNoAlloc(seg, ray)
+	for i := 0; i < n; i++ {
+		ln, ok := getLine(seq, i)
+		if !ok {
+			continue
+		}
+		inter := intersectLineWithLineNoAlloc(ln, ray)
 		if inter.empty {
 			continue
 		}
 		if inter.ptA != inter.ptB {
 			continue
 		}
-		if inter.ptA == seg.a.XY || inter.ptA == seg.b.XY {
-			otherY := seg.a.Y
-			if inter.ptA == seg.a.XY {
-				otherY = seg.b.Y
+		if inter.ptA == ln.a.XY || inter.ptA == ln.b.XY {
+			otherY := ln.a.Y
+			if inter.ptA == ln.a.XY {
+				otherY = ln.b.Y
 			}
 			if otherY < pt.Y {
 				count++

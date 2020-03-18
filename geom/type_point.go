@@ -8,39 +8,30 @@ import (
 	"unsafe"
 )
 
-// Point is a 0-dimensional geometry, and represents a single location in a
-// coordinate space.
+// Point is a zero dimensional geometry that represents a single location in a
+// coordinate space. It is immutable after creation.
 //
 // The Point may be empty.
 //
-// There aren't any assertions about what constitutes a valid point.
+// The zero value of Point is a 2D empty Point.
 type Point struct {
-	coords OptionalCoordinates
+	coords Coordinates
+	full   bool
+}
+
+// NewPoint creates a new point gives its Coordinates.
+func NewPoint(c Coordinates, _ ...ConstructorOption) Point {
+	return Point{c, true}
 }
 
 // NewEmptyPoint creates a Point that is empty.
-func NewEmptyPoint() Point {
-	return Point{OptionalCoordinates{Empty: true}}
+func NewEmptyPoint(ctype CoordinatesType) Point {
+	return Point{Coordinates{Type: ctype}, false}
 }
 
-// NewPointXY creates a new point from an XY.
-func NewPointXY(xy XY, _ ...ConstructorOption) Point {
-	return NewPointC(Coordinates{XY: xy})
-}
-
-// NewPointF creates a new point from float64 x and y values.
-func NewPointF(x, y float64, _ ...ConstructorOption) Point {
-	return NewPointXY(XY{x, y})
-}
-
-// NewPointC creates a new point gives its Coordinates.
-func NewPointC(c Coordinates, _ ...ConstructorOption) Point {
-	return Point{coords: OptionalCoordinates{Value: c}}
-}
-
-// NewPointOC creates a new point given its OptionalCoordinates.
-func NewPointOC(oc OptionalCoordinates, _ ...ConstructorOption) Point {
-	return Point{coords: oc}
+// NewPointFromXY creates a new point from an XY.
+func NewPointFromXY(xy XY, _ ...ConstructorOption) Point {
+	return Point{Coordinates{XY: xy, Type: DimXY}, true}
 }
 
 // Type return type string for Point
@@ -56,12 +47,13 @@ func (p Point) AsGeometry() Geometry {
 // XY gives the XY location of the point. The returned flag is set to true if
 // and only if the point is non-empty.
 func (p Point) XY() (XY, bool) {
-	return p.coords.Value.XY, !p.coords.Empty
+	return p.coords.XY, p.full
 }
 
-// Coordinates returns the coordinates of the point.
-func (p Point) Coordinates() OptionalCoordinates {
-	return p.coords
+// Coordinates returns the coordinates of the point. The returned flag is set
+// to true if and only if the point is non-empty.
+func (p Point) Coordinates() (Coordinates, bool) {
+	return p.coords, p.full
 }
 
 func (p Point) AsText() string {
@@ -69,20 +61,15 @@ func (p Point) AsText() string {
 }
 
 func (p Point) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "POINT"...)
-	xy, ok := p.XY()
-	if !ok {
-		return append(dst, " EMPTY"...)
+	dst = appendWKTHeader(dst, "POINT", p.coords.Type)
+	if !p.full {
+		return appendWKTEmpty(dst)
 	}
-	dst = append(dst, '(')
-	dst = appendFloat(dst, xy.X)
-	dst = append(dst, ' ')
-	dst = appendFloat(dst, xy.Y)
-	return append(dst, ')')
+	return appendWKTCoords(dst, p.coords, true)
 }
 
 func (p Point) IsEmpty() bool {
-	return p.coords.Empty
+	return !p.full
 }
 
 func (p Point) IsSimple() bool {
@@ -106,7 +93,7 @@ func (p Point) Envelope() (Envelope, bool) {
 }
 
 func (p Point) Boundary() GeometryCollection {
-	return NewGeometryCollection(nil)
+	return GeometryCollection{}
 }
 
 func (p Point) Value() (driver.Value, error) {
@@ -118,15 +105,14 @@ func (p Point) Value() (driver.Value, error) {
 func (p Point) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypePoint)
-	xy, ok := p.XY()
-	if !ok {
-		marsh.writeFloat64(math.NaN())
-		marsh.writeFloat64(math.NaN())
-	} else {
-		marsh.writeFloat64(xy.X)
-		marsh.writeFloat64(xy.Y)
+	marsh.writeGeomType(wkbGeomTypePoint, p.CoordinatesType())
+	if !p.full {
+		p.coords.X = math.NaN()
+		p.coords.Y = math.NaN()
+		p.coords.Z = math.NaN()
+		p.coords.M = math.NaN()
 	}
+	marsh.writeCoordinates(p.coords)
 	return marsh.err
 }
 
@@ -137,21 +123,32 @@ func (p Point) ConvexHull() Geometry {
 }
 
 func (p Point) MarshalJSON() ([]byte, error) {
-	return marshalGeoJSON("Point", p.Coordinates())
+	var dst []byte
+	dst = append(dst, `{"type":"Point","coordinates":`...)
+	if p.full {
+		dst = appendGeoJSONCoordinate(dst, p.coords)
+	} else {
+		dst = append(dst, '[', ']')
+	}
+	return append(dst, '}'), nil
 }
 
 // TransformXY transforms this Point into another Point according to fn.
 func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, error) {
-	coords := p.Coordinates()
-	if !coords.Empty {
-		coords.Value.XY = fn(coords.Value.XY)
+	if !p.full {
+		return p, nil
 	}
-	return NewPointOC(coords, opts...), nil
+	newC := p.coords
+	newC.XY = fn(newC.XY)
+	return NewPoint(newC, opts...), nil
 }
 
 // EqualsExact checks if this Point is exactly equal to another Point.
 func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	if !other.IsPoint() {
+		return false
+	}
+	if p.CoordinatesType() != other.CoordinatesType() {
 		return false
 	}
 	if p.IsEmpty() != other.IsEmpty() {
@@ -162,9 +159,7 @@ func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	}
 	// No need to check returned flag, since we know that both Points are
 	// non-empty.
-	xyA, _ := p.XY()
-	xyB, _ := other.AsPoint().XY()
-	return newEqualsExactOptionSet(opts).eq(xyA, xyB)
+	return newEqualsExactOptionSet(opts).eq(p.coords, other.AsPoint().coords)
 }
 
 // IsValid checks if this Point is valid, but there is not way to indicate if
@@ -173,12 +168,44 @@ func (p Point) IsValid() bool {
 	return true
 }
 
-// Centroid of a point it that point.
+// Centroid of a point is that point.
 func (p Point) Centroid() Point {
-	return p
+	return p.Force2D()
 }
 
 // Reverse in the case of Point outputs the same point.
 func (p Point) Reverse() Point {
 	return p
+}
+
+// AsMultiPoint is a convenience function that converts this Point into a
+// MultiPoint.
+func (p Point) AsMultiPoint() MultiPoint {
+	return NewMultiPointFromPoints([]Point{p})
+}
+
+// CoordinatesType returns the CoordinatesType used to represent the Point.
+func (p Point) CoordinatesType() CoordinatesType {
+	return p.coords.Type
+}
+
+// ForceCoordinatesType returns a new Point with a different CoordinatesType. If a dimension
+// is added, then new values are populated with 0.
+func (p Point) ForceCoordinatesType(newCType CoordinatesType) Point {
+	if !p.full {
+		return NewEmptyPoint(newCType)
+	}
+	if newCType.Is3D() != p.coords.Type.Is3D() {
+		p.coords.Z = 0
+	}
+	if newCType.IsMeasured() != p.coords.Type.IsMeasured() {
+		p.coords.M = 0
+	}
+	p.coords.Type = newCType
+	return p
+}
+
+// Force2D returns a copy of the Point with Z and M values removed.
+func (p Point) Force2D() Point {
+	return p.ForceCoordinatesType(DimXY)
 }

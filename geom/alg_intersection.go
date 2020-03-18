@@ -22,13 +22,13 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 	// Matches PostGIS behaviour for empty geometries.
 	if g2.IsEmpty() {
 		if g2.IsGeometryCollection() {
-			return NewGeometryCollection(nil).AsGeometry(), nil
+			return GeometryCollection{}.AsGeometry(), nil
 		}
 		return g2, nil
 	}
 	if g1.IsEmpty() {
 		if g1.IsGeometryCollection() {
-			return NewGeometryCollection(nil).AsGeometry(), nil
+			return GeometryCollection{}.AsGeometry(), nil
 		}
 		return g1, nil
 	}
@@ -46,7 +46,7 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 		case g2.IsLineString():
 			return intersectPointWithLineString(g1.AsPoint(), g2.AsLineString()), nil
 		case g2.IsPolygon():
-			return intersectMultiPointWithPolygon(NewMultiPoint([]Point{g1.AsPoint()}), g2.AsPolygon())
+			return intersectMultiPointWithPolygon(g1.AsPoint().AsMultiPoint(), g2.AsPolygon())
 		case g2.IsMultiPoint():
 			return intersectPointWithMultiPoint(g1.AsPoint(), g2.AsMultiPoint()), nil
 		case g2.IsMultiLineString():
@@ -61,13 +61,13 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 		case g2.IsLine():
 			return intersectLineWithLine(g1.AsLine(), g2.AsLine()), nil
 		case g2.IsLineString():
-			ls, err := NewLineStringC(g1.AsLine().Coordinates())
+			ls, err := NewLineString(g1.AsLine().Coordinates())
 			if err != nil {
 				return Geometry{}, err
 			}
 			return intersectMultiLineStringWithMultiLineString(
-				NewMultiLineString([]LineString{ls}),
-				NewMultiLineString([]LineString{g2.AsLineString()}),
+				ls.AsMultiLineString(),
+				g2.AsLineString().AsMultiLineString(),
 			)
 		case g2.IsPolygon():
 			return Geometry{}, noImpl(g1.AsLine(), g2.AsPolygon)
@@ -84,8 +84,8 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 		switch {
 		case g2.IsLineString():
 			return intersectMultiLineStringWithMultiLineString(
-				NewMultiLineString([]LineString{g1.AsLineString()}),
-				NewMultiLineString([]LineString{g2.AsLineString()}),
+				g1.AsLineString().AsMultiLineString(),
+				g2.AsLineString().AsMultiLineString(),
 			)
 		case g2.IsPolygon():
 			return Geometry{}, noImpl(g1.AsLineString(), g2.AsPolygon())
@@ -93,7 +93,7 @@ func intersection(g1, g2 Geometry) (Geometry, error) {
 			return Geometry{}, noImpl(g1.AsLineString(), g2.AsMultiPoint())
 		case g2.IsMultiLineString():
 			return intersectMultiLineStringWithMultiLineString(
-				NewMultiLineString([]LineString{g1.AsLineString()}),
+				g1.AsLineString().AsMultiLineString(),
 				g2.AsMultiLineString(),
 			)
 		case g2.IsMultiPolygon():
@@ -155,11 +155,11 @@ func intersectLineWithLine(n1, n2 Line) Geometry {
 	result := intersectLineWithLineNoAlloc(n1, n2)
 	switch {
 	case result.empty:
-		return NewGeometryCollection(nil).AsGeometry()
+		return GeometryCollection{}.AsGeometry()
 	case result.ptA == result.ptB:
-		return NewPointXY(result.ptA).AsGeometry()
+		return NewPointFromXY(result.ptA).AsGeometry()
 	default:
-		ln, err := NewLineXY(result.ptA, result.ptB)
+		ln, err := NewLineFromXY(result.ptA, result.ptB)
 		if err != nil {
 			// Cannot occur because the case where ptA and ptB are equal is
 			// already handled.
@@ -250,19 +250,27 @@ func intersectMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) (Ge
 	var points []Point
 	var lines []Line
 	for _, ls1 := range mls1.lines {
-		for i := 0; i < ls1.NumLines(); i++ {
-			ln1 := ls1.LineN(i)
+		seq1 := ls1.Coordinates()
+		for i := 0; i < seq1.Length(); i++ {
+			ln1, ok := getLine(seq1, i)
+			if !ok {
+				continue
+			}
 			for _, ls2 := range mls2.lines {
-				for j := 0; j < ls2.NumLines(); j++ {
-					ln2 := ls2.LineN(j)
+				seq2 := ls2.Coordinates()
+				for j := 0; j < seq2.Length(); j++ {
+					ln2, ok := getLine(seq2, j)
+					if !ok {
+						continue
+					}
 					inter := intersectLineWithLineNoAlloc(ln1, ln2)
 					switch {
 					case inter.empty:
 						continue
 					case inter.ptA == inter.ptB:
-						points = append(points, NewPointXY(inter.ptA))
+						points = append(points, NewPointFromXY(inter.ptA))
 					default:
-						ln, err := NewLineXY(inter.ptA, inter.ptB)
+						ln, err := NewLineFromXY(inter.ptA, inter.ptB)
 						if err != nil {
 							// The case where ptA and ptB are coincident
 							// has already been handled.
@@ -281,40 +289,44 @@ func intersectPointWithLine(pt Point, ln Line) Geometry {
 	env := ln.Envelope()
 	ptXY, ok := pt.XY()
 	if !ok || !env.Contains(ptXY) {
-		return NewGeometryCollection(nil).AsGeometry()
+		return GeometryCollection{}.AsGeometry()
 	}
 	lhs := (ptXY.X - ln.StartPoint().X) * (ln.EndPoint().Y - ln.StartPoint().Y)
 	rhs := (ptXY.Y - ln.StartPoint().Y) * (ln.EndPoint().X - ln.StartPoint().X)
 	if lhs == rhs {
 		return pt.AsGeometry()
 	}
-	return NewGeometryCollection(nil).AsGeometry()
+	return GeometryCollection{}.AsGeometry()
 }
 
 func intersectPointWithLineString(pt Point, ls LineString) Geometry {
-	for i := 0; i < ls.NumLines(); i++ {
-		ln := ls.LineN(i)
+	seq := ls.Coordinates()
+	for i := 0; i < seq.Length(); i++ {
+		ln, ok := getLine(seq, i)
+		if !ok {
+			continue
+		}
 		g := intersectPointWithLine(pt, ln)
 		if !g.IsEmpty() {
 			return g
 		}
 	}
-	return NewGeometryCollection(nil).AsGeometry()
+	return GeometryCollection{}.AsGeometry()
 }
 
 func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (Geometry, error) {
 	mp1Set := make(map[XY]struct{})
-	for _, pt := range mp1.pts {
-		c := pt.Coordinates()
-		if !c.Empty {
-			mp1Set[c.Value.XY] = struct{}{}
+	for i := 0; i < mp1.NumPoints(); i++ {
+		xy, ok := mp1.PointN(i).XY()
+		if ok {
+			mp1Set[xy] = struct{}{}
 		}
 	}
 	mp2Set := make(map[XY]struct{})
-	for _, pt := range mp2.pts {
-		c := pt.Coordinates()
-		if !c.Empty {
-			mp2Set[c.Value.XY] = struct{}{}
+	for i := 0; i < mp2.NumPoints(); i++ {
+		xy, ok := mp2.PointN(i).XY()
+		if ok {
+			mp2Set[xy] = struct{}{}
 		}
 	}
 
@@ -322,13 +334,13 @@ func intersectMultiPointWithMultiPoint(mp1, mp2 MultiPoint) (Geometry, error) {
 	var intersection []Point
 	for pt := range mp1Set {
 		if _, ok := mp2Set[pt]; ok && !seen[pt] {
-			intersection = append(intersection, NewPointXY(pt))
+			intersection = append(intersection, NewPointFromXY(pt))
 			seen[pt] = true
 		}
 	}
 	for pt := range mp2Set {
 		if _, ok := mp1Set[pt]; ok && !seen[pt] {
-			intersection = append(intersection, NewPointXY(pt))
+			intersection = append(intersection, NewPointFromXY(pt))
 			seen[pt] = true
 		}
 	}
@@ -349,27 +361,28 @@ func intersectPointWithMultiPoint(point Point, mp MultiPoint) Geometry {
 	if mp.IsEmpty() {
 		return mp.AsGeometry()
 	}
-	for _, pt := range mp.pts {
+	for i := 0; i < mp.NumPoints(); i++ {
+		pt := mp.PointN(i)
 		if pt.EqualsExact(point.AsGeometry()) {
 			xy, ok := point.XY()
 			if !ok {
-				return NewEmptyPoint().AsGeometry()
+				return NewEmptyPoint(DimXY).AsGeometry()
 			}
-			return NewPointXY(xy).AsGeometry()
+			return NewPointFromXY(xy).AsGeometry()
 		}
 	}
-	return NewGeometryCollection(nil).AsGeometry()
+	return GeometryCollection{}.AsGeometry()
 }
 
 func intersectPointWithPoint(pt1, pt2 Point) Geometry {
 	if pt1.EqualsExact(pt2.AsGeometry()) {
 		xy, ok := pt1.XY()
 		if !ok {
-			return NewEmptyPoint().AsGeometry()
+			return NewEmptyPoint(DimXY).AsGeometry()
 		}
-		return NewPointXY(xy).AsGeometry()
+		return NewPointFromXY(xy).AsGeometry()
 	}
-	return NewGeometryCollection(nil).AsGeometry()
+	return GeometryCollection{}.AsGeometry()
 }
 
 // rightmostThenHighest finds the rightmost-then-highest point

@@ -10,7 +10,7 @@ import (
 )
 
 // Geometry is a single geometry of any type. It's zero value is valid and is
-// an empty GeometryCollection.
+// an empty GeometryCollection. It is immutable after creation.
 type Geometry struct {
 	tag geometryTag
 	ptr unsafe.Pointer
@@ -117,7 +117,7 @@ func (g Geometry) AsGeometryCollection() GeometryCollection {
 	if g.ptr == nil {
 		// Special case so that the zero Geometry value is interpreted as an
 		// empty GeometryCollection.
-		return NewGeometryCollection(nil)
+		return GeometryCollection{}
 	}
 	return *(*GeometryCollection)(g.ptr)
 }
@@ -394,10 +394,11 @@ func (g Geometry) Envelope() (Envelope, bool) {
 // Boundary returns the Geometry representing the limit of this geometry.
 func (g Geometry) Boundary() Geometry {
 	// TODO: Investigate to see if the behaviour from libgeos would make more
-	// sense to use here.
+	// sense to use here (which is to return the same geometry type that would
+	// normally be returned in the non-empty case).
 	if g.IsEmpty() {
 		// Match PostGIS behaviour.
-		return g
+		return g.Force2D()
 	}
 
 	switch g.tag {
@@ -674,4 +675,59 @@ func (g Geometry) Reverse() Geometry {
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}
+}
+
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
+func (g Geometry) CoordinatesType() CoordinatesType {
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().CoordinatesType()
+	case pointTag:
+		return g.AsPoint().CoordinatesType()
+	case lineTag:
+		return g.AsLine().CoordinatesType()
+	case lineStringTag:
+		return g.AsLineString().CoordinatesType()
+	case polygonTag:
+		return g.AsPolygon().CoordinatesType()
+	case multiPointTag:
+		return g.AsMultiPoint().CoordinatesType()
+	case multiLineStringTag:
+		return g.AsMultiLineString().CoordinatesType()
+	case multiPolygonTag:
+		return g.AsMultiPolygon().CoordinatesType()
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}
+
+// ForceCoordinatesType returns a new Geometry with a different CoordinatesType. If a
+// dimension is added, then new values are populated with 0.
+func (g Geometry) ForceCoordinatesType(newCType CoordinatesType) Geometry {
+	switch g.tag {
+	case geometryCollectionTag:
+		return g.AsGeometryCollection().ForceCoordinatesType(newCType).AsGeometry()
+	case pointTag:
+		return g.AsPoint().ForceCoordinatesType(newCType).AsGeometry()
+	case lineTag:
+		return g.AsLine().ForceCoordinatesType(newCType).AsGeometry()
+	case lineStringTag:
+		return g.AsLineString().ForceCoordinatesType(newCType).AsGeometry()
+	case polygonTag:
+		return g.AsPolygon().ForceCoordinatesType(newCType).AsGeometry()
+	case multiPointTag:
+		return g.AsMultiPoint().ForceCoordinatesType(newCType).AsGeometry()
+	case multiLineStringTag:
+		return g.AsMultiLineString().ForceCoordinatesType(newCType).AsGeometry()
+	case multiPolygonTag:
+		return g.AsMultiPolygon().ForceCoordinatesType(newCType).AsGeometry()
+	default:
+		panic("unknown geometry: " + g.tag.String())
+	}
+}
+
+// Force2D returns a copy of the geometry with Z and M values removed.
+func (g Geometry) Force2D() Geometry {
+	return g.ForceCoordinatesType(DimXY)
 }

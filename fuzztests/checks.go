@@ -292,10 +292,13 @@ func CheckBoundary(t *testing.T, want UnaryResult, g geom.Geometry) {
 		}
 
 		got := g.Boundary()
-		want := want.Boundary
-		if !got.EqualsExact(want.Geometry, geom.IgnoreOrder) {
-			t.Logf("got:  %v", got.AsText())
-			t.Logf("want: %v", want.Geometry.AsText())
+		// Simplefeatures doesn't retain boundary Z values.
+		want := want.Boundary.Geometry.Force2D()
+
+		if !got.EqualsExact(want, geom.IgnoreOrder) {
+			t.Logf("input: %v", g.AsText())
+			t.Logf("got:   %v", got.AsText())
+			t.Logf("want:  %v", want.AsText())
 			t.Error("mismatch")
 		}
 	})
@@ -305,9 +308,15 @@ func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckConvexHull", func(t *testing.T) {
 		got := g.ConvexHull()
 		want := want.ConvexHull
-		if !got.EqualsExact(want, geom.IgnoreOrder, geom.Tolerance(1e-9)) {
-			t.Logf("got:  %v", got.AsText())
-			t.Logf("want: %v", want.AsText())
+
+		// PostGIS retains 3D and M coordinates for convex hull, which is
+		// incorrect according to the OGC spec.
+		want = want.Force2D()
+
+		if !got.EqualsExact(want, geom.IgnoreOrder, geom.ToleranceXY(1e-9)) {
+			t.Logf("input: %v", g.AsText())
+			t.Logf("got:   %v", got.AsText())
+			t.Logf("want:  %v", want.AsText())
 			t.Error("mismatch")
 		}
 	})
@@ -457,12 +466,17 @@ func CheckArea(t *testing.T, want UnaryResult, g geom.Geometry) {
 func CheckCentroid(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckCentroid", func(t *testing.T) {
 		got := g.Centroid()
-		want := want.Centroid
 
-		if !got.EqualsExact(want, geom.Tolerance(0.000000001)) {
-			t.Logf("g:  %v", g.AsText())
-			t.Logf("got:  %v", got.AsText())
-			t.Logf("want: %v", want.AsText())
+		// PostGIS gives empty Point results with Z and M values (if the input
+		// has Z or M values). This doesn't match the OGC spec, which states
+		// that the results from spatial operations should not have Z and M
+		// values.
+		want := want.Centroid.Force2D()
+
+		if !got.EqualsExact(want, geom.ToleranceXY(0.000000001)) {
+			t.Logf("input: %v", g.AsText())
+			t.Logf("got:   %v", got.AsText())
+			t.Logf("want:  %v", want.AsText())
 			t.Error("mismatch")
 		}
 	})
@@ -472,9 +486,10 @@ func CheckReverse(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckReverse", func(t *testing.T) {
 		got := g.Reverse()
 		want := want.Reverse
-		if !got.EqualsExact(want, geom.Tolerance(1e-9)) {
-			t.Logf("got:  %v", got.AsText())
-			t.Logf("want: %v", want.AsText())
+		if !got.EqualsExact(want, geom.ToleranceXY(1e-9)) {
+			t.Logf("input: %v", g.AsText())
+			t.Logf("got:   %v", got.AsText())
+			t.Logf("want:  %v", want.AsText())
 			t.Error("mismatch")
 		}
 	})
@@ -489,6 +504,68 @@ func CheckType(t *testing.T, want UnaryResult, g geom.Geometry) {
 			t.Logf("got:  %s", got)
 			t.Logf("want: %v", want)
 			t.Error("mismatch")
+		}
+	})
+}
+
+func CheckForceCoordinatesDimension(t *testing.T, want UnaryResult, g geom.Geometry) {
+	t.Run("CheckForceCoordinatesDimension", func(t *testing.T) {
+
+		// In the case where a collection has some elements but they are all
+		// empty, PostGIS is giving back a collection with zero elements rather
+		// than transforming each empty elements' coordinates type. So we skip
+		// these cases by relaxing the assertions on the result.
+		var isEmptyCollection bool
+		if g.IsEmpty() {
+			switch {
+			case g.IsMultiPoint(), g.IsMultiLineString(), g.IsMultiPolygon(), g.IsGeometryCollection():
+				isEmptyCollection = true
+			}
+		}
+
+		for _, tt := range []struct {
+			name string
+			want geom.Geometry
+			got  geom.Geometry
+		}{
+			{
+				"2D",
+				want.Force2D,
+				g.Force2D(),
+			},
+			{
+				"3DZ",
+				want.Force3DZ,
+				g.ForceCoordinatesType(geom.DimXYZ),
+			},
+			{
+				"3DM",
+				want.Force3DM,
+				g.ForceCoordinatesType(geom.DimXYM),
+			},
+			{
+				"4D",
+				want.Force4D,
+				g.ForceCoordinatesType(geom.DimXYZM),
+			},
+		} {
+			t.Run(tt.name, func(t *testing.T) {
+				if isEmptyCollection {
+					if tt.want.IsEmpty() != tt.got.IsEmpty() || tt.want.CoordinatesType() != tt.got.CoordinatesType() {
+						t.Logf("input:%s", g.AsText())
+						t.Logf("got:  %s", tt.got.AsText())
+						t.Logf("want: %v", tt.want.AsText())
+						t.Error("mismatch")
+					}
+					return
+				}
+				if !tt.got.EqualsExact(tt.want) {
+					t.Logf("input:%s", g.AsText())
+					t.Logf("got:  %s", tt.got.AsText())
+					t.Logf("want: %v", tt.want.AsText())
+					t.Error("mismatch")
+				}
+			})
 		}
 	})
 }

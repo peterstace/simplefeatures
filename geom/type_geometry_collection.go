@@ -8,25 +8,31 @@ import (
 	"unsafe"
 )
 
-// GeometryCollection is a collection of geometries.
-//
-// Its assertions are:
-//
-// 1. It must contain only valid geometries.
-//
-// 2. It must contain zero or more geometries.
+// GeometryCollection is a non-homogeneous collection of geometries. Its zero
+// value is the empty GeometryCollection (i.e. a collection of zero
+// geometries).
 type GeometryCollection struct {
 	geoms []Geometry
+	ctype CoordinatesType
 }
 
-// NewGeometryCollection creates a potentially heterogenous collection of
-// geometries. There are no constraints on the collection.
+// NewGeometryCollection creates a collection of geometries. The coordinates
+// type of the GeometryCollection is the lowest common coordinates type of its
+// child geometries.
 func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) GeometryCollection {
 	if len(geoms) == 0 {
-		// Store empty geoms as nil to make testing easier.
-		geoms = nil
+		return GeometryCollection{}
 	}
-	return GeometryCollection{geoms}
+
+	ctype := DimXYZM
+	for _, g := range geoms {
+		ctype &= g.CoordinatesType()
+	}
+	geoms = append([]Geometry(nil), geoms...)
+	for i := range geoms {
+		geoms[i] = geoms[i].ForceCoordinatesType(ctype)
+	}
+	return GeometryCollection{geoms, ctype}
 }
 
 // Type return type string for GeometryCollection
@@ -54,16 +60,16 @@ func (c GeometryCollection) AsText() string {
 }
 
 func (c GeometryCollection) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "GEOMETRYCOLLECTION"...)
+	dst = appendWKTHeader(dst, "GEOMETRYCOLLECTION", c.ctype)
 	if len(c.geoms) == 0 {
-		return append(dst, " EMPTY"...)
+		return appendWKTEmpty(dst)
 	}
 	dst = append(dst, '(')
 	for i, g := range c.geoms {
-		dst = g.appendWKT(dst)
-		if i != len(c.geoms)-1 {
+		if i > 0 {
 			dst = append(dst, ',')
 		}
+		dst = g.appendWKT(dst)
 	}
 	return append(dst, ')')
 }
@@ -123,12 +129,12 @@ func (c GeometryCollection) Boundary() GeometryCollection {
 	}
 	var bounds []Geometry
 	for _, g := range c.geoms {
-		bound := g.Boundary()
+		bound := g.Boundary().Force2D()
 		if !bound.IsEmpty() {
 			bounds = append(bounds, bound)
 		}
 	}
-	return NewGeometryCollection(bounds)
+	return GeometryCollection{bounds, DimXY}
 }
 
 func (c GeometryCollection) Value() (driver.Value, error) {
@@ -140,7 +146,7 @@ func (c GeometryCollection) Value() (driver.Value, error) {
 func (c GeometryCollection) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeGeometryCollection)
+	marsh.writeGeomType(wkbGeomTypeGeometryCollection, c.ctype)
 	n := c.NumGeometries()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {
@@ -179,7 +185,7 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 			return GeometryCollection{}, err
 		}
 	}
-	return NewGeometryCollection(transformed), nil
+	return GeometryCollection{transformed, c.ctype}, nil
 }
 
 // EqualsExact checks if this GeometryCollection is exactly equal to another GeometryCollection.
@@ -211,7 +217,7 @@ func (c GeometryCollection) Reverse() GeometryCollection {
 		rev := c.GeometryN(n).Reverse()
 		geoms = append(geoms, rev)
 	}
-	return NewGeometryCollection(geoms)
+	return GeometryCollection{geoms, c.ctype}
 }
 
 // Length of a GeometryCollection is the sum of the lengths of its parts.
@@ -261,24 +267,24 @@ func (c GeometryCollection) Centroid() Point {
 	switch result.highestDim {
 	case 0:
 		if result.numPoints == 0 {
-			return NewEmptyPoint() // Invalid centroid, highestDim is 0 and numPoints is 0
+			return NewEmptyPoint(DimXY) // Invalid centroid, highestDim is 0 and numPoints is 0
 		}
 		xy = result.sumXY.Scale(1.0 / float64(result.numPoints))
 	case 1:
 		if result.sumLength == 0 {
-			return NewEmptyPoint() // Invalid centroid, highestDim is 1 and sumLength is 0
+			return NewEmptyPoint(DimXY) // Invalid centroid, highestDim is 1 and sumLength is 0
 		}
 		xy = result.sumXY.Scale(1.0 / result.sumLength)
 	case 2:
 		if result.sumArea == 0 {
-			return NewEmptyPoint() // Invalid centroid, highestDim is 2 and sumArea is 0
+			return NewEmptyPoint(DimXY) // Invalid centroid, highestDim is 2 and sumArea is 0
 		}
 		xy = result.sumXY.Scale(1.0 / result.sumArea)
 	default:
 		panic("Invalid dimensionality in centroid calculation.")
 	}
 
-	return NewPointXY(xy)
+	return NewPointFromXY(xy)
 }
 
 type centroidCalc struct {
@@ -369,4 +375,25 @@ func (c GeometryCollection) sumCentroidCalc() centroidCalc {
 	}
 
 	return result
+}
+
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
+func (c GeometryCollection) CoordinatesType() CoordinatesType {
+	return c.ctype
+}
+
+// ForceCoordinatesType returns a new GeometryCollection with a different CoordinatesType. If
+// a dimension is added, then new values are populated with 0.
+func (c GeometryCollection) ForceCoordinatesType(newCType CoordinatesType) GeometryCollection {
+	gs := make([]Geometry, len(c.geoms))
+	for i := range c.geoms {
+		gs[i] = c.geoms[i].ForceCoordinatesType(newCType)
+	}
+	return GeometryCollection{gs, newCType}
+}
+
+// Force2D returns a copy of the GeometryCollection with Z and M values removed.
+func (c GeometryCollection) Force2D() GeometryCollection {
+	return c.ForceCoordinatesType(DimXY)
 }

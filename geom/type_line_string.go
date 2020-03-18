@@ -10,50 +10,34 @@ import (
 	"unsafe"
 )
 
-// LineString is a curve defined by linear interpolation between a finite set
-// of points. Its zero value is the empty line string.
+// LineString is a linear geometry defined by linear interpolation between a
+// finite set of points. Its zero value is the empty line string. It is
+// immutable after creation.
 //
-// Each consecutive pair of points defines a line segment. It must contain
-// either zero points (i.e. is the empty LineString) or it must contain at
-// least 2 distinct points.
+// A LineString must consist of either zero points (i.e. it is the empty line
+// string), or it must have at least 2 points with distinct XY values.
 type LineString struct {
-	// coords have been deduplicated such that no two consecutive coordinates
-	// are coincident. This allows quick calculation of Line segments.
-	coords []Coordinates
-
-	// points are indexes into coords, and retain consecutive coincident
-	// points. This is so that information about the original points making up
-	// the LineString are retained.
-	points []int
+	seq Sequence
 }
 
-// NewEmptyLineString gives the empty LineString. It is equivalent to calling
-// NewLineStringC with a zero length coordinates argument.
-func NewEmptyLineString() LineString {
-	return LineString{}
-}
+// NewLineString creates a new LineString from a Sequence of points. The
+// sequence must contain exactly 0 points, or at least 2 points with distinct
+// XY values (otherwise an error is returned).
+func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) {
+	n := seq.Length()
+	if skipValidations(opts) || n == 0 {
+		return LineString{seq}, nil
+	}
 
-// NewLineStringC creates a line string from the coordinates defining its
-// points.
-func NewLineStringC(pts []Coordinates, opts ...ConstructorOption) (LineString, error) {
-	coords := make([]Coordinates, 0, len(pts)) // may not use full capacity
-	points := make([]int, len(pts))
-
-	for i := range pts {
-		if len(coords) == 0 || pts[i].XY != coords[len(coords)-1].XY {
-			coords = append(coords, pts[i])
+	// Valid non-empty LineStrings must have at least 2 *distinct* points.
+	first := seq.GetXY(0)
+	for i := 1; i < n; i++ {
+		if seq.GetXY(i) != first {
+			return LineString{seq}, nil
 		}
-		points[i] = len(coords) - 1
 	}
-	if !skipValidations(opts) && len(coords) == 1 {
-		return LineString{}, errors.New("LineString must either contain zero points or at least two distinct points")
-	}
-	return LineString{coords, points}, nil
-}
-
-// NewLineStringXY creates a line string from the XYs defining its points.
-func NewLineStringXY(pts []XY, opts ...ConstructorOption) (LineString, error) {
-	return NewLineStringC(oneDimXYToCoords(pts), opts...)
+	return LineString{}, errors.New("non-empty LineStrings " +
+		"must contain at least 2 points with distinct XY values")
 }
 
 // Type return type string for LineString
@@ -70,46 +54,18 @@ func (s LineString) AsGeometry() Geometry {
 // empty then it returns the empty Point.
 func (s LineString) StartPoint() Point {
 	if s.IsEmpty() {
-		return NewEmptyPoint()
+		return NewEmptyPoint(s.CoordinatesType())
 	}
-	return NewPointC(s.coords[s.points[0]])
+	return NewPoint(s.seq.Get(0))
 }
 
 // EndPoint gives the last point of the LineString. If the LineString is empty
 // then it returns the empty Point.
 func (s LineString) EndPoint() Point {
 	if s.IsEmpty() {
-		return NewEmptyPoint()
+		return NewEmptyPoint(s.CoordinatesType())
 	}
-	return NewPointC(s.coords[s.points[len(s.points)-1]])
-}
-
-// NumPoints gives the number of control points in the line string.
-func (s LineString) NumPoints() int {
-	return len(s.points)
-}
-
-// PointN gives the coordinates of the nth (zero indexed) point in the line
-// string. Panics if n is out of range with respect to the number of points.
-func (s LineString) PointN(n int) Coordinates {
-	return s.coords[s.points[n]]
-}
-
-// NumLines gives the number of Line segments that make up the LineString.
-func (s LineString) NumLines() int {
-	return max(0, len(s.coords)-1)
-}
-
-// LineN gives the nth (zero indexed) Line in the LineString. Panics if n is
-// out of range with respect to the number of lines.
-func (s LineString) LineN(n int) Line {
-	// Line is constructed directly here, rather than via NewLineC. This is
-	// because LineN is called in a tight loop in many places, and skipping the
-	// constructor significantly speeds up the benchmarks.
-	//
-	// The two coordinates are guaranteed to not be coincident due to the way
-	// that the coords slice is constructed, so this is safe.
-	return Line{s.coords[n], s.coords[n+1]}
+	return NewPoint(s.seq.Get(s.seq.Length() - 1))
 }
 
 func (s LineString) AsText() string {
@@ -117,29 +73,15 @@ func (s LineString) AsText() string {
 }
 
 func (s LineString) AppendWKT(dst []byte) []byte {
-	dst = append(dst, "LINESTRING"...)
-	if s.IsEmpty() {
-		dst = append(dst, ' ')
-	}
+	dst = appendWKTHeader(dst, "LINESTRING", s.CoordinatesType())
 	return s.appendWKTBody(dst)
 }
 
 func (s LineString) appendWKTBody(dst []byte) []byte {
 	if s.IsEmpty() {
-		return append(dst, "EMPTY"...)
+		return appendWKTEmpty(dst)
 	}
-
-	dst = append(dst, '(')
-	for i, ptIdx := range s.points {
-		if i > 0 {
-			dst = append(dst, ',')
-		}
-		c := s.coords[ptIdx]
-		dst = appendFloat(dst, c.X)
-		dst = append(dst, ' ')
-		dst = appendFloat(dst, c.Y)
-	}
-	return append(dst, ')')
+	return appendWKTSequence(dst, s.seq, false, BitSet{})
 }
 
 // IsSimple returns true iff the curve defined by the LineString doesn't pass
@@ -157,23 +99,35 @@ func (s LineString) IsSimple() bool {
 	//    b. Check to see if the new element intersects with any elements in the heap.
 	//    c. Insert the current element into the heap.
 
-	n := s.NumLines()
-	unprocessed := seq(n)
+	if s.IsEmpty() {
+		return true
+	}
+
+	lines := make([]Line, 0, s.seq.Length()-1)
+	for i := 0; i < s.seq.Length(); i++ {
+		ln, ok := getLine(s.seq, i)
+		if ok {
+			lines = append(lines, ln)
+		}
+	}
+
+	n := len(lines)
+	unprocessed := intSequence(n)
 	sort.Slice(unprocessed, func(i, j int) bool {
-		return minX(s.LineN(unprocessed[i])) < minX(s.LineN(unprocessed[j]))
+		return minX(lines[unprocessed[i]]) < minX(lines[unprocessed[j]])
 	})
 
 	active := intHeap{less: func(i, j int) bool {
-		return maxX(s.LineN(i)) < maxX(s.LineN(j))
+		return maxX(lines[i]) < maxX(lines[j])
 	}}
 
 	for _, current := range unprocessed {
-		currentX := minX(s.LineN(current))
-		for len(active.data) != 0 && maxX(s.LineN(active.data[0])) < currentX {
+		currentX := minX(lines[current])
+		for len(active.data) != 0 && maxX(lines[active.data[0]]) < currentX {
 			active.pop()
 		}
 		for _, other := range active.data {
-			intersects, dim := hasIntersectionLineWithLine(s.LineN(current), s.LineN(other))
+			intersects, dim := hasIntersectionLineWithLine(lines[current], lines[other])
 			if !intersects {
 				continue
 			}
@@ -212,7 +166,7 @@ func (s LineString) IsSimple() bool {
 }
 
 func (s LineString) IsClosed() bool {
-	return !s.IsEmpty() && s.coords[0].XY == s.coords[len(s.coords)-1].XY
+	return !s.IsEmpty() && s.seq.GetXY(0) == s.seq.GetXY(s.seq.Length()-1)
 }
 
 func (s LineString) Intersection(g Geometry) (Geometry, error) {
@@ -224,26 +178,32 @@ func (s LineString) Intersects(g Geometry) bool {
 }
 
 func (s LineString) IsEmpty() bool {
-	return len(s.coords) == 0
+	return s.seq.Length() == 0
 }
 
 func (s LineString) Envelope() (Envelope, bool) {
-	if s.IsEmpty() {
+	n := s.seq.Length()
+	if n == 0 {
 		return Envelope{}, false
 	}
-	env := NewEnvelope(s.coords[0].XY)
-	for _, c := range s.coords[1:] {
-		env = env.ExtendToIncludePoint(c.XY)
+	env := NewEnvelope(s.seq.GetXY(0))
+	for i := 1; i < n; i++ {
+		env = env.ExtendToIncludePoint(s.seq.GetXY(i))
 	}
 	return env, true
 }
 
 func (s LineString) Boundary() MultiPoint {
-	var pts []Point
+	var fs []float64
 	if !s.IsClosed() {
-		pts = append(pts, s.StartPoint(), s.EndPoint())
+		xy1 := s.seq.GetXY(0)
+		xy2 := s.seq.GetXY(s.seq.Length() - 1)
+		fs = []float64{
+			xy1.X, xy1.Y,
+			xy2.X, xy2.Y,
+		}
 	}
-	return NewMultiPoint(pts)
+	return NewMultiPoint(NewSequence(fs, DimXY))
 }
 
 func (s LineString) Value() (driver.Value, error) {
@@ -255,13 +215,8 @@ func (s LineString) Value() (driver.Value, error) {
 func (s LineString) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeLineString)
-	n := s.NumPoints()
-	marsh.writeCount(n)
-	for i := 0; i < n; i++ {
-		marsh.writeFloat64(s.PointN(i).X)
-		marsh.writeFloat64(s.PointN(i).Y)
-	}
+	marsh.writeGeomType(wkbGeomTypeLineString, s.CoordinatesType())
+	marsh.writeSequence(s.seq)
 	return marsh.err
 }
 
@@ -270,43 +225,41 @@ func (s LineString) ConvexHull() Geometry {
 }
 
 func (s LineString) MarshalJSON() ([]byte, error) {
-	return marshalGeoJSON("LineString", s.Coordinates())
+	var dst []byte
+	dst = append(dst, `{"type":"LineString","coordinates":`...)
+	dst = appendGeoJSONSequence(dst, s.seq, BitSet{})
+	dst = append(dst, '}')
+	return dst, nil
 }
 
 // Coordinates returns the coordinates of each point along the LineString.
-func (s LineString) Coordinates() []Coordinates {
-	tmp := make([]Coordinates, len(s.points))
-	for i := range tmp {
-		tmp[i] = s.coords[s.points[i]]
-	}
-	return tmp
+func (s LineString) Coordinates() Sequence {
+	return s.seq
 }
 
 // TransformXY transforms this LineString into another LineString according to fn.
 func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (LineString, error) {
-	coords := s.Coordinates()
-	transform1dCoords(coords, fn)
-	ls, err := NewLineStringC(coords, opts...)
-	return ls, err
+	transformed := transformSequence(s.seq, fn)
+	return NewLineString(transformed, opts...)
 }
 
 // EqualsExact checks if this LineString is exactly equal to another curve.
 func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	var c curve
+	var otherSeq Sequence
 	switch {
 	case other.IsLine():
-		c = other.AsLine()
+		otherSeq = other.AsLine().Coordinates()
 	case other.IsLineString():
-		c = other.AsLineString()
+		otherSeq = other.AsLineString().Coordinates()
 	default:
 		return false
 	}
-	return curvesExactEqual(s, c, opts)
+	return curvesExactEqual(s.Coordinates(), otherSeq, opts)
 }
 
 // IsValid checks if this LineString is valid
 func (s LineString) IsValid() bool {
-	_, err := NewLineStringC(s.Coordinates())
+	_, err := NewLineString(s.Coordinates())
 	return err == nil
 }
 
@@ -319,10 +272,12 @@ func (s LineString) IsRing() bool {
 // Length gives the length of the line string.
 func (s LineString) Length() float64 {
 	var sum float64
-	for i := 0; i+1 < len(s.coords); i++ {
-		dx := s.coords[i].X - s.coords[i+1].X
-		dy := s.coords[i].Y - s.coords[i+1].Y
-		sum += math.Sqrt(dx*dx + dy*dy)
+	n := s.seq.Length()
+	for i := 0; i+1 < n; i++ {
+		xyA := s.seq.GetXY(i)
+		xyB := s.seq.GetXY(i + 1)
+		delta := xyA.Sub(xyB)
+		sum += math.Sqrt(delta.Dot(delta))
 	}
 	return sum
 }
@@ -331,20 +286,20 @@ func (s LineString) Length() float64 {
 func (s LineString) Centroid() Point {
 	sumXY, sumLength := sumCentroidAndLengthOfLineString(s)
 	if sumLength == 0 {
-		return NewEmptyPoint()
+		return NewEmptyPoint(DimXY)
 	}
-	return NewPointXY(sumXY.Scale(1.0 / sumLength))
+	return NewPointFromXY(sumXY.Scale(1.0 / sumLength))
 }
 
 func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64) {
-	if s.NumPoints() == 0 {
-		return XY{0, 0}, 0
-	}
-	n := s.NumLines()
-	for i := 0; i < n; i++ {
-		line := s.LineN(i)
-		length := line.Length()
-		cent, ok := line.Centroid().XY()
+	seq := s.Coordinates()
+	for i := 0; i < seq.Length(); i++ {
+		ln, ok := getLine(seq, i)
+		if !ok {
+			continue
+		}
+		length := ln.Length()
+		cent, ok := ln.Centroid().XY()
 		if ok {
 			sumXY = sumXY.Add(cent.Scale(length))
 			sumLength += length
@@ -353,22 +308,30 @@ func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64
 	return sumXY, sumLength
 }
 
-// AsMultiLineString is a convinience function that converts this LineString
+// AsMultiLineString is a convenience function that converts this LineString
 // into a MultiLineString.
 func (s LineString) AsMultiLineString() MultiLineString {
-	return NewMultiLineString([]LineString{s})
+	return NewMultiLineStringFromLineStrings([]LineString{s})
 }
 
 // Reverse in the case of LineString outputs the coordinates in reverse order.
 func (s LineString) Reverse() LineString {
-	coords := s.Coordinates()
-	// Reverse the slice.
-	for left, right := 0, len(coords)-1; left < right; left, right = left+1, right-1 {
-		coords[left], coords[right] = coords[right], coords[left]
-	}
-	s2, err := NewLineStringC(coords)
-	if err != nil {
-		panic("Reverse of an existing LineString should not fail")
-	}
-	return s2
+	return LineString{s.seq.Reverse()}
+}
+
+// CoordinatesType returns the CoordinatesType used to represent points making
+// up the geometry.
+func (s LineString) CoordinatesType() CoordinatesType {
+	return s.seq.CoordinatesType()
+}
+
+// ForceCoordinatesType returns a new LineString with a different CoordinatesType. If a
+// dimension is added, then new values are populated with 0.
+func (s LineString) ForceCoordinatesType(newCType CoordinatesType) LineString {
+	return LineString{s.seq.ForceCoordinatesType(newCType)}
+}
+
+// Force2D returns a copy of the LineString with Z and M values removed.
+func (s LineString) Force2D() LineString {
+	return s.ForceCoordinatesType(DimXY)
 }

@@ -17,18 +17,30 @@ func newEqualsExactOptionSet(opts []EqualsExactOption) equalsExactOptionSet {
 	return s
 }
 
-// Tolerance modifies the behaviour of the EqualsExact method by allowing two
-// geometry control points be be considered equal if they are within the given
-// euclidean distance of each other.
-func Tolerance(within float64) EqualsExactOption {
+// ToleranceXY modifies the behaviour of the EqualsExact method by allowing two
+// geometry control points be be considered equal if their XY coordinates are
+// within the given euclidean distance of each other.
+func ToleranceXY(within float64) EqualsExactOption {
 	return func(s *equalsExactOptionSet) {
 		s.toleranceSq = within * within
 	}
 }
 
-func (os equalsExactOptionSet) eq(a XY, b XY) bool {
-	asb := a.Sub(b)
-	return asb.Dot(asb) <= os.toleranceSq
+func (os equalsExactOptionSet) eq(a, b Coordinates) bool {
+	if a.Type != b.Type {
+		return false
+	}
+	asb := a.XY.Sub(b.XY)
+	if asb.Dot(asb) > os.toleranceSq {
+		return false
+	}
+	if a.Type.Is3D() && a.Z != b.Z {
+		return false
+	}
+	if a.Type.IsMeasured() && a.M != b.M {
+		return false
+	}
+	return true
 }
 
 // IgnoreOrder modifies the behaviour of the EqualsExact method by ignoring
@@ -57,16 +69,13 @@ func ignoreOrder(opts []EqualsExactOption) bool {
 	return newEqualsExactOptionSet(opts).ignoreOrder
 }
 
-// curve abstracts Line and LineString.
-type curve interface {
-	NumPoints() int
-	PointN(int) Coordinates
-}
-
-func curvesExactEqual(c1, c2 curve, opts []EqualsExactOption) bool {
-	// Must have the same number of points.
-	n := c1.NumPoints()
-	if n != c2.NumPoints() {
+func curvesExactEqual(c1, c2 Sequence, opts []EqualsExactOption) bool {
+	// Must have the same number of points and be of the same coordinate type.
+	n := c1.Length()
+	if n != c2.Length() {
+		return false
+	}
+	if c1.CoordinatesType() != c2.CoordinatesType() {
 		return false
 	}
 
@@ -76,9 +85,9 @@ func curvesExactEqual(c1, c2 curve, opts []EqualsExactOption) bool {
 	type curveMapping func(int) int
 	sameCurve := func(m1, m2 curveMapping) bool {
 		for i := 0; i < n; i++ {
-			pt1 := c1.PointN(m1(i)).XY
-			pt2 := c2.PointN(m2(i)).XY
-			if !os.eq(pt1, pt2) {
+			c1 := c1.Get(m1(i))
+			c2 := c2.Get(m2(i))
+			if !os.eq(c1, c2) {
 				return false
 			}
 		}
@@ -111,12 +120,10 @@ func curvesExactEqual(c1, c2 curve, opts []EqualsExactOption) bool {
 	return false
 }
 
-// TODO: All curves should have an IsRing function. Once that exists, then this
-// can be removed.
-func isRing(c curve) bool {
-	ptA := c.PointN(0)
-	ptB := c.PointN(c.NumPoints() - 1)
-	return ptA.XY == ptB.XY
+func isRing(c Sequence) bool {
+	ptA := c.GetXY(0)
+	ptB := c.GetXY(c.Length() - 1)
+	return ptA == ptB
 }
 
 func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
@@ -124,17 +131,20 @@ func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
 	if mp2.NumPoints() != n {
 		return false
 	}
+	if mp1.CoordinatesType() != mp2.CoordinatesType() {
+		return false
+	}
 	os := newEqualsExactOptionSet(opts)
 	ptsEq := func(i, j int) bool {
-		xyA, okA := mp1.PointN(i).XY()
-		xyB, okB := mp2.PointN(j).XY()
+		cA, okA := mp1.PointN(i).Coordinates()
+		cB, okB := mp2.PointN(j).Coordinates()
 		if okA != okB {
 			return false // one empty, but not the other
 		}
 		if !okA {
 			return true // both empty
 		}
-		return os.eq(xyA, xyB)
+		return os.eq(cA, cB)
 	}
 	return structureEqual(n, ptsEq, os.ignoreOrder)
 }
@@ -144,13 +154,21 @@ func polygonExactEqual(p1, p2 Polygon, opts []EqualsExactOption) bool {
 	if n != p2.NumInteriorRings() {
 		return false
 	}
-	if !curvesExactEqual(p1.ExteriorRing(), p2.ExteriorRing(), opts) {
+	if !curvesExactEqual(
+		p1.ExteriorRing().Coordinates(),
+		p2.ExteriorRing().Coordinates(),
+		opts,
+	) {
 		return false
 	}
 	ringsEq := func(i, j int) bool {
 		ringA := p1.InteriorRingN(i)
 		ringB := p2.InteriorRingN(j)
-		return curvesExactEqual(ringA, ringB, opts)
+		return curvesExactEqual(
+			ringA.Coordinates(),
+			ringB.Coordinates(),
+			opts,
+		)
 	}
 	return structureEqual(n, ringsEq, ignoreOrder(opts))
 }
@@ -160,10 +178,13 @@ func multiLineStringExactEqual(mls1, mls2 MultiLineString, opts []EqualsExactOpt
 	if n != mls2.NumLineStrings() {
 		return false
 	}
+	if mls1.CoordinatesType() != mls2.CoordinatesType() {
+		return false
+	}
 	lsEq := func(i, j int) bool {
 		lsA := mls1.LineStringN(i)
 		lsB := mls2.LineStringN(j)
-		return curvesExactEqual(lsA, lsB, opts)
+		return curvesExactEqual(lsA.Coordinates(), lsB.Coordinates(), opts)
 	}
 	return structureEqual(n, lsEq, ignoreOrder(opts))
 }
@@ -171,6 +192,9 @@ func multiLineStringExactEqual(mls1, mls2 MultiLineString, opts []EqualsExactOpt
 func multiPolygonExactEqual(mp1, mp2 MultiPolygon, opts []EqualsExactOption) bool {
 	n := mp1.NumPolygons()
 	if n != mp2.NumPolygons() {
+		return false
+	}
+	if mp1.CoordinatesType() != mp2.CoordinatesType() {
 		return false
 	}
 	polyEq := func(i, j int) bool {
@@ -184,6 +208,9 @@ func multiPolygonExactEqual(mp1, mp2 MultiPolygon, opts []EqualsExactOption) boo
 func geometryCollectionExactEqual(gc1, gc2 GeometryCollection, opts []EqualsExactOption) bool {
 	n := gc1.NumGeometries()
 	if n != gc2.NumGeometries() {
+		return false
+	}
+	if gc1.CoordinatesType() != gc2.CoordinatesType() {
 		return false
 	}
 	eq := func(i, j int) bool {
