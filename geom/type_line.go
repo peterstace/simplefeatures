@@ -116,7 +116,6 @@ func (n Line) Boundary() MultiPoint {
 			n.a.XY.X, n.a.XY.Y,
 			n.b.XY.X, n.b.XY.Y,
 		}, DimXY),
-		BitSet{},
 	)
 }
 

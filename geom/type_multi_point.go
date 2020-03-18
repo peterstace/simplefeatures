@@ -44,13 +44,19 @@ func NewMultiPointFromPoints(pts []Point, opts ...ConstructorOption) MultiPoint 
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	return NewMultiPoint(seq, empty, opts...)
+	return NewMultiPointWithEmptyMask(seq, empty, opts...)
 }
 
-// NewMultiPoint creates a new MultiPoint from a sequence of coordinates. If
-// there are any positions set in the BitSet, then these are used to indicate
-// that the corresponding point in the sequence is an empty point.
-func NewMultiPoint(seq Sequence, empty BitSet, opts ...ConstructorOption) MultiPoint {
+// NewMultiPoint creates a new MultiPoint from a sequence of Coordinates.
+func NewMultiPoint(seq Sequence, opts ...ConstructorOption) MultiPoint {
+	return MultiPoint{seq, BitSet{}}
+}
+
+// NewMultiPointWithEmptyMask creates a new MultiPoint from a sequence of
+// coordinates. If there are any positions set in the BitSet, then these are
+// used to indicate that the corresponding point in the sequence is an empty
+// point.
+func NewMultiPointWithEmptyMask(seq Sequence, empty BitSet, opts ...ConstructorOption) MultiPoint {
 	return MultiPoint{
 		seq,
 		empty.Clone(), // clone so that the caller doesn't have access to the interal empty set
@@ -193,7 +199,7 @@ func (m MultiPoint) Coordinates() (seq Sequence, empty BitSet) {
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
 func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPoint, error) {
 	transformed := transformSequence(m.seq, fn)
-	return NewMultiPoint(transformed, m.empty, opts...), nil
+	return NewMultiPointWithEmptyMask(transformed, m.empty, opts...), nil
 }
 
 // EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.

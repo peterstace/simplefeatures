@@ -183,7 +183,7 @@ func (m MultiLineString) Boundary() MultiPoint {
 		}
 	}
 	seq := NewSequence(floats, DimXY)
-	return NewMultiPoint(seq, BitSet{})
+	return NewMultiPoint(seq)
 }
 
 func (m MultiLineString) Value() (driver.Value, error) {

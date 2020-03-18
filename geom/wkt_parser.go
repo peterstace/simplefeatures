@@ -275,7 +275,7 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) MultiPoint {
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	return NewMultiPoint(seq, empty, p.opts...)
+	return NewMultiPointWithEmptyMask(seq, empty, p.opts...)
 }
 
 func (p *parser) nextMultiPointStylePointAppend(dst []float64, ctype CoordinatesType) []float64 {

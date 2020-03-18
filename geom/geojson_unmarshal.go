@@ -261,7 +261,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 	case geojsonMultiPoint:
 		// GeoJSON MultiPoints cannot contain empty Points.
 		seq := twoDimFloat64sToSequence(node.coords, ctype)
-		return NewMultiPoint(seq, BitSet{}).AsGeometry(), nil
+		return NewMultiPoint(seq).AsGeometry(), nil
 	case geojsonMultiLineString:
 		if len(node.coords) == 0 {
 			return MultiLineString{}.ForceCoordinatesType(ctype).AsGeometry(), nil
