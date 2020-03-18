@@ -33,18 +33,26 @@ type Polygon struct {
 
 // NewPolygonFromRings creates a polygon given its rings. The outer ring is
 // first, and any inner rings follow. If no rings are provided, then the
-// returned Polygon is the empty Polygon.
-func NewPolygonFromRings(rings []LineString, ctype CoordinatesType, opts ...ConstructorOption) (Polygon, error) {
+// returned Polygon is the empty Polygon. The coordinate type of the polygon is
+// the lowest common coordinate type of its rings.
+func NewPolygonFromRings(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
+	if len(rings) == 0 {
+		return Polygon{}, nil
+	}
+
+	ctype := DimXYZM
 	for _, r := range rings {
-		if ct := r.CoordinatesType(); ct != ctype {
-			return Polygon{}, mixedCoordinatesTypeError{ct, ctype}
-		}
+		ctype &= r.CoordinatesType()
+	}
+	rings = append([]LineString(nil), rings...)
+	for i := range rings {
+		rings[i] = rings[i].ForceCoordinatesType(ctype)
 	}
 
 	if err := validatePolygon(rings, opts...); err != nil {
 		return Polygon{}, err
 	}
-	return Polygon{append([]LineString(nil), rings...), ctype}, nil
+	return Polygon{rings, ctype}, nil
 }
 
 func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
@@ -246,12 +254,7 @@ func (p Polygon) Envelope() (Envelope, bool) {
 }
 
 func (p Polygon) Boundary() MultiLineString {
-	mls, err := NewMultiLineStringFromLineStrings(p.rings, p.ctype)
-	if err != nil {
-		// Can't get a mixed coordinate type error due to construction.
-		panic(err)
-	}
-	return mls.Force2D()
+	return NewMultiLineStringFromLineStrings(p.rings).Force2D()
 }
 
 func (p Polygon) Value() (driver.Value, error) {
@@ -310,7 +313,8 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon
 			return Polygon{}, err
 		}
 	}
-	return NewPolygonFromRings(transformed, p.ctype, opts...)
+	poly, err := NewPolygonFromRings(transformed, opts...)
+	return poly.ForceCoordinatesType(p.ctype), err
 }
 
 // EqualsExact checks if this Polygon is exactly equal to another Polygon.
@@ -326,7 +330,7 @@ func (p Polygon) IsValid() bool {
 			return false
 		}
 	}
-	_, err := NewPolygonFromRings(p.rings, p.ctype)
+	_, err := NewPolygonFromRings(p.rings)
 	return err == nil
 }
 
@@ -431,13 +435,13 @@ func (p Polygon) AsMultiPolygon() MultiPolygon {
 	if !p.IsEmpty() {
 		polys = []Polygon{p}
 	}
-	mp, err := NewMultiPolygonFromPolygons(polys, p.ctype)
+	mp, err := NewMultiPolygonFromPolygons(polys)
 	if err != nil {
 		// Cannot occur due to construction. A valid polygon will always be a
 		// valid multipolygon.
 		panic(err)
 	}
-	return mp
+	return mp.ForceCoordinatesType(p.ctype)
 }
 
 // Reverse in the case of Polygon outputs the coordinates of each ring in reverse order,

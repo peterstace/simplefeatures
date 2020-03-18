@@ -18,12 +18,13 @@ type Line struct {
 }
 
 // NewLine creates a line segment given the Coordinates of its two endpoints.
-// An error is returned if the coordinate types of the two points don't match,
-// or if the points do not have distinct XY values.
+// An error is returned if the XY values of the coordinates are not distinct.
 func NewLine(a, b Coordinates, opts ...ConstructorOption) (Line, error) {
-	if a.Type != b.Type {
-		return Line{}, mixedCoordinatesTypeError{a.Type, b.Type}
-	}
+	ctype := a.Type & b.Type
+	// TODO: Would be better to have a ForceCoordinateType function on Coordinates.
+	a.Type = ctype
+	b.Type = ctype
+
 	if !skipValidations(opts) && a.XY == b.XY {
 		return Line{}, fmt.Errorf("line endpoints must have distinct XY values: %v", a.XY)
 	}
@@ -115,7 +116,6 @@ func (n Line) Boundary() MultiPoint {
 			n.a.XY.X, n.a.XY.Y,
 			n.b.XY.X, n.b.XY.Y,
 		}, DimXY),
-		BitSet{},
 	)
 }
 

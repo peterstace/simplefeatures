@@ -244,6 +244,9 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 		ls, err := NewLineString(seq)
 		return ls.AsGeometry(), err
 	case geojsonPolygon:
+		if len(node.coords) == 0 {
+			return Polygon{}.ForceCoordinatesType(ctype).AsGeometry(), nil
+		}
 		rings := make([]LineString, len(node.coords))
 		for i, coords := range node.coords {
 			seq := twoDimFloat64sToSequence(coords, ctype)
@@ -253,13 +256,16 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 				return Geometry{}, err
 			}
 		}
-		poly, err := NewPolygonFromRings(rings, ctype)
+		poly, err := NewPolygonFromRings(rings)
 		return poly.AsGeometry(), err
 	case geojsonMultiPoint:
 		// GeoJSON MultiPoints cannot contain empty Points.
 		seq := twoDimFloat64sToSequence(node.coords, ctype)
-		return NewMultiPoint(seq, BitSet{}).AsGeometry(), nil
+		return NewMultiPoint(seq).AsGeometry(), nil
 	case geojsonMultiLineString:
+		if len(node.coords) == 0 {
+			return MultiLineString{}.ForceCoordinatesType(ctype).AsGeometry(), nil
+		}
 		lss := make([]LineString, len(node.coords))
 		for i, coords := range node.coords {
 			seq := twoDimFloat64sToSequence(coords, ctype)
@@ -269,9 +275,11 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 				return Geometry{}, err
 			}
 		}
-		poly, err := NewMultiLineStringFromLineStrings(lss, ctype)
-		return poly.AsGeometry(), err
+		return NewMultiLineStringFromLineStrings(lss).AsGeometry(), nil
 	case geojsonMultiPolygon:
+		if len(node.coords) == 0 {
+			return MultiPolygon{}.ForceCoordinatesType(ctype).AsGeometry(), nil
+		}
 		polys := make([]Polygon, len(node.coords))
 		for i, coords := range node.coords {
 			rings := make([]LineString, len(coords))
@@ -284,14 +292,18 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 				}
 			}
 			var err error
-			polys[i], err = NewPolygonFromRings(rings, ctype)
+			polys[i], err = NewPolygonFromRings(rings)
 			if err != nil {
 				return Geometry{}, err
 			}
+			polys[i] = polys[i].ForceCoordinatesType(ctype)
 		}
-		mp, err := NewMultiPolygonFromPolygons(polys, ctype)
+		mp, err := NewMultiPolygonFromPolygons(polys)
 		return mp.AsGeometry(), err
 	case geojsonGeometryCollection:
+		if len(node.geoms) == 0 {
+			return GeometryCollection{}.ForceCoordinatesType(ctype).AsGeometry(), nil
+		}
 		children := make([]Geometry, len(node.geoms))
 		for i, child := range node.geoms {
 			var err error
@@ -300,8 +312,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 				return Geometry{}, err
 			}
 		}
-		gc, err := NewGeometryCollection(children, ctype)
-		return gc.AsGeometry(), err
+		return NewGeometryCollection(children).AsGeometry(), nil
 	default:
 		panic(fmt.Sprintf("unexpected node: %#v", node))
 	}

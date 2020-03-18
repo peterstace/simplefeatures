@@ -181,17 +181,23 @@ func (p *wkbParser) parseLineString(ctype CoordinatesType) LineString {
 
 func (p *wkbParser) parsePolygon(ctype CoordinatesType) Polygon {
 	n := p.parseUint32()
+	if n == 0 {
+		return Polygon{}.ForceCoordinatesType(ctype)
+	}
 	rings := make([]LineString, n)
 	for i := range rings {
 		rings[i] = p.parseLineString(ctype)
 	}
-	poly, err := NewPolygonFromRings(rings, ctype, p.opts...)
+	poly, err := NewPolygonFromRings(rings, p.opts...)
 	p.setErr(err)
 	return poly
 }
 
 func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) MultiPoint {
 	n := p.parseUint32()
+	if n == 0 {
+		return MultiPoint{}.ForceCoordinatesType(ctype)
+	}
 	var pts []Point
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
@@ -201,13 +207,14 @@ func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) MultiPoint {
 		}
 		pts = append(pts, geom.AsPoint())
 	}
-	mp, err := NewMultiPointFromPoints(pts, ctype, p.opts...)
-	p.setErr(err)
-	return mp
+	return NewMultiPointFromPoints(pts, p.opts...)
 }
 
 func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) MultiLineString {
 	n := p.parseUint32()
+	if n == 0 {
+		return MultiLineString{}.ForceCoordinatesType(ctype)
+	}
 	var lss []LineString
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
@@ -223,13 +230,14 @@ func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) MultiLineString 
 			p.setErr(errors.New("non-LineString found in MultiLineString"))
 		}
 	}
-	mls, err := NewMultiLineStringFromLineStrings(lss, ctype, p.opts...)
-	p.setErr(err)
-	return mls
+	return NewMultiLineStringFromLineStrings(lss, p.opts...)
 }
 
 func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) MultiPolygon {
 	n := p.parseUint32()
+	if n == 0 {
+		return MultiPolygon{}.ForceCoordinatesType(ctype)
+	}
 	var polys []Polygon
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
@@ -239,20 +247,21 @@ func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) MultiPolygon {
 		}
 		polys = append(polys, geom.AsPolygon())
 	}
-	mpoly, err := NewMultiPolygonFromPolygons(polys, ctype, p.opts...)
+	mpoly, err := NewMultiPolygonFromPolygons(polys, p.opts...)
 	p.setErr(err)
 	return mpoly
 }
 
 func (p *wkbParser) parseGeometryCollection(ctype CoordinatesType) GeometryCollection {
 	n := p.parseUint32()
+	if n == 0 {
+		return GeometryCollection{}.ForceCoordinatesType(ctype)
+	}
 	var geoms []Geometry
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
 		p.setErr(err)
 		geoms = append(geoms, geom)
 	}
-	gc, err := NewGeometryCollection(geoms, ctype, p.opts...)
-	p.setErr(err)
-	return gc
+	return NewGeometryCollection(geoms, p.opts...)
 }

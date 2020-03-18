@@ -8,21 +8,24 @@ import (
 )
 
 // MultiPoint is a 0-dimensional geometry that is a collection of points. Its
-// zero value is the empty MultiPoint (i.e. a collection of zero points). It is
-// immutable after creation.
+// zero value is the empty MultiPoint (i.e. a collection of zero points) with
+// 2D coordinates type. It is immutable after creation.
 type MultiPoint struct {
 	seq   Sequence
 	empty BitSet
 }
 
-// NewMultiPointFromPoints creates a MultiPoint from a list of Points. The coordinate
-// type of the Points must all match the CoordinatesType argument, otherwise an
-// error is returned.
-func NewMultiPointFromPoints(pts []Point, ctype CoordinatesType, opts ...ConstructorOption) (MultiPoint, error) {
+// NewMultiPointFromPoints creates a MultiPoint from a list of Points. The
+// coordinate type of the MultiPoint is the lowest common coordinates type of
+// its Points.
+func NewMultiPointFromPoints(pts []Point, opts ...ConstructorOption) MultiPoint {
+	if len(pts) == 0 {
+		return MultiPoint{}
+	}
+
+	ctype := DimXYZM
 	for _, p := range pts {
-		if p.CoordinatesType() != ctype {
-			return MultiPoint{}, mixedCoordinatesTypeError{p.CoordinatesType(), ctype}
-		}
+		ctype &= p.CoordinatesType()
 	}
 
 	var empty BitSet
@@ -41,13 +44,19 @@ func NewMultiPointFromPoints(pts []Point, ctype CoordinatesType, opts ...Constru
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	return MultiPoint{seq, empty}, nil
+	return NewMultiPointWithEmptyMask(seq, empty, opts...)
 }
 
-// NewMultiPoint creates a new MultiPoint from a sequence of coordinates. If
-// there are any positions set in the BitSet, then these are used to indicate
-// that the corresponding point in the sequence is an empty point.
-func NewMultiPoint(seq Sequence, empty BitSet, opts ...ConstructorOption) MultiPoint {
+// NewMultiPoint creates a new MultiPoint from a sequence of Coordinates.
+func NewMultiPoint(seq Sequence, opts ...ConstructorOption) MultiPoint {
+	return MultiPoint{seq, BitSet{}}
+}
+
+// NewMultiPointWithEmptyMask creates a new MultiPoint from a sequence of
+// coordinates. If there are any positions set in the BitSet, then these are
+// used to indicate that the corresponding point in the sequence is an empty
+// point.
+func NewMultiPointWithEmptyMask(seq Sequence, empty BitSet, opts ...ConstructorOption) MultiPoint {
 	return MultiPoint{
 		seq,
 		empty.Clone(), // clone so that the caller doesn't have access to the interal empty set
@@ -190,7 +199,7 @@ func (m MultiPoint) Coordinates() (seq Sequence, empty BitSet) {
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
 func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPoint, error) {
 	transformed := transformSequence(m.seq, fn)
-	return NewMultiPoint(transformed, m.empty, opts...), nil
+	return NewMultiPointWithEmptyMask(transformed, m.empty, opts...), nil
 }
 
 // EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.

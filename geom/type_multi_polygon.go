@@ -27,12 +27,20 @@ type MultiPolygon struct {
 
 // NewMultiPolygonFromPolygons creates a MultiPolygon from its constituent
 // Polygons. It gives an error if any of the MultiPolygon assertions are not
-// maintained.
-func NewMultiPolygonFromPolygons(polys []Polygon, ctype CoordinatesType, opts ...ConstructorOption) (MultiPolygon, error) {
+// maintained. The coordinates type of the MultiPolygon is the lowest common
+// coordinates type its Polygons.
+func NewMultiPolygonFromPolygons(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
+	if len(polys) == 0 {
+		return MultiPolygon{}, nil
+	}
+
+	ctype := DimXYZM
 	for _, p := range polys {
-		if ct := p.CoordinatesType(); ct != ctype {
-			return MultiPolygon{}, mixedCoordinatesTypeError{ct, ctype}
-		}
+		ctype &= p.CoordinatesType()
+	}
+	polys = append([]Polygon(nil), polys...)
+	for i := range polys {
+		polys[i] = polys[i].ForceCoordinatesType(ctype)
 	}
 
 	if skipValidations(opts) {
@@ -279,12 +287,7 @@ func (m MultiPolygon) Boundary() MultiLineString {
 			bounds = append(bounds, r.Force2D())
 		}
 	}
-	mls, err := NewMultiLineStringFromLineStrings(bounds, DimXY)
-	if err != nil {
-		// Can't get a mixed coordinate type error due to the source of the bounds.
-		panic(err)
-	}
-	return mls
+	return NewMultiLineStringFromLineStrings(bounds)
 }
 
 func (m MultiPolygon) Value() (driver.Value, error) {
@@ -339,7 +342,8 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mu
 		}
 		polys[i] = transformed
 	}
-	return NewMultiPolygonFromPolygons(polys, m.ctype, opts...)
+	mp, err := NewMultiPolygonFromPolygons(polys, opts...)
+	return mp.ForceCoordinatesType(m.ctype), err
 }
 
 // EqualsExact checks if this MultiPolygon is exactly equal to another MultiPolygon.
@@ -355,7 +359,7 @@ func (m MultiPolygon) IsValid() bool {
 			return false
 		}
 	}
-	_, err := NewMultiPolygonFromPolygons(m.polys, m.ctype)
+	_, err := NewMultiPolygonFromPolygons(m.polys)
 	return err == nil
 }
 

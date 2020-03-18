@@ -37,23 +37,13 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 			}
 			lineStrings = append(lineStrings, lnStr)
 		}
-		ctype := DimXY
-		if len(lineStrings) > 0 {
-			ctype = lineStrings[0].CoordinatesType()
-		}
-		mls, err := NewMultiLineStringFromLineStrings(lineStrings, ctype)
-		return mls.AsGeometry(), err
+		return NewMultiLineStringFromLineStrings(lineStrings).AsGeometry(), nil
 	case len(lines) == 0:
 		// Points only.
 		if len(points) == 1 {
 			return points[0].AsGeometry(), nil
 		}
-		ctype := DimXY
-		if len(points) > 0 {
-			ctype = points[0].CoordinatesType()
-		}
-		mp, err := NewMultiPointFromPoints(points, ctype)
-		return mp.AsGeometry(), err
+		return NewMultiPointFromPoints(points).AsGeometry(), nil
 	default:
 		all := make([]Geometry, len(points)+len(lines))
 		for i, pt := range points {
@@ -62,12 +52,7 @@ func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 		for i, ln := range lines {
 			all[len(points)+i] = ln.AsGeometry()
 		}
-		ctype := DimXY
-		if len(all) > 0 {
-			ctype = all[0].CoordinatesType()
-		}
-		gc, err := NewGeometryCollection(all, ctype)
-		return gc.AsGeometry(), err
+		return NewGeometryCollection(all).AsGeometry(), nil
 	}
 }
 

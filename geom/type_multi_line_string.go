@@ -9,26 +9,32 @@ import (
 
 // MultiLineString is a linear geometry that consists of a collection of
 // LineStrings. It's zero value is the empty MultiLineString (i.e. the
-// collection of zero LineStrings). It is immutable after creation.
+// collection of zero LineStrings) of 2D coordinate type. It is immutable after
+// creation.
 type MultiLineString struct {
 	lines []LineString
 	ctype CoordinatesType
 }
 
 // NewMultiLineStringFromLineStrings creates a MultiLineString from its
-// constituent LineStrings. The coordinate types of the LineStrings must match
-// the CoordinatesType argument, otherwise an error is returned.
-func NewMultiLineStringFromLineStrings(
-	lines []LineString,
-	ctype CoordinatesType,
-	opts ...ConstructorOption,
-) (MultiLineString, error) {
-	for _, ls := range lines {
-		if ls.CoordinatesType() != ctype {
-			return MultiLineString{}, mixedCoordinatesTypeError{ls.CoordinatesType(), ctype}
-		}
+// constituent LineStrings. The coordinates type of the MultiLineString is the
+// lowest common coordinates type of its LineStrings.
+func NewMultiLineStringFromLineStrings(lines []LineString, opts ...ConstructorOption) MultiLineString {
+	if len(lines) == 0 {
+		return MultiLineString{}
 	}
-	return MultiLineString{lines, ctype}, nil
+
+	ctype := DimXYZM
+	for _, ls := range lines {
+		ctype &= ls.CoordinatesType()
+	}
+
+	lines = append([]LineString(nil), lines...)
+	for i := range lines {
+		lines[i] = lines[i].ForceCoordinatesType(ctype)
+	}
+
+	return MultiLineString{lines, ctype}
 }
 
 // Type return type string for MultiLineString
@@ -177,7 +183,7 @@ func (m MultiLineString) Boundary() MultiPoint {
 		}
 	}
 	seq := NewSequence(floats, DimXY)
-	return NewMultiPoint(seq, BitSet{})
+	return NewMultiPoint(seq)
 }
 
 func (m MultiLineString) Value() (driver.Value, error) {
@@ -236,7 +242,7 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 			return MultiLineString{}, err
 		}
 	}
-	return NewMultiLineStringFromLineStrings(transformed, m.ctype, opts...)
+	return NewMultiLineStringFromLineStrings(transformed, opts...), nil
 }
 
 // EqualsExact checks if this MultiLineString is exactly equal to another MultiLineString.

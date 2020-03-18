@@ -36,7 +36,7 @@ func convexHull(g Geometry) Geometry {
 		if err != nil {
 			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid ring: %v", err))
 		}
-		poly, err := NewPolygonFromRings([]LineString{ring}, ring.CoordinatesType())
+		poly, err := NewPolygonFromRings([]LineString{ring})
 		if err != nil {
 			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid polygon: %v", err))
 		}

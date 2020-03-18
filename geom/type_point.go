@@ -181,12 +181,7 @@ func (p Point) Reverse() Point {
 // AsMultiPoint is a convenience function that converts this Point into a
 // MultiPoint.
 func (p Point) AsMultiPoint() MultiPoint {
-	mp, err := NewMultiPointFromPoints([]Point{p}, p.CoordinatesType())
-	if err != nil {
-		// Cannot occur due to construction.
-		panic(err)
-	}
-	return mp
+	return NewMultiPointFromPoints([]Point{p})
 }
 
 // CoordinatesType returns the CoordinatesType used to represent the Point.
