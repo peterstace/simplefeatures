@@ -213,7 +213,9 @@ func TestMarshalUnmarshal(t *testing.T) {
 			if original.IsEmpty() && original.CoordinatesType().Is3D() {
 				// When parsing GeoJSON, the "width" of each coordinate is used
 				// to infer XY vs XYZ geometry. If there are no coordinates,
-				// then XY is assumed.
+				// then XY is assumed. Therefore GeoJSON empty 3D geometries
+				// are not suitable for this test because they cannot be
+				// round-tripped.
 				continue
 			}
 

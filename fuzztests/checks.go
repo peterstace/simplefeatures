@@ -313,7 +313,7 @@ func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 		// incorrect according to the OGC spec.
 		want = want.Force2D()
 
-		if !got.EqualsExact(want, geom.IgnoreOrder, geom.Tolerance(1e-9)) {
+		if !got.EqualsExact(want, geom.IgnoreOrder, geom.ToleranceXY(1e-9)) {
 			t.Logf("input: %v", g.AsText())
 			t.Logf("got:   %v", got.AsText())
 			t.Logf("want:  %v", want.AsText())
@@ -473,7 +473,7 @@ func CheckCentroid(t *testing.T, want UnaryResult, g geom.Geometry) {
 		// values.
 		want := want.Centroid.Force2D()
 
-		if !got.EqualsExact(want, geom.Tolerance(0.000000001)) {
+		if !got.EqualsExact(want, geom.ToleranceXY(0.000000001)) {
 			t.Logf("input: %v", g.AsText())
 			t.Logf("got:   %v", got.AsText())
 			t.Logf("want:  %v", want.AsText())
@@ -486,7 +486,7 @@ func CheckReverse(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckReverse", func(t *testing.T) {
 		got := g.Reverse()
 		want := want.Reverse
-		if !got.EqualsExact(want, geom.Tolerance(1e-9)) {
+		if !got.EqualsExact(want, geom.ToleranceXY(1e-9)) {
 			t.Logf("input: %v", g.AsText())
 			t.Logf("got:   %v", got.AsText())
 			t.Logf("want:  %v", want.AsText())

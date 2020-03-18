@@ -7,7 +7,7 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-func TestSequnceZeroValue(t *testing.T) {
+func TestSequenceZeroValue(t *testing.T) {
 	var seq geom.Sequence
 	expectIntEq(t, seq.Length(), 0)
 	expectCoordinatesTypeEq(t, seq.CoordinatesType(), geom.DimXY)

@@ -16,6 +16,10 @@ func geomFromWKT(t *testing.T, wkt string) Geometry {
 	return geom
 }
 
+func xyCoords(x, y float64) Coordinates {
+	return Coordinates{XY: XY{x, y}, Type: DimXY}
+}
+
 func expectPanics(t *testing.T, fn func()) {
 	t.Helper()
 	defer func() {

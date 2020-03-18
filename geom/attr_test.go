@@ -689,7 +689,7 @@ func TestCentroid(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := geomFromWKT(t, tt.input).Centroid()
 			want := geomFromWKT(t, tt.output)
-			if !want.EqualsExact(got.AsGeometry(), Tolerance(0.00000001)) {
+			if !want.EqualsExact(got.AsGeometry(), ToleranceXY(0.00000001)) {
 				t.Log(tt.input)
 				t.Errorf("got=%v want=%v", got.AsText(), tt.output)
 			}

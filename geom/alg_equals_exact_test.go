@@ -226,7 +226,7 @@ func TestEqualsExact(t *testing.T) {
 					}
 					gA := geomFromWKT(t, wkts[keyA])
 					gB := geomFromWKT(t, wkts[keyB])
-					got := gA.EqualsExact(gB, geom.Tolerance(0.125))
+					got := gA.EqualsExact(gB, geom.ToleranceXY(0.125))
 					if got != want {
 						t.Logf("WKT A: %v", wkts[keyA])
 						t.Logf("WKT B: %v", wkts[keyB])
