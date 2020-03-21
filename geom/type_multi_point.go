@@ -82,16 +82,18 @@ func (m MultiPoint) NumPoints() int {
 func (m MultiPoint) PointN(n int) Point {
 	if m.empty.Get(n) {
 		return NewEmptyPoint(m.CoordinatesType())
-	} else {
-		c := m.seq.Get(n)
-		return NewPoint(c)
 	}
+	c := m.seq.Get(n)
+	return NewPoint(c)
 }
 
+// AsText returns the WKT (Well Known Text) representation of this geometry.
 func (m MultiPoint) AsText() string {
 	return string(m.AppendWKT(nil))
 }
 
+// AppendWKT appends the WKT (Well Known Text) representation of this geometry
+// to the input byte slice.
 func (m MultiPoint) AppendWKT(dst []byte) []byte {
 	dst = appendWKTHeader(dst, "MULTIPOINT", m.CoordinatesType())
 	if m.NumPoints() == 0 {
@@ -100,7 +102,9 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 	return appendWKTSequence(dst, m.seq, true, m.empty)
 }
 
-// IsSimple returns true iff no two of its points are equal.
+// IsSimple returns true if this geometry contains no anomalous geometry
+// points, such as self intersection or self tangency.  MultiPoints are simple
+// if and only if no two of its points have equal XY coordinates.
 func (m MultiPoint) IsSimple() bool {
 	seen := make(map[XY]bool)
 	for i := 0; i < m.NumPoints(); i++ {
@@ -116,14 +120,21 @@ func (m MultiPoint) IsSimple() bool {
 	return true
 }
 
+// Intersection calculates the of this geometry and another, i.e. the portion
+// of the two geometries that are shared. It is not implemented for all
+// geometry pairs, and returns an error for those cases.
 func (m MultiPoint) Intersection(g Geometry) (Geometry, error) {
 	return intersection(m.AsGeometry(), g)
 }
 
+// Intersects return true if and only if this geometry intersects with the
+// other, i.e. they shared at least one common point.
 func (m MultiPoint) Intersects(g Geometry) bool {
 	return hasIntersection(m.AsGeometry(), g)
 }
 
+// IsEmpty return true if and only if this MultiPoint doesn't contain any
+// Points, or only contains empty Points.
 func (m MultiPoint) IsEmpty() bool {
 	for i := 0; i < m.NumPoints(); i++ {
 		if !m.empty.Get(i) {
@@ -133,6 +144,8 @@ func (m MultiPoint) IsEmpty() bool {
 	return true
 }
 
+// Envelope returns the Envelope that most tightly surrounds the geometry. If
+// the geometry is empty, then false is returned.
 func (m MultiPoint) Envelope() (Envelope, bool) {
 	var has bool
 	var env Envelope
@@ -151,16 +164,22 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 	return env, has
 }
 
+// Boundary returns the spatial boundary for this MultiPoint, which is always
+// the empty set. This is represented by the empty GeometryCollection.
 func (m MultiPoint) Boundary() GeometryCollection {
 	return GeometryCollection{}
 }
 
+// Value implements the database/sql/driver.Valuer interface by returning the
+// WKB (Well Known Binary) representation of this Geometry.
 func (m MultiPoint) Value() (driver.Value, error) {
 	var buf bytes.Buffer
 	err := m.AsBinary(&buf)
 	return buf.Bytes(), err
 }
 
+// AsBinary writes the WKB (Well Known Binary) representation of the geometry
+// to the writer.
 func (m MultiPoint) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
@@ -174,12 +193,14 @@ func (m MultiPoint) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
-// ConvexHull finds the convex hull of the set of points. This may either be
-// the empty set, a single point, a line, or a polygon.
+// ConvexHull returns the geometry representing the smallest convex geometry
+// that contains this geometry.
 func (m MultiPoint) ConvexHull() Geometry {
 	return convexHull(m.AsGeometry())
 }
 
+// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// this geometry as a GeoJSON geometry object.
 func (m MultiPoint) MarshalJSON() ([]byte, error) {
 	var dst []byte
 	dst = append(dst, `{"type":"MultiPoint","coordinates":`...)

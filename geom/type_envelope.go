@@ -147,7 +147,7 @@ func (e Envelope) Width() float64 {
 	return e.max.X - e.min.X
 }
 
-// Width returns the difference between the maximum and minimum Y coordinates
+// Height returns the difference between the maximum and minimum X coordinates
 // of the envelope.
 func (e Envelope) Height() float64 {
 	return e.max.Y - e.min.Y

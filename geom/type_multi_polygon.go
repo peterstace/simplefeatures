@@ -217,10 +217,13 @@ func (m MultiPolygon) PolygonN(n int) Polygon {
 	return m.polys[n]
 }
 
+// AsText returns the WKT (Well Known Text) representation of this geometry.
 func (m MultiPolygon) AsText() string {
 	return string(m.AppendWKT(nil))
 }
 
+// AppendWKT appends the WKT (Well Known Text) representation of this geometry
+// to the input byte slice.
 func (m MultiPolygon) AppendWKT(dst []byte) []byte {
 	dst = appendWKTHeader(dst, "MULTIPOLYGON", m.ctype)
 	if len(m.polys) == 0 {
@@ -236,19 +239,28 @@ func (m MultiPolygon) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-// IsSimple returns true. All MultiPolygons are simple by definition.
+// IsSimple returns true if this geometry contains no anomalous geometry
+// points, such as self intersection or self tangency. Because MultiPolygons
+// are always simple, this method always returns true.
 func (m MultiPolygon) IsSimple() bool {
 	return true
 }
 
+// Intersects return true if and only if this geometry intersects with the
+// other, i.e. they shared at least one common point.
 func (m MultiPolygon) Intersects(g Geometry) bool {
 	return hasIntersection(m.AsGeometry(), g)
 }
 
+// Intersection calculates the of this geometry and another, i.e. the portion
+// of the two geometries that are shared. It is not implemented for all
+// geometry pairs, and returns an error for those cases.
 func (m MultiPolygon) Intersection(g Geometry) (Geometry, error) {
 	return intersection(m.AsGeometry(), g)
 }
 
+// IsEmpty return true if and only if this MultiPolygon doesn't contain any
+// Polygons, or only contains empty Polygons.
 func (m MultiPolygon) IsEmpty() bool {
 	for _, p := range m.polys {
 		if !p.IsEmpty() {
@@ -258,6 +270,8 @@ func (m MultiPolygon) IsEmpty() bool {
 	return true
 }
 
+// Envelope returns the Envelope that most tightly surrounds the geometry. If
+// the geometry is empty, then false is returned.
 func (m MultiPolygon) Envelope() (Envelope, bool) {
 	var env Envelope
 	var has bool
@@ -276,6 +290,8 @@ func (m MultiPolygon) Envelope() (Envelope, bool) {
 	return env, has
 }
 
+// Boundary returns the spatial boundary of this MultiPolygon. This is the
+// MultiLineString containing the boundaries of the MultiPolygon's elements.
 func (m MultiPolygon) Boundary() MultiLineString {
 	var n int
 	for _, p := range m.polys {
@@ -290,12 +306,16 @@ func (m MultiPolygon) Boundary() MultiLineString {
 	return NewMultiLineStringFromLineStrings(bounds)
 }
 
+// Value implements the database/sql/driver.Valuer interface by returning the
+// WKB (Well Known Binary) representation of this Geometry.
 func (m MultiPolygon) Value() (driver.Value, error) {
 	var buf bytes.Buffer
 	err := m.AsBinary(&buf)
 	return buf.Bytes(), err
 }
 
+// AsBinary writes the WKB (Well Known Binary) representation of the geometry
+// to the writer.
 func (m MultiPolygon) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
@@ -309,10 +329,14 @@ func (m MultiPolygon) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
+// ConvexHull returns the geometry representing the smallest convex geometry
+// that contains this geometry.
 func (m MultiPolygon) ConvexHull() Geometry {
 	return convexHull(m.AsGeometry())
 }
 
+// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// this geometry as a GeoJSON geometry object.
 func (m MultiPolygon) MarshalJSON() ([]byte, error) {
 	var dst []byte
 	dst = append(dst, `{"type":"MultiPolygon","coordinates":`...)

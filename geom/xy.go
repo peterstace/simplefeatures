@@ -1,9 +1,13 @@
 package geom
 
+// XY represents a pair of X and Y coordinates. This can either represent a
+// location on the XY plane, or a 2D vector in the real vector space.
 type XY struct {
 	X, Y float64
 }
 
+// Sub returns the result of subtracting the other XY from this XY (in the same
+// manner as vector subtraction).
 func (w XY) Sub(o XY) XY {
 	return XY{
 		w.X - o.X,
@@ -11,6 +15,8 @@ func (w XY) Sub(o XY) XY {
 	}
 }
 
+// Add returns the result of adding this XY to another XY (in the same manner
+// as vector addition).
 func (w XY) Add(o XY) XY {
 	return XY{
 		w.X + o.X,
@@ -18,6 +24,7 @@ func (w XY) Add(o XY) XY {
 	}
 }
 
+// Scale returns the XY where the X and Y have been scaled by s.
 func (w XY) Scale(s float64) XY {
 	return XY{
 		w.X * s,
@@ -25,14 +32,18 @@ func (w XY) Scale(s float64) XY {
 	}
 }
 
+// Cross returns the 2D cross product of this and another XY. This is defined
+// as the 'z' coordinate of the regular 3D cross product.
 func (w XY) Cross(o XY) float64 {
 	return (w.X * o.Y) - (w.Y * o.X)
 }
 
+// Midpoint returns the midpoint of this and another XY.
 func (w XY) Midpoint(o XY) XY {
 	return w.Add(o).Scale(0.5)
 }
 
+// Dot returns the dot product of this and another XY.
 func (w XY) Dot(o XY) float64 {
 	return w.X*o.X + w.Y*o.Y
 }

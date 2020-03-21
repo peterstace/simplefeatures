@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// UnmarshalGeoJSON unmarshals a geometry that is encoded as a GeoJSON Geometry Object.
 func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error) {
 	var root geojsonNode
 	if err := json.Unmarshal(input, &root); err != nil {
@@ -236,9 +237,8 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, e
 		coords, ok := oneDimFloat64sToCoordinates(node.coords, ctype)
 		if ok {
 			return NewPoint(coords).AsGeometry(), nil
-		} else {
-			return NewEmptyPoint(ctype).AsGeometry(), nil
 		}
+		return NewEmptyPoint(ctype).AsGeometry(), nil
 	case geojsonLineString:
 		seq := twoDimFloat64sToSequence(node.coords, ctype)
 		ls, err := NewLineString(seq)
