@@ -1,0 +1,12 @@
+version: "2.1"
+services:
+  lint:
+    build:
+      context: .
+      dockerfile: golint.Dockerfile
+    working_dir: /go/src/github.com/peterstace/simplefeatures
+    entrypoint: golint ./geom
+    volumes:
+      - .:/go/src/github.com/peterstace/simplefeatures
+    environment:
+      - GO111MODULE=on
