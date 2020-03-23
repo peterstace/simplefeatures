@@ -20,19 +20,19 @@ The changelog can be found [here](CHANGELOG.md).
 #### Supported Features
 
 - Marshalling/unmarshalling:
-	- WKT (well known text)
-	- WKB (well known binary)
-	- GeoJSON
+	- WKT - Well Known Text
+	- WKB - Well Known Binary (including SQL valuer/scanner)
+	- GeoJSON (including GeoJSON Feature Collections)
 
-- Geometry attribute calculations:
-	- Geometry validity checks
-	- Dimensionality check
-	- Bounding box calculation
-	- Emptiness check
-	- Boundary calculation
+- 3D and Measure coordinates.
 
 - Spatial analysis:
+	- Geometry validity checks
+	- Boundary calculation
+	- Bounding box (envelope) calculation
 	- Convex Hull calculation
+	- Exact equals check
+	- Is Simple check
 	- Intersects check
 	- Length calculation
 	- Closed geometry calculation
@@ -40,20 +40,24 @@ The changelog can be found [here](CHANGELOG.md).
 	- Area calculation
 	- Centroid calculation
 
+- Geometry manipulation
+	- Reverse calculation
+	- Pointwise transform
+	- Force coordinates type (e.g. Force to 2D)
+
 #### In the works
 
 - Spatial analysis:
 	- Intersection calculation
-	- Spatially equality calculation
 	- Point on surface calculation
 
 #### Features Not Planned Yet
 
 - SRIDs
-- 3D/Measure coordinates.
 
 - Spatial analysis:
 	- Geometry buffering
+	- Spatial equality check
 	- Disjoint check
 	- Touches check
 	- Crosses check

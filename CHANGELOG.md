@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.10.1
+
+- Adds documentation comments to all exported symbols.
+
 ## v0.10.0
 
 2020-03-20
