@@ -80,10 +80,13 @@ func (n Line) PointN(i int) Coordinates {
 	}
 }
 
+// AsText returns the WKT (Well Known Text) representation of this geometry.
 func (n Line) AsText() string {
 	return string(n.AppendWKT(nil))
 }
 
+// AppendWKT appends the WKT (Well Known Text) representation of this geometry
+// to the input byte slice.
 func (n Line) AppendWKT(dst []byte) []byte {
 	dst = appendWKTHeader(dst, "LINESTRING", n.a.Type)
 	dst = append(dst, '(')
@@ -94,22 +97,33 @@ func (n Line) AppendWKT(dst []byte) []byte {
 	return dst
 }
 
+// IsSimple returns true if this geometry contains no anomalous geometry
+// points, such as self intersection or self tangency.  Lines are always
+// simple, so this method always returns true.
 func (n Line) IsSimple() bool {
 	return true
 }
 
+// Intersection calculates the of this geometry and another, i.e. the portion
+// of the two geometries that are shared. It is not implemented for all
+// geometry pairs, and returns an error for those cases.
 func (n Line) Intersection(g Geometry) (Geometry, error) {
 	return intersection(n.AsGeometry(), g)
 }
 
+// Intersects return true if and only if this geometry intersects with the
+// other, i.e. they shared at least one common point.
 func (n Line) Intersects(g Geometry) bool {
 	return hasIntersection(n.AsGeometry(), g)
 }
 
+// Envelope returns the Envelope that most tightly surrounds the Line.
 func (n Line) Envelope() Envelope {
 	return NewEnvelope(n.a.XY, n.b.XY)
 }
 
+// Boundary returns the spatial boundary of this Line. This is the MultiPoint
+// collection containing the two endpoints of the Line.
 func (n Line) Boundary() MultiPoint {
 	return NewMultiPoint(
 		NewSequence([]float64{
@@ -119,12 +133,16 @@ func (n Line) Boundary() MultiPoint {
 	)
 }
 
+// Value implements the database/sql/driver.Valuer interface by returning the
+// WKB (Well Known Binary) representation of this Geometry.
 func (n Line) Value() (driver.Value, error) {
 	var buf bytes.Buffer
 	err := n.AsBinary(&buf)
 	return buf.Bytes(), err
 }
 
+// AsBinary writes the WKB (Well Known Binary) representation of the geometry
+// to the writer.
 func (n Line) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
@@ -135,10 +153,14 @@ func (n Line) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
+// ConvexHull returns the geometry representing the smallest convex geometry
+// that contains this geometry.
 func (n Line) ConvexHull() Geometry {
 	return convexHull(n.AsGeometry())
 }
 
+// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// this geometry as a GeoJSON geometry object.
 func (n Line) MarshalJSON() ([]byte, error) {
 	var dst []byte
 	dst = append(dst, `{"type":"LineString","coordinates":[`...)
@@ -200,6 +222,7 @@ func (n Line) Length() float64 {
 	return math.Sqrt(delta.Dot(delta))
 }
 
+// Centroid retruns the centroid of this Line, which is always its midpoint.
 func (n Line) Centroid() Point {
 	return NewPointFromXY(n.a.XY.Add(n.b.XY).Scale(0.5))
 }

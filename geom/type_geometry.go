@@ -171,7 +171,7 @@ func (g Geometry) AsMultiPolygon() MultiPolygon {
 	return *(*MultiPolygon)(g.ptr)
 }
 
-// AsText returns the WKT representation of the geometry.
+// AsText returns the WKT (Well Known Text) representation of this geometry.
 func (g Geometry) AsText() string {
 	switch g.tag {
 	case geometryCollectionTag:
@@ -195,8 +195,8 @@ func (g Geometry) AsText() string {
 	}
 }
 
-// MarshalJSON implements the encoding/json.Marshaller interface by returning a
-// GeoJSON geometry object.
+// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// this geometry as a GeoJSON geometry object.
 func (g Geometry) MarshalJSON() ([]byte, error) {
 	switch g.tag {
 	case geometryCollectionTag:
@@ -236,7 +236,9 @@ func (g *Geometry) UnmarshalJSON(p []byte) error {
 	return nil
 }
 
-func (g Geometry) appendWKT(dst []byte) []byte {
+// AppendWKT appends the WKT (Well Known Text) representation of this geometry
+// to the input byte slice.
+func (g Geometry) AppendWKT(dst []byte) []byte {
 	switch g.tag {
 	case geometryCollectionTag:
 		return (*GeometryCollection)(g.ptr).AppendWKT(dst)
@@ -322,10 +324,11 @@ func (g *Geometry) Scan(src interface{}) error {
 	return nil
 }
 
-// Dimension returns the dimension of the Geometry. This is  0 for points, 1
-// for curves, and 2 for surfaces (regardless of whether or not they are
-// empty). For GeometryCollections it is the maximum dimension over the
-// collection (or 0 if the collection is the empty collection).
+// Dimension returns the dimension of the Geometry. This is  0 for Points and
+// MultiPoints, 1 for LineStrings and MultiLineStrings, and 2 for Polygons and
+// MultiPolygons (regardless of whether or not they are empty). For
+// GeometryCollections it is the maximum dimension over the collection (or 0 if
+// the collection is the empty collection).
 func (g Geometry) Dimension() int {
 	switch g.tag {
 	case geometryCollectionTag:
@@ -341,7 +344,8 @@ func (g Geometry) Dimension() int {
 	}
 }
 
-// IsEmpty returns true if this object an empty geometry.
+// IsEmpty returns true if this geometry is empty. Collection types are empty
+// if they have zero elements or only contain empty elements.
 func (g Geometry) IsEmpty() bool {
 	switch g.tag {
 	case geometryCollectionTag:
@@ -391,7 +395,10 @@ func (g Geometry) Envelope() (Envelope, bool) {
 	}
 }
 
-// Boundary returns the Geometry representing the limit of this geometry.
+// Boundary returns the Geometry representing the spatial limit of this
+// geometry. The precise definition is dependant on the concrete geometry type
+// (see the documentation of each concrete Geometry's Boundary method for
+// details).
 func (g Geometry) Boundary() Geometry {
 	// TODO: Investigate to see if the behaviour from libgeos would make more
 	// sense to use here (which is to return the same geometry type that would
@@ -458,7 +465,7 @@ func (g Geometry) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	}
 }
 
-// Convex hull returns a Geometry that represents the smallest convex set
+// ConvexHull returns the geometry representing the smallest convex geometry
 // that contains this geometry.
 func (g Geometry) ConvexHull() Geometry {
 	return convexHull(g)
@@ -489,17 +496,15 @@ func (g Geometry) IsValid() bool {
 	}
 }
 
-// Intersects returns true if the intersection of this gemoetry with the
-// specified other geometry is not empty, or false if it is empty.
+// Intersects return true if and only if this geometry intersects with the
+// other, i.e. they shared at least one common point.
 func (g Geometry) Intersects(other Geometry) bool {
 	return hasIntersection(g, other)
 }
 
-// Intersection returns a geometric object that represents the point set
-// intersection of this geometry with another geometry.
-//
-// It is not implemented for all possible pairs of geometries, and returns an
-// error in those cases.
+// Intersection calculates the of this geometry and another, i.e. the portion
+// of the two geometries that are shared. It is not implemented for all
+// geometry pairs, and returns an error for those cases.
 func (g Geometry) Intersection(other Geometry) (Geometry, error) {
 	result, err := intersection(g, other)
 	if err != nil {
