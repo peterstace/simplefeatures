@@ -2,6 +2,8 @@
 
 ## v0.10.1
 
+2020-03-24
+
 - Adds documentation comments to all exported symbols.
 
 ## v0.10.0
