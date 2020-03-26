@@ -33,18 +33,26 @@ type Polygon struct {
 
 // NewPolygonFromRings creates a polygon given its rings. The outer ring is
 // first, and any inner rings follow. If no rings are provided, then the
-// returned Polygon is the empty Polygon.
-func NewPolygonFromRings(rings []LineString, ctype CoordinatesType, opts ...ConstructorOption) (Polygon, error) {
+// returned Polygon is the empty Polygon. The coordinate type of the polygon is
+// the lowest common coordinate type of its rings.
+func NewPolygonFromRings(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
+	if len(rings) == 0 {
+		return Polygon{}, nil
+	}
+
+	ctype := DimXYZM
 	for _, r := range rings {
-		if ct := r.CoordinatesType(); ct != ctype {
-			return Polygon{}, mixedCoordinatesTypeError{ct, ctype}
-		}
+		ctype &= r.CoordinatesType()
+	}
+	rings = append([]LineString(nil), rings...)
+	for i := range rings {
+		rings[i] = rings[i].ForceCoordinatesType(ctype)
 	}
 
 	if err := validatePolygon(rings, opts...); err != nil {
 		return Polygon{}, err
 	}
-	return Polygon{append([]LineString(nil), rings...), ctype}, nil
+	return Polygon{rings, ctype}, nil
 }
 
 func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
@@ -199,10 +207,13 @@ func (p Polygon) InteriorRingN(n int) LineString {
 	return p.rings[n+1]
 }
 
+// AsText returns the WKT (Well Known Text) representation of this geometry.
 func (p Polygon) AsText() string {
 	return string(p.AppendWKT(nil))
 }
 
+// AppendWKT appends the WKT (Well Known Text) representation of this geometry
+// to the input byte slice.
 func (p Polygon) AppendWKT(dst []byte) []byte {
 	dst = appendWKTHeader(dst, "POLYGON", p.ctype)
 	return p.appendWKTBody(dst)
@@ -222,44 +233,57 @@ func (p Polygon) appendWKTBody(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-// IsSimple always returns true. All Polygons are simple.
+// IsSimple returns true if this geometry contains no anomalous geometry
+// points, such as self intersection or self tangency. Because Polygons are
+// always simple, this method always returns true.
 func (p Polygon) IsSimple() bool {
 	return true
 }
 
+// Intersection calculates the of this geometry and another, i.e. the portion
+// of the two geometries that are shared. It is not implemented for all
+// geometry pairs, and returns an error for those cases.
 func (p Polygon) Intersection(g Geometry) (Geometry, error) {
 	return intersection(p.AsGeometry(), g)
 }
 
+// Intersects return true if and only if this geometry intersects with the
+// other, i.e. they shared at least one common point.
 func (p Polygon) Intersects(g Geometry) bool {
 	return hasIntersection(p.AsGeometry(), g)
 }
 
+// IsEmpty returns true if and only if this Polygon is the empty Polygon. The
+// empty Polygon doesn't have any rings and doesn't enclose any area.
 func (p Polygon) IsEmpty() bool {
 	// Rings are not allowed to be empty, so we don't have to check IsEmpty on
 	// each ring.
 	return len(p.rings) == 0
 }
 
+// Envelope returns the Envelope that most tightly surrounds the geometry. If
+// the geometry is empty, then false is returned.
 func (p Polygon) Envelope() (Envelope, bool) {
 	return p.ExteriorRing().Envelope()
 }
 
+// Boundary returns the spatial boundary of this Polygon. For non-empty
+// Polygons, this is the MultiLineString collection containing all of the
+// rings.
 func (p Polygon) Boundary() MultiLineString {
-	mls, err := NewMultiLineStringFromLineStrings(p.rings, p.ctype)
-	if err != nil {
-		// Can't get a mixed coordinate type error due to construction.
-		panic(err)
-	}
-	return mls.Force2D()
+	return NewMultiLineStringFromLineStrings(p.rings).Force2D()
 }
 
+// Value implements the database/sql/driver.Valuer interface by returning the
+// WKB (Well Known Binary) representation of this Geometry.
 func (p Polygon) Value() (driver.Value, error) {
 	var buf bytes.Buffer
 	err := p.AsBinary(&buf)
 	return buf.Bytes(), err
 }
 
+// AsBinary writes the WKB (Well Known Binary) representation of the geometry
+// to the writer.
 func (p Polygon) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
@@ -272,12 +296,14 @@ func (p Polygon) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
-// ConvexHull returns the convex hull of the Polygon, which is always another
-// Polygon.
+// ConvexHull returns the geometry representing the smallest convex geometry
+// that contains this geometry.
 func (p Polygon) ConvexHull() Geometry {
 	return convexHull(p.AsGeometry())
 }
 
+// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// this geometry as a GeoJSON geometry object.
 func (p Polygon) MarshalJSON() ([]byte, error) {
 	var dst []byte
 	dst = append(dst, `{"type":"Polygon","coordinates":`...)
@@ -310,7 +336,8 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon
 			return Polygon{}, err
 		}
 	}
-	return NewPolygonFromRings(transformed, p.ctype, opts...)
+	poly, err := NewPolygonFromRings(transformed, opts...)
+	return poly.ForceCoordinatesType(p.ctype), err
 }
 
 // EqualsExact checks if this Polygon is exactly equal to another Polygon.
@@ -326,7 +353,7 @@ func (p Polygon) IsValid() bool {
 			return false
 		}
 	}
-	_, err := NewPolygonFromRings(p.rings, p.ctype)
+	_, err := NewPolygonFromRings(p.rings)
 	return err == nil
 }
 
@@ -431,13 +458,13 @@ func (p Polygon) AsMultiPolygon() MultiPolygon {
 	if !p.IsEmpty() {
 		polys = []Polygon{p}
 	}
-	mp, err := NewMultiPolygonFromPolygons(polys, p.ctype)
+	mp, err := NewMultiPolygonFromPolygons(polys)
 	if err != nil {
 		// Cannot occur due to construction. A valid polygon will always be a
 		// valid multipolygon.
 		panic(err)
 	}
-	return mp
+	return mp.ForceCoordinatesType(p.ctype)
 }
 
 // Reverse in the case of Polygon outputs the coordinates of each ring in reverse order,

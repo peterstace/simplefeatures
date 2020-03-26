@@ -16,16 +16,23 @@ type GeometryCollection struct {
 	ctype CoordinatesType
 }
 
-// NewGeometryCollection creates a collection of geometries. Each geometry must
-// have the same coordinates type as the supplied coordinates type argument
-// (otherwise an error is returned).
-func NewGeometryCollection(geoms []Geometry, ctype CoordinatesType, opts ...ConstructorOption) (GeometryCollection, error) {
-	for _, g := range geoms {
-		if g.CoordinatesType() != ctype {
-			return GeometryCollection{}, mixedCoordinatesTypeError{g.CoordinatesType(), ctype}
-		}
+// NewGeometryCollection creates a collection of geometries. The coordinates
+// type of the GeometryCollection is the lowest common coordinates type of its
+// child geometries.
+func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) GeometryCollection {
+	if len(geoms) == 0 {
+		return GeometryCollection{}
 	}
-	return GeometryCollection{geoms, ctype}, nil
+
+	ctype := DimXYZM
+	for _, g := range geoms {
+		ctype &= g.CoordinatesType()
+	}
+	geoms = append([]Geometry(nil), geoms...)
+	for i := range geoms {
+		geoms[i] = geoms[i].ForceCoordinatesType(ctype)
+	}
+	return GeometryCollection{geoms, ctype}
 }
 
 // Type return type string for GeometryCollection
@@ -48,10 +55,13 @@ func (c GeometryCollection) GeometryN(n int) Geometry {
 	return c.geoms[n]
 }
 
+// AsText returns the WKT (Well Known Text) representation of this geometry.
 func (c GeometryCollection) AsText() string {
 	return string(c.AppendWKT(nil))
 }
 
+// AppendWKT appends the WKT (Well Known Text) representation of this geometry
+// to the input byte slice.
 func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	dst = appendWKTHeader(dst, "GEOMETRYCOLLECTION", c.ctype)
 	if len(c.geoms) == 0 {
@@ -62,19 +72,26 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 		if i > 0 {
 			dst = append(dst, ',')
 		}
-		dst = g.appendWKT(dst)
+		dst = g.AppendWKT(dst)
 	}
 	return append(dst, ')')
 }
 
+// Intersection calculates the intersection between this geometry and another
+// (i.e. the overlap between the two geometries). It is not implemented for all
+// geometry pairs, and returns an error for those cases.
 func (c GeometryCollection) Intersection(g Geometry) (Geometry, error) {
 	return intersection(c.AsGeometry(), g)
 }
 
+// Intersects return true if and only if this geometry intersects with the
+// other, i.e. they shared at least one common point.
 func (c GeometryCollection) Intersects(g Geometry) bool {
 	return hasIntersection(c.AsGeometry(), g)
 }
 
+// IsEmpty return true if and only if this GeometryCollection doesn't contain
+// any elements, or only contains empty elements.
 func (c GeometryCollection) IsEmpty() bool {
 	for _, g := range c.geoms {
 		if !g.IsEmpty() {
@@ -84,6 +101,10 @@ func (c GeometryCollection) IsEmpty() bool {
 	return true
 }
 
+// Dimension returns the maximum dimension over the collection, or 0 if the
+// collection is the empty collection. Points and MultiPoints have dimension 0,
+// LineStrings and MultiLineStrings have dimension 1, and Polygons and
+// MultiPolygons have dimension 2.
 func (c GeometryCollection) Dimension() int {
 	dim := 0
 	for _, g := range c.geoms {
@@ -112,10 +133,14 @@ func (c GeometryCollection) flatten() []Geometry {
 	return geoms
 }
 
+// Envelope returns the Envelope that most tightly surrounds the geometry. If
+// the geometry is empty, then false is returned.
 func (c GeometryCollection) Envelope() (Envelope, bool) {
 	return EnvelopeFromGeoms(c.flatten()...)
 }
 
+// Boundary returns the spatial boundary of this GeometryCollection. This is
+// the GeometryCollection containing the boundaries of each child geometry.
 func (c GeometryCollection) Boundary() GeometryCollection {
 	if c.IsEmpty() {
 		return c
@@ -130,12 +155,16 @@ func (c GeometryCollection) Boundary() GeometryCollection {
 	return GeometryCollection{bounds, DimXY}
 }
 
+// Value implements the database/sql/driver.Valuer interface by returning the
+// WKB (Well Known Binary) representation of this Geometry.
 func (c GeometryCollection) Value() (driver.Value, error) {
 	var buf bytes.Buffer
 	err := c.AsBinary(&buf)
 	return buf.Bytes(), err
 }
 
+// AsBinary writes the WKB (Well Known Binary) representation of the geometry
+// to the writer.
 func (c GeometryCollection) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
@@ -149,10 +178,14 @@ func (c GeometryCollection) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
+// ConvexHull returns the geometry representing the smallest convex geometry
+// that contains this geometry.
 func (c GeometryCollection) ConvexHull() Geometry {
 	return convexHull(c.AsGeometry())
 }
 
+// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// this geometry as a GeoJSON geometry object.
 func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 	buf := []byte(`{"type":"GeometryCollection","geometries":`)
 	var geoms = c.geoms
@@ -178,7 +211,7 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 			return GeometryCollection{}, err
 		}
 	}
-	return NewGeometryCollection(transformed, c.ctype)
+	return GeometryCollection{transformed, c.ctype}, nil
 }
 
 // EqualsExact checks if this GeometryCollection is exactly equal to another GeometryCollection.
@@ -383,12 +416,7 @@ func (c GeometryCollection) ForceCoordinatesType(newCType CoordinatesType) Geome
 	for i := range c.geoms {
 		gs[i] = c.geoms[i].ForceCoordinatesType(newCType)
 	}
-	gc, err := NewGeometryCollection(gs, newCType)
-	if err != nil {
-		// Should not occur because all geometries have the new coordinates type.
-		panic(err)
-	}
-	return gc
+	return GeometryCollection{gs, newCType}
 }
 
 // Force2D returns a copy of the GeometryCollection with Z and M values removed.

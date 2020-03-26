@@ -17,10 +17,10 @@ func newEqualsExactOptionSet(opts []EqualsExactOption) equalsExactOptionSet {
 	return s
 }
 
-// Tolerance modifies the behaviour of the EqualsExact method by allowing two
+// ToleranceXY modifies the behaviour of the EqualsExact method by allowing two
 // geometry control points be be considered equal if their XY coordinates are
 // within the given euclidean distance of each other.
-func Tolerance(within float64) EqualsExactOption {
+func ToleranceXY(within float64) EqualsExactOption {
 	return func(s *equalsExactOptionSet) {
 		s.toleranceSq = within * within
 	}

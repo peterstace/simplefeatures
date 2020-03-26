@@ -78,9 +78,8 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		c, ok := p.nextPointText(ctype)
 		if !ok {
 			return NewEmptyPoint(ctype).AsGeometry()
-		} else {
-			return NewPoint(c, p.opts...).AsGeometry()
 		}
+		return NewPoint(c, p.opts...).AsGeometry()
 	case "LINESTRING":
 		ls := p.nextLineStringText(ctype)
 		seq := ls.Coordinates()
@@ -100,7 +99,7 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 	case "MULTIPOLYGON":
 		return p.nextMultiPolygonText(ctype).AsGeometry()
 	case "GEOMETRYCOLLECTION":
-		return p.nextGeometryCollectionText(ctype)
+		return p.nextGeometryCollectionText(ctype).AsGeometry()
 	default:
 		p.errorf("unexpected token: %v", geomType)
 		return Geometry{}
@@ -219,16 +218,20 @@ func (p *parser) nextLineStringText(ctype CoordinatesType) LineString {
 
 func (p *parser) nextPolygonText(ctype CoordinatesType) Polygon {
 	rings := p.nextPolygonOrMultiLineStringText(ctype)
-	poly, err := NewPolygonFromRings(rings, ctype, p.opts...)
+	if len(rings) == 0 {
+		return Polygon{}.ForceCoordinatesType(ctype)
+	}
+	poly, err := NewPolygonFromRings(rings, p.opts...)
 	p.check(err)
 	return poly
 }
 
 func (p *parser) nextMultiLineString(ctype CoordinatesType) MultiLineString {
 	lss := p.nextPolygonOrMultiLineStringText(ctype)
-	mls, err := NewMultiLineStringFromLineStrings(lss, ctype, p.opts...)
-	p.check(err)
-	return mls
+	if len(lss) == 0 {
+		return MultiLineString{}.ForceCoordinatesType(ctype)
+	}
+	return NewMultiLineStringFromLineStrings(lss, p.opts...)
 }
 
 func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType) []LineString {
@@ -271,7 +274,7 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) MultiPoint {
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	return NewMultiPoint(seq, empty, p.opts...)
+	return NewMultiPointWithEmptyMask(seq, empty, p.opts...)
 }
 
 func (p *parser) nextMultiPointStylePointAppend(dst []float64, ctype CoordinatesType) []float64 {
@@ -304,12 +307,15 @@ func (p *parser) nextMultiPolygonText(ctype CoordinatesType) MultiPolygon {
 			}
 		}
 	}
-	mp, err := NewMultiPolygonFromPolygons(polys, ctype, p.opts...)
+	if len(polys) == 0 {
+		return MultiPolygon{}.ForceCoordinatesType(ctype)
+	}
+	mp, err := NewMultiPolygonFromPolygons(polys, p.opts...)
 	p.check(err)
 	return mp
 }
 
-func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) Geometry {
+func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) GeometryCollection {
 	var geoms []Geometry
 	tok := p.nextEmptySetOrLeftParen()
 	if tok == "(" {
@@ -322,7 +328,8 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) Geometry {
 			}
 		}
 	}
-	gc, err := NewGeometryCollection(geoms, ctype, p.opts...)
-	p.check(err)
-	return gc.AsGeometry()
+	if len(geoms) == 0 {
+		return GeometryCollection{}.ForceCoordinatesType(ctype)
+	}
+	return NewGeometryCollection(geoms, p.opts...)
 }

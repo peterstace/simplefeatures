@@ -1,6 +1,21 @@
 # Changelog
 
-## v0.9.0
+## v0.10.1
+
+2020-03-24
+
+- Adds documentation comments to all exported symbols.
+
+## v0.10.0
+
+2020-03-20
+
+- Adds support to geometries for Z (3D) and M (Measure) values. This includes
+  many breaking changes, primarily around geometry constructor functions.
+
+## v0.9.0:
+
+2020-03-03
 
 __Special thanks to Frank Sun and Peter Jones for contributing to this release.__
 
@@ -27,6 +42,8 @@ __Special thanks to Frank Sun and Peter Jones for contributing to this release._
 
 ## v0.8.0
 
+2020-02-20
+
 __Special thanks to Lachlan Patrick for contributing to this release.__
 
 - Adds a `Length` implementation for the `Geometry` type.
@@ -44,6 +61,8 @@ __Special thanks to Lachlan Patrick for contributing to this release.__
 
 ## v0.7.0
 
+2020-01-24
+
 - Fixes a deficiency where `LineString` would not retain coincident adjacent
   points.
 
@@ -54,6 +73,8 @@ __Special thanks to Lachlan Patrick for contributing to this release.__
 - Reduces the memory required to store a `LineString`.
 
 ## v0.6.0
+
+2020-01-21
 
 __Special thanks to Lachlan Patrick for contributing to this release.__
 
@@ -66,6 +87,8 @@ negative or positive result for non-empty areal geometries.
 
 ## v0.5.0
 
+2020-01-17
+
 - Fixes a bug where polygons with nested rings would erroneously be reported as
   valid.
 
@@ -75,6 +98,8 @@ memory allocations have been significantly reduced.
 
 ## v0.4.0
 
+2020-01-07
+
 - The `Geometry` interface has been replaced with a concrete type also named
   `Geometry`. This new type holds exactly one geometry value (one of
 `EmptySet`, `Point`, `Line`, `LineString`, `Polygon`, `MultiPoint`,
@@ -83,17 +108,23 @@ has been removed (`Geometry` can be used instead).
 
 ## v0.3.0
 
+2020-01-07
+
 - A Linesweep algorithm is now used for the `Intersects() bool` implementation
   between line types (`Line`, `LineString`, `MultiLineString`). This reduces
 the computational complexity from quadratic time to linearithmic time.
 
 ## v0.2.0
 
+2019-12-24
+
 - The `Intersects` method is now implemented for all geometry pairs. The method
   signature has been changed to no longer return an error (errors were only
 returned for unimplemented geometry pairs).
 
 ## v0.1.0
+
+2019-12-02
 
 __Special thanks to Lachlan Patrick and Den Tsou for contributing to this release.__
 

@@ -68,10 +68,13 @@ func (s LineString) EndPoint() Point {
 	return NewPoint(s.seq.Get(s.seq.Length() - 1))
 }
 
+// AsText returns the WKT (Well Known Text) representation of this geometry.
 func (s LineString) AsText() string {
 	return string(s.AppendWKT(nil))
 }
 
+// AppendWKT appends the WKT (Well Known Text) representation of this geometry
+// to the input byte slice.
 func (s LineString) AppendWKT(dst []byte) []byte {
 	dst = appendWKTHeader(dst, "LINESTRING", s.CoordinatesType())
 	return s.appendWKTBody(dst)
@@ -84,9 +87,10 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 	return appendWKTSequence(dst, s.seq, false, BitSet{})
 }
 
-// IsSimple returns true iff the curve defined by the LineString doesn't pass
-// through the same point twice (with the possible exception of the two
-// endpoints being coincident).
+// IsSimple returns true if this geometry contains no anomalous geometry
+// points, such as self intersection or self tangency. LineStrings are simple
+// if and only if the curve defined by the LineString doesn't pass through the
+// same point twice (with the except of the two endpoints being coincident).
 func (s LineString) IsSimple() bool {
 	// A line sweep algorithm is used, where a vertical line is swept over X
 	// values (from lowest to highest). We only have to consider line segments
@@ -165,22 +169,33 @@ func (s LineString) IsSimple() bool {
 	return true
 }
 
+// IsClosed returns true if and only if this LineString is not empty and its
+// start and end points are coincident.
 func (s LineString) IsClosed() bool {
 	return !s.IsEmpty() && s.seq.GetXY(0) == s.seq.GetXY(s.seq.Length()-1)
 }
 
+// Intersection calculates the of this geometry and another, i.e. the portion
+// of the two geometries that are shared. It is not implemented for all
+// geometry pairs, and returns an error for those cases.
 func (s LineString) Intersection(g Geometry) (Geometry, error) {
 	return intersection(s.AsGeometry(), g)
 }
 
+// Intersects return true if and only if this geometry intersects with the
+// other, i.e. they shared at least one common point.
 func (s LineString) Intersects(g Geometry) bool {
 	return hasIntersection(s.AsGeometry(), g)
 }
 
+// IsEmpty returns true if and only if this LineString is the empty LineString.
+// The empty LineString is defined by a zero length coordinates sequence.
 func (s LineString) IsEmpty() bool {
 	return s.seq.Length() == 0
 }
 
+// Envelope returns the Envelope that most tightly surrounds the geometry. If
+// the geometry is empty, then false is returned.
 func (s LineString) Envelope() (Envelope, bool) {
 	n := s.seq.Length()
 	if n == 0 {
@@ -193,6 +208,10 @@ func (s LineString) Envelope() (Envelope, bool) {
 	return env, true
 }
 
+// Boundary returns the spatial boundary of this LineString. For closed
+// LineStrings (i.e. LineStrings where the start and end points have the same
+// XY value), this is the empty MultiPoint. For non-closed LineStrings, this is
+// the MultiPoint containing the two endpoints of the LineString.
 func (s LineString) Boundary() MultiPoint {
 	var fs []float64
 	if !s.IsClosed() {
@@ -203,15 +222,19 @@ func (s LineString) Boundary() MultiPoint {
 			xy2.X, xy2.Y,
 		}
 	}
-	return NewMultiPoint(NewSequence(fs, DimXY), BitSet{})
+	return NewMultiPoint(NewSequence(fs, DimXY))
 }
 
+// Value implements the database/sql/driver.Valuer interface by returning the
+// WKB (Well Known Binary) representation of this Geometry.
 func (s LineString) Value() (driver.Value, error) {
 	var buf bytes.Buffer
 	err := s.AsBinary(&buf)
 	return buf.Bytes(), err
 }
 
+// AsBinary writes the WKB (Well Known Binary) representation of the geometry
+// to the writer.
 func (s LineString) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
@@ -220,10 +243,14 @@ func (s LineString) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
+// ConvexHull returns the geometry representing the smallest convex geometry
+// that contains this geometry.
 func (s LineString) ConvexHull() Geometry {
 	return convexHull(s.AsGeometry())
 }
 
+// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// this geometry as a GeoJSON geometry object.
 func (s LineString) MarshalJSON() ([]byte, error) {
 	var dst []byte
 	dst = append(dst, `{"type":"LineString","coordinates":`...)
@@ -311,13 +338,7 @@ func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64
 // AsMultiLineString is a convenience function that converts this LineString
 // into a MultiLineString.
 func (s LineString) AsMultiLineString() MultiLineString {
-	mls, err := NewMultiLineStringFromLineStrings([]LineString{s}, s.CoordinatesType())
-	if err != nil {
-		// Because there is only a single line string, this can't panic due to
-		// mixed coordinate type.
-		panic(err)
-	}
-	return mls
+	return NewMultiLineStringFromLineStrings([]LineString{s})
 }
 
 // Reverse in the case of LineString outputs the coordinates in reverse order.

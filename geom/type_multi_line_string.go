@@ -9,26 +9,32 @@ import (
 
 // MultiLineString is a linear geometry that consists of a collection of
 // LineStrings. It's zero value is the empty MultiLineString (i.e. the
-// collection of zero LineStrings). It is immutable after creation.
+// collection of zero LineStrings) of 2D coordinate type. It is immutable after
+// creation.
 type MultiLineString struct {
 	lines []LineString
 	ctype CoordinatesType
 }
 
 // NewMultiLineStringFromLineStrings creates a MultiLineString from its
-// constituent LineStrings. The coordinate types of the LineStrings must match
-// the CoordinatesType argument, otherwise an error is returned.
-func NewMultiLineStringFromLineStrings(
-	lines []LineString,
-	ctype CoordinatesType,
-	opts ...ConstructorOption,
-) (MultiLineString, error) {
-	for _, ls := range lines {
-		if ls.CoordinatesType() != ctype {
-			return MultiLineString{}, mixedCoordinatesTypeError{ls.CoordinatesType(), ctype}
-		}
+// constituent LineStrings. The coordinates type of the MultiLineString is the
+// lowest common coordinates type of its LineStrings.
+func NewMultiLineStringFromLineStrings(lines []LineString, opts ...ConstructorOption) MultiLineString {
+	if len(lines) == 0 {
+		return MultiLineString{}
 	}
-	return MultiLineString{lines, ctype}, nil
+
+	ctype := DimXYZM
+	for _, ls := range lines {
+		ctype &= ls.CoordinatesType()
+	}
+
+	lines = append([]LineString(nil), lines...)
+	for i := range lines {
+		lines[i] = lines[i].ForceCoordinatesType(ctype)
+	}
+
+	return MultiLineString{lines, ctype}
 }
 
 // Type return type string for MultiLineString
@@ -52,10 +58,13 @@ func (m MultiLineString) LineStringN(n int) LineString {
 	return m.lines[n]
 }
 
+// AsText returns the WKT (Well Known Text) representation of this geometry.
 func (m MultiLineString) AsText() string {
 	return string(m.AppendWKT(nil))
 }
 
+// AppendWKT appends the WKT (Well Known Text) representation of this geometry
+// to the input byte slice.
 func (m MultiLineString) AppendWKT(dst []byte) []byte {
 	dst = appendWKTHeader(dst, "MULTILINESTRING", m.ctype)
 	if len(m.lines) == 0 {
@@ -71,7 +80,9 @@ func (m MultiLineString) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-// IsSimple returns true iff the following conditions hold:
+// IsSimple returns true if this geometry contains no anomalous geometry
+// points, such as self intersection or self tangency. A MultiLineString is
+// simple if and only if the following conditions hold:
 //
 // 1. Each element (a LineString) is simple.
 //
@@ -113,14 +124,21 @@ func (m MultiLineString) IsSimple() bool {
 	return true
 }
 
+// Intersection calculates the of this geometry and another, i.e. the portion
+// of the two geometries that are shared. It is not implemented for all
+// geometry pairs, and returns an error for those cases.
 func (m MultiLineString) Intersection(g Geometry) (Geometry, error) {
 	return intersection(m.AsGeometry(), g)
 }
 
+// Intersects return true if and only if this geometry intersects with the
+// other, i.e. they shared at least one common point.
 func (m MultiLineString) Intersects(g Geometry) bool {
 	return hasIntersection(m.AsGeometry(), g)
 }
 
+// IsEmpty return true if and only if this MultiLineString doesn't contain any
+// LineStrings, or only contains empty LineStrings.
 func (m MultiLineString) IsEmpty() bool {
 	for _, ls := range m.lines {
 		if !ls.IsEmpty() {
@@ -130,6 +148,8 @@ func (m MultiLineString) IsEmpty() bool {
 	return true
 }
 
+// Envelope returns the Envelope that most tightly surrounds the geometry. If
+// the geometry is empty, then false is returned.
 func (m MultiLineString) Envelope() (Envelope, bool) {
 	var env Envelope
 	var has bool
@@ -148,6 +168,10 @@ func (m MultiLineString) Envelope() (Envelope, bool) {
 	return env, has
 }
 
+// Boundary returns the spatial boundary of this MultiLineString. This is
+// calculated using the "mod 2 rule". The rule states that a Point is included
+// as part of the boundary if and only if it appears on the boundry of an odd
+// number of members in the collection.
 func (m MultiLineString) Boundary() MultiPoint {
 	counts := make(map[XY]int)
 	var uniqueEndpoints []XY
@@ -177,15 +201,19 @@ func (m MultiLineString) Boundary() MultiPoint {
 		}
 	}
 	seq := NewSequence(floats, DimXY)
-	return NewMultiPoint(seq, BitSet{})
+	return NewMultiPoint(seq)
 }
 
+// Value implements the database/sql/driver.Valuer interface by returning the
+// WKB (Well Known Binary) representation of this Geometry.
 func (m MultiLineString) Value() (driver.Value, error) {
 	var buf bytes.Buffer
 	err := m.AsBinary(&buf)
 	return buf.Bytes(), err
 }
 
+// AsBinary writes the WKB (Well Known Binary) representation of the geometry
+// to the writer.
 func (m MultiLineString) AsBinary(w io.Writer) error {
 	marsh := newWKBMarshaller(w)
 	marsh.writeByteOrder()
@@ -199,10 +227,14 @@ func (m MultiLineString) AsBinary(w io.Writer) error {
 	return marsh.err
 }
 
+// ConvexHull returns the geometry representing the smallest convex geometry
+// that contains this geometry.
 func (m MultiLineString) ConvexHull() Geometry {
 	return convexHull(m.AsGeometry())
 }
 
+// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// this geometry as a GeoJSON geometry object.
 func (m MultiLineString) MarshalJSON() ([]byte, error) {
 	var dst []byte
 	dst = append(dst, `{"type":"MultiLineString","coordinates":`...)
@@ -236,7 +268,7 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 			return MultiLineString{}, err
 		}
 	}
-	return NewMultiLineStringFromLineStrings(transformed, m.ctype, opts...)
+	return NewMultiLineStringFromLineStrings(transformed, opts...), nil
 }
 
 // EqualsExact checks if this MultiLineString is exactly equal to another MultiLineString.
