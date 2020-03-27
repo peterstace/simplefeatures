@@ -151,6 +151,18 @@ func (h *Handle) Touches(g1, g2 geom.Geometry) (bool, error) {
 	return r1 || r2 || r3, nil
 }
 
+// Contains returns true if and only if geometry A contains geometry B.
+// Formally, the following two conditions must hold:
+//
+// 1. No points of B lie on the exterior of geometry A. That is, B must only be
+// in the exterior or boundary of A.
+//
+// 2.At least one point of the interior of B lies on the interior of A. That
+// is, they can't *only* intersect at their boundaries.
+func (h *Handle) Contains(a, b geom.Geometry) (bool, error) {
+	return h.relate(a, b, "T*****FF*")
+}
+
 // relate invokes the libgeos GEOSRelatePattern function, which checks if two
 // geometries are related according to a DE-9IM 'relates' mask.
 func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
