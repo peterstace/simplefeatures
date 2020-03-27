@@ -187,6 +187,23 @@ func (h *Handle) CoveredBy(a, b geom.Geometry) (bool, error) {
 	)
 }
 
+// Crosses returns true if and only if geometry A and B cross each other. See
+// the global Crosses function for details.
+func (h *Handle) Crosses(a, b geom.Geometry) (bool, error) {
+	dimA := a.Dimension()
+	dimB := b.Dimension()
+	switch {
+	case dimA < dimB: // Point/Line, Point/Area, Line/Area
+		return h.relate(a, b, "T*T******")
+	case dimA > dimB: // Line/Point, Area/Point, Area/Line
+		return h.relate(a, b, "T*****T**")
+	case dimA == 1 && dimB == 1: // Line/Line
+		return h.relate(a, b, "0********")
+	default:
+		return false, nil
+	}
+}
+
 // relatesAny checks if the two geometries are related using any of the masks.
 func (h *Handle) relatesAny(g1, g2 geom.Geometry, masks ...string) (bool, error) {
 	for _, m := range masks {

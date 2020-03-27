@@ -395,3 +395,68 @@ func TestRelate(t *testing.T) {
 		})
 	}
 }
+
+func TestCrosses(t *testing.T) {
+	for i, tt := range []struct {
+		wkt1, wkt2 string
+		want       bool
+	}{
+		// Point/Line
+		{"POINT(1 2)", "LINESTRING(1 2,3 4)", false},
+		{"POINT(1 2)", "LINESTRING(0 0,2 4)", false},
+		{"MULTIPOINT(1 2,3 3)", "LINESTRING(0 0,2 4)", true},
+
+		// Point/Area
+		{"POINT(2 2)", "POLYGON((0 0,0 1,1 1,1 0,0 0))", false},
+		{"POINT(0.5 0.5)", "POLYGON((0 0,0 1,1 1,1 0,0 0))", false},
+		{"MULTIPOINT(2 2,0.5 0.5)", "POLYGON((0 0,0 1,1 1,1 0,0 0))", true},
+
+		// Line/Area
+		{"LINESTRING(0 3,2 5)", "POLYGON((1 1,1 4,4 4,4 1,1 1))", false},
+		{"LINESTRING(0 4,5 4)", "POLYGON((1 1,1 4,4 4,4 1,1 1))", false},
+		{"LINESTRING(0 4,2 6)", "POLYGON((1 1,1 4,4 4,4 1,1 1))", false},
+		{"LINESTRING(0 2,3 5)", "POLYGON((1 1,1 4,4 4,4 1,1 1))", true},
+		{"LINESTRING(2 3,2 7)", "POLYGON((1 1,1 4,4 4,4 1,1 1))", true},
+		{"LINESTRING(2 2,3 3)", "POLYGON((1 1,1 4,4 4,4 1,1 1))", false},
+		{"LINESTRING(2 2,4 4)", "POLYGON((1 1,1 4,4 4,4 1,1 1))", false},
+
+		// Area/Point, Area/Line, Line/Point: these are just the reverse of the above cases.
+		{"LINESTRING(1 2,3 4)", "POINT(1 2)", false},
+		{"LINESTRING(0 0,2 4)", "POINT(1 2)", false},
+		{"LINESTRING(0 0,2 4)", "MULTIPOINT(1 2,3 3)", true},
+		{"POLYGON((0 0,0 1,1 1,1 0,0 0))", "POINT(2 2)", false},
+		{"POLYGON((0 0,0 1,1 1,1 0,0 0))", "POINT(0.5 0.5)", false},
+		{"POLYGON((0 0,0 1,1 1,1 0,0 0))", "MULTIPOINT(2 2,0.5 0.5)", true},
+		{"POLYGON((1 1,1 4,4 4,4 1,1 1))", "LINESTRING(0 3,2 5)", false},
+		{"POLYGON((1 1,1 4,4 4,4 1,1 1))", "LINESTRING(0 4,5 4)", false},
+		{"POLYGON((1 1,1 4,4 4,4 1,1 1))", "LINESTRING(0 4,2 6)", false},
+		{"POLYGON((1 1,1 4,4 4,4 1,1 1))", "LINESTRING(0 2,3 5)", true},
+		{"POLYGON((1 1,1 4,4 4,4 1,1 1))", "LINESTRING(2 3,2 7)", true},
+		{"POLYGON((1 1,1 4,4 4,4 1,1 1))", "LINESTRING(2 2,3 3)", false},
+		{"POLYGON((1 1,1 4,4 4,4 1,1 1))", "LINESTRING(2 2,4 4)", false},
+
+		// Line/Line
+		{"LINESTRING(0 0,0 1)", "LINESTRING(1 0,1 1)", false},
+		{"LINESTRING(0 0,0 1)", "LINESTRING(0 0,1 0)", false},
+		{"LINESTRING(0 0,0 2)", "LINESTRING(0 1,1 1)", false},
+		{"LINESTRING(0 0,1 1)", "LINESTRING(0 1,1 0)", true},
+		{"LINESTRING(0 0,2 2)", "LINESTRING(1 1,3 3)", false},
+
+		// Other (Point/Point, Area/Area)
+		{"POINT(0 0)", "POINT(0 0)", false},
+		{"POINT(2 1)", "POINT(0 0)", false},
+		{"POLYGON((0 5,10 5,10 6,0 6,0 5))", "POLYGON((5 0,5 10,6 10,6 0,5 0))", false},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g1 := geomFromWKT(t, tt.wkt1)
+			g2 := geomFromWKT(t, tt.wkt2)
+			got, err := Crosses(g1, g2)
+			expectNoErr(t, err)
+			if got != tt.want {
+				t.Logf("WKT1: %v", tt.wkt1)
+				t.Logf("WKT2: %v", tt.wkt2)
+				t.Errorf("got: %v want: %v", got, tt.want)
+			}
+		})
+	}
+}
