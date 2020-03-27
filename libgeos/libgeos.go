@@ -1,7 +1,8 @@
 package libgeos
 
 // Package libgeos provides a cgo wrapper around the GEOS (Geometry Engine,
-// Open Source) library.
+// Open Source) library. To use this package, you will need to install the
+// GEOS library.
 //
 // Its purpose is to provide functionality that has been implemented in GEOS,
 // but is not yet available in the simplefeatures library.
@@ -72,9 +73,16 @@ func Disjoint(g1, g2 geom.Geometry) (bool, error) {
 	})
 }
 
+// Touches returns true if and only if the geometries have at least 1 point in
+// common, but their interiors don't intersect.
+func Touches(g1, g2 geom.Geometry) (bool, error) {
+	return executeBinaryRelation(func(h *Handle) (bool, error) {
+		return h.Touches(g1, g2)
+	})
+}
+
 // TODO:
 //
-// -- Touches
 // -- Contains
 // -- Covers
 //

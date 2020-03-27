@@ -128,6 +128,29 @@ func (h *Handle) Disjoint(g1, g2 geom.Geometry) (bool, error) {
 	return h.relate(g1, g2, "FF*FF****")
 }
 
+// coalesce gives the first non-nil error argument, or nil if there are no
+// non-nil arguments.
+func coalesce(errs ...error) error {
+	for _, err := range errs {
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Touches returns true if and only if the geometries have at least 1 point in
+// common, but their interiors don't intersect.
+func (h *Handle) Touches(g1, g2 geom.Geometry) (bool, error) {
+	r1, err1 := h.relate(g1, g2, "FT*******")
+	r2, err2 := h.relate(g1, g2, "F**T*****")
+	r3, err3 := h.relate(g1, g2, "F***T****")
+	if err := coalesce(err1, err2, err3); err != nil {
+		return false, err
+	}
+	return r1 || r2 || r3, nil
+}
+
 // relate invokes the libgeos GEOSRelatePattern function, which checks if two
 // geometries are related according to a DE-9IM 'relates' mask.
 func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
