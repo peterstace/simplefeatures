@@ -128,57 +128,77 @@ func (h *Handle) Disjoint(g1, g2 geom.Geometry) (bool, error) {
 	return h.relate(g1, g2, "FF*FF****")
 }
 
-// coalesce gives the first non-nil error argument, or nil if there are no
-// non-nil arguments.
-func coalesce(errs ...error) error {
-	for _, err := range errs {
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // Touches returns true if and only if the geometries have at least 1 point in
 // common, but their interiors don't intersect.
 func (h *Handle) Touches(g1, g2 geom.Geometry) (bool, error) {
-	r1, err1 := h.relate(g1, g2, "FT*******")
-	r2, err2 := h.relate(g1, g2, "F**T*****")
-	r3, err3 := h.relate(g1, g2, "F***T****")
-	if err := coalesce(err1, err2, err3); err != nil {
-		return false, err
-	}
-	return r1 || r2 || r3, nil
+	return h.relatesAny(
+		g1, g2,
+		"FT*******",
+		"F**T*****",
+		"F***T****",
+	)
 }
 
-// Contains returns true if and only if geometry A contains geometry B.
-// Formally, the following two conditions must hold:
-//
-// 1. No points of B lies on the exterior of geometry A. That is, B must only be
-// in the exterior or boundary of A.
-//
-// 2.At least one point of the interior of B lies on the interior of A. That
-// is, they can't *only* intersect at their boundaries.
+// Contains returns true if and only if geometry A contains geometry B.  See
+// the global Contains function for details.
 func (h *Handle) Contains(a, b geom.Geometry) (bool, error) {
 	return h.relate(a, b, "T*****FF*")
 }
 
-// Covers returns true if and only if geometry A covers geometry B. Formally,
-// the following two conditions must hold:
-//
-// 1. No points of B lies on the exterior of geometry A. That is, B must only be
-// in the exterior or boundary of A.
-//
-// 2. At least one point of B lines on A (either its interor or boundary).
+// Covers returns true if and only if geometry A covers geometry B. See the
+// global Covers function for details.
 func (h *Handle) Covers(a, b geom.Geometry) (bool, error) {
-	r1, err1 := h.relate(a, b, "T*****FF*")
-	r2, err2 := h.relate(a, b, "*T****FF*")
-	r3, err3 := h.relate(a, b, "***T**FF*")
-	r4, err4 := h.relate(a, b, "****T*FF*")
-	if err := coalesce(err1, err2, err3, err4); err != nil {
-		return false, err
+	return h.relatesAny(
+		a, b,
+		"T*****FF*",
+		"*T****FF*",
+		"***T**FF*",
+		"****T*FF*",
+	)
+}
+
+// Intersects returns true if and only if the geometries share at least one
+// point in common.
+func (h *Handle) Intersects(a, b geom.Geometry) (bool, error) {
+	return h.relatesAny(
+		a, b,
+		"T********",
+		"*T*******",
+		"***T*****",
+		"****T****",
+	)
+}
+
+// Within returns true if and only if geometry A is completely within geometry
+// B. See the global Within function for details.
+func (h *Handle) Within(a, b geom.Geometry) (bool, error) {
+	return h.relate(a, b, "T*F**F***")
+}
+
+// CoveredBy returns true if and only if geometry A is covered by geometry B.
+// See the global CoveredBy function for details.
+func (h *Handle) CoveredBy(a, b geom.Geometry) (bool, error) {
+	return h.relatesAny(
+		a, b,
+		"T*F**F***",
+		"*TF**F***",
+		"**FT*F***",
+		"**F*TF***",
+	)
+}
+
+// relatesAny checks if the two geometries are related using any of the masks.
+func (h *Handle) relatesAny(g1, g2 geom.Geometry, masks ...string) (bool, error) {
+	for _, m := range masks {
+		r, err := h.relate(g1, g2, m)
+		if err != nil {
+			return false, err
+		}
+		if r {
+			return true, nil
+		}
 	}
-	return r1 || r2 || r3 || r4, nil
+	return false, nil
 }
 
 // relate invokes the libgeos GEOSRelatePattern function, which checks if two

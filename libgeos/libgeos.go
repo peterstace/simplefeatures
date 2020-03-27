@@ -82,6 +82,7 @@ func Touches(g1, g2 geom.Geometry) (bool, error) {
 }
 
 // Contains returns true if and only if geometry A contains geometry B.
+// See the global Contains function for details.
 // Formally, the following two conditions must hold:
 //
 // 1. No points of B lies on the exterior of geometry A. That is, B must only be
@@ -101,18 +102,44 @@ func Contains(a, b geom.Geometry) (bool, error) {
 // 1. No points of B lies on the exterior of geometry A. That is, B must only be
 // in the exterior or boundary of A.
 //
-// 2. At least one point of B lines on A (either its interor or boundary).
+// 2. At least one point of B lies on A (either its interior or boundary).
 func Covers(a, b geom.Geometry) (bool, error) {
 	return executeBinaryRelation(func(h *Handle) (bool, error) {
 		return h.Covers(a, b)
 	})
 }
 
-// TODO:
+// Intersects returns true if and only if the geometries share at least one
+// point in common.
+func Intersects(a, b geom.Geometry) (bool, error) {
+	return executeBinaryRelation(func(h *Handle) (bool, error) {
+		return h.Intersects(a, b)
+	})
+}
+
+// Within returns true if and only if geometry A is completely within geometry
+// B. Formally, the following two conditions must hold:
 //
-// -- Intersects
-// -- Within
-// -- CoveredBy
+// 1. No points of A lies on the exterior of geometry B. That is, A must only be
+// in the exterior or boundary of B.
 //
-// -- Crosses
-// -- Overlaps
+// 2.At least one point of the interior of A lies on the interior of B. That
+// is, they can't *only* intersect at their boundaries.
+func Within(a, b geom.Geometry) (bool, error) {
+	return executeBinaryRelation(func(h *Handle) (bool, error) {
+		return h.Within(a, b)
+	})
+}
+
+// CoveredBy returns true if and only if geometry A is covered by geometry B.
+// Formally, the following two conditions must hold:
+//
+// 1. No points of A lies on the exterior of geometry B. That is, A must only be
+// in the exterior or boundary of B.
+//
+// 2. At least one point of A lies on B (either its interior or boundary).
+func CoveredBy(a, b geom.Geometry) (bool, error) {
+	return executeBinaryRelation(func(h *Handle) (bool, error) {
+		return h.CoveredBy(a, b)
+	})
+}
