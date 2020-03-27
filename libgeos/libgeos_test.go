@@ -35,6 +35,7 @@ func TestRelate(t *testing.T) {
 		disjoint   bool
 		touches    bool
 		contains   bool
+		covers     bool
 	}{
 		{
 			wkt1:     "POINT EMPTY",
@@ -43,6 +44,7 @@ func TestRelate(t *testing.T) {
 			disjoint: true,
 			touches:  false,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "POINT EMPTY",
@@ -51,6 +53,7 @@ func TestRelate(t *testing.T) {
 			disjoint: true,
 			touches:  false,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "POINT(1 2)",
@@ -59,6 +62,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  false,
 			contains: true,
+			covers:   true,
 		},
 		{
 			wkt1:     "POINT(1 2)",
@@ -67,6 +71,7 @@ func TestRelate(t *testing.T) {
 			disjoint: true,
 			touches:  false,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "POINT Z(1 2 3)",
@@ -75,6 +80,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  false,
 			contains: true,
+			covers:   true,
 		},
 		{
 			wkt1:     "POINT M(1 2 3)",
@@ -83,6 +89,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  false,
 			contains: true,
+			covers:   true,
 		},
 		{
 			wkt1:     "POINT Z(1 2 3)",
@@ -91,6 +98,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  false,
 			contains: true,
+			covers:   true,
 		},
 		{
 			wkt1:     "LINESTRING EMPTY",
@@ -99,6 +107,7 @@ func TestRelate(t *testing.T) {
 			disjoint: true,
 			touches:  false,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "LINESTRING(0 0,2 2)",
@@ -107,6 +116,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  false,
 			contains: true,
+			covers:   true,
 		},
 		{
 			wkt1:     "LINESTRING(0 0,3 3)",
@@ -115,6 +125,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  false,
 			contains: true,
+			covers:   true,
 		},
 		{
 			wkt1:     "LINESTRING(1 0,1 1)",
@@ -123,6 +134,7 @@ func TestRelate(t *testing.T) {
 			disjoint: true,
 			touches:  false,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "LINESTRING(0 0,1 1)",
@@ -131,6 +143,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  true,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "POLYGON EMPTY",
@@ -139,6 +152,7 @@ func TestRelate(t *testing.T) {
 			disjoint: true,
 			touches:  false,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "POLYGON EMPTY",
@@ -147,6 +161,7 @@ func TestRelate(t *testing.T) {
 			disjoint: true,
 			touches:  false,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "POLYGON((1 0,0 1,0 0,1 0))",
@@ -155,6 +170,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  false,
 			contains: true,
+			covers:   true,
 		},
 		{
 			wkt1:     "POLYGON((0 0,0 1,1 1,1 0,0 0))",
@@ -163,6 +179,7 @@ func TestRelate(t *testing.T) {
 			disjoint: true,
 			touches:  false,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "POLYGON((0 0,0 1,1 1,1 0,0 0))",
@@ -171,6 +188,7 @@ func TestRelate(t *testing.T) {
 			disjoint: true,
 			touches:  false,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "POLYGON((0 0,0 2,2 2,2 0,0 0))",
@@ -179,6 +197,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  false,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "POLYGON((0 0,0 1,1 1,1 0,0 0))",
@@ -187,6 +206,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  true,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "POLYGON((0 0,0 3,3 3,3 0,0 0))",
@@ -195,6 +215,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  false,
 			contains: true,
+			covers:   true,
 		},
 		{
 			wkt1:     "POLYGON((1 1,1 2,2 2,2 1,1 1))",
@@ -203,6 +224,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  false,
 			contains: false,
+			covers:   false,
 		},
 		{
 			wkt1:     "MULTILINESTRING((0 0,1 1))",
@@ -211,6 +233,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  false,
 			contains: true,
+			covers:   true,
 		},
 		{
 			wkt1:     "MULTILINESTRING((0 0,1 1),(1 1,2 2))",
@@ -219,6 +242,7 @@ func TestRelate(t *testing.T) {
 			disjoint: false,
 			touches:  false,
 			contains: true,
+			covers:   true,
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -258,6 +282,15 @@ func TestRelate(t *testing.T) {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
 					t.Errorf("got: %v want: %v", got, tt.contains)
+				}
+			})
+			t.Run("Covers", func(t *testing.T) {
+				got, err := Covers(g1, g2)
+				expectNoErr(t, err)
+				if got != tt.covers {
+					t.Logf("WKT1: %v", tt.wkt1)
+					t.Logf("WKT2: %v", tt.wkt2)
+					t.Errorf("got: %v want: %v", got, tt.covers)
 				}
 			})
 		})

@@ -154,13 +154,31 @@ func (h *Handle) Touches(g1, g2 geom.Geometry) (bool, error) {
 // Contains returns true if and only if geometry A contains geometry B.
 // Formally, the following two conditions must hold:
 //
-// 1. No points of B lie on the exterior of geometry A. That is, B must only be
+// 1. No points of B lies on the exterior of geometry A. That is, B must only be
 // in the exterior or boundary of A.
 //
 // 2.At least one point of the interior of B lies on the interior of A. That
 // is, they can't *only* intersect at their boundaries.
 func (h *Handle) Contains(a, b geom.Geometry) (bool, error) {
 	return h.relate(a, b, "T*****FF*")
+}
+
+// Covers returns true if and only if geometry A covers geometry B. Formally,
+// the following two conditions must hold:
+//
+// 1. No points of B lies on the exterior of geometry A. That is, B must only be
+// in the exterior or boundary of A.
+//
+// 2. At least one point of B lines on A (either its interor or boundary).
+func (h *Handle) Covers(a, b geom.Geometry) (bool, error) {
+	r1, err1 := h.relate(a, b, "T*****FF*")
+	r2, err2 := h.relate(a, b, "*T****FF*")
+	r3, err3 := h.relate(a, b, "***T**FF*")
+	r4, err4 := h.relate(a, b, "****T*FF*")
+	if err := coalesce(err1, err2, err3, err4); err != nil {
+		return false, err
+	}
+	return r1 || r2 || r3 || r4, nil
 }
 
 // relate invokes the libgeos GEOSRelatePattern function, which checks if two
