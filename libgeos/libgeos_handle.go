@@ -110,17 +110,21 @@ func (h *Handle) createGeometryHandle(g geom.Geometry) (*C.GEOSGeometry, error) 
 // passed to a function that does not support GeometryCollections.
 var ErrGeometryCollectionNotSupported = errors.New("GeometryCollection not supported")
 
-// Equals returns true if and only if the input geometries are spatially equal
-// in the XY plane. It does not support GeometryCollections.
+// Equals returns true if and only if the input geometries are spatially equal.
 func (h *Handle) Equals(g1, g2 geom.Geometry) (bool, error) {
 	if g1.IsEmpty() && g2.IsEmpty() {
 		// Part of the mask is 'dim(I(a) ∩ I(b)) = T'.  If both inputs are
-		// empty, then their interior will be empty, and thus
+		// empty, then their interiors will be empty, and thus
 		// 'dim(I(a) ∩ I(b) = F'. However, we want to return 'true' for this
 		// case. So we just return true manually rather than using DE-9IM.
 		return true, nil
 	}
 	return h.relate(g1, g2, "T*F**FFF*")
+}
+
+// Disjoint returns true if and only if the input geometries have no points in
+// common.
+func (h *Handle) Disjoint(g1, g2 geom.Geometry) (bool, error) {
 }
 
 // relate invokes the libgeos GEOSRelatePattern function, which checks if two
@@ -153,6 +157,6 @@ func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 	case 0:
 		return false, nil
 	default:
-		return false, fmt.Errorf("unexpeted return code: %d", ret)
+		return false, fmt.Errorf("unexpected return code: %d", ret)
 	}
 }
