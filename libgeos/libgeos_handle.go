@@ -125,6 +125,7 @@ func (h *Handle) Equals(g1, g2 geom.Geometry) (bool, error) {
 // Disjoint returns true if and only if the input geometries have no points in
 // common.
 func (h *Handle) Disjoint(g1, g2 geom.Geometry) (bool, error) {
+	return h.relate(g1, g2, "FF*FF****")
 }
 
 // relate invokes the libgeos GEOSRelatePattern function, which checks if two

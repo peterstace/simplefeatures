@@ -28,42 +28,159 @@ func expectNoErr(t *testing.T, err error) {
 // testing is just enough to make use confident that we're invoking libgeos
 // correctly.
 
-func TestEquals(t *testing.T) {
+func TestRelate(t *testing.T) {
 	for i, tt := range []struct {
 		wkt1, wkt2 string
-		want       bool
+		equals     bool
+		disjoint   bool
 	}{
 
-		{"POINT EMPTY", "POINT EMPTY", true},
-		{"POINT EMPTY", "POINT(1 2)", false},
-		{"POINT(1 2)", "POINT(1 2)", true},
-		{"POINT(1 2)", "POINT(1 3)", false},
+		{
+			wkt1:     "POINT EMPTY",
+			wkt2:     "POINT EMPTY",
+			equals:   true,
+			disjoint: true,
+		},
+		{
+			wkt1:     "POINT EMPTY",
+			wkt2:     "POINT(1 2)",
+			equals:   false,
+			disjoint: true,
+		},
+		{
+			wkt1:     "POINT(1 2)",
+			wkt2:     "POINT(1 2)",
+			equals:   true,
+			disjoint: false,
+		},
+		{
+			wkt1:     "POINT(1 2)",
+			wkt2:     "POINT(1 3)",
+			equals:   false,
+			disjoint: true,
+		},
 
-		{"POINT Z(1 2 3)", "POINT(1 2)", true},
-		{"POINT M(1 2 3)", "POINT(1 2)", true},
-		{"POINT Z(1 2 3)", "POINT M(1 2 3)", true},
+		{
+			wkt1:     "POINT Z(1 2 3)",
+			wkt2:     "POINT(1 2)",
+			equals:   true,
+			disjoint: false,
+		},
+		{
+			wkt1:     "POINT M(1 2 3)",
+			wkt2:     "POINT(1 2)",
+			equals:   true,
+			disjoint: false,
+		},
+		{
+			wkt1:     "POINT Z(1 2 3)",
+			wkt2:     "POINT M(1 2 3)",
+			equals:   true,
+			disjoint: false,
+		},
 
-		{"LINESTRING EMPTY", "LINESTRING EMPTY", true},
-		{"LINESTRING(0 0,2 2)", "LINESTRING(0 0,1 1,2 2)", true},
-		{"LINESTRING(0 0,3 3)", "LINESTRING(0 0,1 1,2 2)", false},
+		{
+			wkt1:     "LINESTRING EMPTY",
+			wkt2:     "LINESTRING EMPTY",
+			equals:   true,
+			disjoint: true,
+		},
+		{
+			wkt1:     "LINESTRING(0 0,2 2)",
+			wkt2:     "LINESTRING(0 0,1 1,2 2)",
+			equals:   true,
+			disjoint: false,
+		},
+		{
+			wkt1:     "LINESTRING(0 0,3 3)",
+			wkt2:     "LINESTRING(0 0,1 1,2 2)",
+			equals:   false,
+			disjoint: false,
+		},
+		{
+			wkt1:     "LINESTRING(1 0,1 1)",
+			wkt2:     "LINESTRING(2 1,2 2)",
+			equals:   false,
+			disjoint: true,
+		},
 
-		{"POLYGON EMPTY", "POLYGON EMPTY", true},
-		{"POLYGON EMPTY", "POLYGON((0 0,0 1,1 0,0 0))", false},
-		{"POLYGON((1 0,0 1,0 0,1 0))", "POLYGON((0 0,0 1,1 0,0 0))", true},
+		{
+			wkt1:     "POLYGON EMPTY",
+			wkt2:     "POLYGON EMPTY",
+			equals:   true,
+			disjoint: true,
+		},
+		{
+			wkt1:     "POLYGON EMPTY",
+			wkt2:     "POLYGON((0 0,0 1,1 0,0 0))",
+			equals:   false,
+			disjoint: true,
+		},
+		{
+			wkt1:     "POLYGON((1 0,0 1,0 0,1 0))",
+			wkt2:     "POLYGON((0 0,0 1,1 0,0 0))",
+			equals:   true,
+			disjoint: false,
+		},
+		{
+			wkt1:     "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			wkt2:     "POLYGON((2 2,2 3,3 3,3 2,2 2))",
+			equals:   false,
+			disjoint: true,
+		},
+		{
+			wkt1:     "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			wkt2:     "POLYGON((2 2,2 3,3 3,3 2,2 2))",
+			equals:   false,
+			disjoint: true,
+		},
+		{
+			wkt1:     "POLYGON((0 0,0 2,2 2,2 0,0 0))",
+			wkt2:     "POLYGON((1 1,1 3,3 3,3 1,1 1))",
+			equals:   false,
+			disjoint: false,
+		},
+		{
+			wkt1:     "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			wkt2:     "POLYGON((0 1,0 2,1 2,1 1,0 1))",
+			equals:   false,
+			disjoint: false,
+		},
 
-		{"MULTILINESTRING((0 0,1 1))", "LINESTRING(0 0,1 1)", true},
-		{"MULTILINESTRING((0 0,1 1),(1 1,2 2))", "LINESTRING(0 0,1 1,2 2)", true},
+		{
+			wkt1:     "MULTILINESTRING((0 0,1 1))",
+			wkt2:     "LINESTRING(0 0,1 1)",
+			equals:   true,
+			disjoint: false,
+		},
+		{
+			wkt1:     "MULTILINESTRING((0 0,1 1),(1 1,2 2))",
+			wkt2:     "LINESTRING(0 0,1 1,2 2)",
+			equals:   true,
+			disjoint: false,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, tt.wkt1)
 			g2 := geomFromWKT(t, tt.wkt2)
-			got, err := Equals(g1, g2)
-			expectNoErr(t, err)
-			if got != tt.want {
-				t.Logf("WKT1: %v", tt.wkt1)
-				t.Logf("WKT2: %v", tt.wkt2)
-				t.Errorf("got: %v want: %v", got, tt.want)
-			}
+			t.Run("Equals", func(t *testing.T) {
+				got, err := Equals(g1, g2)
+				expectNoErr(t, err)
+				if got != tt.equals {
+					t.Logf("WKT1: %v", tt.wkt1)
+					t.Logf("WKT2: %v", tt.wkt2)
+					t.Errorf("got: %v want: %v", got, tt.equals)
+				}
+			})
+			t.Run("Disjoint", func(t *testing.T) {
+				got, err := Disjoint(g1, g2)
+				expectNoErr(t, err)
+				if got != tt.disjoint {
+					t.Logf("WKT1: %v", tt.wkt1)
+					t.Logf("WKT2: %v", tt.wkt2)
+					t.Errorf("got: %v want: %v", got, tt.disjoint)
+				}
+			})
 		})
 	}
 }

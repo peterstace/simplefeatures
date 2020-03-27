@@ -45,8 +45,7 @@ func getGlobalHandle() (*Handle, error) {
 	return globalHandle, nil
 }
 
-// Equals returns true if and only if the input geometries are spatially equal.
-func Equals(g1, g2 geom.Geometry) (bool, error) {
+func executeBinaryRelation(fn func(h *Handle) (bool, error)) (bool, error) {
 	globalMutex.Lock()
 	defer globalMutex.Unlock()
 
@@ -54,12 +53,27 @@ func Equals(g1, g2 geom.Geometry) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return h.Equals(g1, g2)
+	return fn(h)
+}
+
+// Equals returns true if and only if the input geometries are spatially equal,
+// i.e. they represent exactly the same set of points.
+func Equals(g1, g2 geom.Geometry) (bool, error) {
+	return executeBinaryRelation(func(h *Handle) (bool, error) {
+		return h.Equals(g1, g2)
+	})
+}
+
+// Disjoint returns true if and only if the input geometries have no points in
+// common.
+func Disjoint(g1, g2 geom.Geometry) (bool, error) {
+	return executeBinaryRelation(func(h *Handle) (bool, error) {
+		return h.Disjoint(g1, g2)
+	})
 }
 
 // TODO:
 //
-// -- Disjoint
 // -- Touches
 // -- Contains
 // -- Covers
