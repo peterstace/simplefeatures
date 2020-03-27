@@ -12,8 +12,6 @@ var (
 )
 
 func getGlobalHandle() (*Handle, error) {
-	globalMutex.Lock() // caller must unlock if this function is successful
-
 	if globalHandle != nil {
 		return globalHandle, nil
 	}
@@ -21,17 +19,20 @@ func getGlobalHandle() (*Handle, error) {
 	var err error
 	globalHandle, err = NewHandle()
 	if err != nil {
-		globalMutex.Unlock()
 		return nil, err
 	}
 	return globalHandle, nil
 }
 
+// Equals returns true if and only if the input geometries are spatially equal
+// in the XY plane. It does not support GeometryCollections.
 func Equals(g1, g2 geom.Geometry) (bool, error) {
+	globalMutex.Lock()
+	defer globalMutex.Unlock()
+
 	h, err := getGlobalHandle()
 	if err != nil {
 		return false, err
 	}
-	defer globalMutex.Unlock()
 	return h.Equals(g1, g2)
 }

@@ -30,11 +30,15 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
+// Handle is an opaque handle that can be used to invoke libgeos operations.
+// Instances are not threadsafe and thus should not be used in a concurrent
+// manner.
 type Handle struct {
 	context C.GEOSContextHandle_t
 	errBuf  [1024]byte
 }
 
+// NewHandle creates a new libgeos handle.
 func NewHandle() (*Handle, error) {
 	h := &Handle{}
 	h.context = C.sf_init(unsafe.Pointer(&h.errBuf))
@@ -44,6 +48,9 @@ func NewHandle() (*Handle, error) {
 	return h, nil
 }
 
+// err gets the last error message reported by libgeos as an error type. It
+// always returns a non-nil error. If no error message has been reported, then
+// it returns a generic error message.
 func (h *Handle) err() error {
 	msg := h.errMsg()
 	if msg == "" {
@@ -55,6 +62,8 @@ func (h *Handle) err() error {
 	return errors.New(strings.TrimSpace(msg))
 }
 
+// errMsg gets the textual representation of the last error message reported by
+// libgeos.
 func (h *Handle) errMsg() string {
 	// The error message is either NULL terminated, or fills the entire buffer.
 	firstZero := len(h.errBuf)
@@ -67,10 +76,13 @@ func (h *Handle) errMsg() string {
 	return string(h.errBuf[:firstZero])
 }
 
+// Release releases any resources held by the handle. The handle should not be
+// used after Release is called.
 func (h *Handle) Release() {
 	C.GEOS_finish_r(h.context)
 }
 
+// createGeometryHandle converts a Geometry object into a libgeos geometry handle.
 func (h *Handle) createGeometryHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
 	wkbReader := C.GEOSWKBReader_create_r(h.context)
 	if wkbReader == nil {
@@ -94,11 +106,30 @@ func (h *Handle) createGeometryHandle(g geom.Geometry) (*C.GEOSGeometry, error) 
 	return gh, nil
 }
 
+// ErrGeometryCollectionNotSupported indicates that a GeometryCollection was
+// passed to a function that does not support GeometryCollections.
+var ErrGeometryCollectionNotSupported = errors.New("GeometryCollection not supported")
+
+// Equals returns true if and only if the input geometries are spatially equal
+// in the XY plane. It does not support GeometryCollections.
 func (h *Handle) Equals(g1, g2 geom.Geometry) (bool, error) {
+	if g1.IsEmpty() && g2.IsEmpty() {
+		// Part of the mask is 'dim(I(a) ∩ I(b)) = T'.  If both inputs are
+		// empty, then their interior will be empty, and thus
+		// 'dim(I(a) ∩ I(b) = F'. However, we want to return 'true' for this
+		// case. So we just return true manually rather than using DE-9IM.
+		return true, nil
+	}
 	return h.relate(g1, g2, "T*F**FFF*")
 }
 
+// relate invokes the libgeos GEOSRelatePattern function, which checks if two
+// geometries are related according to a DE-9IM 'relates' mask.
 func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
+	if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
+		return false, ErrGeometryCollectionNotSupported
+	}
+
 	gh1, err := h.createGeometryHandle(g1)
 	if err != nil {
 		return false, err
