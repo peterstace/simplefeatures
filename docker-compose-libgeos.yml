@@ -1,0 +1,12 @@
+version: "2.1"
+services:
+  libgeostests:
+    build:
+      context: .
+      dockerfile: libgeos.Dockerfile
+    working_dir: /go/src/github.com/peterstace/simplefeatures
+    entrypoint: go test -test.count=1 -test.run=. ./libgeos
+    volumes:
+      - .:/go/src/github.com/peterstace/simplefeatures
+    environment:
+      - GO111MODULE=on

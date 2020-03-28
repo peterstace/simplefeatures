@@ -218,6 +218,11 @@ func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 		return false, fmt.Errorf("mask has invalid length: %q", mask)
 	}
 
+	// Not all versions of libgeos can handle Z and M geometries correctly. For
+	// Relates, we only need 2D geometries anyway.
+	g1 = g1.Force2D()
+	g2 = g2.Force2D()
+
 	gh1, err := h.createGeometryHandle(g1)
 	if err != nil {
 		return false, err
