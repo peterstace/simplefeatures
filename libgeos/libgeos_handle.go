@@ -1,8 +1,7 @@
 package libgeos
 
 /*
-#cgo linux CFLAGS: -I/usr/include
-#cgo linux LDFLAGS: -L/usr/lib -lgeos_c
+#cgo LDFLAGS: -lgeos_c
 #include "geos_c.h"
 #include <stdlib.h>
 #include <string.h>
