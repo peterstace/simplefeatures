@@ -35,6 +35,7 @@ import (
 type Handle struct {
 	context C.GEOSContextHandle_t
 	reader  *C.GEOSWKBReader
+	writer  *C.GEOSWKBWriter
 	errBuf  [1024]byte
 }
 
@@ -50,7 +51,13 @@ func NewHandle() (*Handle, error) {
 	h.reader = C.GEOSWKBReader_create_r(h.context)
 	if h.reader == nil {
 		h.Release()
-		return nil, errors.New("could not create libgeos wkb reader")
+		return nil, h.err()
+	}
+
+	h.writer = C.GEOSWKBWriter_create_r(h.context)
+	if h.writer == nil {
+		h.Release()
+		return nil, h.err()
 	}
 
 	return h, nil
@@ -85,6 +92,10 @@ func (h *Handle) errMsg() string {
 // Release releases any resources held by the handle. The handle should not be
 // used after Release is called.
 func (h *Handle) Release() {
+	if h.writer != nil {
+		C.GEOSWKBWriter_destroy_r(h.context, h.writer)
+		h.writer = (*C.GEOSWKBWriter)(C.NULL)
+	}
 	if h.reader != nil {
 		C.GEOSWKBReader_destroy_r(h.context, h.reader)
 		h.reader = (*C.GEOSWKBReader)(C.NULL)
@@ -288,4 +299,44 @@ func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 	default:
 		return false, fmt.Errorf("unexpected return code: %d", ret)
 	}
+}
+
+// Union returns a geometry that that is the union of the input geometries. See
+// the global Union function for details.
+func (h *Handle) Union(g1, g2 geom.Geometry) (geom.Geometry, error) {
+	// Not all versions of libgeos can handle Z and M geometries correctly. For
+	// Union, we only need 2D geometries anyway.
+	g1 = g1.Force2D()
+	g2 = g2.Force2D()
+
+	gh1, err := h.createGeometryHandle(g1)
+	if err != nil {
+		return geom.Geometry{}, err
+	}
+	defer C.GEOSGeom_destroy(gh1)
+
+	gh2, err := h.createGeometryHandle(g2)
+	if err != nil {
+		return geom.Geometry{}, err
+	}
+	defer C.GEOSGeom_destroy(gh2)
+
+	unionGH := C.GEOSUnion_r(h.context, gh1, gh2)
+	if unionGH == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy(unionGH)
+
+	return h.decodeGeometryHandle(unionGH)
+}
+
+func (h *Handle) decodeGeometryHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
+	var size C.size_t
+	wkb := C.GEOSWKBWriter_write_r(h.context, h.writer, gh, &size)
+	if wkb == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
+	r := bytes.NewReader(C.GoBytes(unsafe.Pointer(wkb), C.int(size)))
+	return geom.UnmarshalWKB(r)
 }

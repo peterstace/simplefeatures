@@ -57,6 +57,17 @@ func executeBinaryRelation(fn func(h *Handle) (bool, error)) (bool, error) {
 	return fn(h)
 }
 
+func executeBinaryOperation(fn func(h *Handle) (geom.Geometry, error)) (geom.Geometry, error) {
+	globalMutex.Lock()
+	defer globalMutex.Unlock()
+
+	h, err := getGlobalHandle()
+	if err != nil {
+		return geom.Geometry{}, err
+	}
+	return fn(h)
+}
+
 // Equals returns true if and only if the input geometries are spatially equal,
 // i.e. they represent exactly the same set of points.
 func Equals(g1, g2 geom.Geometry) (bool, error) {
@@ -171,5 +182,14 @@ func Crosses(a, b geom.Geometry) (bool, error) {
 func Overlaps(a, b geom.Geometry) (bool, error) {
 	return executeBinaryRelation(func(h *Handle) (bool, error) {
 		return h.Overlaps(a, b)
+	})
+}
+
+// Union returns a geometry that that is the union of the input geometries.
+// Formally, the returned geometry will contain a particular point X if and
+// only if X is present in either geometry (or both).
+func Union(a, b geom.Geometry) (geom.Geometry, error) {
+	return executeBinaryOperation(func(h *Handle) (geom.Geometry, error) {
+		return h.Union(a, b)
 	})
 }
