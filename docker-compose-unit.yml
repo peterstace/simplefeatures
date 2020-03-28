@@ -7,7 +7,7 @@ services:
       interval: '10ms'
       timeout: '1s'
       retries: 50
-  tests:
+  geomtests:
     image: golang:1.14
     working_dir: /go/src/github.com/peterstace/simplefeatures
     entrypoint: go test -test.count=1 -test.run=. ./geom
@@ -18,3 +18,13 @@ services:
     depends_on:
       postgis:
         condition: service_healthy
+  libgeostests:
+    build:
+      context: .
+      dockerfile: libgeos.Dockerfile
+    working_dir: /go/src/github.com/peterstace/simplefeatures
+    entrypoint: go test -test.count=1 -test.run=. ./libgeos
+    volumes:
+      - .:/go/src/github.com/peterstace/simplefeatures
+    environment:
+      - GO111MODULE=on
