@@ -211,6 +211,23 @@ func (h *Handle) Crosses(a, b geom.Geometry) (bool, error) {
 	}
 }
 
+// Overlaps returns true if and only if the geometry A and B overlap each
+// other. See the global Overlaps function for details.
+func (h *Handle) Overlaps(a, b geom.Geometry) (bool, error) {
+	dimA := a.Dimension()
+	dimB := b.Dimension()
+
+	switch {
+	case (dimA == 0 && dimB == 0) || (dimA == 2 && dimB == 2):
+		return h.relate(a, b, "T*T***T**")
+	case (dimA == 1 && dimB == 1):
+		return h.relate(a, b, "1*T***T**")
+	default:
+		return false, nil
+	}
+
+}
+
 // relatesAny checks if the two geometries are related using any of the masks.
 func (h *Handle) relatesAny(g1, g2 geom.Geometry, masks ...string) (bool, error) {
 	for _, m := range masks {
