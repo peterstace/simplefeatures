@@ -88,7 +88,7 @@ func Touches(g1, g2 geom.Geometry) (bool, error) {
 // 1. No points of B lies on the exterior of geometry A. That is, B must only be
 // in the exterior or boundary of A.
 //
-// 2.At least one point of the interior of B lies on the interior of A. That
+// 2 .At least one point of the interior of B lies on the interior of A. That
 // is, they can't *only* intersect at their boundaries.
 func Contains(a, b geom.Geometry) (bool, error) {
 	return executeBinaryRelation(func(h *Handle) (bool, error) {
