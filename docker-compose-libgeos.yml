@@ -1,11 +1,11 @@
 version: "2.1"
 services:
-  lint:
+  libgeostests:
     build:
       context: .
-      dockerfile: golint.Dockerfile
+      dockerfile: libgeos.Dockerfile
     working_dir: /go/src/github.com/peterstace/simplefeatures
-    entrypoint: golint ./geom ./libgeos
+    entrypoint: go test -test.count=1 -test.run=. ./libgeos
     volumes:
       - .:/go/src/github.com/peterstace/simplefeatures
     environment:
