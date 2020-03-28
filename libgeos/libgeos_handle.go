@@ -34,16 +34,25 @@ import (
 // protected by a mutex or similar).
 type Handle struct {
 	context C.GEOSContextHandle_t
+	reader  *C.GEOSWKBReader
 	errBuf  [1024]byte
 }
 
 // NewHandle creates a new libgeos handle.
 func NewHandle() (*Handle, error) {
 	h := &Handle{}
+
 	h.context = C.sf_init(unsafe.Pointer(&h.errBuf))
 	if h.context == nil {
 		return nil, errors.New("could not create libgeos context")
 	}
+
+	h.reader = C.GEOSWKBReader_create_r(h.context)
+	if h.reader == nil {
+		h.Release()
+		return nil, errors.New("could not create libgeos wkb reader")
+	}
+
 	return h, nil
 }
 
@@ -76,25 +85,25 @@ func (h *Handle) errMsg() string {
 // Release releases any resources held by the handle. The handle should not be
 // used after Release is called.
 func (h *Handle) Release() {
-	C.GEOS_finish_r(h.context)
-	h.context = C.GEOSContextHandle_t(C.NULL)
+	if h.reader != nil {
+		C.GEOSWKBReader_destroy_r(h.context, h.reader)
+		h.reader = (*C.GEOSWKBReader)(C.NULL)
+	}
+	if h.context != nil {
+		C.GEOS_finish_r(h.context)
+		h.context = C.GEOSContextHandle_t(C.NULL)
+	}
 }
 
 // createGeometryHandle converts a Geometry object into a libgeos geometry handle.
 func (h *Handle) createGeometryHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
-	wkbReader := C.GEOSWKBReader_create_r(h.context)
-	if wkbReader == nil {
-		return nil, h.err()
-	}
-	defer C.GEOSWKBReader_destroy_r(h.context, wkbReader)
-
 	wkb := new(bytes.Buffer)
 	if err := g.AsBinary(wkb); err != nil {
 		return nil, err
 	}
 	gh := C.GEOSWKBReader_read_r(
 		h.context,
-		wkbReader,
+		h.reader,
 		(*C.uchar)(&wkb.Bytes()[0]),
 		C.ulong(wkb.Len()),
 	)
@@ -231,7 +240,7 @@ func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 		relateTrue      = 1
 		relateFalse     = 0
 	)
-	switch ret := C.GEOSRelatePattern_r(h.context, gh1, gh2, (*C.char)(unsafe.Pointer(&cmask[0]))); ret {
+	switch ret := C.GEOSRelatePattern_r(h.context, gh1, gh2, (*C.char)(unsafe.Pointer(&cmask))); ret {
 	case relateException:
 		return false, h.err()
 	case relateTrue:
