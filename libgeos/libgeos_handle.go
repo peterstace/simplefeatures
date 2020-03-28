@@ -216,7 +216,6 @@ func (h *Handle) Crosses(a, b geom.Geometry) (bool, error) {
 func (h *Handle) Overlaps(a, b geom.Geometry) (bool, error) {
 	dimA := a.Dimension()
 	dimB := b.Dimension()
-
 	switch {
 	case (dimA == 0 && dimB == 0) || (dimA == 2 && dimB == 2):
 		return h.relate(a, b, "T*T***T**")
