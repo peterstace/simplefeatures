@@ -31,8 +31,8 @@ import (
 )
 
 // Handle is an opaque handle that can be used to invoke libgeos operations.
-// Instances are not threadsafe and thus should not be used in a concurrent
-// manner.
+// Instances are not threadsafe and thus should only be used serially (e.g.
+// protected by a mutex or similar).
 type Handle struct {
 	context C.GEOSContextHandle_t
 	errBuf  [1024]byte
@@ -66,20 +66,19 @@ func (h *Handle) err() error {
 // libgeos.
 func (h *Handle) errMsg() string {
 	// The error message is either NULL terminated, or fills the entire buffer.
-	firstZero := len(h.errBuf)
 	for i, b := range h.errBuf {
 		if b == 0 {
-			firstZero = i
-			break
+			return string(h.errBuf[:i])
 		}
 	}
-	return string(h.errBuf[:firstZero])
+	return string(h.errBuf[:])
 }
 
 // Release releases any resources held by the handle. The handle should not be
 // used after Release is called.
 func (h *Handle) Release() {
 	C.GEOS_finish_r(h.context)
+	h.context = C.GEOSContextHandle_t(C.NULL)
 }
 
 // createGeometryHandle converts a Geometry object into a libgeos geometry handle.
@@ -207,6 +206,9 @@ func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 	if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
 		return false, ErrGeometryCollectionNotSupported
 	}
+	if len(mask) != 9 {
+		return false, fmt.Errorf("mask has invalid length: %q", mask)
+	}
 
 	gh1, err := h.createGeometryHandle(g1)
 	if err != nil {
@@ -218,17 +220,24 @@ func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
 	defer C.GEOSGeom_destroy(gh2)
-	cmask := C.CString(mask)
-	defer C.free(unsafe.Pointer(cmask))
 
-	switch ret := C.GEOSRelatePattern_r(h.context, gh1, gh2, cmask); ret {
-	case 2:
+	var cmask [10]byte
+	copy(cmask[:], mask)
+
+	const (
+		// From geos_c.h:
+		// return 2 on exception, 1 on true, 0 on false.
+		relateException = 2
+		relateTrue      = 1
+		relateFalse     = 0
+	)
+	switch ret := C.GEOSRelatePattern_r(h.context, gh1, gh2, (*C.char)(unsafe.Pointer(&cmask[0]))); ret {
+	case relateException:
 		return false, h.err()
-	case 1:
+	case relateTrue:
 		return true, nil
-	case 0:
+	case relateFalse:
 		return false, nil
 	default:
 		return false, fmt.Errorf("unexpected return code: %d", ret)
