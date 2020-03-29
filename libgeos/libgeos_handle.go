@@ -16,6 +16,8 @@ GEOSContextHandle_t sf_init(void *userdata) {
 	return ctx;
 }
 
+unsigned char *marshal(GEOSContextHandle_t handle, const GEOSGeometry *g, size_t *size, char *isWKT);
+
 */
 import "C"
 
@@ -35,7 +37,6 @@ import (
 type Handle struct {
 	context C.GEOSContextHandle_t
 	reader  *C.GEOSWKBReader
-	writer  *C.GEOSWKBWriter
 	errBuf  [1024]byte
 }
 
@@ -50,12 +51,6 @@ func NewHandle() (*Handle, error) {
 
 	h.reader = C.GEOSWKBReader_create_r(h.context)
 	if h.reader == nil {
-		h.Release()
-		return nil, h.err()
-	}
-
-	h.writer = C.GEOSWKBWriter_create_r(h.context)
-	if h.writer == nil {
 		h.Release()
 		return nil, h.err()
 	}
@@ -92,10 +87,6 @@ func (h *Handle) errMsg() string {
 // Release releases any resources held by the handle. The handle should not be
 // used after Release is called.
 func (h *Handle) Release() {
-	if h.writer != nil {
-		C.GEOSWKBWriter_destroy_r(h.context, h.writer)
-		h.writer = (*C.GEOSWKBWriter)(C.NULL)
-	}
 	if h.reader != nil {
 		C.GEOSWKBReader_destroy_r(h.context, h.reader)
 		h.reader = (*C.GEOSWKBReader)(C.NULL)
@@ -309,6 +300,8 @@ func (h *Handle) boolErr(c C.char) (bool, error) {
 	}
 }
 
+// TODO: Factor out commonalities between Union and Intersection.
+
 // Union returns a geometry that that is the union of the input geometries. See
 // the global Union function for details.
 func (h *Handle) Union(g1, g2 geom.Geometry) (geom.Geometry, error) {
@@ -335,7 +328,7 @@ func (h *Handle) Union(g1, g2 geom.Geometry) (geom.Geometry, error) {
 	}
 	defer C.GEOSGeom_destroy(unionGH)
 
-	return h.decodeGeometryHandle(unionGH)
+	return h.decode(unionGH)
 }
 
 // Intersection returns a geometry that is the intersection of the input
@@ -364,97 +357,24 @@ func (h *Handle) Intersection(g1, g2 geom.Geometry) (geom.Geometry, error) {
 	}
 	defer C.GEOSGeom_destroy(intersectionGH)
 
-	return h.decodeGeometryHandle(intersectionGH)
+	return h.decode(intersectionGH)
 }
 
-func (h *Handle) decodeGeometryHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
-	geomType := C.GEOSGeomType_r(h.context, gh)
-	if geomType == nil {
+func (h *Handle) decode(gh *C.GEOSGeometry) (geom.Geometry, error) {
+	var (
+		isWKT C.char
+		size  C.size_t
+	)
+	serialised := C.marshal(h.context, gh, &size, &isWKT)
+	if serialised == nil {
 		return geom.Geometry{}, h.err()
 	}
-	defer C.free(unsafe.Pointer(geomType))
+	defer C.GEOSFree_r(h.context, unsafe.Pointer(serialised))
+	r := bytes.NewReader(C.GoBytes(unsafe.Pointer(serialised), C.int(size)))
 
-	// GEOS gives an error when empty Points are converted to WKB.
-	switch C.GoString(geomType) {
-	case "Point":
-		pt, err := h.decodeGeometryHandleUsingPoint(gh)
-		return pt.AsGeometry(), err
-	case "MultiPoint":
-		mp, err := h.decodeGeometryHandleUsingMultiPoint(gh)
-		return mp.AsGeometry(), err
-	case "GeometryCollection":
-		gc, err := h.decodeGeometryHandleUsingGeometryCollection(gh)
-		return gc.AsGeometry(), err
-	default:
-		return h.decodeGeometryHandleUsingWKB(gh)
+	if isWKT != 0 {
+		return geom.UnmarshalWKT(r)
+	} else {
+		return geom.UnmarshalWKB(r)
 	}
-}
-
-func (h *Handle) decodeGeometryHandleUsingPoint(gh *C.GEOSGeometry) (geom.Point, error) {
-	isEmpty, err := h.boolErr(C.GEOSisEmpty_r(h.context, gh))
-	if err != nil {
-		return geom.Point{}, err
-	}
-	if isEmpty {
-		return geom.Point{}, nil
-	}
-	pt, err := h.decodeGeometryHandleUsingWKB(gh)
-	if err != nil {
-		return geom.Point{}, err
-	}
-	if !pt.IsPoint() {
-		return geom.Point{}, errors.New("expected Point but got another geometry type")
-	}
-	return pt.AsPoint(), nil
-}
-
-func (h *Handle) decodeGeometryHandleUsingMultiPoint(gh *C.GEOSGeometry) (geom.MultiPoint, error) {
-	n := C.GEOSGetNumGeometries_r(h.context, gh)
-	if n == -1 {
-		return geom.MultiPoint{}, h.err()
-	}
-	subPoints := make([]geom.Point, n)
-	for i := 0; i < int(n); i++ {
-		sub := C.GEOSGetGeometryN_r(h.context, gh, C.int(i))
-		if sub == nil {
-			return geom.MultiPoint{}, h.err()
-		}
-		var err error
-		subPoints[i], err = h.decodeGeometryHandleUsingPoint(sub)
-		if err != nil {
-			return geom.MultiPoint{}, err
-		}
-	}
-	return geom.NewMultiPointFromPoints(subPoints), nil
-}
-
-func (h *Handle) decodeGeometryHandleUsingGeometryCollection(gh *C.GEOSGeometry) (geom.GeometryCollection, error) {
-	n := C.GEOSGetNumGeometries_r(h.context, gh)
-	if n == -1 {
-		return geom.GeometryCollection{}, h.err()
-	}
-	subGeoms := make([]geom.Geometry, n)
-	for i := 0; i < int(n); i++ {
-		sub := C.GEOSGetGeometryN_r(h.context, gh, C.int(i))
-		if sub == nil {
-			return geom.GeometryCollection{}, h.err()
-		}
-		var err error
-		subGeoms[i], err = h.decodeGeometryHandle(sub)
-		if err != nil {
-			return geom.GeometryCollection{}, nil
-		}
-	}
-	return geom.NewGeometryCollection(subGeoms), nil
-}
-
-func (h *Handle) decodeGeometryHandleUsingWKB(gh *C.GEOSGeometry) (geom.Geometry, error) {
-	var size C.size_t
-	wkb := C.GEOSWKBWriter_write_r(h.context, h.writer, gh, &size)
-	if wkb == nil {
-		return geom.Geometry{}, h.err()
-	}
-	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
-	r := bytes.NewReader(C.GoBytes(unsafe.Pointer(wkb), C.int(size)))
-	return geom.UnmarshalWKB(r)
 }
