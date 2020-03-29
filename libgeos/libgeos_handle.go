@@ -300,42 +300,28 @@ func (h *Handle) boolErr(c C.char) (bool, error) {
 	}
 }
 
-// TODO: Factor out commonalities between Union and Intersection.
-
 // Union returns a geometry that that is the union of the input geometries. See
 // the global Union function for details.
 func (h *Handle) Union(g1, g2 geom.Geometry) (geom.Geometry, error) {
-	// Not all versions of libgeos can handle Z and M geometries correctly. For
-	// Union, we only need 2D geometries anyway.
-	g1 = g1.Force2D()
-	g2 = g2.Force2D()
-
-	gh1, err := h.createGeometryHandle(g1)
-	if err != nil {
-		return geom.Geometry{}, err
-	}
-	defer C.GEOSGeom_destroy(gh1)
-
-	gh2, err := h.createGeometryHandle(g2)
-	if err != nil {
-		return geom.Geometry{}, err
-	}
-	defer C.GEOSGeom_destroy(gh2)
-
-	unionGH := C.GEOSUnion_r(h.context, gh1, gh2)
-	if unionGH == nil {
-		return geom.Geometry{}, h.err()
-	}
-	defer C.GEOSGeom_destroy(unionGH)
-
-	return h.decode(unionGH)
+	return h.binaryOperation(g1, g2, func(gh1, gh2 *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSUnion_r(h.context, gh1, gh2)
+	})
 }
 
 // Intersection returns a geometry that is the intersection of the input
 // geometries. See the global Intersection function for details.
 func (h *Handle) Intersection(g1, g2 geom.Geometry) (geom.Geometry, error) {
+	return h.binaryOperation(g1, g2, func(gh1, gh2 *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSIntersection_r(h.context, gh1, gh2)
+	})
+}
+
+func (h *Handle) binaryOperation(
+	g1, g2 geom.Geometry,
+	op func(*C.GEOSGeometry, *C.GEOSGeometry) *C.GEOSGeometry,
+) (geom.Geometry, error) {
 	// Not all versions of libgeos can handle Z and M geometries correctly. For
-	// Union, we only need 2D geometries anyway.
+	// binary operations, we only need 2D geometries anyway.
 	g1 = g1.Force2D()
 	g2 = g2.Force2D()
 
@@ -351,13 +337,13 @@ func (h *Handle) Intersection(g1, g2 geom.Geometry) (geom.Geometry, error) {
 	}
 	defer C.GEOSGeom_destroy(gh2)
 
-	intersectionGH := C.GEOSIntersection_r(h.context, gh1, gh2)
-	if intersectionGH == nil {
+	resultGH := op(gh1, gh2)
+	if resultGH == nil {
 		return geom.Geometry{}, h.err()
 	}
-	defer C.GEOSGeom_destroy(intersectionGH)
+	defer C.GEOSGeom_destroy(resultGH)
 
-	return h.decode(intersectionGH)
+	return h.decode(resultGH)
 }
 
 func (h *Handle) decode(gh *C.GEOSGeometry) (geom.Geometry, error) {
