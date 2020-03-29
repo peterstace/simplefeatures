@@ -193,3 +193,12 @@ func Union(a, b geom.Geometry) (geom.Geometry, error) {
 		return h.Union(a, b)
 	})
 }
+
+// Intersection returns a geometry that is the intersection of the input
+// geometries. Formally, the returned geometry will contain a particular point
+// X if and only if X is present in both geometries.
+func Intersection(a, b geom.Geometry) (geom.Geometry, error) {
+	return executeBinaryOperation(func(h *Handle) (geom.Geometry, error) {
+		return h.Intersection(a, b)
+	})
+}
