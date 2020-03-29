@@ -143,3 +143,33 @@ func CoveredBy(a, b geom.Geometry) (bool, error) {
 		return h.CoveredBy(a, b)
 	})
 }
+
+// Crosses returns true if and only if geometry A and B cross each other.
+// Formally, the following conditions must hold:
+//
+// 1. The geometries must have some but not all interior points in common.
+//
+// 2. The dimensionality of the intersection must be less than the maximum
+// dimension of the input geometries.
+//
+// 3. The intersection must not equal either of the input geometries.
+func Crosses(a, b geom.Geometry) (bool, error) {
+	return executeBinaryRelation(func(h *Handle) (bool, error) {
+		return h.Crosses(a, b)
+	})
+}
+
+// Overlaps returns true if and only if geometry A and B overlap with each
+// other. Formally, the following conditions must hold:
+//
+// 1. The geometries must have the same dimension.
+//
+// 2. The geometries must have some but not all points in common.
+//
+// 3. The intersection of the geometries must have the same dimension as the
+// geometries themselves.
+func Overlaps(a, b geom.Geometry) (bool, error) {
+	return executeBinaryRelation(func(h *Handle) (bool, error) {
+		return h.Overlaps(a, b)
+	})
+}
