@@ -16,6 +16,8 @@ GEOSContextHandle_t sf_init(void *userdata) {
 	return ctx;
 }
 
+unsigned char *marshal(GEOSContextHandle_t handle, const GEOSGeometry *g, size_t *size, char *isWKT);
+
 */
 import "C"
 
@@ -50,7 +52,7 @@ func NewHandle() (*Handle, error) {
 	h.reader = C.GEOSWKBReader_create_r(h.context)
 	if h.reader == nil {
 		h.Release()
-		return nil, errors.New("could not create libgeos wkb reader")
+		return nil, h.err()
 	}
 
 	return h, nil
@@ -271,6 +273,14 @@ func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 	var cmask [10]byte
 	copy(cmask[:], mask)
 
+	return h.boolErr(C.GEOSRelatePattern_r(
+		h.context, gh1, gh2,
+		(*C.char)(unsafe.Pointer(&cmask)),
+	))
+}
+
+// boolErr converts a char result from libgeos into a boolean result.
+func (h *Handle) boolErr(c C.char) (bool, error) {
 	const (
 		// From geos_c.h:
 		// return 2 on exception, 1 on true, 0 on false.
@@ -278,14 +288,79 @@ func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 		relateTrue      = 1
 		relateFalse     = 0
 	)
-	switch ret := C.GEOSRelatePattern_r(h.context, gh1, gh2, (*C.char)(unsafe.Pointer(&cmask))); ret {
-	case relateException:
-		return false, h.err()
-	case relateTrue:
-		return true, nil
-	case relateFalse:
+	switch c {
+	case 0:
 		return false, nil
+	case 1:
+		return true, nil
+	case 2:
+		return false, h.err()
 	default:
-		return false, fmt.Errorf("unexpected return code: %d", ret)
+		return false, fmt.Errorf("illegal result from libgeos: %v", c)
+	}
+}
+
+// Union returns a geometry that that is the union of the input geometries. See
+// the global Union function for details.
+func (h *Handle) Union(g1, g2 geom.Geometry) (geom.Geometry, error) {
+	return h.binaryOperation(g1, g2, func(gh1, gh2 *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSUnion_r(h.context, gh1, gh2)
+	})
+}
+
+// Intersection returns a geometry that is the intersection of the input
+// geometries. See the global Intersection function for details.
+func (h *Handle) Intersection(g1, g2 geom.Geometry) (geom.Geometry, error) {
+	return h.binaryOperation(g1, g2, func(gh1, gh2 *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSIntersection_r(h.context, gh1, gh2)
+	})
+}
+
+func (h *Handle) binaryOperation(
+	g1, g2 geom.Geometry,
+	op func(*C.GEOSGeometry, *C.GEOSGeometry) *C.GEOSGeometry,
+) (geom.Geometry, error) {
+	// Not all versions of libgeos can handle Z and M geometries correctly. For
+	// binary operations, we only need 2D geometries anyway.
+	g1 = g1.Force2D()
+	g2 = g2.Force2D()
+
+	gh1, err := h.createGeometryHandle(g1)
+	if err != nil {
+		return geom.Geometry{}, err
+	}
+	defer C.GEOSGeom_destroy(gh1)
+
+	gh2, err := h.createGeometryHandle(g2)
+	if err != nil {
+		return geom.Geometry{}, err
+	}
+	defer C.GEOSGeom_destroy(gh2)
+
+	resultGH := op(gh1, gh2)
+	if resultGH == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy(resultGH)
+
+	return h.decode(resultGH)
+}
+
+func (h *Handle) decode(gh *C.GEOSGeometry) (geom.Geometry, error) {
+	var (
+		isWKT C.char
+		size  C.size_t
+	)
+	serialised := C.marshal(h.context, gh, &size, &isWKT)
+	if serialised == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSFree_r(h.context, unsafe.Pointer(serialised))
+	r := bytes.NewReader(C.GoBytes(unsafe.Pointer(serialised), C.int(size)))
+
+	if isWKT != 0 {
+		return geom.UnmarshalWKT(r)
+	} else {
+		return geom.UnmarshalWKB(r)
 	}
 }

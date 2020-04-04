@@ -24,6 +24,19 @@ func expectNoErr(t *testing.T, err error) {
 	}
 }
 
+func expectGeomEq(t *testing.T, got, want geom.Geometry, opts ...geom.EqualsExactOption) {
+	t.Helper()
+	if !got.EqualsExact(want, opts...) {
+		t.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
+	}
+}
+
+func TestRelease(t *testing.T) {
+	h, err := NewHandle()
+	expectNoErr(t, err)
+	h.Release()
+}
+
 // These tests aren't exhaustive, because we are leveraging libgeos.  The
 // testing is just enough to make use confident that we're invoking libgeos
 // correctly.
@@ -547,4 +560,90 @@ func TestOverlaps(t *testing.T) {
 			t.Run("Reverse", run(true))
 		})
 	}
+}
+
+type BinaryOperationTestCase struct {
+	In1, In2 string
+	Out      string
+}
+
+func RunBinaryOperationTest(t *testing.T, fn func(a, b geom.Geometry) (geom.Geometry, error), cases []BinaryOperationTestCase) {
+	for i, c := range cases {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			run := func(rev bool) func(t *testing.T) {
+				return func(t *testing.T) {
+					g1 := geomFromWKT(t, c.In1)
+					g2 := geomFromWKT(t, c.In2)
+					if rev {
+						g1, g2 = g2, g1
+					}
+					t.Logf("WKT1: %v", g1.AsText())
+					t.Logf("WKT2: %v", g2.AsText())
+					got, err := fn(g1, g2)
+					expectNoErr(t, err)
+					expectGeomEq(t, got, geomFromWKT(t, c.Out), geom.IgnoreOrder)
+				}
+			}
+			t.Run("Forward", run(false))
+			t.Run("Reverse", run(true))
+		})
+	}
+}
+
+func TestUnion(t *testing.T) {
+	RunBinaryOperationTest(t, Union, []BinaryOperationTestCase{
+		{
+			"POINT(1 2)",
+			"POINT(3 4)",
+			"MULTIPOINT(1 2,3 4)",
+		},
+		{
+			"POINT EMPTY",
+			"POINT(3 4)",
+			"POINT(3 4)",
+		},
+		{
+			"POINT EMPTY",
+			"POINT EMPTY",
+			"POINT EMPTY",
+		},
+		{
+			"MULTIPOINT(EMPTY)",
+			"MULTIPOINT(EMPTY)",
+			"MULTIPOINT EMPTY",
+		},
+		{
+			"GEOMETRYCOLLECTION(POINT EMPTY)",
+			"GEOMETRYCOLLECTION(POINT EMPTY)",
+			"GEOMETRYCOLLECTION EMPTY",
+		},
+		{
+			"POLYGON((0 0,0 2,2 2,2 0,0 0))",
+			"POLYGON((1 1,1 3,3 3,3 1,1 1))",
+			"POLYGON((0 0,2 0,2 1,3 1,3 3,1 3,1 2,0 2,0 0))",
+		},
+		{
+			"POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1))",
+			"POLYGON((1 1,1 2,2 2,2 1,1 1))",
+			"POLYGON((0 0,0 3,3 3,3 0,0 0))",
+		},
+		{
+			"GEOMETRYCOLLECTION(POINT(0 0),POLYGON((0 1,1 1,1 2,0 2,0 1)))",
+			"LINESTRING(1 0,1 1,0 2)",
+			"GEOMETRYCOLLECTION(POINT(0 0),LINESTRING(1 0,1 1),POLYGON((0 1,1 1,1 2,0 2,0 1)))",
+		},
+	})
+}
+
+func TestIntersection(t *testing.T) {
+	RunBinaryOperationTest(t, Intersection, []BinaryOperationTestCase{
+		{"POINT EMPTY", "POINT EMPTY", "GEOMETRYCOLLECTION EMPTY"},
+		{"POINT(1 2)", "POINT EMPTY", "GEOMETRYCOLLECTION EMPTY"},
+		{"POINT(1 2)", "POINT(1 2)", "POINT(1 2)"},
+		{
+			"POLYGON((0 0,3 0,3 3,2 3,2 1,0 1,0 0))",
+			"POLYGON((0 0,0 3,3 3,3 2,1 2,1 0,0 0))",
+			"MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)),((2 2,2 3,3 3,3 2,2 2)))",
+		},
+	})
 }
