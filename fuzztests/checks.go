@@ -189,7 +189,7 @@ func geojsonEqual(gj1, gj2 string) error {
 		f2, err2 := strconv.ParseFloat(t2, 64)
 		var eq bool
 		if err1 == nil && err2 == nil {
-			eq = math.Abs(f1-f2) <= 1e-6*math.Max(math.Abs(f1), math.Abs(f2))
+			eq = math.Abs(f1-f2) <= 1e-6*math.Max(math.Abs(f1), math.Abs(f2)) || math.Abs(f1-f2) < 1e-6
 		} else {
 			eq = t1 == t2
 		}
@@ -206,9 +206,19 @@ func tokenize(str string) []string {
 	scn.Error = func(_ *scanner.Scanner, msg string) {
 		panic(msg)
 	}
+	var neg bool
 	var tokens []string
 	for tok := scn.Scan(); tok != scanner.EOF; tok = scn.Scan() {
-		tokens = append(tokens, scn.TokenText())
+		token := scn.TokenText()
+		if token == "-" && !neg {
+			neg = true
+			continue
+		}
+		if neg {
+			neg = false
+			token = "-" + token
+		}
+		tokens = append(tokens, token)
 	}
 	return tokens
 }
@@ -295,7 +305,7 @@ func CheckBoundary(t *testing.T, want UnaryResult, g geom.Geometry) {
 		// Simplefeatures doesn't retain boundary Z values.
 		want := want.Boundary.Geometry.Force2D()
 
-		if !got.EqualsExact(want, geom.IgnoreOrder) {
+		if !got.EqualsExact(want, geom.IgnoreOrder, geom.ToleranceXY(1e-13)) {
 			t.Logf("input: %v", g.AsText())
 			t.Logf("got:   %v", got.AsText())
 			t.Logf("want:  %v", want.AsText())
