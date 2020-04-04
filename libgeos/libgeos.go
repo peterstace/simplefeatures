@@ -46,7 +46,7 @@ func getGlobalHandle() (*Handle, error) {
 	return globalHandle, nil
 }
 
-func executeBinaryRelation(fn func(h *Handle) (bool, error)) (bool, error) {
+func executeBoolOp(fn func(h *Handle) (bool, error)) (bool, error) {
 	globalMutex.Lock()
 	defer globalMutex.Unlock()
 
@@ -57,7 +57,7 @@ func executeBinaryRelation(fn func(h *Handle) (bool, error)) (bool, error) {
 	return fn(h)
 }
 
-func executeBinaryOperation(fn func(h *Handle) (geom.Geometry, error)) (geom.Geometry, error) {
+func executeGeomOp(fn func(h *Handle) (geom.Geometry, error)) (geom.Geometry, error) {
 	globalMutex.Lock()
 	defer globalMutex.Unlock()
 
@@ -71,7 +71,7 @@ func executeBinaryOperation(fn func(h *Handle) (geom.Geometry, error)) (geom.Geo
 // Equals returns true if and only if the input geometries are spatially equal,
 // i.e. they represent exactly the same set of points.
 func Equals(g1, g2 geom.Geometry) (bool, error) {
-	return executeBinaryRelation(func(h *Handle) (bool, error) {
+	return executeBoolOp(func(h *Handle) (bool, error) {
 		return h.Equals(g1, g2)
 	})
 }
@@ -79,7 +79,7 @@ func Equals(g1, g2 geom.Geometry) (bool, error) {
 // Disjoint returns true if and only if the input geometries have no points in
 // common.
 func Disjoint(g1, g2 geom.Geometry) (bool, error) {
-	return executeBinaryRelation(func(h *Handle) (bool, error) {
+	return executeBoolOp(func(h *Handle) (bool, error) {
 		return h.Disjoint(g1, g2)
 	})
 }
@@ -87,7 +87,7 @@ func Disjoint(g1, g2 geom.Geometry) (bool, error) {
 // Touches returns true if and only if the geometries have at least 1 point in
 // common, but their interiors don't intersect.
 func Touches(g1, g2 geom.Geometry) (bool, error) {
-	return executeBinaryRelation(func(h *Handle) (bool, error) {
+	return executeBoolOp(func(h *Handle) (bool, error) {
 		return h.Touches(g1, g2)
 	})
 }
@@ -102,7 +102,7 @@ func Touches(g1, g2 geom.Geometry) (bool, error) {
 // 2 .At least one point of the interior of B lies on the interior of A. That
 // is, they can't *only* intersect at their boundaries.
 func Contains(a, b geom.Geometry) (bool, error) {
-	return executeBinaryRelation(func(h *Handle) (bool, error) {
+	return executeBoolOp(func(h *Handle) (bool, error) {
 		return h.Contains(a, b)
 	})
 }
@@ -115,7 +115,7 @@ func Contains(a, b geom.Geometry) (bool, error) {
 //
 // 2. At least one point of B lies on A (either its interior or boundary).
 func Covers(a, b geom.Geometry) (bool, error) {
-	return executeBinaryRelation(func(h *Handle) (bool, error) {
+	return executeBoolOp(func(h *Handle) (bool, error) {
 		return h.Covers(a, b)
 	})
 }
@@ -123,7 +123,7 @@ func Covers(a, b geom.Geometry) (bool, error) {
 // Intersects returns true if and only if the geometries share at least one
 // point in common.
 func Intersects(a, b geom.Geometry) (bool, error) {
-	return executeBinaryRelation(func(h *Handle) (bool, error) {
+	return executeBoolOp(func(h *Handle) (bool, error) {
 		return h.Intersects(a, b)
 	})
 }
@@ -137,7 +137,7 @@ func Intersects(a, b geom.Geometry) (bool, error) {
 // 2.At least one point of the interior of A lies on the interior of B. That
 // is, they can't *only* intersect at their boundaries.
 func Within(a, b geom.Geometry) (bool, error) {
-	return executeBinaryRelation(func(h *Handle) (bool, error) {
+	return executeBoolOp(func(h *Handle) (bool, error) {
 		return h.Within(a, b)
 	})
 }
@@ -150,7 +150,7 @@ func Within(a, b geom.Geometry) (bool, error) {
 //
 // 2. At least one point of A lies on B (either its interior or boundary).
 func CoveredBy(a, b geom.Geometry) (bool, error) {
-	return executeBinaryRelation(func(h *Handle) (bool, error) {
+	return executeBoolOp(func(h *Handle) (bool, error) {
 		return h.CoveredBy(a, b)
 	})
 }
@@ -165,7 +165,7 @@ func CoveredBy(a, b geom.Geometry) (bool, error) {
 //
 // 3. The intersection must not equal either of the input geometries.
 func Crosses(a, b geom.Geometry) (bool, error) {
-	return executeBinaryRelation(func(h *Handle) (bool, error) {
+	return executeBoolOp(func(h *Handle) (bool, error) {
 		return h.Crosses(a, b)
 	})
 }
@@ -180,7 +180,7 @@ func Crosses(a, b geom.Geometry) (bool, error) {
 // 3. The intersection of the geometries must have the same dimension as the
 // geometries themselves.
 func Overlaps(a, b geom.Geometry) (bool, error) {
-	return executeBinaryRelation(func(h *Handle) (bool, error) {
+	return executeBoolOp(func(h *Handle) (bool, error) {
 		return h.Overlaps(a, b)
 	})
 }
@@ -189,7 +189,7 @@ func Overlaps(a, b geom.Geometry) (bool, error) {
 // Formally, the returned geometry will contain a particular point X if and
 // only if X is present in either geometry (or both).
 func Union(a, b geom.Geometry) (geom.Geometry, error) {
-	return executeBinaryOperation(func(h *Handle) (geom.Geometry, error) {
+	return executeGeomOp(func(h *Handle) (geom.Geometry, error) {
 		return h.Union(a, b)
 	})
 }
@@ -198,7 +198,15 @@ func Union(a, b geom.Geometry) (geom.Geometry, error) {
 // geometries. Formally, the returned geometry will contain a particular point
 // X if and only if X is present in both geometries.
 func Intersection(a, b geom.Geometry) (geom.Geometry, error) {
-	return executeBinaryOperation(func(h *Handle) (geom.Geometry, error) {
+	return executeGeomOp(func(h *Handle) (geom.Geometry, error) {
 		return h.Intersection(a, b)
+	})
+}
+
+// Buffer returns a geometry that contains all points within the given radius
+// of the input geometry.
+func Buffer(g geom.Geometry, radius float64) (geom.Geometry, error) {
+	return executeGeomOp(func(h *Handle) (geom.Geometry, error) {
+		return h.Buffer(g, radius)
 	})
 }
