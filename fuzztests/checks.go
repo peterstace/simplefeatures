@@ -131,10 +131,7 @@ func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 			// cases are skipped.
 			return
 		}
-		var got bytes.Buffer
-		if err := g.AsBinary(&got); err != nil {
-			t.Fatalf("writing wkb: %v", err)
-		}
+		got := g.AsBinary()
 
 		// PostGIS and SimpleFeatures use slightly different (but compatible)
 		// representations of NaN. Account for this by converting the PostGIS
@@ -144,9 +141,9 @@ func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 			[]byte{0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f},
 		)
 
-		if !bytes.Equal(got.Bytes(), want) {
+		if !bytes.Equal(got, want) {
 			t.Logf("wkt: %v", g.AsText())
-			t.Logf("got:\n%s", hex.Dump(got.Bytes()))
+			t.Logf("got:\n%s", hex.Dump(got))
 			t.Logf("want:\n%s", hex.Dump(want))
 			t.Error("mismatch")
 		}

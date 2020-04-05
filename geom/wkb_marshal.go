@@ -2,50 +2,40 @@ package geom
 
 import (
 	"encoding/binary"
-	"io"
+	"math"
 )
 
 type wkbMarshaller struct {
-	w   io.Writer
-	err error
+	buf []byte
 }
 
-func newWKBMarshaller(w io.Writer) *wkbMarshaller {
-	return &wkbMarshaller{w: w}
-}
+var wkbBO = binary.LittleEndian
 
-func (m *wkbMarshaller) setErr(err error) {
-	if m.err == nil {
-		m.err = err
-	}
-}
-
-func (m *wkbMarshaller) write(data interface{}) {
-	if m.err != nil {
-		return
-	}
-	// Output byte order is an arbitrary choice (either is allowed by the
-	// WKB spec). Little endian is chosen because this is the same as
-	// Postgres.
-	err := binary.Write(m.w, binary.LittleEndian, data)
-	m.setErr(err)
+func newWKBMarshaller(buf []byte) *wkbMarshaller {
+	return &wkbMarshaller{buf}
 }
 
 func (m *wkbMarshaller) writeByteOrder() {
 	const littleEndian byte = 1
-	m.write(littleEndian)
+	m.buf = append(m.buf, littleEndian)
 }
 
 func (m *wkbMarshaller) writeGeomType(geomType uint32, ctype CoordinatesType) {
-	m.write(uint32(ctype)*1000 + geomType)
+	var buf [4]byte
+	wkbBO.PutUint32(buf[:], uint32(ctype)*1000+geomType)
+	m.buf = append(m.buf, buf[:]...)
 }
 
 func (m *wkbMarshaller) writeFloat64(f float64) {
-	m.write(f)
+	var buf [8]byte
+	wkbBO.PutUint64(buf[:], math.Float64bits(f))
+	m.buf = append(m.buf, buf[:]...)
 }
 
 func (m *wkbMarshaller) writeCount(n int) {
-	m.write(uint32(n))
+	var buf [4]byte
+	wkbBO.PutUint32(buf[:], uint32(n))
+	m.buf = append(m.buf, buf[:]...)
 }
 
 func (m *wkbMarshaller) writeCoordinates(c Coordinates) {

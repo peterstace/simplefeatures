@@ -3,7 +3,6 @@ package geom_test
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"strconv"
 	"strings"
 	"testing"
@@ -31,7 +30,7 @@ func TestZeroGeometry(t *testing.T) {
 	expectBoolEq(t, z.IsEmpty(), true)
 	z = Geometry{}
 
-	z.AsBinary(ioutil.Discard) // Doesn't crash
+	_ = z.AsBinary() // Doesn't crash
 
 	_, err = z.Value()
 	expectNoErr(t, err)

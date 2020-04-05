@@ -1,9 +1,7 @@
 package geom
 
 import (
-	"bytes"
 	"database/sql/driver"
-	"io"
 	"unsafe"
 )
 
@@ -173,24 +171,27 @@ func (m MultiPoint) Boundary() GeometryCollection {
 // Value implements the database/sql/driver.Valuer interface by returning the
 // WKB (Well Known Binary) representation of this Geometry.
 func (m MultiPoint) Value() (driver.Value, error) {
-	var buf bytes.Buffer
-	err := m.AsBinary(&buf)
-	return buf.Bytes(), err
+	return m.AsBinary(), nil
 }
 
-// AsBinary writes the WKB (Well Known Binary) representation of the geometry
-// to the writer.
-func (m MultiPoint) AsBinary(w io.Writer) error {
-	marsh := newWKBMarshaller(w)
+// AsBinary returns the WKB (Well Known Text) representation of the geometry.
+func (m MultiPoint) AsBinary() []byte {
+	return m.AppendWKB(nil)
+}
+
+// AppendWKB appends the WKB (Well Known Text) representation of the geometry
+// to the input slice.
+func (m MultiPoint) AppendWKB(dst []byte) []byte {
+	marsh := newWKBMarshaller(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(wkbGeomTypeMultiPoint, m.CoordinatesType())
 	n := m.NumPoints()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {
 		pt := m.PointN(i)
-		marsh.setErr(pt.AsBinary(w))
+		marsh.buf = pt.AppendWKB(marsh.buf)
 	}
-	return marsh.err
+	return marsh.buf
 }
 
 // ConvexHull returns the geometry representing the smallest convex geometry

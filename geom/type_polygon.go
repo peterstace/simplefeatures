@@ -1,10 +1,8 @@
 package geom
 
 import (
-	"bytes"
 	"database/sql/driver"
 	"errors"
-	"io"
 	"math"
 	"sort"
 	"unsafe"
@@ -277,15 +275,18 @@ func (p Polygon) Boundary() MultiLineString {
 // Value implements the database/sql/driver.Valuer interface by returning the
 // WKB (Well Known Binary) representation of this Geometry.
 func (p Polygon) Value() (driver.Value, error) {
-	var buf bytes.Buffer
-	err := p.AsBinary(&buf)
-	return buf.Bytes(), err
+	return p.AsBinary(), nil
 }
 
-// AsBinary writes the WKB (Well Known Binary) representation of the geometry
-// to the writer.
-func (p Polygon) AsBinary(w io.Writer) error {
-	marsh := newWKBMarshaller(w)
+// AsBinary returns the WKB (Well Known Text) representation of the geometry.
+func (p Polygon) AsBinary() []byte {
+	return p.AppendWKB(nil)
+}
+
+// AppendWKB appends the WKB (Well Known Text) representation of the geometry
+// to the input slice.
+func (p Polygon) AppendWKB(dst []byte) []byte {
+	marsh := newWKBMarshaller(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(wkbGeomTypePolygon, p.ctype)
 	marsh.writeCount(len(p.rings))
@@ -293,7 +294,7 @@ func (p Polygon) AsBinary(w io.Writer) error {
 		seq := ring.Coordinates()
 		marsh.writeSequence(seq)
 	}
-	return marsh.err
+	return marsh.buf
 }
 
 // ConvexHull returns the geometry representing the smallest convex geometry

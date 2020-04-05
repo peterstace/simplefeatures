@@ -1,10 +1,8 @@
 package geom
 
 import (
-	"bytes"
 	"database/sql/driver"
 	"encoding/json"
-	"io"
 	"unsafe"
 )
 
@@ -158,24 +156,27 @@ func (c GeometryCollection) Boundary() GeometryCollection {
 // Value implements the database/sql/driver.Valuer interface by returning the
 // WKB (Well Known Binary) representation of this Geometry.
 func (c GeometryCollection) Value() (driver.Value, error) {
-	var buf bytes.Buffer
-	err := c.AsBinary(&buf)
-	return buf.Bytes(), err
+	return c.AsBinary(), nil
 }
 
-// AsBinary writes the WKB (Well Known Binary) representation of the geometry
-// to the writer.
-func (c GeometryCollection) AsBinary(w io.Writer) error {
-	marsh := newWKBMarshaller(w)
+// AsBinary returns the WKB (Well Known Text) representation of the geometry.
+func (c GeometryCollection) AsBinary() []byte {
+	return c.AppendWKB(nil)
+}
+
+// AppendWKB appends the WKB (Well Known Text) representation of the geometry
+// to the input slice.
+func (c GeometryCollection) AppendWKB(dst []byte) []byte {
+	marsh := newWKBMarshaller(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(wkbGeomTypeGeometryCollection, c.ctype)
 	n := c.NumGeometries()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {
 		g := c.GeometryN(i)
-		marsh.setErr(g.AsBinary(w))
+		marsh.buf = g.AppendWKB(marsh.buf)
 	}
-	return marsh.err
+	return marsh.buf
 }
 
 // ConvexHull returns the geometry representing the smallest convex geometry

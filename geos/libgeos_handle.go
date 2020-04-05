@@ -99,15 +99,12 @@ func (h *Handle) Release() {
 
 // createGeometryHandle converts a Geometry object into a GEOS geometry handle.
 func (h *Handle) createGeometryHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
-	wkb := new(bytes.Buffer)
-	if err := g.AsBinary(wkb); err != nil {
-		return nil, err
-	}
+	wkb := g.AsBinary()
 	gh := C.GEOSWKBReader_read_r(
 		h.context,
 		h.reader,
-		(*C.uchar)(&wkb.Bytes()[0]),
-		C.ulong(wkb.Len()),
+		(*C.uchar)(&wkb[0]),
+		C.ulong(len(wkb)),
 	)
 	if gh == nil {
 		return nil, h.err()

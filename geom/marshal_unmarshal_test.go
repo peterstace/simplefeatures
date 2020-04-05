@@ -193,9 +193,8 @@ func TestMarshalUnmarshal(t *testing.T) {
 		for i, wkt := range wkts {
 			t.Run(strconv.Itoa(i), func(t *testing.T) {
 				original := geomFromWKT(t, wkt)
-				var wkb bytes.Buffer
-				expectNoErr(t, original.AsBinary(&wkb))
-				reconstructed, err := geom.UnmarshalWKB(&wkb)
+				wkb := original.AsBinary()
+				reconstructed, err := geom.UnmarshalWKB(bytes.NewReader(wkb))
 				expectNoErr(t, err)
 				reconstructedWKT := reconstructed.AsText()
 				expectStringEq(t, wkt, reconstructedWKT)

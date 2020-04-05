@@ -234,16 +234,12 @@ func (h *Handle) createGeomHandleForGeometryCollection(gc geom.GeometryCollectio
 }
 
 func (h *Handle) createGeomHandleUsingWKB(g geom.Geometry) (*C.GEOSGeometry, error) {
-	wkb := bytes.NewBuffer(h.wkbBuf)
-	if err := g.AsBinary(wkb); err != nil {
-		return nil, err
-	}
-	h.wkbBuf = wkb.Bytes()
+	h.wkbBuf = g.AppendWKB(h.wkbBuf)
 	gh := C.GEOSWKBReader_read_r(
 		h.context,
 		h.wkbReader,
 		(*C.uchar)(&h.wkbBuf[0]),
-		C.ulong(wkb.Len()),
+		C.ulong(len(h.wkbBuf)),
 	)
 	h.wkbBuf = h.wkbBuf[:0]
 	if gh == nil {

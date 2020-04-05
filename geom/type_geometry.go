@@ -261,26 +261,31 @@ func (g Geometry) AppendWKT(dst []byte) []byte {
 	}
 }
 
-// AsBinary writes the WKB (Well Known Binary) representation of the geometry
-// to the writer.
-func (g Geometry) AsBinary(w io.Writer) error {
+// AsBinary returns the WKB (Well Known Text) representation of the geometry.
+func (g Geometry) AsBinary() []byte {
+	return g.AppendWKB(nil)
+}
+
+// AppendWKB appends the WKB (Well Known Text) representation of the geometry
+// to the input slice.
+func (g Geometry) AppendWKB(dst []byte) []byte {
 	switch g.tag {
 	case geometryCollectionTag:
-		return g.AsGeometryCollection().AsBinary(w)
+		return g.AsGeometryCollection().AppendWKB(dst)
 	case pointTag:
-		return g.AsPoint().AsBinary(w)
+		return g.AsPoint().AppendWKB(dst)
 	case lineTag:
-		return g.AsLine().AsBinary(w)
+		return g.AsLine().AppendWKB(dst)
 	case lineStringTag:
-		return g.AsLineString().AsBinary(w)
+		return g.AsLineString().AppendWKB(dst)
 	case polygonTag:
-		return g.AsPolygon().AsBinary(w)
+		return g.AsPolygon().AppendWKB(dst)
 	case multiPointTag:
-		return g.AsMultiPoint().AsBinary(w)
+		return g.AsMultiPoint().AppendWKB(dst)
 	case multiLineStringTag:
-		return g.AsMultiLineString().AsBinary(w)
+		return g.AsMultiLineString().AppendWKB(dst)
 	case multiPolygonTag:
-		return g.AsMultiPolygon().AsBinary(w)
+		return g.AsMultiPolygon().AppendWKB(dst)
 	default:
 		panic("unknown geometry: " + g.tag.String())
 	}
@@ -289,9 +294,7 @@ func (g Geometry) AsBinary(w io.Writer) error {
 // Value implements the database/sql/driver.Valuer interface by returning the
 // WKB (Well Known Binary) representation of this Geometry.
 func (g Geometry) Value() (driver.Value, error) {
-	var buf bytes.Buffer
-	err := g.AsBinary(&buf)
-	return buf.Bytes(), err
+	return g.AsBinary(), nil
 }
 
 // Scan implements the database/sql.Scanner interface by parsing the src value
