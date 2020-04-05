@@ -346,6 +346,37 @@ func (h *Handle) binaryOperation(
 	return h.decode(resultGH)
 }
 
+// Buffer returns a geometry that contains all points within the given radius
+// of the input geometry.
+func (h *Handle) Buffer(g geom.Geometry, radius float64) (geom.Geometry, error) {
+	return h.unaryOperation(g, func(gh *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSBufferWithStyle_r(h.context, gh, C.double(radius), 8, C.GEOSBUF_CAP_ROUND, C.GEOSBUF_JOIN_ROUND, 0.0)
+	})
+}
+
+func (h *Handle) unaryOperation(
+	g geom.Geometry,
+	op func(*C.GEOSGeometry) *C.GEOSGeometry,
+) (geom.Geometry, error) {
+	// Not all versions of libgeos can handle Z and M geometries correctly. For
+	// unary operations, we only need 2D geometries anyway.
+	g = g.Force2D()
+
+	gh, err := h.createGeometryHandle(g)
+	if err != nil {
+		return geom.Geometry{}, err
+	}
+	defer C.GEOSGeom_destroy(gh)
+
+	resultGH := op(gh)
+	if resultGH == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy(resultGH)
+
+	return h.decode(resultGH)
+}
+
 func (h *Handle) decode(gh *C.GEOSGeometry) (geom.Geometry, error) {
 	var (
 		isWKT C.char
