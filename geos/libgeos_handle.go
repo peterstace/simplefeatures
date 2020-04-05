@@ -1,4 +1,4 @@
-package libgeos
+package geos
 
 /*
 #cgo LDFLAGS: -lgeos_c
@@ -31,7 +31,7 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-// Handle is an opaque handle that can be used to invoke libgeos operations.
+// Handle is an opaque handle that can be used to invoke GEOS operations.
 // Instances are not threadsafe and thus should only be used serially (e.g.
 // protected by a mutex or similar).
 type Handle struct {
@@ -40,13 +40,13 @@ type Handle struct {
 	errBuf  [1024]byte
 }
 
-// NewHandle creates a new libgeos handle.
+// NewHandle creates a new GEOS handle.
 func NewHandle() (*Handle, error) {
 	h := &Handle{}
 
 	h.context = C.sf_init(unsafe.Pointer(&h.errBuf))
 	if h.context == nil {
-		return nil, errors.New("could not create libgeos context")
+		return nil, errors.New("could not create GEOS context")
 	}
 
 	h.reader = C.GEOSWKBReader_create_r(h.context)
@@ -58,7 +58,7 @@ func NewHandle() (*Handle, error) {
 	return h, nil
 }
 
-// err gets the last error message reported by libgeos as an error type. It
+// err gets the last error message reported by GEOS as an error type. It
 // always returns a non-nil error. If no error message has been reported, then
 // it returns a generic error message.
 func (h *Handle) err() error {
@@ -66,14 +66,14 @@ func (h *Handle) err() error {
 	if msg == "" {
 		// No error stored, which indicates that the error handler didn't get
 		// trigged. The best we can do is give a generic error.
-		msg = "libgeos internal error"
+		msg = "GEOS internal error"
 	}
 	h.errBuf = [1024]byte{} // Reset the buffer for the next error message.
 	return errors.New(strings.TrimSpace(msg))
 }
 
 // errMsg gets the textual representation of the last error message reported by
-// libgeos.
+// GEOS.
 func (h *Handle) errMsg() string {
 	// The error message is either NULL terminated, or fills the entire buffer.
 	for i, b := range h.errBuf {
@@ -97,7 +97,7 @@ func (h *Handle) Release() {
 	}
 }
 
-// createGeometryHandle converts a Geometry object into a libgeos geometry handle.
+// createGeometryHandle converts a Geometry object into a GEOS geometry handle.
 func (h *Handle) createGeometryHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
 	wkb := new(bytes.Buffer)
 	if err := g.AsBinary(wkb); err != nil {
@@ -243,7 +243,7 @@ func (h *Handle) relatesAny(g1, g2 geom.Geometry, masks ...string) (bool, error)
 	return false, nil
 }
 
-// relate invokes the libgeos GEOSRelatePattern function, which checks if two
+// relate invokes the GEOS GEOSRelatePattern function, which checks if two
 // geometries are related according to a DE-9IM 'relates' mask.
 func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 	if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
@@ -253,7 +253,7 @@ func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 		return false, fmt.Errorf("mask has invalid length: %q", mask)
 	}
 
-	// Not all versions of libgeos can handle Z and M geometries correctly. For
+	// Not all versions of GEOS can handle Z and M geometries correctly. For
 	// Relates, we only need 2D geometries anyway.
 	g1 = g1.Force2D()
 	g2 = g2.Force2D()
@@ -279,7 +279,7 @@ func (h *Handle) relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 	))
 }
 
-// boolErr converts a char result from libgeos into a boolean result.
+// boolErr converts a char result from GEOS into a boolean result.
 func (h *Handle) boolErr(c C.char) (bool, error) {
 	const (
 		// From geos_c.h:
@@ -296,7 +296,7 @@ func (h *Handle) boolErr(c C.char) (bool, error) {
 	case 2:
 		return false, h.err()
 	default:
-		return false, fmt.Errorf("illegal result from libgeos: %v", c)
+		return false, fmt.Errorf("illegal result from GEOS: %v", c)
 	}
 }
 
@@ -320,7 +320,7 @@ func (h *Handle) binaryOperation(
 	g1, g2 geom.Geometry,
 	op func(*C.GEOSGeometry, *C.GEOSGeometry) *C.GEOSGeometry,
 ) (geom.Geometry, error) {
-	// Not all versions of libgeos can handle Z and M geometries correctly. For
+	// Not all versions of GEOS can handle Z and M geometries correctly. For
 	// binary operations, we only need 2D geometries anyway.
 	g1 = g1.Force2D()
 	g2 = g2.Force2D()
