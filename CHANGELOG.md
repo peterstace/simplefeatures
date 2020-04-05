@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.11.0
+
+- Adds a new package `github.com/peterstace/simplefeatures/geos` that wraps the
+  [GEOS](https://github.com/libgeos/geos) library. The following functions are
+wrapped: Equals, Disjoint, Touches, Contains, Covers, Intersects, Within,
+CoveredBy, Crosses, Overlaps, Union, Intersection, and Buffer.
+
 ## v0.10.1
 
 2020-03-24
