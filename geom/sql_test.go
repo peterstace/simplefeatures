@@ -23,8 +23,7 @@ func TestValuerAny(t *testing.T) {
 
 func TestScanner(t *testing.T) {
 	const wkt = "POINT(2 3)"
-	var wkb bytes.Buffer
-	expectNoErr(t, geomFromWKT(t, wkt).AsBinary(&wkb))
+	wkb := geomFromWKT(t, wkt).AsBinary()
 	var g Geometry
 	check := func(t *testing.T, err error) {
 		if err != nil {
@@ -34,11 +33,11 @@ func TestScanner(t *testing.T) {
 	}
 	t.Run("string", func(t *testing.T) {
 		g = Geometry{}
-		check(t, g.Scan(string(wkb.Bytes())))
+		check(t, g.Scan(string(wkb)))
 	})
 	t.Run("byte", func(t *testing.T) {
 		g = Geometry{}
-		check(t, g.Scan([]byte(wkb.Bytes())))
+		check(t, g.Scan(wkb))
 	})
 }
 

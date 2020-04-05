@@ -1,10 +1,8 @@
 package geom
 
 import (
-	"bytes"
 	"database/sql/driver"
 	"errors"
-	"io"
 	"sort"
 	"unsafe"
 )
@@ -309,24 +307,27 @@ func (m MultiPolygon) Boundary() MultiLineString {
 // Value implements the database/sql/driver.Valuer interface by returning the
 // WKB (Well Known Binary) representation of this Geometry.
 func (m MultiPolygon) Value() (driver.Value, error) {
-	var buf bytes.Buffer
-	err := m.AsBinary(&buf)
-	return buf.Bytes(), err
+	return m.AsBinary(), nil
 }
 
-// AsBinary writes the WKB (Well Known Binary) representation of the geometry
-// to the writer.
-func (m MultiPolygon) AsBinary(w io.Writer) error {
-	marsh := newWKBMarshaller(w)
+// AsBinary returns the WKB (Well Known Text) representation of the geometry.
+func (m MultiPolygon) AsBinary() []byte {
+	return m.AppendWKB(nil)
+}
+
+// AppendWKB appends the WKB (Well Known Text) representation of the geometry
+// to the input slice.
+func (m MultiPolygon) AppendWKB(dst []byte) []byte {
+	marsh := newWKBMarshaller(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(wkbGeomTypeMultiPolygon, m.ctype)
 	n := m.NumPolygons()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {
 		poly := m.PolygonN(i)
-		marsh.setErr(poly.AsBinary(w))
+		marsh.buf = poly.AppendWKB(marsh.buf)
 	}
-	return marsh.err
+	return marsh.buf
 }
 
 // ConvexHull returns the geometry representing the smallest convex geometry

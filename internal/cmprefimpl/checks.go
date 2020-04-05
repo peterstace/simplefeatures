@@ -86,12 +86,9 @@ func unaryChecks(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 var mismatchErr = errors.New("mismatch")
 
 func checkIsValid(h *libgeos.Handle, g geom.Geometry, log *log.Logger) (bool, error) {
-	var wkb bytes.Buffer
-	if err := g.AsBinary(&wkb); err != nil {
-		return false, err
-	}
+	wkb := g.AsBinary()
 	var validAsPerSimpleFeatures bool
-	if _, err := geom.UnmarshalWKB(&wkb); err == nil {
+	if _, err := geom.UnmarshalWKB(bytes.NewReader(wkb)); err == nil {
 		validAsPerSimpleFeatures = true
 	}
 	log.Printf("Valid as per simplefeatures: %v", validAsPerSimpleFeatures)
@@ -232,13 +229,10 @@ func checkAsBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	var got bytes.Buffer
-	if err := g.AsBinary(&got); err != nil {
-		return err
-	}
-	if bytes.Compare(want, got.Bytes()) != 0 {
+	got := g.AsBinary()
+	if bytes.Compare(want, got) != 0 {
 		log.Printf("want:\n%s", hex.Dump(want))
-		log.Printf("got:\n%s", hex.Dump(got.Bytes()))
+		log.Printf("got:\n%s", hex.Dump(got))
 		return mismatchErr
 	}
 	return nil
@@ -250,10 +244,7 @@ func checkFromBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error 
 		return nil
 	}
 
-	var wkb bytes.Buffer
-	if err := g.AsBinary(&wkb); err != nil {
-		return err
-	}
+	wkb := g.AsBinary()
 
 	// Skip any MultiPoints that contain empty Points. Libgeos seems has
 	// trouble handling these.
@@ -267,12 +258,12 @@ func checkFromBinary(h *libgeos.Handle, g geom.Geometry, log *log.Logger) error 
 		}
 	}
 
-	want, err := h.FromBinary(wkb.Bytes())
+	want, err := h.FromBinary(wkb)
 	if err != nil {
 		return err
 	}
 
-	got, err := geom.UnmarshalWKB(bytes.NewReader(wkb.Bytes()))
+	got, err := geom.UnmarshalWKB(bytes.NewReader(wkb))
 	if err != nil {
 		return err
 	}

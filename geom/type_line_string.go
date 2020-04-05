@@ -1,10 +1,8 @@
 package geom
 
 import (
-	"bytes"
 	"database/sql/driver"
 	"errors"
-	"io"
 	"math"
 	"sort"
 	"unsafe"
@@ -228,19 +226,22 @@ func (s LineString) Boundary() MultiPoint {
 // Value implements the database/sql/driver.Valuer interface by returning the
 // WKB (Well Known Binary) representation of this Geometry.
 func (s LineString) Value() (driver.Value, error) {
-	var buf bytes.Buffer
-	err := s.AsBinary(&buf)
-	return buf.Bytes(), err
+	return s.AsBinary(), nil
 }
 
-// AsBinary writes the WKB (Well Known Binary) representation of the geometry
-// to the writer.
-func (s LineString) AsBinary(w io.Writer) error {
-	marsh := newWKBMarshaller(w)
+// AsBinary returns the WKB (Well Known Text) representation of the geometry.
+func (s LineString) AsBinary() []byte {
+	return s.AppendWKB(nil)
+}
+
+// AppendWKB appends the WKB (Well Known Text) representation of the geometry
+// to the input slice.
+func (s LineString) AppendWKB(dst []byte) []byte {
+	marsh := newWKBMarshaller(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(wkbGeomTypeLineString, s.CoordinatesType())
 	marsh.writeSequence(s.seq)
-	return marsh.err
+	return marsh.buf
 }
 
 // ConvexHull returns the geometry representing the smallest convex geometry

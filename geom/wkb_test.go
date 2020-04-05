@@ -428,10 +428,8 @@ func TestWKBMarshalValid(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			geom := geomFromWKT(t, wkt)
-			var buf bytes.Buffer
-			err := geom.AsBinary(&buf)
-			expectNoErr(t, err)
-			readBackGeom, err := UnmarshalWKB(&buf)
+			buf := geom.AsBinary()
+			readBackGeom, err := UnmarshalWKB(bytes.NewReader(buf))
 			expectNoErr(t, err)
 			expectGeomEq(t, readBackGeom, geom)
 		})
@@ -522,14 +520,12 @@ func TestWKBMarshalEmptyPoint(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g := geomFromWKT(t, tt.wkt)
-			var buf bytes.Buffer
-			err := g.AsBinary(&buf)
-			expectNoErr(t, err)
+			buf := g.AsBinary()
 			want := hexStringToBytes(t, tt.hex)
-			if !bytes.Equal(want, buf.Bytes()) {
+			if !bytes.Equal(want, buf) {
 				t.Logf("wkt: %v", tt.wkt)
 				t.Logf("want:\n%v", hex.Dump(want))
-				t.Logf("got:\n%v", hex.Dump(buf.Bytes()))
+				t.Logf("got:\n%v", hex.Dump(buf))
 				t.Errorf("mismatch")
 			}
 		})
