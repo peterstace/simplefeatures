@@ -69,7 +69,7 @@ func setupDB(t *testing.T) PostGIS {
 
 func extractStringsFromSource(t *testing.T) []string {
 	var strs []string
-	if err := filepath.Walk("..", func(path string, info os.FileInfo, err error) error {
+	if err := filepath.Walk("../../..", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}

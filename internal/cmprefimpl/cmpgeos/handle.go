@@ -1,4 +1,4 @@
-package libgeos
+package main
 
 import (
 	"bytes"
