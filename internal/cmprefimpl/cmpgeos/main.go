@@ -9,7 +9,6 @@ import (
 	"sort"
 
 	"github.com/peterstace/simplefeatures/geom"
-	"github.com/peterstace/simplefeatures/internal/libgeos"
 )
 
 // TODO: These are additional geometries. Needs something a bit more robust...
@@ -37,7 +36,7 @@ func main() {
 	forceTo2D(geoms)
 	geoms = deduplicateGeometries(geoms)
 
-	h, err := libgeos.NewHandle()
+	h, err := NewHandle()
 	if err != nil {
 		panic(err)
 	}
