@@ -217,22 +217,6 @@ func (p PostGIS) IsRing(t *testing.T, g geom.Geometry) bool {
 		p.boolFunc(t, g, "ST_IsRing")
 }
 
-func (p PostGIS) OrderingEquals(t *testing.T, g1, g2 geom.Geometry) bool {
-	return p.boolBinary(t, g1, g2, "ST_OrderingEquals")
-}
-
-func (p PostGIS) Intersects(t *testing.T, g1, g2 geom.Geometry) bool {
-	return p.boolBinary(t, g1, g2, "ST_Intersects")
-}
-
-func (p PostGIS) Intersection(t *testing.T, g1, g2 geom.Geometry) geom.Geometry {
-	// PostGIS returns an error if geometries with differing coordinate type
-	// are passed in (hence force to 2D).
-	g1 = g1.Force2D()
-	g2 = g2.Force2D()
-	return p.geomBinary(t, g1, g2, "ST_Intersection")
-}
-
 func (p PostGIS) Length(t *testing.T, g geom.Geometry) float64 {
 	return p.float64Func(t, g, "ST_Length")
 }
