@@ -377,17 +377,6 @@ func (m MultiPolygon) EqualsExact(other Geometry, opts ...EqualsExactOption) boo
 		multiPolygonExactEqual(m, other.AsMultiPolygon(), opts)
 }
 
-// IsValid checks if this MultiPolygon is valid
-func (m MultiPolygon) IsValid() bool {
-	for _, p := range m.polys {
-		if !p.IsValid() {
-			return false
-		}
-	}
-	_, err := NewMultiPolygonFromPolygons(m.polys)
-	return err == nil
-}
-
 // Area in the case of a MultiPolygon is the sum of the areas of its polygons.
 func (m MultiPolygon) Area() float64 {
 	var area float64

@@ -21,7 +21,6 @@ type UnaryResult struct {
 	IsSimple   sql.NullBool
 	Boundary   geom.NullGeometry
 	ConvexHull geom.Geometry
-	IsValid    bool
 	IsRing     sql.NullBool
 	Length     float64
 	Area       float64
@@ -89,7 +88,6 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		END,
 
 		ST_AsText(ST_ConvexHull(ST_GeomFromText($3))),
-		ST_IsValid(ST_GeomFromWKB($1)),
 
 		-- IsRing only defined for LineStrings.
 		CASE
@@ -120,7 +118,6 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		&result.IsSimple,
 		&boundaryWKT,
 		&convexHullWKT,
-		&result.IsValid,
 		&result.IsRing,
 		&result.Length,
 		&result.Area,

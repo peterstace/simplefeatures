@@ -329,18 +329,6 @@ func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckIsValid(t *testing.T, want UnaryResult, g geom.Geometry) {
-	t.Run("CheckIsValid", func(t *testing.T) {
-		got := g.IsValid()
-		want := want.IsValid
-		if got != want {
-			t.Logf("got:  %t", got)
-			t.Logf("want: %t", want)
-			t.Error("mismatch")
-		}
-	})
-}
-
 func CheckIsRing(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckIsRing", func(t *testing.T) {
 		isDefined := g.IsLine() || g.IsLineString()

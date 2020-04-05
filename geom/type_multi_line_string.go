@@ -278,16 +278,6 @@ func (m MultiLineString) EqualsExact(other Geometry, opts ...EqualsExactOption) 
 		multiLineStringExactEqual(m, other.AsMultiLineString(), opts)
 }
 
-// IsValid checks if this MultiLineString is valid
-func (m MultiLineString) IsValid() bool {
-	for _, ls := range m.lines {
-		if !ls.IsValid() {
-			return false
-		}
-	}
-	return true
-}
-
 // Length gives the sum of the lengths of the constituent members of the multi
 // line string.
 func (m MultiLineString) Length() float64 {
