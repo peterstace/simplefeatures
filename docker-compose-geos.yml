@@ -1,11 +1,11 @@
 version: "2.1"
 services:
-  libgeostests:
+  geostests:
     build:
       context: .
-      dockerfile: libgeos.Dockerfile
+      dockerfile: geos.Dockerfile
     working_dir: /go/src/github.com/peterstace/simplefeatures
-    entrypoint: go test -test.count=1 -test.run=. ./libgeos
+    entrypoint: go test -test.count=1 -test.run=. ./geos
     volumes:
       - .:/go/src/github.com/peterstace/simplefeatures
     environment:

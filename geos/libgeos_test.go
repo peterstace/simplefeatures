@@ -1,4 +1,4 @@
-package libgeos
+package geos
 
 import (
 	"strconv"
@@ -37,8 +37,8 @@ func TestRelease(t *testing.T) {
 	h.Release()
 }
 
-// These tests aren't exhaustive, because we are leveraging libgeos.  The
-// testing is just enough to make use confident that we're invoking libgeos
+// These tests aren't exhaustive, because we are leveraging GEOS.  The
+// testing is just enough to make use confident that we're invoking GEOS
 // correctly.
 
 func TestRelate(t *testing.T) {

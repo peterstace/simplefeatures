@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: golint.Dockerfile
     working_dir: /go/src/github.com/peterstace/simplefeatures
-    entrypoint: golint ./geom ./libgeos
+    entrypoint: golint ./geom ./geos
     volumes:
       - .:/go/src/github.com/peterstace/simplefeatures
     environment:

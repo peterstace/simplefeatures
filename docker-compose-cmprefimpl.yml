@@ -3,7 +3,7 @@ services:
   cmprefimpl:
     build:
       context: .
-      dockerfile: libgeos.Dockerfile
+      dockerfile: geos.Dockerfile
     working_dir: /go/src/github.com/peterstace/simplefeatures
     entrypoint: sh -c "go install ./internal/cmprefimpl && cmprefimpl"
     volumes:

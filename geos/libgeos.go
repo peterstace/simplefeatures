@@ -1,6 +1,6 @@
-package libgeos
+package geos
 
-// Package libgeos provides a cgo wrapper around the GEOS (Geometry Engine,
+// Package geos provides a cgo wrapper around the GEOS (Geometry Engine,
 // Open Source) library. To use this package, you will need to install the
 // GEOS library.
 //
