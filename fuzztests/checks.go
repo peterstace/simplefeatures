@@ -379,35 +379,6 @@ func CheckLength(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckEqualsExact(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
-	t.Run("CheckEqualsExact", func(t *testing.T) {
-		got := g1.EqualsExact(g2)
-		want := pg.OrderingEquals(t, g1, g2)
-		if got != want {
-			t.Logf("got:  %t", got)
-			t.Logf("want: %t", want)
-			t.Error("mismatch")
-		}
-	})
-}
-
-func CheckIntersects(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
-	t.Run("CheckIntersects", func(t *testing.T) {
-		if containsMultiPointContainingEmptyPoint(g1) || containsMultiPointContainingEmptyPoint(g2) {
-			// PostGIS gives the incorrect result for these geometries (it says
-			// that they always intersect).
-			return
-		}
-		got := g1.Intersects(g2)
-		want := pg.Intersects(t, g1, g2)
-		if got != want {
-			t.Logf("got:  %t", got)
-			t.Logf("want: %t", want)
-			t.Error("mismatch")
-		}
-	})
-}
-
 func containsMultiPointContainingEmptyPoint(g geom.Geometry) bool {
 	switch {
 	case g.IsMultiPoint():
@@ -426,38 +397,6 @@ func containsMultiPointContainingEmptyPoint(g geom.Geometry) bool {
 		}
 	}
 	return false
-}
-
-func CheckIntersection(t *testing.T, pg PostGIS, g1, g2 geom.Geometry) {
-	t.Run("CheckIntersection", func(t *testing.T) {
-		got, err := g1.Intersection(g2)
-		if err != nil {
-			return // operation not implemented
-		}
-		want := pg.Intersection(t, g1, g2)
-
-		if got.IsEmpty() && want.IsEmpty() {
-			return // Both empty, so they match.
-		}
-
-		if got.IsGeometryCollection() || want.IsGeometryCollection() {
-			// GeometryCollections are not supported by ST_Equals. So there's
-			// not much that we can do here.
-			return
-		}
-
-		// PostGIS TolerantEquals (a chain of ST_SnapToGrid and ST_Equals) is
-		// used rather than in memory ExactEquals because simplefeatures does
-		// not implement intersect in exactly the same way as PostGIS.
-
-		if !pg.TolerantEquals(t, got, want) {
-			t.Logf("g1:   %s", g1.AsText())
-			t.Logf("g2:   %s", g2.AsText())
-			t.Logf("got:  %s", got.AsText())
-			t.Logf("want: %s", want.AsText())
-			t.Error("mismatch")
-		}
-	})
 }
 
 func CheckArea(t *testing.T, want UnaryResult, g geom.Geometry) {
