@@ -388,7 +388,6 @@ func (h *Handle) decode(gh *C.GEOSGeometry) (geom.Geometry, error) {
 
 	if isWKT != 0 {
 		return geom.UnmarshalWKT(r)
-	} else {
-		return geom.UnmarshalWKB(r)
 	}
+	return geom.UnmarshalWKB(r)
 }
