@@ -220,18 +220,6 @@ func (c GeometryCollection) EqualsExact(other Geometry, opts ...EqualsExactOptio
 		geometryCollectionExactEqual(c, other.AsGeometryCollection(), opts)
 }
 
-// IsValid checks if this GeometryCollection is valid. However, there is no
-// constraints on it, so this function always returns true
-func (c GeometryCollection) IsValid() bool {
-	all := true
-	c.walk(func(g Geometry) {
-		if !g.IsValid() {
-			all = false
-		}
-	})
-	return all
-}
-
 // Reverse in the case of GeometryCollection reverses each component and also
 // returns them in the original order.
 func (c GeometryCollection) Reverse() GeometryCollection {

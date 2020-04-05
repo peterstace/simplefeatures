@@ -229,12 +229,6 @@ func (m MultiPoint) EqualsExact(other Geometry, opts ...EqualsExactOption) bool 
 		multiPointExactEqual(m, other.AsMultiPoint(), opts)
 }
 
-// IsValid checks if this MultiPoint is valid. However, there is no way to indicate
-// whether or not MultiPoint is valid, so this function always returns true
-func (m MultiPoint) IsValid() bool {
-	return true
-}
-
 // Centroid gives the centroid of the coordinates of the MultiPoint.
 func (m MultiPoint) Centroid() Point {
 	var sum XY

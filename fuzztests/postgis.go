@@ -211,10 +211,6 @@ func (p PostGIS) ConvexHull(t *testing.T, g geom.Geometry) geom.Geometry {
 	return p.geomFunc(t, g, "ST_ConvexHull")
 }
 
-func (p PostGIS) IsValid(t *testing.T, g geom.Geometry) bool {
-	return p.boolFunc(t, g, "ST_IsValid")
-}
-
 func (p PostGIS) IsRing(t *testing.T, g geom.Geometry) bool {
 	// ST_IsRing returns an error whenever it gets anything other than an ST_LineString.
 	return p.stringFunc(t, g, "ST_GeometryType") == "ST_LineString" &&

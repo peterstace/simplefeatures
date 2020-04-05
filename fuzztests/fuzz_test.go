@@ -46,7 +46,6 @@ func TestFuzz(t *testing.T) {
 			CheckIsSimple(t, want, g)
 			CheckBoundary(t, want, g)
 			CheckConvexHull(t, want, g)
-			CheckIsValid(t, want, g)
 			CheckIsRing(t, want, g)
 			CheckLength(t, want, g)
 			CheckArea(t, want, g)

@@ -284,12 +284,6 @@ func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool 
 	return curvesExactEqual(s.Coordinates(), otherSeq, opts)
 }
 
-// IsValid checks if this LineString is valid
-func (s LineString) IsValid() bool {
-	_, err := NewLineString(s.Coordinates())
-	return err == nil
-}
-
 // IsRing returns true iff this LineString is both simple and closed (i.e. is a
 // linear ring).
 func (s LineString) IsRing() bool {

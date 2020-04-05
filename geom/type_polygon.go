@@ -346,17 +346,6 @@ func (p Polygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 		polygonExactEqual(p, other.AsPolygon(), opts)
 }
 
-// IsValid checks if this Polygon is valid
-func (p Polygon) IsValid() bool {
-	for _, r := range p.rings {
-		if !r.IsValid() {
-			return false
-		}
-	}
-	_, err := NewPolygonFromRings(p.rings)
-	return err == nil
-}
-
 // Area of a Polygon is the outer ring's area minus the areas of all inner rings.
 func (p Polygon) Area() float64 {
 	area := math.Abs(signedAreaOfLinearRing(p.ExteriorRing()))

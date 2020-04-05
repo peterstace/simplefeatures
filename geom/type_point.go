@@ -184,12 +184,6 @@ func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	return newEqualsExactOptionSet(opts).eq(p.coords, other.AsPoint().coords)
 }
 
-// IsValid checks if this Point is valid, but there is not way to indicate if
-// Point is valid, so this function always returns true
-func (p Point) IsValid() bool {
-	return true
-}
-
 // Centroid of a point is that point.
 func (p Point) Centroid() Point {
 	return p.Force2D()

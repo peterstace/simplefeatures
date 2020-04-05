@@ -210,12 +210,6 @@ func (n Line) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 	return curvesExactEqual(n.Coordinates(), otherSeq, opts)
 }
 
-// IsValid checks if this Line is valid
-func (n Line) IsValid() bool {
-	_, err := NewLine(n.a, n.b)
-	return err == nil
-}
-
 // Length gives the length of the line.
 func (n Line) Length() float64 {
 	delta := n.a.XY.Sub(n.b.XY)
