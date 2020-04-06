@@ -173,13 +173,6 @@ func (s LineString) IsClosed() bool {
 	return !s.IsEmpty() && s.seq.GetXY(0) == s.seq.GetXY(s.seq.Length()-1)
 }
 
-// Intersection calculates the of this geometry and another, i.e. the portion
-// of the two geometries that are shared. It is not implemented for all
-// geometry pairs, and returns an error for those cases.
-func (s LineString) Intersection(g Geometry) (Geometry, error) {
-	return intersection(s.AsGeometry(), g)
-}
-
 // Intersects return true if and only if this geometry intersects with the
 // other, i.e. they shared at least one common point.
 func (s LineString) Intersects(g Geometry) bool {

@@ -480,17 +480,6 @@ func (g Geometry) Intersects(other Geometry) bool {
 	return hasIntersection(g, other)
 }
 
-// Intersection calculates the of this geometry and another, i.e. the portion
-// of the two geometries that are shared. It is not implemented for all
-// geometry pairs, and returns an error for those cases.
-func (g Geometry) Intersection(other Geometry) (Geometry, error) {
-	result, err := intersection(g, other)
-	if err != nil {
-		return Geometry{}, err
-	}
-	return result, nil
-}
-
 // TransformXY transforms this Geometry into another geometry according the
 // mapping provided by the XY function. Some classes of mappings (such as
 // affine transformations) will preserve the validity this Geometry in the

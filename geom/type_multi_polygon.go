@@ -250,13 +250,6 @@ func (m MultiPolygon) Intersects(g Geometry) bool {
 	return hasIntersection(m.AsGeometry(), g)
 }
 
-// Intersection calculates the of this geometry and another, i.e. the portion
-// of the two geometries that are shared. It is not implemented for all
-// geometry pairs, and returns an error for those cases.
-func (m MultiPolygon) Intersection(g Geometry) (Geometry, error) {
-	return intersection(m.AsGeometry(), g)
-}
-
 // IsEmpty return true if and only if this MultiPolygon doesn't contain any
 // Polygons, or only contains empty Polygons.
 func (m MultiPolygon) IsEmpty() bool {

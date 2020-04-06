@@ -238,13 +238,6 @@ func (p Polygon) IsSimple() bool {
 	return true
 }
 
-// Intersection calculates the of this geometry and another, i.e. the portion
-// of the two geometries that are shared. It is not implemented for all
-// geometry pairs, and returns an error for those cases.
-func (p Polygon) Intersection(g Geometry) (Geometry, error) {
-	return intersection(p.AsGeometry(), g)
-}
-
 // Intersects return true if and only if this geometry intersects with the
 // other, i.e. they shared at least one common point.
 func (p Polygon) Intersects(g Geometry) bool {

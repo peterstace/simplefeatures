@@ -118,13 +118,6 @@ func (m MultiPoint) IsSimple() bool {
 	return true
 }
 
-// Intersection calculates the of this geometry and another, i.e. the portion
-// of the two geometries that are shared. It is not implemented for all
-// geometry pairs, and returns an error for those cases.
-func (m MultiPoint) Intersection(g Geometry) (Geometry, error) {
-	return intersection(m.AsGeometry(), g)
-}
-
 // Intersects return true if and only if this geometry intersects with the
 // other, i.e. they shared at least one common point.
 func (m MultiPoint) Intersects(g Geometry) bool {

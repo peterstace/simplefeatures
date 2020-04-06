@@ -1,11 +1,9 @@
-package geom_test
+package geom
 
 import (
 	"strconv"
 	"strings"
 	"testing"
-
-	. "github.com/peterstace/simplefeatures/geom"
 )
 
 func TestIntersection(t *testing.T) {
@@ -188,11 +186,15 @@ func TestIntersection(t *testing.T) {
 			}
 
 			t.Run("forward", func(t *testing.T) {
-				got, err := in1g.Intersection(in2g)
+				got, err := intersection(in1g, in2g)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
+				want, err := UnmarshalWKT(strings.NewReader(tt.out))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !got.EqualsExact(want, IgnoreOrder) {
 					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got.AsText())
 				}
 
@@ -215,12 +217,16 @@ func TestIntersection(t *testing.T) {
 				return
 			}
 			t.Run("reversed", func(t *testing.T) {
-				got, err := in2g.Intersection(in1g)
+				got, err := intersection(in1g, in2g)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if !got.EqualsExact(geomFromWKT(t, tt.out), IgnoreOrder) {
-					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in2, tt.in1, tt.out, got.AsText())
+				want, err := UnmarshalWKT(strings.NewReader(tt.out))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !got.EqualsExact(want, IgnoreOrder) {
+					t.Errorf("\ninput1: %s\ninput2: %s\nwant:   %v\ngot:    %v", tt.in1, tt.in2, tt.out, got.AsText())
 				}
 
 				// We can infer the desired result for Intersects, which gives

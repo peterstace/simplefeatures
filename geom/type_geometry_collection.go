@@ -75,13 +75,6 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-// Intersection calculates the intersection between this geometry and another
-// (i.e. the overlap between the two geometries). It is not implemented for all
-// geometry pairs, and returns an error for those cases.
-func (c GeometryCollection) Intersection(g Geometry) (Geometry, error) {
-	return intersection(c.AsGeometry(), g)
-}
-
 // Intersects return true if and only if this geometry intersects with the
 // other, i.e. they shared at least one common point.
 func (c GeometryCollection) Intersects(g Geometry) bool {
