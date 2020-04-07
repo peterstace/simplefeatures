@@ -37,15 +37,22 @@ import (
 type Handle struct {
 	context C.GEOSContextHandle_t
 	reader  *C.GEOSWKBReader
-	errBuf  [1024]byte
+	errBuf  *C.char
 }
 
 // NewHandle creates a new GEOS handle.
 func NewHandle() (*Handle, error) {
 	h := &Handle{}
 
+	h.errBuf = (*C.char)(C.malloc(1024))
+	if h.errBuf == nil {
+		h.Release()
+		return nil, errors.New("malloc failed")
+	}
+
 	h.context = C.sf_init(unsafe.Pointer(&h.errBuf))
 	if h.context == nil {
+		h.Release()
 		return nil, errors.New("could not create GEOS context")
 	}
 
@@ -68,7 +75,7 @@ func (h *Handle) err() error {
 		// trigged. The best we can do is give a generic error.
 		msg = "GEOS internal error"
 	}
-	h.errBuf = [1024]byte{} // Reset the buffer for the next error message.
+	C.memset((unsafe.Pointer)(h.errBuf), 0, 1024) // Reset the buffer for the next error message.
 	return errors.New(strings.TrimSpace(msg))
 }
 
@@ -76,12 +83,13 @@ func (h *Handle) err() error {
 // GEOS.
 func (h *Handle) errMsg() string {
 	// The error message is either NULL terminated, or fills the entire buffer.
-	for i, b := range h.errBuf {
+	buf := C.GoBytes((unsafe.Pointer)(h.errBuf), 1024)
+	for i, b := range buf {
 		if b == 0 {
-			return string(h.errBuf[:i])
+			return string(buf[:i])
 		}
 	}
-	return string(h.errBuf[:])
+	return string(buf[:])
 }
 
 // Release releases any resources held by the handle. The handle should not be
@@ -94,6 +102,10 @@ func (h *Handle) Release() {
 	if h.context != nil {
 		C.GEOS_finish_r(h.context)
 		h.context = C.GEOSContextHandle_t(C.NULL)
+	}
+	if h.errBuf != nil {
+		C.free((unsafe.Pointer)(h.errBuf))
+		h.errBuf = (*C.char)(C.NULL)
 	}
 }
 
