@@ -363,6 +363,16 @@ func (h *Handle) Buffer(g geom.Geometry, radius float64) (geom.Geometry, error) 
 	})
 }
 
+// Simplify creates a simplified version of a geometry using the
+// Douglas-Peucker algorithm. Topological invariants may not be maintained,
+// e.g. polygons can collapse into linestrings, and holes in polygons may be
+// lost.
+func (h *Handle) Simplify(g geom.Geometry, tolerance float64) (geom.Geometry, error) {
+	return h.unaryOperation(g, func(gh *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSSimplify_r(h.context, gh, C.double(tolerance))
+	})
+}
+
 func (h *Handle) unaryOperation(
 	g geom.Geometry,
 	op func(*C.GEOSGeometry) *C.GEOSGeometry,

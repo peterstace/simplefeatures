@@ -210,3 +210,13 @@ func Buffer(g geom.Geometry, radius float64) (geom.Geometry, error) {
 		return h.Buffer(g, radius)
 	})
 }
+
+// Simplify creates a simplified version of a geometry using the
+// Douglas-Peucker algorithm. Topological invariants may not be maintained,
+// e.g. polygons can collapse into linestrings, and holes in polygons may be
+// lost.
+func Simplify(g geom.Geometry, tolerance float64) (geom.Geometry, error) {
+	return executeGeomOp(func(h *Handle) (geom.Geometry, error) {
+		return h.Simplify(g, tolerance)
+	})
+}
