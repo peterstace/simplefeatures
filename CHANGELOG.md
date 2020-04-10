@@ -1,6 +1,32 @@
 # Changelog
 
+## v0.12.0
+
+2020-04-11
+
+- Removes redundant PostGIS reference implementation tests, improving CI speed.
+
+- Overhauls WKB and WKT interfaces. These now return `[]byte` and `string`
+  respectively, rather than writing to a supplied `io.Writer`.
+
+- Removes the `IsValid` method. If users want to know if a geometry is valid or
+  not, they should check for an error when geometries are constructed.
+
+- Unexports the partially implemented `Intersection` method. It will be
+  reexported once the feature is complete.
+
+- Fixes a memory related bug in the `github.com/peterstace/simplefeatures/geos`
+  package.
+
+- Adds a wrapper for the GEOS simplify function.
+
+- Simplifies the `github.com/peterstace/simplefeatures/geos` package by not
+  exporting the 'handle' concept. The package now just exposes standalone
+functions.
+
 ## v0.11.0
+
+2020-04-05
 
 - Adds a new package `github.com/peterstace/simplefeatures/geos` that wraps the
   [GEOS](https://github.com/libgeos/geos) library. The following functions are
