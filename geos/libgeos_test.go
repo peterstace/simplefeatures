@@ -31,12 +31,6 @@ func expectGeomEq(t *testing.T, got, want geom.Geometry, opts ...geom.EqualsExac
 	}
 }
 
-func TestRelease(t *testing.T) {
-	h, err := NewHandle()
-	expectNoErr(t, err)
-	h.Release()
-}
-
 // These tests aren't exhaustive, because we are leveraging GEOS.  The
 // testing is just enough to make use confident that we're invoking GEOS
 // correctly.
