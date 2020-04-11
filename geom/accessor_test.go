@@ -17,45 +17,6 @@ func TestPointAccessorEmpty(t *testing.T) {
 	expectBoolEq(t, ok, false)
 }
 
-func TestLineAccessor(t *testing.T) {
-	line := geomFromWKT(t, "LINESTRING(1 2,3 4)").AsLine()
-	t.Run("start", func(t *testing.T) {
-		got := line.StartPoint()
-		want := xyCoords(1, 2)
-		expectCoordsEq(t, got, want)
-	})
-	t.Run("end", func(t *testing.T) {
-		got := line.EndPoint()
-		want := xyCoords(3, 4)
-		expectCoordsEq(t, got, want)
-	})
-	t.Run("num points", func(t *testing.T) {
-		if line.NumPoints() != 2 {
-			t.Errorf("wanted 2")
-		}
-	})
-	t.Run("point 0", func(t *testing.T) {
-		got := line.PointN(0)
-		want := xyCoords(1, 2)
-		expectCoordsEq(t, got, want)
-	})
-	t.Run("point 1", func(t *testing.T) {
-		got := line.PointN(1)
-		want := xyCoords(3, 4)
-		expectCoordsEq(t, got, want)
-	})
-	t.Run("point 2", func(t *testing.T) {
-		expectPanics(t, func() {
-			line.PointN(2)
-		})
-	})
-	t.Run("point -1", func(t *testing.T) {
-		expectPanics(t, func() {
-			line.PointN(-1)
-		})
-	})
-}
-
 func TestLineStringAccessor(t *testing.T) {
 	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").AsLineString()
 	seq := ls.Coordinates()

@@ -82,12 +82,19 @@ func NewMultiPolygonFromPolygons(polys []Polygon, opts ...ConstructorOption) (Mu
 			if polys[j].IsEmpty() {
 				continue
 			}
-			bound1 := polys[i].Boundary()
-			bound2 := polys[j].Boundary()
-			inter := mustIntersection(bound1.AsGeometry(), bound2.AsGeometry())
-			if inter.Dimension() > 0 {
-				return MultiPolygon{}, errors.New("the boundaries of the polygon elements of multipolygons must only intersect at points")
+
+			_, interMLS := intersectionOfMultiLineStringAndMultiLineString(
+				polys[i].Boundary(),
+				polys[j].Boundary(),
+			)
+			for k := 0; k < interMLS.NumLineStrings(); k++ {
+				if !interMLS.LineStringN(k).IsEmpty() {
+					return MultiPolygon{}, errors.New(
+						"the boundaries of the polygon elements of " +
+							"multipolygons must only intersect at points")
+				}
 			}
+
 			if polyInteriorsIntersect(polys[i], polys[j]) {
 				return MultiPolygon{}, errors.New("polygon interiors must not intersect")
 			}
@@ -120,8 +127,8 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 				}
 				// Collect boundary control points and intersection points.
 				linePts := make(map[XY]struct{})
-				linePts[line1.a.XY] = struct{}{}
-				linePts[line1.b.XY] = struct{}{}
+				linePts[line1.a] = struct{}{}
+				linePts[line1.b] = struct{}{}
 				for _, r2 := range p2.rings {
 					seq2 := r2.Coordinates()
 					for idx2 := 0; idx2 < seq2.Length(); idx2++ {
@@ -129,14 +136,14 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 						if !ok {
 							continue
 						}
-						inter := intersectLineWithLineNoAlloc(line1, line2)
+						inter := line1.intersectsLine(line2)
 						if inter.empty {
 							continue
 						}
 						if inter.ptA != inter.ptB {
 							continue
 						}
-						if inter.ptA != line1.StartPoint().XY && inter.ptA != line1.EndPoint().XY {
+						if inter.ptA != line1.a && inter.ptA != line1.b {
 							linePts[inter.ptA] = struct{}{}
 						}
 					}

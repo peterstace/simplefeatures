@@ -81,15 +81,7 @@ func (p *parser) nextGeometryTaggedText() Geometry {
 		}
 		return NewPoint(c, p.opts...).AsGeometry()
 	case "LINESTRING":
-		ls := p.nextLineStringText(ctype)
-		seq := ls.Coordinates()
-		n := seq.Length()
-		if n == 2 {
-			ln, err := NewLine(seq.Get(0), seq.Get(1), p.opts...)
-			p.check(err)
-			return ln.AsGeometry()
-		}
-		return ls.AsGeometry()
+		return p.nextLineStringText(ctype).AsGeometry()
 	case "POLYGON":
 		return p.nextPolygonText(ctype).AsGeometry()
 	case "MULTIPOINT":

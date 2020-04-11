@@ -2,7 +2,6 @@ package geom
 
 import (
 	"fmt"
-	"math"
 )
 
 func max(a, b int) int {
@@ -30,20 +29,18 @@ func rank(g Geometry) int {
 	switch g.tag {
 	case pointTag:
 		return 1
-	case lineTag:
-		return 2
 	case lineStringTag:
-		return 3
+		return 2
 	case polygonTag:
-		return 4
+		return 3
 	case multiPointTag:
-		return 5
+		return 4
 	case multiLineStringTag:
-		return 6
+		return 5
 	case multiPolygonTag:
-		return 7
+		return 6
 	case geometryCollectionTag:
-		return 8
+		return 7
 	default:
 		panic(fmt.Sprintf("unknown geometry tag: %s", g.tag))
 	}
@@ -54,12 +51,4 @@ func mustEnv(env Envelope, ok bool) Envelope {
 		panic("not ok")
 	}
 	return env
-}
-
-func minX(ln Line) float64 {
-	return math.Min(ln.StartPoint().X, ln.EndPoint().X)
-}
-
-func maxX(ln Line) float64 {
-	return math.Max(ln.StartPoint().X, ln.EndPoint().X)
 }

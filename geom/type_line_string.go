@@ -105,7 +105,7 @@ func (s LineString) IsSimple() bool {
 		return true
 	}
 
-	lines := make([]Line, 0, s.seq.Length()-1)
+	lines := make([]line, 0, s.seq.Length()-1)
 	for i := 0; i < s.seq.Length(); i++ {
 		ln, ok := getLine(s.seq, i)
 		if ok {
@@ -116,30 +116,30 @@ func (s LineString) IsSimple() bool {
 	n := len(lines)
 	unprocessed := intSequence(n)
 	sort.Slice(unprocessed, func(i, j int) bool {
-		return minX(lines[unprocessed[i]]) < minX(lines[unprocessed[j]])
+		return lines[unprocessed[i]].minX() < lines[unprocessed[j]].minX()
 	})
 
 	active := intHeap{less: func(i, j int) bool {
-		return maxX(lines[i]) < maxX(lines[j])
+		return lines[i].maxX() < lines[j].maxX()
 	}}
 
 	for _, current := range unprocessed {
-		currentX := minX(lines[current])
-		for len(active.data) != 0 && maxX(lines[active.data[0]]) < currentX {
+		currentX := lines[current].minX()
+		for len(active.data) != 0 && lines[active.data[0]].maxX() < currentX {
 			active.pop()
 		}
 		for _, other := range active.data {
-			intersects, dim := hasIntersectionLineWithLine(lines[current], lines[other])
-			if !intersects {
+			inter := lines[current].intersectsLine(lines[other])
+			if inter.empty {
 				continue
 			}
-			if dim >= 1 {
+			if inter.ptA != inter.ptB {
 				// Two overlapping line segments.
 				return false
 			}
 
 			// The dimension must be 1. Since the intersection is between two
-			// Lines, the intersection must be a *single* point.
+			// lines, the intersection must be a *single* point.
 
 			if abs(current-other) == 1 {
 				// Adjacent lines will intersect at a point due to
@@ -266,16 +266,10 @@ func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Line
 
 // EqualsExact checks if this LineString is exactly equal to another curve.
 func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	var otherSeq Sequence
-	switch {
-	case other.IsLine():
-		otherSeq = other.AsLine().Coordinates()
-	case other.IsLineString():
-		otherSeq = other.AsLineString().Coordinates()
-	default:
+	if !other.IsLineString() {
 		return false
 	}
-	return curvesExactEqual(s.Coordinates(), otherSeq, opts)
+	return curvesExactEqual(s.Coordinates(), other.AsLineString().Coordinates(), opts)
 }
 
 // IsRing returns true iff this LineString is both simple and closed (i.e. is a
@@ -313,12 +307,10 @@ func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64
 		if !ok {
 			continue
 		}
-		length := ln.Length()
-		cent, ok := ln.Centroid().XY()
-		if ok {
-			sumXY = sumXY.Add(cent.Scale(length))
-			sumLength += length
-		}
+		length := ln.length()
+		cent := ln.centroid()
+		sumXY = sumXY.Add(cent.Scale(length))
+		sumLength += length
 	}
 	return sumXY, sumLength
 }

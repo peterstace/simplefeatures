@@ -23,12 +23,11 @@ func pointRingSide(pt XY, ring LineString) side {
 	seq := ring.Coordinates()
 	n := seq.Length()
 
-	ptg := NewPointFromXY(pt)
 	maxX := math.Inf(-1)
 	for i := 0; i < n; i++ {
 		maxX = math.Max(maxX, seq.GetXY(i).X)
 		ln, ok := getLine(seq, i)
-		if ok && hasIntersectionPointWithLine(ptg, ln) {
+		if ok && ln.intersectsXY(pt) {
 			return boundary
 		}
 	}
@@ -36,28 +35,23 @@ func pointRingSide(pt XY, ring LineString) side {
 		return exterior
 	}
 
-	ray, err := NewLineFromXY(pt, XY{maxX + 1, pt.Y})
-	if err != nil {
-		// Cannot occur because X coordinates are different.
-		panic(err)
-	}
-
+	ray := line{pt, XY{maxX + 1, pt.Y}}
 	var count int
 	for i := 0; i < n; i++ {
 		ln, ok := getLine(seq, i)
 		if !ok {
 			continue
 		}
-		inter := intersectLineWithLineNoAlloc(ln, ray)
+		inter := ln.intersectsLine(ray)
 		if inter.empty {
 			continue
 		}
 		if inter.ptA != inter.ptB {
 			continue
 		}
-		if inter.ptA == ln.a.XY || inter.ptA == ln.b.XY {
+		if inter.ptA == ln.a || inter.ptA == ln.b {
 			otherY := ln.a.Y
-			if inter.ptA == ln.a.XY {
+			if inter.ptA == ln.a {
 				otherY = ln.b.Y
 			}
 			if otherY < pt.Y {

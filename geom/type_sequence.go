@@ -133,13 +133,13 @@ func (s Sequence) Force2D() Sequence {
 // adjacent locations in the sequence. It is designed to be called with i equal
 // to each index in the sequence (from 0 to n-1, both inclusive). The flag
 // indicates if the returned line is valid.
-func getLine(seq Sequence, i int) (Line, bool) {
+func getLine(seq Sequence, i int) (line, bool) {
 	if i == 0 {
-		return Line{}, false
+		return line{}, false
 	}
-	ln := Line{
-		a: Coordinates{Type: DimXY, XY: seq.GetXY(i - 1)},
-		b: Coordinates{Type: DimXY, XY: seq.GetXY(i)},
+	ln := line{
+		a: seq.GetXY(i - 1),
+		b: seq.GetXY(i),
 	}
-	return ln, ln.a.XY != ln.b.XY
+	return ln, ln.a != ln.b
 }

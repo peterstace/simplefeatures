@@ -1,5 +1,6 @@
 package geom
 
+/*
 func canonicalPointsAndLines(points []Point, lines []Line) (Geometry, error) {
 	// Deduplicate.
 	points = dedupPoints(points)
@@ -93,3 +94,4 @@ func dedupLines(lines []Line) []Line {
 	}
 	return dedup
 }
+*/

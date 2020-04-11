@@ -15,20 +15,6 @@ func xy(x, y float64) Coordinates {
 	return Coordinates{Type: DimXY, XY: XY{x, y}}
 }
 
-func TestLineValidation(t *testing.T) {
-	for i, pts := range [][2]Coordinates{
-		{xy(0, 0), xy(0, 0)},
-		{xy(-1, -1), xy(-1, -1)},
-	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := NewLine(pts[0], pts[1])
-			if err == nil {
-				t.Error("expected error")
-			}
-		})
-	}
-}
-
 func TestLineStringValidation(t *testing.T) {
 	for i, pts := range [][]float64{
 		[]float64{0, 0},

@@ -324,12 +324,6 @@ func TestCoordinatesSequence(t *testing.T) {
 			expectBoolEq(t, ok, false)
 		})
 	})
-	t.Run("line", func(t *testing.T) {
-		seq := geomFromWKT(t, "LINESTRING(0 1,2 3)").AsLine().Coordinates()
-		expectIntEq(t, seq.Length(), 2)
-		expectXYEq(t, seq.GetXY(0), XY{0, 1})
-		expectXYEq(t, seq.GetXY(1), XY{2, 3})
-	})
 	t.Run("linestring", func(t *testing.T) {
 		seq := geomFromWKT(t, "LINESTRING(0 1,2 3,4 5)").AsLineString().Coordinates()
 		expectIntEq(t, seq.Length(), 3)
@@ -704,14 +698,6 @@ func TestLineStringToMultiLineString(t *testing.T) {
 	if !got.EqualsExact(want) {
 		t.Errorf("want=%v got=%v", want, got)
 	}
-}
-
-func TestLineToLineString(t *testing.T) {
-	ln := geomFromWKT(t, "LINESTRING(1 2,3 4)").AsLine()
-	got := ln.AsLineString()
-	want, err := NewLineString(NewSequence([]float64{1, 2, 3, 4}, DimXY))
-	expectNoErr(t, err)
-	expectGeomEq(t, got.AsGeometry(), want.AsGeometry())
 }
 
 func TestPolygonToMultiPolygon(t *testing.T) {

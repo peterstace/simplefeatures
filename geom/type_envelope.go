@@ -51,18 +51,23 @@ func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 // AsGeometry returns the envelope as a Geometry. In the regular case where the
 // envelope covers some area, then a Polygon geometry is returned. In
 // degenerate cases where the envelope only covers a line or a point, a
-// Line or Point geometry is returned.
+// LineString or Point geometry is returned.
 func (e Envelope) AsGeometry() Geometry {
 	if e.min == e.max {
 		return NewPointFromXY(e.min).AsGeometry()
 	}
 
 	if e.min.X == e.max.X || e.min.Y == e.max.Y {
-		ln, err := NewLineFromXY(e.min, e.max)
+		floats := []float64{
+			e.min.X, e.min.Y,
+			e.max.X, e.max.Y,
+		}
+		seq := NewSequence(floats, DimXY)
+		ls, err := NewLineString(seq)
 		if err != nil {
 			panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
 		}
-		return ln.AsGeometry()
+		return ls.AsGeometry()
 	}
 
 	floats := [...]float64{

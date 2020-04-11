@@ -90,12 +90,6 @@ func (p *wkbParser) parseGeomRoot(gtype uint32, ctype CoordinatesType) Geometry 
 		return NewPoint(c, p.opts...).AsGeometry()
 	case wkbGeomTypeLineString:
 		ls := p.parseLineString(ctype)
-		seq := ls.Coordinates()
-		if seq.Length() == 2 {
-			ln, err := NewLine(seq.Get(0), seq.Get(1), p.opts...)
-			p.setErr(err)
-			return ln.AsGeometry()
-		}
 		return ls.AsGeometry()
 	case wkbGeomTypePolygon:
 		return p.parsePolygon(ctype).AsGeometry()
@@ -218,15 +212,10 @@ func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) MultiLineString 
 	for i := uint32(0); i < n; i++ {
 		geom, err := UnmarshalWKB(p.r)
 		p.setErr(err)
-		switch {
-		case geom.IsLineString():
-			lss = append(lss, geom.AsLineString())
-		case geom.IsLine():
-			ln := geom.AsLine()
-			ls := ln.AsLineString()
-			lss = append(lss, ls)
-		default:
+		if !geom.IsLineString() {
 			p.setErr(errors.New("non-LineString found in MultiLineString"))
+		} else {
+			lss = append(lss, geom.AsLineString())
 		}
 	}
 	return NewMultiLineStringFromLineStrings(lss, p.opts...)
