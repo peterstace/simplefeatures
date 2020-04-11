@@ -92,6 +92,7 @@ func (m MultiLineString) IsSimple() bool {
 			return false
 		}
 	}
+	// TODO: This has bad time complexity (worse than quadratic).
 	for i := 0; i < len(m.lines); i++ {
 		for j := i + 1; j < len(m.lines); j++ {
 			// Ignore any intersections if the lines are *exactly* the same

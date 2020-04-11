@@ -42,7 +42,7 @@ func pointRingSide(pt XY, ring LineString) side {
 		if !ok {
 			continue
 		}
-		inter := ln.intersectsLine(ray)
+		inter := ln.intersectLine(ray)
 		if inter.empty {
 			continue
 		}

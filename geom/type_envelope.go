@@ -58,16 +58,8 @@ func (e Envelope) AsGeometry() Geometry {
 	}
 
 	if e.min.X == e.max.X || e.min.Y == e.max.Y {
-		floats := []float64{
-			e.min.X, e.min.Y,
-			e.max.X, e.max.Y,
-		}
-		seq := NewSequence(floats, DimXY)
-		ls, err := NewLineString(seq)
-		if err != nil {
-			panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
-		}
-		return ls.AsGeometry()
+		ln := line{e.min, e.max}
+		return ln.asLineString().AsGeometry()
 	}
 
 	floats := [...]float64{

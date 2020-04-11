@@ -73,9 +73,9 @@ type lineWithLineIntersection struct {
 	ptA, ptB XY
 }
 
-// intersectLineWithLineNoAlloc calculates the intersection between two line
+// intersectLine calculates the intersection between two line
 // segments without performing any heap allocations.
-func (n1 line) intersectsLine(n2 line) lineWithLineIntersection {
+func (n1 line) intersectLine(n2 line) lineWithLineIntersection {
 	a := n1.a
 	b := n1.b
 	c := n2.a

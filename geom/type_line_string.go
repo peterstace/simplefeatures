@@ -129,7 +129,7 @@ func (s LineString) IsSimple() bool {
 			active.pop()
 		}
 		for _, other := range active.data {
-			inter := lines[current].intersectsLine(lines[other])
+			inter := lines[current].intersectLine(lines[other])
 			if inter.empty {
 				continue
 			}
@@ -266,10 +266,11 @@ func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Line
 
 // EqualsExact checks if this LineString is exactly equal to another curve.
 func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	if !other.IsLineString() {
-		return false
-	}
-	return curvesExactEqual(s.Coordinates(), other.AsLineString().Coordinates(), opts)
+	return other.IsLineString() && curvesExactEqual(
+		s.Coordinates(),
+		other.AsLineString().Coordinates(),
+		opts,
+	)
 }
 
 // IsRing returns true iff this LineString is both simple and closed (i.e. is a

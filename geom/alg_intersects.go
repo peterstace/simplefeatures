@@ -259,7 +259,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 				lnA := side.lines[lnIdxA]
 				for _, lnIdxB := range other.active.data {
 					lnB := other.lines[lnIdxB]
-					inter := lnA.intersectsLine(lnB)
+					inter := lnA.intersectLine(lnB)
 					if inter.empty {
 						continue
 					}

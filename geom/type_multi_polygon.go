@@ -136,7 +136,7 @@ func polyInteriorsIntersect(p1, p2 Polygon) bool {
 						if !ok {
 							continue
 						}
-						inter := line1.intersectsLine(line2)
+						inter := line1.intersectLine(line2)
 						if inter.empty {
 							continue
 						}
