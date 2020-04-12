@@ -20,6 +20,9 @@ func convexHull(g Geometry) Geometry {
 	case 1:
 		return NewPointFromXY(hull[0]).AsGeometry()
 	case 2:
+		if hull[0] == hull[1] {
+			panic(fmt.Sprintf("bug in grahamScan routine - output 2 coincident points: %v", hull))
+		}
 		ln := line{hull[0], hull[1]}
 		return ln.asLineString().AsGeometry()
 	default:
