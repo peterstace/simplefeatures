@@ -20,11 +20,11 @@ func convexHull(g Geometry) Geometry {
 	case 1:
 		return NewPointFromXY(hull[0]).AsGeometry()
 	case 2:
-		ln, err := NewLineFromXY(hull[0], hull[1])
-		if err != nil {
-			panic("bug in grahamScan routine - output 2 coincident points")
+		if hull[0] == hull[1] {
+			panic(fmt.Sprintf("bug in grahamScan routine - output 2 coincident points: %v", hull))
 		}
-		return ln.AsGeometry()
+		ln := line{hull[0], hull[1]}
+		return ln.asLineString().AsGeometry()
 	default:
 		floats := make([]float64, 2*len(hull))
 		for i := range hull {
@@ -63,12 +63,6 @@ func convexHullPointSet(g Geometry) []XY {
 			return nil
 		}
 		return []XY{xy}
-	case g.IsLine():
-		n := g.AsLine()
-		return []XY{
-			n.StartPoint().XY,
-			n.EndPoint().XY,
-		}
 	case g.IsLineString():
 		cs := g.AsLineString().Coordinates()
 		n := cs.Length()

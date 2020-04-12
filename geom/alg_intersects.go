@@ -28,8 +28,6 @@ func hasIntersection(g1, g2 Geometry) bool {
 		switch {
 		case g2.IsPoint():
 			return hasIntersectionPointWithPoint(g1.AsPoint(), g2.AsPoint())
-		case g2.IsLine():
-			return hasIntersectionPointWithLine(g1.AsPoint(), g2.AsLine())
 		case g2.IsLineString():
 			return hasIntersectionPointWithLineString(g1.AsPoint(), g2.AsLineString())
 		case g2.IsPolygon():
@@ -40,37 +38,6 @@ func hasIntersection(g1, g2 Geometry) bool {
 			return hasIntersectionPointWithMultiLineString(g1.AsPoint(), g2.AsMultiLineString())
 		case g2.IsMultiPolygon():
 			return hasIntersectionPointWithMultiPolygon(g1.AsPoint(), g2.AsMultiPolygon())
-		}
-	case g1.IsLine():
-		switch {
-		case g2.IsLine():
-			has, _ := hasIntersectionLineWithLine(g1.AsLine(), g2.AsLine())
-			return has
-		case g2.IsLineString():
-			has, _ := hasIntersectionMultiLineStringWithMultiLineString(
-				g1.AsLine().AsLineString().AsMultiLineString(),
-				g2.AsLineString().AsMultiLineString(),
-				false,
-			)
-			return has
-		case g2.IsPolygon():
-			return hasIntersectionMultiLineStringWithMultiPolygon(
-				g1.AsLine().AsLineString().AsMultiLineString(),
-				g2.AsPolygon().AsMultiPolygon(),
-			)
-		case g2.IsMultiPoint():
-			return hasIntersectionLineWithMultiPoint(g1.AsLine(), g2.AsMultiPoint())
-		case g2.IsMultiLineString():
-			has, _ := hasIntersectionMultiLineStringWithMultiLineString(
-				g1.AsLine().AsLineString().AsMultiLineString(),
-				g2.AsMultiLineString(),
-				false,
-			)
-			return has
-		case g2.IsMultiPolygon():
-			return hasIntersectionMultiLineStringWithMultiPolygon(
-				g1.AsLine().AsLineString().AsMultiLineString(), g2.AsMultiPolygon(),
-			)
 		}
 	case g1.IsLineString():
 		switch {
@@ -173,66 +140,18 @@ func hasIntersection(g1, g2 Geometry) bool {
 	panic(fmt.Sprintf("implementation error: unhandled geometry types %T and %T", g1, g2))
 }
 
-func hasIntersectionLineWithLine(n1, n2 Line) (intersects bool, dimension int) {
-	// Speed is O(1), but there are multiplications involved.
-	a := n1.a.XY
-	b := n1.b.XY
-	c := n2.a.XY
-	d := n2.b.XY
-
-	o1 := orientation(a, b, c)
-	o2 := orientation(a, b, d)
-	o3 := orientation(c, d, a)
-	o4 := orientation(c, d, b)
-
-	if o1 != o2 && o3 != o4 {
-		return true, 0 // Point has dimension 0
-	}
-
-	if o1 == collinear && o2 == collinear {
-		if (!onSegment(a, b, c) && !onSegment(a, b, d)) && (!onSegment(c, d, a) && !onSegment(c, d, b)) {
-			return false, 0 // No intersection
-		}
-
-		// ---------------------
-		// This block is to remove the collinear points in between the two endpoints
-		abcd := [4]XY{a, b, c, d}
-		pts := abcd[:]
-		rth := rightmostThenHighestIndex(pts)
-		pts = append(pts[:rth], pts[rth+1:]...)
-		ltl := leftmostThenLowestIndex(pts)
-		pts = append(pts[:ltl], pts[ltl+1:]...)
-		if pts[0] == pts[1] {
-			return true, 0 // Point has dimension 0
-		}
-		//----------------------
-
-		return true, 1 // Line has dimension 1
-	}
-
-	return false, 0 // No intersection.
-}
-
-func hasIntersectionLineWithMultiPoint(ln Line, mp MultiPoint) bool {
-	// Worst case speed is O(n), n is the number of points.
-	n := mp.NumPoints()
-	for i := 0; i < n; i++ {
-		pt := mp.PointN(i)
-		if hasIntersectionPointWithLine(pt, ln) {
-			return true
-		}
-	}
-	return false
-}
-
 func hasIntersectionMultiPointWithMultiLineString(mp MultiPoint, mls MultiLineString) bool {
 	for i := 0; i < mp.NumPoints(); i++ {
 		pt := mp.PointN(i)
+		ptXY, ok := pt.XY()
+		if !ok {
+			continue
+		}
 		for j := 0; j < mls.NumLineStrings(); j++ {
 			seq := mls.LineStringN(j).Coordinates()
 			for k := 0; k < seq.Length(); k++ {
 				ln, ok := getLine(seq, k)
-				if ok && hasIntersectionPointWithLine(pt, ln) {
+				if ok && ln.intersectsXY(ptXY) {
 					return true
 				}
 			}
@@ -266,7 +185,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 
 	type side struct {
 		mls         MultiLineString
-		lines       []Line  // all lines from the MLS
+		lines       []line  // all lines from the MLS
 		next        int     // index into lines
 		active      intHeap // indexes into lines
 		newSegments []int   // indexes into lines
@@ -280,7 +199,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		for _, ls := range side.mls.lines {
 			n += ls.Coordinates().Length()
 		}
-		side.lines = make([]Line, 0, n)
+		side.lines = make([]line, 0, n)
 		for _, ls := range side.mls.lines {
 			seq := ls.Coordinates()
 			for i := 0; i < seq.Length(); i++ {
@@ -288,19 +207,19 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 				if !ok {
 					continue
 				}
-				if ln.StartPoint().X > ln.EndPoint().X {
-					ln = ln.Reverse()
+				if ln.a.X > ln.b.X {
+					ln = ln.reverse()
 				}
 				side.lines = append(side.lines, ln)
 			}
 		}
 		sort.Slice(side.lines, func(i, j int) bool {
-			return side.lines[i].StartPoint().X < side.lines[j].StartPoint().X
+			return side.lines[i].a.X < side.lines[j].a.X
 		})
 		sideCopy := side // copy because we're using anon func
 		side.active.less = func(i, j int) bool {
-			ix := sideCopy.lines[i].EndPoint().X
-			jx := sideCopy.lines[j].EndPoint().X
+			ix := sideCopy.lines[i].b.X
+			jx := sideCopy.lines[j].b.X
 			return ix < jx
 		}
 	}
@@ -313,7 +232,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		sweepX := math.Inf(+1)
 		for _, side := range sides {
 			if side.next < len(side.lines) {
-				sweepX = math.Min(sweepX, side.lines[side.next].StartPoint().X)
+				sweepX = math.Min(sweepX, side.lines[side.next].a.X)
 			}
 		}
 
@@ -321,11 +240,11 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 		// segments that can no longer possibly intersect with any unprocessed
 		// line segments, and adding any new line segments to the active sets.
 		for _, side := range sides {
-			for len(side.active.data) != 0 && side.lines[side.active.data[0]].EndPoint().X < sweepX {
+			for len(side.active.data) != 0 && side.lines[side.active.data[0]].b.X < sweepX {
 				side.active.pop()
 			}
 			side.newSegments = side.newSegments[:0]
-			for side.next < len(side.lines) && side.lines[side.next].StartPoint().X == sweepX {
+			for side.next < len(side.lines) && side.lines[side.next].a.X == sweepX {
 				side.newSegments = append(side.newSegments, side.next)
 				side.active.push(side.next)
 				side.next++
@@ -340,7 +259,7 @@ func hasIntersectionMultiLineStringWithMultiLineString(
 				lnA := side.lines[lnIdxA]
 				for _, lnIdxB := range other.active.data {
 					lnB := other.lines[lnIdxB]
-					inter := intersectLineWithLineNoAlloc(lnA, lnB)
+					inter := lnA.intersectLine(lnB)
 					if inter.empty {
 						continue
 					}
@@ -394,30 +313,16 @@ func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp Mult
 	return false
 }
 
-func hasIntersectionPointWithLine(pt Point, ln Line) bool {
-	// Speed is O(1) using a bounding box check then a point-on-line check.
-	env := ln.Envelope()
-	xy, ok := pt.XY()
+func hasIntersectionPointWithLineString(pt Point, ls LineString) bool {
+	// Worst case speed is O(n), n is the number of lines.
+	ptXY, ok := pt.XY()
 	if !ok {
 		return false
 	}
-	if !env.Contains(xy) {
-		return false
-	}
-	lhs := (xy.X - ln.a.X) * (ln.b.Y - ln.a.Y)
-	rhs := (xy.Y - ln.a.Y) * (ln.b.X - ln.a.X)
-	if lhs == rhs {
-		return true
-	}
-	return false
-}
-
-func hasIntersectionPointWithLineString(pt Point, ls LineString) bool {
-	// Worst case speed is O(n), n is the number of lines.
 	seq := ls.Coordinates()
 	for i := 0; i < seq.Length(); i++ {
 		ln, ok := getLine(seq, i)
-		if ok && hasIntersectionPointWithLine(pt, ln) {
+		if ok && ln.intersectsXY(ptXY) {
 			return true
 		}
 	}

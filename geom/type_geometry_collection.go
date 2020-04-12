@@ -334,14 +334,6 @@ func (c GeometryCollection) sumCentroidCalc() centroidCalc {
 					result.numPoints++
 				}
 			}
-		case g.IsLine():
-			line := g.AsLine()
-			cent, ok := line.Centroid().XY()
-			if ok {
-				length := line.Length()
-				result.sumXY = result.sumXY.Add(cent.Scale(length))
-				result.sumLength += length
-			}
 		case g.IsLineString():
 			ls := g.AsLineString()
 			xy, length := sumCentroidAndLengthOfLineString(ls)

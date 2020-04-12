@@ -331,7 +331,7 @@ func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 
 func CheckIsRing(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckIsRing", func(t *testing.T) {
-		isDefined := g.IsLine() || g.IsLineString()
+		isDefined := g.IsLineString()
 		if want.IsRing.Valid != isDefined {
 			t.Fatalf("Unexpected IsString definition: "+
 				"IsLineString=%v PostGISDefined=%v",

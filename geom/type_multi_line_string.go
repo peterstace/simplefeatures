@@ -92,6 +92,7 @@ func (m MultiLineString) IsSimple() bool {
 			return false
 		}
 	}
+	// TODO: This has bad time complexity (worse than quadratic).
 	for i := 0; i < len(m.lines); i++ {
 		for j := i + 1; j < len(m.lines); j++ {
 			// Ignore any intersections if the lines are *exactly* the same
@@ -103,18 +104,29 @@ func (m MultiLineString) IsSimple() bool {
 				continue
 			}
 
-			inter := mustIntersection(
-				m.lines[i].AsGeometry(),
-				m.lines[j].AsGeometry(),
+			interMP, interMLS := intersectionOfLineStringAndLineString(
+				m.lines[i],
+				m.lines[j],
 			)
-			if inter.IsEmpty() {
+			if !interMLS.IsEmpty() {
+				// Line part of the intersection was non-empty, so the whole
+				// MLS is not simple.
+				return false
+			}
+			if interMP.IsEmpty() {
+				// No intersection at all between the two LineStrings. Move on
+				// to the next combination.
 				continue
 			}
-			bound := mustIntersection(
-				m.lines[i].Boundary().AsGeometry(),
-				m.lines[j].Boundary().AsGeometry(),
+
+			// There was an intersection between the two LineStrings, which
+			// consists of only Points. This is OK, so long as the points are
+			// on the boundary of each LineString.
+			bound := intersectionOfMultiPointAndMultiPoint(
+				m.lines[i].Boundary(),
+				m.lines[j].Boundary(),
 			)
-			if !inter.EqualsExact(mustIntersection(inter, bound), IgnoreOrder) {
+			if !interMP.EqualsExact(bound.AsGeometry(), IgnoreOrder) {
 				return false
 			}
 		}

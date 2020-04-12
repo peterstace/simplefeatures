@@ -21,7 +21,6 @@ type geometryTag int
 const (
 	geometryCollectionTag geometryTag = iota
 	pointTag
-	lineTag
 	lineStringTag
 	polygonTag
 	multiPointTag
@@ -33,7 +32,6 @@ func (t geometryTag) String() string {
 	s, ok := map[geometryTag]string{
 		geometryCollectionTag: "GeometryCollection",
 		pointTag:              "Point",
-		lineTag:               "Line",
 		lineStringTag:         "LineString",
 		polygonTag:            "Polygon",
 		multiPointTag:         "MultiPoint",
@@ -63,8 +61,6 @@ func (g Geometry) Type() string {
 		return g.AsGeometryCollection().Type()
 	case pointTag:
 		return g.AsPoint().Type()
-	case lineTag:
-		return g.AsLine().Type()
 	case lineStringTag:
 		return g.AsLineString().Type()
 	case polygonTag:
@@ -85,9 +81,6 @@ func (g Geometry) IsGeometryCollection() bool { return g.tag == geometryCollecti
 
 // IsPoint return true iff the Geometry is a Point geometry.
 func (g Geometry) IsPoint() bool { return g.tag == pointTag }
-
-// IsLine return true iff the Geometry is a Line geometry.
-func (g Geometry) IsLine() bool { return g.tag == lineTag }
 
 // IsLineString return true iff the Geometry is a LineString geometry.
 func (g Geometry) IsLineString() bool { return g.tag == lineStringTag }
@@ -127,13 +120,6 @@ func (g Geometry) AsGeometryCollection() GeometryCollection {
 func (g Geometry) AsPoint() Point {
 	g.check(pointTag)
 	return *(*Point)(g.ptr)
-}
-
-// AsLine returns the geometry as a Line. It panics if the geometry is not a
-// Line.
-func (g Geometry) AsLine() Line {
-	g.check(lineTag)
-	return *(*Line)(g.ptr)
 }
 
 // AsLineString returns the geometry as a LineString. It panics if the geometry
@@ -178,8 +164,6 @@ func (g Geometry) AsText() string {
 		return g.AsGeometryCollection().AsText()
 	case pointTag:
 		return g.AsPoint().AsText()
-	case lineTag:
-		return g.AsLine().AsText()
 	case lineStringTag:
 		return g.AsLineString().AsText()
 	case polygonTag:
@@ -203,8 +187,6 @@ func (g Geometry) MarshalJSON() ([]byte, error) {
 		return g.AsGeometryCollection().MarshalJSON()
 	case pointTag:
 		return g.AsPoint().MarshalJSON()
-	case lineTag:
-		return g.AsLine().MarshalJSON()
 	case lineStringTag:
 		return g.AsLineString().MarshalJSON()
 	case polygonTag:
@@ -244,8 +226,6 @@ func (g Geometry) AppendWKT(dst []byte) []byte {
 		return (*GeometryCollection)(g.ptr).AppendWKT(dst)
 	case pointTag:
 		return (*Point)(g.ptr).AppendWKT(dst)
-	case lineTag:
-		return (*Line)(g.ptr).AppendWKT(dst)
 	case lineStringTag:
 		return (*LineString)(g.ptr).AppendWKT(dst)
 	case polygonTag:
@@ -274,8 +254,6 @@ func (g Geometry) AppendWKB(dst []byte) []byte {
 		return g.AsGeometryCollection().AppendWKB(dst)
 	case pointTag:
 		return g.AsPoint().AppendWKB(dst)
-	case lineTag:
-		return g.AsLine().AppendWKB(dst)
 	case lineStringTag:
 		return g.AsLineString().AppendWKB(dst)
 	case polygonTag:
@@ -338,7 +316,7 @@ func (g Geometry) Dimension() int {
 		return g.AsGeometryCollection().Dimension()
 	case pointTag, multiPointTag:
 		return 0
-	case lineTag, lineStringTag, multiLineStringTag:
+	case lineStringTag, multiLineStringTag:
 		return 1
 	case polygonTag, multiPolygonTag:
 		return 2
@@ -355,8 +333,6 @@ func (g Geometry) IsEmpty() bool {
 		return g.AsGeometryCollection().IsEmpty()
 	case pointTag:
 		return g.AsPoint().IsEmpty()
-	case lineTag:
-		return false
 	case lineStringTag:
 		return g.AsLineString().IsEmpty()
 	case polygonTag:
@@ -381,8 +357,6 @@ func (g Geometry) Envelope() (Envelope, bool) {
 		return g.AsGeometryCollection().Envelope()
 	case pointTag:
 		return g.AsPoint().Envelope()
-	case lineTag:
-		return g.AsLine().Envelope(), true
 	case lineStringTag:
 		return g.AsLineString().Envelope()
 	case polygonTag:
@@ -416,8 +390,6 @@ func (g Geometry) Boundary() Geometry {
 		return g.AsGeometryCollection().Boundary().AsGeometry()
 	case pointTag:
 		return g.AsPoint().Boundary().AsGeometry()
-	case lineTag:
-		return g.AsLine().Boundary().AsGeometry()
 	case lineStringTag:
 		return g.AsLineString().Boundary().AsGeometry()
 	case polygonTag:
@@ -451,8 +423,6 @@ func (g Geometry) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 		return g.AsGeometryCollection().EqualsExact(other, opts...)
 	case pointTag:
 		return g.AsPoint().EqualsExact(other, opts...)
-	case lineTag:
-		return g.AsLine().EqualsExact(other, opts...)
 	case lineStringTag:
 		return g.AsLineString().EqualsExact(other, opts...)
 	case polygonTag:
@@ -494,9 +464,6 @@ func (g Geometry) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geomet
 	case pointTag:
 		gt, err := g.AsPoint().TransformXY(fn, opts...)
 		return gt.AsGeometry(), err
-	case lineTag:
-		gt, err := g.AsLine().TransformXY(fn, opts...)
-		return gt.AsGeometry(), err
 	case lineStringTag:
 		gt, err := g.AsLineString().TransformXY(fn, opts...)
 		return gt.AsGeometry(), err
@@ -526,8 +493,6 @@ func (g Geometry) Length() float64 {
 		return 0
 	case g.IsGeometryCollection():
 		return g.AsGeometryCollection().Length()
-	case g.IsLine():
-		return g.AsLine().Length()
 	case g.IsLineString():
 		return g.AsLineString().Length()
 	case g.IsMultiLineString():
@@ -553,8 +518,6 @@ func (g Geometry) Centroid() Point {
 		return g.AsGeometryCollection().Centroid()
 	case pointTag:
 		return g.AsPoint().Centroid()
-	case lineTag:
-		return g.AsLine().Centroid()
 	case lineStringTag:
 		return g.AsLineString().Centroid()
 	case polygonTag:
@@ -577,8 +540,6 @@ func (g Geometry) Area() float64 {
 	case geometryCollectionTag:
 		return g.AsGeometryCollection().Area()
 	case pointTag:
-		return 0
-	case lineTag:
 		return 0
 	case lineStringTag:
 		return 0
@@ -606,8 +567,6 @@ func (g Geometry) IsSimple() (isSimple bool, wellDefined bool) {
 		return false, false
 	case pointTag:
 		return g.AsPoint().IsSimple(), true
-	case lineTag:
-		return g.AsLine().IsSimple(), true
 	case lineStringTag:
 		return g.AsLineString().IsSimple(), true
 	case polygonTag:
@@ -632,8 +591,6 @@ func (g Geometry) Reverse() Geometry {
 		return g.AsGeometryCollection().Reverse().AsGeometry()
 	case pointTag:
 		return g.AsPoint().Reverse().AsGeometry()
-	case lineTag:
-		return g.AsLine().Reverse().AsGeometry()
 	case lineStringTag:
 		return g.AsLineString().Reverse().AsGeometry()
 	case polygonTag:
@@ -657,8 +614,6 @@ func (g Geometry) CoordinatesType() CoordinatesType {
 		return g.AsGeometryCollection().CoordinatesType()
 	case pointTag:
 		return g.AsPoint().CoordinatesType()
-	case lineTag:
-		return g.AsLine().CoordinatesType()
 	case lineStringTag:
 		return g.AsLineString().CoordinatesType()
 	case polygonTag:
@@ -682,8 +637,6 @@ func (g Geometry) ForceCoordinatesType(newCType CoordinatesType) Geometry {
 		return g.AsGeometryCollection().ForceCoordinatesType(newCType).AsGeometry()
 	case pointTag:
 		return g.AsPoint().ForceCoordinatesType(newCType).AsGeometry()
-	case lineTag:
-		return g.AsLine().ForceCoordinatesType(newCType).AsGeometry()
 	case lineStringTag:
 		return g.AsLineString().ForceCoordinatesType(newCType).AsGeometry()
 	case polygonTag:
