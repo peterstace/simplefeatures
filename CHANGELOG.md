@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.13.0
+
+2020-04-13
+
+- Removes the `Line` type. This was done in order to better align
+  simplefeatures with the OGC Simple Feature Access specification, and allows
+many edge cases in the code to be removed. Users previously using the `Line`
+type should use the `LineString` type instead.
+
+- Adds an explicit `GeometryType` type, which represents one of the 7 types of
+  geometry (Point, LineString, Polygon, MultiPoint, MultiLineString,
+MultiPolygon, and GeometryCollection). The `Type` method now returns a
+`GeometryType` rather than a `string`.
+
 ## v0.12.0
 
 2020-04-11
