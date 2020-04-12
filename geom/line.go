@@ -75,11 +75,11 @@ type lineWithLineIntersection struct {
 
 // intersectLine calculates the intersection between two line
 // segments without performing any heap allocations.
-func (n1 line) intersectLine(n2 line) lineWithLineIntersection {
-	a := n1.a
-	b := n1.b
-	c := n2.a
-	d := n2.b
+func (ln line) intersectLine(other line) lineWithLineIntersection {
+	a := ln.a
+	b := ln.b
+	c := other.a
+	d := other.b
 
 	o1 := orientation(a, b, c)
 	o2 := orientation(a, b, d)
