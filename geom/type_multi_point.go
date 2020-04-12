@@ -61,14 +61,14 @@ func NewMultiPointWithEmptyMask(seq Sequence, empty BitSet, opts ...ConstructorO
 	}
 }
 
-// Type return type string for MultiPoint
-func (m MultiPoint) Type() string {
-	return multiPointType
+// Type returns the GeometryType for a MultiPoint
+func (m MultiPoint) Type() GeometryType {
+	return TypeMultiPoint
 }
 
 // AsGeometry converts this MultiPoint into a Geometry.
 func (m MultiPoint) AsGeometry() Geometry {
-	return Geometry{multiPointTag, unsafe.Pointer(&m)}
+	return Geometry{TypeMultiPoint, unsafe.Pointer(&m)}
 }
 
 // NumPoints gives the number of element points making up the MultiPoint.
@@ -177,7 +177,7 @@ func (m MultiPoint) AsBinary() []byte {
 func (m MultiPoint) AppendWKB(dst []byte) []byte {
 	marsh := newWKBMarshaller(dst)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeMultiPoint, m.CoordinatesType())
+	marsh.writeGeomType(TypeMultiPoint, m.CoordinatesType())
 	n := m.NumPoints()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {

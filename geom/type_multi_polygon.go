@@ -202,14 +202,14 @@ func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
 	return true
 }
 
-// Type return type string for MultiPolygon
-func (m MultiPolygon) Type() string {
-	return multiPolygonType
+// Type returns the GeometryType for a MultiPolygon
+func (m MultiPolygon) Type() GeometryType {
+	return TypeMultiPolygon
 }
 
 // AsGeometry converts this MultiPolygon into a Geometry.
 func (m MultiPolygon) AsGeometry() Geometry {
-	return Geometry{multiPolygonTag, unsafe.Pointer(&m)}
+	return Geometry{TypeMultiPolygon, unsafe.Pointer(&m)}
 }
 
 // NumPolygons gives the number of Polygon elements in the MultiPolygon.
@@ -320,7 +320,7 @@ func (m MultiPolygon) AsBinary() []byte {
 func (m MultiPolygon) AppendWKB(dst []byte) []byte {
 	marsh := newWKBMarshaller(dst)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeMultiPolygon, m.ctype)
+	marsh.writeGeomType(TypeMultiPolygon, m.ctype)
 	n := m.NumPolygons()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {

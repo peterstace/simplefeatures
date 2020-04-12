@@ -32,14 +32,14 @@ func NewPointFromXY(xy XY, _ ...ConstructorOption) Point {
 	return Point{Coordinates{XY: xy, Type: DimXY}, true}
 }
 
-// Type return type string for Point
-func (p Point) Type() string {
-	return pointType
+// Type returns the GeometryType for a Point
+func (p Point) Type() GeometryType {
+	return TypePoint
 }
 
 // AsGeometry converts this Point into a Geometry.
 func (p Point) AsGeometry() Geometry {
-	return Geometry{pointTag, unsafe.Pointer(&p)}
+	return Geometry{TypePoint, unsafe.Pointer(&p)}
 }
 
 // XY gives the XY location of the point. The returned flag is set to true if
@@ -119,7 +119,7 @@ func (p Point) AsBinary() []byte {
 func (p Point) AppendWKB(dst []byte) []byte {
 	marsh := newWKBMarshaller(dst)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypePoint, p.CoordinatesType())
+	marsh.writeGeomType(TypePoint, p.CoordinatesType())
 	if !p.full {
 		p.coords.X = math.NaN()
 		p.coords.Y = math.NaN()

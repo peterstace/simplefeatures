@@ -20,9 +20,10 @@ func (m *wkbMarshaller) writeByteOrder() {
 	m.buf = append(m.buf, littleEndian)
 }
 
-func (m *wkbMarshaller) writeGeomType(geomType uint32, ctype CoordinatesType) {
+func (m *wkbMarshaller) writeGeomType(geomType GeometryType, ctype CoordinatesType) {
+	gt := [...]uint32{7, 1, 2, 3, 4, 5, 6}[geomType]
 	var buf [4]byte
-	wkbBO.PutUint32(buf[:], uint32(ctype)*1000+geomType)
+	wkbBO.PutUint32(buf[:], uint32(ctype)*1000+gt)
 	m.buf = append(m.buf, buf[:]...)
 }
 

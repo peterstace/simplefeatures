@@ -397,7 +397,7 @@ func TestWKBParserInvalidGeometryType(t *testing.T) {
 	if err == nil {
 		t.Errorf("expected an error but got nil")
 	}
-	if !strings.Contains(err.Error(), "unknown geometry type") {
+	if !strings.Contains(err.Error(), "invalid geometry type") {
 		t.Errorf("expected to be an error about unknown geometry type, but got: %v", err)
 	}
 }

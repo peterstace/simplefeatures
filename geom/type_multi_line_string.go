@@ -35,14 +35,14 @@ func NewMultiLineStringFromLineStrings(lines []LineString, opts ...ConstructorOp
 	return MultiLineString{lines, ctype}
 }
 
-// Type return type string for MultiLineString
-func (m MultiLineString) Type() string {
-	return multiLineStringType
+// Type returns the GeometryType for a MultiLineString
+func (m MultiLineString) Type() GeometryType {
+	return TypeMultiLineString
 }
 
 // AsGeometry converts this MultiLineString into a Geometry.
 func (m MultiLineString) AsGeometry() Geometry {
-	return Geometry{multiLineStringTag, unsafe.Pointer(&m)}
+	return Geometry{TypeMultiLineString, unsafe.Pointer(&m)}
 }
 
 // NumLineStrings gives the number of LineString elements in the
@@ -223,7 +223,7 @@ func (m MultiLineString) AsBinary() []byte {
 func (m MultiLineString) AppendWKB(dst []byte) []byte {
 	marsh := newWKBMarshaller(dst)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeMultiLineString, m.ctype)
+	marsh.writeGeomType(TypeMultiLineString, m.ctype)
 	n := m.NumLineStrings()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {

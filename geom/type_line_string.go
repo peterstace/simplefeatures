@@ -38,14 +38,14 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 		"must contain at least 2 points with distinct XY values")
 }
 
-// Type return type string for LineString
-func (s LineString) Type() string {
-	return lineStringType
+// Type returns the GeometryType for a LineString
+func (s LineString) Type() GeometryType {
+	return TypeLineString
 }
 
 // AsGeometry converts this LineString into a Geometry.
 func (s LineString) AsGeometry() Geometry {
-	return Geometry{lineStringTag, unsafe.Pointer(&s)}
+	return Geometry{TypeLineString, unsafe.Pointer(&s)}
 }
 
 // StartPoint gives the first point of the LineString. If the LineString is
@@ -232,7 +232,7 @@ func (s LineString) AsBinary() []byte {
 func (s LineString) AppendWKB(dst []byte) []byte {
 	marsh := newWKBMarshaller(dst)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeLineString, s.CoordinatesType())
+	marsh.writeGeomType(TypeLineString, s.CoordinatesType())
 	marsh.writeSequence(s.seq)
 	return marsh.buf
 }

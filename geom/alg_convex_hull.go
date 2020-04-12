@@ -110,7 +110,7 @@ func convexHullPointSet(g Geometry) []XY {
 		}
 		return points
 	default:
-		panic("unknown geometry: " + g.tag.String())
+		panic("unknown geometry: " + g.gtype.String())
 	}
 }
 

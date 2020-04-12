@@ -51,9 +51,28 @@ func (p *wkbParser) parseUint32() uint32 {
 	return x
 }
 
-func (p *wkbParser) parseGeomAndCoordType() (uint32, CoordinatesType) {
+func (p *wkbParser) parseGeomAndCoordType() (GeometryType, CoordinatesType) {
 	geomCode := p.parseUint32()
-	gtype := geomCode % 1000
+	var gtype GeometryType
+	switch geomCode % 1000 {
+	case 1:
+		gtype = TypePoint
+	case 2:
+		gtype = TypeLineString
+	case 3:
+		gtype = TypePolygon
+	case 4:
+		gtype = TypeMultiPoint
+	case 5:
+		gtype = TypeMultiLineString
+	case 6:
+		gtype = TypeMultiPolygon
+	case 7:
+		gtype = TypeGeometryCollection
+	default:
+		p.setErr(fmt.Errorf("invalid geometry type in geom code: %v", geomCode))
+	}
+
 	var ctype CoordinatesType
 	switch geomCode / 1000 {
 	case 0:
@@ -65,41 +84,32 @@ func (p *wkbParser) parseGeomAndCoordType() (uint32, CoordinatesType) {
 	case 3:
 		ctype = DimXYZM
 	default:
-		p.setErr(errors.New("cannot determine coordinate type"))
+		p.setErr(fmt.Errorf("invalid coordinates type in geom code: %v", geomCode))
 	}
+
 	return gtype, ctype
 }
 
-const (
-	wkbGeomTypePoint              = uint32(1)
-	wkbGeomTypeLineString         = uint32(2)
-	wkbGeomTypePolygon            = uint32(3)
-	wkbGeomTypeMultiPoint         = uint32(4)
-	wkbGeomTypeMultiLineString    = uint32(5)
-	wkbGeomTypeMultiPolygon       = uint32(6)
-	wkbGeomTypeGeometryCollection = uint32(7)
-)
-
-func (p *wkbParser) parseGeomRoot(gtype uint32, ctype CoordinatesType) Geometry {
+func (p *wkbParser) parseGeomRoot(gtype GeometryType, ctype CoordinatesType) Geometry {
 	switch gtype {
-	case wkbGeomTypePoint:
+	case TypePoint:
 		c, ok := p.parsePoint(ctype)
 		if !ok {
 			return NewEmptyPoint(ctype).AsGeometry()
 		}
 		return NewPoint(c, p.opts...).AsGeometry()
-	case wkbGeomTypeLineString:
+	case TypeLineString:
 		ls := p.parseLineString(ctype)
 		return ls.AsGeometry()
-	case wkbGeomTypePolygon:
+	case TypePolygon:
 		return p.parsePolygon(ctype).AsGeometry()
-	case wkbGeomTypeMultiPoint:
+	case TypeMultiPoint:
 		return p.parseMultiPoint(ctype).AsGeometry()
-	case wkbGeomTypeMultiLineString:
+	case TypeMultiLineString:
 		return p.parseMultiLineString(ctype).AsGeometry()
-	case wkbGeomTypeMultiPolygon:
+	case TypeMultiPolygon:
 		return p.parseMultiPolygon(ctype).AsGeometry()
-	case wkbGeomTypeGeometryCollection:
+	case TypeGeometryCollection:
 		return p.parseGeometryCollection(ctype).AsGeometry()
 	default:
 		p.setErr(fmt.Errorf("unknown geometry type: %d", gtype))
