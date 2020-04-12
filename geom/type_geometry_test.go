@@ -41,24 +41,24 @@ func TestZeroGeometry(t *testing.T) {
 func TestGeometryType(t *testing.T) {
 	for i, tt := range []struct {
 		wkt     string
-		geoType string
+		geoType GeometryType
 	}{
-		{"POINT(1 1)", "Point"},
-		{"POINT EMPTY", "Point"},
-		{"MULTIPOINT EMPTY", "MultiPoint"},
-		{"MULTIPOINT ((10 40), (40 30), (20 20), (30 10))", "MultiPoint"},
-		{"LINESTRING(1 2,3 4)", "LineString"},
-		{"LINESTRING(1 2,3 4,5 6)", "LineString"},
-		{"LINESTRING EMPTY", "LineString"},
-		{"MULTILINESTRING ((10 10, 20 20, 10 40),(40 40, 30 30, 40 20, 30 10))", "MultiLineString"},
-		{"MULTILINESTRING EMPTY", "MultiLineString"},
-		{"MULTILINESTRING(EMPTY)", "MultiLineString"},
-		{"POLYGON((1 1,3 1,2 2,2 4,1 1))", "Polygon"},
-		{"POLYGON EMPTY", "Polygon"},
-		{"MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20)))", "MultiPolygon"},
-		{"MULTIPOLYGON EMPTY", "MultiPolygon"},
-		{"MULTIPOLYGON(EMPTY)", "MultiPolygon"},
-		{"GEOMETRYCOLLECTION EMPTY", "GeometryCollection"},
+		{"POINT(1 1)", TypePoint},
+		{"POINT EMPTY", TypePoint},
+		{"MULTIPOINT EMPTY", TypeMultiPoint},
+		{"MULTIPOINT ((10 40), (40 30), (20 20), (30 10))", TypeMultiPoint},
+		{"LINESTRING(1 2,3 4)", TypeLineString},
+		{"LINESTRING(1 2,3 4,5 6)", TypeLineString},
+		{"LINESTRING EMPTY", TypeLineString},
+		{"MULTILINESTRING ((10 10, 20 20, 10 40),(40 40, 30 30, 40 20, 30 10))", TypeMultiLineString},
+		{"MULTILINESTRING EMPTY", TypeMultiLineString},
+		{"MULTILINESTRING(EMPTY)", TypeMultiLineString},
+		{"POLYGON((1 1,3 1,2 2,2 4,1 1))", TypePolygon},
+		{"POLYGON EMPTY", TypePolygon},
+		{"MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20)))", TypeMultiPolygon},
+		{"MULTIPOLYGON EMPTY", TypeMultiPolygon},
+		{"MULTIPOLYGON(EMPTY)", TypeMultiPolygon},
+		{"GEOMETRYCOLLECTION EMPTY", TypeGeometryCollection},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("wkt:", tt.wkt)

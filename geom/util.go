@@ -26,23 +26,23 @@ func abs(i int) int {
 }
 
 func rank(g Geometry) int {
-	switch g.tag {
-	case pointTag:
+	switch g.gtype {
+	case TypePoint:
 		return 1
-	case lineStringTag:
+	case TypeLineString:
 		return 2
-	case polygonTag:
+	case TypePolygon:
 		return 3
-	case multiPointTag:
+	case TypeMultiPoint:
 		return 4
-	case multiLineStringTag:
+	case TypeMultiLineString:
 		return 5
-	case multiPolygonTag:
+	case TypeMultiPolygon:
 		return 6
-	case geometryCollectionTag:
+	case TypeGeometryCollection:
 		return 7
 	default:
-		panic(fmt.Sprintf("unknown geometry tag: %s", g.tag))
+		panic(fmt.Sprintf("unknown geometry tag: %s", g.gtype))
 	}
 }
 

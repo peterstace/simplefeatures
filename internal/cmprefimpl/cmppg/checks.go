@@ -431,7 +431,7 @@ func CheckReverse(t *testing.T, want UnaryResult, g geom.Geometry) {
 
 func CheckType(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckType", func(t *testing.T) {
-		got := g.Type()
+		got := g.Type().String()
 		want := want.Type
 
 		if got != want {

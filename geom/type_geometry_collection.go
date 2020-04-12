@@ -33,14 +33,14 @@ func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) Geometry
 	return GeometryCollection{geoms, ctype}
 }
 
-// Type return type string for GeometryCollection
-func (c GeometryCollection) Type() string {
-	return geometryCollectionType
+// Type returns the GeometryType for a GeometryCollection
+func (c GeometryCollection) Type() GeometryType {
+	return TypeGeometryCollection
 }
 
 // AsGeometry converts this GeometryCollection into a Geometry.
 func (c GeometryCollection) AsGeometry() Geometry {
-	return Geometry{geometryCollectionTag, unsafe.Pointer(&c)}
+	return Geometry{TypeGeometryCollection, unsafe.Pointer(&c)}
 }
 
 // NumGeometries gives the number of Geomety elements is the GeometryCollection.
@@ -162,7 +162,7 @@ func (c GeometryCollection) AsBinary() []byte {
 func (c GeometryCollection) AppendWKB(dst []byte) []byte {
 	marsh := newWKBMarshaller(dst)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypeGeometryCollection, c.ctype)
+	marsh.writeGeomType(TypeGeometryCollection, c.ctype)
 	n := c.NumGeometries()
 	marsh.writeCount(n)
 	for i := 0; i < n; i++ {

@@ -170,14 +170,14 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 	return nil
 }
 
-// Type return type string for Polygon
-func (p Polygon) Type() string {
-	return polygonType
+// Type returns the GeometryType for a Polygon
+func (p Polygon) Type() GeometryType {
+	return TypePolygon
 }
 
 // AsGeometry converts this Polygon into a Geometry.
 func (p Polygon) AsGeometry() Geometry {
-	return Geometry{polygonTag, unsafe.Pointer(&p)}
+	return Geometry{TypePolygon, unsafe.Pointer(&p)}
 }
 
 // ExteriorRing gives the exterior ring of the polygon boundary. If the polygon
@@ -281,7 +281,7 @@ func (p Polygon) AsBinary() []byte {
 func (p Polygon) AppendWKB(dst []byte) []byte {
 	marsh := newWKBMarshaller(dst)
 	marsh.writeByteOrder()
-	marsh.writeGeomType(wkbGeomTypePolygon, p.ctype)
+	marsh.writeGeomType(TypePolygon, p.ctype)
 	marsh.writeCount(len(p.rings))
 	for _, ring := range p.rings {
 		seq := ring.Coordinates()
