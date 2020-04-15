@@ -205,6 +205,29 @@ func TestIsSimple(t *testing.T) {
 	}
 }
 
+func BenchmarkLineStringIsSimpleZigZag(b *testing.B) {
+	for _, sz := range []int{10, 100, 1000, 10000} {
+		b.Run(strconv.Itoa(sz), func(b *testing.B) {
+			floats := make([]float64, 2*sz)
+			for i := 0; i < sz; i++ {
+				floats[2*i+0] = float64(i%2) * 0.01
+				floats[2*i+1] = float64(i) * 0.01
+			}
+			ls, err := NewLineString(NewSequence(floats, DimXY))
+			if err != nil {
+				b.Fatal(err)
+			}
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				if !ls.IsSimple() {
+					b.Fatal("not simple")
+				}
+			}
+		})
+	}
+}
+
 func TestIsSimpleGeometryCollection(t *testing.T) {
 	_, defined := geomFromWKT(t, "GEOMETRYCOLLECTION(POINT(1 2))").IsSimple()
 	expectBoolEq(t, defined, false)
