@@ -107,6 +107,7 @@ func TestPolygonValidation(t *testing.T) {
 		t.Run("invalid_"+strconv.Itoa(i), func(t *testing.T) {
 			_, err := UnmarshalWKT(strings.NewReader(wkt))
 			if err == nil {
+				t.Log("WKT", wkt)
 				t.Error("expected error")
 			}
 		})
