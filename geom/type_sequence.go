@@ -132,7 +132,8 @@ func (s Sequence) Force2D() Sequence {
 // getLine extracts a 2D line segment from a sequence by joining together
 // adjacent locations in the sequence. It is designed to be called with i equal
 // to each index in the sequence (from 0 to n-1, both inclusive). The flag
-// indicates if the returned line is valid.
+// indicates if the returned line is valid. Calling getLine with 0 will never
+// return a valid line, calling getLine with 1 will return the first line etc.
 func getLine(seq Sequence, i int) (line, bool) {
 	if i == 0 {
 		return line{}, false

@@ -4,8 +4,9 @@ import (
 	"database/sql/driver"
 	"errors"
 	"math"
-	"sort"
 	"unsafe"
+
+	"github.com/peterstace/simplefeatures/rtree"
 )
 
 // LineString is a linear geometry defined by linear interpolation between a
@@ -101,68 +102,65 @@ func (s LineString) IsSimple() bool {
 	//    b. Check to see if the new element intersects with any elements in the heap.
 	//    c. Insert the current element into the heap.
 
-	if s.IsEmpty() {
-		return true
-	}
-
-	lines := make([]line, 0, s.seq.Length()-1)
-	for i := 0; i < s.seq.Length(); i++ {
+	var tree rtree.RTree
+	n := s.seq.Length()
+	for i := 0; i < n; i++ {
 		ln, ok := getLine(s.seq, i)
-		if ok {
-			lines = append(lines, ln)
+		if !ok {
+			continue
 		}
-	}
+		simple := true // assume simple until proven otherwise
+		box := toBox(ln.envelope())
+		tree.Search(box, func(j int) error {
+			other, ok := getLine(s.seq, j)
+			if !ok {
+				// We previously were able to access line j (otherwise we
+				// wouldn't have been able to put it into the tree). So if we
+				// can't access it now, something has gone horribly wrong.
+				panic("couldn't get line")
+			}
 
-	n := len(lines)
-	unprocessed := intSequence(n)
-	sort.Slice(unprocessed, func(i, j int) bool {
-		return lines[unprocessed[i]].minX() < lines[unprocessed[j]].minX()
-	})
-
-	active := intHeap{less: func(i, j int) bool {
-		return lines[i].maxX() < lines[j].maxX()
-	}}
-
-	for _, current := range unprocessed {
-		currentX := lines[current].minX()
-		for len(active.data) != 0 && lines[active.data[0]].maxX() < currentX {
-			active.pop()
-		}
-		for _, other := range active.data {
-			inter := lines[current].intersectLine(lines[other])
+			inter := ln.intersectLine(other)
 			if inter.empty {
-				continue
+				return nil
 			}
 			if inter.ptA != inter.ptB {
 				// Two overlapping line segments.
-				return false
+				simple = false
+				return rtree.Stop
 			}
 
 			// The dimension must be 1. Since the intersection is between two
 			// lines, the intersection must be a *single* point.
 
-			if abs(current-other) == 1 {
+			if abs(i-j) == 1 {
 				// Adjacent lines will intersect at a point due to
 				// construction, so this case is okay.
-				continue
+				return nil
 			}
 
 			// The first and last segment are allowed to intersect at a point,
 			// so long as that point is the start of the first segment and the
 			// end of the last segment (i.e. the line string is closed).
-			if (current == 0 && other == n-1) || (current == n-1 && other == 0) {
+			if (i == 1 && j == n-1) || (i == n-1 && j == 1) {
 				if s.IsClosed() {
-					continue
+					return nil
 				} else {
-					return false
+					simple = false
+					return rtree.Stop
 				}
 			}
 
 			// Any other point intersection (e.g. looping back on
 			// itself at a point) is disallowed for simple linestrings.
+			simple = false
+			return rtree.Stop
+		})
+
+		if !simple {
 			return false
 		}
-		active.push(current)
+		tree.Insert(box, i)
 	}
 	return true
 }
