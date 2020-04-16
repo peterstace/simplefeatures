@@ -142,13 +142,9 @@ func (s LineString) IsSimple() bool {
 			// The first and last segment are allowed to intersect at a point,
 			// so long as that point is the start of the first segment and the
 			// end of the last segment (i.e. the line string is closed).
-			if (i == first && j == last) || (i == last && j == first) {
-				if s.IsClosed() {
-					return nil
-				} else {
-					simple = false
-					return rtree.Stop
-				}
+			atLoop := (i == first && j == last) || (i == last && j == first)
+			if atLoop && s.IsClosed() {
+				return nil
 			}
 
 			// Any other point intersection (e.g. looping back on
