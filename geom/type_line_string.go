@@ -96,6 +96,12 @@ func (s LineString) IsSimple() bool {
 		return true
 	}
 
+	// We need to track the index of the previous line segments, so that we can
+	// ignore the case where adjacent line segments intersect at a point (due
+	// to their construction). We can just subtract 1 from the current index,
+	// since there could be duplicated vertices in the middle of the sequence.
+	prev := -1
+
 	var tree rtree.RTree
 	n := s.seq.Length()
 	for i := 0; i < n; i++ {
@@ -127,7 +133,7 @@ func (s LineString) IsSimple() bool {
 			// The dimension must be 1. Since the intersection is between two
 			// lines, the intersection must be a *single* point.
 
-			if abs(i-j) == 1 {
+			if j == prev {
 				// Adjacent lines will intersect at a point due to
 				// construction, so this case is okay.
 				return nil
@@ -155,6 +161,7 @@ func (s LineString) IsSimple() bool {
 			return false
 		}
 		tree.Insert(box, i)
+		prev = i
 	}
 	return true
 }
