@@ -4,8 +4,9 @@ import (
 	"database/sql/driver"
 	"errors"
 	"math"
-	"sort"
 	"unsafe"
+
+	"github.com/peterstace/simplefeatures/rtree"
 )
 
 // Polygon is a planar surface geometry. Its zero value is the empty Polygon.
@@ -58,29 +59,6 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 		return nil
 	}
 
-	// Overview:
-	//
-	// 1. Create slice of all rings, ordered by min X coordinate.
-	// 2. Loop over each ring.
-	//    a. Remove any ring from the heap that has max X coordinate less than
-	//       the min X of the current ring.
-	//    b. Check to see if the current ring intersects with any in the heap.
-	//    c. Insert the current ring into the heap.
-
-	orderedRings := intSequence(len(rings))
-	type interval struct {
-		minX, maxX float64
-	}
-	intervals := make([]interval, len(orderedRings))
-	for i := range intervals {
-		env, ok := rings[i].Envelope()
-		if !ok {
-			return errors.New("polygon rings must not be empty")
-		}
-		intervals[i].minX = env.Min().X
-		intervals[i].maxX = env.Max().X
-	}
-
 	for _, r := range rings {
 		if !r.IsClosed() {
 			return errors.New("polygon rings must be closed")
@@ -90,34 +68,28 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 		}
 	}
 
-	sort.Slice(orderedRings, func(i, j int) bool {
-		return intervals[i].minX < intervals[j].minX
-	})
-
-	nextInterVert := len(orderedRings)
+	// Data structures used to track connectedness.
+	nextInterVert := len(rings)
 	interVerts := make(map[XY]int)
 	graph := newGraph()
 
-	h := intHeap{less: func(i, j int) bool {
-		return intervals[i].maxX < intervals[j].maxX
-	}}
-
-	for _, current := range orderedRings {
-		currentRing := rings[current]
-		currentX := intervals[current].minX
-		for len(h.data) > 0 && intervals[h.data[0]].maxX < currentX {
-			h.pop()
+	// Check each pair of rings (skipping any pairs that could not possibly intersect).
+	var tree rtree.RTree
+	for i, currentRing := range rings {
+		env, ok := currentRing.Envelope()
+		if !ok {
+			return errors.New("polygon rings must not be empty")
 		}
-		for _, other := range h.data {
-			otherRing := rings[other]
-			if current > 0 && other > 0 {
-				// Check is skipped if the outer ring is involved.
-				startXY, ok := currentRing.StartPoint().XY()
-				if !ok {
-					panic("already checked that all rings are non-empty")
-				}
-				nestedFwd := pointRingSide(startXY, otherRing) == interior
-				nestedRev := pointRingSide(startXY, currentRing) == interior
+		box := toBox(env)
+		if err := tree.Search(box, func(j int) error {
+			otherRing := rings[j]
+			if i > 0 && j > 0 { // Check is skipped if the outer ring is involved.
+				// It's ok to access the first coord (index 0), since we've
+				// already checked to ensure that no ring is empty.
+				startCurrent := currentRing.Coordinates().GetXY(0)
+				startOther := otherRing.Coordinates().GetXY(0)
+				nestedFwd := pointRingSide(startCurrent, otherRing) == interior
+				nestedRev := pointRingSide(startOther, currentRing) == interior
 				if nestedFwd || nestedRev {
 					return errors.New("polygon must not have nested rings")
 				}
@@ -129,7 +101,7 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 				true,
 			)
 			if !intersects {
-				continue
+				return nil
 			}
 			if ext.multiplePoints {
 				return errors.New("polygon rings must not intersect at multiple points")
@@ -141,10 +113,14 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 				nextInterVert++
 				interVerts[ext.singlePoint] = interVert
 			}
-			graph.addEdge(interVert, current)
-			graph.addEdge(interVert, other)
+			graph.addEdge(interVert, i)
+			graph.addEdge(interVert, j)
+			return nil
+		}); err != nil {
+			return err
 		}
-		h.push(current)
+
+		tree.Insert(box, i)
 	}
 
 	// All inner rings must be inside the outer ring.
@@ -168,6 +144,15 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 		return errors.New("polygon interiors must be connected")
 	}
 	return nil
+}
+
+func toBox(env Envelope) rtree.Box {
+	return rtree.Box{
+		MinX: env.min.X,
+		MinY: env.min.Y,
+		MaxX: env.max.X,
+		MaxY: env.max.Y,
+	}
 }
 
 // Type returns the GeometryType for a Polygon
