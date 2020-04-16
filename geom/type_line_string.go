@@ -91,16 +91,10 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 // if and only if the curve defined by the LineString doesn't pass through the
 // same point twice (with the except of the two endpoints being coincident).
 func (s LineString) IsSimple() bool {
-	// A line sweep algorithm is used, where a vertical line is swept over X
-	// values (from lowest to highest). We only have to consider line segments
-	// that have overlapping X values when performing pairwise intersection
-	// tests.
-	//
-	// 1. Create slice of segments, sorted by their min X coordinate.
-	// 2. Loop over each segment.
-	//    a. Remove any elements from the heap that have their max X less than the minX of the current segment.
-	//    b. Check to see if the new element intersects with any elements in the heap.
-	//    c. Insert the current element into the heap.
+	first, last, ok := firstAndLastLines(s.seq)
+	if !ok {
+		return true
+	}
 
 	var tree rtree.RTree
 	n := s.seq.Length()
@@ -142,7 +136,7 @@ func (s LineString) IsSimple() bool {
 			// The first and last segment are allowed to intersect at a point,
 			// so long as that point is the start of the first segment and the
 			// end of the last segment (i.e. the line string is closed).
-			if (i == 1 && j == n-1) || (i == n-1 && j == 1) {
+			if (i == first && j == last) || (i == last && j == first) {
 				if s.IsClosed() {
 					return nil
 				} else {

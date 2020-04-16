@@ -132,8 +132,7 @@ func (s Sequence) Force2D() Sequence {
 // getLine extracts a 2D line segment from a sequence by joining together
 // adjacent locations in the sequence. It is designed to be called with i equal
 // to each index in the sequence (from 0 to n-1, both inclusive). The flag
-// indicates if the returned line is valid. Calling getLine with 0 will never
-// return a valid line, calling getLine with 1 will return the first line etc.
+// indicates if the returned line is valid.
 func getLine(seq Sequence, i int) (line, bool) {
 	if i == 0 {
 		return line{}, false
@@ -143,4 +142,24 @@ func getLine(seq Sequence, i int) (line, bool) {
 		b: seq.GetXY(i),
 	}
 	return ln, ln.a != ln.b
+}
+
+// firstAndLastLines returns the index of the first and last line segments (if
+// they exist) in the sequence.
+func firstAndLastLines(seq Sequence) (int, int, bool) {
+	n := seq.Length()
+	first, last := -1, -1
+	for i := 1; i < n; i++ {
+		if seq.GetXY(i) != seq.GetXY(i-1) {
+			first = i
+			break
+		}
+	}
+	for i := n - 1; i >= 1; i-- {
+		if seq.GetXY(i) != seq.GetXY(i-1) {
+			last = i
+			break
+		}
+	}
+	return first, last, first != -1 && last != -1
 }

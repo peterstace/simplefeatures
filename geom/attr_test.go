@@ -158,6 +158,8 @@ func TestIsSimple(t *testing.T) {
 		{"LINESTRING(1 1,2 2,0 0)", false},
 		{"LINESTRING(1 1,2 2,3 2,3 3,0 0)", false},
 		{"LINESTRING(0 0,1 1,2 2)", true},
+		{"LINESTRING(0 0,0 0,0 1,1 0,0 0)", true},
+		{"LINESTRING(0 0,0 1,1 0,0 0,0 0)", true},
 
 		{"POLYGON((0 0,0 1,1 0,0 0))", true},
 
