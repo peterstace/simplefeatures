@@ -142,8 +142,7 @@ func (s LineString) IsSimple() bool {
 			// The first and last segment are allowed to intersect at a point,
 			// so long as that point is the start of the first segment and the
 			// end of the last segment (i.e. the line string is closed).
-			atLoop := (i == first && j == last) || (i == last && j == first)
-			if atLoop && s.IsClosed() {
+			if i == last && j == first && s.IsClosed() {
 				return nil
 			}
 
