@@ -158,6 +158,9 @@ func TestIsSimple(t *testing.T) {
 		{"LINESTRING(1 1,2 2,0 0)", false},
 		{"LINESTRING(1 1,2 2,3 2,3 3,0 0)", false},
 		{"LINESTRING(0 0,1 1,2 2)", true},
+		{"LINESTRING(0 0,0 0,0 1,1 0,0 0)", true},
+		{"LINESTRING(0 0,0 1,1 0,0 0,0 0)", true},
+		{"LINESTRING(1 2,1 2,3 4,3 4,3 4,5 6,5 6)", true},
 
 		{"POLYGON((0 0,0 1,1 0,0 0))", true},
 
@@ -200,6 +203,29 @@ func TestIsSimple(t *testing.T) {
 			if got != tt.wantSimple {
 				t.Logf("wkt: %s", tt.wkt)
 				t.Errorf("got=%v want=%v", got, tt.wantSimple)
+			}
+		})
+	}
+}
+
+func BenchmarkLineStringIsSimpleZigZag(b *testing.B) {
+	for _, sz := range []int{10, 100, 1000, 10000} {
+		b.Run(strconv.Itoa(sz), func(b *testing.B) {
+			floats := make([]float64, 2*sz)
+			for i := 0; i < sz; i++ {
+				floats[2*i+0] = float64(i%2) * 0.01
+				floats[2*i+1] = float64(i) * 0.01
+			}
+			ls, err := NewLineString(NewSequence(floats, DimXY))
+			if err != nil {
+				b.Fatal(err)
+			}
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				if !ls.IsSimple() {
+					b.Fatal("not simple")
+				}
 			}
 		})
 	}

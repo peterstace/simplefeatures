@@ -143,3 +143,23 @@ func getLine(seq Sequence, i int) (line, bool) {
 	}
 	return ln, ln.a != ln.b
 }
+
+// firstAndLastLines returns the index of the first and last line segments (if
+// they exist) in the sequence.
+func firstAndLastLines(seq Sequence) (int, int, bool) {
+	n := seq.Length()
+	first, last := -1, -1
+	for i := 1; i < n; i++ {
+		if seq.GetXY(i) != seq.GetXY(i-1) {
+			first = i
+			break
+		}
+	}
+	for i := n - 1; i >= 1; i-- {
+		if seq.GetXY(i) != seq.GetXY(i-1) {
+			last = i
+			break
+		}
+	}
+	return first, last, first != -1 && last != -1
+}
