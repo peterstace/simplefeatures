@@ -95,10 +95,8 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 				}
 			}
 
-			intersects, ext := hasIntersectionMultiLineStringWithMultiLineString(
-				currentRing.AsMultiLineString(),
-				otherRing.AsMultiLineString(),
-				true,
+			intersects, ext := hasIntersectionLineStringWithLineString(
+				currentRing, otherRing, true,
 			)
 			if !intersects {
 				return nil

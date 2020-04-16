@@ -340,3 +340,24 @@ func (m MultiLineString) ForceCoordinatesType(newCType CoordinatesType) MultiLin
 func (m MultiLineString) Force2D() MultiLineString {
 	return m.ForceCoordinatesType(DimXY)
 }
+
+func (m MultiLineString) asLines() []line {
+	var n int
+	numLineStrings := m.NumLineStrings()
+	for i := 0; i < numLineStrings; i++ {
+		n += max(0, m.LineStringN(i).Coordinates().Length()-1)
+	}
+
+	lines := make([]line, 0, n)
+	for i := 0; i < numLineStrings; i++ {
+		seq := m.LineStringN(i).Coordinates()
+		length := seq.Length()
+		for j := 0; j < length; j++ {
+			ln, ok := getLine(seq, j)
+			if ok {
+				lines = append(lines, ln)
+			}
+		}
+	}
+	return lines
+}

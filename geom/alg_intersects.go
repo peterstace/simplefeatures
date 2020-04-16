@@ -2,8 +2,8 @@ package geom
 
 import (
 	"fmt"
-	"math"
-	"sort"
+
+	"github.com/peterstace/simplefeatures/rtree"
 )
 
 func hasIntersection(g1, g2 Geometry) bool {
@@ -42,9 +42,9 @@ func hasIntersection(g1, g2 Geometry) bool {
 	case g1.IsLineString():
 		switch {
 		case g2.IsLineString():
-			has, _ := hasIntersectionMultiLineStringWithMultiLineString(
-				g1.AsLineString().AsMultiLineString(),
-				g2.AsLineString().AsMultiLineString(),
+			has, _ := hasIntersectionLineStringWithLineString(
+				g1.AsLineString(),
+				g2.AsLineString(),
 				false,
 			)
 			return has
@@ -170,128 +170,89 @@ type mlsWithMLSIntersectsExtension struct {
 	singlePoint XY
 }
 
+func hasIntersectionLineStringWithLineString(
+	ls1, ls2 LineString, populateExtension bool,
+) (
+	bool, mlsWithMLSIntersectsExtension,
+) {
+	lines1 := ls1.asLines()
+	lines2 := ls2.asLines()
+	return hasIntersectionBetweenLines(lines1, lines2, populateExtension)
+}
+
 func hasIntersectionMultiLineStringWithMultiLineString(
 	mls1, mls2 MultiLineString, populateExtension bool,
 ) (
 	bool, mlsWithMLSIntersectsExtension,
 ) {
-	// A Sweep-Line-Algorithm approach is used to reduce the number of raw line
-	// segment intersection tests that must be performed. A vertical sweep line
-	// is swept across the plane from left to right. Two 'active' sets of
-	// segments are maintained for each multi line string, corresponding to the
-	// segments that intersect with the sweep line. Only segments in the active
-	// sets need to be considered when checking to see if the multi line
-	// strings intersect with each other.
+	lines1 := mls1.asLines()
+	lines2 := mls2.asLines()
+	return hasIntersectionBetweenLines(lines1, lines2, populateExtension)
+}
 
-	type side struct {
-		mls         MultiLineString
-		lines       []line  // all lines from the MLS
-		next        int     // index into lines
-		active      intHeap // indexes into lines
-		newSegments []int   // indexes into lines
-	}
-	var sides [2]*side
-	sides[0] = &side{mls: mls1}
-	sides[1] = &side{mls: mls2}
-
-	for _, side := range sides {
-		var n int
-		for _, ls := range side.mls.lines {
-			n += ls.Coordinates().Length()
-		}
-		side.lines = make([]line, 0, n)
-		for _, ls := range side.mls.lines {
-			seq := ls.Coordinates()
-			for i := 0; i < seq.Length(); i++ {
-				ln, ok := getLine(seq, i)
-				if !ok {
-					continue
-				}
-				if ln.a.X > ln.b.X {
-					ln = ln.reverse()
-				}
-				side.lines = append(side.lines, ln)
-			}
-		}
-		sort.Slice(side.lines, func(i, j int) bool {
-			return side.lines[i].a.X < side.lines[j].a.X
-		})
-		sideCopy := side // copy because we're using anon func
-		side.active.less = func(i, j int) bool {
-			ix := sideCopy.lines[i].b.X
-			jx := sideCopy.lines[j].b.X
-			return ix < jx
-		}
+func hasIntersectionBetweenLines(
+	lines1, lines2 []line, populateExtension bool,
+) (
+	bool, mlsWithMLSIntersectsExtension,
+) {
+	// TODO: Should we conditionally reorder lines1 and lines2?
+	var tree rtree.RTree
+	// TODO: Bulk load instead. How must faster is that;
+	for i, ln := range lines1 {
+		tree.Insert(toBox(ln.envelope()), i)
 	}
 
+	// Keep track of an envelope of all of the points that are in the
+	// intersection.
 	var env Envelope
 	var envPopulated bool
-	for sides[0].next < len(sides[0].lines) || sides[1].next < len(sides[1].lines) {
-		// Calculate the X coordinate of the next line segment(s) that will be
-		// processed when sweeping left to right.
-		sweepX := math.Inf(+1)
-		for _, side := range sides {
-			if side.next < len(side.lines) {
-				sweepX = math.Min(sweepX, side.lines[side.next].a.X)
-			}
-		}
 
-		// Update the active line segment sets by throwing away any line
-		// segments that can no longer possibly intersect with any unprocessed
-		// line segments, and adding any new line segments to the active sets.
-		for _, side := range sides {
-			for len(side.active.data) != 0 && side.lines[side.active.data[0]].b.X < sweepX {
-				side.active.pop()
+	for _, lnA := range lines2 {
+		tree.Search(toBox(lnA.envelope()), func(i int) error {
+			lnB := lines1[i]
+			inter := lnA.intersectLine(lnB)
+			if inter.empty {
+				return nil
 			}
-			side.newSegments = side.newSegments[:0]
-			for side.next < len(side.lines) && side.lines[side.next].a.X == sweepX {
-				side.newSegments = append(side.newSegments, side.next)
-				side.active.push(side.next)
-				side.next++
-			}
-		}
 
-		// Check for intersection between any new line segments, and segments
-		// in the opposing active set.
-		for i, side := range sides {
-			other := sides[1-i]
-			for _, lnIdxA := range side.newSegments {
-				lnA := side.lines[lnIdxA]
-				for _, lnIdxB := range other.active.data {
-					lnB := other.lines[lnIdxB]
-					inter := lnA.intersectLine(lnB)
-					if inter.empty {
-						continue
-					}
-					if !populateExtension {
-						return true, mlsWithMLSIntersectsExtension{}
-					}
-					if inter.ptA != inter.ptB {
-						return true, mlsWithMLSIntersectsExtension{
-							multiplePoints: true,
-							singlePoint:    inter.ptA,
-						}
-					}
-					if !envPopulated {
-						env = NewEnvelope(inter.ptA)
-						envPopulated = true
-					} else {
-						env = env.ExtendToIncludePoint(inter.ptA)
-						if env.Min() != env.Max() {
-							return true, mlsWithMLSIntersectsExtension{
-								multiplePoints: true,
-								singlePoint:    env.Min(),
-							}
-						}
-					}
-				}
+			if !populateExtension {
+				envPopulated = true
+				env = NewEnvelope(inter.ptA)
+				env = env.ExtendToIncludePoint(inter.ptB)
+				return rtree.Stop
 			}
+
+			if inter.ptA != inter.ptB {
+				envPopulated = true
+				env = NewEnvelope(inter.ptA)
+				env = env.ExtendToIncludePoint(inter.ptB)
+				return rtree.Stop
+			}
+
+			// Single point intersection case from here onwards:
+
+			if !envPopulated {
+				envPopulated = true
+				env = NewEnvelope(inter.ptA)
+				return nil
+			}
+
+			env = env.ExtendToIncludePoint(inter.ptA)
+			if env.Min() != env.Max() {
+				return rtree.Stop
+			}
+			return nil
+		})
+	}
+
+	var ext mlsWithMLSIntersectsExtension
+	if populateExtension {
+		ext = mlsWithMLSIntersectsExtension{
+			multiplePoints: envPopulated && env.Min() != env.Max(),
+			singlePoint:    env.Min(),
 		}
 	}
-	return envPopulated, mlsWithMLSIntersectsExtension{
-		multiplePoints: false,
-		singlePoint:    env.Min(),
-	}
+	return envPopulated, ext
 }
 
 func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp MultiPolygon) bool {
