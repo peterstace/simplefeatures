@@ -246,6 +246,45 @@ func BenchmarkPolygonMultipleRingsValidation(b *testing.B) {
 	}
 }
 
+func BenchmarkPolygonZigZagRingsValidation(b *testing.B) {
+	for _, sz := range []int{10, 100, 1000, 10000} {
+		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+			outerRing := NewEnvelope(XY{}, XY{7, float64(sz + 1)}).AsGeometry().AsPolygon().ExteriorRing()
+			var leftFloats, rightFloats []float64
+			for i := 0; i < sz; i++ {
+				leftFloats = append(leftFloats, float64(2+(i%2)*2), float64(1+i))
+				rightFloats = append(rightFloats, float64(3+(i%2)*2), float64(1+i))
+			}
+			leftFloats = append(leftFloats,
+				1, float64(sz),
+				1, 1,
+				2, 1,
+			)
+			rightFloats = append(rightFloats,
+				6, float64(sz),
+				6, 1,
+				3, 1,
+			)
+			leftRing, err := NewLineString(NewSequence(leftFloats, DimXY))
+			if err != nil {
+				b.Fatal(err)
+			}
+			rightRing, err := NewLineString(NewSequence(rightFloats, DimXY))
+			if err != nil {
+				b.Fatal(err)
+			}
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				_, err := NewPolygonFromRings([]LineString{outerRing, leftRing, rightRing})
+				if err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
 func BenchmarkMultipolygonValidation(b *testing.B) {
 	for _, sz := range []int{1, 2, 4, 8, 16, 32} {
 		b.Run(fmt.Sprintf("n=%d", sz*sz), func(b *testing.B) {
