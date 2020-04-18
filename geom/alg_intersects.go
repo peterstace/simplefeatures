@@ -196,11 +196,15 @@ func hasIntersectionBetweenLines(
 	bool, mlsWithMLSIntersectsExtension,
 ) {
 	// TODO: Should we conditionally reorder lines1 and lines2?
-	var tree rtree.RTree
-	// TODO: Bulk load instead. How must faster is that;
+
+	bulk := make([]rtree.BulkItem, len(lines1))
 	for i, ln := range lines1 {
-		tree.Insert(toBox(ln.envelope()), i)
+		bulk[i] = rtree.BulkItem{
+			Box:       toBox(ln.envelope()),
+			DataIndex: i,
+		}
 	}
+	tree := rtree.BulkLoad(bulk)
 
 	// Keep track of an envelope of all of the points that are in the
 	// intersection.
