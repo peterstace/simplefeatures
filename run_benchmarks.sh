@@ -14,7 +14,7 @@ old="$(mktemp)"
 new="$(mktemp)"
 trap "rm -f $new $old" EXIT
 
-for (( i = 0; i < 3; i++ )); do
+for (( i = 0; i < 15; i++ )); do
 	echo
 	echo "RUN $i"
 
@@ -22,13 +22,13 @@ for (( i = 0; i < 3; i++ )); do
 	echo "OLD"
 	git checkout "$old_git_sha1"
 	echo
-	go test ./... -test.run='^$' -bench=. | tee -a "$old"
+	go test ./... -test.run='^$' -benchtime=0.1s -bench=. | tee -a "$old"
 
 	echo
 	echo "NEW"
 	git checkout "$new_git_sha1"
 	echo
-	go test ./... -test.run='^$' -bench=. | tee -a "$new"
+	go test ./... -test.run='^$' -benchtime=0.1s -bench=. | tee -a "$new"
 done
 
 echo
@@ -42,4 +42,4 @@ cat "$new"
 echo
 echo "COMPARISON"
 
-benchstat -alpha 0.15 "$old" "$new"
+benchstat "$old" "$new"
