@@ -169,6 +169,14 @@ func TestMultiPolygonValidation(t *testing.T) {
 			((0 0,0 1,1 0,0 0)),
 			((0 0,0 1,1 0,0 0))
 		)`,
+		`MULTIPOLYGON(
+			((0 0,3 0,3 3,0 3,0 0)),
+			((1 1,2 1,2 2,1 2,1 1))
+		)`,
+		`MULTIPOLYGON(
+			((1 1,2 1,2 2,1 2,1 1)),
+			((0 0,3 0,3 3,0 3,0 0))
+		)`,
 	} {
 		t.Run(fmt.Sprintf("invalid_%d", i), func(t *testing.T) {
 			_, err := UnmarshalWKT(strings.NewReader(wkt))
