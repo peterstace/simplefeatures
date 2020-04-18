@@ -15,6 +15,8 @@ func intersectionOfMultiLineStringAndMultiLineString(
 }
 
 func intersectionOfLines(lines1, lines2 []line) (MultiPoint, MultiLineString) {
+	// TODO: Should we swap lines1 and lines2 depending on length?
+
 	bulk := make([]rtree.BulkItem, len(lines1))
 	for i, ln := range lines1 {
 		bulk[i] = rtree.BulkItem{
