@@ -5,6 +5,8 @@ import (
 	"errors"
 	"sort"
 	"unsafe"
+
+	"github.com/peterstace/simplefeatures/rtree"
 )
 
 // MultiPolygon is a planar surface geometry that consists of a collection of
@@ -41,68 +43,49 @@ func NewMultiPolygonFromPolygons(polys []Polygon, opts ...ConstructorOption) (Mu
 		polys[i] = polys[i].ForceCoordinatesType(ctype)
 	}
 
+	if err := validateMultiPolygon(polys, opts...); err != nil {
+		return MultiPolygon{}, err
+	}
+	return MultiPolygon{polys, ctype}, nil
+}
+
+func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 	if skipValidations(opts) {
-		return MultiPolygon{polys, ctype}, nil
+		return nil
 	}
 
-	type interval struct {
-		minX, maxX float64
-	}
-	intervals := make([]interval, len(polys))
-	for i := range intervals {
+	var tree rtree.RTree
+	for i := range polys {
 		env, ok := polys[i].Envelope()
-		if ok {
-			intervals[i].minX = env.Min().X
-			intervals[i].maxX = env.Max().X
-		}
-	}
-	indexes := intSequence(len(polys))
-	sort.Slice(indexes, func(i, j int) bool {
-		// Empty Polygons with have an interval of (0, 0).
-		xi := intervals[indexes[i]].minX
-		xj := intervals[indexes[j]].minX
-		return xi < xj
-	})
-
-	active := intHeap{less: func(i, j int) bool {
-		xi := intervals[i].maxX
-		xj := intervals[j].maxX
-		return xi < xj
-	}}
-
-	for _, i := range indexes {
-		if polys[i].IsEmpty() {
+		if !ok {
 			continue
 		}
-		currentX := intervals[i].minX
-		for len(active.data) > 0 && intervals[active.data[0]].maxX < currentX {
-			active.pop()
-		}
-		for _, j := range active.data {
-			if polys[j].IsEmpty() {
-				continue
-			}
+		box := toBox(env)
 
+		err := tree.Search(box, func(j int) error {
 			_, interMLS := intersectionOfMultiLineStringAndMultiLineString(
 				polys[i].Boundary(),
 				polys[j].Boundary(),
 			)
 			for k := 0; k < interMLS.NumLineStrings(); k++ {
 				if !interMLS.LineStringN(k).IsEmpty() {
-					return MultiPolygon{}, errors.New(
+					return errors.New(
 						"the boundaries of the polygon elements of " +
 							"multipolygons must only intersect at points")
 				}
 			}
-
 			if polyInteriorsIntersect(polys[i], polys[j]) {
-				return MultiPolygon{}, errors.New("polygon interiors must not intersect")
+				return errors.New("polygon interiors must not intersect")
 			}
+			return nil
+		})
+		if err != nil {
+			return err
 		}
-		active.push(i)
-	}
 
-	return MultiPolygon{polys, ctype}, nil
+		tree.Insert(box, i)
+	}
+	return nil
 }
 
 func polyInteriorsIntersect(p1, p2 Polygon) bool {
