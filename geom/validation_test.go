@@ -383,3 +383,44 @@ func BenchmarkMultiPolygonTwoCircles(b *testing.B) {
 		})
 	}
 }
+
+func BenchmarkMultiPolygonMultipleTouchingPoints(b *testing.B) {
+	for _, sz := range []int{1, 10, 100, 1000} {
+		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+			fs1 := []float64{0, 0}
+			fs2 := []float64{4, 0}
+			for i := 0; i < 2*sz+1; i++ {
+				fs1 = append(fs1, float64(1+i%2), float64(i))
+				fs2 = append(fs2, float64(3-i%2), float64(i))
+			}
+			fs1 = append(fs1, 0, float64(2*sz), 0, 0)
+			fs2 = append(fs2, 4, float64(2*sz), 4, 0)
+
+			ls1, err := NewLineString(NewSequence(fs1, DimXY))
+			if err != nil {
+				b.Fatal(err)
+			}
+			ls2, err := NewLineString(NewSequence(fs2, DimXY))
+			if err != nil {
+				b.Fatal(err)
+			}
+			p1, err := NewPolygonFromRings([]LineString{ls1})
+			if err != nil {
+				b.Fatal(err)
+			}
+			p2, err := NewPolygonFromRings([]LineString{ls2})
+			if err != nil {
+				b.Fatal(err)
+			}
+			polys := []Polygon{p1, p2}
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				_, err := NewMultiPolygonFromPolygons(polys)
+				if err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
