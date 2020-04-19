@@ -21,7 +21,7 @@ func intersectionOfLines(lines1, lines2 []line) (MultiPoint, MultiLineString) {
 	for i, ln := range lines1 {
 		bulk[i] = rtree.BulkItem{
 			Box:      toBox(ln.envelope()),
-			RecordID: i,
+			RecordID: uint64(i),
 		}
 	}
 	tree := rtree.BulkLoad(bulk)
@@ -31,7 +31,7 @@ func intersectionOfLines(lines1, lines2 []line) (MultiPoint, MultiLineString) {
 	seen := make(map[XY]bool)
 
 	for j := range lines2 {
-		tree.Search(toBox(lines2[j].envelope()), func(i int) error {
+		tree.Search(toBox(lines2[j].envelope()), func(i uint64) error {
 			inter := lines2[j].intersectLine(lines1[i])
 			if inter.empty {
 				return nil

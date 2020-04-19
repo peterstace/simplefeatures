@@ -5,7 +5,7 @@ import "sort"
 // BulkItem is an item that can be inserted for bulk loading.
 type BulkItem struct {
 	Box      Box
-	RecordID int
+	RecordID uint64
 }
 
 // BulkLoad bulk loads multiple items into a new R-Tree. The bulk load
@@ -23,8 +23,8 @@ func (t *RTree) bulkInsert(items []BulkItem) int {
 		node := node{isLeaf: true, parent: -1}
 		for _, item := range items {
 			node.entries = append(node.entries, entry{
-				box:   item.Box,
-				index: item.RecordID,
+				box:      item.Box,
+				recordID: item.RecordID,
 			})
 		}
 		t.nodes = append(t.nodes, node)
@@ -52,8 +52,8 @@ func (t *RTree) bulkInsert(items []BulkItem) int {
 	n2 := t.bulkInsert(items[split:])
 
 	parent := node{isLeaf: false, parent: -1, entries: []entry{
-		entry{box: t.calculateBound(n1), index: n1},
-		entry{box: t.calculateBound(n2), index: n2},
+		entry{box: t.calculateBound(n1), child: n1},
+		entry{box: t.calculateBound(n2), child: n2},
 	}}
 	t.nodes = append(t.nodes, parent)
 	t.nodes[n1].parent = len(t.nodes) - 1

@@ -201,7 +201,7 @@ func hasIntersectionBetweenLines(
 	for i, ln := range lines1 {
 		bulk[i] = rtree.BulkItem{
 			Box:      toBox(ln.envelope()),
-			RecordID: i,
+			RecordID: uint64(i),
 		}
 	}
 	tree := rtree.BulkLoad(bulk)
@@ -212,7 +212,7 @@ func hasIntersectionBetweenLines(
 	var envPopulated bool
 
 	for _, lnA := range lines2 {
-		tree.Search(toBox(lnA.envelope()), func(i int) error {
+		tree.Search(toBox(lnA.envelope()), func(i uint64) error {
 			lnB := lines1[i]
 			inter := lnA.intersectLine(lnB)
 			if inter.empty {

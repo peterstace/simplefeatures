@@ -62,7 +62,7 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 		}
 		box := toBox(env)
 
-		err := tree.Search(box, func(j int) error {
+		err := tree.Search(box, func(j uint64) error {
 			interMP, interMLS := intersectionOfMultiLineStringAndMultiLineString(
 				polys[i].Boundary(),
 				polys[j].Boundary(),
@@ -98,7 +98,7 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 			return err
 		}
 
-		tree.Insert(box, i)
+		tree.Insert(box, uint64(i))
 	}
 	return nil
 }

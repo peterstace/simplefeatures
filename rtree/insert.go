@@ -11,21 +11,21 @@ const (
 )
 
 // Insert adds a new record to the RTree.
-func (t *RTree) Insert(box Box, recordID int) {
+func (t *RTree) Insert(box Box, recordID uint64) {
 	if len(t.nodes) == 0 {
 		t.nodes = append(t.nodes, node{isLeaf: true, entries: nil, parent: -1})
 		t.rootIndex = 0
 	}
 
 	leaf := t.chooseLeafNode(box)
-	t.nodes[leaf].entries = append(t.nodes[leaf].entries, entry{box: box, index: recordID})
+	t.nodes[leaf].entries = append(t.nodes[leaf].entries, entry{box: box, recordID: recordID})
 
 	current := leaf
 	for current != t.rootIndex {
 		parent := t.nodes[current].parent
 		for i := range t.nodes[parent].entries {
 			e := &t.nodes[parent].entries[i]
-			if e.index == current {
+			if e.child == current {
 				e.box = combine(e.box, box)
 				break
 			}
@@ -51,11 +51,11 @@ func (t *RTree) joinRoots(r1, r2 int) {
 		entries: []entry{
 			entry{
 				box:   t.calculateBound(r1),
-				index: r1,
+				child: r1,
 			},
 			entry{
 				box:   t.calculateBound(r2),
-				index: r2,
+				child: r2,
 			},
 		},
 		parent: -1,
@@ -73,7 +73,7 @@ func (t *RTree) adjustTree(n, nn int) (int, int) {
 		parent := t.nodes[n].parent
 		parentEntry := -1
 		for i, entry := range t.nodes[parent].entries {
-			if entry.index == n {
+			if entry.child == n {
 				parentEntry = i
 				break
 			}
@@ -85,7 +85,7 @@ func (t *RTree) adjustTree(n, nn int) (int, int) {
 		if nn != -1 {
 			newEntry := entry{
 				box:   t.calculateBound(nn),
-				index: nn,
+				child: nn,
 			}
 			t.nodes[parent].entries = append(t.nodes[parent].entries, newEntry)
 			t.nodes[nn].parent = parent
@@ -163,7 +163,7 @@ func (t *RTree) splitNode(n int) int {
 	})
 	if !t.nodes[n].isLeaf {
 		for _, entry := range entriesB {
-			t.nodes[entry.index].parent = len(t.nodes) - 1
+			t.nodes[entry.child].parent = len(t.nodes) - 1
 		}
 	}
 	return len(t.nodes) - 1
@@ -188,6 +188,6 @@ func (t *RTree) chooseLeafNode(box Box) int {
 				bestEntry = i
 			}
 		}
-		node = t.nodes[node].entries[bestEntry].index
+		node = t.nodes[node].entries[bestEntry].child
 	}
 }

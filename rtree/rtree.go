@@ -14,11 +14,9 @@ type node struct {
 
 // entry is an entry under a node, leading either to terminal items, or more nodes.
 type entry struct {
-	box Box
-
-	// For leaf nodes, this is a record ID. For non-leaf nodes, this is the
-	// index of the child node.
-	index int
+	box      Box
+	child    int    // Only populated for non-leaf nodes.
+	recordID uint64 // Only populated for leaf nodes.
 }
 
 // RTree is an in-memory R-Tree data structure. It holds record ID and bounding
@@ -40,7 +38,7 @@ var Stop = errors.New("stop")
 // Any error returned from the callback is returned by Search, except for the
 // case where the special Stop sentinal error is returned (in which case nil
 // will be returned from Search).
-func (t *RTree) Search(box Box, callback func(recordID int) error) error {
+func (t *RTree) Search(box Box, callback func(recordID uint64) error) error {
 	if len(t.nodes) == 0 {
 		return nil
 	}
@@ -51,13 +49,13 @@ func (t *RTree) Search(box Box, callback func(recordID int) error) error {
 				continue
 			}
 			if n.isLeaf {
-				if err := callback(entry.index); err == Stop {
+				if err := callback(entry.recordID); err == Stop {
 					return nil
 				} else if err != nil {
 					return err
 				}
 			} else {
-				if err := recurse(&t.nodes[entry.index]); err != nil {
+				if err := recurse(&t.nodes[entry.child]); err != nil {
 					return err
 				}
 			}

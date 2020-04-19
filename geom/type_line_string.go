@@ -100,7 +100,7 @@ func (s LineString) IsSimple() bool {
 	// ignore the case where adjacent line segments intersect at a point (due
 	// to their construction). We can just subtract 1 from the current index,
 	// since there could be duplicated vertices in the middle of the sequence.
-	prev := -1
+	var prev uint64 = math.MaxUint64
 
 	var tree rtree.RTree
 	n := s.seq.Length()
@@ -111,8 +111,8 @@ func (s LineString) IsSimple() bool {
 		}
 		simple := true // assume simple until proven otherwise
 		box := toBox(ln.envelope())
-		tree.Search(box, func(j int) error {
-			other, ok := getLine(s.seq, j)
+		tree.Search(box, func(j uint64) error {
+			other, ok := getLine(s.seq, int(j))
 			if !ok {
 				// We previously were able to access line j (otherwise we
 				// wouldn't have been able to put it into the tree). So if we
@@ -142,7 +142,7 @@ func (s LineString) IsSimple() bool {
 			// The first and last segment are allowed to intersect at a point,
 			// so long as that point is the start of the first segment and the
 			// end of the last segment (i.e. the line string is closed).
-			if i == last && j == first && s.IsClosed() {
+			if i == last && int(j) == first && s.IsClosed() {
 				return nil
 			}
 
@@ -155,8 +155,8 @@ func (s LineString) IsSimple() bool {
 		if !simple {
 			return false
 		}
-		tree.Insert(box, i)
-		prev = i
+		tree.Insert(box, uint64(i))
+		prev = uint64(i)
 	}
 	return true
 }

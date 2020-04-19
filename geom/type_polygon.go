@@ -81,7 +81,7 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 			return errors.New("polygon rings must not be empty")
 		}
 		box := toBox(env)
-		if err := tree.Search(box, func(j int) error {
+		if err := tree.Search(box, func(j uint64) error {
 			otherRing := rings[j]
 			if i > 0 && j > 0 { // Check is skipped if the outer ring is involved.
 				// It's ok to access the first coord (index 0), since we've
@@ -112,13 +112,13 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 				interVerts[ext.singlePoint] = interVert
 			}
 			graph.addEdge(interVert, i)
-			graph.addEdge(interVert, j)
+			graph.addEdge(interVert, int(j))
 			return nil
 		}); err != nil {
 			return err
 		}
 
-		tree.Insert(box, i)
+		tree.Insert(box, uint64(i))
 	}
 
 	// All inner rings must be inside the outer ring.

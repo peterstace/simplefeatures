@@ -20,7 +20,7 @@ func TestRandom(t *testing.T) {
 			inserts := make([]BulkItem, len(boxes))
 			for i := range inserts {
 				inserts[i].Box = boxes[i]
-				inserts[i].RecordID = i
+				inserts[i].RecordID = uint64(i)
 			}
 			rt := BulkLoad(inserts)
 
@@ -37,7 +37,7 @@ func TestRandom(t *testing.T) {
 
 			var rt RTree
 			for i, box := range boxes {
-				rt.Insert(box, i)
+				rt.Insert(box, uint64(i))
 				checkInvariants(t, rt)
 			}
 
@@ -49,21 +49,21 @@ func TestRandom(t *testing.T) {
 func checkSearch(t *testing.T, rt RTree, boxes []Box, rnd *rand.Rand) {
 	for i := 0; i < 10; i++ {
 		searchBB := randomBox(rnd, 0.5, 0.5)
-		var got []int
-		rt.Search(searchBB, func(idx int) error {
+		var got []uint64
+		rt.Search(searchBB, func(idx uint64) error {
 			got = append(got, idx)
 			return nil
 		})
 
-		var want []int
+		var want []uint64
 		for i, box := range boxes {
 			if overlap(box, searchBB) {
-				want = append(want, i)
+				want = append(want, uint64(i))
 			}
 		}
 
-		sort.Ints(want)
-		sort.Ints(got)
+		sort.Slice(want, func(i, j int) bool { return want[i] < want[j] })
+		sort.Slice(got, func(i, j int) bool { return got[i] < got[j] })
 
 		if !reflect.DeepEqual(want, got) {
 			t.Logf("search box: %v", searchBB)
@@ -94,7 +94,7 @@ func checkInvariants(t *testing.T, rt RTree) {
 	for i, n := range rt.nodes {
 		t.Logf("%d: leaf=%t numentries=%d parent=%d", i, n.isLeaf, len(n.entries), n.parent)
 		for j, e := range n.entries {
-			t.Logf("\t%d: index=%d box=%v", j, e.index, e.box)
+			t.Logf("\t%d: child=%d recordID=%d box=%v", j, e.child, e.recordID, e.box)
 		}
 	}
 
@@ -112,7 +112,7 @@ func checkInvariants(t *testing.T, rt RTree) {
 
 		var matchingChildren int
 		for _, entry := range rt.nodes[node.parent].entries {
-			if entry.index == i {
+			if entry.child == i {
 				matchingChildren++
 			}
 		}
@@ -127,7 +127,7 @@ func checkInvariants(t *testing.T, rt RTree) {
 			continue
 		}
 		for j, parentEntry := range parentNode.entries {
-			childNode := rt.nodes[parentEntry.index]
+			childNode := rt.nodes[parentEntry.child]
 			union := childNode.entries[0].box
 			for _, childEntry := range childNode.entries[1:] {
 				union = combine(childEntry.box, union)
@@ -152,7 +152,7 @@ func checkInvariants(t *testing.T, rt RTree) {
 			return
 		}
 		for _, entry := range node.entries {
-			recurse(entry.index)
+			recurse(entry.child)
 		}
 	}
 	recurse(rt.rootIndex)
