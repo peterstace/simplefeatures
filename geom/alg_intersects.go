@@ -200,8 +200,8 @@ func hasIntersectionBetweenLines(
 	bulk := make([]rtree.BulkItem, len(lines1))
 	for i, ln := range lines1 {
 		bulk[i] = rtree.BulkItem{
-			Box:       toBox(ln.envelope()),
-			DataIndex: i,
+			Box:      toBox(ln.envelope()),
+			RecordID: i,
 		}
 	}
 	tree := rtree.BulkLoad(bulk)

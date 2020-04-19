@@ -20,7 +20,7 @@ func TestRandom(t *testing.T) {
 			inserts := make([]BulkItem, len(boxes))
 			for i := range inserts {
 				inserts[i].Box = boxes[i]
-				inserts[i].DataIndex = i
+				inserts[i].RecordID = i
 			}
 			rt := BulkLoad(inserts)
 
