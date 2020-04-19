@@ -169,6 +169,14 @@ func TestMultiPolygonValidation(t *testing.T) {
 			((0 0,0 1,1 0,0 0)),
 			((0 0,0 1,1 0,0 0))
 		)`,
+		`MULTIPOLYGON(
+			((0 0,3 0,3 3,0 3,0 0)),
+			((1 1,2 1,2 2,1 2,1 1))
+		)`,
+		`MULTIPOLYGON(
+			((1 1,2 1,2 2,1 2,1 1)),
+			((0 0,3 0,3 3,0 3,0 0))
+		)`,
 	} {
 		t.Run(fmt.Sprintf("invalid_%d", i), func(t *testing.T) {
 			_, err := UnmarshalWKT(strings.NewReader(wkt))
@@ -311,6 +319,49 @@ func BenchmarkMultipolygonValidation(b *testing.B) {
 				}
 			}
 
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				if _, err := NewMultiPolygonFromPolygons(polys); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
+// regularPolygon computes a regular polygon circumscribed by a circle with the
+// given center and radius. Sides must be at least 3 or it will panic.
+func regularPolygon(center XY, radius float64, sides int) Polygon {
+	if sides <= 2 {
+		panic(sides)
+	}
+	coords := make([]float64, 2*(sides+1))
+	for i := 0; i < sides; i++ {
+		angle := math.Pi/2 + float64(i)/float64(sides)*2*math.Pi
+		coords[2*i+0] = center.X + math.Cos(angle)*radius
+		coords[2*i+1] = center.Y + math.Sin(angle)*radius
+	}
+	coords[2*sides+0] = coords[0]
+	coords[2*sides+1] = coords[1]
+	ring, err := NewLineString(NewSequence(coords, DimXY))
+	if err != nil {
+		panic(err)
+	}
+	poly, err := NewPolygonFromRings([]LineString{ring})
+	if err != nil {
+		panic(err)
+	}
+	return poly
+}
+
+func BenchmarkMultiPolygonTwoCircles(b *testing.B) {
+	for _, sz := range []int{10, 100, 1000, 10000} {
+		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+			const eps = 0.1
+			polys := []Polygon{
+				regularPolygon(XY{X: -eps, Y: -eps}, 1.0, sz),
+				regularPolygon(XY{X: math.Sqrt2, Y: math.Sqrt2}, 1.0, sz),
+			}
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				if _, err := NewMultiPolygonFromPolygons(polys); err != nil {

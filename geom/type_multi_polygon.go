@@ -63,17 +63,32 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 		box := toBox(env)
 
 		err := tree.Search(box, func(j int) error {
-			_, interMLS := intersectionOfMultiLineStringAndMultiLineString(
+			interMP, interMLS := intersectionOfMultiLineStringAndMultiLineString(
 				polys[i].Boundary(),
 				polys[j].Boundary(),
 			)
-			for k := 0; k < interMLS.NumLineStrings(); k++ {
-				if !interMLS.LineStringN(k).IsEmpty() {
-					return errors.New(
-						"the boundaries of the polygon elements of " +
-							"multipolygons must only intersect at points")
-				}
+			if !interMLS.IsEmpty() {
+				return errors.New("the boundaries of the polygon elements" +
+					" of multipolygons must only intersect at points")
 			}
+
+			// Fast case: If both the point and line parts of the intersection
+			// are empty, then the only thing we have to worry about is one
+			// polygon being nested entirely within the other. But since the
+			// boundaries don't intersect in any way, we just have to check a
+			// single point.
+			if interMP.IsEmpty() {
+				ptI := polys[i].ExteriorRing().StartPoint()
+				ptJ := polys[j].ExteriorRing().StartPoint()
+				if hasIntersectionPointWithPolygon(ptI, polys[j]) ||
+					hasIntersectionPointWithPolygon(ptJ, polys[i]) {
+					return errors.New("polygons must not be nested")
+				}
+				return nil
+			}
+
+			// Slow case: The boundaries intersect at a point (or many points).
+			// But we still need to ensure that the interiors don't intersect.
 			if polyInteriorsIntersect(polys[i], polys[j]) {
 				return errors.New("polygon interiors must not intersect")
 			}
