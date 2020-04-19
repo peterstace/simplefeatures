@@ -50,11 +50,11 @@ func (t *RTree) joinRoots(r1, r2 int) {
 		isLeaf: false,
 		entries: []entry{
 			entry{
-				box:  t.calculateBound(r1),
+				box:   t.calculateBound(r1),
 				index: r1,
 			},
 			entry{
-				box:  t.calculateBound(r2),
+				box:   t.calculateBound(r2),
 				index: r2,
 			},
 		},
@@ -84,7 +84,7 @@ func (t *RTree) adjustTree(n, nn int) (int, int) {
 		pp := -1
 		if nn != -1 {
 			newEntry := entry{
-				box:  t.calculateBound(nn),
+				box:   t.calculateBound(nn),
 				index: nn,
 			}
 			t.nodes[parent].entries = append(t.nodes[parent].entries, newEntry)
