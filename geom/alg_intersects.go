@@ -357,13 +357,13 @@ func hasIntersectionPointWithPolygon(pt Point, p Polygon) bool {
 	if p.IsEmpty() {
 		return false
 	}
-	if pointRingSide(xy, p.ExteriorRing()) == exterior {
+	if relatePointToRing(xy, p.ExteriorRing()) == exterior {
 		return false
 	}
 	m := p.NumInteriorRings()
 	for i := 0; i < m; i++ {
 		ring := p.InteriorRingN(i)
-		if pointRingSide(xy, ring) == interior {
+		if relatePointToRing(xy, ring) == interior {
 			return false
 		}
 	}

@@ -148,7 +148,7 @@ func TestPointInRing(t *testing.T) {
 				if !ok {
 					panic("point empty not expected in this test")
 				}
-				got := pointRingSide(xy, ring) != exterior
+				got := relatePointToRing(xy, ring) != exterior
 				t.Log(tc.ringWKT)
 				t.Log(st.pointWKT)
 				if got != st.inside {

@@ -66,3 +66,12 @@ func (t *RTree) Search(box Box, callback func(recordID int) error) error {
 	}
 	return recurse(&t.nodes[t.rootIndex])
 }
+
+// Extent gives the Box that most closely bounds the RTree. If the RTree is
+// empty, then false is returned.
+func (t *RTree) Extent() (Box, bool) {
+	if len(t.nodes) == 0 {
+		return Box{}, false
+	}
+	return t.calculateBound(t.rootIndex), true
+}
