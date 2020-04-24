@@ -129,7 +129,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 
 	for j := range p2.lines {
 		// Find intersection points.
-		pts := make(map[XY]struct{}) // TODO: Could reuse map
+		var pts []XY
 		p1.tree.Search(p2.lines[j].envelope().box(), func(i int) error {
 			inter := p1.lines[i].intersectLine(p2.lines[j])
 			if inter.empty {
@@ -139,7 +139,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 				panic(fmt.Sprintf("already established that boundaries only "+
 					"intersect at points, but got: %v", inter))
 			}
-			pts[inter.ptA] = struct{}{}
+			pts = append(pts, inter.ptA)
 			return nil
 		})
 		if len(pts) == 0 {
@@ -147,24 +147,12 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 		}
 
 		// Construct midpoints between intersection points and endpoints.
-		pts[p2.lines[j].a] = struct{}{}
-		pts[p2.lines[j].b] = struct{}{}
-		ptsSlice := make([]XY, 0, len(pts)) // TODO: Could reuse slice.
-		for pt := range pts {
-			ptsSlice = append(ptsSlice, pt)
-		}
-		sort.Slice(ptsSlice, func(i, j int) bool {
-			ptI := ptsSlice[i]
-			ptJ := ptsSlice[j]
-			if ptI.X != ptJ.X {
-				return ptI.X < ptJ.X
-			}
-			return ptI.Y < ptJ.Y
-		})
+		pts = append(pts, p2.lines[j].a, p2.lines[j].b)
+		pts = sortAndUniquify(pts)
 
 		// Check if midpoints are inside the other polygon.
-		for k := 0; k+1 < len(ptsSlice); k++ {
-			midpoint := ptsSlice[k].Add(ptsSlice[k+1]).Scale(0.5)
+		for k := 0; k+1 < len(pts); k++ {
+			midpoint := pts[k].Add(pts[k+1]).Scale(0.5)
 			if relatePointToPolygon(midpoint, p1) == interior {
 				return fmt.Errorf("polygon interiors intersect at %s",
 					NewPointFromXY(midpoint).AsText())
@@ -172,6 +160,28 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 		}
 	}
 	return nil
+}
+
+func sortAndUniquify(xys []XY) []XY {
+	if len(xys) == 0 {
+		return xys
+	}
+	sort.Slice(xys, func(i, j int) bool {
+		ptI := xys[i]
+		ptJ := xys[j]
+		if ptI.X != ptJ.X {
+			return ptI.X < ptJ.X
+		}
+		return ptI.Y < ptJ.Y
+	})
+	n := 1
+	for i := 1; i < len(xys); i++ {
+		if xys[i] != xys[i-1] {
+			xys[n] = xys[i]
+			n++
+		}
+	}
+	return xys[:n]
 }
 
 // Type returns the GeometryType for a MultiPolygon
