@@ -22,13 +22,13 @@ for (( i = 0; i < 15; i++ )); do
 	echo "OLD"
 	git checkout "$old_git_sha1"
 	echo
-	go test ./... -test.run='^$' -benchtime=0.1s -bench=. | tee -a "$old"
+	go test ./... -test.run='^$' -benchtime=0.1s -benchmem -bench=. | tee -a "$old"
 
 	echo
 	echo "NEW"
 	git checkout "$new_git_sha1"
 	echo
-	go test ./... -test.run='^$' -benchtime=0.1s -bench=. | tee -a "$new"
+	go test ./... -test.run='^$' -benchtime=0.1s -benchmem -bench=. | tee -a "$new"
 done
 
 echo
