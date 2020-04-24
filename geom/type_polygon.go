@@ -80,7 +80,7 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 		if !ok {
 			return errors.New("polygon rings must not be empty")
 		}
-		box := toBox(env)
+		box := env.box()
 		if err := tree.Search(box, func(j int) error {
 			otherRing := rings[j]
 			if i > 0 && j > 0 { // Check is skipped if the outer ring is involved.
@@ -88,8 +88,8 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 				// already checked to ensure that no ring is empty.
 				startCurrent := currentRing.Coordinates().GetXY(0)
 				startOther := otherRing.Coordinates().GetXY(0)
-				nestedFwd := pointRingSide(startCurrent, otherRing) == interior
-				nestedRev := pointRingSide(startOther, currentRing) == interior
+				nestedFwd := relatePointToRing(startCurrent, otherRing) == interior
+				nestedRev := relatePointToRing(startOther, currentRing) == interior
 				if nestedFwd || nestedRev {
 					return errors.New("polygon must not have nested rings")
 				}
@@ -127,7 +127,7 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 		holeLen := holeSeq.Length()
 		for i := 0; i < holeLen; i++ {
 			xy := holeSeq.GetXY(i)
-			if pointRingSide(xy, rings[0]) == exterior {
+			if relatePointToRing(xy, rings[0]) == exterior {
 				return errors.New("hole must be inside outer ring")
 			}
 		}
@@ -142,15 +142,6 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 		return errors.New("polygon interiors must be connected")
 	}
 	return nil
-}
-
-func toBox(env Envelope) rtree.Box {
-	return rtree.Box{
-		MinX: env.min.X,
-		MinY: env.min.Y,
-		MaxX: env.max.X,
-		MaxY: env.max.Y,
-	}
 }
 
 // Type returns the GeometryType for a Polygon

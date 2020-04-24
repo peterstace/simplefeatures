@@ -104,9 +104,9 @@ func (m MultiLineString) IsSimple() bool {
 				continue
 			}
 
-			interMP, interMLS := intersectionOfLineStringAndLineString(
-				m.lines[i],
-				m.lines[j],
+			interMP, interMLS := intersectionOfLines(
+				m.lines[i].asLines(),
+				m.lines[j].asLines(),
 			)
 			if !interMLS.IsEmpty() {
 				// Line part of the intersection was non-empty, so the whole

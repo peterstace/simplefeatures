@@ -110,7 +110,7 @@ func (s LineString) IsSimple() bool {
 			continue
 		}
 		simple := true // assume simple until proven otherwise
-		box := toBox(ln.envelope())
+		box := ln.envelope().box()
 		tree.Search(box, func(j int) error {
 			other, ok := getLine(s.seq, j)
 			if !ok {

@@ -3,6 +3,8 @@ package geom
 import (
 	"fmt"
 	"math"
+
+	"github.com/peterstace/simplefeatures/rtree"
 )
 
 // Envelope is an axis-aligned rectangle (also known as an Axis Aligned
@@ -180,4 +182,13 @@ func (e Envelope) Distance(o Envelope) float64 {
 	dx := math.Max(0, math.Max(o.min.X-e.max.X, e.min.X-o.max.X))
 	dy := math.Max(0, math.Max(o.min.Y-e.max.Y, e.min.Y-o.max.Y))
 	return math.Sqrt(dx*dx + dy*dy)
+}
+
+func (e Envelope) box() rtree.Box {
+	return rtree.Box{
+		MinX: e.min.X,
+		MinY: e.min.Y,
+		MaxX: e.max.X,
+		MaxY: e.max.Y,
+	}
 }

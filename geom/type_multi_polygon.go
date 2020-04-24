@@ -3,6 +3,7 @@ package geom
 import (
 	"database/sql/driver"
 	"errors"
+	"fmt"
 	"sort"
 	"unsafe"
 
@@ -54,18 +55,28 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 		return nil
 	}
 
+	polyBoundaries := make([]indexedLines, len(polys))
+	polyBoundaryPopulated := make([]bool, len(polys))
+
 	var tree rtree.RTree
 	for i := range polys {
 		env, ok := polys[i].Envelope()
 		if !ok {
 			continue
 		}
-		box := toBox(env)
+		box := env.box()
 
 		err := tree.Search(box, func(j int) error {
-			interMP, interMLS := intersectionOfMultiLineStringAndMultiLineString(
-				polys[i].Boundary(),
-				polys[j].Boundary(),
+			for k := range [...]int{i, j} {
+				if !polyBoundaryPopulated[k] {
+					polyBoundaries[k] = newIndexedLines(polys[k].Boundary().asLines())
+					polyBoundaryPopulated[k] = true
+				}
+			}
+
+			interMP, interMLS := intersectionOfIndexedLines(
+				polyBoundaries[i],
+				polyBoundaries[j],
 			)
 			if !interMLS.IsEmpty() {
 				return errors.New("the boundaries of the polygon elements" +
@@ -78,10 +89,12 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 			// boundaries don't intersect in any way, we just have to check a
 			// single point.
 			if interMP.IsEmpty() {
-				ptI := polys[i].ExteriorRing().StartPoint()
-				ptJ := polys[j].ExteriorRing().StartPoint()
-				if hasIntersectionPointWithPolygon(ptI, polys[j]) ||
-					hasIntersectionPointWithPolygon(ptJ, polys[i]) {
+				// We already know the polygons are NOT empty, so it's safe to
+				// directly access index 0.
+				ptI := polys[i].ExteriorRing().Coordinates().GetXY(0)
+				ptJ := polys[j].ExteriorRing().Coordinates().GetXY(0)
+				if relatePointToPolygon(ptI, polyBoundaries[j]) != exterior ||
+					relatePointToPolygon(ptJ, polyBoundaries[i]) != exterior {
 					return errors.New("polygons must not be nested")
 				}
 				return nil
@@ -89,8 +102,13 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 
 			// Slow case: The boundaries intersect at a point (or many points).
 			// But we still need to ensure that the interiors don't intersect.
-			if polyInteriorsIntersect(polys[i], polys[j]) {
-				return errors.New("polygon interiors must not intersect")
+			for _, pair := range [...]struct{ pb1, pb2 indexedLines }{
+				{polyBoundaries[i], polyBoundaries[j]},
+				{polyBoundaries[j], polyBoundaries[i]},
+			} {
+				if err := validatePolyNotInsidePoly(pair.pb1, pair.pb2); err != nil {
+					return err
+				}
 			}
 			return nil
 		})
@@ -103,101 +121,67 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 	return nil
 }
 
-func polyInteriorsIntersect(p1, p2 Polygon) bool {
-	// Run twice, swapping the order of the polygons each time.
-	for order := 0; order < 2; order++ {
-		p1, p2 = p2, p1
+func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
+	// For each point where the boundaries of the two polygons intersect, we
+	// take points clockwise and counterclockwise along the boundaries and see
+	// if they are inside the opposing polygon. If they are, then the interiors
+	// intersect.
 
-		// Collect points along the boundary of the first polygon. Do this by
-		// first breaking the lines in the ring into multiple segments where
-		// they are intersected by the rings from the other polygon. Collect
-		// the original points in the boundary, plus the intersection points,
-		// then each midpoint between those points. These are enough points
-		// that one of the points will be inside the other polygon iff the
-		// interior of the polygons intersect.
-		allPts := make(map[XY]struct{})
-		for _, r1 := range p1.rings {
-			seq1 := r1.Coordinates()
-			for idx1 := 0; idx1 < seq1.Length(); idx1++ {
-				line1, ok := getLine(seq1, idx1)
-				if !ok {
-					continue
-				}
-				// Collect boundary control points and intersection points.
-				linePts := make(map[XY]struct{})
-				linePts[line1.a] = struct{}{}
-				linePts[line1.b] = struct{}{}
-				for _, r2 := range p2.rings {
-					seq2 := r2.Coordinates()
-					for idx2 := 0; idx2 < seq2.Length(); idx2++ {
-						line2, ok := getLine(seq2, idx2)
-						if !ok {
-							continue
-						}
-						inter := line1.intersectLine(line2)
-						if inter.empty {
-							continue
-						}
-						if inter.ptA != inter.ptB {
-							continue
-						}
-						if inter.ptA != line1.a && inter.ptA != line1.b {
-							linePts[inter.ptA] = struct{}{}
-						}
-					}
-				}
-				// Collect midpoints.
-				if len(linePts) <= 2 {
-					for pt := range linePts {
-						allPts[pt] = struct{}{}
-					}
-				} else {
-					linePtsSlice := make([]XY, 0, len(linePts))
-					for pt := range linePts {
-						linePtsSlice = append(linePtsSlice, pt)
-					}
-					sort.Slice(linePtsSlice, func(i, j int) bool {
-						ptI := linePtsSlice[i]
-						ptJ := linePtsSlice[j]
-						if ptI.X != ptJ.X {
-							return ptI.X < ptJ.X
-						}
-						return ptI.Y < ptJ.Y
-					})
-					allPts[linePtsSlice[0]] = struct{}{}
-					for i := 0; i+1 < len(linePtsSlice); i++ {
-						midpoint := linePtsSlice[i].Midpoint(linePtsSlice[i+1])
-						allPts[midpoint] = struct{}{}
-						allPts[linePtsSlice[i+1]] = struct{}{}
-					}
-				}
+	for j := range p2.lines {
+		// Find intersection points.
+		var pts []XY
+		p1.tree.Search(p2.lines[j].envelope().box(), func(i int) error {
+			inter := p1.lines[i].intersectLine(p2.lines[j])
+			if inter.empty {
+				return nil
 			}
+			if inter.ptA != inter.ptB {
+				panic(fmt.Sprintf("already established that boundaries only "+
+					"intersect at points, but got: %v", inter))
+			}
+			pts = append(pts, inter.ptA)
+			return nil
+		})
+		if len(pts) == 0 {
+			continue
 		}
 
-		// Check to see if any of the points from the boundary from the first
-		// polygon are inside the second polygon.
-		for pt := range allPts {
-			if isPointInteriorToPolygon(pt, p2) {
-				return true
+		// Construct midpoints between intersection points and endpoints.
+		pts = append(pts, p2.lines[j].a, p2.lines[j].b)
+		pts = sortAndUniquify(pts)
+
+		// Check if midpoints are inside the other polygon.
+		for k := 0; k+1 < len(pts); k++ {
+			midpoint := pts[k].Add(pts[k+1]).Scale(0.5)
+			if relatePointToPolygon(midpoint, p1) == interior {
+				return fmt.Errorf("polygon interiors intersect at %s",
+					NewPointFromXY(midpoint).AsText())
 			}
 		}
 	}
-	return false
+	return nil
 }
 
-// isPointInteriorToPolygon returns true iff the pt is strictly inside the
-// polygon (i.e. is not outside the polygon or on its boundary).
-func isPointInteriorToPolygon(pt XY, poly Polygon) bool {
-	if poly.IsEmpty() || pointRingSide(pt, poly.ExteriorRing()) != interior {
-		return false
+func sortAndUniquify(xys []XY) []XY {
+	if len(xys) == 0 {
+		return xys
 	}
-	for i := 0; i < poly.NumInteriorRings(); i++ {
-		hole := poly.InteriorRingN(i)
-		if pointRingSide(pt, hole) != exterior {
-			return false
+	sort.Slice(xys, func(i, j int) bool {
+		ptI := xys[i]
+		ptJ := xys[j]
+		if ptI.X != ptJ.X {
+			return ptI.X < ptJ.X
+		}
+		return ptI.Y < ptJ.Y
+	})
+	n := 1
+	for i := 1; i < len(xys); i++ {
+		if xys[i] != xys[i-1] {
+			xys[n] = xys[i]
+			n++
 		}
 	}
-	return true
+	return xys[:n]
 }
 
 // Type returns the GeometryType for a MultiPolygon
