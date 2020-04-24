@@ -1,6 +1,6 @@
 # Simple Features
 
-[![Build Status](https://travis-ci.com/peterstace/simplefeatures.svg?token=ueRpGt4cSSnk321nW8xG&branch=master)](https://travis-ci.com/peterstace/simplefeatures)
+[![Build Status](https://github.com/peterstace/simplefeatures/workflows/ci/badge.svg)](https://github.com/peterstace/simplefeatures/actions)
 [![Documentation](https://godoc.org/github.com/peterstace/simplefeatures?status.svg)](http://godoc.org/github.com/peterstace/simplefeatures/geom)
 
 Simple Features is a pure Go Implementation of the OpenGIS Simple Feature Access
