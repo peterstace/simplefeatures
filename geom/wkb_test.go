@@ -10,10 +10,6 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-func TestFail(t *testing.T) {
-	t.Fatal("test goes brrrrr")
-}
-
 func hexStringToBytes(t *testing.T, s string) []byte {
 	t.Helper()
 	s = strings.ReplaceAll(s, " ", "")
