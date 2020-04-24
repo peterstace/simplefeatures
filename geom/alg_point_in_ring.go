@@ -96,7 +96,7 @@ func relatePointToPolygon(pt XY, polyBoundary indexedLines) side {
 	ray := line{pt, XY{extent.MaxX + 1, pt.Y}}
 
 	var count int
-	polyBoundary.tree.Search(toBox(ray.envelope()), func(i int) error {
+	polyBoundary.tree.Search(ray.envelope().box(), func(i int) error {
 		ln := polyBoundary.lines[i]
 		if incrementCountPointInRing(pt, ray, ln) {
 			count++

@@ -80,7 +80,7 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 		if !ok {
 			return errors.New("polygon rings must not be empty")
 		}
-		box := toBox(env)
+		box := env.box()
 		if err := tree.Search(box, func(j int) error {
 			otherRing := rings[j]
 			if i > 0 && j > 0 { // Check is skipped if the outer ring is involved.

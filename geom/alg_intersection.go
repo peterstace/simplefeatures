@@ -12,7 +12,7 @@ func intersectionOfIndexedLines(
 	var ptFloats []float64
 	seen := make(map[XY]bool)
 	for i := range lines1.lines {
-		lines2.tree.Search(toBox(lines1.lines[i].envelope()), func(j int) error {
+		lines2.tree.Search(lines1.lines[i].envelope().box(), func(j int) error {
 			inter := lines1.lines[i].intersectLine(lines2.lines[j])
 			if inter.empty {
 				return nil
@@ -38,7 +38,7 @@ func intersectionOfLines(lines1, lines2 []line) (MultiPoint, MultiLineString) {
 	bulk := make([]rtree.BulkItem, len(lines1))
 	for i, ln := range lines1 {
 		bulk[i] = rtree.BulkItem{
-			Box:      toBox(ln.envelope()),
+			Box:      ln.envelope().box(),
 			RecordID: i,
 		}
 	}
@@ -49,7 +49,7 @@ func intersectionOfLines(lines1, lines2 []line) (MultiPoint, MultiLineString) {
 	seen := make(map[XY]bool)
 
 	for j := range lines2 {
-		tree.Search(toBox(lines2[j].envelope()), func(i int) error {
+		tree.Search(lines2[j].envelope().box(), func(i int) error {
 			inter := lines2[j].intersectLine(lines1[i])
 			if inter.empty {
 				return nil

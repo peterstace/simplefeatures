@@ -64,7 +64,7 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 		if !ok {
 			continue
 		}
-		box := toBox(env)
+		box := env.box()
 
 		err := tree.Search(box, func(j int) error {
 			for k := range [...]int{i, j} {
@@ -90,7 +90,7 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 			// single point.
 			if interMP.IsEmpty() {
 				// We already know the polygons are NOT empty, so it's safe to
-				// directly acces index 0.
+				// directly access index 0.
 				ptI := polys[i].ExteriorRing().Coordinates().GetXY(0)
 				ptJ := polys[j].ExteriorRing().Coordinates().GetXY(0)
 				if relatePointToPolygon(ptI, polyBoundaries[j]) != exterior ||
@@ -130,7 +130,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 	for j := range p2.lines {
 		// Find intersection points.
 		pts := make(map[XY]struct{}) // TODO: Could reuse map
-		p1.tree.Search(toBox(p2.lines[j].envelope()), func(i int) error {
+		p1.tree.Search(p2.lines[j].envelope().box(), func(i int) error {
 			inter := p1.lines[i].intersectLine(p2.lines[j])
 			if inter.empty {
 				return nil
