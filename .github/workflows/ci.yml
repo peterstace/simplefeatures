@@ -8,8 +8,4 @@ jobs:
     - uses: actions/checkout@v2
     - name: CI
       run: |
-        env
-        echo xxx $GITHUB_WORKSPACE xxx
-        ls "$GITHUB_WORKSPACE"
-        echo Add other actions to build,
-        echo test, and deploy your project.
+        "$GITHUB_WORKSPACE/ci.sh"
