@@ -9,6 +9,7 @@ jobs:
     - name: CI
       run: |
         env
-        echo $GITHUB_WORKSPACE
+        echo xxx $GITHUB_WORKSPACE xxx
+        ls "$GITHUB_WORKSPACE"
         echo Add other actions to build,
         echo test, and deploy your project.
