@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.14.0
+
+2020-04-20
+
+- Adds an R-Tree data structure (new package,
+  `github.com/peterestace/simplefeatures/rtree`). The implementation follows
+the approach outlined in [R-Trees - A Dynamic Index Structure For Spatial
+Searching](http://www-db.deis.unibo.it/courses/SI-LS/papers/Gut84.pdf).
+
+- Improves some nasty worst-case performance behaviour for Polygon and
+  MultiPolygon validation.
+
 ## v0.13.0
 
 2020-04-13

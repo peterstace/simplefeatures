@@ -1,6 +1,0 @@
-script:
-  - docker-compose -f docker-compose-lint.yml    up --abort-on-container-exit
-  - docker-compose -f docker-compose-unit.yml    up --abort-on-container-exit
-  - docker-compose -f docker-compose-geos.yml    up --abort-on-container-exit
-  - docker-compose -f docker-compose-cmpgeos.yml up --abort-on-container-exit
-  - docker-compose -f docker-compose-cmppg.yml   up --abort-on-container-exit
