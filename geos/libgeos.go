@@ -225,6 +225,22 @@ func Simplify(g geom.Geometry, tolerance float64, opts ...geom.ConstructorOption
 	})
 }
 
+// Difference returns the geometry that represents the parts of input geometry
+// A that are not part of input geometry B.
+func Difference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	return binaryOperation(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSDifference_r(ctx, a, b)
+	})
+}
+
+// SymmetricDifference returns the geometry that represents the parts of the
+// input geometries that are not part of the other input geometry.
+func SymmetricDifference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	return binaryOperation(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSSymDifference_r(ctx, a, b)
+	})
+}
+
 // handle is an opaque handle that can be used to invoke GEOS operations.
 // Instances are not threadsafe and thus should only be used serially (e.g.
 // protected by a mutex or similar).
