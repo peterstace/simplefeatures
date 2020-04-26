@@ -192,8 +192,8 @@ func Overlaps(a, b geom.Geometry) (bool, error) {
 // Union returns a geometry that that is the union of the input geometries.
 // Formally, the returned geometry will contain a particular point X if and
 // only if X is present in either geometry (or both).
-func Union(a, b geom.Geometry) (geom.Geometry, error) {
-	return binaryOperation(a, b, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+func Union(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	return binaryOperation(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSUnion_r(ctx, a, b)
 	})
 }
@@ -201,16 +201,16 @@ func Union(a, b geom.Geometry) (geom.Geometry, error) {
 // Intersection returns a geometry that is the intersection of the input
 // geometries. Formally, the returned geometry will contain a particular point
 // X if and only if X is present in both geometries.
-func Intersection(a, b geom.Geometry) (geom.Geometry, error) {
-	return binaryOperation(a, b, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+func Intersection(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	return binaryOperation(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSIntersection_r(ctx, a, b)
 	})
 }
 
 // Buffer returns a geometry that contains all points within the given radius
 // of the input geometry.
-func Buffer(g geom.Geometry, radius float64) (geom.Geometry, error) {
-	return unaryOperation(g, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
+func Buffer(g geom.Geometry, radius float64, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	return unaryOperation(g, opts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSBufferWithStyle_r(ctx, gh, C.double(radius), 8, C.GEOSBUF_CAP_ROUND, C.GEOSBUF_JOIN_ROUND, 0.0)
 	})
 }
@@ -219,8 +219,8 @@ func Buffer(g geom.Geometry, radius float64) (geom.Geometry, error) {
 // Douglas-Peucker algorithm. Topological invariants may not be maintained,
 // e.g. polygons can collapse into linestrings, and holes in polygons may be
 // lost.
-func Simplify(g geom.Geometry, tolerance float64) (geom.Geometry, error) {
-	return unaryOperation(g, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
+func Simplify(g geom.Geometry, tolerance float64, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	return unaryOperation(g, opts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSSimplify_r(ctx, gh, C.double(tolerance))
 	})
 }
@@ -400,6 +400,7 @@ func (h *handle) boolErr(c C.char) (bool, error) {
 
 func binaryOperation(
 	g1, g2 geom.Geometry,
+	opts []geom.ConstructorOption,
 	op func(C.GEOSContextHandle_t, *C.GEOSGeometry, *C.GEOSGeometry) *C.GEOSGeometry,
 ) (geom.Geometry, error) {
 	// Not all versions of GEOS can handle Z and M geometries correctly. For
@@ -431,11 +432,12 @@ func binaryOperation(
 	}
 	defer C.GEOSGeom_destroy(resultGH)
 
-	return h.decode(resultGH)
+	return h.decode(resultGH, opts)
 }
 
 func unaryOperation(
 	g geom.Geometry,
+	opts []geom.ConstructorOption,
 	op func(C.GEOSContextHandle_t, *C.GEOSGeometry) *C.GEOSGeometry,
 ) (geom.Geometry, error) {
 	// Not all versions of libgeos can handle Z and M geometries correctly. For
@@ -460,10 +462,10 @@ func unaryOperation(
 	}
 	defer C.GEOSGeom_destroy(resultGH)
 
-	return h.decode(resultGH)
+	return h.decode(resultGH, opts)
 }
 
-func (h *handle) decode(gh *C.GEOSGeometry) (geom.Geometry, error) {
+func (h *handle) decode(gh *C.GEOSGeometry, opts []geom.ConstructorOption) (geom.Geometry, error) {
 	var (
 		isWKT C.char
 		size  C.size_t
@@ -476,7 +478,7 @@ func (h *handle) decode(gh *C.GEOSGeometry) (geom.Geometry, error) {
 	r := bytes.NewReader(C.GoBytes(unsafe.Pointer(serialised), C.int(size)))
 
 	if isWKT != 0 {
-		return geom.UnmarshalWKT(r)
+		return geom.UnmarshalWKT(r, opts...)
 	}
-	return geom.UnmarshalWKB(r)
+	return geom.UnmarshalWKB(r, opts...)
 }
