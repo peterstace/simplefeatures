@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.15.0
+
+2020-04-27
+
+- Allow geometry constructor options to be passed to GEOS operations that
+  produce geometries.
+
+- Improve performance for MultiPolygon validation in cases where the child
+  polygons touch at many points.
+
 ## v0.14.0
 
 2020-04-20
