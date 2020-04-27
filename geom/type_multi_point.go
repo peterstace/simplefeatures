@@ -265,6 +265,10 @@ func (m MultiPoint) Force2D() MultiPoint {
 
 // PointOnSurface returns one of the Points in the Collection.
 func (m MultiPoint) PointOnSurface() Point {
-	// TODO
-	return Point{}
+	nearest := newNearestPoint(m.Centroid())
+	n := m.seq.Length()
+	for i := 0; i < n; i++ {
+		nearest.add(NewPointFromXY(m.seq.GetXY(i)))
+	}
+	return nearest.point
 }

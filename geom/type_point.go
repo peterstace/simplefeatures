@@ -222,6 +222,5 @@ func (p Point) Force2D() Point {
 
 // PointOnSurface returns the original Point.
 func (p Point) PointOnSurface() Point {
-	// TODO
-	return Point{}
+	return p.Force2D()
 }

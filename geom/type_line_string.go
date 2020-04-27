@@ -352,6 +352,21 @@ func (s LineString) asLines() []line {
 
 // PointOnSurface returns a Point on the LineString.
 func (s LineString) PointOnSurface() Point {
-	// TODO
-	return Point{}
+	// Look for the control point on the LineString (other than the first and
+	// last point) that is closest to the centroid.
+	n := s.seq.Length()
+	nearest := newNearestPoint(s.Centroid())
+	for i := 1; i < n-1; i++ {
+		candidate := NewPointFromXY(s.seq.GetXY(i))
+		nearest.add(candidate)
+	}
+	if !nearest.point.IsEmpty() {
+		return nearest.point
+	}
+
+	// Consider the star/end points if we don't have anything yet.
+	nearest.add(s.StartPoint())
+	nearest.add(s.EndPoint())
+	return nearest.point
+
 }
