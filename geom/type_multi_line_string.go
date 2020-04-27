@@ -361,3 +361,9 @@ func (m MultiLineString) asLines() []line {
 	}
 	return lines
 }
+
+// PointOnSurface returns a Point on one of the LineStrings in the collection.
+func (m MultiLineString) PointOnSurface() Point {
+	// TODO
+	return Point{}
+}

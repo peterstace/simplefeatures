@@ -262,3 +262,9 @@ func (m MultiPoint) ForceCoordinatesType(newCType CoordinatesType) MultiPoint {
 func (m MultiPoint) Force2D() MultiPoint {
 	return m.ForceCoordinatesType(DimXY)
 }
+
+// PointOnSurface returns one of the Points in the Collection.
+func (m MultiPoint) PointOnSurface() Point {
+	// TODO
+	return Point{}
+}

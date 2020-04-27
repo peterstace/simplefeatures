@@ -349,3 +349,9 @@ func (s LineString) asLines() []line {
 	}
 	return lines
 }
+
+// PointOnSurface returns a Point on the LineString.
+func (s LineString) PointOnSurface() Point {
+	// TODO
+	return Point{}
+}

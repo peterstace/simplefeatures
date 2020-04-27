@@ -427,3 +427,9 @@ func (m MultiPolygon) ForceCoordinatesType(newCType CoordinatesType) MultiPolygo
 func (m MultiPolygon) Force2D() MultiPolygon {
 	return m.ForceCoordinatesType(DimXY)
 }
+
+// PointOnSurface returns a Point on the interior of the MultiPolygon.
+func (m MultiPolygon) PointOnSurface() Point {
+	// TODO
+	return Point{}
+}

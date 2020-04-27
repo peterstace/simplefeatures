@@ -397,3 +397,10 @@ func (c GeometryCollection) ForceCoordinatesType(newCType CoordinatesType) Geome
 func (c GeometryCollection) Force2D() GeometryCollection {
 	return c.ForceCoordinatesType(DimXY)
 }
+
+// PointOnSurface returns a Point that's on one of the geometries in the
+// collection.
+func (c GeometryCollection) PointOnSurface() Point {
+	// TODO
+	return Point{}
+}
