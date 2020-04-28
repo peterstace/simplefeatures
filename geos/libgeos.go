@@ -189,7 +189,7 @@ func Overlaps(a, b geom.Geometry) (bool, error) {
 
 }
 
-// Union returns a geometry that that is the union of the input geometries.
+// Union returns a geometry that is the union of the input geometries.
 // Formally, the returned geometry will contain a particular point X if and
 // only if X is present in either geometry (or both).
 func Union(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
