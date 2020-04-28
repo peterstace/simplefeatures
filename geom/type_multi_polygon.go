@@ -148,7 +148,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 
 		// Construct midpoints between intersection points and endpoints.
 		pts = append(pts, p2.lines[j].a, p2.lines[j].b)
-		pts = sortAndUniquify(pts)
+		pts = sortAndUniquifyXYs(pts)
 
 		// Check if midpoints are inside the other polygon.
 		for k := 0; k+1 < len(pts); k++ {
@@ -162,7 +162,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 	return nil
 }
 
-func sortAndUniquify(xys []XY) []XY {
+func sortAndUniquifyXYs(xys []XY) []XY {
 	if len(xys) == 0 {
 		return xys
 	}
