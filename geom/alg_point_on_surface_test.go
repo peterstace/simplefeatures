@@ -38,6 +38,7 @@ func TestPointOnSurface(t *testing.T) {
 		{"POLYGON((0 0,0 1,0 1.5,0 2,2 2,2 0,0 0))", "POINT(1 1.25)"},
 		{"POLYGON((0 0,0 0.5,0 1,0 2,2 2,2 0,0 0))", "POINT(1 1.5)"},
 		{"POLYGON((0 0,1 0,1 2,2 1.5,3 2,3 3,0 3,0 0))", "POINT(0.5 1.75)"},
+		{"POLYGON((0 0,3 0,3 3,0 3,0 0),(1.5 1.5,2 2,1.5 2.5,1 2,1.5 1.5))", "POINT(0.625 1.75)"},
 		{"MULTIPOINT EMPTY", "POINT EMPTY"},
 		{"MULTIPOINT(EMPTY)", "POINT EMPTY"},
 		{"MULTIPOINT(1 2,3 4)", "POINT(1 2)"},

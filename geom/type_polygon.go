@@ -483,17 +483,21 @@ func (p Polygon) PointOnSurface() Point {
 	midY := env.Center().Y
 
 	// Adjust mid-y value if a control point has the same Y.
-	outerRingSeq := p.ExteriorRing().Coordinates()
-	n := outerRingSeq.Length()
 	var midYMatchesNode bool
 	nextY := math.Inf(+1)
-	for i := 0; i < n; i++ {
-		xy := outerRingSeq.GetXY(i)
-		if xy.Y == midY {
-			midYMatchesNode = true
+	for i := 0; i < 1+p.NumInteriorRings(); i++ {
+		ring := p.ExteriorRing().Coordinates()
+		if i < p.NumInteriorRings() {
+			ring = p.InteriorRingN(i).Coordinates()
 		}
-		if xy.Y < nextY && xy.Y > midY {
-			nextY = xy.Y
+		for j := 0; j < ring.Length(); j++ {
+			xy := ring.GetXY(j)
+			if xy.Y == midY {
+				midYMatchesNode = true
+			}
+			if xy.Y < nextY && xy.Y > midY {
+				nextY = xy.Y
+			}
 		}
 	}
 	if midYMatchesNode {
@@ -535,7 +539,7 @@ func (p Polygon) PointOnSurface() Point {
 		panic(fmt.Sprintf("should have gotten at least two xIntercepts, but got: %v", xIntercepts))
 	}
 	bestA, bestB := xIntercepts[0], xIntercepts[1]
-	for i := 2; i < len(xIntercepts); i += 2 {
+	for i := 2; i+1 < len(xIntercepts); i += 2 {
 		newA, newB := xIntercepts[i], xIntercepts[i+1]
 		if newB-newA > bestB-bestA {
 			bestA, bestB = newA, newB
