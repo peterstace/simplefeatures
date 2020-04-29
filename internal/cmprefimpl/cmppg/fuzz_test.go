@@ -52,6 +52,7 @@ func TestFuzz(t *testing.T) {
 			CheckCentroid(t, want, g)
 			CheckReverse(t, want, g)
 			CheckType(t, want, g)
+			CheckPointOnSurface(t, want, g)
 		})
 	}
 }

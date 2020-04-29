@@ -442,6 +442,19 @@ func CheckType(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
+func CheckPointOnSurface(t *testing.T, want UnaryResult, g geom.Geometry) {
+	t.Run("CheckPointOnSurface", func(t *testing.T) {
+		got := g.PointOnSurface()
+		want := want.PointOnSurface
+
+		if !got.EqualsExact(want) {
+			t.Logf("got:  %v", got.AsText())
+			t.Logf("want: %v", want.AsText())
+			t.Error("mismatch")
+		}
+	})
+}
+
 func CheckForceCoordinatesDimension(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckForceCoordinatesDimension", func(t *testing.T) {
 
