@@ -401,6 +401,23 @@ func (c GeometryCollection) Force2D() GeometryCollection {
 // PointOnSurface returns a Point that's on one of the geometries in the
 // collection.
 func (c GeometryCollection) PointOnSurface() Point {
-	// TODO
-	return Point{}
+	// For collection with mixed dimension, we only consider members who have
+	// the highest dimension.
+	var maxDim int
+	c.walk(func(g Geometry) {
+		if !g.IsEmpty() {
+			maxDim = max(maxDim, g.Dimension())
+		}
+	})
+
+	// Find the point-on-surface of a member that is closest to the overall
+	// centroid.
+	nearest := newNearestPoint(c.Centroid())
+	c.walk(func(g Geometry) {
+		if g.Dimension() == maxDim {
+			nearest.add(g.PointOnSurface())
+		}
+	})
+
+	return nearest.point
 }
