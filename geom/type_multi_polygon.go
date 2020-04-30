@@ -430,5 +430,20 @@ func (m MultiPolygon) Force2D() MultiPolygon {
 
 // PointOnSurface returns a Point on the interior of the MultiPolygon.
 func (m MultiPolygon) PointOnSurface() Point {
-	return pointOnAreaSurface(m)
+	var (
+		bestWidth float64
+		bestPoint Point
+	)
+	for i := 0; i < m.NumPolygons(); i++ {
+		poly := m.PolygonN(i)
+		point, bisectorWidth := pointOnAreaSurface(poly)
+		if point.IsEmpty() {
+			continue
+		}
+		if bisectorWidth > bestWidth {
+			bestWidth = bisectorWidth
+			bestPoint = point
+		}
+	}
+	return bestPoint
 }

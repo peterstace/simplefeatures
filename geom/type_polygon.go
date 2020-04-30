@@ -457,5 +457,6 @@ func (p Polygon) Force2D() Polygon {
 
 // PointOnSurface returns a Point that lines inside the Polygon.
 func (p Polygon) PointOnSurface() Point {
-	return pointOnAreaSurface(p.AsMultiPolygon())
+	pt, _ := pointOnAreaSurface(p)
+	return pt
 }
