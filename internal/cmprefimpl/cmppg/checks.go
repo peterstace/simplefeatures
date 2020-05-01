@@ -445,11 +445,17 @@ func CheckType(t *testing.T, want UnaryResult, g geom.Geometry) {
 func CheckPointOnSurface(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckPointOnSurface", func(t *testing.T) {
 		got := g.PointOnSurface()
-		want := want.PointOnSurface
+
+		// Simplefeatures doesn't support Z or M values here, because PostGIS
+		// does some very inconsistent things with them (it drops them in some
+		// scenarios but not others). It seems simpler to just not support them
+		// right now.
+		want := want.PointOnSurface.Force2D()
 
 		if !got.EqualsExact(want) {
-			t.Logf("got:  %v", got.AsText())
-			t.Logf("want: %v", want.AsText())
+			t.Logf("input: %v", g.AsText())
+			t.Logf("got:   %v", got.AsText())
+			t.Logf("want:  %v", want.AsText())
 			t.Error("mismatch")
 		}
 	})

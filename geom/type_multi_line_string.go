@@ -381,8 +381,8 @@ func (m MultiLineString) PointOnSurface() Point {
 	// If we still don't have a point, then consider the start/end points.
 	for i := 0; i < m.NumLineStrings(); i++ {
 		ls := m.LineStringN(i)
-		nearest.add(ls.StartPoint())
-		nearest.add(ls.EndPoint())
+		nearest.add(ls.StartPoint().Force2D())
+		nearest.add(ls.EndPoint().Force2D())
 	}
 	return nearest.point
 }

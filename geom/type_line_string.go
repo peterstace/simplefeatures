@@ -365,8 +365,8 @@ func (s LineString) PointOnSurface() Point {
 	}
 
 	// Consider the star/end points if we don't have anything yet.
-	nearest.add(s.StartPoint())
-	nearest.add(s.EndPoint())
+	nearest.add(s.StartPoint().Force2D())
+	nearest.add(s.EndPoint().Force2D())
 	return nearest.point
 
 }
