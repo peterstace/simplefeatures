@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/geos"
 )
 
 func unaryChecks(h *Handle, g geom.Geometry, log *log.Logger) error {
@@ -74,6 +75,10 @@ func unaryChecks(h *Handle, g geom.Geometry, log *log.Logger) error {
 	}
 	log.Println("checking Centroid")
 	if err := checkCentroid(h, g, log); err != nil {
+		return err
+	}
+	log.Println("checking PointOnSurface")
+	if err := checkPointOnSurface(h, g, log); err != nil {
 		return err
 	}
 	return nil
@@ -496,6 +501,49 @@ func checkCentroid(h *Handle, g geom.Geometry, log *log.Logger) error {
 		log.Printf("got:  %v", got.AsText())
 		return mismatchErr
 	}
+	return nil
+}
+
+func checkPointOnSurface(h *Handle, g geom.Geometry, log *log.Logger) error {
+	// It's too difficult to perform a direct comparison against GEOS's
+	// PointOnSurface, due to numeric stability related issue. This is because
+	// there are floating point comparisons to find the "best" point. However,
+	// sometimes there are many points that are equally best. Floating point
+	// issues mean that it's hard to get the implementations to line up
+	// precisely in all cases (and there is no objectively best way to do it).
+	// Instead, we check invariants on the result.
+
+	pt := g.PointOnSurface().AsGeometry()
+
+	if pt.IsEmpty() != g.IsEmpty() {
+		log.Printf("The geometry's empty status doesn't match the point's empty status")
+		log.Printf("g empty:  %v", g.IsEmpty())
+		log.Printf("pt empty: %v", pt.IsEmpty())
+		return mismatchErr
+	}
+
+	if !g.IsEmpty() && !g.IsGeometryCollection() {
+		intersects, err := geos.Intersects(pt, g)
+		if err != nil {
+			return err
+		}
+		if !intersects {
+			log.Printf("the pt doesn't intersect with the input")
+			return mismatchErr
+		}
+	}
+
+	if g.Dimension() == 2 && !g.IsEmpty() && !g.IsGeometryCollection() {
+		contains, err := geos.Contains(g, pt)
+		if err != nil {
+			return err
+		}
+		if !contains {
+			log.Printf("the input doesn't contain the pt")
+			return mismatchErr
+		}
+	}
+
 	return nil
 }
 
