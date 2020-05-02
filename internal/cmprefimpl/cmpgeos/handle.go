@@ -663,6 +663,22 @@ func (h *Handle) Centroid(g geom.Geometry) (geom.Geometry, error) {
 	return h.decodeGeomHandle(env)
 }
 
+func (h *Handle) PointOnSurface(g geom.Geometry) (geom.Geometry, error) {
+	gh, err := h.createGeomHandle(g)
+	if err != nil {
+		return geom.Geometry{}, err
+	}
+	defer C.GEOSGeom_destroy(gh)
+
+	env := C.GEOSPointOnSurface_r(h.context, gh)
+	if env == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy_r(h.context, env)
+
+	return h.decodeGeomHandle(env)
+}
+
 func (h *Handle) Reverse(g geom.Geometry) (geom.Geometry, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
