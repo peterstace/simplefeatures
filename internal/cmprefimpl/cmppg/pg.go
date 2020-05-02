@@ -12,26 +12,25 @@ type BatchPostGIS struct {
 }
 
 type UnaryResult struct {
-	AsText         string
-	AsBinary       []byte
-	AsGeoJSON      sql.NullString
-	IsEmpty        bool
-	Dimension      int
-	Envelope       geom.Geometry
-	IsSimple       sql.NullBool
-	Boundary       geom.NullGeometry
-	ConvexHull     geom.Geometry
-	IsRing         sql.NullBool
-	Length         float64
-	Area           float64
-	Centroid       geom.Geometry
-	Reverse        geom.Geometry
-	Type           string
-	PointOnSurface geom.Geometry
-	Force2D        geom.Geometry
-	Force3DZ       geom.Geometry
-	Force3DM       geom.Geometry
-	Force4D        geom.Geometry
+	AsText     string
+	AsBinary   []byte
+	AsGeoJSON  sql.NullString
+	IsEmpty    bool
+	Dimension  int
+	Envelope   geom.Geometry
+	IsSimple   sql.NullBool
+	Boundary   geom.NullGeometry
+	ConvexHull geom.Geometry
+	IsRing     sql.NullBool
+	Length     float64
+	Area       float64
+	Centroid   geom.Geometry
+	Reverse    geom.Geometry
+	Type       string
+	Force2D    geom.Geometry
+	Force3DZ   geom.Geometry
+	Force3DM   geom.Geometry
+	Force4D    geom.Geometry
 }
 
 const (
@@ -102,7 +101,6 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		ST_AsBinary(ST_Centroid(ST_GeomFromWKB($1))),
 		ST_AsText(ST_Reverse(ST_GeomFromText($3))),
 		ST_GeometryType(ST_GeomFromWKB($1)),
-		ST_AsBinary(ST_PointOnSurface(ST_GeomFromWKB($1))),
 
 		ST_AsBinary(ST_Force2D(ST_GeomFromWKB($1))),
 		ST_AsBinary(ST_Force3DZ(ST_GeomFromWKB($1))),
@@ -126,7 +124,6 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		&result.Centroid,
 		&reverseWKT,
 		&result.Type,
-		&result.PointOnSurface,
 		&result.Force2D,
 		&result.Force3DZ,
 		&result.Force3DM,
