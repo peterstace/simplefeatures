@@ -189,7 +189,7 @@ func Overlaps(a, b geom.Geometry) (bool, error) {
 
 }
 
-// Union returns a geometry that that is the union of the input geometries.
+// Union returns a geometry that is the union of the input geometries.
 // Formally, the returned geometry will contain a particular point X if and
 // only if X is present in either geometry (or both).
 func Union(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
@@ -222,6 +222,22 @@ func Buffer(g geom.Geometry, radius float64, opts ...geom.ConstructorOption) (ge
 func Simplify(g geom.Geometry, tolerance float64, opts ...geom.ConstructorOption) (geom.Geometry, error) {
 	return unaryOperation(g, opts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSSimplify_r(ctx, gh, C.double(tolerance))
+	})
+}
+
+// Difference returns the geometry that represents the parts of input geometry
+// A that are not part of input geometry B.
+func Difference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	return binaryOperation(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSDifference_r(ctx, a, b)
+	})
+}
+
+// SymmetricDifference returns the geometry that represents the parts of the
+// input geometries that are not part of the other input geometry.
+func SymmetricDifference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	return binaryOperation(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSSymDifference_r(ctx, a, b)
 	})
 }
 

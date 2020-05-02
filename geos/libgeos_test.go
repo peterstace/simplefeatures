@@ -698,3 +698,25 @@ func TestSimplify(t *testing.T) {
 		})
 	}
 }
+
+func TestDifference(t *testing.T) {
+	a := geomFromWKT(t, "POLYGON((0 0,0 2,2 2,2 0,0 0))")
+	b := geomFromWKT(t, "POLYGON((1 1,1 3,3 3,3 1,1 1))")
+
+	got, err := Difference(a, b)
+	expectNoErr(t, err)
+	want := geomFromWKT(t, "POLYGON((0 0,0 2,1 2,1 1,2 1,2 0,0 0))")
+
+	expectGeomEq(t, got, want, geom.IgnoreOrder)
+}
+
+func TestSymmetricDifference(t *testing.T) {
+	a := geomFromWKT(t, "POLYGON((0 0,0 2,2 2,2 0,0 0))")
+	b := geomFromWKT(t, "POLYGON((1 1,1 3,3 3,3 1,1 1))")
+
+	got, err := SymmetricDifference(a, b)
+	expectNoErr(t, err)
+	want := geomFromWKT(t, "MULTIPOLYGON(((0 0,0 2,1 2,1 1,2 1,2 0,0 0)),((2 1,3 1,3 3,1 3,1 2,2 2,2 1)))")
+
+	expectGeomEq(t, got, want, geom.IgnoreOrder)
+}
