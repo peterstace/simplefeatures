@@ -76,10 +76,6 @@ func unaryChecks(h *Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkCentroid(h, g, log); err != nil {
 		return err
 	}
-	log.Println("checking PointOnSurface")
-	if err := checkPointOnSurface(h, g, log); err != nil {
-		return err
-	}
 	return nil
 
 	// TODO: Reverse isn't checked yet. There is some significant behaviour
@@ -496,27 +492,6 @@ func checkCentroid(h *Handle, g geom.Geometry, log *log.Logger) error {
 	got := g.Centroid().AsGeometry()
 
 	if !want.EqualsExact(got, geom.ToleranceXY(1e-9)) {
-		log.Printf("want: %v", want.AsText())
-		log.Printf("got:  %v", got.AsText())
-		return mismatchErr
-	}
-	return nil
-}
-
-func checkPointOnSurface(h *Handle, g geom.Geometry, log *log.Logger) error {
-
-	switch g.AsText() {
-	case "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT EMPTY,POINT(1 2)))", "GEOMETRYCOLLECTION(LINESTRING EMPTY,POINT(1 2),POINT(3 4))", "GEOMETRYCOLLECTION(POINT EMPTY,POINT(1 2))", "GEOMETRYCOLLECTION(POINT EMPTY,POINT(5 5))", "MULTILINESTRING((0 0,1 1,2 2),EMPTY)", "MULTILINESTRING((0 1,2 3),EMPTY)", "MULTILINESTRING((0 1,2 3,4 5),EMPTY)", "MULTILINESTRING((1 2,3 4),EMPTY,(5 6,7 8))", "MULTILINESTRING((1 2,3 4,5 6),EMPTY)", "MULTILINESTRING((4 1,4 2),EMPTY,(1 1,3 1,2 2,2 4,1 1))", "MULTILINESTRING(EMPTY,(0 0,1 1,2 2))", "MULTILINESTRING(EMPTY,(0 1,2 3,4 5))", "MULTIPOINT((0 1),(2 3),EMPTY,(4 5))", "MULTIPOINT((1 1),EMPTY,(3 4))", "MULTIPOINT((1 2),(2 3),EMPTY)", "MULTIPOINT((1 2),(3 4),EMPTY)", "MULTIPOINT((1 2),EMPTY)", "MULTIPOINT((10 40),(40 30),EMPTY)", "MULTIPOINT(EMPTY,(1 1),EMPTY,(3 4))", "MULTIPOINT(EMPTY,(1 2))", "MULTIPOINT(EMPTY,(1 2),EMPTY)":
-		return errors.New("would crash")
-	}
-
-	want, err := h.PointOnSurface(g)
-	if err != nil {
-		return err
-	}
-	got := g.PointOnSurface().AsGeometry()
-
-	if !want.EqualsExact(got) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
 		return mismatchErr

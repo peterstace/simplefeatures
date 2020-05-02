@@ -405,7 +405,9 @@ func (c GeometryCollection) PointOnSurface() Point {
 	// the highest dimension.
 	var maxDim int
 	c.walk(func(g Geometry) {
-		maxDim = max(maxDim, g.Dimension())
+		if !g.IsEmpty() {
+			maxDim = max(maxDim, g.Dimension())
+		}
 	})
 
 	// Find the point-on-surface of a member that is closest to the overall

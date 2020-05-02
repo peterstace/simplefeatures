@@ -2,7 +2,6 @@ package geom
 
 import (
 	"fmt"
-	"math"
 )
 
 func max(a, b int) int {
@@ -52,19 +51,4 @@ func mustEnv(env Envelope, ok bool) Envelope {
 		panic("not ok")
 	}
 	return env
-}
-
-func float64AsInt64(f float64) int64 {
-	if f < 0 {
-		return -int64(math.Float64bits(-f))
-	} else {
-		return int64(math.Float64bits(f))
-	}
-}
-
-// diffULP calculates f1-f1, but in terms of ULP (units of least precision)
-// instead of the regular float64 result. This is the number of discrete
-// floating point values between the two inputs.
-func diffULP(f1, f2 float64) int64 {
-	return float64AsInt64(f1) - float64AsInt64(f2)
 }

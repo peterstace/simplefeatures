@@ -25,19 +25,9 @@ func (n *nearestPoint) add(candidate Point) {
 		return
 	}
 
-	// ulpTolerance is the number of ULPs that the candidate point has to be
-	// nearer to the target compared to the existing best point for it to be
-	// considerer the new best point. This is to help work around numerical
-	// precision issues where two points should be the 'same' distance away
-	// from another point, but one is is slightly closed when using IEEE
-	// floating point arithmetic. In reality, it doesn't matter which point we
-	// choose (it's arbitrary). However using this approach helps to match GEOS
-	// behaviour.
-	const ulpTolerance = 15
-
 	delta := targetXY.Sub(candidateXY)
 	candidateDist := delta.Dot(delta)
-	if n.point.IsEmpty() || diffULP(n.dist, candidateDist) > ulpTolerance {
+	if n.point.IsEmpty() || candidateDist < n.dist {
 		n.dist = candidateDist
 		n.point = candidate
 	}
