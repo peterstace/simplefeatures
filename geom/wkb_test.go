@@ -546,3 +546,20 @@ func BenchmarkMarshalWKB(b *testing.B) {
 		}
 	})
 }
+
+func BenchmarkUnmarshalWKB(b *testing.B) {
+	b.Run("polygon", func(b *testing.B) {
+		for _, sz := range []int{10, 100, 1000, 10000} {
+			b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+				wkb := regularPolygon(XY{}, 1.0, sz).AsBinary()
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					_, err := UnmarshalWKB(bytes.NewReader(wkb), DisableAllValidations)
+					if err != nil {
+						b.Fatal(err)
+					}
+				}
+			})
+		}
+	})
+}
