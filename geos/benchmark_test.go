@@ -26,7 +26,7 @@ func regularPolygon(center geom.XY, radius float64, sides int) geom.Polygon {
 	if err != nil {
 		panic(err)
 	}
-	poly, err := geom.NewPolygonFromRings([]geom.LineString{ring})
+	poly, err := geom.NewPolygonFromRings([]geom.LineString{ring}, geom.DisableAllValidations)
 	if err != nil {
 		panic(err)
 	}
