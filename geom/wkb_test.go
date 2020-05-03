@@ -3,6 +3,7 @@ package geom_test
 import (
 	"bytes"
 	"encoding/hex"
+	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -530,4 +531,18 @@ func TestWKBMarshalEmptyPoint(t *testing.T) {
 			}
 		})
 	}
+}
+
+func BenchmarkMarshalWKB(b *testing.B) {
+	b.Run("polygon", func(b *testing.B) {
+		for _, sz := range []int{10, 100, 1000, 10000} {
+			b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+				poly := regularPolygon(XY{}, 1.0, sz)
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					poly.AsBinary()
+				}
+			})
+		}
+	})
 }
