@@ -34,8 +34,11 @@ func newWKBMarshaller(buf []byte) *wkbMarshaller {
 }
 
 func (m *wkbMarshaller) writeByteOrder() {
-	const littleEndian byte = 1
-	m.buf = append(m.buf, littleEndian)
+	if nativeOrder == binary.LittleEndian {
+		m.buf = append(m.buf, 1)
+	} else {
+		m.buf = append(m.buf, 0)
+	}
 }
 
 func (m *wkbMarshaller) writeGeomType(geomType GeometryType, ctype CoordinatesType) {
