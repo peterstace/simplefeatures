@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"reflect"
+	"unsafe"
 )
 
 // UnmarshalWKB reads the Well Known Binary (WKB), and returns the
@@ -117,14 +119,9 @@ func (p *wkbParser) parseGeomAndCoordType() (GeometryType, CoordinatesType) {
 func (p *wkbParser) parseGeomRoot(gtype GeometryType, ctype CoordinatesType) Geometry {
 	switch gtype {
 	case TypePoint:
-		c, ok := p.parsePoint(ctype)
-		if !ok {
-			return NewEmptyPoint(ctype).AsGeometry()
-		}
-		return NewPoint(c, p.opts...).AsGeometry()
+		return p.parsePoint(ctype).AsGeometry()
 	case TypeLineString:
-		ls := p.parseLineString(ctype)
-		return ls.AsGeometry()
+		return p.parseLineString(ctype).AsGeometry()
 	case TypePolygon:
 		return p.parsePolygon(ctype).AsGeometry()
 	case TypeMultiPoint:
@@ -151,7 +148,7 @@ func (p *wkbParser) parseFloat64() float64 {
 	return math.Float64frombits(u)
 }
 
-func (p *wkbParser) parsePoint(ctype CoordinatesType) (Coordinates, bool) {
+func (p *wkbParser) parsePoint(ctype CoordinatesType) Point {
 	var c Coordinates
 	c.Type = ctype
 	c.X = p.parseFloat64()
@@ -167,40 +164,67 @@ func (p *wkbParser) parsePoint(ctype CoordinatesType) (Coordinates, bool) {
 		c.M = p.parseFloat64()
 	default:
 		p.setErr(errors.New("unknown coord type"))
-		return Coordinates{}, false
+		return Point{}
 	}
 
 	if math.IsNaN(c.X) && math.IsNaN(c.Y) {
 		// Empty points are represented as NaN,NaN is WKB.
-		return Coordinates{}, false
+		return Point{}
 	}
 	if math.IsNaN(c.X) || math.IsNaN(c.Y) {
 		p.setErr(errors.New("point contains mixed NaN values"))
-		return Coordinates{}, false
+		return Point{}
 	}
-	return c, true
+	return NewPoint(c, p.opts...)
 }
 
 func (p *wkbParser) parseLineString(ctype CoordinatesType) LineString {
 	n := p.parseUint32()
-	floats := make([]float64, 0, int(n)*ctype.Dimension())
-	for i := uint32(0); i < n; i++ {
-		c, ok := p.parsePoint(ctype)
-		if !ok {
-			p.setErr(errors.New("empty point not allowed in LineString"))
-		}
-		floats = append(floats, c.X, c.Y)
-		if ctype.Is3D() {
-			floats = append(floats, c.Z)
-		}
-		if ctype.IsMeasured() {
-			floats = append(floats, c.M)
-		}
+	floats := make([]float64, int(n)*ctype.Dimension())
+
+	if len(p.body) < 8*len(floats) {
+		p.setErr(io.ErrUnexpectedEOF)
+		return LineString{}
 	}
+
+	var seqData []byte
+	if p.bo == nativeOrder {
+		seqData = p.body[:8*len(floats)]
+	} else {
+		seqData = make([]byte, 8*len(floats))
+		copy(seqData, p.body)
+		flipEndianessStride8(seqData)
+	}
+	p.body = p.body[8*len(floats):]
+	copy(floats, bytesAsFloats(seqData))
+
 	seq := NewSequence(floats, ctype)
 	poly, err := NewLineString(seq, p.opts...)
 	p.setErr(err)
 	return poly
+}
+
+// bytesAsFloats reinterprets the bytes slice as a float64 slice in a similar
+// manner to reinterpret_cast in C++.
+func bytesAsFloats(byts []byte) []float64 {
+	bytsHeader := (*reflect.SliceHeader)(unsafe.Pointer(&byts))
+	floatsHeader := reflect.SliceHeader{
+		Data: bytsHeader.Data,
+		Len:  len(byts) / 8,
+		Cap:  cap(byts) / 8,
+	}
+	return *(*[]float64)(unsafe.Pointer(&floatsHeader))
+}
+
+// flipEndianessStride8 flips the endianess of the input bytes, assuming that
+// they represent data items that are 8 bytes long.
+func flipEndianessStride8(p []byte) {
+	for i := 0; i < len(p)/8; i += 8 {
+		p[i+0], p[i+7] = p[i+7], p[i+0]
+		p[i+1], p[i+6] = p[i+6], p[i+1]
+		p[i+2], p[i+5] = p[i+5], p[i+2]
+		p[i+3], p[i+4] = p[i+4], p[i+3]
+	}
 }
 
 func (p *wkbParser) parsePolygon(ctype CoordinatesType) Polygon {
