@@ -53,8 +53,13 @@ func (m *wkbMarshaller) writeCoordinates(c Coordinates) {
 func (m *wkbMarshaller) writeSequence(seq Sequence) {
 	n := seq.Length()
 	m.writeCount(n)
-	for i := 0; i < n; i++ {
-		c := seq.Get(i)
-		m.writeCoordinates(c)
+
+	// Iterating over the floats in the sequence and appending them directly
+	// rather than using the Get method on the sequence provides a significant
+	// performance improvement.
+	for _, f := range seq.floats {
+		var buf [8]byte
+		wkbBO.PutUint64(buf[:], math.Float64bits(f))
+		m.buf = append(m.buf, buf[:]...)
 	}
 }
