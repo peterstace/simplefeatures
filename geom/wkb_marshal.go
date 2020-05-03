@@ -2,14 +2,32 @@ package geom
 
 import (
 	"encoding/binary"
+	"fmt"
 	"math"
+	"reflect"
+	"unsafe"
 )
+
+var nativeOrder binary.ByteOrder
+
+func init() {
+	var buf [2]byte
+	*(*uint16)(unsafe.Pointer(&buf[0])) = uint16(0x1234)
+
+	switch buf[0] {
+	case 0x12:
+		nativeOrder = binary.BigEndian
+	case 0x34:
+		nativeOrder = binary.LittleEndian
+	default:
+		panic(fmt.Sprintf("unexpected buf[0]: %d", buf[0]))
+	}
+
+}
 
 type wkbMarshaller struct {
 	buf []byte
 }
-
-var wkbBO = binary.LittleEndian
 
 func newWKBMarshaller(buf []byte) *wkbMarshaller {
 	return &wkbMarshaller{buf}
@@ -23,19 +41,19 @@ func (m *wkbMarshaller) writeByteOrder() {
 func (m *wkbMarshaller) writeGeomType(geomType GeometryType, ctype CoordinatesType) {
 	gt := [...]uint32{7, 1, 2, 3, 4, 5, 6}[geomType]
 	var buf [4]byte
-	wkbBO.PutUint32(buf[:], uint32(ctype)*1000+gt)
+	nativeOrder.PutUint32(buf[:], uint32(ctype)*1000+gt)
 	m.buf = append(m.buf, buf[:]...)
 }
 
 func (m *wkbMarshaller) writeFloat64(f float64) {
 	var buf [8]byte
-	wkbBO.PutUint64(buf[:], math.Float64bits(f))
+	nativeOrder.PutUint64(buf[:], math.Float64bits(f))
 	m.buf = append(m.buf, buf[:]...)
 }
 
 func (m *wkbMarshaller) writeCount(n int) {
 	var buf [4]byte
-	wkbBO.PutUint32(buf[:], uint32(n))
+	nativeOrder.PutUint32(buf[:], uint32(n))
 	m.buf = append(m.buf, buf[:]...)
 }
 
@@ -54,12 +72,23 @@ func (m *wkbMarshaller) writeSequence(seq Sequence) {
 	n := seq.Length()
 	m.writeCount(n)
 
-	// Iterating over the floats in the sequence and appending them directly
-	// rather than using the Get method on the sequence provides a significant
-	// performance improvement.
-	for _, f := range seq.floats {
-		var buf [8]byte
-		wkbBO.PutUint64(buf[:], math.Float64bits(f))
-		m.buf = append(m.buf, buf[:]...)
+	// Rather than iterating over the sequence using the Get method, then
+	// writing the Coordinates of the point using the writeCoordinates
+	// function, we instead directly append the byte representation of the
+	// floats. This relies on the assumption that the WKB being produced has
+	// native byte order. This hack provides a *significant* performance
+	// improvement.
+	m.buf = append(m.buf, floatsAsBytes(seq.floats)...)
+}
+
+// floatsAsBytes reinterprets the floats slice as a bytes slice in a similar
+// manner to reinterpret_cast in C++.
+func floatsAsBytes(floats []float64) []byte {
+	floatsHeader := (*reflect.SliceHeader)(unsafe.Pointer(&floats))
+	bytesHeader := reflect.SliceHeader{
+		Data: floatsHeader.Data,
+		Len:  8 * len(floats),
+		Cap:  8 * cap(floats),
 	}
+	return *(*[]byte)(unsafe.Pointer(&bytesHeader))
 }
