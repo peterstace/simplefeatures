@@ -53,7 +53,7 @@ func CheckWKBParse(t *testing.T, pg PostGIS, candidates []string) {
 		}
 		any = true
 		t.Run(fmt.Sprintf("CheckWKBParse_%d", i), func(t *testing.T) {
-			_, sfErr := geom.UnmarshalWKB(bytes.NewReader(buf))
+			_, sfErr := geom.UnmarshalWKB(buf)
 			isValid, reason := pg.WKBIsValidWithReason(t, wkb)
 			if (sfErr == nil) != isValid {
 				t.Logf("WKB: %v", wkb)

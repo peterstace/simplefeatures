@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"strings"
@@ -350,8 +349,8 @@ func (h *Handle) decodeGeomHandleUsingWKB(gh *C.GEOSGeometry) (geom.Geometry, er
 		return geom.Geometry{}, fmt.Errorf("writing wkb: %v", h.err())
 	}
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
-	reader := bytes.NewReader(C.GoBytes(unsafe.Pointer(wkb), C.int(size)))
-	return geom.UnmarshalWKB(reader)
+	byts := C.GoBytes(unsafe.Pointer(wkb), C.int(size))
+	return geom.UnmarshalWKB(byts)
 }
 
 func (h *Handle) AsText(g geom.Geometry) (string, error) {

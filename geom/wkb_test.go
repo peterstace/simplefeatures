@@ -384,7 +384,7 @@ func TestWKBParseValid(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			geom, err := UnmarshalWKB(bytes.NewReader(hexStringToBytes(t, tt.wkb)))
+			geom, err := UnmarshalWKB(hexStringToBytes(t, tt.wkb))
 			expectNoErr(t, err)
 			expectGeomEq(t, geom, geomFromWKT(t, tt.wkt))
 		})
@@ -394,7 +394,7 @@ func TestWKBParseValid(t *testing.T) {
 func TestWKBParserInvalidGeometryType(t *testing.T) {
 	// Same as POINT(1 2), but with the geometry type byte set to 0xff.
 	const wkb = "01ff000000000000000000f03f0000000000000040"
-	_, err := UnmarshalWKB(bytes.NewReader(hexStringToBytes(t, wkb)))
+	_, err := UnmarshalWKB(hexStringToBytes(t, wkb))
 	if err == nil {
 		t.Errorf("expected an error but got nil")
 	}
@@ -430,7 +430,7 @@ func TestWKBMarshalValid(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			geom := geomFromWKT(t, wkt)
 			buf := geom.AsBinary()
-			readBackGeom, err := UnmarshalWKB(bytes.NewReader(buf))
+			readBackGeom, err := UnmarshalWKB(buf)
 			expectNoErr(t, err)
 			expectGeomEq(t, readBackGeom, geom)
 		})
@@ -554,7 +554,7 @@ func BenchmarkUnmarshalWKB(b *testing.B) {
 				wkb := regularPolygon(XY{}, 1.0, sz).AsBinary()
 				b.ResetTimer()
 				for i := 0; i < b.N; i++ {
-					_, err := UnmarshalWKB(bytes.NewReader(wkb), DisableAllValidations)
+					_, err := UnmarshalWKB(wkb, DisableAllValidations)
 					if err != nil {
 						b.Fatal(err)
 					}

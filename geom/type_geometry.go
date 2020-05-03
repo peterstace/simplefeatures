@@ -1,11 +1,8 @@
 package geom
 
 import (
-	"bytes"
 	"database/sql/driver"
 	"fmt"
-	"io"
-	"strings"
 	"unsafe"
 )
 
@@ -281,12 +278,12 @@ func (g Geometry) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (g *Geometry) Scan(src interface{}) error {
-	var r io.Reader
+	var wkb []byte
 	switch src := src.(type) {
 	case []byte:
-		r = bytes.NewReader(src)
+		wkb = src
 	case string:
-		r = strings.NewReader(src)
+		wkb = []byte(src)
 	default:
 		// nil is specifically not supported. It _could_ map to an empty
 		// geometry, however then the caller wouldn't be able to differentiate
@@ -295,7 +292,7 @@ func (g *Geometry) Scan(src interface{}) error {
 		return fmt.Errorf("unsupported src type in Scan: %T", src)
 	}
 
-	unmarshalled, err := UnmarshalWKB(r)
+	unmarshalled, err := UnmarshalWKB(wkb)
 	if err != nil {
 		return err
 	}

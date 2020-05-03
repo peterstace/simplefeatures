@@ -92,7 +92,7 @@ var mismatchErr = errors.New("mismatch")
 func checkIsValid(h *Handle, g geom.Geometry, log *log.Logger) (bool, error) {
 	wkb := g.AsBinary()
 	var validAsPerSimpleFeatures bool
-	if _, err := geom.UnmarshalWKB(bytes.NewReader(wkb)); err == nil {
+	if _, err := geom.UnmarshalWKB(wkb); err == nil {
 		validAsPerSimpleFeatures = true
 	}
 	log.Printf("Valid as per simplefeatures: %v", validAsPerSimpleFeatures)
@@ -267,7 +267,7 @@ func checkFromBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return err
 	}
 
-	got, err := geom.UnmarshalWKB(bytes.NewReader(wkb))
+	got, err := geom.UnmarshalWKB(wkb)
 	if err != nil {
 		return err
 	}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"go/ast"
@@ -79,7 +78,7 @@ func convertToGeometries(candidates []string) ([]geom.Geometry, error) {
 		if err != nil {
 			continue
 		}
-		g, err := geom.UnmarshalWKB(bytes.NewReader(buf), geom.DisableAllValidations)
+		g, err := geom.UnmarshalWKB(buf, geom.DisableAllValidations)
 		if err == nil {
 			geoms = append(geoms, g)
 		}

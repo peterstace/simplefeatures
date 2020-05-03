@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"database/sql"
 	"fmt"
 	"go/ast"
@@ -130,7 +129,7 @@ func convertToGeometries(t *testing.T, candidates []string) []geom.Geometry {
 		if err != nil {
 			continue
 		}
-		g, err := geom.UnmarshalWKB(bytes.NewReader(buf))
+		g, err := geom.UnmarshalWKB(buf)
 		if err == nil {
 			geoms = append(geoms, g)
 		}

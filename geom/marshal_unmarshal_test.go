@@ -1,7 +1,6 @@
 package geom_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"strconv"
 	"testing"
@@ -194,7 +193,7 @@ func TestMarshalUnmarshal(t *testing.T) {
 			t.Run(strconv.Itoa(i), func(t *testing.T) {
 				original := geomFromWKT(t, wkt)
 				wkb := original.AsBinary()
-				reconstructed, err := geom.UnmarshalWKB(bytes.NewReader(wkb))
+				reconstructed, err := geom.UnmarshalWKB(wkb)
 				expectNoErr(t, err)
 				reconstructedWKT := reconstructed.AsText()
 				expectStringEq(t, wkt, reconstructedWKT)
