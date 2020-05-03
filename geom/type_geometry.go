@@ -654,3 +654,25 @@ func (g Geometry) ForceCoordinatesType(newCType CoordinatesType) Geometry {
 func (g Geometry) Force2D() Geometry {
 	return g.ForceCoordinatesType(DimXY)
 }
+
+// PointOnSurface returns a Point that lies inside the geometry.
+func (g Geometry) PointOnSurface() Point {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		return g.AsGeometryCollection().PointOnSurface()
+	case TypePoint:
+		return g.AsPoint().PointOnSurface()
+	case TypeLineString:
+		return g.AsLineString().PointOnSurface()
+	case TypePolygon:
+		return g.AsPolygon().PointOnSurface()
+	case TypeMultiPoint:
+		return g.AsMultiPoint().PointOnSurface()
+	case TypeMultiLineString:
+		return g.AsMultiLineString().PointOnSurface()
+	case TypeMultiPolygon:
+		return g.AsMultiPolygon().PointOnSurface()
+	default:
+		panic("unknown geometry: " + g.gtype.String())
+	}
+}

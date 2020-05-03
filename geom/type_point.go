@@ -219,3 +219,8 @@ func (p Point) ForceCoordinatesType(newCType CoordinatesType) Point {
 func (p Point) Force2D() Point {
 	return p.ForceCoordinatesType(DimXY)
 }
+
+// PointOnSurface returns the original Point.
+func (p Point) PointOnSurface() Point {
+	return p.Force2D()
+}

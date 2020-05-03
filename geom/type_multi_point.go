@@ -262,3 +262,13 @@ func (m MultiPoint) ForceCoordinatesType(newCType CoordinatesType) MultiPoint {
 func (m MultiPoint) Force2D() MultiPoint {
 	return m.ForceCoordinatesType(DimXY)
 }
+
+// PointOnSurface returns one of the Points in the Collection.
+func (m MultiPoint) PointOnSurface() Point {
+	nearest := newNearestPointAccumulator(m.Centroid())
+	n := m.NumPoints()
+	for i := 0; i < n; i++ {
+		nearest.consider(m.PointN(i).Force2D())
+	}
+	return nearest.point
+}

@@ -148,7 +148,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 
 		// Construct midpoints between intersection points and endpoints.
 		pts = append(pts, p2.lines[j].a, p2.lines[j].b)
-		pts = sortAndUniquify(pts)
+		pts = sortAndUniquifyXYs(pts)
 
 		// Check if midpoints are inside the other polygon.
 		for k := 0; k+1 < len(pts); k++ {
@@ -162,7 +162,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 	return nil
 }
 
-func sortAndUniquify(xys []XY) []XY {
+func sortAndUniquifyXYs(xys []XY) []XY {
 	if len(xys) == 0 {
 		return xys
 	}
@@ -426,4 +426,24 @@ func (m MultiPolygon) ForceCoordinatesType(newCType CoordinatesType) MultiPolygo
 // Force2D returns a copy of the MultiPolygon with Z and M values removed.
 func (m MultiPolygon) Force2D() MultiPolygon {
 	return m.ForceCoordinatesType(DimXY)
+}
+
+// PointOnSurface returns a Point on the interior of the MultiPolygon.
+func (m MultiPolygon) PointOnSurface() Point {
+	var (
+		bestWidth float64
+		bestPoint Point
+	)
+	for i := 0; i < m.NumPolygons(); i++ {
+		poly := m.PolygonN(i)
+		point, bisectorWidth := pointOnAreaSurface(poly)
+		if point.IsEmpty() {
+			continue
+		}
+		if bisectorWidth > bestWidth {
+			bestWidth = bisectorWidth
+			bestPoint = point
+		}
+	}
+	return bestPoint
 }

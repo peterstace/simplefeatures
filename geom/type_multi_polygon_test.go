@@ -85,7 +85,7 @@ func TestSortAndUniquify(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := sortAndUniquify(tt.input)
+			got := sortAndUniquifyXYs(tt.input)
 			if !reflect.DeepEqual(got, tt.output) {
 				t.Logf("got:  %v", got)
 				t.Logf("want: %v", tt.output)

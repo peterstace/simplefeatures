@@ -397,3 +397,27 @@ func (c GeometryCollection) ForceCoordinatesType(newCType CoordinatesType) Geome
 func (c GeometryCollection) Force2D() GeometryCollection {
 	return c.ForceCoordinatesType(DimXY)
 }
+
+// PointOnSurface returns a Point that's on one of the geometries in the
+// collection.
+func (c GeometryCollection) PointOnSurface() Point {
+	// For collection with mixed dimension, we only consider members who have
+	// the highest dimension.
+	var maxDim int
+	c.walk(func(g Geometry) {
+		if !g.IsEmpty() {
+			maxDim = max(maxDim, g.Dimension())
+		}
+	})
+
+	// Find the point-on-surface of a member that is closest to the overall
+	// centroid.
+	nearest := newNearestPointAccumulator(c.Centroid())
+	c.walk(func(g Geometry) {
+		if g.Dimension() == maxDim {
+			nearest.consider(g.PointOnSurface())
+		}
+	})
+
+	return nearest.point
+}

@@ -361,3 +361,28 @@ func (m MultiLineString) asLines() []line {
 	}
 	return lines
 }
+
+// PointOnSurface returns a Point on one of the LineStrings in the collection.
+func (m MultiLineString) PointOnSurface() Point {
+	// Find the nearest control point on the LineString, ignoring the start/end points.
+	nearest := newNearestPointAccumulator(m.Centroid())
+	for i := 0; i < m.NumLineStrings(); i++ {
+		seq := m.LineStringN(i).Coordinates()
+		n := seq.Length()
+		for j := 1; j < n-1; j++ {
+			candidate := NewPointFromXY(seq.GetXY(j))
+			nearest.consider(candidate)
+		}
+	}
+	if !nearest.point.IsEmpty() {
+		return nearest.point
+	}
+
+	// If we still don't have a point, then consider the start/end points.
+	for i := 0; i < m.NumLineStrings(); i++ {
+		ls := m.LineStringN(i)
+		nearest.consider(ls.StartPoint().Force2D())
+		nearest.consider(ls.EndPoint().Force2D())
+	}
+	return nearest.point
+}

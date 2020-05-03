@@ -454,3 +454,9 @@ func (p Polygon) ForceCoordinatesType(newCType CoordinatesType) Polygon {
 func (p Polygon) Force2D() Polygon {
 	return p.ForceCoordinatesType(DimXY)
 }
+
+// PointOnSurface returns a Point that lies inside the Polygon.
+func (p Polygon) PointOnSurface() Point {
+	pt, _ := pointOnAreaSurface(p)
+	return pt
+}

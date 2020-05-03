@@ -17,13 +17,13 @@ import (
 #include <stdlib.h>
 #include <string.h>
 
-void sf_error_handler(const char *message, void *userdata) {
+void sf_geos_error_handler(const char *message, void *userdata) {
 	strncpy(userdata, message, 1024);
 }
 
-GEOSContextHandle_t sf_init(void *userdata) {
+GEOSContextHandle_t sf_geos_init(void *userdata) {
 	GEOSContextHandle_t ctx = GEOS_init_r();
-	GEOSContext_setErrorMessageHandler_r(ctx, sf_error_handler, userdata);
+	GEOSContext_setErrorMessageHandler_r(ctx, sf_geos_error_handler, userdata);
 	return ctx;
 }
 
@@ -51,7 +51,7 @@ type Handle struct {
 // NewHandle creates a new handle.
 func NewHandle() (*Handle, error) {
 	h := &Handle{}
-	h.context = C.sf_init(unsafe.Pointer(&h.errBuf))
+	h.context = C.sf_geos_init(unsafe.Pointer(&h.errBuf))
 	if h.context == nil {
 		return nil, errors.New("could not create libgeos context")
 	}
