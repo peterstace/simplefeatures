@@ -14,6 +14,8 @@ old="$(mktemp)"
 new="$(mktemp)"
 trap "rm -f $new $old" EXIT
 
+package="./..."
+
 for (( i = 0; i < 15; i++ )); do
 	echo
 	echo "RUN $i"
@@ -22,13 +24,13 @@ for (( i = 0; i < 15; i++ )); do
 	echo "OLD"
 	git checkout "$old_git_sha1"
 	echo
-	go test ./... -test.run='^$' -benchtime=0.1s -benchmem -bench=. | tee -a "$old"
+	go test "$package" -test.run='^$' -benchtime=0.1s -benchmem -bench=. | tee -a "$old"
 
 	echo
 	echo "NEW"
 	git checkout "$new_git_sha1"
 	echo
-	go test ./... -test.run='^$' -benchtime=0.1s -benchmem -bench=. | tee -a "$new"
+	go test "$package" -test.run='^$' -benchtime=0.1s -benchmem -bench=. | tee -a "$new"
 done
 
 echo

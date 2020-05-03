@@ -28,6 +28,10 @@ GEOSContextHandle_t sf_init(void *userdata) {
 
 unsigned char *marshal(GEOSContextHandle_t handle, const GEOSGeometry *g, size_t *size, char *isWKT);
 
+GEOSGeometry const *noop(GEOSContextHandle_t handle, const GEOSGeometry *g) {
+	return g;
+}
+
 */
 import "C"
 
@@ -237,6 +241,15 @@ func Difference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geomet
 func SymmetricDifference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
 	return binaryOperation(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSSymDifference_r(ctx, a, b)
+	})
+}
+
+// noop returns the geometry unaltered, via conversion to and from GEOS. This
+// function is only for benchmarking purposes, hence it is not exported or used
+// outside of benchmark tests.
+func noop(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	return unaryOperation(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.noop(ctx, g)
 	})
 }
 
@@ -475,7 +488,11 @@ func unaryOperation(
 	if resultGH == nil {
 		return geom.Geometry{}, h.err()
 	}
-	defer C.GEOSGeom_destroy(resultGH)
+	if gh != resultGH {
+		// gh and resultGH will be the same if op is the noop function that
+		// just returns its input.
+		defer C.GEOSGeom_destroy(resultGH)
+	}
 
 	return h.decode(resultGH, opts)
 }
