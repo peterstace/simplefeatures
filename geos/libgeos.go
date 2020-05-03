@@ -72,7 +72,6 @@ func Touches(g1, g2 geom.Geometry) (bool, error) {
 }
 
 // Contains returns true if and only if geometry A contains geometry B.
-// See the global Contains function for details.
 // Formally, the following two conditions must hold:
 //
 // 1. No points of B lies on the exterior of geometry A. That is, B must only be
