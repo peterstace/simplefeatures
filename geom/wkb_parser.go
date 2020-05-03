@@ -68,7 +68,7 @@ func (p *wkbParser) readByte() byte {
 }
 
 func (p *wkbParser) parseUint32() uint32 {
-	if len(p.body) < 4 {
+	if p.err != nil || len(p.body) < 4 {
 		p.setErr(io.ErrUnexpectedEOF)
 		return 0
 	}
@@ -139,7 +139,7 @@ func (p *wkbParser) parseGeomRoot(gtype GeometryType, ctype CoordinatesType) Geo
 }
 
 func (p *wkbParser) parseFloat64() float64 {
-	if len(p.body) < 8 {
+	if p.err != nil || len(p.body) < 8 {
 		p.setErr(io.ErrUnexpectedEOF)
 		return 0
 	}
