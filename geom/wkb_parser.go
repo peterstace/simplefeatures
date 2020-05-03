@@ -207,13 +207,12 @@ func (p *wkbParser) parseLineString(ctype CoordinatesType) LineString {
 // bytesAsFloats reinterprets the bytes slice as a float64 slice in a similar
 // manner to reinterpret_cast in C++.
 func bytesAsFloats(byts []byte) []float64 {
-	bytsHeader := (*reflect.SliceHeader)(unsafe.Pointer(&byts))
-	floatsHeader := reflect.SliceHeader{
-		Data: bytsHeader.Data,
-		Len:  len(byts) / 8,
-		Cap:  cap(byts) / 8,
-	}
-	return *(*[]float64)(unsafe.Pointer(&floatsHeader))
+	var floats []float64
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&floats))
+	hdr.Data = (*reflect.SliceHeader)(unsafe.Pointer(&byts)).Data
+	hdr.Len = len(byts) / 8
+	hdr.Cap = cap(byts) / 8
+	return floats
 }
 
 // flipEndianessStride8 flips the endianess of the input bytes, assuming that
