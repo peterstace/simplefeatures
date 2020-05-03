@@ -39,7 +39,7 @@ func (n *nearestPointAccumulator) consider(candidate Point) {
 func pointOnAreaSurface(poly Polygon) (Point, float64) {
 	// Algorithm overview:
 	//
-	// 1. Find the middle of the envelope around the Polygon.
+	// 1. Find the middle Y value of the envelope around the Polygon.
 	//
 	// 2. If the Y value of any control points in the polygon share that
 	// mid-envelope Y value, then choose a new Y value. The new Y value is the
@@ -47,9 +47,11 @@ func pointOnAreaSurface(poly Polygon) (Point, float64) {
 	// control point.
 	//
 	// 3. Construct a bisector line that crosses through the polygon at the
-	// height of the chosen Y value.
+	// height of the chosen Y value. Due to the choice of Y value, this
+	// bisector won't pass through any control point in the polygon.
 	//
-	// 4. Find the largest portion of the bisector line that intersects with the Polygon.
+	// 4. Find the largest portion of the bisector line that intersects with
+	// the Polygon.
 	//
 	// 5. The PointOnSurface is the midpoint of that largest portion.
 

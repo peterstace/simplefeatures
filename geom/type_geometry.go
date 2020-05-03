@@ -655,7 +655,7 @@ func (g Geometry) Force2D() Geometry {
 	return g.ForceCoordinatesType(DimXY)
 }
 
-// PointOnSurface returns a Point that lines inside the geometry.
+// PointOnSurface returns a Point that lies inside the geometry.
 func (g Geometry) PointOnSurface() Point {
 	switch g.gtype {
 	case TypeGeometryCollection:

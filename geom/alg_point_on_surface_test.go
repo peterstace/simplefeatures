@@ -74,7 +74,6 @@ func TestPointOnSurface(t *testing.T) {
 		{"GEOMETRYCOLLECTION(POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1)),POINT(1.5 1.5))", "POINT(0.5 1.5)"},
 		{"GEOMETRYCOLLECTION(POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1)),LINESTRING(1.4 1.4,1.6 1.6))", "POINT(0.5 1.5)"},
 		{"GEOMETRYCOLLECTION(LINESTRING(0 0,1 1),POINT(0.5 0.5))", "POINT(0 0)"},
-		{"POINT EMPTY", "POINT EMPTY"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			input := geomFromWKT(t, tt.inputWKT)
