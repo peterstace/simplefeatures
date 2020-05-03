@@ -1,4 +1,4 @@
-package geos_test
+package geos
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
-	"github.com/peterstace/simplefeatures/geos"
 )
 
 // regularPolygon computes a regular polygon circumscribed by a circle with the
@@ -39,10 +38,10 @@ func BenchmarkIntersection(b *testing.B) {
 		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
 			inputA := regularPolygon(geom.XY{X: 0, Y: 0}, 1.0, sz).AsGeometry()
 			inputB := regularPolygon(geom.XY{X: 1, Y: 0}, 1.0, sz).AsGeometry()
-
 			b.ResetTimer()
+
 			for i := 0; i < b.N; i++ {
-				_, err := geos.Intersection(inputA, inputB)
+				_, err := Intersection(inputA, inputB, geom.DisableAllValidations)
 				if err != nil {
 					b.Fatal(err)
 				}
