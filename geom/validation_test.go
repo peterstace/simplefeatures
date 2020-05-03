@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/peterstace/simplefeatures/geom"
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
@@ -355,11 +356,11 @@ func regularPolygon(center XY, radius float64, sides int) Polygon {
 	}
 	coords[2*sides+0] = coords[0]
 	coords[2*sides+1] = coords[1]
-	ring, err := NewLineString(NewSequence(coords, DimXY))
+	ring, err := NewLineString(NewSequence(coords, DimXY), geom.DisableAllValidations)
 	if err != nil {
 		panic(err)
 	}
-	poly, err := NewPolygonFromRings([]LineString{ring})
+	poly, err := NewPolygonFromRings([]LineString{ring}, geom.DisableAllValidations)
 	if err != nil {
 		panic(err)
 	}
