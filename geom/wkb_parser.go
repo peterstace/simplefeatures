@@ -219,7 +219,7 @@ func bytesAsFloats(byts []byte) []float64 {
 // flipEndianessStride8 flips the endianess of the input bytes, assuming that
 // they represent data items that are 8 bytes long.
 func flipEndianessStride8(p []byte) {
-	for i := 0; i < len(p)/8; i += 8 {
+	for i := 0; i < len(p); i += 8 {
 		p[i+0], p[i+7] = p[i+7], p[i+0]
 		p[i+1], p[i+6] = p[i+6], p[i+1]
 		p[i+2], p[i+5] = p[i+5], p[i+2]

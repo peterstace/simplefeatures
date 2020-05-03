@@ -533,6 +533,46 @@ func TestWKBMarshalEmptyPoint(t *testing.T) {
 	}
 }
 
+func TestWKBUnmarshalEndianess(t *testing.T) {
+	for i, tt := range []struct {
+		wkt string
+		hex string
+	}{
+		{
+			"LINESTRING(1 2,3 4,5 6)",
+			"01" + // little endian
+				"02000000" + // LineString
+				"03000000" + // 3 points
+				"000000000000F03F" + // 1
+				"0000000000000040" + // 2
+				"0000000000000840" + // 3
+				"0000000000001040" + // 4
+				"0000000000001440" + // 5
+				"0000000000001840", //  6
+		},
+		{
+			"LINESTRING(1 2,3 4,5 6)",
+			"00" + // big endian
+				"00000002" + // LineString
+				"00000003" + // 3 points
+				"3FF0000000000000" + // 1
+				"4000000000000000" + // 2
+				"4008000000000000" + // 3
+				"4010000000000000" + // 4
+				"4014000000000000" + // 5
+				"4018000000000000", //  6
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			want := geomFromWKT(t, tt.wkt)
+			wkb := hexStringToBytes(t, tt.hex)
+			got, err := UnmarshalWKB(wkb)
+			expectNoErr(t, err)
+			expectGeomEq(t, got, want)
+		})
+	}
+}
+
 func BenchmarkMarshalWKB(b *testing.B) {
 	b.Run("polygon", func(b *testing.B) {
 		for _, sz := range []int{10, 100, 1000, 10000} {
