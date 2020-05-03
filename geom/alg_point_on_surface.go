@@ -5,17 +5,20 @@ import (
 	"sort"
 )
 
-func newNearestPoint(target Point) nearestPoint {
-	return nearestPoint{target: target}
+func newNearestPointAccumulator(target Point) nearestPointAccumulator {
+	return nearestPointAccumulator{target: target}
 }
 
-type nearestPoint struct {
+// nearestPointAccumulator keeps track of the point within a group of
+// candidates that is nearest to a target point.
+type nearestPointAccumulator struct {
 	target Point
 	point  Point
 	dist   float64
 }
 
-func (n *nearestPoint) add(candidate Point) {
+// consider considers if a candidate point is the new nearest point to the target.
+func (n *nearestPointAccumulator) consider(candidate Point) {
 	targetXY, ok := n.target.XY()
 	if !ok {
 		return

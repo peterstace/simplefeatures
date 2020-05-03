@@ -412,10 +412,10 @@ func (c GeometryCollection) PointOnSurface() Point {
 
 	// Find the point-on-surface of a member that is closest to the overall
 	// centroid.
-	nearest := newNearestPoint(c.Centroid())
+	nearest := newNearestPointAccumulator(c.Centroid())
 	c.walk(func(g Geometry) {
 		if g.Dimension() == maxDim {
-			nearest.add(g.PointOnSurface())
+			nearest.consider(g.PointOnSurface())
 		}
 	})
 
