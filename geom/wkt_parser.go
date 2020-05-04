@@ -16,7 +16,14 @@ import (
 
 // UnmarshalWKT parses a Well Known Text (WKT), and returns the corresponding
 // Geometry.
-func UnmarshalWKT(r io.Reader, opts ...ConstructorOption) (Geometry, error) {
+func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
+	return UnmarshalWKTFromReader(strings.NewReader(wkt), opts...)
+}
+
+// UnmarshalWKTFromReader parses a Well Known Text (WKT), and returns the
+// corresponding Geometry. It the same as UnmarshalWKT, but allows an io.Reader
+// to be used instead of a string.
+func UnmarshalWKTFromReader(r io.Reader, opts ...ConstructorOption) (Geometry, error) {
 	p := newParser(r, opts)
 	geom := p.nextGeometryTaggedText()
 	p.checkEOF()

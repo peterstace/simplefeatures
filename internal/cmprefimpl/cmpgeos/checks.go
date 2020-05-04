@@ -200,7 +200,7 @@ func checkFromText(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return err
 	}
 
-	got, err := geom.UnmarshalWKT(strings.NewReader(wkt))
+	got, err := geom.UnmarshalWKT(wkt)
 	if err != nil {
 		return err
 	}

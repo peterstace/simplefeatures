@@ -510,7 +510,7 @@ func (h *handle) decode(gh *C.GEOSGeometry, opts []geom.ConstructorOption) (geom
 	r := bytes.NewReader(C.GoBytes(unsafe.Pointer(serialised), C.int(size)))
 
 	if isWKT != 0 {
-		return geom.UnmarshalWKT(r, opts...)
+		return geom.UnmarshalWKTFromReader(r, opts...)
 	}
 	return geom.UnmarshalWKB(r, opts...)
 }

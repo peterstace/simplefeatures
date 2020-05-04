@@ -2,7 +2,6 @@ package geos
 
 import (
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -10,7 +9,7 @@ import (
 
 func geomFromWKT(t *testing.T, wkt string) geom.Geometry {
 	t.Helper()
-	geom, err := geom.UnmarshalWKT(strings.NewReader(wkt))
+	geom, err := geom.UnmarshalWKT(wkt)
 	if err != nil {
 		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 	}
