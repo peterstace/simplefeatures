@@ -5,7 +5,6 @@ import (
 	"math"
 	"math/rand"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -53,7 +52,7 @@ func TestPolygonValidation(t *testing.T) {
 		)`,
 	} {
 		t.Run("valid_"+strconv.Itoa(i), func(t *testing.T) {
-			_, err := UnmarshalWKT(strings.NewReader(wkt))
+			_, err := UnmarshalWKT(wkt)
 			if err != nil {
 				t.Error(err)
 			}
@@ -106,7 +105,7 @@ func TestPolygonValidation(t *testing.T) {
 		`POLYGON((0 0,0 1,1 0,0 0),EMPTY)`,
 	} {
 		t.Run("invalid_"+strconv.Itoa(i), func(t *testing.T) {
-			_, err := UnmarshalWKT(strings.NewReader(wkt))
+			_, err := UnmarshalWKT(wkt)
 			if err == nil {
 				t.Log("WKT", wkt)
 				t.Error("expected error")
@@ -192,7 +191,7 @@ func TestMultiPolygonValidation(t *testing.T) {
 		)`,
 	} {
 		t.Run(fmt.Sprintf("invalid_%d", i), func(t *testing.T) {
-			_, err := UnmarshalWKT(strings.NewReader(wkt))
+			_, err := UnmarshalWKT(wkt)
 			if err == nil {
 				t.Log(wkt)
 				t.Error("expected error")

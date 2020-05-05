@@ -3,7 +3,6 @@ package geom_test
 import (
 	"math"
 	"strconv"
-	"strings"
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
@@ -47,7 +46,7 @@ func TestIsEmptyDimension(t *testing.T) {
 		{"GEOMETRYCOLLECTION(POLYGON((0 0,1 1,1 0,0 0)),POINT(1 1),LINESTRING(0 0,1 1))", false, 2},
 	} {
 		t.Run(tt.wkt, func(t *testing.T) {
-			geom, err := UnmarshalWKT(strings.NewReader(tt.wkt))
+			geom, err := UnmarshalWKT(tt.wkt)
 			if err != nil {
 				t.Fatal(err)
 			}

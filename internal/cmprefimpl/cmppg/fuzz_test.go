@@ -115,7 +115,7 @@ func extractStringsFromSource(t *testing.T) []string {
 func convertToGeometries(t *testing.T, candidates []string) []geom.Geometry {
 	var geoms []geom.Geometry
 	for _, c := range candidates {
-		g, err := geom.UnmarshalWKT(strings.NewReader(c))
+		g, err := geom.UnmarshalWKT(c)
 		if err == nil {
 			geoms = append(geoms, g)
 		}

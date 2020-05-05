@@ -2,7 +2,6 @@ package geom_test
 
 import (
 	"strconv"
-	"strings"
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
@@ -20,7 +19,7 @@ func TestUnmarshalWKTValidGrammar(t *testing.T) {
 		{"exponent", "point (1e3 1.5e2)"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := UnmarshalWKT(strings.NewReader(tt.wkt))
+			_, err := UnmarshalWKT(tt.wkt)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -51,7 +50,7 @@ func TestUnmarshalWKTInvalidGrammar(t *testing.T) {
 		{"geometry collection no coords", "GEOMETRYCOLLECTION()"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := UnmarshalWKT(strings.NewReader(tt.wkt))
+			_, err := UnmarshalWKT(tt.wkt)
 			if err == nil {
 				t.Fatalf("expected error but got nil")
 			} else {

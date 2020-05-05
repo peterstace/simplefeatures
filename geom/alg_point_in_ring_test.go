@@ -3,7 +3,6 @@ package geom
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"testing"
 )
 
@@ -130,7 +129,7 @@ func TestPointInRing(t *testing.T) {
 			},
 		},
 	} {
-		g, err := UnmarshalWKT(strings.NewReader(tc.wkt))
+		g, err := UnmarshalWKT(tc.wkt)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -142,7 +141,7 @@ func TestPointInRing(t *testing.T) {
 		ring := poly.ExteriorRing()
 
 		for j, st := range tc.subTests {
-			pt, err := UnmarshalWKT(strings.NewReader(st.pointWKT))
+			pt, err := UnmarshalWKT(st.pointWKT)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -170,10 +169,10 @@ func TestPointInRing(t *testing.T) {
 }
 
 func TestPointInPolygon(t *testing.T) {
-	g, err := UnmarshalWKT(strings.NewReader(`POLYGON(
+	g, err := UnmarshalWKT(`POLYGON(
 		(0 0,1 0,1 1,2 1,2 0,3 0,3 -1,4 -1,4 0,5 0,5 1,6 1,6 -1,7 -1,7 0,8 0,8 -1,9 -1,10 0,11 -1,11 1,12 0,13 1,13 -1,14 -1,14 -2,30 -2,30 3,14 3,14 2,0 2,0 0),
 		(15 0,16 0,16 1,17 1,17 0,18 0,18 -1,19 -1,19 0,20 0,20 1,21 1,21 -1,22 -1,22 0,23 0,23 -1,24 -1,25 0,26 -1,26 1,27 0,28 1,28 -1,29 -1,29 2,15 2,15 0)
-	)`))
+	)`)
 	if err != nil {
 		t.Fatal(err)
 	}

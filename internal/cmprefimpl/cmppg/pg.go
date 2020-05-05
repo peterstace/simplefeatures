@@ -135,24 +135,18 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 
 	if boundaryWKT.Valid {
 		result.Boundary.Valid = true
-		result.Boundary.Geometry, err = geom.UnmarshalWKT(
-			strings.NewReader(boundaryWKT.String),
-		)
+		result.Boundary.Geometry, err = geom.UnmarshalWKT(boundaryWKT.String)
 		if err != nil {
 			return result, err
 		}
 	}
 
-	result.ConvexHull, err = geom.UnmarshalWKT(
-		strings.NewReader(convexHullWKT),
-	)
+	result.ConvexHull, err = geom.UnmarshalWKT(convexHullWKT)
 	if err != nil {
 		return result, err
 	}
 
-	result.Reverse, err = geom.UnmarshalWKT(
-		strings.NewReader(reverseWKT),
-	)
+	result.Reverse, err = geom.UnmarshalWKT(reverseWKT)
 	if err != nil {
 		return result, err
 	}
