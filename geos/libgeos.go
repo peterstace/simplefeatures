@@ -1,15 +1,5 @@
 package geos
 
-// Package geos provides a cgo wrapper around the GEOS (Geometry Engine, Open
-// Source) library.
-//
-// Its purpose is to provide functionality that has been implemented in GEOS,
-// but is not yet available in the simplefeatures library.
-//
-// The operations in this package ignore Z and M values if they are present.
-//
-// To use this package, you will need to install the GEOS library.
-
 /*
 #cgo LDFLAGS: -lgeos_c
 #include "geos_c.h"
