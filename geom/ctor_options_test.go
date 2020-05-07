@@ -2,7 +2,6 @@ package geom_test
 
 import (
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -31,11 +30,11 @@ func TestDisableValidation(t *testing.T) {
 		"GEOMETRYCOLLECTION(LINESTRING(0 1,0 1))",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := geom.UnmarshalWKT(strings.NewReader(wkt))
+			_, err := geom.UnmarshalWKT(wkt)
 			if err == nil {
 				t.Fatal("expected validation error unmarshalling wkt")
 			}
-			_, err = geom.UnmarshalWKT(strings.NewReader(wkt), geom.DisableAllValidations)
+			_, err = geom.UnmarshalWKT(wkt, geom.DisableAllValidations)
 			if err != nil {
 				t.Errorf("disabling validations still gave an error: %v", err)
 			}

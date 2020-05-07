@@ -17,7 +17,7 @@ import (
 // For a Polygon to be valid, the following assertions must hold:
 //
 // 1. The rings (outer and inner) must be valid linear rings. This means that
-//    they must be non-empty, simple, and closed.
+// they must be non-empty, simple, and closed.
 //
 // 2. Each pair of rings must only intersect at a single point.
 //

@@ -27,7 +27,7 @@ func CheckWKTParse(t *testing.T, pg PostGIS, candidates []string) {
 			// isn't closed (and thus won't be accepted by simple features).
 			wkt := strings.ReplaceAll(wkt, "LINEARRING", "LINESTRING")
 
-			_, sfErr := geom.UnmarshalWKT(strings.NewReader(wkt))
+			_, sfErr := geom.UnmarshalWKT(wkt)
 			isValid, reason := pg.WKTIsValidWithReason(wkt)
 			if (sfErr == nil) != isValid {
 				t.Logf("SimpleFeatures err: %v", sfErr)

@@ -1,7 +1,6 @@
 package geom_test
 
 import (
-	"strings"
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
@@ -9,7 +8,7 @@ import (
 
 func geomFromWKT(t *testing.T, wkt string) Geometry {
 	t.Helper()
-	geom, err := UnmarshalWKT(strings.NewReader(wkt))
+	geom, err := UnmarshalWKT(wkt)
 	if err != nil {
 		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 	}
