@@ -1,6 +1,5 @@
-// Package geos provides a cgo wrapper around the
-// [GEOS](https://www.osgeo.org/projects/geos/) (Geometry Engine, Open Source)
-// library.
+// Package geos provides a cgo wrapper around the GEOS (Geometry Engine, Open
+// Source)  library. See https://www.osgeo.org/projects/geos/ for more details.
 //
 // Its purpose is to provide functionality that has been implemented in GEOS,
 // but is not yet available natively in the simplefeatures library.
