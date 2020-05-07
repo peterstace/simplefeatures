@@ -8,10 +8,10 @@ type ConstructorOption func(o *ctorOptionSet)
 // implications for using the resultant geometries:
 //
 // 1. If the geometry is invalid, then any geometric calculations resulting
-//    from the geometry may be invalid.
+// from the geometry may be invalid.
 //
 // 2. If the geometry is invalid, then invoking geometric calculations may
-//    cause a panic or infinite loop.
+// cause a panic or infinite loop.
 //
 // This option should be used with caution. It is most useful when invalid
 // geometries need to be loaded, but no geometric calculations will be
