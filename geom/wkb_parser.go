@@ -6,23 +6,38 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"reflect"
+	"unsafe"
 )
 
 // UnmarshalWKB reads the Well Known Binary (WKB), and returns the
 // corresponding Geometry.
-func UnmarshalWKB(r io.Reader, opts ...ConstructorOption) (Geometry, error) {
-	p := wkbParser{r: r, opts: opts}
-	p.parseByteOrder()
-	gtype, ctype := p.parseGeomAndCoordType()
-	geom := p.parseGeomRoot(gtype, ctype)
-	return geom, p.err
+func UnmarshalWKB(wkb []byte, opts ...ConstructorOption) (Geometry, error) {
+	p := wkbParser{body: wkb, opts: opts}
+	g := p.run()
+	return g, p.err
 }
 
 type wkbParser struct {
 	err  error
-	r    io.Reader
+	body []byte
 	bo   binary.ByteOrder
 	opts []ConstructorOption
+}
+
+func (p *wkbParser) run() Geometry {
+	p.parseByteOrder()
+	gtype, ctype := p.parseGeomAndCoordType()
+	geom := p.parseGeomRoot(gtype, ctype)
+	return geom
+}
+
+func (p *wkbParser) inner() Geometry {
+	inner := wkbParser{err: p.err, body: p.body, opts: p.opts}
+	g := inner.run()
+	p.body = inner.body
+	p.setErr(inner.err)
+	return g
 }
 
 func (p *wkbParser) setErr(err error) {
@@ -32,22 +47,33 @@ func (p *wkbParser) setErr(err error) {
 }
 
 func (p *wkbParser) parseByteOrder() {
-	var buf [1]byte
-	_, err := io.ReadFull(p.r, buf[:])
-	p.setErr(err)
-	switch buf[0] {
+	switch b := p.readByte(); b {
 	case 0:
 		p.bo = binary.BigEndian
 	case 1:
 		p.bo = binary.LittleEndian
 	default:
-		p.setErr(fmt.Errorf("invalid byte order: %x", buf[0]))
+		p.setErr(fmt.Errorf("invalid byte order: %x", b))
 	}
 }
 
+func (p *wkbParser) readByte() byte {
+	if len(p.body) == 0 {
+		p.setErr(io.ErrUnexpectedEOF)
+		return 0
+	}
+	b := p.body[0]
+	p.body = p.body[1:]
+	return b
+}
+
 func (p *wkbParser) parseUint32() uint32 {
-	var x uint32
-	p.read(&x)
+	if p.err != nil || len(p.body) < 4 {
+		p.setErr(io.ErrUnexpectedEOF)
+		return 0
+	}
+	x := p.bo.Uint32(p.body)
+	p.body = p.body[4:]
 	return x
 }
 
@@ -93,14 +119,9 @@ func (p *wkbParser) parseGeomAndCoordType() (GeometryType, CoordinatesType) {
 func (p *wkbParser) parseGeomRoot(gtype GeometryType, ctype CoordinatesType) Geometry {
 	switch gtype {
 	case TypePoint:
-		c, ok := p.parsePoint(ctype)
-		if !ok {
-			return NewEmptyPoint(ctype).AsGeometry()
-		}
-		return NewPoint(c, p.opts...).AsGeometry()
+		return p.parsePoint(ctype).AsGeometry()
 	case TypeLineString:
-		ls := p.parseLineString(ctype)
-		return ls.AsGeometry()
+		return p.parseLineString(ctype).AsGeometry()
 	case TypePolygon:
 		return p.parsePolygon(ctype).AsGeometry()
 	case TypeMultiPoint:
@@ -117,20 +138,17 @@ func (p *wkbParser) parseGeomRoot(gtype GeometryType, ctype CoordinatesType) Geo
 	}
 }
 
-func (p *wkbParser) read(ptr interface{}) {
-	if p.bo == nil {
-		return // an error will have already been set
-	}
-	p.setErr(binary.Read(p.r, p.bo, ptr))
-}
-
 func (p *wkbParser) parseFloat64() float64 {
-	var f float64
-	p.read(&f)
-	return f
+	if p.err != nil || len(p.body) < 8 {
+		p.setErr(io.ErrUnexpectedEOF)
+		return 0
+	}
+	u := p.bo.Uint64(p.body)
+	p.body = p.body[8:]
+	return math.Float64frombits(u)
 }
 
-func (p *wkbParser) parsePoint(ctype CoordinatesType) (Coordinates, bool) {
+func (p *wkbParser) parsePoint(ctype CoordinatesType) Point {
 	var c Coordinates
 	c.Type = ctype
 	c.X = p.parseFloat64()
@@ -146,40 +164,66 @@ func (p *wkbParser) parsePoint(ctype CoordinatesType) (Coordinates, bool) {
 		c.M = p.parseFloat64()
 	default:
 		p.setErr(errors.New("unknown coord type"))
-		return Coordinates{}, false
+		return Point{}
 	}
 
 	if math.IsNaN(c.X) && math.IsNaN(c.Y) {
 		// Empty points are represented as NaN,NaN is WKB.
-		return Coordinates{}, false
+		return Point{}.ForceCoordinatesType(ctype)
 	}
 	if math.IsNaN(c.X) || math.IsNaN(c.Y) {
 		p.setErr(errors.New("point contains mixed NaN values"))
-		return Coordinates{}, false
+		return Point{}
 	}
-	return c, true
+	return NewPoint(c, p.opts...)
 }
 
 func (p *wkbParser) parseLineString(ctype CoordinatesType) LineString {
 	n := p.parseUint32()
-	floats := make([]float64, 0, int(n)*ctype.Dimension())
-	for i := uint32(0); i < n; i++ {
-		c, ok := p.parsePoint(ctype)
-		if !ok {
-			p.setErr(errors.New("empty point not allowed in LineString"))
-		}
-		floats = append(floats, c.X, c.Y)
-		if ctype.Is3D() {
-			floats = append(floats, c.Z)
-		}
-		if ctype.IsMeasured() {
-			floats = append(floats, c.M)
-		}
+	floats := make([]float64, int(n)*ctype.Dimension())
+
+	if len(p.body) < 8*len(floats) {
+		p.setErr(io.ErrUnexpectedEOF)
+		return LineString{}
 	}
+
+	var seqData []byte
+	if p.bo == nativeOrder {
+		seqData = p.body[:8*len(floats)]
+	} else {
+		seqData = make([]byte, 8*len(floats))
+		copy(seqData, p.body)
+		flipEndianessStride8(seqData)
+	}
+	p.body = p.body[8*len(floats):]
+	copy(floats, bytesAsFloats(seqData))
+
 	seq := NewSequence(floats, ctype)
 	poly, err := NewLineString(seq, p.opts...)
 	p.setErr(err)
 	return poly
+}
+
+// bytesAsFloats reinterprets the bytes slice as a float64 slice in a similar
+// manner to reinterpret_cast in C++.
+func bytesAsFloats(byts []byte) []float64 {
+	var floats []float64
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&floats))
+	hdr.Data = (*reflect.SliceHeader)(unsafe.Pointer(&byts)).Data
+	hdr.Len = len(byts) / 8
+	hdr.Cap = cap(byts) / 8
+	return floats
+}
+
+// flipEndianessStride8 flips the endianess of the input bytes, assuming that
+// they represent data items that are 8 bytes long.
+func flipEndianessStride8(p []byte) {
+	for i := 0; i < len(p); i += 8 {
+		p[i+0], p[i+7] = p[i+7], p[i+0]
+		p[i+1], p[i+6] = p[i+6], p[i+1]
+		p[i+2], p[i+5] = p[i+5], p[i+2]
+		p[i+3], p[i+4] = p[i+4], p[i+3]
+	}
 }
 
 func (p *wkbParser) parsePolygon(ctype CoordinatesType) Polygon {
@@ -203,8 +247,7 @@ func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) MultiPoint {
 	}
 	var pts []Point
 	for i := uint32(0); i < n; i++ {
-		geom, err := UnmarshalWKB(p.r)
-		p.setErr(err)
+		geom := p.inner()
 		if !geom.IsPoint() {
 			p.setErr(errors.New("non-Point found in MultiPoint"))
 		}
@@ -220,8 +263,7 @@ func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) MultiLineString 
 	}
 	var lss []LineString
 	for i := uint32(0); i < n; i++ {
-		geom, err := UnmarshalWKB(p.r)
-		p.setErr(err)
+		geom := p.inner()
 		if !geom.IsLineString() {
 			p.setErr(errors.New("non-LineString found in MultiLineString"))
 		} else {
@@ -238,8 +280,7 @@ func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) MultiPolygon {
 	}
 	var polys []Polygon
 	for i := uint32(0); i < n; i++ {
-		geom, err := UnmarshalWKB(p.r)
-		p.setErr(err)
+		geom := p.inner()
 		if !geom.IsPolygon() {
 			p.setErr(errors.New("non-Polygon found in MultiPolygon"))
 		}
@@ -257,8 +298,7 @@ func (p *wkbParser) parseGeometryCollection(ctype CoordinatesType) GeometryColle
 	}
 	var geoms []Geometry
 	for i := uint32(0); i < n; i++ {
-		geom, err := UnmarshalWKB(p.r)
-		p.setErr(err)
+		geom := p.inner()
 		geoms = append(geoms, geom)
 	}
 	return NewGeometryCollection(geoms, p.opts...)

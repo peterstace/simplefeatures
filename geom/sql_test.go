@@ -1,7 +1,6 @@
 package geom_test
 
 import (
-	"bytes"
 	"strconv"
 	"testing"
 
@@ -14,7 +13,7 @@ func TestValuerAny(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	geom, err := UnmarshalWKB(bytes.NewReader(val.([]byte)))
+	geom, err := UnmarshalWKB(val.([]byte))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +58,7 @@ func TestValuerConcrete(t *testing.T) {
 			geom := geomFromWKT(t, wkt)
 			val, err := geom.Value()
 			expectNoErr(t, err)
-			g, err := UnmarshalWKB(bytes.NewReader(val.([]byte)))
+			g, err := UnmarshalWKB(val.([]byte))
 			expectNoErr(t, err)
 			expectGeomEq(t, g, geom)
 		})
