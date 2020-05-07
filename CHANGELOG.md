@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.16.0
+
+2020-05-08
+
+- Add wrappers for the GEOS Difference and Symmetric Difference algorithms.
+
+- Implement the Point On Surface algorithm, which finds a point on the interior
+  of a Polygon or Polygon. This algorithm is extended to also work with point
+and linear geometries.
+
+- Improve performance of WKB marshalling and unmarshalling.
+
+- Alters the `UnmarshalWKT` function to accept a `string` rather than an
+  `io.Reader`. A new function `UnmarshalWKTFromReader` has been added that
+accepts a reader. This makes the WKT interface more consistent with the WKB
+interface.
+
 ## v0.15.0
 
 2020-04-27
