@@ -48,6 +48,34 @@ func TestRandom(t *testing.T) {
 	}
 }
 
+func TestDelete(t *testing.T) {
+	for pop := 0.0; pop < 1000; pop = (pop + 1) * 1.5 {
+		population := int(pop)
+
+		t.Run(fmt.Sprintf("pop=%d", population), func(t *testing.T) {
+			rnd := rand.New(rand.NewSource(0))
+			boxes := make([]Box, population)
+			for i := range boxes {
+				boxes[i] = randomBox(rnd, 0.9, 0.1)
+			}
+			inserts := make([]BulkItem, len(boxes))
+			for i := range inserts {
+				inserts[i].Box = boxes[i]
+				inserts[i].RecordID = i
+			}
+			rt := BulkLoad(inserts)
+			checkInvariants(t, rt, boxes)
+
+			for i := len(boxes) - 1; i >= 0; i-- {
+				t.Logf("deleting recordID %d", i)
+				rt.Delete(boxes[i], i)
+				checkInvariants(t, rt, boxes[:i])
+				checkSearch(t, rt, boxes[:i], rnd)
+			}
+		})
+	}
+}
+
 func checkSearch(t *testing.T, rt RTree, boxes []Box, rnd *rand.Rand) {
 	for i := 0; i < 10; i++ {
 		searchBB := randomBox(rnd, 0.5, 0.5)
@@ -107,9 +135,13 @@ func checkInvariants(t *testing.T, rt RTree, boxes []Box) {
 			}
 		}
 	}
+	t.Log("---")
 	if rt.root != nil {
 		recurse(rt.root, "")
+	} else {
+		t.Log("Root is nil")
 	}
+	t.Log("---")
 
 	unfound := make(map[int]struct{})
 	for i := range boxes {
