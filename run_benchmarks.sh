@@ -14,7 +14,7 @@ old="$(mktemp)"
 new="$(mktemp)"
 trap "rm -f $new $old" EXIT
 
-package="./..."
+package="./geos"
 
 for (( i = 0; i < 15; i++ )); do
 	echo

@@ -26,7 +26,6 @@ GEOSGeometry const *noop(GEOSContextHandle_t handle, const GEOSGeometry *g) {
 import "C"
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"strings"
@@ -322,13 +321,51 @@ func (h *handle) release() {
 
 // createGeometryHandle converts a Geometry object into a GEOS geometry handle.
 func (h *handle) createGeometryHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
-	wkb := g.AsBinary()
-	gh := C.GEOSWKBReader_read_r(
-		h.context,
-		h.reader,
-		(*C.uchar)(&wkb[0]),
-		C.ulong(len(wkb)),
-	)
+	if !g.IsPolygon() || g.IsEmpty() {
+		return nil, errors.New("not implemented")
+	}
+	poly := g.AsPolygon()
+
+	convertRing := func(ls geom.LineString) (*C.GEOSGeometry, error) {
+		seq := ls.Coordinates()
+		n := seq.Length()
+
+		geosSeq := C.GEOSCoordSeq_create_r(h.context, C.uint(n), C.uint(seq.CoordinatesType().Dimension()))
+		if geosSeq == nil {
+			return nil, h.err()
+		}
+
+		for i := 0; i < n; i++ {
+			xy := seq.GetXY(i)
+			if 0 == C.GEOSCoordSeq_setXY_r(h.context, geosSeq, C.uint(i), C.double(xy.X), C.double(xy.Y)) {
+				return nil, h.err()
+			}
+		}
+
+		ring := C.GEOSGeom_createLinearRing_r(h.context, geosSeq)
+		if ring == nil {
+			return nil, h.err()
+		}
+		return ring, nil
+	}
+
+	shell, err := convertRing(poly.ExteriorRing())
+	if err != nil {
+		return nil, err
+	}
+	var holes []*C.GEOSGeometry
+	for i := 0; i < poly.NumInteriorRings(); i++ {
+		hole, err := convertRing(poly.InteriorRingN(i))
+		if err != nil {
+			return nil, err
+		}
+		holes = append(holes, hole)
+	}
+	var holesPtr **C.GEOSGeometry = nil
+	if len(holes) > 0 {
+		holesPtr = &holes[0]
+	}
+	gh := C.GEOSGeom_createPolygon_r(h.context, shell, holesPtr, C.uint(len(holes)))
 	if gh == nil {
 		return nil, h.err()
 	}
@@ -488,19 +525,70 @@ func unaryOperation(
 }
 
 func (h *handle) decode(gh *C.GEOSGeometry, opts []geom.ConstructorOption) (geom.Geometry, error) {
-	var (
-		isWKT C.char
-		size  C.size_t
-	)
-	serialised := C.marshal(h.context, gh, &size, &isWKT)
-	if serialised == nil {
+	processRing := func(ring *C.GEOSGeometry) (geom.LineString, error) {
+		geosSeq := C.GEOSGeom_getCoordSeq_r(h.context, ring)
+		if geosSeq == nil {
+			return geom.LineString{}, h.err()
+		}
+
+		var geosSeqLen C.uint
+		if 0 == C.GEOSCoordSeq_getSize_r(h.context, geosSeq, &geosSeqLen) {
+			return geom.LineString{}, h.err()
+		}
+
+		// x and y get allocated on the heap because pointers to them get sent
+		// across the Cgo barrier. By declaring them outside the loop rather
+		// than inside, we cause that allocation only to happen once (rather
+		// than j times).
+		var x, y float64
+
+		seqFloats := make([]float64, 2*geosSeqLen)
+		for j := 0; j < int(geosSeqLen); j++ {
+			if 0 == C.GEOSCoordSeq_getXY_r(h.context, geosSeq, C.uint(j), (*C.double)(&x), (*C.double)(&y)) {
+				return geom.LineString{}, h.err()
+			}
+			seqFloats[2*j+0] = x
+			seqFloats[2*j+1] = y
+			//seqFloats = append(seqFloats, x, y)
+		}
+
+		seq := geom.NewSequence(seqFloats, geom.DimXY)
+		ls, err := geom.NewLineString(seq, opts...)
+		if err != nil {
+			return geom.LineString{}, h.err()
+		}
+		return ls, nil
+	}
+
+	extRing := C.GEOSGetExteriorRing_r(h.context, gh)
+	if extRing == nil {
 		return geom.Geometry{}, h.err()
 	}
-	defer C.GEOSFree_r(h.context, unsafe.Pointer(serialised))
-	byts := C.GoBytes(unsafe.Pointer(serialised), C.int(size))
 
-	if isWKT != 0 {
-		return geom.UnmarshalWKTFromReader(bytes.NewReader(byts), opts...)
+	outer, err := processRing(extRing)
+	if err != nil {
+		return geom.Geometry{}, err
 	}
-	return geom.UnmarshalWKB(byts, opts...)
+	rings := []geom.LineString{outer}
+
+	numInteriorRings := C.GEOSGetNumInteriorRings_r(h.context, gh)
+	if numInteriorRings == -1 {
+		return geom.Geometry{}, h.err()
+	}
+
+	for i := C.int(0); i < numInteriorRings; i++ {
+		ring := C.GEOSGetInteriorRingN_r(h.context, gh, i)
+		if ring == nil {
+			return geom.Geometry{}, h.err()
+		}
+
+		inner, err := processRing(ring)
+		if err != nil {
+			return geom.Geometry{}, err
+		}
+		rings = append(rings, inner)
+	}
+
+	poly, err := geom.NewPolygonFromRings(rings, opts...)
+	return poly.AsGeometry(), err
 }
