@@ -14,21 +14,23 @@ type BulkItem struct {
 func BulkLoad(items []BulkItem) RTree {
 	var tr RTree
 	n := tr.bulkInsert(items)
-	tr.rootIndex = n
+	tr.root = n
 	return tr
 }
 
-func (t *RTree) bulkInsert(items []BulkItem) int {
+func (t *RTree) bulkInsert(items []BulkItem) *node {
+	if len(items) == 0 {
+		return nil
+	}
 	if len(items) <= 2 {
-		node := node{isLeaf: true, parent: -1}
-		for _, item := range items {
-			node.entries = append(node.entries, entry{
-				box:   item.Box,
-				index: item.RecordID,
-			})
+		root := &node{isLeaf: true, numEntries: len(items)}
+		for i, item := range items {
+			root.entries[i] = entry{
+				box:      item.Box,
+				recordID: item.RecordID,
+			}
 		}
-		t.nodes = append(t.nodes, node)
-		return len(t.nodes) - 1
+		return root
 	}
 
 	box := items[0].Box
@@ -48,15 +50,20 @@ func (t *RTree) bulkInsert(items []BulkItem) int {
 	})
 
 	split := len(items) / 2
-	n1 := t.bulkInsert(items[:split])
-	n2 := t.bulkInsert(items[split:])
+	childA := t.bulkInsert(items[:split])
+	childB := t.bulkInsert(items[split:])
 
-	parent := node{isLeaf: false, parent: -1, entries: []entry{
-		entry{box: t.calculateBound(n1), index: n1},
-		entry{box: t.calculateBound(n2), index: n2},
-	}}
-	t.nodes = append(t.nodes, parent)
-	t.nodes[n1].parent = len(t.nodes) - 1
-	t.nodes[n2].parent = len(t.nodes) - 1
-	return len(t.nodes) - 1
+	root := &node{
+		entries: [1 + maxChildren]entry{
+			entry{box: calculateBound(childA), child: childA},
+			entry{box: calculateBound(childB), child: childB},
+		},
+		numEntries: 2,
+		parent:     nil,
+		isLeaf:     false,
+	}
+	childA.parent = root
+	childB.parent = root
+
+	return root
 }
