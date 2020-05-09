@@ -2,14 +2,14 @@ package rtree
 
 import "container/heap"
 
-// NearestSearch iterates over the records in the RTree in order of distance
-// from the input box (shortest distanace first using the Euclidean metric).
-// The callback is called for every element iterated over. If an error is
-// returned from the callback, then iteration stops immediately. Any error
-// returned from the callback is returned by NearestSearch, except for the case
-// where the special Stop sentinal error is returned (in which case nil will be
-// returned from NearestSearch).
-func (t *RTree) NearestSearch(box Box, callback func(recordID int) error) error {
+// PrioritySearch iterates over the records in the RTree in priority order of
+// distance from the input box (shortest distanace first using the Euclidean
+// metric).  The callback is called for every element iterated over. If an
+// error is returned from the callback, then iteration stops immediately. Any
+// error returned from the callback is returned by PrioritySearch, except for
+// the case where the special Stop sentinal error is returned (in which case
+// nil will be returned from PrioritySearch).
+func (t *RTree) PrioritySearch(box Box, callback func(recordID int) error) error {
 	if t.root == nil {
 		return nil
 	}

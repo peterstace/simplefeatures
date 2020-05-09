@@ -37,7 +37,7 @@ func checkNearest(t *testing.T, rt RTree, boxes []Box, rnd *rand.Rand) {
 		var got []int
 		originBB := randomBox(rnd, 0.9, 0.1)
 		t.Logf("origin: %v", originBB)
-		rt.NearestSearch(originBB, func(recordID int) error {
+		rt.PrioritySearch(originBB, func(recordID int) error {
 			got = append(got, recordID)
 			return nil
 		})
@@ -73,7 +73,7 @@ func TestNearestEarlyStop(t *testing.T) {
 
 	t.Run("stop using sentinal", func(t *testing.T) {
 		var count int
-		err := rt.NearestSearch(origin, func(int) error {
+		err := rt.PrioritySearch(origin, func(int) error {
 			count++
 			if count >= 3 {
 				return Stop
@@ -91,7 +91,7 @@ func TestNearestEarlyStop(t *testing.T) {
 	t.Run("stop with user error", func(t *testing.T) {
 		var count int
 		userErr := errors.New("user error")
-		err := rt.NearestSearch(origin, func(int) error {
+		err := rt.PrioritySearch(origin, func(int) error {
 			count++
 			if count >= 3 {
 				return userErr
