@@ -28,6 +28,7 @@ func TestRandom(t *testing.T) {
 
 			checkInvariants(t, rt)
 			checkSearch(t, rt, boxes, rnd)
+			checkExtent(t, rt, boxes)
 		})
 		name := fmt.Sprintf("pop_%d", population)
 		t.Run(name, func(t *testing.T) {
@@ -44,6 +45,7 @@ func TestRandom(t *testing.T) {
 			}
 
 			checkSearch(t, rt, boxes, rnd)
+			checkExtent(t, rt, boxes)
 		})
 	}
 }
@@ -70,6 +72,23 @@ func checkSearch(t *testing.T, rt RTree, boxes []Box, rnd *rand.Rand) {
 		if !reflect.DeepEqual(want, got) {
 			t.Logf("search box: %v", searchBB)
 			t.Errorf("search failed, got: %v want: %v", got, want)
+		}
+	}
+}
+
+func checkExtent(t *testing.T, rt RTree, boxes []Box) {
+	got, ok := rt.Extent()
+	if len(boxes) == 0 {
+		if ok {
+			t.Fatal("expected not to get an extent, but got one")
+		}
+	} else {
+		want := boxes[0]
+		for _, b := range boxes[1:] {
+			want = combine(want, b)
+		}
+		if want != got {
+			t.Fatal("unexpected bounding box")
 		}
 	}
 }
