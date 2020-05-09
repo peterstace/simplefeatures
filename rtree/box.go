@@ -41,3 +41,9 @@ func overlap(box1, box2 Box) bool {
 		(box1.MinX <= box2.MaxX) && (box1.MaxX >= box2.MinX) &&
 		(box1.MinY <= box2.MaxY) && (box1.MaxY >= box2.MinY)
 }
+
+func squaredEuclideanDistance(b1, b2 Box) float64 {
+	dx := math.Max(0, math.Max(b1.MinX-b2.MaxX, b2.MinX-b1.MaxX))
+	dy := math.Max(0, math.Max(b1.MinY-b2.MaxY, b2.MinY-b1.MaxY))
+	return dx*dx + dy*dy
+}
