@@ -9,7 +9,9 @@ import (
 )
 
 func TestRandom(t *testing.T) {
-	for population := 0; population < 200; population++ {
+	for pop := 0.0; pop < 1000; pop = (pop + 1) * 1.2 {
+		population := int(pop)
+
 		t.Run(fmt.Sprintf("bulk_%d", population), func(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
 			boxes := make([]Box, population)
@@ -24,10 +26,10 @@ func TestRandom(t *testing.T) {
 			}
 			rt := BulkLoad(inserts)
 
-			checkInvariants(t, rt)
+			checkInvariants(t, rt, boxes)
 			checkSearch(t, rt, boxes, rnd)
 		})
-		name := fmt.Sprintf("pop_%d", population)
+		name := fmt.Sprintf("insert_%d", population)
 		t.Run(name, func(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
 			boxes := make([]Box, population)
@@ -38,7 +40,7 @@ func TestRandom(t *testing.T) {
 			var rt RTree
 			for i, box := range boxes {
 				rt.Insert(box, i)
-				checkInvariants(t, rt)
+				checkInvariants(t, rt, boxes[:i+1])
 			}
 
 			checkSearch(t, rt, boxes, rnd)
@@ -87,83 +89,101 @@ func randomBox(rnd *rand.Rand, maxStart, maxWidth float64) Box {
 	return box
 }
 
-func checkInvariants(t *testing.T, rt RTree) {
-	t.Logf("")
-	t.Logf("RTree description:")
-	t.Logf("node_count=%v, root=%d", len(rt.nodes), rt.rootIndex)
-	for i, n := range rt.nodes {
-		t.Logf("%d: leaf=%t numentries=%d parent=%d", i, n.isLeaf, len(n.entries), n.parent)
-		for j, e := range n.entries {
-			t.Logf("\t%d: index=%d box=%v", j, e.index, e.box)
-		}
-	}
-
-	// Each node has the correct parent set.
-	for i, node := range rt.nodes {
-		if i == rt.rootIndex {
-			if node.parent != -1 {
-				t.Fatalf("expected root to have parent -1, but has %d", node.parent)
+func checkInvariants(t *testing.T, rt RTree, boxes []Box) {
+	var recurse func(*node, string)
+	recurse = func(current *node, indent string) {
+		t.Logf("%sNode addr=%p leaf=%t numEntries=%d", indent, current, current.isLeaf, current.numEntries)
+		indent += "\t"
+		if current.isLeaf {
+			for i := 0; i < current.numEntries; i++ {
+				e := current.entries[i]
+				t.Logf("%sEntry[%d] recordID=%d box=%v", indent, i, e.recordID, e.box)
 			}
-			continue
-		}
-		if node.parent == -1 {
-			t.Fatalf("expected parent for non-root not to be -1, but was -1")
-		}
-
-		var matchingChildren int
-		for _, entry := range rt.nodes[node.parent].entries {
-			if entry.index == i {
-				matchingChildren++
-			}
-		}
-		if matchingChildren != 1 {
-			t.Fatalf("expected parent to have 1 matching child, but has %d", matchingChildren)
-		}
-	}
-
-	// For each non-leaf node, its entries should have the smallest bounding boxes that cover its children.
-	for i, parentNode := range rt.nodes {
-		if parentNode.isLeaf {
-			continue
-		}
-		for j, parentEntry := range parentNode.entries {
-			childNode := rt.nodes[parentEntry.index]
-			union := childNode.entries[0].box
-			for _, childEntry := range childNode.entries[1:] {
-				union = combine(childEntry.box, union)
-			}
-			if union != parentEntry.box {
-				t.Fatalf("expected parent to have smallest box that covers its children (node=%d, entry=%d)", i, j)
+		} else {
+			for i := 0; i < current.numEntries; i++ {
+				e := &current.entries[i]
+				t.Logf("%sEntry[%d] box=%v", indent, i, e.box)
+				recurse(e.child, indent+"\t")
 			}
 		}
 	}
+	if rt.root != nil {
+		recurse(rt.root, "")
+	}
 
-	// Each leaf should be reached exactly once from the root. This implies
-	// that the tree has no loops, and there are no orphan leafs. Also checks
-	// that each non-leaf is visited at least once (i.e. no orphan non-leaves).
-	leafCount := make(map[int]int)
-	visited := make(map[int]bool)
-	var recurse func(int)
-	recurse = func(n int) {
-		visited[n] = true
-		node := &rt.nodes[n]
-		if node.isLeaf {
-			leafCount[n]++
-			return
+	unfound := make(map[int]struct{})
+	for i := range boxes {
+		unfound[i] = struct{}{}
+	}
+
+	var check func(*node)
+	check = func(current *node) {
+		if current.isLeaf {
+			for i := 0; i < current.numEntries; i++ {
+				e := current.entries[i]
+				if e.child != nil {
+					t.Fatal("leaf node has child")
+				}
+				if _, ok := unfound[e.recordID]; !ok {
+					t.Fatal("record ID found in tree but wasn't in unfound map")
+				}
+				delete(unfound, e.recordID)
+			}
+		} else {
+			for i := 0; i < current.numEntries; i++ {
+				e := &current.entries[i]
+				if e.recordID != 0 {
+					t.Fatal("non-leaf has recordID")
+				}
+				if e.child.parent != current {
+					t.Fatalf("node %p has wrong parent", e.child)
+				}
+				box := e.child.entries[0].box
+				for j := 1; j < e.child.numEntries; j++ {
+					box = combine(box, e.child.entries[j].box)
+				}
+				if box != e.box {
+					t.Fatalf("entry box doesn't match smallest box enclosing child")
+				}
+				check(e.child)
+			}
 		}
-		for _, entry := range node.entries {
-			recurse(entry.index)
+		for i := current.numEntries; i < len(current.entries); i++ {
+			e := current.entries[i]
+			if e.box != (Box{}) || e.child != nil || e.recordID != 0 {
+				t.Fatal("entry past numEntries is not the zero value")
+			}
+		}
+		if current.numEntries > maxChildren || (current != rt.root && current.numEntries < minChildren) {
+			t.Fatalf("%p: unexpected number of entries", current)
 		}
 	}
-	recurse(rt.rootIndex)
-	for leaf, count := range leafCount {
-		if count != 1 {
-			t.Fatalf("leaf %d visited %d times", leaf, count)
+	if rt.root != nil {
+		check(rt.root)
+		if rt.root.parent != nil {
+			t.Fatalf("root parent should be nil, but is %p", rt.root.parent)
 		}
 	}
-	for i := range rt.nodes {
-		if !visited[i] {
-			t.Fatalf("node %d was not visited", i)
+
+	if len(unfound) != 0 {
+		t.Fatalf("there were still unfound record IDs after traversing tree")
+	}
+
+	gotExtent, hasExtent := rt.Extent()
+	if len(boxes) == 0 {
+		if hasExtent {
+			t.Fatal("expected not to get an extent, but got one")
+		}
+	} else {
+		if !hasExtent {
+			t.Fatalf("expected to get an extent, but didn't")
+		}
+		wantExtent := boxes[0]
+		for _, b := range boxes[1:] {
+			wantExtent = combine(wantExtent, b)
+		}
+		if wantExtent != gotExtent {
+			t.Fatalf("unexpected bounding box: want=%v got=%v", wantExtent, gotExtent)
 		}
 	}
 }

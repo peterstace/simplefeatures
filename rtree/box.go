@@ -7,11 +7,11 @@ type Box struct {
 	MinX, MinY, MaxX, MaxY float64
 }
 
-// calculate bound calculates the smallest bounding box that fits a node.
-func (t *RTree) calculateBound(n int) Box {
-	box := t.nodes[n].entries[0].box
-	for _, entry := range t.nodes[n].entries[1:] {
-		box = combine(box, entry.box)
+// calculateBound calculates the smallest bounding box that fits a node.
+func calculateBound(n *node) Box {
+	box := n.entries[0].box
+	for i := 1; i < n.numEntries; i++ {
+		box = combine(box, n.entries[i].box)
 	}
 	return box
 }
