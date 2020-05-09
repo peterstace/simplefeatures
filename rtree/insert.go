@@ -106,7 +106,7 @@ func (t *RTree) splitNode(n *node) *node {
 	bestArea := math.Inf(+1)
 	var bestSplit uint64
 	for split := minSplit; split <= maxSplit; split++ {
-		if bits.OnesCount64(split) < minChildren {
+		if ones := bits.OnesCount64(split); ones < minChildren || (n.numEntries-ones) < minChildren {
 			continue
 		}
 		var boxA, boxB Box
