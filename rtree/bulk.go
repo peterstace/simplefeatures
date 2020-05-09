@@ -19,7 +19,7 @@ func BulkLoad(items []BulkItem) RTree {
 }
 
 func (t *RTree) bulkInsert(items []BulkItem) *node {
-	if len(items) <= 2 {
+	if len(items) <= maxChildren {
 		root := &node{isLeaf: true, numEntries: len(items)}
 		for i, item := range items {
 			root.entries[i] = entry{

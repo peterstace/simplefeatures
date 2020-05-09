@@ -134,27 +134,25 @@ func (t *RTree) splitNode(n *node) *node {
 		}
 	}
 
-	var entriesA, entriesB []entry
-	for i := 0; i < n.numEntries; i++ {
+	// Use the existing node for the 0 bits in the split, and a new node for
+	// the 1 bits in the split.
+	//n.entries = [maxChildren + 1]entry{}
+	newNode := &node{isLeaf: n.isLeaf}
+	totalEntries := n.numEntries
+	n.numEntries = 0
+	for i := 0; i < totalEntries; i++ {
 		entry := n.entries[i]
 		if bestSplit&(1<<i) == 0 {
-			entriesA = append(entriesA, entry)
+			n.entries[n.numEntries] = entry
+			n.numEntries++
 		} else {
-			entriesB = append(entriesB, entry)
+			newNode.entries[newNode.numEntries] = entry
+			newNode.numEntries++
 		}
 	}
-
-	// Use the existing node for A...
-	copy(n.entries[:], entriesA)
-	n.numEntries = len(entriesA)
-
-	// And create a new node for B.
-	newNode := &node{
-		numEntries: len(entriesB),
-		parent:     nil,
-		isLeaf:     n.isLeaf,
+	for i := n.numEntries; i < len(n.entries); i++ {
+		n.entries[i] = entry{}
 	}
-	copy(newNode.entries[:], entriesB)
 	if !n.isLeaf {
 		for i := 0; i < newNode.numEntries; i++ {
 			newNode.entries[i].child.parent = newNode

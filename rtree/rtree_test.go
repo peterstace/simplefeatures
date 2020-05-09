@@ -26,11 +26,10 @@ func TestRandom(t *testing.T) {
 			}
 			rt := BulkLoad(inserts)
 
-			checkInvariants(t, rt)
+			checkInvariants(t, rt, boxes)
 			checkSearch(t, rt, boxes, rnd)
-			checkExtent(t, rt, boxes)
 		})
-		name := fmt.Sprintf("pop_%d", population)
+		name := fmt.Sprintf("insert_%d", population)
 		t.Run(name, func(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
 			boxes := make([]Box, population)
@@ -41,11 +40,10 @@ func TestRandom(t *testing.T) {
 			var rt RTree
 			for i, box := range boxes {
 				rt.Insert(box, i)
-				checkInvariants(t, rt)
+				checkInvariants(t, rt, boxes[:i+1])
 			}
 
 			checkSearch(t, rt, boxes, rnd)
-			checkExtent(t, rt, boxes)
 		})
 	}
 }
@@ -76,23 +74,6 @@ func checkSearch(t *testing.T, rt RTree, boxes []Box, rnd *rand.Rand) {
 	}
 }
 
-func checkExtent(t *testing.T, rt RTree, boxes []Box) {
-	got, ok := rt.Extent()
-	if len(boxes) == 0 {
-		if ok {
-			t.Fatal("expected not to get an extent, but got one")
-		}
-	} else {
-		want := boxes[0]
-		for _, b := range boxes[1:] {
-			want = combine(want, b)
-		}
-		if want != got {
-			t.Fatal("unexpected bounding box")
-		}
-	}
-}
-
 func randomBox(rnd *rand.Rand, maxStart, maxWidth float64) Box {
 	box := Box{
 		MinX: rnd.Float64() * maxStart,
@@ -108,7 +89,7 @@ func randomBox(rnd *rand.Rand, maxStart, maxWidth float64) Box {
 	return box
 }
 
-func checkInvariants(t *testing.T, rt RTree) {
+func checkInvariants(t *testing.T, rt RTree, boxes []Box) {
 	var recurse func(*node, string)
 	recurse = func(current *node, indent string) {
 		t.Logf("%sNode addr=%p leaf=%t numEntries=%d", indent, current, current.isLeaf, current.numEntries)
@@ -130,6 +111,11 @@ func checkInvariants(t *testing.T, rt RTree) {
 		recurse(rt.root, "")
 	}
 
+	unfound := make(map[int]struct{})
+	for i := range boxes {
+		unfound[i] = struct{}{}
+	}
+
 	var check func(*node)
 	check = func(current *node) {
 		if current.isLeaf {
@@ -138,6 +124,10 @@ func checkInvariants(t *testing.T, rt RTree) {
 				if e.child != nil {
 					t.Fatal("leaf node has child")
 				}
+				if _, ok := unfound[e.recordID]; !ok {
+					t.Fatal("record ID found in tree but wasn't in unfound map")
+				}
+				delete(unfound, e.recordID)
 			}
 		} else {
 			for i := 0; i < current.numEntries; i++ {
@@ -155,6 +145,7 @@ func checkInvariants(t *testing.T, rt RTree) {
 				if box != e.box {
 					t.Fatalf("entry box doesn't match smallest box enclosing child")
 				}
+				check(e.child)
 			}
 		}
 		for i := current.numEntries; i < len(current.entries); i++ {
@@ -164,13 +155,35 @@ func checkInvariants(t *testing.T, rt RTree) {
 			}
 		}
 		if current.numEntries > maxChildren || (current != rt.root && current.numEntries < minChildren) {
-			t.Fatal("unexpected number of children")
+			t.Fatalf("%p: unexpected number of entries", current)
 		}
 	}
 	if rt.root != nil {
 		check(rt.root)
 		if rt.root.parent != nil {
 			t.Fatalf("root parent should be nil, but is %p", rt.root.parent)
+		}
+	}
+
+	if len(unfound) != 0 {
+		t.Fatalf("there were still unfound record IDs after traversing tree")
+	}
+
+	gotExtent, hasExtent := rt.Extent()
+	if len(boxes) == 0 {
+		if hasExtent {
+			t.Fatal("expected not to get an extent, but got one")
+		}
+	} else {
+		if !hasExtent {
+			t.Fatalf("expected to get an extent, but didn't")
+		}
+		wantExtent := boxes[0]
+		for _, b := range boxes[1:] {
+			wantExtent = combine(wantExtent, b)
+		}
+		if wantExtent != gotExtent {
+			t.Fatalf("unexpected bounding box: want=%v got=%v", wantExtent, gotExtent)
 		}
 	}
 }
