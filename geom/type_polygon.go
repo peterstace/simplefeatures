@@ -354,59 +354,62 @@ func signedAreaOfLinearRing(lr LineString) float64 {
 // Centroid returns the polygon's centroid point. If returns an empty Point if
 // the Polygon is empty.
 func (p Polygon) Centroid() Point {
-	sumXY, sumArea := sumCentroidAndAreaOfPolygon(p)
-	if sumArea == 0 {
+	if p.IsEmpty() {
 		return NewEmptyPoint(DimXY)
 	}
-	return NewPointFromXY(sumXY.Scale(1.0 / sumArea))
+
+	// The basis of this approach is taken from:
+	// https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon
+	// The original sources that the SO answer links to are gone (servers no
+	// longer up), so it's hard to trace it through to the original sources.
+	// GEOS and JTS seem to use a very similar calculation method.
+
+	areas := make([]float64, 1+p.NumInteriorRings())
+	areas[0] = math.Abs(signedAreaOfLinearRing(p.ExteriorRing()))
+	sumAreas := areas[0]
+	for i := 0; i < p.NumInteriorRings(); i++ {
+		areas[i+1] = -math.Abs(signedAreaOfLinearRing(p.InteriorRingN(i)))
+		sumAreas += areas[i+1]
+	}
+
+	centroid := weightedCentroid(p.ExteriorRing(), areas[0], sumAreas)
+	for i := 0; i < p.NumInteriorRings(); i++ {
+		centroid = centroid.Add(
+			weightedCentroid(p.InteriorRingN(i), areas[i+1], sumAreas))
+	}
+	return NewPointFromXY(centroid)
 }
 
-func sumCentroidAndAreaOfPolygon(p Polygon) (sumXY XY, sumArea float64) {
-	n := p.NumInteriorRings()
-	xy, area := sumCentroidAndAreaOfLinearRing(p.ExteriorRing())
-	if area > 0 {
-		sumXY = sumXY.Add(xy)
-		sumArea += area // Define exterior ring as having positive area.
-	} else {
-		sumXY = sumXY.Sub(xy)
-		sumArea -= area // Define exterior ring as having positive area.
-	}
-	for i := 0; i < n; i++ {
-		r := p.InteriorRingN(i)
-		xy, area = sumCentroidAndAreaOfLinearRing(r)
-		if area > 0 {
-			sumXY = sumXY.Sub(xy)
-			sumArea -= area // Holes have negative area.
-		} else {
-			sumXY = sumXY.Add(xy)
-			sumArea += area // Holes have negative area.
-		}
-	}
-	return sumXY, sumArea
+func weightedCentroid(ring LineString, ringArea, totalArea float64) XY {
+	centroid := centroidOfRing(ring)
+	return centroid.Scale(ringArea / totalArea)
 }
 
-func centroidAndAreaOfLinearRing(lr LineString) (XY, float64) {
-	xy, area := sumCentroidAndAreaOfLinearRing(lr)
-	if area == 0 {
-		return XY{}, 0
-	}
-	return XY{xy.X / area, xy.Y / area}, math.Abs(area)
-}
+func centroidOfRing(ring LineString) XY {
+	var areaSum2 float64 // double the area
+	var cent6 XY         // sextuple the centroid (also scaled by area)
 
-func sumCentroidAndAreaOfLinearRing(lr LineString) (XY, float64) {
-	seq := lr.Coordinates()
+	seq := ring.Coordinates()
 	n := seq.Length()
-	var x, y float64
-	var area float64
-	for i := 0; i < n; i++ {
-		pt0 := seq.GetXY(i)
-		pt1 := seq.GetXY((i + 1) % n)
-		x += (pt0.X + pt1.X) * (pt0.X*pt1.Y - pt1.X*pt0.Y)
-		y += (pt0.Y + pt1.Y) * (pt0.X*pt1.Y - pt1.X*pt0.Y)
-		area += pt0.X*pt1.Y - pt1.X*pt0.Y
+
+	base := seq.GetXY(0)
+	for i := 1; i+1 < n; i++ {
+		cent3 := centroid3(base, seq.GetXY(i), seq.GetXY(i+1))
+		area2 := triangleArea2(base, seq.GetXY(i), seq.GetXY(i+1))
+		cent6 = cent6.Add(cent3.Scale(area2))
+		areaSum2 += area2
 	}
-	area /= 2
-	return XY{x / 6, y / 6}, area
+	return cent6.Scale(1.0 / 3.0 / areaSum2)
+}
+
+// centroid3 returns triple the centroid of 3 points
+func centroid3(pt1, pt2, pt3 XY) XY {
+	return pt1.Add(pt2).Add(pt3)
+}
+
+// triangleArea2 returns double the signed area of the triangle defined by 3 points.
+func triangleArea2(pt1, pt2, pt3 XY) float64 {
+	return (pt2.X-pt1.X)*(pt3.Y-pt1.Y) - (pt3.X-pt1.X)*(pt2.Y-pt1.Y)
 }
 
 // AsMultiPolygon is a helper that converts this Polygon into a MultiPolygon.
