@@ -44,13 +44,13 @@ type RTree struct {
 // without any error.
 var Stop = errors.New("stop")
 
-// Search looks for any items in the tree that overlap with the given bounding
-// box. The callback is called with the record ID for each found item. If an
-// error is returned from the callback then the search is terminated early.
-// Any error returned from the callback is returned by Search, except for the
-// case where the special Stop sentinal error is returned (in which case nil
-// will be returned from Search).
-func (t *RTree) Search(box Box, callback func(recordID int) error) error {
+// RangeSearch looks for any items in the tree that overlap with the given
+// bounding box. The callback is called with the record ID for each found item.
+// If an error is returned from the callback then the search is terminated
+// early.  Any error returned from the callback is returned by RangeSearch,
+// except for the case where the special Stop sentinal error is returned (in
+// which case nil will be returned from RangeSearch).
+func (t *RTree) RangeSearch(box Box, callback func(recordID int) error) error {
 	if t.root == nil {
 		return nil
 	}

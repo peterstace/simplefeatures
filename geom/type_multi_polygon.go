@@ -66,7 +66,7 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 		}
 		box := env.box()
 
-		err := tree.Search(box, func(j int) error {
+		err := tree.RangeSearch(box, func(j int) error {
 			for k := range [...]int{i, j} {
 				if !polyBoundaryPopulated[k] {
 					polyBoundaries[k] = newIndexedLines(polys[k].Boundary().asLines())
@@ -130,7 +130,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 	for j := range p2.lines {
 		// Find intersection points.
 		var pts []XY
-		p1.tree.Search(p2.lines[j].envelope().box(), func(i int) error {
+		p1.tree.RangeSearch(p2.lines[j].envelope().box(), func(i int) error {
 			inter := p1.lines[i].intersectLine(p2.lines[j])
 			if inter.empty {
 				return nil

@@ -212,7 +212,7 @@ func hasIntersectionBetweenLines(
 	var envPopulated bool
 
 	for _, lnA := range lines2 {
-		tree.Search(lnA.envelope().box(), func(i int) error {
+		tree.RangeSearch(lnA.envelope().box(), func(i int) error {
 			lnB := lines1[i]
 			inter := lnA.intersectLine(lnB)
 			if inter.empty {

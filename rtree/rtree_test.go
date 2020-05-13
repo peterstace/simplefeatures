@@ -80,7 +80,7 @@ func checkSearch(t *testing.T, rt RTree, boxes []Box, rnd *rand.Rand) {
 	for i := 0; i < 10; i++ {
 		searchBB := randomBox(rnd, 0.5, 0.5)
 		var got []int
-		rt.Search(searchBB, func(idx int) error {
+		rt.RangeSearch(searchBB, func(idx int) error {
 			got = append(got, idx)
 			return nil
 		})

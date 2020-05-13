@@ -111,7 +111,7 @@ func (s LineString) IsSimple() bool {
 		}
 		simple := true // assume simple until proven otherwise
 		box := ln.envelope().box()
-		tree.Search(box, func(j int) error {
+		tree.RangeSearch(box, func(j int) error {
 			other, ok := getLine(s.seq, j)
 			if !ok {
 				// We previously were able to access line j (otherwise we
