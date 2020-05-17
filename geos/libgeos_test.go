@@ -555,6 +555,17 @@ func TestOverlaps(t *testing.T) {
 	}
 }
 
+func TestRelateCode(t *testing.T) {
+	g1 := geomFromWKT(t, "POLYGON((0 0,0 2,2 2,2 0,0 0))")
+	g2 := geomFromWKT(t, "POLYGON((1 1,1 3,3 3,3 1,1 1))")
+	got, err := Relate(g1, g2)
+	expectNoErr(t, err)
+	const want = "212101212"
+	if got != want {
+		t.Errorf("got: %v want: %v", got, want)
+	}
+}
+
 type BinaryOperationTestCase struct {
 	In1, In2 string
 	Out      string
