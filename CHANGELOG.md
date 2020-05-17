@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.17.0
+
+2020-05-17
+
+- Improve the performance of R-Tree operations (with flow on improvements to
+  many algorithms, including geometry validation).
+
+- Add a Delete method to the R-Tree implementation.
+
+- Improve the numerical stability of the centroid calculation algorithm.
+
+- Add a method to the R-Tree to find the boxes nearest to another box.
+
+- Add a wrapper for the GEOS Relate function (which returns a DE-9IM code).
+
 ## v0.16.0
 
 2020-05-08
