@@ -159,6 +159,36 @@ func Crosses(a, b geom.Geometry) (bool, error) {
 	}
 }
 
+// Relate returns a 9-character DE9-IM string that describes the relationship
+// between two geometries.
+func Relate(g1, g2 geom.Geometry) (string, error) {
+	h, err := newHandle()
+	if err != nil {
+		return "", err
+	}
+	defer h.release()
+
+	gh1, err := h.createGeometryHandle(g1)
+	if err != nil {
+		return "", err
+	}
+	defer C.GEOSGeom_destroy(gh1)
+
+	gh2, err := h.createGeometryHandle(g2)
+	if err != nil {
+		return "", err
+	}
+	defer C.GEOSGeom_destroy(gh2)
+
+	cstr := C.GEOSRelate_r(h.context, gh1, gh2)
+	if cstr == nil {
+		return "", h.err()
+	}
+	defer C.GEOSFree_r(h.context, unsafe.Pointer(cstr))
+
+	return C.GoString(cstr), nil
+}
+
 // Overlaps returns true if and only if geometry A and B overlap with each
 // other. Formally, the following conditions must hold:
 //
