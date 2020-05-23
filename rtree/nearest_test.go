@@ -14,19 +14,8 @@ func TestNearest(t *testing.T) {
 
 		t.Run(fmt.Sprintf("n=%d", population), func(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
-			boxes := make([]Box, population)
-			for i := range boxes {
-				boxes[i] = randomBox(rnd, 0.9, 0.1)
-			}
-
-			inserts := make([]BulkItem, len(boxes))
-			for i := range inserts {
-				inserts[i].Box = boxes[i]
-				inserts[i].RecordID = i
-			}
-			rt := BulkLoad(inserts)
+			rt, boxes := testBulkLoad(rnd, population, 0.9, 0.1)
 			checkInvariants(t, rt, boxes)
-
 			checkNearest(t, rt, boxes, rnd)
 		})
 	}

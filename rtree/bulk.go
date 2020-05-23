@@ -1,6 +1,8 @@
 package rtree
 
-import "sort"
+import (
+	"sort"
+)
 
 // BulkItem is an item that can be inserted for bulk loading.
 type BulkItem struct {
@@ -12,14 +14,35 @@ type BulkItem struct {
 // operation is optimised for creating R-Trees with minimal node overlap. This
 // allows for fast searching.
 func BulkLoad(items []BulkItem) RTree {
+	if len(items) == 0 {
+		return RTree{}
+	}
+
+	levels := calculateLevels(len(items))
 	var tr RTree
-	n := tr.bulkInsert(items)
-	tr.root = n
+	tr.root = bulkInsert(items, levels)
 	return tr
 }
 
-func (t *RTree) bulkInsert(items []BulkItem) *node {
-	if len(items) <= maxChildren {
+func calculateLevels(numItems int) int {
+	// We could theoretically do this calculation using math.Log. However,
+	// numerical stability issues can cause off-by-one related problems. Better
+	// to just calculate using integer arithmetic (it will be quick anyway,
+	// since the calculation is logarithmic in the number of items).
+	var levels int
+	count := 1
+	for count < numItems {
+		count *= 4
+		levels++
+	}
+	if levels > 0 {
+		levels--
+	}
+	return levels
+}
+
+func bulkInsert(items []BulkItem, level int) *node {
+	if level == 0 {
 		root := &node{isLeaf: true, numEntries: len(items)}
 		for i, item := range items {
 			root.entries[i] = entry{
@@ -30,11 +53,73 @@ func (t *RTree) bulkInsert(items []BulkItem) *node {
 		return root
 	}
 
+	// NOTE: bulk loading is hardcoded around the fact that the min and max
+	// node cardinalites are 2 and 4.
+
+	// 6 is the first number of items that can be split into 3 nodes while
+	// respecting the minimum node cardinality, i.e. 6 = 2 + 2 + 2. Anything
+	// less than 6 must instead be split into 2 nodes.
+	if len(items) < 6 {
+		firstHalf, secondHalf := splitBulkItems2Ways(items)
+		return bulkNode(level, firstHalf, secondHalf)
+	}
+
+	// 8 is the first number of items that can be split into 4 nodes while
+	// respecting the minimum node cardinality, i.e. 8 = 2 + 2 + 2 + 2.
+	// Anything less that 8 must instead be split into 3 nodes.
+	if len(items) < 8 {
+		firstThird, secondThird, thirdThird := splitBulkItems3Ways(items)
+		return bulkNode(level, firstThird, secondThird, thirdThird)
+	}
+
+	// 4-way split:
+	firstHalf, secondHalf := splitBulkItems2Ways(items)
+	firstQuarter, secondQuarter := splitBulkItems2Ways(firstHalf)
+	thirdQuarter, fourthQuarter := splitBulkItems2Ways(secondHalf)
+	return bulkNode(level, firstQuarter, secondQuarter, thirdQuarter, fourthQuarter)
+}
+
+func bulkNode(level int, parts ...[]BulkItem) *node {
+	root := &node{
+		numEntries: len(parts),
+		parent:     nil,
+		isLeaf:     false,
+	}
+	for i, part := range parts {
+		child := bulkInsert(part, level-1)
+		child.parent = root
+		root.entries[i].child = child
+		root.entries[i].box = calculateBound(child)
+	}
+	return root
+}
+
+func splitBulkItems2Ways(items []BulkItem) ([]BulkItem, []BulkItem) {
+	sortBulkItems(items)
+	split := len(items) / 2
+	return items[:split], items[split:]
+}
+
+func splitBulkItems3Ways(items []BulkItem) ([]BulkItem, []BulkItem, []BulkItem) {
+	sortBulkItems(items)
+	cutA := len(items) / 3
+	cutB := cutA
+	remaining := len(items)/3 - 3*cutA
+	if remaining == 1 {
+		cutA++
+	}
+	if remaining == 2 {
+		cutA++
+		cutB++
+	}
+	return items[:cutA], items[cutA : cutA+cutB], items[cutA+cutB:]
+}
+
+func sortBulkItems(items []BulkItem) {
 	box := items[0].Box
 	for _, item := range items[1:] {
 		box = combine(box, item.Box)
 	}
-
 	horizontal := box.MaxX-box.MinX > box.MaxY-box.MinY
 	sort.Slice(items, func(i, j int) bool {
 		bi := items[i].Box
@@ -45,22 +130,4 @@ func (t *RTree) bulkInsert(items []BulkItem) *node {
 			return bi.MinY+bi.MaxY < bj.MinY+bj.MaxY
 		}
 	})
-
-	split := len(items) / 2
-	childA := t.bulkInsert(items[:split])
-	childB := t.bulkInsert(items[split:])
-
-	root := &node{
-		entries: [1 + maxChildren]entry{
-			entry{box: calculateBound(childA), child: childA},
-			entry{box: calculateBound(childB), child: childB},
-		},
-		numEntries: 2,
-		parent:     nil,
-		isLeaf:     false,
-	}
-	childA.parent = root
-	childB.parent = root
-
-	return root
 }
