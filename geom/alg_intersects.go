@@ -320,8 +320,6 @@ func hasIntersectionPointWithMultiLineString(point Point, mls MultiLineString) b
 	n := mls.NumLineStrings()
 	for i := 0; i < n; i++ {
 		if hasIntersectionPointWithLineString(point, mls.LineStringN(i)) {
-			// There will never be higher dimensionality, so no point in
-			// continuing to check other line strings.
 			return true
 		}
 	}
@@ -332,8 +330,6 @@ func hasIntersectionPointWithMultiPolygon(pt Point, mp MultiPolygon) bool {
 	n := mp.NumPolygons()
 	for i := 0; i < n; i++ {
 		if hasIntersectionPointWithPolygon(pt, mp.PolygonN(i)) {
-			// There will never be higher dimensionality, so no point in
-			// continuing to check other line strings.
 			return true
 		}
 	}
