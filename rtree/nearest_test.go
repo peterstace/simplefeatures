@@ -9,9 +9,7 @@ import (
 )
 
 func TestNearest(t *testing.T) {
-	for pop := 0.0; pop < 1000; pop = (pop + 1) * 1.1 {
-		population := int(pop)
-
+	for _, population := range testPopulations(66, 1000, 1.1) {
 		t.Run(fmt.Sprintf("n=%d", population), func(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
 			rt, boxes := testBulkLoad(rnd, population, 0.9, 0.1)

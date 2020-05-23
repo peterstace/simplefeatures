@@ -21,10 +21,19 @@ func testBulkLoad(rnd *rand.Rand, pop int, maxStart, maxWidth float64) (RTree, [
 	return BulkLoad(inserts), boxes
 }
 
-func TestRandom(t *testing.T) {
-	for pop := 0.0; pop < 1000; pop = (pop + 1) * 1.2 {
-		population := int(pop)
+func testPopulations(manditory, max int, mult float64) []int {
+	var pops []int
+	for i := 0; i < manditory; i++ {
+		pops = append(pops, i)
+	}
+	for pop := float64(manditory); pop < float64(max); pop *= mult {
+		pops = append(pops, int(pop))
+	}
+	return pops
+}
 
+func TestRandom(t *testing.T) {
+	for _, population := range testPopulations(66, 1000, 1.2) {
 		t.Run(fmt.Sprintf("bulk_%d", population), func(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
 			rt, boxes := testBulkLoad(rnd, population, 0.9, 0.1)
@@ -51,9 +60,7 @@ func TestRandom(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	for pop := 0.0; pop < 1000; pop = (pop + 1) * 1.5 {
-		population := int(pop)
-
+	for _, population := range testPopulations(66, 1000, 1.5) {
 		t.Run(fmt.Sprintf("pop=%d", population), func(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
 			rt, boxes := testBulkLoad(rnd, population, 0.9, 0.1)
