@@ -19,16 +19,15 @@ func BulkLoad(items []BulkItem) RTree {
 	}
 
 	levels := calculateLevels(len(items))
-	var tr RTree
-	tr.root = bulkInsert(items, levels)
-	return tr
+	return RTree{bulkInsert(items, levels)}
 }
 
 func calculateLevels(numItems int) int {
 	// We could theoretically do this calculation using math.Log. However,
-	// numerical stability issues can cause off-by-one related problems. Better
-	// to just calculate using integer arithmetic (it will be quick anyway,
-	// since the calculation is logarithmic in the number of items).
+	// float precision issues can cause off-by-one errors in some scenarios.
+	// Instead, we calculate the number of levels using integer arithmetic
+	// only. This will be fast anyway, since the calculation only requires
+	// logarithmic time.
 	var levels int
 	count := 1
 	for count < numItems {
@@ -54,7 +53,7 @@ func bulkInsert(items []BulkItem, level int) *node {
 	}
 
 	// NOTE: bulk loading is hardcoded around the fact that the min and max
-	// node cardinalites are 2 and 4.
+	// node cardinalities are 2 and 4.
 
 	// 6 is the first number of items that can be split into 3 nodes while
 	// respecting the minimum node cardinality, i.e. 6 = 2 + 2 + 2. Anything
