@@ -33,7 +33,7 @@ func (t *RTree) Insert(box Box, recordID int) {
 	}
 }
 
-// combineBoxesUpwards expands the boxes from the given node all the way to the
+// adjustBoxesUpwards expands the boxes from the given node all the way to the
 // root by the given box.
 func (t *RTree) adjustBoxesUpwards(node *node, box Box) {
 	for node != t.root {
