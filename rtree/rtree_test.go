@@ -8,24 +8,35 @@ import (
 	"testing"
 )
 
-func TestRandom(t *testing.T) {
-	for pop := 0.0; pop < 1000; pop = (pop + 1) * 1.2 {
-		population := int(pop)
+func testBulkLoad(rnd *rand.Rand, pop int, maxStart, maxWidth float64) (RTree, []Box) {
+	boxes := make([]Box, pop)
+	for i := range boxes {
+		boxes[i] = randomBox(rnd, maxStart, maxWidth)
+	}
+	inserts := make([]BulkItem, len(boxes))
+	for i := range inserts {
+		inserts[i].Box = boxes[i]
+		inserts[i].RecordID = i
+	}
+	return BulkLoad(inserts), boxes
+}
 
+func testPopulations(manditory, max int, mult float64) []int {
+	var pops []int
+	for i := 0; i < manditory; i++ {
+		pops = append(pops, i)
+	}
+	for pop := float64(manditory); pop < float64(max); pop *= mult {
+		pops = append(pops, int(pop))
+	}
+	return pops
+}
+
+func TestRandom(t *testing.T) {
+	for _, population := range testPopulations(66, 1000, 1.2) {
 		t.Run(fmt.Sprintf("bulk_%d", population), func(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
-			boxes := make([]Box, population)
-			for i := range boxes {
-				boxes[i] = randomBox(rnd, 0.9, 0.1)
-			}
-
-			inserts := make([]BulkItem, len(boxes))
-			for i := range inserts {
-				inserts[i].Box = boxes[i]
-				inserts[i].RecordID = i
-			}
-			rt := BulkLoad(inserts)
-
+			rt, boxes := testBulkLoad(rnd, population, 0.9, 0.1)
 			checkInvariants(t, rt, boxes)
 			checkSearch(t, rt, boxes, rnd)
 		})
@@ -49,21 +60,10 @@ func TestRandom(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	for pop := 0.0; pop < 1000; pop = (pop + 1) * 1.5 {
-		population := int(pop)
-
+	for _, population := range testPopulations(66, 1000, 1.5) {
 		t.Run(fmt.Sprintf("pop=%d", population), func(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
-			boxes := make([]Box, population)
-			for i := range boxes {
-				boxes[i] = randomBox(rnd, 0.9, 0.1)
-			}
-			inserts := make([]BulkItem, len(boxes))
-			for i := range inserts {
-				inserts[i].Box = boxes[i]
-				inserts[i].RecordID = i
-			}
-			rt := BulkLoad(inserts)
+			rt, boxes := testBulkLoad(rnd, population, 0.9, 0.1)
 			checkInvariants(t, rt, boxes)
 
 			for i := len(boxes) - 1; i >= 0; i-- {
@@ -148,9 +148,16 @@ func checkInvariants(t *testing.T, rt RTree, boxes []Box) {
 		unfound[i] = struct{}{}
 	}
 
-	var check func(*node)
-	check = func(current *node) {
+	leafLevel := -1
+	var check func(n *node, level int)
+	check = func(current *node, level int) {
 		if current.isLeaf {
+			if leafLevel == -1 {
+				leafLevel = level
+			} else if leafLevel != level {
+				t.Fatalf("inconsistent leaf level: %d vs %d", leafLevel, level)
+			}
+
 			for i := 0; i < current.numEntries; i++ {
 				e := current.entries[i]
 				if e.child != nil {
@@ -177,7 +184,7 @@ func checkInvariants(t *testing.T, rt RTree, boxes []Box) {
 				if box != e.box {
 					t.Fatalf("entry box doesn't match smallest box enclosing child")
 				}
-				check(e.child)
+				check(e.child, level+1)
 			}
 		}
 		for i := current.numEntries; i < len(current.entries); i++ {
@@ -191,7 +198,7 @@ func checkInvariants(t *testing.T, rt RTree, boxes []Box) {
 		}
 	}
 	if rt.root != nil {
-		check(rt.root)
+		check(rt.root, 0)
 		if rt.root.parent != nil {
 			t.Fatalf("root parent should be nil, but is %p", rt.root.parent)
 		}
