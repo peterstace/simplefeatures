@@ -28,20 +28,17 @@ func calculateLevels(numItems int) int {
 	// Instead, we calculate the number of levels using integer arithmetic
 	// only. This will be fast anyway, since the calculation only requires
 	// logarithmic time.
-	var levels int
-	count := 1
+	levels := 1
+	count := maxChildren
 	for count < numItems {
-		count *= 4
+		count *= maxChildren
 		levels++
-	}
-	if levels > 0 {
-		levels--
 	}
 	return levels
 }
 
-func bulkInsert(items []BulkItem, level int) *node {
-	if level == 0 {
+func bulkInsert(items []BulkItem, levels int) *node {
+	if levels == 1 {
 		root := &node{isLeaf: true, numEntries: len(items)}
 		for i, item := range items {
 			root.entries[i] = entry{
@@ -60,7 +57,7 @@ func bulkInsert(items []BulkItem, level int) *node {
 	// less than 6 must instead be split into 2 nodes.
 	if len(items) < 6 {
 		firstHalf, secondHalf := splitBulkItems2Ways(items)
-		return bulkNode(level, firstHalf, secondHalf)
+		return bulkNode(levels, firstHalf, secondHalf)
 	}
 
 	// 8 is the first number of items that can be split into 4 nodes while
@@ -68,24 +65,24 @@ func bulkInsert(items []BulkItem, level int) *node {
 	// Anything less that 8 must instead be split into 3 nodes.
 	if len(items) < 8 {
 		firstThird, secondThird, thirdThird := splitBulkItems3Ways(items)
-		return bulkNode(level, firstThird, secondThird, thirdThird)
+		return bulkNode(levels, firstThird, secondThird, thirdThird)
 	}
 
 	// 4-way split:
 	firstHalf, secondHalf := splitBulkItems2Ways(items)
 	firstQuarter, secondQuarter := splitBulkItems2Ways(firstHalf)
 	thirdQuarter, fourthQuarter := splitBulkItems2Ways(secondHalf)
-	return bulkNode(level, firstQuarter, secondQuarter, thirdQuarter, fourthQuarter)
+	return bulkNode(levels, firstQuarter, secondQuarter, thirdQuarter, fourthQuarter)
 }
 
-func bulkNode(level int, parts ...[]BulkItem) *node {
+func bulkNode(levels int, parts ...[]BulkItem) *node {
 	root := &node{
 		numEntries: len(parts),
 		parent:     nil,
 		isLeaf:     false,
 	}
 	for i, part := range parts {
-		child := bulkInsert(part, level-1)
+		child := bulkInsert(part, levels-1)
 		child.parent = root
 		root.entries[i].child = child
 		root.entries[i].box = calculateBound(child)
