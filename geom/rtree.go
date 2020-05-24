@@ -7,7 +7,7 @@ import "github.com/peterstace/simplefeatures/rtree"
 // the indices of the lines slice.
 type indexedLines struct {
 	lines []line
-	tree  rtree.RTree
+	tree  *rtree.RTree
 }
 
 func newIndexedLines(lines []line) indexedLines {

@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func testBulkLoad(rnd *rand.Rand, pop int, maxStart, maxWidth float64) (RTree, []Box) {
+func testBulkLoad(rnd *rand.Rand, pop int, maxStart, maxWidth float64) (*RTree, []Box) {
 	boxes := make([]Box, pop)
 	for i := range boxes {
 		boxes[i] = randomBox(rnd, maxStart, maxWidth)
@@ -48,7 +48,7 @@ func TestRandom(t *testing.T) {
 				boxes[i] = randomBox(rnd, 0.9, 0.1)
 			}
 
-			var rt RTree
+			rt := new(RTree)
 			for i, box := range boxes {
 				rt.Insert(box, i)
 				checkInvariants(t, rt, boxes[:i+1])
@@ -76,7 +76,7 @@ func TestDelete(t *testing.T) {
 	}
 }
 
-func checkSearch(t *testing.T, rt RTree, boxes []Box, rnd *rand.Rand) {
+func checkSearch(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
 	for i := 0; i < 10; i++ {
 		searchBB := randomBox(rnd, 0.5, 0.5)
 		var got []int
@@ -117,7 +117,7 @@ func randomBox(rnd *rand.Rand, maxStart, maxWidth float64) Box {
 	return box
 }
 
-func checkInvariants(t *testing.T, rt RTree, boxes []Box) {
+func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 	var recurse func(*node, string)
 	recurse = func(current *node, indent string) {
 		t.Logf("%sNode addr=%p leaf=%t numEntries=%d", indent, current, current.isLeaf, current.numEntries)
