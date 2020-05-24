@@ -192,26 +192,3 @@ func (t *RTree) chooseBestNode(box Box, level int) *node {
 		level--
 	}
 }
-
-func (t *RTree) chooseLeafNode(box Box) *node {
-	node := t.root
-	for {
-		if node.isLeaf {
-			return node
-		}
-		bestDelta := enlargement(box, node.entries[0].box)
-		bestEntry := 0
-		for i := 1; i < node.numEntries; i++ {
-			entryBox := node.entries[i].box
-			delta := enlargement(box, entryBox)
-			if delta < bestDelta {
-				bestDelta = delta
-				bestEntry = i
-			} else if delta == bestDelta && area(entryBox) < area(node.entries[bestEntry].box) {
-				// Area is used as a tie breaking if the enlargements are the same.
-				bestEntry = i
-			}
-		}
-		node = node.entries[bestEntry].child
-	}
-}
