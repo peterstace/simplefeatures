@@ -161,7 +161,7 @@ func checkInvariants(t *testing.T, rt RTree, boxes []Box) {
 			for i := 0; i < current.numEntries; i++ {
 				e := current.entries[i]
 				if e.child != nil {
-					t.Fatal("leaf node has child")
+					t.Fatalf("leaf node has child (entry %d)", i)
 				}
 				if _, ok := unfound[e.recordID]; !ok {
 					t.Fatal("record ID found in tree but wasn't in unfound map")
@@ -182,7 +182,7 @@ func checkInvariants(t *testing.T, rt RTree, boxes []Box) {
 					box = combine(box, e.child.entries[j].box)
 				}
 				if box != e.box {
-					t.Fatalf("entry box doesn't match smallest box enclosing child")
+					t.Fatalf("entry box doesn't match smallest box enclosing children")
 				}
 				check(e.child, level+1)
 			}

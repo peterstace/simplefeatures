@@ -94,16 +94,38 @@ func (t *RTree) condenseTree(leaf *node) {
 	}
 
 	// CT6 [Reinsert orphaned entries]
-	for len(eliminated) > 0 {
-		last := eliminated[len(eliminated)-1]
-		eliminated = eliminated[:len(eliminated)-1] // pop
-		for i := 0; i < last.numEntries; i++ {
-			e := last.entries[i]
-			if last.isLeaf {
+	for _, node := range eliminated {
+		if node.isLeaf {
+			for i := 0; i < node.numEntries; i++ {
+				e := node.entries[i]
 				t.Insert(e.box, e.recordID)
-			} else {
-				eliminated = append(eliminated, e.child) // push
+			}
+		} else {
+			for i := 0; i < node.numEntries; i++ {
+				t.reInsertNode(node.entries[i].child)
 			}
 		}
+	}
+}
+
+// reInsertNode reinserts the subtree rooted at a node that was previously
+// deleted from the tree.
+func (t *RTree) reInsertNode(node *node) {
+	box := calculateBound(node)
+	treeDepth := t.root.depth()
+	nodeDepth := node.depth()
+	insNode := t.chooseBestNode(box, treeDepth-nodeDepth-1)
+
+	insNode.appendChild(box, node)
+	t.adjustBoxesUpwards(node, box)
+
+	if insNode.numEntries <= maxChildren {
+		return
+	}
+
+	newNode := t.splitNode(insNode)
+	root1, root2 := t.adjustTree(insNode, newNode)
+	if root2 != nil {
+		t.joinRoots(root1, root2)
 	}
 }

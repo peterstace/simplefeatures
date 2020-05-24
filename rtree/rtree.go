@@ -30,6 +30,17 @@ func (n *node) appendRecord(box Box, recordID int) {
 func (n *node) appendChild(box Box, child *node) {
 	n.entries[n.numEntries] = entry{box: box, child: child}
 	n.numEntries++
+	child.parent = n
+}
+
+// depth calculates the number of layers of nodes in the subtree rooted at the node.
+func (n *node) depth() int {
+	var d = 1
+	for !n.isLeaf {
+		d++
+		n = n.entries[0].child
+	}
+	return d
 }
 
 // RTree is an in-memory R-Tree data structure. It holds record ID and bounding

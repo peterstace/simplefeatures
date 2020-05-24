@@ -16,20 +16,11 @@ func (t *RTree) Insert(box Box, recordID int) {
 		t.root = &node{isLeaf: true}
 	}
 
-	leaf := t.chooseLeafNode(box)
-	leaf.appendRecord(box, recordID)
+	level := t.root.depth() - 1
+	leaf := t.chooseBestNode(box, level)
 
-	current := leaf
-	for current != t.root {
-		parent := current.parent
-		for i := 0; i < parent.numEntries; i++ {
-			e := &parent.entries[i]
-			if e.child == current {
-				e.box = combine(e.box, box)
-			}
-		}
-		current = parent
-	}
+	leaf.appendRecord(box, recordID)
+	t.adjustBoxesUpwards(leaf, box)
 
 	if leaf.numEntries <= maxChildren {
 		return
@@ -37,9 +28,23 @@ func (t *RTree) Insert(box Box, recordID int) {
 
 	newNode := t.splitNode(leaf)
 	root1, root2 := t.adjustTree(leaf, newNode)
-
 	if root2 != nil {
 		t.joinRoots(root1, root2)
+	}
+}
+
+// combineBoxesUpwards expands the boxes from the given node all the way to the
+// root by the given box.
+func (t *RTree) adjustBoxesUpwards(node *node, box Box) {
+	for node != t.root {
+		parent := node.parent
+		for i := 0; i < parent.numEntries; i++ {
+			e := &parent.entries[i]
+			if e.child == node {
+				e.box = combine(e.box, box)
+			}
+		}
+		node = parent
 	}
 }
 
@@ -136,7 +141,6 @@ func (t *RTree) splitNode(n *node) *node {
 
 	// Use the existing node for the 0 bits in the split, and a new node for
 	// the 1 bits in the split.
-	//n.entries = [maxChildren + 1]entry{}
 	newNode := &node{isLeaf: n.isLeaf}
 	totalEntries := n.numEntries
 	n.numEntries = 0
@@ -159,6 +163,34 @@ func (t *RTree) splitNode(n *node) *node {
 		}
 	}
 	return newNode
+}
+
+// chooseBestNode chooses the best node in the tree under which to insert a new
+// entry. The Box is the box of the new entry, and the level is the level of
+// the tree on which the best node will be found (where the root is at level 0,
+// the nodes under the root are level 1 etc.).
+func (t *RTree) chooseBestNode(box Box, level int) *node {
+	node := t.root
+	for {
+		if level == 0 {
+			return node
+		}
+		bestDelta := enlargement(box, node.entries[0].box)
+		bestEntry := 0
+		for i := 1; i < node.numEntries; i++ {
+			entryBox := node.entries[i].box
+			delta := enlargement(box, entryBox)
+			if delta < bestDelta {
+				bestDelta = delta
+				bestEntry = i
+			} else if delta == bestDelta && area(entryBox) < area(node.entries[bestEntry].box) {
+				// Area is used as a tie breaking if the enlargements are the same.
+				bestEntry = i
+			}
+		}
+		node = node.entries[bestEntry].child
+		level--
+	}
 }
 
 func (t *RTree) chooseLeafNode(box Box) *node {
