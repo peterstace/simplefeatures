@@ -81,7 +81,6 @@ func (t *RTree) adjustTree(n, nn *node) (*node, *node) {
 		var pp *node
 		if nn != nil {
 			parent.appendChild(calculateBound(nn), nn)
-			nn.parent = parent
 			if parent.numEntries > maxChildren {
 				pp = t.splitNode(parent)
 			}
