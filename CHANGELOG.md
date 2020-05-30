@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.18.0
+
+2020-05-30
+
+- Improve R-Tree delete operation performance.
+
+- Fix a bug in MultiPolygon validation.
+
 ## v0.17.0
 
 2020-05-17
