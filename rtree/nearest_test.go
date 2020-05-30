@@ -19,7 +19,7 @@ func TestNearest(t *testing.T) {
 	}
 }
 
-func checkNearest(t *testing.T, rt RTree, boxes []Box, rnd *rand.Rand) {
+func checkNearest(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
 	for i := 0; i < 10; i++ {
 		var got []int
 		originBB := randomBox(rnd, 0.9, 0.1)
