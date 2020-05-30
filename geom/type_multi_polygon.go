@@ -67,7 +67,7 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 		box := env.box()
 
 		err := tree.RangeSearch(box, func(j int) error {
-			for k := range [...]int{i, j} {
+			for _, k := range [...]int{i, j} {
 				if !polyBoundaryPopulated[k] {
 					polyBoundaries[k] = newIndexedLines(polys[k].Boundary().asLines())
 					polyBoundaryPopulated[k] = true

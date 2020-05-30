@@ -139,6 +139,9 @@ func TestMultiPolygonValidation(t *testing.T) {
 		`MULTIPOLYGON(EMPTY)`,
 		`MULTIPOLYGON(((0 0,0 1,1 0,0 0)),EMPTY)`,
 		`MULTIPOLYGON(EMPTY,((0 0,0 1,1 0,0 0)))`,
+
+		// Replicates a bug.
+		`MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 -1,3 -1,3 0,2 0,2 -1)),((1 1,3 1,3 3,1 3,1 1)))`,
 	} {
 		t.Run(fmt.Sprintf("valid_%d", i), func(t *testing.T) {
 			geomFromWKT(t, wkt)
