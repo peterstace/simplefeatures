@@ -13,13 +13,13 @@ type BulkItem struct {
 // BulkLoad bulk loads multiple items into a new R-Tree. The bulk load
 // operation is optimised for creating R-Trees with minimal node overlap. This
 // allows for fast searching.
-func BulkLoad(items []BulkItem) RTree {
+func BulkLoad(items []BulkItem) *RTree {
 	if len(items) == 0 {
-		return RTree{}
+		return &RTree{}
 	}
 
 	levels := calculateLevels(len(items))
-	return RTree{bulkInsert(items, levels)}
+	return &RTree{bulkInsert(items, levels)}
 }
 
 func calculateLevels(numItems int) int {
