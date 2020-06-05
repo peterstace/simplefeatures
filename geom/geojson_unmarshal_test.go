@@ -248,3 +248,23 @@ func TestGeoJSONUnmarshalInvalid(t *testing.T) {
 		})
 	}
 }
+
+func TestGeoJSONUnmarshalDisableAllValidations(t *testing.T) {
+	for i, geojson := range []string{
+		`{"type":"LineString","coordinates":[[0,0],[0,0]]}`,
+		`{"type":"Polygon","coordinates":[[[0,0],[1,1],[1,0],[0,1],[0,0]]]}`,
+		`{"type":"Polygon","coordinates":[[[0,0],[0,0]]]}`,
+		`{"type":"MultiLineString","coordinates":[[[0,0],[0,0]]]}`,
+		`{"type":"MultiPolygon","coordinates":[[[[0,0],[1,1],[1,0],[0,1],[0,0]]]]}`,
+		`{"type":"MultiPolygon","coordinates":[[[[0,0],[0,0]]]]}`,
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			if _, err := UnmarshalGeoJSON([]byte(geojson)); err == nil {
+				t.Fatal("invalid test case -- geometry should be invalid")
+			}
+			if _, err := UnmarshalGeoJSON([]byte(geojson), DisableAllValidations); err != nil {
+				t.Errorf("got error but didn't expect one because validations are disabled")
+			}
+		})
+	}
+}
