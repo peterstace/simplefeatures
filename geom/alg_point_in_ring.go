@@ -17,92 +17,68 @@ const (
 // relatePointToRing checks the side of a ring that a point is on. It assumes that
 // the input ring is actually a ring (i.e. closed and simple) and is non-empty.
 func relatePointToRing(pt XY, ring LineString) side {
-	if !ring.IsClosed() {
-		// We don't explicitly check for simplicity, since that's an expensive
-		// operation. If a ring is closed, then that implies that it's also
-		// non-empty.
-		panic("pointRingSide called with non-closed ring")
-	}
-
 	seq := ring.Coordinates()
 	n := seq.Length()
 
-	maxX := math.Inf(-1)
-	for i := 0; i < n; i++ {
-		maxX = math.Max(maxX, seq.GetXY(i).X)
-		ln, ok := getLine(seq, i)
-		if ok && ln.intersectsXY(pt) {
-			return boundary
-		}
-	}
-	if pt.X > maxX {
-		return exterior
-	}
-
-	ray := line{pt, XY{maxX + 1, pt.Y}}
 	var count int
 	for i := 0; i < n; i++ {
 		ln, ok := getLine(seq, i)
 		if !ok {
 			continue
 		}
-		if incrementCountPointInRing(pt, ray, ln) {
+		crossing, onLine := hasCrossing(pt, ln)
+		if onLine {
+			return boundary
+		}
+		if crossing {
 			count++
 		}
 	}
-	if count%2 == 1 {
-		return interior
+	if count%2 == 0 {
+		return exterior
 	}
-	return exterior
+	return interior
 }
 
-func incrementCountPointInRing(pt XY, ray, iterLine line) bool {
-	inter := ray.intersectLine(iterLine)
-	if inter.empty {
-		return false
+func hasCrossing(pt XY, ln line) (crossing, onLine bool) {
+	if ln.a.Y == ln.b.Y {
+		return false, pt.Y == ln.a.Y && ln.minX() <= pt.X && pt.X <= ln.maxX()
 	}
-	if inter.ptA != inter.ptB {
-		return false
+	lower, upper := ln.a, ln.b
+	if lower.Y > upper.Y {
+		lower, upper = upper, lower
 	}
-	if inter.ptA == iterLine.a || inter.ptA == iterLine.b {
-		otherY := iterLine.a.Y
-		if inter.ptA == iterLine.a {
-			otherY = iterLine.b.Y
-		}
-		return otherY < pt.Y
-	}
-	return true
+	o := orientation(lower, upper, pt)
+
+	crossing = pt.Y >= lower.Y && pt.Y < upper.Y && o == rightTurn
+	onLine = pt == lower || pt == upper || (ln.envelope().Contains(pt) && o == collinear)
+	return
 }
 
 func relatePointToPolygon(pt XY, polyBoundary indexedLines) side {
-	var onBoundary bool
-	ptBox := rtree.Box{MinX: pt.X, MinY: pt.Y, MaxX: pt.X, MaxY: pt.Y}
-	polyBoundary.tree.RangeSearch(ptBox, func(i int) error {
+	box := rtree.Box{
+		MinX: math.Inf(-1),
+		MinY: pt.Y,
+		MaxX: pt.X,
+		MaxY: pt.Y,
+	}
+	var onBound bool
+	var count int
+	polyBoundary.tree.RangeSearch(box, func(i int) error {
 		ln := polyBoundary.lines[i]
-		if ln.intersectsXY(pt) {
-			onBoundary = true
+		crossing, onLine := hasCrossing(pt, ln)
+		if onLine {
+			onBound = true
 			return rtree.Stop
 		}
-		return nil
-	})
-	if onBoundary {
-		return boundary
-	}
-
-	extent, ok := polyBoundary.tree.Extent()
-	if !ok {
-		return exterior
-	}
-	ray := line{pt, XY{extent.MaxX + 1, pt.Y}}
-
-	var count int
-	polyBoundary.tree.RangeSearch(ray.envelope().box(), func(i int) error {
-		ln := polyBoundary.lines[i]
-		if incrementCountPointInRing(pt, ray, ln) {
+		if crossing {
 			count++
 		}
 		return nil
 	})
+	if onBound {
+		return boundary
+	}
 	if count%2 == 1 {
 		return interior
 	}
