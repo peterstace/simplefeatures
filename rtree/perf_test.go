@@ -38,7 +38,8 @@ func BenchmarkBulk(b *testing.B) {
 		}
 		b.Run(fmt.Sprintf("n=%d", pop), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				BulkLoad(inserts)
+				tr := BulkLoad(inserts)
+				tr.Recycle()
 			}
 		})
 	}

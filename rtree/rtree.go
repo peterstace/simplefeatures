@@ -2,7 +2,35 @@ package rtree
 
 import (
 	"errors"
+	"sync"
 )
+
+var nodePool = sync.Pool{
+	New: func() interface{} {
+		return new(node)
+	},
+}
+
+func releaseNode(n *node) {
+	*n = node{}
+	nodePool.Put(n)
+}
+
+func (t *RTree) Recycle() {
+	var recurse func(*node)
+	recurse = func(n *node) {
+		for i := 0; i < n.numEntries; i++ {
+			c := n.entries[i].child
+			if c != nil {
+				recurse(c)
+				releaseNode(c)
+			}
+		}
+	}
+	if t.root != nil {
+		recurse(t.root)
+	}
+}
 
 // node is a node in an R-Tree. nodes can either be leaf nodes holding entries
 // for terminal items, or intermediate nodes holding entries for more nodes.
