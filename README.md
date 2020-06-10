@@ -39,6 +39,7 @@ The changelog can be found [here](CHANGELOG.md).
 	- Ring property calculation
 	- Area calculation
 	- Centroid calculation
+	- Point on surface calculation
 
 - Geometry manipulation
 	- Reverse calculation
@@ -49,7 +50,6 @@ The changelog can be found [here](CHANGELOG.md).
 
 - Spatial analysis:
 	- Intersection calculation
-	- Point on surface calculation
 
 #### Features Not Planned Yet
 
