@@ -41,9 +41,6 @@ func relatePointToRing(pt XY, ring LineString) side {
 }
 
 func hasCrossing(pt XY, ln line) (crossing, onLine bool) {
-	if ln.a.Y == ln.b.Y {
-		return false, pt.Y == ln.a.Y && ln.minX() <= pt.X && pt.X <= ln.maxX()
-	}
 	lower, upper := ln.a, ln.b
 	if lower.Y > upper.Y {
 		lower, upper = upper, lower
@@ -51,7 +48,7 @@ func hasCrossing(pt XY, ln line) (crossing, onLine bool) {
 	o := orientation(lower, upper, pt)
 
 	crossing = pt.Y >= lower.Y && pt.Y < upper.Y && o == rightTurn
-	onLine = pt == lower || pt == upper || (ln.envelope().Contains(pt) && o == collinear)
+	onLine = ln.envelope().Contains(pt) && o == collinear
 	return
 }
 
