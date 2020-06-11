@@ -43,3 +43,23 @@ func BenchmarkBulk(b *testing.B) {
 		})
 	}
 }
+
+func BenchmarkInsert(b *testing.B) {
+	for _, pop := range [...]int{10, 100, 1000} {
+		b.Run(fmt.Sprintf("n=%d", pop), func(b *testing.B) {
+			rnd := rand.New(rand.NewSource(0))
+			boxes := make([]Box, pop)
+			for i := range boxes {
+				boxes[i] = randomBox(rnd, 0.9, 0.1)
+			}
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				var tree RTree
+				for j, b := range boxes {
+					tree.Insert(b, j)
+				}
+			}
+		})
+	}
+}
