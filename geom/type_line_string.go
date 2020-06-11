@@ -98,7 +98,7 @@ func (s LineString) IsSimple() bool {
 
 	// We need to track the index of the previous line segments, so that we can
 	// ignore the case where adjacent line segments intersect at a point (due
-	// to their construction). We can just subtract 1 from the current index,
+	// to their construction). We can't just subtract 1 from the current index,
 	// since there could be duplicated vertices in the middle of the sequence.
 	prev := -1
 

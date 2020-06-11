@@ -122,6 +122,8 @@ func sortBulkItems(items []BulkItem) {
 	sort.Sort(bulkItems)
 }
 
+// bulkItems implements the sort.Interface interface. This style of sorting is
+// used rather than sort.Slice because it does less allocations.
 type bulkItems struct {
 	horizontal bool
 	items      []BulkItem
