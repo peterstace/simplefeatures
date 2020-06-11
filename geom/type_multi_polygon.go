@@ -58,8 +58,17 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 	polyBoundaries := make([]indexedLines, len(polys))
 	polyBoundaryPopulated := make([]bool, len(polys))
 
-	var tree rtree.RTree
+	bulkItems := make([]rtree.BulkItem, 0, len(polys))
+	for i, p := range polys {
+		env, ok := p.Envelope()
+		if ok {
+			item := rtree.BulkItem{Box: env.box(), RecordID: i}
+			bulkItems = append(bulkItems, item)
+		}
+	}
+	tree := rtree.BulkLoad(bulkItems)
 	defer tree.Recycle()
+
 	for i := range polys {
 		env, ok := polys[i].Envelope()
 		if !ok {
@@ -68,6 +77,10 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 		box := env.box()
 
 		err := tree.RangeSearch(box, func(j int) error {
+			if i <= j {
+				return nil
+			}
+
 			for _, k := range [...]int{i, j} {
 				if !polyBoundaryPopulated[k] {
 					polyBoundaries[k] = newIndexedLines(polys[k].Boundary().asLines())
@@ -116,8 +129,6 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 		if err != nil {
 			return err
 		}
-
-		tree.Insert(box, i)
 	}
 	return nil
 }
