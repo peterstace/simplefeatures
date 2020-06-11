@@ -103,6 +103,7 @@ func (s LineString) IsSimple() bool {
 	prev := -1
 
 	var tree rtree.RTree
+	defer tree.Recycle()
 	n := s.seq.Length()
 	for i := 0; i < n; i++ {
 		ln, ok := getLine(s.seq, i)

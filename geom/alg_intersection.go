@@ -43,6 +43,7 @@ func intersectionOfLines(lines1, lines2 []line) (MultiPoint, MultiLineString) {
 		}
 	}
 	tree := rtree.BulkLoad(bulk)
+	defer tree.Recycle()
 
 	var lines []LineString
 	var ptFloats []float64

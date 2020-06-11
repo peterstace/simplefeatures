@@ -75,6 +75,7 @@ func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
 
 	// Check each pair of rings (skipping any pairs that could not possibly intersect).
 	var tree rtree.RTree
+	defer tree.Recycle()
 	for i, currentRing := range rings {
 		env, ok := currentRing.Envelope()
 		if !ok {

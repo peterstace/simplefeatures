@@ -16,6 +16,9 @@ func releaseNode(n *node) {
 	nodePool.Put(n)
 }
 
+// Recycle empties the tree, keeping any internally allocated memory for later
+// use by future RTrees. As a performance optimisation, it's generally a good
+// idea to call Recycle after an RTree is no longer needed.
 func (t *RTree) Recycle() {
 	var recurse func(*node)
 	recurse = func(n *node) {

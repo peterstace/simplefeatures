@@ -59,6 +59,7 @@ func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
 	polyBoundaryPopulated := make([]bool, len(polys))
 
 	var tree rtree.RTree
+	defer tree.Recycle()
 	for i := range polys {
 		env, ok := polys[i].Envelope()
 		if !ok {
