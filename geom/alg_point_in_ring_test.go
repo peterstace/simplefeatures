@@ -128,6 +128,15 @@ func TestPointInRing(t *testing.T) {
 				{"POINT(2 3)", boundary},
 			},
 		},
+		{
+			wkt: "POLYGON((0 0,1 0,1.5 0.5,2 1,0 1,0 0.5,0 0))",
+			subTests: []subTestCase{
+				{"POINT(0 0.5)", boundary},
+				{"POINT(1 0.5)", interior},
+				{"POINT(1.5 0.5)", boundary},
+				{"POINT(2 0.5)", exterior},
+			},
+		},
 	} {
 		g, err := UnmarshalWKT(tc.wkt)
 		if err != nil {
