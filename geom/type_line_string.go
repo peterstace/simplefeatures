@@ -102,9 +102,18 @@ func (s LineString) IsSimple() bool {
 	// since there could be duplicated vertices in the middle of the sequence.
 	prev := -1
 
-	var tree rtree.RTree
-	defer tree.Recycle()
 	n := s.seq.Length()
+	bulkItems := make([]rtree.BulkItem, 0, n-1)
+	for i := 0; i < n; i++ {
+		ln, ok := getLine(s.seq, i)
+		if ok {
+			item := rtree.BulkItem{Box: ln.envelope().box(), RecordID: i}
+			bulkItems = append(bulkItems, item)
+		}
+	}
+	tree := rtree.BulkLoad(bulkItems)
+	defer tree.Recycle()
+
 	for i := 0; i < n; i++ {
 		ln, ok := getLine(s.seq, i)
 		if !ok {
@@ -113,6 +122,10 @@ func (s LineString) IsSimple() bool {
 		simple := true // assume simple until proven otherwise
 		box := ln.envelope().box()
 		tree.RangeSearch(box, func(j int) error {
+			if j >= i {
+				return nil
+			}
+
 			other, ok := getLine(s.seq, j)
 			if !ok {
 				// We previously were able to access line j (otherwise we
@@ -156,7 +169,6 @@ func (s LineString) IsSimple() bool {
 		if !simple {
 			return false
 		}
-		tree.Insert(box, i)
 		prev = i
 	}
 	return true
