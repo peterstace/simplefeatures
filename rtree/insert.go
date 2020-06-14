@@ -14,7 +14,7 @@ const (
 func (t *RTree) Insert(box Box, recordID int) {
 	if t.root == nil {
 		t.root = nodePool.Get().(*node)
-		t.root.isLeaf = true
+		*t.root = node{isLeaf: true}
 	}
 
 	level := t.root.depth() - 1
