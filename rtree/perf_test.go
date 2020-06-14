@@ -63,6 +63,7 @@ func BenchmarkInsert(b *testing.B) {
 				for j, b := range boxes {
 					tree.Insert(b, j)
 				}
+				tree.Recycle()
 			}
 		})
 	}
