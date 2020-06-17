@@ -116,14 +116,32 @@ func sortBulkItems(items []BulkItem) {
 	for _, item := range items[1:] {
 		box = combine(box, item.Box)
 	}
-	horizontal := box.MaxX-box.MinX > box.MaxY-box.MinY
-	sort.Slice(items, func(i, j int) bool {
-		bi := items[i].Box
-		bj := items[j].Box
-		if horizontal {
-			return bi.MinX+bi.MaxX < bj.MinX+bj.MaxX
-		} else {
-			return bi.MinY+bi.MaxY < bj.MinY+bj.MaxY
-		}
-	})
+	bulkItems := bulkItems{
+		horizontal: box.MaxX-box.MinX > box.MaxY-box.MinY,
+		items:      items,
+	}
+	sort.Sort(bulkItems)
+}
+
+// bulkItems implements the sort.Interface interface. This style of sorting is
+// used rather than sort.Slice because it does less allocations.
+type bulkItems struct {
+	horizontal bool
+	items      []BulkItem
+}
+
+func (b bulkItems) Len() int {
+	return len(b.items)
+}
+func (b bulkItems) Less(i, j int) bool {
+	bi := b.items[i].Box
+	bj := b.items[j].Box
+	if b.horizontal {
+		return bi.MinX+bi.MaxX < bj.MinX+bj.MaxX
+	} else {
+		return bi.MinY+bi.MaxY < bj.MinY+bj.MaxY
+	}
+}
+func (b bulkItems) Swap(i, j int) {
+	b.items[i], b.items[j] = b.items[j], b.items[i]
 }
