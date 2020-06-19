@@ -1,7 +1,6 @@
 package rtree
 
 import (
-	"math/rand"
 	"sort"
 )
 
@@ -123,10 +122,20 @@ func splitBulkItems3Ways(items []BulkItem) ([]BulkItem, []BulkItem, []BulkItem) 
 // partial sort is such that items 0 through k-1 are less than or equal to item
 // k, and items k+1 through n-1 are greater than or equal to item k.
 func quickPartition(items sort.Interface, k int) {
+	// Use a custom linear congruential random number generator. This is used
+	// because we don't need high quality random numbers. Using a regular
+	// rand.Rand generator causes a significant bottleneck due to the reliance
+	// on random numbers in this algorithm.
+	var rndState int
+	rnd := func(n int) int {
+		rndState = (1664525*rndState + 1013904223) % (1 << 32)
+		return rndState % n
+	}
+
 	left, right := 0, items.Len()-1
 	for {
 		// Select pivot and store it at the end.
-		pivot := left + rand.Intn(right-left+1)
+		pivot := left + rnd(right-left+1)
 		items.Swap(pivot, right)
 
 		// Partition the left and right sides of the pivot.
