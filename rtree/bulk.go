@@ -92,13 +92,15 @@ func bulkNode(levels int, parts ...[]BulkItem) *node {
 }
 
 func splitBulkItems2Ways(items []BulkItem) ([]BulkItem, []BulkItem) {
-	sortBulkItems(items)
+	bulkItems := buildBulkItems(items)
 	split := len(items) / 2
+	quickPartition(bulkItems, split)
 	return items[:split], items[split:]
 }
 
 func splitBulkItems3Ways(items []BulkItem) ([]BulkItem, []BulkItem, []BulkItem) {
-	sortBulkItems(items)
+	bulkItems := buildBulkItems(items)
+
 	cutA := len(items) / 3
 	cutB := cutA
 	remaining := len(items)/3 - 3*cutA
@@ -109,6 +111,11 @@ func splitBulkItems3Ways(items []BulkItem) ([]BulkItem, []BulkItem, []BulkItem) 
 		cutA++
 		cutB++
 	}
+
+	quickPartition(bulkItems, cutA)
+	bulkItems.items = bulkItems.items[cutA:]
+	quickPartition(bulkItems, cutB)
+
 	return items[:cutA], items[cutA : cutA+cutB], items[cutA+cutB:]
 }
 
@@ -148,16 +155,15 @@ func quickPartition(items sort.Interface, k int) {
 	}
 }
 
-func sortBulkItems(items []BulkItem) {
+func buildBulkItems(items []BulkItem) bulkItems {
 	box := items[0].Box
 	for _, item := range items[1:] {
 		box = combine(box, item.Box)
 	}
-	bulkItems := bulkItems{
+	return bulkItems{
 		horizontal: box.MaxX-box.MinX > box.MaxY-box.MinY,
 		items:      items,
 	}
-	sort.Sort(bulkItems)
 }
 
 // bulkItems implements the sort.Interface interface. This style of sorting is
