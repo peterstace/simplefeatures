@@ -1,6 +1,7 @@
 package rtree
 
 import (
+	"math/rand"
 	"sort"
 )
 
@@ -109,6 +110,42 @@ func splitBulkItems3Ways(items []BulkItem) ([]BulkItem, []BulkItem, []BulkItem) 
 		cutB++
 	}
 	return items[:cutA], items[cutA : cutA+cutB], items[cutA+cutB:]
+}
+
+// quickPartition performs a partial in-place sort on the items slice. The
+// partial sort is such that items 0 through k-1 are less than or equal to item
+// k, and items k+1 through n-1 are greater than or equal to item k.
+func quickPartition(items sort.Interface, k int) {
+	left, right := 0, items.Len()-1
+	for {
+		// Select pivot and store it at the end.
+		pivot := left + rand.Intn(right-left+1)
+		items.Swap(pivot, right)
+
+		// Partition the left and right sides of the pivot.
+		j := left
+		for i := left; i <= right; i++ {
+			if items.Less(i, right) {
+				items.Swap(i, j)
+				j++
+			}
+		}
+
+		// Restore the pivot to the middle position between the two partitions.
+		items.Swap(right, j)
+
+		// Repeat on either the left or right parts depending on which contains
+		// the kth element.
+		switch {
+		case j-left < k:
+			k -= j - left + 1
+			left = j + 1
+		case j-left > k:
+			right = j - 1
+		default:
+			return
+		}
+	}
 }
 
 func sortBulkItems(items []BulkItem) {
