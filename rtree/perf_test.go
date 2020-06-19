@@ -7,7 +7,7 @@ import (
 )
 
 func BenchmarkDelete(b *testing.B) {
-	// We test from 100 to 10000 instead of the regular 10 to 1000 because this
+	// We test from 100 to 10000 instead of the regular 10 to 10000 because this
 	// benchmark has a long startup time (which `go test` doesn't consider when
 	// limiting the total runtime of the entire benchmark).
 	for pop := 100; pop <= 10000; pop *= 10 {
@@ -28,7 +28,7 @@ func BenchmarkDelete(b *testing.B) {
 }
 
 func BenchmarkBulk(b *testing.B) {
-	for _, pop := range [...]int{10, 100, 1000} {
+	for _, pop := range [...]int{10, 100, 1000, 10_000, 100_000} {
 		rnd := rand.New(rand.NewSource(0))
 		boxes := make([]Box, pop)
 		for i := range boxes {
@@ -48,7 +48,7 @@ func BenchmarkBulk(b *testing.B) {
 }
 
 func BenchmarkInsert(b *testing.B) {
-	for _, pop := range [...]int{10, 100, 1000} {
+	for _, pop := range [...]int{10, 100, 1000, 10_000, 100_000} {
 		b.Run(fmt.Sprintf("n=%d", pop), func(b *testing.B) {
 			rnd := rand.New(rand.NewSource(0))
 			boxes := make([]Box, pop)
