@@ -98,24 +98,19 @@ func splitBulkItems2Ways(items []BulkItem) ([]BulkItem, []BulkItem) {
 }
 
 func splitBulkItems3Ways(items []BulkItem) ([]BulkItem, []BulkItem, []BulkItem) {
+	// We only need to split 3 ways when we have 6 or 7 elements. By making use
+	// of that assumption, we greatly simplify the logic in this function
+	// compared to if we were to implement a 3 way split in the general case.
+	if ln := len(items); ln != 6 && ln != 7 {
+		panic(len(items))
+	}
+
 	bulkItems := buildBulkItems(items)
+	quickPartition(bulkItems, 2)
+	bulkItems.items = bulkItems.items[3:]
+	quickPartition(bulkItems, 1)
 
-	cutA := len(items) / 3
-	cutB := cutA
-	remaining := len(items)/3 - 3*cutA
-	if remaining == 1 {
-		cutA++
-	}
-	if remaining == 2 {
-		cutA++
-		cutB++
-	}
-
-	quickPartition(bulkItems, cutA)
-	bulkItems.items = bulkItems.items[cutA:]
-	quickPartition(bulkItems, cutB)
-
-	return items[:cutA], items[cutA : cutA+cutB], items[cutA+cutB:]
+	return items[:2], items[2:4], items[4:]
 }
 
 // quickPartition performs a partial in-place sort on the items slice. The
