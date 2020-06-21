@@ -3,6 +3,7 @@ package rtree
 import (
 	"fmt"
 	"math/rand"
+	"runtime"
 	"testing"
 )
 
@@ -12,13 +13,19 @@ func BenchmarkDelete(b *testing.B) {
 	// limiting the total runtime of the entire benchmark).
 	for pop := 100; pop <= 10000; pop *= 10 {
 		b.Run(fmt.Sprintf("n=%d", pop), func(b *testing.B) {
+
+			var boxes []Box
+			trees := make([]*RTree, b.N)
 			for i := 0; i < b.N; i++ {
-				b.StopTimer()
 				rnd := rand.New(rand.NewSource(0))
-				rt, boxes := testBulkLoad(rnd, pop, 0.9, 0.1)
-				b.StartTimer()
+				trees[i], boxes = testBulkLoad(rnd, pop, 0.9, 0.1)
+			}
+			runtime.GC()
+			b.ResetTimer()
+
+			for i := 0; i < b.N; i++ {
 				for j, box := range boxes {
-					if !rt.Delete(box, j) {
+					if !trees[i].Delete(box, j) {
 						b.Fatal("could not delete")
 					}
 				}
