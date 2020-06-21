@@ -106,9 +106,9 @@ func splitBulkItems3Ways(items []BulkItem) ([]BulkItem, []BulkItem, []BulkItem) 
 	}
 
 	bulkItems := buildBulkItems(items)
-	quickPartition(bulkItems, 2)
+	quickPartition(&bulkItems, 2)
 	bulkItems.items = bulkItems.items[3:]
-	quickPartition(bulkItems, 1)
+	quickPartition(&bulkItems, 1)
 
 	return items[:2], items[2:4], items[4:]
 }
