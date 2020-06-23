@@ -2,12 +2,9 @@ package rtree
 
 import (
 	"fmt"
-	"hash/crc64"
 	"math/rand"
 	"reflect"
 	"sort"
-	"strconv"
-	"strings"
 	"testing"
 )
 
@@ -77,57 +74,6 @@ func TestDelete(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestBulkLoadGolden(t *testing.T) {
-	for _, tt := range []struct {
-		pop  int
-		want uint64
-	}{
-		// Test data is 'golden'. We don't really care what the values are,
-		// just that they remain stable over time. If they unexpectedly change,
-		// then that's an indication that the structure of the bulkloaded tree
-		// has changed (which may or may not be ok depending on the reason for
-		// the change).
-		{pop: 1, want: 4796333603149578240},
-		{pop: 3, want: 4729504678986907648},
-		{pop: 4, want: 4616912695452668560},
-		{pop: 5, want: 4329441588449081019},
-		{pop: 6, want: 2189616554920753830},
-		{pop: 7, want: 18175851834761875554},
-		{pop: 10, want: 3134134291419311046},
-		{pop: 15, want: 4266143990412453129},
-		{pop: 16, want: 3347339997226441897},
-		{pop: 17, want: 492585592469164258},
-		{pop: 100, want: 14966132007611414076},
-		{pop: 1000, want: 6535743965441116214},
-		{pop: 10_000, want: 7407227297016950893},
-		{pop: 100_000, want: 14387712569501511190},
-	} {
-		t.Run(fmt.Sprintf("n=%d", tt.pop), func(t *testing.T) {
-			rnd := rand.New(rand.NewSource(0))
-			rt, _ := testBulkLoad(rnd, tt.pop, 0.9, 0.1)
-			got := checksum(rt.root)
-			if got != tt.want {
-				t.Errorf("got=%d want=%d", got, tt.want)
-			}
-		})
-	}
-}
-
-func checksum(n *node) uint64 {
-	var entries []string
-	for i := 0; i < n.numEntries; i++ {
-		var entry string
-		if n.isLeaf {
-			entry = strconv.Itoa(n.entries[i].recordID)
-		} else {
-			entry = strconv.FormatUint(checksum(n.entries[i].child), 10)
-		}
-		entries = append(entries, entry)
-	}
-	sort.Strings(entries)
-	return crc64.Checksum([]byte(strings.Join(entries, ",")), crc64.MakeTable(crc64.ISO))
 }
 
 func checkSearch(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
