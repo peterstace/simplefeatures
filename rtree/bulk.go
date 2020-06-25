@@ -131,7 +131,9 @@ func quickPartition(items sort.Interface, k int) {
 	for {
 		// Select pivot and store it at the end.
 		pivot := left + rnd(right-left+1)
-		items.Swap(pivot, right)
+		if pivot != right {
+			items.Swap(pivot, right)
+		}
 
 		// Partition the left and right sides of the pivot.
 		j := left
