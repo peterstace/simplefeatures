@@ -129,11 +129,23 @@ func quickPartition(items sort.Interface, k int) {
 
 	left, right := 0, items.Len()-1
 	for {
-		// If there are only 2 items remaining, we can finish with a single
-		// compare and swap.
-		if right-left == 1 {
+		// For the case where there are 2 or 3 items remaining, we can use
+		// special case logic to reduce the number of comparisons and swaps.
+		switch right - left {
+		case 1:
 			if items.Less(right, left) {
 				items.Swap(left, right)
+			}
+			return
+		case 2:
+			if items.Less(left+1, left) {
+				items.Swap(left+1, left)
+			}
+			if items.Less(left+2, left+1) {
+				items.Swap(left+2, left+1)
+				if items.Less(left+1, left) {
+					items.Swap(left+1, left)
+				}
 			}
 			return
 		}
