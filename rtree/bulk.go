@@ -129,6 +129,15 @@ func quickPartition(items sort.Interface, k int) {
 
 	left, right := 0, items.Len()-1
 	for {
+		// If there are only 2 items remaining, we can finish with a single
+		// compare and swap.
+		if right-left == 1 {
+			if items.Less(right, left) {
+				items.Swap(left, right)
+			}
+			return
+		}
+
 		// Select pivot and store it at the end.
 		pivot := left + rnd(right-left+1)
 		if pivot != right {
