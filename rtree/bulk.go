@@ -146,7 +146,7 @@ func quickPartition(items sort.Interface, k int) {
 
 		// Partition the left and right sides of the pivot.
 		j := left
-		for i := left; i <= right; i++ {
+		for i := left; i < right; i++ {
 			if items.Less(i, right) {
 				items.Swap(i, j)
 				j++
