@@ -10,7 +10,6 @@ import (
 
 func testBulkLoad(rnd *rand.Rand, pop int, maxStart, maxWidth float64) (*RTree, []Box) {
 	boxes := make([]Box, pop)
-	type xy struct{ x, y float64 }
 	seenX := make(map[float64]bool)
 	seenY := make(map[float64]bool)
 	for i := range boxes {
