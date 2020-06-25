@@ -2,7 +2,6 @@ package rtree
 
 import (
 	"fmt"
-	"sort"
 	"strconv"
 	"testing"
 
@@ -47,22 +46,30 @@ func TestQuickPartition(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			for k := range tc {
 				t.Run(fmt.Sprintf("k=%d", k), func(t *testing.T) {
-					items := make([]int, len(tc))
-					copy(items, tc)
-					quickPartition(sort.IntSlice(items), k)
+
+					items := make([]BulkItem, 0, len(tc))
+					for _, num := range tc {
+						f := float64(num)
+						items = append(items, BulkItem{
+							Box{f, f, f, f},
+							len(items),
+						})
+					}
+
+					quickPartition(items, k, false)
 					kth := items[k]
 					for j, item := range items {
 						switch {
 						case j < k:
-							if item > kth {
+							if item.Box.MaxX > kth.Box.MaxX {
 								t.Errorf("item at index %d not partitioned", j)
 							}
 						case j > k:
-							if item < kth {
+							if item.Box.MaxX < kth.Box.MaxX {
 								t.Errorf("item at index %d not partitioned", j)
 							}
 						default:
-							if item != kth {
+							if item.Box.MaxX != kth.Box.MaxX {
 								t.Errorf("item at index %d not partitioned", j)
 							}
 						}

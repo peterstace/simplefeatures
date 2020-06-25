@@ -1,9 +1,5 @@
 package rtree
 
-import (
-	"sort"
-)
-
 // BulkItem is an item that can be inserted for bulk loading.
 type BulkItem struct {
 	Box      Box
@@ -91,9 +87,9 @@ func bulkNode(levels int, parts ...[]BulkItem) *node {
 }
 
 func splitBulkItems2Ways(items []BulkItem) ([]BulkItem, []BulkItem) {
-	bulkItems := buildBulkItems(items)
+	horizontal := itemsAreHorizontal(items)
 	split := len(items) / 2
-	quickPartition(bulkItems, split)
+	quickPartition(items, split, horizontal)
 	return items[:split], items[split:]
 }
 
@@ -105,10 +101,9 @@ func splitBulkItems3Ways(items []BulkItem) ([]BulkItem, []BulkItem, []BulkItem) 
 		panic(len(items))
 	}
 
-	bulkItems := buildBulkItems(items)
-	quickPartition(&bulkItems, 2)
-	bulkItems.items = bulkItems.items[3:]
-	quickPartition(&bulkItems, 1)
+	horizontal := itemsAreHorizontal(items)
+	quickPartition(items, 2, horizontal)
+	quickPartition(items[3:], 1, horizontal)
 
 	return items[:2], items[2:4], items[4:]
 }
@@ -116,7 +111,7 @@ func splitBulkItems3Ways(items []BulkItem) ([]BulkItem, []BulkItem, []BulkItem) 
 // quickPartition performs a partial in-place sort on the items slice. The
 // partial sort is such that items 0 through k-1 are less than or equal to item
 // k, and items k+1 through n-1 are greater than or equal to item k.
-func quickPartition(items sort.Interface, k int) {
+func quickPartition(items []BulkItem, k int, horizontal bool) {
 	// Use a custom linear congruential random number generator. This is used
 	// because we don't need high quality random numbers. Using a regular
 	// rand.Rand generator causes a significant bottleneck due to the reliance
@@ -127,24 +122,37 @@ func quickPartition(items sort.Interface, k int) {
 		return rndState % n
 	}
 
-	left, right := 0, items.Len()-1
+	less := func(i, j int) bool {
+		bi := items[i].Box
+		bj := items[j].Box
+		if horizontal {
+			return bi.MinX+bi.MaxX < bj.MinX+bj.MaxX
+		} else {
+			return bi.MinY+bi.MaxY < bj.MinY+bj.MaxY
+		}
+	}
+	swap := func(i, j int) {
+		items[i], items[j] = items[j], items[i]
+	}
+
+	left, right := 0, len(items)-1
 	for {
 		// For the case where there are 2 or 3 items remaining, we can use
 		// special case logic to reduce the number of comparisons and swaps.
 		switch right - left {
 		case 1:
-			if items.Less(right, left) {
-				items.Swap(left, right)
+			if less(right, left) {
+				swap(right, left)
 			}
 			return
 		case 2:
-			if items.Less(left+1, left) {
-				items.Swap(left+1, left)
+			if less(left+1, left) {
+				swap(left+1, left)
 			}
-			if items.Less(left+2, left+1) {
-				items.Swap(left+2, left+1)
-				if items.Less(left+1, left) {
-					items.Swap(left+1, left)
+			if less(left+2, left+1) {
+				swap(left+2, left+1)
+				if less(left+1, left) {
+					swap(left+1, left)
 				}
 			}
 			return
@@ -153,20 +161,20 @@ func quickPartition(items sort.Interface, k int) {
 		// Select pivot and store it at the end.
 		pivot := left + rnd(right-left+1)
 		if pivot != right {
-			items.Swap(pivot, right)
+			swap(pivot, right)
 		}
 
 		// Partition the left and right sides of the pivot.
 		j := left
 		for i := left; i < right; i++ {
-			if items.Less(i, right) {
-				items.Swap(i, j)
+			if less(i, right) {
+				swap(i, j)
 				j++
 			}
 		}
 
 		// Restore the pivot to the middle position between the two partitions.
-		items.Swap(right, j)
+		swap(right, j)
 
 		// Repeat on either the left or right parts depending on which contains
 		// the kth element.
@@ -182,36 +190,10 @@ func quickPartition(items sort.Interface, k int) {
 	}
 }
 
-func buildBulkItems(items []BulkItem) bulkItems {
+func itemsAreHorizontal(items []BulkItem) bool {
 	box := items[0].Box
 	for _, item := range items[1:] {
 		box = combine(box, item.Box)
 	}
-	return bulkItems{
-		horizontal: box.MaxX-box.MinX > box.MaxY-box.MinY,
-		items:      items,
-	}
-}
-
-// bulkItems implements the sort.Interface interface. This style of sorting is
-// used rather than sort.Slice because it does less allocations.
-type bulkItems struct {
-	horizontal bool
-	items      []BulkItem
-}
-
-func (b bulkItems) Len() int {
-	return len(b.items)
-}
-func (b bulkItems) Less(i, j int) bool {
-	bi := b.items[i].Box
-	bj := b.items[j].Box
-	if b.horizontal {
-		return bi.MinX+bi.MaxX < bj.MinX+bj.MaxX
-	} else {
-		return bi.MinY+bi.MaxY < bj.MinY+bj.MaxY
-	}
-}
-func (b bulkItems) Swap(i, j int) {
-	b.items[i], b.items[j] = b.items[j], b.items[i]
+	return box.MaxX-box.MinX > box.MaxY-box.MinY
 }
