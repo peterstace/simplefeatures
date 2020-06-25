@@ -10,8 +10,21 @@ import (
 
 func testBulkLoad(rnd *rand.Rand, pop int, maxStart, maxWidth float64) (*RTree, []Box) {
 	boxes := make([]Box, pop)
+	seenX := make(map[float64]bool)
+	seenY := make(map[float64]bool)
 	for i := range boxes {
-		boxes[i] = randomBox(rnd, maxStart, maxWidth)
+		var box Box
+		for {
+			box = randomBox(rnd, maxStart, maxWidth)
+			x := box.MinX + box.MaxX
+			y := box.MinY + box.MaxY
+			if !seenX[x] && !seenY[y] {
+				seenX[x] = true
+				seenY[y] = true
+				break
+			}
+		}
+		boxes[i] = box
 	}
 	inserts := make([]BulkItem, len(boxes))
 	for i := range inserts {
@@ -110,10 +123,10 @@ func randomBox(rnd *rand.Rand, maxStart, maxWidth float64) Box {
 	box.MaxX = box.MinX + rnd.Float64()*maxWidth
 	box.MaxY = box.MinY + rnd.Float64()*maxWidth
 
-	box.MinX = float64(int(box.MinX*100)) / 100
-	box.MinY = float64(int(box.MinY*100)) / 100
-	box.MaxX = float64(int(box.MaxX*100)) / 100
-	box.MaxY = float64(int(box.MaxY*100)) / 100
+	box.MinX = float64(int(box.MinX*1_000_000)) / 1_000_000
+	box.MinY = float64(int(box.MinY*1_000_000)) / 1_000_000
+	box.MaxX = float64(int(box.MaxX*1_000_000)) / 1_000_000
+	box.MaxY = float64(int(box.MaxY*1_000_000)) / 1_000_000
 	return box
 }
 
