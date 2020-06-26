@@ -116,10 +116,10 @@ func quickPartition(items []BulkItem, k int, horizontal bool) {
 	// because we don't need high quality random numbers. Using a regular
 	// rand.Rand generator causes a significant bottleneck due to the reliance
 	// on random numbers in this algorithm.
-	var rndState int
+	var rndState uint32
 	rnd := func(n int) int {
-		rndState = (1664525*rndState + 1013904223) % (1 << 32)
-		return rndState % n
+		rndState = 1664525*rndState + 1013904223
+		return int((uint64(rndState) * uint64(n)) >> 32)
 	}
 
 	less := func(i, j int) bool {
