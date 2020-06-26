@@ -207,6 +207,7 @@ func itemsAreHorizontal(items []BulkItem) bool {
 	return maxX-minX > maxY-minY
 }
 
+// quickMin is a faster but not functionally identical version of math.Min.
 func quickMin(a, b float64) float64 {
 	if a < b {
 		return a
@@ -214,6 +215,7 @@ func quickMin(a, b float64) float64 {
 	return b
 }
 
+// quickMax is a faster but not functionally identical version of math.Max.
 func quickMax(a, b float64) float64 {
 	if a > b {
 		return a
