@@ -13,82 +13,31 @@ geometries. This is the same access and storage model used by libraries such as
 [JTS](https://locationtech.github.io/jts/), and
 [PostGIS](https://postgis.net/).
 
-#### Changelog
+Simple Features also provides spatial analysis algorithms that operate on
+2-dimensional geometries.
+
+### Changelog
 
 The changelog can be found [here](CHANGELOG.md).
 
-#### Supported Features
+### Library Features (native Go)
 
-- Marshalling/unmarshalling:
-	- WKT - Well Known Text
-	- WKB - Well Known Binary (including SQL valuer/scanner)
-	- GeoJSON (including GeoJSON Feature Collections)
+- Marshalling/unmarshalling (WKT, WKB, GeoJSON).
 
 - 3D and Measure coordinates.
 
-- Spatial analysis:
-	- Geometry validity checks
-	- Boundary calculation
-	- Bounding box (envelope) calculation
-	- Convex Hull calculation
-	- Exact equals check
-	- Is Simple check
-	- Intersects check
-	- Length calculation
-	- Closed geometry calculation
-	- Ring property calculation
-	- Area calculation
-	- Centroid calculation
-	- Point on surface calculation
+- Spatial analysis (geometry validation, boundary calculation, envelopes,
+  convex hull, equality, is simple, intersects, length, closed, ring, area,
+centroid, point on surface).
 
-- Geometry manipulation
-	- Reverse calculation
-	- Pointwise transform
-	- Force coordinates type (e.g. Force to 2D)
+- Geometry manipulation (reverse, pointwise transform, force coordinates
+  types).
 
-#### In the works
+### GEOS Wrapper
 
-- Spatial analysis:
-	- Intersection calculation
-
-#### Features Not Planned Yet
-
-- SRIDs
-
-- Spatial analysis:
-	- Geometry buffering
-	- Spatial equality check
-	- Disjoint check
-	- Touches check
-	- Crosses check
-	- Within check
-	- Contains check
-	- Overlaps check
-	- Relates check
-
-### Tests
-
-Some of the tests have a dependency on a [Postgis](https://postgis.net/)
-database being available.
-
-While the tests can be run in the usual Go way if you have Postgis set up
-locally, it's easier to run the tests using docker-compose:
-
-```
-docker-compose up --abort-on-container-exit
-```
-
-There are two additional suite of test suits utilising an automatically
-generated test corpus. The test suite test every function against every input
-combination exhaustively, and compare the result against a reference
-implementation. They take much longer to run, and are designed to be used as a
-final double check for correctness. They can be run using the following
-commands:
-
-```
-docker-compose -f docker-compose-postgis.yml up --abort-on-container-exit
-```
-
-```
-docker-compose -f docker-compose-cmprefimpl.yml up --abort-on-container-exit
-```
+A [GEOS](https://www.osgeo.org/projects/geos/) CGO wrapper is also provided,
+giving access to functionality not yet implemented natively in Go. The [wrapper
+is implemented in a separate
+package](https://pkg.go.dev/github.com/peterstace/simplefeatures/geos?tab=doc),
+meaning that library users who don't need this additional functionality don't
+need to expose themselves to CGO.
