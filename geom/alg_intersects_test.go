@@ -1,7 +1,6 @@
 package geom_test
 
 import (
-	"fmt"
 	"strconv"
 	"testing"
 
@@ -387,37 +386,6 @@ func TestIntersects(t *testing.T) {
 			g2 := geomFromWKT(t, tt.in2)
 			t.Run("fwd", runTest(g1, g2))
 			t.Run("rev", runTest(g2, g1))
-		})
-	}
-}
-
-func BenchmarkIntersectsLineStringWithLineString(b *testing.B) {
-	for _, sz := range []int{10, 100, 1000, 10000} {
-		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
-			var floats1, floats2 []float64
-			for i := 0; i < sz; i++ {
-				x := float64(i) / float64(sz)
-				floats1 = append(floats1, x, 1)
-				floats2 = append(floats2, x, 2)
-			}
-			seq1 := geom.NewSequence(floats1, geom.DimXY)
-			seq2 := geom.NewSequence(floats2, geom.DimXY)
-			ls1, err := geom.NewLineString(seq1)
-			if err != nil {
-				b.Fatal(err)
-			}
-			ls2, err := geom.NewLineString(seq2)
-			if err != nil {
-				b.Fatal(err)
-			}
-			b.ResetTimer()
-			ls2g := ls2.AsGeometry()
-
-			for i := 0; i < b.N; i++ {
-				if ls1.Intersects(ls2g) {
-					b.Fatal("should not intersect")
-				}
-			}
 		})
 	}
 }
