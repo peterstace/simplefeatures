@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.19.0
+
+2020-06-27
+
+- Fix a bug where constructor options were ignored in GeoJSON unmarshalling.
+
+- Performance improvements to geometry validations and the Intersects
+  operation (due to improvements to point-in-ring operations and RTree bulk
+loading).
+
 ## v0.18.0
 
 2020-05-30
