@@ -3,7 +3,6 @@ package geom_test
 import (
 	"bytes"
 	"encoding/hex"
-	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -571,35 +570,4 @@ func TestWKBUnmarshalEndianess(t *testing.T) {
 			expectGeomEq(t, got, want)
 		})
 	}
-}
-
-func BenchmarkMarshalWKB(b *testing.B) {
-	b.Run("polygon", func(b *testing.B) {
-		for _, sz := range []int{10, 100, 1000, 10000} {
-			b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
-				poly := regularPolygon(XY{}, 1.0, sz)
-				b.ResetTimer()
-				for i := 0; i < b.N; i++ {
-					poly.AsBinary()
-				}
-			})
-		}
-	})
-}
-
-func BenchmarkUnmarshalWKB(b *testing.B) {
-	b.Run("polygon", func(b *testing.B) {
-		for _, sz := range []int{10, 100, 1000, 10000} {
-			b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
-				wkb := regularPolygon(XY{}, 1.0, sz).AsBinary()
-				b.ResetTimer()
-				for i := 0; i < b.N; i++ {
-					_, err := UnmarshalWKB(wkb, DisableAllValidations)
-					if err != nil {
-						b.Fatal(err)
-					}
-				}
-			})
-		}
-	})
 }
