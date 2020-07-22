@@ -314,31 +314,59 @@ func (p Polygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
 		polygonExactEqual(p, other.AsPolygon(), opts)
 }
 
-// Area of a Polygon is the outer ring's area minus the areas of all inner rings.
-func (p Polygon) Area() float64 {
-	area := math.Abs(signedAreaOfLinearRing(p.ExteriorRing()))
-	n := p.NumInteriorRings()
-	for i := 0; i < n; i++ {
-		area -= math.Abs(signedAreaOfLinearRing(p.InteriorRingN(i)))
-	}
-	return area
+// AreaOption allows the behaviour of area calculations to be modified.
+type AreaOption func(o *areaOptionSet)
+
+type areaOptionSet struct {
+	signed    bool
+	transform func(XY) XY
 }
 
-// SignedArea gives the positive area of the polygon when the outer rings are
-// wound CCW and any inner rings are wound CW, and the negative area of the
-// polygon when the outer rings are wound CW and any inner rings are wound CCW.
-// If the windings of the inner and outer rings are the same, then the area
-// will be inconsistent.
-func (p Polygon) SignedArea() float64 {
-	signedArea := signedAreaOfLinearRing(p.ExteriorRing())
-	n := p.NumInteriorRings()
-	for i := 0; i < n; i++ {
-		signedArea += signedAreaOfLinearRing(p.InteriorRingN(i))
+func newAreaOptionSet(opts []AreaOption) areaOptionSet {
+	var os areaOptionSet
+	for _, opt := range opts {
+		opt(&os)
 	}
-	return signedArea
+	return os
 }
 
-func signedAreaOfLinearRing(lr LineString) float64 {
+// WithTransform alters the behaviour of area calculations by first
+// transforming the geometry with the provided transform function.
+func WithTransform(tr func(XY) XY) AreaOption {
+	return func(o *areaOptionSet) {
+		o.transform = tr
+	}
+}
+
+// SignedArea alters the behaviour of area calculations. It causes them to give
+// a positive areas when the outer rings are wound CCW and any inner rings are
+// wound CW, and a negative area when the outer rings are wound CW and any
+// inner rings are wound CCW.  If the windings of the inner and outer rings are
+// the same, then the area will be inconsistent.
+func SignedArea(o *areaOptionSet) {
+	o.signed = true
+}
+
+// Area of a Polygon is the area enclosed by the polygon's boundary.
+func (p Polygon) Area(opts ...AreaOption) float64 {
+	os := newAreaOptionSet(opts)
+	totalArea := signedAreaOfLinearRing(p.ExteriorRing(), os.transform)
+	if !os.signed {
+		totalArea = math.Abs(totalArea)
+	}
+	n := p.NumInteriorRings()
+	for i := 0; i < n; i++ {
+		area := signedAreaOfLinearRing(p.InteriorRingN(i), os.transform)
+		if os.signed {
+			totalArea += area
+		} else {
+			totalArea -= math.Abs(area)
+		}
+	}
+	return totalArea
+}
+
+func signedAreaOfLinearRing(lr LineString, transform func(XY) XY) float64 {
 	// This is the "Shoelace Formula".
 	var sum float64
 	seq := lr.Coordinates()
@@ -346,6 +374,10 @@ func signedAreaOfLinearRing(lr LineString) float64 {
 	for i := 0; i < n; i++ {
 		pt0 := seq.GetXY(i)
 		pt1 := seq.GetXY((i + 1) % n)
+		if transform != nil {
+			pt0 = transform(pt0)
+			pt1 = transform(pt1)
+		}
 		sum += (pt1.X + pt0.X) * (pt1.Y - pt0.Y)
 	}
 	return sum / 2
@@ -365,10 +397,10 @@ func (p Polygon) Centroid() Point {
 	// GEOS and JTS seem to use a very similar calculation method.
 
 	areas := make([]float64, 1+p.NumInteriorRings())
-	areas[0] = math.Abs(signedAreaOfLinearRing(p.ExteriorRing()))
+	areas[0] = math.Abs(signedAreaOfLinearRing(p.ExteriorRing(), nil))
 	sumAreas := areas[0]
 	for i := 0; i < p.NumInteriorRings(); i++ {
-		areas[i+1] = -math.Abs(signedAreaOfLinearRing(p.InteriorRingN(i)))
+		areas[i+1] = -math.Abs(signedAreaOfLinearRing(p.InteriorRingN(i), nil))
 		sumAreas += areas[i+1]
 	}
 
