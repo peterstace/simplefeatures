@@ -513,7 +513,7 @@ func (p Polygon) ForceCCW() Polygon {
 func (p Polygon) forceOrientation(forceCW bool) Polygon {
 	orientedRings := make([]LineString, len(p.rings))
 	for i, ring := range p.rings {
-		alreadyCW := signedAreaOfLinearRing(ring) < 0
+		alreadyCW := signedAreaOfLinearRing(ring, nil) < 0
 		if (i == 0) == (alreadyCW == forceCW) {
 			orientedRings[i] = ring
 		} else {
