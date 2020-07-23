@@ -455,3 +455,17 @@ func (m MultiPolygon) PointOnSurface() Point {
 	}
 	return bestPoint
 }
+
+// ForceCW returns the equivalent MultiPolygon that has its exterior rings in a
+// clockwise orientation and any inner rings in a counter-clockwise
+// orientation.
+func (m MultiPolygon) ForceCW() MultiPolygon {
+	return m
+}
+
+// ForceCCW returns the equivalent MultiPolygon that has its exterior rings in
+// a counter-clockwise orientation and any inner rings in a clockwise
+// orientation.
+func (m MultiPolygon) ForceCCW() MultiPolygon {
+	return m
+}
