@@ -1085,18 +1085,36 @@ func TestForceWindingDirection(t *testing.T) {
 			forceCW:  "POLYGON((0 0,0 4,4 0,0 0),(1 1,2 1,1 2,1 1))",
 			forceCCW: "POLYGON((0 0,4 0,0 4,0 0),(1 1,1 2,2 1,1 1))",
 		},
-		//{
-		//	desc:     "polygon with outer ring wound CW and inner rings mixed",
-		//	input:    "",
-		//	forceCW:  "",
-		//	forceCCW: "",
-		//},
-		//{
-		//	desc:     "polygon with outer ring wound CCW and inner rings mixed",
-		//	input:    "",
-		//	forceCW:  "",
-		//	forceCCW: "",
-		//},
+		{
+			desc: "polygon with outer ring wound CW and inner rings mixed",
+			input: `POLYGON(
+						(0 0,0 3,5 3,5 0,0 0),
+						(1 1,1 2,2 2,2 1,1 1),
+						(3 1,4 1,4 2,3 2,3 1))`,
+			forceCW: `POLYGON(
+						(0 0,0 3,5 3,5 0,0 0),
+						(1 1,2 1,2 2,1 2,1 1),
+						(3 1,4 1,4 2,3 2,3 1))`,
+			forceCCW: `POLYGON(
+						(0 0,5 0,5 3,0 3,0 0),
+						(1 1,1 2,2 2,2 1,1 1),
+						(3 1,3 2,4 2,4 1,3 1))`,
+		},
+		{
+			desc: "polygon with outer ring wound CCW and inner rings mixed",
+			input: `POLYGON(
+						(0 0,5 0,5 3,0 3,0 0),
+						(1 1,1 2,2 2,2 1,1 1),
+						(3 1,4 1,4 2,3 2,3 1))`,
+			forceCW: `POLYGON(
+						(0 0,0 3,5 3,5 0,0 0),
+						(1 1,2 1,2 2,1 2,1 1),
+						(3 1,4 1,4 2,3 2,3 1))`,
+			forceCCW: `POLYGON(
+						(0 0,5 0,5 3,0 3,0 0),
+						(1 1,1 2,2 2,2 1,1 1),
+						(3 1,3 2,4 2,4 1,3 1))`,
+		},
 		//{
 		//	desc:     "multipolygon with single poly wound CW",
 		//	input:    "",
