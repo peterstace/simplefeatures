@@ -613,21 +613,36 @@ func TestSignedArea(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Logf("input: %s", tc.input)
 			geom := geomFromWKT(t, tc.input)
-			var got float64
-			switch {
-			case geom.IsPolygon():
-				got = geom.AsPolygon().SignedArea()
-			case geom.IsMultiPolygon():
-				got = geom.AsMultiPolygon().SignedArea()
-			default:
-				t.Errorf("expected: Polygon or MultiPolygon but got a different type")
-			}
+			got := geom.Area(SignedArea)
 			if got != tc.expected {
 				t.Errorf("expected: %f, got: %f", tc.expected, got)
 			}
 		})
 	}
 
+}
+
+func TestTransformedArea(t *testing.T) {
+	for i, tt := range []struct {
+		wkt  string
+		want float64
+	}{
+		{"GEOMETRYCOLLECTION(POLYGON((0 0,2 0,2 1,0 1,0 0)))", 0.25},
+		{"POLYGON((0 0,2 0,2 1,0 1,0 0))", 0.25},
+		{"POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,1 2,2 2,2 1,1 1))", 1},
+		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((2 2,3 2,2 3,2 2)))", 0.125},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := geomFromWKT(t, tt.wkt).Area(WithTransform(func(xy XY) XY {
+				xy.X *= 0.5
+				xy.Y *= 0.25
+				return xy
+			}))
+			if got != tt.want {
+				t.Errorf("got=%v want=%v", got, tt.want)
+			}
+		})
+	}
 }
 
 func TestCentroid(t *testing.T) {
