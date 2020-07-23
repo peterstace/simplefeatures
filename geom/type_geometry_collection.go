@@ -240,12 +240,12 @@ func (c GeometryCollection) Length() float64 {
 }
 
 // Area in the case of a GeometryCollection is the sum of the areas of its parts.
-func (c GeometryCollection) Area() float64 {
+func (c GeometryCollection) Area(opts ...AreaOption) float64 {
 	var sum float64
 	n := c.NumGeometries()
 	for i := 0; i < n; i++ {
 		g := c.GeometryN(i)
-		sum += g.Area()
+		sum += g.Area(opts...)
 	}
 	return sum
 }

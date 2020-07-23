@@ -530,22 +530,22 @@ func (g Geometry) Centroid() Point {
 
 // Area gives the area of the Polygon or MultiPolygon or GeometryCollection.
 // If the Geometry is none of those types, then 0 is returned.
-func (g Geometry) Area() float64 {
+func (g Geometry) Area(opts ...AreaOption) float64 {
 	switch g.gtype {
 	case TypeGeometryCollection:
-		return g.AsGeometryCollection().Area()
+		return g.AsGeometryCollection().Area(opts...)
 	case TypePoint:
 		return 0
 	case TypeLineString:
 		return 0
 	case TypePolygon:
-		return g.AsPolygon().Area()
+		return g.AsPolygon().Area(opts...)
 	case TypeMultiPoint:
 		return 0
 	case TypeMultiLineString:
 		return 0
 	case TypeMultiPolygon:
-		return g.AsMultiPolygon().Area()
+		return g.AsMultiPolygon().Area(opts...)
 	default:
 		panic("unknown geometry: " + g.gtype.String())
 	}

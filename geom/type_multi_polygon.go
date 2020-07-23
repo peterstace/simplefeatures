@@ -360,23 +360,13 @@ func (m MultiPolygon) EqualsExact(other Geometry, opts ...EqualsExactOption) boo
 }
 
 // Area in the case of a MultiPolygon is the sum of the areas of its polygons.
-func (m MultiPolygon) Area() float64 {
+func (m MultiPolygon) Area(opts ...AreaOption) float64 {
 	var area float64
 	n := m.NumPolygons()
 	for i := 0; i < n; i++ {
-		area += m.PolygonN(i).Area()
+		area += m.PolygonN(i).Area(opts...)
 	}
 	return area
-}
-
-// SignedArea returns the sum of the signed areas of the constituent polygons.
-func (m MultiPolygon) SignedArea() float64 {
-	var signedArea float64
-	n := m.NumPolygons()
-	for i := 0; i < n; i++ {
-		signedArea += m.PolygonN(i).SignedArea()
-	}
-	return signedArea
 }
 
 // Centroid returns the multi polygon's centroid point. It returns the empty
