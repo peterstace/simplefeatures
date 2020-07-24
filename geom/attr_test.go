@@ -1115,30 +1115,42 @@ func TestForceWindingDirection(t *testing.T) {
 						(1 1,1 2,2 2,2 1,1 1),
 						(3 1,3 2,4 2,4 1,3 1))`,
 		},
-		//{
-		//	desc:     "multipolygon with single poly wound CW",
-		//	input:    "",
-		//	forceCW:  "",
-		//	forceCCW: "",
-		//},
-		//{
-		//	desc:     "multipolygon with single poly wound CCW",
-		//	input:    "",
-		//	forceCW:  "",
-		//	forceCCW: "",
-		//},
-		//{
-		//	desc:     "multipolygon with two polys of mixed winding",
-		//	input:    "",
-		//	forceCW:  "",
-		//	forceCCW: "",
-		//},
-		//{
-		//	desc:     "geometry collection containing poly and multipoly",
-		//	input:    "",
-		//	forceCW:  "",
-		//	forceCCW: "",
-		//},
+		{
+			desc:     "multipolygon with single poly wound CW",
+			input:    "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))",
+			forceCW:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))",
+			forceCCW: "MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)))",
+		},
+		{
+			desc:     "multipolygon with single poly wound CCW",
+			input:    "MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)))",
+			forceCW:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))",
+			forceCCW: "MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)))",
+		},
+		{
+			desc: "multipolygon with two polys of mixed winding (CCW and CW)",
+			input: `MULTIPOLYGON(
+						((0 0,1 0,1 1,0 1,0 0)),
+						((2 0,2 1,3 1,3 0,2 0)))`,
+			forceCW: `MULTIPOLYGON(
+						((0 0,0 1,1 1,1 0,0 0)),
+						((2 0,2 1,3 1,3 0,2 0)))`,
+			forceCCW: `MULTIPOLYGON(
+						((0 0,1 0,1 1,0 1,0 0)),
+						((2 0,3 0,3 1,2 1,2 0)))`,
+		},
+		{
+			desc: "geometry collection containing poly and multipoly",
+			input: `GEOMETRYCOLLECTION(
+						POLYGON((0 0,0 1,1 1,1 0,0 0)),
+						MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0))))`,
+			forceCW: `GEOMETRYCOLLECTION(
+						POLYGON((0 0,0 1,1 1,1 0,0 0)),
+						MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0))))`,
+			forceCCW: `GEOMETRYCOLLECTION(
+						POLYGON((0 0,1 0,1 1,0 1,0 0)),
+						MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0))))`,
+		},
 	} {
 		t.Run(tt.desc, func(t *testing.T) {
 			t.Run("ForceCW", func(t *testing.T) {

@@ -450,12 +450,20 @@ func (m MultiPolygon) PointOnSurface() Point {
 // clockwise orientation and any inner rings in a counter-clockwise
 // orientation.
 func (m MultiPolygon) ForceCW() MultiPolygon {
-	return m
+	return m.forceOrientation(true)
 }
 
 // ForceCCW returns the equivalent MultiPolygon that has its exterior rings in
 // a counter-clockwise orientation and any inner rings in a clockwise
 // orientation.
 func (m MultiPolygon) ForceCCW() MultiPolygon {
-	return m
+	return m.forceOrientation(false)
+}
+
+func (m MultiPolygon) forceOrientation(forceCW bool) MultiPolygon {
+	polys := make([]Polygon, len(m.polys))
+	for i, poly := range m.polys {
+		polys[i] = poly.forceOrientation(forceCW)
+	}
+	return MultiPolygon{polys, m.ctype}
 }
