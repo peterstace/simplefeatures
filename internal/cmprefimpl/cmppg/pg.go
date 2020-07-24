@@ -31,6 +31,8 @@ type UnaryResult struct {
 	Force3DZ   geom.Geometry
 	Force3DM   geom.Geometry
 	Force4D    geom.Geometry
+	ForceCW    geom.Geometry
+	ForceCCW   geom.Geometry
 }
 
 const (
@@ -105,7 +107,10 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		ST_AsBinary(ST_Force2D(ST_GeomFromWKB($1))),
 		ST_AsBinary(ST_Force3DZ(ST_GeomFromWKB($1))),
 		ST_AsBinary(ST_Force3DM(ST_GeomFromWKB($1))),
-		ST_AsBinary(ST_Force4D(ST_GeomFromWKB($1)))
+		ST_AsBinary(ST_Force4D(ST_GeomFromWKB($1))),
+
+		ST_AsBinary(ST_ForcePolygonCW(ST_GeomFromWKB($1))),
+		ST_AsBinary(ST_ForcePolygonCCW(ST_GeomFromWKB($1)))
 
 		`, g, isNestedGeometryCollection(g), g.AsText(),
 	).Scan(
@@ -128,6 +133,8 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		&result.Force3DZ,
 		&result.Force3DM,
 		&result.Force4D,
+		&result.ForceCW,
+		&result.ForceCCW,
 	)
 	if err != nil {
 		return result, err

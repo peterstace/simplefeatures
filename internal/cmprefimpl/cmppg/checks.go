@@ -442,6 +442,63 @@ func CheckType(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
+func CheckForceOrientation(t *testing.T, want UnaryResult, g geom.Geometry) {
+	if !containsOnlyPolygonsOrMultiPolygons(g) {
+		// Skip geometries that contain things other than areal components.
+		// PostGIS does some weird things with LineStrings when it forces
+		// orientation (it seems to sometimes reverse them). This conflicts
+		// with PostGIS documentation, which states that non polygonal
+		// geometries are returned unchanged. So this is probably a PostGIS
+		// bug.
+		return
+	}
+	if g.IsEmpty() {
+		// When PostGIS forces orientation, it has weird behaviour for empty
+		// geometries. It collapses nested empty geometries into a single
+		// level, which is different from the simplefeatures behaviour (which
+		// is to preserve the structure of nested geometries).
+		return
+	}
+
+	t.Run("CheckForceOrientation", func(t *testing.T) {
+		t.Run("CW", func(t *testing.T) {
+			got := g.ForceCW()
+			want := want.ForceCW
+			if !got.EqualsExact(want) {
+				t.Logf("got:  %s", got.AsText())
+				t.Logf("want: %s", want.AsText())
+				t.Error("mismatch")
+			}
+		})
+		t.Run("CCW", func(t *testing.T) {
+			got := g.ForceCCW()
+			want := want.ForceCCW
+			if !got.EqualsExact(want) {
+				t.Logf("got:  %s", got.AsText())
+				t.Logf("want: %s", want.AsText())
+				t.Error("mismatch")
+			}
+		})
+	})
+}
+
+func containsOnlyPolygonsOrMultiPolygons(g geom.Geometry) bool {
+	switch g.Type() {
+	case geom.TypePolygon, geom.TypeMultiPolygon:
+		return true
+	case geom.TypeGeometryCollection:
+		gc := g.AsGeometryCollection()
+		for i := 0; i < gc.NumGeometries(); i++ {
+			if !containsOnlyPolygonsOrMultiPolygons(gc.GeometryN(i)) {
+				return false
+			}
+		}
+		return true
+	default:
+		return false
+	}
+}
+
 func CheckForceCoordinatesDimension(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckForceCoordinatesDimension", func(t *testing.T) {
 
