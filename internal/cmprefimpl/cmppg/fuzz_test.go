@@ -51,6 +51,7 @@ func TestFuzz(t *testing.T) {
 			CheckCentroid(t, want, g)
 			CheckReverse(t, want, g)
 			CheckType(t, want, g)
+			CheckForceOrientation(t, want, g)
 		})
 	}
 }

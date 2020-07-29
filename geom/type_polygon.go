@@ -495,3 +495,30 @@ func (p Polygon) PointOnSurface() Point {
 	pt, _ := pointOnAreaSurface(p)
 	return pt
 }
+
+// ForceCW returns the equivalent Polygon that has its exterior ring in a
+// clockwise orientation and any inner rings in a counter-clockwise
+// orientation.
+func (p Polygon) ForceCW() Polygon {
+	return p.forceOrientation(true)
+}
+
+// ForceCCW returns the equivalent Polygon that has its exterior ring in a
+// counter-clockwise orientation and any inner rings in a clockwise
+// orientation.
+func (p Polygon) ForceCCW() Polygon {
+	return p.forceOrientation(false)
+}
+
+func (p Polygon) forceOrientation(forceCW bool) Polygon {
+	orientedRings := make([]LineString, len(p.rings))
+	for i, ring := range p.rings {
+		alreadyCW := signedAreaOfLinearRing(ring, nil) < 0
+		if (i == 0) == (alreadyCW == forceCW) {
+			orientedRings[i] = ring
+		} else {
+			orientedRings[i] = ring.Reverse()
+		}
+	}
+	return Polygon{orientedRings, p.ctype}
+}

@@ -673,3 +673,30 @@ func (g Geometry) PointOnSurface() Point {
 		panic("unknown geometry: " + g.gtype.String())
 	}
 }
+
+// ForceCW returns the equivalent Geometry that has its exterior rings in a
+// clockwise orientation and any inner rings in a counter-clockwise
+// orientation. Non-areal geometrys are returned as is.
+func (g Geometry) ForceCW() Geometry {
+	return g.forceOrientation(true)
+}
+
+// ForceCCW returns the equivalent Geometry that has its exterior rings in a
+// counter-clockwise orientation and any inner rings in a clockwise
+// orientation. Non-areal geometrys are returned as is.
+func (g Geometry) ForceCCW() Geometry {
+	return g.forceOrientation(false)
+}
+
+func (g Geometry) forceOrientation(forceCW bool) Geometry {
+	switch g.gtype {
+	case TypePolygon:
+		return g.AsPolygon().forceOrientation(forceCW).AsGeometry()
+	case TypeMultiPolygon:
+		return g.AsMultiPolygon().forceOrientation(forceCW).AsGeometry()
+	case TypeGeometryCollection:
+		return g.AsGeometryCollection().forceOrientation(forceCW).AsGeometry()
+	default:
+		return g
+	}
+}

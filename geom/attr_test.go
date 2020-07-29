@@ -1035,3 +1035,134 @@ func TestForceCoordinatesType(t *testing.T) {
 		})
 	}
 }
+
+func TestForceWindingDirection(t *testing.T) {
+	for _, tt := range []struct {
+		desc     string
+		input    string
+		forceCW  string
+		forceCCW string
+	}{
+		{
+			desc:     "point",
+			input:    "POINT(4 5)",
+			forceCW:  "POINT(4 5)",
+			forceCCW: "POINT(4 5)",
+		},
+		{
+			desc:     "polygon with outer ring wound CW",
+			input:    "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			forceCW:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			forceCCW: "POLYGON((0 0,1 0,1 1,0 1,0 0))",
+		},
+		{
+			desc:     "polygon with outer ring wound CCW",
+			input:    "POLYGON((0 0,1 0,1 1,0 1,0 0))",
+			forceCW:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			forceCCW: "POLYGON((0 0,1 0,1 1,0 1,0 0))",
+		},
+		{
+			desc:     "polygon with outer ring wound CW and inner ring wound CW",
+			input:    "POLYGON((0 0,0 4,4 0,0 0),(1 1,1 2,2 1,1 1))",
+			forceCW:  "POLYGON((0 0,0 4,4 0,0 0),(1 1,2 1,1 2,1 1))",
+			forceCCW: "POLYGON((0 0,4 0,0 4,0 0),(1 1,1 2,2 1,1 1))",
+		},
+		{
+			desc:     "polygon with outer ring wound CW and inner ring wound CCW",
+			input:    "POLYGON((0 0,0 4,4 0,0 0),(1 1,2 1,1 2,1 1))",
+			forceCW:  "POLYGON((0 0,0 4,4 0,0 0),(1 1,2 1,1 2,1 1))",
+			forceCCW: "POLYGON((0 0,4 0,0 4,0 0),(1 1,1 2,2 1,1 1))",
+		},
+		{
+			desc:     "polygon with outer ring wound CCW and inner ring wound CW",
+			input:    "POLYGON((0 0,4 0,0 4,0 0),(1 1,1 2,2 1,1 1))",
+			forceCW:  "POLYGON((0 0,0 4,4 0,0 0),(1 1,2 1,1 2,1 1))",
+			forceCCW: "POLYGON((0 0,4 0,0 4,0 0),(1 1,1 2,2 1,1 1))",
+		},
+		{
+			desc:     "polygon with outer ring wound CCW and inner ring wound CCW",
+			input:    "POLYGON((0 0,4 0,0 4,0 0),(1 1,2 1,1 2,1 1))",
+			forceCW:  "POLYGON((0 0,0 4,4 0,0 0),(1 1,2 1,1 2,1 1))",
+			forceCCW: "POLYGON((0 0,4 0,0 4,0 0),(1 1,1 2,2 1,1 1))",
+		},
+		{
+			desc: "polygon with outer ring wound CW and inner rings mixed",
+			input: `POLYGON(
+						(0 0,0 3,5 3,5 0,0 0),
+						(1 1,1 2,2 2,2 1,1 1),
+						(3 1,4 1,4 2,3 2,3 1))`,
+			forceCW: `POLYGON(
+						(0 0,0 3,5 3,5 0,0 0),
+						(1 1,2 1,2 2,1 2,1 1),
+						(3 1,4 1,4 2,3 2,3 1))`,
+			forceCCW: `POLYGON(
+						(0 0,5 0,5 3,0 3,0 0),
+						(1 1,1 2,2 2,2 1,1 1),
+						(3 1,3 2,4 2,4 1,3 1))`,
+		},
+		{
+			desc: "polygon with outer ring wound CCW and inner rings mixed",
+			input: `POLYGON(
+						(0 0,5 0,5 3,0 3,0 0),
+						(1 1,1 2,2 2,2 1,1 1),
+						(3 1,4 1,4 2,3 2,3 1))`,
+			forceCW: `POLYGON(
+						(0 0,0 3,5 3,5 0,0 0),
+						(1 1,2 1,2 2,1 2,1 1),
+						(3 1,4 1,4 2,3 2,3 1))`,
+			forceCCW: `POLYGON(
+						(0 0,5 0,5 3,0 3,0 0),
+						(1 1,1 2,2 2,2 1,1 1),
+						(3 1,3 2,4 2,4 1,3 1))`,
+		},
+		{
+			desc:     "multipolygon with single poly wound CW",
+			input:    "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))",
+			forceCW:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))",
+			forceCCW: "MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)))",
+		},
+		{
+			desc:     "multipolygon with single poly wound CCW",
+			input:    "MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)))",
+			forceCW:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))",
+			forceCCW: "MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)))",
+		},
+		{
+			desc: "multipolygon with two polys of mixed winding (CCW and CW)",
+			input: `MULTIPOLYGON(
+						((0 0,1 0,1 1,0 1,0 0)),
+						((2 0,2 1,3 1,3 0,2 0)))`,
+			forceCW: `MULTIPOLYGON(
+						((0 0,0 1,1 1,1 0,0 0)),
+						((2 0,2 1,3 1,3 0,2 0)))`,
+			forceCCW: `MULTIPOLYGON(
+						((0 0,1 0,1 1,0 1,0 0)),
+						((2 0,3 0,3 1,2 1,2 0)))`,
+		},
+		{
+			desc: "geometry collection containing poly and multipoly",
+			input: `GEOMETRYCOLLECTION(
+						POLYGON((0 0,0 1,1 1,1 0,0 0)),
+						MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0))))`,
+			forceCW: `GEOMETRYCOLLECTION(
+						POLYGON((0 0,0 1,1 1,1 0,0 0)),
+						MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0))))`,
+			forceCCW: `GEOMETRYCOLLECTION(
+						POLYGON((0 0,1 0,1 1,0 1,0 0)),
+						MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0))))`,
+		},
+	} {
+		t.Run(tt.desc, func(t *testing.T) {
+			t.Run("ForceCW", func(t *testing.T) {
+				got := geomFromWKT(t, tt.input).ForceCW()
+				want := geomFromWKT(t, tt.forceCW)
+				expectGeomEq(t, got, want)
+			})
+			t.Run("ForceCCW", func(t *testing.T) {
+				got := geomFromWKT(t, tt.input).ForceCCW()
+				want := geomFromWKT(t, tt.forceCCW)
+				expectGeomEq(t, got, want)
+			})
+		})
+	}
+}

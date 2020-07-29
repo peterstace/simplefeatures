@@ -410,3 +410,27 @@ func (c GeometryCollection) PointOnSurface() Point {
 
 	return nearest.point
 }
+
+// ForceCW returns the equivalent GeometryCollection that has its constituent
+// Polygons and MultiPolygons reoriented in a clockwise direction (i.e.
+// exterior rings clockwise and interior rings counter-clockwise). Geometries
+// other that Polygons and MultiPolygons are unchanged.
+func (c GeometryCollection) ForceCW() GeometryCollection {
+	return c.forceOrientation(true)
+}
+
+// ForceCCW returns the equivalent GeometryCollection that has its constituent
+// Polygons and MultiPolygons reoriented in a counter-clockwise direction (i.e.
+// exterior rings counter-clockwise and interior rings clockwise). Geometries
+// other that Polygons and MultiPolygons are unchanged.
+func (c GeometryCollection) ForceCCW() GeometryCollection {
+	return c.forceOrientation(false)
+}
+
+func (c GeometryCollection) forceOrientation(forceCW bool) GeometryCollection {
+	geoms := make([]Geometry, len(c.geoms))
+	for i, g := range c.geoms {
+		geoms[i] = g.forceOrientation(forceCW)
+	}
+	return GeometryCollection{geoms, c.ctype}
+}
