@@ -208,9 +208,25 @@ func sortByPolarAngle(ps []XY) {
 		if anchor == ps[j] {
 			return false
 		}
+
 		// In the normal case, check which order the points are in relative to
 		// the anchor.
-		return orientation(anchor, ps[i], ps[j]) == leftTurn
+		switch ori := orientation(anchor, ps[i], ps[j]); ori {
+		case leftTurn:
+			return true
+		case rightTurn:
+			return false
+		case collinear:
+			// When collinear, the point closest to the anchor comes first.
+			// This is to prevent some cases where numerical inconsistencies
+			// can occur. For example, calls to orientation(A,B,C) being
+			// collinear but calls to orientation(A,C,B) NOT being collinear.
+			a := anchor.Sub(ps[i])
+			b := anchor.Sub(ps[j])
+			return a.Dot(a) < b.Dot(b)
+		default:
+			panic(ori)
+		}
 	})
 }
 
