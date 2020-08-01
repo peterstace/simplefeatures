@@ -221,9 +221,9 @@ func sortByPolarAngle(ps []XY) {
 			// This is to prevent some cases where numerical inconsistencies
 			// can occur. For example, calls to orientation(A,B,C) being
 			// collinear but calls to orientation(A,C,B) NOT being collinear.
-			a := anchor.Sub(ps[i])
-			b := anchor.Sub(ps[j])
-			return a.Dot(a) < b.Dot(b)
+			ptI := anchor.Sub(ps[i])
+			ptB := anchor.Sub(ps[j])
+			return ptI.Dot(ptI) < ptB.Dot(ptB)
 		default:
 			panic(ori)
 		}
