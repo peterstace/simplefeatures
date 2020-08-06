@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/peterstace/simplefeatures/geom"
 )
@@ -84,10 +85,14 @@ func main() {
 			err := binaryChecks(h, g1, g2, lg)
 			lg.Printf("=========================== END ============================")
 			if err != nil {
-				fmt.Printf("Check failed: %v\n", err)
-				io.Copy(os.Stdout, &buf)
-				fmt.Println()
-				failures++
+				if strings.HasPrefix(err.Error(), "TopologyException") {
+					fmt.Printf("WARNING: Ignoring TopologyException error: %v\n", err)
+				} else {
+					fmt.Printf("Check failed: %v\n", err)
+					io.Copy(os.Stdout, &buf)
+					fmt.Println()
+					failures++
+				}
 			}
 		}
 	}

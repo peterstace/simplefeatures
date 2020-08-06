@@ -230,11 +230,108 @@ func Intersection(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geom
 	})
 }
 
+// BufferOption allows the behaviour of the Buffer operation to be modified.
+type BufferOption func(*bufferOptionSet)
+
+type bufferOptionSet struct {
+	quadSegments int
+	endCapStyle  int
+	joinStyle    int
+	mitreLimit   float64
+	ctorOpts     []geom.ConstructorOption
+}
+
+func newBufferOptionSet(opts []BufferOption) bufferOptionSet {
+	bos := bufferOptionSet{
+		quadSegments: 8,
+		endCapStyle:  int(C.GEOSBUF_CAP_ROUND),
+		joinStyle:    int(C.GEOSBUF_JOIN_ROUND),
+		mitreLimit:   0.0,
+	}
+	for _, opt := range opts {
+		opt(&bos)
+	}
+	return bos
+}
+
+// BufferQuadSegments sets the number of segments used to approximate a quarter
+// circle. It defaults to 8.
+func BufferQuadSegments(quadSegments int) BufferOption {
+	return func(bos *bufferOptionSet) {
+		bos.quadSegments = quadSegments
+	}
+}
+
+// BufferEndCapRound sets the end cap style to 'round'. It is 'round' by
+// default.
+func BufferEndCapRound() BufferOption {
+	return func(bos *bufferOptionSet) {
+		bos.endCapStyle = int(C.GEOSBUF_CAP_ROUND)
+	}
+}
+
+// BufferEndCapFlat sets the end cap style to 'flat'. It is 'round' by default.
+func BufferEndCapFlat() BufferOption {
+	return func(bos *bufferOptionSet) {
+		bos.endCapStyle = int(C.GEOSBUF_CAP_FLAT)
+	}
+}
+
+// BufferEndCapSquare sets the end cap style to 'square'. It is 'round' by
+// default.
+func BufferEndCapSquare() BufferOption {
+	return func(bos *bufferOptionSet) {
+		bos.endCapStyle = int(C.GEOSBUF_CAP_SQUARE)
+	}
+}
+
+// BufferJoinStyleRound sets the join style to 'round'. It is 'round' by
+// default.
+func BufferJoinStyleRound() BufferOption {
+	return func(bos *bufferOptionSet) {
+		bos.joinStyle = int(C.GEOSBUF_JOIN_ROUND)
+		bos.mitreLimit = 0.0
+	}
+}
+
+// BufferJoinStyleMitre sets the join style to 'mitre'. It is 'round' by
+// default.
+func BufferJoinStyleMitre(mitreLimit float64) BufferOption {
+	return func(bos *bufferOptionSet) {
+		bos.joinStyle = int(C.GEOSBUF_JOIN_MITRE)
+		bos.mitreLimit = mitreLimit
+	}
+}
+
+// BufferJoinStyleBevel sets the join style to 'bevel'. It is 'round' by
+// default.
+func BufferJoinStyleBevel() BufferOption {
+	return func(bos *bufferOptionSet) {
+		bos.joinStyle = int(C.GEOSBUF_JOIN_BEVEL)
+		bos.mitreLimit = 0.0
+	}
+}
+
+// BufferConstructorOption sets constructor option that are used when
+// reconstructing the buffered geometry that is returned from the GEOS lib.
+func BufferConstructorOption(opts ...geom.ConstructorOption) BufferOption {
+	return func(bos *bufferOptionSet) {
+		bos.ctorOpts = append(bos.ctorOpts, opts...)
+	}
+}
+
 // Buffer returns a geometry that contains all points within the given radius
 // of the input geometry.
-func Buffer(g geom.Geometry, radius float64, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return unaryOperation(g, opts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
-		return C.GEOSBufferWithStyle_r(ctx, gh, C.double(radius), 8, C.GEOSBUF_CAP_ROUND, C.GEOSBUF_JOIN_ROUND, 0.0)
+func Buffer(g geom.Geometry, radius float64, opts ...BufferOption) (geom.Geometry, error) {
+	optSet := newBufferOptionSet(opts)
+	return unaryOperation(g, optSet.ctorOpts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSBufferWithStyle_r(
+			ctx, gh, C.double(radius),
+			C.int(optSet.quadSegments),
+			C.int(optSet.endCapStyle),
+			C.int(optSet.joinStyle),
+			C.double(optSet.mitreLimit),
+		)
 	})
 }
 
