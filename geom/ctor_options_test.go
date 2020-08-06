@@ -48,8 +48,24 @@ func TestOmitInvalid(t *testing.T) {
 		output string
 	}{
 		{
-			"LINESTRING(0 0,0 0)",
+			"LINESTRING(1 1)",
 			"LINESTRING EMPTY",
+		},
+		{
+			"LINESTRING(2 2,2 2)",
+			"LINESTRING EMPTY",
+		},
+		{
+			"MULTILINESTRING((3 3))",
+			"MULTILINESTRING(EMPTY)",
+		},
+		{
+			"MULTILINESTRING((4 4,5 5),(6 6,6 6))",
+			"MULTILINESTRING((4 4,5 5),EMPTY)",
+		},
+		{
+			"MULTILINESTRING((7 7,7 7),(8 8,9 9))",
+			"MULTILINESTRING(EMPTY,(8 8,9 9))",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {

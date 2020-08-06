@@ -30,17 +30,16 @@ func DisableAllValidations(o *ctorOptionSet) {
 // * LineString: if the LineString is invalid (e.g. doesn't contain at least 2
 // distinct points), then it is replaced with an empty LineString.
 //
-// * MultiLineString: if a child LineString is invalid, then it is omitted from
-// the MultiLineString.
+// * MultiLineString: if a child LineString is invalid, then it is replaced
+// with an empty LineString within the MultiLineString.
 //
 // * Polygon: if the Polygon is invalid (e.g. self intersecting rings or rings
 // that intersect in an invalid way), then it is replaced with an empty
 // Polygon.
 //
-// * MultiPolygon: if a child Polygon is invalid, then it is omitted from the
-// MultiPolygon. If two child Polygons (that weren't previously omitted)
-// interact in an invalid way, then the MultiPolygon is replaced with an empty
-// MultiPolygon.
+// * MultiPolygon: if a child Polygon is invalid, then it is replaced with an
+// empty Polygon within the MultiPolygon. If two child Polygons  interact in an
+// invalid way, then the MultiPolygon is replaced with an empty MultiPolygon.
 func OmitInvalid(o *ctorOptionSet) {
 	o.omitInvalid = true
 }
