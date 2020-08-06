@@ -24,7 +24,8 @@ type LineString struct {
 // XY values (otherwise an error is returned).
 func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) {
 	n := seq.Length()
-	if skipValidations(opts) || n == 0 {
+	ctorOpts := newOptionSet(opts)
+	if ctorOpts.skipValidations || n == 0 {
 		return LineString{seq}, nil
 	}
 
@@ -35,6 +36,11 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 			return LineString{seq}, nil
 		}
 	}
+
+	if ctorOpts.omitInvalid {
+		return LineString{}, nil
+	}
+
 	return LineString{}, errors.New("non-empty LineStrings " +
 		"must contain at least 2 points with distinct XY values")
 }

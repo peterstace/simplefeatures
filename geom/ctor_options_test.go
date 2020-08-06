@@ -41,3 +41,21 @@ func TestDisableValidation(t *testing.T) {
 		})
 	}
 }
+
+func TestOmitInvalid(t *testing.T) {
+	for i, tt := range []struct {
+		input  string
+		output string
+	}{
+		{
+			"LINESTRING(0 0,0 0)",
+			"LINESTRING EMPTY",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g, err := geom.UnmarshalWKT(tt.input, geom.OmitInvalid)
+			expectNoErr(t, err)
+			expectGeomEq(t, g, geomFromWKT(t, tt.output))
+		})
+	}
+}
