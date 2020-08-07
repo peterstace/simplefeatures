@@ -71,6 +71,22 @@ func TestOmitInvalid(t *testing.T) {
 			"POLYGON((0 0,1 1,0 1,1 0,0 0))",
 			"POLYGON EMPTY",
 		},
+		{
+			"MULTIPOLYGON(((0 0,1 1,0 1,1 0,0 0)))",
+			"MULTIPOLYGON(EMPTY)",
+		},
+		{
+			"MULTIPOLYGON(((0 0,1 1,0 1,1 0,0 0)),((0 0,0 1,1 0,0 0)))",
+			"MULTIPOLYGON(EMPTY,((0 0,0 1,1 0,0 0)))",
+		},
+		{
+			"MULTIPOLYGON(((0 0,0 1,1 0,0 0)),((0 0,1 1,0 1,1 0,0 0)))",
+			"MULTIPOLYGON(((0 0,0 1,1 0,0 0)),EMPTY)",
+		},
+		{
+			"MULTIPOLYGON(((0 0,0 2,2 2,2 0,0 0)),((1 1,1 3,3 3,3 1,1 1)))",
+			"MULTIPOLYGON EMPTY",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g, err := geom.UnmarshalWKT(tt.input, geom.OmitInvalid)

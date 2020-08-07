@@ -44,14 +44,18 @@ func NewMultiPolygonFromPolygons(polys []Polygon, opts ...ConstructorOption) (Mu
 		polys[i] = polys[i].ForceCoordinatesType(ctype)
 	}
 
-	if err := validateMultiPolygon(polys, opts...); err != nil {
+	ctorOpts := newOptionSet(opts)
+	if err := validateMultiPolygon(polys, ctorOpts); err != nil {
+		if ctorOpts.omitInvalid {
+			return MultiPolygon{}, nil
+		}
 		return MultiPolygon{}, err
 	}
 	return MultiPolygon{polys, ctype}, nil
 }
 
-func validateMultiPolygon(polys []Polygon, opts ...ConstructorOption) error {
-	if skipValidations(opts) {
+func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
+	if opts.skipValidations {
 		return nil
 	}
 
