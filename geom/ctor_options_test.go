@@ -67,6 +67,10 @@ func TestOmitInvalid(t *testing.T) {
 			"MULTILINESTRING((7 7,7 7),(8 8,9 9))",
 			"MULTILINESTRING(EMPTY,(8 8,9 9))",
 		},
+		{
+			"POLYGON((0 0,1 1,0 1,1 0,0 0))",
+			"POLYGON EMPTY",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g, err := geom.UnmarshalWKT(tt.input, geom.OmitInvalid)
