@@ -87,6 +87,14 @@ func TestOmitInvalid(t *testing.T) {
 			"MULTIPOLYGON(((0 0,0 2,2 2,2 0,0 0)),((1 1,1 3,3 3,3 1,1 1)))",
 			"MULTIPOLYGON EMPTY",
 		},
+		{
+			"GEOMETRYCOLLECTION(LINESTRING(2 2,2 2))",
+			"GEOMETRYCOLLECTION(LINESTRING EMPTY)",
+		},
+		{
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(LINESTRING(2 2,2 2)))",
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(LINESTRING EMPTY))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g, err := geom.UnmarshalWKT(tt.input, geom.OmitInvalid)
