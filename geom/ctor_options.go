@@ -62,13 +62,3 @@ func newOptionSet(opts []ConstructorOption) ctorOptionSet {
 	}
 	return cos
 }
-
-func skipValidations(opts []ConstructorOption) bool {
-	os := newOptionSet(opts)
-	return os.skipValidations
-}
-
-func omitInvalid(opts []ConstructorOption) bool {
-	os := newOptionSet(opts)
-	return os.omitInvalid
-}
