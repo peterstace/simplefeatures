@@ -41,3 +41,65 @@ func TestDisableValidation(t *testing.T) {
 		})
 	}
 }
+
+func TestOmitInvalid(t *testing.T) {
+	for i, tt := range []struct {
+		input  string
+		output string
+	}{
+		{
+			"LINESTRING(1 1)",
+			"LINESTRING EMPTY",
+		},
+		{
+			"LINESTRING(2 2,2 2)",
+			"LINESTRING EMPTY",
+		},
+		{
+			"MULTILINESTRING((3 3))",
+			"MULTILINESTRING(EMPTY)",
+		},
+		{
+			"MULTILINESTRING((4 4,5 5),(6 6,6 6))",
+			"MULTILINESTRING((4 4,5 5),EMPTY)",
+		},
+		{
+			"MULTILINESTRING((7 7,7 7),(8 8,9 9))",
+			"MULTILINESTRING(EMPTY,(8 8,9 9))",
+		},
+		{
+			"POLYGON((0 0,1 1,0 1,1 0,0 0))",
+			"POLYGON EMPTY",
+		},
+		{
+			"MULTIPOLYGON(((0 0,1 1,0 1,1 0,0 0)))",
+			"MULTIPOLYGON(EMPTY)",
+		},
+		{
+			"MULTIPOLYGON(((0 0,1 1,0 1,1 0,0 0)),((0 0,0 1,1 0,0 0)))",
+			"MULTIPOLYGON(EMPTY,((0 0,0 1,1 0,0 0)))",
+		},
+		{
+			"MULTIPOLYGON(((0 0,0 1,1 0,0 0)),((0 0,1 1,0 1,1 0,0 0)))",
+			"MULTIPOLYGON(((0 0,0 1,1 0,0 0)),EMPTY)",
+		},
+		{
+			"MULTIPOLYGON(((0 0,0 2,2 2,2 0,0 0)),((1 1,1 3,3 3,3 1,1 1)))",
+			"MULTIPOLYGON EMPTY",
+		},
+		{
+			"GEOMETRYCOLLECTION(LINESTRING(2 2,2 2))",
+			"GEOMETRYCOLLECTION(LINESTRING EMPTY)",
+		},
+		{
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(LINESTRING(2 2,2 2)))",
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(LINESTRING EMPTY))",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g, err := geom.UnmarshalWKT(tt.input, geom.OmitInvalid)
+			expectNoErr(t, err)
+			expectGeomEq(t, g, geomFromWKT(t, tt.output))
+		})
+	}
+}

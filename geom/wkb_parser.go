@@ -283,8 +283,9 @@ func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) MultiPolygon {
 		geom := p.inner()
 		if !geom.IsPolygon() {
 			p.setErr(errors.New("non-Polygon found in MultiPolygon"))
+		} else {
+			polys = append(polys, geom.AsPolygon())
 		}
-		polys = append(polys, geom.AsPolygon())
 	}
 	mpoly, err := NewMultiPolygonFromPolygons(polys, p.opts...)
 	p.setErr(err)

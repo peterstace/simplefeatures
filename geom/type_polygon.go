@@ -48,14 +48,18 @@ func NewPolygonFromRings(rings []LineString, opts ...ConstructorOption) (Polygon
 		rings[i] = rings[i].ForceCoordinatesType(ctype)
 	}
 
-	if err := validatePolygon(rings, opts...); err != nil {
+	ctorOpts := newOptionSet(opts)
+	if err := validatePolygon(rings, ctorOpts); err != nil {
+		if ctorOpts.omitInvalid {
+			return Polygon{}, nil
+		}
 		return Polygon{}, err
 	}
 	return Polygon{rings, ctype}, nil
 }
 
-func validatePolygon(rings []LineString, opts ...ConstructorOption) error {
-	if len(rings) == 0 || skipValidations(opts) {
+func validatePolygon(rings []LineString, opts ctorOptionSet) error {
+	if len(rings) == 0 || opts.skipValidations {
 		return nil
 	}
 
