@@ -434,3 +434,6 @@ func (c GeometryCollection) forceOrientation(forceCW bool) GeometryCollection {
 	}
 	return GeometryCollection{geoms, c.ctype}
 }
+func (c GeometryCollection) Distance(o Geometry) (float64, bool) {
+	panic("not implemented")
+}

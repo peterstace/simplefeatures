@@ -471,3 +471,6 @@ func (m MultiPolygon) forceOrientation(forceCW bool) MultiPolygon {
 	}
 	return MultiPolygon{polys, m.ctype}
 }
+func (m MultiPolygon) Distance(o Geometry) (float64, bool) {
+	panic("not implemented")
+}

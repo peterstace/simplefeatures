@@ -526,3 +526,7 @@ func (p Polygon) forceOrientation(forceCW bool) Polygon {
 	}
 	return Polygon{orientedRings, p.ctype}
 }
+
+func (p Polygon) Distance(o Geometry) (float64, bool) {
+	panic("not implemented")
+}

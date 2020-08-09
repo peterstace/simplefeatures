@@ -386,3 +386,6 @@ func (m MultiLineString) PointOnSurface() Point {
 	}
 	return nearest.point
 }
+func (m MultiLineString) Distance(o Geometry) (float64, bool) {
+	panic("not implemented")
+}

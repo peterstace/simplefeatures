@@ -700,3 +700,7 @@ func (g Geometry) forceOrientation(forceCW bool) Geometry {
 		return g
 	}
 }
+
+func (g Geometry) Distance(o Geometry) (float64, bool) {
+	return dispatchDistance(g, o)
+}

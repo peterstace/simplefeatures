@@ -376,3 +376,6 @@ func (s LineString) PointOnSurface() Point {
 	return nearest.point
 
 }
+func (s LineString) Distance(o Geometry) (float64, bool) {
+	panic("not implemented")
+}

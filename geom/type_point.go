@@ -224,3 +224,6 @@ func (p Point) Force2D() Point {
 func (p Point) PointOnSurface() Point {
 	return p.Force2D()
 }
+func (p Point) Distance(o Geometry) (float64, bool) {
+	panic("not implemented")
+}
