@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.20.0
+
+2020-08-10
+
+- Add area calculation options (there are initially 2 options). The first
+  option causes the area calculation to return the signed area. This replaces
+  the `SignedArea` methods, and so is a breaking change. The second area allows
+  the geometries to be transformed inline with the area calculation.
+
+- Add `ForceCW` and `ForceCCW` methods. These methods force areal geometries to
+  have consistent winding order (orientation).
+
+- Fix a bug in the convex hull algorithm that causes a crash in some rare
+  scenarios involving almost collinear points.
+
+- Add GEOS Buffer option wrappers. The following options are now wrapped:
+  
+    - The number of line segments used to represent curved parts of buffered
+      geometries.
+
+    - End-cap style (round, flat, square).
+
+    - Join style (round, mitre, bevel).
+
+- Add a new constructor option `OmitInvalid`. This option causes invalid
+  geometries to be replaced with empty geometries upon construction rather than
+  giving an error.
+
 ## v0.19.0
 
 2020-06-27
