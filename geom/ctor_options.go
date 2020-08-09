@@ -23,9 +23,10 @@ func DisableAllValidations(o *ctorOptionSet) {
 // OmitInvalid causes geometry constructors to omit any geometries or
 // sub-geometries that are invalid.
 //
-// Behaviour for each geometry type is:
+// The behaviour for each geometry type is:
 //
-// * Point and MultiPoint: no effect.
+// * Point and MultiPoint: no effect (because Point and MultiPoint don't have
+// geometry constraints).
 //
 // * LineString: if the LineString is invalid (e.g. doesn't contain at least 2
 // distinct points), then it is replaced with an empty LineString.
