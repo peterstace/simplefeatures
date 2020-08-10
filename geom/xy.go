@@ -1,5 +1,7 @@
 package geom
 
+import "math"
+
 // XY represents a pair of X and Y coordinates. This can either represent a
 // location on the XY plane, or a 2D vector in the real vector space.
 type XY struct {
@@ -46,6 +48,12 @@ func (w XY) Midpoint(o XY) XY {
 // Dot returns the dot product of this and another XY.
 func (w XY) Dot(o XY) float64 {
 	return w.X*o.X + w.Y*o.Y
+}
+
+// Unit treats the XY as a vector, and scales it to have unit length.
+func (w XY) Unit() XY {
+	norm := math.Sqrt(w.Dot(w))
+	return w.Scale(1 / norm)
 }
 
 // Less gives an ordering on XYs. If two XYs have different X values, then the

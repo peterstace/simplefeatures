@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestDistanceNonEmpty(t *testing.T) {
+func TestDistance(t *testing.T) {
 	for i, tt := range []struct {
 		wkt1, wkt2 string
 		wantOK     bool
@@ -17,6 +17,26 @@ func TestDistanceNonEmpty(t *testing.T) {
 		{"POINT EMPTY", "POINT (0 0)", false, 0},
 		{"POINT(1 2)", "POINT(3 2)", true, 2.0},
 		{"POINT(1 2)", "POINT(2 3)", true, math.Sqrt(2)},
+
+		{"POINT EMPTY", "LINESTRING EMPTY", false, 0},
+		{"POINT EMPTY", "LINESTRING(0 0,1 1)", false, 0},
+		{"POINT(1 1)", "LINESTRING EMPTY", false, 0},
+
+		{"LINESTRING(1 0,2 1)", "POINT(1 0)", true, 0},
+		{"LINESTRING(1 0,2 1)", "POINT(2 1)", true, 0},
+		{"LINESTRING(1 0,2 1)", "POINT(1.5 0.5)", true, 0},
+		{"LINESTRING(1 0,2 1)", "POINT(1 1)", true, math.Sqrt(2) / 2},
+		{"LINESTRING(1 0,2 1)", "POINT(0 1)", true, math.Sqrt(2)},
+		{"LINESTRING(1 0,2 1)", "POINT(2 -1)", true, math.Sqrt(2)},
+		{"LINESTRING(1 0,2 1)", "POINT(3 0)", true, math.Sqrt(2)},
+		{"LINESTRING(1 0,2 1)", "POINT(0 0)", true, 1},
+		{"LINESTRING(1 0,2 1)", "POINT(2 2)", true, 1},
+		{"LINESTRING(0 0,1 2,2 2)", "POINT(0 0)", true, 0},
+		{"LINESTRING(0 0,1 2,2 2)", "POINT(0 -1)", true, 1},
+		{"LINESTRING(0 0,1 2,2 2)", "POINT(0 3)", true, math.Sqrt(2)},
+		{"LINESTRING(0 0,1 2,2 2)", "POINT(1 0)", true, 2 / math.Sqrt(5)},
+		{"LINESTRING(0 0,1 2,2 2)", "POINT(1.5 1.5)", true, 0.5},
+		{"LINESTRING(0 0,1 2,2 2)", "POINT(3 2)", true, 1},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, tt.wkt1)
@@ -30,7 +50,7 @@ func TestDistanceNonEmpty(t *testing.T) {
 			if !gotOK {
 				return
 			}
-			if gotDist != tt.wantDist {
+			if math.Abs(gotDist-tt.wantDist) > 1e-15 {
 				t.Logf("WKT1: %s", tt.wkt1)
 				t.Logf("WKT2: %s", tt.wkt2)
 				t.Logf("want distance: %f", tt.wantDist)
