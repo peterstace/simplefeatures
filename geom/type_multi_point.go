@@ -272,6 +272,8 @@ func (m MultiPoint) PointOnSurface() Point {
 	}
 	return nearest.point
 }
+
+// Distance returns the distance between this and another geometry.
 func (m MultiPoint) Distance(o Geometry) (float64, bool) {
-	panic("not implemented")
+	return dispatchDistance(m.AsGeometry(), o)
 }

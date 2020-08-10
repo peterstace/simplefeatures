@@ -224,6 +224,8 @@ func (p Point) Force2D() Point {
 func (p Point) PointOnSurface() Point {
 	return p.Force2D()
 }
+
+// Distance returns the distance between this and another geometry.
 func (p Point) Distance(o Geometry) (float64, bool) {
-	panic("not implemented")
+	return dispatchDistance(p.AsGeometry(), o)
 }
