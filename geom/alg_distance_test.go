@@ -58,6 +58,17 @@ func TestDistance(t *testing.T) {
 		{"POINT(0 0)", "MULTIPOINT(0 1,1 0)", true, 1},
 		{"POINT(0 0)", "MULTIPOINT(0 2,3 0)", true, 2},
 		{"POINT(0 0)", "MULTIPOINT(0 2,1 1,3 0)", true, math.Sqrt(2)},
+
+		{"POINT EMPTY", "MULTILINESTRING EMPTY", false, 0},
+		{"POINT EMPTY", "MULTILINESTRING(EMPTY)", false, 0},
+		{"POINT EMPTY", "MULTILINESTRING(EMPTY,EMPTY)", false, 0},
+		{"POINT(0 0)", "MULTILINESTRING EMPTY", false, 0},
+		{"POINT(0 0)", "MULTILINESTRING(EMPTY)", false, 0},
+		{"POINT(0 0)", "MULTILINESTRING(EMPTY,EMPTY)", false, 0},
+		{"POINT EMPTY", "MULTILINESTRING((0 0,1 1))", false, 0},
+		{"POINT EMPTY", "MULTILINESTRING((0 0,1 1),EMPTY)", false, 0},
+		{"POINT(1 1)", "MULTILINESTRING((0 2,1 2),(10 0,10 1))", true, 1},
+		{"POINT(1 1)", "MULTILINESTRING((10 0,10 1),(0 2,1 2))", true, 1},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, tt.wkt1)

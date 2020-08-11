@@ -18,16 +18,16 @@ func dispatchDistance(g1, g2 Geometry) (float64, bool) {
 		}
 		switch g2.Type() {
 		case TypePoint:
-			return distanceBetweenXYAndPoint(xy, g2.AsPoint())
+			return distBetweenXYAndPoint(xy, g2.AsPoint())
 		case TypeLineString:
-			return distanceBetweenXYAndLineString(xy, g2.AsLineString())
+			return distBetweenXYAndLineString(xy, g2.AsLineString())
 		case TypePolygon:
-			//return distanceBetweenXYAndPolygon(xy, g2.AsPolygon())
+			//return distBetweenXYAndPolygon(xy, g2.AsPolygon())
 			break
 		case TypeMultiPoint:
-			return distanceBetweenXYAndMultiPoint(xy, g2.AsMultiPoint())
+			return distBetweenXYAndMultiPoint(xy, g2.AsMultiPoint())
 		case TypeMultiLineString:
-			break
+			return distBetweenXYAndMultiLineString(xy, g2.AsMultiLineString())
 		case TypeMultiPolygon:
 			break
 		case TypeGeometryCollection:
@@ -96,12 +96,12 @@ func dispatchDistance(g1, g2 Geometry) (float64, bool) {
 	panic(fmt.Sprintf("implementation error: unhandled geometry types %s and %s", g1.Type(), g2.Type()))
 }
 
-func distanceBetweenXYs(xy1, xy2 XY) float64 {
+func distBetweenXYs(xy1, xy2 XY) float64 {
 	sub := xy1.Sub(xy2)
 	return math.Sqrt(sub.Dot(sub))
 }
 
-func distanceBetweenXYAndLine(xy XY, ln line) float64 {
+func distBetweenXYAndLine(xy XY, ln line) float64 {
 	lnVec := ln.b.Sub(ln.a)
 	lnVecUnit := lnVec.Unit()
 	proj := xy.Sub(ln.a).Dot(lnVecUnit)
@@ -115,18 +115,39 @@ func distanceBetweenXYAndLine(xy XY, ln line) float64 {
 		scaled := lnVecUnit.Scale(proj)
 		closest = scaled.Add(ln.a)
 	}
-	return distanceBetweenXYs(xy, closest)
+	return distBetweenXYs(xy, closest)
 }
 
-func distanceBetweenXYAndPoint(xy XY, pt Point) (float64, bool) {
+type distAggregator struct {
+	dist float64
+}
+
+func newDistAggregator() distAggregator {
+	return distAggregator{math.Inf(+1)}
+}
+
+func (a *distAggregator) agg(dist float64, ok bool) {
+	if ok && dist < a.dist {
+		a.dist = dist
+	}
+}
+
+func (a *distAggregator) result() (float64, bool) {
+	if math.IsInf(a.dist, +1) {
+		return 0, false
+	}
+	return a.dist, true
+}
+
+func distBetweenXYAndPoint(xy XY, pt Point) (float64, bool) {
 	other, ok := pt.XY()
 	if !ok {
 		return 0, false
 	}
-	return distanceBetweenXYs(xy, other), true
+	return distBetweenXYs(xy, other), true
 }
 
-func distanceBetweenXYAndLineString(xy XY, ls LineString) (float64, bool) {
+func distBetweenXYAndLineString(xy XY, ls LineString) (float64, bool) {
 	if ls.IsEmpty() {
 		return 0, false
 	}
@@ -138,13 +159,13 @@ func distanceBetweenXYAndLineString(xy XY, ls LineString) (float64, bool) {
 		if !ok {
 			continue
 		}
-		dist := distanceBetweenXYAndLine(xy, ln)
+		dist := distBetweenXYAndLine(xy, ln)
 		minDist = math.Min(minDist, dist)
 	}
 	return minDist, true
 }
 
-//func distanceBetweenXYAndPolygon(xy XY, poly Polygon) (float64, bool) {
+//func distBetweenXYAndPolygon(xy XY, poly Polygon) (float64, bool) {
 //	TODO: Do I need this check here? The distance to the boundary might do
 //	// this for us.
 //	if poly.IsEmpty() {
@@ -159,12 +180,12 @@ func distanceBetweenXYAndLineString(xy XY, ls LineString) (float64, bool) {
 //	return 69, true
 //}
 
-func distanceBetweenXYAndMultiPoint(xy XY, mp MultiPoint) (float64, bool) {
+func distBetweenXYAndMultiPoint(xy XY, mp MultiPoint) (float64, bool) {
 	minDist := math.Inf(+1)
 	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
-		dist, ok := distanceBetweenXYAndPoint(xy, pt)
+		dist, ok := distBetweenXYAndPoint(xy, pt)
 		if ok && dist < minDist {
 			minDist = dist
 		}
@@ -173,4 +194,14 @@ func distanceBetweenXYAndMultiPoint(xy XY, mp MultiPoint) (float64, bool) {
 		return 0, false
 	}
 	return minDist, true
+}
+
+func distBetweenXYAndMultiLineString(xy XY, mls MultiLineString) (float64, bool) {
+	dist := newDistAggregator()
+	n := mls.NumLineStrings()
+	for i := 0; i < n; i++ {
+		ls := mls.LineStringN(i)
+		dist.agg(distBetweenXYAndLineString(xy, ls))
+	}
+	return dist.result()
 }
