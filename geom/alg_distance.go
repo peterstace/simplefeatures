@@ -28,9 +28,9 @@ func dispatchDistance(g1, g2 Geometry) (float64, bool) {
 		case TypeMultiLineString:
 			return distBetweenXYAndMultiLineString(xy, g2.AsMultiLineString())
 		case TypeMultiPolygon:
-			break
+			return distBetweenXYAndMultiPolygon(xy, g2.AsMultiPolygon())
 		case TypeGeometryCollection:
-			break
+			return distBetweenXYAndGeometryCollection(xy, g2.AsGeometryCollection())
 		}
 	case TypeLineString:
 		switch g2.Type() {
@@ -194,5 +194,24 @@ func distBetweenXYAndMultiLineString(xy XY, mls MultiLineString) (float64, bool)
 		ls := mls.LineStringN(i)
 		dist.agg(distBetweenXYAndLineString(xy, ls))
 	}
+	return dist.result()
+}
+
+func distBetweenXYAndMultiPolygon(xy XY, mp MultiPolygon) (float64, bool) {
+	dist := newDistAggregator()
+	n := mp.NumPolygons()
+	for i := 0; i < n; i++ {
+		p := mp.PolygonN(i)
+		dist.agg(distBetweenXYAndPolygon(xy, p))
+	}
+	return dist.result()
+}
+
+func distBetweenXYAndGeometryCollection(xy XY, gc GeometryCollection) (float64, bool) {
+	pt := NewPointFromXY(xy)
+	dist := newDistAggregator()
+	gc.walk(func(g Geometry) {
+		dist.agg(pt.Distance(g))
+	})
 	return dist.result()
 }

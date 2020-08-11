@@ -69,12 +69,34 @@ func TestDistance(t *testing.T) {
 		{"POINT EMPTY", "MULTILINESTRING((0 0,1 1),EMPTY)", false, 0},
 		{"POINT(1 1)", "MULTILINESTRING((0 2,1 2),(10 0,10 1))", true, 1},
 		{"POINT(1 1)", "MULTILINESTRING((10 0,10 1),(0 2,1 2))", true, 1},
+
+		{"POINT EMPTY", "MULTIPOLYGON EMPTY", false, 0},
+		{"POINT EMPTY", "MULTIPOLYGON(EMPTY)", false, 0},
+		{"POINT(0 0)", "MULTIPOLYGON EMPTY", false, 0},
+		{"POINT(0 0)", "MULTIPOLYGON(EMPTY)", false, 0},
+		{"POINT EMPTY", "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", false, 0},
+		{"POINT EMPTY", "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", false, 0},
+		{"POINT(0 0)", "MULTIPOLYGON(((10 0,11 0,10 1,10 0)),((0 3,1 3,0 4,0 3)))", true, 3},
+		{"POINT(0 0)", "MULTIPOLYGON(((0 3,1 3,0 4,0 3)),((10 0,11 0,10 1,10 0)))", true, 3},
+
+		{"POINT EMPTY", "GEOMETRYCOLLECTION EMPTY", false, 0},
+		{"POINT EMPTY", "GEOMETRYCOLLECTION(POINT EMPTY)", false, 0},
+		{"POINT EMPTY", "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT EMPTY))", false, 0},
+		{"POINT EMPTY", "GEOMETRYCOLLECTION(POINT(0 0))", false, 0},
+		{"POINT EMPTY", "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(0 0)))", false, 0},
+		{"POINT(0 0)", "GEOMETRYCOLLECTION EMPTY", false, 0},
+		{"POINT(0 0)", "GEOMETRYCOLLECTION(POINT EMPTY)", false, 0},
+		{"POINT(0 0)", "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT EMPTY))", false, 0},
+		{"POINT(0 0)", "GEOMETRYCOLLECTION(POINT(1 1))", true, math.Sqrt(2)},
+		{"POINT(0 0)", "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 1)))", true, math.Sqrt(2)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, tt.wkt1)
 			g2 := geomFromWKT(t, tt.wkt2)
 			gotDist, gotOK := g1.Distance(g2)
 			if gotOK != tt.wantOK {
+				t.Logf("WKT1: %s", tt.wkt1)
+				t.Logf("WKT2: %s", tt.wkt2)
 				t.Logf("want ok: %v", tt.wantOK)
 				t.Logf("got ok:  %v", gotOK)
 				t.Fatal("mismatch")
