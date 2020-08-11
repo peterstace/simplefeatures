@@ -22,11 +22,12 @@ func dispatchDistance(g1, g2 Geometry) (float64, bool) {
 		case TypeLineString:
 			return distanceBetweenXYAndLineString(xy, g2.AsLineString())
 		case TypePolygon:
+			//return distanceBetweenXYAndPolygon(xy, g2.AsPolygon())
 			fallthrough
 		case TypeMultiPoint:
 			fallthrough
 		case TypeMultiLineString:
-			fallthrough
+			return distanceBetweenXYAndMultiPoint(xy, g2.AsMultiPoint())
 		case TypeMultiPolygon:
 			fallthrough
 		case TypeGeometryCollection:
@@ -139,6 +140,37 @@ func distanceBetweenXYAndLineString(xy XY, ls LineString) (float64, bool) {
 		}
 		dist := distanceBetweenXYAndLine(xy, ln)
 		minDist = math.Min(minDist, dist)
+	}
+	return minDist, true
+}
+
+//func distanceBetweenXYAndPolygon(xy XY, poly Polygon) (float64, bool) {
+//	// TODO: Do I need this check here? The distance to the boundary might do
+//	// this for us.
+//	if poly.IsEmpty() {
+//		return 0, false
+//	}
+//
+//	if hasIntersectionPointWithPolygon(NewPointFromXY(xy), poly) {
+//		return 0, true
+//	}
+//
+//	//poly.Boundary()
+//	return 69, true
+//}
+
+func distanceBetweenXYAndMultiPoint(xy XY, mp MultiPoint) (float64, bool) {
+	minDist := math.Inf(+1)
+	n := mp.NumPoints()
+	for i := 0; i < n; i++ {
+		pt := mp.PointN(i)
+		dist, ok := distanceBetweenXYAndPoint(xy, pt)
+		if ok && dist < minDist {
+			minDist = dist
+		}
+	}
+	if math.IsInf(minDist, +1) {
+		return 0, false
 	}
 	return minDist, true
 }
