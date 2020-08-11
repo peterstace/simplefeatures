@@ -147,21 +147,16 @@ func distBetweenXYAndPoint(xy XY, pt Point) (float64, bool) {
 }
 
 func distBetweenXYAndLineString(xy XY, ls LineString) (float64, bool) {
-	if ls.IsEmpty() {
-		return 0, false
-	}
-	minDist := math.Inf(+1)
+	dist := newDistAggregator()
 	seq := ls.Coordinates()
 	n := seq.Length()
 	for i := 0; i < n; i++ {
 		ln, ok := getLine(seq, i)
-		if !ok {
-			continue
+		if ok {
+			dist.agg(distBetweenXYAndLine(xy, ln), true)
 		}
-		dist := distBetweenXYAndLine(xy, ln)
-		minDist = math.Min(minDist, dist)
 	}
-	return minDist, true
+	return dist.result()
 }
 
 func distBetweenXYAndPolygon(xy XY, poly Polygon) (float64, bool) {
@@ -172,19 +167,13 @@ func distBetweenXYAndPolygon(xy XY, poly Polygon) (float64, bool) {
 }
 
 func distBetweenXYAndMultiPoint(xy XY, mp MultiPoint) (float64, bool) {
-	minDist := math.Inf(+1)
+	dist := newDistAggregator()
 	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
 		pt := mp.PointN(i)
-		dist, ok := distBetweenXYAndPoint(xy, pt)
-		if ok && dist < minDist {
-			minDist = dist
-		}
+		dist.agg(distBetweenXYAndPoint(xy, pt))
 	}
-	if math.IsInf(minDist, +1) {
-		return 0, false
-	}
-	return minDist, true
+	return dist.result()
 }
 
 func distBetweenXYAndMultiLineString(xy XY, mls MultiLineString) (float64, bool) {
