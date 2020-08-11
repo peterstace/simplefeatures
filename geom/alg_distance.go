@@ -23,73 +23,73 @@ func dispatchDistance(g1, g2 Geometry) (float64, bool) {
 			return distanceBetweenXYAndLineString(xy, g2.AsLineString())
 		case TypePolygon:
 			//return distanceBetweenXYAndPolygon(xy, g2.AsPolygon())
-			fallthrough
+			break
 		case TypeMultiPoint:
-			fallthrough
-		case TypeMultiLineString:
 			return distanceBetweenXYAndMultiPoint(xy, g2.AsMultiPoint())
+		case TypeMultiLineString:
+			break
 		case TypeMultiPolygon:
-			fallthrough
+			break
 		case TypeGeometryCollection:
-			// TODO
+			break
 		}
 	case TypeLineString:
 		switch g2.Type() {
 		case TypeLineString:
-			fallthrough
+			break
 		case TypePolygon:
-			fallthrough
+			break
 		case TypeMultiLineString:
-			fallthrough
+			break
 		case TypeMultiPolygon:
-			fallthrough
+			break
 		case TypeGeometryCollection:
-			// TODO
+			break
 		}
 	case TypePolygon:
 		switch g2.Type() {
 		case TypePolygon:
-			fallthrough
+			break
 		case TypeMultiPoint:
-			fallthrough
+			break
 		case TypeMultiLineString:
-			fallthrough
+			break
 		case TypeMultiPolygon:
-			fallthrough
+			break
 		case TypeGeometryCollection:
-			// TODO
+			break
 		}
 	case TypeMultiPoint:
 		switch g2.Type() {
 		case TypeMultiPoint:
-			fallthrough
+			break
 		case TypeMultiLineString:
-			fallthrough
+			break
 		case TypeMultiPolygon:
-			fallthrough
+			break
 		case TypeGeometryCollection:
-			// TODO
+			break
 		}
 	case TypeMultiLineString:
 		switch g2.Type() {
 		case TypeMultiLineString:
-			fallthrough
+			break
 		case TypeMultiPolygon:
-			fallthrough
+			break
 		case TypeGeometryCollection:
-			// TODO
+			break
 		}
 	case TypeMultiPolygon:
 		switch g2.Type() {
 		case TypeMultiPolygon:
-			fallthrough
+			break
 		case TypeGeometryCollection:
-			// TODO
+			break
 		}
 	case TypeGeometryCollection:
 		switch g2.Type() {
 		case TypeGeometryCollection:
-			// TODO
+			break
 		}
 	}
 
@@ -145,7 +145,7 @@ func distanceBetweenXYAndLineString(xy XY, ls LineString) (float64, bool) {
 }
 
 //func distanceBetweenXYAndPolygon(xy XY, poly Polygon) (float64, bool) {
-//	// TODO: Do I need this check here? The distance to the boundary might do
+//	TODO: Do I need this check here? The distance to the boundary might do
 //	// this for us.
 //	if poly.IsEmpty() {
 //		return 0, false
