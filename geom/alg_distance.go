@@ -102,17 +102,17 @@ func distBetweenXYs(xy1, xy2 XY) float64 {
 }
 
 func distBetweenXYAndLine(xy XY, ln line) float64 {
-	lnVec := ln.b.Sub(ln.a)
-	lnVecUnit := lnVec.Unit()
-	proj := xy.Sub(ln.a).Dot(lnVecUnit)
+	ab := ln.b.Sub(ln.a)
+	abLen := ab.Length()
+	proj := xy.Sub(ln.a).Dot(ab) / abLen
 	var closest XY
 	switch {
 	case proj < 0:
 		closest = ln.a
-	case proj > lnVec.Length():
+	case proj > abLen:
 		closest = ln.b
 	default:
-		scaled := lnVecUnit.Scale(proj)
+		scaled := ab.Scale(proj / abLen)
 		closest = scaled.Add(ln.a)
 	}
 	return distBetweenXYs(xy, closest)
