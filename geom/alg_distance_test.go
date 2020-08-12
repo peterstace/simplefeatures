@@ -36,6 +36,7 @@ func TestDistance(t *testing.T) {
 		{"LINESTRING(0 0,1 2,2 2)", "POINT(1 0)", true, 2 / math.Sqrt(5)},
 		{"LINESTRING(0 0,1 2,2 2)", "POINT(1.5 1.5)", true, 0.5},
 		{"LINESTRING(0 0,1 2,2 2)", "POINT(3 2)", true, 1},
+		{"LINESTRING(0 0,4 0)", "POINT(3 1)", true, 1},
 
 		{"POINT EMPTY", "POLYGON EMPTY", false, 0},
 		{"POINT EMPTY", "POLYGON((0 0,0 1,1 0,0 0))", false, 0},
@@ -89,27 +90,47 @@ func TestDistance(t *testing.T) {
 		{"POINT(0 0)", "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT EMPTY))", false, 0},
 		{"POINT(0 0)", "GEOMETRYCOLLECTION(POINT(1 1))", true, math.Sqrt(2)},
 		{"POINT(0 0)", "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 1)))", true, math.Sqrt(2)},
+
+		{"LINESTRING EMPTY", "LINESTRING EMPTY", false, 0},
+		{"LINESTRING EMPTY", "LINESTRING(0 0,1 1)", false, 0},
+		{"LINESTRING(0 0,1 1)", "LINESTRING EMPTY", false, 0},
+		{"LINESTRING(0 0,4 0)", "LINESTRING(1 1,3 1)", true, 1},
+		{"LINESTRING(0 0,4 0)", "LINESTRING(1 1,2 2)", true, 1},
+		{"LINESTRING(0 0,4 0)", "LINESTRING(3 1,2 2)", true, 1},
+		{"LINESTRING(0 0,4 0)", "LINESTRING(-1 1,-1 2)", true, math.Sqrt(2)},
+		{"LINESTRING(0 0,4 0)", "LINESTRING(5 1,5 2)", true, math.Sqrt(2)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g1 := geomFromWKT(t, tt.wkt1)
-			g2 := geomFromWKT(t, tt.wkt2)
-			gotDist, gotOK := g1.Distance(g2)
-			if gotOK != tt.wantOK {
-				t.Logf("WKT1: %s", tt.wkt1)
-				t.Logf("WKT2: %s", tt.wkt2)
-				t.Logf("want ok: %v", tt.wantOK)
-				t.Logf("got ok:  %v", gotOK)
-				t.Fatal("mismatch")
-			}
-			if !gotOK {
-				return
-			}
-			if math.Abs(gotDist-tt.wantDist) > 1e-15 {
-				t.Logf("WKT1: %s", tt.wkt1)
-				t.Logf("WKT2: %s", tt.wkt2)
-				t.Logf("want distance: %f", tt.wantDist)
-				t.Logf("got distance:  %f", gotDist)
-				t.Error("mismatch")
+			for _, flip := range []bool{false, true} {
+				desc := "fwd"
+				if flip {
+					desc = "rev"
+				}
+				t.Run(desc, func(t *testing.T) {
+					g1 := geomFromWKT(t, tt.wkt1)
+					g2 := geomFromWKT(t, tt.wkt2)
+					if flip {
+						g1, g2 = g2, g1
+					}
+					gotDist, gotOK := g1.Distance(g2)
+					if gotOK != tt.wantOK {
+						t.Logf("WKT1: %s", tt.wkt1)
+						t.Logf("WKT2: %s", tt.wkt2)
+						t.Logf("want ok: %v", tt.wantOK)
+						t.Logf("got ok:  %v", gotOK)
+						t.Fatal("mismatch")
+					}
+					if !gotOK {
+						return
+					}
+					if math.Abs(gotDist-tt.wantDist) > 1e-15 {
+						t.Logf("WKT1: %s", tt.wkt1)
+						t.Logf("WKT2: %s", tt.wkt2)
+						t.Logf("want distance: %f", tt.wantDist)
+						t.Logf("got distance:  %f", gotDist)
+						t.Error("mismatch")
+					}
+				})
 			}
 		})
 	}

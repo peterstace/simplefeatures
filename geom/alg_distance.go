@@ -33,9 +33,10 @@ func dispatchDistance(g1, g2 Geometry) (float64, bool) {
 			return distBetweenXYAndGeometryCollection(xy, g2.AsGeometryCollection())
 		}
 	case TypeLineString:
+		ls := g1.AsLineString()
 		switch g2.Type() {
 		case TypeLineString:
-			break
+			return distBetweenLineStringAndLineString(ls, g2.AsLineString())
 		case TypePolygon:
 			break
 		case TypeMultiLineString:
@@ -108,13 +109,28 @@ func distBetweenXYAndLine(xy XY, ln line) float64 {
 	switch {
 	case proj < 0:
 		closest = ln.a
-	case proj > 1:
+	case proj > lnVec.Length():
 		closest = ln.b
 	default:
 		scaled := lnVecUnit.Scale(proj)
 		closest = scaled.Add(ln.a)
 	}
 	return distBetweenXYs(xy, closest)
+}
+
+func distBetweenLineAndLine(ln1, ln2 line) float64 {
+	minDist := math.Inf(+1)
+	for _, dist := range [4]float64{
+		distBetweenXYAndLine(ln1.a, ln2),
+		distBetweenXYAndLine(ln1.b, ln2),
+		distBetweenXYAndLine(ln2.a, ln1),
+		distBetweenXYAndLine(ln2.b, ln1),
+	} {
+		if dist < minDist {
+			minDist = dist
+		}
+	}
+	return minDist
 }
 
 type distAggregator struct {
@@ -202,5 +218,28 @@ func distBetweenXYAndGeometryCollection(xy XY, gc GeometryCollection) (float64, 
 	gc.walk(func(g Geometry) {
 		dist.agg(pt.Distance(g))
 	})
+	return dist.result()
+}
+
+func distBetweenLineStringAndLineString(ls1, ls2 LineString) (float64, bool) {
+	seq1 := ls1.Coordinates()
+	seq2 := ls2.Coordinates()
+	n1 := seq1.Length()
+	n2 := seq2.Length()
+
+	dist := newDistAggregator()
+	for i := 0; i < n1; i++ {
+		ln1, ok := getLine(seq1, i)
+		if !ok {
+			continue
+		}
+		for j := 0; j < n2; j++ {
+			ln2, ok := getLine(seq2, j)
+			if !ok {
+				continue
+			}
+			dist.agg(distBetweenLineAndLine(ln1, ln2), true)
+		}
+	}
 	return dist.result()
 }

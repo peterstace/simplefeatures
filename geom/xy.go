@@ -52,8 +52,12 @@ func (w XY) Dot(o XY) float64 {
 
 // Unit treats the XY as a vector, and scales it to have unit length.
 func (w XY) Unit() XY {
-	norm := math.Sqrt(w.Dot(w))
-	return w.Scale(1 / norm)
+	return w.Scale(1 / w.Length())
+}
+
+// Length treats XY as a vector, and returns its length.
+func (w XY) Length() float64 {
+	return math.Sqrt(w.Dot(w))
 }
 
 // Less gives an ordering on XYs. If two XYs have different X values, then the
