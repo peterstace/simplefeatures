@@ -229,3 +229,10 @@ func (p Point) PointOnSurface() Point {
 func (p Point) Distance(o Geometry) (float64, bool) {
 	return dispatchDistance(p.AsGeometry(), o)
 }
+
+func (p Point) asXYs() []XY {
+	if xy, ok := p.XY(); ok {
+		return []XY{xy}
+	}
+	return nil
+}

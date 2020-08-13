@@ -243,3 +243,31 @@ func distBetweenLineStringAndLineString(ls1, ls2 LineString) (float64, bool) {
 	}
 	return dist.result()
 }
+
+func extractXYsAndLines(g Geometry) ([]XY, []line) {
+	switch g.Type() {
+	case TypePoint:
+		return g.AsPoint().asXYs(), nil
+	case TypeLineString:
+		return nil, g.AsLineString().asLines()
+	case TypePolygon:
+		return nil, g.AsPolygon().Boundary().asLines()
+	case TypeMultiPoint:
+		return g.AsMultiPoint().asXYs(), nil
+	case TypeMultiLineString:
+		return nil, g.AsMultiLineString().asLines()
+	case TypeMultiPolygon:
+		return nil, g.AsMultiPolygon().Boundary().asLines()
+	case TypeGeometryCollection:
+		var allXYs []XY
+		var allLines []line
+		g.AsGeometryCollection().walk(func(child Geometry) {
+			xys, lns := extractXYsAndLines(child)
+			allXYs = append(allXYs, xys...)
+			allLines = append(allLines, lns...)
+		})
+		return allXYs, allLines
+	default:
+		panic(fmt.Sprintf("implementation error: unhandled geometry types %s", g.Type()))
+	}
+}

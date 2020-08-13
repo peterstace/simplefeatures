@@ -277,3 +277,14 @@ func (m MultiPoint) PointOnSurface() Point {
 func (m MultiPoint) Distance(o Geometry) (float64, bool) {
 	return dispatchDistance(m.AsGeometry(), o)
 }
+
+func (m MultiPoint) asXYs() []XY {
+	n := m.seq.Length()
+	xys := make([]XY, 0, n)
+	for i := 0; i < n; i++ {
+		if !m.empty.Get(i) {
+			xys = append(xys, m.seq.GetXY(i))
+		}
+	}
+	return xys
+}
