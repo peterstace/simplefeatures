@@ -3,6 +3,8 @@ package geom
 import (
 	"fmt"
 	"math"
+
+	"github.com/peterstace/simplefeatures/rtree"
 )
 
 func dispatchDistance(g1, g2 Geometry) (float64, bool) {
@@ -270,4 +272,96 @@ func extractXYsAndLines(g Geometry) ([]XY, []line) {
 	default:
 		panic(fmt.Sprintf("implementation error: unhandled geometry types %s", g.Type()))
 	}
+}
+
+func distance(g1, g2 Geometry) (float64, bool) {
+	if g1.IsEmpty() || g2.IsEmpty() {
+		return 0, false
+	}
+
+	xys1, lns1 := extractXYsAndLines(g1)
+	xys2, lns2 := extractXYsAndLines(g2)
+	tr := loadTree(xys2, lns2)
+
+	minDist := math.Inf(+1)
+
+	for _, xy := range xys1 {
+		xyEnv := NewEnvelope(xy)
+		tr.PrioritySearch(xyEnv.box(), func(recordID int) error {
+			var recordEnv Envelope
+			if recordID > 0 {
+				recordEnv = NewEnvelope(xys2[recordID-1])
+			} else {
+				recordEnv = lns2[-recordID-1].envelope()
+			}
+			envDist := recordEnv.Distance(xyEnv)
+			if envDist > minDist {
+				return rtree.Stop
+			}
+
+			var dist float64
+			if recordID > 0 {
+				dist = distBetweenXYs(xy, xys2[recordID-1])
+			} else {
+				dist = distBetweenXYAndLine(xy, lns2[-recordID-1])
+			}
+			if dist < minDist {
+				minDist = dist
+			}
+			return nil
+		})
+	}
+
+	for _, ln := range lns1 {
+		lnEnv := ln.envelope()
+		tr.PrioritySearch(lnEnv.box(), func(recordID int) error {
+			var recordEnv Envelope
+			if recordID > 0 {
+				recordEnv = NewEnvelope(xys2[recordID-1])
+			} else {
+				recordEnv = lns2[-recordID-1].envelope()
+			}
+			envDist := recordEnv.Distance(lnEnv)
+			if envDist > minDist {
+				return rtree.Stop
+			}
+
+			var dist float64
+			if recordID > 0 {
+				dist = distBetweenXYAndLine(xys2[recordID-1], ln)
+			} else {
+				dist = distBetweenLineAndLine(lns2[-recordID-1], ln)
+			}
+			if dist < minDist {
+				minDist = dist
+			}
+			return nil
+		})
+	}
+
+	if math.IsInf(minDist, +1) {
+		return 0, false
+	}
+	return minDist, true
+}
+
+// loadTree creates a new RTree that indexes both the XYs and the lines. It
+// uses positive record IDs to refer to the XYs, and negative recordIDs to
+// refer to the lines. Because +0 and -0 are the same, indexing is 1-based and
+// recordID 0 is not used.
+func loadTree(xys []XY, lns []line) *rtree.RTree {
+	items := make([]rtree.BulkItem, len(xys)+len(lns))
+	for i, xy := range xys {
+		items[i] = rtree.BulkItem{
+			Box:      NewEnvelope(xy).box(),
+			RecordID: i + 1,
+		}
+	}
+	for i, ln := range lns {
+		items[i+len(xys)] = rtree.BulkItem{
+			Box:      ln.envelope().box(),
+			RecordID: -(i + 1),
+		}
+	}
+	return rtree.BulkLoad(items)
 }
