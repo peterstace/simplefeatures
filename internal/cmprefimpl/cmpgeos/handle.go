@@ -721,26 +721,29 @@ func (h *Handle) EqualsExact(g1, g2 geom.Geometry) (bool, error) {
 	return h.boolErr(C.GEOSEqualsExact_r(h.context, gh1, gh2, 0.0))
 }
 
-func isNonEmptyGeometryCollection(g geom.Geometry) bool {
-	return g.IsGeometryCollection() && !g.IsEmpty()
-}
-
-func containsMultiPointWithEmptyPoint(g geom.Geometry) bool {
-	switch {
-	case g.IsMultiPoint():
-		mp := g.AsMultiPoint()
-		for i := 0; i < mp.NumPoints(); i++ {
-			if mp.PointN(i).IsEmpty() {
-				return true
-			}
-		}
-	case g.IsGeometryCollection():
-		gc := g.AsGeometryCollection()
-		for i := 0; i < gc.NumGeometries(); i++ {
-			if containsMultiPointWithEmptyPoint(gc.GeometryN(i)) {
-				return true
-			}
-		}
+func (h *Handle) Distance(g1, g2 geom.Geometry) (float64, error) {
+	if containsMultiLineStringWithEmptyLineString(g1) ||
+		containsMultiLineStringWithEmptyLineString(g2) ||
+		containsMultiPointWithEmptyPoint(g1) ||
+		containsMultiPointWithEmptyPoint(g2) ||
+		containsMultiPolygonWithEmptyPolygon(g1) ||
+		containsMultiPolygonWithEmptyPolygon(g2) {
+		// GEOS crashes on these inputs.
+		return 0, LibgeosCrashError
 	}
-	return false
+
+	gh1, err := h.createGeomHandle(g1)
+	if err != nil {
+		return 0, h.err()
+	}
+	defer C.GEOSGeom_destroy(gh1)
+	gh2, err := h.createGeomHandle(g2)
+	if err != nil {
+		return 0, h.err()
+	}
+	defer C.GEOSGeom_destroy(gh2)
+
+	var dist C.double
+	err = h.intToErr(C.GEOSDistance_r(h.context, gh1, gh2, &dist))
+	return float64(dist), err
 }
