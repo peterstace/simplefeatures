@@ -227,7 +227,7 @@ func (p Point) PointOnSurface() Point {
 
 // Distance returns the distance between this and another geometry.
 func (p Point) Distance(o Geometry) (float64, bool) {
-	return dispatchDistance(p.AsGeometry(), o)
+	return distance(p.AsGeometry(), o)
 }
 
 func (p Point) asXYs() []XY {

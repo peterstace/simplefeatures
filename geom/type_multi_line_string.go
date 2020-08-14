@@ -389,5 +389,5 @@ func (m MultiLineString) PointOnSurface() Point {
 
 // Distance returns the distance between this and another geometry.
 func (m MultiLineString) Distance(o Geometry) (float64, bool) {
-	return dispatchDistance(m.AsGeometry(), o)
+	return distance(m.AsGeometry(), o)
 }

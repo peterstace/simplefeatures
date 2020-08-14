@@ -474,5 +474,5 @@ func (m MultiPolygon) forceOrientation(forceCW bool) MultiPolygon {
 
 // Distance returns the distance between this and another geometry.
 func (m MultiPolygon) Distance(o Geometry) (float64, bool) {
-	return dispatchDistance(m.AsGeometry(), o)
+	return distance(m.AsGeometry(), o)
 }

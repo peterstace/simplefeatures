@@ -437,5 +437,5 @@ func (c GeometryCollection) forceOrientation(forceCW bool) GeometryCollection {
 
 // Distance returns the distance between this and another geometry.
 func (c GeometryCollection) Distance(o Geometry) (float64, bool) {
-	return dispatchDistance(c.AsGeometry(), o)
+	return distance(c.AsGeometry(), o)
 }

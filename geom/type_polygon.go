@@ -529,5 +529,5 @@ func (p Polygon) forceOrientation(forceCW bool) Polygon {
 
 // Distance returns the distance between this and another geometry.
 func (p Polygon) Distance(o Geometry) (float64, bool) {
-	return dispatchDistance(p.AsGeometry(), o)
+	return distance(p.AsGeometry(), o)
 }

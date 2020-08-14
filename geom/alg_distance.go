@@ -7,7 +7,7 @@ import (
 	"github.com/peterstace/simplefeatures/rtree"
 )
 
-func dispatchDistance(g1, g2 Geometry) (float64, bool) {
+func distance(g1, g2 Geometry) (float64, bool) {
 	if g1.Intersects(g2) {
 		return 0, true
 	}
