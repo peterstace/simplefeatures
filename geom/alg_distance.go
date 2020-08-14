@@ -15,60 +15,59 @@ func dispatchDistance(g1, g2 Geometry) (float64, bool) {
 	xys1, lns1 := extractXYsAndLines(g1)
 	xys2, lns2 := extractXYsAndLines(g2)
 	tr := loadTree(xys2, lns2)
-
 	minDist := math.Inf(+1)
 
+	searchBody := func(
+		env Envelope,
+		recordID int,
+		xyDist func(int) float64,
+		lnDist func(int) float64,
+	) error {
+		// Convert recordID back to array indexes.
+		xyIdx := recordID - 1
+		lnIdx := -recordID - 1
+
+		// Abort the search if we're gone further away compared to our best
+		// distance so far.
+		var recordEnv Envelope
+		if recordID > 0 {
+			recordEnv = NewEnvelope(xys2[xyIdx])
+		} else {
+			recordEnv = lns2[lnIdx].envelope()
+		}
+		if recordEnv.Distance(env) > minDist {
+			return rtree.Stop
+		}
+
+		// See if the current item in the tree is better than our current best
+		// distance.
+		if recordID > 0 {
+			minDist = math.Min(minDist, xyDist(xyIdx))
+		} else {
+			minDist = math.Min(minDist, lnDist(lnIdx))
+		}
+		return nil
+	}
 	for _, xy := range xys1 {
 		xyEnv := NewEnvelope(xy)
 		tr.PrioritySearch(xyEnv.box(), func(recordID int) error {
-			var recordEnv Envelope
-			if recordID > 0 {
-				recordEnv = NewEnvelope(xys2[recordID-1])
-			} else {
-				recordEnv = lns2[-recordID-1].envelope()
-			}
-			envDist := recordEnv.Distance(xyEnv)
-			if envDist > minDist {
-				return rtree.Stop
-			}
-
-			var dist float64
-			if recordID > 0 {
-				dist = distBetweenXYs(xy, xys2[recordID-1])
-			} else {
-				dist = distBetweenXYAndLine(xy, lns2[-recordID-1])
-			}
-			if dist < minDist {
-				minDist = dist
-			}
-			return nil
+			return searchBody(
+				xyEnv,
+				recordID,
+				func(i int) float64 { return distBetweenXYs(xy, xys2[i]) },
+				func(i int) float64 { return distBetweenXYAndLine(xy, lns2[i]) },
+			)
 		})
 	}
-
 	for _, ln := range lns1 {
 		lnEnv := ln.envelope()
 		tr.PrioritySearch(lnEnv.box(), func(recordID int) error {
-			var recordEnv Envelope
-			if recordID > 0 {
-				recordEnv = NewEnvelope(xys2[recordID-1])
-			} else {
-				recordEnv = lns2[-recordID-1].envelope()
-			}
-			envDist := recordEnv.Distance(lnEnv)
-			if envDist > minDist {
-				return rtree.Stop
-			}
-
-			var dist float64
-			if recordID > 0 {
-				dist = distBetweenXYAndLine(xys2[recordID-1], ln)
-			} else {
-				dist = distBetweenLineAndLine(lns2[-recordID-1], ln)
-			}
-			if dist < minDist {
-				minDist = dist
-			}
-			return nil
+			return searchBody(
+				lnEnv,
+				recordID,
+				func(i int) float64 { return distBetweenXYAndLine(xys2[i], ln) },
+				func(i int) float64 { return distBetweenLineAndLine(lns2[i], ln) },
+			)
 		})
 	}
 
@@ -128,8 +127,7 @@ func loadTree(xys []XY, lns []line) *rtree.RTree {
 }
 
 func distBetweenXYs(xy1, xy2 XY) float64 {
-	sub := xy1.Sub(xy2)
-	return math.Sqrt(sub.Dot(sub))
+	return xy1.Sub(xy2).Length()
 }
 
 func distBetweenXYAndLine(xy XY, ln line) float64 {
@@ -157,9 +155,7 @@ func distBetweenLineAndLine(ln1, ln2 line) float64 {
 		distBetweenXYAndLine(ln2.a, ln1),
 		distBetweenXYAndLine(ln2.b, ln1),
 	} {
-		if dist < minDist {
-			minDist = dist
-		}
+		minDist = math.Min(minDist, dist)
 	}
 	return minDist
 }
