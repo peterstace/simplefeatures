@@ -273,11 +273,6 @@ func (m MultiPoint) PointOnSurface() Point {
 	return nearest.point
 }
 
-// Distance returns the distance between this and another geometry.
-func (m MultiPoint) Distance(o Geometry) (float64, bool) {
-	return distance(m.AsGeometry(), o)
-}
-
 func (m MultiPoint) asXYs() []XY {
 	n := m.seq.Length()
 	xys := make([]XY, 0, n)

@@ -225,11 +225,6 @@ func (p Point) PointOnSurface() Point {
 	return p.Force2D()
 }
 
-// Distance returns the distance between this and another geometry.
-func (p Point) Distance(o Geometry) (float64, bool) {
-	return distance(p.AsGeometry(), o)
-}
-
 func (p Point) asXYs() []XY {
 	if xy, ok := p.XY(); ok {
 		return []XY{xy}

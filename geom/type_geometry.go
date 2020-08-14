@@ -700,8 +700,3 @@ func (g Geometry) forceOrientation(forceCW bool) Geometry {
 		return g
 	}
 }
-
-// Distance returns the distance between this and another geometry.
-func (g Geometry) Distance(o Geometry) (float64, bool) {
-	return distance(g, o)
-}

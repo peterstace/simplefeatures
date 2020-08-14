@@ -376,8 +376,3 @@ func (s LineString) PointOnSurface() Point {
 	return nearest.point
 
 }
-
-// Distance returns the distance between this and another geometry.
-func (s LineString) Distance(o Geometry) (float64, bool) {
-	return distance(s.AsGeometry(), o)
-}

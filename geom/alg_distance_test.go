@@ -4,6 +4,8 @@ import (
 	"math"
 	"strconv"
 	"testing"
+
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestDistance(t *testing.T) {
@@ -115,7 +117,7 @@ func TestDistance(t *testing.T) {
 					if flip {
 						g1, g2 = g2, g1
 					}
-					gotDist, gotOK := g1.Distance(g2)
+					gotDist, gotOK := geom.Distance(g1, g2)
 					if gotOK != tt.wantOK {
 						t.Logf("WKT1: %s", tt.wkt1)
 						t.Logf("WKT2: %s", tt.wkt2)

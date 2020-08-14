@@ -7,7 +7,10 @@ import (
 	"github.com/peterstace/simplefeatures/rtree"
 )
 
-func distance(g1, g2 Geometry) (float64, bool) {
+// Distance calculates the shortest distance (using the Euclidean metric)
+// between two geometries. If either geometry is empty, then false is returned
+// and the distance is not calculated.
+func Distance(g1, g2 Geometry) (float64, bool) {
 	// If the geometries intersect with each other, then the distance between
 	// them is trivially zero.
 	if g1.Intersects(g2) {
