@@ -99,6 +99,9 @@ func TestDistance(t *testing.T) {
 		{"LINESTRING(0 0,4 0)", "LINESTRING(3 1,2 2)", true, 1},
 		{"LINESTRING(0 0,4 0)", "LINESTRING(-1 1,-1 2)", true, math.Sqrt(2)},
 		{"LINESTRING(0 0,4 0)", "LINESTRING(5 1,5 2)", true, math.Sqrt(2)},
+
+		{"POLYGON((1 2,0 1,1 0,2 1,1 2))", "POLYGON((4 2,3 1,4 0,5 1,4 2))", true, 1},
+		{"MULTIPOLYGON(((1 2,0 1,1 0,2 1,1 2)),((1 5,0 4,1 3,2 4,1 5)))", "POLYGON((4 2,3 1,4 0,5 1,4 2))", true, 1},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			for _, flip := range []bool{false, true} {
