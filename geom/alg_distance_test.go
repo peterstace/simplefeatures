@@ -48,6 +48,7 @@ func TestDistance(t *testing.T) {
 		{"POLYGON((0 0,0 1,1 0,0 0))", "POINT(2 0)", true, 1},
 		{"POLYGON((0 0,0 1,1 0,0 0))", "POINT(0.1 0.1)", true, 0},
 		{"POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,1 2,2 2,2 1,1 1))", "POINT(1.5 1.5)", true, 0.5},
+		{"POLYGON((0 0,3 0,1 1,0 3,0 0))", "POINT(2 2)", true, 3 / math.Sqrt(5)},
 
 		{"POINT EMPTY", "MULTIPOINT EMPTY", false, 0},
 		{"POINT EMPTY", "MULTIPOINT(EMPTY)", false, 0},
