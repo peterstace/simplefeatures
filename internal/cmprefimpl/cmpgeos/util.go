@@ -90,6 +90,46 @@ func containsMultiPolygonWithEmptyPolygon(g geom.Geometry) bool {
 	}
 }
 
+func containsMultiPointWithEmptyPoint(g geom.Geometry) bool {
+	switch {
+	case g.IsMultiPoint():
+		mp := g.AsMultiPoint()
+		for i := 0; i < mp.NumPoints(); i++ {
+			if mp.PointN(i).IsEmpty() {
+				return true
+			}
+		}
+	case g.IsGeometryCollection():
+		gc := g.AsGeometryCollection()
+		for i := 0; i < gc.NumGeometries(); i++ {
+			if containsMultiPointWithEmptyPoint(gc.GeometryN(i)) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func containsMultiLineStringWithEmptyLineString(g geom.Geometry) bool {
+	switch {
+	case g.IsMultiLineString():
+		mls := g.AsMultiLineString()
+		for i := 0; i < mls.NumLineStrings(); i++ {
+			if mls.LineStringN(i).IsEmpty() {
+				return true
+			}
+		}
+	case g.IsGeometryCollection():
+		gc := g.AsGeometryCollection()
+		for i := 0; i < gc.NumGeometries(); i++ {
+			if containsMultiLineStringWithEmptyLineString(gc.GeometryN(i)) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func hasEmptyRing(g geom.Geometry) bool {
 	// NOTE: Valid geometries _don't_ have empty rings. This function gets
 	// called with invalid geometries.
@@ -157,4 +197,8 @@ func tokenizeWKT(wkt string) []string {
 		tokens = append(tokens, scn.TokenText())
 	}
 	return tokens
+}
+
+func isNonEmptyGeometryCollection(g geom.Geometry) bool {
+	return g.IsGeometryCollection() && !g.IsEmpty()
 }
