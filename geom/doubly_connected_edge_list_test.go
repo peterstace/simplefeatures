@@ -347,6 +347,41 @@ func TestGraphWithHoles(t *testing.T) {
 	eqInt(t, len(f2.innerComponents), 0)
 }
 
+func TestGraphReNode(t *testing.T) {
+	poly, err := UnmarshalWKT("POLYGON((0 0,2 0,1 2,0 0))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcel := newDCELFromPolygon(poly.AsPolygon())
+
+	other, err := UnmarshalWKT("POLYGON((0 1,2 1,1 3,0 1))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcel.reNode(other.AsPolygon())
+
+	/*
+
+	                 V3
+	                  .
+	               ^     \
+	              /  / ^  \            F0
+	             /  e4  \  e7
+	           e5  /    e6  \
+	           /  v       \  \
+	                       \  v
+	       V4 .               .  V2
+	                         ^  \
+	       ^  /               \  \
+	      /  e8      F1       e2  e3
+	    e9  /                   \  \
+	    /  v                     \  v
+	        ---------e0--------->
+	 V0 . <----------e1------------  . V1
+
+	*/
+}
+
 func eqFace(t *testing.T, f1, f2 *faceRecord) {
 	t.Helper()
 	if f1 != f2 {

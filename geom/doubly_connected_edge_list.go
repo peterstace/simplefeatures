@@ -123,3 +123,7 @@ func newDCELFromPolygon(poly Polygon) *doublyConnectedEdgeList {
 
 	return dcel
 }
+
+func (d *doublyConnectedEdgeList) reNode(other Polygon) {
+	// TODO
+}
