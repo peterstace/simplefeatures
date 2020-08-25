@@ -2,6 +2,51 @@ package geom
 
 import "testing"
 
+func CheckFaceOuterComponent(t *testing.T, f *faceRecord, want ...XY) {
+	t.Helper()
+
+	if len(want) == 0 {
+		if f.outerComponent != nil {
+			t.Errorf("want no outer component but outer component is not nil")
+		}
+		return
+	}
+	if len(want) != 0 && f.outerComponent == nil {
+		t.Errorf("want outer component but outer component is nil")
+		return
+	}
+
+	start := f.outerComponent
+	e := start
+	var got []XY
+	for {
+		got = append(got, e.origin.coords)
+		e = e.next
+		if e == start {
+			break
+		}
+	}
+	CheckXYs(t, got, want)
+}
+
+func CheckXYs(t *testing.T, got, want []XY) {
+	if len(want) != len(got) {
+		t.Errorf("XY sequences don't match: got=%v want=%v", got, want)
+	}
+	n := len(want)
+outer:
+	for offset := 0; offset < n; offset++ {
+		for i := 0; i < n; i++ {
+			j := (i + offset) % n
+			if got[i] != want[j] {
+				continue outer
+			}
+		}
+		return // success, we found an offset that results in the XYs being equal
+	}
+	t.Errorf("XY sequences don't match: got=%v want=%v", got, want)
+}
+
 func TestGraphTriangle(t *testing.T) {
 	poly, err := UnmarshalWKT("POLYGON((0 0,0 1,1 0,0 0))")
 	if err != nil {
@@ -94,6 +139,15 @@ func TestGraphTriangle(t *testing.T) {
 	eqEdge(t, f0.innerComponents[0], e1)
 	eqEdge(t, f1.outerComponent, e0)
 	eqInt(t, len(f1.innerComponents), 0)
+
+	//--- New testing style:
+
+	u0 := XY{0, 0}
+	u1 := XY{1, 0}
+	u2 := XY{0, 1}
+
+	CheckFaceOuterComponent(t, f0)
+	CheckFaceOuterComponent(t, f1, u2, u0, u1)
 }
 
 func TestGraphWithHoles(t *testing.T) {
