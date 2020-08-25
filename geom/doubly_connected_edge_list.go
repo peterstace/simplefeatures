@@ -124,6 +124,95 @@ func newDCELFromPolygon(poly Polygon) *doublyConnectedEdgeList {
 	return dcel
 }
 
-func (d *doublyConnectedEdgeList) reNode(other Polygon) {
-	// TODO
+func (d *doublyConnectedEdgeList) reNodeGraph(other Polygon) {
+	indexed := newIndexedLines(other.Boundary().asLines())
+	for _, face := range d.faces {
+		d.reNodeFace(face, indexed)
+	}
+}
+
+func (d *doublyConnectedEdgeList) reNodeFace(face *faceRecord, indexed indexedLines) {
+	d.reNodeComponent(face.outerComponent, indexed)
+	for _, inner := range face.innerComponents {
+		d.reNodeComponent(inner, indexed)
+	}
+}
+
+func (d *doublyConnectedEdgeList) reNodeComponent(start *halfEdgeRecord, indexed indexedLines) {
+	e := start
+	for {
+		// Gather cut locations.
+		ln := line{
+			e.origin.coords,
+			e.twin.origin.coords,
+		}
+		xys := []XY{ln.a, ln.b}
+		indexed.tree.RangeSearch(ln.envelope().box(), func(i int) error {
+			other := indexed.lines[i]
+			inter := ln.intersectLine(other)
+			if inter.empty {
+				return nil
+			}
+			xys = append(xys, inter.ptA, inter.ptB)
+			return nil
+		})
+		xys = sortAndUniquifyXYs(xys) // TODO: make common function
+
+		// Reverse order to match direction of edge.
+		if xys[0] != ln.a {
+			for i := 0; i < len(xys)/2; i++ {
+				j := len(xys) - i - 1
+				xys[i], xys[j] = xys[j], xys[i]
+			}
+		}
+
+		// Perform cuts.
+		cuts := len(xys) - 2
+		for i := 0; i < cuts; i++ {
+			xy := xys[i+1]
+			vert, ok := d.vertices[xy]
+			if !ok {
+				vert = &vertexRecord{
+					coords:   xy,
+					incident: nil, /* populated later */
+				}
+				d.vertices[xy] = vert
+			}
+			reNodeEdge(e, vert)
+			e = e.next
+		}
+		e = e.next
+
+		if e == start {
+			break
+		}
+	}
+}
+
+func reNodeEdge(e *halfEdgeRecord, cut *vertexRecord) {
+	// Store original values we need later.
+	dest := e.twin.origin
+	next := e.next
+
+	// Create new edges.
+	ePrime := &halfEdgeRecord{
+		origin:   cut,
+		twin:     nil, // populated later
+		incident: e.incident,
+		next:     next,
+		prev:     e,
+	}
+	ePrimeTwin := &halfEdgeRecord{
+		origin:   dest,
+		twin:     ePrime,
+		incident: e.twin.incident,
+		next:     e.twin,
+		prev:     next,
+	}
+	e.twin.origin = cut
+	ePrime.twin = ePrimeTwin
+	e.next = ePrime
+	next.twin.next = ePrimeTwin
+	e.twin.prev = ePrimeTwin
+	e.prev.twin.prev = e.twin
 }

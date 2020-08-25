@@ -358,7 +358,9 @@ func TestGraphReNode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel.reNode(other.AsPolygon())
+	//dcel.reNodeGraph(other.AsPolygon())
+	_ = dcel
+	_ = other
 
 	/*
 
