@@ -1,6 +1,8 @@
 package geom
 
-import "testing"
+import (
+	"testing"
+)
 
 func CheckVertexIncidents(t *testing.T, verts map[XY]*vertexRecord) {
 	t.Helper()
@@ -8,8 +10,11 @@ func CheckVertexIncidents(t *testing.T, verts map[XY]*vertexRecord) {
 		if xy != vr.coords {
 			t.Errorf("xy in vertex map doesn't match record")
 		}
+		if vr.incident == nil {
+			t.Fatalf("vertex record (at %v) incident ptr not set", vr.coords)
+		}
 		if vr.incident.origin != vr {
-			t.Errorf("incident edge of vert doesn't have vert as its origin")
+			t.Errorf("incident edge of vert (at %v) doesn't have vert as its origin", vr.coords)
 		}
 	}
 }
@@ -21,15 +26,14 @@ func CheckFaceComponents(
 
 	if len(wantOuter) == 0 {
 		if f.outerComponent != nil {
-			t.Errorf("want no outer component but outer component is not nil")
+			t.Fatal("want no outer component but outer component is not nil")
 		}
-		return
+	} else {
+		if len(wantOuter) != 0 && f.outerComponent == nil {
+			t.Fatal("want outer component but outer component is nil")
+		}
+		CheckComponent(t, f, f.outerComponent, wantOuter)
 	}
-	if len(wantOuter) != 0 && f.outerComponent == nil {
-		t.Errorf("want outer component but outer component is nil")
-		return
-	}
-	CheckComponent(t, f, f.outerComponent, wantOuter)
 
 	if len(f.innerComponents) != len(wantInners) {
 		t.Errorf("len want inners not equal to actual inners: %d vs %d",
@@ -105,8 +109,10 @@ func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []X
 }
 
 func CheckXYs(t *testing.T, got, want []XY) {
+	t.Helper()
 	if len(want) != len(got) {
 		t.Errorf("XY sequences don't match: got=%v want=%v", got, want)
+		return
 	}
 	n := len(want)
 outer:
@@ -269,30 +275,47 @@ func TestGraphReNode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	//dcel.reNodeGraph(other.AsPolygon())
-	_ = dcel
-	_ = other
+	dcel.reNodeGraph(other.AsPolygon())
 
 	/*
 
-	                 V3
-	                  .
-	               ^     \
-	              /  / ^  \            F0
-	             /  e4  \  e7
-	           e5  /    e6  \
-	           /  v       \  \
-	                       \  v
-	       V4 .               .  V2
-	                         ^  \
-	       ^  /               \  \
-	      /  e8      F1       e2  e3
-	    e9  /                   \  \
-	    /  v                     \  v
-	        ---------e0--------->
-	 V0 . <----------e1------------  . V1
+	           v3
+	          /  \
+	         /    \
+	        /      \
+	      v4        v2
+	      /    f1    \    f0
+	     /            \
+	    /              \
+	   v0--------------v1
 
 	*/
+
+	eqInt(t, len(dcel.vertices), 5)
+	eqInt(t, len(dcel.halfEdges), 10)
+	eqInt(t, len(dcel.faces), 2)
+
+	f0 := dcel.faces[0]
+	//f1 := dcel.faces[1]
+
+	v0 := XY{0, 0}
+	v1 := XY{2, 0}
+	v2 := XY{1.5, 1}
+	v3 := XY{1, 2}
+	v4 := XY{0.5, 1}
+
+	CheckVertexIncidents(t, dcel.vertices)
+	CheckFaceComponents(
+		t, f0,
+		nil,
+		[]XY{v1, v0, v4, v3, v2},
+	)
+
+	// TODO: this check causes an infinite loop
+	//CheckFaceComponents(
+	//	t, f1,
+	//	[]XY{v0, v1, v2, v3, v4},
+	//)
 }
 
 func eqInt(t *testing.T, i1, i2 int) {
