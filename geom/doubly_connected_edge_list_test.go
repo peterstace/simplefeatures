@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -46,6 +47,15 @@ func CheckFaceComponents(
 }
 
 func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []XY) {
+	fmt.Println("CheckComponent")
+	fmt.Println("start.origin.coords", start.origin.coords)
+	fmt.Println("start.prev.origin.coords", start.prev.origin.coords)
+	fmt.Println("start.prev.prev.origin.coords", start.prev.prev.origin.coords)
+	fmt.Println("start.prev.prev.prev.origin.coords", start.prev.prev.prev.origin.coords)
+	fmt.Println("start.prev.prev.prev.prev.origin.coords", start.prev.prev.prev.prev.origin.coords)
+	fmt.Println("start.prev.prev.prev.prev.prev.origin.coords", start.prev.prev.prev.prev.prev.origin.coords)
+	fmt.Println("start.prev.prev.prev.prev.prev.prev.origin.coords", start.prev.prev.prev.prev.prev.prev.origin.coords)
+
 	// Check component matches forward order when following 'next' pointer.
 	e := start
 	var got []XY
@@ -65,9 +75,15 @@ func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []X
 	CheckXYs(t, got, want)
 
 	// Check component matches reverse order when following 'prev' pointer.
+	var i int
 	e = start
 	got = nil
 	for {
+		i++
+		if i == 20 {
+			t.Fatal("inf loop")
+		}
+
 		if e.incident != f {
 			t.Errorf("half edge has incorrect incident face")
 		}
@@ -296,7 +312,7 @@ func TestGraphReNode(t *testing.T) {
 	eqInt(t, len(dcel.faces), 2)
 
 	f0 := dcel.faces[0]
-	//f1 := dcel.faces[1]
+	f1 := dcel.faces[1]
 
 	v0 := XY{0, 0}
 	v1 := XY{2, 0}
@@ -310,12 +326,10 @@ func TestGraphReNode(t *testing.T) {
 		nil,
 		[]XY{v1, v0, v4, v3, v2},
 	)
-
-	// TODO: this check causes an infinite loop
-	//CheckFaceComponents(
-	//	t, f1,
-	//	[]XY{v0, v1, v2, v3, v4},
-	//)
+	CheckFaceComponents(
+		t, f1,
+		[]XY{v0, v1, v2, v3, v4},
+	)
 }
 
 func eqInt(t *testing.T, i1, i2 int) {
