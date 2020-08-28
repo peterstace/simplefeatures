@@ -332,6 +332,58 @@ func TestGraphReNode(t *testing.T) {
 	)
 }
 
+func TestGraphReNodeTwoCutsInOneEdge(t *testing.T) {
+	poly, err := UnmarshalWKT("POLYGON((0 0,1 2,2 0,0 0))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcel := newDCELFromPolygon(poly.AsPolygon())
+
+	other, err := UnmarshalWKT("POLYGON((0 -1,1 1,2 -1,0 -1))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcel.reNodeGraph(other.AsPolygon())
+
+	/*
+
+	           v4
+	          /  \
+	         /    \
+	        /      \
+	       /        \
+	      /    f1    \    f0
+	     /            \
+	    /              \
+	   v0---v1----v2---v3
+
+	*/
+
+	eqInt(t, len(dcel.vertices), 5)
+	eqInt(t, len(dcel.halfEdges), 10)
+	eqInt(t, len(dcel.faces), 2)
+
+	f0 := dcel.faces[0]
+	f1 := dcel.faces[1]
+
+	v0 := XY{0, 0}
+	v1 := XY{0.5, 0}
+	v2 := XY{1.5, 0}
+	v3 := XY{2, 0}
+	v4 := XY{1, 2}
+
+	CheckVertexIncidents(t, dcel.vertices)
+	CheckFaceComponents(
+		t, f0,
+		nil,
+		[]XY{v0, v4, v3, v2, v1},
+	)
+	CheckFaceComponents(
+		t, f1,
+		[]XY{v0, v1, v2, v3, v4},
+	)
+}
+
 func eqInt(t *testing.T, i1, i2 int) {
 	t.Helper()
 	if i1 != i2 {
