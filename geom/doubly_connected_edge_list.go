@@ -1,7 +1,5 @@
 package geom
 
-import "fmt"
-
 type doublyConnectedEdgeList struct {
 	faces     []*faceRecord
 	halfEdges []*halfEdgeRecord
@@ -143,17 +141,13 @@ func (d *doublyConnectedEdgeList) reNodeFace(face *faceRecord, indexed indexedLi
 }
 
 func (d *doublyConnectedEdgeList) reNodeComponent(start *halfEdgeRecord, indexed indexedLines) {
-	fmt.Println("DEBUG reNodeComponent")
 	e := start
 	for {
-		fmt.Println("  ITER")
-
 		// Gather cut locations.
 		ln := line{
 			e.origin.coords,
 			e.twin.origin.coords,
 		}
-		fmt.Printf("    ln: %v\n", ln)
 		xys := []XY{ln.a, ln.b}
 		indexed.tree.RangeSearch(ln.envelope().box(), func(i int) error {
 			other := indexed.lines[i]
@@ -161,7 +155,6 @@ func (d *doublyConnectedEdgeList) reNodeComponent(start *halfEdgeRecord, indexed
 			if inter.empty {
 				return nil
 			}
-			fmt.Printf("      intersect: %v\n", inter)
 			xys = append(xys, inter.ptA, inter.ptB)
 			return nil
 		})
@@ -175,13 +168,10 @@ func (d *doublyConnectedEdgeList) reNodeComponent(start *halfEdgeRecord, indexed
 			}
 		}
 
-		fmt.Printf("    xys: %v\n", xys)
-
 		// Perform cuts.
 		cuts := len(xys) - 2
 		for i := 0; i < cuts; i++ {
 			xy := xys[i+1]
-			fmt.Printf("      cut i:%d xys:%v\n", i, xy)
 			cutVert, ok := d.vertices[xy]
 			if !ok {
 				cutVert = &vertexRecord{
@@ -202,24 +192,6 @@ func (d *doublyConnectedEdgeList) reNodeComponent(start *halfEdgeRecord, indexed
 }
 
 func (d *doublyConnectedEdgeList) reNodeEdge(e *halfEdgeRecord, cut *vertexRecord) {
-	fmt.Println("    DEBUG reNodeEdge")
-	fmt.Printf("      cut --- cut.coords: %v\n", cut.coords)
-	fmt.Printf("      e.origin.coords: %v\n", e.origin.coords)
-	fmt.Printf("      e.next.origin.coords: %v\n", e.next.origin.coords)
-	fmt.Printf("      e.next.next.origin.coords: %v\n", e.next.next.origin.coords)
-	fmt.Printf("      e.next.prev.origin.coords: %v\n", e.next.prev.origin.coords)
-	fmt.Printf("      e.next.next.prev.origin.coords: %v\n", e.next.next.prev.origin.coords)
-	fmt.Printf("      e.next.next.prev.prev.origin.coords: %v\n", e.next.next.prev.prev.origin.coords)
-	fmt.Printf("      e.prev.origin.coords: %v\n", e.prev.origin.coords)
-	fmt.Printf("      e.prev.prev.origin.coords: %v\n", e.prev.prev.origin.coords)
-	fmt.Printf("      e.prev.prev.prev.origin.coords: %v\n", e.prev.prev.prev.origin.coords)
-	fmt.Printf("      e.prev.prev.prev.prev.origin.coords: %v\n", e.prev.prev.prev.prev.origin.coords)
-	fmt.Printf("      e.twin.next.origin.coords: %v\n", e.twin.next.origin.coords)
-	fmt.Printf("      e.twin.prev.origin.coords: %v\n", e.twin.prev.origin.coords)
-	fmt.Printf("      e.twin.prev.prev.origin.coords: %v\n", e.twin.prev.prev.origin.coords)
-	fmt.Printf("      e.twin.prev.prev.prev.origin.coords: %v\n", e.twin.prev.prev.prev.origin.coords)
-	fmt.Printf("      e.twin.prev.prev.prev.prev.origin.coords: %v\n", e.twin.prev.prev.prev.prev.origin.coords)
-
 	// Store original values we need later.
 	dest := e.twin.origin
 	next := e.next
@@ -251,21 +223,4 @@ func (d *doublyConnectedEdgeList) reNodeEdge(e *halfEdgeRecord, cut *vertexRecor
 	dest.incident = ePrimeTwin
 
 	d.halfEdges = append(d.halfEdges, ePrime, ePrimeTwin)
-
-	fmt.Printf("      AFTER\n")
-	fmt.Printf("      e.origin.coords: %v\n", e.origin.coords)
-	fmt.Printf("      e.next.origin.coords: %v\n", e.next.origin.coords)
-	fmt.Printf("      e.next.next.origin.coords: %v\n", e.next.next.origin.coords)
-	fmt.Printf("      e.next.prev.origin.coords: %v\n", e.next.prev.origin.coords)
-	fmt.Printf("      e.next.next.prev.origin.coords: %v\n", e.next.next.prev.origin.coords)
-	fmt.Printf("      e.next.next.prev.prev.origin.coords: %v\n", e.next.next.prev.prev.origin.coords)
-	fmt.Printf("      e.prev.origin.coords: %v\n", e.prev.origin.coords)
-	fmt.Printf("      e.prev.prev.origin.coords: %v\n", e.prev.prev.origin.coords)
-	fmt.Printf("      e.prev.prev.prev.origin.coords: %v\n", e.prev.prev.prev.origin.coords)
-	fmt.Printf("      e.prev.prev.prev.prev.origin.coords: %v\n", e.prev.prev.prev.prev.origin.coords)
-	fmt.Printf("      e.twin.next.origin.coords: %v\n", e.twin.next.origin.coords)
-	fmt.Printf("      e.twin.prev.origin.coords: %v\n", e.twin.prev.origin.coords)
-	fmt.Printf("      e.twin.prev.prev.origin.coords: %v\n", e.twin.prev.prev.origin.coords)
-	fmt.Printf("      e.twin.prev.prev.prev.origin.coords: %v\n", e.twin.prev.prev.prev.origin.coords)
-	fmt.Printf("      e.twin.prev.prev.prev.prev.origin.coords: %v\n", e.twin.prev.prev.prev.prev.origin.coords)
 }

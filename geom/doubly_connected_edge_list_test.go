@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -47,15 +46,6 @@ func CheckFaceComponents(
 }
 
 func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []XY) {
-	fmt.Println("CheckComponent")
-	fmt.Println("start.origin.coords", start.origin.coords)
-	fmt.Println("start.prev.origin.coords", start.prev.origin.coords)
-	fmt.Println("start.prev.prev.origin.coords", start.prev.prev.origin.coords)
-	fmt.Println("start.prev.prev.prev.origin.coords", start.prev.prev.prev.origin.coords)
-	fmt.Println("start.prev.prev.prev.prev.origin.coords", start.prev.prev.prev.prev.origin.coords)
-	fmt.Println("start.prev.prev.prev.prev.prev.origin.coords", start.prev.prev.prev.prev.prev.origin.coords)
-	fmt.Println("start.prev.prev.prev.prev.prev.prev.origin.coords", start.prev.prev.prev.prev.prev.prev.origin.coords)
-
 	// Check component matches forward order when following 'next' pointer.
 	e := start
 	var got []XY
