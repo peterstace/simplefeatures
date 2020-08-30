@@ -224,3 +224,34 @@ func (d *doublyConnectedEdgeList) reNodeEdge(e *halfEdgeRecord, cut *vertexRecor
 
 	d.halfEdges = append(d.halfEdges, ePrime, ePrimeTwin)
 }
+
+func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
+	d.overlayVertices(other)
+}
+
+func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
+	for _, face := range other.faces {
+		if cmp := face.outerComponent; cmp != nil {
+			d.overlayVerticesInComponent(cmp)
+		}
+		for _, cmp := range face.innerComponents {
+			d.overlayVerticesInComponent(cmp)
+		}
+	}
+}
+
+func (d *doublyConnectedEdgeList) overlayVerticesInComponent(start *halfEdgeRecord) {
+	// TODO: helper for iterating over edges in cycle?
+	e := start
+	for {
+		if existing, ok := d.vertices[e.origin.coords]; ok {
+			e.origin = existing
+		} else {
+			d.vertices[e.origin.coords] = e.origin
+		}
+		e = e.next
+		if e == start {
+			break
+		}
+	}
+}
