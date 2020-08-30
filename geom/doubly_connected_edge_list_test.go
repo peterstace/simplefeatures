@@ -424,6 +424,47 @@ func TestGraphReNodeOverlappingEdge(t *testing.T) {
 	)
 }
 
+func TestGraphOverlay(t *testing.T) {
+	polyA, err := UnmarshalWKT("POLYGON((0 0,1 2,2 0,0 0))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelA := newDCELFromPolygon(polyA.AsPolygon())
+
+	polyB, err := UnmarshalWKT("POLYGON((0 1,2 1,1 3,0 1))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelB := newDCELFromPolygon(polyB.AsPolygon())
+
+	dcelA.reNodeGraph(polyB.AsPolygon())
+	dcelB.reNodeGraph(polyA.AsPolygon())
+
+	dcelA.overlay(dcelB)
+
+	/*
+	           v7
+	          /  \
+	         /    \
+	        /  f2  \
+	       /        \
+	      /    v3    \
+	     /    /  \    \
+	    /    / f3 \    \
+	   v5--v4------v2--v6
+	       /        \
+	      /    f1    \    f0
+	     /            \
+	    /              \
+	   v0--------------v1
+
+	*/
+
+	eqInt(t, len(dcelA.vertices), 8)
+	//eqInt(t, len(dcelA.halfEdges), 20)
+	//eqInt(t, len(dcelA.faces), 4)
+}
+
 func eqInt(t *testing.T, i1, i2 int) {
 	t.Helper()
 	if i1 != i2 {
