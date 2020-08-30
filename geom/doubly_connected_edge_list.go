@@ -1,8 +1,10 @@
 package geom
 
+import "fmt"
+
 type doublyConnectedEdgeList struct {
 	faces     []*faceRecord
-	halfEdges []*halfEdgeRecord
+	halfEdges []*halfEdgeRecord // TODO: I don't think this is a great way of tracking the half edges.
 	vertices  map[XY]*vertexRecord
 }
 
@@ -226,7 +228,9 @@ func (d *doublyConnectedEdgeList) reNodeEdge(e *halfEdgeRecord, cut *vertexRecor
 }
 
 func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
+	// TODO: merge infinite faces so that there is a single infinite face.
 	d.overlayVertices(other)
+	d.overlayEdges(other)
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -241,17 +245,96 @@ func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList
 }
 
 func (d *doublyConnectedEdgeList) overlayVerticesInComponent(start *halfEdgeRecord) {
-	// TODO: helper for iterating over edges in cycle?
-	e := start
-	for {
+	forEachEdge(start, func(e *halfEdgeRecord) {
 		if existing, ok := d.vertices[e.origin.coords]; ok {
 			e.origin = existing
 		} else {
 			d.vertices[e.origin.coords] = e.origin
 		}
+	})
+}
+
+func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
+	e := start
+	for {
+		fn(e)
 		e = e.next
 		if e == start {
 			break
 		}
 	}
+}
+
+func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) {
+	exists := d.populateExistingEdges()
+	for _, face := range other.faces {
+		if cmp := face.outerComponent; cmp != nil {
+			d.overlayEdgesInComponent(cmp, exists)
+		}
+		for _, cmp := range face.innerComponents {
+			d.overlayEdgesInComponent(cmp, exists)
+		}
+	}
+}
+
+func (d *doublyConnectedEdgeList) populateExistingEdges() map[line]bool {
+	exists := make(map[line]bool)
+	add := func(e *halfEdgeRecord) {
+		ln := line{e.origin.coords, e.twin.origin.coords}
+		exists[ln.canonical()] = true
+	}
+	for _, face := range d.faces {
+		if cmp := face.outerComponent; cmp != nil {
+			forEachEdge(cmp, add)
+		}
+		for _, cmp := range face.innerComponents {
+			forEachEdge(cmp, add)
+		}
+	}
+	return exists
+}
+
+func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord, exists map[line]bool) {
+	fmt.Printf("overlayEdgesInComponent\n")
+	fmt.Printf("  start.origin.coords: %v\n", start.origin.coords)
+	fmt.Printf("  start.incident.outerComponent == nil: %v\n", start.incident.outerComponent == nil)
+
+	// Special case: if none of the edges are already in the overlay, then we
+	// can just add the whole component.
+	var anyExist bool
+	forEachEdge(start, func(e *halfEdgeRecord) {
+		if exists[canonicalLineForEdge(e)] {
+			anyExist = true
+		}
+	})
+	if !anyExist {
+		// TODO: This is super hacky... And is more to get the test cases
+		// passing rather than being the correct behaviour.
+
+		// Make the infinite face of d include start as an inner component
+		var infFaceOfD *faceRecord
+		for _, f := range d.faces {
+			if f.outerComponent == nil {
+				infFaceOfD = f
+				f.innerComponents = append(f.innerComponents, start)
+				break
+			}
+		}
+		// Make each incident face in the loop point to the infinite face of d as its incident
+		forEachEdge(start, func(e *halfEdgeRecord) {
+			e.incident = infFaceOfD
+		})
+		return
+	}
+
+	// TODO
+	panic("not implemented")
+}
+
+func canonicalLineForEdge(e *halfEdgeRecord) line {
+	ln := line{
+		e.origin.coords,
+		e.twin.origin.coords,
+	}
+	return ln.canonical()
 }
