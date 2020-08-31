@@ -19,6 +19,81 @@ func CheckVertexIncidents(t *testing.T, verts map[XY]*vertexRecord) {
 	}
 }
 
+func FindEdge(t *testing.T, dcel *doublyConnectedEdgeList, origin, dest XY) *halfEdgeRecord {
+	for _, e := range dcel.halfEdges {
+		if e.origin.coords == origin && e.twin.origin.coords == dest {
+			return e
+		}
+	}
+	t.Fatalf("could not find edge with origin %v and dest %v", origin, dest)
+	return nil
+}
+
+// TODO: This function is a hack/duplication of CheckComponent that can be used
+// before we sort out faces in the overlay algorithm.
+func CheckHalfEdgeLoop(t *testing.T, start *halfEdgeRecord, want []XY) {
+	// Check component matches forward order when following 'next' pointer.
+	e := start
+	var got []XY
+	for {
+		if e.origin == nil {
+			t.Errorf("edge origin not set")
+		}
+		got = append(got, e.origin.coords)
+		e = e.next
+		if e == start {
+			break
+		}
+	}
+	CheckXYs(t, got, want)
+
+	// Check component matches reverse order when following 'prev' pointer.
+	var i int
+	e = start
+	got = nil
+	for {
+		i++
+		if i == 20 {
+			t.Fatal("inf loop")
+		}
+
+		if e.origin == nil {
+			t.Errorf("edge origin not set")
+		}
+		got = append(got, e.origin.coords)
+		e = e.prev
+		if e == start {
+			break
+		}
+	}
+	for i := 0; i < len(got)/2; i++ {
+		j := len(got) - i - 1
+		got[i], got[j] = got[j], got[i]
+	}
+	CheckXYs(t, got, want)
+
+	// Check 'twin' assertions.
+	e = start
+	for {
+		if e.twin == nil {
+			t.Fatalf("twin not populated")
+		}
+		if e.twin.twin != e {
+			t.Fatalf("twin's twin is not itself")
+		}
+		if e.origin != e.twin.next.origin {
+			t.Fatalf("edge's origin doesn't match twin's next origin")
+		}
+		if e.next.origin != e.twin.origin {
+			t.Fatalf("edge's next origin doesn't match twin's origin ")
+		}
+		e = e.next
+		if e == start {
+			break
+		}
+	}
+}
+
 func CheckFaceComponents(
 	t *testing.T, f *faceRecord, wantOuter []XY, wantInners ...[]XY,
 ) {
@@ -459,6 +534,20 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 
 	*/
 
+	v0 := XY{0, 0}
+	v1 := XY{1, 0}
+	v2 := XY{1, 1}
+	v3 := XY{0, 1}
+	v4 := XY{2, 2}
+	v5 := XY{3, 2}
+	v6 := XY{3, 3}
+	v7 := XY{2, 3}
+
+	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v0, v1), []XY{v0, v1, v2, v3})
+	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v1, v0), []XY{v3, v2, v1, v0})
+	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v4, v5), []XY{v4, v5, v6, v7})
+	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v5, v4), []XY{v7, v6, v5, v4})
+
 	eqInt(t, len(dcelA.vertices), 8)
 	eqInt(t, len(dcelA.halfEdges), 16)
 	//eqInt(t, len(dcelA.faces), 3)
@@ -500,8 +589,17 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 
 	*/
 
+	//v0 := XY{0, 0}
+	//v1 := XY{2, 0}
+	//v2 := XY{1.5, 1}
+	//v3 := XY{1, 2}
+	//v4 := XY{0.5, 1}
+
 	eqInt(t, len(dcelA.vertices), 8)
 	eqInt(t, len(dcelA.halfEdges), 20)
+
+	//CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v0, v1), []XY{v0, v1, v2, v4})
+
 	//eqInt(t, len(dcelA.faces), 4)
 }
 
