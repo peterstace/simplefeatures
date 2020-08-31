@@ -589,16 +589,22 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 
 	*/
 
-	//v0 := XY{0, 0}
-	//v1 := XY{2, 0}
-	//v2 := XY{1.5, 1}
-	//v3 := XY{1, 2}
-	//v4 := XY{0.5, 1}
+	v0 := XY{0, 0}
+	v1 := XY{2, 0}
+	v2 := XY{1.5, 1}
+	v3 := XY{1, 2}
+	v4 := XY{0.5, 1}
+	v5 := XY{0, 1}
+	v6 := XY{2, 1}
+	v7 := XY{1, 3}
 
 	eqInt(t, len(dcelA.vertices), 8)
 	eqInt(t, len(dcelA.halfEdges), 20)
 
-	//CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v0, v1), []XY{v0, v1, v2, v4})
+	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v0, v1), []XY{v0, v1, v2, v4})
+	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v6, v7), []XY{v6, v7, v5, v4, v3, v2})
+	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v4, v2), []XY{v4, v2, v3})
+	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v1, v0), []XY{v1, v0, v4, v5, v7, v6, v2})
 
 	//eqInt(t, len(dcelA.faces), 4)
 }

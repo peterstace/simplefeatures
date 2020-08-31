@@ -1,5 +1,10 @@
 package geom
 
+import (
+	"math"
+	"sort"
+)
+
 type doublyConnectedEdgeList struct {
 	faces     []*faceRecord
 	halfEdges []*halfEdgeRecord // TODO: I don't think this is a great way of tracking the half edges.
@@ -228,7 +233,7 @@ func (d *doublyConnectedEdgeList) reNodeEdge(e *halfEdgeRecord, cut *vertexRecor
 func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 	d.overlayVertices(other)
 	d.overlayEdges(other)
-	// TODO: next step is to "fix" the points
+	d.fixVertices()
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -279,4 +284,45 @@ func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord)
 	forEachEdge(start, func(e *halfEdgeRecord) {
 		d.halfEdges = append(d.halfEdges, e)
 	})
+}
+
+func (d *doublyConnectedEdgeList) fixVertices() {
+	for xy := range d.vertices {
+		d.fixVertex(xy)
+	}
+}
+
+func (d *doublyConnectedEdgeList) fixVertex(v XY) {
+	// Find edges that start at v.
+	//
+	// TODO: This is not efficient, we should use an acceleration structure
+	// rather than a linear search.
+	var incident []*halfEdgeRecord
+	for _, e := range d.halfEdges {
+		if e.origin.coords == v {
+			incident = append(incident, e)
+		}
+	}
+
+	// Sort the edges radially.
+	//
+	// TODO: Might be able to use regular vector operations rather than
+	// trigonometry here.
+	sort.Slice(incident, func(i, j int) bool {
+		ei := incident[i]
+		ej := incident[j]
+		di := ei.twin.origin.coords.Sub(ei.origin.coords)
+		dj := ej.twin.origin.coords.Sub(ej.origin.coords)
+		aI := math.Atan2(di.Y, di.X)
+		aJ := math.Atan2(dj.Y, dj.X)
+		return aI < aJ
+	})
+
+	// Fix pointers.
+	for i := range incident {
+		ei := incident[i]
+		ej := incident[(i+1)%len(incident)]
+		ei.prev = ej.twin
+		ej.twin.next = ei
+	}
 }
