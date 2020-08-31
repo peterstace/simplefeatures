@@ -4,28 +4,6 @@ import (
 	"testing"
 )
 
-// TODO: Use this function everywhere, and remove the half edge array.
-func CheckHalfEdgeCount(t *testing.T, dcel *doublyConnectedEdgeList, want int) {
-	t.Helper()
-	var count int
-	countComponent := func(e *halfEdgeRecord) {
-		forEachEdge(e, func(*halfEdgeRecord) {
-			count++
-		})
-	}
-	for _, face := range dcel.faces {
-		if cmp := face.outerComponent; cmp != nil {
-			countComponent(cmp)
-		}
-		for _, cmp := range face.innerComponents {
-			countComponent(cmp)
-		}
-	}
-	if count != want {
-		t.Errorf("half edge count isn't as expected: want=%d got=%d", want, count)
-	}
-}
-
 func CheckVertexIncidents(t *testing.T, verts map[XY]*vertexRecord) {
 	t.Helper()
 	for xy, vr := range verts {
@@ -482,7 +460,7 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 	*/
 
 	eqInt(t, len(dcelA.vertices), 8)
-	CheckHalfEdgeCount(t, dcelA, 16)
+	eqInt(t, len(dcelA.halfEdges), 16)
 	//eqInt(t, len(dcelA.faces), 3)
 }
 
@@ -523,7 +501,7 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	*/
 
 	eqInt(t, len(dcelA.vertices), 8)
-	//eqInt(t, len(dcelA.halfEdges), 20)
+	eqInt(t, len(dcelA.halfEdges), 20)
 	//eqInt(t, len(dcelA.faces), 4)
 }
 
