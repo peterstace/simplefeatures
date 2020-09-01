@@ -19,7 +19,7 @@ func CheckVertexIncidents(t *testing.T, verts map[XY]*vertexRecord) {
 	}
 }
 
-func FindEdge(t *testing.T, dcel *doublyConnectedEdgeList, origin, dest XY) *halfEdgeRecord {
+func findEdge(t *testing.T, dcel *doublyConnectedEdgeList, origin, dest XY) *halfEdgeRecord {
 	for _, e := range dcel.halfEdges {
 		if e.origin.coords == origin && e.twin.origin.coords == dest {
 			return e
@@ -543,10 +543,10 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 	v6 := XY{3, 3}
 	v7 := XY{2, 3}
 
-	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v0, v1), []XY{v0, v1, v2, v3})
-	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v1, v0), []XY{v3, v2, v1, v0})
-	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v4, v5), []XY{v4, v5, v6, v7})
-	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v5, v4), []XY{v7, v6, v5, v4})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v0, v1), []XY{v0, v1, v2, v3})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v1, v0), []XY{v3, v2, v1, v0})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v4, v5), []XY{v4, v5, v6, v7})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v5, v4), []XY{v7, v6, v5, v4})
 
 	eqInt(t, len(dcelA.vertices), 8)
 	eqInt(t, len(dcelA.halfEdges), 16)
@@ -603,10 +603,10 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	eqInt(t, len(dcelA.vertices), 8)
 	eqInt(t, len(dcelA.halfEdges), 20)
 
-	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v0, v1), []XY{v0, v1, v2, v4})
-	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v6, v7), []XY{v6, v7, v5, v4, v3, v2})
-	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v4, v2), []XY{v4, v2, v3})
-	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v1, v0), []XY{v1, v0, v4, v5, v7, v6, v2})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v0, v1), []XY{v0, v1, v2, v4})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v6, v7), []XY{v6, v7, v5, v4, v3, v2})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v4, v2), []XY{v4, v2, v3})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v1, v0), []XY{v1, v0, v4, v5, v7, v6, v2})
 
 	eqInt(t, len(dcelA.faces), 4)
 	// TODO: trial and error was used to find the right permutation of face
