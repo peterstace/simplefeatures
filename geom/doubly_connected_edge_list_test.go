@@ -552,7 +552,7 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 	eqInt(t, len(dcelA.halfEdges), 16)
 
 	// TODO: we can't yet handle multiple holes in a face
-	//eqInt(t, len(dcelA.faces), 3)
+	eqInt(t, len(dcelA.faces), 3)
 }
 
 func TestGraphOverlayIntersecting(t *testing.T) {

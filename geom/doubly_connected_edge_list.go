@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"fmt"
 	"math"
 	"sort"
 )
@@ -336,30 +337,59 @@ func (d *doublyConnectedEdgeList) fixVertex(v XY) {
 // single inner component (and no outer component), or just an outer component
 // (with no inner components).
 func (d *doublyConnectedEdgeList) reAssignFaces() {
-	d.faces = nil
+	// Find all boundary cycles, and categorise them as either outer components
+	// or inner components.
+	var innerComponents, outerComponents []*halfEdgeRecord
 	seen := make(map[*halfEdgeRecord]bool)
 	for _, e := range d.halfEdges {
 		if seen[e] {
 			continue
 		}
-
-		// A new face record is created for each edge loop.
-		// mark each edge in the loop as visited, we will only create a single
-		// face per loop.
-		f := new(faceRecord)
-		d.faces = append(d.faces, f)
-
 		leftmostLowest := edgeLoopLeftmostLowest(e)
 		if edgeLoopIsOuterComponent(leftmostLowest) {
-			f.outerComponent = leftmostLowest
+			outerComponents = append(outerComponents, leftmostLowest)
 		} else {
-			f.innerComponents = append(f.innerComponents, leftmostLowest)
+			innerComponents = append(innerComponents, leftmostLowest)
 		}
-
 		forEachEdge(e, func(e *halfEdgeRecord) {
 			seen[e] = true
-			e.incident = f
 		})
+	}
+
+	// Group together boundary cycles that are for the same face.
+	var graph disjointEdgeSet
+	for _, e := range innerComponents {
+		graph.addSingleton(e)
+	}
+	for _, e := range outerComponents {
+		graph.addSingleton(e)
+	}
+	for _, leftmostLowest := range innerComponents {
+		nextLeft := d.findNextDownEdgeToTheLeft(leftmostLowest)
+		if nextLeft == nil {
+			// There is no next left edge, indicating that the current
+			// component is the inner component of the infinite face.
+			continue
+		}
+		nextLeft = edgeLoopLeftmostLowest(nextLeft)
+		graph.union(leftmostLowest, nextLeft)
+	}
+
+	// Construct new faces.
+	d.faces = nil
+	for _, set := range graph.sets {
+		f := new(faceRecord)
+		d.faces = append(d.faces, f)
+		for _, e := range set {
+			if edgeLoopIsOuterComponent(e) {
+				if f.outerComponent != nil {
+					panic("double outer component")
+				}
+				f.outerComponent = e
+			} else {
+				f.innerComponents = append(f.innerComponents, e)
+			}
+		}
 	}
 }
 
@@ -387,4 +417,91 @@ func edgeLoopIsOuterComponent(leftmostLowest *halfEdgeRecord) bool {
 	here := leftmostLowest.origin.coords
 	next := leftmostLowest.next.origin.coords
 	return orientation(prev, here, next) == leftTurn
+}
+
+func (d *doublyConnectedEdgeList) findNextDownEdgeToTheLeft(edge *halfEdgeRecord) *halfEdgeRecord {
+	var bestEdge *halfEdgeRecord
+	var bestDist float64
+
+	for _, e := range d.halfEdges {
+		if e == edge {
+			continue
+		}
+		origin := e.origin.coords
+		destin := e.next.origin.coords
+		if origin.Y < destin.Y {
+			// Edge goes "up".
+			continue
+		}
+		pt := edge.origin.coords
+		if !(destin.Y <= pt.Y && pt.Y <= origin.Y) {
+			// Edge doesn't overlap vertically.
+			continue
+		}
+		if orientation(pt, origin, destin) == rightTurn {
+			// Edge is on the wrong side.
+			continue
+		}
+
+		if bestEdge == nil {
+			bestEdge = e
+		} else if dist := horizontalDistanceBetweenXYAndLine(pt, line{origin, destin}); dist < bestDist {
+			bestEdge = e
+			bestDist = dist
+		}
+	}
+	return bestEdge
+}
+
+func horizontalDistanceBetweenXYAndLine(xy XY, ln line) float64 {
+	rat := (xy.Y - ln.a.Y) / (ln.b.Y - ln.a.Y)
+	x := (1-rat)*ln.a.X + rat*ln.b.X
+	return math.Abs(x - xy.X)
+}
+
+// disjointEdgeSet is a disjoint set data structure where each element in the
+// set is a *halfEdgeRecord (see
+// https://en.wikipedia.org/wiki/Disjoint-set_data_structure).
+//
+// TODO: the implementation here is naive/brute-force. There are well known
+// better disjoint edge set algorithms.
+type disjointEdgeSet struct {
+	sets [][]*halfEdgeRecord
+}
+
+// addSingleton adds a new set containing just e to the disjoint edge set.
+func (s *disjointEdgeSet) addSingleton(e *halfEdgeRecord) {
+	s.sets = append(s.sets, []*halfEdgeRecord{e})
+}
+
+// union unions together the distinct sets containing e1 and e2.
+func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
+	idx1, idx2 := -1, -1
+	for i, set := range s.sets {
+		for _, e := range set {
+			if e == e1 {
+				if idx1 != -1 {
+					panic(idx1)
+				}
+				idx1 = i
+			}
+			if e == e2 {
+				if idx2 != -2 {
+					panic(idx2)
+				}
+				idx2 = i
+			}
+		}
+	}
+	if idx1 == -1 || idx2 == -1 || idx1 == idx2 {
+		panic(fmt.Sprintf("indexes: %d %d", idx1, idx2))
+	}
+
+	set1 := s.sets[idx1]
+	set2 := s.sets[idx2]
+	n := len(s.sets)
+	s.sets[idx1], s.sets[n-1] = s.sets[n-1], s.sets[idx1]
+	s.sets[idx2], s.sets[n-2] = s.sets[n-2], s.sets[idx2]
+	s.sets = s.sets[:n-2]
+	s.sets = append(s.sets, append(set1, set2...))
 }
