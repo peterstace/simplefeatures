@@ -550,6 +550,8 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 
 	eqInt(t, len(dcelA.vertices), 8)
 	eqInt(t, len(dcelA.halfEdges), 16)
+
+	// TODO: we can't yet handle multiple holes in a face
 	//eqInt(t, len(dcelA.faces), 3)
 }
 
@@ -606,7 +608,18 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v4, v2), []XY{v4, v2, v3})
 	CheckHalfEdgeLoop(t, FindEdge(t, dcelA, v1, v0), []XY{v1, v0, v4, v5, v7, v6, v2})
 
-	//eqInt(t, len(dcelA.faces), 4)
+	eqInt(t, len(dcelA.faces), 4)
+	// TODO: trial and error was used to find the right permutation of face
+	// labels. It relies on the permutation being stable. There is probably a
+	// better way to test this.
+	f0 := dcelA.faces[1]
+	f1 := dcelA.faces[0]
+	f2 := dcelA.faces[3]
+	f3 := dcelA.faces[2]
+	CheckFaceComponents(t, f0, nil, []XY{v0, v4, v5, v7, v6, v2, v1})
+	CheckFaceComponents(t, f1, []XY{v0, v1, v2, v4})
+	CheckFaceComponents(t, f2, []XY{v5, v4, v3, v2, v6, v7})
+	CheckFaceComponents(t, f3, []XY{v4, v2, v3})
 }
 
 func eqInt(t *testing.T, i1, i2 int) {

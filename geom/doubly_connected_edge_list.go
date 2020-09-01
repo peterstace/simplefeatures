@@ -234,6 +234,7 @@ func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 	d.overlayVertices(other)
 	d.overlayEdges(other)
 	d.fixVertices()
+	d.reAssignFaces()
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -324,5 +325,53 @@ func (d *doublyConnectedEdgeList) fixVertex(v XY) {
 		ej := incident[(i+1)%len(incident)]
 		ei.prev = ej.twin
 		ej.twin.next = ei
+	}
+}
+
+// reAssignFaces clears the DCEL face list and creates new faces based on the
+// half edge loops.
+//
+// TODO: We currently make the assumption that there is a 1-1 mapping between
+// faces and half edge loops. This assumption only holds for faces that have a
+// single inner component (and no outer component), or just an outer component
+// (with no inner components).
+func (d *doublyConnectedEdgeList) reAssignFaces() {
+	d.faces = nil
+	seen := make(map[*halfEdgeRecord]bool)
+	for _, e := range d.halfEdges {
+		// We mark each edge as its visited, so skip any edges we have already seen.
+		if seen[e] {
+			continue
+		}
+
+		// A new face record is created for each edge loop. Because we will
+		// mark each edge in the loop as visited, we will only create a single
+		// face per loop.
+		f := new(faceRecord)
+		d.faces = append(d.faces, f)
+
+		// Iterate through the edge loop, tracking the leftmost (then lowest
+		// for ties) edge origin.
+		var leftmostLowest *halfEdgeRecord
+		forEachEdge(e, func(e *halfEdgeRecord) {
+			seen[e] = true
+			if leftmostLowest == nil || e.origin.coords.Less(leftmostLowest.origin.coords) {
+				leftmostLowest = e
+			}
+			e.incident = f
+		})
+
+		// We can look at the next and prev points relative to the leftmost
+		// (then lowest) point in the cycle. Then we can use orientation of the
+		// triplet to determine if we're looking at an outer or inner
+		// component.
+		prev := leftmostLowest.prev.origin.coords
+		here := leftmostLowest.origin.coords
+		next := leftmostLowest.next.origin.coords
+		if orientation(prev, here, next) == leftTurn {
+			f.outerComponent = leftmostLowest
+		} else {
+			f.innerComponents = append(f.innerComponents, leftmostLowest)
+		}
 	}
 }
