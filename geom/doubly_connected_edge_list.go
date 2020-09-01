@@ -339,39 +339,52 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 	d.faces = nil
 	seen := make(map[*halfEdgeRecord]bool)
 	for _, e := range d.halfEdges {
-		// We mark each edge as its visited, so skip any edges we have already seen.
 		if seen[e] {
 			continue
 		}
 
-		// A new face record is created for each edge loop. Because we will
+		// A new face record is created for each edge loop.
 		// mark each edge in the loop as visited, we will only create a single
 		// face per loop.
 		f := new(faceRecord)
 		d.faces = append(d.faces, f)
 
-		// Iterate through the edge loop, tracking the leftmost (then lowest
-		// for ties) edge origin.
-		var leftmostLowest *halfEdgeRecord
-		forEachEdge(e, func(e *halfEdgeRecord) {
-			seen[e] = true
-			if leftmostLowest == nil || e.origin.coords.Less(leftmostLowest.origin.coords) {
-				leftmostLowest = e
-			}
-			e.incident = f
-		})
-
-		// We can look at the next and prev points relative to the leftmost
-		// (then lowest) point in the cycle. Then we can use orientation of the
-		// triplet to determine if we're looking at an outer or inner
-		// component.
-		prev := leftmostLowest.prev.origin.coords
-		here := leftmostLowest.origin.coords
-		next := leftmostLowest.next.origin.coords
-		if orientation(prev, here, next) == leftTurn {
+		leftmostLowest := edgeLoopLeftmostLowest(e)
+		if edgeLoopIsOuterComponent(leftmostLowest) {
 			f.outerComponent = leftmostLowest
 		} else {
 			f.innerComponents = append(f.innerComponents, leftmostLowest)
 		}
+
+		forEachEdge(e, func(e *halfEdgeRecord) {
+			seen[e] = true
+			e.incident = f
+		})
 	}
+}
+
+// edgeLoopLeftmostLowest finds the edge whose origin is the leftmost (or
+// lowest for a tie) point in the loop.
+func edgeLoopLeftmostLowest(start *halfEdgeRecord) *halfEdgeRecord {
+	var best *halfEdgeRecord
+	forEachEdge(start, func(e *halfEdgeRecord) {
+		if best == nil || e.origin.coords.Less(best.origin.coords) {
+			best = e
+		}
+	})
+	return best
+}
+
+// edgeLoopIsOuterComponent checks to see if an edge loop is an outer edge loop
+// or an inner edge loop. It does this by examining the edge whose origin is
+// the leftmost (or lowest for ties) in the loop.
+func edgeLoopIsOuterComponent(leftmostLowest *halfEdgeRecord) bool {
+	// We can look at the next and prev points relative to the leftmost (then
+	// lowest) point in the cycle. Then we can use orientation of the triplet
+	// to determine if we're looking at an outer or inner component. This works
+	// because outer components are wound CCW and inner components are wound CW.
+	prev := leftmostLowest.prev.origin.coords
+	here := leftmostLowest.origin.coords
+	next := leftmostLowest.next.origin.coords
+	return orientation(prev, here, next) == leftTurn
 }
