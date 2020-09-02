@@ -214,7 +214,7 @@ func TestGraphTriangle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromPolygon(poly.AsPolygon())
+	dcel := newDCELFromPolygon(poly.AsPolygon(), true)
 
 	/*
 
@@ -253,6 +253,11 @@ func TestGraphTriangle(t *testing.T) {
 		t, f1,
 		[]XY{v0, v1, v2},
 	)
+
+	eqBool(t, f0.labelA, false)
+	eqBool(t, f0.labelB, false)
+	eqBool(t, f1.labelA, true)
+	eqBool(t, f1.labelB, false)
 }
 
 func TestGraphWithHoles(t *testing.T) {
@@ -299,7 +304,7 @@ func TestGraphWithHoles(t *testing.T) {
 		V0                                                        V1
 	*/
 
-	dcel := newDCELFromPolygon(poly.AsPolygon())
+	dcel := newDCELFromPolygon(poly.AsPolygon(), false)
 
 	eqInt(t, len(dcel.vertices), 12)
 	eqInt(t, len(dcel.halfEdges), 24)
@@ -343,6 +348,15 @@ func TestGraphWithHoles(t *testing.T) {
 		t, f3,
 		[]XY{v8, v11, v10, v9},
 	)
+
+	eqBool(t, f0.labelA, false)
+	eqBool(t, f0.labelB, false)
+	eqBool(t, f1.labelA, false)
+	eqBool(t, f1.labelB, true)
+	eqBool(t, f2.labelA, false)
+	eqBool(t, f2.labelB, false)
+	eqBool(t, f3.labelA, false)
+	eqBool(t, f3.labelB, false)
 }
 
 func TestGraphReNode(t *testing.T) {
@@ -350,7 +364,7 @@ func TestGraphReNode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromPolygon(poly.AsPolygon())
+	dcel := newDCELFromPolygon(poly.AsPolygon(), true)
 
 	other, err := UnmarshalWKT("POLYGON((0 1,2 1,1 3,0 1))")
 	if err != nil {
@@ -395,6 +409,11 @@ func TestGraphReNode(t *testing.T) {
 		t, f1,
 		[]XY{v0, v1, v2, v3, v4},
 	)
+
+	eqBool(t, f0.labelA, false)
+	eqBool(t, f0.labelB, false)
+	eqBool(t, f1.labelA, true)
+	eqBool(t, f1.labelB, false)
 }
 
 func TestGraphReNodeTwoCutsInOneEdge(t *testing.T) {
@@ -402,7 +421,7 @@ func TestGraphReNodeTwoCutsInOneEdge(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromPolygon(poly.AsPolygon())
+	dcel := newDCELFromPolygon(poly.AsPolygon(), false)
 
 	other, err := UnmarshalWKT("POLYGON((0 -1,1 1,2 -1,0 -1))")
 	if err != nil {
@@ -447,6 +466,11 @@ func TestGraphReNodeTwoCutsInOneEdge(t *testing.T) {
 		t, f1,
 		[]XY{v0, v1, v2, v3, v4},
 	)
+
+	eqBool(t, f0.labelA, false)
+	eqBool(t, f0.labelB, false)
+	eqBool(t, f1.labelA, false)
+	eqBool(t, f1.labelB, true)
 }
 
 func TestGraphReNodeOverlappingEdge(t *testing.T) {
@@ -454,7 +478,7 @@ func TestGraphReNodeOverlappingEdge(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromPolygon(poly.AsPolygon())
+	dcel := newDCELFromPolygon(poly.AsPolygon(), true)
 
 	other, err := UnmarshalWKT("POLYGON((1 2,2 2,2 3,1 3,1 2))")
 	if err != nil {
@@ -497,6 +521,11 @@ func TestGraphReNodeOverlappingEdge(t *testing.T) {
 		t, f1,
 		[]XY{v4, v3, v2, v1, v0},
 	)
+
+	eqBool(t, f0.labelA, false)
+	eqBool(t, f0.labelB, false)
+	eqBool(t, f1.labelA, true)
+	eqBool(t, f1.labelB, false)
 }
 
 func TestGraphOverlayDisjoint(t *testing.T) {
@@ -504,13 +533,13 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelA := newDCELFromPolygon(polyA.AsPolygon())
+	dcelA := newDCELFromPolygon(polyA.AsPolygon(), true)
 
 	polyB, err := UnmarshalWKT("POLYGON((2 2,2 3,3 3,3 2,2 2))")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelB := newDCELFromPolygon(polyB.AsPolygon())
+	dcelB := newDCELFromPolygon(polyB.AsPolygon(), false)
 
 	dcelA.reNodeGraph(polyB.AsPolygon())
 	dcelB.reNodeGraph(polyA.AsPolygon())
@@ -568,13 +597,13 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelA := newDCELFromPolygon(polyA.AsPolygon())
+	dcelA := newDCELFromPolygon(polyA.AsPolygon(), true)
 
 	polyB, err := UnmarshalWKT("POLYGON((0 1,2 1,1 3,0 1))")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelB := newDCELFromPolygon(polyB.AsPolygon())
+	dcelB := newDCELFromPolygon(polyB.AsPolygon(), false)
 
 	dcelA.reNodeGraph(polyB.AsPolygon())
 	dcelB.reNodeGraph(polyA.AsPolygon())
@@ -634,5 +663,14 @@ func eqInt(t *testing.T, i1, i2 int) {
 	t.Helper()
 	if i1 != i2 {
 		t.Errorf("ints not equal: %d vs %d", i1, i2)
+	}
+}
+
+// TODO: rather than using an eqBool helper, it may make more sense to bake the
+// label check directly into the CheckFaceComponents routine.
+func eqBool(t *testing.T, b1, b2 bool) {
+	t.Helper()
+	if b1 != b2 {
+		t.Errorf("bools not equal: %t vs %t", b1, b2)
 	}
 }

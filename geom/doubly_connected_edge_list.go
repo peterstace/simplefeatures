@@ -15,6 +15,11 @@ type doublyConnectedEdgeList struct {
 type faceRecord struct {
 	outerComponent  *halfEdgeRecord
 	innerComponents []*halfEdgeRecord
+
+	// TODO: Would it be better to use a bit mask instead? That would simplify
+	// some logic around indicating whether a polygon is "Poly A" or "Poly B".
+	labelA bool
+	labelB bool
 }
 
 type halfEdgeRecord struct {
@@ -29,7 +34,7 @@ type vertexRecord struct {
 	incident *halfEdgeRecord
 }
 
-func newDCELFromPolygon(poly Polygon) *doublyConnectedEdgeList {
+func newDCELFromPolygon(poly Polygon, isPolyA bool) *doublyConnectedEdgeList {
 	poly = poly.ForceCCW()
 
 	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
@@ -58,6 +63,11 @@ func newDCELFromPolygon(poly Polygon) *doublyConnectedEdgeList {
 	polyFace := &faceRecord{
 		outerComponent:  nil, // populated later
 		innerComponents: nil, // populated later
+	}
+	if isPolyA {
+		polyFace.labelA = true
+	} else {
+		polyFace.labelB = true
 	}
 	dcel.faces = append(dcel.faces, infFace, polyFace)
 
