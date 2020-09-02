@@ -551,8 +551,16 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 	eqInt(t, len(dcelA.vertices), 8)
 	eqInt(t, len(dcelA.halfEdges), 16)
 
-	// TODO: we can't yet handle multiple holes in a face
 	eqInt(t, len(dcelA.faces), 3)
+	// TODO: trial and error was used to find the right permutation of face
+	// labels. It relies on the permutation being stable. There is probably a
+	// better way to test this.
+	f0 := dcelA.faces[2]
+	f1 := dcelA.faces[1]
+	f2 := dcelA.faces[0]
+	CheckFaceComponents(t, f0, nil, []XY{v4, v7, v6, v5}, []XY{v0, v3, v2, v1})
+	CheckFaceComponents(t, f1, []XY{v0, v1, v2, v3})
+	CheckFaceComponents(t, f2, []XY{v4, v5, v6, v7})
 }
 
 func TestGraphOverlayIntersecting(t *testing.T) {
@@ -612,9 +620,9 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	// TODO: trial and error was used to find the right permutation of face
 	// labels. It relies on the permutation being stable. There is probably a
 	// better way to test this.
-	f0 := dcelA.faces[1]
-	f1 := dcelA.faces[0]
-	f2 := dcelA.faces[3]
+	f0 := dcelA.faces[3]
+	f1 := dcelA.faces[1]
+	f2 := dcelA.faces[0]
 	f3 := dcelA.faces[2]
 	CheckFaceComponents(t, f0, nil, []XY{v0, v4, v5, v7, v6, v2, v1})
 	CheckFaceComponents(t, f1, []XY{v0, v1, v2, v4})

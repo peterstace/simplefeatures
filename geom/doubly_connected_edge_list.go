@@ -331,11 +331,6 @@ func (d *doublyConnectedEdgeList) fixVertex(v XY) {
 
 // reAssignFaces clears the DCEL face list and creates new faces based on the
 // half edge loops.
-//
-// TODO: We currently make the assumption that there is a 1-1 mapping between
-// faces and half edge loops. This assumption only holds for faces that have a
-// single inner component (and no outer component), or just an outer component
-// (with no inner components).
 func (d *doublyConnectedEdgeList) reAssignFaces() {
 	// Find all boundary cycles, and categorise them as either outer components
 	// or inner components.
@@ -364,14 +359,17 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 	for _, e := range outerComponents {
 		graph.addSingleton(e)
 	}
+	graph.addSingleton(nil) // nil represents the outer component of the infinite face
+
 	for _, leftmostLowest := range innerComponents {
 		nextLeft := d.findNextDownEdgeToTheLeft(leftmostLowest)
-		if nextLeft == nil {
-			// There is no next left edge, indicating that the current
-			// component is the inner component of the infinite face.
-			continue
+		if nextLeft != nil {
+			// When there is no next left edge, then this indicates that the
+			// current component is the inner component of the infinite face.
+			// In this case, we *don't* want to find the lowest (or leftmost
+			// for tie) edge, since there is no actual loop.
+			nextLeft = edgeLoopLeftmostLowest(nextLeft)
 		}
-		nextLeft = edgeLoopLeftmostLowest(nextLeft)
 		graph.union(leftmostLowest, nextLeft)
 	}
 
@@ -381,13 +379,16 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 		f := new(faceRecord)
 		d.faces = append(d.faces, f)
 		for _, e := range set {
-			if edgeLoopIsOuterComponent(e) {
+			if e == nil || edgeLoopIsOuterComponent(e) {
 				if f.outerComponent != nil {
 					panic("double outer component")
 				}
 				f.outerComponent = e
 			} else {
 				f.innerComponents = append(f.innerComponents, e)
+			}
+			if e != nil {
+				forEachEdge(e, func(e *halfEdgeRecord) { e.incident = f })
 			}
 		}
 	}
@@ -424,28 +425,22 @@ func (d *doublyConnectedEdgeList) findNextDownEdgeToTheLeft(edge *halfEdgeRecord
 	var bestDist float64
 
 	for _, e := range d.halfEdges {
-		if e == edge {
-			continue
-		}
 		origin := e.origin.coords
 		destin := e.next.origin.coords
-		if origin.Y < destin.Y {
-			// Edge goes "up".
-			continue
-		}
 		pt := edge.origin.coords
 		if !(destin.Y <= pt.Y && pt.Y <= origin.Y) {
-			// Edge doesn't overlap vertically.
+			// We only want to consider edges that go "down" and overlap
+			// vertically with pt.
 			continue
 		}
-		if orientation(pt, origin, destin) == rightTurn {
-			// Edge is on the wrong side.
+		ln := line{origin, destin}
+		dist := signedHorizontalDistanceBetweenXYAndLine(pt, ln)
+		if dist <= 0 {
+			// Edge is on the wrong side of pt (we only want edges to the left).
 			continue
 		}
 
-		if bestEdge == nil {
-			bestEdge = e
-		} else if dist := horizontalDistanceBetweenXYAndLine(pt, line{origin, destin}); dist < bestDist {
+		if bestEdge == nil || dist < bestDist {
 			bestEdge = e
 			bestDist = dist
 		}
@@ -453,10 +448,15 @@ func (d *doublyConnectedEdgeList) findNextDownEdgeToTheLeft(edge *halfEdgeRecord
 	return bestEdge
 }
 
-func horizontalDistanceBetweenXYAndLine(xy XY, ln line) float64 {
+func signedHorizontalDistanceBetweenXYAndLine(xy XY, ln line) float64 {
+	// TODO: This is not robust in cases of an *almost* horizontal line. Need
+	// to have a think about a better approach here.
+	if ln.b.Y == ln.a.Y {
+		return xy.X - math.Max(ln.a.X, ln.b.X)
+	}
 	rat := (xy.Y - ln.a.Y) / (ln.b.Y - ln.a.Y)
 	x := (1-rat)*ln.a.X + rat*ln.b.X
-	return math.Abs(x - xy.X)
+	return xy.X - x
 }
 
 // disjointEdgeSet is a disjoint set data structure where each element in the
@@ -486,7 +486,7 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 				idx1 = i
 			}
 			if e == e2 {
-				if idx2 != -2 {
+				if idx2 != -1 {
 					panic(idx2)
 				}
 				idx2 = i
@@ -494,13 +494,16 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 		}
 	}
 	if idx1 == -1 || idx2 == -1 || idx1 == idx2 {
-		panic(fmt.Sprintf("indexes: %d %d", idx1, idx2))
+		panic(fmt.Sprintf("e1: %p e2: %p state: %v indexes: %d %d", e1, e2, s.sets, idx1, idx2))
 	}
 
 	set1 := s.sets[idx1]
 	set2 := s.sets[idx2]
 	n := len(s.sets)
 	s.sets[idx1], s.sets[n-1] = s.sets[n-1], s.sets[idx1]
+	if idx2 == n-1 {
+		idx2 = idx1
+	}
 	s.sets[idx2], s.sets[n-2] = s.sets[n-2], s.sets[idx2]
 	s.sets = s.sets[:n-2]
 	s.sets = append(s.sets, append(set1, set2...))
