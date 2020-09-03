@@ -390,7 +390,10 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 				f.innerComponents = append(f.innerComponents, e)
 			}
 			if e != nil {
-				forEachEdge(e, func(e *halfEdgeRecord) { e.incident = f })
+				forEachEdge(e, func(e *halfEdgeRecord) {
+					f.label |= e.incident.label
+					e.incident = f
+				})
 			}
 		}
 	}

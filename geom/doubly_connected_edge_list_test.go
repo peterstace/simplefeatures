@@ -578,6 +578,10 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 	CheckFaceComponents(t, f0, nil, []XY{v4, v7, v6, v5}, []XY{v0, v3, v2, v1})
 	CheckFaceComponents(t, f1, []XY{v0, v1, v2, v3})
 	CheckFaceComponents(t, f2, []XY{v4, v5, v6, v7})
+
+	eqUint8(t, f0.label, 0b00)
+	eqUint8(t, f1.label, 0b01)
+	eqUint8(t, f2.label, 0b10)
 }
 
 func TestGraphOverlayIntersecting(t *testing.T) {
@@ -645,6 +649,11 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	CheckFaceComponents(t, f1, []XY{v0, v1, v2, v4})
 	CheckFaceComponents(t, f2, []XY{v5, v4, v3, v2, v6, v7})
 	CheckFaceComponents(t, f3, []XY{v4, v2, v3})
+
+	eqUint8(t, f0.label, 0b00)
+	eqUint8(t, f1.label, 0b01)
+	eqUint8(t, f2.label, 0b10)
+	eqUint8(t, f3.label, 0b11)
 }
 
 func eqInt(t *testing.T, i1, i2 int) {
