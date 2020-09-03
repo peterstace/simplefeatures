@@ -582,6 +582,10 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 	eqUint8(t, f0.label, 0b00)
 	eqUint8(t, f1.label, 0b01)
 	eqUint8(t, f2.label, 0b10)
+
+	eqPoly(t, dcelA.toPolygon(func(label uint8) bool { return label == 0b01 }), "POLYGON((0 0,1 0,1 1,0 1,0 0))")
+	eqPoly(t, dcelA.toPolygon(func(label uint8) bool { return label == 0b10 }), "POLYGON((2 2,3 2,3 3,2 3,2 2))")
+	eqPoly(t, dcelA.toPolygon(func(label uint8) bool { return label == 0b11 }), "POLYGON EMPTY")
 }
 
 func TestGraphOverlayIntersecting(t *testing.T) {
@@ -654,6 +658,8 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	eqUint8(t, f1.label, 0b01)
 	eqUint8(t, f2.label, 0b10)
 	eqUint8(t, f3.label, 0b11)
+
+	// TODO: Add tests for conversion to polygon.
 }
 
 func eqInt(t *testing.T, i1, i2 int) {
@@ -667,5 +673,16 @@ func eqUint8(t *testing.T, u1, u2 uint8) {
 	t.Helper()
 	if u1 != u2 {
 		t.Errorf("uint8s not equal: %d vs %d", u1, u2)
+	}
+}
+
+func eqPoly(t *testing.T, got Polygon, wantWKT string) {
+	t.Helper()
+	want, err := UnmarshalWKT(wantWKT)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !want.EqualsExact(got.AsGeometry(), IgnoreOrder) {
+		t.Errorf("\nwant: %v\ngot:  %v\n", want.AsText(), got.AsText())
 	}
 }

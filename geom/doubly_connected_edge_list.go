@@ -513,3 +513,47 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 	s.sets = s.sets[:n-2]
 	s.sets = append(s.sets, append(set1, set2...))
 }
+
+func (d *doublyConnectedEdgeList) toPolygon(include func(uint8) bool) Polygon {
+	seen := make(map[*halfEdgeRecord]bool)
+	for _, edge := range d.halfEdges {
+		if seen[edge] {
+			continue
+		}
+		seen[edge] = true
+
+		// If the edge doesn't form the boundary of the region we are
+		// interested in, then we can ignore it.
+		if !include(edge.incident.label) || include(edge.twin.incident.label) {
+			continue
+		}
+
+		var coords []float64
+		e := edge
+		for {
+			xy := e.origin.coords
+			coords = append(coords, xy.X, xy.Y)
+
+			// TODO: This assumes that we don't want to join any faces
+			// together. This is an incorrect assumption.
+			e = e.next
+
+			if e == edge {
+				break
+			}
+		}
+
+		coords = append(coords, coords[:2]...)
+		seq := NewSequence(coords, DimXY)
+		ls, err := NewLineString(seq)
+		if err != nil {
+			panic(fmt.Sprintf("could not create LineString: %v", err))
+		}
+		poly, err := NewPolygonFromRings([]LineString{ls})
+		if err != nil {
+			panic(fmt.Sprintf("could not create Polygon: %v", err))
+		}
+		return poly
+	}
+	return Polygon{}
+}
