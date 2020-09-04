@@ -514,13 +514,13 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 	s.sets = append(s.sets, append(set1, set2...))
 }
 
-func (d *doublyConnectedEdgeList) toPolygon(include func(uint8) bool) Polygon {
+func (d *doublyConnectedEdgeList) toPolygon(include func(uint8) bool) Geometry {
 	seen := make(map[*halfEdgeRecord]bool)
+	var polys []Polygon
 	for _, edge := range d.halfEdges {
 		if seen[edge] {
 			continue
 		}
-		seen[edge] = true
 
 		// If the edge doesn't form the boundary of the region we are
 		// interested in, then we can ignore it.
@@ -533,6 +533,8 @@ func (d *doublyConnectedEdgeList) toPolygon(include func(uint8) bool) Polygon {
 		for {
 			xy := e.origin.coords
 			coords = append(coords, xy.X, xy.Y)
+
+			seen[e] = true
 
 			e = e.next
 
@@ -557,7 +559,19 @@ func (d *doublyConnectedEdgeList) toPolygon(include func(uint8) bool) Polygon {
 		if err != nil {
 			panic(fmt.Sprintf("could not create Polygon: %v", err))
 		}
-		return poly
+		polys = append(polys, poly)
 	}
-	return Polygon{}
+
+	switch len(polys) {
+	case 0:
+		return Polygon{}.AsGeometry()
+	case 1:
+		return polys[0].AsGeometry()
+	default:
+		mp, err := NewMultiPolygonFromPolygons(polys)
+		if err != nil {
+			panic(fmt.Sprintf("could not create MultiPolygon: %v", err))
+		}
+		return mp.AsGeometry()
+	}
 }
