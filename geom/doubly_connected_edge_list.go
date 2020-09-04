@@ -30,7 +30,7 @@ type vertexRecord struct {
 	incident *halfEdgeRecord
 }
 
-func newDCELFromPolygon(poly Polygon, label uint8) *doublyConnectedEdgeList {
+func newDCELFromPolygon(poly Polygon, mask uint8) *doublyConnectedEdgeList {
 	poly = poly.ForceCCW()
 
 	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
@@ -55,11 +55,12 @@ func newDCELFromPolygon(poly Polygon, label uint8) *doublyConnectedEdgeList {
 	infFace := &faceRecord{
 		outerComponent:  nil, // left nil
 		innerComponents: nil, // populated later
+		label:           presenceMask & mask,
 	}
 	polyFace := &faceRecord{
 		outerComponent:  nil, // populated later
 		innerComponents: nil, // populated later
-		label:           label,
+		label:           mask,
 	}
 	dcel.faces = append(dcel.faces, infFace, polyFace)
 
@@ -67,12 +68,14 @@ func newDCELFromPolygon(poly Polygon, label uint8) *doublyConnectedEdgeList {
 		interiorFace := polyFace
 		exteriorFace := infFace
 		if ringIdx > 0 {
-			// For inner rings, the exterior face is a hole rather than the
-			// infinite face.
-			exteriorFace = &faceRecord{
+			holeFace := &faceRecord{
 				outerComponent:  nil, // left nil
 				innerComponents: nil, // populated later
+				label:           presenceMask & mask,
 			}
+			// For inner rings, the exterior face is a hole rather than the
+			// infinite face.
+			exteriorFace = holeFace
 			dcel.faces = append(dcel.faces, exteriorFace)
 		}
 
