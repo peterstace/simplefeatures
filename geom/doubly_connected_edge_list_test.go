@@ -579,11 +579,9 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 	CheckFaceComponents(t, f1, []XY{v0, v1, v2, v3})
 	CheckFaceComponents(t, f2, []XY{v4, v5, v6, v7})
 
-	// TODO: The parts of the test below were commented out to make it pass,
-	// but the behaviour is not correct.
 	eqUint8(t, f0.label, inputAPresent|inputBPresent)
-	eqUint8(t, f1.label, inputAPresent /*|inputBPresent*/ |inputAValue)
-	eqUint8(t, f2.label /*inputAPresent|*/, inputBPresent|inputBValue)
+	eqUint8(t, f1.label, inputAPresent|inputBPresent|inputAValue)
+	eqUint8(t, f2.label, inputAPresent|inputBPresent|inputBValue)
 }
 
 func TestGraphOverlayIntersecting(t *testing.T) {
@@ -718,11 +716,9 @@ func TestGraphOverlayInside(t *testing.T) {
 	CheckFaceComponents(t, f1, []XY{v0, v1, v2, v3}, []XY{v7, v6, v5, v4})
 	CheckFaceComponents(t, f2, []XY{v4, v5, v6, v7})
 
-	// TODO: The parts of the test below were commented out to make it pass,
-	// but the behaviour is not correct.
-	eqUint8(t, f0.label, inputAPresent /*|inputBPresent*/)
+	eqUint8(t, f0.label, inputAPresent|inputBPresent)
 	eqUint8(t, f1.label, inputAPresent|inputBPresent|inputAValue)
-	eqUint8(t, f2.label /*inputAPresent|*/, inputBPresent /*|inputAValue*/ |inputBValue)
+	eqUint8(t, f2.label, inputAPresent|inputBPresent|inputAValue|inputBValue)
 }
 
 func eqInt(t *testing.T, i1, i2 int) {

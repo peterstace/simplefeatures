@@ -1,5 +1,7 @@
 package geom
 
+import "fmt"
+
 const (
 	// TODO: Better names?
 	inputAValue   uint8 = 0b0001
@@ -15,10 +17,9 @@ const (
 )
 
 func assertPresenceBits(label uint8) {
-	// TODO: re-enable
-	//if presenceMask&label != presenceMask {
-	//	panic(fmt.Sprintf("all presence bits in label not set: %v", label))
-	//}
+	if presenceMask&label != presenceMask {
+		panic(fmt.Sprintf("all presence bits in label not set: %v", label))
+	}
 }
 
 func selectUnion(label uint8) bool {

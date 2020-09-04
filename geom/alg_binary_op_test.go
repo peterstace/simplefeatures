@@ -95,7 +95,7 @@ func TestBinaryOp(t *testing.T) {
 			union:  "POLYGON((0 0,3 0,3 3,0 3,0 0))",
 
 			// TODO: The following tests are disabled because they currently don't pass.
-			//inter: "POLYGON((1 1,2 1,2 2,1 2,1 1))",
+			inter: "POLYGON((1 1,2 1,2 2,1 2,1 1))",
 			//fwdDiff: "POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1)))",
 			//revDiff: "POLYGON EMPTY", // TODO: should this be GEOMETRYCOLLECTION EMPTY?
 			//symDiff: "POLYGON EMPTY", // TODO: should this be GEOMETRYCOLLECTION EMPTY?

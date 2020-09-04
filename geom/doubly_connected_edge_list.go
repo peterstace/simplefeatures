@@ -400,6 +400,68 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 			}
 		}
 	}
+
+	for _, face := range d.faces {
+		d.completePartialFaceLabel(face)
+	}
+}
+
+// completePartialFaceLabel checks to see if the face label for the given face
+// is complete (i.e. contains a part for both A and B). If it's not complete,
+// then in searches adjacent faces until it finds a face that it can copy the
+// missing part of the label from. This situation occurs whenever a face in the
+// overlay DCEL doesn't have any edges from one of the original geometries.
+func (d *doublyConnectedEdgeList) completePartialFaceLabel(face *faceRecord) {
+	labelIsComplete := func() bool {
+		return (face.label & presenceMask) == presenceMask
+	}
+	expanded := make(map[*faceRecord]bool)
+	stack := []*faceRecord{face}
+	for len(stack) > 0 {
+		popped := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		adjacent := adjacentFaces(popped)
+		expanded[popped] = true
+		for _, adj := range adjacent {
+			completeFaceLabel(face, adj)
+			if labelIsComplete() {
+				return
+			}
+			if !expanded[adj] {
+				stack = append(stack, adj)
+			}
+		}
+	}
+}
+
+func adjacentFaces(f *faceRecord) []*faceRecord {
+	set := make(map[*faceRecord]struct{})
+	if cmp := f.outerComponent; cmp != nil {
+		forEachEdge(cmp, func(e *halfEdgeRecord) {
+			set[e.twin.incident] = struct{}{}
+		})
+	}
+	for _, cmp := range f.innerComponents {
+		forEachEdge(cmp, func(e *halfEdgeRecord) {
+			set[e.twin.incident] = struct{}{}
+		})
+	}
+
+	faces := make([]*faceRecord, 0, len(set))
+	for face := range set {
+		faces = append(faces, face)
+	}
+	return faces
+}
+
+func completeFaceLabel(dst, src *faceRecord) {
+	// TODO: is there a way to do this without treating the two halfs of the label separately?
+	if dst.label&inputAPresent == 0 {
+		dst.label |= (src.label & inputAMask)
+	}
+	if dst.label&inputBPresent == 0 {
+		dst.label |= (src.label & inputBMask)
+	}
 }
 
 // edgeLoopLeftmostLowest finds the edge whose origin is the leftmost (or
