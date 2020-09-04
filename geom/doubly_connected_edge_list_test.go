@@ -659,12 +659,25 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	eqUint8(t, f2.label, 0b10)
 	eqUint8(t, f3.label, 0b11)
 
-	eqPoly(t, dcelA.toPolygon(func(label uint8) bool { return label == 0b01 }), "POLYGON((0 0,2 0,1.5 1,0.5 1,0 0))")
-	eqPoly(t, dcelA.toPolygon(func(label uint8) bool { return label == 0b10 }), "POLYGON((1 3,2 1,1.5 1,1 2,0.5 1,0 1,1 3))")
-	eqPoly(t, dcelA.toPolygon(func(label uint8) bool { return label == 0b11 }), "POLYGON((0.5 1,1 2,1.5 1,0.5 1))")
+	// PolyA - PolyB
+	eqPoly(t, dcelA.toPolygon(func(label uint8) bool {
+		return label == 0b01
+	}), "POLYGON((0 0,2 0,1.5 1,0.5 1,0 0))")
 
-	// TODO: We don't handle polygons made from multiple faces yet.
-	//eqPoly(t, dcelA.toPolygon(func(label uint8) bool { return label != 0 }), "POLYGON((0 0,0.5 1,0 1,1 3,2 1,1.5 1,2 0,0 0))")
+	// PolyB - PolyA
+	eqPoly(t, dcelA.toPolygon(func(label uint8) bool {
+		return label == 0b10
+	}), "POLYGON((1 3,2 1,1.5 1,1 2,0.5 1,0 1,1 3))")
+
+	// Intersection
+	eqPoly(t, dcelA.toPolygon(func(label uint8) bool {
+		return label == 0b11
+	}), "POLYGON((0.5 1,1 2,1.5 1,0.5 1))")
+
+	// Union
+	eqPoly(t, dcelA.toPolygon(func(label uint8) bool {
+		return label != 0
+	}), "POLYGON((0 0,0.5 1,0 1,1 3,2 1,1.5 1,2 0,0 0))")
 }
 
 func eqInt(t *testing.T, i1, i2 int) {

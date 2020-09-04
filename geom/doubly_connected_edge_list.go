@@ -534,9 +534,13 @@ func (d *doublyConnectedEdgeList) toPolygon(include func(uint8) bool) Polygon {
 			xy := e.origin.coords
 			coords = append(coords, xy.X, xy.Y)
 
-			// TODO: This assumes that we don't want to join any faces
-			// together. This is an incorrect assumption.
 			e = e.next
+
+			// Sweep through the edges around the vertex until we find the next
+			// edge that is part of the polygon boundary.
+			for include(e.twin.incident.label) {
+				e = e.twin.next
+			}
 
 			if e == edge {
 				break
