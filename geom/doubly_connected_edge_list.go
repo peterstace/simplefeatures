@@ -30,7 +30,7 @@ type vertexRecord struct {
 	incident *halfEdgeRecord
 }
 
-func newDCELFromPolygon(poly Polygon, label uint8) *doublyConnectedEdgeList {
+func newDCELFromPolygon(poly Polygon, mask uint8) *doublyConnectedEdgeList {
 	poly = poly.ForceCCW()
 
 	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
@@ -55,11 +55,12 @@ func newDCELFromPolygon(poly Polygon, label uint8) *doublyConnectedEdgeList {
 	infFace := &faceRecord{
 		outerComponent:  nil, // left nil
 		innerComponents: nil, // populated later
+		label:           presenceMask & mask,
 	}
 	polyFace := &faceRecord{
 		outerComponent:  nil, // populated later
 		innerComponents: nil, // populated later
-		label:           label,
+		label:           mask,
 	}
 	dcel.faces = append(dcel.faces, infFace, polyFace)
 
@@ -67,12 +68,14 @@ func newDCELFromPolygon(poly Polygon, label uint8) *doublyConnectedEdgeList {
 		interiorFace := polyFace
 		exteriorFace := infFace
 		if ringIdx > 0 {
-			// For inner rings, the exterior face is a hole rather than the
-			// infinite face.
-			exteriorFace = &faceRecord{
+			holeFace := &faceRecord{
 				outerComponent:  nil, // left nil
 				innerComponents: nil, // populated later
+				label:           presenceMask & mask,
 			}
+			// For inner rings, the exterior face is a hole rather than the
+			// infinite face.
+			exteriorFace = holeFace
 			dcel.faces = append(dcel.faces, exteriorFace)
 		}
 
@@ -397,6 +400,69 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 			}
 		}
 	}
+
+	for _, face := range d.faces {
+		d.completePartialFaceLabel(face)
+	}
+}
+
+// completePartialFaceLabel checks to see if the face label for the given face
+// is complete (i.e. contains a part for both A and B). If it's not complete,
+// then in searches adjacent faces until it finds a face that it can copy the
+// missing part of the label from. This situation occurs whenever a face in the
+// overlay DCEL doesn't have any edges from one of the original geometries.
+func (d *doublyConnectedEdgeList) completePartialFaceLabel(face *faceRecord) {
+	labelIsComplete := func() bool {
+		return (face.label & presenceMask) == presenceMask
+	}
+	expanded := make(map[*faceRecord]bool)
+	stack := []*faceRecord{face}
+	for len(stack) > 0 {
+		popped := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		adjacent := adjacentFaces(popped)
+		expanded[popped] = true
+		for _, adj := range adjacent {
+			completeFaceLabel(face, adj)
+			if labelIsComplete() {
+				return
+			}
+			if !expanded[adj] {
+				stack = append(stack, adj)
+			}
+		}
+	}
+}
+
+// adjacentFaces finds all of the faces that adjacent to f.
+func adjacentFaces(f *faceRecord) []*faceRecord {
+	set := make(map[*faceRecord]struct{})
+	if cmp := f.outerComponent; cmp != nil {
+		forEachEdge(cmp, func(e *halfEdgeRecord) {
+			set[e.twin.incident] = struct{}{}
+		})
+	}
+	for _, cmp := range f.innerComponents {
+		forEachEdge(cmp, func(e *halfEdgeRecord) {
+			set[e.twin.incident] = struct{}{}
+		})
+	}
+
+	faces := make([]*faceRecord, 0, len(set))
+	for face := range set {
+		faces = append(faces, face)
+	}
+	return faces
+}
+
+func completeFaceLabel(dst, src *faceRecord) {
+	// TODO: is there a way to do this without treating the two halfs of the label separately?
+	if dst.label&inputAPresent == 0 {
+		dst.label |= (src.label & inputAMask)
+	}
+	if dst.label&inputBPresent == 0 {
+		dst.label |= (src.label & inputBMask)
+	}
 }
 
 // edgeLoopLeftmostLowest finds the edge whose origin is the leftmost (or
@@ -514,54 +580,11 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 	s.sets = append(s.sets, append(set1, set2...))
 }
 
-func (d *doublyConnectedEdgeList) toPolygon(include func(uint8) bool) Geometry {
-	seen := make(map[*halfEdgeRecord]bool)
-	var polys []Polygon
-	for _, edge := range d.halfEdges {
-		if seen[edge] {
-			continue
-		}
-
-		// If the edge doesn't form the boundary of the region we are
-		// interested in, then we can ignore it.
-		if !include(edge.incident.label) || include(edge.twin.incident.label) {
-			continue
-		}
-
-		var coords []float64
-		e := edge
-		for {
-			xy := e.origin.coords
-			coords = append(coords, xy.X, xy.Y)
-
-			seen[e] = true
-
-			e = e.next
-
-			// Sweep through the edges around the vertex until we find the next
-			// edge that is part of the polygon boundary.
-			for include(e.twin.incident.label) {
-				e = e.twin.next
-			}
-
-			if e == edge {
-				break
-			}
-		}
-
-		coords = append(coords, coords[:2]...)
-		seq := NewSequence(coords, DimXY)
-		ls, err := NewLineString(seq)
-		if err != nil {
-			panic(fmt.Sprintf("could not create LineString: %v", err))
-		}
-		poly, err := NewPolygonFromRings([]LineString{ls})
-		if err != nil {
-			panic(fmt.Sprintf("could not create Polygon: %v", err))
-		}
-		polys = append(polys, poly)
-	}
-
+// toGeometry extracts geometries from the DCEL.
+//
+// TODO: extract geometries other than Polygons and MultiPolygons.
+func (d *doublyConnectedEdgeList) toGeometry(include func(uint8) bool) Geometry {
+	polys := d.extractPolygons(include)
 	switch len(polys) {
 	case 0:
 		return Polygon{}.AsGeometry()
@@ -573,5 +596,134 @@ func (d *doublyConnectedEdgeList) toPolygon(include func(uint8) bool) Geometry {
 			panic(fmt.Sprintf("could not create MultiPolygon: %v", err))
 		}
 		return mp.AsGeometry()
+	}
+}
+
+func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Polygon {
+	var polys []Polygon
+	for _, face := range d.faces {
+		if (face.label & extracted) != 0 {
+			continue
+		}
+		if !include(face.label) {
+			continue
+		}
+
+		// Find all faces that make up the polygon.
+		facesInPoly := findFacesMakingPolygon(include, face)
+
+		// Find all edge cycles incident to the faces. These are candidates to
+		// be part of the Polygon boundary.
+		var edges []*halfEdgeRecord
+		for _, f := range facesInPoly {
+			f.label |= extracted
+			if cmp := f.outerComponent; cmp != nil {
+				edges = append(edges, cmp)
+			}
+			edges = append(edges, f.innerComponents...)
+		}
+
+		// Extract the Polygon boundaries from the candidate edges.
+		var rings []LineString
+		seen := make(map[*halfEdgeRecord]bool)
+		for _, edge := range edges {
+			if seen[edge] {
+				continue
+			}
+			if include(edge.twin.incident.label) {
+				// Adjacent face is in the polygon, so this edge cannot be part
+				// of the boundary.
+				continue
+			}
+			seq := extractPolygonBoundary(include, edge, seen)
+			ring, err := NewLineString(seq)
+			if err != nil {
+				panic(fmt.Sprintf("could not create LineString: %v", err))
+			}
+			rings = append(rings, ring)
+		}
+
+		// Construct the polygon.
+		orderCCWRingFirst(rings)
+		poly, err := NewPolygonFromRings(rings)
+		if err != nil {
+			panic(fmt.Sprintf("could not create Polygon: %v", err))
+		}
+		polys = append(polys, poly)
+	}
+	return polys
+}
+
+func extractPolygonBoundary(include func(uint8) bool, start *halfEdgeRecord, seen map[*halfEdgeRecord]bool) Sequence {
+	var coords []float64
+	e := start
+	for {
+		seen[e] = true
+		xy := e.origin.coords
+		coords = append(coords, xy.X, xy.Y)
+
+		// Sweep through the edges around the vertex until we find the next
+		// edge that is part of the polygon boundary.
+		e = e.next
+		for include(e.twin.incident.label) {
+			e = e.twin.next
+		}
+
+		if e == start {
+			break
+		}
+	}
+
+	coords = append(coords, coords[:2]...)
+	return NewSequence(coords, DimXY)
+}
+
+// findFacesMakingPolygon finds all faces that belong to the polygon that
+// contains the start face (according to the given inclusion criteria).
+func findFacesMakingPolygon(include func(uint8) bool, start *faceRecord) []*faceRecord {
+	expanded := make(map[*faceRecord]bool)
+	toExpand := make(map[*faceRecord]bool)
+	toExpand[start] = true
+	pop := func() *faceRecord {
+		for f := range toExpand {
+			delete(toExpand, f)
+			return f
+		}
+		panic("could not pop")
+	}
+
+	for len(toExpand) > 0 {
+		popped := pop()
+		adj := adjacentFaces(popped)
+		expanded[popped] = true
+		for _, f := range adj {
+			if !include(f.label) {
+				continue
+			}
+			if expanded[f] {
+				continue
+			}
+			if toExpand[f] {
+				continue
+			}
+			toExpand[f] = true
+		}
+	}
+
+	list := make([]*faceRecord, 0, len(expanded))
+	for f := range expanded {
+		list = append(list, f)
+	}
+	return list
+}
+
+// orderCCWRingFirst reorders rings such that if it contains at least one CCW
+// ring, then a CCW ring is the first element.
+func orderCCWRingFirst(rings []LineString) {
+	for i, r := range rings {
+		if ccw := signedAreaOfLinearRing(r, nil) > 0; ccw {
+			rings[i], rings[0] = rings[0], rings[i]
+			return
+		}
 	}
 }
