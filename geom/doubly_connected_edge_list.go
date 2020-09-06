@@ -642,6 +642,9 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Po
 			}
 			rings = append(rings, ring)
 		}
+
+		// Construct the polygon.
+		orderCCWRingFirst(rings)
 		poly, err := NewPolygonFromRings(rings)
 		if err != nil {
 			panic(fmt.Sprintf("could not create Polygon: %v", err))
@@ -712,4 +715,15 @@ func findFacesMakingPolygon(include func(uint8) bool, start *faceRecord) []*face
 		list = append(list, f)
 	}
 	return list
+}
+
+// orderCCWRingFirst reorders rings such that if it contains at least one CCW
+// ring, then a CCW ring is the first element.
+func orderCCWRingFirst(rings []LineString) {
+	for i, r := range rings {
+		if ccw := signedAreaOfLinearRing(r, nil) > 0; ccw {
+			rings[i], rings[0] = rings[0], rings[i]
+			return
+		}
+	}
 }
