@@ -1,7 +1,5 @@
 package geom
 
-import "fmt"
-
 // Union returns a geometry that represents the parts that are common to either
 // geometry A or geometry B (or both).
 func Union(a, b Geometry) Geometry {
@@ -27,17 +25,31 @@ func SymmetricDifference(a, b Geometry) Geometry {
 }
 
 func binaryOp(a, b Geometry, include func(uint8) bool) Geometry {
-	if !a.IsPolygon() || !b.IsPolygon() {
-		// TODO: support all other input geometry types.
-		panic(fmt.Sprintf("binary op not implemented for types %s and %s", a.Type(), b.Type()))
-	}
-	polyA := a.AsPolygon()
-	polyB := b.AsPolygon()
+	dcelA := newDCELFromGeometry(a, inputAMask)
+	dcelB := newDCELFromGeometry(b, inputBMask)
 
-	dcelA := newDCELFromPolygon(polyA, inputAValue|inputAPresent)
-	dcelB := newDCELFromPolygon(polyB, inputBValue|inputBPresent)
-	dcelA.reNodeGraph(polyB)
-	dcelB.reNodeGraph(polyA)
+	var linesA []line
+	switch {
+	case a.IsPolygon():
+		linesA = a.AsPolygon().Boundary().asLines()
+	case a.IsMultiPolygon():
+		linesA = a.AsMultiPolygon().Boundary().asLines()
+	default:
+		panic("not supported")
+	}
+
+	var linesB []line
+	switch {
+	case b.IsPolygon():
+		linesB = b.AsPolygon().Boundary().asLines()
+	case b.IsMultiPolygon():
+		linesB = b.AsMultiPolygon().Boundary().asLines()
+	default:
+		panic("not supported")
+	}
+
+	dcelA.reNodeGraph(linesB)
+	dcelB.reNodeGraph(linesA)
 
 	dcelA.overlay(dcelB)
 	return dcelA.toGeometry(include)

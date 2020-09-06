@@ -98,6 +98,53 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "POLYGON EMPTY", // TODO: should this be GEOMETRYCOLLECTION EMPTY?
 			symDiff: "POLYGON((0 0,0 3,3 3,3 0,0 0),(1 1,2 1,2 2,1 2,1 1))",
 		},
+		{
+			/*
+			   +-----+
+			   | A   |
+			   |     |
+			   +-----+
+
+
+			   +-----------+
+			   | A         |
+			   |           |
+			   |     +-----+-----+
+			   |     | A&B |     |
+			   |     |     |     |
+			   +-----+-----+     |     +-----+
+			         |           |     | B   |
+			         |         B |     |     |
+			         +-----------+     +-----+
+			*/
+			input1:  "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 1,0 1)))",
+			input2:  "MULTIPOLYGON(((4 0,4 1,5 1,5 0,4 0)),((1 0,1 2,3 2,3 0,1 0)))",
+			union:   "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 2,3 2,3 0,1 0,1 1,0 1)),((4 0,4 1,5 1,5 0,4 0)))",
+			inter:   "POLYGON((2 2,2 1,1 1,1 2,2 2))",
+			fwdDiff: "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 2,1 2,1 1,0 1)))",
+			// TODO: reverse diff not giving correct result
+			//revDiff: "MULTIPOLYGON(((4 0,4 1,5 1,5 0,4 0)),((1 0,1 1,2 1,2 2,3 2,3 0,1 0)))",
+			symDiff: "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 2,1 2,1 1,0 1)),((1 1,2 1,2 2,3 2,3 0,1 0,1 1)),((4 0,4 1,5 1,5 0,4 0)))",
+		},
+		//{
+		//	/*
+		//	   +-----+-----+
+		//	   | B   | A   |
+		//	   |     |     |
+		//	   +-----+-----+
+		//	   | A   | B   |
+		//	   |     |     |
+		//	   +-----+-----+
+		//	*/
+		//	input1: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))",
+		//	input2: "MULTIPOLYGON(((0 1,0 2,1 2,1 1,0 1)),((1 0,1 1,2 1,2 0,1 0)))",
+		//	union:  "POLYGON((0 0,2 0,2 2,0 2,0 0))",
+		//	// TODO: We don't yet support linear output elements.
+		//	//inter:   "MULTILINESTRING((0 1,1 1),(1 1,1 0),(1 1,1 2),(2 1,1 1))",
+		//	fwdDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))",
+		//	revDiff: "MULTIPOLYGON(((0 1,0 2,1 2,1 1,0 1)),((1 0,1 1,2 1,2 0,1 0)))",
+		//	symDiff: "POLYGON((0 0,0 1,0 2,1 2,2 2,2 1,2 0,1 0,0 0))",
+		//},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
