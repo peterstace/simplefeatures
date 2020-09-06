@@ -14,6 +14,8 @@ const (
 
 	inputAMask uint8 = 0b0011
 	inputBMask uint8 = 0b1100
+
+	extracted uint8 = 0b010000
 )
 
 func assertPresenceBits(label uint8) {

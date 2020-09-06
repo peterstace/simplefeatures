@@ -434,6 +434,7 @@ func (d *doublyConnectedEdgeList) completePartialFaceLabel(face *faceRecord) {
 	}
 }
 
+// adjacentFaces finds all of the faces that adjacent to f.
 func adjacentFaces(f *faceRecord) []*faceRecord {
 	set := make(map[*faceRecord]struct{})
 	if cmp := f.outerComponent; cmp != nil {
@@ -579,54 +580,11 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 	s.sets = append(s.sets, append(set1, set2...))
 }
 
-func (d *doublyConnectedEdgeList) toPolygon(include func(uint8) bool) Geometry {
-	seen := make(map[*halfEdgeRecord]bool)
-	var polys []Polygon
-	for _, edge := range d.halfEdges {
-		if seen[edge] {
-			continue
-		}
-
-		// If the edge doesn't form the boundary of the region we are
-		// interested in, then we can ignore it.
-		if !include(edge.incident.label) || include(edge.twin.incident.label) {
-			continue
-		}
-
-		var coords []float64
-		e := edge
-		for {
-			xy := e.origin.coords
-			coords = append(coords, xy.X, xy.Y)
-
-			seen[e] = true
-
-			e = e.next
-
-			// Sweep through the edges around the vertex until we find the next
-			// edge that is part of the polygon boundary.
-			for include(e.twin.incident.label) {
-				e = e.twin.next
-			}
-
-			if e == edge {
-				break
-			}
-		}
-
-		coords = append(coords, coords[:2]...)
-		seq := NewSequence(coords, DimXY)
-		ls, err := NewLineString(seq)
-		if err != nil {
-			panic(fmt.Sprintf("could not create LineString: %v", err))
-		}
-		poly, err := NewPolygonFromRings([]LineString{ls})
-		if err != nil {
-			panic(fmt.Sprintf("could not create Polygon: %v", err))
-		}
-		polys = append(polys, poly)
-	}
-
+// toGeometry extracts geometries from the DCEL.
+//
+// TODO: extract geometries other than Polygons and MultiPolygons.
+func (d *doublyConnectedEdgeList) toGeometry(include func(uint8) bool) Geometry {
+	polys := d.extractPolygons(include)
 	switch len(polys) {
 	case 0:
 		return Polygon{}.AsGeometry()
@@ -639,4 +597,119 @@ func (d *doublyConnectedEdgeList) toPolygon(include func(uint8) bool) Geometry {
 		}
 		return mp.AsGeometry()
 	}
+}
+
+func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Polygon {
+	var polys []Polygon
+	for _, face := range d.faces {
+		if (face.label & extracted) != 0 {
+			continue
+		}
+		if !include(face.label) {
+			continue
+		}
+
+		// Find all faces that make up the polygon.
+		facesInPoly := findFacesMakingPolygon(include, face)
+
+		// Find all edge cycles incident to the faces. These are candidates to
+		// be part of the Polygon boundary.
+		var edges []*halfEdgeRecord
+		for _, f := range facesInPoly {
+			f.label |= extracted
+			if cmp := f.outerComponent; cmp != nil {
+				edges = append(edges, cmp)
+			}
+			edges = append(edges, f.innerComponents...)
+		}
+
+		// Extract the Polygon boundaries from the candidate edges.
+		var rings []LineString
+		seen := make(map[*halfEdgeRecord]bool)
+		for _, edge := range edges {
+			if seen[edge] {
+				continue
+			}
+			if include(edge.twin.incident.label) {
+				// Adjacent face is in the polygon, so this edge cannot be part
+				// of the boundary.
+				continue
+			}
+			seq := extractPolygonBoundary(include, edge, seen)
+			ring, err := NewLineString(seq)
+			if err != nil {
+				panic(fmt.Sprintf("could not create LineString: %v", err))
+			}
+			rings = append(rings, ring)
+		}
+		poly, err := NewPolygonFromRings(rings)
+		if err != nil {
+			panic(fmt.Sprintf("could not create Polygon: %v", err))
+		}
+		polys = append(polys, poly)
+	}
+	return polys
+}
+
+func extractPolygonBoundary(include func(uint8) bool, start *halfEdgeRecord, seen map[*halfEdgeRecord]bool) Sequence {
+	var coords []float64
+	e := start
+	for {
+		seen[e] = true
+		xy := e.origin.coords
+		coords = append(coords, xy.X, xy.Y)
+
+		// Sweep through the edges around the vertex until we find the next
+		// edge that is part of the polygon boundary.
+		e = e.next
+		for include(e.twin.incident.label) {
+			e = e.twin.next
+		}
+
+		if e == start {
+			break
+		}
+	}
+
+	coords = append(coords, coords[:2]...)
+	return NewSequence(coords, DimXY)
+}
+
+// findFacesMakingPolygon finds all faces that belong to the polygon that
+// contains the start face (according to the given inclusion criteria).
+func findFacesMakingPolygon(include func(uint8) bool, start *faceRecord) []*faceRecord {
+	expanded := make(map[*faceRecord]bool)
+	toExpand := make(map[*faceRecord]bool)
+	toExpand[start] = true
+	pop := func() *faceRecord {
+		for f := range toExpand {
+			delete(toExpand, f)
+			return f
+		}
+		panic("could not pop")
+	}
+
+	for len(toExpand) > 0 {
+		popped := pop()
+		adj := adjacentFaces(popped)
+		expanded[popped] = true
+		for _, f := range adj {
+			if !include(f.label) {
+				continue
+			}
+			if expanded[f] {
+				continue
+			}
+			if toExpand[f] {
+				continue
+			}
+			toExpand[f] = true
+		}
+	}
+
+	list := make([]*faceRecord, 0, len(expanded))
+	for f := range expanded {
+		list = append(list, f)
+	}
+	return list
 }

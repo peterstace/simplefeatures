@@ -40,5 +40,5 @@ func binaryOp(a, b Geometry, include func(uint8) bool) Geometry {
 	dcelB.reNodeGraph(polyA)
 
 	dcelA.overlay(dcelB)
-	return dcelA.toPolygon(include)
+	return dcelA.toGeometry(include)
 }
