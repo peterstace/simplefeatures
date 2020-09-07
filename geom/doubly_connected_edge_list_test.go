@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -789,6 +790,110 @@ func TestGraphOverlayInside(t *testing.T) {
 	eqUint8(t, f0.label, inputAPresent|inputBPresent)
 	eqUint8(t, f1.label, inputAPresent|inputBPresent|inputAValue)
 	eqUint8(t, f2.label, inputAPresent|inputBPresent|inputAValue|inputBValue)
+}
+
+func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
+	polyA, err := UnmarshalWKT("MULTIPOLYGON(((4 0,4 1,5 1,5 0,4 0)),((1 0,1 2,3 2,3 0,1 0)))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelA := newDCELFromGeometry(polyA, inputAMask)
+
+	polyB, err := UnmarshalWKT("MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 1,0 1)))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelB := newDCELFromGeometry(polyB, inputBMask)
+
+	dcelA.reNodeGraph(polyB.AsMultiPolygon().Boundary().asLines())
+	dcelB.reNodeGraph(polyA.AsMultiPolygon().Boundary().asLines())
+
+	dcelA.overlay(dcelB)
+
+	/*
+	  v16---v15
+	   | f2  |
+	   |     |
+	  v13---v14
+
+
+	  v12---------v11
+	   |  f4       |
+	   |           |
+	   |    v4----v18----v3
+	   |     | f5  |     |    f0
+	   |     |     |     |
+	  v9----v17---v10    |    v8-----v7
+	         |           |     | f1  |
+	         |  f3       |     |     |
+	   o    v1-----------v2   v5-----v6
+	*/
+
+	v1 := XY{1, 0}
+	v2 := XY{3, 0}
+	v3 := XY{3, 2}
+	v4 := XY{1, 2}
+	v5 := XY{4, 0}
+	v6 := XY{5, 0}
+	v7 := XY{5, 1}
+	v8 := XY{4, 1}
+	v9 := XY{0, 1}
+	v10 := XY{2, 1}
+	v11 := XY{2, 3}
+	v12 := XY{0, 3}
+	v13 := XY{0, 4}
+	v14 := XY{1, 4}
+	v15 := XY{1, 5}
+	v16 := XY{0, 5}
+	v17 := XY{1, 1}
+	v18 := XY{2, 2}
+
+	eqInt(t, len(dcelA.vertices), 18)
+	eqInt(t, len(dcelA.halfEdges), 40)
+
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v5, v6), []XY{v5, v6, v7, v8})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v1, v2), []XY{v1, v2, v3, v18, v10, v17})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v17, v10), []XY{v17, v10, v18, v4})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v9, v17), []XY{v9, v17, v4, v18, v11, v12})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v13, v14), []XY{v13, v14, v15, v16})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v6, v5), []XY{v6, v5, v8, v7})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v14, v13), []XY{v14, v13, v16, v15})
+	CheckHalfEdgeLoop(t, findEdge(t, dcelA, v2, v1), []XY{v1, v17, v9, v12, v11, v18, v3, v2})
+
+	eqInt(t, len(dcelA.faces), 6)
+	// TODO: trial and error was used to find the right permutation of face
+	// labels. It relies on the permutation being stable. There is probably a
+	// better way to test this.
+	f0 := dcelA.faces[5]
+	f1 := dcelA.faces[3]
+	f2 := dcelA.faces[1]
+	f3 := dcelA.faces[4]
+	f4 := dcelA.faces[0]
+	f5 := dcelA.faces[2]
+	CheckFaceComponents(t, f0, nil,
+		[]XY{v14, v13, v16, v15},
+		[]XY{v6, v5, v8, v7},
+		[]XY{v1, v17, v9, v12, v11, v18, v3, v2},
+	)
+	CheckFaceComponents(t, f1, []XY{v5, v6, v7, v8})
+	CheckFaceComponents(t, f2, []XY{v13, v14, v15, v16})
+	CheckFaceComponents(t, f3, []XY{v1, v2, v3, v18, v10, v17})
+	CheckFaceComponents(t, f4, []XY{v12, v9, v17, v4, v18, v11})
+	CheckFaceComponents(t, f5, []XY{v17, v10, v18, v4})
+
+	eqUint8(t, f0.label, inputBPresent|inputAPresent)
+	eqUint8(t, f1.label, inputBPresent|inputAPresent|inputAValue)
+	eqUint8(t, f2.label, inputBPresent|inputAPresent|inputBValue)
+	eqUint8(t, f3.label, inputBPresent|inputAPresent|inputAValue)
+	eqUint8(t, f4.label, inputBPresent|inputAPresent|inputBValue)
+	eqUint8(t, f5.label, inputBPresent|inputAPresent|inputBValue|inputAValue)
+
+	// This shows that the problem _doesn't_ exist.
+	fmt.Println("===")
+	for i, face := range dcelA.faces {
+		fmt.Printf("face %d: %p outerComponent:%p innerComponents:%v\n", i, face, face.outerComponent, face.innerComponents)
+	}
+	fmt.Println("===")
 }
 
 func eqInt(t *testing.T, i1, i2 int) {
