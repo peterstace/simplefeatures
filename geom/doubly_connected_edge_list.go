@@ -646,30 +646,27 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Po
 			components = append(components, f.innerComponents...)
 		}
 
-		// Extract candidate edges from the edge cycles.
-		var candidates []*halfEdgeRecord
-		for _, cmp := range components {
-			forEachEdge(cmp, func(e *halfEdgeRecord) { candidates = append(candidates, e) })
-		}
-
 		// Extract the Polygon boundaries from the candidate edges.
 		var rings []LineString
 		seen := make(map[*halfEdgeRecord]bool)
-		for _, edge := range candidates {
-			if seen[edge] {
-				continue
-			}
-			if include(edge.twin.incident.label) {
-				// Adjacent face is in the polygon, so this edge cannot be part
-				// of the boundary.
-				continue
-			}
-			seq := extractPolygonBoundary(include, edge, seen)
-			ring, err := NewLineString(seq)
-			if err != nil {
-				panic(fmt.Sprintf("could not create LineString: %v", err))
-			}
-			rings = append(rings, ring)
+		for _, cmp := range components {
+			forEachEdge(cmp, func(edge *halfEdgeRecord) {
+				if seen[edge] {
+					return
+				}
+				if include(edge.twin.incident.label) {
+					// Adjacent face is in the polygon, so this edge cannot be part
+					// of the boundary.
+					seen[edge] = true
+					return
+				}
+				seq := extractPolygonBoundary(include, edge, seen)
+				ring, err := NewLineString(seq)
+				if err != nil {
+					panic(fmt.Sprintf("could not create LineString: %v", err))
+				}
+				rings = append(rings, ring)
+			})
 		}
 
 		// Construct the polygon.
