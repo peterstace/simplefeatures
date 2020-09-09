@@ -30,113 +30,132 @@ type vertexRecord struct {
 	incident *halfEdgeRecord
 }
 
-func newDCELFromPolygon(poly Polygon, mask uint8) *doublyConnectedEdgeList {
-	poly = poly.ForceCCW()
+func newDCELFromGeometry(g Geometry, mask uint8) *doublyConnectedEdgeList {
+	switch g.Type() {
+	case TypePolygon:
+		poly := g.AsPolygon()
+		return newDCELFromMultiPolygon(poly.AsMultiPolygon(), mask)
+	case TypeMultiPolygon:
+		mp := g.AsMultiPolygon()
+		return newDCELFromMultiPolygon(mp, mask)
+	default:
+		// TODO: support all other input geometry types.
+		panic(fmt.Sprintf("binary op not implemented for type %s", g.Type()))
+	}
+}
+
+func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeList {
+	mp = mp.ForceCCW()
 
 	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
-
-	// Extract rings.
-	rings := make([]Sequence, 1+poly.NumInteriorRings())
-	rings[0] = poly.ExteriorRing().Coordinates()
-	for i := 0; i < poly.NumInteriorRings(); i++ {
-		rings[i+1] = poly.InteriorRingN(i).Coordinates()
-	}
-
-	// Populate vertices.
-	for _, ring := range rings {
-		for i := 0; i < ring.Length(); i++ {
-			xy := ring.GetXY(i)
-			if _, ok := dcel.vertices[xy]; !ok {
-				dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */}
-			}
-		}
-	}
 
 	infFace := &faceRecord{
 		outerComponent:  nil, // left nil
 		innerComponents: nil, // populated later
 		label:           presenceMask & mask,
 	}
-	polyFace := &faceRecord{
-		outerComponent:  nil, // populated later
-		innerComponents: nil, // populated later
-		label:           mask,
-	}
-	dcel.faces = append(dcel.faces, infFace, polyFace)
+	dcel.faces = append(dcel.faces, infFace)
 
-	for ringIdx, ring := range rings {
-		interiorFace := polyFace
-		exteriorFace := infFace
-		if ringIdx > 0 {
-			holeFace := &faceRecord{
-				outerComponent:  nil, // left nil
-				innerComponents: nil, // populated later
-				label:           presenceMask & mask,
-			}
-			// For inner rings, the exterior face is a hole rather than the
-			// infinite face.
-			exteriorFace = holeFace
-			dcel.faces = append(dcel.faces, exteriorFace)
+	for polyIdx := 0; polyIdx < mp.NumPolygons(); polyIdx++ {
+		poly := mp.PolygonN(polyIdx)
+
+		// Extract rings.
+		rings := make([]Sequence, 1+poly.NumInteriorRings())
+		rings[0] = poly.ExteriorRing().Coordinates()
+		for i := 0; i < poly.NumInteriorRings(); i++ {
+			rings[i+1] = poly.InteriorRingN(i).Coordinates()
 		}
 
-		var newEdges []*halfEdgeRecord
-		first := true
-		for i := 0; i < ring.Length(); i++ {
-			ln, ok := getLine(ring, i)
-			if !ok {
-				continue
-			}
-			internalEdge := &halfEdgeRecord{
-				origin:   dcel.vertices[ln.a],
-				twin:     nil, // populated later
-				incident: interiorFace,
-				next:     nil, // populated later
-				prev:     nil, // populated later
-			}
-			externalEdge := &halfEdgeRecord{
-				origin:   dcel.vertices[ln.b],
-				twin:     internalEdge,
-				incident: exteriorFace,
-				next:     nil, // populated later
-				prev:     nil, // populated later
-			}
-			internalEdge.twin = externalEdge
-			dcel.vertices[ln.a].incident = internalEdge
-			newEdges = append(newEdges, internalEdge, externalEdge)
-
-			// Set interior/exterior face linkage.
-			if first {
-				// TODO: The logic here feels awkward. The might be a more general way to do this.
-				first = false
-				if ringIdx == 0 {
-					exteriorFace.innerComponents = append(exteriorFace.innerComponents, externalEdge)
-					if interiorFace.outerComponent == nil {
-						interiorFace.outerComponent = internalEdge
-					}
-				} else {
-					interiorFace.innerComponents = append(interiorFace.innerComponents, internalEdge)
-					if exteriorFace.outerComponent == nil {
-						exteriorFace.outerComponent = externalEdge
-					}
+		// Populate vertices.
+		for _, ring := range rings {
+			for i := 0; i < ring.Length(); i++ {
+				xy := ring.GetXY(i)
+				if _, ok := dcel.vertices[xy]; !ok {
+					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */}
 				}
 			}
 		}
 
-		numEdges := len(newEdges)
-		for i := 0; i < numEdges/2; i++ {
-			newEdges[i*2].next = newEdges[(2*i+2)%numEdges]
-			newEdges[i*2+1].next = newEdges[(i*2-1+numEdges)%numEdges]
-			newEdges[i*2].prev = newEdges[(2*i-2+numEdges)%numEdges]
-			newEdges[i*2+1].prev = newEdges[(2*i+3)%numEdges]
+		polyFace := &faceRecord{
+			outerComponent:  nil, // populated later
+			innerComponents: nil, // populated later
+			label:           mask,
 		}
-		dcel.halfEdges = append(dcel.halfEdges, newEdges...)
-	}
+		dcel.faces = append(dcel.faces, polyFace)
 
+		for ringIdx, ring := range rings {
+			interiorFace := polyFace
+			exteriorFace := infFace
+			if ringIdx > 0 {
+				holeFace := &faceRecord{
+					outerComponent:  nil, // left nil
+					innerComponents: nil, // populated later
+					label:           presenceMask & mask,
+				}
+				// For inner rings, the exterior face is a hole rather than the
+				// infinite face.
+				exteriorFace = holeFace
+				dcel.faces = append(dcel.faces, exteriorFace)
+			}
+
+			var newEdges []*halfEdgeRecord
+			first := true
+			for i := 0; i < ring.Length(); i++ {
+				ln, ok := getLine(ring, i)
+				if !ok {
+					continue
+				}
+				internalEdge := &halfEdgeRecord{
+					origin:   dcel.vertices[ln.a],
+					twin:     nil, // populated later
+					incident: interiorFace,
+					next:     nil, // populated later
+					prev:     nil, // populated later
+				}
+				externalEdge := &halfEdgeRecord{
+					origin:   dcel.vertices[ln.b],
+					twin:     internalEdge,
+					incident: exteriorFace,
+					next:     nil, // populated later
+					prev:     nil, // populated later
+				}
+				internalEdge.twin = externalEdge
+				dcel.vertices[ln.a].incident = internalEdge
+				newEdges = append(newEdges, internalEdge, externalEdge)
+
+				// Set interior/exterior face linkage.
+				if first {
+					// TODO: The logic here feels awkward. The might be a more general way to do this.
+					first = false
+					if ringIdx == 0 {
+						exteriorFace.innerComponents = append(exteriorFace.innerComponents, externalEdge)
+						if interiorFace.outerComponent == nil {
+							interiorFace.outerComponent = internalEdge
+						}
+					} else {
+						interiorFace.innerComponents = append(interiorFace.innerComponents, internalEdge)
+						if exteriorFace.outerComponent == nil {
+							exteriorFace.outerComponent = externalEdge
+						}
+					}
+				}
+			}
+
+			numEdges := len(newEdges)
+			for i := 0; i < numEdges/2; i++ {
+				newEdges[i*2].next = newEdges[(2*i+2)%numEdges]
+				newEdges[i*2+1].next = newEdges[(i*2-1+numEdges)%numEdges]
+				newEdges[i*2].prev = newEdges[(2*i-2+numEdges)%numEdges]
+				newEdges[i*2+1].prev = newEdges[(2*i+3)%numEdges]
+			}
+			dcel.halfEdges = append(dcel.halfEdges, newEdges...)
+		}
+	}
 	return dcel
 }
 
-func (d *doublyConnectedEdgeList) reNodeGraph(other Polygon) {
-	indexed := newIndexedLines(other.Boundary().asLines())
+func (d *doublyConnectedEdgeList) reNodeGraph(other []line) {
+	indexed := newIndexedLines(other)
 	for _, face := range d.faces {
 		d.reNodeFace(face, indexed)
 	}
@@ -400,7 +419,6 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 			}
 		}
 	}
-
 	for _, face := range d.faces {
 		d.completePartialFaceLabel(face)
 	}
@@ -500,8 +518,13 @@ func (d *doublyConnectedEdgeList) findNextDownEdgeToTheLeft(edge *halfEdgeRecord
 		destin := e.next.origin.coords
 		pt := edge.origin.coords
 		if !(destin.Y <= pt.Y && pt.Y <= origin.Y) {
-			// We only want to consider edges that go "down" and overlap
-			// vertically with pt.
+			// We only want to consider edges that go "down" (or horizontal)
+			// and overlap vertically with pt.
+			continue
+		}
+		if origin.Y == destin.Y && origin.X < destin.X {
+			// For horizontal lines, we only want to consider edges that go
+			// from the right to the left.
 			continue
 		}
 		ln := line{origin, destin}
@@ -580,10 +603,10 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 	s.sets = append(s.sets, append(set1, set2...))
 }
 
-// toGeometry extracts geometries from the DCEL.
+// extractGeometry converts the DECL into a Geometry that represents it.
 //
 // TODO: extract geometries other than Polygons and MultiPolygons.
-func (d *doublyConnectedEdgeList) toGeometry(include func(uint8) bool) Geometry {
+func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geometry {
 	polys := d.extractPolygons(include)
 	switch len(polys) {
 	case 0:
@@ -612,35 +635,38 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Po
 		// Find all faces that make up the polygon.
 		facesInPoly := findFacesMakingPolygon(include, face)
 
-		// Find all edge cycles incident to the faces. These are candidates to
-		// be part of the Polygon boundary.
-		var edges []*halfEdgeRecord
+		// Find all edge cycles incident to the faces. Edges in these cycles
+		// are are candidates to be part of the Polygon boundary.
+		var components []*halfEdgeRecord
 		for _, f := range facesInPoly {
 			f.label |= extracted
 			if cmp := f.outerComponent; cmp != nil {
-				edges = append(edges, cmp)
+				components = append(components, cmp)
 			}
-			edges = append(edges, f.innerComponents...)
+			components = append(components, f.innerComponents...)
 		}
 
 		// Extract the Polygon boundaries from the candidate edges.
 		var rings []LineString
 		seen := make(map[*halfEdgeRecord]bool)
-		for _, edge := range edges {
-			if seen[edge] {
-				continue
-			}
-			if include(edge.twin.incident.label) {
-				// Adjacent face is in the polygon, so this edge cannot be part
-				// of the boundary.
-				continue
-			}
-			seq := extractPolygonBoundary(include, edge, seen)
-			ring, err := NewLineString(seq)
-			if err != nil {
-				panic(fmt.Sprintf("could not create LineString: %v", err))
-			}
-			rings = append(rings, ring)
+		for _, cmp := range components {
+			forEachEdge(cmp, func(edge *halfEdgeRecord) {
+				if seen[edge] {
+					return
+				}
+				if include(edge.twin.incident.label) {
+					// Adjacent face is in the polygon, so this edge cannot be part
+					// of the boundary.
+					seen[edge] = true
+					return
+				}
+				seq := extractPolygonBoundary(include, edge, seen)
+				ring, err := NewLineString(seq)
+				if err != nil {
+					panic(fmt.Sprintf("could not create LineString: %v", err))
+				}
+				rings = append(rings, ring)
+			})
 		}
 
 		// Construct the polygon.
