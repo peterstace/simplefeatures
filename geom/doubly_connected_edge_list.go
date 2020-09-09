@@ -260,13 +260,6 @@ func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 	d.overlayEdges(other)
 	d.fixVertices()
 	d.reAssignFaces()
-
-	// // This exhibits the problem -- we have an inner component where we shouldn't
-	// fmt.Println("+++")
-	// for i, face := range d.faces {
-	// 	fmt.Printf("face %d: %p label:%b outerComponent:%p innerComponents:%v\n", i, face, face.label, face.outerComponent, face.innerComponents)
-	// }
-	// fmt.Println("+++")
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -363,8 +356,6 @@ func (d *doublyConnectedEdgeList) fixVertex(v XY) {
 // reAssignFaces clears the DCEL face list and creates new faces based on the
 // half edge loops.
 func (d *doublyConnectedEdgeList) reAssignFaces() {
-	//fmt.Println("START reAssignFaces")
-	//defer fmt.Println("END reAssignFaces")
 	// Find all boundary cycles, and categorise them as either outer components
 	// or inner components.
 	var innerComponents, outerComponents []*halfEdgeRecord
@@ -384,10 +375,6 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 		})
 	}
 
-	// // Looks OK, 5 inner and 3 outer components.
-	// fmt.Printf(" +outerComponents:%v\n", outerComponents)
-	// fmt.Printf(" +innerComponents:%v\n", innerComponents)
-
 	// Group together boundary cycles that are for the same face.
 	var graph disjointEdgeSet
 	for _, e := range innerComponents {
@@ -398,13 +385,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 	}
 	graph.addSingleton(nil) // nil represents the outer component of the infinite face
 
-	//fmt.Printf(" +graph(singletons):%v\n", graph)
-
 	for _, leftmostLowest := range innerComponents {
-		// !!!
-		// TODO: The problem is when this function is called with edge (v5,v8),
-		// the result is (v1,v2). It should instead be (v2, v1).
-		// !!!
 		nextLeft := d.findNextDownEdgeToTheLeft(leftmostLowest)
 		if nextLeft != nil {
 			// When there is no next left edge, then this indicates that the
@@ -412,12 +393,9 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 			// In this case, we *don't* want to find the lowest (or leftmost
 			// for tie) edge, since there is no actual loop.
 			nextLeft = edgeLoopLeftmostLowest(nextLeft)
-			//fmt.Printf("  + canonicalized %v -> %v (%p)\n", nextLeft.origin.coords, nextLeft.next.origin.coords, nextLeft)
 		}
 		graph.union(leftmostLowest, nextLeft)
 	}
-
-	//fmt.Printf(" +graph(calculated):%v\n", graph)
 
 	// Construct new faces.
 	d.faces = nil
@@ -440,11 +418,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 				})
 			}
 		}
-
-		// // This shows the problem of too many inner components.
-		// fmt.Printf(" +constructed face %p outerComponent:%p innerComponents:%v\n", f, f.outerComponent, f.innerComponents)
 	}
-
 	for _, face := range d.faces {
 		d.completePartialFaceLabel(face)
 	}
@@ -480,20 +454,14 @@ func (d *doublyConnectedEdgeList) completePartialFaceLabel(face *faceRecord) {
 
 // adjacentFaces finds all of the faces that adjacent to f.
 func adjacentFaces(f *faceRecord) []*faceRecord {
-	//fmt.Println("       adjacentFaces")
-	//fmt.Printf("        f %p\n", f)
-	//fmt.Printf("        outerComponent:%p innerComponents:%v \n", f.outerComponent, f.innerComponents)
 	set := make(map[*faceRecord]struct{})
 	if cmp := f.outerComponent; cmp != nil {
 		forEachEdge(cmp, func(e *halfEdgeRecord) {
-			//fmt.Printf("        e %v -> %v\n", e.origin.coords, e.next.origin.coords)
 			set[e.twin.incident] = struct{}{}
-			//fmt.Printf("        twin %p\n", e.twin.incident)
 		})
 	}
 	for _, cmp := range f.innerComponents {
 		forEachEdge(cmp, func(e *halfEdgeRecord) {
-			//fmt.Printf("        here\n")
 			set[e.twin.incident] = struct{}{}
 		})
 	}
@@ -542,8 +510,6 @@ func edgeLoopIsOuterComponent(leftmostLowest *halfEdgeRecord) bool {
 }
 
 func (d *doublyConnectedEdgeList) findNextDownEdgeToTheLeft(edge *halfEdgeRecord) *halfEdgeRecord {
-	//fmt.Printf("  +START findNextDownEdgeToTheLeft %v -> %v (%p)\n", edge.origin.coords, edge.next.origin.coords, edge)
-
 	var bestEdge *halfEdgeRecord
 	var bestDist float64
 
@@ -573,11 +539,6 @@ func (d *doublyConnectedEdgeList) findNextDownEdgeToTheLeft(edge *halfEdgeRecord
 			bestDist = dist
 		}
 	}
-	//if bestEdge != nil {
-	//	fmt.Printf("  +END findNextDownEdgeToTheLeft %v -> %v (%p)\n", bestEdge.origin.coords, bestEdge.next.origin.coords, bestEdge)
-	//} else {
-	//	fmt.Printf("  +END findNextDownEdgeToTheLeft nil\n")
-	//}
 	return bestEdge
 }
 
@@ -663,22 +624,17 @@ func (d *doublyConnectedEdgeList) toGeometry(include func(uint8) bool) Geometry 
 }
 
 func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Polygon {
-	fmt.Println("extractPolygons")
 	var polys []Polygon
 	for _, face := range d.faces {
-		fmt.Printf(" iter face:%p label:%b\n", face, face.label)
 		if (face.label & extracted) != 0 {
-			fmt.Println("  already extracted")
 			continue
 		}
 		if !include(face.label) {
-			fmt.Println("  face not included")
 			continue
 		}
 
 		// Find all faces that make up the polygon.
 		facesInPoly := findFacesMakingPolygon(include, face)
-		fmt.Printf("  facesInPoly:%v\n", facesInPoly)
 
 		// Find all edge cycles incident to the faces. Edges in these cycles
 		// are are candidates to be part of the Polygon boundary.
@@ -724,7 +680,6 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Po
 			panic(fmt.Sprintf("could not create Polygon: %v", err))
 		}
 		polys = append(polys, poly)
-		fmt.Println("  created polygon", poly.AsText())
 	}
 	return polys
 }
@@ -756,7 +711,6 @@ func extractPolygonBoundary(include func(uint8) bool, start *halfEdgeRecord, see
 // findFacesMakingPolygon finds all faces that belong to the polygon that
 // contains the start face (according to the given inclusion criteria).
 func findFacesMakingPolygon(include func(uint8) bool, start *faceRecord) []*faceRecord {
-	//fmt.Println("   findFacesMakingPolygon")
 	expanded := make(map[*faceRecord]bool)
 	toExpand := make(map[*faceRecord]bool)
 	toExpand[start] = true
@@ -769,32 +723,21 @@ func findFacesMakingPolygon(include func(uint8) bool, start *faceRecord) []*face
 	}
 
 	for len(toExpand) > 0 {
-		//fmt.Println("    iter")
 		popped := pop()
-		//fmt.Printf("     popped %p\n", popped)
 		adj := adjacentFaces(popped)
-		//fmt.Printf("     adjacent %v\n", adj)
 		expanded[popped] = true
-		//fmt.Printf("     state_before_loop toExpand:%v expanded:%v\n", toExpand, expanded)
 		for _, f := range adj {
-			//fmt.Println("     iter")
-			//fmt.Printf("      face %p\n", f)
 			if !include(f.label) {
-				//fmt.Println("      continue (not included)")
 				continue
 			}
 			if expanded[f] {
-				//fmt.Println("      continue (already expanded)")
 				continue
 			}
 			if toExpand[f] {
-				//fmt.Println("      continue (already in pending expand list)")
 				continue
 			}
 			toExpand[f] = true
-			//fmt.Println("      add to toExpand")
 		}
-		//fmt.Printf("     state_after_loop  toExpand:%v expanded:%v\n", toExpand, expanded)
 	}
 
 	list := make([]*faceRecord, 0, len(expanded))
