@@ -10,14 +10,14 @@ import (
 // Results for the following tests can be found using the following style of
 // SQL query:
 //
-// WITH CONST AS (
+// WITH const AS (
 //   SELECT
 //     ST_GeomFromText('POLYGON((0 0,1 2,2 0,0 0))') AS input1,
 //     ST_GeomFromText('POLYGON((0 1,2 1,1 3,0 1))') AS input2
 // )
 // SELECT
-//   ST_AsText(input1) AS input2,
-//   ST_AsText(input2) AS input1,
+//   ST_AsText(input1) AS input1,
+//   ST_AsText(input2) AS input2,
 //   ST_AsText(ST_Union(input1, input2)) AS union,
 //   ST_AsText(ST_Intersection(input1, input2)) AS inter,
 //   ST_AsText(ST_Difference(input1, input2)) AS fwd_diff,
