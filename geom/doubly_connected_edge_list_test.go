@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -887,13 +886,6 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 	eqUint8(t, f3.label, inputBPresent|inputAPresent|inputAValue)
 	eqUint8(t, f4.label, inputBPresent|inputAPresent|inputBValue)
 	eqUint8(t, f5.label, inputBPresent|inputAPresent|inputBValue|inputAValue)
-
-	// This shows that the problem _doesn't_ exist.
-	fmt.Println("===")
-	for i, face := range dcelA.faces {
-		fmt.Printf("face %d: %p outerComponent:%p innerComponents:%v\n", i, face, face.outerComponent, face.innerComponents)
-	}
-	fmt.Println("===")
 }
 
 func eqInt(t *testing.T, i1, i2 int) {
