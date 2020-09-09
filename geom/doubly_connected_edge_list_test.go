@@ -407,22 +407,6 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 	eqUint8(t, f2.label, inputBPresent|inputBValue)
 }
 
-func TestGraphWithMultiPolygonWeirdCycle(t *testing.T) {
-	// TODO: Write a test that looks like this.
-	// It's not too clear to me whether the infinite face should have a single
-	// inner boundary or multiple inner boundaries. I'm leaning towards it
-	// having a single inner boundary.
-	/*
-	        v6-----v5
-	     f0  | f2  |
-	         |     |
-	  v3-----v2----v4
-	   | f1  |
-	   |     |
-	  v0-----v1
-	*/
-}
-
 func TestGraphReNode(t *testing.T) {
 	poly, err := UnmarshalWKT("POLYGON((0 0,2 0,1 2,0 0))")
 	if err != nil {
