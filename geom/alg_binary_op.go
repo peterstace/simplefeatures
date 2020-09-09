@@ -28,29 +28,22 @@ func binaryOp(a, b Geometry, include func(uint8) bool) Geometry {
 	dcelA := newDCELFromGeometry(a, inputAMask)
 	dcelB := newDCELFromGeometry(b, inputBMask)
 
-	var linesA []line
-	switch {
-	case a.IsPolygon():
-		linesA = a.AsPolygon().Boundary().asLines()
-	case a.IsMultiPolygon():
-		linesA = a.AsMultiPolygon().Boundary().asLines()
-	default:
-		panic("not supported")
-	}
-
-	var linesB []line
-	switch {
-	case b.IsPolygon():
-		linesB = b.AsPolygon().Boundary().asLines()
-	case b.IsMultiPolygon():
-		linesB = b.AsMultiPolygon().Boundary().asLines()
-	default:
-		panic("not supported")
-	}
-
+	linesA := geometryToLines(a)
+	linesB := geometryToLines(b)
 	dcelA.reNodeGraph(linesB)
 	dcelB.reNodeGraph(linesA)
 
 	dcelA.overlay(dcelB)
 	return dcelA.toGeometry(include)
+}
+
+func geometryToLines(g Geometry) []line {
+	switch g.Type() {
+	case TypePolygon:
+		return g.AsPolygon().Boundary().asLines()
+	case TypeMultiPolygon:
+		return g.AsMultiPolygon().Boundary().asLines()
+	default:
+		panic("not supported")
+	}
 }
