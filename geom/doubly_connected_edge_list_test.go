@@ -1,8 +1,69 @@
 package geom
 
 import (
+	"fmt"
 	"testing"
 )
+
+type DCELSpec struct {
+	NumVerts int
+	NumEdges int
+	NumFaces int
+	Faces    []FaceSpec
+}
+
+type FaceSpec struct {
+	// Origin and destination of an edge that is incident to the face.
+	EdgeOrigin      XY
+	EdgeDestin      XY
+	OuterComponent  []XY
+	InnerComponents [][]XY
+	Label           uint8
+}
+
+func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
+	t.Helper()
+	if spec.NumVerts != len(dcel.vertices) {
+		t.Fatalf("verticies: want=%d got=%d", spec.NumVerts, len(dcel.vertices))
+	}
+	if spec.NumEdges != len(dcel.halfEdges) {
+		t.Fatalf("edges: want=%d got=%d", spec.NumEdges, len(dcel.halfEdges))
+	}
+	if spec.NumFaces != len(dcel.faces) {
+		t.Fatalf("faces: want=%d got=%d", spec.NumFaces, len(dcel.faces))
+	}
+	if spec.NumFaces != len(spec.Faces) {
+		t.Fatalf("NumFaces doesn't match len(spec.Faces): %d vs %d", spec.NumFaces, len(spec.Faces))
+	}
+	for i, face := range spec.Faces {
+		t.Run(fmt.Sprintf("f%d", i), func(t *testing.T) {
+			f := findEdge(t, dcel, face.EdgeOrigin, face.EdgeDestin).incident
+
+			if len(face.OuterComponent) == 0 {
+				if f.outerComponent != nil {
+					t.Fatal("want no outer component but outer component is not nil")
+				}
+			} else {
+				if len(face.OuterComponent) != 0 && f.outerComponent == nil {
+					t.Fatal("want outer component but outer component is nil")
+				}
+				CheckComponent(t, f, f.outerComponent, face.OuterComponent)
+			}
+
+			if len(f.innerComponents) != len(face.InnerComponents) {
+				t.Errorf("len want inners not equal to actual inners: %d vs %d",
+					len(face.InnerComponents), len(f.innerComponents))
+				return
+			}
+			for i, wantInner := range face.InnerComponents {
+				CheckComponent(t, f, f.innerComponents[i], wantInner)
+			}
+			if face.Label != f.label {
+				t.Errorf("label doesn't match: want=%b got=%b", face.Label, f.label)
+			}
+		})
+	}
+}
 
 func CheckVertexIncidents(t *testing.T, verts map[XY]*vertexRecord) {
 	t.Helper()
@@ -218,44 +279,46 @@ func TestGraphTriangle(t *testing.T) {
 
 	/*
 
-		V2 .
-		      ^ \
-		   ^|  \ \
-		   ||   \ \
-		   |e4   \ e3   f0
-		   ||    e2 \
-		  e5|      \ \
-		   ||  f1   \ \
-		   |v        \ v
-		     ---e0--->
-		V0 . <---e1---  . V1
+	  V2 *
+	     |\
+	     | \
+	     |  \
+	     |   \
+	     |    \   f0
+	     |     \
+	     | f1   \
+	     |       \
+	  V0 *--------* V1
 
 	*/
-
-	eqInt(t, len(dcel.vertices), 3)
-	eqInt(t, len(dcel.halfEdges), 6)
-	eqInt(t, len(dcel.faces), 2)
-
-	f0 := dcel.faces[0]
-	f1 := dcel.faces[1]
 
 	v0 := XY{0, 0}
 	v1 := XY{1, 0}
 	v2 := XY{0, 1}
 
-	CheckVertexIncidents(t, dcel.vertices)
-	CheckFaceComponents(
-		t, f0,
-		nil,
-		[]XY{v2, v1, v0},
-	)
-	CheckFaceComponents(
-		t, f1,
-		[]XY{v0, v1, v2},
-	)
-
-	eqUint8(t, f0.label, inputAPresent)
-	eqUint8(t, f1.label, inputAPresent|inputAValue)
+	CheckDCEL(t, dcel, DCELSpec{
+		NumVerts: 3,
+		NumEdges: 6,
+		NumFaces: 2,
+		Faces: []FaceSpec{
+			{
+				// f0
+				EdgeOrigin:      v2,
+				EdgeDestin:      v1,
+				OuterComponent:  nil,
+				InnerComponents: [][]XY{{v2, v1, v0}},
+				Label:           inputAPresent,
+			},
+			{
+				// f1
+				EdgeOrigin:      v0,
+				EdgeDestin:      v1,
+				OuterComponent:  []XY{v0, v1, v2},
+				InnerComponents: [][]XY{},
+				Label:           inputAMask,
+			},
+		},
+	})
 }
 
 func TestGraphWithHoles(t *testing.T) {
