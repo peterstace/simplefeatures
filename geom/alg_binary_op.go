@@ -34,7 +34,7 @@ func binaryOp(a, b Geometry, include func(uint8) bool) Geometry {
 	dcelB.reNodeGraph(linesA)
 
 	dcelA.overlay(dcelB)
-	return dcelA.toGeometry(include)
+	return dcelA.extractGeometry(include)
 }
 
 func geometryToLines(g Geometry) []line {

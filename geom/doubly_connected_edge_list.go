@@ -603,11 +603,10 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 	s.sets = append(s.sets, append(set1, set2...))
 }
 
-// toGeometry extracts geometries from the DCEL.
+// extractGeometry converts the DECL into a Geometry that represents it.
 //
 // TODO: extract geometries other than Polygons and MultiPolygons.
-// TODO: rename to extractGeometry
-func (d *doublyConnectedEdgeList) toGeometry(include func(uint8) bool) Geometry {
+func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geometry {
 	polys := d.extractPolygons(include)
 	switch len(polys) {
 	case 0:
