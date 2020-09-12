@@ -1,7 +1,7 @@
 package geom
 
-// Union returns a geometry that represents the parts that are common to either
-// geometry A or geometry B (or both).
+// Union returns a geometry that represents the parts from either geometry A or
+// geometry B (or both).
 func Union(a, b Geometry) Geometry {
 	return binaryOp(a, b, selectUnion)
 }
@@ -13,13 +13,13 @@ func Intersection(a, b Geometry) Geometry {
 }
 
 // Difference returns a geometry that represents the parts of input geometry A
-// that do not intersect with any parts of input geometry B.
+// that are not part of input geometry B.
 func Difference(a, b Geometry) Geometry {
 	return binaryOp(a, b, selectDifference)
 }
 
 // SymmetricDifference returns a geometry that represents the parts of geometry
-// A and B that do not intersect with each other.
+// A and B that are not in common.
 func SymmetricDifference(a, b Geometry) Geometry {
 	return binaryOp(a, b, selectSymmetricDifference)
 }
