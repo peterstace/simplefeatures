@@ -257,9 +257,9 @@ func (d *doublyConnectedEdgeList) reNodeEdge(e *halfEdgeRecord, cut *vertexRecor
 
 func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 	d.overlayVertices(other)
-	d.overlayEdges(other)
+	faceLabels := d.overlayEdges(other)
 	d.fixVertices()
-	d.reAssignFaces()
+	d.reAssignFaces(faceLabels)
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -294,21 +294,32 @@ func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
 	}
 }
 
-func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) {
+func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) map[line]uint8 {
+	faceLabels := make(map[line]uint8)
+	for _, e := range d.halfEdges {
+		ln := line{e.origin.coords, e.next.origin.coords}
+		faceLabels[ln] = e.incident.label
+	}
 	for _, face := range other.faces {
 		if cmp := face.outerComponent; cmp != nil {
-			d.overlayEdgesInComponent(cmp)
+			d.overlayEdgesInComponent(cmp, faceLabels)
 		}
 		for _, cmp := range face.innerComponents {
-			d.overlayEdgesInComponent(cmp)
+			d.overlayEdgesInComponent(cmp, faceLabels)
 		}
 	}
+	return faceLabels
 }
 
-func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord) {
-	// TODO: should handle the case where some half edges overlap with existing ones.
+func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord, faceLabels map[line]uint8) {
 	forEachEdge(start, func(e *halfEdgeRecord) {
-		d.halfEdges = append(d.halfEdges, e)
+		ln := line{e.origin.coords, e.next.origin.coords}
+		label, ok := faceLabels[ln]
+		if !ok {
+			d.halfEdges = append(d.halfEdges, e)
+		}
+		label |= e.incident.label
+		faceLabels[ln] = label
 	})
 }
 
@@ -355,7 +366,7 @@ func (d *doublyConnectedEdgeList) fixVertex(v XY) {
 
 // reAssignFaces clears the DCEL face list and creates new faces based on the
 // half edge loops.
-func (d *doublyConnectedEdgeList) reAssignFaces() {
+func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 	// Find all boundary cycles, and categorise them as either outer components
 	// or inner components.
 	var innerComponents, outerComponents []*halfEdgeRecord
@@ -413,7 +424,8 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 			}
 			if e != nil {
 				forEachEdge(e, func(e *halfEdgeRecord) {
-					f.label |= e.incident.label
+					ln := line{e.origin.coords, e.next.origin.coords}
+					f.label |= faceLabels[ln]
 					e.incident = f
 				})
 			}
@@ -610,7 +622,7 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geom
 	polys := d.extractPolygons(include)
 	switch len(polys) {
 	case 0:
-		return Polygon{}.AsGeometry()
+		return GeometryCollection{}.AsGeometry()
 	case 1:
 		return polys[0].AsGeometry()
 	default:

@@ -889,3 +889,186 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 		},
 	})
 }
+
+func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
+	polyA, err := UnmarshalWKT("POLYGON((0 0,0 1,1 1,1 0,0 0))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelA := newDCELFromGeometry(polyA, inputAMask)
+
+	polyB, err := UnmarshalWKT("POLYGON((1 0,1 1,2 1,2 0,1 0))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelB := newDCELFromGeometry(polyB, inputBMask)
+
+	dcelA.reNodeGraph(polyB.AsPolygon().Boundary().asLines())
+	dcelB.reNodeGraph(polyA.AsPolygon().Boundary().asLines())
+
+	dcelA.overlay(dcelB)
+
+	/*
+	  v5-----v4----v3
+	   |  f2 |  f1 |  f0
+	   |     |     |
+	  v0----v1-----v2
+	*/
+
+	v0 := XY{0, 0}
+	v1 := XY{1, 0}
+	v2 := XY{2, 0}
+	v3 := XY{2, 1}
+	v4 := XY{1, 1}
+	v5 := XY{0, 1}
+
+	CheckDCEL(t, dcelA, DCELSpec{
+		NumVerts: 6,
+		NumEdges: 14,
+		NumFaces: 3,
+		Faces: []FaceSpec{
+			{
+				EdgeOrigin:      v1,
+				EdgeDestin:      v0,
+				OuterComponent:  nil,
+				InnerComponents: [][]XY{{v0, v5, v4, v3, v2, v1}},
+				Label:           inputAPresent | inputBPresent,
+			},
+			{
+				EdgeOrigin:      v0,
+				EdgeDestin:      v1,
+				OuterComponent:  []XY{v0, v1, v4, v5},
+				InnerComponents: nil,
+				Label:           inputAPresent | inputBPresent | inputAValue,
+			},
+			{
+				EdgeOrigin:      v1,
+				EdgeDestin:      v2,
+				OuterComponent:  []XY{v1, v2, v3, v4},
+				InnerComponents: nil,
+				Label:           inputAPresent | inputBPresent | inputBValue,
+			},
+		},
+	})
+}
+
+func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
+	polyA, err := UnmarshalWKT("POLYGON((0 1,0 3,2 3,2 1,0 1))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelA := newDCELFromGeometry(polyA, inputAMask)
+
+	polyB, err := UnmarshalWKT("POLYGON((2 0,2 2,4 2,4 0,2 0))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelB := newDCELFromGeometry(polyB, inputBMask)
+
+	dcelA.reNodeGraph(polyB.AsPolygon().Boundary().asLines())
+	dcelB.reNodeGraph(polyA.AsPolygon().Boundary().asLines())
+
+	dcelA.overlay(dcelB)
+
+	/*
+	  v7-------v6    f0
+	   |       |
+	   | f2   v5-------v4
+	   |       |       |
+	  v0------v1   f1  |
+	           |       |
+	          v2-------v3
+	*/
+
+	v0 := XY{0, 1}
+	v1 := XY{2, 1}
+	v2 := XY{2, 0}
+	v3 := XY{4, 0}
+	v4 := XY{4, 2}
+	v5 := XY{2, 2}
+	v6 := XY{2, 3}
+	v7 := XY{0, 3}
+
+	CheckDCEL(t, dcelA, DCELSpec{
+		NumVerts: 8,
+		NumEdges: 18,
+		NumFaces: 3,
+		Faces: []FaceSpec{
+			{
+				EdgeOrigin:      v1,
+				EdgeDestin:      v0,
+				OuterComponent:  nil,
+				InnerComponents: [][]XY{{v1, v0, v7, v6, v5, v4, v3, v2}},
+				Label:           inputAPresent | inputBPresent,
+			},
+			{
+				EdgeOrigin:      v0,
+				EdgeDestin:      v1,
+				OuterComponent:  []XY{v0, v1, v5, v6, v7},
+				InnerComponents: nil,
+				Label:           inputAPresent | inputBPresent | inputAValue,
+			},
+			{
+				EdgeOrigin:      v1,
+				EdgeDestin:      v2,
+				OuterComponent:  []XY{v1, v2, v3, v4, v5},
+				InnerComponents: nil,
+				Label:           inputAPresent | inputBPresent | inputBValue,
+			},
+		},
+	})
+}
+
+func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
+	polyA, err := UnmarshalWKT("POLYGON((0 0,0 1,1 1,1 0,0 0))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelA := newDCELFromGeometry(polyA, inputAMask)
+
+	polyB, err := UnmarshalWKT("POLYGON((0 0,0 1,1 1,1 0,0 0))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelB := newDCELFromGeometry(polyB, inputBMask)
+
+	dcelA.reNodeGraph(polyB.AsPolygon().Boundary().asLines())
+	dcelB.reNodeGraph(polyA.AsPolygon().Boundary().asLines())
+
+	dcelA.overlay(dcelB)
+
+	/*
+	  v3-------v2
+	   |       |
+	   |  f1   |  f0
+	   |       |
+	  v0-------v1
+	*/
+
+	v0 := XY{0, 0}
+	v1 := XY{1, 0}
+	v2 := XY{1, 1}
+	v3 := XY{0, 1}
+
+	CheckDCEL(t, dcelA, DCELSpec{
+		NumVerts: 4,
+		NumEdges: 8,
+		NumFaces: 2,
+		Faces: []FaceSpec{
+			{
+				EdgeOrigin:      v1,
+				EdgeDestin:      v0,
+				OuterComponent:  nil,
+				InnerComponents: [][]XY{{v1, v0, v3, v2}},
+				Label:           inputAPresent | inputBPresent,
+			},
+			{
+				EdgeOrigin:      v0,
+				EdgeDestin:      v1,
+				OuterComponent:  []XY{v0, v1, v2, v3},
+				InnerComponents: nil,
+				Label:           inputAPresent | inputBPresent | inputAValue | inputBValue,
+			},
+		},
+	})
+}

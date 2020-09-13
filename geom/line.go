@@ -164,13 +164,3 @@ func leftmostThenLowestIndex(ps []XY) int {
 	}
 	return rpi
 }
-
-// canonical returns a canonical line with regards to ordering of its
-// endpoints. A line from A to B and a line from B to A will always have the
-// same canonical representation.
-func (ln line) canonical() line {
-	if ln.b.Less(ln.a) {
-		ln.b, ln.a = ln.a, ln.b
-	}
-	return ln
-}
