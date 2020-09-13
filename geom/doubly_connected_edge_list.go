@@ -259,9 +259,9 @@ func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 	//fmt.Println("START overlay")
 	//defer fmt.Println("END overlay")
 	d.overlayVertices(other)
-	d.overlayEdges(other)
+	faceLabels := d.overlayEdges(other)
 	d.fixVertices()
-	d.reAssignFaces()
+	d.reAssignFaces(faceLabels)
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -296,35 +296,35 @@ func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
 	}
 }
 
-func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) {
+func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) map[line]uint8 {
+	faceLabels := make(map[line]uint8)
+	for _, e := range d.halfEdges {
+		ln := line{e.origin.coords, e.next.origin.coords}
+		faceLabels[ln] = e.incident.label
+	}
 	for _, face := range other.faces {
 		if cmp := face.outerComponent; cmp != nil {
-			d.overlayEdgesInComponent(cmp)
+			d.overlayEdgesInComponent(cmp, faceLabels)
 		}
 		for _, cmp := range face.innerComponents {
-			d.overlayEdgesInComponent(cmp)
+			d.overlayEdgesInComponent(cmp, faceLabels)
 		}
 	}
+	return faceLabels
 }
 
-func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord) {
+func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord, faceLabels map[line]uint8) {
 	//fmt.Println("START overlayVerticesInComponent")
 	//defer fmt.Println("END overlayVerticesInComponent")
 
-	// TODO: we should keep track of this map at a different level, otherwise
-	// we are going to recalculate it for each component.
-	set := make(map[line]bool)
-	for _, e := range d.halfEdges {
-		ln := line{e.origin.coords, e.next.origin.coords}
-		set[ln] = true
-	}
-
 	forEachEdge(start, func(e *halfEdgeRecord) {
 		ln := line{e.origin.coords, e.next.origin.coords}
-		if !set[ln] {
+		label, ok := faceLabels[ln]
+		if !ok {
 			d.halfEdges = append(d.halfEdges, e)
-			set[ln] = true
 		}
+		label |= e.incident.label
+		faceLabels[ln] = label
 	})
 }
 
@@ -377,7 +377,7 @@ func (d *doublyConnectedEdgeList) fixVertex(v XY) {
 
 // reAssignFaces clears the DCEL face list and creates new faces based on the
 // half edge loops.
-func (d *doublyConnectedEdgeList) reAssignFaces() {
+func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 	//fmt.Println("START reAssignFaces")
 	//defer func() { fmt.Printf("END reAssignFaces %d\n", len(d.faces)) }()
 
@@ -432,6 +432,11 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 
 	//fmt.Println("unioned DES")
 
+	//fmt.Println("faceLabels:")
+	//for ln, label := range faceLabels {
+	//	fmt.Printf(" ln:%v lbl:%b\n", ln, label)
+	//}
+
 	// Construct new faces.
 	d.faces = nil
 	for _, set := range graph.sets {
@@ -448,7 +453,8 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 			}
 			if e != nil {
 				forEachEdge(e, func(e *halfEdgeRecord) {
-					f.label |= e.incident.label
+					ln := line{e.origin.coords, e.next.origin.coords}
+					f.label |= faceLabels[ln]
 					e.incident = f
 				})
 			}
