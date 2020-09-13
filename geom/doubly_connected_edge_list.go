@@ -330,6 +330,8 @@ func (d *doublyConnectedEdgeList) fixVertices() {
 }
 
 func (d *doublyConnectedEdgeList) fixVertex(v XY) {
+	// Find edges that start at v.
+	//
 	// TODO: This is not efficient, we should use an acceleration structure
 	// rather than a linear search.
 	var incident []*halfEdgeRecord
@@ -429,7 +431,6 @@ func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 			}
 		}
 	}
-
 	for _, face := range d.faces {
 		d.completePartialFaceLabel(face)
 	}
