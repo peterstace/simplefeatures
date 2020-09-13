@@ -622,7 +622,7 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geom
 	polys := d.extractPolygons(include)
 	switch len(polys) {
 	case 0:
-		return Polygon{}.AsGeometry()
+		return GeometryCollection{}.AsGeometry()
 	case 1:
 		return polys[0].AsGeometry()
 	default:
