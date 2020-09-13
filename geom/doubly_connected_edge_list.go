@@ -256,8 +256,6 @@ func (d *doublyConnectedEdgeList) reNodeEdge(e *halfEdgeRecord, cut *vertexRecor
 }
 
 func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
-	//fmt.Println("START overlay")
-	//defer fmt.Println("END overlay")
 	d.overlayVertices(other)
 	faceLabels := d.overlayEdges(other)
 	d.fixVertices()
@@ -314,9 +312,6 @@ func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) m
 }
 
 func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord, faceLabels map[line]uint8) {
-	//fmt.Println("START overlayVerticesInComponent")
-	//defer fmt.Println("END overlayVerticesInComponent")
-
 	forEachEdge(start, func(e *halfEdgeRecord) {
 		ln := line{e.origin.coords, e.next.origin.coords}
 		label, ok := faceLabels[ln]
@@ -329,25 +324,17 @@ func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord,
 }
 
 func (d *doublyConnectedEdgeList) fixVertices() {
-	//fmt.Println("START fixVertices")
-	//defer fmt.Println("END fixVertices")
-
 	for xy := range d.vertices {
 		d.fixVertex(xy)
 	}
 }
 
 func (d *doublyConnectedEdgeList) fixVertex(v XY) {
-	//fmt.Printf(" START fixVertex %v\n", v)
-	//defer fmt.Printf(" END fixVertex\n")
-	// Find edges that start at v.
-	//
 	// TODO: This is not efficient, we should use an acceleration structure
 	// rather than a linear search.
 	var incident []*halfEdgeRecord
 	for _, e := range d.halfEdges {
 		if e.origin.coords == v {
-			//fmt.Printf("  incident %v -> %v\n", e.origin.coords, e.next.origin.coords)
 			incident = append(incident, e)
 		}
 	}
@@ -378,33 +365,24 @@ func (d *doublyConnectedEdgeList) fixVertex(v XY) {
 // reAssignFaces clears the DCEL face list and creates new faces based on the
 // half edge loops.
 func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
-	//fmt.Println("START reAssignFaces")
-	//defer func() { fmt.Printf("END reAssignFaces %d\n", len(d.faces)) }()
-
 	// Find all boundary cycles, and categorise them as either outer components
 	// or inner components.
 	var innerComponents, outerComponents []*halfEdgeRecord
 	seen := make(map[*halfEdgeRecord]bool)
 	for _, e := range d.halfEdges {
-		//fmt.Printf(" iter %d/%d\n", i, len(d.halfEdges))
 		if seen[e] {
 			continue
 		}
 		leftmostLowest := edgeLoopLeftmostLowest(e)
-		//fmt.Println("  after edgeLoopLeftmostLowest")
 		if edgeLoopIsOuterComponent(leftmostLowest) {
 			outerComponents = append(outerComponents, leftmostLowest)
 		} else {
 			innerComponents = append(innerComponents, leftmostLowest)
 		}
-		//fmt.Println("  after edgeLoopIsOuterComponent")
 		forEachEdge(e, func(e *halfEdgeRecord) {
 			seen[e] = true
 		})
-		//fmt.Println("  after forEachEdge")
 	}
-
-	//fmt.Println("found cycles")
 
 	// Group together boundary cycles that are for the same face.
 	var graph disjointEdgeSet
@@ -415,8 +393,6 @@ func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 		graph.addSingleton(e)
 	}
 	graph.addSingleton(nil) // nil represents the outer component of the infinite face
-
-	//fmt.Println("created singletons")
 
 	for _, leftmostLowest := range innerComponents {
 		nextLeft := d.findNextDownEdgeToTheLeft(leftmostLowest)
@@ -429,13 +405,6 @@ func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 		}
 		graph.union(leftmostLowest, nextLeft)
 	}
-
-	//fmt.Println("unioned DES")
-
-	//fmt.Println("faceLabels:")
-	//for ln, label := range faceLabels {
-	//	fmt.Printf(" ln:%v lbl:%b\n", ln, label)
-	//}
 
 	// Construct new faces.
 	d.faces = nil
@@ -461,13 +430,9 @@ func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 		}
 	}
 
-	//fmt.Println("constructed faces")
-
 	for _, face := range d.faces {
 		d.completePartialFaceLabel(face)
 	}
-
-	//fmt.Println("completed partial face labels")
 }
 
 // completePartialFaceLabel checks to see if the face label for the given face
@@ -532,11 +497,8 @@ func completeFaceLabel(dst, src *faceRecord) {
 // edgeLoopLeftmostLowest finds the edge whose origin is the leftmost (or
 // lowest for a tie) point in the loop.
 func edgeLoopLeftmostLowest(start *halfEdgeRecord) *halfEdgeRecord {
-	//fmt.Println("   edgeLoopLeftmostLowest")
-	//fmt.Printf("   start (%p): %v -> %v\n", start, start.origin.coords, start.next.origin.coords)
 	var best *halfEdgeRecord
 	forEachEdge(start, func(e *halfEdgeRecord) {
-		//fmt.Printf("   iter, e (%p): %v -> %v\n", e, e.origin.coords, e.next.origin.coords)
 		if best == nil || e.origin.coords.Less(best.origin.coords) {
 			best = e
 		}
