@@ -632,7 +632,7 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 
 // extractGeometry converts the DECL into a Geometry that represents it.
 //
-// TODO: extract geometries other than Polygons and MultiPolygons.
+// TODO: extract point geometries as well.
 func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geometry {
 	polys := d.extractPolygons(include)
 	switch len(polys) {
@@ -778,5 +778,48 @@ func orderCCWRingFirst(rings []LineString) {
 			rings[i], rings[0] = rings[0], rings[i]
 			return
 		}
+	}
+}
+
+func (d *doublyConnectedEdgeList) extractLineStrings() []LineString {
+	var lss []LineString
+	for _, e := range d.halfEdges {
+		if (e.label & extracted) == 0 {
+			ls := extractLineString(e)
+			lss = append(lss, ls)
+		}
+	}
+	return lss
+}
+
+func extractLineString(e *halfEdgeRecord) LineString {
+	u := e.origin.coords
+	v := e.next.origin.coords
+	coords := []float64{u.X, u.Y, v.X, v.Y}
+
+	// TODO: consider the presence flags. Only extract if matches selector.
+
+	// TODO: when considering if something is a branch, we should only consider
+	// elements that would be extracted (i.e. those edges where the two
+	// incident faces are not selected).
+
+	// TODO: set extracted flags after extraction.
+
+	// TODO: Idea -- loop over each edge branching away from the current edge.
+	// If there is only one that matches the criteria, then we follow it. Only
+	// needs a single pass loop.
+
+	// Follow the line until we get to a branch.
+	for e.next.twin.next == e.twin {
+		e = e.next
+		v = e.next.origin.coords
+		coords = append(coords, v.X, v.Y)
+	}
+
+	seq := NewSequence(coords, DimXY)
+	ls, err := NewLineString(seq)
+	if err != nil {
+		// Shouldn't ever happen, since we have at least one edge.
+		panic("could not construct line string using %v: %v", coords, err)
 	}
 }
