@@ -23,6 +23,7 @@ type halfEdgeRecord struct {
 	twin       *halfEdgeRecord
 	incident   *faceRecord
 	next, prev *halfEdgeRecord
+	label      uint8
 }
 
 type vertexRecord struct {
@@ -111,6 +112,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 					incident: interiorFace,
 					next:     nil, // populated later
 					prev:     nil, // populated later
+					label:    mask | presenceMask,
 				}
 				externalEdge := &halfEdgeRecord{
 					origin:   dcel.vertices[ln.b],
@@ -118,6 +120,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 					incident: exteriorFace,
 					next:     nil, // populated later
 					prev:     nil, // populated later
+					label:    mask | presenceMask,
 				}
 				internalEdge.twin = externalEdge
 				dcel.vertices[ln.a].incident = internalEdge
@@ -233,6 +236,7 @@ func (d *doublyConnectedEdgeList) reNodeEdge(e *halfEdgeRecord, cut *vertexRecor
 		incident: e.incident,
 		next:     next,
 		prev:     e,
+		label:    e.label,
 	}
 	ePrimeTwin := &halfEdgeRecord{
 		origin:   dest,
@@ -240,6 +244,7 @@ func (d *doublyConnectedEdgeList) reNodeEdge(e *halfEdgeRecord, cut *vertexRecor
 		incident: e.twin.incident,
 		next:     e.twin,
 		prev:     next.twin,
+		label:    e.label,
 	}
 	ePrime.twin = ePrimeTwin
 
@@ -295,31 +300,41 @@ func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
 }
 
 func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) map[line]uint8 {
+	edgeRecords := make(map[line]*halfEdgeRecord)
 	faceLabels := make(map[line]uint8)
 	for _, e := range d.halfEdges {
 		ln := line{e.origin.coords, e.next.origin.coords}
+		edgeRecords[ln] = e
 		faceLabels[ln] = e.incident.label
 	}
+
 	for _, face := range other.faces {
 		if cmp := face.outerComponent; cmp != nil {
-			d.overlayEdgesInComponent(cmp, faceLabels)
+			d.overlayEdgesInComponent(cmp, edgeRecords, faceLabels)
 		}
 		for _, cmp := range face.innerComponents {
-			d.overlayEdgesInComponent(cmp, faceLabels)
+			d.overlayEdgesInComponent(cmp, edgeRecords, faceLabels)
 		}
 	}
 	return faceLabels
 }
 
-func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord, faceLabels map[line]uint8) {
+func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord, edgeRecords map[line]*halfEdgeRecord, faceLabels map[line]uint8) {
 	forEachEdge(start, func(e *halfEdgeRecord) {
 		ln := line{e.origin.coords, e.next.origin.coords}
+
 		label, ok := faceLabels[ln]
 		if !ok {
 			d.halfEdges = append(d.halfEdges, e)
 		}
 		label |= e.incident.label
 		faceLabels[ln] = label
+
+		if existing, ok := edgeRecords[ln]; ok {
+			existing.label |= e.label
+		} else {
+			edgeRecords[ln] = e
+		}
 	})
 }
 

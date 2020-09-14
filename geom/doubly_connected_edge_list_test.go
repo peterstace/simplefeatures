@@ -10,6 +10,7 @@ type DCELSpec struct {
 	NumEdges int
 	NumFaces int
 	Faces    []FaceSpec
+	Edges    []EdgeLabelSpec
 }
 
 type FaceSpec struct {
@@ -19,6 +20,11 @@ type FaceSpec struct {
 	OuterComponent  []XY
 	InnerComponents [][]XY
 	Label           uint8
+}
+
+type EdgeLabelSpec struct {
+	Label uint8
+	Edges []XY
 }
 
 func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
@@ -75,6 +81,24 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 			}
 		})
 	}
+
+	t.Run("edge_labels", func(t *testing.T) {
+		for _, want := range spec.Edges {
+			for i := 0; i+1 < len(want.Edges); i++ {
+				u := want.Edges[i]
+				v := want.Edges[i+1]
+				e := findEdge(t, dcel, u, v)
+				if e.label != want.Label {
+					t.Errorf("incorrect label for edge %v -> %v: "+
+						"want=%b got=%b", u, v, want.Label, e.label)
+				}
+				if e.twin.label != want.Label {
+					t.Errorf("incorrect label for edge %v -> %v: "+
+						"want=%b got=%b", v, u, want.Label, e.twin.label)
+				}
+			}
+		}
+	})
 }
 
 func findEdge(t *testing.T, dcel *doublyConnectedEdgeList, origin, dest XY) *halfEdgeRecord {
@@ -949,6 +973,20 @@ func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
 				Label:           inputAPresent | inputBPresent | inputBValue,
 			},
 		},
+		Edges: []EdgeLabelSpec{
+			{
+				Label: presenceMask | inputAValue,
+				Edges: []XY{v1, v0, v5, v4},
+			},
+			{
+				Label: presenceMask | inputBValue,
+				Edges: []XY{v4, v3, v2, v1},
+			},
+			{
+				Label: presenceMask | inputAValue | inputBValue,
+				Edges: []XY{v1, v4},
+			},
+		},
 	})
 }
 
@@ -1016,6 +1054,20 @@ func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
 				Label:           inputAPresent | inputBPresent | inputBValue,
 			},
 		},
+		Edges: []EdgeLabelSpec{
+			{
+				Label: presenceMask | inputAValue,
+				Edges: []XY{v1, v0, v7, v6, v5},
+			},
+			{
+				Label: presenceMask | inputBValue,
+				Edges: []XY{v5, v4, v3, v2, v1},
+			},
+			{
+				Label: presenceMask | inputAValue | inputBValue,
+				Edges: []XY{v1, v5},
+			},
+		},
 	})
 }
 
@@ -1068,6 +1120,12 @@ func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
 				OuterComponent:  []XY{v0, v1, v2, v3},
 				InnerComponents: nil,
 				Label:           inputAPresent | inputBPresent | inputAValue | inputBValue,
+			},
+		},
+		Edges: []EdgeLabelSpec{
+			{
+				Label: presenceMask | inputAValue | inputBValue,
+				Edges: []XY{v0, v1, v2, v3},
 			},
 		},
 	})
