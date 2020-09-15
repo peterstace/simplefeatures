@@ -208,11 +208,10 @@ func TestBinaryOp(t *testing.T) {
 			   |     |     |
 			   +-----+-----+
 			*/
-			input1: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))",
-			input2: "MULTIPOLYGON(((0 1,0 2,1 2,1 1,0 1)),((1 0,1 1,2 1,2 0,1 0)))",
-			union:  "POLYGON((0 0,0 1,0 2,1 2,2 2,2 1,2 0,1 0,0 0))",
-			// TODO: We don't yet support linear output elements.
-			//inter:   "MULTILINESTRING((0 1,1 1),(1 1,1 0),(1 1,1 2),(2 1,1 1))",
+			input1:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))",
+			input2:  "MULTIPOLYGON(((0 1,0 2,1 2,1 1,0 1)),((1 0,1 1,2 1,2 0,1 0)))",
+			union:   "POLYGON((0 0,0 1,0 2,1 2,2 2,2 1,2 0,1 0,0 0))",
+			inter:   "MULTILINESTRING((0 1,1 1),(1 1,1 0),(1 1,1 2),(2 1,1 1))",
 			fwdDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))",
 			revDiff: "MULTIPOLYGON(((0 1,0 2,1 2,1 1,0 1)),((1 0,1 1,2 1,2 0,1 0)))",
 			symDiff: "POLYGON((0 0,0 1,0 2,1 2,2 2,2 1,2 0,1 0,0 0))",
@@ -224,10 +223,10 @@ func TestBinaryOp(t *testing.T) {
 			   |     |     |
 			   +-----+-----+
 			*/
-			input1: "POLYGON((0 0,0 1,1 1,1 0,0 0))",
-			input2: "POLYGON((1 0,1 1,2 1,2 0,1 0))",
-			union:  "POLYGON((0 0,0 1,1 1,2 1,2 0,1 0,0 0))",
-			//inter:   "LINESTRING(1 1,1 0)",
+			input1:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			input2:  "POLYGON((1 0,1 1,2 1,2 0,1 0))",
+			union:   "POLYGON((0 0,0 1,1 1,2 1,2 0,1 0,0 0))",
+			inter:   "LINESTRING(1 1,1 0)",
 			fwdDiff: "POLYGON((0 0,0 1,1 1,1 0,0 0))",
 			revDiff: "POLYGON((1 0,1 1,2 1,2 0,1 0))",
 			symDiff: "POLYGON((1 1,2 1,2 0,1 0,0 0,0 1,1 1))",
@@ -242,10 +241,10 @@ func TestBinaryOp(t *testing.T) {
 			           |       |
 			           +-------+
 			*/
-			input1: "POLYGON((0 0.5,0 1.5,1 1.5,1 0.5,0 0.5))",
-			input2: "POLYGON((1 0,1 1,2 1,2 0,1 0))",
-			union:  "POLYGON((0 0.5,0 1.5,1 1.5,1 1,2 1,2 0,1 0,1 0.5,0 0.5))",
-			//inter:   "LINESTRING(1 1,1 0.5)",
+			input1:  "POLYGON((0 0.5,0 1.5,1 1.5,1 0.5,0 0.5))",
+			input2:  "POLYGON((1 0,1 1,2 1,2 0,1 0))",
+			union:   "POLYGON((0 0.5,0 1.5,1 1.5,1 1,2 1,2 0,1 0,1 0.5,0 0.5))",
+			inter:   "LINESTRING(1 1,1 0.5)",
 			fwdDiff: "POLYGON((0 0.5,0 1.5,1 1.5,1 1,1 0.5,0 0.5))",
 			revDiff: "POLYGON((1 0,1 0.5,1 1,2 1,2 0,1 0))",
 			symDiff: "POLYGON((1 0,1 0.5,0 0.5,0 1.5,1 1.5,1 1,2 1,2 0,1 0))",
@@ -269,6 +268,8 @@ func TestBinaryOp(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
 			g2 := geomFromWKT(t, geomCase.input2)
+			t.Logf("input1: %s", geomCase.input1)
+			t.Logf("input2: %s", geomCase.input2)
 			for _, opCase := range []struct {
 				opName string
 				op     func(geom.Geometry, geom.Geometry) geom.Geometry

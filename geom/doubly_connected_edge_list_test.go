@@ -720,6 +720,20 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 				Label:           presenceMask | inputAValue | inputBValue,
 			},
 		},
+		Edges: []EdgeLabelSpec{
+			{
+				Label: presenceMask | inputAValue,
+				Edges: []XY{v4, v0, v1, v2},
+			},
+			{
+				Label: presenceMask | inputBValue,
+				Edges: []XY{v4, v5, v7, v6, v2},
+			},
+			{
+				Label: presenceMask | valueMask,
+				Edges: []XY{v4, v3, v2, v4},
+			},
+		},
 	})
 }
 

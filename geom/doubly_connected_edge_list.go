@@ -265,6 +265,7 @@ func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 	faceLabels := d.overlayEdges(other)
 	d.fixVertices()
 	d.reAssignFaces(faceLabels)
+	d.fixEdgeLabels()
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -630,22 +631,41 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 	s.sets = append(s.sets, append(set1, set2...))
 }
 
+// fixEdgeLabels updates edge labels after performing an overlay. It adds edge
+// presence if the two faces adjacent to the edge are both present.
+func (d *doublyConnectedEdgeList) fixEdgeLabels() {
+	for _, e := range d.halfEdges {
+		face1 := e.incident.label
+		face2 := e.twin.incident.label
+		e.label |= face1 & face2 & valueMask
+	}
+}
+
 // extractGeometry converts the DECL into a Geometry that represents it.
 //
 // TODO: extract point geometries as well.
+// TODO: handle cases where there are mixed geometries (e.g. areal and linear)
 func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geometry {
 	polys := d.extractPolygons(include)
-	switch len(polys) {
-	case 0:
-		return GeometryCollection{}.AsGeometry()
-	case 1:
-		return polys[0].AsGeometry()
-	default:
+	linears := d.extractLineStrings(include)
+
+	switch {
+	case len(polys) != 0:
+		if len(polys) == 1 {
+			return polys[0].AsGeometry()
+		}
 		mp, err := NewMultiPolygonFromPolygons(polys)
 		if err != nil {
 			panic(fmt.Sprintf("could not create MultiPolygon: %v", err))
 		}
 		return mp.AsGeometry()
+	case len(linears) != 0:
+		if len(linears) == 1 {
+			return linears[0].AsGeometry()
+		}
+		return NewMultiLineStringFromLineStrings(linears).AsGeometry()
+	default:
+		return GeometryCollection{}.AsGeometry()
 	}
 }
 
@@ -781,45 +801,77 @@ func orderCCWRingFirst(rings []LineString) {
 	}
 }
 
-func (d *doublyConnectedEdgeList) extractLineStrings() []LineString {
+func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) []LineString {
 	var lss []LineString
 	for _, e := range d.halfEdges {
-		if (e.label & extracted) == 0 {
-			ls := extractLineString(e)
+		if shouldExtractLine(e, include) {
+			ls := extractLineString(e, include)
 			lss = append(lss, ls)
 		}
 	}
 	return lss
 }
 
-func extractLineString(e *halfEdgeRecord) LineString {
+func extractLineString(e *halfEdgeRecord, include func(uint8) bool) LineString {
 	u := e.origin.coords
-	v := e.next.origin.coords
-	coords := []float64{u.X, u.Y, v.X, v.Y}
+	coords := []float64{u.X, u.Y}
 
-	// TODO: consider the presence flags. Only extract if matches selector.
-
-	// TODO: when considering if something is a branch, we should only consider
-	// elements that would be extracted (i.e. those edges where the two
-	// incident faces are not selected).
-
-	// TODO: set extracted flags after extraction.
-
-	// TODO: Idea -- loop over each edge branching away from the current edge.
-	// If there is only one that matches the criteria, then we follow it. Only
-	// needs a single pass loop.
-
-	// Follow the line until we get to a branch.
-	for e.next.twin.next == e.twin {
-		e = e.next
-		v = e.next.origin.coords
+	for {
+		v := e.next.origin.coords
 		coords = append(coords, v.X, v.Y)
+		e.label |= extracted
+		e.twin.label |= extracted
+
+		e = nextNoBranch(e, include)
+		if e == nil {
+			break
+		}
 	}
 
 	seq := NewSequence(coords, DimXY)
 	ls, err := NewLineString(seq)
 	if err != nil {
 		// Shouldn't ever happen, since we have at least one edge.
-		panic("could not construct line string using %v: %v", coords, err)
+		panic(fmt.Sprintf("could not construct line string using %v: %v", coords, err))
+	}
+	return ls
+}
+
+func shouldExtractLine(e *halfEdgeRecord, include func(uint8) bool) bool {
+	return (e.label&extracted == 0) && include(e.label) && !include(e.incident.label) && !include(e.twin.incident.label)
+}
+
+// nextNoBranch checks to see if the given edge has multiple next edges that it
+// could use for linear extraction. If there are multiple edges, then nil is
+// returned (this is called a 'branch'). If there is just one possible next
+// edge, then that next edge is returned.
+func nextNoBranch(edge *halfEdgeRecord, include func(uint8) bool) *halfEdgeRecord {
+	e := edge.next
+	var nextEdge *halfEdgeRecord
+
+	// Find the first next edge.
+	for {
+		if e == edge.twin {
+			// There are no linear branches that could be extracted.
+			return nil
+		}
+		if shouldExtractLine(e, include) {
+			nextEdge = e
+			break
+		}
+		e = e.twin.next
+	}
+
+	// Check to see if there are additional next edges (i.e. a branch scenario).
+	for {
+		if e == edge.twin {
+			// There is no branching.
+			return nextEdge
+		}
+		if shouldExtractLine(e, include) {
+			// There is branching, so indicate this by returning nil.
+			return nil
+		}
+		e = e.twin.next
 	}
 }
