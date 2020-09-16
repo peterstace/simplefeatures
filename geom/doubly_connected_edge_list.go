@@ -644,26 +644,35 @@ func (d *doublyConnectedEdgeList) fixEdgeLabels() {
 // extractGeometry converts the DECL into a Geometry that represents it.
 //
 // TODO: extract point geometries as well.
-// TODO: handle cases where there are mixed geometries (e.g. areal and linear)
 func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geometry {
-	polys := d.extractPolygons(include)
+	areals := d.extractPolygons(include)
 	linears := d.extractLineStrings(include)
 
-	switch {
-	case len(polys) != 0:
-		if len(polys) == 1 {
-			return polys[0].AsGeometry()
-		}
-		mp, err := NewMultiPolygonFromPolygons(polys)
+	var arealGeom Geometry
+	if len(areals) == 1 {
+		arealGeom = areals[0].AsGeometry()
+	} else if len(areals) > 1 {
+		mp, err := NewMultiPolygonFromPolygons(areals)
 		if err != nil {
 			panic(fmt.Sprintf("could not create MultiPolygon: %v", err))
 		}
-		return mp.AsGeometry()
-	case len(linears) != 0:
-		if len(linears) == 1 {
-			return linears[0].AsGeometry()
-		}
-		return NewMultiLineStringFromLineStrings(linears).AsGeometry()
+		arealGeom = mp.AsGeometry()
+	}
+
+	var linearGeom Geometry
+	if len(linears) == 1 {
+		linearGeom = linears[0].AsGeometry()
+	} else if len(linears) > 1 {
+		linearGeom = NewMultiLineStringFromLineStrings(linears).AsGeometry()
+	}
+
+	switch {
+	case !arealGeom.IsEmpty() && !linearGeom.IsEmpty():
+		return NewGeometryCollection([]Geometry{arealGeom, linearGeom}).AsGeometry()
+	case !arealGeom.IsEmpty():
+		return arealGeom
+	case !linearGeom.IsEmpty():
+		return linearGeom
 	default:
 		return GeometryCollection{}.AsGeometry()
 	}

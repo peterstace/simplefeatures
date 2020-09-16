@@ -264,6 +264,25 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "GEOMETRYCOLLECTION EMPTY",
 			symDiff: "GEOMETRYCOLLECTION EMPTY",
 		},
+		{
+			/*
+			   *-------*
+			   |\ A&B /|
+			   | \   / |
+			   |  \ /  |
+			   *   *   *
+			   | A | B |
+			   |   |   |
+			   *---*---*
+			*/
+			input1:  "POLYGON((0 0,0 2,2 2,1 1,1 0,0 0))",
+			input2:  "POLYGON((1 0,1 1,0 2,2 2,2 0,1 0))",
+			union:   "POLYGON((0 0,0 2,2 2,2 0,1 0,0 0))",
+			inter:   "GEOMETRYCOLLECTION(LINESTRING(1 1,1 0),POLYGON((0 2,2 2,1 1,0 2)))",
+			fwdDiff: "POLYGON((0 0,0 2,1 1,1 0,0 0))",
+			revDiff: "POLYGON((1 0,1 1,2 2,2 0,1 0))",
+			symDiff: "POLYGON((0 2,1 1,2 2,2 0,1 0,0 0,0 2))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
