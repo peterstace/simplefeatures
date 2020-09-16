@@ -23,6 +23,7 @@ type halfEdgeRecord struct {
 	twin       *halfEdgeRecord
 	incident   *faceRecord
 	next, prev *halfEdgeRecord
+	label      uint8
 }
 
 type vertexRecord struct {
@@ -111,6 +112,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 					incident: interiorFace,
 					next:     nil, // populated later
 					prev:     nil, // populated later
+					label:    mask | presenceMask,
 				}
 				externalEdge := &halfEdgeRecord{
 					origin:   dcel.vertices[ln.b],
@@ -118,6 +120,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 					incident: exteriorFace,
 					next:     nil, // populated later
 					prev:     nil, // populated later
+					label:    mask | presenceMask,
 				}
 				internalEdge.twin = externalEdge
 				dcel.vertices[ln.a].incident = internalEdge
@@ -233,6 +236,7 @@ func (d *doublyConnectedEdgeList) reNodeEdge(e *halfEdgeRecord, cut *vertexRecor
 		incident: e.incident,
 		next:     next,
 		prev:     e,
+		label:    e.label,
 	}
 	ePrimeTwin := &halfEdgeRecord{
 		origin:   dest,
@@ -240,6 +244,7 @@ func (d *doublyConnectedEdgeList) reNodeEdge(e *halfEdgeRecord, cut *vertexRecor
 		incident: e.twin.incident,
 		next:     e.twin,
 		prev:     next.twin,
+		label:    e.label,
 	}
 	ePrime.twin = ePrimeTwin
 
@@ -260,6 +265,7 @@ func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 	faceLabels := d.overlayEdges(other)
 	d.fixVertices()
 	d.reAssignFaces(faceLabels)
+	d.fixEdgeLabels()
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -295,31 +301,41 @@ func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
 }
 
 func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) map[line]uint8 {
+	edgeRecords := make(map[line]*halfEdgeRecord)
 	faceLabels := make(map[line]uint8)
 	for _, e := range d.halfEdges {
 		ln := line{e.origin.coords, e.next.origin.coords}
+		edgeRecords[ln] = e
 		faceLabels[ln] = e.incident.label
 	}
+
 	for _, face := range other.faces {
 		if cmp := face.outerComponent; cmp != nil {
-			d.overlayEdgesInComponent(cmp, faceLabels)
+			d.overlayEdgesInComponent(cmp, edgeRecords, faceLabels)
 		}
 		for _, cmp := range face.innerComponents {
-			d.overlayEdgesInComponent(cmp, faceLabels)
+			d.overlayEdgesInComponent(cmp, edgeRecords, faceLabels)
 		}
 	}
 	return faceLabels
 }
 
-func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord, faceLabels map[line]uint8) {
+func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord, edgeRecords map[line]*halfEdgeRecord, faceLabels map[line]uint8) {
 	forEachEdge(start, func(e *halfEdgeRecord) {
 		ln := line{e.origin.coords, e.next.origin.coords}
+
 		label, ok := faceLabels[ln]
 		if !ok {
 			d.halfEdges = append(d.halfEdges, e)
 		}
 		label |= e.incident.label
 		faceLabels[ln] = label
+
+		if existing, ok := edgeRecords[ln]; ok {
+			existing.label |= e.label
+		} else {
+			edgeRecords[ln] = e
+		}
 	})
 }
 
@@ -615,22 +631,50 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 	s.sets = append(s.sets, append(set1, set2...))
 }
 
+// fixEdgeLabels updates edge labels after performing an overlay. It adds edge
+// presence if the two faces adjacent to the edge are both present.
+func (d *doublyConnectedEdgeList) fixEdgeLabels() {
+	for _, e := range d.halfEdges {
+		face1 := e.incident.label
+		face2 := e.twin.incident.label
+		e.label |= face1 & face2 & valueMask
+	}
+}
+
 // extractGeometry converts the DECL into a Geometry that represents it.
 //
-// TODO: extract geometries other than Polygons and MultiPolygons.
+// TODO: extract point geometries as well.
 func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geometry {
-	polys := d.extractPolygons(include)
-	switch len(polys) {
-	case 0:
-		return GeometryCollection{}.AsGeometry()
-	case 1:
-		return polys[0].AsGeometry()
-	default:
-		mp, err := NewMultiPolygonFromPolygons(polys)
+	areals := d.extractPolygons(include)
+	linears := d.extractLineStrings(include)
+
+	var arealGeom Geometry
+	if len(areals) == 1 {
+		arealGeom = areals[0].AsGeometry()
+	} else if len(areals) > 1 {
+		mp, err := NewMultiPolygonFromPolygons(areals)
 		if err != nil {
 			panic(fmt.Sprintf("could not create MultiPolygon: %v", err))
 		}
-		return mp.AsGeometry()
+		arealGeom = mp.AsGeometry()
+	}
+
+	var linearGeom Geometry
+	if len(linears) == 1 {
+		linearGeom = linears[0].AsGeometry()
+	} else if len(linears) > 1 {
+		linearGeom = NewMultiLineStringFromLineStrings(linears).AsGeometry()
+	}
+
+	switch {
+	case !arealGeom.IsEmpty() && !linearGeom.IsEmpty():
+		return NewGeometryCollection([]Geometry{arealGeom, linearGeom}).AsGeometry()
+	case !arealGeom.IsEmpty():
+		return arealGeom
+	case !linearGeom.IsEmpty():
+		return linearGeom
+	default:
+		return GeometryCollection{}.AsGeometry()
 	}
 }
 
@@ -763,5 +807,80 @@ func orderCCWRingFirst(rings []LineString) {
 			rings[i], rings[0] = rings[0], rings[i]
 			return
 		}
+	}
+}
+
+func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) []LineString {
+	var lss []LineString
+	for _, e := range d.halfEdges {
+		if shouldExtractLine(e, include) {
+			ls := extractLineString(e, include)
+			lss = append(lss, ls)
+		}
+	}
+	return lss
+}
+
+func extractLineString(e *halfEdgeRecord, include func(uint8) bool) LineString {
+	u := e.origin.coords
+	coords := []float64{u.X, u.Y}
+
+	for {
+		v := e.next.origin.coords
+		coords = append(coords, v.X, v.Y)
+		e.label |= extracted
+		e.twin.label |= extracted
+
+		e = nextNoBranch(e, include)
+		if e == nil {
+			break
+		}
+	}
+
+	seq := NewSequence(coords, DimXY)
+	ls, err := NewLineString(seq)
+	if err != nil {
+		// Shouldn't ever happen, since we have at least one edge.
+		panic(fmt.Sprintf("could not construct line string using %v: %v", coords, err))
+	}
+	return ls
+}
+
+func shouldExtractLine(e *halfEdgeRecord, include func(uint8) bool) bool {
+	return (e.label&extracted == 0) && include(e.label) && !include(e.incident.label) && !include(e.twin.incident.label)
+}
+
+// nextNoBranch checks to see if the given edge has multiple next edges that it
+// could use for linear extraction. If there are multiple edges, then nil is
+// returned (this is called a 'branch'). If there is just one possible next
+// edge, then that next edge is returned.
+func nextNoBranch(edge *halfEdgeRecord, include func(uint8) bool) *halfEdgeRecord {
+	e := edge.next
+	var nextEdge *halfEdgeRecord
+
+	// Find the first next edge.
+	for {
+		if e == edge.twin {
+			// There are no linear branches that could be extracted.
+			return nil
+		}
+		if shouldExtractLine(e, include) {
+			nextEdge = e
+			break
+		}
+		e = e.twin.next
+	}
+
+	// Check to see if there are additional next edges (i.e. a branch scenario).
+	for {
+		if e == edge.twin {
+			// There is no branching.
+			return nextEdge
+		}
+		if shouldExtractLine(e, include) {
+			// There is branching, so indicate this by returning nil.
+			return nil
+		}
+		e = e.twin.next
 	}
 }
