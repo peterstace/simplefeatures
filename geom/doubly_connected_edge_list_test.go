@@ -11,6 +11,7 @@ type DCELSpec struct {
 	NumFaces int
 	Faces    []FaceSpec
 	Edges    []EdgeLabelSpec
+	Vertices []VertexSpec
 }
 
 type FaceSpec struct {
@@ -25,6 +26,11 @@ type FaceSpec struct {
 type EdgeLabelSpec struct {
 	Label uint8
 	Edges []XY
+}
+
+type VertexSpec struct {
+	Label    uint8
+	Vertices []XY
 }
 
 func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
@@ -95,6 +101,21 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 				if e.twin.label != want.Label {
 					t.Errorf("incorrect label for edge %v -> %v: "+
 						"want=%b got=%b", v, u, want.Label, e.twin.label)
+				}
+			}
+		}
+	})
+
+	t.Run("vertex_labels", func(t *testing.T) {
+		for _, want := range spec.Vertices {
+			for _, wantXY := range want.Vertices {
+				vert, ok := dcel.vertices[wantXY]
+				if !ok {
+					t.Errorf("no vertex %v", wantXY)
+					continue
+				}
+				if vert.label != want.Label {
+					t.Errorf("vertex label mismatch for %v: want=%b got=%b", wantXY, want.Label, vert.label)
 				}
 			}
 		}
@@ -248,6 +269,10 @@ func TestGraphTriangle(t *testing.T) {
 				Label:           inputAMask,
 			},
 		},
+		Vertices: []VertexSpec{{
+			Label:    inputAPresent | inputAValue,
+			Vertices: []XY{v0, v1, v2},
+		}},
 	})
 }
 
@@ -443,6 +468,10 @@ func TestGraphReNode(t *testing.T) {
 				Label:           inputAPresent | inputAValue,
 			},
 		},
+		Vertices: []VertexSpec{{
+			Label:    inputAPresent | inputAValue,
+			Vertices: []XY{v0, v1, v2, v3, v4},
+		}},
 	})
 }
 

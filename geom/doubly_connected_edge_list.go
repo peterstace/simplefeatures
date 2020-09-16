@@ -8,7 +8,7 @@ import (
 
 type doublyConnectedEdgeList struct {
 	faces     []*faceRecord
-	halfEdges []*halfEdgeRecord // TODO: I don't think this is a great way of tracking the half edges.
+	halfEdges []*halfEdgeRecord
 	vertices  map[XY]*vertexRecord
 }
 
@@ -29,6 +29,7 @@ type halfEdgeRecord struct {
 type vertexRecord struct {
 	coords   XY
 	incident *halfEdgeRecord
+	label    uint8
 }
 
 func newDCELFromGeometry(g Geometry, mask uint8) *doublyConnectedEdgeList {
@@ -72,7 +73,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 			for i := 0; i < ring.Length(); i++ {
 				xy := ring.GetXY(i)
 				if _, ok := dcel.vertices[xy]; !ok {
-					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */}
+					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask}
 				}
 			}
 		}
@@ -210,6 +211,7 @@ func (d *doublyConnectedEdgeList) reNodeComponent(start *halfEdgeRecord, indexed
 				cutVert = &vertexRecord{
 					coords:   xy,
 					incident: nil, /* populated later */
+					// TODO: populate mask?
 				}
 				d.vertices[xy] = cutVert
 			}
