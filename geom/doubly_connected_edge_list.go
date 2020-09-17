@@ -113,7 +113,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 					incident: interiorFace,
 					next:     nil, // populated later
 					prev:     nil, // populated later
-					label:    mask | presenceMask,
+					label:    mask,
 				}
 				externalEdge := &halfEdgeRecord{
 					origin:   dcel.vertices[ln.b],
@@ -121,7 +121,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 					incident: exteriorFace,
 					next:     nil, // populated later
 					prev:     nil, // populated later
-					label:    mask | presenceMask,
+					label:    mask,
 				}
 				internalEdge.twin = externalEdge
 				dcel.vertices[ln.a].incident = internalEdge
@@ -208,11 +208,7 @@ func (d *doublyConnectedEdgeList) reNodeComponent(start *halfEdgeRecord, indexed
 			xy := xys[i+1]
 			cutVert, ok := d.vertices[xy]
 			if !ok {
-				cutVert = &vertexRecord{
-					coords:   xy,
-					incident: nil, /* populated later */
-					// TODO: populate mask?
-				}
+				cutVert = &vertexRecord{xy, nil /* populated later */, e.label}
 				d.vertices[xy] = cutVert
 			}
 			d.reNodeEdge(e, cutVert)
@@ -267,7 +263,7 @@ func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 	faceLabels := d.overlayEdges(other)
 	d.fixVertices()
 	d.reAssignFaces(faceLabels)
-	d.fixEdgeLabels()
+	d.fixLabels()
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -284,6 +280,7 @@ func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList
 func (d *doublyConnectedEdgeList) overlayVerticesInComponent(start *halfEdgeRecord) {
 	forEachEdge(start, func(e *halfEdgeRecord) {
 		if existing, ok := d.vertices[e.origin.coords]; ok {
+			existing.label |= e.origin.label
 			e.origin = existing
 		} else {
 			d.vertices[e.origin.coords] = e.origin
@@ -633,14 +630,28 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 	s.sets = append(s.sets, append(set1, set2...))
 }
 
-// fixEdgeLabels updates edge labels after performing an overlay. It adds edge
-// presence if the two faces adjacent to the edge are both present.
-func (d *doublyConnectedEdgeList) fixEdgeLabels() {
+// fixLabels updates edge and vertex labels after performing an overlay.
+func (d *doublyConnectedEdgeList) fixLabels() {
 	for _, e := range d.halfEdges {
+		// Add edge presence if the two faces adjacent to the edge are both
+		// present. The edge is part of that geometry (because it's "within"
+		// it), even if it's not explicitly part of its boundary.
 		face1 := e.incident.label
 		face2 := e.twin.incident.label
 		e.label |= face1 & face2 & valueMask
+
+		// If we haven't seen an edge label yet for one of the two input
+		// geometries, we can assume that we'll never see it. So we mark off
+		// that side as having the bit populated.
+		e.label |= presenceMask
+
+		// Copy edge labels onto the labels of adjacent vertices. This is
+		// because the vertices represent the endpoints of the edges, and
+		// should have at least those bits set.
+		e.origin.label |= e.label | e.prev.label
 	}
+
+	// TODO: do we need to set the presence bits for all vertices? They might not be set yet in some cases.
 }
 
 // extractGeometry converts the DECL into a Geometry that represents it.

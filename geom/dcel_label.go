@@ -4,6 +4,10 @@ import "fmt"
 
 const (
 	// TODO: Better names?
+	// Perhaps "in set" to indicate whether the part of the DCEL is in one of
+	// the geometries, and "populated" to indicate whether or not the
+	// aforementioned bit has been set yet.
+
 	inputAValue   uint8 = 0b0001
 	inputAPresent uint8 = 0b0010
 	inputBValue   uint8 = 0b0100

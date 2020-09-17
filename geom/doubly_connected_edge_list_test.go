@@ -269,6 +269,10 @@ func TestGraphTriangle(t *testing.T) {
 				Label:           inputAMask,
 			},
 		},
+		Edges: []EdgeLabelSpec{{
+			Label: inputAPresent | inputAValue,
+			Edges: []XY{v0, v1, v2},
+		}},
 		Vertices: []VertexSpec{{
 			Label:    inputAPresent | inputAValue,
 			Vertices: []XY{v0, v1, v2},
@@ -761,6 +765,20 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 			{
 				Label: presenceMask | valueMask,
 				Edges: []XY{v4, v3, v2, v4},
+			},
+		},
+		Vertices: []VertexSpec{
+			{
+				Label:    presenceMask | inputAValue,
+				Vertices: []XY{v0, v1},
+			},
+			{
+				Label:    presenceMask | inputBValue,
+				Vertices: []XY{v5, v7, v6},
+			},
+			{
+				Label:    presenceMask | valueMask,
+				Vertices: []XY{v2, v3, v4},
 			},
 		},
 	})
