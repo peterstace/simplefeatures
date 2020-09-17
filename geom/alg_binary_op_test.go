@@ -283,6 +283,26 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "POLYGON((1 0,1 1,2 2,2 0,1 0))",
 			symDiff: "POLYGON((0 2,1 1,2 2,2 0,1 0,0 0,0 2))",
 		},
+		{
+			/*
+			   +---+
+			   | A |
+			   +---+---+
+			       | B |
+			       +---+
+			*/
+
+			input1:  "POLYGON((0 1,1 1,1 2,0 2,0 1))",
+			input2:  "POLYGON((1 0,2 0,2 1,1 1,1 0))",
+			union:   "MULTIPOLYGON(((1 1,0 1,0 2,1 2,1 1)),((1 1,2 1,2 0,1 0,1 1)))",
+			inter:   "POINT(1 1)",
+			fwdDiff: "POLYGON((1 1,0 1,0 2,1 2,1 1))",
+			revDiff: "POLYGON((1 1,2 1,2 0,1 0,1 1))",
+			symDiff: "MULTIPOLYGON(((1 1,2 1,2 0,1 0,1 1)),((1 1,0 1,0 2,1 2,1 1)))",
+		},
+		// TODO: test case where intersection is point and line
+		// TODO: test case where intersection is point and polygon
+		// TODO: test case where intersection is point, line, and polygon
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)

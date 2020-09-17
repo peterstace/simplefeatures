@@ -660,6 +660,7 @@ func (d *doublyConnectedEdgeList) fixLabels() {
 func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geometry {
 	areals := d.extractPolygons(include)
 	linears := d.extractLineStrings(include)
+	points := d.extractPoints(include)
 
 	var arealGeom Geometry
 	if len(areals) == 1 {
@@ -679,6 +680,14 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geom
 		linearGeom = NewMultiLineStringFromLineStrings(linears).AsGeometry()
 	}
 
+	var pointGeom Geometry
+	if points.Length() == 1 {
+		pointGeom = NewPoint(points.Get(0)).AsGeometry()
+	} else if points.Length() > 1 {
+		pointGeom = NewMultiPoint(points).AsGeometry()
+	}
+
+	// TODO: more cases here
 	switch {
 	case !arealGeom.IsEmpty() && !linearGeom.IsEmpty():
 		return NewGeometryCollection([]Geometry{arealGeom, linearGeom}).AsGeometry()
@@ -686,6 +695,8 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geom
 		return arealGeom
 	case !linearGeom.IsEmpty():
 		return linearGeom
+	case !pointGeom.IsEmpty():
+		return pointGeom
 	default:
 		return GeometryCollection{}.AsGeometry()
 	}
@@ -896,4 +907,22 @@ func nextNoBranch(edge *halfEdgeRecord, include func(uint8) bool) *halfEdgeRecor
 		}
 		e = e.twin.next
 	}
+}
+
+// extractPoints extracts any vertices in the DCEL that should be part of the
+// output geometry, but aren't yet represented as part of any previously
+// extracted geometries.
+func (d *doublyConnectedEdgeList) extractPoints(include func(uint8) bool) Sequence {
+	// TODO: I'm not convinced that this works in all cases. We're not marking
+	// vertices as extracted as we extract faces and linear elements, so
+	// shouldn't this function be returning too many points? We might be
+	// missing some test cases.
+	var coords []float64
+	for xy, vert := range d.vertices {
+		if include(vert.label) && (vert.label&extracted) == 0 {
+			vert.label |= extracted
+			coords = append(coords, xy.X, xy.Y)
+		}
+	}
+	return NewSequence(coords, DimXY)
 }
