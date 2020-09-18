@@ -786,12 +786,7 @@ func extractPolygonBoundary(include func(uint8) bool, start *halfEdgeRecord, see
 			break
 		}
 	}
-
-	// TODO: rather than copying the first 2 coords, should we take the next
-	// origin instead?  There might be a way to reshuffle this loop so that
-	// there's less duplication.
 	coords = append(coords, coords[:2]...)
-
 	return NewSequence(coords, DimXY)
 }
 
@@ -926,13 +921,9 @@ func nextNoBranch(edge *halfEdgeRecord, include func(uint8) bool) *halfEdgeRecor
 // output geometry, but aren't yet represented as part of any previously
 // extracted geometries.
 func (d *doublyConnectedEdgeList) extractPoints(include func(uint8) bool) Sequence {
-	// TODO: I'm not convinced that this works in all cases. We're not marking
-	// vertices as extracted as we extract faces and linear elements, so
-	// shouldn't this function be returning too many points? We might be
-	// missing some test cases.
 	var coords []float64
 	for xy, vert := range d.vertices {
-		if include(vert.label) && (vert.label&extracted) == 0 {
+		if include(vert.label) && vert.label&extracted == 0 {
 			vert.label |= extracted
 			coords = append(coords, xy.X, xy.Y)
 		}
