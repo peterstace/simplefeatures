@@ -283,6 +283,86 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "POLYGON((1 0,1 1,2 2,2 0,1 0))",
 			symDiff: "POLYGON((0 2,1 1,2 2,2 0,1 0,0 0,0 2))",
 		},
+		{
+			/*
+			   +---+
+			   | A |
+			   +---+---+
+			       | B |
+			       +---+
+			*/
+			input1:  "POLYGON((0 1,1 1,1 2,0 2,0 1))",
+			input2:  "POLYGON((1 0,2 0,2 1,1 1,1 0))",
+			union:   "MULTIPOLYGON(((1 1,0 1,0 2,1 2,1 1)),((1 1,2 1,2 0,1 0,1 1)))",
+			inter:   "POINT(1 1)",
+			fwdDiff: "POLYGON((1 1,0 1,0 2,1 2,1 1))",
+			revDiff: "POLYGON((1 1,2 1,2 0,1 0,1 1))",
+			symDiff: "MULTIPOLYGON(((1 1,2 1,2 0,1 0,1 1)),((1 1,0 1,0 2,1 2,1 1)))",
+		},
+		{
+			/*
+			   +-------+-------+
+			   |    ,"   ",    |
+			   |   +---+---+   |
+			   | A     |     B |
+			   +-------+-------+
+			*/
+			input1: "POLYGON((0 0,2 0,2 1,1 1,2 2,0 2,0 0))",
+			input2: "POLYGON((2 0,4 0,4 2,2 2,3 1,2 1,2 0))",
+
+			// Union shows the existence of an unrelated bug.
+			//union:   "POLYGON((2 0,0 0,0 2,2 2,4 2,4 0,2 0),(2 2,1 1,2 1,3 1,2 2))",
+
+			inter:   "GEOMETRYCOLLECTION(POINT(2 2),LINESTRING(2 0,2 1))",
+			fwdDiff: "POLYGON((2 0,0 0,0 2,2 2,1 1,2 1,2 0))",
+			revDiff: "POLYGON((2 2,4 2,4 0,2 0,2 1,3 1,2 2))",
+
+			// symDiff shows the existence of an unrelated bug (same bug as for
+			// union since the geometries are identical).
+			//symDiff: "POLYGON((2 2,4 2,4 0,2 0,0 0,0 2,2 2),(2 2,1 1,2 1,3 1,2 2))",
+		},
+		{
+			/*
+			        +---+
+			        | A |
+			        +---+---+
+			            | B |
+			   +---+    +---+
+			   |A&B|
+			   +---+
+			*/
+			input1:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 2,2 2,2 3,1 3,1 2)))",
+			input2:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 1,3 1,3 2,2 2,2 1)))",
+			union:   "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 2,1 2,1 3,2 3,2 2)),((2 2,3 2,3 1,2 1,2 2)))",
+			inter:   "GEOMETRYCOLLECTION(POINT(2 2),POLYGON((0 0,0 1,1 1,1 0,0 0)))",
+			fwdDiff: "POLYGON((2 2,1 2,1 3,2 3,2 2))",
+			revDiff: "POLYGON((2 2,3 2,3 1,2 1,2 2))",
+			symDiff: "MULTIPOLYGON(((2 2,3 2,3 1,2 1,2 2)),((2 2,1 2,1 3,2 3,2 2)))",
+		},
+		{
+			/*
+			       +-------+
+			       |       |
+			   +---+---+   |
+			   |   |   |   |
+			   |   +---+   |
+			   | A |       |
+			   |   +---+   |
+			   |   |   |   |
+			   +---+---+   |
+			   |A&B|     B |
+			   +---+-------+
+			*/
+			input1: "POLYGON((0 0,1 0,1 4,0 4,0 0))",
+			input2: "POLYGON((0 0,3 0,3 5,1 5,1 4,2 4,2 3,1 3,1 2,2 2,2 1,0 1,0 0))",
+			// broken due to same bug
+			//union:   "POLYGON((1 0,0 0,0 1,0 4,1 4,1 5,3 5,3 0,1 0),(1 4,1 3,2 3,2 4,1 4),(1 2,1 1,2 1,2 2,1 2))",
+			inter:   "GEOMETRYCOLLECTION(POINT(1 4),LINESTRING(1 2,1 3),POLYGON((1 0,0 0,0 1,1 1,1 0)))",
+			fwdDiff: "POLYGON((1 2,1 1,0 1,0 4,1 4,1 3,1 2))",
+			revDiff: "POLYGON((1 4,1 5,3 5,3 0,1 0,1 1,2 1,2 2,1 2,1 3,2 3,2 4,1 4))",
+			// broken due to same bug
+			//symDiff: "POLYGON((1 4,1 5,3 5,3 0,1 0,1 1,0 1,0 4,1 4),(1 1,2 1,2 2,1 2,1 1),(1 4,1 3,2 3,2 4,1 4))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)

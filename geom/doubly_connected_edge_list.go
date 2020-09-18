@@ -8,7 +8,7 @@ import (
 
 type doublyConnectedEdgeList struct {
 	faces     []*faceRecord
-	halfEdges []*halfEdgeRecord // TODO: I don't think this is a great way of tracking the half edges.
+	halfEdges []*halfEdgeRecord
 	vertices  map[XY]*vertexRecord
 }
 
@@ -29,6 +29,7 @@ type halfEdgeRecord struct {
 type vertexRecord struct {
 	coords   XY
 	incident *halfEdgeRecord
+	label    uint8
 }
 
 func newDCELFromGeometry(g Geometry, mask uint8) *doublyConnectedEdgeList {
@@ -72,7 +73,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 			for i := 0; i < ring.Length(); i++ {
 				xy := ring.GetXY(i)
 				if _, ok := dcel.vertices[xy]; !ok {
-					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */}
+					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask}
 				}
 			}
 		}
@@ -112,7 +113,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 					incident: interiorFace,
 					next:     nil, // populated later
 					prev:     nil, // populated later
-					label:    mask | presenceMask,
+					label:    mask,
 				}
 				externalEdge := &halfEdgeRecord{
 					origin:   dcel.vertices[ln.b],
@@ -120,7 +121,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 					incident: exteriorFace,
 					next:     nil, // populated later
 					prev:     nil, // populated later
-					label:    mask | presenceMask,
+					label:    mask,
 				}
 				internalEdge.twin = externalEdge
 				dcel.vertices[ln.a].incident = internalEdge
@@ -207,10 +208,7 @@ func (d *doublyConnectedEdgeList) reNodeComponent(start *halfEdgeRecord, indexed
 			xy := xys[i+1]
 			cutVert, ok := d.vertices[xy]
 			if !ok {
-				cutVert = &vertexRecord{
-					coords:   xy,
-					incident: nil, /* populated later */
-				}
+				cutVert = &vertexRecord{xy, nil /* populated later */, e.label}
 				d.vertices[xy] = cutVert
 			}
 			d.reNodeEdge(e, cutVert)
@@ -265,7 +263,7 @@ func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 	faceLabels := d.overlayEdges(other)
 	d.fixVertices()
 	d.reAssignFaces(faceLabels)
-	d.fixEdgeLabels()
+	d.fixLabels()
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -282,6 +280,7 @@ func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList
 func (d *doublyConnectedEdgeList) overlayVerticesInComponent(start *halfEdgeRecord) {
 	forEachEdge(start, func(e *halfEdgeRecord) {
 		if existing, ok := d.vertices[e.origin.coords]; ok {
+			existing.label |= e.origin.label
 			e.origin = existing
 		} else {
 			d.vertices[e.origin.coords] = e.origin
@@ -631,22 +630,35 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 	s.sets = append(s.sets, append(set1, set2...))
 }
 
-// fixEdgeLabels updates edge labels after performing an overlay. It adds edge
-// presence if the two faces adjacent to the edge are both present.
-func (d *doublyConnectedEdgeList) fixEdgeLabels() {
+// fixLabels updates edge and vertex labels after performing an overlay.
+func (d *doublyConnectedEdgeList) fixLabels() {
 	for _, e := range d.halfEdges {
+		// Add edge presence if the two faces adjacent to the edge are both
+		// present. The edge is part of that geometry (because it's "within"
+		// it), even if it's not explicitly part of its boundary.
 		face1 := e.incident.label
 		face2 := e.twin.incident.label
 		e.label |= face1 & face2 & valueMask
+
+		// If we haven't seen an edge label yet for one of the two input
+		// geometries, we can assume that we'll never see it. So we mark off
+		// that side as having the bit populated.
+		e.label |= presenceMask
+
+		// Copy edge labels onto the labels of adjacent vertices. This is
+		// because the vertices represent the endpoints of the edges, and
+		// should have at least those bits set.
+		e.origin.label |= e.label | e.prev.label
 	}
+
+	// TODO: do we need to set the presence bits for all vertices? They might not be set yet in some cases.
 }
 
 // extractGeometry converts the DECL into a Geometry that represents it.
-//
-// TODO: extract point geometries as well.
 func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geometry {
 	areals := d.extractPolygons(include)
 	linears := d.extractLineStrings(include)
+	points := d.extractPoints(include)
 
 	var arealGeom Geometry
 	if len(areals) == 1 {
@@ -666,16 +678,27 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geom
 		linearGeom = NewMultiLineStringFromLineStrings(linears).AsGeometry()
 	}
 
-	switch {
-	case !arealGeom.IsEmpty() && !linearGeom.IsEmpty():
-		return NewGeometryCollection([]Geometry{arealGeom, linearGeom}).AsGeometry()
-	case !arealGeom.IsEmpty():
-		return arealGeom
-	case !linearGeom.IsEmpty():
-		return linearGeom
-	default:
-		return GeometryCollection{}.AsGeometry()
+	var pointGeom Geometry
+	if points.Length() == 1 {
+		pointGeom = NewPoint(points.Get(0)).AsGeometry()
+	} else if points.Length() > 1 {
+		pointGeom = NewMultiPoint(points).AsGeometry()
 	}
+
+	var geoms []Geometry
+	if !arealGeom.IsEmpty() {
+		geoms = append(geoms, arealGeom)
+	}
+	if !linearGeom.IsEmpty() {
+		geoms = append(geoms, linearGeom)
+	}
+	if !pointGeom.IsEmpty() {
+		geoms = append(geoms, pointGeom)
+	}
+	if len(geoms) == 1 {
+		return geoms[0]
+	}
+	return NewGeometryCollection(geoms).AsGeometry()
 }
 
 func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Polygon {
@@ -707,6 +730,14 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Po
 		seen := make(map[*halfEdgeRecord]bool)
 		for _, cmp := range components {
 			forEachEdge(cmp, func(edge *halfEdgeRecord) {
+
+				// Mark all edges and vertices intersecting with the polygon as
+				// being extracted.  This will prevent them being considered
+				// during linear and point geometry extraction.
+				edge.label |= extracted
+				edge.twin.label |= extracted
+				edge.origin.label |= extracted
+
 				if seen[edge] {
 					return
 				}
@@ -755,7 +786,6 @@ func extractPolygonBoundary(include func(uint8) bool, start *halfEdgeRecord, see
 			break
 		}
 	}
-
 	coords = append(coords, coords[:2]...)
 	return NewSequence(coords, DimXY)
 }
@@ -830,6 +860,8 @@ func extractLineString(e *halfEdgeRecord, include func(uint8) bool) LineString {
 		coords = append(coords, v.X, v.Y)
 		e.label |= extracted
 		e.twin.label |= extracted
+		e.origin.label |= extracted
+		e.twin.origin.label |= extracted
 
 		e = nextNoBranch(e, include)
 		if e == nil {
@@ -883,4 +915,18 @@ func nextNoBranch(edge *halfEdgeRecord, include func(uint8) bool) *halfEdgeRecor
 		}
 		e = e.twin.next
 	}
+}
+
+// extractPoints extracts any vertices in the DCEL that should be part of the
+// output geometry, but aren't yet represented as part of any previously
+// extracted geometries.
+func (d *doublyConnectedEdgeList) extractPoints(include func(uint8) bool) Sequence {
+	var coords []float64
+	for xy, vert := range d.vertices {
+		if include(vert.label) && vert.label&extracted == 0 {
+			vert.label |= extracted
+			coords = append(coords, xy.X, xy.Y)
+		}
+	}
+	return NewSequence(coords, DimXY)
 }
