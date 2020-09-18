@@ -437,10 +437,38 @@ func TestGraphMultiLineString(t *testing.T) {
 	        v0    v5
 	*/
 
+	v0 := XY{1, 0}
+	v1 := XY{0, 1}
+	v2 := XY{1, 2}
+	v3 := XY{2, 2}
+	v4 := XY{3, 1}
+	v5 := XY{2, 0}
+
 	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 6,
 		NumEdges: 8,
 		NumFaces: 1,
+		Faces: []FaceSpec{{
+			EdgeOrigin:      v0,
+			EdgeDestin:      v1,
+			OuterComponent:  nil,
+			InnerComponents: [][]XY{{v0, v1, v2, v1}, {v5, v4, v3, v4}},
+			Label:           inputAPresent,
+		}},
+		Edges: []EdgeLabelSpec{
+			{
+				Label: inputAPresent | inputAValue,
+				Edges: []XY{v0, v1, v2},
+			},
+			{
+				Label: inputAPresent | inputAValue,
+				Edges: []XY{v3, v4, v5},
+			},
+		},
+		Vertices: []VertexSpec{{
+			Label:    inputAPresent | inputAValue,
+			Vertices: []XY{v0, v1, v2, v3, v4, v5},
+		}},
 	})
 }
 

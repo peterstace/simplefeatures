@@ -169,6 +169,7 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 		vertices: make(map[XY]*vertexRecord),
 	}
 
+	// Add vertices.
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		ls := mls.LineStringN(i)
 		seq := ls.Coordinates()
@@ -177,6 +178,77 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 			dcel.vertices[xy] = &vertexRecord{coords: xy, label: mask}
 		}
 	}
+
+	// Linear elements have no face structure, so everything just points to the
+	// infinite face.
+	infFace := &faceRecord{
+		outerComponent:  nil,
+		innerComponents: nil,
+		label:           mask & presenceMask,
+	}
+	dcel.faces = []*faceRecord{infFace}
+
+	// Add edges.
+	for i := 0; i < mls.NumLineStrings(); i++ {
+		// TODO: handle non-simple edges
+		var newEdges []*halfEdgeRecord
+		ls := mls.LineStringN(i)
+		seq := ls.Coordinates()
+		for j := 0; j < seq.Length(); j++ {
+			ln, ok := getLine(seq, j)
+			if !ok {
+				continue
+			}
+			vOrigin := dcel.vertices[ln.a]
+			vDestin := dcel.vertices[ln.b]
+			fwd := &halfEdgeRecord{
+				origin:   vOrigin,
+				twin:     nil, // set later
+				incident: infFace,
+				next:     nil, // set later
+				prev:     nil, // set later
+				label:    mask,
+			}
+			rev := &halfEdgeRecord{
+				origin:   vDestin,
+				twin:     fwd,
+				incident: infFace,
+				next:     nil, // set later
+				prev:     nil, // set later
+				label:    mask,
+			}
+			fwd.twin = rev
+			newEdges = append(newEdges, fwd, rev)
+			vOrigin.incident = fwd
+			vDestin.incident = rev
+		}
+		n := len(newEdges)
+		for j, e := range newEdges {
+			if j%2 == 0 {
+				if j+2 < n {
+					e.next = newEdges[j+2]
+				}
+				if j-2 >= 0 {
+					e.prev = newEdges[j-2]
+				}
+			} else {
+				if j-2 >= 0 {
+					e.next = newEdges[j-2]
+				}
+				if j+2 < n {
+					e.prev = newEdges[j+2]
+				}
+			}
+		}
+		newEdges[0].prev = newEdges[1]
+		newEdges[1].next = newEdges[0]
+		newEdges[n-2].next = newEdges[n-1]
+		newEdges[n-1].prev = newEdges[n-2]
+
+		dcel.halfEdges = append(dcel.halfEdges, newEdges...)
+		infFace.innerComponents = append(infFace.innerComponents, newEdges[0])
+	}
+
 	return dcel
 }
 
