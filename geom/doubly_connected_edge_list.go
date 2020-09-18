@@ -655,8 +655,6 @@ func (d *doublyConnectedEdgeList) fixLabels() {
 }
 
 // extractGeometry converts the DECL into a Geometry that represents it.
-//
-// TODO: extract point geometries as well.
 func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geometry {
 	areals := d.extractPolygons(include)
 	linears := d.extractLineStrings(include)
@@ -687,19 +685,20 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geom
 		pointGeom = NewMultiPoint(points).AsGeometry()
 	}
 
-	// TODO: more cases here
-	switch {
-	case !arealGeom.IsEmpty() && !linearGeom.IsEmpty():
-		return NewGeometryCollection([]Geometry{arealGeom, linearGeom}).AsGeometry()
-	case !arealGeom.IsEmpty():
-		return arealGeom
-	case !linearGeom.IsEmpty():
-		return linearGeom
-	case !pointGeom.IsEmpty():
-		return pointGeom
-	default:
-		return GeometryCollection{}.AsGeometry()
+	var geoms []Geometry
+	if !arealGeom.IsEmpty() {
+		geoms = append(geoms, arealGeom)
 	}
+	if !linearGeom.IsEmpty() {
+		geoms = append(geoms, linearGeom)
+	}
+	if !pointGeom.IsEmpty() {
+		geoms = append(geoms, pointGeom)
+	}
+	if len(geoms) == 1 {
+		return geoms[0]
+	}
+	return NewGeometryCollection(geoms).AsGeometry()
 }
 
 func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Polygon {
@@ -731,6 +730,14 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Po
 		seen := make(map[*halfEdgeRecord]bool)
 		for _, cmp := range components {
 			forEachEdge(cmp, func(edge *halfEdgeRecord) {
+
+				// Mark all edges and vertices intersecting with the polygon as
+				// being extracted.  This will prevent them being considered
+				// during linear and point geometry extraction.
+				edge.label |= extracted
+				edge.twin.label |= extracted
+				edge.origin.label |= extracted
+
 				if seen[edge] {
 					return
 				}
@@ -780,7 +787,11 @@ func extractPolygonBoundary(include func(uint8) bool, start *halfEdgeRecord, see
 		}
 	}
 
+	// TODO: rather than copying the first 2 coords, should we take the next
+	// origin instead?  There might be a way to reshuffle this loop so that
+	// there's less duplication.
 	coords = append(coords, coords[:2]...)
+
 	return NewSequence(coords, DimXY)
 }
 
@@ -854,6 +865,8 @@ func extractLineString(e *halfEdgeRecord, include func(uint8) bool) LineString {
 		coords = append(coords, v.X, v.Y)
 		e.label |= extracted
 		e.twin.label |= extracted
+		e.origin.label |= extracted
+		e.twin.origin.label |= extracted
 
 		e = nextNoBranch(e, include)
 		if e == nil {

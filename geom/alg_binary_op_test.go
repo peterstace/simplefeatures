@@ -291,7 +291,6 @@ func TestBinaryOp(t *testing.T) {
 			       | B |
 			       +---+
 			*/
-
 			input1:  "POLYGON((0 1,1 1,1 2,0 2,0 1))",
 			input2:  "POLYGON((1 0,2 0,2 1,1 1,1 0))",
 			union:   "MULTIPOLYGON(((1 1,0 1,0 2,1 2,1 1)),((1 1,2 1,2 0,1 0,1 1)))",
@@ -300,7 +299,28 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "POLYGON((1 1,2 1,2 0,1 0,1 1))",
 			symDiff: "MULTIPOLYGON(((1 1,2 1,2 0,1 0,1 1)),((1 1,0 1,0 2,1 2,1 1)))",
 		},
-		// TODO: test case where intersection is point and line
+		{
+			/*
+			   +-------+-------+
+			   |    ,"   ",    |
+			   |   +---+---+   |
+			   | A     |     B |
+			   +-------+-------+
+			*/
+			input1: "POLYGON((0 0,2 0,2 1,1 1,2 2,0 2,0 0))",
+			input2: "POLYGON((2 0,4 0,4 2,2 2,3 1,2 1,2 0))",
+
+			// Union shows the existence of an unrelated bug.
+			//union:   "POLYGON((2 0,0 0,0 2,2 2,4 2,4 0,2 0),(2 2,1 1,2 1,3 1,2 2))",
+
+			inter:   "GEOMETRYCOLLECTION(POINT(2 2),LINESTRING(2 0,2 1))",
+			fwdDiff: "POLYGON((2 0,0 0,0 2,2 2,1 1,2 1,2 0))",
+			revDiff: "POLYGON((2 2,4 2,4 0,2 0,2 1,3 1,2 2))",
+
+			// symDiff shows the existence of an unrelated bug (same bug as for
+			// union since the geometries are identical).
+			//symDiff: "POLYGON((2 2,4 2,4 0,2 0,0 0,0 2,2 2),(2 2,1 1,2 1,3 1,2 2))",
+		},
 		// TODO: test case where intersection is point and polygon
 		// TODO: test case where intersection is point, line, and polygon
 	} {
