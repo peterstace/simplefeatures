@@ -43,6 +43,9 @@ func geometryToLines(g Geometry) []line {
 		return g.AsPolygon().Boundary().asLines()
 	case TypeMultiPolygon:
 		return g.AsMultiPolygon().Boundary().asLines()
+	case TypeLineString:
+		return g.AsLineString().asLines()
+		// TODO: MultiLineString as well?
 	default:
 		panic("not supported")
 	}

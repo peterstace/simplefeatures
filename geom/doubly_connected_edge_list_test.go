@@ -1246,3 +1246,62 @@ func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
 		},
 	})
 }
+
+func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
+	lsA, err := UnmarshalWKT("LINESTRING(0 0,1 0)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelA := newDCELFromGeometry(lsA, inputAMask)
+
+	lsB, err := UnmarshalWKT("LINESTRING(0 0,0 1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelB := newDCELFromGeometry(lsB, inputBMask)
+
+	dcelA.reNodeGraph(lsB.AsLineString().asLines())
+	dcelB.reNodeGraph(lsA.AsLineString().asLines())
+
+	dcelA.overlay(dcelB)
+
+	/*
+	  v0 B
+	   |
+	   |
+	  v1----v2 A
+	*/
+
+	v0 := XY{0, 1}
+	v1 := XY{0, 0}
+	v2 := XY{1, 0}
+
+	CheckDCEL(t, dcelA, DCELSpec{
+		NumVerts: 3,
+		NumEdges: 4,
+		NumFaces: 1,
+		Faces: []FaceSpec{{
+			EdgeOrigin:      v0,
+			EdgeDestin:      v1,
+			OuterComponent:  nil,
+			InnerComponents: [][]XY{{v0, v1, v2, v1}},
+			Label:           presenceMask,
+		}},
+		Edges: []EdgeLabelSpec{
+			{
+				Label: presenceMask | inputAValue,
+				Edges: []XY{v0, v1},
+			},
+			{
+				Label: presenceMask | inputBValue,
+				Edges: []XY{v1, v2},
+			},
+		},
+	})
+
+	fA := findEdge(t, dcelA, v0, v1).incident
+	fB := findEdge(t, dcelA, v1, v2).incident
+
+	fmt.Printf("%p %v\n", fA, fA)
+	fmt.Printf("%p %v\n", fB, fB)
+}

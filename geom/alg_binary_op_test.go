@@ -396,6 +396,21 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "POLYGON((0 3,3 3,3 0,2 2,0 3))",
 			symDiff: "MULTIPOLYGON(((0 3,3 3,3 0,2 2,0 3)),((3 0,0 0,0 3,1 1,3 0)))",
 		},
+		{
+			/*
+			   +
+			   |A
+			   |   B
+			   +----+
+			*/
+			input1:  "LINESTRING(0 0,0 1)",
+			input2:  "LINESTRING(0 0,1 0)",
+			union:   "MULTILINESTRING((0 0,0 1),(0 0,1 0))",
+			inter:   "POINT(0 0)",
+			fwdDiff: "LINESTRING(0 0,0 1)",
+			//revDiff: "LINESTRING(0 0,1 0)", // causes crash
+			symDiff: "MULTILINESTRING((0 0,1 0),(0 0,0 1))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
