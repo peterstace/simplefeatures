@@ -717,7 +717,7 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Po
 		// Find all edge cycles incident to the faces. Edges in these cycles
 		// are are candidates to be part of the Polygon boundary.
 		var components []*halfEdgeRecord
-		for _, f := range facesInPoly {
+		for f := range facesInPoly {
 			f.label |= extracted
 			if cmp := f.outerComponent; cmp != nil {
 				components = append(components, cmp)
@@ -747,7 +747,7 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Po
 					seen[edge] = true
 					return
 				}
-				seq := extractPolygonBoundary(include, edge, seen)
+				seq := extractPolygonBoundary(facesInPoly, edge, seen)
 				ring, err := NewLineString(seq)
 				if err != nil {
 					panic(fmt.Sprintf("could not create LineString: %v", err))
@@ -767,7 +767,7 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Po
 	return polys
 }
 
-func extractPolygonBoundary(include func(uint8) bool, start *halfEdgeRecord, seen map[*halfEdgeRecord]bool) Sequence {
+func extractPolygonBoundary(faceSet map[*faceRecord]bool, start *halfEdgeRecord, seen map[*halfEdgeRecord]bool) Sequence {
 	var coords []float64
 	e := start
 	for {
@@ -775,11 +775,12 @@ func extractPolygonBoundary(include func(uint8) bool, start *halfEdgeRecord, see
 		xy := e.origin.coords
 		coords = append(coords, xy.X, xy.Y)
 
-		// Sweep through the edges around the vertex until we find the next
-		// edge that is part of the polygon boundary.
-		e = e.next
-		for include(e.twin.incident.label) {
-			e = e.twin.next
+		// Sweep through the edges around the vertex (in a counter-clockwise
+		// order) until we find the next edge that is part of the polygon
+		// boundary.
+		e = e.twin.prev.twin
+		for !faceSet[e.incident] {
+			e = e.prev.twin
 		}
 
 		if e == start {
@@ -792,7 +793,7 @@ func extractPolygonBoundary(include func(uint8) bool, start *halfEdgeRecord, see
 
 // findFacesMakingPolygon finds all faces that belong to the polygon that
 // contains the start face (according to the given inclusion criteria).
-func findFacesMakingPolygon(include func(uint8) bool, start *faceRecord) []*faceRecord {
+func findFacesMakingPolygon(include func(uint8) bool, start *faceRecord) map[*faceRecord]bool {
 	expanded := make(map[*faceRecord]bool)
 	toExpand := make(map[*faceRecord]bool)
 	toExpand[start] = true
@@ -821,12 +822,7 @@ func findFacesMakingPolygon(include func(uint8) bool, start *faceRecord) []*face
 			toExpand[f] = true
 		}
 	}
-
-	list := make([]*faceRecord, 0, len(expanded))
-	for f := range expanded {
-		list = append(list, f)
-	}
-	return list
+	return expanded
 }
 
 // orderCCWRingFirst reorders rings such that if it contains at least one CCW

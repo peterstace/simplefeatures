@@ -301,25 +301,19 @@ func TestBinaryOp(t *testing.T) {
 		},
 		{
 			/*
-			   +-------+-------+
-			   |    ,"   ",    |
-			   |   +---+---+   |
-			   | A     |     B |
-			   +-------+-------+
+			   +-----+-----+
+			   |    / \    |
+			   |   +-+-+   |
+			   | A   |   B |
+			   +-----+-----+
 			*/
-			input1: "POLYGON((0 0,2 0,2 1,1 1,2 2,0 2,0 0))",
-			input2: "POLYGON((2 0,4 0,4 2,2 2,3 1,2 1,2 0))",
-
-			// Union shows the existence of an unrelated bug.
-			//union:   "POLYGON((2 0,0 0,0 2,2 2,4 2,4 0,2 0),(2 2,1 1,2 1,3 1,2 2))",
-
+			input1:  "POLYGON((0 0,2 0,2 1,1 1,2 2,0 2,0 0))",
+			input2:  "POLYGON((2 0,4 0,4 2,2 2,3 1,2 1,2 0))",
+			union:   "POLYGON((2 0,0 0,0 2,2 2,4 2,4 0,2 0),(2 2,1 1,2 1,3 1,2 2))",
 			inter:   "GEOMETRYCOLLECTION(POINT(2 2),LINESTRING(2 0,2 1))",
 			fwdDiff: "POLYGON((2 0,0 0,0 2,2 2,1 1,2 1,2 0))",
 			revDiff: "POLYGON((2 2,4 2,4 0,2 0,2 1,3 1,2 2))",
-
-			// symDiff shows the existence of an unrelated bug (same bug as for
-			// union since the geometries are identical).
-			//symDiff: "POLYGON((2 2,4 2,4 0,2 0,0 0,0 2,2 2),(2 2,1 1,2 1,3 1,2 2))",
+			symDiff: "POLYGON((2 2,4 2,4 0,2 0,0 0,0 2,2 2),(2 2,1 1,2 1,3 1,2 2))",
 		},
 		{
 			/*
@@ -353,15 +347,54 @@ func TestBinaryOp(t *testing.T) {
 			   |A&B|     B |
 			   +---+-------+
 			*/
-			input1: "POLYGON((0 0,1 0,1 4,0 4,0 0))",
-			input2: "POLYGON((0 0,3 0,3 5,1 5,1 4,2 4,2 3,1 3,1 2,2 2,2 1,0 1,0 0))",
-			// broken due to same bug
-			//union:   "POLYGON((1 0,0 0,0 1,0 4,1 4,1 5,3 5,3 0,1 0),(1 4,1 3,2 3,2 4,1 4),(1 2,1 1,2 1,2 2,1 2))",
+			input1:  "POLYGON((0 0,1 0,1 4,0 4,0 0))",
+			input2:  "POLYGON((0 0,3 0,3 5,1 5,1 4,2 4,2 3,1 3,1 2,2 2,2 1,0 1,0 0))",
+			union:   "POLYGON((1 0,0 0,0 1,0 4,1 4,1 5,3 5,3 0,1 0),(1 4,1 3,2 3,2 4,1 4),(1 2,1 1,2 1,2 2,1 2))",
 			inter:   "GEOMETRYCOLLECTION(POINT(1 4),LINESTRING(1 2,1 3),POLYGON((1 0,0 0,0 1,1 1,1 0)))",
 			fwdDiff: "POLYGON((1 2,1 1,0 1,0 4,1 4,1 3,1 2))",
 			revDiff: "POLYGON((1 4,1 5,3 5,3 0,1 0,1 1,2 1,2 2,1 2,1 3,2 3,2 4,1 4))",
-			// broken due to same bug
-			//symDiff: "POLYGON((1 4,1 5,3 5,3 0,1 0,1 1,0 1,0 4,1 4),(1 1,2 1,2 2,1 2,1 1),(1 4,1 3,2 3,2 4,1 4))",
+			symDiff: "POLYGON((1 4,1 5,3 5,3 0,1 0,1 1,0 1,0 4,1 4),(1 1,2 1,2 2,1 2,1 1),(1 4,1 3,2 3,2 4,1 4))",
+		},
+		{
+			/*
+			   +-------+-------+
+			   | A     |     B |
+			   |   +---+---+   |
+			   |   |       |   |
+			   |   +---+---+   |
+			   |       |       |
+			   +-------+-------+
+			*/
+
+			input1:  "POLYGON((0 0,2 0,2 1,1 1,1 2,2 2,2 3,0 3,0 0))",
+			input2:  "POLYGON((2 0,4 0,4 3,2 3,2 2,3 2,3 1,2 1,2 0))",
+			union:   "POLYGON((2 0,0 0,0 3,2 3,4 3,4 0,2 0),(2 2,1 2,1 1,2 1,3 1,3 2,2 2))",
+			inter:   "MULTILINESTRING((2 0,2 1),(2 2,2 3))",
+			fwdDiff: "POLYGON((2 0,0 0,0 3,2 3,2 2,1 2,1 1,2 1,2 0))",
+			revDiff: "POLYGON((2 3,4 3,4 0,2 0,2 1,3 1,3 2,2 2,2 3))",
+			symDiff: "POLYGON((2 3,4 3,4 0,2 0,0 0,0 3,2 3),(2 1,3 1,3 2,2 2,1 2,1 1,2 1))",
+		},
+		{
+			/*
+			   *-------------+
+			   |\`.        B |
+			   | \ `.        |
+			   |  \  `.      |
+			   |   \   `*    |
+			   |    *    \   |
+			   |     `.   \  |
+			   |       `.  \ |
+			   | A       `. \|
+			   +-----------`-*
+			*/
+
+			input1:  "POLYGON((0 0,3 0,1 1,0 3,0 0))",
+			input2:  "POLYGON((3 0,3 3,0 3,2 2,3 0))",
+			union:   "MULTIPOLYGON(((3 0,0 0,0 3,1 1,3 0)),((0 3,3 3,3 0,2 2,0 3)))",
+			inter:   "MULTIPOINT(0 3,3 0)",
+			fwdDiff: "POLYGON((3 0,0 0,0 3,1 1,3 0))",
+			revDiff: "POLYGON((0 3,3 3,3 0,2 2,0 3))",
+			symDiff: "MULTIPOLYGON(((0 3,3 3,3 0,2 2,0 3)),((3 0,0 0,0 3,1 1,3 0)))",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
