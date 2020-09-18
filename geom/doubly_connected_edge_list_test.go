@@ -417,6 +417,33 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 	})
 }
 
+func TestGraphMultiLineString(t *testing.T) {
+	mls, err := UnmarshalWKT("MULTILINESTRING((1 0,0 1,1 2),(2 0,3 1,2 2))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcel := newDCELFromGeometry(mls, inputAMask)
+	_ = dcel
+
+	/*
+	        v2    v3
+	       /        \
+	      /          \
+	     /            \
+	   v1              v4
+	     \            /
+	      \          /
+	       \        /
+	        v0    v5
+	*/
+
+	CheckDCEL(t, dcel, DCELSpec{
+		NumVerts: 6,
+		NumEdges: 8,
+		NumFaces: 1,
+	})
+}
+
 func TestGraphReNode(t *testing.T) {
 	poly, err := UnmarshalWKT("POLYGON((0 0,2 0,1 2,0 0))")
 	if err != nil {

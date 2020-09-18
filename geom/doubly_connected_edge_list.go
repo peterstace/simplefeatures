@@ -40,6 +40,12 @@ func newDCELFromGeometry(g Geometry, mask uint8) *doublyConnectedEdgeList {
 	case TypeMultiPolygon:
 		mp := g.AsMultiPolygon()
 		return newDCELFromMultiPolygon(mp, mask)
+	case TypeLineString:
+		mls := g.AsLineString().AsMultiLineString()
+		return newDCELFromMultiLineString(mls, mask)
+	case TypeMultiLineString:
+		mls := g.AsMultiLineString()
+		return newDCELFromMultiLineString(mls, mask)
 	default:
 		// TODO: support all other input geometry types.
 		panic(fmt.Sprintf("binary op not implemented for type %s", g.Type()))
@@ -153,6 +159,22 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 				newEdges[i*2+1].prev = newEdges[(2*i+3)%numEdges]
 			}
 			dcel.halfEdges = append(dcel.halfEdges, newEdges...)
+		}
+	}
+	return dcel
+}
+
+func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnectedEdgeList {
+	dcel := &doublyConnectedEdgeList{
+		vertices: make(map[XY]*vertexRecord),
+	}
+
+	for i := 0; i < mls.NumLineStrings(); i++ {
+		ls := mls.LineStringN(i)
+		seq := ls.Coordinates()
+		for j := 0; j < seq.Length(); j++ {
+			xy := seq.GetXY(j)
+			dcel.vertices[xy] = &vertexRecord{coords: xy, label: mask}
 		}
 	}
 	return dcel
