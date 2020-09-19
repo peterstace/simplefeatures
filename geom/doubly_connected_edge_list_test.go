@@ -137,7 +137,9 @@ func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []X
 	e := start
 	var got []XY
 	for {
-		if e.incident != f {
+		if e.incident == nil {
+			t.Errorf("half edge has no incident face set")
+		} else if e.incident != f {
 			t.Errorf("half edge has incorrect incident face")
 		}
 		if e.origin == nil {
@@ -161,7 +163,9 @@ func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []X
 			t.Fatal("inf loop")
 		}
 
-		if e.incident != f {
+		if e.incident == nil {
+			t.Errorf("half edge has no incident face set")
+		} else if e.incident != f {
 			t.Errorf("half edge has incorrect incident face")
 		}
 		if e.origin == nil {
@@ -1288,20 +1292,13 @@ func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 			Label:           presenceMask,
 		}},
 		Edges: []EdgeLabelSpec{
-			{
-				Label: presenceMask | inputAValue,
-				Edges: []XY{v0, v1},
-			},
-			{
-				Label: presenceMask | inputBValue,
-				Edges: []XY{v1, v2},
-			},
+			{Edges: []XY{v1, v2}, Label: presenceMask | inputAValue},
+			{Edges: []XY{v0, v1}, Label: presenceMask | inputBValue},
+		},
+		Vertices: []VertexSpec{
+			{Vertices: []XY{v2}, Label: presenceMask | inputAValue},
+			{Vertices: []XY{v0}, Label: presenceMask | inputBValue},
+			{Vertices: []XY{v1}, Label: presenceMask | valueMask},
 		},
 	})
-
-	fA := findEdge(t, dcelA, v0, v1).incident
-	fB := findEdge(t, dcelA, v1, v2).incident
-
-	fmt.Printf("%p %v\n", fA, fA)
-	fmt.Printf("%p %v\n", fB, fB)
 }

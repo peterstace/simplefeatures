@@ -408,7 +408,7 @@ func TestBinaryOp(t *testing.T) {
 			union:   "MULTILINESTRING((0 0,0 1),(0 0,1 0))",
 			inter:   "POINT(0 0)",
 			fwdDiff: "LINESTRING(0 0,0 1)",
-			//revDiff: "LINESTRING(0 0,1 0)", // causes crash
+			revDiff: "LINESTRING(0 0,1 0)",
 			symDiff: "MULTILINESTRING((0 0,1 0),(0 0,0 1))",
 		},
 	} {

@@ -485,7 +485,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 			continue
 		}
 		leftmostLowest := edgeLoopLeftmostLowest(e)
-		if edgeLoopIsOuterComponent(leftmostLowest) {
+		if edgeLoopIsOuterComponent(e) {
 			outerComponents = append(outerComponents, leftmostLowest)
 		} else {
 			innerComponents = append(innerComponents, leftmostLowest)
@@ -604,8 +604,8 @@ func completeFaceLabel(dst, src *faceRecord) {
 	}
 }
 
-// edgeLoopLeftmostLowest finds the edge whose origin is the leftmost (or
-// lowest for a tie) point in the loop.
+// edgeLoopLeftmostLowest finds the edge in the cycle whose origin is the
+// leftmost (or lowest for a tie) point in the loop.
 func edgeLoopLeftmostLowest(start *halfEdgeRecord) *halfEdgeRecord {
 	var best *halfEdgeRecord
 	forEachEdge(start, func(e *halfEdgeRecord) {
@@ -617,17 +617,32 @@ func edgeLoopLeftmostLowest(start *halfEdgeRecord) *halfEdgeRecord {
 }
 
 // edgeLoopIsOuterComponent checks to see if an edge loop is an outer edge loop
-// or an inner edge loop. It does this by examining the edge whose origin is
-// the leftmost (or lowest for ties) in the loop.
-func edgeLoopIsOuterComponent(leftmostLowest *halfEdgeRecord) bool {
-	// We can look at the next and prev points relative to the leftmost (then
-	// lowest) point in the cycle. Then we can use orientation of the triplet
-	// to determine if we're looking at an outer or inner component. This works
-	// because outer components are wound CCW and inner components are wound CW.
-	prev := leftmostLowest.prev.origin.coords
-	here := leftmostLowest.origin.coords
-	next := leftmostLowest.next.origin.coords
-	return orientation(prev, here, next) == leftTurn
+// or an inner edge loop. It does this by checking its orientation via the
+// Shoelace Formula.
+func edgeLoopIsOuterComponent(start *halfEdgeRecord) bool {
+	// Check to see if the loop is degenerate (i.e. doesn't enclose any area).
+	// Degenerate loops must always be inner components.
+	degenerate := true
+	for e, ok := start, true; ok; ok = e != start {
+		if e.incident != e.twin.incident {
+			degenerate = false
+			break
+		}
+	}
+	if degenerate {
+		return false
+	}
+
+	// Check the area of the loop using the shoelace formula. The sign of the
+	// loop area implies an orientation, which in turn implies whether the loop
+	// is an inner or outer component.
+	var sum float64
+	forEachEdge(start, func(e *halfEdgeRecord) {
+		pt0 := e.origin.coords
+		pt1 := e.next.origin.coords
+		sum += (pt1.X + pt0.X) * (pt1.Y - pt0.Y)
+	})
+	return sum > 0
 }
 
 func (d *doublyConnectedEdgeList) findNextDownEdgeToTheLeft(edge *halfEdgeRecord) *halfEdgeRecord {
