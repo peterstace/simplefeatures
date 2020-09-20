@@ -427,6 +427,26 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "LINESTRING(1 0,1 1)",
 			symDiff: "MULTILINESTRING((1 0,1 1),(0 1,0 0))",
 		},
+		{
+			//
+			//    *      *
+			//     \    /
+			//      B  A
+			//       \/
+			//       /\
+			//      A  B
+			//     /    \
+			//    *      *
+			//
+			input1: "LINESTRING(0 0,1 1)",
+			input2: "LINESTRING(0 1,1 0)",
+			// TODO: All test cases below cause infinite loop.
+			//union:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.5 0.5),(0.5 0.5,1 0))",
+			//inter: "POINT(0.5 0.5)",
+			//fwdDiff: "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))",
+			//revDiff: "MULTILINESTRING((0 1,0.5 0.5),(0.5 0.5,1 0))",
+			//symDiff: "MULTILINESTRING((0 1,0.5 0.5),(0.5 0.5,1 0),(0 0,0.5 0.5),(0.5 0.5,1 1))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
