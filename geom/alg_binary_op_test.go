@@ -440,7 +440,13 @@ func TestBinaryOp(t *testing.T) {
 			//
 			input1: "LINESTRING(0 0,1 1)",
 			input2: "LINESTRING(0 1,1 0)",
-			// TODO: All test cases below cause infinite loop.
+			//
+			// TODO: All test cases below cause infinite loop. The root cause
+			// is due to LINESTRING(0 0,1 1) not being re-noded correctly.
+			// Rather than re-noding after the graph has been created (which is
+			// a complex algorithm), it should be much easier to re-node the
+			// geometry as a pre-step.
+			//
 			//union:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.5 0.5),(0.5 0.5,1 0))",
 			//inter: "POINT(0.5 0.5)",
 			//fwdDiff: "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))",
