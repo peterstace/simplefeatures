@@ -411,6 +411,22 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "LINESTRING(0 0,1 0)",
 			symDiff: "MULTILINESTRING((0 0,1 0),(0 0,0 1))",
 		},
+		{
+			/*
+			   +       +
+			   |       |
+			   A       B
+			   |       |
+			   +--A&B--+
+			*/
+			input1:  "LINESTRING(0 1,0 0,1 0)",
+			input2:  "LINESTRING(0 0,1 0,1 1)",
+			union:   "MULTILINESTRING((0 1,0 0),(0 0,1 0),(1 0,1 1))",
+			inter:   "LINESTRING(0 0,1 0)",
+			fwdDiff: "LINESTRING(0 1,0 0)",
+			revDiff: "LINESTRING(1 0,1 1)",
+			symDiff: "MULTILINESTRING((1 0,1 1),(0 1,0 0))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
