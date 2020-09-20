@@ -40,6 +40,12 @@ func newDCELFromGeometry(g Geometry, mask uint8) *doublyConnectedEdgeList {
 	case TypeMultiPolygon:
 		mp := g.AsMultiPolygon()
 		return newDCELFromMultiPolygon(mp, mask)
+	case TypeLineString:
+		mls := g.AsLineString().AsMultiLineString()
+		return newDCELFromMultiLineString(mls, mask)
+	case TypeMultiLineString:
+		mls := g.AsMultiLineString()
+		return newDCELFromMultiLineString(mls, mask)
 	default:
 		// TODO: support all other input geometry types.
 		panic(fmt.Sprintf("binary op not implemented for type %s", g.Type()))
@@ -155,6 +161,94 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 			dcel.halfEdges = append(dcel.halfEdges, newEdges...)
 		}
 	}
+	return dcel
+}
+
+func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnectedEdgeList {
+	dcel := &doublyConnectedEdgeList{
+		vertices: make(map[XY]*vertexRecord),
+	}
+
+	// Add vertices.
+	for i := 0; i < mls.NumLineStrings(); i++ {
+		ls := mls.LineStringN(i)
+		seq := ls.Coordinates()
+		for j := 0; j < seq.Length(); j++ {
+			xy := seq.GetXY(j)
+			dcel.vertices[xy] = &vertexRecord{coords: xy, label: mask}
+		}
+	}
+
+	// Linear elements have no face structure, so everything just points to the
+	// infinite face.
+	infFace := &faceRecord{
+		outerComponent:  nil,
+		innerComponents: nil,
+		label:           mask & presenceMask,
+	}
+	dcel.faces = []*faceRecord{infFace}
+
+	// Add edges.
+	for i := 0; i < mls.NumLineStrings(); i++ {
+		// TODO: handle non-simple edges
+		var newEdges []*halfEdgeRecord
+		ls := mls.LineStringN(i)
+		seq := ls.Coordinates()
+		for j := 0; j < seq.Length(); j++ {
+			ln, ok := getLine(seq, j)
+			if !ok {
+				continue
+			}
+			vOrigin := dcel.vertices[ln.a]
+			vDestin := dcel.vertices[ln.b]
+			fwd := &halfEdgeRecord{
+				origin:   vOrigin,
+				twin:     nil, // set later
+				incident: infFace,
+				next:     nil, // set later
+				prev:     nil, // set later
+				label:    mask,
+			}
+			rev := &halfEdgeRecord{
+				origin:   vDestin,
+				twin:     fwd,
+				incident: infFace,
+				next:     nil, // set later
+				prev:     nil, // set later
+				label:    mask,
+			}
+			fwd.twin = rev
+			newEdges = append(newEdges, fwd, rev)
+			vOrigin.incident = fwd
+			vDestin.incident = rev
+		}
+		n := len(newEdges)
+		for j, e := range newEdges {
+			if j%2 == 0 {
+				if j+2 < n {
+					e.next = newEdges[j+2]
+				}
+				if j-2 >= 0 {
+					e.prev = newEdges[j-2]
+				}
+			} else {
+				if j-2 >= 0 {
+					e.next = newEdges[j-2]
+				}
+				if j+2 < n {
+					e.prev = newEdges[j+2]
+				}
+			}
+		}
+		newEdges[0].prev = newEdges[1]
+		newEdges[1].next = newEdges[0]
+		newEdges[n-2].next = newEdges[n-1]
+		newEdges[n-1].prev = newEdges[n-2]
+
+		dcel.halfEdges = append(dcel.halfEdges, newEdges...)
+		infFace.innerComponents = append(infFace.innerComponents, newEdges[0])
+	}
+
 	return dcel
 }
 
@@ -391,7 +485,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 			continue
 		}
 		leftmostLowest := edgeLoopLeftmostLowest(e)
-		if edgeLoopIsOuterComponent(leftmostLowest) {
+		if edgeLoopIsOuterComponent(e) {
 			outerComponents = append(outerComponents, leftmostLowest)
 		} else {
 			innerComponents = append(innerComponents, leftmostLowest)
@@ -510,8 +604,8 @@ func completeFaceLabel(dst, src *faceRecord) {
 	}
 }
 
-// edgeLoopLeftmostLowest finds the edge whose origin is the leftmost (or
-// lowest for a tie) point in the loop.
+// edgeLoopLeftmostLowest finds the edge in the cycle whose origin is the
+// leftmost (or lowest for a tie) point in the loop.
 func edgeLoopLeftmostLowest(start *halfEdgeRecord) *halfEdgeRecord {
 	var best *halfEdgeRecord
 	forEachEdge(start, func(e *halfEdgeRecord) {
@@ -523,17 +617,32 @@ func edgeLoopLeftmostLowest(start *halfEdgeRecord) *halfEdgeRecord {
 }
 
 // edgeLoopIsOuterComponent checks to see if an edge loop is an outer edge loop
-// or an inner edge loop. It does this by examining the edge whose origin is
-// the leftmost (or lowest for ties) in the loop.
-func edgeLoopIsOuterComponent(leftmostLowest *halfEdgeRecord) bool {
-	// We can look at the next and prev points relative to the leftmost (then
-	// lowest) point in the cycle. Then we can use orientation of the triplet
-	// to determine if we're looking at an outer or inner component. This works
-	// because outer components are wound CCW and inner components are wound CW.
-	prev := leftmostLowest.prev.origin.coords
-	here := leftmostLowest.origin.coords
-	next := leftmostLowest.next.origin.coords
-	return orientation(prev, here, next) == leftTurn
+// or an inner edge loop. It does this by checking its orientation via the
+// Shoelace Formula.
+func edgeLoopIsOuterComponent(start *halfEdgeRecord) bool {
+	// Check to see if the loop is degenerate (i.e. doesn't enclose any area).
+	// Degenerate loops must always be inner components.
+	degenerate := true
+	for e, ok := start, true; ok; ok = e != start {
+		if e.incident != e.twin.incident {
+			degenerate = false
+			break
+		}
+	}
+	if degenerate {
+		return false
+	}
+
+	// Check the area of the loop using the shoelace formula. The sign of the
+	// loop area implies an orientation, which in turn implies whether the loop
+	// is an inner or outer component.
+	var sum float64
+	forEachEdge(start, func(e *halfEdgeRecord) {
+		pt0 := e.origin.coords
+		pt1 := e.next.origin.coords
+		sum += (pt1.X + pt0.X) * (pt1.Y - pt0.Y)
+	})
+	return sum > 0
 }
 
 func (d *doublyConnectedEdgeList) findNextDownEdgeToTheLeft(edge *halfEdgeRecord) *halfEdgeRecord {

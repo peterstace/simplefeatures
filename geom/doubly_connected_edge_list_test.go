@@ -137,7 +137,9 @@ func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []X
 	e := start
 	var got []XY
 	for {
-		if e.incident != f {
+		if e.incident == nil {
+			t.Errorf("half edge has no incident face set")
+		} else if e.incident != f {
 			t.Errorf("half edge has incorrect incident face")
 		}
 		if e.origin == nil {
@@ -161,7 +163,9 @@ func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []X
 			t.Fatal("inf loop")
 		}
 
-		if e.incident != f {
+		if e.incident == nil {
+			t.Errorf("half edge has no incident face set")
+		} else if e.incident != f {
 			t.Errorf("half edge has incorrect incident face")
 		}
 		if e.origin == nil {
@@ -414,6 +418,61 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 				Label:           inputBPresent | inputBValue,
 			},
 		},
+	})
+}
+
+func TestGraphMultiLineString(t *testing.T) {
+	mls, err := UnmarshalWKT("MULTILINESTRING((1 0,0 1,1 2),(2 0,3 1,2 2))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcel := newDCELFromGeometry(mls, inputAMask)
+	_ = dcel
+
+	/*
+	        v2    v3
+	       /        \
+	      /          \
+	     /            \
+	   v1              v4
+	     \            /
+	      \          /
+	       \        /
+	        v0    v5
+	*/
+
+	v0 := XY{1, 0}
+	v1 := XY{0, 1}
+	v2 := XY{1, 2}
+	v3 := XY{2, 2}
+	v4 := XY{3, 1}
+	v5 := XY{2, 0}
+
+	CheckDCEL(t, dcel, DCELSpec{
+		NumVerts: 6,
+		NumEdges: 8,
+		NumFaces: 1,
+		Faces: []FaceSpec{{
+			EdgeOrigin:      v0,
+			EdgeDestin:      v1,
+			OuterComponent:  nil,
+			InnerComponents: [][]XY{{v0, v1, v2, v1}, {v5, v4, v3, v4}},
+			Label:           inputAPresent,
+		}},
+		Edges: []EdgeLabelSpec{
+			{
+				Label: inputAPresent | inputAValue,
+				Edges: []XY{v0, v1, v2},
+			},
+			{
+				Label: inputAPresent | inputAValue,
+				Edges: []XY{v3, v4, v5},
+			},
+		},
+		Vertices: []VertexSpec{{
+			Label:    inputAPresent | inputAValue,
+			Vertices: []XY{v0, v1, v2, v3, v4, v5},
+		}},
 	})
 }
 
@@ -1188,6 +1247,58 @@ func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
 				Label: presenceMask | inputAValue | inputBValue,
 				Edges: []XY{v0, v1, v2, v3},
 			},
+		},
+	})
+}
+
+func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
+	lsA, err := UnmarshalWKT("LINESTRING(0 0,1 0)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelA := newDCELFromGeometry(lsA, inputAMask)
+
+	lsB, err := UnmarshalWKT("LINESTRING(0 0,0 1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcelB := newDCELFromGeometry(lsB, inputBMask)
+
+	dcelA.reNodeGraph(lsB.AsLineString().asLines())
+	dcelB.reNodeGraph(lsA.AsLineString().asLines())
+
+	dcelA.overlay(dcelB)
+
+	/*
+	  v0 B
+	   |
+	   |
+	  v1----v2 A
+	*/
+
+	v0 := XY{0, 1}
+	v1 := XY{0, 0}
+	v2 := XY{1, 0}
+
+	CheckDCEL(t, dcelA, DCELSpec{
+		NumVerts: 3,
+		NumEdges: 4,
+		NumFaces: 1,
+		Faces: []FaceSpec{{
+			EdgeOrigin:      v0,
+			EdgeDestin:      v1,
+			OuterComponent:  nil,
+			InnerComponents: [][]XY{{v0, v1, v2, v1}},
+			Label:           presenceMask,
+		}},
+		Edges: []EdgeLabelSpec{
+			{Edges: []XY{v1, v2}, Label: presenceMask | inputAValue},
+			{Edges: []XY{v0, v1}, Label: presenceMask | inputBValue},
+		},
+		Vertices: []VertexSpec{
+			{Vertices: []XY{v2}, Label: presenceMask | inputAValue},
+			{Vertices: []XY{v0}, Label: presenceMask | inputBValue},
+			{Vertices: []XY{v1}, Label: presenceMask | valueMask},
 		},
 	})
 }

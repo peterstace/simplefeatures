@@ -396,6 +396,80 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "POLYGON((0 3,3 3,3 0,2 2,0 3))",
 			symDiff: "MULTIPOLYGON(((0 3,3 3,3 0,2 2,0 3)),((3 0,0 0,0 3,1 1,3 0)))",
 		},
+		{
+			/*
+			   +
+			   |A
+			   |   B
+			   +----+
+			*/
+			input1:  "LINESTRING(0 0,0 1)",
+			input2:  "LINESTRING(0 0,1 0)",
+			union:   "MULTILINESTRING((0 0,0 1),(0 0,1 0))",
+			inter:   "POINT(0 0)",
+			fwdDiff: "LINESTRING(0 0,0 1)",
+			revDiff: "LINESTRING(0 0,1 0)",
+			symDiff: "MULTILINESTRING((0 0,1 0),(0 0,0 1))",
+		},
+		{
+			/*
+			   +       +
+			   |       |
+			   A       B
+			   |       |
+			   +--A&B--+
+			*/
+			input1:  "LINESTRING(0 1,0 0,1 0)",
+			input2:  "LINESTRING(0 0,1 0,1 1)",
+			union:   "MULTILINESTRING((0 1,0 0),(0 0,1 0),(1 0,1 1))",
+			inter:   "LINESTRING(0 0,1 0)",
+			fwdDiff: "LINESTRING(0 1,0 0)",
+			revDiff: "LINESTRING(1 0,1 1)",
+			symDiff: "MULTILINESTRING((1 0,1 1),(0 1,0 0))",
+		},
+		{
+			//
+			//    *      *
+			//     \    /
+			//      B  A
+			//       \/
+			//       /\
+			//      A  B
+			//     /    \
+			//    *      *
+			//
+			input1: "LINESTRING(0 0,1 1)",
+			input2: "LINESTRING(0 1,1 0)",
+			//
+			// TODO: All test cases below cause infinite loop. The root cause
+			// is due to LINESTRING(0 0,1 1) not being re-noded correctly.
+			// Rather than re-noding after the graph has been created (which is
+			// a complex algorithm), it should be much easier to re-node the
+			// geometry as a pre-step.
+			//
+			//union:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.5 0.5),(0.5 0.5,1 0))",
+			//inter: "POINT(0.5 0.5)",
+			//fwdDiff: "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))",
+			//revDiff: "MULTILINESTRING((0 1,0.5 0.5),(0.5 0.5,1 0))",
+			//symDiff: "MULTILINESTRING((0 1,0.5 0.5),(0.5 0.5,1 0),(0 0,0.5 0.5),(0.5 0.5,1 1))",
+		},
+		{
+			//    +---A---+
+			//    |       |
+			//    B       B
+			//    |       |
+			//    +---A---+
+			//
+			// TODO: MultiLineStrings not yet supported.
+			//
+			input1: "MULTILINESTRING((0 0,1 0),(0 1,1 1))",
+			input2: "MULTILINESTRING((0 0,0 1),(1 0,1 1))",
+			//union:   "MULTILINESTRING((0 0,1 0),(0 1,1 1),(0 0,0 1),(1 0,1 1))",
+			//inter: "MULTIPOINT(0 0,0 1,1 0,1 1)",
+			//fwdDiff: "MULTILINESTRING((0 0,1 0),(0 1,1 1))",
+			//revDiff: "MULTILINESTRING((0 0,0 1),(1 0,1 1))",
+			//symDiff: "MULTILINESTRING((0 0,0 1),(1 0,1 1),(0 0,1 0),(0 1,1 1))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
