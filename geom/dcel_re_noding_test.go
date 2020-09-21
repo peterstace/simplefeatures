@@ -27,6 +27,16 @@ func TestDCELReNoding(t *testing.T) {
 			want:  "MULTIPOINT(1 2,2 1)",
 		},
 		{
+			input: "LINESTRING(0 0,1 1)",
+			cut:   "POINT(0.5 0.5)",
+			want:  "LINESTRING(0 0,0.5 0.5,1 1)",
+		},
+		{
+			input: "LINESTRING(0 0,1 1)",
+			cut:   "GEOMETRYCOLLECTION(POINT(0.5 0.5),LINESTRING(0.5 1,1 0.5))",
+			want:  "LINESTRING(0 0,0.5 0.5,0.75 0.75,1 1)",
+		},
+		{
 			input: "LINESTRING EMPTY",
 			cut:   "LINESTRING(0 1,1 0)",
 			want:  "LINESTRING EMPTY",

@@ -110,6 +110,14 @@ func reNodeLineString(ls LineString, cut cutSet) LineString {
 			xys = append(xys, inter.ptA, inter.ptB)
 			return nil
 		})
+		cut.ptIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
+			other := cut.ptIndex.points[i]
+			if ln.intersectsXY(other) {
+				xys = append(xys, other)
+			}
+			return nil
+		})
+
 		xys = sortAndUniquifyXYs(xys) // TODO: make common function
 
 		// Reverse order to match direction of edge.
