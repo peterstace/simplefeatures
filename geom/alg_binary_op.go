@@ -25,28 +25,19 @@ func SymmetricDifference(a, b Geometry) Geometry {
 }
 
 func binaryOp(a, b Geometry, include func(uint8) bool) Geometry {
+	overlay := createOverlay(a, b)
+	return overlay.extractGeometry(include)
+}
+
+func createOverlay(a, b Geometry) *doublyConnectedEdgeList {
+	cutA := newCutSet(a)
+	cutB := newCutSet(b)
+	a = reNodeGeometry(a, cutB)
+	b = reNodeGeometry(b, cutA)
+
 	dcelA := newDCELFromGeometry(a, inputAMask)
 	dcelB := newDCELFromGeometry(b, inputBMask)
 
-	linesA := geometryToLines(a)
-	linesB := geometryToLines(b)
-	dcelA.reNodeGraph(linesB)
-	dcelB.reNodeGraph(linesA)
-
 	dcelA.overlay(dcelB)
-	return dcelA.extractGeometry(include)
-}
-
-func geometryToLines(g Geometry) []line {
-	switch g.Type() {
-	case TypePolygon:
-		return g.AsPolygon().Boundary().asLines()
-	case TypeMultiPolygon:
-		return g.AsMultiPolygon().Boundary().asLines()
-	case TypeLineString:
-		return g.AsLineString().asLines()
-		// TODO: MultiLineString as well?
-	default:
-		panic("not supported")
-	}
+	return dcelA
 }

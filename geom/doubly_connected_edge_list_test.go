@@ -476,199 +476,17 @@ func TestGraphMultiLineString(t *testing.T) {
 	})
 }
 
-func TestGraphReNode(t *testing.T) {
-	poly, err := UnmarshalWKT("POLYGON((0 0,2 0,1 2,0 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), inputAMask)
-
-	other, err := UnmarshalWKT("POLYGON((0 1,2 1,1 3,0 1))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	dcel.reNodeGraph(other.AsPolygon().Boundary().asLines())
-
-	/*
-
-	           v3
-	          /  \
-	         /    \
-	        /      \
-	      v4        v2
-	      /    f1    \    f0
-	     /            \
-	    /              \
-	   v0--------------v1
-
-	*/
-
-	v0 := XY{0, 0}
-	v1 := XY{2, 0}
-	v2 := XY{1.5, 1}
-	v3 := XY{1, 2}
-	v4 := XY{0.5, 1}
-
-	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 5,
-		NumEdges: 10,
-		NumFaces: 2,
-		Faces: []FaceSpec{
-			{
-				// f0
-				EdgeOrigin:      v2,
-				EdgeDestin:      v1,
-				OuterComponent:  nil,
-				InnerComponents: [][]XY{{v2, v1, v0, v4, v3}},
-				Label:           inputAPresent,
-			},
-			{
-				// f1
-				EdgeOrigin:      v1,
-				EdgeDestin:      v2,
-				OuterComponent:  []XY{v3, v4, v0, v1, v2},
-				InnerComponents: nil,
-				Label:           inputAPresent | inputAValue,
-			},
-		},
-		Vertices: []VertexSpec{{
-			Label:    inputAPresent | inputAValue,
-			Vertices: []XY{v0, v1, v2, v3, v4},
-		}},
-	})
-}
-
-func TestGraphReNodeTwoCutsInOneEdge(t *testing.T) {
-	poly, err := UnmarshalWKT("POLYGON((0 0,1 2,2 0,0 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), inputBMask)
-
-	other, err := UnmarshalWKT("POLYGON((0 -1,1 1,2 -1,0 -1))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	dcel.reNodeGraph(other.AsPolygon().Boundary().asLines())
-
-	v0 := XY{0, 0}
-	v1 := XY{0.5, 0}
-	v2 := XY{1.5, 0}
-	v3 := XY{2, 0}
-	v4 := XY{1, 2}
-
-	/*
-
-	           v4
-	          /  \
-	         /    \
-	        /      \
-	       /        \
-	      /    f1    \    f0
-	     /            \
-	    /              \
-	   v0---v1----v2---v3
-
-	*/
-
-	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 5,
-		NumEdges: 10,
-		NumFaces: 2,
-		Faces: []FaceSpec{
-			{
-				// f0
-				EdgeOrigin:      v4,
-				EdgeDestin:      v3,
-				OuterComponent:  nil,
-				InnerComponents: [][]XY{{v4, v3, v2, v1, v0}},
-				Label:           inputBPresent,
-			},
-			{
-				// f1
-				EdgeOrigin:      v3,
-				EdgeDestin:      v4,
-				OuterComponent:  []XY{v3, v4, v0, v1, v2},
-				InnerComponents: nil,
-				Label:           inputBPresent | inputBValue,
-			},
-		},
-	})
-}
-
-func TestGraphReNodeOverlappingEdge(t *testing.T) {
-	poly, err := UnmarshalWKT("POLYGON((0 0,0 2,2 2,2 0,0 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), inputAMask)
-
-	other, err := UnmarshalWKT("POLYGON((1 2,2 2,2 3,1 3,1 2))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	dcel.reNodeGraph(other.AsPolygon().Boundary().asLines())
-
-	/*
-
-	  V0---V1---V2
-	  |          |
-	  |          |
-	  |    f1    |   f0
-	  |          |
-	  |          |
-	  V4--------V3
-
-	*/
-
-	v0 := XY{0, 2}
-	v1 := XY{1, 2}
-	v2 := XY{2, 2}
-	v3 := XY{2, 0}
-	v4 := XY{0, 0}
-
-	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 5,
-		NumEdges: 10,
-		NumFaces: 2,
-		Faces: []FaceSpec{
-			{
-				// f0
-				EdgeOrigin:      v2,
-				EdgeDestin:      v3,
-				OuterComponent:  nil,
-				InnerComponents: [][]XY{{v2, v3, v4, v0, v1}},
-				Label:           inputAPresent,
-			},
-			{
-				// f1
-				EdgeOrigin:      v3,
-				EdgeDestin:      v2,
-				OuterComponent:  []XY{v1, v0, v4, v3, v2},
-				InnerComponents: nil,
-				Label:           inputAPresent | inputAValue,
-			},
-		},
-	})
-}
-
 func TestGraphOverlayDisjoint(t *testing.T) {
 	polyA, err := UnmarshalWKT("POLYGON((0 0,1 0,1 1,0 1,0 0))")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelA := newDCELFromMultiPolygon(polyA.AsPolygon().AsMultiPolygon(), inputAMask)
-
 	polyB, err := UnmarshalWKT("POLYGON((2 2,2 3,3 3,3 2,2 2))")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelB := newDCELFromMultiPolygon(polyB.AsPolygon().AsMultiPolygon(), inputBMask)
 
-	dcelA.reNodeGraph(polyB.AsPolygon().Boundary().asLines())
-	dcelB.reNodeGraph(polyA.AsPolygon().Boundary().asLines())
-
-	dcelA.overlay(dcelB)
+	overlay := createOverlay(polyA, polyB)
 
 	/*
 	                v7------v6
@@ -696,7 +514,7 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 	v6 := XY{3, 3}
 	v7 := XY{2, 3}
 
-	CheckDCEL(t, dcelA, DCELSpec{
+	CheckDCEL(t, overlay, DCELSpec{
 		NumVerts: 8,
 		NumEdges: 16,
 		NumFaces: 3,
@@ -734,18 +552,12 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelA := newDCELFromMultiPolygon(polyA.AsPolygon().AsMultiPolygon(), inputAMask)
-
 	polyB, err := UnmarshalWKT("POLYGON((0 1,2 1,1 3,0 1))")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelB := newDCELFromMultiPolygon(polyB.AsPolygon().AsMultiPolygon(), inputBMask)
 
-	dcelA.reNodeGraph(polyB.AsPolygon().Boundary().asLines())
-	dcelB.reNodeGraph(polyA.AsPolygon().Boundary().asLines())
-
-	dcelA.overlay(dcelB)
+	overlay := createOverlay(polyA, polyB)
 
 	/*
 	           v7
@@ -774,7 +586,7 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	v6 := XY{2, 1}
 	v7 := XY{1, 3}
 
-	CheckDCEL(t, dcelA, DCELSpec{
+	CheckDCEL(t, overlay, DCELSpec{
 		NumVerts: 8,
 		NumEdges: 20,
 		NumFaces: 4,
@@ -848,18 +660,12 @@ func TestGraphOverlayInside(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelA := newDCELFromMultiPolygon(polyA.AsPolygon().AsMultiPolygon(), inputAMask)
-
 	polyB, err := UnmarshalWKT("POLYGON((1 1,2 1,2 2,1 2,1 1))")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelB := newDCELFromMultiPolygon(polyB.AsPolygon().AsMultiPolygon(), inputBMask)
 
-	dcelA.reNodeGraph(polyB.AsPolygon().Boundary().asLines())
-	dcelB.reNodeGraph(polyA.AsPolygon().Boundary().asLines())
-
-	dcelA.overlay(dcelB)
+	overlay := createOverlay(polyA, polyB)
 
 	/*
 	  v3-----------------v2
@@ -884,7 +690,7 @@ func TestGraphOverlayInside(t *testing.T) {
 	v6 := XY{2, 2}
 	v7 := XY{1, 2}
 
-	CheckDCEL(t, dcelA, DCELSpec{
+	CheckDCEL(t, overlay, DCELSpec{
 		NumVerts: 8,
 		NumEdges: 16,
 		NumFaces: 3,
@@ -922,18 +728,12 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelA := newDCELFromGeometry(polyA, inputAMask)
-
 	polyB, err := UnmarshalWKT("MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 1,0 1)))")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelB := newDCELFromGeometry(polyB, inputBMask)
 
-	dcelA.reNodeGraph(polyB.AsMultiPolygon().Boundary().asLines())
-	dcelB.reNodeGraph(polyA.AsMultiPolygon().Boundary().asLines())
-
-	dcelA.overlay(dcelB)
+	overlay := createOverlay(polyA, polyB)
 
 	/*
 	  v16---v15
@@ -973,7 +773,7 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 	v17 := XY{1, 1}
 	v18 := XY{2, 2}
 
-	CheckDCEL(t, dcelA, DCELSpec{
+	CheckDCEL(t, overlay, DCELSpec{
 		NumVerts: 18,
 		NumEdges: 40,
 		NumFaces: 6,
@@ -1039,18 +839,12 @@ func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelA := newDCELFromGeometry(polyA, inputAMask)
-
 	polyB, err := UnmarshalWKT("POLYGON((1 0,1 1,2 1,2 0,1 0))")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelB := newDCELFromGeometry(polyB, inputBMask)
 
-	dcelA.reNodeGraph(polyB.AsPolygon().Boundary().asLines())
-	dcelB.reNodeGraph(polyA.AsPolygon().Boundary().asLines())
-
-	dcelA.overlay(dcelB)
+	overlay := createOverlay(polyA, polyB)
 
 	/*
 	  v5-----v4----v3
@@ -1066,7 +860,7 @@ func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
 	v4 := XY{1, 1}
 	v5 := XY{0, 1}
 
-	CheckDCEL(t, dcelA, DCELSpec{
+	CheckDCEL(t, overlay, DCELSpec{
 		NumVerts: 6,
 		NumEdges: 14,
 		NumFaces: 3,
@@ -1115,18 +909,12 @@ func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelA := newDCELFromGeometry(polyA, inputAMask)
-
 	polyB, err := UnmarshalWKT("POLYGON((2 0,2 2,4 2,4 0,2 0))")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelB := newDCELFromGeometry(polyB, inputBMask)
 
-	dcelA.reNodeGraph(polyB.AsPolygon().Boundary().asLines())
-	dcelB.reNodeGraph(polyA.AsPolygon().Boundary().asLines())
-
-	dcelA.overlay(dcelB)
+	overlay := createOverlay(polyA, polyB)
 
 	/*
 	  v7-------v6    f0
@@ -1147,7 +935,7 @@ func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
 	v6 := XY{2, 3}
 	v7 := XY{0, 3}
 
-	CheckDCEL(t, dcelA, DCELSpec{
+	CheckDCEL(t, overlay, DCELSpec{
 		NumVerts: 8,
 		NumEdges: 18,
 		NumFaces: 3,
@@ -1196,18 +984,12 @@ func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelA := newDCELFromGeometry(polyA, inputAMask)
-
 	polyB, err := UnmarshalWKT("POLYGON((0 0,0 1,1 1,1 0,0 0))")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelB := newDCELFromGeometry(polyB, inputBMask)
 
-	dcelA.reNodeGraph(polyB.AsPolygon().Boundary().asLines())
-	dcelB.reNodeGraph(polyA.AsPolygon().Boundary().asLines())
-
-	dcelA.overlay(dcelB)
+	overlay := createOverlay(polyA, polyB)
 
 	/*
 	  v3-------v2
@@ -1222,7 +1004,7 @@ func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
 	v2 := XY{1, 1}
 	v3 := XY{0, 1}
 
-	CheckDCEL(t, dcelA, DCELSpec{
+	CheckDCEL(t, overlay, DCELSpec{
 		NumVerts: 4,
 		NumEdges: 8,
 		NumFaces: 2,
@@ -1256,18 +1038,12 @@ func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelA := newDCELFromGeometry(lsA, inputAMask)
-
 	lsB, err := UnmarshalWKT("LINESTRING(0 0,0 1)")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcelB := newDCELFromGeometry(lsB, inputBMask)
 
-	dcelA.reNodeGraph(lsB.AsLineString().asLines())
-	dcelB.reNodeGraph(lsA.AsLineString().asLines())
-
-	dcelA.overlay(dcelB)
+	overlay := createOverlay(lsA, lsB)
 
 	/*
 	  v0 B
@@ -1280,7 +1056,7 @@ func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 	v1 := XY{0, 0}
 	v2 := XY{1, 0}
 
-	CheckDCEL(t, dcelA, DCELSpec{
+	CheckDCEL(t, overlay, DCELSpec{
 		NumVerts: 3,
 		NumEdges: 4,
 		NumFaces: 1,

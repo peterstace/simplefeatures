@@ -66,6 +66,21 @@ func TestDCELReNoding(t *testing.T) {
 			cut:   "LINESTRING(0 0,2 4)",
 			want:  "MULTILINESTRING((0 1,0.5 1,2 1),(0 2,1 2,2 2))",
 		},
+		{
+			input: "POLYGON((0 0,2 0,1 2,0 0))",
+			cut:   "POLYGON((0 1,2 1,1 3,0 1))",
+			want:  "POLYGON((0 0,2 0,1.5 1,1 2,0.5 1,0 0))",
+		},
+		{
+			input: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			cut:   "LINESTRING(-1 0.5,4 0.5)",
+			want:  "MULTIPOLYGON(((0 0,0 0.5,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 0.5,2 1,3 1,3 0.5,3 0,2 0)))",
+		},
+		{
+			input: "GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 1,1 0,0 0)),LINESTRING(2 0,2 1))",
+			cut:   "LINESTRING(-1 0.5,4 0.5)",
+			want:  "GEOMETRYCOLLECTION(POLYGON((0 0,0 0.5,0 1,1 1,1 0.5,1 0,0 0)),LINESTRING(2 0,2 0.5,2 1))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Logf("input: %v", tt.input)
@@ -89,7 +104,8 @@ func TestDCELReNoding(t *testing.T) {
 			got := reNodeGeometry(inputG, cutSet)
 
 			if !got.EqualsExact(wantG) {
-				t.Errorf("mismatch, got: %v", got.AsText())
+				t.Logf("MISMATCH")
+				t.Errorf("got: %v", got.AsText())
 			}
 		})
 	}
