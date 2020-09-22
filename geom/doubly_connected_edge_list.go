@@ -60,7 +60,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 	infFace := &faceRecord{
 		outerComponent:  nil, // left nil
 		innerComponents: nil, // populated later
-		label:           presenceMask & mask,
+		label:           populatedMask & mask,
 	}
 	dcel.faces = append(dcel.faces, infFace)
 
@@ -98,7 +98,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 				holeFace := &faceRecord{
 					outerComponent:  nil, // left nil
 					innerComponents: nil, // populated later
-					label:           presenceMask & mask,
+					label:           populatedMask & mask,
 				}
 				// For inner rings, the exterior face is a hole rather than the
 				// infinite face.
@@ -184,7 +184,7 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 	infFace := &faceRecord{
 		outerComponent:  nil,
 		innerComponents: nil,
-		label:           mask & presenceMask,
+		label:           mask & populatedMask,
 	}
 	dcel.faces = []*faceRecord{infFace}
 
@@ -452,7 +452,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 // overlay DCEL doesn't have any edges from one of the original geometries.
 func (d *doublyConnectedEdgeList) completePartialFaceLabel(face *faceRecord) {
 	labelIsComplete := func() bool {
-		return (face.label & presenceMask) == presenceMask
+		return (face.label & populatedMask) == populatedMask
 	}
 	expanded := make(map[*faceRecord]bool)
 	stack := []*faceRecord{face}
@@ -496,10 +496,10 @@ func adjacentFaces(f *faceRecord) []*faceRecord {
 
 func completeFaceLabel(dst, src *faceRecord) {
 	// TODO: is there a way to do this without treating the two halfs of the label separately?
-	if dst.label&inputAPresent == 0 {
+	if dst.label&inputAPopulated == 0 {
 		dst.label |= (src.label & inputAMask)
 	}
-	if dst.label&inputBPresent == 0 {
+	if dst.label&inputBPopulated == 0 {
 		dst.label |= (src.label & inputBMask)
 	}
 }
@@ -652,12 +652,12 @@ func (d *doublyConnectedEdgeList) fixLabels() {
 		// it), even if it's not explicitly part of its boundary.
 		face1 := e.incident.label
 		face2 := e.twin.incident.label
-		e.label |= face1 & face2 & valueMask
+		e.label |= face1 & face2 & inSetMask
 
 		// If we haven't seen an edge label yet for one of the two input
 		// geometries, we can assume that we'll never see it. So we mark off
 		// that side as having the bit populated.
-		e.label |= presenceMask
+		e.label |= populatedMask
 
 		// Copy edge labels onto the labels of adjacent vertices. This is
 		// because the vertices represent the endpoints of the edges, and

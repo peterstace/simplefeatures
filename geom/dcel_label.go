@@ -3,18 +3,13 @@ package geom
 import "fmt"
 
 const (
-	// TODO: Better names?
-	// Perhaps "in set" to indicate whether the part of the DCEL is in one of
-	// the geometries, and "populated" to indicate whether or not the
-	// aforementioned bit has been set yet.
+	inputAInSet     uint8 = 0b0001
+	inputAPopulated uint8 = 0b0010
+	inputBInSet     uint8 = 0b0100
+	inputBPopulated uint8 = 0b1000
 
-	inputAValue   uint8 = 0b0001
-	inputAPresent uint8 = 0b0010
-	inputBValue   uint8 = 0b0100
-	inputBPresent uint8 = 0b1000
-
-	presenceMask uint8 = 0b1010
-	valueMask    uint8 = 0b0101
+	populatedMask uint8 = 0b1010
+	inSetMask     uint8 = 0b0101
 
 	inputAMask uint8 = 0b0011
 	inputBMask uint8 = 0b1100
@@ -23,28 +18,28 @@ const (
 )
 
 func assertPresenceBits(label uint8) {
-	if presenceMask&label != presenceMask {
+	if populatedMask&label != populatedMask {
 		panic(fmt.Sprintf("all presence bits in label not set: %v", label))
 	}
 }
 
 func selectUnion(label uint8) bool {
 	assertPresenceBits(label)
-	return label&valueMask != 0
+	return label&inSetMask != 0
 }
 
 func selectIntersection(label uint8) bool {
 	assertPresenceBits(label)
-	return label&valueMask == valueMask
+	return label&inSetMask == inSetMask
 }
 
 func selectDifference(label uint8) bool {
 	assertPresenceBits(label)
-	return label&valueMask == inputAValue
+	return label&inSetMask == inputAInSet
 }
 
 func selectSymmetricDifference(label uint8) bool {
 	assertPresenceBits(label)
-	vals := label & valueMask
-	return vals == inputAValue || vals == inputBValue
+	vals := label & inSetMask
+	return vals == inputAInSet || vals == inputBInSet
 }

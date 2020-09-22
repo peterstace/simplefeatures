@@ -262,7 +262,7 @@ func TestGraphTriangle(t *testing.T) {
 				EdgeDestin:      v1,
 				OuterComponent:  nil,
 				InnerComponents: [][]XY{{v2, v1, v0}},
-				Label:           inputAPresent,
+				Label:           inputAPopulated,
 			},
 			{
 				// f1
@@ -274,11 +274,11 @@ func TestGraphTriangle(t *testing.T) {
 			},
 		},
 		Edges: []EdgeLabelSpec{{
-			Label: inputAPresent | inputAValue,
+			Label: inputAPopulated | inputAInSet,
 			Edges: []XY{v0, v1, v2},
 		}},
 		Vertices: []VertexSpec{{
-			Label:    inputAPresent | inputAValue,
+			Label:    inputAPopulated | inputAInSet,
 			Vertices: []XY{v0, v1, v2},
 		}},
 	})
@@ -333,7 +333,7 @@ func TestGraphWithHoles(t *testing.T) {
 				EdgeDestin:      v2,
 				OuterComponent:  nil,
 				InnerComponents: [][]XY{{v3, v2, v1, v0}},
-				Label:           inputBPresent,
+				Label:           inputBPopulated,
 			},
 			{
 				// f1
@@ -341,7 +341,7 @@ func TestGraphWithHoles(t *testing.T) {
 				EdgeDestin:      v3,
 				OuterComponent:  []XY{v2, v3, v0, v1},
 				InnerComponents: [][]XY{{v7, v4, v5, v6}, {v11, v8, v9, v10}},
-				Label:           inputBPresent | inputBValue,
+				Label:           inputBPopulated | inputBInSet,
 			},
 			{
 				// f2
@@ -349,7 +349,7 @@ func TestGraphWithHoles(t *testing.T) {
 				EdgeDestin:      v7,
 				OuterComponent:  []XY{v4, v7, v6, v5},
 				InnerComponents: nil,
-				Label:           inputBPresent,
+				Label:           inputBPopulated,
 			},
 			{
 				// f3
@@ -357,7 +357,7 @@ func TestGraphWithHoles(t *testing.T) {
 				EdgeDestin:      v11,
 				OuterComponent:  []XY{v8, v11, v10, v9},
 				InnerComponents: nil,
-				Label:           inputBPresent,
+				Label:           inputBPopulated,
 			},
 		},
 	})
@@ -399,7 +399,7 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 				EdgeDestin:      v6,
 				OuterComponent:  nil,
 				InnerComponents: [][]XY{{v3, v2, v1, v0}, {v7, v6, v5, v4}},
-				Label:           inputBPresent,
+				Label:           inputBPopulated,
 			},
 			{
 				// f1
@@ -407,7 +407,7 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 				EdgeDestin:      v7,
 				OuterComponent:  []XY{v6, v7, v4, v5},
 				InnerComponents: nil,
-				Label:           inputBPresent | inputBValue,
+				Label:           inputBPopulated | inputBInSet,
 			},
 			{
 				// f2
@@ -415,7 +415,7 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 				EdgeDestin:      v3,
 				OuterComponent:  []XY{v2, v3, v0, v1},
 				InnerComponents: nil,
-				Label:           inputBPresent | inputBValue,
+				Label:           inputBPopulated | inputBInSet,
 			},
 		},
 	})
@@ -457,20 +457,20 @@ func TestGraphMultiLineString(t *testing.T) {
 			EdgeDestin:      v1,
 			OuterComponent:  nil,
 			InnerComponents: [][]XY{{v0, v1, v2, v1}, {v5, v4, v3, v4}},
-			Label:           inputAPresent,
+			Label:           inputAPopulated,
 		}},
 		Edges: []EdgeLabelSpec{
 			{
-				Label: inputAPresent | inputAValue,
+				Label: inputAPopulated | inputAInSet,
 				Edges: []XY{v0, v1, v2},
 			},
 			{
-				Label: inputAPresent | inputAValue,
+				Label: inputAPopulated | inputAInSet,
 				Edges: []XY{v3, v4, v5},
 			},
 		},
 		Vertices: []VertexSpec{{
-			Label:    inputAPresent | inputAValue,
+			Label:    inputAPopulated | inputAInSet,
 			Vertices: []XY{v0, v1, v2, v3, v4, v5},
 		}},
 	})
@@ -525,7 +525,7 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 				EdgeDestin:      v1,
 				OuterComponent:  nil,
 				InnerComponents: [][]XY{{v6, v5, v4, v7}, {v2, v1, v0, v3}},
-				Label:           presenceMask,
+				Label:           populatedMask,
 			},
 			{
 				// f1
@@ -533,7 +533,7 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 				EdgeDestin:      v2,
 				OuterComponent:  []XY{v2, v3, v0, v1},
 				InnerComponents: nil,
-				Label:           presenceMask | inputAValue,
+				Label:           populatedMask | inputAInSet,
 			},
 			{
 				// f2
@@ -541,7 +541,7 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 				EdgeDestin:      v6,
 				OuterComponent:  []XY{v5, v6, v7, v4},
 				InnerComponents: nil,
-				Label:           presenceMask | inputBValue,
+				Label:           populatedMask | inputBInSet,
 			},
 		},
 	})
@@ -597,7 +597,7 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 				EdgeDestin:      v6,
 				OuterComponent:  nil,
 				InnerComponents: [][]XY{{v7, v6, v2, v1, v0, v4, v5}},
-				Label:           presenceMask,
+				Label:           populatedMask,
 			},
 			{
 				// f1
@@ -605,7 +605,7 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 				EdgeDestin:      v1,
 				OuterComponent:  []XY{v0, v1, v2, v4},
 				InnerComponents: nil,
-				Label:           presenceMask | inputAValue,
+				Label:           populatedMask | inputAInSet,
 			},
 			{
 				// f2
@@ -613,7 +613,7 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 				EdgeDestin:      v7,
 				OuterComponent:  []XY{v6, v7, v5, v4, v3, v2},
 				InnerComponents: nil,
-				Label:           presenceMask | inputBValue,
+				Label:           populatedMask | inputBInSet,
 			},
 			{
 				// f3
@@ -621,34 +621,34 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 				EdgeDestin:      v2,
 				OuterComponent:  []XY{v4, v2, v3},
 				InnerComponents: nil,
-				Label:           presenceMask | inputAValue | inputBValue,
+				Label:           populatedMask | inputAInSet | inputBInSet,
 			},
 		},
 		Edges: []EdgeLabelSpec{
 			{
-				Label: presenceMask | inputAValue,
+				Label: populatedMask | inputAInSet,
 				Edges: []XY{v4, v0, v1, v2},
 			},
 			{
-				Label: presenceMask | inputBValue,
+				Label: populatedMask | inputBInSet,
 				Edges: []XY{v4, v5, v7, v6, v2},
 			},
 			{
-				Label: presenceMask | valueMask,
+				Label: populatedMask | inSetMask,
 				Edges: []XY{v4, v3, v2, v4},
 			},
 		},
 		Vertices: []VertexSpec{
 			{
-				Label:    presenceMask | inputAValue,
+				Label:    populatedMask | inputAInSet,
 				Vertices: []XY{v0, v1},
 			},
 			{
-				Label:    presenceMask | inputBValue,
+				Label:    populatedMask | inputBInSet,
 				Vertices: []XY{v5, v7, v6},
 			},
 			{
-				Label:    presenceMask | valueMask,
+				Label:    populatedMask | inSetMask,
 				Vertices: []XY{v2, v3, v4},
 			},
 		},
@@ -701,7 +701,7 @@ func TestGraphOverlayInside(t *testing.T) {
 				EdgeDestin:      v1,
 				OuterComponent:  nil,
 				InnerComponents: [][]XY{{v2, v1, v0, v3}},
-				Label:           presenceMask,
+				Label:           populatedMask,
 			},
 			{
 				// f1
@@ -709,7 +709,7 @@ func TestGraphOverlayInside(t *testing.T) {
 				EdgeDestin:      v1,
 				OuterComponent:  []XY{v0, v1, v2, v3},
 				InnerComponents: [][]XY{{v4, v7, v6, v5}},
-				Label:           presenceMask | inputAValue,
+				Label:           populatedMask | inputAInSet,
 			},
 			{
 				// f2
@@ -717,7 +717,7 @@ func TestGraphOverlayInside(t *testing.T) {
 				EdgeDestin:      v5,
 				OuterComponent:  []XY{v4, v5, v6, v7},
 				InnerComponents: nil,
-				Label:           presenceMask | inputAValue | inputBValue,
+				Label:           populatedMask | inputAInSet | inputBInSet,
 			},
 		},
 	})
@@ -788,7 +788,7 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 					{v6, v5, v8, v7},
 					{v1, v17, v9, v12, v11, v18, v3, v2},
 				},
-				Label: inputBPresent | inputAPresent,
+				Label: inputBPopulated | inputAPopulated,
 			},
 			{
 				// f1
@@ -796,7 +796,7 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 				EdgeDestin:      v7,
 				OuterComponent:  []XY{v6, v7, v8, v5},
 				InnerComponents: nil,
-				Label:           inputBPresent | inputAPresent | inputAValue,
+				Label:           inputBPopulated | inputAPopulated | inputAInSet,
 			},
 			{
 				// f2
@@ -804,7 +804,7 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 				EdgeDestin:      v14,
 				OuterComponent:  []XY{v13, v14, v15, v16},
 				InnerComponents: nil,
-				Label:           inputBPresent | inputAPresent | inputBValue,
+				Label:           inputBPopulated | inputAPopulated | inputBInSet,
 			},
 			{
 				// f3
@@ -812,7 +812,7 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 				EdgeDestin:      v2,
 				OuterComponent:  []XY{v1, v2, v3, v18, v10, v17},
 				InnerComponents: nil,
-				Label:           inputBPresent | inputAPresent | inputAValue,
+				Label:           inputBPopulated | inputAPopulated | inputAInSet,
 			},
 			{
 				// f4
@@ -820,7 +820,7 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 				EdgeDestin:      v18,
 				OuterComponent:  []XY{v4, v18, v11, v12, v9, v17},
 				InnerComponents: nil,
-				Label:           inputBPresent | inputAPresent | inputBValue,
+				Label:           inputBPopulated | inputAPopulated | inputBInSet,
 			},
 			{
 				// f5
@@ -828,7 +828,7 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 				EdgeDestin:      v10,
 				OuterComponent:  []XY{v17, v10, v18, v4},
 				InnerComponents: nil,
-				Label:           inputBPresent | inputAPresent | inputBValue | inputAValue,
+				Label:           inputBPopulated | inputAPopulated | inputBInSet | inputAInSet,
 			},
 		},
 	})
@@ -870,34 +870,34 @@ func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
 				EdgeDestin:      v0,
 				OuterComponent:  nil,
 				InnerComponents: [][]XY{{v0, v5, v4, v3, v2, v1}},
-				Label:           inputAPresent | inputBPresent,
+				Label:           inputAPopulated | inputBPopulated,
 			},
 			{
 				EdgeOrigin:      v0,
 				EdgeDestin:      v1,
 				OuterComponent:  []XY{v0, v1, v4, v5},
 				InnerComponents: nil,
-				Label:           inputAPresent | inputBPresent | inputAValue,
+				Label:           inputAPopulated | inputBPopulated | inputAInSet,
 			},
 			{
 				EdgeOrigin:      v1,
 				EdgeDestin:      v2,
 				OuterComponent:  []XY{v1, v2, v3, v4},
 				InnerComponents: nil,
-				Label:           inputAPresent | inputBPresent | inputBValue,
+				Label:           inputAPopulated | inputBPopulated | inputBInSet,
 			},
 		},
 		Edges: []EdgeLabelSpec{
 			{
-				Label: presenceMask | inputAValue,
+				Label: populatedMask | inputAInSet,
 				Edges: []XY{v1, v0, v5, v4},
 			},
 			{
-				Label: presenceMask | inputBValue,
+				Label: populatedMask | inputBInSet,
 				Edges: []XY{v4, v3, v2, v1},
 			},
 			{
-				Label: presenceMask | inputAValue | inputBValue,
+				Label: populatedMask | inputAInSet | inputBInSet,
 				Edges: []XY{v1, v4},
 			},
 		},
@@ -945,34 +945,34 @@ func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
 				EdgeDestin:      v0,
 				OuterComponent:  nil,
 				InnerComponents: [][]XY{{v1, v0, v7, v6, v5, v4, v3, v2}},
-				Label:           inputAPresent | inputBPresent,
+				Label:           inputAPopulated | inputBPopulated,
 			},
 			{
 				EdgeOrigin:      v0,
 				EdgeDestin:      v1,
 				OuterComponent:  []XY{v0, v1, v5, v6, v7},
 				InnerComponents: nil,
-				Label:           inputAPresent | inputBPresent | inputAValue,
+				Label:           inputAPopulated | inputBPopulated | inputAInSet,
 			},
 			{
 				EdgeOrigin:      v1,
 				EdgeDestin:      v2,
 				OuterComponent:  []XY{v1, v2, v3, v4, v5},
 				InnerComponents: nil,
-				Label:           inputAPresent | inputBPresent | inputBValue,
+				Label:           inputAPopulated | inputBPopulated | inputBInSet,
 			},
 		},
 		Edges: []EdgeLabelSpec{
 			{
-				Label: presenceMask | inputAValue,
+				Label: populatedMask | inputAInSet,
 				Edges: []XY{v1, v0, v7, v6, v5},
 			},
 			{
-				Label: presenceMask | inputBValue,
+				Label: populatedMask | inputBInSet,
 				Edges: []XY{v5, v4, v3, v2, v1},
 			},
 			{
-				Label: presenceMask | inputAValue | inputBValue,
+				Label: populatedMask | inputAInSet | inputBInSet,
 				Edges: []XY{v1, v5},
 			},
 		},
@@ -1014,19 +1014,19 @@ func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
 				EdgeDestin:      v0,
 				OuterComponent:  nil,
 				InnerComponents: [][]XY{{v1, v0, v3, v2}},
-				Label:           inputAPresent | inputBPresent,
+				Label:           inputAPopulated | inputBPopulated,
 			},
 			{
 				EdgeOrigin:      v0,
 				EdgeDestin:      v1,
 				OuterComponent:  []XY{v0, v1, v2, v3},
 				InnerComponents: nil,
-				Label:           inputAPresent | inputBPresent | inputAValue | inputBValue,
+				Label:           inputAPopulated | inputBPopulated | inputAInSet | inputBInSet,
 			},
 		},
 		Edges: []EdgeLabelSpec{
 			{
-				Label: presenceMask | inputAValue | inputBValue,
+				Label: populatedMask | inputAInSet | inputBInSet,
 				Edges: []XY{v0, v1, v2, v3},
 			},
 		},
@@ -1065,16 +1065,16 @@ func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 			EdgeDestin:      v1,
 			OuterComponent:  nil,
 			InnerComponents: [][]XY{{v0, v1, v2, v1}},
-			Label:           presenceMask,
+			Label:           populatedMask,
 		}},
 		Edges: []EdgeLabelSpec{
-			{Edges: []XY{v1, v2}, Label: presenceMask | inputAValue},
-			{Edges: []XY{v0, v1}, Label: presenceMask | inputBValue},
+			{Edges: []XY{v1, v2}, Label: populatedMask | inputAInSet},
+			{Edges: []XY{v0, v1}, Label: populatedMask | inputBInSet},
 		},
 		Vertices: []VertexSpec{
-			{Vertices: []XY{v2}, Label: presenceMask | inputAValue},
-			{Vertices: []XY{v0}, Label: presenceMask | inputBValue},
-			{Vertices: []XY{v1}, Label: presenceMask | valueMask},
+			{Vertices: []XY{v2}, Label: populatedMask | inputAInSet},
+			{Vertices: []XY{v0}, Label: populatedMask | inputBInSet},
+			{Vertices: []XY{v1}, Label: populatedMask | inSetMask},
 		},
 	})
 }
