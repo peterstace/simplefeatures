@@ -453,15 +453,13 @@ func TestBinaryOp(t *testing.T) {
 			//    |       |
 			//    +---A---+
 			//
-			// TODO: MultiLineStrings not yet supported.
-			//
-			input1: "MULTILINESTRING((0 0,1 0),(0 1,1 1))",
-			input2: "MULTILINESTRING((0 0,0 1),(1 0,1 1))",
-			//union:  "MULTILINESTRING((0 0,1 0),(0 1,1 1),(0 0,0 1),(1 0,1 1))",
-			//inter: "MULTIPOINT(0 0,0 1,1 0,1 1)",
-			//fwdDiff: "MULTILINESTRING((0 0,1 0),(0 1,1 1))",
-			//revDiff: "MULTILINESTRING((0 0,0 1),(1 0,1 1))",
-			//symDiff: "MULTILINESTRING((0 0,0 1),(1 0,1 1),(0 0,1 0),(0 1,1 1))",
+			input1:  "MULTILINESTRING((0 0,1 0),(0 1,1 1))",
+			input2:  "MULTILINESTRING((0 0,0 1),(1 0,1 1))",
+			union:   "MULTILINESTRING((0 0,1 0),(0 1,1 1),(0 0,0 1),(1 0,1 1))",
+			inter:   "MULTIPOINT(0 0,0 1,1 0,1 1)",
+			fwdDiff: "MULTILINESTRING((0 0,1 0),(0 1,1 1))",
+			revDiff: "MULTILINESTRING((0 0,0 1),(1 0,1 1))",
+			symDiff: "MULTILINESTRING((0 0,0 1),(1 0,1 1),(0 0,1 0),(0 1,1 1))",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
