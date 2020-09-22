@@ -850,6 +850,12 @@ func orderCCWRingFirst(rings []LineString) {
 	}
 }
 
+// TODO: Line extraction isn't working too well at the moment. It's currently
+// extracting each line individually, which isn't intended. It might be better
+// to return a []line here, and then construct back into LineString and
+// MultiLineString as a separate logical step since it seems tricky to do
+// inline.
+
 func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) []LineString {
 	var lss []LineString
 	for _, e := range d.halfEdges {
