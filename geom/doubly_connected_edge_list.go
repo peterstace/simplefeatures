@@ -521,16 +521,21 @@ func edgeLoopLeftmostLowest(start *halfEdgeRecord) *halfEdgeRecord {
 // Shoelace Formula.
 func edgeLoopIsOuterComponent(start *halfEdgeRecord) bool {
 	// Check to see if the loop is degenerate (i.e. doesn't enclose any area).
-	// Degenerate loops must always be inner components.
-	degenerate := true
-	for e, ok := start, true; ok; ok = e != start {
-		if e.incident != e.twin.incident {
-			degenerate = false
-			break
+	// Degenerate loops must always be inner components. We can't just use the
+	// shoelace formula and check for an area of zero due to numerical
+	// precision issues. Instead, we keep track of which twin edges we see
+	// during edge cycle iteration -- if we never see a twin again then we can
+	// be sure the cycle isn't degenerate.
+	twins := make(map[*halfEdgeRecord]struct{})
+	forEachEdge(start, func(e *halfEdgeRecord) {
+		if _, ok := twins[e]; ok {
+			delete(twins, e)
+		} else {
+			twins[e] = struct{}{}
 		}
-	}
-	if degenerate {
-		return false
+	})
+	if len(twins) == 0 {
+		return false // degenerate
 	}
 
 	// Check the area of the loop using the shoelace formula. The sign of the
