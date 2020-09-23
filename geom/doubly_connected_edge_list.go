@@ -673,45 +673,44 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geom
 	linears := d.extractLineStrings(include)
 	points := d.extractPoints(include)
 
-	var arealGeom Geometry
-	if len(areals) == 1 {
-		arealGeom = areals[0].AsGeometry()
-	} else if len(areals) > 1 {
+	switch {
+	case len(areals) > 0 && len(linears) == 0 && len(points) == 0:
+		if len(areals) == 1 {
+			return areals[0].AsGeometry()
+		}
 		mp, err := NewMultiPolygonFromPolygons(areals)
 		if err != nil {
 			panic(fmt.Sprintf("could not create MultiPolygon: %v", err))
 		}
-		arealGeom = mp.AsGeometry()
+		return mp.AsGeometry()
+	case len(areals) == 0 && len(linears) > 0 && len(points) == 0:
+		if len(linears) == 1 {
+			return linears[0].AsGeometry()
+		}
+		return NewMultiLineStringFromLineStrings(linears).AsGeometry()
+	case len(areals) == 0 && len(linears) == 0 && len(points) > 0:
+		if len(points) == 1 {
+			return NewPointFromXY(points[0]).AsGeometry()
+		}
+		coords := make([]float64, 2*len(points))
+		for i, xy := range points {
+			coords[i*2+0] = xy.X
+			coords[i*2+1] = xy.Y
+		}
+		return NewMultiPoint(NewSequence(coords, DimXY)).AsGeometry()
+	default:
+		geoms := make([]Geometry, 0, len(areals)+len(linears)+len(points))
+		for _, poly := range areals {
+			geoms = append(geoms, poly.AsGeometry())
+		}
+		for _, ls := range linears {
+			geoms = append(geoms, ls.AsGeometry())
+		}
+		for _, xy := range points {
+			geoms = append(geoms, NewPointFromXY(xy).AsGeometry())
+		}
+		return NewGeometryCollection(geoms).AsGeometry()
 	}
-
-	var linearGeom Geometry
-	if len(linears) == 1 {
-		linearGeom = linears[0].AsGeometry()
-	} else if len(linears) > 1 {
-		linearGeom = NewMultiLineStringFromLineStrings(linears).AsGeometry()
-	}
-
-	var pointGeom Geometry
-	if points.Length() == 1 {
-		pointGeom = NewPoint(points.Get(0)).AsGeometry()
-	} else if points.Length() > 1 {
-		pointGeom = NewMultiPoint(points).AsGeometry()
-	}
-
-	var geoms []Geometry
-	if !arealGeom.IsEmpty() {
-		geoms = append(geoms, arealGeom)
-	}
-	if !linearGeom.IsEmpty() {
-		geoms = append(geoms, linearGeom)
-	}
-	if !pointGeom.IsEmpty() {
-		geoms = append(geoms, pointGeom)
-	}
-	if len(geoms) == 1 {
-		return geoms[0]
-	}
-	return NewGeometryCollection(geoms).AsGeometry()
 }
 
 func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Polygon {
@@ -935,13 +934,13 @@ func nextNoBranch(edge *halfEdgeRecord, include func(uint8) bool) *halfEdgeRecor
 // extractPoints extracts any vertices in the DCEL that should be part of the
 // output geometry, but aren't yet represented as part of any previously
 // extracted geometries.
-func (d *doublyConnectedEdgeList) extractPoints(include func(uint8) bool) Sequence {
-	var coords []float64
+func (d *doublyConnectedEdgeList) extractPoints(include func(uint8) bool) []XY {
+	var xys []XY
 	for xy, vert := range d.vertices {
 		if include(vert.label) && vert.label&extracted == 0 {
 			vert.label |= extracted
-			coords = append(coords, xy.X, xy.Y)
+			xys = append(xys, xy)
 		}
 	}
-	return NewSequence(coords, DimXY)
+	return xys
 }
