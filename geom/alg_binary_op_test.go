@@ -477,7 +477,7 @@ func TestBinaryOp(t *testing.T) {
 			input2: "LINESTRING(1 2,1 0,0 0,0 2,1 2)",
 			// TODO: I needed to make some structural modifications to the linear elements manually compared to PostGIS output.
 			union:   "MULTILINESTRING((0 2,1 2),(1 2,2 2),(2 2,2 1),(2 1,1 1),(1 1,0 1),(0 1,0 2),(1 2,1 1),(1 1,1 0),(1 0,0 0),(0 0,0 1))",
-			inter:   "GEOMETRYCOLLECTION(POINT(1 1),MULTILINESTRING((0 2,1 2),(0 1,0 2)))",
+			inter:   "GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(0 2,1 2),LINESTRING(0 1,0 2))",
 			fwdDiff: "MULTILINESTRING((1 2,2 2),(2 2,2 1),(2 1,1 1),(1 1,0 1))",
 			revDiff: "MULTILINESTRING((1 2,1 1),(1 1,1 0),(1 0,0 0),(0 0,0 1))",
 			symDiff: "MULTILINESTRING((1 2,1 1),(1 1,1 0),(1 0,0 0),(0 0,0 1),(1 2,2 2),(2 2,2 1),(2 1,1 1),(1 1,0 1))",
@@ -534,6 +534,24 @@ func TestBinaryOp(t *testing.T) {
 			fwdDiff: "POLYGON((0 0,0 3,3 3,3 0,0 0))",
 			revDiff: "GEOMETRYCOLLECTION EMPTY",
 			symDiff: "POLYGON((0 0,0 3,3 3,3 0,0 0))",
+		},
+		{
+			/*
+			   +---+---+---+
+			   |   A   |A&B|
+			   +---+---+---+
+			   |A&B|   B   |
+			   +---+---+---+
+			   |   A   |A&B|
+			   +---+---+---+
+			*/
+			input1:  "POLYGON((0 0,3 0,3 1,1 1,1 2,3 2,3 3,0 3,0 0))",
+			input2:  "POLYGON((0 1,0 2,2 2,2 3,3 3,3 0,2 0,2 1,0 1))",
+			union:   "POLYGON((2 0,0 0,0 1,0 2,0 3,2 3,3 3,3 2,3 1,3 0,2 0))",
+			inter:   "GEOMETRYCOLLECTION(LINESTRING(2 1,1 1),LINESTRING(1 2,2 2),POLYGON((3 0,2 0,2 1,3 1,3 0)),POLYGON((1 2,1 1,0 1,0 2,1 2)),POLYGON((3 2,2 2,2 3,3 3,3 2)))",
+			fwdDiff: "MULTIPOLYGON(((2 0,0 0,0 1,1 1,2 1,2 0)),((2 2,1 2,0 2,0 3,2 3,2 2)))",
+			revDiff: "POLYGON((1 2,2 2,3 2,3 1,2 1,1 1,1 2))",
+			symDiff: "POLYGON((1 2,0 2,0 3,2 3,2 2,3 2,3 1,2 1,2 0,0 0,0 1,1 1,1 2))",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
