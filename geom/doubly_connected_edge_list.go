@@ -190,7 +190,6 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 
 	// Add edges.
 	for i := 0; i < mls.NumLineStrings(); i++ {
-		// TODO: handle non-simple edges
 		var newEdges []*halfEdgeRecord
 		ls := mls.LineStringN(i)
 		seq := ls.Coordinates()

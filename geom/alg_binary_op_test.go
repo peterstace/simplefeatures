@@ -501,6 +501,40 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "MULTILINESTRING((2 0,3 1),(3 1,2 2))",
 			symDiff: "MULTILINESTRING((2 0,3 1),(3 1,2 2),(0 0,1 1),(1 1,2 2),(2 2,0 2),(0 2,1 1),(1 1,2 0))",
 		},
+		{
+			/*
+			       +
+			       |
+			   +---+---+
+			   |   |   |
+			   |   +   |
+			   |       |
+			   +-------+
+			*/
+			input1:  "POLYGON((0 0,0 2,2 2,2 0,0 0))",
+			input2:  "LINESTRING(1 1,1 3)",
+			union:   "GEOMETRYCOLLECTION(LINESTRING(1 2,1 3),POLYGON((0 0,0 2,1 2,2 2,2 0,0 0)))",
+			inter:   "LINESTRING(1 1,1 2)",
+			fwdDiff: "POLYGON((0 0,0 2,1 2,2 2,2 0,0 0))",
+			revDiff: "LINESTRING(1 2,1 3)",
+			symDiff: "GEOMETRYCOLLECTION(LINESTRING(1 2,1 3),POLYGON((0 0,0 2,1 2,2 2,2 0,0 0)))",
+		},
+		{
+			/*
+			   +--------+
+			   |     ,  |
+			   |   ,`   |
+			   |  `     |
+			   +--------+
+			*/
+			input1:  "POLYGON((0 0,0 3,3 3,3 0,0 0))",
+			input2:  "LINESTRING(1 1,2 2)",
+			union:   "POLYGON((0 0,0 3,3 3,3 0,0 0))",
+			inter:   "LINESTRING(1 1,2 2)",
+			fwdDiff: "POLYGON((0 0,0 3,3 3,3 0,0 0))",
+			revDiff: "GEOMETRYCOLLECTION EMPTY",
+			symDiff: "POLYGON((0 0,0 3,3 3,3 0,0 0))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
