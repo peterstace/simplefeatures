@@ -648,3 +648,35 @@ func TestBinaryOp(t *testing.T) {
 		})
 	}
 }
+
+func TestBinaryOpEmptyInputs(t *testing.T) {
+	for i, wkt := range []string{
+		"POINT EMPTY",
+		"MULTIPOINT EMPTY",
+		"MULTIPOINT(EMPTY)",
+		"LINESTRING EMPTY",
+		"MULTILINESTRING EMPTY",
+		"MULTILINESTRING(EMPTY)",
+		"POLYGON EMPTY",
+		"MULTIPOLYGON EMPTY",
+		"MULTIPOLYGON(EMPTY)",
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g := geomFromWKT(t, wkt)
+			for _, opCase := range []struct {
+				opName string
+				op     func(geom.Geometry, geom.Geometry) geom.Geometry
+			}{
+				{"union", geom.Union},
+				{"inter", geom.Intersection},
+				{"fwd_diff", geom.Difference},
+				{"sym_diff", geom.SymmetricDifference},
+			} {
+				t.Run(opCase.opName, func(t *testing.T) {
+					got := opCase.op(g, g)
+					expectGeomEq(t, got, geom.Geometry{}, geom.IgnoreOrder)
+				})
+			}
+		})
+	}
+}

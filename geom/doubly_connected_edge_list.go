@@ -199,6 +199,9 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		var newEdges []*halfEdgeRecord
 		ls := mls.LineStringN(i)
+		if ls.IsEmpty() {
+			continue
+		}
 		seq := ls.Coordinates()
 		for j := 0; j < seq.Length(); j++ {
 			ln, ok := getLine(seq, j)
