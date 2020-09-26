@@ -556,18 +556,26 @@ func binaryChecks(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 		}
 	}
 
-	log.Println("checking intersects")
+	log.Println("checking Intersects")
 	if err := checkIntersects(h, g1, g2, log); err != nil {
 		return err
 	}
-	log.Println("checking exact equals")
+
+	log.Println("checking EqualsExact")
 	if err := checkEqualsExact(h, g1, g2, log); err != nil {
 		return err
 	}
-	log.Println("checking distance")
+
+	log.Println("checking Distance")
 	if err := checkDistance(h, g1, g2, log); err != nil {
 		return err
 	}
+
+	log.Println("checking DCEL operations")
+	if err := checkDCELOperations(h, g1, g2, log); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -639,6 +647,114 @@ func checkDistance(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	if math.Abs(want-got) > 1e-12 {
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
+		return mismatchErr
+	}
+	return nil
+}
+
+func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+	// TODO: simplefeatures doesn't support GeometryCollections yet
+	if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
+		return nil
+	}
+
+	// Some numerical precision issues are cropping up with geometries with
+	// control points that are very close together. One way to work around this
+	// is to filter out any geometries who's control points aren't very simple.
+	//
+	// TODO: Remove this skip once the numerical issues are sorted out.
+	if !mantissaTerminatesQuickly(g1) || !mantissaTerminatesQuickly(g2) {
+		return nil
+	}
+
+	for _, op := range []struct {
+		name     string
+		sfFunc   func(g1, g2 geom.Geometry) geom.Geometry
+		geosFunc func(g1, g2 geom.Geometry) (geom.Geometry, error)
+	}{
+		{
+			"Union",
+			func(g1, g2 geom.Geometry) geom.Geometry { return geom.Union(g1, g2) },
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.Union(g1, g2) },
+		},
+		{
+			"Intersection",
+			func(g1, g2 geom.Geometry) geom.Geometry { return geom.Intersection(g1, g2) },
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.Intersection(g1, g2) },
+		},
+		{
+			"Difference",
+			func(g1, g2 geom.Geometry) geom.Geometry { return geom.Difference(g1, g2) },
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.Difference(g1, g2) },
+		},
+		{
+			"SymmetricDifference",
+			func(g1, g2 geom.Geometry) geom.Geometry { return geom.SymmetricDifference(g1, g2) },
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.SymmetricDifference(g1, g2) },
+		},
+	} {
+		log.Println("checking", op.name)
+		err := checkDCELOp(op.sfFunc, op.geosFunc, g1, g2, log)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func checkDCELOp(
+	op func(g1, g2 geom.Geometry) geom.Geometry,
+	refImpl func(g1, g2 geom.Geometry) (geom.Geometry, error),
+	g1, g2 geom.Geometry,
+	log *log.Logger,
+) error {
+	// Empty points will cause the reference impl to crash.
+	if hasEmptyPoint(g1) || hasEmptyPoint(g2) {
+		return nil
+	}
+
+	got := op(g1, g2)
+	if usesNonSimpleFloats(got) {
+		// We're not going to be able to compare this to want because of
+		// numeric precision issues.
+		//
+		// TODO: We should be able to use some heuristics at least. There are 2
+		// heuristics we could use:
+		//
+		// 1. Compare the areas (with some tolerance).
+		//
+		// 2. Buffer the entire geometry, and then compare the areas (again,
+		// with tolerance).
+		return nil
+	}
+
+	want, err := refImpl(g1, g2)
+	if err != nil {
+		if err == ErrInvalidAccordingToGEOS {
+			// Because GEOS has given us back an invalid geometry (even according
+			// to its own validation routines) we can't trust it for this test
+			// case.
+			return nil
+		}
+		return err
+	}
+
+	if want.IsGeometryCollection() || got.IsGeometryCollection() {
+		// We can't use Equals from GEOS on GeometryCollections, so we have to
+		// skip this case.
+		//
+		// TODO: Use heuristics instead.
+		return nil
+	}
+
+	log.Printf("want: %v", want.AsText())
+	log.Printf("got:  %v", got.AsText())
+
+	eq, err := geos.Equals(want, got)
+	if err != nil {
+		return err
+	}
+	if !eq {
 		return mismatchErr
 	}
 	return nil

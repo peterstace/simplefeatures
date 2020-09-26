@@ -842,7 +842,11 @@ func TestBinaryOpEmptyInputs(t *testing.T) {
 			} {
 				t.Run(opCase.opName, func(t *testing.T) {
 					got := opCase.op(g, g)
-					expectGeomEq(t, got, geom.Geometry{}, geom.IgnoreOrder)
+					want := geom.Geometry{}
+					if opCase.opName == "union" {
+						want = got
+					}
+					expectGeomEq(t, got, want, geom.IgnoreOrder)
 				})
 			}
 		})
