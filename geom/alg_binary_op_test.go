@@ -553,6 +553,71 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "POLYGON((1 2,2 2,3 2,3 1,2 1,1 1,1 2))",
 			symDiff: "POLYGON((1 2,0 2,0 3,2 3,2 2,3 2,3 1,2 1,2 0,0 0,0 1,1 1,1 2))",
 		},
+		{
+			/*
+			   +   +   +
+			   A  A&B  B
+			*/
+			input1:  "MULTIPOINT(0 0,1 1)",
+			input2:  "MULTIPOINT(1 1,2 2)",
+			union:   "MULTIPOINT(0 0,1 1,2 2)",
+			inter:   "POINT(1 1)",
+			fwdDiff: "POINT(0 0)",
+			revDiff: "POINT(2 2)",
+			symDiff: "MULTIPOINT(0 0,2 2)",
+		},
+		{
+			/*
+			   +-------+
+			   |       |
+			   |   +   |   +
+			   |       |
+			   +-------+
+			*/
+			input1:  "POLYGON((0 0,0 2,2 2,2 0,0 0))",
+			input2:  "MULTIPOINT(1 1,3 1)",
+			union:   "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 0,0 0)))",
+			inter:   "POINT(1 1)",
+			fwdDiff: "POLYGON((0 0,0 2,2 2,2 0,0 0))",
+			revDiff: "POINT(3 1)",
+			symDiff: "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 0,0 0)))",
+		},
+		{
+			/*
+			   +
+			   |\
+			   | \
+			   |  \
+			   |   \
+			   |    \
+			   O-----+
+			*/
+			input1:  "POLYGON((0 0,0 1,1 0,0 0))",
+			input2:  "POINT(0 0)",
+			union:   "POLYGON((0 0,0 1,1 0,0 0))",
+			inter:   "POINT(0 0)",
+			fwdDiff: "POLYGON((0 0,0 1,1 0,0 0))",
+			revDiff: "GEOMETRYCOLLECTION EMPTY",
+			symDiff: "POLYGON((0 0,0 1,1 0,0 0))",
+		},
+		{
+			/*
+			   +
+			   |\
+			   | \
+			   |  O
+			   |   \
+			   |    \
+			   +-----+
+			*/
+			input1:  "POLYGON((0 0,0 1,1 0,0 0))",
+			input2:  "POINT(0.5 0.5)",
+			union:   "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
+			inter:   "POINT(0.5 0.5)",
+			fwdDiff: "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
+			revDiff: "GEOMETRYCOLLECTION EMPTY",
+			symDiff: "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)

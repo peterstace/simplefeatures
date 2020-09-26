@@ -13,9 +13,10 @@ type doublyConnectedEdgeList struct {
 }
 
 type faceRecord struct {
-	outerComponent  *halfEdgeRecord
-	innerComponents []*halfEdgeRecord
-	label           uint8
+	outerComponent   *halfEdgeRecord
+	innerComponents  []*halfEdgeRecord
+	internalVertices []*vertexRecord // only populated in the overlay
+	label            uint8
 }
 
 type halfEdgeRecord struct {
@@ -46,8 +47,14 @@ func newDCELFromGeometry(g Geometry, mask uint8) *doublyConnectedEdgeList {
 	case TypeMultiLineString:
 		mls := g.AsMultiLineString()
 		return newDCELFromMultiLineString(mls, mask)
+	case TypePoint:
+		mp := NewMultiPointFromPoints([]Point{g.AsPoint()})
+		return newDCELFromMultiPoint(mp, mask)
+	case TypeMultiPoint:
+		mp := g.AsMultiPoint()
+		return newDCELFromMultiPoint(mp, mask)
 	default:
-		// TODO: support all other input geometry types.
+		// TODO: support all other input geometry types. The only remaining one is GeometryCollection.
 		panic(fmt.Sprintf("binary op not implemented for type %s", g.Type()))
 	}
 }
@@ -251,6 +258,28 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 	return dcel
 }
 
+func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
+	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+	n := mp.NumPoints()
+	for i := 0; i < n; i++ {
+		xy, ok := mp.PointN(i).XY()
+		if !ok {
+			continue
+		}
+		record, ok := dcel.vertices[xy]
+		if !ok {
+			record = &vertexRecord{
+				coords:   xy,
+				incident: nil,
+				label:    0,
+			}
+			dcel.vertices[xy] = record
+		}
+		record.label |= mask
+	}
+	return dcel
+}
+
 func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 	d.overlayVertices(other)
 	faceLabels := d.overlayEdges(other)
@@ -260,6 +289,14 @@ func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
+	for xy, otherVert := range other.vertices {
+		vert, ok := d.vertices[xy]
+		if ok {
+			vert.label |= otherVert.label
+		} else {
+			d.vertices[xy] = otherVert
+		}
+	}
 	for _, face := range other.faces {
 		if cmp := face.outerComponent; cmp != nil {
 			d.overlayVerticesInComponent(cmp)
@@ -273,7 +310,6 @@ func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList
 func (d *doublyConnectedEdgeList) overlayVerticesInComponent(start *halfEdgeRecord) {
 	forEachEdge(start, func(e *halfEdgeRecord) {
 		if existing, ok := d.vertices[e.origin.coords]; ok {
-			existing.label |= e.origin.label
 			e.origin = existing
 		} else {
 			d.vertices[e.origin.coords] = e.origin
@@ -405,7 +441,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 	graph.addSingleton(nil) // nil represents the outer component of the infinite face
 
 	for _, leftmostLowest := range innerComponents {
-		nextLeft := d.findNextDownEdgeToTheLeft(leftmostLowest)
+		nextLeft := d.findNextDownEdgeToTheLeft(leftmostLowest.origin.coords)
 		if nextLeft != nil {
 			// When there is no next left edge, then this indicates that the
 			// current component is the inner component of the infinite face.
@@ -438,6 +474,11 @@ func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 				})
 			}
 		}
+		if f.outerComponent == nil {
+			// The outer face never has geometries present on it, so we can
+			// just mark it's label as being populated now.
+			f.label |= populatedMask
+		}
 	}
 	for _, face := range d.faces {
 		d.completePartialFaceLabel(face)
@@ -461,7 +502,7 @@ func (d *doublyConnectedEdgeList) completePartialFaceLabel(face *faceRecord) {
 		adjacent := adjacentFaces(popped)
 		expanded[popped] = true
 		for _, adj := range adjacent {
-			completeFaceLabel(face, adj)
+			face.label = completeLabel(face.label, adj.label)
 			if labelIsComplete() {
 				return
 			}
@@ -493,14 +534,16 @@ func adjacentFaces(f *faceRecord) []*faceRecord {
 	return faces
 }
 
-func completeFaceLabel(dst, src *faceRecord) {
-	// TODO: is there a way to do this without treating the two halfs of the label separately?
-	if dst.label&inputAPopulated == 0 {
-		dst.label |= (src.label & inputAMask)
+// completeLabel copies any missing portion (part A or part B) of the label
+// from donor to recipient, and then returns recipient.
+func completeLabel(recipient, donor uint8) uint8 {
+	if (recipient & inputAPopulated) == 0 {
+		recipient |= (donor & inputAMask)
 	}
-	if dst.label&inputBPopulated == 0 {
-		dst.label |= (src.label & inputBMask)
+	if (recipient & inputBPopulated) == 0 {
+		recipient |= (donor & inputBMask)
 	}
+	return recipient
 }
 
 // edgeLoopLeftmostLowest finds the edge in the cycle whose origin is the
@@ -549,14 +592,13 @@ func edgeLoopIsOuterComponent(start *halfEdgeRecord) bool {
 	return sum > 0
 }
 
-func (d *doublyConnectedEdgeList) findNextDownEdgeToTheLeft(edge *halfEdgeRecord) *halfEdgeRecord {
+func (d *doublyConnectedEdgeList) findNextDownEdgeToTheLeft(pt XY) *halfEdgeRecord {
 	var bestEdge *halfEdgeRecord
 	var bestDist float64
 
 	for _, e := range d.halfEdges {
 		origin := e.origin.coords
 		destin := e.next.origin.coords
-		pt := edge.origin.coords
 		if !(destin.Y <= pt.Y && pt.Y <= origin.Y) {
 			// We only want to consider edges that go "down" (or horizontal)
 			// and overlap vertically with pt.
@@ -664,7 +706,33 @@ func (d *doublyConnectedEdgeList) fixLabels() {
 		e.origin.label |= e.label | e.prev.label
 	}
 
-	// TODO: do we need to set the presence bits for all vertices? They might not be set yet in some cases.
+	var infFace *faceRecord
+	for _, f := range d.faces {
+		if f.outerComponent == nil {
+			infFace = f
+			break
+		}
+	}
+
+	// If there are any vertices that don't have populated labels, it's because
+	// they are isolated (i.e. in the middle of a face). We need to work out
+	// which face they are part of.
+	for xy, vert := range d.vertices {
+		if (vert.label & populatedMask) == populatedMask {
+			continue
+		}
+		var face *faceRecord
+		e := d.findNextDownEdgeToTheLeft(xy)
+		if e == nil {
+			// There was no next edge to the left, so the face we're interested
+			// in is the infinite face.
+			face = infFace
+		} else {
+			face = e.incident
+		}
+		vert.label = completeLabel(vert.label, face.label)
+		face.internalVertices = append(face.internalVertices, vert)
+	}
 }
 
 // extractGeometry converts the DECL into a Geometry that represents it.
@@ -716,10 +784,17 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geom
 func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Polygon {
 	var polys []Polygon
 	for _, face := range d.faces {
-		if (face.label & extracted) != 0 {
+		if !include(face.label) {
 			continue
 		}
-		if !include(face.label) {
+
+		// Mark vertices internal to the face as already extracted so that
+		// they're ignored during point extraction.
+		for _, vert := range face.internalVertices {
+			vert.label |= extracted
+		}
+
+		if (face.label & extracted) != 0 {
 			continue
 		}
 
