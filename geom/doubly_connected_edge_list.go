@@ -172,6 +172,8 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 }
 
 func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnectedEdgeList {
+	mls = removeDuplicateEdges(mls)
+
 	dcel := &doublyConnectedEdgeList{
 		vertices: make(map[XY]*vertexRecord),
 	}
@@ -259,6 +261,56 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 	}
 
 	return dcel
+}
+
+// removeDuplicateEdges alters a MultiLineString such that it doesn't contain
+// any duplicated line segments. It assumes that the MultiLineString has
+// already be re-noded for internal intersections.
+func removeDuplicateEdges(mls MultiLineString) MultiLineString {
+	canonicalLine := func(ln line) line {
+		if !ln.a.Less(ln.b) {
+			ln.a, ln.b = ln.b, ln.a
+		}
+		return ln
+	}
+
+	var coords []float64
+	seen := make(map[line]bool)
+	var lss []LineString
+
+	terminateAccumulatedCoords := func() {
+		if len(coords) > 0 {
+			newLS, err := NewLineString(NewSequence(coords, DimXY))
+			if err != nil {
+				// This shouldn't ever happen, because the first line
+				// added to coords will contain two distinct points.
+				panic(fmt.Sprintf("could not construct LineString in removeDuplicateEdges: %v", err))
+			}
+			lss = append(lss, newLS)
+			coords = nil
+		}
+	}
+
+	for i := 0; i < mls.NumLineStrings(); i++ {
+		seq := mls.LineStringN(i).Coordinates()
+		for j := 0; j < seq.Length(); j++ {
+			ln, ok := getLine(seq, j)
+			if !ok {
+				continue
+			}
+			if seen[canonicalLine(ln)] {
+				terminateAccumulatedCoords()
+				continue
+			}
+			seen[canonicalLine(ln)] = true
+			if len(coords) == 0 {
+				coords = append(coords, ln.a.X, ln.a.Y)
+			}
+			coords = append(coords, ln.b.X, ln.b.Y)
+		}
+		terminateAccumulatedCoords()
+	}
+	return NewMultiLineStringFromLineStrings(lss)
 }
 
 func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
