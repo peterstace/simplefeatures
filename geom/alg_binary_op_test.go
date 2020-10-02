@@ -618,6 +618,22 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "GEOMETRYCOLLECTION EMPTY",
 			symDiff: "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
 		},
+		{
+			/*
+			   +-------+
+			   |       |
+			   |   +   |
+			   |       |
+			   +-------+
+			*/
+			input1:  "LINESTRING(0 0,0 1,1 1,1 0,0 0,0 1)", // overlapping line segment
+			input2:  "POINT(0.5 0.5)",
+			union:   "GEOMETRYCOLLECTION(POINT(0.5 0.5),LINESTRING(0 0,0 1),LINESTRING(0 1,1 1),LINESTRING(1 1,1 0),LINESTRING(1 0,0 0))",
+			inter:   "GEOMETRYCOLLECTION EMPTY",
+			fwdDiff: "MULTILINESTRING((0 0,0 1),(0 1,1 1),(1 1,1 0),(1 0,0 0))",
+			revDiff: "POINT(0.5 0.5)",
+			symDiff: "GEOMETRYCOLLECTION(POINT(0.5 0.5),LINESTRING(0 0,0 1),LINESTRING(0 1,1 1),LINESTRING(1 1,1 0),LINESTRING(1 0,0 0))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)

@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 )
 
@@ -427,7 +428,6 @@ func TestGraphMultiLineString(t *testing.T) {
 		t.Fatal(err)
 	}
 	dcel := newDCELFromGeometry(mls, inputAMask)
-	_ = dcel
 
 	/*
 	        v2    v3
@@ -472,6 +472,56 @@ func TestGraphMultiLineString(t *testing.T) {
 		Vertices: []VertexSpec{{
 			Label:    inputAPopulated | inputAInSet,
 			Vertices: []XY{v0, v1, v2, v3, v4, v5},
+		}},
+	})
+}
+
+func TestGraphSelfOverlappingLineString(t *testing.T) {
+	ls, err := UnmarshalWKT("LINESTRING(0 0,0 1,1 1,1 0,0 1,1 1,2 1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcel := newDCELFromGeometry(ls, inputAMask)
+
+	/*
+	   v1----v2----v4
+	    |\   |
+	    | \  |
+	    |  \ |
+	    |   \|
+	   v0    v3
+	*/
+
+	v0 := XY{0, 0}
+	v1 := XY{0, 1}
+	v2 := XY{1, 1}
+	v3 := XY{1, 0}
+	v4 := XY{2, 1}
+
+	CheckDCEL(t, dcel, DCELSpec{
+		NumVerts: 5,
+		NumEdges: 10,
+		NumFaces: 1, // just the infinite face
+		Faces: []FaceSpec{{
+			EdgeOrigin:      v0,
+			EdgeDestin:      v1,
+			OuterComponent:  nil,
+			InnerComponents: [][]XY{{v0, v1, v2, v3, v1, v3, v2, v1}, {v2, v4}},
+			Label:           inputAPopulated,
+		}},
+		Edges: []EdgeLabelSpec{
+			{
+				Label: inputAPopulated | inputAInSet,
+				Edges: []XY{v0, v1, v3, v2},
+			},
+			{
+				Label: inputAPopulated | inputAInSet,
+				Edges: []XY{v1, v2, v4},
+			},
+		},
+		Vertices: []VertexSpec{{
+			Label:    inputAPopulated | inputAInSet,
+			Vertices: []XY{v0, v1, v2, v3, v4},
 		}},
 	})
 }
@@ -1077,4 +1127,60 @@ func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 			{Vertices: []XY{v1}, Label: populatedMask | inSetMask},
 		},
 	})
+}
+
+func TestRemoveDuplicateEdges(t *testing.T) {
+	for i, tt := range []struct {
+		input, output string
+	}{
+		{
+			"MULTILINESTRING((0 0,1 1))",
+			"MULTILINESTRING((0 0,1 1))",
+		},
+		{
+			"MULTILINESTRING((0 0,1 1),(0 0,1 1))",
+			"MULTILINESTRING((0 0,1 1))",
+		},
+		{
+			"MULTILINESTRING((0 0,1 1),(1 1,0 0))",
+			"MULTILINESTRING((0 0,1 1))",
+		},
+		{
+			"MULTILINESTRING((0 0,0 1,1 1,2 1,2 0),(0 1,1 1,2 1))",
+			"MULTILINESTRING((0 0,0 1,1 1,2 1,2 0))",
+		},
+		{
+			"MULTILINESTRING((0 1,1 1,2 1),(0 0,0 1,1 1,2 1,2 0))",
+			"MULTILINESTRING((0 1,1 1,2 1),(0 0,0 1),(2 1,2 0))",
+		},
+		{
+			"MULTILINESTRING((0 0,0 1),(0 0,0 1,1 1))",
+			"MULTILINESTRING((0 0,0 1),(0 1,1 1))",
+		},
+		{
+			"MULTILINESTRING((1 1,0 1),(0 0,0 1,1 1))",
+			"MULTILINESTRING((1 1,0 1),(0 0,0 1))",
+		},
+		{
+			"MULTILINESTRING((0 0,0 1,1 1,1 0,0 1,1 1,2 1))",
+			"MULTILINESTRING((0 0,0 1,1 1,1 0,0 1),(1 1,2 1))",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			in, err := UnmarshalWKT(tt.input)
+			if err != nil {
+				t.Fatal(err)
+			}
+			out, err := UnmarshalWKT(tt.output)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := removeDuplicateEdges(in.AsMultiLineString())
+			if !out.EqualsExact(got.AsGeometry()) {
+				t.Errorf(
+					"\ninput: %v\nwant:  %v\ngot:   %v\n",
+					in.AsText(), out.AsText(), got.AsText())
+			}
+		})
+	}
 }
