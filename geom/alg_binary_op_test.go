@@ -634,6 +634,16 @@ func TestBinaryOp(t *testing.T) {
 			revDiff: "POINT(0.5 0.5)",
 			symDiff: "GEOMETRYCOLLECTION(POINT(0.5 0.5),LINESTRING(0 0,0 1),LINESTRING(0 1,1 1),LINESTRING(1 1,1 0),LINESTRING(1 0,0 0))",
 		},
+		{
+			// Reproduces a bug.
+			"LINESTRING(-1 1,1 -1)",
+			"MULTILINESTRING((1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2))",
+			"MULTILINESTRING((-1 1,1 -1),(1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2))",
+			"GEOMETRYCOLLECTION EMPTY",
+			"LINESTRING(-1 1,1 -1)",
+			"MULTILINESTRING((1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2))",
+			"MULTILINESTRING((1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2),(-1 1,1 -1))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)

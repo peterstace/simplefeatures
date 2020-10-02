@@ -602,11 +602,15 @@ func completeLabel(recipient, donor uint8) uint8 {
 }
 
 // edgeLoopLeftmostLowest finds the edge in the cycle whose origin is the
-// leftmost (or lowest for a tie) point in the loop.
+// leftmost (or lowest for a tie) point in the loop. If there is a tie (i.e.
+// two edges in the cycle with the same origin), then it uses the edge
+// destination to choose between them.
 func edgeLoopLeftmostLowest(start *halfEdgeRecord) *halfEdgeRecord {
 	var best *halfEdgeRecord
 	forEachEdge(start, func(e *halfEdgeRecord) {
-		if best == nil || e.origin.coords.Less(best.origin.coords) {
+		if best == nil ||
+			e.origin.coords.Less(best.origin.coords) ||
+			e.origin.coords == best.origin.coords && e.twin.origin.coords.Less(best.twin.origin.coords) {
 			best = e
 		}
 	})
