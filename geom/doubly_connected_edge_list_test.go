@@ -1129,6 +1129,76 @@ func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 	})
 }
 
+func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
+	geomA, err := UnmarshalWKT("LINESTRING(0 1,1 0)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	geomB, err := UnmarshalWKT("MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	overlay := createOverlay(geomA, geomB)
+
+	v0 := XY{0, 0}
+	v1 := XY{1, 0}
+	v2 := XY{1, 1}
+	v3 := XY{0, 1}
+	v4 := XY{2, 0}
+	v5 := XY{3, 0}
+	v6 := XY{3, 1}
+	v7 := XY{2, 1}
+
+	CheckDCEL(t, overlay, DCELSpec{
+		NumVerts: 8,
+		NumEdges: 18,
+		NumFaces: 4,
+		Faces: []FaceSpec{
+			{
+				EdgeOrigin:     v1,
+				EdgeDestin:     v0,
+				OuterComponent: nil,
+				InnerComponents: [][]XY{
+					{v4, v7, v6, v5},
+					{v0, v3, v2, v1},
+				},
+				Label: populatedMask,
+			},
+			{
+				EdgeOrigin:      v0,
+				EdgeDestin:      v1,
+				OuterComponent:  []XY{v0, v1, v3},
+				InnerComponents: nil,
+				Label:           populatedMask | inputBInSet,
+			},
+			{
+				EdgeOrigin:      v1,
+				EdgeDestin:      v2,
+				OuterComponent:  []XY{v1, v2, v3},
+				InnerComponents: nil,
+				Label:           populatedMask | inputBInSet,
+			},
+			{
+				EdgeOrigin:      v4,
+				EdgeDestin:      v5,
+				OuterComponent:  []XY{v4, v5, v6, v7},
+				InnerComponents: nil,
+				Label:           populatedMask | inputBInSet,
+			},
+		},
+		Edges: []EdgeLabelSpec{
+			{Edges: []XY{v1, v3}, Label: populatedMask | inputAInSet | inputBInSet},
+			{Edges: []XY{v0, v1, v2, v3}, Label: populatedMask | inputBInSet},
+			{Edges: []XY{v4, v5, v6, v7}, Label: populatedMask | inputBInSet},
+		},
+		Vertices: []VertexSpec{
+			{Vertices: []XY{v1, v3}, Label: populatedMask | inputAInSet | inputBInSet},
+			{Vertices: []XY{v0, v2, v4, v5, v6, v7}, Label: populatedMask | inputBInSet},
+		},
+	})
+}
+
 func TestRemoveDuplicateEdges(t *testing.T) {
 	for i, tt := range []struct {
 		input, output string

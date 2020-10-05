@@ -652,35 +652,59 @@ func edgeLoopIsOuterComponent(start *halfEdgeRecord) bool {
 }
 
 func (d *doublyConnectedEdgeList) findNextDownEdgeToTheLeft(pt XY) *halfEdgeRecord {
-	var bestEdge *halfEdgeRecord
-	var bestDist float64
-
+	var acc nextDownEdgeToTheLeftAccumulator
 	for _, e := range d.halfEdges {
-		origin := e.origin.coords
-		destin := e.next.origin.coords
-		if !(destin.Y <= pt.Y && pt.Y <= origin.Y) {
-			// We only want to consider edges that go "down" (or horizontal)
-			// and overlap vertically with pt.
-			continue
-		}
-		if origin.Y == destin.Y && origin.X < destin.X {
-			// For horizontal lines, we only want to consider edges that go
-			// from the right to the left.
-			continue
-		}
-		ln := line{origin, destin}
-		dist := signedHorizontalDistanceBetweenXYAndLine(pt, ln)
-		if dist <= 0 {
-			// Edge is on the wrong side of pt (we only want edges to the left).
-			continue
-		}
-
-		if bestEdge == nil || dist < bestDist {
-			bestEdge = e
-			bestDist = dist
-		}
+		acc.accumulate(e, pt)
 	}
-	return bestEdge
+	return acc.bestEdge
+}
+
+type nextDownEdgeToTheLeftAccumulator struct {
+	bestEdge *halfEdgeRecord
+	bestDist float64
+	tieBreak float64
+}
+
+func (a *nextDownEdgeToTheLeftAccumulator) accumulate(e *halfEdgeRecord, pt XY) {
+	origin := e.origin.coords
+	destin := e.next.origin.coords
+	if !(destin.Y <= pt.Y && pt.Y <= origin.Y) {
+		// We only want to consider edges that go "down" (or horizontal)
+		// and overlap vertically with pt.
+		return
+	}
+	if origin.Y == destin.Y && origin.X < destin.X {
+		// For horizontal lines, we only want to consider edges that go
+		// from the right to the left.
+		return
+	}
+
+	// Calculate distance.
+	ln := line{origin, destin}
+	dist := signedHorizontalDistanceBetweenXYAndLine(pt, ln)
+	if dist <= 0 {
+		// Edge is on the wrong side of pt (we only want edges to the left).
+		return
+	}
+
+	// Calculate tie-break.
+	unitAwayFromHit := XY{1, 0}
+	hit := XY{pt.X - dist, pt.Y}
+	var other XY
+	if hit.distanceTo(origin) > hit.distanceTo(destin) {
+		other = origin
+	} else {
+		other = destin
+	}
+	edgeUnit := other.Sub(hit).unit()
+	tieBreak := unitAwayFromHit.Dot(edgeUnit)
+
+	// Replace if best.
+	if a.bestEdge == nil || dist < a.bestDist || (dist == a.bestDist && tieBreak > a.tieBreak) {
+		a.bestEdge = e
+		a.bestDist = dist
+		a.tieBreak = tieBreak
+	}
 }
 
 func signedHorizontalDistanceBetweenXYAndLine(xy XY, ln line) float64 {
@@ -691,7 +715,8 @@ func signedHorizontalDistanceBetweenXYAndLine(xy XY, ln line) float64 {
 	}
 	rat := (xy.Y - ln.a.Y) / (ln.b.Y - ln.a.Y)
 	x := (1-rat)*ln.a.X + rat*ln.b.X
-	return xy.X - x
+	dist := xy.X - x
+	return dist
 }
 
 // disjointEdgeSet is a disjoint set data structure where each element in the
