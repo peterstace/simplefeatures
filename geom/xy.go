@@ -1,5 +1,9 @@
 package geom
 
+import (
+	"math"
+)
+
 // XY represents a pair of X and Y coordinates. This can either represent a
 // location on the XY plane, or a 2D vector in the real vector space.
 type XY struct {
@@ -57,4 +61,21 @@ func (w XY) Less(o XY) bool {
 		return w.X < o.X
 	}
 	return w.Y < o.Y
+}
+
+// unit normalises the vector to be unit length. Panics if invoked on the zero
+// XY value.
+func (w XY) unit() XY {
+	dot := w.Dot(w)
+	length := math.Sqrt(dot)
+	scale := 1 / length
+	if math.IsInf(scale, 0) {
+		panic("invoked unit() on zero length vector")
+	}
+	return w.Scale(scale)
+}
+
+func (w XY) distanceTo(o XY) float64 {
+	delta := o.Sub(w)
+	return math.Sqrt(delta.Dot(delta))
 }
