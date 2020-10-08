@@ -27,6 +27,15 @@ type halfEdgeRecord struct {
 	label      uint8
 }
 
+// String shows the origin and destination of the edge (for debugging
+// purposes). We can remove this once DCEL active development is completed.
+func (e *halfEdgeRecord) String() string {
+	if e == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("%v->%v", e.origin.coords, e.twin.origin.coords)
+}
+
 type vertexRecord struct {
 	coords   XY
 	incident *halfEdgeRecord
@@ -632,7 +641,7 @@ func edgeLoopIsOuterComponent(start *halfEdgeRecord) bool {
 		if _, ok := twins[e]; ok {
 			delete(twins, e)
 		} else {
-			twins[e] = struct{}{}
+			twins[e.twin] = struct{}{}
 		}
 	})
 	if len(twins) == 0 {

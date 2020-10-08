@@ -1199,6 +1199,45 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 	})
 }
 
+func TestGraphOverlayReproducePointOnLineStringPrecisionBug(t *testing.T) {
+	geomA, err := UnmarshalWKT("LINESTRING(0 0,1 1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	geomB, err := UnmarshalWKT("POINT(0.35355339059327373 0.35355339059327373)")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	overlay := createOverlay(geomA, geomB)
+
+	v0 := XY{0, 0}
+	v1 := XY{0.35355339059327373, 0.35355339059327373}
+	v2 := XY{1, 1}
+
+	CheckDCEL(t, overlay, DCELSpec{
+		NumVerts: 3,
+		NumEdges: 4,
+		NumFaces: 1,
+		Faces: []FaceSpec{
+			{
+				EdgeOrigin:      v0,
+				EdgeDestin:      v1,
+				OuterComponent:  nil,
+				InnerComponents: [][]XY{{v0, v1, v2, v1}},
+				Label:           populatedMask,
+			},
+		},
+		Edges: []EdgeLabelSpec{
+			{Edges: []XY{v0, v1, v2}, Label: populatedMask | inputAInSet},
+		},
+		Vertices: []VertexSpec{
+			{Vertices: []XY{v0, v2}, Label: populatedMask | inputAInSet},
+			{Vertices: []XY{v1}, Label: populatedMask | inputAInSet | inputBInSet},
+		},
+	})
+}
+
 func TestRemoveDuplicateEdges(t *testing.T) {
 	for i, tt := range []struct {
 		input, output string
