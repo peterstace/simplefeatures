@@ -653,38 +653,41 @@ func edgeLoopIsOuterComponent(start *halfEdgeRecord) bool {
 
 func (d *doublyConnectedEdgeList) findNextDownEdgeToTheLeft(pt XY) *halfEdgeRecord {
 	var acc nextDownEdgeToTheLeftAccumulator
+	var bestEdge *halfEdgeRecord
 	for _, e := range d.halfEdges {
-		acc.accumulate(e, pt)
+		ln := line{e.origin.coords, e.twin.origin.coords}
+		if acc.accumulate(ln, pt) {
+			bestEdge = e
+		}
 	}
-	return acc.bestEdge
+	return bestEdge
 }
 
 type nextDownEdgeToTheLeftAccumulator struct {
-	bestEdge *halfEdgeRecord
+	bestLine line
 	bestDist float64
 	tieBreak float64
 }
 
-func (a *nextDownEdgeToTheLeftAccumulator) accumulate(e *halfEdgeRecord, pt XY) {
-	origin := e.origin.coords
-	destin := e.next.origin.coords
+func (a *nextDownEdgeToTheLeftAccumulator) accumulate(ln line, pt XY) bool {
+	origin := ln.a
+	destin := ln.b
 	if !(destin.Y <= pt.Y && pt.Y <= origin.Y) {
 		// We only want to consider edges that go "down" (or horizontal)
 		// and overlap vertically with pt.
-		return
+		return false
 	}
 	if origin.Y == destin.Y && origin.X < destin.X {
 		// For horizontal lines, we only want to consider edges that go
 		// from the right to the left.
-		return
+		return false
 	}
 
 	// Calculate distance.
-	ln := line{origin, destin}
 	dist := signedHorizontalDistanceBetweenXYAndLine(pt, ln)
 	if dist <= 0 {
 		// Edge is on the wrong side of pt (we only want edges to the left).
-		return
+		return false
 	}
 
 	// Calculate tie-break.
@@ -700,11 +703,13 @@ func (a *nextDownEdgeToTheLeftAccumulator) accumulate(e *halfEdgeRecord, pt XY) 
 	tieBreak := unitAwayFromHit.Dot(edgeUnit)
 
 	// Replace if best.
-	if a.bestEdge == nil || dist < a.bestDist || (dist == a.bestDist && tieBreak > a.tieBreak) {
-		a.bestEdge = e
+	if a.bestLine == (line{}) || dist < a.bestDist || (dist == a.bestDist && tieBreak > a.tieBreak) {
+		a.bestLine = ln
 		a.bestDist = dist
 		a.tieBreak = tieBreak
+		return true
 	}
+	return false
 }
 
 func signedHorizontalDistanceBetweenXYAndLine(xy XY, ln line) float64 {
