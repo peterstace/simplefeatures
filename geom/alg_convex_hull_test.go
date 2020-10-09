@@ -188,6 +188,11 @@ func TestConvexHull(t *testing.T) {
 			input:  `MULTIPOINT((0.532 0.548),(0.385 0.378),(0.428 0.463),(0.506 0.443),(0.372 0.613),(0.648 0.636),(0.417 0.447))`,
 			output: `POLYGON((0.385 0.378,0.506 0.443,0.648 0.636,0.372 0.613,0.385 0.378))`,
 		},
+		{
+			// collinear points, but with numerical issues
+			input:  `MULTIPOINT(0 1,0.333333333333333 0.666666666666667,1 0)`,
+			output: `LINESTRING(1 0,0 1)`,
+		},
 
 		// Reproduced a bug.
 		{

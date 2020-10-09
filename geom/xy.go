@@ -70,3 +70,10 @@ func (w XY) Less(o XY) bool {
 	}
 	return w.Y < o.Y
 }
+
+// squareDistanceTo calculates the square of the distance between this XY and
+// another.
+func (w XY) squareDistanceTo(o XY) float64 {
+	s := w.Sub(o)
+	return s.Dot(s)
+}

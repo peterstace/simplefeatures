@@ -38,7 +38,27 @@ func convexHull(g Geometry) Geometry {
 		}
 		poly, err := NewPolygonFromRings([]LineString{ring})
 		if err != nil {
-			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid polygon: %v", err))
+			// We could get an error here in the case where there are multiple
+			// input points that are collinear within some numerical precision
+			// bounds. The Graham scan thinks that the points are not
+			// collinear, but polygon validations thinks that they are
+			// collinear (i.e. not a valid Polygon). If we hit this case, we
+			// need to give a LineString instead. This is a bit of a hack, but
+			// would likely be fixed by
+			// https://github.com/peterstace/simplefeatures/issues/246
+
+			origin := hull[0]
+			destin := hull[0]
+			for _, pt := range hull[1:] {
+				if origin.squareDistanceTo(pt) > origin.squareDistanceTo(destin) {
+					destin = pt
+				}
+			}
+			if origin == destin {
+				panic(fmt.Sprintf("bug in collinear point fallback - output 2 coincident points: %v", origin))
+			}
+			ln := line{origin, destin}
+			return ln.asLineString().AsGeometry()
 		}
 		return poly.AsGeometry()
 	}
