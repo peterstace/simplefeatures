@@ -36,16 +36,16 @@ func createOverlay(a, b Geometry) *doublyConnectedEdgeList {
 	// Re-node any linear elements with themselves, since they may be
 	// self-intersecting.
 	if containsLinearElement(a) {
-		a = reNodeGeometry(a, cutA)
+		a = reNodeGeometry(a, cutA, false)
 		cutA = newCutSet(a)
 	}
 	if containsLinearElement(b) {
-		b = reNodeGeometry(b, cutB)
+		b = reNodeGeometry(b, cutB, true)
 		cutB = newCutSet(b)
 	}
 
-	a = reNodeGeometry(a, cutB)
-	b = reNodeGeometry(b, cutA)
+	a = reNodeGeometry(a, cutB, false)
+	b = reNodeGeometry(b, cutA, true)
 
 	dcelA := newDCELFromGeometry(a, inputAMask)
 	dcelB := newDCELFromGeometry(b, inputBMask)

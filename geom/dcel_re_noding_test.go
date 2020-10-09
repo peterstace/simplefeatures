@@ -111,7 +111,7 @@ func TestDCELReNoding(t *testing.T) {
 			}
 
 			cutSet := newCutSet(cutG)
-			got := reNodeGeometry(inputG, cutSet)
+			got := reNodeGeometry(inputG, cutSet, false)
 
 			if !got.EqualsExact(wantG) {
 				t.Logf("MISMATCH")

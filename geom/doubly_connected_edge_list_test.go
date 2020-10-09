@@ -226,6 +226,18 @@ outer:
 	t.Errorf("XY sequences don't match: got=%v want=%v", got, want)
 }
 
+func createOverlayFromWKTs(t *testing.T, wktA, wktB string) *doublyConnectedEdgeList {
+	gA, err := UnmarshalWKT(wktA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gB, err := UnmarshalWKT(wktB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return createOverlay(gA, gB)
+}
+
 func TestGraphTriangle(t *testing.T) {
 	poly, err := UnmarshalWKT("POLYGON((0 0,0 1,1 0,0 0))")
 	if err != nil {
@@ -527,16 +539,10 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 }
 
 func TestGraphOverlayDisjoint(t *testing.T) {
-	polyA, err := UnmarshalWKT("POLYGON((0 0,1 0,1 1,0 1,0 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	polyB, err := UnmarshalWKT("POLYGON((2 2,2 3,3 3,3 2,2 2))")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	overlay := createOverlay(polyA, polyB)
+	overlay := createOverlayFromWKTs(t,
+		"POLYGON((0 0,1 0,1 1,0 1,0 0))",
+		"POLYGON((2 2,2 3,3 3,3 2,2 2))",
+	)
 
 	/*
 	                v7------v6
@@ -598,16 +604,10 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 }
 
 func TestGraphOverlayIntersecting(t *testing.T) {
-	polyA, err := UnmarshalWKT("POLYGON((0 0,1 2,2 0,0 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	polyB, err := UnmarshalWKT("POLYGON((0 1,2 1,1 3,0 1))")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	overlay := createOverlay(polyA, polyB)
+	overlay := createOverlayFromWKTs(t,
+		"POLYGON((0 0,1 2,2 0,0 0))",
+		"POLYGON((0 1,2 1,1 3,0 1))",
+	)
 
 	/*
 	           v7
@@ -706,16 +706,10 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 }
 
 func TestGraphOverlayInside(t *testing.T) {
-	polyA, err := UnmarshalWKT("POLYGON((0 0,3 0,3 3,0 3,0 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	polyB, err := UnmarshalWKT("POLYGON((1 1,2 1,2 2,1 2,1 1))")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	overlay := createOverlay(polyA, polyB)
+	overlay := createOverlayFromWKTs(t,
+		"POLYGON((0 0,3 0,3 3,0 3,0 0))",
+		"POLYGON((1 1,2 1,2 2,1 2,1 1))",
+	)
 
 	/*
 	  v3-----------------v2
@@ -774,16 +768,10 @@ func TestGraphOverlayInside(t *testing.T) {
 }
 
 func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
-	polyA, err := UnmarshalWKT("MULTIPOLYGON(((4 0,4 1,5 1,5 0,4 0)),((1 0,1 2,3 2,3 0,1 0)))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	polyB, err := UnmarshalWKT("MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 1,0 1)))")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	overlay := createOverlay(polyA, polyB)
+	overlay := createOverlayFromWKTs(t,
+		"MULTIPOLYGON(((4 0,4 1,5 1,5 0,4 0)),((1 0,1 2,3 2,3 0,1 0)))",
+		"MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 1,0 1)))",
+	)
 
 	/*
 	  v16---v15
@@ -885,16 +873,10 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 }
 
 func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
-	polyA, err := UnmarshalWKT("POLYGON((0 0,0 1,1 1,1 0,0 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	polyB, err := UnmarshalWKT("POLYGON((1 0,1 1,2 1,2 0,1 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	overlay := createOverlay(polyA, polyB)
+	overlay := createOverlayFromWKTs(t,
+		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
+		"POLYGON((1 0,1 1,2 1,2 0,1 0))",
+	)
 
 	/*
 	  v5-----v4----v3
@@ -955,16 +937,10 @@ func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
 }
 
 func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
-	polyA, err := UnmarshalWKT("POLYGON((0 1,0 3,2 3,2 1,0 1))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	polyB, err := UnmarshalWKT("POLYGON((2 0,2 2,4 2,4 0,2 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	overlay := createOverlay(polyA, polyB)
+	overlay := createOverlayFromWKTs(t,
+		"POLYGON((0 1,0 3,2 3,2 1,0 1))",
+		"POLYGON((2 0,2 2,4 2,4 0,2 0))",
+	)
 
 	/*
 	  v7-------v6    f0
@@ -1030,16 +1006,10 @@ func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
 }
 
 func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
-	polyA, err := UnmarshalWKT("POLYGON((0 0,0 1,1 1,1 0,0 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	polyB, err := UnmarshalWKT("POLYGON((0 0,0 1,1 1,1 0,0 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	overlay := createOverlay(polyA, polyB)
+	overlay := createOverlayFromWKTs(t,
+		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
+		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
+	)
 
 	/*
 	  v3-------v2
@@ -1084,16 +1054,10 @@ func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
 }
 
 func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
-	lsA, err := UnmarshalWKT("LINESTRING(0 0,1 0)")
-	if err != nil {
-		t.Fatal(err)
-	}
-	lsB, err := UnmarshalWKT("LINESTRING(0 0,0 1)")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	overlay := createOverlay(lsA, lsB)
+	overlay := createOverlayFromWKTs(t,
+		"LINESTRING(0 0,1 0)",
+		"LINESTRING(0 0,0 1)",
+	)
 
 	/*
 	  v0 B
@@ -1130,16 +1094,10 @@ func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 }
 
 func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
-	geomA, err := UnmarshalWKT("LINESTRING(0 1,1 0)")
-	if err != nil {
-		t.Fatal(err)
-	}
-	geomB, err := UnmarshalWKT("MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	overlay := createOverlay(geomA, geomB)
+	overlay := createOverlayFromWKTs(t,
+		"LINESTRING(0 1,1 0)",
+		"MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+	)
 
 	v0 := XY{0, 0}
 	v1 := XY{1, 0}
@@ -1200,16 +1158,10 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 }
 
 func TestGraphOverlayReproducePointOnLineStringPrecisionBug(t *testing.T) {
-	geomA, err := UnmarshalWKT("LINESTRING(0 0,1 1)")
-	if err != nil {
-		t.Fatal(err)
-	}
-	geomB, err := UnmarshalWKT("POINT(0.35355339059327373 0.35355339059327373)")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	overlay := createOverlay(geomA, geomB)
+	overlay := createOverlayFromWKTs(t,
+		"LINESTRING(0 0,1 1)",
+		"POINT(0.35355339059327373 0.35355339059327373)",
+	)
 
 	v0 := XY{0, 0}
 	v1 := XY{0.35355339059327373, 0.35355339059327373}

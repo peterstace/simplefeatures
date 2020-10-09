@@ -2,18 +2,24 @@ package geom
 
 import "fmt"
 
-func reNodeGeometry(g Geometry, cut cutSet) Geometry {
+// reNodeGeometry returns a geometry that is spatially equivalent to g, but
+// with additional nodes (i.e. control points). The cut set is used to
+// determine the location of additional nodes (they will occur wherever the cut
+// set intersects with g). Because intersection between line segments is
+// non-commutative (due to numerical precision issues), flip is used to reverse
+// the order between the operator and operand.
+func reNodeGeometry(g Geometry, cut cutSet, flip bool) Geometry {
 	switch g.Type() {
 	case TypeGeometryCollection:
-		return reNodeGeometryCollection(g.AsGeometryCollection(), cut).AsGeometry()
+		return reNodeGeometryCollection(g.AsGeometryCollection(), cut, flip).AsGeometry()
 	case TypeLineString:
-		return reNodeLineString(g.AsLineString(), cut).AsGeometry()
+		return reNodeLineString(g.AsLineString(), cut, flip).AsGeometry()
 	case TypePolygon:
-		return reNodePolygon(g.AsPolygon(), cut).AsGeometry()
+		return reNodePolygon(g.AsPolygon(), cut, flip).AsGeometry()
 	case TypeMultiLineString:
-		return reNodeMultiLineString(g.AsMultiLineString(), cut).AsGeometry()
+		return reNodeMultiLineString(g.AsMultiLineString(), cut, flip).AsGeometry()
 	case TypeMultiPolygon:
-		return reNodeMultiPolygonString(g.AsMultiPolygon(), cut).AsGeometry()
+		return reNodeMultiPolygonString(g.AsMultiPolygon(), cut, flip).AsGeometry()
 	case TypePoint, TypeMultiPoint:
 		// It doesn't make sense to re-node point geometries, since they have
 		// no edges.
@@ -89,7 +95,7 @@ func appendPoints(points []XY, g Geometry) []XY {
 	return points
 }
 
-func reNodeLineString(ls LineString, cut cutSet) LineString {
+func reNodeLineString(ls LineString, cut cutSet, flip bool) LineString {
 	var newCoords []float64
 	seq := ls.Coordinates()
 	n := seq.Length()
@@ -103,7 +109,12 @@ func reNodeLineString(ls LineString, cut cutSet) LineString {
 		xys := []XY{ln.a, ln.b}
 		cut.lnIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
 			other := cut.lnIndex.lines[i]
-			inter := ln.intersectLine(other)
+			var inter lineWithLineIntersection
+			if flip {
+				inter = other.intersectLine(ln)
+			} else {
+				inter = ln.intersectLine(other)
+			}
 			if inter.empty {
 				return nil
 			}
@@ -146,17 +157,17 @@ func reNodeLineString(ls LineString, cut cutSet) LineString {
 	return newLS
 }
 
-func reNodeMultiLineString(mls MultiLineString, cut cutSet) MultiLineString {
+func reNodeMultiLineString(mls MultiLineString, cut cutSet, flip bool) MultiLineString {
 	n := mls.NumLineStrings()
 	lss := make([]LineString, n)
 	for i := 0; i < n; i++ {
-		lss[i] = reNodeLineString(mls.LineStringN(i), cut)
+		lss[i] = reNodeLineString(mls.LineStringN(i), cut, flip)
 	}
 	return NewMultiLineStringFromLineStrings(lss, DisableAllValidations)
 }
 
-func reNodePolygon(poly Polygon, cut cutSet) Polygon {
-	reNodedBoundary := reNodeMultiLineString(poly.Boundary(), cut)
+func reNodePolygon(poly Polygon, cut cutSet, flip bool) Polygon {
+	reNodedBoundary := reNodeMultiLineString(poly.Boundary(), cut, flip)
 	n := reNodedBoundary.NumLineStrings()
 	rings := make([]LineString, n)
 	for i := 0; i < n; i++ {
@@ -169,11 +180,11 @@ func reNodePolygon(poly Polygon, cut cutSet) Polygon {
 	return reNodedPoly
 }
 
-func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet) MultiPolygon {
+func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, flip bool) MultiPolygon {
 	n := mp.NumPolygons()
 	polys := make([]Polygon, n)
 	for i := 0; i < n; i++ {
-		polys[i] = reNodePolygon(mp.PolygonN(i), cut)
+		polys[i] = reNodePolygon(mp.PolygonN(i), cut, flip)
 	}
 	reNodedMP, err := NewMultiPolygonFromPolygons(polys, DisableAllValidations)
 	if err != nil {
@@ -182,11 +193,11 @@ func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet) MultiPolygon {
 	return reNodedMP
 }
 
-func reNodeGeometryCollection(gc GeometryCollection, cut cutSet) GeometryCollection {
+func reNodeGeometryCollection(gc GeometryCollection, cut cutSet, flip bool) GeometryCollection {
 	n := gc.NumGeometries()
 	geoms := make([]Geometry, n)
 	for i := 0; i < n; i++ {
-		geoms[i] = reNodeGeometry(gc.GeometryN(i), cut)
+		geoms[i] = reNodeGeometry(gc.GeometryN(i), cut, flip)
 	}
 	return NewGeometryCollection(geoms, DisableAllValidations)
 }
