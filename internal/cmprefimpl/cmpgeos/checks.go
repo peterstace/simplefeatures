@@ -556,10 +556,16 @@ func binaryChecks(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 		}
 	}
 
+	log.Println("checking intersects")
 	if err := checkIntersects(h, g1, g2, log); err != nil {
 		return err
 	}
+	log.Println("checking exact equals")
 	if err := checkEqualsExact(h, g1, g2, log); err != nil {
+		return err
+	}
+	log.Println("checking distance")
+	if err := checkDistance(h, g1, g2, log); err != nil {
 		return err
 	}
 	return nil
@@ -591,6 +597,29 @@ func checkEqualsExact(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	got := g1.EqualsExact(g2)
 
 	if want != got {
+		log.Printf("want: %v", want)
+		log.Printf("got:  %v", got)
+		return mismatchErr
+	}
+	return nil
+}
+
+func checkDistance(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+	want, err := h.Distance(g1, g2)
+	if err != nil {
+		if err == LibgeosCrashError {
+			// Skip any tests that would cause libgeos to crash.
+			return nil
+		}
+		return err
+	}
+	got, ok := geom.Distance(g1, g2)
+	if !ok {
+		// GEOS gives 0 when distance is not defined.
+		got = 0
+	}
+
+	if math.Abs(want-got) > 1e-12 {
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
 		return mismatchErr

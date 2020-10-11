@@ -272,3 +272,14 @@ func (m MultiPoint) PointOnSurface() Point {
 	}
 	return nearest.point
 }
+
+func (m MultiPoint) asXYs() []XY {
+	n := m.seq.Length()
+	xys := make([]XY, 0, n)
+	for i := 0; i < n; i++ {
+		if !m.empty.Get(i) {
+			xys = append(xys, m.seq.GetXY(i))
+		}
+	}
+	return xys
+}

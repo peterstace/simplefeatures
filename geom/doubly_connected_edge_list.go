@@ -708,7 +708,7 @@ func (a *nextDownEdgeToTheLeftAccumulator) accumulate(ln line, pt XY) bool {
 	} else {
 		other = destin
 	}
-	edgeUnit := other.Sub(hit).unit()
+	edgeUnit := other.Sub(hit).Unit()
 	tieBreak := unitAwayFromHit.Dot(edgeUnit)
 
 	// Replace if best.

@@ -52,6 +52,16 @@ func (w XY) Dot(o XY) float64 {
 	return w.X*o.X + w.Y*o.Y
 }
 
+// Unit treats the XY as a vector, and scales it to have unit length.
+func (w XY) Unit() XY {
+	return w.Scale(1 / w.Length())
+}
+
+// Length treats XY as a vector, and returns its length.
+func (w XY) Length() float64 {
+	return math.Sqrt(w.Dot(w))
+}
+
 // Less gives an ordering on XYs. If two XYs have different X values, then the
 // one with the lower X value is ordered before the one with the higher X
 // value. If the X values are then same, then the Y values are used (the lower
@@ -61,18 +71,6 @@ func (w XY) Less(o XY) bool {
 		return w.X < o.X
 	}
 	return w.Y < o.Y
-}
-
-// unit normalises the vector to be unit length. Panics if invoked on the zero
-// XY value.
-func (w XY) unit() XY {
-	dot := w.Dot(w)
-	length := math.Sqrt(dot)
-	scale := 1 / length
-	if math.IsInf(scale, 0) {
-		panic("invoked unit() on zero length vector")
-	}
-	return w.Scale(scale)
 }
 
 func (w XY) distanceTo(o XY) float64 {
