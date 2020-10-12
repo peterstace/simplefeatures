@@ -49,10 +49,7 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 		t.Fatalf("NumFaces doesn't match len(spec.Faces): %d vs %d", spec.NumFaces, len(spec.Faces))
 	}
 
-	for xy, vr := range dcel.vertices {
-		if xy != vr.coords {
-			t.Errorf("xy in vertex map doesn't match record")
-		}
+	for _, vr := range dcel.vertices {
 		if vr.incident == nil {
 			t.Fatalf("vertex record (at %v) incident ptr not set", vr.coords)
 		}
@@ -110,7 +107,7 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 	t.Run("vertex_labels", func(t *testing.T) {
 		for _, want := range spec.Vertices {
 			for _, wantXY := range want.Vertices {
-				vert, ok := dcel.vertices[wantXY]
+				vert, ok := dcel.vertices.lookup(wantXY)
 				if !ok {
 					t.Errorf("no vertex %v", wantXY)
 					continue

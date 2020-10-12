@@ -9,7 +9,7 @@ import (
 type doublyConnectedEdgeList struct {
 	faces     []*faceRecord
 	halfEdges []*halfEdgeRecord
-	vertices  map[XY]*vertexRecord
+	vertices  vertexGrid
 }
 
 type faceRecord struct {
@@ -94,8 +94,8 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 		for _, ring := range rings {
 			for i := 0; i < ring.Length(); i++ {
 				xy := ring.GetXY(i)
-				if _, ok := dcel.vertices[xy]; !ok {
-					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask}
+				if _, ok := dcel.vertices.lookup(xy); !ok {
+					dcel.vertices.assign(xy, &vertexRecord{xy, nil /* populated later */, mask})
 				}
 			}
 		}
@@ -129,8 +129,10 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 				if !ok {
 					continue
 				}
+				vertA, _ := dcel.vertices.lookup(ln.a)
+				vertB, _ := dcel.vertices.lookup(ln.b)
 				internalEdge := &halfEdgeRecord{
-					origin:   dcel.vertices[ln.a],
+					origin:   vertA,
 					twin:     nil, // populated later
 					incident: interiorFace,
 					next:     nil, // populated later
@@ -138,7 +140,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 					label:    mask,
 				}
 				externalEdge := &halfEdgeRecord{
-					origin:   dcel.vertices[ln.b],
+					origin:   vertB,
 					twin:     internalEdge,
 					incident: exteriorFace,
 					next:     nil, // populated later
@@ -146,7 +148,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 					label:    mask,
 				}
 				internalEdge.twin = externalEdge
-				dcel.vertices[ln.a].incident = internalEdge
+				vertA.incident = internalEdge
 				newEdges = append(newEdges, internalEdge, externalEdge)
 
 				// Set interior/exterior face linkage.
@@ -193,7 +195,7 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 		seq := ls.Coordinates()
 		for j := 0; j < seq.Length(); j++ {
 			xy := seq.GetXY(j)
-			dcel.vertices[xy] = &vertexRecord{coords: xy, label: mask}
+			dcel.vertices.assign(xy, &vertexRecord{coords: xy, label: mask})
 		}
 	}
 
@@ -219,8 +221,8 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 			if !ok {
 				continue
 			}
-			vOrigin := dcel.vertices[ln.a]
-			vDestin := dcel.vertices[ln.b]
+			vOrigin, _ := dcel.vertices.lookup(ln.a)
+			vDestin, _ := dcel.vertices.lookup(ln.b)
 			fwd := &halfEdgeRecord{
 				origin:   vOrigin,
 				twin:     nil, // set later
@@ -330,14 +332,14 @@ func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
 		if !ok {
 			continue
 		}
-		record, ok := dcel.vertices[xy]
+		record, ok := dcel.vertices.lookup(xy)
 		if !ok {
 			record = &vertexRecord{
 				coords:   xy,
 				incident: nil,
 				label:    0,
 			}
-			dcel.vertices[xy] = record
+			dcel.vertices.assign(xy, record)
 		}
 		record.label |= mask
 	}
@@ -353,12 +355,15 @@ func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
-	for xy, otherVert := range other.vertices {
-		vert, ok := d.vertices[xy]
+	for bucket, otherVert := range other.vertices {
+		// We still need to lookup by checking the 8 adjacent buckets, since we
+		// don't want 2 adjacent buckets to be populated (so we can't do a
+		// direct lookup in the map).
+		vert, ok := d.vertices.lookup(bucket)
 		if ok {
 			vert.label |= otherVert.label
 		} else {
-			d.vertices[xy] = otherVert
+			d.vertices[bucket] = otherVert
 		}
 	}
 	for _, face := range other.faces {
@@ -373,10 +378,10 @@ func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList
 
 func (d *doublyConnectedEdgeList) overlayVerticesInComponent(start *halfEdgeRecord) {
 	forEachEdge(start, func(e *halfEdgeRecord) {
-		if existing, ok := d.vertices[e.origin.coords]; ok {
+		if existing, ok := d.vertices.lookup(e.origin.coords); ok {
 			e.origin = existing
 		} else {
-			d.vertices[e.origin.coords] = e.origin
+			d.vertices.assign(e.origin.coords, e.origin)
 		}
 	})
 }
@@ -432,8 +437,8 @@ func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord,
 }
 
 func (d *doublyConnectedEdgeList) fixVertices() {
-	for xy := range d.vertices {
-		d.fixVertex(xy)
+	for _, vert := range d.vertices {
+		d.fixVertex(vert.coords)
 	}
 }
 
@@ -815,7 +820,8 @@ func (d *doublyConnectedEdgeList) fixLabels() {
 	// If there are any vertices that don't have populated labels, it's because
 	// they are isolated (i.e. in the middle of a face). We need to work out
 	// which face they are part of.
-	for xy, vert := range d.vertices {
+	for _, vert := range d.vertices {
+		xy := vert.coords
 		if (vert.label & populatedMask) == populatedMask {
 			continue
 		}
@@ -1109,10 +1115,10 @@ func nextNoBranch(edge *halfEdgeRecord, include func(uint8) bool) *halfEdgeRecor
 // extracted geometries.
 func (d *doublyConnectedEdgeList) extractPoints(include func(uint8) bool) []XY {
 	var xys []XY
-	for xy, vert := range d.vertices {
+	for _, vert := range d.vertices {
 		if include(vert.label) && vert.label&extracted == 0 {
 			vert.label |= extracted
-			xys = append(xys, xy)
+			xys = append(xys, vert.coords)
 		}
 	}
 	return xys
