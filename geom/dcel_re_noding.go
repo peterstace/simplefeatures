@@ -32,10 +32,12 @@ type cutSet struct {
 	ptIndex indexedPoints
 }
 
-func newCutSet(g Geometry) cutSet {
+func newCutSet(g1, g2 Geometry) cutSet {
+	lines := appendLines(appendLines(nil, g1), g2)
+	points := appendPoints(appendPoints(nil, g1), g2)
 	return cutSet{
-		lnIndex: newIndexedLines(appendLines(nil, g)),
-		ptIndex: newIndexedPoints(appendPoints(nil, g)),
+		lnIndex: newIndexedLines(lines),
+		ptIndex: newIndexedPoints(points),
 	}
 }
 

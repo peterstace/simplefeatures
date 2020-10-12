@@ -651,6 +651,16 @@ func TestBinaryOp(t *testing.T) {
 			symDiff: "MULTILINESTRING((0 0,0.35355339059327373 0.35355339059327373),(0.35355339059327373 0.35355339059327373,1 1))",
 		},
 		{
+			// LineString with a Point in the middle of it.
+			input1:  "POINT(5 5)",
+			input2:  "LINESTRING(1 2,9 8)",
+			union:   "MULTILINESTRING((1 2,5 5),(5 5,9 8))",
+			inter:   "POINT(5 5)",
+			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
+			revDiff: "MULTILINESTRING((1 2,5 5),(5 5,9 8))",
+			symDiff: "MULTILINESTRING((1 2,5 5),(5 5,9 8))",
+		},
+		{
 			/*
 			       *
 			   +  /
@@ -734,6 +744,11 @@ func TestBinaryOp(t *testing.T) {
 			fwdDiff: "LINESTRING(0 1,0.333333333333333 1.66666666666667)",
 			revDiff: "MULTIPOLYGON(((1 0,0 1,0.5 1.5,1 1,1.5 1.5,2 1,1 0)),((1.5 1.5,1 2,0.5 1.5,0.333333333333333 1.66666666666667,0 2,1 3,2 2,1.5 1.5)),((3.5 1.5,4 1,3 0,2 1,2.5 1.5,3 1,3.5 1.5)),((3.5 1.5,3 2,2.5 1.5,2 2,3 3,4 2,3.5 1.5)))",
 			symDiff: "GEOMETRYCOLLECTION(LINESTRING(0 1,0.333333333333333 1.66666666666667),POLYGON((1 0,0 1,0.5 1.5,1 1,1.5 1.5,2 1,1 0)),POLYGON((1.5 1.5,1 2,0.5 1.5,0.333333333333333 1.66666666666667,0 2,1 3,2 2,1.5 1.5)),POLYGON((3.5 1.5,4 1,3 0,2 1,2.5 1.5,3 1,3.5 1.5)),POLYGON((3.5 1.5,3 2,2.5 1.5,2 2,3 3,4 2,3.5 1.5)))",
+		},
+		{
+			input1:  "POINT(5 5)",
+			input2:  "LINESTRING(5 3,4 8,1 2,9 8)",
+			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {

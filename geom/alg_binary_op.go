@@ -30,22 +30,9 @@ func binaryOp(a, b Geometry, include func(uint8) bool) Geometry {
 }
 
 func createOverlay(a, b Geometry) *doublyConnectedEdgeList {
-	cutA := newCutSet(a)
-	cutB := newCutSet(b)
-
-	// Re-node any linear elements with themselves, since they may be
-	// self-intersecting.
-	if containsLinearElement(a) {
-		a = reNodeGeometry(a, cutA)
-		cutA = newCutSet(a)
-	}
-	if containsLinearElement(b) {
-		b = reNodeGeometry(b, cutB)
-		cutB = newCutSet(b)
-	}
-
-	a = reNodeGeometry(a, cutB)
-	b = reNodeGeometry(b, cutA)
+	cut := newCutSet(a, b)
+	a = reNodeGeometry(a, cut)
+	b = reNodeGeometry(b, cut)
 
 	dcelA := newDCELFromGeometry(a, inputAMask)
 	dcelB := newDCELFromGeometry(b, inputBMask)

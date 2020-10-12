@@ -110,7 +110,7 @@ func TestDCELReNoding(t *testing.T) {
 				t.Fatalf("could not unmarshal geometry: %v", err)
 			}
 
-			cutSet := newCutSet(cutG)
+			cutSet := newCutSet(cutG, Geometry{})
 			got := reNodeGeometry(inputG, cutSet)
 
 			if !got.EqualsExact(wantG) {
