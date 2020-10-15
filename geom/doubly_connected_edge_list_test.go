@@ -2,7 +2,6 @@ package geom
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
 )
 
@@ -465,7 +464,7 @@ func TestGraphMultiLineString(t *testing.T) {
 			EdgeOrigin:      v0,
 			EdgeDestin:      v1,
 			OuterComponent:  nil,
-			InnerComponents: [][]XY{{v0, v1, v2, v1}, {v5, v4, v3, v4}},
+			InnerComponents: [][]XY{{v0, v1}, {v1, v2}, {v5, v4}, {v4, v3}},
 			Label:           inputAPopulated,
 		}},
 		Edges: []EdgeLabelSpec{
@@ -515,7 +514,7 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 			EdgeOrigin:      v0,
 			EdgeDestin:      v1,
 			OuterComponent:  nil,
-			InnerComponents: [][]XY{{v0, v1, v2, v3, v1, v3, v2, v1}, {v2, v4}},
+			InnerComponents: [][]XY{{v0, v1}, {v1, v2}, {v3, v2}, {v1, v3}, {v2, v4}},
 			Label:           inputAPopulated,
 		}},
 		Edges: []EdgeLabelSpec{
@@ -1185,60 +1184,4 @@ func TestGraphOverlayReproducePointOnLineStringPrecisionBug(t *testing.T) {
 			{Vertices: []XY{v1}, Label: populatedMask | inputAInSet | inputBInSet},
 		},
 	})
-}
-
-func TestRemoveDuplicateEdges(t *testing.T) {
-	for i, tt := range []struct {
-		input, output string
-	}{
-		{
-			"MULTILINESTRING((0 0,1 1))",
-			"MULTILINESTRING((0 0,1 1))",
-		},
-		{
-			"MULTILINESTRING((0 0,1 1),(0 0,1 1))",
-			"MULTILINESTRING((0 0,1 1))",
-		},
-		{
-			"MULTILINESTRING((0 0,1 1),(1 1,0 0))",
-			"MULTILINESTRING((0 0,1 1))",
-		},
-		{
-			"MULTILINESTRING((0 0,0 1,1 1,2 1,2 0),(0 1,1 1,2 1))",
-			"MULTILINESTRING((0 0,0 1,1 1,2 1,2 0))",
-		},
-		{
-			"MULTILINESTRING((0 1,1 1,2 1),(0 0,0 1,1 1,2 1,2 0))",
-			"MULTILINESTRING((0 1,1 1,2 1),(0 0,0 1),(2 1,2 0))",
-		},
-		{
-			"MULTILINESTRING((0 0,0 1),(0 0,0 1,1 1))",
-			"MULTILINESTRING((0 0,0 1),(0 1,1 1))",
-		},
-		{
-			"MULTILINESTRING((1 1,0 1),(0 0,0 1,1 1))",
-			"MULTILINESTRING((1 1,0 1),(0 0,0 1))",
-		},
-		{
-			"MULTILINESTRING((0 0,0 1,1 1,1 0,0 1,1 1,2 1))",
-			"MULTILINESTRING((0 0,0 1,1 1,1 0,0 1),(1 1,2 1))",
-		},
-	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			in, err := UnmarshalWKT(tt.input)
-			if err != nil {
-				t.Fatal(err)
-			}
-			out, err := UnmarshalWKT(tt.output)
-			if err != nil {
-				t.Fatal(err)
-			}
-			got := removeDuplicateEdges(in.AsMultiLineString())
-			if !out.EqualsExact(got.AsGeometry()) {
-				t.Errorf(
-					"\ninput: %v\nwant:  %v\ngot:   %v\n",
-					in.AsText(), out.AsText(), got.AsText())
-			}
-		})
-	}
 }

@@ -109,7 +109,7 @@ func reNodeLineString(ls LineString, cut cutSet) LineString {
 		xys := []XY{ln.a, ln.b}
 		cut.lnIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
 			other := cut.lnIndex.lines[i]
-			inter := commutativeLineIntersection(ln, other)
+			inter := ln.intersectLine(other)
 			if inter.empty {
 				return nil
 			}
@@ -150,24 +150,6 @@ func reNodeLineString(ls LineString, cut cutSet) LineString {
 		panic(fmt.Sprintf("could not re-node LineString: %v", err))
 	}
 	return newLS
-}
-
-// commutativeLineIntersection finds the intersection between 2 lines in a
-// commutative way (i.e. the result is the same, no matter the order of the
-// inputs). Furthermore, the ordering of the endpoints within each individual
-// line segment doesn't matter either. This is to prevent erroneous additional
-// intersection points being created.
-func commutativeLineIntersection(lnA, lnB line) lineWithLineIntersection {
-	if lnA.a.Less(lnA.b) {
-		lnA.a, lnA.b = lnA.b, lnA.a
-	}
-	if lnB.a.Less(lnB.b) {
-		lnB.a, lnB.b = lnB.b, lnB.a
-	}
-	if lnA.a.Less(lnB.a) {
-		lnA, lnB = lnB, lnA
-	}
-	return lnA.intersectLine(lnB)
 }
 
 func reNodeMultiLineString(mls MultiLineString, cut cutSet) MultiLineString {

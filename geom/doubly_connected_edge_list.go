@@ -183,8 +183,6 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 }
 
 func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnectedEdgeList {
-	mls = removeDuplicateEdges(mls)
-
 	dcel := &doublyConnectedEdgeList{
 		vertices: make(map[XY]*vertexRecord),
 	}
@@ -208,21 +206,38 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 	}
 	dcel.faces = []*faceRecord{infFace}
 
+	type vertPair struct {
+		a, b *vertexRecord
+	}
+	edgeSet := make(map[vertPair]bool)
+
 	// Add edges.
 	for i := 0; i < mls.NumLineStrings(); i++ {
-		var newEdges []*halfEdgeRecord
-		ls := mls.LineStringN(i)
-		if ls.IsEmpty() {
-			continue
-		}
-		seq := ls.Coordinates()
+		seq := mls.LineStringN(i).Coordinates()
 		for j := 0; j < seq.Length(); j++ {
 			ln, ok := getLine(seq, j)
 			if !ok {
 				continue
 			}
-			vOrigin, _ := dcel.vertices.lookup(ln.a)
-			vDestin, _ := dcel.vertices.lookup(ln.b)
+
+			vOrigin, ok := dcel.vertices.lookup(ln.a)
+			if !ok {
+				panic("could not find vertex")
+			}
+			vDestin, ok := dcel.vertices.lookup(ln.b)
+			if !ok {
+				panic("could not find vertex")
+			}
+
+			pair := vertPair{vOrigin, vDestin}
+			if pair.a.coords.Less(pair.b.coords) {
+				pair.a, pair.b = pair.b, pair.a
+			}
+			if edgeSet[pair] {
+				continue
+			}
+			edgeSet[pair] = true
+
 			fwd := &halfEdgeRecord{
 				origin:   vOrigin,
 				twin:     nil, // set later
@@ -235,93 +250,23 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 				origin:   vDestin,
 				twin:     fwd,
 				incident: infFace,
-				next:     nil, // set later
-				prev:     nil, // set later
+				next:     fwd,
+				prev:     fwd,
 				label:    mask,
 			}
 			fwd.twin = rev
-			newEdges = append(newEdges, fwd, rev)
+			fwd.next = rev
+			fwd.prev = rev
+
 			vOrigin.incident = fwd
 			vDestin.incident = rev
-		}
-		n := len(newEdges)
-		for j, e := range newEdges {
-			if j%2 == 0 {
-				if j+2 < n {
-					e.next = newEdges[j+2]
-				}
-				if j-2 >= 0 {
-					e.prev = newEdges[j-2]
-				}
-			} else {
-				if j-2 >= 0 {
-					e.next = newEdges[j-2]
-				}
-				if j+2 < n {
-					e.prev = newEdges[j+2]
-				}
-			}
-		}
-		newEdges[0].prev = newEdges[1]
-		newEdges[1].next = newEdges[0]
-		newEdges[n-2].next = newEdges[n-1]
-		newEdges[n-1].prev = newEdges[n-2]
 
-		dcel.halfEdges = append(dcel.halfEdges, newEdges...)
-		infFace.innerComponents = append(infFace.innerComponents, newEdges[0])
+			dcel.halfEdges = append(dcel.halfEdges, fwd, rev)
+			infFace.innerComponents = append(infFace.innerComponents, fwd)
+		}
 	}
 
 	return dcel
-}
-
-// removeDuplicateEdges alters a MultiLineString such that it doesn't contain
-// any duplicated line segments. It assumes that the MultiLineString has
-// already be re-noded for internal intersections.
-func removeDuplicateEdges(mls MultiLineString) MultiLineString {
-	canonicalLine := func(ln line) line {
-		if !ln.a.Less(ln.b) {
-			ln.a, ln.b = ln.b, ln.a
-		}
-		return ln
-	}
-
-	var coords []float64
-	seen := make(map[line]bool)
-	var lss []LineString
-
-	terminateAccumulatedCoords := func() {
-		if len(coords) > 0 {
-			newLS, err := NewLineString(NewSequence(coords, DimXY))
-			if err != nil {
-				// This shouldn't ever happen, because the first line
-				// added to coords will contain two distinct points.
-				panic(fmt.Sprintf("could not construct LineString in removeDuplicateEdges: %v", err))
-			}
-			lss = append(lss, newLS)
-			coords = nil
-		}
-	}
-
-	for i := 0; i < mls.NumLineStrings(); i++ {
-		seq := mls.LineStringN(i).Coordinates()
-		for j := 0; j < seq.Length(); j++ {
-			ln, ok := getLine(seq, j)
-			if !ok {
-				continue
-			}
-			if seen[canonicalLine(ln)] {
-				terminateAccumulatedCoords()
-				continue
-			}
-			seen[canonicalLine(ln)] = true
-			if len(coords) == 0 {
-				coords = append(coords, ln.a.X, ln.a.Y)
-			}
-			coords = append(coords, ln.b.X, ln.b.Y)
-		}
-		terminateAccumulatedCoords()
-	}
-	return NewMultiLineStringFromLineStrings(lss)
 }
 
 func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
