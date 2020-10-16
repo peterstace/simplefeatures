@@ -690,6 +690,27 @@ func TestBinaryOp(t *testing.T) {
 			symDiff: "MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0),(0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2))",
 		},
 
+		// In the following test cases, lines from the first input intersect
+		// *almost* exactly with one of the vertices in the second input.
+		{
+			input1:  "LINESTRING(-1 1,1 -1)",
+			input2:  "POLYGON((-1 0,-0.070710678118655 0.070710678118655,0 1,-1 0))",
+			union:   "GEOMETRYCOLLECTION(LINESTRING(-1 1,-0.5 0.5),LINESTRING(-0.070710678118655 0.070710678118655,1 -1),POLYGON((-1 0,-0.5 0.5,0 1,-0.070710678118655 0.070710678118655,-1 0)))",
+			inter:   "LINESTRING(-0.5 0.5,-0.070710678118655 0.070710678118655)",
+			fwdDiff: "MULTILINESTRING((-1 1,-0.5 0.5),(-0.070710678118655 0.070710678118655,1 -1))",
+			revDiff: "POLYGON((-1 0,-0.5 0.5,0 1,-0.070710678118655 0.070710678118655,-1 0))",
+			symDiff: "GEOMETRYCOLLECTION(LINESTRING(-1 1,-0.5 0.5),LINESTRING(-0.070710678118655 0.070710678118655,1 -1),POLYGON((-1 0,-0.5 0.5,0 1,-0.070710678118655 0.070710678118655,-1 0)))",
+		},
+		{
+			input1:  "LINESTRING(0 0,1 1)",
+			input2:  "LINESTRING(1 0,0.5000000000000001 0.5,0 1)",
+			union:   "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(1 0,0.5 0.5),(0.5 0.5,0 1))",
+			inter:   "POINT(0.5 0.5)",
+			fwdDiff: "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))",
+			revDiff: "MULTILINESTRING((1 0,0.5 0.5),(0.5 0.5,0 1))",
+			symDiff: "MULTILINESTRING((1 0,0.5 0.5),(0.5 0.5,0 1),(0 0,0.5 0.5),(0.5 0.5,1 1))",
+		},
+
 		// Bug reproductions:
 		{
 			input1:  "LINESTRING(-1 1,1 -1)",

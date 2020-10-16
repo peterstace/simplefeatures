@@ -572,6 +572,23 @@ func binaryChecks(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 }
 
 func checkIntersects(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+	skipList := map[string]bool{
+		// postgres=# SELECT ST_Intersects(
+		//   ST_GeomFromText('LINESTRING(1 0,0.5000000000000001 0.5,0 1)'),
+		//   ST_GeomFromText('LINESTRING(0.5 0.5,1.5 1.5)')
+		// );
+		//  st_intersects
+		// ---------------
+		//  f # WRONG!!
+		// (1 row)
+		"LINESTRING(1 0,0.5000000000000001 0.5,0 1)": true,
+	}
+	if skipList[g1.AsText()] || skipList[g2.AsText()] {
+		// Skipping test because GEOS gives the incorrect result for *some*
+		// intersection operations involving this input.
+		return nil
+	}
+
 	want, err := h.Intersects(g1, g2)
 	if err != nil {
 		if err == LibgeosCrashError {

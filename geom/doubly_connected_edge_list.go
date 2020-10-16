@@ -131,6 +131,13 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 				}
 				vertA, _ := dcel.vertices.lookup(ln.a)
 				vertB, _ := dcel.vertices.lookup(ln.b)
+				if vertA == vertB {
+					// The XYs making up the line aren't _exactly_ equal
+					// but still resolve to the same vertex. So for the purpose
+					// of DCELs we consider them to be the same and thus don't
+					// treat it as a valid line.
+					continue
+				}
 				internalEdge := &halfEdgeRecord{
 					origin:   vertA,
 					twin:     nil, // populated later
@@ -227,6 +234,13 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 			vDestin, ok := dcel.vertices.lookup(ln.b)
 			if !ok {
 				panic("could not find vertex")
+			}
+			if vOrigin == vDestin {
+				// The XYs making up the line aren't _exactly_ equal but still
+				// resolve to the same vertex. So for the purpose of DCELs we
+				// consider them to be the same and thus don't treat it as a
+				// valid line.
+				continue
 			}
 
 			pair := vertPair{vOrigin, vDestin}
