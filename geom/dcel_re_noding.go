@@ -287,10 +287,27 @@ type nodeSet map[XY]XY
 
 func (s nodeSet) insertOrGet(xy XY) XY {
 	trunc := truncateMantissaXY(xy)
-	node, ok := s[trunc]
-	if !ok {
-		s[trunc] = xy
-		node = xy
+	xNext := addULPs(trunc.X, 0x100)
+	xPrev := addULPs(trunc.X, -0x100)
+	yNext := addULPs(trunc.Y, 0x100)
+	yPrev := addULPs(trunc.Y, -0x100)
+
+	for _, bucket := range [...]XY{
+		trunc, // trunc goes first, since it's the most likely entry
+		XY{trunc.X, yNext},
+		XY{trunc.X, yPrev},
+		XY{xPrev, yPrev},
+		XY{xPrev, trunc.Y},
+		XY{xPrev, yNext},
+		XY{xNext, yPrev},
+		XY{xNext, trunc.Y},
+		XY{xNext, yNext},
+	} {
+		node, ok := s[bucket]
+		if ok {
+			return node
+		}
 	}
-	return node
+	s[trunc] = xy
+	return xy
 }

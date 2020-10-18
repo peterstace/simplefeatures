@@ -776,6 +776,11 @@ func TestBinaryOp(t *testing.T) {
 			input2: "LINESTRING(1 2,2 0)",
 			inter:  "POINT(1.3333333333 1.3333333333)",
 		},
+		{
+			input1: "MULTILINESTRING((0 0,1 1),(0 1,1 0))",
+			input2: "LINESTRING(0 1,0.3333333333 0.6666666667,1 0)",
+			union:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,0.5 0.5),(0.5 0.5,1 0))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
