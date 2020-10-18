@@ -57,13 +57,9 @@ func binaryOp(a, b Geometry, include func(uint8) bool) Geometry {
 }
 
 func createOverlay(a, b Geometry) *doublyConnectedEdgeList {
-	cut := newCutSet(a, b)
-	a = reNodeGeometry(a, cut)
-	b = reNodeGeometry(b, cut)
-
+	a, b = reNodeGeometries(a, b)
 	dcelA := newDCELFromGeometry(a, inputAMask)
 	dcelB := newDCELFromGeometry(b, inputBMask)
-
 	dcelA.overlay(dcelB)
 	return dcelA
 }

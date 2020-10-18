@@ -9,7 +9,7 @@ import (
 type doublyConnectedEdgeList struct {
 	faces     []*faceRecord
 	halfEdges []*halfEdgeRecord
-	vertices  vertexGrid
+	vertices  map[XY]*vertexRecord
 }
 
 type faceRecord struct {
@@ -94,8 +94,8 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 		for _, ring := range rings {
 			for i := 0; i < ring.Length(); i++ {
 				xy := ring.GetXY(i)
-				if _, ok := dcel.vertices.lookup(xy); !ok {
-					dcel.vertices.assign(xy, &vertexRecord{xy, nil /* populated later */, mask})
+				if _, ok := dcel.vertices[xy]; !ok {
+					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask}
 				}
 			}
 		}
@@ -129,14 +129,13 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 				if !ok {
 					continue
 				}
-				vertA, _ := dcel.vertices.lookup(ln.a)
-				vertB, _ := dcel.vertices.lookup(ln.b)
-				if vertA == vertB {
-					// The XYs making up the line aren't _exactly_ equal
-					// but still resolve to the same vertex. So for the purpose
-					// of DCELs we consider them to be the same and thus don't
-					// treat it as a valid line.
-					continue
+				vertA, ok := dcel.vertices[ln.a]
+				if !ok {
+					panic("could not find vertex")
+				}
+				vertB, ok := dcel.vertices[ln.b]
+				if !ok {
+					panic("could not find vertex")
 				}
 				internalEdge := &halfEdgeRecord{
 					origin:   vertA,
@@ -200,7 +199,7 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 		seq := ls.Coordinates()
 		for j := 0; j < seq.Length(); j++ {
 			xy := seq.GetXY(j)
-			dcel.vertices.assign(xy, &vertexRecord{coords: xy, label: mask})
+			dcel.vertices[xy] = &vertexRecord{coords: xy, label: mask}
 		}
 	}
 
@@ -227,20 +226,13 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 				continue
 			}
 
-			vOrigin, ok := dcel.vertices.lookup(ln.a)
+			vOrigin, ok := dcel.vertices[ln.a]
 			if !ok {
 				panic("could not find vertex")
 			}
-			vDestin, ok := dcel.vertices.lookup(ln.b)
+			vDestin, ok := dcel.vertices[ln.b]
 			if !ok {
 				panic("could not find vertex")
-			}
-			if vOrigin == vDestin {
-				// The XYs making up the line aren't _exactly_ equal but still
-				// resolve to the same vertex. So for the purpose of DCELs we
-				// consider them to be the same and thus don't treat it as a
-				// valid line.
-				continue
 			}
 
 			pair := vertPair{vOrigin, vDestin}
@@ -291,14 +283,14 @@ func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
 		if !ok {
 			continue
 		}
-		record, ok := dcel.vertices.lookup(xy)
+		record, ok := dcel.vertices[xy]
 		if !ok {
 			record = &vertexRecord{
 				coords:   xy,
 				incident: nil,
 				label:    0,
 			}
-			dcel.vertices.assign(xy, record)
+			dcel.vertices[xy] = record
 		}
 		record.label |= mask
 	}
@@ -314,15 +306,12 @@ func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
-	for bucket, otherVert := range other.vertices {
-		// We still need to lookup by checking the 8 adjacent buckets, since we
-		// don't want 2 adjacent buckets to be populated (so we can't do a
-		// direct lookup in the map).
-		vert, ok := d.vertices.lookup(bucket)
+	for xy, otherVert := range other.vertices {
+		vert, ok := d.vertices[xy]
 		if ok {
 			vert.label |= otherVert.label
 		} else {
-			d.vertices[bucket] = otherVert
+			d.vertices[xy] = otherVert
 		}
 	}
 	for _, face := range other.faces {
@@ -337,10 +326,10 @@ func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList
 
 func (d *doublyConnectedEdgeList) overlayVerticesInComponent(start *halfEdgeRecord) {
 	forEachEdge(start, func(e *halfEdgeRecord) {
-		if existing, ok := d.vertices.lookup(e.origin.coords); ok {
+		if existing, ok := d.vertices[e.origin.coords]; ok {
 			e.origin = existing
 		} else {
-			d.vertices.assign(e.origin.coords, e.origin)
+			d.vertices[e.origin.coords] = e.origin
 		}
 	})
 }

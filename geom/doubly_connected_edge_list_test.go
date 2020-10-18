@@ -106,7 +106,7 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 	t.Run("vertex_labels", func(t *testing.T) {
 		for _, want := range spec.Vertices {
 			for _, wantXY := range want.Vertices {
-				vert, ok := dcel.vertices.lookup(wantXY)
+				vert, ok := dcel.vertices[wantXY]
 				if !ok {
 					t.Errorf("no vertex %v", wantXY)
 					continue

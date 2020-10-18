@@ -1,27 +1,100 @@
 package geom
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+	"sort"
+)
 
-// reNodeGeometry returns a geometry that is spatially equivalent to g, but
-// with additional nodes (i.e. control points). The cut set is used to
-// determine the location of additional nodes (they will occur wherever the cut
-// set intersects with g).
-func reNodeGeometry(g Geometry, cut cutSet) Geometry {
+// infLineWithLineIntersection extends infinitely the two input lines and finds
+// their intersection. In degenerate cases where the lines are parallel, then
+// the result will be at infinity.
+func infLineWithLineIntersection(ln1, ln2 line) XY {
+	// TODO: I took this formula directly from Wikipedia. But it's definitely
+	// possible to refactor it to be a bit easier to read and understand using
+	// vector notation.
+	a, b, c, d := ln1.a, ln1.b, ln2.a, ln2.b
+	numerX := (a.X*b.Y-a.Y*b.X)*(c.X-d.X) - (a.X-b.X)*(c.X*d.Y-c.Y*d.X)
+	denomX := (a.X-b.X)*(c.Y-d.Y) - (a.Y-b.Y)*(c.X-d.X)
+	numerY := (a.X*b.Y-a.Y*b.X)*(c.Y-d.Y) - (a.Y-b.Y)*(c.X*d.Y-c.Y*d.X)
+	denomY := (a.X-b.X)*(c.Y-d.Y) - (a.Y-b.Y)*(c.X-d.X)
+	return XY{
+		numerX / denomX,
+		numerY / denomY,
+	}
+}
+
+// newNodesFromLineLineIntersection finds the new nodes that would be created
+// on a line when it is intersected with another line.
+func newNodesFromLineLineIntersection(ln, other line, eps float64) []XY {
+	var xys []XY
+	if distBetweenXYAndLine(other.a, ln) < eps {
+		xys = append(xys, other.a)
+	}
+	if distBetweenXYAndLine(other.b, ln) < eps {
+		xys = append(xys, other.b)
+	}
+	e := infLineWithLineIntersection(ln, other)
+	if ln.envelope().Contains(e) && other.envelope().Contains(e) {
+		xys = append(xys, e)
+	}
+	return xys
+}
+
+// newNodesFromLinePointIntersection finds the new nodes that would be created
+// on a line when it is intersected with a point.
+func newNodesFromLinePointIntersection(ln line, pt XY, eps float64) []XY {
+	if distBetweenXYAndLine(pt, ln) < eps {
+		return []XY{pt}
+	}
+	return nil
+}
+
+// ulpSizeForLine finds the maximum ULP out of the 4 float64s that make a line.
+func ulpSizeForLine(ln line) float64 {
+	return math.Max(math.Max(math.Max(
+		ulpSize(ln.a.X),
+		ulpSize(ln.a.Y)),
+		ulpSize(ln.b.X)),
+		ulpSize(ln.b.Y))
+}
+
+// reNodeGeometries returns the input geometries, but with additional
+// intermediate nodes (i.e. control points). The additional nodes are created
+// such that when the two geometries are overlaid they only interact at nodes.
+func reNodeGeometries(g1, g2 Geometry) (Geometry, Geometry) {
+	// TODO: We need to be smarter about using the node map. We could still end
+	// up with two XYs in different cells that are only a single ULP away from
+	// each other. Could do a check in each 8 neighbouring cells before doing
+	// an insert.
+	nodes := make(map[XY]XY) // truncated to non-truncated values
+	cut := newCutSet(g1, g2)
+	// TODO: We may want to insert vertices from both geometries first, since
+	// it's first-in-best-dressed for the real vertex per cell grid. It
+	// probably makes more sense to have input vertices rather than derived
+	// vertices in the output.
+	a := reNodeGeometry(g1, cut, nodes)
+	b := reNodeGeometry(g2, cut, nodes)
+	return a, b
+}
+
+// reNodeGeometry re-nodes a single geometry, using a common cut set and node map.
+func reNodeGeometry(g Geometry, cut cutSet, nodes nodeSet) Geometry {
 	switch g.Type() {
 	case TypeGeometryCollection:
-		return reNodeGeometryCollection(g.AsGeometryCollection(), cut).AsGeometry()
+		return reNodeGeometryCollection(g.AsGeometryCollection(), cut, nodes).AsGeometry()
 	case TypeLineString:
-		return reNodeLineString(g.AsLineString(), cut).AsGeometry()
+		return reNodeLineString(g.AsLineString(), cut, nodes).AsGeometry()
 	case TypePolygon:
-		return reNodePolygon(g.AsPolygon(), cut).AsGeometry()
+		return reNodePolygon(g.AsPolygon(), cut, nodes).AsGeometry()
 	case TypeMultiLineString:
-		return reNodeMultiLineString(g.AsMultiLineString(), cut).AsGeometry()
+		return reNodeMultiLineString(g.AsMultiLineString(), cut, nodes).AsGeometry()
 	case TypeMultiPolygon:
-		return reNodeMultiPolygonString(g.AsMultiPolygon(), cut).AsGeometry()
-	case TypePoint, TypeMultiPoint:
-		// It doesn't make sense to re-node point geometries, since they have
-		// no edges.
-		return g
+		return reNodeMultiPolygonString(g.AsMultiPolygon(), cut, nodes).AsGeometry()
+	case TypePoint:
+		return reNodeMultiPoint(g.AsPoint().AsMultiPoint(), nodes).AsGeometry()
+	case TypeMultiPoint:
+		return reNodeMultiPoint(g.AsMultiPoint(), nodes).AsGeometry()
 	default:
 		panic(fmt.Sprintf("unknown geometry type %v", g.Type()))
 	}
@@ -95,7 +168,7 @@ func appendPoints(points []XY, g Geometry) []XY {
 	return points
 }
 
-func reNodeLineString(ls LineString, cut cutSet) LineString {
+func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) LineString {
 	var newCoords []float64
 	seq := ls.Coordinates()
 	n := seq.Length()
@@ -106,33 +179,33 @@ func reNodeLineString(ls LineString, cut cutSet) LineString {
 		}
 
 		// Collect cut locations.
-		xys := []XY{ln.a, ln.b}
+		eps := 0xFF * ulpSizeForLine(ln)
+		xys := []XY{nodes.insertOrGet(ln.a), nodes.insertOrGet(ln.b)}
 		cut.lnIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
 			other := cut.lnIndex.lines[i]
-			inter := ln.intersectLine(other)
-			if inter.empty {
-				return nil
+			newXYs := newNodesFromLineLineIntersection(ln, other, eps)
+			for _, xy := range newXYs {
+				xys = append(xys, nodes.insertOrGet(xy))
 			}
-			xys = append(xys, inter.ptA, inter.ptB)
 			return nil
 		})
 		cut.ptIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
 			other := cut.ptIndex.points[i]
-			if ln.intersectsXY(other) {
-				xys = append(xys, other)
+			newXYs := newNodesFromLinePointIntersection(ln, other, eps)
+			for _, xy := range newXYs {
+				xys = append(xys, nodes.insertOrGet(xy))
 			}
 			return nil
 		})
 
+		// Uniquify and sort.
 		xys = sortAndUniquifyXYs(xys) // TODO: make common function
-
-		// Reverse order to match direction of edge.
-		if xys[0] != ln.a {
-			for i := 0; i < len(xys)/2; i++ {
-				j := len(xys) - i - 1
-				xys[i], xys[j] = xys[j], xys[i]
-			}
-		}
+		sortOrigin := nodes.insertOrGet(ln.a)
+		sort.Slice(xys, func(i, j int) bool {
+			distI := sortOrigin.distanceSquaredTo(xys[i])
+			distJ := sortOrigin.distanceSquaredTo(xys[j])
+			return distI < distJ
+		})
 
 		// Add coords related to this line segment. The end of the previous
 		// line is the same as the first point of this line, so we skip it to
@@ -152,17 +225,17 @@ func reNodeLineString(ls LineString, cut cutSet) LineString {
 	return newLS
 }
 
-func reNodeMultiLineString(mls MultiLineString, cut cutSet) MultiLineString {
+func reNodeMultiLineString(mls MultiLineString, cut cutSet, nodes nodeSet) MultiLineString {
 	n := mls.NumLineStrings()
 	lss := make([]LineString, n)
 	for i := 0; i < n; i++ {
-		lss[i] = reNodeLineString(mls.LineStringN(i), cut)
+		lss[i] = reNodeLineString(mls.LineStringN(i), cut, nodes)
 	}
 	return NewMultiLineStringFromLineStrings(lss, DisableAllValidations)
 }
 
-func reNodePolygon(poly Polygon, cut cutSet) Polygon {
-	reNodedBoundary := reNodeMultiLineString(poly.Boundary(), cut)
+func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) Polygon {
+	reNodedBoundary := reNodeMultiLineString(poly.Boundary(), cut, nodes)
 	n := reNodedBoundary.NumLineStrings()
 	rings := make([]LineString, n)
 	for i := 0; i < n; i++ {
@@ -175,11 +248,11 @@ func reNodePolygon(poly Polygon, cut cutSet) Polygon {
 	return reNodedPoly
 }
 
-func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet) MultiPolygon {
+func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet) MultiPolygon {
 	n := mp.NumPolygons()
 	polys := make([]Polygon, n)
 	for i := 0; i < n; i++ {
-		polys[i] = reNodePolygon(mp.PolygonN(i), cut)
+		polys[i] = reNodePolygon(mp.PolygonN(i), cut, nodes)
 	}
 	reNodedMP, err := NewMultiPolygonFromPolygons(polys, DisableAllValidations)
 	if err != nil {
@@ -188,11 +261,36 @@ func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet) MultiPolygon {
 	return reNodedMP
 }
 
-func reNodeGeometryCollection(gc GeometryCollection, cut cutSet) GeometryCollection {
+func reNodeMultiPoint(mp MultiPoint, nodes nodeSet) MultiPoint {
+	n := mp.NumPoints()
+	coords := make([]float64, 0, n*2)
+	for i := 0; i < n; i++ {
+		xy, ok := mp.PointN(i).XY()
+		if ok {
+			node := nodes.insertOrGet(xy)
+			coords = append(coords, node.X, node.Y)
+		}
+	}
+	return NewMultiPoint(NewSequence(coords, DimXY))
+}
+
+func reNodeGeometryCollection(gc GeometryCollection, cut cutSet, nodes nodeSet) GeometryCollection {
 	n := gc.NumGeometries()
 	geoms := make([]Geometry, n)
 	for i := 0; i < n; i++ {
-		geoms[i] = reNodeGeometry(gc.GeometryN(i), cut)
+		geoms[i] = reNodeGeometry(gc.GeometryN(i), cut, nodes)
 	}
 	return NewGeometryCollection(geoms, DisableAllValidations)
+}
+
+type nodeSet map[XY]XY
+
+func (s nodeSet) insertOrGet(xy XY) XY {
+	trunc := truncateMantissaXY(xy)
+	node, ok := s[trunc]
+	if !ok {
+		s[trunc] = xy
+		node = xy
+	}
+	return node
 }

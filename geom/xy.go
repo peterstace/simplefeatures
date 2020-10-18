@@ -77,3 +77,8 @@ func (w XY) distanceTo(o XY) float64 {
 	delta := o.Sub(w)
 	return math.Sqrt(delta.Dot(delta))
 }
+
+func (w XY) distanceSquaredTo(o XY) float64 {
+	delta := o.Sub(w)
+	return delta.Dot(delta)
+}
