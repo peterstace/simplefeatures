@@ -63,11 +63,18 @@ func ulpSizeForLine(ln line) float64 {
 // intermediate nodes (i.e. control points). The additional nodes are created
 // such that when the two geometries are overlaid they only interact at nodes.
 func reNodeGeometries(g1, g2 Geometry) (Geometry, Geometry) {
-	// TODO: We need to be smarter about using the node map. We could still end
-	// up with two XYs in different cells that are only a single ULP away from
-	// each other. Could do a check in each 8 neighbouring cells before doing
-	// an insert.
-	nodes := make(map[XY]XY) // truncated to non-truncated values
+	// Calculate the maximum ULP size over all control points in the input
+	// geometries. This size is a good indication of the precision that we
+	// should use when node merging.
+	var maxULPSize float64
+	walk(NewGeometryCollection([]Geometry{g1, g2}).AsGeometry(), func(xy XY) {
+		maxULPSize = math.Max(maxULPSize, math.Max(
+			ulpSize(math.Abs(xy.X)),
+			ulpSize(math.Abs(xy.Y)),
+		))
+	})
+
+	nodes := newNodeSet(maxULPSize)
 	cut := newCutSet(g1, g2)
 	// TODO: We may want to insert vertices from both geometries first, since
 	// it's first-in-best-dressed for the real vertex per cell grid. It
@@ -283,31 +290,48 @@ func reNodeGeometryCollection(gc GeometryCollection, cut cutSet, nodes nodeSet) 
 	return NewGeometryCollection(geoms, DisableAllValidations)
 }
 
-type nodeSet map[XY]XY
+func newNodeSet(maxULPSize float64) nodeSet {
+	// The appropriate multiplication factor to use to calculate bucket size is
+	// a bit of a guess.
+	bucketSize := maxULPSize * 0xff
+	return nodeSet{bucketSize, make(map[nodeBucket]XY)}
+}
+
+type nodeSet struct {
+	bucketSize float64
+	nodes      map[nodeBucket]XY
+}
+
+type nodeBucket struct {
+	x, y int
+}
 
 func (s nodeSet) insertOrGet(xy XY) XY {
-	trunc := truncateMantissaXY(xy)
-	xNext := addULPs(trunc.X, 0x100)
-	xPrev := addULPs(trunc.X, -0x100)
-	yNext := addULPs(trunc.Y, 0x100)
-	yPrev := addULPs(trunc.Y, -0x100)
+	bucket := nodeBucket{
+		int(math.Floor(xy.X / s.bucketSize)),
+		int(math.Floor(xy.Y / s.bucketSize)),
+	}
+	xNext := bucket.x + 1
+	xPrev := bucket.x - 1
+	yNext := bucket.y + 1
+	yPrev := bucket.y - 1
 
-	for _, bucket := range [...]XY{
-		trunc, // trunc goes first, since it's the most likely entry
-		XY{trunc.X, yNext},
-		XY{trunc.X, yPrev},
-		XY{xPrev, yPrev},
-		XY{xPrev, trunc.Y},
-		XY{xPrev, yNext},
-		XY{xNext, yPrev},
-		XY{xNext, trunc.Y},
-		XY{xNext, yNext},
+	for _, bucket := range [...]nodeBucket{
+		bucket, // the original bucket goes first, since it's the most likely entry
+		nodeBucket{bucket.x, yNext},
+		nodeBucket{bucket.x, yPrev},
+		nodeBucket{xPrev, yPrev},
+		nodeBucket{xPrev, bucket.y},
+		nodeBucket{xPrev, yNext},
+		nodeBucket{xNext, yPrev},
+		nodeBucket{xNext, bucket.y},
+		nodeBucket{xNext, yNext},
 	} {
-		node, ok := s[bucket]
+		node, ok := s.nodes[bucket]
 		if ok {
 			return node
 		}
 	}
-	s[trunc] = xy
+	s.nodes[bucket] = xy
 	return xy
 }
