@@ -577,7 +577,16 @@ func binaryOperation(
 	}
 	defer C.GEOSGeom_destroy(resultGH)
 
-	return h.decode(resultGH, opts)
+	// GEOS binary operations (Intersection, Union etc) sometimes produce
+	// invalid geometries. Rather than passing invalid geometries back to the
+	// user, we try to fix them.
+	madeValidGH := C.GEOSMakeValid_r(h.context, resultGH)
+	if madeValidGH == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy(madeValidGH)
+
+	return h.decode(madeValidGH, opts)
 }
 
 func unaryOperation(
