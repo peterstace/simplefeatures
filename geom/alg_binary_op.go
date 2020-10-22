@@ -1,57 +1,61 @@
 package geom
 
 // Union returns a geometry that represents the parts from either geometry A or
-// geometry B (or both).
-func Union(a, b Geometry) Geometry {
+// geometry B (or both). An error may be returned in pathological cases of
+// numerical degeneracy.
+func Union(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() && b.IsEmpty() {
-		return Geometry{}
+		return Geometry{}, nil
 	}
 	if a.IsEmpty() {
-		return b
+		return b, nil
 	}
 	if b.IsEmpty() {
-		return a
+		return a, nil
 	}
 	return binaryOp(a, b, selectUnion)
 }
 
 // Intersection returns a geometry that represents the parts that are common to
-// both geometry A and geometry B.
-func Intersection(a, b Geometry) Geometry {
+// both geometry A and geometry B. An error may be returned in pathological
+// cases of numerical degeneracy.
+func Intersection(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() || b.IsEmpty() {
-		return Geometry{}
+		return Geometry{}, nil
 	}
 	return binaryOp(a, b, selectIntersection)
 }
 
 // Difference returns a geometry that represents the parts of input geometry A
-// that are not part of input geometry B.
-func Difference(a, b Geometry) Geometry {
+// that are not part of input geometry B. An error may be returned in cases of
+// pathological cases of numerical degeneracy.
+func Difference(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() {
-		return Geometry{}
+		return Geometry{}, nil
 	}
 	if b.IsEmpty() {
-		return a
+		return a, nil
 	}
 	return binaryOp(a, b, selectDifference)
 }
 
 // SymmetricDifference returns a geometry that represents the parts of geometry
-// A and B that are not in common.
-func SymmetricDifference(a, b Geometry) Geometry {
+// A and B that are not in common. An error may be returned in pathological
+// cases of numerical degeneracy.
+func SymmetricDifference(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() && b.IsEmpty() {
-		return Geometry{}
+		return Geometry{}, nil
 	}
 	if a.IsEmpty() {
-		return b
+		return b, nil
 	}
 	if b.IsEmpty() {
-		return a
+		return a, nil
 	}
 	return binaryOp(a, b, selectSymmetricDifference)
 }
 
-func binaryOp(a, b Geometry, include func(uint8) bool) Geometry {
+func binaryOp(a, b Geometry, include func(uint8) bool) (Geometry, error) {
 	overlay := createOverlay(a, b)
 	return overlay.extractGeometry(include)
 }

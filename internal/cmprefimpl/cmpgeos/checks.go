@@ -669,27 +669,27 @@ func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error
 
 	for _, op := range []struct {
 		name     string
-		sfFunc   func(g1, g2 geom.Geometry) geom.Geometry
+		sfFunc   func(g1, g2 geom.Geometry) (geom.Geometry, error)
 		geosFunc func(g1, g2 geom.Geometry) (geom.Geometry, error)
 	}{
 		{
 			"Union",
-			func(g1, g2 geom.Geometry) geom.Geometry { return geom.Union(g1, g2) },
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.Union(g1, g2) },
 			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.Union(g1, g2) },
 		},
 		{
 			"Intersection",
-			func(g1, g2 geom.Geometry) geom.Geometry { return geom.Intersection(g1, g2) },
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.Intersection(g1, g2) },
 			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.Intersection(g1, g2) },
 		},
 		{
 			"Difference",
-			func(g1, g2 geom.Geometry) geom.Geometry { return geom.Difference(g1, g2) },
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.Difference(g1, g2) },
 			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.Difference(g1, g2) },
 		},
 		{
 			"SymmetricDifference",
-			func(g1, g2 geom.Geometry) geom.Geometry { return geom.SymmetricDifference(g1, g2) },
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.SymmetricDifference(g1, g2) },
 			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.SymmetricDifference(g1, g2) },
 		},
 	} {
@@ -703,7 +703,7 @@ func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error
 }
 
 func checkDCELOp(
-	op func(g1, g2 geom.Geometry) geom.Geometry,
+	op func(g1, g2 geom.Geometry) (geom.Geometry, error),
 	refImpl func(g1, g2 geom.Geometry) (geom.Geometry, error),
 	g1, g2 geom.Geometry,
 	log *log.Logger,
@@ -713,7 +713,10 @@ func checkDCELOp(
 		return nil
 	}
 
-	got := op(g1, g2)
+	got, err := op(g1, g2)
+	if err != nil {
+		return err
+	}
 	if usesNonSimpleFloats(got) {
 		// We're not going to be able to compare this to want because of
 		// numeric precision issues.

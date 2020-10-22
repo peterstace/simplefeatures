@@ -794,13 +794,13 @@ func TestBinaryOp(t *testing.T) {
 			t.Logf("input2: %s", geomCase.input2)
 			for _, opCase := range []struct {
 				opName string
-				op     func(geom.Geometry, geom.Geometry) geom.Geometry
+				op     func(geom.Geometry, geom.Geometry) (geom.Geometry, error)
 				want   string
 			}{
 				{"union", geom.Union, geomCase.union},
 				{"inter", geom.Intersection, geomCase.inter},
 				{"fwd_diff", geom.Difference, geomCase.fwdDiff},
-				{"rev_diff", func(a, b geom.Geometry) geom.Geometry { return geom.Difference(b, a) }, geomCase.revDiff},
+				{"rev_diff", func(a, b geom.Geometry) (geom.Geometry, error) { return geom.Difference(b, a) }, geomCase.revDiff},
 				{"sym_diff", geom.SymmetricDifference, geomCase.symDiff},
 			} {
 				t.Run(opCase.opName, func(t *testing.T) {
@@ -809,7 +809,10 @@ func TestBinaryOp(t *testing.T) {
 						t.Skip("Skipping test because it would fail")
 					}
 					want := geomFromWKT(t, opCase.want)
-					got := opCase.op(g1, g2)
+					got, err := opCase.op(g1, g2)
+					if err != nil {
+						t.Fatalf("could not perform op: %v", err)
+					}
 					expectGeomEq(t, got, want, geom.IgnoreOrder, geom.ToleranceXY(1e-7))
 				})
 			}
@@ -833,7 +836,7 @@ func TestBinaryOpEmptyInputs(t *testing.T) {
 			g := geomFromWKT(t, wkt)
 			for _, opCase := range []struct {
 				opName string
-				op     func(geom.Geometry, geom.Geometry) geom.Geometry
+				op     func(geom.Geometry, geom.Geometry) (geom.Geometry, error)
 			}{
 				{"union", geom.Union},
 				{"inter", geom.Intersection},
@@ -841,7 +844,10 @@ func TestBinaryOpEmptyInputs(t *testing.T) {
 				{"sym_diff", geom.SymmetricDifference},
 			} {
 				t.Run(opCase.opName, func(t *testing.T) {
-					got := opCase.op(g, g)
+					got, err := opCase.op(g, g)
+					if err != nil {
+						t.Fatalf("could not perform op: %v", err)
+					}
 					want := geom.Geometry{}
 					if opCase.opName == "union" {
 						want = got

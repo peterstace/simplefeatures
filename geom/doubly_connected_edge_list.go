@@ -788,7 +788,7 @@ func (d *doublyConnectedEdgeList) fixLabels() {
 }
 
 // extractGeometry converts the DECL into a Geometry that represents it.
-func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geometry {
+func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) (Geometry, error) {
 	areals := d.extractPolygons(include)
 	linears := d.extractLineStrings(include)
 	points := d.extractPoints(include)
@@ -796,28 +796,28 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geom
 	switch {
 	case len(areals) > 0 && len(linears) == 0 && len(points) == 0:
 		if len(areals) == 1 {
-			return areals[0].AsGeometry()
+			return areals[0].AsGeometry(), nil
 		}
 		mp, err := NewMultiPolygonFromPolygons(areals)
 		if err != nil {
-			panic(fmt.Sprintf("could not create MultiPolygon: %v", err))
+			return Geometry{}, fmt.Errorf("could not extract areal geometry from DCEL: %v", err)
 		}
-		return mp.AsGeometry()
+		return mp.AsGeometry(), nil
 	case len(areals) == 0 && len(linears) > 0 && len(points) == 0:
 		if len(linears) == 1 {
-			return linears[0].AsGeometry()
+			return linears[0].AsGeometry(), nil
 		}
-		return NewMultiLineStringFromLineStrings(linears).AsGeometry()
+		return NewMultiLineStringFromLineStrings(linears).AsGeometry(), nil
 	case len(areals) == 0 && len(linears) == 0 && len(points) > 0:
 		if len(points) == 1 {
-			return NewPointFromXY(points[0]).AsGeometry()
+			return NewPointFromXY(points[0]).AsGeometry(), nil
 		}
 		coords := make([]float64, 2*len(points))
 		for i, xy := range points {
 			coords[i*2+0] = xy.X
 			coords[i*2+1] = xy.Y
 		}
-		return NewMultiPoint(NewSequence(coords, DimXY)).AsGeometry()
+		return NewMultiPoint(NewSequence(coords, DimXY)).AsGeometry(), nil
 	default:
 		geoms := make([]Geometry, 0, len(areals)+len(linears)+len(points))
 		for _, poly := range areals {
@@ -829,7 +829,7 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) Geom
 		for _, xy := range points {
 			geoms = append(geoms, NewPointFromXY(xy).AsGeometry())
 		}
-		return NewGeometryCollection(geoms).AsGeometry()
+		return NewGeometryCollection(geoms).AsGeometry(), nil
 	}
 }
 
