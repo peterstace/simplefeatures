@@ -6,24 +6,6 @@ import (
 	"sort"
 )
 
-// infLineWithLineIntersection extends infinitely the two input lines and finds
-// their intersection. In degenerate cases where the lines are parallel, then
-// the result will be at infinity.
-func infLineWithLineIntersection(ln1, ln2 line) XY {
-	// TODO: I took this formula directly from Wikipedia. But it's definitely
-	// possible to refactor it to be a bit easier to read and understand using
-	// vector notation.
-	a, b, c, d := ln1.a, ln1.b, ln2.a, ln2.b
-	numerX := (a.X*b.Y-a.Y*b.X)*(c.X-d.X) - (a.X-b.X)*(c.X*d.Y-c.Y*d.X)
-	denomX := (a.X-b.X)*(c.Y-d.Y) - (a.Y-b.Y)*(c.X-d.X)
-	numerY := (a.X*b.Y-a.Y*b.X)*(c.Y-d.Y) - (a.Y-b.Y)*(c.X*d.Y-c.Y*d.X)
-	denomY := (a.X-b.X)*(c.Y-d.Y) - (a.Y-b.Y)*(c.X-d.X)
-	return XY{
-		numerX / denomX,
-		numerY / denomY,
-	}
-}
-
 // newNodesFromLineLineIntersection finds the new nodes that would be created
 // on a line when it is intersected with another line.
 func newNodesFromLineLineIntersection(ln, other line, eps float64) []XY {
@@ -34,9 +16,9 @@ func newNodesFromLineLineIntersection(ln, other line, eps float64) []XY {
 	if distBetweenXYAndLine(other.b, ln) < eps {
 		xys = append(xys, other.b)
 	}
-	e := infLineWithLineIntersection(ln, other)
-	if ln.envelope().Contains(e) && other.envelope().Contains(e) {
-		xys = append(xys, e)
+	inter := ln.intersectLine(other)
+	if !inter.empty {
+		xys = append(xys, inter.ptA, inter.ptB)
 	}
 	return xys
 }
