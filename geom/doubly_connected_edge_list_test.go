@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -49,11 +50,19 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 	}
 
 	for _, vr := range dcel.vertices {
-		if vr.incident == nil {
-			t.Fatalf("vertex record (at %v) incident ptr not set", vr.coords)
+		bruteForceEdgeSet := make(map[*halfEdgeRecord]struct{})
+		for _, er := range dcel.halfEdges {
+			if er.origin.coords == vr.coords {
+				bruteForceEdgeSet[er] = struct{}{}
+			}
 		}
-		if vr.incident.origin != vr {
-			t.Errorf("incident edge of vert (at %v) doesn't have vert as its origin", vr.coords)
+		incidentsSet := make(map[*halfEdgeRecord]struct{})
+		for _, e := range vr.incidents {
+			incidentsSet[e] = struct{}{}
+		}
+		if !reflect.DeepEqual(bruteForceEdgeSet, incidentsSet) {
+			t.Fatalf("vertex record at %v doesn't have correct incidents: "+
+				"bruteForceEdgeSet=%v incidentsSet=%v", vr.coords, bruteForceEdgeSet, incidentsSet)
 		}
 	}
 

@@ -37,9 +37,9 @@ func (e *halfEdgeRecord) String() string {
 }
 
 type vertexRecord struct {
-	coords   XY
-	incident *halfEdgeRecord
-	label    uint8
+	coords    XY
+	incidents []*halfEdgeRecord
+	label     uint8
 }
 
 func newDCELFromGeometry(g Geometry, mask uint8) *doublyConnectedEdgeList {
@@ -154,7 +154,8 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 					label:    mask,
 				}
 				internalEdge.twin = externalEdge
-				vertA.incident = internalEdge
+				vertA.incidents = append(vertA.incidents, internalEdge)
+				vertB.incidents = append(vertB.incidents, externalEdge)
 				newEdges = append(newEdges, internalEdge, externalEdge)
 
 				// Set interior/exterior face linkage.
@@ -199,7 +200,7 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 		seq := ls.Coordinates()
 		for j := 0; j < seq.Length(); j++ {
 			xy := seq.GetXY(j)
-			dcel.vertices[xy] = &vertexRecord{coords: xy, label: mask}
+			dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask}
 		}
 	}
 
@@ -264,8 +265,8 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 			fwd.next = rev
 			fwd.prev = rev
 
-			vOrigin.incident = fwd
-			vDestin.incident = rev
+			vOrigin.incidents = append(vOrigin.incidents, fwd)
+			vDestin.incidents = append(vDestin.incidents, rev)
 
 			dcel.halfEdges = append(dcel.halfEdges, fwd, rev)
 			infFace.innerComponents = append(infFace.innerComponents, fwd)
@@ -286,9 +287,9 @@ func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
 		record, ok := dcel.vertices[xy]
 		if !ok {
 			record = &vertexRecord{
-				coords:   xy,
-				incident: nil,
-				label:    0,
+				coords:    xy,
+				incidents: nil,
+				label:     0,
 			}
 			dcel.vertices[xy] = record
 		}
@@ -346,11 +347,20 @@ func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
 }
 
 func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) map[line]uint8 {
+	// Clear incidents lists, since we're going to re-compute them.
+	for _, vert := range d.vertices {
+		vert.incidents = nil
+	}
+	for _, vert := range other.vertices {
+		vert.incidents = nil
+	}
+
 	edgeRecords := make(map[line]*halfEdgeRecord)
 	faceLabels := make(map[line]uint8)
 	for _, e := range d.halfEdges {
 		ln := line{e.origin.coords, e.next.origin.coords}
 		edgeRecords[ln] = e
+		e.origin.incidents = append(e.origin.incidents, e)
 		faceLabels[ln] = e.incident.label
 	}
 
@@ -380,35 +390,25 @@ func (d *doublyConnectedEdgeList) overlayEdgesInComponent(start *halfEdgeRecord,
 			existing.label |= e.label
 		} else {
 			edgeRecords[ln] = e
+			e.origin.incidents = append(e.origin.incidents, e)
 		}
 	})
 }
 
 func (d *doublyConnectedEdgeList) fixVertices() {
 	for _, vert := range d.vertices {
-		d.fixVertex(vert.coords)
+		d.fixVertex(vert)
 	}
 }
 
-func (d *doublyConnectedEdgeList) fixVertex(v XY) {
-	// Find edges that start at v.
-	//
-	// TODO: This is not efficient, we should use an acceleration structure
-	// rather than a linear search.
-	var incident []*halfEdgeRecord
-	for _, e := range d.halfEdges {
-		if e.origin.coords == v {
-			incident = append(incident, e)
-		}
-	}
-
+func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 	// Sort the edges radially.
 	//
 	// TODO: Might be able to use regular vector operations rather than
 	// trigonometry here.
-	sort.Slice(incident, func(i, j int) bool {
-		ei := incident[i]
-		ej := incident[j]
+	sort.Slice(v.incidents, func(i, j int) bool {
+		ei := v.incidents[i]
+		ej := v.incidents[j]
 		di := ei.twin.origin.coords.Sub(ei.origin.coords)
 		dj := ej.twin.origin.coords.Sub(ej.origin.coords)
 		aI := math.Atan2(di.Y, di.X)
@@ -417,9 +417,9 @@ func (d *doublyConnectedEdgeList) fixVertex(v XY) {
 	})
 
 	// Fix pointers.
-	for i := range incident {
-		ei := incident[i]
-		ej := incident[(i+1)%len(incident)]
+	for i := range v.incidents {
+		ei := v.incidents[i]
+		ej := v.incidents[(i+1)%len(v.incidents)]
 		ei.prev = ej.twin
 		ej.twin.next = ei
 	}
