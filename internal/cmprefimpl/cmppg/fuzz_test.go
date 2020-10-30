@@ -34,7 +34,8 @@ func TestFuzz(t *testing.T) {
 	for i, g := range geoms {
 		t.Run(fmt.Sprintf("geom_%d_", i), func(t *testing.T) {
 
-			// TODO: resolve this error
+			// This geometry shows a problem with the simplefeature's convex hull.
+			// See https://github.com/peterstace/simplefeatures/issues/246
 			if g.AsText() == "LINESTRING(1 0,0.5000000000000001 0.5,0 1)" {
 				t.Skip("Causes unmarshalling to fail for derivative geometry")
 			}

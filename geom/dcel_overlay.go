@@ -390,8 +390,8 @@ func (a *nextDownEdgeToTheLeftAccumulator) accumulate(ln line, pt XY) bool {
 }
 
 func signedHorizontalDistanceBetweenXYAndLine(xy XY, ln line) float64 {
-	// TODO: This is not robust in cases of an *almost* horizontal line. Need
-	// to have a think about a better approach here.
+	// TODO: This may not be robust in cases of an *almost* horizontal line.
+	// Need to have a think about a better approach here.
 	if ln.b.Y == ln.a.Y {
 		return xy.X - math.Max(ln.a.X, ln.b.X)
 	}
@@ -416,7 +416,8 @@ func (s *disjointEdgeSet) addSingleton(e *halfEdgeRecord) {
 	s.sets = append(s.sets, []*halfEdgeRecord{e})
 }
 
-// union unions together the distinct sets containing e1 and e2.
+// union unions together the distinct sets containing e1 and e2. It *shouldn't*
+// ever return an error (however we want to be cautious not to panic).
 func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) error {
 	idx1, idx2 := -1, -1
 	for i, set := range s.sets {

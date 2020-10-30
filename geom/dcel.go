@@ -62,7 +62,7 @@ func newDCELFromGeometry(g Geometry, mask uint8) (*doublyConnectedEdgeList, erro
 		mp := g.AsMultiPoint()
 		return newDCELFromMultiPoint(mp, mask), nil
 	case TypeGeometryCollection:
-		// TODO: support all other input geometry types. The only remaining one is GeometryCollection.
+		// TODO: Add support for GeometryCollection inputs.
 		return nil, errors.New("GeometryCollection argument not supported")
 	default:
 		panic(fmt.Sprintf("unknown geometry type: %v", g.Type()))
@@ -75,7 +75,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
 
 	infFace := &faceRecord{
-		outerComponent:  nil, // left nil
+		outerComponent:  nil, // infinite face has no outer component, so left nil
 		innerComponents: nil, // populated later
 		label:           populatedMask & mask,
 	}
@@ -155,7 +155,6 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 
 				// Set interior/exterior face linkage.
 				if first {
-					// TODO: The logic here feels awkward. The might be a more general way to do this.
 					first = false
 					if ringIdx == 0 {
 						exteriorFace.innerComponents = append(exteriorFace.innerComponents, externalEdge)

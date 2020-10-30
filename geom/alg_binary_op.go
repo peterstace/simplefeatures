@@ -61,11 +61,11 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 func binaryOp(a, b Geometry, include func(uint8) bool) (Geometry, error) {
 	overlay, err := createOverlay(a, b)
 	if err != nil {
-		return Geometry{}, err
+		return Geometry{}, fmt.Errorf("internal error creating overlay: %v", err)
 	}
 	g, err := overlay.extractGeometry(include)
 	if err != nil {
-		return Geometry{}, fmt.Errorf("internal error: %v", err)
+		return Geometry{}, fmt.Errorf("internal error extracting geometry: %v", err)
 	}
 	return g, nil
 }
@@ -87,21 +87,4 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 		return nil, err
 	}
 	return dcelA, nil
-}
-
-func containsLinearElement(g Geometry) bool {
-	switch g.Type() {
-	case TypeLineString, TypeMultiLineString:
-		return true
-	case TypeGeometryCollection:
-		gc := g.AsGeometryCollection()
-		n := gc.NumGeometries()
-		for i := 0; i < n; i++ {
-			g := gc.GeometryN(i)
-			if containsLinearElement(g) {
-				return true
-			}
-		}
-	}
-	return false
 }

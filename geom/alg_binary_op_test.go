@@ -810,8 +810,7 @@ func TestBinaryOp(t *testing.T) {
 			} {
 				t.Run(opCase.opName, func(t *testing.T) {
 					if opCase.want == "" {
-						// Allows tests to be skipped by just commenting them out.
-						t.Skip("Skipping test because it would fail")
+						t.Skip("Skipping test because it's not specified or is commented out")
 					}
 					want := geomFromWKT(t, opCase.want)
 					got, err := opCase.op(g1, g2)
