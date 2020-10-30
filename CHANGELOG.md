@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.22.0
+
+2020-10-30
+
+- Add `Intersection`, `Union`, `Difference`, and `SymmetricDifference`
+  operations.
+
 ## v0.21.0
 
 2020-10-30
