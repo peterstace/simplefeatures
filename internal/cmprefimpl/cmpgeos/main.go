@@ -65,7 +65,13 @@ func main() {
 	}
 
 	var skipped, tested int
-	for _, g1 := range geoms {
+	var lastPct int
+	for i, g1 := range geoms {
+		if newPct := int(float64(100*i) / float64(len(geoms))); newPct > lastPct {
+			lastPct = newPct
+			fmt.Printf("%d%%\n", newPct)
+		}
+
 		// Non-empty GeometryCollections are not supported for binary operations by libgeos.
 		if g1.IsGeometryCollection() && !g1.IsEmpty() {
 			skipped += len(geoms)

@@ -331,7 +331,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 			var err error
 			subGeoms[i], err = h.decodeGeomHandle(sub)
 			if err != nil {
-				return geom.Geometry{}, nil
+				return geom.Geometry{}, err
 			}
 		}
 		return geom.NewGeometryCollection(subGeoms).AsGeometry(), nil
@@ -342,7 +342,23 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 	}
 }
 
+// ErrInvalidAccordingToGEOS indicates that the geometry or geometry resulting
+// from an operation is invalid according to GEOS.
+var ErrInvalidAccordingToGEOS = errors.New("invalid geometry according to GEOS")
+
 func (h *Handle) decodeGeomHandleUsingWKB(gh *C.GEOSGeometry) (geom.Geometry, error) {
+	// Check to see if GEOS thinks the geometry is invalid. Sometimes the
+	// results of complex operations (e.g. Union) can be invalid due to bugs in
+	// GEOS.
+	isValid, err := h.boolErr(C.GEOSisValid_r(h.context, gh))
+	if err != nil {
+		// Geometry is so invalid that GEOS can't even tell if it's valid or not.
+		return geom.Geometry{}, err
+	}
+	if !isValid {
+		return geom.Geometry{}, ErrInvalidAccordingToGEOS
+	}
+
 	var size C.size_t
 	wkb := C.GEOSWKBWriter_write_r(h.context, h.wkbWriter, gh, &size)
 	if wkb == nil {
@@ -350,6 +366,7 @@ func (h *Handle) decodeGeomHandleUsingWKB(gh *C.GEOSGeometry) (geom.Geometry, er
 	}
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
 	byts := C.GoBytes(unsafe.Pointer(wkb), C.int(size))
+
 	return geom.UnmarshalWKB(byts)
 }
 
@@ -746,4 +763,88 @@ func (h *Handle) Distance(g1, g2 geom.Geometry) (float64, error) {
 	var dist C.double
 	err = h.intToErr(C.GEOSDistance_r(h.context, gh1, gh2, &dist))
 	return float64(dist), err
+}
+
+func (h *Handle) Union(g1, g2 geom.Geometry) (geom.Geometry, error) {
+	gh1, err := h.createGeomHandle(g1)
+	if err != nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy(gh1)
+	gh2, err := h.createGeomHandle(g2)
+	if err != nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy(gh2)
+
+	union := C.GEOSUnion_r(h.context, gh1, gh2)
+	if union == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy_r(h.context, union)
+
+	return h.decodeGeomHandle(union)
+}
+
+func (h *Handle) Intersection(g1, g2 geom.Geometry) (geom.Geometry, error) {
+	gh1, err := h.createGeomHandle(g1)
+	if err != nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy(gh1)
+	gh2, err := h.createGeomHandle(g2)
+	if err != nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy(gh2)
+
+	union := C.GEOSIntersection_r(h.context, gh1, gh2)
+	if union == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy_r(h.context, union)
+
+	return h.decodeGeomHandle(union)
+}
+
+func (h *Handle) Difference(g1, g2 geom.Geometry) (geom.Geometry, error) {
+	gh1, err := h.createGeomHandle(g1)
+	if err != nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy(gh1)
+	gh2, err := h.createGeomHandle(g2)
+	if err != nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy(gh2)
+
+	union := C.GEOSDifference_r(h.context, gh1, gh2)
+	if union == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy_r(h.context, union)
+
+	return h.decodeGeomHandle(union)
+}
+
+func (h *Handle) SymmetricDifference(g1, g2 geom.Geometry) (geom.Geometry, error) {
+	gh1, err := h.createGeomHandle(g1)
+	if err != nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy(gh1)
+	gh2, err := h.createGeomHandle(g2)
+	if err != nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy(gh2)
+
+	union := C.GEOSSymDifference_r(h.context, gh1, gh2)
+	if union == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy_r(h.context, union)
+
+	return h.decodeGeomHandle(union)
 }

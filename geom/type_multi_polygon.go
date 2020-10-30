@@ -4,7 +4,6 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"sort"
 	"unsafe"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -164,28 +163,6 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 		}
 	}
 	return nil
-}
-
-func sortAndUniquifyXYs(xys []XY) []XY {
-	if len(xys) == 0 {
-		return xys
-	}
-	sort.Slice(xys, func(i, j int) bool {
-		ptI := xys[i]
-		ptJ := xys[j]
-		if ptI.X != ptJ.X {
-			return ptI.X < ptJ.X
-		}
-		return ptI.Y < ptJ.Y
-	})
-	n := 1
-	for i := 1; i < len(xys); i++ {
-		if xys[i] != xys[i-1] {
-			xys[n] = xys[i]
-			n++
-		}
-	}
-	return xys[:n]
 }
 
 // Type returns the GeometryType for a MultiPolygon

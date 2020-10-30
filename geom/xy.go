@@ -1,6 +1,8 @@
 package geom
 
-import "math"
+import (
+	"math"
+)
 
 // XY represents a pair of X and Y coordinates. This can either represent a
 // location on the XY plane, or a 2D vector in the real vector space.
@@ -69,4 +71,14 @@ func (w XY) Less(o XY) bool {
 		return w.X < o.X
 	}
 	return w.Y < o.Y
+}
+
+func (w XY) distanceTo(o XY) float64 {
+	delta := o.Sub(w)
+	return math.Sqrt(delta.Dot(delta))
+}
+
+func (w XY) distanceSquaredTo(o XY) float64 {
+	delta := o.Sub(w)
+	return delta.Dot(delta)
 }

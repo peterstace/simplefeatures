@@ -320,3 +320,19 @@ func BenchmarkMultiPolygonMultipleTouchingPoints(b *testing.B) {
 		})
 	}
 }
+
+func BenchmarkIntersection(b *testing.B) {
+	for _, sz := range []int{10, 100, 1000, 10000} {
+		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+			p1 := regularPolygon(geom.XY{0, 0}, 1.0, sz).AsGeometry()
+			p2 := regularPolygon(geom.XY{1, 0}, 1.0, sz).AsGeometry()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				_, err := Intersection(p1, p2)
+				if err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}

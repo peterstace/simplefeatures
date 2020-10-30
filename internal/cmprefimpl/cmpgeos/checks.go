@@ -556,22 +556,47 @@ func binaryChecks(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 		}
 	}
 
-	log.Println("checking intersects")
+	log.Println("checking Intersects")
 	if err := checkIntersects(h, g1, g2, log); err != nil {
 		return err
 	}
-	log.Println("checking exact equals")
+
+	log.Println("checking EqualsExact")
 	if err := checkEqualsExact(h, g1, g2, log); err != nil {
 		return err
 	}
-	log.Println("checking distance")
+
+	log.Println("checking Distance")
 	if err := checkDistance(h, g1, g2, log); err != nil {
 		return err
 	}
+
+	log.Println("checking DCEL operations")
+	if err := checkDCELOperations(h, g1, g2, log); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func checkIntersects(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+	skipList := map[string]bool{
+		// postgres=# SELECT ST_Intersects(
+		//   ST_GeomFromText('LINESTRING(1 0,0.5000000000000001 0.5,0 1)'),
+		//   ST_GeomFromText('LINESTRING(0.5 0.5,1.5 1.5)')
+		// );
+		//  st_intersects
+		// ---------------
+		//  f # WRONG!!
+		// (1 row)
+		"LINESTRING(1 0,0.5000000000000001 0.5,0 1)": true,
+	}
+	if skipList[g1.AsText()] || skipList[g2.AsText()] {
+		// Skipping test because GEOS gives the incorrect result for *some*
+		// intersection operations involving this input.
+		return nil
+	}
+
 	want, err := h.Intersects(g1, g2)
 	if err != nil {
 		if err == LibgeosCrashError {
@@ -622,6 +647,178 @@ func checkDistance(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	if math.Abs(want-got) > 1e-12 {
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
+		return mismatchErr
+	}
+	return nil
+}
+
+var skipIntersection = map[string]bool{
+	"LINESTRING(0 1,0.3333333333 0.6666666667,1 0)": true,
+	"LINESTRING(1 0,0.5000000000000001 0.5,0 1)":    true,
+	"MULTILINESTRING((0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2),(0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))": true,
+	"MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))":                                                                 true,
+	"MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0),(0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2))": true,
+	"POLYGON((1 0,0.9807852804032305 -0.19509032201612808,0.923879532511287 -0.3826834323650894,0.8314696123025456 -0.5555702330196017,0.7071067811865481 -0.7071067811865469,0.5555702330196031 -0.8314696123025447,0.38268343236509084 -0.9238795325112863,0.19509032201612964 -0.9807852804032302,0.0000000000000016155445744325867 -1,-0.19509032201612647 -0.9807852804032308,-0.38268343236508784 -0.9238795325112875,-0.5555702330196005 -0.8314696123025463,-0.7071067811865459 -0.7071067811865491,-0.8314696123025438 -0.5555702330196043,-0.9238795325112857 -0.38268343236509234,-0.9807852804032299 -0.19509032201613122,-1 -0.0000000000000032310891488651735,-0.9807852804032311 0.19509032201612486,-0.9238795325112882 0.38268343236508634,-0.8314696123025475 0.555570233019599,-0.7071067811865505 0.7071067811865446,-0.5555702330196058 0.8314696123025428,-0.3826834323650936 0.9238795325112852,-0.19509032201613213 0.9807852804032297,-0.000000000000003736410698672604 1,0.1950903220161248 0.9807852804032311,0.38268343236508673 0.9238795325112881,0.5555702330195996 0.8314696123025469,0.7071067811865455 0.7071067811865496,0.8314696123025438 0.5555702330196044,0.9238795325112859 0.38268343236509206,0.98078528040323 0.19509032201613047,1 0))": true,
+}
+
+var skipDifference = map[string]bool{
+	"LINESTRING(0 1,0.3333333333 0.6666666667,0.5 0.5,1 0)": true,
+	"LINESTRING(0 1,0.3333333333 0.6666666667,1 0)":         true,
+	"LINESTRING(1 0,0.5000000000000001 0.5,0 1)":            true,
+	"MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,0.5 0.5),(0.5 0.5,1 0))": true,
+	"MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))":                                               true,
+
+	"MULTIPOLYGON(((1 0,0 1,0.5 1.5,1 1,1.5 1.5,2 1,1 0)),((1.5 1.5,1 2,0.5 1.5,0.333333333333333 1.66666666666667,0 2,1 3,2 2,1.5 1.5)),((3.5 1.5,4 1,3 0,2 1,2.5 1.5,3 1,3.5 1.5)),((3.5 1.5,3 2,2.5 1.5,2 2,3 3,4 2,3.5 1.5)))": true,
+	"POLYGON((1 0,-0.9 -0.2,-1 -0.0000000000000032310891488651735,-0.9 0.2,1 0))": true,
+	"POLYGON((1 0,0.9807852804032305 -0.19509032201612808,0.923879532511287 -0.3826834323650894,0.8314696123025456 -0.5555702330196017,0.7071067811865481 -0.7071067811865469,0.5555702330196031 -0.8314696123025447,0.38268343236509084 -0.9238795325112863,0.19509032201612964 -0.9807852804032302,0.0000000000000016155445744325867 -1,-0.19509032201612647 -0.9807852804032308,-0.38268343236508784 -0.9238795325112875,-0.5555702330196005 -0.8314696123025463,-0.7071067811865459 -0.7071067811865491,-0.8314696123025438 -0.5555702330196043,-0.9238795325112857 -0.38268343236509234,-0.9807852804032299 -0.19509032201613122,-1 -0.0000000000000032310891488651735,-0.9807852804032311 0.19509032201612486,-0.9238795325112882 0.38268343236508634,-0.8314696123025475 0.555570233019599,-0.7071067811865505 0.7071067811865446,-0.5555702330196058 0.8314696123025428,-0.3826834323650936 0.9238795325112852,-0.19509032201613213 0.9807852804032297,-0.000000000000003736410698672604 1,0.1950903220161248 0.9807852804032311,0.38268343236508673 0.9238795325112881,0.5555702330195996 0.8314696123025469,0.7071067811865455 0.7071067811865496,0.8314696123025438 0.5555702330196044,0.9238795325112859 0.38268343236509206,0.98078528040323 0.19509032201613047,1 0))": true,
+	"MULTILINESTRING((0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2),(0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))": true,
+	"MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0),(0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2))": true,
+
+	// The following are not topological differences, but instead bugs in GEOS
+	// v3.7.1. I believe that it may be fixed in GEOS v3.8.0 but I haven't
+	// confirmed that.
+	"POLYGON((0.9 0.1,0.9 1,0.901921471959677 1.019509032201613,0.9076120467488714 1.0382683432365092,0.9168530387697456 1.0555570233019602,0.9292893218813453 1.0707106781186548,0.9444429766980398 1.0831469612302547,0.961731656763491 1.0923879532511287,0.9804909677983872 1.0980785280403231,1 1.1,1.0195090322016127 1.0980785280403231,1.038268343236509 1.0923879532511287,1.0555570233019602 1.0831469612302547,1.0707106781186546 1.0707106781186548,1.0831469612302544 1.0555570233019602,1.0923879532511287 1.0382683432365092,1.0980785280403231 1.019509032201613,1.1 1,1.0717462120245884 0.06467514421272098,0.9353248557872769 -0.07174621202458649,0 -0.1,-0.019509032201612955 -0.09807852804032302,-0.03826834323650912 -0.09238795325112863,-0.055557023301960363 -0.08314696123025443,-0.07071067811865482 -0.07071067811865468,-0.08314696123025457 -0.055557023301960155,-0.0923879532511287 -0.03826834323650893,-0.09807852804032306 -0.01950903220161279,-0.1 0.000000000000000012246467991473533,-0.09807852804032305 0.01950903220161282,-0.0923879532511287 0.03826834323650895,-0.08314696123025456 0.055557023301960176,-0.07071067811865482 0.0707106781186547,-0.05555702330196031 0.08314696123025447,-0.0382683432365091 0.09238795325112864,-0.019509032201612972 0.09807852804032302,0 0.1,0.9 0.1))":                                                                                                                                                                                                                      true,
+	"POLYGON((0.9 0.1,0.9 1,0.901921471959677 1.019509032201613,0.9076120467488714 1.0382683432365092,0.9168530387697456 1.0555570233019602,0.9292893218813453 1.0707106781186548,0.9444429766980398 1.0831469612302547,0.961731656763491 1.0923879532511287,0.9804909677983872 1.0980785280403231,1 1.1,1.0195090322016127 1.0980785280403231,1.038268343236509 1.0923879532511287,1.0555570233019602 1.0831469612302547,1.0707106781186546 1.0707106781186548,1.0831469612302544 1.0555570233019602,1.0923879532511287 1.0382683432365092,1.0980785280403231 1.019509032201613,1.1 1,1.1 0,1 -0.1,0 -0.1,-0.019509032201612955 -0.09807852804032302,-0.03826834323650912 -0.09238795325112863,-0.055557023301960363 -0.08314696123025443,-0.07071067811865482 -0.07071067811865468,-0.08314696123025457 -0.055557023301960155,-0.0923879532511287 -0.03826834323650893,-0.09807852804032306 -0.01950903220161279,-0.1 0.000000000000000012246467991473533,-0.09807852804032305 0.01950903220161282,-0.0923879532511287 0.03826834323650895,-0.08314696123025456 0.055557023301960176,-0.07071067811865482 0.0707106781186547,-0.05555702330196031 0.08314696123025447,-0.0382683432365091 0.09238795325112864,-0.019509032201612972 0.09807852804032302,0 0.1,0.9 0.1))":                                                                                                                                                                                                                                                                                        true,
+	"POLYGON((0.9 0.1,0.9 1,0.901921471959677 1.019509032201613,0.9076120467488714 1.0382683432365092,0.9168530387697456 1.0555570233019602,0.9292893218813453 1.0707106781186548,0.9444429766980398 1.0831469612302547,0.961731656763491 1.0923879532511287,0.9804909677983872 1.0980785280403231,1 1.1,1.0195090322016127 1.0980785280403231,1.038268343236509 1.0923879532511287,1.0555570233019602 1.0831469612302547,1.0707106781186546 1.0707106781186548,1.0831469612302544 1.0555570233019602,1.0923879532511287 1.0382683432365092,1.0980785280403231 1.019509032201613,1.1 1,1.1 0,1.0980785280403231 -0.019509032201612826,1.0923879532511287 -0.03826834323650898,1.0831469612302544 -0.05555702330196022,1.0707106781186548 -0.07071067811865475,1.0555570233019602 -0.08314696123025453,1.038268343236509 -0.09238795325112868,1.019509032201613 -0.09807852804032305,1 -0.1,0 -0.1,-0.019509032201612955 -0.09807852804032302,-0.03826834323650912 -0.09238795325112863,-0.055557023301960363 -0.08314696123025443,-0.07071067811865482 -0.07071067811865468,-0.08314696123025457 -0.055557023301960155,-0.0923879532511287 -0.03826834323650893,-0.09807852804032306 -0.01950903220161279,-0.1 0.000000000000000012246467991473533,-0.09807852804032305 0.01950903220161282,-0.0923879532511287 0.03826834323650895,-0.08314696123025456 0.055557023301960176,-0.07071067811865482 0.0707106781186547,-0.05555702330196031 0.08314696123025447,-0.0382683432365091 0.09238795325112864,-0.019509032201612972 0.09807852804032302,0 0.1,0.9 0.1))": true,
+}
+
+var skipSymDiff = map[string]bool{
+	"LINESTRING(0 1,0.3333333333 0.6666666667,0.5 0.5,1 0)": true,
+	"LINESTRING(0 1,0.3333333333 0.6666666667,1 0)":         true,
+	"LINESTRING(1 0,0.5000000000000001 0.5,0 1)":            true,
+	"MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,0.5 0.5),(0.5 0.5,1 0))": true,
+	"MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))":                                               true,
+}
+
+func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+	// TODO: simplefeatures doesn't support GeometryCollections yet
+	if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
+		return nil
+	}
+
+	for _, op := range []struct {
+		name     string
+		sfFunc   func(g1, g2 geom.Geometry) (geom.Geometry, error)
+		geosFunc func(g1, g2 geom.Geometry) (geom.Geometry, error)
+		skip     map[string]bool
+	}{
+		{
+			"Union",
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.Union(g1, g2) },
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.Union(g1, g2) },
+			nil,
+		},
+		{
+			"Intersection",
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.Intersection(g1, g2) },
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.Intersection(g1, g2) },
+			skipIntersection,
+		},
+		{
+			"Difference",
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.Difference(g1, g2) },
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.Difference(g1, g2) },
+			skipDifference,
+		},
+		{
+			"SymmetricDifference",
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.SymmetricDifference(g1, g2) },
+			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.SymmetricDifference(g1, g2) },
+			skipSymDiff,
+		},
+	} {
+		log.Println("checking", op.name)
+		err := checkDCELOp(op.sfFunc, op.geosFunc, g1, g2, op.skip, log)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func checkDCELOp(
+	op func(g1, g2 geom.Geometry) (geom.Geometry, error),
+	refImpl func(g1, g2 geom.Geometry) (geom.Geometry, error),
+	g1, g2 geom.Geometry,
+	skip map[string]bool,
+	log *log.Logger,
+) error {
+	// Empty points will cause the reference impl to crash.
+	if hasEmptyPoint(g1) || hasEmptyPoint(g2) {
+		return nil
+	}
+
+	got, err := op(g1, g2)
+	if err != nil {
+		return err
+	}
+
+	// Some geometries give results that are not topologically equivalent to
+	// those from GEOS. These have been checked manually, and decided that the
+	// difference is acceptable (they typically have to do with different
+	// handling of numerically degenerate cases). Note that we bail out of this
+	// test _after_ we calculate got. That way we're at least checking that it
+	// doesn't crash or give an error.
+	if skip[g1.AsText()] || skip[g2.AsText()] {
+		return nil
+	}
+
+	want, err := refImpl(g1, g2)
+	if err != nil {
+		if err == ErrInvalidAccordingToGEOS {
+			// Because GEOS has given us back an invalid geometry (even according
+			// to its own validation routines) we can't trust it for this test
+			// case.
+			return nil
+		}
+		return err
+	}
+
+	if !mantissaTerminatesQuickly(got) || !mantissaTerminatesQuickly(want) {
+		// We're not going to be able to compare got and want because of
+		// numeric precision issues.
+		log.Printf("mantissa doesn't terminate quickly, using area heuristic")
+		if err := checkEqualityHeuristic(want, got, log); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	if want.IsGeometryCollection() || got.IsGeometryCollection() {
+		// We can't use Equals from GEOS on GeometryCollections, so we can't
+		// use proper Equals for this case.
+		log.Printf("want or got is a geometry collection, using area heuristic")
+		if err := checkEqualityHeuristic(want, got, log); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	eq, err := geos.Equals(want, got)
+	if err != nil {
+		return err
+	}
+	if !eq {
+		log.Printf("want: %v", want.AsText())
+		log.Printf("got:  %v", got.AsText())
+		return mismatchErr
+	}
+	return nil
+}
+
+// checkEqualityHeuristic checks some necessary but not sufficient properties
+// of two geometries if they are to be equal.
+//
+// TODO: we could come up with some smarter heuristics. E.g. distance sampled
+// by many random points.
+func checkEqualityHeuristic(want, got geom.Geometry, log *log.Logger) error {
+	wantArea := want.Area()
+	gotArea := got.Area()
+	if math.Abs(wantArea-gotArea) > 1e-3 {
+		log.Printf("wantWKT: %v\n", want.AsText())
+		log.Printf("gotWKT:  %v\n", got.AsText())
+		log.Printf("wantArea: %v\n", wantArea)
+		log.Printf("gotArea:  %v\n", gotArea)
 		return mismatchErr
 	}
 	return nil

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"math"
 	"strings"
 	"text/scanner"
 
@@ -201,4 +203,65 @@ func tokenizeWKT(wkt string) []string {
 
 func isNonEmptyGeometryCollection(g geom.Geometry) bool {
 	return g.IsGeometryCollection() && !g.IsEmpty()
+}
+
+func mantissaTerminatesQuickly(g geom.Geometry) bool {
+	termF := func(f float64) bool {
+		const (
+			mantissaMask        = ^uint64(0) >> 12
+			allowedMantissaMask = (mantissaMask >> 28) << 28
+		)
+		mant := math.Float64bits(f) & mantissaMask
+		return mant & ^allowedMantissaMask == 0
+	}
+	termXY := func(xy geom.XY) bool {
+		return termF(xy.X) && termF(xy.Y)
+	}
+
+	switch g.Type() {
+	case geom.TypePoint:
+		xy, ok := g.AsPoint().XY()
+		return !ok || termXY(xy)
+	case geom.TypeLineString:
+		seq := g.AsLineString().Coordinates()
+		for i := 0; i < seq.Length(); i++ {
+			if !termXY(seq.GetXY(i)) {
+				return false
+			}
+		}
+		return true
+	case geom.TypePolygon:
+		return g.IsEmpty() || mantissaTerminatesQuickly(g.Boundary())
+	case geom.TypeMultiPoint:
+		mp := g.AsMultiPoint()
+		for i := 0; i < mp.NumPoints(); i++ {
+			pt := mp.PointN(i)
+			if !mantissaTerminatesQuickly(pt.AsGeometry()) {
+				return false
+			}
+		}
+		return true
+	case geom.TypeMultiLineString:
+		mls := g.AsMultiLineString()
+		for i := 0; i < mls.NumLineStrings(); i++ {
+			ls := mls.LineStringN(i)
+			if !mantissaTerminatesQuickly(ls.AsGeometry()) {
+				return false
+			}
+		}
+		return true
+	case geom.TypeMultiPolygon:
+		return g.IsEmpty() || mantissaTerminatesQuickly(g.Boundary())
+	case geom.TypeGeometryCollection:
+		gc := g.AsGeometryCollection()
+		for i := 0; i < gc.NumGeometries(); i++ {
+			g := gc.GeometryN(i)
+			if !mantissaTerminatesQuickly(g) {
+				return false
+			}
+		}
+		return true
+	default:
+		panic(fmt.Sprintf("unknown type: %v", g.Type()))
+	}
 }

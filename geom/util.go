@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"sort"
 )
 
 func max(a, b int) int {
@@ -51,4 +52,29 @@ func mustEnv(env Envelope, ok bool) Envelope {
 		panic("not ok")
 	}
 	return env
+}
+
+// sortAndUniquifyXYs sorts the xys, and then makes them unique. The input
+// slice is modified, however the result is in the returned slice since it may
+// have its size changed due to uniquification.
+func sortAndUniquifyXYs(xys []XY) []XY {
+	if len(xys) == 0 {
+		return xys
+	}
+	sort.Slice(xys, func(i, j int) bool {
+		ptI := xys[i]
+		ptJ := xys[j]
+		if ptI.X != ptJ.X {
+			return ptI.X < ptJ.X
+		}
+		return ptI.Y < ptJ.Y
+	})
+	n := 1
+	for i := 1; i < len(xys); i++ {
+		if xys[i] != xys[i-1] {
+			xys[n] = xys[i]
+			n++
+		}
+	}
+	return xys[:n]
 }
