@@ -863,3 +863,17 @@ func TestBinaryOpEmptyInputs(t *testing.T) {
 		})
 	}
 }
+
+func TestBinaryOpGeometryCollection(t *testing.T) {
+	for i, wkt := range []string{
+		"GEOMETRYCOLLECTION(POINT(0 0))",
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g := geomFromWKT(t, wkt)
+			_, err := geom.Union(g, g)
+			if err == nil {
+				t.Error("expected to fail, but not nil err")
+			}
+		})
+	}
+}

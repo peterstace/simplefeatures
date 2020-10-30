@@ -1,6 +1,9 @@
 package geom
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type doublyConnectedEdgeList struct {
 	faces     []*faceRecord
@@ -38,29 +41,31 @@ type vertexRecord struct {
 	label     uint8
 }
 
-func newDCELFromGeometry(g Geometry, mask uint8) *doublyConnectedEdgeList {
+func newDCELFromGeometry(g Geometry, mask uint8) (*doublyConnectedEdgeList, error) {
 	switch g.Type() {
 	case TypePolygon:
 		poly := g.AsPolygon()
-		return newDCELFromMultiPolygon(poly.AsMultiPolygon(), mask)
+		return newDCELFromMultiPolygon(poly.AsMultiPolygon(), mask), nil
 	case TypeMultiPolygon:
 		mp := g.AsMultiPolygon()
-		return newDCELFromMultiPolygon(mp, mask)
+		return newDCELFromMultiPolygon(mp, mask), nil
 	case TypeLineString:
 		mls := g.AsLineString().AsMultiLineString()
-		return newDCELFromMultiLineString(mls, mask)
+		return newDCELFromMultiLineString(mls, mask), nil
 	case TypeMultiLineString:
 		mls := g.AsMultiLineString()
-		return newDCELFromMultiLineString(mls, mask)
+		return newDCELFromMultiLineString(mls, mask), nil
 	case TypePoint:
 		mp := NewMultiPointFromPoints([]Point{g.AsPoint()})
-		return newDCELFromMultiPoint(mp, mask)
+		return newDCELFromMultiPoint(mp, mask), nil
 	case TypeMultiPoint:
 		mp := g.AsMultiPoint()
-		return newDCELFromMultiPoint(mp, mask)
-	default:
+		return newDCELFromMultiPoint(mp, mask), nil
+	case TypeGeometryCollection:
 		// TODO: support all other input geometry types. The only remaining one is GeometryCollection.
-		panic(fmt.Sprintf("binary op not implemented for type %s", g.Type()))
+		return nil, errors.New("GeometryCollection argument not supported")
+	default:
+		panic(fmt.Sprintf("unknown geometry type: %v", g.Type()))
 	}
 }
 

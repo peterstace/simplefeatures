@@ -2,7 +2,7 @@ package geom
 
 // Union returns a geometry that represents the parts from either geometry A or
 // geometry B (or both). An error may be returned in pathological cases of
-// numerical degeneracy.
+// numerical degeneracy. GeometryCollections are not supported.
 func Union(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() && b.IsEmpty() {
 		return Geometry{}, nil
@@ -18,7 +18,7 @@ func Union(a, b Geometry) (Geometry, error) {
 
 // Intersection returns a geometry that represents the parts that are common to
 // both geometry A and geometry B. An error may be returned in pathological
-// cases of numerical degeneracy.
+// cases of numerical degeneracy. GeometryCollections are not supported.
 func Intersection(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() || b.IsEmpty() {
 		return Geometry{}, nil
@@ -28,7 +28,8 @@ func Intersection(a, b Geometry) (Geometry, error) {
 
 // Difference returns a geometry that represents the parts of input geometry A
 // that are not part of input geometry B. An error may be returned in cases of
-// pathological cases of numerical degeneracy.
+// pathological cases of numerical degeneracy. GeometryCollections are not
+// supported.
 func Difference(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() {
 		return Geometry{}, nil
@@ -41,7 +42,7 @@ func Difference(a, b Geometry) (Geometry, error) {
 
 // SymmetricDifference returns a geometry that represents the parts of geometry
 // A and B that are not in common. An error may be returned in pathological
-// cases of numerical degeneracy.
+// cases of numerical degeneracy. GeometryCollections are not supported.
 func SymmetricDifference(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() && b.IsEmpty() {
 		return Geometry{}, nil
@@ -56,16 +57,25 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 }
 
 func binaryOp(a, b Geometry, include func(uint8) bool) (Geometry, error) {
-	overlay := createOverlay(a, b)
+	overlay, err := createOverlay(a, b)
+	if err != nil {
+		return Geometry{}, err
+	}
 	return overlay.extractGeometry(include)
 }
 
-func createOverlay(a, b Geometry) *doublyConnectedEdgeList {
+func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 	a, b = reNodeGeometries(a, b)
-	dcelA := newDCELFromGeometry(a, inputAMask)
-	dcelB := newDCELFromGeometry(b, inputBMask)
+	dcelA, err := newDCELFromGeometry(a, inputAMask)
+	if err != nil {
+		return nil, err
+	}
+	dcelB, err := newDCELFromGeometry(b, inputBMask)
+	if err != nil {
+		return nil, err
+	}
 	dcelA.overlay(dcelB)
-	return dcelA
+	return dcelA, nil
 }
 
 func containsLinearElement(g Geometry) bool {

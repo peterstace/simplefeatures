@@ -240,7 +240,11 @@ func createOverlayFromWKTs(t *testing.T, wktA, wktB string) *doublyConnectedEdge
 	if err != nil {
 		t.Fatal(err)
 	}
-	return createOverlay(gA, gB)
+	overlay, err := createOverlay(gA, gB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return overlay
 }
 
 func TestGraphTriangle(t *testing.T) {
@@ -444,7 +448,10 @@ func TestGraphMultiLineString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromGeometry(mls, inputAMask)
+	dcel, err := newDCELFromGeometry(mls, inputAMask)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	/*
 	        v2    v3
@@ -498,7 +505,10 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromGeometry(ls, inputAMask)
+	dcel, err := newDCELFromGeometry(ls, inputAMask)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	/*
 	   v1----v2----v4
