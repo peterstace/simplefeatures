@@ -46,7 +46,10 @@ func TestReNode(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			gotA, gotB := reNodeGeometries(inA, inB)
+			gotA, gotB, err := reNodeGeometries(inA, inB)
+			if err != nil {
+				t.Fatal(err)
+			}
 			if !gotA.EqualsExact(wantA) || !gotB.EqualsExact(wantB) {
 				t.Logf("INPUT A: %v\n", inA.AsText())
 				t.Logf("INPUT B: %v\n", inB.AsText())

@@ -130,14 +130,8 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 				if !ok {
 					continue
 				}
-				vertA, ok := dcel.vertices[ln.a]
-				if !ok {
-					panic("could not find vertex")
-				}
-				vertB, ok := dcel.vertices[ln.b]
-				if !ok {
-					panic("could not find vertex")
-				}
+				vertA := dcel.vertices[ln.a]
+				vertB := dcel.vertices[ln.b]
 				internalEdge := &halfEdgeRecord{
 					origin:   vertA,
 					twin:     nil, // populated later
@@ -228,14 +222,8 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 				continue
 			}
 
-			vOrigin, ok := dcel.vertices[ln.a]
-			if !ok {
-				panic("could not find vertex")
-			}
-			vDestin, ok := dcel.vertices[ln.b]
-			if !ok {
-				panic("could not find vertex")
-			}
+			vOrigin := dcel.vertices[ln.a]
+			vDestin := dcel.vertices[ln.b]
 
 			pair := vertPair{vOrigin, vDestin}
 			if pair.a.coords.Less(pair.b.coords) {

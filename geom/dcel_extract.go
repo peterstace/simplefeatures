@@ -4,8 +4,14 @@ import "fmt"
 
 // extractGeometry converts the DECL into a Geometry that represents it.
 func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) (Geometry, error) {
-	areals := d.extractPolygons(include)
-	linears := d.extractLineStrings(include)
+	areals, err := d.extractPolygons(include)
+	if err != nil {
+		return Geometry{}, err
+	}
+	linears, err := d.extractLineStrings(include)
+	if err != nil {
+		return Geometry{}, err
+	}
 	points := d.extractPoints(include)
 
 	switch {
@@ -48,7 +54,7 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) (Geo
 	}
 }
 
-func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Polygon {
+func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) ([]Polygon, error) {
 	var polys []Polygon
 	for _, face := range d.faces {
 		if !include(face.label) {
@@ -114,11 +120,11 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) []Po
 		orderCCWRingFirst(rings)
 		poly, err := NewPolygonFromRings(rings)
 		if err != nil {
-			panic(fmt.Sprintf("could not create Polygon: %v", err))
+			return nil, err
 		}
 		polys = append(polys, poly)
 	}
-	return polys
+	return polys, nil
 }
 
 func extractPolygonBoundary(faceSet map[*faceRecord]bool, start *halfEdgeRecord, seen map[*halfEdgeRecord]bool) Sequence {
@@ -151,16 +157,15 @@ func findFacesMakingPolygon(include func(uint8) bool, start *faceRecord) map[*fa
 	expanded := make(map[*faceRecord]bool)
 	toExpand := make(map[*faceRecord]bool)
 	toExpand[start] = true
-	pop := func() *faceRecord {
-		for f := range toExpand {
-			delete(toExpand, f)
-			return f
-		}
-		panic("could not pop")
-	}
 
 	for len(toExpand) > 0 {
-		popped := pop()
+		var popped *faceRecord
+		for f := range toExpand {
+			delete(toExpand, f)
+			popped = f
+			break
+		}
+
 		adj := adjacentFaces(popped)
 		expanded[popped] = true
 		for _, f := range adj {
@@ -196,18 +201,21 @@ func orderCCWRingFirst(rings []LineString) {
 // MultiLineString as a separate logical step since it seems tricky to do
 // inline.
 
-func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) []LineString {
+func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) ([]LineString, error) {
 	var lss []LineString
 	for _, e := range d.halfEdges {
 		if shouldExtractLine(e, include) {
-			ls := extractLineString(e, include)
+			ls, err := extractLineString(e, include)
+			if err != nil {
+				return nil, err
+			}
 			lss = append(lss, ls)
 		}
 	}
-	return lss
+	return lss, nil
 }
 
-func extractLineString(e *halfEdgeRecord, include func(uint8) bool) LineString {
+func extractLineString(e *halfEdgeRecord, include func(uint8) bool) (LineString, error) {
 	u := e.origin.coords
 	coords := []float64{u.X, u.Y}
 
@@ -228,10 +236,9 @@ func extractLineString(e *halfEdgeRecord, include func(uint8) bool) LineString {
 	seq := NewSequence(coords, DimXY)
 	ls, err := NewLineString(seq)
 	if err != nil {
-		// Shouldn't ever happen, since we have at least one edge.
-		panic(fmt.Sprintf("could not construct line string using %v: %v", coords, err))
+		return LineString{}, err
 	}
-	return ls
+	return ls, nil
 }
 
 func shouldExtractLine(e *halfEdgeRecord, include func(uint8) bool) bool {

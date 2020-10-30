@@ -1,5 +1,7 @@
 package geom
 
+import "fmt"
+
 // Union returns a geometry that represents the parts from either geometry A or
 // geometry B (or both). An error may be returned in pathological cases of
 // numerical degeneracy. GeometryCollections are not supported.
@@ -61,11 +63,18 @@ func binaryOp(a, b Geometry, include func(uint8) bool) (Geometry, error) {
 	if err != nil {
 		return Geometry{}, err
 	}
-	return overlay.extractGeometry(include)
+	g, err := overlay.extractGeometry(include)
+	if err != nil {
+		return Geometry{}, fmt.Errorf("internal error: %v", err)
+	}
+	return g, nil
 }
 
 func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
-	a, b = reNodeGeometries(a, b)
+	a, b, err := reNodeGeometries(a, b)
+	if err != nil {
+		return nil, err
+	}
 	dcelA, err := newDCELFromGeometry(a, inputAMask)
 	if err != nil {
 		return nil, err
@@ -74,7 +83,9 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 	if err != nil {
 		return nil, err
 	}
-	dcelA.overlay(dcelB)
+	if err := dcelA.overlay(dcelB); err != nil {
+		return nil, err
+	}
 	return dcelA, nil
 }
 

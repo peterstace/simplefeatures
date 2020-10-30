@@ -1,17 +1,21 @@
 package geom
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"sort"
 )
 
-func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
+func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) error {
 	d.overlayVertices(other)
 	faceLabels := d.overlayEdges(other)
 	d.fixVertices()
-	d.reAssignFaces(faceLabels)
+	if err := d.reAssignFaces(faceLabels); err != nil {
+		return err
+	}
 	d.fixLabels()
+	return nil
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -135,7 +139,7 @@ func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 
 // reAssignFaces clears the DCEL face list and creates new faces based on the
 // half edge loops.
-func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
+func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) error {
 	// Find all boundary cycles, and categorise them as either outer components
 	// or inner components.
 	var innerComponents, outerComponents []*halfEdgeRecord
@@ -174,7 +178,9 @@ func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 			// for tie) edge, since there is no actual loop.
 			nextLeft = edgeLoopLeftmostLowest(nextLeft)
 		}
-		graph.union(leftmostLowest, nextLeft)
+		if err := graph.union(leftmostLowest, nextLeft); err != nil {
+			return err
+		}
 	}
 
 	// Construct new faces.
@@ -185,7 +191,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 		for _, e := range set {
 			if e == nil || edgeLoopIsOuterComponent(e) {
 				if f.outerComponent != nil {
-					panic("double outer component")
+					return errors.New("double outer component")
 				}
 				f.outerComponent = e
 			} else {
@@ -208,6 +214,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces(faceLabels map[line]uint8) {
 	for _, face := range d.faces {
 		d.completePartialFaceLabel(face)
 	}
+	return nil
 }
 
 // completePartialFaceLabel checks to see if the face label for the given face
@@ -410,26 +417,26 @@ func (s *disjointEdgeSet) addSingleton(e *halfEdgeRecord) {
 }
 
 // union unions together the distinct sets containing e1 and e2.
-func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
+func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) error {
 	idx1, idx2 := -1, -1
 	for i, set := range s.sets {
 		for _, e := range set {
 			if e == e1 {
 				if idx1 != -1 {
-					panic(idx1)
+					return fmt.Errorf("idx1 already set: %d", idx1)
 				}
 				idx1 = i
 			}
 			if e == e2 {
 				if idx2 != -1 {
-					panic(idx2)
+					return fmt.Errorf("idx2 already set: %d", idx2)
 				}
 				idx2 = i
 			}
 		}
 	}
 	if idx1 == -1 || idx2 == -1 || idx1 == idx2 {
-		panic(fmt.Sprintf("e1: %p e2: %p state: %v indexes: %d %d", e1, e2, s.sets, idx1, idx2))
+		return fmt.Errorf("e1: %p e2: %p state: %v indexes: %d %d", e1, e2, s.sets, idx1, idx2)
 	}
 
 	set1 := s.sets[idx1]
@@ -442,6 +449,7 @@ func (s *disjointEdgeSet) union(e1, e2 *halfEdgeRecord) {
 	s.sets[idx2], s.sets[n-2] = s.sets[n-2], s.sets[idx2]
 	s.sets = s.sets[:n-2]
 	s.sets = append(s.sets, append(set1, set2...))
+	return nil
 }
 
 // fixLabels updates edge and vertex labels after performing an overlay.

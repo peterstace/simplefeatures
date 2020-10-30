@@ -44,7 +44,7 @@ func ulpSizeForLine(ln line) float64 {
 // reNodeGeometries returns the input geometries, but with additional
 // intermediate nodes (i.e. control points). The additional nodes are created
 // such that when the two geometries are overlaid they only interact at nodes.
-func reNodeGeometries(g1, g2 Geometry) (Geometry, Geometry) {
+func reNodeGeometries(g1, g2 Geometry) (Geometry, Geometry, error) {
 	// Calculate the maximum ULP size over all control points in the input
 	// geometries. This size is a good indication of the precision that we
 	// should use when node merging.
@@ -62,28 +62,39 @@ func reNodeGeometries(g1, g2 Geometry) (Geometry, Geometry) {
 	// it's first-in-best-dressed for the real vertex per cell grid. It
 	// probably makes more sense to have input vertices rather than derived
 	// vertices in the output.
-	a := reNodeGeometry(g1, cut, nodes)
-	b := reNodeGeometry(g2, cut, nodes)
-	return a, b
+	a, err := reNodeGeometry(g1, cut, nodes)
+	if err != nil {
+		return Geometry{}, Geometry{}, err
+	}
+	b, err := reNodeGeometry(g2, cut, nodes)
+	if err != nil {
+		return Geometry{}, Geometry{}, err
+	}
+	return a, b, nil
 }
 
 // reNodeGeometry re-nodes a single geometry, using a common cut set and node map.
-func reNodeGeometry(g Geometry, cut cutSet, nodes nodeSet) Geometry {
+func reNodeGeometry(g Geometry, cut cutSet, nodes nodeSet) (Geometry, error) {
 	switch g.Type() {
 	case TypeGeometryCollection:
-		return reNodeGeometryCollection(g.AsGeometryCollection(), cut, nodes).AsGeometry()
+		gc, err := reNodeGeometryCollection(g.AsGeometryCollection(), cut, nodes)
+		return gc.AsGeometry(), err
 	case TypeLineString:
-		return reNodeLineString(g.AsLineString(), cut, nodes).AsGeometry()
+		ls, err := reNodeLineString(g.AsLineString(), cut, nodes)
+		return ls.AsGeometry(), err
 	case TypePolygon:
-		return reNodePolygon(g.AsPolygon(), cut, nodes).AsGeometry()
+		poly, err := reNodePolygon(g.AsPolygon(), cut, nodes)
+		return poly.AsGeometry(), err
 	case TypeMultiLineString:
-		return reNodeMultiLineString(g.AsMultiLineString(), cut, nodes).AsGeometry()
+		mls, err := reNodeMultiLineString(g.AsMultiLineString(), cut, nodes)
+		return mls.AsGeometry(), err
 	case TypeMultiPolygon:
-		return reNodeMultiPolygonString(g.AsMultiPolygon(), cut, nodes).AsGeometry()
+		mp, err := reNodeMultiPolygonString(g.AsMultiPolygon(), cut, nodes)
+		return mp.AsGeometry(), err
 	case TypePoint:
-		return reNodeMultiPoint(g.AsPoint().AsMultiPoint(), nodes).AsGeometry()
+		return reNodeMultiPoint(g.AsPoint().AsMultiPoint(), nodes).AsGeometry(), nil
 	case TypeMultiPoint:
-		return reNodeMultiPoint(g.AsMultiPoint(), nodes).AsGeometry()
+		return reNodeMultiPoint(g.AsMultiPoint(), nodes).AsGeometry(), nil
 	default:
 		panic(fmt.Sprintf("unknown geometry type %v", g.Type()))
 	}
@@ -157,7 +168,7 @@ func appendPoints(points []XY, g Geometry) []XY {
 	return points
 }
 
-func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) LineString {
+func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, error) {
 	var newCoords []float64
 	seq := ls.Coordinates()
 	n := seq.Length()
@@ -209,22 +220,29 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) LineString {
 
 	newLS, err := NewLineString(NewSequence(newCoords, DimXY), DisableAllValidations)
 	if err != nil {
-		panic(fmt.Sprintf("could not re-node LineString: %v", err))
+		return LineString{}, err
 	}
-	return newLS
+	return newLS, nil
 }
 
-func reNodeMultiLineString(mls MultiLineString, cut cutSet, nodes nodeSet) MultiLineString {
+func reNodeMultiLineString(mls MultiLineString, cut cutSet, nodes nodeSet) (MultiLineString, error) {
 	n := mls.NumLineStrings()
 	lss := make([]LineString, n)
 	for i := 0; i < n; i++ {
-		lss[i] = reNodeLineString(mls.LineStringN(i), cut, nodes)
+		var err error
+		lss[i], err = reNodeLineString(mls.LineStringN(i), cut, nodes)
+		if err != nil {
+			return MultiLineString{}, err
+		}
 	}
-	return NewMultiLineStringFromLineStrings(lss, DisableAllValidations)
+	return NewMultiLineStringFromLineStrings(lss, DisableAllValidations), nil
 }
 
-func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) Polygon {
-	reNodedBoundary := reNodeMultiLineString(poly.Boundary(), cut, nodes)
+func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) (Polygon, error) {
+	reNodedBoundary, err := reNodeMultiLineString(poly.Boundary(), cut, nodes)
+	if err != nil {
+		return Polygon{}, err
+	}
 	n := reNodedBoundary.NumLineStrings()
 	rings := make([]LineString, n)
 	for i := 0; i < n; i++ {
@@ -232,22 +250,26 @@ func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) Polygon {
 	}
 	reNodedPoly, err := NewPolygonFromRings(rings, DisableAllValidations)
 	if err != nil {
-		panic(err)
+		return Polygon{}, err
 	}
-	return reNodedPoly
+	return reNodedPoly, nil
 }
 
-func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet) MultiPolygon {
+func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet) (MultiPolygon, error) {
 	n := mp.NumPolygons()
 	polys := make([]Polygon, n)
 	for i := 0; i < n; i++ {
-		polys[i] = reNodePolygon(mp.PolygonN(i), cut, nodes)
+		var err error
+		polys[i], err = reNodePolygon(mp.PolygonN(i), cut, nodes)
+		if err != nil {
+			return MultiPolygon{}, err
+		}
 	}
 	reNodedMP, err := NewMultiPolygonFromPolygons(polys, DisableAllValidations)
 	if err != nil {
-		panic(err)
+		return MultiPolygon{}, err
 	}
-	return reNodedMP
+	return reNodedMP, nil
 }
 
 func reNodeMultiPoint(mp MultiPoint, nodes nodeSet) MultiPoint {
@@ -263,13 +285,17 @@ func reNodeMultiPoint(mp MultiPoint, nodes nodeSet) MultiPoint {
 	return NewMultiPoint(NewSequence(coords, DimXY))
 }
 
-func reNodeGeometryCollection(gc GeometryCollection, cut cutSet, nodes nodeSet) GeometryCollection {
+func reNodeGeometryCollection(gc GeometryCollection, cut cutSet, nodes nodeSet) (GeometryCollection, error) {
 	n := gc.NumGeometries()
 	geoms := make([]Geometry, n)
 	for i := 0; i < n; i++ {
-		geoms[i] = reNodeGeometry(gc.GeometryN(i), cut, nodes)
+		var err error
+		geoms[i], err = reNodeGeometry(gc.GeometryN(i), cut, nodes)
+		if err != nil {
+			return GeometryCollection{}, err
+		}
 	}
-	return NewGeometryCollection(geoms, DisableAllValidations)
+	return NewGeometryCollection(geoms, DisableAllValidations), nil
 }
 
 func newNodeSet(maxULPSize float64) nodeSet {
