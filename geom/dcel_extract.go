@@ -195,17 +195,27 @@ func orderCCWRingFirst(rings []LineString) {
 	}
 }
 
-// TODO: Line extraction isn't working too well at the moment. It's currently
-// extracting each line individually, which isn't intended. It might be better
-// to return a []line here, and then construct back into LineString and
-// MultiLineString as a separate logical step since it seems tricky to do
-// inline.
-
+// TODO: Line extracting currently pulls out single line segments, without any
+// joining. It would be better to return []line, and then do joining in a
+// separate routine.
 func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) ([]LineString, error) {
 	var lss []LineString
 	for _, e := range d.halfEdges {
 		if shouldExtractLine(e, include) {
-			ls, err := extractLineString(e, include)
+			e.label |= extracted
+			e.twin.label |= extracted
+			e.origin.label |= extracted
+			e.twin.origin.label |= extracted
+			seq := NewSequence(
+				[]float64{
+					e.origin.coords.X,
+					e.origin.coords.Y,
+					e.twin.origin.coords.X,
+					e.twin.origin.coords.Y,
+				},
+				DimXY,
+			)
+			ls, err := NewLineString(seq)
 			if err != nil {
 				return nil, err
 			}
@@ -215,69 +225,8 @@ func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) (
 	return lss, nil
 }
 
-func extractLineString(e *halfEdgeRecord, include func(uint8) bool) (LineString, error) {
-	u := e.origin.coords
-	coords := []float64{u.X, u.Y}
-
-	for {
-		v := e.next.origin.coords
-		coords = append(coords, v.X, v.Y)
-		e.label |= extracted
-		e.twin.label |= extracted
-		e.origin.label |= extracted
-		e.twin.origin.label |= extracted
-
-		e = nextNoBranch(e, include)
-		if e == nil {
-			break
-		}
-	}
-
-	seq := NewSequence(coords, DimXY)
-	ls, err := NewLineString(seq)
-	if err != nil {
-		return LineString{}, err
-	}
-	return ls, nil
-}
-
 func shouldExtractLine(e *halfEdgeRecord, include func(uint8) bool) bool {
 	return (e.label&extracted == 0) && include(e.label) && !include(e.incident.label) && !include(e.twin.incident.label)
-}
-
-// nextNoBranch checks to see if the given edge has multiple next edges that it
-// could use for linear extraction. If there are multiple edges, then nil is
-// returned (this is called a 'branch'). If there is just one possible next
-// edge, then that next edge is returned.
-func nextNoBranch(edge *halfEdgeRecord, include func(uint8) bool) *halfEdgeRecord {
-	e := edge.next
-	var nextEdge *halfEdgeRecord
-
-	// Find the first next edge.
-	for {
-		if e == edge.twin {
-			// There are no linear branches that could be extracted.
-			return nil
-		}
-		if shouldExtractLine(e, include) {
-			nextEdge = e
-			break
-		}
-		e = e.twin.next
-	}
-
-	// Check to see if there are additional next edges (i.e. a branch scenario).
-	for {
-		if e == edge.twin {
-			// There is no branching.
-			return nextEdge
-		}
-		if shouldExtractLine(e, include) {
-			// There is branching, so indicate this by returning nil.
-			return nil
-		}
-		e = e.twin.next
-	}
 }
 
 // extractPoints extracts any vertices in the DCEL that should be part of the
