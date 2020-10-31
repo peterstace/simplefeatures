@@ -115,18 +115,17 @@ func (d *doublyConnectedEdgeList) fixVertices() {
 
 func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 	// Sort the edges radially.
-	//
-	// TODO: Might be able to use regular vector operations rather than
-	// trigonometry here.
-	sort.Slice(v.incidents, func(i, j int) bool {
-		ei := v.incidents[i]
-		ej := v.incidents[j]
-		di := ei.twin.origin.coords.Sub(ei.origin.coords)
-		dj := ej.twin.origin.coords.Sub(ej.origin.coords)
-		aI := math.Atan2(di.Y, di.X)
-		aJ := math.Atan2(dj.Y, dj.X)
-		return aI < aJ
-	})
+	if len(v.incidents) >= 3 {
+		sort.Slice(v.incidents, func(i, j int) bool {
+			ei := v.incidents[i]
+			ej := v.incidents[j]
+			di := ei.twin.origin.coords.Sub(ei.origin.coords)
+			dj := ej.twin.origin.coords.Sub(ej.origin.coords)
+			aI := math.Atan2(di.Y, di.X)
+			aJ := math.Atan2(dj.Y, dj.X)
+			return aI < aJ
+		})
+	}
 
 	// Fix pointers.
 	for i := range v.incidents {
