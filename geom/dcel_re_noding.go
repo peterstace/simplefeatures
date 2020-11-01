@@ -49,7 +49,8 @@ func reNodeGeometries(g1, g2 Geometry) (Geometry, Geometry, error) {
 	// geometries. This size is a good indication of the precision that we
 	// should use when node merging.
 	var maxULPSize float64
-	walk(NewGeometryCollection([]Geometry{g1, g2}).AsGeometry(), func(xy XY) {
+	both := NewGeometryCollection([]Geometry{g1, g2}).AsGeometry()
+	walk(both, func(xy XY) {
 		maxULPSize = math.Max(maxULPSize, math.Max(
 			ulpSize(math.Abs(xy.X)),
 			ulpSize(math.Abs(xy.Y)),
@@ -58,10 +59,10 @@ func reNodeGeometries(g1, g2 Geometry) (Geometry, Geometry, error) {
 
 	nodes := newNodeSet(maxULPSize)
 	cut := newCutSet(g1, g2)
-	// TODO: We may want to insert vertices from both geometries first, since
-	// it's first-in-best-dressed for the real vertex per cell grid. It
-	// probably makes more sense to have input vertices rather than derived
-	// vertices in the output.
+	walk(both, func(xy XY) {
+		nodes.insertOrGet(xy)
+	})
+
 	a, err := reNodeGeometry(g1, cut, nodes)
 	if err != nil {
 		return Geometry{}, Geometry{}, err
