@@ -71,15 +71,21 @@ func binaryOp(a, b Geometry, include func(uint8) bool) (Geometry, error) {
 }
 
 func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
-	a, b, err := reNodeGeometries(a, b)
+	aGhost := connectGeometry(a)
+	bGhost := connectGeometry(b)
+	joinGhost := connectGeometries(a, b)
+	ghosts := mergeMultiLineStrings([]MultiLineString{aGhost, bGhost, joinGhost.AsMultiLineString()})
+
+	a, b, ghosts, err := reNodeGeometries(a, b, ghosts)
 	if err != nil {
 		return nil, err
 	}
-	dcelA, err := newDCELFromGeometry(a, inputAMask)
+
+	dcelA, err := newDCELFromGeometry(a, ghosts, inputAMask)
 	if err != nil {
 		return nil, err
 	}
-	dcelB, err := newDCELFromGeometry(b, inputBMask)
+	dcelB, err := newDCELFromGeometry(b, ghosts, inputBMask)
 	if err != nil {
 		return nil, err
 	}

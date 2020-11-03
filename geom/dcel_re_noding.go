@@ -44,13 +44,13 @@ func ulpSizeForLine(ln line) float64 {
 // reNodeGeometries returns the input geometries, but with additional
 // intermediate nodes (i.e. control points). The additional nodes are created
 // such that when the two geometries are overlaid they only interact at nodes.
-func reNodeGeometries(g1, g2 Geometry) (Geometry, Geometry, error) {
+func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry, MultiLineString, error) {
 	// Calculate the maximum ULP size over all control points in the input
 	// geometries. This size is a good indication of the precision that we
 	// should use when node merging.
 	var maxULPSize float64
-	both := NewGeometryCollection([]Geometry{g1, g2}).AsGeometry()
-	walk(both, func(xy XY) {
+	all := NewGeometryCollection([]Geometry{g1, g2, mls.AsGeometry()}).AsGeometry()
+	walk(all, func(xy XY) {
 		maxULPSize = math.Max(maxULPSize, math.Max(
 			ulpSize(math.Abs(xy.X)),
 			ulpSize(math.Abs(xy.Y)),
@@ -58,20 +58,24 @@ func reNodeGeometries(g1, g2 Geometry) (Geometry, Geometry, error) {
 	})
 
 	nodes := newNodeSet(maxULPSize)
-	cut := newCutSet(g1, g2)
-	walk(both, func(xy XY) {
+	cut := newCutSet(all)
+	walk(all, func(xy XY) {
 		nodes.insertOrGet(xy)
 	})
 
 	a, err := reNodeGeometry(g1, cut, nodes)
 	if err != nil {
-		return Geometry{}, Geometry{}, err
+		return Geometry{}, Geometry{}, MultiLineString{}, err
 	}
 	b, err := reNodeGeometry(g2, cut, nodes)
 	if err != nil {
-		return Geometry{}, Geometry{}, err
+		return Geometry{}, Geometry{}, MultiLineString{}, err
 	}
-	return a, b, nil
+	c, err := reNodeMultiLineString(mls, cut, nodes)
+	if err != nil {
+		return Geometry{}, Geometry{}, MultiLineString{}, err
+	}
+	return a, b, c, nil
 }
 
 // reNodeGeometry re-nodes a single geometry, using a common cut set and node map.
@@ -106,9 +110,9 @@ type cutSet struct {
 	ptIndex indexedPoints
 }
 
-func newCutSet(g1, g2 Geometry) cutSet {
-	lines := appendLines(appendLines(nil, g1), g2)
-	points := appendPoints(appendPoints(nil, g1), g2)
+func newCutSet(g Geometry) cutSet {
+	lines := appendLines(nil, g)
+	points := appendPoints(nil, g)
 	return cutSet{
 		lnIndex: newIndexedLines(lines),
 		ptIndex: newIndexedPoints(points),
