@@ -137,11 +137,11 @@ func TestBinaryOp(t *testing.T) {
 			*/
 			input1:  "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 1,0 1)))",
 			input2:  "MULTIPOLYGON(((4 0,4 1,5 1,5 0,4 0)),((1 0,1 2,3 2,3 0,1 0)))",
-			union:   "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 2,3 2,3 0,1 0,1 1,0 1)),((4 0,4 1,5 1,5 0,4 0)))",
+			union:   "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,1 3,2 3,2 2,3 2,3 1,3 0,1 0,1 1,0 1)),((4 0,4 1,5 1,5 0,4 0)))",
 			inter:   "POLYGON((2 2,2 1,1 1,1 2,2 2))",
-			fwdDiff: "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 2,1 2,1 1,0 1)))",
-			revDiff: "MULTIPOLYGON(((4 0,4 1,5 1,5 0,4 0)),((1 0,1 1,2 1,2 2,3 2,3 0,1 0)))",
-			symDiff: "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 2,1 2,1 1,0 1)),((1 1,2 1,2 2,3 2,3 0,1 0,1 1)),((4 0,4 1,5 1,5 0,4 0)))",
+			fwdDiff: "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,1 3,2 3,2 2,1 2,1 1,0 1)))",
+			revDiff: "MULTIPOLYGON(((4 0,4 1,5 1,5 0,4 0)),((1 0,1 1,2 1,2 2,3 2,3 1,3 0,1 0)))",
+			symDiff: "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,1 3,2 3,2 2,1 2,1 1,0 1)),((1 1,2 1,2 2,3 2,3 1,3 0,1 0,1 1)),((4 0,4 1,5 1,5 0,4 0)))",
 		},
 		{
 			/*
@@ -190,7 +190,7 @@ func TestBinaryOp(t *testing.T) {
 
 			*/
 			input1:  "MULTIPOLYGON(((0 2,1 1,2 2,1 3,0 2)),((2 2,3 1,4 2,3 3,2 2)))",
-			input2:  "MULTIPOLYGON(((1 0,0 1,1 2,2 1,1 0)),((3 0,4 1,3 2,2 1,3 0)))",
+			input2:  "MULTIPOLYGON(((0 1,1 2,2 1,1 0,0 1)),((2 1,3 0,4 1,3 2,2 1)))",
 			union:   "MULTIPOLYGON(((0.5 1.5,0 2,1 3,2 2,1.5 1.5,2 1,1 0,0 1,0.5 1.5)),((2.5 1.5,2 2,3 3,4 2,3.5 1.5,4 1,3 0,2 1,2.5 1.5)))",
 			inter:   "MULTIPOLYGON(((1.5 1.5,1 1,0.5 1.5,1 2,1.5 1.5)),((3.5 1.5,3 1,2.5 1.5,3 2,3.5 1.5)))",
 			fwdDiff: "MULTIPOLYGON(((0.5 1.5,0 2,1 3,2 2,1.5 1.5,1 2,0.5 1.5)),((2.5 1.5,2 2,3 3,4 2,3.5 1.5,3 2,2.5 1.5)))",
@@ -325,8 +325,8 @@ func TestBinaryOp(t *testing.T) {
 			   |A&B|
 			   +---+
 			*/
-			input1:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 2,2 2,2 3,1 3,1 2)))",
-			input2:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 1,3 1,3 2,2 2,2 1)))",
+			input1:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((1 2,2 2,2 3,1 3,1 2)))",
+			input2:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((2 1,3 1,3 2,2 2,2 1)))",
 			union:   "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 2,1 2,1 3,2 3,2 2)),((2 2,3 2,3 1,2 1,2 2)))",
 			inter:   "GEOMETRYCOLLECTION(POINT(2 2),POLYGON((0 0,0 1,1 1,1 0,0 0)))",
 			fwdDiff: "POLYGON((2 2,1 2,1 3,2 3,2 2))",
@@ -576,11 +576,11 @@ func TestBinaryOp(t *testing.T) {
 			*/
 			input1:  "POLYGON((0 0,0 2,2 2,2 0,0 0))",
 			input2:  "MULTIPOINT(1 1,3 1)",
-			union:   "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 0,0 0)))",
+			union:   "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 1,2 0,0 0)))",
 			inter:   "POINT(1 1)",
-			fwdDiff: "POLYGON((0 0,0 2,2 2,2 0,0 0))",
+			fwdDiff: "POLYGON((0 0,0 2,2 2,2 1,2 0,0 0))",
 			revDiff: "POINT(3 1)",
-			symDiff: "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 0,0 0)))",
+			symDiff: "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 1,2 0,0 0)))",
 		},
 		{
 			/*
@@ -741,7 +741,7 @@ func TestBinaryOp(t *testing.T) {
 		},
 		{
 			input1:  "POLYGON((0 0,1 1,1 0,0 0))",
-			input2:  "POLYGON((2 1,2 2,3 2,3 1,2 1))",
+			input2:  "POLYGON((2 2,3 2,3 1,2 1,2 2))",
 			union:   "MULTIPOLYGON(((0 0,1 0,1 1,0 0)),((2 1,2 2,3 2,3 1,2 1)))",
 			inter:   "GEOMETRYCOLLECTION EMPTY",
 			fwdDiff: "POLYGON((0 0,1 1,1 0,0 0))",
@@ -750,21 +750,12 @@ func TestBinaryOp(t *testing.T) {
 		},
 		{
 			input1:  "LINESTRING(0 1,1 0)",
-			input2:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 1,2 2,3 2,3 1,2 1)))",
-			union:   "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 1,2 2,3 2,3 1,2 1)))",
+			input2:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((2 1,2 2,3 2,3 1,2 1)))",
+			union:   "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((2 1,2 2,3 2,3 1,2 1)))",
 			inter:   "LINESTRING(0 1,1 0)",
 			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
 			revDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 1,2 2,3 2,3 1,2 1)))",
 			symDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 1,2 2,3 2,3 1,2 1)))",
-		},
-		{
-			input1:  "LINESTRING(0 1,1 3)",
-			input2:  "MULTIPOLYGON(((1 0,0 1,0.5 1.5,1 1,1.5 1.5,2 1,1 0)),((1.5 1.5,1 2,0.5 1.5,0 2,1 3,2 2,1.5 1.5)),((3.5 1.5,4 1,3 0,2 1,2.5 1.5,3 1,3.5 1.5)),((3.5 1.5,3 2,2.5 1.5,2 2,3 3,4 2,3.5 1.5)))",
-			union:   "GEOMETRYCOLLECTION(LINESTRING(0 1,0.333333333333333 1.66666666666667),POLYGON((1 0,0 1,0.5 1.5,1 1,1.5 1.5,2 1,1 0)),POLYGON((1.5 1.5,1 2,0.5 1.5,0.333333333333333 1.66666666666667,0 2,1 3,2 2,1.5 1.5)),POLYGON((3.5 1.5,4 1,3 0,2 1,2.5 1.5,3 1,3.5 1.5)),POLYGON((3.5 1.5,3 2,2.5 1.5,2 2,3 3,4 2,3.5 1.5)))",
-			inter:   "GEOMETRYCOLLECTION(POINT(0 1),LINESTRING(0.333333333333333 1.66666666666667,1 3))",
-			fwdDiff: "LINESTRING(0 1,0.333333333333333 1.66666666666667)",
-			revDiff: "MULTIPOLYGON(((1 0,0 1,0.5 1.5,1 1,1.5 1.5,2 1,1 0)),((1.5 1.5,1 2,0.5 1.5,0.333333333333333 1.66666666666667,0 2,1 3,2 2,1.5 1.5)),((3.5 1.5,4 1,3 0,2 1,2.5 1.5,3 1,3.5 1.5)),((3.5 1.5,3 2,2.5 1.5,2 2,3 3,4 2,3.5 1.5)))",
-			symDiff: "GEOMETRYCOLLECTION(LINESTRING(0 1,0.333333333333333 1.66666666666667),POLYGON((1 0,0 1,0.5 1.5,1 1,1.5 1.5,2 1,1 0)),POLYGON((1.5 1.5,1 2,0.5 1.5,0.333333333333333 1.66666666666667,0 2,1 3,2 2,1.5 1.5)),POLYGON((3.5 1.5,4 1,3 0,2 1,2.5 1.5,3 1,3.5 1.5)),POLYGON((3.5 1.5,3 2,2.5 1.5,2 2,3 3,4 2,3.5 1.5)))",
 		},
 		{
 			input1:  "POINT(5 5)",
@@ -790,6 +781,11 @@ func TestBinaryOp(t *testing.T) {
 			input1: "LINESTRING(1 2.1,2.1 1)",
 			input2: "POLYGON((0 0,0 10,10 10,10 0,0 0),(1.5 1.5,8.5 1.5,8.5 8.5,1.5 8.5,1.5 1.5))",
 			inter:  "MULTILINESTRING((1 2.1,1.5 1.6),(1.6 1.5,2.1 1))",
+		},
+		{
+			input1: "LINESTRING(1 2,2 3)",
+			input2: "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((1 2,2 2,2 3,1 3,1 2)))",
+			union:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((1 2,2 2,2 3,1 3,1 2)))",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {

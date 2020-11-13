@@ -6,24 +6,30 @@ import (
 )
 
 type doublyConnectedEdgeList struct {
-	faces     []*faceRecord
+	faces     []*faceRecord // only populated in the overlay
 	halfEdges []*halfEdgeRecord
 	vertices  map[XY]*vertexRecord
 }
 
 type faceRecord struct {
-	outerComponent   *halfEdgeRecord
-	innerComponents  []*halfEdgeRecord
-	internalVertices []*vertexRecord // only populated in the overlay
-	label            uint8
+	cycle *halfEdgeRecord
+	label uint8
+}
+
+func (f *faceRecord) String() string {
+	if f == nil {
+		return "nil"
+	}
+	return "[" + f.cycle.String() + "]"
 }
 
 type halfEdgeRecord struct {
 	origin     *vertexRecord
 	twin       *halfEdgeRecord
-	incident   *faceRecord
+	incident   *faceRecord // only populated in the overlay
 	next, prev *halfEdgeRecord
-	label      uint8
+	edgeLabel  uint8
+	faceLabel  uint8
 }
 
 // String shows the origin and destination of the edge (for debugging
@@ -41,45 +47,53 @@ type vertexRecord struct {
 	label     uint8
 }
 
-func newDCELFromGeometry(g Geometry, mask uint8) (*doublyConnectedEdgeList, error) {
+func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
+	e := start
+	for {
+		fn(e)
+		e = e.next
+		if e == start {
+			break
+		}
+	}
+}
+
+func newDCELFromGeometry(g Geometry, ghosts MultiLineString, mask uint8) (*doublyConnectedEdgeList, error) {
+	var dcel *doublyConnectedEdgeList
 	switch g.Type() {
 	case TypePolygon:
 		poly := g.AsPolygon()
-		return newDCELFromMultiPolygon(poly.AsMultiPolygon(), mask), nil
+		dcel = newDCELFromMultiPolygon(poly.AsMultiPolygon(), mask)
 	case TypeMultiPolygon:
 		mp := g.AsMultiPolygon()
-		return newDCELFromMultiPolygon(mp, mask), nil
+		dcel = newDCELFromMultiPolygon(mp, mask)
 	case TypeLineString:
 		mls := g.AsLineString().AsMultiLineString()
-		return newDCELFromMultiLineString(mls, mask), nil
+		dcel = newDCELFromMultiLineString(mls, mask)
 	case TypeMultiLineString:
 		mls := g.AsMultiLineString()
-		return newDCELFromMultiLineString(mls, mask), nil
+		dcel = newDCELFromMultiLineString(mls, mask)
 	case TypePoint:
 		mp := NewMultiPointFromPoints([]Point{g.AsPoint()})
-		return newDCELFromMultiPoint(mp, mask), nil
+		dcel = newDCELFromMultiPoint(mp, mask)
 	case TypeMultiPoint:
 		mp := g.AsMultiPoint()
-		return newDCELFromMultiPoint(mp, mask), nil
+		dcel = newDCELFromMultiPoint(mp, mask)
 	case TypeGeometryCollection:
 		// TODO: Add support for GeometryCollection inputs.
 		return nil, errors.New("GeometryCollection argument not supported")
 	default:
 		panic(fmt.Sprintf("unknown geometry type: %v", g.Type()))
 	}
+
+	dcel.addGhosts(ghosts, mask)
+	return dcel, nil
 }
 
 func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeList {
 	mp = mp.ForceCCW()
 
 	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
-
-	infFace := &faceRecord{
-		outerComponent:  nil, // infinite face has no outer component, so left nil
-		innerComponents: nil, // populated later
-		label:           populatedMask & mask,
-	}
-	dcel.faces = append(dcel.faces, infFace)
 
 	for polyIdx := 0; polyIdx < mp.NumPolygons(); polyIdx++ {
 		poly := mp.PolygonN(polyIdx)
@@ -101,30 +115,8 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 			}
 		}
 
-		polyFace := &faceRecord{
-			outerComponent:  nil, // populated later
-			innerComponents: nil, // populated later
-			label:           mask,
-		}
-		dcel.faces = append(dcel.faces, polyFace)
-
-		for ringIdx, ring := range rings {
-			interiorFace := polyFace
-			exteriorFace := infFace
-			if ringIdx > 0 {
-				holeFace := &faceRecord{
-					outerComponent:  nil, // left nil
-					innerComponents: nil, // populated later
-					label:           populatedMask & mask,
-				}
-				// For inner rings, the exterior face is a hole rather than the
-				// infinite face.
-				exteriorFace = holeFace
-				dcel.faces = append(dcel.faces, exteriorFace)
-			}
-
+		for _, ring := range rings {
 			var newEdges []*halfEdgeRecord
-			first := true
 			for i := 0; i < ring.Length(); i++ {
 				ln, ok := getLine(ring, i)
 				if !ok {
@@ -133,41 +125,27 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 				vertA := dcel.vertices[ln.a]
 				vertB := dcel.vertices[ln.b]
 				internalEdge := &halfEdgeRecord{
-					origin:   vertA,
-					twin:     nil, // populated later
-					incident: interiorFace,
-					next:     nil, // populated later
-					prev:     nil, // populated later
-					label:    mask,
+					origin:    vertA,
+					twin:      nil, // populated later
+					incident:  nil, // only populated in the overlay
+					next:      nil, // populated later
+					prev:      nil, // populated later
+					edgeLabel: mask,
+					faceLabel: mask,
 				}
 				externalEdge := &halfEdgeRecord{
-					origin:   vertB,
-					twin:     internalEdge,
-					incident: exteriorFace,
-					next:     nil, // populated later
-					prev:     nil, // populated later
-					label:    mask,
+					origin:    vertB,
+					twin:      internalEdge,
+					incident:  nil, // only populated in the overlay
+					next:      nil, // populated later
+					prev:      nil, // populated later
+					edgeLabel: mask,
+					faceLabel: mask & populatedMask,
 				}
 				internalEdge.twin = externalEdge
 				vertA.incidents = append(vertA.incidents, internalEdge)
 				vertB.incidents = append(vertB.incidents, externalEdge)
 				newEdges = append(newEdges, internalEdge, externalEdge)
-
-				// Set interior/exterior face linkage.
-				if first {
-					first = false
-					if ringIdx == 0 {
-						exteriorFace.innerComponents = append(exteriorFace.innerComponents, externalEdge)
-						if interiorFace.outerComponent == nil {
-							interiorFace.outerComponent = internalEdge
-						}
-					} else {
-						interiorFace.innerComponents = append(interiorFace.innerComponents, internalEdge)
-						if exteriorFace.outerComponent == nil {
-							exteriorFace.outerComponent = externalEdge
-						}
-					}
-				}
 			}
 
 			numEdges := len(newEdges)
@@ -200,13 +178,6 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 
 	// Linear elements have no face structure, so everything just points to the
 	// infinite face.
-	infFace := &faceRecord{
-		outerComponent:  nil,
-		innerComponents: nil,
-		label:           mask & populatedMask,
-	}
-	dcel.faces = []*faceRecord{infFace}
-
 	type vertPair struct {
 		a, b *vertexRecord
 	}
@@ -234,20 +205,22 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 			edgeSet[pair] = true
 
 			fwd := &halfEdgeRecord{
-				origin:   vOrigin,
-				twin:     nil, // set later
-				incident: infFace,
-				next:     nil, // set later
-				prev:     nil, // set later
-				label:    mask,
+				origin:    vOrigin,
+				twin:      nil, // set later
+				incident:  nil, // only populated in overlay
+				next:      nil, // set later
+				prev:      nil, // set later
+				edgeLabel: mask,
+				faceLabel: mask & populatedMask,
 			}
 			rev := &halfEdgeRecord{
-				origin:   vDestin,
-				twin:     fwd,
-				incident: infFace,
-				next:     fwd,
-				prev:     fwd,
-				label:    mask,
+				origin:    vDestin,
+				twin:      fwd,
+				incident:  nil, // only populated in overlay
+				next:      fwd,
+				prev:      fwd,
+				edgeLabel: mask,
+				faceLabel: mask & populatedMask,
 			}
 			fwd.twin = rev
 			fwd.next = rev
@@ -257,10 +230,8 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnecte
 			vDestin.incidents = append(vDestin.incidents, rev)
 
 			dcel.halfEdges = append(dcel.halfEdges, fwd, rev)
-			infFace.innerComponents = append(infFace.innerComponents, fwd)
 		}
 	}
-
 	return dcel
 }
 
@@ -284,4 +255,72 @@ func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
 		record.label |= mask
 	}
 	return dcel
+}
+
+func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, mask uint8) {
+	edges := make(map[line]*halfEdgeRecord)
+	for _, e := range d.halfEdges {
+		ln := line{e.origin.coords, e.twin.origin.coords}
+		edges[ln] = e
+	}
+
+	for i := 0; i < mls.NumLineStrings(); i++ {
+		seq := mls.LineStringN(i).Coordinates()
+		n := seq.Length()
+		for j := 0; j < n; j++ {
+			if ln, ok := getLine(seq, j); ok {
+				if _, ok := d.vertices[ln.a]; !ok {
+					d.vertices[ln.a] = &vertexRecord{coords: ln.a, incidents: nil, label: 0}
+				}
+				if _, ok := d.vertices[ln.b]; !ok {
+					d.vertices[ln.b] = &vertexRecord{coords: ln.b, incidents: nil, label: 0}
+				}
+				d.addGhostLine(ln, mask, edges)
+			}
+		}
+	}
+}
+
+func (d *doublyConnectedEdgeList) addGhostLine(ln line, mask uint8, edges map[line]*halfEdgeRecord) {
+	if _, ok := edges[ln]; ok {
+		// Already exists, so shouldn't add.
+		return
+	}
+
+	vertA := d.vertices[ln.a]
+	vertB := d.vertices[ln.b]
+
+	e1 := &halfEdgeRecord{
+		origin:    vertA,
+		twin:      nil, // populated later
+		incident:  nil, // only populated in the overlay
+		next:      nil, // popluated later
+		prev:      nil, // populated later
+		edgeLabel: mask & populatedMask,
+		faceLabel: 0,
+	}
+	e2 := &halfEdgeRecord{
+		origin:    vertB,
+		twin:      e1,
+		incident:  nil, // only populated in the overlay
+		next:      e1,
+		prev:      e1,
+		edgeLabel: mask & populatedMask,
+		faceLabel: 0,
+	}
+	e1.twin = e2
+	e1.next = e2
+	e1.prev = e2
+
+	vertA.incidents = append(vertA.incidents, e1)
+	vertB.incidents = append(vertB.incidents, e2)
+
+	d.halfEdges = append(d.halfEdges, e1, e2)
+
+	edges[ln] = e1
+	ln.a, ln.b = ln.b, ln.a
+	edges[ln] = e2
+
+	d.fixVertex(vertA)
+	d.fixVertex(vertB)
 }

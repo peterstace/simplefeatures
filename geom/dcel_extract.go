@@ -57,45 +57,27 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) (Geo
 func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) ([]Polygon, error) {
 	var polys []Polygon
 	for _, face := range d.faces {
-		if !include(face.label) {
-			continue
-		}
-
-		// Mark vertices internal to the face as already extracted so that
-		// they're ignored during point extraction.
-		for _, vert := range face.internalVertices {
-			vert.label |= extracted
-		}
-
-		if (face.label & extracted) != 0 {
+		// Skip any faces not selected to be include in the output geometry, or
+		// any faces already extracted.
+		if !include(face.label) || face.label&extracted != 0 {
 			continue
 		}
 
 		// Find all faces that make up the polygon.
 		facesInPoly := findFacesMakingPolygon(include, face)
 
-		// Find all edge cycles incident to the faces. Edges in these cycles
-		// are are candidates to be part of the Polygon boundary.
-		var components []*halfEdgeRecord
-		for f := range facesInPoly {
-			f.label |= extracted
-			if cmp := f.outerComponent; cmp != nil {
-				components = append(components, cmp)
-			}
-			components = append(components, f.innerComponents...)
-		}
-
-		// Extract the Polygon boundaries from the candidate edges.
+		// Extract the Polygon boundaries from the edges forming the face cycles.
 		var rings []LineString
 		seen := make(map[*halfEdgeRecord]bool)
-		for _, cmp := range components {
-			forEachEdge(cmp, func(edge *halfEdgeRecord) {
+		for f := range facesInPoly {
+			f.label |= extracted
+			forEachEdge(f.cycle, func(edge *halfEdgeRecord) {
 
 				// Mark all edges and vertices intersecting with the polygon as
 				// being extracted.  This will prevent them being considered
 				// during linear and point geometry extraction.
-				edge.label |= extracted
-				edge.twin.label |= extracted
+				edge.edgeLabel |= extracted
+				edge.twin.edgeLabel |= extracted
 				edge.origin.label |= extracted
 
 				if seen[edge] {
@@ -202,8 +184,8 @@ func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) (
 	var lss []LineString
 	for _, e := range d.halfEdges {
 		if shouldExtractLine(e, include) {
-			e.label |= extracted
-			e.twin.label |= extracted
+			e.edgeLabel |= extracted
+			e.twin.edgeLabel |= extracted
 			e.origin.label |= extracted
 			e.twin.origin.label |= extracted
 			seq := NewSequence(
@@ -226,7 +208,7 @@ func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) (
 }
 
 func shouldExtractLine(e *halfEdgeRecord, include func(uint8) bool) bool {
-	return (e.label&extracted == 0) && include(e.label) && !include(e.incident.label) && !include(e.twin.incident.label)
+	return (e.edgeLabel&extracted == 0) && include(e.edgeLabel) && !include(e.incident.label) && !include(e.twin.incident.label)
 }
 
 // extractPoints extracts any vertices in the DCEL that should be part of the
