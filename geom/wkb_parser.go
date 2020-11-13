@@ -159,8 +159,7 @@ func (p *wkbParser) parseFloat64() (float64, error) {
 }
 
 func (p *wkbParser) parsePoint(ctype CoordinatesType) (Point, error) {
-	var c Coordinates
-	c.Type = ctype
+	c := Coordinates{Type: ctype}
 	var err error
 	c.X, err = p.parseFloat64()
 	if err != nil {
@@ -170,33 +169,22 @@ func (p *wkbParser) parsePoint(ctype CoordinatesType) (Point, error) {
 	if err != nil {
 		return Point{}, err
 	}
-	switch c.Type {
-	case DimXY:
-	case DimXYZ:
+
+	if ctype == DimXYZ || ctype == DimXYZM {
 		c.Z, err = p.parseFloat64()
 		if err != nil {
 			return Point{}, err
 		}
-	case DimXYM:
+	}
+	if ctype == DimXYM || ctype == DimXYZM {
 		c.M, err = p.parseFloat64()
 		if err != nil {
 			return Point{}, err
 		}
-	case DimXYZM:
-		c.Z, err = p.parseFloat64()
-		if err != nil {
-			return Point{}, err
-		}
-		c.M, err = p.parseFloat64()
-		if err != nil {
-			return Point{}, err
-		}
-	default:
-		return Point{}, errors.New("unknown coord type")
 	}
 
 	if math.IsNaN(c.X) && math.IsNaN(c.Y) {
-		// Empty points are represented as NaN,NaN is WKB.
+		// Empty points are represented as NaN,NaN in WKB.
 		return Point{}.ForceCoordinatesType(ctype), nil
 	}
 	if math.IsNaN(c.X) || math.IsNaN(c.Y) {
