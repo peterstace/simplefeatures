@@ -309,9 +309,8 @@ func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) (MultiLineString
 		}
 		if !geom.IsLineString() {
 			return MultiLineString{}, errors.New("non-LineString found in MultiLineString")
-		} else {
-			lss = append(lss, geom.AsLineString())
 		}
+		lss = append(lss, geom.AsLineString())
 	}
 	return NewMultiLineStringFromLineStrings(lss, p.opts...), nil
 }
@@ -332,9 +331,8 @@ func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) (MultiPolygon, erro
 		}
 		if !geom.IsPolygon() {
 			return MultiPolygon{}, errors.New("non-Polygon found in MultiPolygon")
-		} else {
-			polys = append(polys, geom.AsPolygon())
 		}
+		polys = append(polys, geom.AsPolygon())
 	}
 	return NewMultiPolygonFromPolygons(polys, p.opts...)
 }
