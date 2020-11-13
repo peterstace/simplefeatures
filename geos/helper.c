@@ -6,7 +6,7 @@
 // something went wrong). The size param is set to the number of bytes in the
 // returned WKB or WKT. The isWKT param is either set to 0 (WKB) or 1 (WKT),
 // indicating the type of marshalling used.
-unsigned char *marshal(
+char *marshal(
 	GEOSContextHandle_t handle,
 	const GEOSGeometry *g,
 	size_t *size,
@@ -21,7 +21,7 @@ unsigned char *marshal(
 	GEOSWKBWriter_destroy_r(handle, wkbWriter);
 	if (wkb) {
 		*isWKT = 0;
-		return wkb;
+		return (char*)wkb;
 	}
 
 	// Try WKT. This should work for all geometries, but will be a bit slower.
@@ -29,7 +29,7 @@ unsigned char *marshal(
 	if (!wktWriter) {
 		return NULL;
 	}
-	unsigned char *wkt = GEOSWKTWriter_write_r(handle, wktWriter, g);
+	char *wkt = GEOSWKTWriter_write_r(handle, wktWriter, g);
 	GEOSWKTWriter_destroy_r(handle, wktWriter);
 	if (wkt) {
 		*size = strlen(wkt);

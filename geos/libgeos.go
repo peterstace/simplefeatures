@@ -2,6 +2,7 @@ package geos
 
 /*
 #cgo LDFLAGS: -lgeos_c
+#cgo CFLAGS: -Wall
 #include "geos_c.h"
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +17,7 @@ GEOSContextHandle_t sf_init(void *userdata) {
 	return ctx;
 }
 
-unsigned char *marshal(GEOSContextHandle_t handle, const GEOSGeometry *g, size_t *size, char *isWKT);
+char *marshal(GEOSContextHandle_t handle, const GEOSGeometry *g, size_t *size, char *isWKT);
 
 GEOSGeometry const *noop(GEOSContextHandle_t handle, const GEOSGeometry *g) {
 	return g;
