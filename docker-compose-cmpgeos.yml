@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: geos.Dockerfile
     working_dir: /go/src/github.com/peterstace/simplefeatures
-    entrypoint: sh -c "go install ./internal/cmprefimpl/cmpgeos && cmpgeos"
+    entrypoint: sh -c "go install ./internal/cmprefimpl/cmpgeos && /root/go/bin/cmpgeos"
     volumes:
       - .:/go/src/github.com/peterstace/simplefeatures
     environment:

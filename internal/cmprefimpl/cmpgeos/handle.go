@@ -346,6 +346,10 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 // from an operation is invalid according to GEOS.
 var ErrInvalidAccordingToGEOS = errors.New("invalid geometry according to GEOS")
 
+// ErrInvalidAccordingToSF indicates that the geometry or geometry resulting
+// from an operation is invalid according to simplefeatures.
+var ErrInvalidAccordingToSF = errors.New("invalid geometry according to simplefeatures")
+
 func (h *Handle) decodeGeomHandleUsingWKB(gh *C.GEOSGeometry) (geom.Geometry, error) {
 	// Check to see if GEOS thinks the geometry is invalid. Sometimes the
 	// results of complex operations (e.g. Union) can be invalid due to bugs in
@@ -367,7 +371,15 @@ func (h *Handle) decodeGeomHandleUsingWKB(gh *C.GEOSGeometry) (geom.Geometry, er
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
 	byts := C.GoBytes(unsafe.Pointer(wkb), C.int(size))
 
-	return geom.UnmarshalWKB(byts)
+	gInvalid, _ := geom.UnmarshalWKB(byts, geom.DisableAllValidations)
+	gValid, err := geom.UnmarshalWKB(byts)
+	if err != nil {
+		fmt.Println("WARNING: GEOS result is valid according to GEOS but invalid according to simplefeatures:")
+		fmt.Println("GEOMETRY:", gInvalid.AsText())
+		fmt.Println("SKIPPING")
+		return geom.Geometry{}, ErrInvalidAccordingToSF
+	}
+	return gValid, nil
 }
 
 func (h *Handle) AsText(g geom.Geometry) (string, error) {
