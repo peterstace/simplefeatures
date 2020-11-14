@@ -11,9 +11,10 @@ func exactSum(a, b float64) (s, e float64) {
 	return
 }
 
-func exponentFloat64(f float64) uint64 {
+func exponentFloat64(f float64) int {
 	u := math.Float64bits(f)
-	return (u & 0x7ff0000000000000) >> 52
+	biased := (u & 0x7ff0000000000000) >> 52
+	return int(biased) - 1023
 }
 
 func exactMul(a, b float64) (p, q float64) {
@@ -56,4 +57,133 @@ func clear27thBitOfMantissa(f float64) float64 {
 func bit27OfMantissaSet(f float64) bool {
 	u := math.Float64bits(f)
 	return (u & 0x2000000) != 0
+}
+
+func accurateDotProduct(u, v XY) float64 {
+	// Step 1
+	var pSet, nSet, qSet []float64
+
+	// Step 2
+	for i := 0; i < 2; i++ {
+		var ai, bi float64
+		switch i {
+		case 0:
+			ai = u.X
+			bi = v.X
+		case 1:
+			ai = u.Y
+			bi = v.Y
+		default:
+			panic(i)
+		}
+
+		// Step 2.a
+		pi, qi := exactMul(ai, bi)
+
+		// Step 2.b
+		if pi > 0 {
+			pSet = append(pSet, pi)
+		} else if pi < 0 {
+			nSet = append(nSet, pi)
+		}
+
+		// Step 2.c
+		if qi != 0 {
+			qSet = append(qSet, qi)
+		}
+	}
+
+	// Step 3
+	s := 0.0
+	e1 := 0.0
+	e2 := 0.0
+	first := true
+
+	// Step 4
+step4:
+	if e1 > 0 {
+		pSet = append(pSet, e1)
+	} else if e1 < 0 {
+		nSet = append(nSet, e1)
+	}
+
+	// Step 5
+	if e2 > 0 {
+		pSet = append(pSet, e2)
+	} else if e2 < 0 {
+		nSet = append(nSet, e2)
+	}
+
+	// Step 6
+	n1 := len(pSet)
+	sPos := 0.0
+
+	// Step 7
+	for i := 0; i < n1; i++ {
+		// Step 7.a
+		a := pSet[0]
+		pSet = pSet[1:]
+		b := sPos
+
+		// Step 7.b
+		var e float64
+		sPos, e = exactSum(a, b)
+		if e > 0 {
+			pSet = append(pSet, e)
+		} else if e < 0 {
+			nSet = append(nSet, e)
+		}
+	}
+
+	// Step 8
+	s, e1 = exactSum(s, sPos)
+
+	// Step 9
+	n2 := len(nSet)
+	sNeg := 0.0
+
+	// Step 10
+	for i := 0; i < n2; i++ {
+		// Step 10.a
+		a := nSet[0]
+		nSet = nSet[1:]
+		b := sNeg
+
+		// Step 10.b
+		var e float64
+		sNeg, e = exactSum(a, b)
+		if e > 0 {
+			pSet = append(pSet, e)
+		} else if e < 0 {
+			nSet = append(nSet, e)
+		}
+	}
+
+	// Step 11
+	s, e2 = exactSum(s, sNeg)
+
+	// Step 12
+	if first {
+		// Step 12.a
+		for _, q := range qSet {
+			if q > 0 {
+				pSet = append(pSet, q)
+			} else if q < 0 {
+				nSet = append(nSet, q)
+			}
+		}
+		first = false
+
+		// Step 12.b
+		goto step4
+	}
+
+	// Step 13 and 14 (this is a bit different compared to the paper)
+	if len(pSet)+len(nSet) > 0 {
+		goto step4
+	}
+
+	// Step 15
+	s = s + (e1 + e2)
+	return s
 }

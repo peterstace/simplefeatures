@@ -81,3 +81,62 @@ func BenchmarkExactMul(b *testing.B) {
 		exactMul(math.Pi, math.E)
 	}
 }
+
+func TestAccurateDotProduct(t *testing.T) {
+	for i, tt := range []struct {
+		u, v XY
+	}{
+		{
+			XY{0, 0},
+			XY{0, 0},
+		},
+		{
+			XY{1, 0},
+			XY{0, 1},
+		},
+		{
+			XY{1, 1},
+			XY{0, 1},
+		},
+		{
+			XY{math.Pi, math.E},
+			XY{math.E, math.Pi},
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := accurateDotProduct(tt.u, tt.v)
+			gotRat := new(big.Rat).SetFloat64(got)
+			exact := new(big.Rat).Add(
+				new(big.Rat).Mul(
+					new(big.Rat).SetFloat64(tt.u.X),
+					new(big.Rat).SetFloat64(tt.v.X),
+				),
+				new(big.Rat).Mul(
+					new(big.Rat).SetFloat64(tt.u.Y),
+					new(big.Rat).SetFloat64(tt.v.Y),
+				),
+			)
+			flt := func(r *big.Rat) float64 {
+				f, _ := r.Float64()
+				return f
+			}
+			ulp := new(big.Rat).SetFloat64(ulpSize(flt(exact)))
+			diff := new(big.Rat).Sub(gotRat, exact)
+			diff = diff.Abs(diff)
+			t.Logf("u:          %v", tt.u)
+			t.Logf("v:          %v", tt.v)
+			t.Logf("exact:      %v", exact)
+			t.Logf("got:        %v", got)
+			t.Logf("ulp (flt):  %v", flt(ulp))
+			t.Logf("diff (flt): %v", flt(diff))
+			if diff.Cmp(ulp) > 0 {
+				t.Errorf("difference is bigger than ULP")
+			}
+		})
+	}
+}
+
+//func ulpSize(f float64) float64 {
+//	u := math.Float64bits(f) + 1
+//	return math.Float64frombits(u) - f
+//}
