@@ -104,7 +104,7 @@ func TestAccurateDotProduct(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := dotProduct(tt.u, tt.v)
+			got := accurateDotProduct(tt.u, tt.v)
 			gotRat := new(big.Rat).SetFloat64(got)
 			exact := new(big.Rat).Add(
 				new(big.Rat).Mul(
