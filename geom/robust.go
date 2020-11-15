@@ -1,7 +1,11 @@
 package geom
 
-import "math"
+import (
+	"math"
+)
 
+// exactSum finds the exact sum (s) of a and b and its error (e). It uses the
+// algorithm found here: https://core.ac.uk/download/pdf/191319061.pdf
 func exactSum(a, b float64) (s, e float64) {
 	if exponentFloat64(b) < exponentFloat64(a) {
 		a, b = b, a
@@ -17,6 +21,8 @@ func exponentFloat64(f float64) int {
 	return int(biased) - 1023
 }
 
+// exactMul finds the exact product (p) of a and b and its error (q). It uses
+// the algorithm found here: https://core.ac.uk/download/pdf/191319061.pdf
 func exactMul(a, b float64) (p, q float64) {
 	a1 := clearLast27BitsOfMantissa(a)
 	b1 := clearLast27BitsOfMantissa(b)
@@ -60,130 +66,57 @@ func bit27OfMantissaSet(f float64) bool {
 }
 
 func accurateDotProduct(u, v XY) float64 {
-	// Step 1
-	var pSet, nSet, qSet []float64
+	px, qx := exactMul(u.X, v.X)
+	py, qy := exactMul(u.Y, v.Y)
+	return sumFloat64s(px, qx, py, qy)
+}
 
-	// Step 2
-	for i := 0; i < 2; i++ {
-		var ai, bi float64
-		switch i {
-		case 0:
-			ai = u.X
-			bi = v.X
-		case 1:
-			ai = u.Y
-			bi = v.Y
-		default:
-			panic(i)
-		}
-
-		// Step 2.a
-		pi, qi := exactMul(ai, bi)
-
-		// Step 2.b
-		if pi > 0 {
-			pSet = append(pSet, pi)
-		} else if pi < 0 {
-			nSet = append(nSet, pi)
-		}
-
-		// Step 2.c
-		if qi != 0 {
-			qSet = append(qSet, qi)
+// sumFloat64s sums together 4 floats using the algorithm described here:
+// https://hal.inria.fr/inria-00517618/PDF/Yong-KangZhu2005b.pdf
+func sumFloat64s(a, b, c, d float64) float64 {
+	var pos, neg []float64
+	addToSet := func(f float64) {
+		if f > 0 {
+			pos = append(pos, f)
+		} else if f < 0 {
+			neg = append(neg, f)
 		}
 	}
+	addToSet(a)
+	addToSet(b)
+	addToSet(c)
+	addToSet(d)
 
-	// Step 3
-	s := 0.0
-	e1 := 0.0
-	e2 := 0.0
-	first := true
+	var s, e1, e2 float64
+	for {
+		addToSet(e1)
+		addToSet(e2)
 
-	// Step 4
-step4:
-	if e1 > 0 {
-		pSet = append(pSet, e1)
-	} else if e1 < 0 {
-		nSet = append(nSet, e1)
-	}
+		sPrime := s
+		n1 := len(pos)
+		var sPos float64
+		for i := 0; i < n1; i++ {
+			var e float64
+			sPos, e = exactSum(pos[0], sPos)
+			pos = pos[1:]
+			addToSet(e)
+		}
+		s, e1 = exactSum(s, sPos)
 
-	// Step 5
-	if e2 > 0 {
-		pSet = append(pSet, e2)
-	} else if e2 < 0 {
-		nSet = append(nSet, e2)
-	}
+		sDoublePrime := s
+		n2 := len(neg)
+		var sNeg float64
+		for i := 0; i < n2; i++ {
+			var e float64
+			sNeg, e = exactSum(neg[0], sNeg)
+			neg = neg[1:]
+			addToSet(e)
+		}
+		s, e2 = exactSum(s, sNeg)
 
-	// Step 6
-	n1 := len(pSet)
-	sPos := 0.0
-
-	// Step 7
-	for i := 0; i < n1; i++ {
-		// Step 7.a
-		a := pSet[0]
-		pSet = pSet[1:]
-		b := sPos
-
-		// Step 7.b
-		var e float64
-		sPos, e = exactSum(a, b)
-		if e > 0 {
-			pSet = append(pSet, e)
-		} else if e < 0 {
-			nSet = append(nSet, e)
+		if s == sPrime && s == sDoublePrime {
+			break
 		}
 	}
-
-	// Step 8
-	s, e1 = exactSum(s, sPos)
-
-	// Step 9
-	n2 := len(nSet)
-	sNeg := 0.0
-
-	// Step 10
-	for i := 0; i < n2; i++ {
-		// Step 10.a
-		a := nSet[0]
-		nSet = nSet[1:]
-		b := sNeg
-
-		// Step 10.b
-		var e float64
-		sNeg, e = exactSum(a, b)
-		if e > 0 {
-			pSet = append(pSet, e)
-		} else if e < 0 {
-			nSet = append(nSet, e)
-		}
-	}
-
-	// Step 11
-	s, e2 = exactSum(s, sNeg)
-
-	// Step 12
-	if first {
-		// Step 12.a
-		for _, q := range qSet {
-			if q > 0 {
-				pSet = append(pSet, q)
-			} else if q < 0 {
-				nSet = append(nSet, q)
-			}
-		}
-		first = false
-
-		// Step 12.b
-		goto step4
-	}
-
-	// Step 13 and 14 (this is a bit different compared to the paper)
-	if len(pSet)+len(nSet) > 0 {
-		goto step4
-	}
-
-	// Step 15
-	s = s + (e1 + e2)
-	return s
+	return s + (e1 + e2)
 }

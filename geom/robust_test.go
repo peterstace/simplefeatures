@@ -104,7 +104,7 @@ func TestAccurateDotProduct(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := accurateDotProduct(tt.u, tt.v)
+			got := dotProduct(tt.u, tt.v)
 			gotRat := new(big.Rat).SetFloat64(got)
 			exact := new(big.Rat).Add(
 				new(big.Rat).Mul(
@@ -136,7 +136,8 @@ func TestAccurateDotProduct(t *testing.T) {
 	}
 }
 
-//func ulpSize(f float64) float64 {
-//	u := math.Float64bits(f) + 1
-//	return math.Float64frombits(u) - f
-//}
+func BenchmarkAccurateDotProduct(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		accurateDotProduct(XY{math.Pi, math.E}, XY{math.E, math.Pi})
+	}
+}
