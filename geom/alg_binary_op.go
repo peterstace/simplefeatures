@@ -81,11 +81,20 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 		return nil, err
 	}
 
-	dcelA, err := newDCELFromGeometry(a, ghosts, inputAMask)
+	edgeColours := make(map[line]byte)
+	for i, g := range [...]Geometry{ghosts.AsGeometry(), a, b} {
+		walkLines(g, func(ln line) {
+			edgeColours[ln] |= 1 << i
+			ln.a, ln.b = ln.b, ln.a
+			edgeColours[ln] |= 1 << i
+		})
+	}
+
+	dcelA, err := newDCELFromGeometry(a, ghosts, edgeColours, inputAMask)
 	if err != nil {
 		return nil, err
 	}
-	dcelB, err := newDCELFromGeometry(b, ghosts, inputBMask)
+	dcelB, err := newDCELFromGeometry(b, ghosts, edgeColours, inputBMask)
 	if err != nil {
 		return nil, err
 	}

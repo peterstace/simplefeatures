@@ -24,12 +24,13 @@ func (f *faceRecord) String() string {
 }
 
 type halfEdgeRecord struct {
-	origin     *vertexRecord
-	twin       *halfEdgeRecord
-	incident   *faceRecord // only populated in the overlay
-	next, prev *halfEdgeRecord
-	edgeLabel  uint8
-	faceLabel  uint8
+	origin        *vertexRecord
+	intermediates []XY
+	twin          *halfEdgeRecord
+	incident      *faceRecord // only populated in the overlay
+	next, prev    *halfEdgeRecord
+	edgeLabel     uint8
+	faceLabel     uint8
 }
 
 // String shows the origin and destination of the edge (for debugging
@@ -58,21 +59,21 @@ func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
 	}
 }
 
-func newDCELFromGeometry(g Geometry, ghosts MultiLineString, mask uint8) (*doublyConnectedEdgeList, error) {
+func newDCELFromGeometry(g Geometry, ghosts MultiLineString, edgeColour map[line]byte, mask uint8) (*doublyConnectedEdgeList, error) {
 	var dcel *doublyConnectedEdgeList
 	switch g.Type() {
 	case TypePolygon:
 		poly := g.AsPolygon()
-		dcel = newDCELFromMultiPolygon(poly.AsMultiPolygon(), mask)
+		dcel = newDCELFromMultiPolygon(poly.AsMultiPolygon(), edgeColour, mask)
 	case TypeMultiPolygon:
 		mp := g.AsMultiPolygon()
-		dcel = newDCELFromMultiPolygon(mp, mask)
+		dcel = newDCELFromMultiPolygon(mp, edgeColour, mask)
 	case TypeLineString:
 		mls := g.AsLineString().AsMultiLineString()
-		dcel = newDCELFromMultiLineString(mls, mask)
+		dcel = newDCELFromMultiLineString(mls, edgeColour, mask)
 	case TypeMultiLineString:
 		mls := g.AsMultiLineString()
-		dcel = newDCELFromMultiLineString(mls, mask)
+		dcel = newDCELFromMultiLineString(mls, edgeColour, mask)
 	case TypePoint:
 		mp := NewMultiPointFromPoints([]Point{g.AsPoint()})
 		dcel = newDCELFromMultiPoint(mp, mask)
@@ -90,7 +91,7 @@ func newDCELFromGeometry(g Geometry, ghosts MultiLineString, mask uint8) (*doubl
 	return dcel, nil
 }
 
-func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeList {
+func newDCELFromMultiPolygon(mp MultiPolygon, edgeColour map[line]byte, mask uint8) *doublyConnectedEdgeList {
 	mp = mp.ForceCCW()
 
 	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
@@ -161,7 +162,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 	return dcel
 }
 
-func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnectedEdgeList {
+func newDCELFromMultiLineString(mls MultiLineString, edgeColour map[line]byte, mask uint8) *doublyConnectedEdgeList {
 	dcel := &doublyConnectedEdgeList{
 		vertices: make(map[XY]*vertexRecord),
 	}

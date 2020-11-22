@@ -50,7 +50,7 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 	// should use when node merging.
 	var maxULPSize float64
 	all := NewGeometryCollection([]Geometry{g1, g2, mls.AsGeometry()}).AsGeometry()
-	walk(all, func(xy XY) {
+	walkPoints(all, func(xy XY) {
 		maxULPSize = math.Max(maxULPSize, math.Max(
 			ulpSize(math.Abs(xy.X)),
 			ulpSize(math.Abs(xy.Y)),
@@ -59,7 +59,7 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 
 	nodes := newNodeSet(maxULPSize)
 	cut := newCutSet(all)
-	walk(all, func(xy XY) {
+	walkPoints(all, func(xy XY) {
 		nodes.insertOrGet(xy)
 	})
 

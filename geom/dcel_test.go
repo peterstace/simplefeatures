@@ -259,7 +259,7 @@ func TestGraphTriangle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), inputAMask)
+	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), nil, inputAMask)
 
 	/*
 
@@ -327,7 +327,7 @@ func TestGraphWithHoles(t *testing.T) {
 
 	*/
 
-	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), inputBMask)
+	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), nil, inputBMask)
 
 	v0 := XY{0, 0}
 	v1 := XY{5, 0}
@@ -400,7 +400,7 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 	  v0-----v1   v4-----v5
 	*/
 
-	dcel := newDCELFromMultiPolygon(mp.AsMultiPolygon(), inputBMask)
+	dcel := newDCELFromMultiPolygon(mp.AsMultiPolygon(), nil, inputBMask)
 
 	v0 := XY{0, 0}
 	v1 := XY{1, 0}
@@ -450,7 +450,7 @@ func TestGraphMultiLineString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel, err := newDCELFromGeometry(mls, MultiLineString{}, inputAMask)
+	dcel, err := newDCELFromGeometry(mls, MultiLineString{}, nil, inputAMask)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -503,7 +503,7 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel, err := newDCELFromGeometry(ls, MultiLineString{}, inputAMask)
+	dcel, err := newDCELFromGeometry(ls, MultiLineString{}, nil, inputAMask)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -561,7 +561,7 @@ func TestGraphGhostDeduplication(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dcel, err := newDCELFromGeometry(ls, ghost.AsMultiLineString(), inputAMask)
+	dcel, err := newDCELFromGeometry(ls, ghost.AsMultiLineString(), nil, inputAMask)
 	if err != nil {
 		t.Fatal(err)
 	}
