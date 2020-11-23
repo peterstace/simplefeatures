@@ -81,6 +81,15 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 		return nil, err
 	}
 
+	// TODO: create "action XYs". We need the following XYs:
+	//
+	//  - Starts/ends of geometries (e.g. start of ring, end of linestring).
+	//
+	//  - Single-point interactions (e.g. crossing line segments). Would need
+	//  to ignore intersections between segments at multiple points, since this
+	//  is handled by edge colours. Could be self intersections or between
+	//  geometries.
+
 	edgeColours := make(map[line]byte)
 	for i, g := range [...]Geometry{ghosts.AsGeometry(), a, b} {
 		walkLines(g, func(ln line) {
