@@ -85,10 +85,20 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 	//
 	//  - Starts/ends of geometries (e.g. start of ring, end of linestring).
 	//
-	//  - Single-point interactions (e.g. crossing line segments). Would need
-	//  to ignore intersections between segments at multiple points, since this
-	//  is handled by edge colours. Could be self intersections or between
-	//  geometries.
+	//  - Single point interactions (e.g. where either two geometries interact,
+	//  or a geometry interacts with itself). We could calculate this by using
+	//  point 'colour', and finding any points with more than 1 colour.
+
+	actionPoints := make(map[XY]struct{})
+
+	seenPointInWalk := make(map[XY]struct{})
+	for i, g := range [...]Geometry{ghosts.AsGeometry(), a, b} {
+		walkPoints(g, func(xy XY) {
+			if _, ok := seenPointInWalk[xy]; ok {
+				actionPoints[xy] = struct{}{}
+			}
+		})
+	}
 
 	edgeColours := make(map[line]byte)
 	for i, g := range [...]Geometry{ghosts.AsGeometry(), a, b} {
