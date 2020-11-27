@@ -81,6 +81,9 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 		return nil, err
 	}
 
+	interactionPoints := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
+	_ = interactionPoints // TODO: pass into DCEL ctors.
+
 	dcelA, err := newDCELFromGeometry(a, ghosts, inputAMask)
 	if err != nil {
 		return nil, err
