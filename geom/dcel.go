@@ -23,12 +23,13 @@ func (f *faceRecord) String() string {
 }
 
 type halfEdgeRecord struct {
-	origin     *vertexRecord
-	twin       *halfEdgeRecord
-	incident   *faceRecord // only populated in the overlay
-	next, prev *halfEdgeRecord
-	edgeLabel  uint8
-	faceLabel  uint8
+	origin       *vertexRecord
+	twin         *halfEdgeRecord
+	incident     *faceRecord // only populated in the overlay
+	next, prev   *halfEdgeRecord
+	intermediate []XY
+	edgeLabel    uint8
+	faceLabel    uint8
 }
 
 // String shows the origin and destination of the edge (for debugging
@@ -37,7 +38,7 @@ func (e *halfEdgeRecord) String() string {
 	if e == nil {
 		return "nil"
 	}
-	return fmt.Sprintf("%v->%v", e.origin.coords, e.twin.origin.coords)
+	return fmt.Sprintf("%v->%v->%v", e.origin.coords, e.intermediate, e.twin.origin.coords)
 }
 
 type vertexRecord struct {
@@ -58,21 +59,20 @@ func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
 }
 
 func newDCELFromGeometry(g Geometry, ghosts MultiLineString, mask uint8, interactions map[XY]struct{}) *doublyConnectedEdgeList {
-	// TODO: do something with interactions
 	var dcel *doublyConnectedEdgeList
 	switch g.Type() {
 	case TypePolygon:
 		poly := g.AsPolygon()
-		dcel = newDCELFromMultiPolygon(poly.AsMultiPolygon(), mask)
+		dcel = newDCELFromMultiPolygon(poly.AsMultiPolygon(), mask, interactions)
 	case TypeMultiPolygon:
 		mp := g.AsMultiPolygon()
-		dcel = newDCELFromMultiPolygon(mp, mask)
+		dcel = newDCELFromMultiPolygon(mp, mask, interactions)
 	case TypeLineString:
 		mls := g.AsLineString().AsMultiLineString()
-		dcel = newDCELFromMultiLineString(mls, mask)
+		dcel = newDCELFromMultiLineString(mls, mask, interactions)
 	case TypeMultiLineString:
 		mls := g.AsMultiLineString()
-		dcel = newDCELFromMultiLineString(mls, mask)
+		dcel = newDCELFromMultiLineString(mls, mask, interactions)
 	case TypePoint:
 		mp := NewMultiPointFromPoints([]Point{g.AsPoint()})
 		dcel = newDCELFromMultiPoint(mp, mask)
@@ -89,7 +89,7 @@ func newDCELFromGeometry(g Geometry, ghosts MultiLineString, mask uint8, interac
 	return dcel
 }
 
-func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeList {
+func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8, interactions map[XY]struct{}) *doublyConnectedEdgeList {
 	mp = mp.ForceCCW()
 
 	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
@@ -108,6 +108,9 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 		for _, ring := range rings {
 			for i := 0; i < ring.Length(); i++ {
 				xy := ring.GetXY(i)
+				if _, ok := interactions[xy]; !ok {
+					continue
+				}
 				if _, ok := dcel.vertices[xy]; !ok {
 					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask}
 				}
@@ -116,30 +119,59 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 
 		for _, ring := range rings {
 			var newEdges []*halfEdgeRecord
-			for i := 0; i < ring.Length(); i++ {
-				ln, ok := getLine(ring, i)
-				if !ok {
-					continue
+			n := ring.Length()
+			i := 0
+			for i < n-1 {
+				// Find the next interaction point after i. This will be the
+				// end of the next edge.
+				start := i
+				var end int
+				for j := i + 1; j < n; j++ {
+					if _, ok := interactions[ring.GetXY(j)]; ok {
+						end = j
+						break
+					}
 				}
-				vertA := dcel.vertices[ln.a]
-				vertB := dcel.vertices[ln.b]
+
+				// Construct the internal points slices.
+				intermediateFwd := make([]XY, end-start-1)
+				for j := range intermediateFwd {
+					intermediateFwd[j] = ring.GetXY(start + j + 1)
+				}
+				intermediateRev := make([]XY, len(intermediateFwd))
+				for j := range intermediateRev {
+					intermediateRev[j] = intermediateFwd[len(intermediateFwd)-1-j]
+				}
+
+				//fmt.Println("intermediateFwd", intermediateFwd)
+				//fmt.Println("intermediateRev", intermediateRev)
+
+				// On the next iteration, start the next edge at the end of
+				// this one.
+				i = end
+
+				// Build the edges (fwd and rev).
+				vertA := dcel.vertices[ring.GetXY(start)]
+				vertB := dcel.vertices[ring.GetXY(end)]
 				internalEdge := &halfEdgeRecord{
-					origin:    vertA,
-					twin:      nil, // populated later
-					incident:  nil, // only populated in the overlay
-					next:      nil, // populated later
-					prev:      nil, // populated later
-					edgeLabel: mask,
-					faceLabel: mask,
+					origin:       vertA,
+					twin:         nil, // populated later
+					incident:     nil, // only populated in the overlay
+					next:         nil, // populated later
+					prev:         nil, // populated later
+					intermediate: intermediateFwd,
+					edgeLabel:    mask,
+					faceLabel:    mask,
 				}
 				externalEdge := &halfEdgeRecord{
-					origin:    vertB,
-					twin:      internalEdge,
-					incident:  nil, // only populated in the overlay
-					next:      nil, // populated later
-					prev:      nil, // populated later
-					edgeLabel: mask,
-					faceLabel: mask & populatedMask,
+					origin:       vertB,
+					twin:         internalEdge,
+					incident:     nil, // only populated in the overlay
+					next:         nil, // populated later
+					prev:         nil, // populated later
+					intermediate: intermediateRev,
+					edgeLabel:    mask,
+					faceLabel:    mask & populatedMask,
 				}
 				internalEdge.twin = externalEdge
 				vertA.incidents = append(vertA.incidents, internalEdge)
@@ -147,20 +179,27 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeLi
 				newEdges = append(newEdges, internalEdge, externalEdge)
 			}
 
+			// Link together next/prev pointers.
 			numEdges := len(newEdges)
 			for i := 0; i < numEdges/2; i++ {
-				newEdges[i*2].next = newEdges[(2*i+2)%numEdges]
-				newEdges[i*2+1].next = newEdges[(i*2-1+numEdges)%numEdges]
-				newEdges[i*2].prev = newEdges[(2*i-2+numEdges)%numEdges]
+				newEdges[i*2+0].next = newEdges[(2*i+2)%numEdges]
+				newEdges[i*2+1].next = newEdges[(2*i-1+numEdges)%numEdges]
+				newEdges[i*2+0].prev = newEdges[(2*i-2+numEdges)%numEdges]
 				newEdges[i*2+1].prev = newEdges[(2*i+3)%numEdges]
 			}
 			dcel.halfEdges = append(dcel.halfEdges, newEdges...)
+
+			//fmt.Println("halfEdges:", len(dcel.halfEdges))
+			//for _, e := range dcel.halfEdges {
+			//	fmt.Printf("%s %b\n", e, e.faceLabel)
+			//}
 		}
 	}
 	return dcel
 }
 
-func newDCELFromMultiLineString(mls MultiLineString, mask uint8) *doublyConnectedEdgeList {
+func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions map[XY]struct{}) *doublyConnectedEdgeList {
+	// TODO: handle the interactions
 	dcel := &doublyConnectedEdgeList{
 		vertices: make(map[XY]*vertexRecord),
 	}
