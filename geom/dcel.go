@@ -1,7 +1,9 @@
 package geom
 
 import (
+	"encoding/binary"
 	"fmt"
+	"hash/maphash"
 )
 
 type doublyConnectedEdgeList struct {
@@ -199,7 +201,6 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8, interactions map[XY]st
 }
 
 func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions map[XY]struct{}) *doublyConnectedEdgeList {
-	// TODO: handle the interactions
 	dcel := &doublyConnectedEdgeList{
 		vertices: make(map[XY]*vertexRecord),
 	}
@@ -210,55 +211,86 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 		seq := ls.Coordinates()
 		for j := 0; j < seq.Length(); j++ {
 			xy := seq.GetXY(j)
-			dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask}
+			if _, ok := interactions[xy]; !ok {
+				continue
+			}
+			if _, ok := dcel.vertices[xy]; !ok {
+				dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask}
+			}
 		}
 	}
 
-	// Linear elements have no face structure, so everything just points to the
-	// infinite face.
-	type vertPair struct {
-		a, b *vertexRecord
-	}
-	edgeSet := make(map[vertPair]bool)
+	// Track potentially duplicate edges (using a hash of the edge).
+	edgeSet := make(map[uint64]bool)
 
 	// Add edges.
-	for i := 0; i < mls.NumLineStrings(); i++ {
-		seq := mls.LineStringN(i).Coordinates()
-		for j := 0; j < seq.Length(); j++ {
-			ln, ok := getLine(seq, j)
-			if !ok {
-				continue
+	for lsIdx := 0; lsIdx < mls.NumLineStrings(); lsIdx++ {
+		//fmt.Println("lsIdx", lsIdx)
+		seq := mls.LineStringN(lsIdx).Coordinates()
+		n := seq.Length()
+		i := 0
+		for i < n-1 {
+			// Find the next interaction point after i. This will be the
+			// end of the next edge.
+			start := i
+			var end int
+			for j := i + 1; j < n; j++ {
+				if _, ok := interactions[seq.GetXY(j)]; ok {
+					end = j
+					break
+				}
 			}
 
-			vOrigin := dcel.vertices[ln.a]
-			vDestin := dcel.vertices[ln.b]
-
-			pair := vertPair{vOrigin, vDestin}
-			if pair.a.coords.Less(pair.b.coords) {
-				pair.a, pair.b = pair.b, pair.a
+			// Construct the internal points slices.
+			intermediateFwd := make([]XY, end-start-1)
+			for j := range intermediateFwd {
+				intermediateFwd[j] = seq.GetXY(start + j + 1)
 			}
-			if edgeSet[pair] {
+			intermediateRev := make([]XY, len(intermediateFwd))
+			for j := range intermediateRev {
+				intermediateRev[j] = intermediateFwd[len(intermediateFwd)-1-j]
+			}
+
+			// On the next iteration, start the next edge at the end of
+			// this one.
+			i = end
+
+			startXY := seq.GetXY(start)
+			endXY := seq.GetXY(end)
+
+			vOrigin := dcel.vertices[startXY]
+			vDestin := dcel.vertices[endXY]
+
+			var hash uint64
+			if endXY.Less(startXY) {
+				hash = edgeHash(startXY, intermediateFwd, endXY)
+			} else {
+				hash = edgeHash(endXY, intermediateRev, startXY)
+			}
+			if edgeSet[hash] {
 				continue
 			}
-			edgeSet[pair] = true
+			edgeSet[hash] = true
 
 			fwd := &halfEdgeRecord{
-				origin:    vOrigin,
-				twin:      nil, // set later
-				incident:  nil, // only populated in overlay
-				next:      nil, // set later
-				prev:      nil, // set later
-				edgeLabel: mask,
-				faceLabel: mask & populatedMask,
+				origin:       vOrigin,
+				twin:         nil, // set later
+				incident:     nil, // only populated in overlay
+				next:         nil, // set later
+				prev:         nil, // set later
+				intermediate: intermediateFwd,
+				edgeLabel:    mask,
+				faceLabel:    mask & populatedMask,
 			}
 			rev := &halfEdgeRecord{
-				origin:    vDestin,
-				twin:      fwd,
-				incident:  nil, // only populated in overlay
-				next:      fwd,
-				prev:      fwd,
-				edgeLabel: mask,
-				faceLabel: mask & populatedMask,
+				origin:       vDestin,
+				twin:         fwd,
+				incident:     nil, // only populated in overlay
+				next:         fwd,
+				prev:         fwd,
+				intermediate: intermediateRev,
+				edgeLabel:    mask,
+				faceLabel:    mask & populatedMask,
 			}
 			fwd.twin = rev
 			fwd.next = rev
@@ -271,6 +303,19 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 		}
 	}
 	return dcel
+}
+
+var edgeHashSeed = maphash.MakeSeed()
+
+// edgeHash calculates a uniformly distributed hash for an edge based on its
+// start, intermediate, and end XY locations.
+func edgeHash(start XY, intermediate []XY, end XY) uint64 {
+	var h maphash.Hash
+	h.SetSeed(edgeHashSeed)
+	binary.Write(&h, binary.LittleEndian, start)
+	binary.Write(&h, binary.LittleEndian, intermediate)
+	binary.Write(&h, binary.LittleEndian, end)
+	return h.Sum64()
 }
 
 func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {

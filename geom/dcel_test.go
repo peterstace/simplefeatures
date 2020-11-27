@@ -475,102 +475,142 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 	})
 }
 
-//func TestGraphMultiLineString(t *testing.T) {
-//	mls, err := UnmarshalWKT("MULTILINESTRING((1 0,0 1,1 2),(2 0,3 1,2 2))")
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	dcel := newDCELFromGeometry(mls, MultiLineString{}, inputAMask, findInteractionPoints([]Geometry{mls}))
-//
-//	/*
-//	        v2    v3
-//	       /        \
-//	      /          \
-//	     /            \
-//	   v1              v4
-//	     \            /
-//	      \          /
-//	       \        /
-//	        v0    v5
-//	*/
-//
-//	v0 := XY{1, 0}
-//	v1 := XY{0, 1}
-//	v2 := XY{1, 2}
-//	v3 := XY{2, 2}
-//	v4 := XY{3, 1}
-//	v5 := XY{2, 0}
-//
-//	CheckDCEL(t, dcel, DCELSpec{
-//		NumVerts: 6,
-//		NumEdges: 8,
-//		NumFaces: 0,
-//		Vertices: []VertexSpec{{
-//			Label:    inputAPopulated | inputAInSet,
-//			Vertices: []XY{v0, v1, v2, v3, v4, v5},
-//		}},
-//		Edges: []EdgeLabelSpec{
-//			{
-//				EdgeLabel: inputAPopulated | inputAInSet,
-//				FaceLabel: inputAPopulated,
-//				Edges:     []XY{v0, v1, v2, v1, v0},
-//			},
-//			{
-//				EdgeLabel: inputAPopulated | inputAInSet,
-//				FaceLabel: inputAPopulated,
-//				Edges:     []XY{v3, v4, v5, v4, v3},
-//			},
-//		},
-//		Faces: nil,
-//	})
-//}
-//
-//func TestGraphSelfOverlappingLineString(t *testing.T) {
-//	ls, err := UnmarshalWKT("LINESTRING(0 0,0 1,1 1,1 0,0 1,1 1,2 1)")
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	dcel := newDCELFromGeometry(ls, MultiLineString{}, inputAMask, findInteractionPoints([]Geometry{ls}))
-//
-//	/*
-//	   v1----v2----v4
-//	    |\   |
-//	    | \  |
-//	    |  \ |
-//	    |   \|
-//	   v0    v3
-//	*/
-//
-//	v0 := XY{0, 0}
-//	v1 := XY{0, 1}
-//	v2 := XY{1, 1}
-//	v3 := XY{1, 0}
-//	v4 := XY{2, 1}
-//
-//	CheckDCEL(t, dcel, DCELSpec{
-//		NumVerts: 5,
-//		NumEdges: 10,
-//		NumFaces: 0,
-//		Vertices: []VertexSpec{{
-//			Label:    inputAPopulated | inputAInSet,
-//			Vertices: []XY{v0, v1, v2, v3, v4},
-//		}},
-//		Edges: []EdgeLabelSpec{
-//			{
-//				EdgeLabel: inputAPopulated | inputAInSet,
-//				FaceLabel: inputAPopulated,
-//				Edges:     []XY{v0, v1, v3, v2, v3, v1, v0},
-//			},
-//			{
-//				EdgeLabel: inputAPopulated | inputAInSet,
-//				FaceLabel: inputAPopulated,
-//				Edges:     []XY{v1, v2, v4, v2, v1},
-//			},
-//		},
-//		Faces: nil,
-//	})
-//}
-//
+func TestGraphMultiLineString(t *testing.T) {
+	mls, err := UnmarshalWKT("MULTILINESTRING((1 0,0 1,1 2),(2 0,3 1,2 2))")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcel := newDCELFromGeometry(mls, MultiLineString{}, inputAMask, findInteractionPoints([]Geometry{mls}))
+
+	/*
+	        v2    v3
+	       /        \
+	      /          \
+	     /            \
+	   v1              v4
+	     \            /
+	      \          /
+	       \        /
+	        v0    v5
+	*/
+
+	v0 := XY{1, 0}
+	v1 := XY{0, 1}
+	v2 := XY{1, 2}
+	v3 := XY{2, 2}
+	v4 := XY{3, 1}
+	v5 := XY{2, 0}
+
+	CheckDCEL(t, dcel, DCELSpec{
+		NumVerts: 4,
+		NumEdges: 4,
+		NumFaces: 0,
+		Vertices: []VertexSpec{{
+			Label:    inputAPopulated | inputAInSet,
+			Vertices: []XY{v0, v2, v3, v5},
+		}},
+		Edges: []EdgeSpec{
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v0, v1, v2},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v2, v1, v0},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v3, v4, v5},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v5, v4, v3},
+			},
+		},
+		Faces: nil,
+	})
+}
+
+func TestGraphSelfOverlappingLineString(t *testing.T) {
+	ls, err := UnmarshalWKT("LINESTRING(0 0,0 1,1 1,1 0,0 1,1 1,2 1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcel := newDCELFromGeometry(ls, MultiLineString{}, inputAMask, findInteractionPoints([]Geometry{ls}))
+
+	/*
+	   v1----v2----v4
+	    |\   |
+	    | \  |
+	    |  \ |
+	    |   \|
+	   v0    v3
+	*/
+
+	v0 := XY{0, 0}
+	v1 := XY{0, 1}
+	v2 := XY{1, 1}
+	v3 := XY{1, 0}
+	v4 := XY{2, 1}
+
+	CheckDCEL(t, dcel, DCELSpec{
+		NumVerts: 4,
+		NumEdges: 8,
+		NumFaces: 0,
+		Vertices: []VertexSpec{{
+			Label:    inputAPopulated | inputAInSet,
+			Vertices: []XY{v0, v1, v2, v4},
+		}},
+		Edges: []EdgeSpec{
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v0, v1},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v1, v0},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v1, v2},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v2, v1},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v1, v3, v2},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v2, v3, v1},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v2, v4},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v4, v2},
+			},
+		},
+		Faces: nil,
+	})
+}
+
 //func TestGraphGhostDeduplication(t *testing.T) {
 //	ls, err := UnmarshalWKT("LINESTRING(0 0,1 0)")
 //	if err != nil {
