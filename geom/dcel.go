@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -58,7 +57,8 @@ func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
 	}
 }
 
-func newDCELFromGeometry(g Geometry, ghosts MultiLineString, mask uint8) (*doublyConnectedEdgeList, error) {
+func newDCELFromGeometry(g Geometry, ghosts MultiLineString, mask uint8, interactions map[XY]struct{}) *doublyConnectedEdgeList {
+	// TODO: do something with interactions
 	var dcel *doublyConnectedEdgeList
 	switch g.Type() {
 	case TypePolygon:
@@ -80,14 +80,13 @@ func newDCELFromGeometry(g Geometry, ghosts MultiLineString, mask uint8) (*doubl
 		mp := g.AsMultiPoint()
 		dcel = newDCELFromMultiPoint(mp, mask)
 	case TypeGeometryCollection:
-		// TODO: Add support for GeometryCollection inputs.
-		return nil, errors.New("GeometryCollection argument not supported")
+		panic("geometry collection not supported")
 	default:
 		panic(fmt.Sprintf("unknown geometry type: %v", g.Type()))
 	}
 
 	dcel.addGhosts(ghosts, mask)
-	return dcel, nil
+	return dcel
 }
 
 func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8) *doublyConnectedEdgeList {

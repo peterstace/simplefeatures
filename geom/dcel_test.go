@@ -450,10 +450,7 @@ func TestGraphMultiLineString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel, err := newDCELFromGeometry(mls, MultiLineString{}, inputAMask)
-	if err != nil {
-		t.Fatal(err)
-	}
+	dcel := newDCELFromGeometry(mls, MultiLineString{}, inputAMask, findInteractionPoints([]Geometry{mls}))
 
 	/*
 	        v2    v3
@@ -503,10 +500,7 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel, err := newDCELFromGeometry(ls, MultiLineString{}, inputAMask)
-	if err != nil {
-		t.Fatal(err)
-	}
+	dcel := newDCELFromGeometry(ls, MultiLineString{}, inputAMask, findInteractionPoints([]Geometry{ls}))
 
 	/*
 	   v1----v2----v4
@@ -561,10 +555,7 @@ func TestGraphGhostDeduplication(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dcel, err := newDCELFromGeometry(ls, ghost.AsMultiLineString(), inputAMask)
-	if err != nil {
-		t.Fatal(err)
-	}
+	dcel := newDCELFromGeometry(ls, ghost.AsMultiLineString(), inputAMask, findInteractionPoints([]Geometry{ls, ghost}))
 
 	v0 := XY{0, 0}
 	v1 := XY{1, 0}
