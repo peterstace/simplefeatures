@@ -1,9 +1,7 @@
 package geom
 
 import (
-	"encoding/binary"
 	"fmt"
-	"hash/maphash"
 )
 
 type doublyConnectedEdgeList struct {
@@ -220,8 +218,7 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 		}
 	}
 
-	// Track potentially duplicate edges (using a hash of the edge).
-	edgeSet := make(map[uint64]bool)
+	edges := make(edgeSet)
 
 	// Add edges.
 	for lsIdx := 0; lsIdx < mls.NumLineStrings(); lsIdx++ {
@@ -261,16 +258,17 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 			vOrigin := dcel.vertices[startXY]
 			vDestin := dcel.vertices[endXY]
 
-			var hash uint64
 			if endXY.Less(startXY) {
-				hash = edgeHash(startXY, intermediateFwd, endXY)
+				if edges.containsStartIntermediateEnd(startXY, intermediateFwd, endXY) {
+					continue
+				}
+				edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY)
 			} else {
-				hash = edgeHash(endXY, intermediateRev, startXY)
+				if edges.containsStartIntermediateEnd(endXY, intermediateFwd, startXY) {
+					continue
+				}
+				edges.insertStartIntermediateEnd(endXY, intermediateFwd, startXY)
 			}
-			if edgeSet[hash] {
-				continue
-			}
-			edgeSet[hash] = true
 
 			fwd := &halfEdgeRecord{
 				origin:       vOrigin,
@@ -305,19 +303,6 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 	return dcel
 }
 
-var edgeHashSeed = maphash.MakeSeed()
-
-// edgeHash calculates a uniformly distributed hash for an edge based on its
-// start, intermediate, and end XY locations.
-func edgeHash(start XY, intermediate []XY, end XY) uint64 {
-	var h maphash.Hash
-	h.SetSeed(edgeHashSeed)
-	binary.Write(&h, binary.LittleEndian, start)
-	binary.Write(&h, binary.LittleEndian, intermediate)
-	binary.Write(&h, binary.LittleEndian, end)
-	return h.Sum64()
-}
-
 func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
 	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
 	n := mp.NumPoints()
@@ -341,9 +326,9 @@ func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
 }
 
 func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, mask uint8) {
-	edges := make(map[uint64]struct{})
+	edges := make(edgeSet)
 	for _, e := range d.halfEdges {
-		edges[edgeHash(e.origin.coords, e.intermediate, e.twin.origin.coords)] = struct{}{}
+		edges.insertEdge(e)
 	}
 
 	for i := 0; i < mls.NumLineStrings(); i++ {
@@ -363,8 +348,8 @@ func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, mask uint8) {
 	}
 }
 
-func (d *doublyConnectedEdgeList) addGhostLine(ln line, mask uint8, edges map[uint64]struct{}) {
-	if _, ok := edges[edgeHash(ln.a, nil, ln.b)]; ok {
+func (d *doublyConnectedEdgeList) addGhostLine(ln line, mask uint8, edges edgeSet) {
+	if edges.containsLine(ln) {
 		// Already exists, so shouldn't add.
 		return
 	}
@@ -399,8 +384,9 @@ func (d *doublyConnectedEdgeList) addGhostLine(ln line, mask uint8, edges map[ui
 
 	d.halfEdges = append(d.halfEdges, e1, e2)
 
-	edges[edgeHash(ln.a, nil, ln.b)] = struct{}{}
-	edges[edgeHash(ln.b, nil, ln.a)] = struct{}{}
+	edges.insertLine(ln)
+	ln.a, ln.b = ln.b, ln.a
+	edges.insertLine(ln)
 
 	d.fixVertex(vertA)
 	d.fixVertex(vertB)
