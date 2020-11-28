@@ -17,10 +17,10 @@ type DCELSpec struct {
 
 type FaceSpec struct {
 	// Origin and destination of an edge that is incident to the face.
-	EdgeOrigin XY
-	EdgeDestin XY
-	Cycle      []XY
-	Label      uint8
+	First  XY
+	Second XY
+	Cycle  []XY
+	Label  uint8
 }
 
 type EdgeSpec struct {
@@ -127,7 +127,7 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 				found = true
 			}
 			if !found {
-				t.Fatalf("could not find edge spec matching sequence: %v", want.Sequence)
+				t.Fatalf("could not find edge spec matching edge: %v", e)
 			}
 
 			if e.edgeLabel != want.EdgeLabel {
@@ -143,8 +143,8 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 
 	for i, want := range spec.Faces {
 		t.Run(fmt.Sprintf("face_%d", i), func(t *testing.T) {
-			got := findEdge(t, dcel, want.EdgeOrigin, want.EdgeDestin).incident
-			CheckComponent(t, got, got.cycle, want.Cycle)
+			got := findEdge(t, dcel, want.First, want.Second).incident
+			CheckCycle(t, got, got.cycle, want.Cycle)
 			if want.Label != got.label {
 				t.Errorf("face label doesn't match: want=%b got=%b", want.Label, got.label)
 			}
@@ -164,18 +164,17 @@ func xysEqual(a, b []XY) bool {
 	return true
 }
 
-func findEdge(t *testing.T, dcel *doublyConnectedEdgeList, origin, dest XY) *halfEdgeRecord {
+func findEdge(t *testing.T, dcel *doublyConnectedEdgeList, first, second XY) *halfEdgeRecord {
 	for _, e := range dcel.halfEdges {
-		if e.origin.coords == origin && e.twin.origin.coords == dest {
+		if e.origin.coords == first && e.secondXY() == second {
 			return e
 		}
 	}
-	t.Fatalf("could not find edge with origin %v and dest %v", origin, dest)
+	t.Fatalf("could not find edge with first %v and second %v", first, second)
 	return nil
 }
 
-// TODO: rename to CheckCycle
-func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []XY) {
+func CheckCycle(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []XY) {
 	// Check component matches forward order when following 'next' pointer.
 	e := start
 	var got []XY
@@ -189,15 +188,22 @@ func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []X
 			t.Errorf("edge origin not set")
 		}
 		got = append(got, e.origin.coords)
+		got = append(got, e.intermediate...)
 		e = e.next
 		if e == start {
+			got = append(got, e.origin.coords)
 			break
 		}
 	}
 	CheckXYs(t, got, want)
 
 	// Check component matches reverse order when following 'prev' pointer.
+	for i := 0; i < len(want)/2; i++ {
+		j := len(got) - i - 1
+		want[i], want[j] = want[j], want[i]
+	}
 	var i int
+	start = start.prev
 	e = start
 	got = nil
 	for {
@@ -206,23 +212,16 @@ func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []X
 			t.Fatal("inf loop")
 		}
 
-		if e.incident == nil {
-			t.Errorf("half edge has no incident face set")
-		} else if e.incident != f {
-			t.Errorf("half edge has incorrect incident face")
+		got = append(got, e.next.origin.coords)
+		for j := len(e.intermediate) - 1; j >= 0; j-- {
+			got = append(got, e.intermediate[j])
 		}
-		if e.origin == nil {
-			t.Errorf("edge origin not set")
-		}
-		got = append(got, e.origin.coords)
+
 		e = e.prev
 		if e == start {
+			got = append(got, e.next.origin.coords)
 			break
 		}
-	}
-	for i := 0; i < len(got)/2; i++ {
-		j := len(got) - i - 1
-		got[i], got[j] = got[j], got[i]
 	}
 	CheckXYs(t, got, want)
 
@@ -664,118 +663,137 @@ func TestGraphGhostDeduplication(t *testing.T) {
 	})
 }
 
-//
-//func TestGraphOverlayDisjoint(t *testing.T) {
-//	overlay := createOverlayFromWKTs(t,
-//		"POLYGON((0 0,1 0,1 1,0 1,0 0))",
-//		"POLYGON((2 2,2 3,3 3,3 2,2 2))",
-//	)
-//
-//	/*
-//	                v7------v6
-//	                |        |
-//	                |   f3   |
-//	                |        |
-//	                |        |
-//	               ,v4------v5
-//	             ,`
-//	   v3------v2
-//	   |     ,` |
-//	   |f2  `   |       f0
-//	   |  ,` f1 |
-//	   | ,      |
-//	   v0------v1
-//
-//	*/
-//
-//	v0 := XY{0, 0}
-//	v1 := XY{1, 0}
-//	v2 := XY{1, 1}
-//	v3 := XY{0, 1}
-//	v4 := XY{2, 2}
-//	v5 := XY{3, 2}
-//	v6 := XY{3, 3}
-//	v7 := XY{2, 3}
-//
-//	CheckDCEL(t, overlay, DCELSpec{
-//		NumVerts: 8,
-//		NumEdges: 20,
-//		NumFaces: 4,
-//		Vertices: []VertexSpec{
-//			{
-//				Label:    populatedMask | inputAInSet,
-//				Vertices: []XY{v0, v1, v2, v3},
-//			},
-//			{
-//				Label:    populatedMask | inputBInSet,
-//				Vertices: []XY{v4, v5, v6, v7},
-//			},
-//		},
-//		Edges: []EdgeLabelSpec{
-//			{
-//				EdgeLabel: populatedMask | inputAInSet,
-//				FaceLabel: inputAPopulated | inputAInSet,
-//				Edges:     []XY{v0, v1, v2, v3, v0},
-//			},
-//			{
-//				EdgeLabel: populatedMask | inputBInSet,
-//				FaceLabel: inputBPopulated | inputBInSet,
-//				Edges:     []XY{v4, v5, v6, v7, v4},
-//			},
-//			{
-//				EdgeLabel: populatedMask | inputAInSet,
-//				FaceLabel: inputAPopulated,
-//				Edges:     []XY{v0, v3, v2, v1, v0},
-//			},
-//			{
-//				EdgeLabel: populatedMask | inputBInSet,
-//				FaceLabel: inputBPopulated,
-//				Edges:     []XY{v4, v7, v6, v5, v4},
-//			},
-//			{
-//				EdgeLabel: populatedMask | inputAInSet,
-//				FaceLabel: 0,
-//				Edges:     []XY{v0, v2, v0},
-//			},
-//			{
-//				EdgeLabel: populatedMask,
-//				FaceLabel: 0,
-//				Edges:     []XY{v2, v4, v2},
-//			},
-//		},
-//		Faces: []FaceSpec{
-//			{
-//				// f0
-//				EdgeOrigin: v2,
-//				EdgeDestin: v1,
-//				Cycle:      []XY{v2, v1, v0, v3, v2, v4, v7, v6, v5, v4},
-//				Label:      populatedMask,
-//			},
-//			{
-//				// f1
-//				EdgeOrigin: v1,
-//				EdgeDestin: v2,
-//				Cycle:      []XY{v2, v0, v1},
-//				Label:      populatedMask | inputAInSet,
-//			},
-//			{
-//				// f2
-//				EdgeOrigin: v2,
-//				EdgeDestin: v3,
-//				Cycle:      []XY{v2, v3, v0},
-//				Label:      populatedMask | inputAInSet,
-//			},
-//			{
-//				// f3
-//				EdgeOrigin: v5,
-//				EdgeDestin: v6,
-//				Cycle:      []XY{v5, v6, v7, v4},
-//				Label:      populatedMask | inputBInSet,
-//			},
-//		},
-//	})
-//}
-//
+func TestGraphOverlayDisjoint(t *testing.T) {
+	overlay := createOverlayFromWKTs(t,
+		"POLYGON((0 0,1 0,1 1,0 1,0 0))",
+		"POLYGON((2 2,2 3,3 3,3 2,2 2))",
+	)
+
+	/*
+	                v7------v6
+	                |        |
+	                |   f3   |
+	                |        |
+	                |        |
+	               ,v4------v5
+	             ,`
+	   v3------v2
+	   |     ,` |
+	   |f2  `   |       f0
+	   |  ,` f1 |
+	   | ,      |
+	   v0------v1
+
+	*/
+
+	v0 := XY{0, 0}
+	v1 := XY{1, 0}
+	v2 := XY{1, 1}
+	v3 := XY{0, 1}
+	v4 := XY{2, 2}
+	v5 := XY{3, 2}
+	v6 := XY{3, 3}
+	v7 := XY{2, 3}
+
+	CheckDCEL(t, overlay, DCELSpec{
+		NumVerts: 3,
+		NumEdges: 10,
+		NumFaces: 4,
+		Vertices: []VertexSpec{
+			{
+				Label:    populatedMask | inputAInSet,
+				Vertices: []XY{v0, v2},
+			},
+			{
+				Label:    populatedMask | inputBInSet,
+				Vertices: []XY{v4},
+			},
+		},
+		Edges: []EdgeSpec{
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated | inputAInSet,
+				Sequence:  []XY{v0, v1, v2},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v2, v1, v0},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated | inputAInSet,
+				Sequence:  []XY{v2, v3, v0},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v0, v3, v2},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+				Sequence:  []XY{v4, v5, v6, v7, v4},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
+				Sequence:  []XY{v4, v7, v6, v5, v4},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: 0,
+				Sequence:  []XY{v0, v2},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: 0,
+				Sequence:  []XY{v2, v0},
+			},
+			{
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+				Sequence:  []XY{v2, v4},
+			},
+			{
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+				Sequence:  []XY{v4, v2},
+			},
+		},
+		Faces: []FaceSpec{
+			{
+				// f0
+				First:  v2,
+				Second: v1,
+				Cycle:  []XY{v2, v1, v0, v3, v2, v4, v7, v6, v5, v4, v2},
+				Label:  populatedMask,
+			},
+			{
+				// f1
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v2, v0},
+				Label:  populatedMask | inputAInSet,
+			},
+			{
+				// f2
+				First:  v2,
+				Second: v3,
+				Cycle:  []XY{v2, v3, v0, v2},
+				Label:  populatedMask | inputAInSet,
+			},
+			{
+				// f3
+				First:  v4,
+				Second: v5,
+				Cycle:  []XY{v4, v5, v6, v7, v4},
+				Label:  populatedMask | inputBInSet,
+			},
+		},
+	})
+}
+
 //func TestGraphOverlayIntersecting(t *testing.T) {
 //	overlay := createOverlayFromWKTs(t,
 //		"POLYGON((0 0,1 2,2 0,0 0))",

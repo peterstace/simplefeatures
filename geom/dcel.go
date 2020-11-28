@@ -32,6 +32,16 @@ type halfEdgeRecord struct {
 	faceLabel    uint8
 }
 
+// secondXY gives the second (1-indexed) XY in the edge. This is either the
+// first intermediate XY, or the origin of the next/twin edge in the case where
+// there are no intermediates.
+func (e *halfEdgeRecord) secondXY() XY {
+	if len(e.intermediate) == 0 {
+		return e.twin.origin.coords
+	}
+	return e.intermediate[0]
+}
+
 // String shows the origin and destination of the edge (for debugging
 // purposes). We can remove this once DCEL active development is completed.
 func (e *halfEdgeRecord) String() string {
