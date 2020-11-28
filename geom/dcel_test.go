@@ -611,48 +611,59 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 	})
 }
 
-//func TestGraphGhostDeduplication(t *testing.T) {
-//	ls, err := UnmarshalWKT("LINESTRING(0 0,1 0)")
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	// Ghost contains duplicated lines. This could happen in the scenario where
-//	// one of the inputs is a multipolygon and the ghost joins the rings, but
-//	// then the line joining the two input geometries is the same line segment.
-//	ghost, err := UnmarshalWKT("MULTILINESTRING((0 0,0 1,0 0))")
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	dcel := newDCELFromGeometry(ls, ghost.AsMultiLineString(), inputAMask, findInteractionPoints([]Geometry{ls, ghost}))
-//
-//	v0 := XY{0, 0}
-//	v1 := XY{1, 0}
-//	v2 := XY{0, 1}
-//
-//	CheckDCEL(t, dcel, DCELSpec{
-//		NumVerts: 3,
-//		NumEdges: 4,
-//		NumFaces: 0,
-//		Vertices: []VertexSpec{
-//			{Label: inputAPopulated | inputAInSet, Vertices: []XY{v0, v1}},
-//			{Label: 0, Vertices: []XY{v2}},
-//		},
-//		Edges: []EdgeLabelSpec{
-//			{
-//				EdgeLabel: inputAPopulated | inputAInSet,
-//				FaceLabel: inputAPopulated,
-//				Edges:     []XY{v0, v1, v0},
-//			},
-//			{
-//				EdgeLabel: inputAPopulated,
-//				FaceLabel: 0,
-//				Edges:     []XY{v0, v2, v0},
-//			},
-//		},
-//	})
-//}
+func TestGraphGhostDeduplication(t *testing.T) {
+	ls, err := UnmarshalWKT("LINESTRING(0 0,1 0)")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Ghost contains duplicated lines. This could happen in the scenario where
+	// one of the inputs is a multipolygon and the ghost joins the rings, but
+	// then the line joining the two input geometries is the same line segment.
+	ghost, err := UnmarshalWKT("MULTILINESTRING((0 0,0 1,0 0))")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dcel := newDCELFromGeometry(ls, ghost.AsMultiLineString(), inputAMask, findInteractionPoints([]Geometry{ls, ghost}))
+
+	v0 := XY{0, 0}
+	v1 := XY{1, 0}
+	v2 := XY{0, 1}
+
+	CheckDCEL(t, dcel, DCELSpec{
+		NumVerts: 3,
+		NumEdges: 4,
+		NumFaces: 0,
+		Vertices: []VertexSpec{
+			{Label: inputAPopulated | inputAInSet, Vertices: []XY{v0, v1}},
+			{Label: 0, Vertices: []XY{v2}},
+		},
+		Edges: []EdgeSpec{
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v0, v1},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v1, v0},
+			},
+			{
+				EdgeLabel: inputAPopulated,
+				FaceLabel: 0,
+				Sequence:  []XY{v0, v2},
+			},
+			{
+				EdgeLabel: inputAPopulated,
+				FaceLabel: 0,
+				Sequence:  []XY{v2, v0},
+			},
+		},
+	})
+}
+
 //
 //func TestGraphOverlayDisjoint(t *testing.T) {
 //	overlay := createOverlayFromWKTs(t,

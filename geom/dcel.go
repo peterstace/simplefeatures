@@ -341,10 +341,9 @@ func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
 }
 
 func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, mask uint8) {
-	edges := make(map[line]*halfEdgeRecord)
+	edges := make(map[uint64]struct{})
 	for _, e := range d.halfEdges {
-		ln := line{e.origin.coords, e.twin.origin.coords}
-		edges[ln] = e
+		edges[edgeHash(e.origin.coords, e.intermediate, e.twin.origin.coords)] = struct{}{}
 	}
 
 	for i := 0; i < mls.NumLineStrings(); i++ {
@@ -364,8 +363,8 @@ func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, mask uint8) {
 	}
 }
 
-func (d *doublyConnectedEdgeList) addGhostLine(ln line, mask uint8, edges map[line]*halfEdgeRecord) {
-	if _, ok := edges[ln]; ok {
+func (d *doublyConnectedEdgeList) addGhostLine(ln line, mask uint8, edges map[uint64]struct{}) {
+	if _, ok := edges[edgeHash(ln.a, nil, ln.b)]; ok {
 		// Already exists, so shouldn't add.
 		return
 	}
@@ -400,9 +399,8 @@ func (d *doublyConnectedEdgeList) addGhostLine(ln line, mask uint8, edges map[li
 
 	d.halfEdges = append(d.halfEdges, e1, e2)
 
-	edges[ln] = e1
-	ln.a, ln.b = ln.b, ln.a
-	edges[ln] = e2
+	edges[edgeHash(ln.a, nil, ln.b)] = struct{}{}
+	edges[edgeHash(ln.b, nil, ln.a)] = struct{}{}
 
 	d.fixVertex(vertA)
 	d.fixVertex(vertB)
