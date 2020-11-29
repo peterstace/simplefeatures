@@ -1,21 +1,11 @@
 package geom
 
 import (
-	"fmt"
 	"math"
 	"sort"
 )
 
 func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) error {
-	fmt.Println("A", len(d.halfEdges))
-	for _, e := range d.halfEdges {
-		fmt.Println(" ", e)
-	}
-	fmt.Println("B", len(other.halfEdges))
-	for _, e := range other.halfEdges {
-		fmt.Println(" ", e)
-	}
-
 	d.overlayVertices(other)
 	d.overlayEdges(other)
 	d.fixVertices()
