@@ -116,6 +116,9 @@ func extractPolygonBoundary(faceSet map[*faceRecord]bool, start *halfEdgeRecord,
 		seen[e] = true
 		xy := e.origin.coords
 		coords = append(coords, xy.X, xy.Y)
+		for _, xy := range e.intermediate {
+			coords = append(coords, xy.X, xy.Y)
+		}
 
 		// Sweep through the edges around the vertex (in a counter-clockwise
 		// order) until we find the next edge that is part of the polygon
@@ -188,15 +191,18 @@ func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) (
 			e.twin.edgeLabel |= extracted
 			e.origin.label |= extracted
 			e.twin.origin.label |= extracted
-			seq := NewSequence(
-				[]float64{
-					e.origin.coords.X,
-					e.origin.coords.Y,
-					e.twin.origin.coords.X,
-					e.twin.origin.coords.Y,
-				},
-				DimXY,
-			)
+
+			coords := make([]float64, 4+2*len(e.intermediate))
+			coords[0] = e.origin.coords.X
+			coords[1] = e.origin.coords.Y
+			for i, xy := range e.intermediate {
+				coords[2+2*i] = xy.X
+				coords[3+2*i] = xy.Y
+			}
+			coords[len(coords)-2] = e.twin.origin.coords.X
+			coords[len(coords)-1] = e.twin.origin.coords.Y
+
+			seq := NewSequence(coords, DimXY)
 			ls, err := NewLineString(seq)
 			if err != nil {
 				return nil, err
