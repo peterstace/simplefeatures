@@ -95,7 +95,7 @@ func newDCELFromGeometry(g Geometry, ghosts MultiLineString, mask uint8, interac
 		panic(fmt.Sprintf("unknown geometry type: %v", g.Type()))
 	}
 
-	dcel.addGhosts(ghosts, mask)
+	dcel.addGhosts(ghosts, mask, interactions)
 	return dcel
 }
 
@@ -335,55 +335,95 @@ func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
 	return dcel
 }
 
-func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, mask uint8) {
+func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, mask uint8, interactions map[XY]struct{}) {
 	edges := make(edgeSet)
 	for _, e := range d.halfEdges {
 		edges.insertEdge(e)
 	}
 
-	for i := 0; i < mls.NumLineStrings(); i++ {
-		seq := mls.LineStringN(i).Coordinates()
+	for lsIdx := 0; lsIdx < mls.NumLineStrings(); lsIdx++ {
+
+		// TODO: Factor out extraction of each edge.
+		//
+		// There is a huge amount of similarity here compared to converting
+		// polygons and linestrings to DCELs. Could add a function that accepts
+		// a Sequence, and returns a start, intermediates, and end (and also
+		// the remaining sequence).
+
+		seq := mls.LineStringN(lsIdx).Coordinates()
 		n := seq.Length()
-		for j := 0; j < n; j++ {
-			if ln, ok := getLine(seq, j); ok {
-				if _, ok := d.vertices[ln.a]; !ok {
-					d.vertices[ln.a] = &vertexRecord{coords: ln.a, incidents: nil, label: 0}
+		i := 0
+		for i < n-1 {
+			// Find the next interaction point after i. This will be the
+			// end of the next edge.
+			start := i
+			var end int
+			for j := i + 1; j < n; j++ {
+				if _, ok := interactions[seq.GetXY(j)]; ok {
+					end = j
+					break
 				}
-				if _, ok := d.vertices[ln.b]; !ok {
-					d.vertices[ln.b] = &vertexRecord{coords: ln.b, incidents: nil, label: 0}
-				}
-				d.addGhostLine(ln, mask, edges)
 			}
+
+			// Construct the internal points slices.
+			intermediateFwd := make([]XY, end-start-1)
+			for j := range intermediateFwd {
+				intermediateFwd[j] = seq.GetXY(start + j + 1)
+			}
+			intermediateRev := make([]XY, len(intermediateFwd))
+			for j := range intermediateRev {
+				intermediateRev[j] = intermediateFwd[len(intermediateFwd)-1-j]
+			}
+
+			// On the next iteration, start the next edge at the end of
+			// this one.
+			i = end
+
+			startXY := seq.GetXY(start)
+			endXY := seq.GetXY(end)
+
+			if _, ok := d.vertices[startXY]; !ok {
+				d.vertices[startXY] = &vertexRecord{coords: startXY, incidents: nil, label: 0}
+			}
+			if _, ok := d.vertices[endXY]; !ok {
+				d.vertices[endXY] = &vertexRecord{coords: endXY, incidents: nil, label: 0}
+			}
+
+			if edges.containsStartIntermediateEnd(startXY, intermediateFwd, endXY) {
+				// Already exists, so shouldn't add.
+				continue
+			}
+
+			d.addGhostLine(startXY, intermediateFwd, intermediateRev, endXY, mask)
+			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY)
+			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY)
 		}
 	}
 }
 
-func (d *doublyConnectedEdgeList) addGhostLine(ln line, mask uint8, edges edgeSet) {
-	if edges.containsLine(ln) {
-		// Already exists, so shouldn't add.
-		return
-	}
-
-	vertA := d.vertices[ln.a]
-	vertB := d.vertices[ln.b]
+func (d *doublyConnectedEdgeList) addGhostLine(startXY XY, intermediateFwd, intermediateRev []XY, endXY XY, mask uint8) {
+	vertA := d.vertices[startXY]
+	vertB := d.vertices[endXY]
 
 	e1 := &halfEdgeRecord{
-		origin:    vertA,
-		twin:      nil, // populated later
-		incident:  nil, // only populated in the overlay
-		next:      nil, // popluated later
-		prev:      nil, // populated later
-		edgeLabel: mask & populatedMask,
-		faceLabel: 0,
+		origin:       vertA,
+		twin:         nil, // populated later
+		incident:     nil, // only populated in the overlay
+		next:         nil, // popluated later
+		prev:         nil, // populated later
+		intermediate: intermediateFwd,
+		edgeLabel:    mask & populatedMask,
+		faceLabel:    0,
 	}
 	e2 := &halfEdgeRecord{
-		origin:    vertB,
-		twin:      e1,
-		incident:  nil, // only populated in the overlay
-		next:      e1,
-		prev:      e1,
-		edgeLabel: mask & populatedMask,
-		faceLabel: 0,
+		origin:       vertB,
+		twin:         e1,
+		incident:     nil, // only populated in the overlay
+		next:         e1,
+		prev:         e1,
+		intermediate: intermediateRev,
+		edgeLabel:    mask & populatedMask,
+		faceLabel:    0,
 	}
 	e1.twin = e2
 	e1.next = e2
@@ -393,10 +433,6 @@ func (d *doublyConnectedEdgeList) addGhostLine(ln line, mask uint8, edges edgeSe
 	vertB.incidents = append(vertB.incidents, e2)
 
 	d.halfEdges = append(d.halfEdges, e1, e2)
-
-	edges.insertLine(ln)
-	ln.a, ln.b = ln.b, ln.a
-	edges.insertLine(ln)
 
 	d.fixVertex(vertA)
 	d.fixVertex(vertB)
