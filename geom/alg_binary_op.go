@@ -92,6 +92,7 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 
 	dcelA := newDCELFromGeometry(a, ghosts, inputAMask, interactionPoints)
 	dcelB := newDCELFromGeometry(b, ghosts, inputBMask, interactionPoints)
+
 	err = dcelA.overlay(dcelB)
 	return dcelA, err
 }

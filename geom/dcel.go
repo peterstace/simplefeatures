@@ -274,10 +274,10 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 				}
 				edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY)
 			} else {
-				if edges.containsStartIntermediateEnd(endXY, intermediateFwd, startXY) {
+				if edges.containsStartIntermediateEnd(endXY, intermediateRev, startXY) {
 					continue
 				}
-				edges.insertStartIntermediateEnd(endXY, intermediateFwd, startXY)
+				edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY)
 			}
 
 			fwd := &halfEdgeRecord{
