@@ -15,11 +15,6 @@ func (s edgeSet) containsEdge(e *halfEdgeRecord) bool {
 	return ok
 }
 
-func (s edgeSet) containsLine(ln line) bool {
-	_, ok := s[s.key(ln.a, nil, ln.b)]
-	return ok
-}
-
 func (s edgeSet) containsStartIntermediateEnd(start XY, intermediate []XY, end XY) bool {
 	_, ok := s[s.key(start, intermediate, end)]
 	return ok
@@ -30,11 +25,6 @@ func (s edgeSet) insertEdge(e *halfEdgeRecord) {
 	s[k] = e
 }
 
-func (s edgeSet) insertLine(ln line) {
-	k := s.key(ln.a, nil, ln.b)
-	s[k] = nil // TODO: this is a bit weird...
-}
-
 func (s edgeSet) insertStartIntermediateEnd(start XY, intermediate []XY, end XY) {
 	k := s.key(start, intermediate, end)
 	s[k] = nil // TODO: this is a bit weird...
@@ -42,12 +32,6 @@ func (s edgeSet) insertStartIntermediateEnd(start XY, intermediate []XY, end XY)
 
 func (s edgeSet) lookupEdge(e *halfEdgeRecord) (*halfEdgeRecord, bool) {
 	k := s.key(e.origin.coords, e.intermediate, e.next.origin.coords)
-	e, ok := s[k]
-	return e, ok
-}
-
-func (s edgeSet) lookupLine(ln line) (*halfEdgeRecord, bool) {
-	k := s.key(ln.a, nil, ln.b)
 	e, ok := s[k]
 	return e, ok
 }
