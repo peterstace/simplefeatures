@@ -129,40 +129,14 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8, interactions map[XY]st
 
 		for _, ring := range rings {
 			var newEdges []*halfEdgeRecord
-			n := ring.Length()
-			i := 0
-			for i < n-1 {
-				// Find the next interaction point after i. This will be the
-				// end of the next edge.
-				start := i
-				var end int
-				for j := i + 1; j < n; j++ {
-					if _, ok := interactions[ring.GetXY(j)]; ok {
-						end = j
-						break
-					}
-				}
-
+			forEachNonInteractingSegment(ring, interactions, func(segment []XY) {
 				// Construct the internal points slices.
-				intermediateFwd := make([]XY, end-start-1)
-				for j := range intermediateFwd {
-					intermediateFwd[j] = ring.GetXY(start + j + 1)
-				}
-				intermediateRev := make([]XY, len(intermediateFwd))
-				for j := range intermediateRev {
-					intermediateRev[j] = intermediateFwd[len(intermediateFwd)-1-j]
-				}
-
-				//fmt.Println("intermediateFwd", intermediateFwd)
-				//fmt.Println("intermediateRev", intermediateRev)
-
-				// On the next iteration, start the next edge at the end of
-				// this one.
-				i = end
+				intermediateFwd := segment[1 : len(segment)-1]
+				intermediateRev := reverseXYs(intermediateFwd)
 
 				// Build the edges (fwd and rev).
-				vertA := dcel.vertices[ring.GetXY(start)]
-				vertB := dcel.vertices[ring.GetXY(end)]
+				vertA := dcel.vertices[segment[0]]
+				vertB := dcel.vertices[segment[len(segment)-1]]
 				internalEdge := &halfEdgeRecord{
 					origin:       vertA,
 					twin:         nil, // populated later
@@ -187,7 +161,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8, interactions map[XY]st
 				vertA.incidents = append(vertA.incidents, internalEdge)
 				vertB.incidents = append(vertB.incidents, externalEdge)
 				newEdges = append(newEdges, internalEdge, externalEdge)
-			}
+			})
 
 			// Link together next/prev pointers.
 			numEdges := len(newEdges)
@@ -198,11 +172,6 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8, interactions map[XY]st
 				newEdges[i*2+1].prev = newEdges[(2*i+3)%numEdges]
 			}
 			dcel.halfEdges = append(dcel.halfEdges, newEdges...)
-
-			//fmt.Println("halfEdges:", len(dcel.halfEdges))
-			//for _, e := range dcel.halfEdges {
-			//	fmt.Printf("%s %b\n", e, e.faceLabel)
-			//}
 		}
 	}
 	return dcel
@@ -231,54 +200,23 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 	edges := make(edgeSet)
 
 	// Add edges.
-	for lsIdx := 0; lsIdx < mls.NumLineStrings(); lsIdx++ {
-		//fmt.Println("lsIdx", lsIdx)
-		seq := mls.LineStringN(lsIdx).Coordinates()
-		n := seq.Length()
-		i := 0
-		for i < n-1 {
-			// Find the next interaction point after i. This will be the
-			// end of the next edge.
-			start := i
-			var end int
-			for j := i + 1; j < n; j++ {
-				if _, ok := interactions[seq.GetXY(j)]; ok {
-					end = j
-					break
-				}
-			}
+	for i := 0; i < mls.NumLineStrings(); i++ {
+		seq := mls.LineStringN(i).Coordinates()
+		forEachNonInteractingSegment(seq, interactions, func(segment []XY) {
+			startXY := segment[0]
+			endXY := segment[len(segment)-1]
 
-			// Construct the internal points slices.
-			intermediateFwd := make([]XY, end-start-1)
-			for j := range intermediateFwd {
-				intermediateFwd[j] = seq.GetXY(start + j + 1)
-			}
-			intermediateRev := make([]XY, len(intermediateFwd))
-			for j := range intermediateRev {
-				intermediateRev[j] = intermediateFwd[len(intermediateFwd)-1-j]
-			}
+			intermediateFwd := segment[1 : len(segment)-1]
+			intermediateRev := reverseXYs(intermediateFwd)
 
-			// On the next iteration, start the next edge at the end of
-			// this one.
-			i = end
-
-			startXY := seq.GetXY(start)
-			endXY := seq.GetXY(end)
+			if edges.containsStartIntermediateEnd(startXY, intermediateFwd, endXY) {
+				return
+			}
+			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY)
+			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY)
 
 			vOrigin := dcel.vertices[startXY]
 			vDestin := dcel.vertices[endXY]
-
-			if endXY.Less(startXY) {
-				if edges.containsStartIntermediateEnd(startXY, intermediateFwd, endXY) {
-					continue
-				}
-				edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY)
-			} else {
-				if edges.containsStartIntermediateEnd(endXY, intermediateRev, startXY) {
-					continue
-				}
-				edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY)
-			}
 
 			fwd := &halfEdgeRecord{
 				origin:       vOrigin,
@@ -308,7 +246,7 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 			vDestin.incidents = append(vDestin.incidents, rev)
 
 			dcel.halfEdges = append(dcel.halfEdges, fwd, rev)
-		}
+		})
 	}
 	return dcel
 }
@@ -341,46 +279,13 @@ func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, mask uint8, int
 		edges.insertEdge(e)
 	}
 
-	for lsIdx := 0; lsIdx < mls.NumLineStrings(); lsIdx++ {
-
-		// TODO: Factor out extraction of each edge.
-		//
-		// There is a huge amount of similarity here compared to converting
-		// polygons and linestrings to DCELs. Could add a function that accepts
-		// a Sequence, and returns a start, intermediates, and end (and also
-		// the remaining sequence).
-
-		seq := mls.LineStringN(lsIdx).Coordinates()
-		n := seq.Length()
-		i := 0
-		for i < n-1 {
-			// Find the next interaction point after i. This will be the
-			// end of the next edge.
-			start := i
-			var end int
-			for j := i + 1; j < n; j++ {
-				if _, ok := interactions[seq.GetXY(j)]; ok {
-					end = j
-					break
-				}
-			}
-
-			// Construct the internal points slices.
-			intermediateFwd := make([]XY, end-start-1)
-			for j := range intermediateFwd {
-				intermediateFwd[j] = seq.GetXY(start + j + 1)
-			}
-			intermediateRev := make([]XY, len(intermediateFwd))
-			for j := range intermediateRev {
-				intermediateRev[j] = intermediateFwd[len(intermediateFwd)-1-j]
-			}
-
-			// On the next iteration, start the next edge at the end of
-			// this one.
-			i = end
-
-			startXY := seq.GetXY(start)
-			endXY := seq.GetXY(end)
+	for i := 0; i < mls.NumLineStrings(); i++ {
+		seq := mls.LineStringN(i).Coordinates()
+		forEachNonInteractingSegment(seq, interactions, func(segment []XY) {
+			startXY := segment[0]
+			endXY := segment[len(segment)-1]
+			intermediateFwd := segment[1 : len(segment)-1]
+			intermediateRev := reverseXYs(intermediateFwd)
 
 			if _, ok := d.vertices[startXY]; !ok {
 				d.vertices[startXY] = &vertexRecord{coords: startXY, incidents: nil, label: 0}
@@ -391,13 +296,13 @@ func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, mask uint8, int
 
 			if edges.containsStartIntermediateEnd(startXY, intermediateFwd, endXY) {
 				// Already exists, so shouldn't add.
-				continue
+				return
 			}
-
-			d.addGhostLine(startXY, intermediateFwd, intermediateRev, endXY, mask)
 			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY)
 			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY)
-		}
+
+			d.addGhostLine(startXY, intermediateFwd, intermediateRev, endXY, mask)
+		})
 	}
 }
 
@@ -436,4 +341,34 @@ func (d *doublyConnectedEdgeList) addGhostLine(startXY XY, intermediateFwd, inte
 
 	d.fixVertex(vertA)
 	d.fixVertex(vertB)
+}
+
+func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn func([]XY)) {
+	n := seq.Length()
+	i := 0
+	for i < n-1 {
+		// Find the next interaction point after i. This will be the
+		// end of the next non-interacting segment.
+		start := i
+		var end int
+		for j := i + 1; j < n; j++ {
+			if _, ok := interactions[seq.GetXY(j)]; ok {
+				end = j
+				break
+			}
+		}
+
+		// Construct the segment.
+		segment := make([]XY, end-start+1)
+		for j := range segment {
+			segment[j] = seq.GetXY(start + j)
+		}
+
+		// Execute the callback with the segment.
+		fn(segment)
+
+		// On the next iteration, start the next edge at the end of
+		// this one.
+		i = end
+	}
 }
