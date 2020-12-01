@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"time"
 )
 
 // appendNewNodesFromLineLineIntersection finds the new nodes that would be
@@ -172,6 +173,15 @@ func appendPoints(points []XY, g Geometry) []XY {
 	return points
 }
 
+var freq = make(map[int]int)
+
+func init() {
+	go func() {
+		time.Sleep(time.Second * 4)
+		fmt.Println(freq)
+	}()
+}
+
 func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, error) {
 	var (
 		xys       []XY // Use is isolated in each iteration of the for loop, reused for performance.
@@ -201,6 +211,7 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 		})
 
 		// Uniquify and sort.
+		freq[len(xys)]++
 		xys = sortAndUniquifyXYs(xys) // TODO: make common function
 		sortOrigin := nodes.insertOrGet(ln.a)
 		sort.Slice(xys, func(i, j int) bool {
