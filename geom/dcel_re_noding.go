@@ -22,10 +22,13 @@ func appendNewNodesFromLineLineIntersection(dst []XY, ln, other line, eps float6
 	return dst
 }
 
-// newNodeFromLinePointIntersection finds the new node that might be created on
+// appendNewNodeFromLinePointIntersection finds the new node that might be created on
 // a line when it is intersected with a point.
-func newNodeFromLinePointIntersection(ln line, pt XY, eps float64) (XY, bool) {
-	return pt, distBetweenXYAndLine(pt, ln) < eps
+func appendNewNodeFromLinePointIntersection(dst []XY, ln line, pt XY, eps float64) []XY {
+	if distBetweenXYAndLine(pt, ln) < eps {
+		dst = append(dst, pt)
+	}
+	return dst
 }
 
 // ulpSizeForLine finds the maximum ULP out of the 4 float64s that make a line.
@@ -197,9 +200,7 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 		})
 		cut.ptIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
 			other := cut.ptIndex.points[i]
-			if xy, ok := newNodeFromLinePointIntersection(ln, other, eps); ok {
-				xys = append(xys, nodes.insertOrGet(xy))
-			}
+			xys = appendNewNodeFromLinePointIntersection(xys, ln, other, eps)
 			return nil
 		})
 
