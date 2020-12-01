@@ -171,7 +171,8 @@ func appendPoints(points []XY, g Geometry) []XY {
 
 func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, error) {
 	var (
-		tmp       []XY
+		tmp       []XY // Temp scratch space, reused for performance.
+		xys       []XY // Use is isolated in each iteration of the for loop, reused for performance.
 		newCoords []float64
 	)
 	seq := ls.Coordinates()
@@ -184,7 +185,8 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 
 		// Collect cut locations.
 		eps := 0xFF * ulpSizeForLine(ln)
-		xys := []XY{nodes.insertOrGet(ln.a), nodes.insertOrGet(ln.b)}
+		xys = xys[:0]
+		xys = append(xys, nodes.insertOrGet(ln.a), nodes.insertOrGet(ln.b))
 		cut.lnIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
 			other := cut.lnIndex.lines[i]
 			tmp = appendNewNodesFromLineLineIntersection(tmp[:0], ln, other, eps)
