@@ -1,6 +1,9 @@
 package geom
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // Union returns a geometry that represents the parts from either geometry A or
 // geometry B (or both). An error may be returned in pathological cases of
@@ -71,6 +74,10 @@ func binaryOp(a, b Geometry, include func(uint8) bool) (Geometry, error) {
 }
 
 func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
+	if a.IsGeometryCollection() || b.IsGeometryCollection() {
+		return nil, errors.New("GeometryCollection argument not supported")
+	}
+
 	aGhost := connectGeometry(a)
 	bGhost := connectGeometry(b)
 	joinGhost := connectGeometries(a, b)
@@ -81,16 +88,11 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 		return nil, err
 	}
 
-	dcelA, err := newDCELFromGeometry(a, ghosts, inputAMask)
-	if err != nil {
-		return nil, err
-	}
-	dcelB, err := newDCELFromGeometry(b, ghosts, inputBMask)
-	if err != nil {
-		return nil, err
-	}
-	if err := dcelA.overlay(dcelB); err != nil {
-		return nil, err
-	}
-	return dcelA, nil
+	interactionPoints := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
+
+	dcelA := newDCELFromGeometry(a, ghosts, inputAMask, interactionPoints)
+	dcelB := newDCELFromGeometry(b, ghosts, inputBMask, interactionPoints)
+
+	err = dcelA.overlay(dcelB)
+	return dcelA, err
 }

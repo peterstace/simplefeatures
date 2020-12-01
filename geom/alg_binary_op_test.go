@@ -473,14 +473,13 @@ func TestBinaryOp(t *testing.T) {
 			   |       |
 			   +---B---+
 			*/
-			input1: "LINESTRING(0 2,2 2,2 1,0 1,0 2)",
-			input2: "LINESTRING(1 2,1 0,0 0,0 2,1 2)",
-			// TODO: I needed to make some structural modifications to the linear elements manually compared to PostGIS output.
-			union:   "MULTILINESTRING((0 2,1 2),(1 2,2 2),(2 2,2 1),(2 1,1 1),(1 1,0 1),(0 1,0 2),(1 2,1 1),(1 1,1 0),(1 0,0 0),(0 0,0 1))",
+			input1:  "LINESTRING(0 2,2 2,2 1,0 1,0 2)",
+			input2:  "LINESTRING(1 2,1 0,0 0,0 2,1 2)",
+			union:   "MULTILINESTRING((0 2,1 2),(1 2,2 2,2 1,1 1),(1 1,0 1),(0 1,0 2),(1 2,1 1),(1 1,1 0,0 0,0 1))",
 			inter:   "GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(0 2,1 2),LINESTRING(0 1,0 2))",
-			fwdDiff: "MULTILINESTRING((1 2,2 2),(2 2,2 1),(2 1,1 1),(1 1,0 1))",
-			revDiff: "MULTILINESTRING((1 2,1 1),(1 1,1 0),(1 0,0 0),(0 0,0 1))",
-			symDiff: "MULTILINESTRING((1 2,1 1),(1 1,1 0),(1 0,0 0),(0 0,0 1),(1 2,2 2),(2 2,2 1),(2 1,1 1),(1 1,0 1))",
+			fwdDiff: "MULTILINESTRING((1 2,2 2,2 1,1 1),(1 1,0 1))",
+			revDiff: "MULTILINESTRING((1 2,1 1),(1 1,1 0,0 0,0 1))",
+			symDiff: "MULTILINESTRING((1 2,2 2,2 1,1 1),(1 1,0 1),(1 2,1 1),(1 1,1 0,0 0,0 1))",
 		},
 		{
 			/*
@@ -492,14 +491,13 @@ func TestBinaryOp(t *testing.T) {
 			  +`       `+`
 
 			*/
-			input1: "LINESTRING(0 0,2 2,0 2,2 0)",
-			input2: "LINESTRING(2 0,3 1,2 2)",
-			// TODO: I needed to make some structural modifications to the linear elements manually compared to PostGIS output.
-			union:   "MULTILINESTRING((0 0,1 1),(1 1,2 2),(2 2,0 2),(0 2,1 1),(1 1,2 0),(2 0,3 1),(3 1,2 2))",
+			input1:  "LINESTRING(0 0,2 2,0 2,2 0)",
+			input2:  "LINESTRING(2 0,3 1,2 2)",
+			union:   "MULTILINESTRING((0 0,1 1),(1 1,2 2),(2 2,0 2,1 1),(1 1,2 0),(2 0,3 1,2 2))",
 			inter:   "MULTIPOINT(2 0,2 2)",
-			fwdDiff: "MULTILINESTRING((0 0,1 1),(1 1,2 2),(2 2,0 2),(0 2,1 1),(1 1,2 0))",
-			revDiff: "MULTILINESTRING((2 0,3 1),(3 1,2 2))",
-			symDiff: "MULTILINESTRING((2 0,3 1),(3 1,2 2),(0 0,1 1),(1 1,2 2),(2 2,0 2),(0 2,1 1),(1 1,2 0))",
+			fwdDiff: "MULTILINESTRING((0 0,1 1),(1 1,2 2),(2 2,0 2,1 1),(1 1,2 0))",
+			revDiff: "LINESTRING(2 0,3 1,2 2)",
+			symDiff: "MULTILINESTRING((0 0,1 1),(1 1,2 2),(2 2,0 2,1 1),(1 1,2 0),(2 0,3 1,2 2))",
 		},
 		{
 			/*
@@ -628,11 +626,11 @@ func TestBinaryOp(t *testing.T) {
 			*/
 			input1:  "LINESTRING(0 0,0 1,1 1,1 0,0 0,0 1)", // overlapping line segment
 			input2:  "POINT(0.5 0.5)",
-			union:   "GEOMETRYCOLLECTION(POINT(0.5 0.5),LINESTRING(0 0,0 1),LINESTRING(0 1,1 1),LINESTRING(1 1,1 0),LINESTRING(1 0,0 0))",
+			union:   "GEOMETRYCOLLECTION(LINESTRING(0 0,0 1),LINESTRING(0 1,1 1,1 0,0 0),POINT(0.5 0.5))",
 			inter:   "GEOMETRYCOLLECTION EMPTY",
-			fwdDiff: "MULTILINESTRING((0 0,0 1),(0 1,1 1),(1 1,1 0),(1 0,0 0))",
+			fwdDiff: "MULTILINESTRING((0 0,0 1),(0 1,1 1,1 0,0 0))",
 			revDiff: "POINT(0.5 0.5)",
-			symDiff: "GEOMETRYCOLLECTION(POINT(0.5 0.5),LINESTRING(0 0,0 1),LINESTRING(0 1,1 1),LINESTRING(1 1,1 0),LINESTRING(1 0,0 0))",
+			symDiff: "GEOMETRYCOLLECTION(LINESTRING(0 0,0 1),LINESTRING(0 1,1 1,1 0,0 0),POINT(0.5 0.5))",
 		},
 		{
 			/*
@@ -770,7 +768,7 @@ func TestBinaryOp(t *testing.T) {
 		{
 			input1: "MULTILINESTRING((0 0,1 1),(0 1,1 0))",
 			input2: "LINESTRING(0 1,0.3333333333 0.6666666667,1 0)",
-			union:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,0.5 0.5),(0.5 0.5,1 0))",
+			union:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.3333333333 0.6666666667,0.5 0.5),(0.5 0.5,1 0))",
 		},
 		{
 			input1: "POLYGON((-1 0,0 0,0 1,-1 0))",
@@ -786,6 +784,21 @@ func TestBinaryOp(t *testing.T) {
 			input1: "LINESTRING(1 2,2 3)",
 			input2: "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((1 2,2 2,2 3,1 3,1 2)))",
 			union:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((1 2,2 2,2 3,1 3,1 2)))",
+		},
+		{
+			input1: "LINESTRING(0 1,0 0,1 0)",
+			input2: "POLYGON((0 0,1 0,1 1,0 1,0 0.5,0 0))",
+			union:  "POLYGON((0 0,1 0,1 1,0 1,0 0.5,0 0))",
+		},
+		{
+			input1:  "LINESTRING(2 2,3 3,4 4,5 5,0 0)",
+			input2:  "LINESTRING(0 0,1 1)",
+			fwdDiff: "MULTILINESTRING((2 2,3 3,4 4,5 5),(1 1,2 2))",
+		},
+		{
+			input1:  "LINESTRING(0 0,0 0,0 1,1 0,0 0)",
+			input2:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.3333333333 0.6666666667,0.5 0.5),(0.5 0.5,1 0))",
+			fwdDiff: "MULTILINESTRING((0 0,0 1),(1 0,0 0))",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {

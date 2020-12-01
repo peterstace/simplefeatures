@@ -34,6 +34,12 @@ func TestReNode(t *testing.T) {
 			outputA: "MULTILINESTRING((0 0,0.5 0.5,1 1,2 2.000000000000001),(1 0,0.5 0.5,0 1,-1 2.000000000000001))",
 			outputB: "POLYGON((0 1,1 1,0.5 0.5,0 1))",
 		},
+		{
+			inputA:  "LINESTRING(0 0,1 1,1 1,2 2)",
+			inputB:  "LINESTRING(0 0,0 0,1 1,2 2)",
+			outputA: "LINESTRING(0 0,1 1,2 2)",
+			outputB: "LINESTRING(0 0,1 1,2 2)",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			inA, err := UnmarshalWKT(tt.inputA)

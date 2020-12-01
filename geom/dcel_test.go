@@ -11,22 +11,22 @@ type DCELSpec struct {
 	NumEdges int
 	NumFaces int
 	Vertices []VertexSpec
-	Edges    []EdgeLabelSpec
+	Edges    []EdgeSpec
 	Faces    []FaceSpec
 }
 
 type FaceSpec struct {
 	// Origin and destination of an edge that is incident to the face.
-	EdgeOrigin XY
-	EdgeDestin XY
-	Cycle      []XY
-	Label      uint8
+	First  XY
+	Second XY
+	Cycle  []XY
+	Label  uint8
 }
 
-type EdgeLabelSpec struct {
+type EdgeSpec struct {
 	EdgeLabel uint8
 	FaceLabel uint8
-	Edges     []XY
+	Sequence  []XY
 }
 
 type VertexSpec struct {
@@ -36,12 +36,25 @@ type VertexSpec struct {
 
 func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 	t.Helper()
+
 	if spec.NumVerts != len(dcel.vertices) {
-		t.Fatalf("verticies: want=%d got=%d", spec.NumVerts, len(dcel.vertices))
+		t.Fatalf("vertices: want=%d got=%d", spec.NumVerts, len(dcel.vertices))
 	}
+	var vertsInSpec int
+	for _, v := range spec.Vertices {
+		vertsInSpec += len(v.Vertices)
+	}
+	if spec.NumVerts != vertsInSpec {
+		t.Fatalf("NumVerts doesn't match vertsInSpec: %d vs %d", spec.NumVerts, vertsInSpec)
+	}
+
 	if spec.NumEdges != len(dcel.halfEdges) {
 		t.Fatalf("edges: want=%d got=%d", spec.NumEdges, len(dcel.halfEdges))
 	}
+	if spec.NumEdges != len(spec.Edges) {
+		t.Fatalf("NumEdges doesn't match len(spec.Edges): %d vs %d", spec.NumEdges, len(spec.Edges))
+	}
+
 	if spec.NumFaces != len(dcel.faces) {
 		t.Fatalf("faces: want=%d got=%d", spec.NumFaces, len(dcel.faces))
 	}
@@ -94,39 +107,44 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 		}
 	})
 
-	t.Run("edge_labels", func(t *testing.T) {
-		unchecked := make(map[*halfEdgeRecord]bool)
+	t.Run("edges", func(t *testing.T) {
 		for _, e := range dcel.halfEdges {
-			unchecked[e] = true
-		}
-		for _, want := range spec.Edges {
-			for i := 0; i+1 < len(want.Edges); i++ {
-				u := want.Edges[i]
-				v := want.Edges[i+1]
-				e := findEdge(t, dcel, u, v)
-				delete(unchecked, e)
-				if e.edgeLabel != want.EdgeLabel {
-					t.Errorf("incorrect edge label for edge %v -> %v: "+
-						"want=%b got=%b", u, v, want.EdgeLabel, e.edgeLabel)
+			// Find an edge spec that matches e.
+			var found bool
+			var want EdgeSpec
+			for i := range spec.Edges {
+				seq := spec.Edges[i].Sequence
+				if seq[0] != e.origin.coords {
+					continue
 				}
-				if e.faceLabel != want.FaceLabel {
-					t.Errorf("incorrect face label for edge %v -> %v: "+
-						"want=%b got=%b", u, v, want.FaceLabel, e.faceLabel)
+				if seq[len(seq)-1] != e.next.origin.coords {
+					continue
 				}
+				if !xysEqual(e.intermediate, seq[1:len(seq)-1]) {
+					continue
+				}
+				want = spec.Edges[i]
+				found = true
 			}
-		}
-		if len(unchecked) > 0 {
-			for e := range unchecked {
-				t.Logf("unchecked edge: %v", e)
+			if !found {
+				t.Fatalf("could not find edge spec matching edge: %v", e)
 			}
-			t.Errorf("some edge labels not checked: %d", len(unchecked))
+
+			if e.edgeLabel != want.EdgeLabel {
+				t.Errorf("incorrect edge label for edge %v: "+
+					"want=%b got=%b", e, want.EdgeLabel, e.edgeLabel)
+			}
+			if e.faceLabel != want.FaceLabel {
+				t.Errorf("incorrect face label for edge %v: "+
+					"want=%b got=%b", e, want.FaceLabel, e.faceLabel)
+			}
 		}
 	})
 
 	for i, want := range spec.Faces {
 		t.Run(fmt.Sprintf("face_%d", i), func(t *testing.T) {
-			got := findEdge(t, dcel, want.EdgeOrigin, want.EdgeDestin).incident
-			CheckComponent(t, got, got.cycle, want.Cycle)
+			got := findEdge(t, dcel, want.First, want.Second).incident
+			CheckCycle(t, got, got.cycle, want.Cycle)
 			if want.Label != got.label {
 				t.Errorf("face label doesn't match: want=%b got=%b", want.Label, got.label)
 			}
@@ -134,18 +152,29 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 	}
 }
 
-func findEdge(t *testing.T, dcel *doublyConnectedEdgeList, origin, dest XY) *halfEdgeRecord {
+func xysEqual(a, b []XY) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func findEdge(t *testing.T, dcel *doublyConnectedEdgeList, first, second XY) *halfEdgeRecord {
 	for _, e := range dcel.halfEdges {
-		if e.origin.coords == origin && e.twin.origin.coords == dest {
+		if e.origin.coords == first && e.secondXY() == second {
 			return e
 		}
 	}
-	t.Fatalf("could not find edge with origin %v and dest %v", origin, dest)
+	t.Fatalf("could not find edge with first %v and second %v", first, second)
 	return nil
 }
 
-// TODO: rename to CheckCycle
-func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []XY) {
+func CheckCycle(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []XY) {
 	// Check component matches forward order when following 'next' pointer.
 	e := start
 	var got []XY
@@ -159,15 +188,22 @@ func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []X
 			t.Errorf("edge origin not set")
 		}
 		got = append(got, e.origin.coords)
+		got = append(got, e.intermediate...)
 		e = e.next
 		if e == start {
+			got = append(got, e.origin.coords)
 			break
 		}
 	}
 	CheckXYs(t, got, want)
 
 	// Check component matches reverse order when following 'prev' pointer.
+	for i := 0; i < len(want)/2; i++ {
+		j := len(want) - i - 1
+		want[i], want[j] = want[j], want[i]
+	}
 	var i int
+	start = start.prev
 	e = start
 	got = nil
 	for {
@@ -176,23 +212,16 @@ func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []X
 			t.Fatal("inf loop")
 		}
 
-		if e.incident == nil {
-			t.Errorf("half edge has no incident face set")
-		} else if e.incident != f {
-			t.Errorf("half edge has incorrect incident face")
+		got = append(got, e.next.origin.coords)
+		for j := len(e.intermediate) - 1; j >= 0; j-- {
+			got = append(got, e.intermediate[j])
 		}
-		if e.origin == nil {
-			t.Errorf("edge origin not set")
-		}
-		got = append(got, e.origin.coords)
+
 		e = e.prev
 		if e == start {
+			got = append(got, e.next.origin.coords)
 			break
 		}
-	}
-	for i := 0; i < len(got)/2; i++ {
-		j := len(got) - i - 1
-		got[i], got[j] = got[j], got[i]
 	}
 	CheckXYs(t, got, want)
 
@@ -221,9 +250,23 @@ func CheckComponent(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []X
 func CheckXYs(t *testing.T, got, want []XY) {
 	t.Helper()
 	if len(want) != len(got) {
-		t.Errorf("XY sequences don't match: got=%v want=%v", got, want)
+		t.Errorf("XY sequences don't match:\ngot:  %v\nwant: %v", got, want)
 		return
 	}
+
+	if len(got) < 3 || got[0] != got[len(got)-1] {
+		t.Errorf("got not a cycle")
+	}
+	if len(want) < 3 || want[0] != want[len(want)-1] {
+		t.Errorf("want not a cycle")
+	}
+
+	// Strip of the part of the cycle that joints back to the
+	// start, so that we can run the cycles through offsets
+	// looking for a match.
+	got = got[:len(got)-1]
+	want = want[:len(want)-1]
+
 	n := len(want)
 outer:
 	for offset := 0; offset < n; offset++ {
@@ -235,7 +278,7 @@ outer:
 		}
 		return // success, we found an offset that results in the XYs being equal
 	}
-	t.Errorf("XY sequences don't match: got=%v want=%v", got, want)
+	t.Errorf("XY sequences don't match:\ngot:  %v\nwant: %v", got, want)
 }
 
 func createOverlayFromWKTs(t *testing.T, wktA, wktB string) *doublyConnectedEdgeList {
@@ -259,7 +302,7 @@ func TestGraphTriangle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), inputAMask)
+	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), inputAMask, findInteractionPoints([]Geometry{poly}))
 
 	/*
 
@@ -272,7 +315,7 @@ func TestGraphTriangle(t *testing.T) {
 	     |     \
 	     | f1   \
 	     |       \
-	  V0 *--------* V1
+	  V0 @--------* V1
 
 	*/
 
@@ -281,23 +324,23 @@ func TestGraphTriangle(t *testing.T) {
 	v2 := XY{0, 1}
 
 	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 3,
-		NumEdges: 6,
+		NumVerts: 1,
+		NumEdges: 2,
 		NumFaces: 0,
 		Vertices: []VertexSpec{{
 			Label:    inputAPopulated | inputAInSet,
-			Vertices: []XY{v0, v1, v2},
+			Vertices: []XY{v0},
 		}},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: inputAPopulated | inputAInSet,
 				FaceLabel: inputAPopulated | inputAInSet,
-				Edges:     []XY{v0, v1, v2, v0},
+				Sequence:  []XY{v0, v1, v2, v0},
 			},
 			{
 				EdgeLabel: inputAPopulated | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v0, v2, v1, v0},
+				Sequence:  []XY{v0, v2, v1, v0},
 			},
 		},
 		Faces: nil,
@@ -327,7 +370,7 @@ func TestGraphWithHoles(t *testing.T) {
 
 	*/
 
-	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), inputBMask)
+	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), inputBMask, findInteractionPoints([]Geometry{poly}))
 
 	v0 := XY{0, 0}
 	v1 := XY{5, 0}
@@ -343,43 +386,43 @@ func TestGraphWithHoles(t *testing.T) {
 	v11 := XY{4, 3}
 
 	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 12,
-		NumEdges: 24,
+		NumVerts: 3,
+		NumEdges: 6,
 		NumFaces: 0,
 		Vertices: []VertexSpec{{
 			Label:    inputBPopulated | inputBInSet,
-			Vertices: []XY{v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11},
+			Vertices: []XY{v0, v4, v8},
 		}},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: inputBPopulated | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v0, v1, v2, v3, v0},
+				Sequence:  []XY{v0, v1, v2, v3, v0},
 			},
 			{
 				EdgeLabel: inputBPopulated | inputBInSet,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v0, v3, v2, v1, v0},
+				Sequence:  []XY{v0, v3, v2, v1, v0},
 			},
 			{
 				EdgeLabel: inputBPopulated | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v4, v5, v6, v7, v4},
+				Sequence:  []XY{v4, v5, v6, v7, v4},
 			},
 			{
 				EdgeLabel: inputBPopulated | inputBInSet,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v4, v7, v6, v5, v4},
+				Sequence:  []XY{v4, v7, v6, v5, v4},
 			},
 			{
 				EdgeLabel: inputBPopulated | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v8, v9, v10, v11, v8},
+				Sequence:  []XY{v8, v9, v10, v11, v8},
 			},
 			{
 				EdgeLabel: inputBPopulated | inputBInSet,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v8, v11, v10, v9, v8},
+				Sequence:  []XY{v8, v11, v10, v9, v8},
 			},
 		},
 		Faces: nil,
@@ -400,7 +443,7 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 	  v0-----v1   v4-----v5
 	*/
 
-	dcel := newDCELFromMultiPolygon(mp.AsMultiPolygon(), inputBMask)
+	dcel := newDCELFromMultiPolygon(mp.AsMultiPolygon(), inputBMask, findInteractionPoints([]Geometry{mp}))
 
 	v0 := XY{0, 0}
 	v1 := XY{1, 0}
@@ -412,33 +455,33 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 	v7 := XY{2, 1}
 
 	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 8,
-		NumEdges: 16,
+		NumVerts: 2,
+		NumEdges: 4,
 		NumFaces: 0,
 		Vertices: []VertexSpec{{
 			Label:    inputBPopulated | inputBInSet,
-			Vertices: []XY{v0, v1, v2, v3, v4, v5, v6, v7},
+			Vertices: []XY{v0, v4},
 		}},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: inputBPopulated | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v0, v1, v2, v3, v0},
+				Sequence:  []XY{v0, v1, v2, v3, v0},
 			},
 			{
 				EdgeLabel: inputBPopulated | inputBInSet,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v0, v3, v2, v1, v0},
+				Sequence:  []XY{v0, v3, v2, v1, v0},
 			},
 			{
 				EdgeLabel: inputBPopulated | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v4, v5, v6, v7, v4},
+				Sequence:  []XY{v4, v5, v6, v7, v4},
 			},
 			{
 				EdgeLabel: inputBPopulated | inputBInSet,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v4, v7, v6, v5, v4},
+				Sequence:  []XY{v4, v7, v6, v5, v4},
 			},
 		},
 		Faces: nil,
@@ -450,10 +493,7 @@ func TestGraphMultiLineString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel, err := newDCELFromGeometry(mls, MultiLineString{}, inputAMask)
-	if err != nil {
-		t.Fatal(err)
-	}
+	dcel := newDCELFromGeometry(mls, MultiLineString{}, inputAMask, findInteractionPoints([]Geometry{mls}))
 
 	/*
 	        v2    v3
@@ -475,23 +515,33 @@ func TestGraphMultiLineString(t *testing.T) {
 	v5 := XY{2, 0}
 
 	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 6,
-		NumEdges: 8,
+		NumVerts: 4,
+		NumEdges: 4,
 		NumFaces: 0,
 		Vertices: []VertexSpec{{
 			Label:    inputAPopulated | inputAInSet,
-			Vertices: []XY{v0, v1, v2, v3, v4, v5},
+			Vertices: []XY{v0, v2, v3, v5},
 		}},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: inputAPopulated | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v0, v1, v2, v1, v0},
+				Sequence:  []XY{v0, v1, v2},
 			},
 			{
 				EdgeLabel: inputAPopulated | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v3, v4, v5, v4, v3},
+				Sequence:  []XY{v2, v1, v0},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v3, v4, v5},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v5, v4, v3},
 			},
 		},
 		Faces: nil,
@@ -503,10 +553,7 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel, err := newDCELFromGeometry(ls, MultiLineString{}, inputAMask)
-	if err != nil {
-		t.Fatal(err)
-	}
+	dcel := newDCELFromGeometry(ls, MultiLineString{}, inputAMask, findInteractionPoints([]Geometry{ls}))
 
 	/*
 	   v1----v2----v4
@@ -524,23 +571,53 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 	v4 := XY{2, 1}
 
 	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 5,
-		NumEdges: 10,
+		NumVerts: 4,
+		NumEdges: 8,
 		NumFaces: 0,
 		Vertices: []VertexSpec{{
 			Label:    inputAPopulated | inputAInSet,
-			Vertices: []XY{v0, v1, v2, v3, v4},
+			Vertices: []XY{v0, v1, v2, v4},
 		}},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: inputAPopulated | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v0, v1, v3, v2, v3, v1, v0},
+				Sequence:  []XY{v0, v1},
 			},
 			{
 				EdgeLabel: inputAPopulated | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v1, v2, v4, v2, v1},
+				Sequence:  []XY{v1, v0},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v1, v2},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v2, v1},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v1, v3, v2},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v2, v3, v1},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v2, v4},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v4, v2},
 			},
 		},
 		Faces: nil,
@@ -561,10 +638,7 @@ func TestGraphGhostDeduplication(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dcel, err := newDCELFromGeometry(ls, ghost.AsMultiLineString(), inputAMask)
-	if err != nil {
-		t.Fatal(err)
-	}
+	dcel := newDCELFromGeometry(ls, ghost.AsMultiLineString(), inputAMask, findInteractionPoints([]Geometry{ls, ghost}))
 
 	v0 := XY{0, 0}
 	v1 := XY{1, 0}
@@ -578,16 +652,26 @@ func TestGraphGhostDeduplication(t *testing.T) {
 			{Label: inputAPopulated | inputAInSet, Vertices: []XY{v0, v1}},
 			{Label: 0, Vertices: []XY{v2}},
 		},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: inputAPopulated | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v0, v1, v0},
+				Sequence:  []XY{v0, v1},
+			},
+			{
+				EdgeLabel: inputAPopulated | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v1, v0},
 			},
 			{
 				EdgeLabel: inputAPopulated,
 				FaceLabel: 0,
-				Edges:     []XY{v0, v2, v0},
+				Sequence:  []XY{v0, v2},
+			},
+			{
+				EdgeLabel: inputAPopulated,
+				FaceLabel: 0,
+				Sequence:  []XY{v2, v0},
 			},
 		},
 	})
@@ -626,79 +710,99 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 	v7 := XY{2, 3}
 
 	CheckDCEL(t, overlay, DCELSpec{
-		NumVerts: 8,
-		NumEdges: 20,
+		NumVerts: 3,
+		NumEdges: 10,
 		NumFaces: 4,
 		Vertices: []VertexSpec{
 			{
 				Label:    populatedMask | inputAInSet,
-				Vertices: []XY{v0, v1, v2, v3},
+				Vertices: []XY{v0, v2},
 			},
 			{
 				Label:    populatedMask | inputBInSet,
-				Vertices: []XY{v4, v5, v6, v7},
+				Vertices: []XY{v4},
 			},
 		},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated | inputAInSet,
-				Edges:     []XY{v0, v1, v2, v3, v0},
-			},
-			{
-				EdgeLabel: populatedMask | inputBInSet,
-				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v4, v5, v6, v7, v4},
+				Sequence:  []XY{v0, v1, v2},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v0, v3, v2, v1, v0},
+				Sequence:  []XY{v2, v1, v0},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated | inputAInSet,
+				Sequence:  []XY{v2, v3, v0},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v0, v3, v2},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+				Sequence:  []XY{v4, v5, v6, v7, v4},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v4, v7, v6, v5, v4},
+				Sequence:  []XY{v4, v7, v6, v5, v4},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: 0,
-				Edges:     []XY{v0, v2, v0},
+				Sequence:  []XY{v0, v2},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: 0,
+				Sequence:  []XY{v2, v0},
 			},
 			{
 				EdgeLabel: populatedMask,
 				FaceLabel: 0,
-				Edges:     []XY{v2, v4, v2},
+				Sequence:  []XY{v2, v4},
+			},
+			{
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+				Sequence:  []XY{v4, v2},
 			},
 		},
 		Faces: []FaceSpec{
 			{
 				// f0
-				EdgeOrigin: v2,
-				EdgeDestin: v1,
-				Cycle:      []XY{v2, v1, v0, v3, v2, v4, v7, v6, v5, v4},
-				Label:      populatedMask,
+				First:  v2,
+				Second: v1,
+				Cycle:  []XY{v2, v1, v0, v3, v2, v4, v7, v6, v5, v4, v2},
+				Label:  populatedMask,
 			},
 			{
 				// f1
-				EdgeOrigin: v1,
-				EdgeDestin: v2,
-				Cycle:      []XY{v2, v0, v1},
-				Label:      populatedMask | inputAInSet,
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v2, v0},
+				Label:  populatedMask | inputAInSet,
 			},
 			{
 				// f2
-				EdgeOrigin: v2,
-				EdgeDestin: v3,
-				Cycle:      []XY{v2, v3, v0},
-				Label:      populatedMask | inputAInSet,
+				First:  v2,
+				Second: v3,
+				Cycle:  []XY{v2, v3, v0, v2},
+				Label:  populatedMask | inputAInSet,
 			},
 			{
 				// f3
-				EdgeOrigin: v5,
-				EdgeDestin: v6,
-				Cycle:      []XY{v5, v6, v7, v4},
-				Label:      populatedMask | inputBInSet,
+				First:  v4,
+				Second: v5,
+				Cycle:  []XY{v4, v5, v6, v7, v4},
+				Label:  populatedMask | inputBInSet,
 			},
 		},
 	})
@@ -738,105 +842,130 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	v7 := XY{1, 3}
 
 	CheckDCEL(t, overlay, DCELSpec{
-		NumVerts: 8,
-		NumEdges: 22,
+		NumVerts: 4,
+		NumEdges: 14,
 		NumFaces: 5,
 		Vertices: []VertexSpec{
 			{
 				Label:    populatedMask | inputAInSet,
-				Vertices: []XY{v0, v1},
+				Vertices: []XY{v0},
 			},
 			{
 				Label:    populatedMask | inputBInSet,
-				Vertices: []XY{v5, v7, v6},
+				Vertices: []XY{v5},
 			},
 			{
 				Label:    populatedMask | inSetMask,
-				Vertices: []XY{v2, v3, v4},
+				Vertices: []XY{v2, v4},
 			},
 		},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated | inputAInSet,
-				Edges:     []XY{v4, v0, v1, v2},
+				Sequence:  []XY{v4, v0},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated | inputAInSet,
+				Sequence:  []XY{v0, v1, v2},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v2, v1, v0, v4},
+				Sequence:  []XY{v2, v1, v0},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v0, v4},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v2, v6, v7, v5, v4},
+				Sequence:  []XY{v2, v6, v7, v5},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+				Sequence:  []XY{v5, v4},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v4, v5, v7, v6, v2},
+				Sequence:  []XY{v4, v5},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
+				Sequence:  []XY{v5, v7, v6, v2},
 			},
 			{
 				EdgeLabel: populatedMask | inSetMask,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v2, v4},
+				Sequence:  []XY{v2, v4},
 			},
 			{
 				EdgeLabel: populatedMask | inSetMask,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v4, v2},
+				Sequence:  []XY{v4, v2},
 			},
 			{
 				EdgeLabel: populatedMask | inSetMask,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v4, v3, v2},
+				Sequence:  []XY{v4, v3, v2},
 			},
 			{
 				EdgeLabel: populatedMask | inSetMask,
 				FaceLabel: inputAPopulated | inputAInSet,
-				Edges:     []XY{v2, v3, v4},
+				Sequence:  []XY{v2, v3, v4},
 			},
 			{
 				EdgeLabel: populatedMask,
 				FaceLabel: 0,
-				Edges:     []XY{v0, v5, v0},
+				Sequence:  []XY{v5, v0},
+			},
+			{
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+				Sequence:  []XY{v0, v5},
 			},
 		},
 		Faces: []FaceSpec{
 			{
 				// f0
-				EdgeOrigin: v7,
-				EdgeDestin: v6,
-				Cycle:      []XY{v7, v6, v2, v1, v0, v5},
-				Label:      populatedMask,
+				First:  v2,
+				Second: v1,
+				Cycle:  []XY{v2, v1, v0, v5, v7, v6, v2},
+				Label:  populatedMask,
 			},
 			{
 				// f1
-				EdgeOrigin: v0,
-				EdgeDestin: v1,
-				Cycle:      []XY{v0, v1, v2, v4},
-				Label:      populatedMask | inputAInSet,
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v2, v4, v0},
+				Label:  populatedMask | inputAInSet,
 			},
 			{
 				// f2
-				EdgeOrigin: v6,
-				EdgeDestin: v7,
-				Cycle:      []XY{v6, v7, v5, v4, v3, v2},
-				Label:      populatedMask | inputBInSet,
+				First:  v2,
+				Second: v6,
+				Cycle:  []XY{v2, v6, v7, v5, v4, v3, v2},
+				Label:  populatedMask | inputBInSet,
 			},
 			{
 				// f3
-				EdgeOrigin: v4,
-				EdgeDestin: v2,
-				Cycle:      []XY{v4, v2, v3},
-				Label:      populatedMask | inputAInSet | inputBInSet,
+				First:  v4,
+				Second: v2,
+				Cycle:  []XY{v4, v2, v3, v4},
+				Label:  populatedMask | inputAInSet | inputBInSet,
 			},
 			{
 				// f4
-				EdgeOrigin: v0,
-				EdgeDestin: v4,
-				Cycle:      []XY{v0, v4, v5},
-				Label:      populatedMask,
+				First:  v0,
+				Second: v4,
+				Cycle:  []XY{v0, v4, v5, v0},
+				Label:  populatedMask,
 			},
 		},
 	})
@@ -872,67 +1001,72 @@ func TestGraphOverlayInside(t *testing.T) {
 	v7 := XY{1, 2}
 
 	CheckDCEL(t, overlay, DCELSpec{
-		NumVerts: 8,
-		NumEdges: 18,
+		NumVerts: 2,
+		NumEdges: 6,
 		NumFaces: 3,
 		Vertices: []VertexSpec{
 			{
 				Label:    populatedMask | inputAInSet,
-				Vertices: []XY{v0, v1, v2, v3},
+				Vertices: []XY{v0},
 			},
 			{
 				Label:    populatedMask | inSetMask,
-				Vertices: []XY{v4, v5, v6, v7},
+				Vertices: []XY{v4},
 			},
 		},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v0, v3, v2, v1, v0},
+				Sequence:  []XY{v0, v3, v2, v1, v0},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated | inputAInSet,
-				Edges:     []XY{v0, v1, v2, v3, v0},
+				Sequence:  []XY{v0, v1, v2, v3, v0},
 			},
 			{
 				EdgeLabel: populatedMask | inSetMask,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v4, v7, v6, v5, v4},
+				Sequence:  []XY{v4, v7, v6, v5, v4},
 			},
 			{
 				EdgeLabel: populatedMask | inSetMask,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v4, v5, v6, v7, v4},
+				Sequence:  []XY{v4, v5, v6, v7, v4},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: 0,
-				Edges:     []XY{v0, v4, v0},
+				Sequence:  []XY{v0, v4},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: 0,
+				Sequence:  []XY{v4, v0},
 			},
 		},
 		Faces: []FaceSpec{
 			{
 				// f0
-				EdgeOrigin: v2,
-				EdgeDestin: v1,
-				Cycle:      []XY{v2, v1, v0, v3},
-				Label:      populatedMask,
+				First:  v0,
+				Second: v3,
+				Cycle:  []XY{v0, v3, v2, v1, v0},
+				Label:  populatedMask,
 			},
 			{
 				// f1
-				EdgeOrigin: v0,
-				EdgeDestin: v1,
-				Cycle:      []XY{v0, v1, v2, v3, v0, v4, v7, v6, v5, v4},
-				Label:      populatedMask | inputAInSet,
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v2, v3, v0, v4, v7, v6, v5, v4, v0},
+				Label:  populatedMask | inputAInSet,
 			},
 			{
 				// f2
-				EdgeOrigin: v4,
-				EdgeDestin: v5,
-				Cycle:      []XY{v4, v5, v6, v7},
-				Label:      populatedMask | inputAInSet | inputBInSet,
+				First:  v4,
+				Second: v5,
+				Cycle:  []XY{v4, v5, v6, v7, v4},
+				Label:  populatedMask | inputAInSet | inputBInSet,
 			},
 		},
 	})
@@ -985,179 +1119,279 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 	v20 := XY{3, 1}
 
 	CheckDCEL(t, overlay, DCELSpec{
-		NumVerts: 20,
-		NumEdges: 56,
+		NumVerts: 10,
+		NumEdges: 36,
 		NumFaces: 10,
 		Vertices: []VertexSpec{
 			{
 				Label:    populatedMask | inputAInSet,
-				Vertices: []XY{v1, v3, v20, v2, v8, v5, v7, v6},
-			},
-			{
-				Label:    populatedMask | inputBInSet,
-				Vertices: []XY{v9, v12, v19, v11, v13, v14, v16, v15},
+				Vertices: []XY{v1, v20, v2, v5},
 			},
 			{
 				Label:    populatedMask | inSetMask,
-				Vertices: []XY{v4, v17, v10, v18},
+				Vertices: []XY{v17, v18},
+			},
+			{
+				Label:    populatedMask | inputBInSet,
+				Vertices: []XY{v9, v19, v12, v13},
 			},
 		},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: populatedMask,
 				FaceLabel: 0,
-				Edges:     []XY{v20, v5, v2, v5, v20},
+				Sequence:  []XY{v20, v5},
 			},
 			{
 				EdgeLabel: populatedMask,
 				FaceLabel: 0,
-				Edges:     []XY{v12, v13, v19, v13, v12},
+				Sequence:  []XY{v5, v2},
+			},
+			{
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+				Sequence:  []XY{v5, v20},
+			},
+			{
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+				Sequence:  []XY{v2, v5},
+			},
+			{
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+				Sequence:  []XY{v12, v13},
+			},
+			{
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+				Sequence:  []XY{v13, v19},
+			},
+			{
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+				Sequence:  []XY{v13, v12},
+			},
+			{
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+				Sequence:  []XY{v19, v13},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated | inputAInSet,
-				Edges:     []XY{v5, v6, v7, v8, v5},
+				Sequence:  []XY{v5, v6, v7, v8, v5},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v5, v8, v7, v6, v5},
+				Sequence:  []XY{v5, v8, v7, v6, v5},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v13, v14, v15, v16, v13},
+				Sequence:  []XY{v13, v14, v15, v16, v13},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v13, v16, v15, v14, v13},
+				Sequence:  []XY{v13, v16, v15, v14, v13},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v18, v3, v20, v2, v1, v17},
+				Sequence:  []XY{v18, v3, v20},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v20, v2},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v2, v1},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v1, v17},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v17, v9, v12, v19, v11, v18},
+				Sequence:  []XY{v17, v9},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
+				Sequence:  []XY{v9, v12},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
+				Sequence:  []XY{v12, v19},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
+				Sequence:  []XY{v19, v11, v18},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated | inputAInSet,
-				Edges:     []XY{v17, v1, v2, v20, v3, v18},
+				Sequence:  []XY{v17, v1},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated | inputAInSet,
+				Sequence:  []XY{v1, v2},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated | inputAInSet,
+				Sequence:  []XY{v2, v20},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated | inputAInSet,
+				Sequence:  []XY{v20, v3, v18},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v18, v11, v19, v12, v9, v17},
+				Sequence:  []XY{v18, v11, v19},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+				Sequence:  []XY{v19, v12},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+				Sequence:  []XY{v12, v9},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+				Sequence:  []XY{v9, v17},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet | inputBInSet,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v18, v10, v17},
+				Sequence:  []XY{v18, v10, v17},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet | inputBInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v17, v4, v18},
+				Sequence:  []XY{v17, v4, v18},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v17, v10, v18},
+				Sequence:  []XY{v17, v10, v18},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet | inputBInSet,
 				FaceLabel: inputAPopulated | inputAInSet,
-				Edges:     []XY{v18, v4, v17},
+				Sequence:  []XY{v18, v4, v17},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: 0,
-				Edges:     []XY{v20, v18, v20},
+				Sequence:  []XY{v20, v18},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: 0,
+				Sequence:  []XY{v18, v20},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: 0,
-				Edges:     []XY{v19, v18, v19},
+				Sequence:  []XY{v19, v18},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: 0,
+				Sequence:  []XY{v18, v19},
 			},
 		},
 		Faces: []FaceSpec{
 			{
 				// f0
-				EdgeOrigin: v19,
-				EdgeDestin: v11,
+				First:  v19,
+				Second: v11,
 				Cycle: []XY{
 					v19, v11, v18, v3, v20, v5, v8, v7,
 					v6, v5, v2, v1, v17, v9, v12,
-					v13, v16, v15, v14, v13,
+					v13, v16, v15, v14, v13, v19,
 				},
 				Label: inputBPopulated | inputAPopulated,
 			},
 			{
 				// f1
-				EdgeOrigin: v6,
-				EdgeDestin: v7,
-				Cycle:      []XY{v6, v7, v8, v5},
-				Label:      inputBPopulated | inputAPopulated | inputAInSet,
+				First:  v5,
+				Second: v6,
+				Cycle:  []XY{v5, v6, v7, v8, v5},
+				Label:  inputBPopulated | inputAPopulated | inputAInSet,
 			},
 			{
 				// f2
-				EdgeOrigin: v13,
-				EdgeDestin: v14,
-				Cycle:      []XY{v13, v14, v15, v16},
-				Label:      inputBPopulated | inputAPopulated | inputBInSet,
+				First:  v13,
+				Second: v14,
+				Cycle:  []XY{v13, v14, v15, v16, v13},
+				Label:  inputBPopulated | inputAPopulated | inputBInSet,
 			},
 			{
 				// f3
-				EdgeOrigin: v1,
-				EdgeDestin: v2,
-				Cycle:      []XY{v1, v2, v20, v18, v10, v17},
-				Label:      inputBPopulated | inputAPopulated | inputAInSet,
+				First:  v1,
+				Second: v2,
+				Cycle:  []XY{v1, v2, v20, v18, v10, v17, v1},
+				Label:  inputBPopulated | inputAPopulated | inputAInSet,
 			},
 			{
 				// f4
-				EdgeOrigin: v4,
-				EdgeDestin: v18,
-				Cycle:      []XY{v4, v18, v19, v12, v9, v17},
-				Label:      inputBPopulated | inputAPopulated | inputBInSet,
+				First:  v17,
+				Second: v4,
+				Cycle:  []XY{v17, v4, v18, v19, v12, v9, v17},
+				Label:  inputBPopulated | inputAPopulated | inputBInSet,
 			},
 			{
 				// f5
-				EdgeOrigin: v17,
-				EdgeDestin: v10,
-				Cycle:      []XY{v17, v10, v18, v4},
-				Label:      inputBPopulated | inputAPopulated | inputBInSet | inputAInSet,
+				First:  v17,
+				Second: v10,
+				Cycle:  []XY{v17, v10, v18, v4, v17},
+				Label:  inputBPopulated | inputAPopulated | inputBInSet | inputAInSet,
 			},
 			{
 				// f6
-				EdgeOrigin: v2,
-				EdgeDestin: v5,
-				Cycle:      []XY{v2, v5, v20},
-				Label:      populatedMask,
+				First:  v2,
+				Second: v5,
+				Cycle:  []XY{v2, v5, v20, v2},
+				Label:  populatedMask,
 			},
 			{
 				// f7
-				EdgeOrigin: v20,
-				EdgeDestin: v3,
-				Cycle:      []XY{v20, v3, v18},
-				Label:      inputBPopulated | inputAPopulated | inputAInSet,
+				First:  v20,
+				Second: v3,
+				Cycle:  []XY{v20, v3, v18, v20},
+				Label:  inputBPopulated | inputAPopulated | inputAInSet,
 			},
 			{
 				// f8
-				EdgeOrigin: v18,
-				EdgeDestin: v11,
-				Cycle:      []XY{v18, v11, v19},
-				Label:      inputBPopulated | inputAPopulated | inputBInSet,
+				First:  v18,
+				Second: v11,
+				Cycle:  []XY{v18, v11, v19, v18},
+				Label:  inputBPopulated | inputAPopulated | inputBInSet,
 			},
 			{
 				// f9
-				EdgeOrigin: v12,
-				EdgeDestin: v19,
-				Cycle:      []XY{v12, v19, v13},
-				Label:      populatedMask,
+				First:  v12,
+				Second: v19,
+				Cycle:  []XY{v12, v19, v13, v12},
+				Label:  populatedMask,
 			},
 		},
 	})
@@ -1171,7 +1405,7 @@ func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
 
 	/*
 	  v5-----v4----v3
-	   |  f2 |  f1 |  f0
+	   |  f1 |  f2 |  f0
 	   |     |     |
 	  v0----v1-----v2
 	*/
@@ -1184,64 +1418,79 @@ func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
 	v5 := XY{0, 1}
 
 	CheckDCEL(t, overlay, DCELSpec{
-		NumVerts: 6,
-		NumEdges: 14,
+		NumVerts: 3,
+		NumEdges: 8,
 		NumFaces: 3,
 		Vertices: []VertexSpec{
-			{Vertices: []XY{v0, v5}, Label: populatedMask | inputAInSet},
-			{Vertices: []XY{v1, v4}, Label: populatedMask | inputAInSet | inputBInSet},
-			{Vertices: []XY{v3, v2}, Label: populatedMask | inputBInSet},
+			{
+				Vertices: []XY{v0},
+				Label:    populatedMask | inputAInSet,
+			},
+			{
+				Vertices: []XY{v1, v4},
+				Label:    populatedMask | inSetMask,
+			},
 		},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v1, v0, v5, v4},
+				Sequence:  []XY{v1, v0},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v0, v5, v4},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated | inputAInSet,
-				Edges:     []XY{v4, v5, v0, v1},
+				Sequence:  []XY{v4, v5, v0},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated | inputAInSet,
+				Sequence:  []XY{v0, v1},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v4, v3, v2, v1},
+				Sequence:  []XY{v4, v3, v2, v1},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v1, v2, v3, v4},
+				Sequence:  []XY{v1, v2, v3, v4},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet | inputBInSet,
 				FaceLabel: populatedMask | inputAInSet,
-				Edges:     []XY{v1, v4},
+				Sequence:  []XY{v1, v4},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet | inputBInSet,
 				FaceLabel: populatedMask | inputBInSet,
-				Edges:     []XY{v4, v1},
+				Sequence:  []XY{v4, v1},
 			},
 		},
 		Faces: []FaceSpec{
 			{
-				EdgeOrigin: v1,
-				EdgeDestin: v0,
-				Cycle:      []XY{v0, v5, v4, v3, v2, v1},
-				Label:      inputAPopulated | inputBPopulated,
+				First:  v1,
+				Second: v0,
+				Cycle:  []XY{v0, v5, v4, v3, v2, v1, v0},
+				Label:  inputAPopulated | inputBPopulated,
 			},
 			{
-				EdgeOrigin: v0,
-				EdgeDestin: v1,
-				Cycle:      []XY{v0, v1, v4, v5},
-				Label:      inputAPopulated | inputBPopulated | inputAInSet,
+				First:  v1,
+				Second: v4,
+				Cycle:  []XY{v1, v4, v5, v0, v1},
+				Label:  inputAPopulated | inputBPopulated | inputAInSet,
 			},
 			{
-				EdgeOrigin: v1,
-				EdgeDestin: v2,
-				Cycle:      []XY{v1, v2, v3, v4},
-				Label:      inputAPopulated | inputBPopulated | inputBInSet,
+				First:  v1,
+				Second: v2,
+				Cycle:  []XY{v1, v2, v3, v4, v1},
+				Label:  inputAPopulated | inputBPopulated | inputBInSet,
 			},
 		},
 	})
@@ -1256,9 +1505,9 @@ func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
 	/*
 	  v7-------v6    f0
 	   |       |
-	   | f2   v5-------v4
+	   | f1   v5-------v4
 	   |       |       |
-	  v0------v1   f1  |
+	  v0------v1   f2  |
 	    `-, f3 |       |
 	       `-,v2-------v3
 	*/
@@ -1273,79 +1522,115 @@ func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
 	v7 := XY{0, 3}
 
 	CheckDCEL(t, overlay, DCELSpec{
-		NumVerts: 8,
-		NumEdges: 20,
+		NumVerts: 4,
+		NumEdges: 12,
 		NumFaces: 4,
 		Vertices: []VertexSpec{
-			{Vertices: []XY{v0, v7, v6}, Label: populatedMask | inputAInSet},
-			{Vertices: []XY{v2, v3, v4}, Label: populatedMask | inputBInSet},
-			{Vertices: []XY{v1, v5}, Label: populatedMask | inputAInSet | inputBInSet},
+			{
+				Vertices: []XY{v0},
+				Label:    populatedMask | inputAInSet,
+			},
+			{
+				Vertices: []XY{v2},
+				Label:    populatedMask | inputBInSet,
+			},
+			{
+				Vertices: []XY{v1, v5},
+				Label:    populatedMask | inSetMask,
+			},
 		},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Edges:     []XY{v1, v0, v7, v6, v5},
+				Sequence:  []XY{v1, v0},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v0, v7, v6, v5},
+			},
+
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated | inputAInSet,
+				Sequence:  []XY{v5, v6, v7, v0},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated | inputAInSet,
-				Edges:     []XY{v5, v6, v7, v0, v1},
+				Sequence:  []XY{v0, v1},
+			},
+
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
+				Sequence:  []XY{v5, v4, v3, v2},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated,
-				Edges:     []XY{v5, v4, v3, v2, v1},
+				Sequence:  []XY{v2, v1},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
-				Edges:     []XY{v1, v2, v3, v4, v5},
+				Sequence:  []XY{v1, v2},
+			},
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+				Sequence:  []XY{v2, v3, v4, v5},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet | inputBInSet,
 				FaceLabel: populatedMask | inputAInSet,
-				Edges:     []XY{v1, v5},
+				Sequence:  []XY{v1, v5},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet | inputBInSet,
 				FaceLabel: populatedMask | inputBInSet,
-				Edges:     []XY{v5, v1},
+				Sequence:  []XY{v5, v1},
 			},
 			{
 				EdgeLabel: populatedMask,
 				FaceLabel: 0,
-				Edges:     []XY{v2, v0, v2},
+				Sequence:  []XY{v2, v0},
+			},
+			{
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+				Sequence:  []XY{v0, v2},
 			},
 		},
 		Faces: []FaceSpec{
 			{
 				// f0
-				EdgeOrigin: v0,
-				EdgeDestin: v7,
-				Cycle:      []XY{v0, v7, v6, v5, v4, v3, v2},
-				Label:      populatedMask,
+				First:  v0,
+				Second: v7,
+				Cycle:  []XY{v0, v7, v6, v5, v4, v3, v2, v0},
+				Label:  populatedMask,
 			},
 			{
 				// f1
-				EdgeOrigin: v0,
-				EdgeDestin: v1,
-				Cycle:      []XY{v0, v1, v5, v6, v7},
-				Label:      populatedMask | inputAInSet,
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v5, v6, v7, v0},
+				Label:  populatedMask | inputAInSet,
 			},
 			{
 				// f2
-				EdgeOrigin: v1,
-				EdgeDestin: v2,
-				Cycle:      []XY{v1, v2, v3, v4, v5},
-				Label:      populatedMask | inputBInSet,
+				First:  v1,
+				Second: v2,
+				Cycle:  []XY{v1, v2, v3, v4, v5, v1},
+				Label:  populatedMask | inputBInSet,
 			},
 			{
 				// f3
-				EdgeOrigin: v2,
-				EdgeDestin: v1,
-				Cycle:      []XY{v2, v1, v0},
-				Label:      populatedMask,
+				First:  v2,
+				Second: v1,
+				Cycle:  []XY{v2, v1, v0, v2},
+				Label:  populatedMask,
 			},
 		},
 	})
@@ -1371,39 +1656,39 @@ func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
 	v3 := XY{0, 1}
 
 	CheckDCEL(t, overlay, DCELSpec{
-		NumVerts: 4,
-		NumEdges: 8,
+		NumVerts: 1,
+		NumEdges: 2,
 		NumFaces: 2,
 		Vertices: []VertexSpec{{
 			Label:    populatedMask | inSetMask,
-			Vertices: []XY{v0, v1, v2, v3},
+			Vertices: []XY{v0},
 		}},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
 				EdgeLabel: populatedMask | inSetMask,
 				FaceLabel: populatedMask | inSetMask,
-				Edges:     []XY{v0, v1, v2, v3, v0},
+				Sequence:  []XY{v0, v1, v2, v3, v0},
 			},
 			{
 				EdgeLabel: populatedMask | inSetMask,
 				FaceLabel: populatedMask,
-				Edges:     []XY{v0, v3, v2, v1, v0},
+				Sequence:  []XY{v0, v3, v2, v1, v0},
 			},
 		},
 		Faces: []FaceSpec{
 			{
 				// f0
-				EdgeOrigin: v1,
-				EdgeDestin: v0,
-				Cycle:      []XY{v1, v0, v3, v2},
-				Label:      inputAPopulated | inputBPopulated,
+				First:  v0,
+				Second: v3,
+				Cycle:  []XY{v0, v3, v2, v1, v0},
+				Label:  inputAPopulated | inputBPopulated,
 			},
 			{
 				// f1
-				EdgeOrigin: v0,
-				EdgeDestin: v1,
-				Cycle:      []XY{v0, v1, v2, v3},
-				Label:      inputAPopulated | inputBPopulated | inputAInSet | inputBInSet,
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v2, v3, v0},
+				Label:  inputAPopulated | inputBPopulated | inputAInSet | inputBInSet,
 			},
 		},
 	})
@@ -1435,23 +1720,33 @@ func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 			{Vertices: []XY{v0}, Label: populatedMask | inputBInSet},
 			{Vertices: []XY{v1}, Label: populatedMask | inSetMask},
 		},
-		Edges: []EdgeLabelSpec{
+		Edges: []EdgeSpec{
 			{
-				Edges:     []XY{v1, v2, v1},
+				Sequence:  []XY{v1, v2},
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated,
 			},
 			{
-				Edges:     []XY{v0, v1, v0},
+				Sequence:  []XY{v2, v1},
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+			},
+			{
+				Sequence:  []XY{v0, v1},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
+			},
+			{
+				Sequence:  []XY{v1, v0},
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated,
 			},
 		},
 		Faces: []FaceSpec{{
-			EdgeOrigin: v0,
-			EdgeDestin: v1,
-			Cycle:      []XY{v0, v1, v2, v1},
-			Label:      populatedMask,
+			First:  v0,
+			Second: v1,
+			Cycle:  []XY{v0, v1, v2, v1, v0},
+			Label:  populatedMask,
 		}},
 	})
 }
@@ -1480,41 +1775,77 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 	v7 := XY{2, 1}
 
 	CheckDCEL(t, overlay, DCELSpec{
-		NumVerts: 8,
-		NumEdges: 20,
+		NumVerts: 4,
+		NumEdges: 12,
 		NumFaces: 4,
 		Vertices: []VertexSpec{
-			{Vertices: []XY{v1, v3}, Label: populatedMask | inputAInSet | inputBInSet},
-			{Vertices: []XY{v0, v2, v4, v5, v6, v7}, Label: populatedMask | inputBInSet},
-		},
-		Edges: []EdgeLabelSpec{
 			{
-				Edges:     []XY{v1, v3, v1},
+				Vertices: []XY{v1, v3},
+				Label:    populatedMask | inSetMask,
+			},
+			{
+				Vertices: []XY{v0, v4},
+				Label:    populatedMask | inputBInSet,
+			},
+		},
+		Edges: []EdgeSpec{
+			{
+				Sequence:  []XY{v1, v3},
 				EdgeLabel: populatedMask | inputAInSet | inputBInSet,
 				FaceLabel: inputAPopulated,
 			},
 			{
-				Edges:     []XY{v0, v1, v2, v3, v0},
+				Sequence:  []XY{v3, v1},
+				EdgeLabel: populatedMask | inputAInSet | inputBInSet,
+				FaceLabel: inputAPopulated,
+			},
+			{
+				Sequence:  []XY{v0, v1},
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
 			},
 			{
-				Edges:     []XY{v0, v3, v2, v1, v0},
-				EdgeLabel: populatedMask | inputBInSet,
-				FaceLabel: inputBPopulated,
-			},
-			{
-				Edges:     []XY{v4, v5, v6, v7, v4},
+				Sequence:  []XY{v1, v2, v3},
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated | inputBInSet,
 			},
 			{
-				Edges:     []XY{v4, v7, v6, v5, v4},
+				Sequence:  []XY{v3, v0},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+			},
+			{
+				Sequence:  []XY{v0, v3},
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated,
 			},
 			{
-				Edges:     []XY{v1, v4, v1},
+				Sequence:  []XY{v3, v2, v1},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
+			},
+			{
+				Sequence:  []XY{v1, v0},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
+			},
+			{
+				Sequence:  []XY{v4, v5, v6, v7, v4},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+			},
+			{
+				Sequence:  []XY{v4, v7, v6, v5, v4},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
+			},
+			{
+				Sequence:  []XY{v4, v1},
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+			},
+			{
+				Sequence:  []XY{v1, v4},
 				EdgeLabel: populatedMask,
 				FaceLabel: 0,
 			},
@@ -1522,31 +1853,31 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 		Faces: []FaceSpec{
 			{
 				// f0
-				EdgeOrigin: v1,
-				EdgeDestin: v0,
-				Cycle:      []XY{v1, v0, v3, v2, v1, v4, v7, v6, v5, v4},
-				Label:      populatedMask,
+				First:  v1,
+				Second: v0,
+				Cycle:  []XY{v1, v0, v3, v2, v1, v4, v7, v6, v5, v4, v1},
+				Label:  populatedMask,
 			},
 			{
 				// f1
-				EdgeOrigin: v0,
-				EdgeDestin: v1,
-				Cycle:      []XY{v0, v1, v3},
-				Label:      populatedMask | inputBInSet,
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v3, v0},
+				Label:  populatedMask | inputBInSet,
 			},
 			{
 				// f2
-				EdgeOrigin: v1,
-				EdgeDestin: v2,
-				Cycle:      []XY{v1, v2, v3},
-				Label:      populatedMask | inputBInSet,
+				First:  v1,
+				Second: v2,
+				Cycle:  []XY{v1, v2, v3, v1},
+				Label:  populatedMask | inputBInSet,
 			},
 			{
 				// f3
-				EdgeOrigin: v4,
-				EdgeDestin: v5,
-				Cycle:      []XY{v4, v5, v6, v7},
-				Label:      populatedMask | inputBInSet,
+				First:  v4,
+				Second: v5,
+				Cycle:  []XY{v4, v5, v6, v7, v4},
+				Label:  populatedMask | inputBInSet,
 			},
 		},
 	})
@@ -1575,22 +1906,126 @@ func TestGraphOverlayReproducePointOnLineStringPrecisionBug(t *testing.T) {
 		NumEdges: 4,
 		NumFaces: 1,
 		Vertices: []VertexSpec{
-			{Vertices: []XY{v0, v2}, Label: populatedMask | inputAInSet},
-			{Vertices: []XY{v1}, Label: populatedMask | inputAInSet | inputBInSet},
-		},
-		Edges: []EdgeLabelSpec{
 			{
-				Edges:     []XY{v0, v1, v2, v1, v0},
+				Vertices: []XY{v0, v2},
+				Label:    populatedMask | inputAInSet,
+			},
+			{
+				Vertices: []XY{v1},
+				Label:    populatedMask | inputAInSet | inputBInSet,
+			},
+		},
+		Edges: []EdgeSpec{
+			{
+				Sequence:  []XY{v0, v1},
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+			},
+			{
+				Sequence:  []XY{v1, v2},
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+			},
+			{
+				Sequence:  []XY{v2, v1},
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated,
+			},
+			{
+				Sequence:  []XY{v1, v0},
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated,
 			},
 		},
 		Faces: []FaceSpec{
 			{
-				EdgeOrigin: v0,
-				EdgeDestin: v1,
-				Cycle:      []XY{v0, v1, v2, v1},
-				Label:      populatedMask,
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v2, v1, v0},
+				Label:  populatedMask,
+			},
+		},
+	})
+}
+
+func TestGraphOverlayReproduceGhostOnGeometryBug(t *testing.T) {
+	overlay := createOverlayFromWKTs(t,
+		"LINESTRING(0 1,0 0,1 0)",
+		"POLYGON((0 0,1 0,1 1,0 1,0 0.5,0 0))",
+	)
+
+	/*
+	   v3        v2
+	   @----------+
+	   |          |
+	   |          |
+	 v4+    f1    |  f0
+	   |          |
+	   |          |
+	   @----------@
+	   v0        v1
+	*/
+
+	v0 := XY{0, 0}
+	v1 := XY{1, 0}
+	v2 := XY{1, 1}
+	v3 := XY{0, 1}
+	v4 := XY{0, 0.5}
+
+	CheckDCEL(t, overlay, DCELSpec{
+		NumVerts: 3,
+		NumEdges: 6,
+		NumFaces: 2,
+		Vertices: []VertexSpec{
+			{
+				Vertices: []XY{v0, v1, v3},
+				Label:    populatedMask | inputAInSet | inputBInSet,
+			},
+		},
+		Edges: []EdgeSpec{
+			{
+				Sequence:  []XY{v0, v1},
+				EdgeLabel: populatedMask | inSetMask,
+				FaceLabel: populatedMask | inputBInSet,
+			},
+			{
+				Sequence:  []XY{v1, v0},
+				EdgeLabel: populatedMask | inSetMask,
+				FaceLabel: populatedMask,
+			},
+			{
+				Sequence:  []XY{v1, v2, v3},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+			},
+			{
+				Sequence:  []XY{v3, v2, v1},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
+			},
+			{
+				Sequence:  []XY{v3, v4, v0},
+				EdgeLabel: populatedMask | inSetMask,
+				FaceLabel: populatedMask | inputBInSet,
+			},
+			{
+				Sequence:  []XY{v0, v4, v3},
+				EdgeLabel: populatedMask | inSetMask,
+				FaceLabel: populatedMask,
+			},
+		},
+		Faces: []FaceSpec{
+			{
+				First:  v1,
+				Second: v0,
+				Cycle:  []XY{v1, v0, v4, v3, v2, v1},
+				Label:  populatedMask,
+			},
+			{
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v2, v3, v4, v0},
+				Label:  populatedMask | inputBInSet,
 			},
 		},
 	})

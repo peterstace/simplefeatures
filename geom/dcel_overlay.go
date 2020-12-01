@@ -43,21 +43,19 @@ func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) {
 		vert.incidents = nil
 	}
 
-	edgeRecords := make(map[line]*halfEdgeRecord)
+	edges := make(edgeSet)
 	for _, e := range d.halfEdges {
-		ln := line{e.origin.coords, e.next.origin.coords}
-		edgeRecords[ln] = e
+		edges.insertEdge(e)
 		e.origin.incidents = append(e.origin.incidents, e)
 	}
 
 	for _, e := range other.halfEdges {
-		ln := line{e.origin.coords, e.next.origin.coords}
-		if existing, ok := edgeRecords[ln]; ok {
+		if existing, ok := edges.lookupEdge(e); ok {
 			existing.edgeLabel |= e.edgeLabel
 			existing.faceLabel |= e.faceLabel
 		} else {
-			edgeRecords[ln] = e
-			e.origin = d.vertices[ln.a]
+			edges.insertEdge(e)
+			e.origin = d.vertices[e.origin.coords]
 			e.origin.incidents = append(e.origin.incidents, e)
 			d.halfEdges = append(d.halfEdges, e)
 		}
@@ -76,8 +74,8 @@ func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 		sort.Slice(v.incidents, func(i, j int) bool {
 			ei := v.incidents[i]
 			ej := v.incidents[j]
-			di := ei.twin.origin.coords.Sub(ei.origin.coords)
-			dj := ej.twin.origin.coords.Sub(ej.origin.coords)
+			di := ei.secondXY().Sub(ei.origin.coords)
+			dj := ej.secondXY().Sub(ej.origin.coords)
 			aI := math.Atan2(di.Y, di.X)
 			aJ := math.Atan2(dj.Y, dj.X)
 			return aI < aJ
