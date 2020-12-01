@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.23.0
+
+2020-12-02
+
+- Improvements for DCEL operations (`Intersection`, `Union`, `Difference`, and
+  `SymmetricDifference`). Some improvements simplify data structures and
+  algorithms, and other improvements increase performance (~2x speedup).
+
+- Fixes a compiler warning in the `geos` package.
+
+- Internal refactor of WKB error handling to mirror the error handling strategy
+  used for WKT.
+
 ## v0.22.0
 
 2020-10-30
