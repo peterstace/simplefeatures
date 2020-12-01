@@ -6,30 +6,26 @@ import (
 	"sort"
 )
 
-// newNodesFromLineLineIntersection finds the new nodes that would be created
-// on a line when it is intersected with another line.
-func newNodesFromLineLineIntersection(ln, other line, eps float64) []XY {
-	var xys []XY
+// appendNewNodesFromLineLineIntersection finds the new nodes that would be
+// created on a line when it is intersected with another line.
+func appendNewNodesFromLineLineIntersection(dst []XY, ln, other line, eps float64) []XY {
 	if distBetweenXYAndLine(other.a, ln) < eps {
-		xys = append(xys, other.a)
+		dst = append(dst, other.a)
 	}
 	if distBetweenXYAndLine(other.b, ln) < eps {
-		xys = append(xys, other.b)
+		dst = append(dst, other.b)
 	}
 	inter := ln.intersectLine(other)
 	if !inter.empty {
-		xys = append(xys, inter.ptA, inter.ptB)
+		dst = append(dst, inter.ptA, inter.ptB)
 	}
-	return xys
+	return dst
 }
 
-// newNodesFromLinePointIntersection finds the new nodes that would be created
-// on a line when it is intersected with a point.
-func newNodesFromLinePointIntersection(ln line, pt XY, eps float64) []XY {
-	if distBetweenXYAndLine(pt, ln) < eps {
-		return []XY{pt}
-	}
-	return nil
+// newNodeFromLinePointIntersection finds the new node that might be created on
+// a line when it is intersected with a point.
+func newNodeFromLinePointIntersection(ln line, pt XY, eps float64) (XY, bool) {
+	return pt, distBetweenXYAndLine(pt, ln) < eps
 }
 
 // ulpSizeForLine finds the maximum ULP out of the 4 float64s that make a line.
@@ -174,7 +170,10 @@ func appendPoints(points []XY, g Geometry) []XY {
 }
 
 func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, error) {
-	var newCoords []float64
+	var (
+		tmp       []XY
+		newCoords []float64
+	)
 	seq := ls.Coordinates()
 	n := seq.Length()
 	for lnIdx := 0; lnIdx < n; lnIdx++ {
@@ -188,16 +187,15 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 		xys := []XY{nodes.insertOrGet(ln.a), nodes.insertOrGet(ln.b)}
 		cut.lnIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
 			other := cut.lnIndex.lines[i]
-			newXYs := newNodesFromLineLineIntersection(ln, other, eps)
-			for _, xy := range newXYs {
+			tmp = appendNewNodesFromLineLineIntersection(tmp[:0], ln, other, eps)
+			for _, xy := range tmp {
 				xys = append(xys, nodes.insertOrGet(xy))
 			}
 			return nil
 		})
 		cut.ptIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
 			other := cut.ptIndex.points[i]
-			newXYs := newNodesFromLinePointIntersection(ln, other, eps)
-			for _, xy := range newXYs {
+			if xy, ok := newNodeFromLinePointIntersection(ln, other, eps); ok {
 				xys = append(xys, nodes.insertOrGet(xy))
 			}
 			return nil
