@@ -40,6 +40,12 @@ func TestReNode(t *testing.T) {
 			outputA: "LINESTRING(0 0,1 1,2 2)",
 			outputB: "LINESTRING(0 0,1 1,2 2)",
 		},
+		{
+			inputA:  "LINESTRING(0.5 1,0.5000000000000001 0.5)",
+			inputB:  "LINESTRING(0.5 0,0.5 0.5)",
+			outputA: "LINESTRING(0.5 1,0.5000000000000001 0.5)",
+			outputB: "LINESTRING(0.5 0,0.5000000000000001 0.5)",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			inA, err := UnmarshalWKT(tt.inputA)

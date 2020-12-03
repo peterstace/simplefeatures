@@ -800,6 +800,11 @@ func TestBinaryOp(t *testing.T) {
 			input2:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.3333333333 0.6666666667,0.5 0.5),(0.5 0.5,1 0))",
 			fwdDiff: "MULTILINESTRING((0 0,0 1),(1 0,0 0))",
 		},
+		{
+			input1: "LINESTRING(1 0,0.5000000000000001 0.5,0 1)",
+			input2: "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0),(0.5 0.5,1 0.5,1 1.5,0.5 1.5,0.5 0.5)))",
+			union:  "POLYGON((0 0,1 0,2 0,2 2,0 2,0 1,0 0),(0.5000000000000001 0.5,1 0.5,1 1.5,0.5 1.5,0.5000000000000001 0.5))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
