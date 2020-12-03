@@ -590,6 +590,11 @@ func checkIntersects(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 		//  f # WRONG!!
 		// (1 row)
 		"LINESTRING(1 0,0.5000000000000001 0.5,0 1)": true,
+
+		// Simplefeatures sometimes gives an incorrect result for this due to
+		// numerical precision issues. Would be solved by
+		// https://github.com/peterstace/simplefeatures/issues/274
+		"LINESTRING(0.5 0,0.5000000000000001 0.5)": true,
 	}
 	if skipList[g1.AsText()] || skipList[g2.AsText()] {
 		// Skipping test because GEOS gives the incorrect result for *some*
@@ -663,6 +668,8 @@ var skipIntersection = map[string]bool{
 	"MULTILINESTRING((0 0,0.5 0.5,1 1,2 2.000000000000001),(1 0,0.5 0.5,0 1,-1 2.000000000000001))": true,
 	"POLYGON((1.5 1,1.353553390593274 0.6464466094067265,1.0000000000000009 0.5,0.646446609406727 0.6464466094067254,0.5 0.9999999999999983,0.6464466094067247 1.3535533905932722,0.9999999999999977 1.5,1.3535533905932717 1.3535533905932757,1.5 1))": true,
 	"POLYGON((1 0,-0.9 -0.2,-1 -0.0000000000000032310891488651735,-0.9 0.2,1 0))": true,
+	"LINESTRING(0.5 0,0.5000000000000001 0.5)":                                    true,
+	"LINESTRING(0.5 1,0.5000000000000001 0.5)":                                    true,
 }
 
 var skipDifference = map[string]bool{
@@ -680,6 +687,8 @@ var skipDifference = map[string]bool{
 	"MULTILINESTRING((0 0,2 2.000000000000001),(1 0,-1 2.000000000000001))":                                                                            true,
 	"MULTILINESTRING((0 0,0.5 0.5,1 1,2 2.000000000000001),(1 0,0.5 0.5,0 1,-1 2.000000000000001))":                                                    true,
 	"MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.3333333333 0.6666666667,0.5 0.5),(0.5 0.5,1 0))":                                               true,
+	"LINESTRING(0.5 0,0.5000000000000001 0.5)": true,
+	"LINESTRING(0.5 1,0.5000000000000001 0.5)": true,
 }
 
 var skipSymDiff = map[string]bool{

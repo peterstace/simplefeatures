@@ -244,7 +244,7 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 
 	// Copy over final point.
 	if n > 0 {
-		last := seq.GetXY(n - 1)
+		last := nodes.insertOrGet(seq.GetXY(n - 1))
 		newCoords = append(newCoords, last.X, last.Y)
 	}
 
