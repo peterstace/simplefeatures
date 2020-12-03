@@ -205,7 +205,7 @@ func checkFromText(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return err
 	}
 
-	if !got.EqualsExact(want) {
+	if !geom.EqualsExact(got, want) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
 		return mismatchErr
@@ -272,7 +272,7 @@ func checkFromBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return err
 	}
 
-	if !want.EqualsExact(got) {
+	if !geom.EqualsExact(want, got) {
 		return mismatchErr
 	}
 	return nil
@@ -392,7 +392,7 @@ func checkBoundary(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	if !want.EqualsExact(got, geom.IgnoreOrder) {
+	if !geom.EqualsExact(want, got, geom.IgnoreOrder) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
 		return mismatchErr
@@ -414,7 +414,7 @@ func checkConvexHull(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	if !want.EqualsExact(got, geom.IgnoreOrder) {
+	if !geom.EqualsExact(want, got, geom.IgnoreOrder) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
 		return mismatchErr
@@ -496,7 +496,7 @@ func checkCentroid(h *Handle, g geom.Geometry, log *log.Logger) error {
 	}
 	got := g.Centroid().AsGeometry()
 
-	if !want.EqualsExact(got, geom.ToleranceXY(1e-9)) {
+	if !geom.EqualsExact(want, got, geom.ToleranceXY(1e-9)) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
 		return mismatchErr
@@ -624,7 +624,7 @@ func checkEqualsExact(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	if err != nil {
 		return err
 	}
-	got := g1.EqualsExact(g2)
+	got := geom.EqualsExact(g1, g2)
 
 	if want != got {
 		log.Printf("want: %v", want)

@@ -159,25 +159,6 @@ func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, er
 	return NewPoint(newC, opts...), nil
 }
 
-// EqualsExact checks if this Point is exactly equal to another Point.
-func (p Point) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	if !other.IsPoint() {
-		return false
-	}
-	if p.CoordinatesType() != other.CoordinatesType() {
-		return false
-	}
-	if p.IsEmpty() != other.IsEmpty() {
-		return false
-	}
-	if p.IsEmpty() {
-		return true
-	}
-	// No need to check returned flag, since we know that both Points are
-	// non-empty.
-	return newEqualsExactOptionSet(opts).eq(p.coords, other.AsPoint().coords)
-}
-
 // Centroid of a point is that point.
 func (p Point) Centroid() Point {
 	return p.Force2D()

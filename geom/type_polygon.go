@@ -312,12 +312,6 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon
 	return poly.ForceCoordinatesType(p.ctype), err
 }
 
-// EqualsExact checks if this Polygon is exactly equal to another Polygon.
-func (p Polygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	return other.IsPolygon() &&
-		polygonExactEqual(p, other.AsPolygon(), opts)
-}
-
 // AreaOption allows the behaviour of area calculations to be modified.
 type AreaOption func(o *areaOptionSet)
 

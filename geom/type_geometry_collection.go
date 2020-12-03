@@ -208,12 +208,6 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 	return GeometryCollection{transformed, c.ctype}, nil
 }
 
-// EqualsExact checks if this GeometryCollection is exactly equal to another GeometryCollection.
-func (c GeometryCollection) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	return other.IsGeometryCollection() &&
-		geometryCollectionExactEqual(c, other.AsGeometryCollection(), opts)
-}
-
 // Reverse in the case of GeometryCollection reverses each component and also
 // returns them in the original order.
 func (c GeometryCollection) Reverse() GeometryCollection {

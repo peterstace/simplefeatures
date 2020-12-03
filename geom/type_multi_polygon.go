@@ -334,12 +334,6 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mu
 	return mp.ForceCoordinatesType(m.ctype), err
 }
 
-// EqualsExact checks if this MultiPolygon is exactly equal to another MultiPolygon.
-func (m MultiPolygon) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	return other.IsMultiPolygon() &&
-		multiPolygonExactEqual(m, other.AsMultiPolygon(), opts)
-}
-
 // Area in the case of a MultiPolygon is the sum of the areas of its polygons.
 func (m MultiPolygon) Area(opts ...AreaOption) float64 {
 	var area float64

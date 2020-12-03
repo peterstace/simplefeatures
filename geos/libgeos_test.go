@@ -25,7 +25,7 @@ func expectNoErr(t *testing.T, err error) {
 
 func expectGeomEq(t *testing.T, got, want geom.Geometry, opts ...geom.EqualsExactOption) {
 	t.Helper()
-	if !got.EqualsExact(want, opts...) {
+	if !geom.EqualsExact(got, want, opts...) {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
 	}
 }

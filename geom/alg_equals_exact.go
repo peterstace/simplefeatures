@@ -2,36 +2,37 @@ package geom
 
 // EqualsExactOption allows the behaviour of the EqualsExact method in the
 // Geometry interface to be modified.
-type EqualsExactOption func(s *equalsExactOptionSet)
+type EqualsExactOption func(equalsExactComparator) equalsExactComparator
 
-type equalsExactOptionSet struct {
+type equalsExactComparator struct {
 	toleranceSq float64
 	ignoreOrder bool
 }
 
-func newEqualsExactOptionSet(opts []EqualsExactOption) equalsExactOptionSet {
-	var s equalsExactOptionSet
+func newEqualsExactComparator(opts []EqualsExactOption) equalsExactComparator {
+	var c equalsExactComparator
 	for _, o := range opts {
-		o(&s)
+		c = o(c)
 	}
-	return s
+	return c
 }
 
 // ToleranceXY modifies the behaviour of the EqualsExact method by allowing two
 // geometry control points be be considered equal if their XY coordinates are
 // within the given euclidean distance of each other.
 func ToleranceXY(within float64) EqualsExactOption {
-	return func(s *equalsExactOptionSet) {
-		s.toleranceSq = within * within
+	return func(c equalsExactComparator) equalsExactComparator {
+		c.toleranceSq = within * within
+		return c
 	}
 }
 
-func (os equalsExactOptionSet) eq(a, b Coordinates) bool {
+func (c equalsExactComparator) eq(a, b Coordinates) bool {
 	if a.Type != b.Type {
 		return false
 	}
 	asb := a.XY.Sub(b.XY)
-	if asb.Dot(asb) > os.toleranceSq {
+	if asb.Dot(asb) > c.toleranceSq {
 		return false
 	}
 	if a.Type.Is3D() && a.Z != b.Z {
@@ -60,16 +61,48 @@ func (os equalsExactOptionSet) eq(a, b Coordinates) bool {
 // GeometryCollection), the ordering of constituent elements in the collection
 // are ignored.
 var IgnoreOrder = EqualsExactOption(
-	func(s *equalsExactOptionSet) {
-		s.ignoreOrder = true
+	func(c equalsExactComparator) equalsExactComparator {
+		c.ignoreOrder = true
+		return c
 	},
 )
 
-func ignoreOrder(opts []EqualsExactOption) bool {
-	return newEqualsExactOptionSet(opts).ignoreOrder
+// EqualsExact checks if two geometries are equal from a structural pointwise
+// equality perspective. Geometries that are structurally equal are defined by
+// exactly same control points in the same order. Note that even if two
+// geometries are spatially equal (i.e.  represent the same point set), they
+// may not be defined by exactly the same way. Ordering differences and numeric
+// tolerances can be accounted for using options.
+func EqualsExact(g1, g2 Geometry, opts ...EqualsExactOption) bool {
+	os := newEqualsExactComparator(opts)
+	return os.geometriesEq(g1, g2)
 }
 
-func curvesExactEqual(c1, c2 Sequence, opts []EqualsExactOption) bool {
+func (c equalsExactComparator) geometriesEq(g1, g2 Geometry) bool {
+	if g1.Type() != g2.Type() {
+		return false
+	}
+	switch typ := g1.Type(); typ {
+	case TypePoint:
+		return c.pointsEq(g1.AsPoint(), g2.AsPoint())
+	case TypeMultiPoint:
+		return c.multiPointsEq(g1.AsMultiPoint(), g2.AsMultiPoint())
+	case TypeLineString:
+		return c.curvesEq(g1.AsLineString().Coordinates(), g2.AsLineString().Coordinates())
+	case TypeMultiLineString:
+		return c.multiLineStringsEq(g1.AsMultiLineString(), g2.AsMultiLineString())
+	case TypePolygon:
+		return c.polygonsEq(g1.AsPolygon(), g2.AsPolygon())
+	case TypeMultiPolygon:
+		return c.multiPolygonsEq(g1.AsMultiPolygon(), g2.AsMultiPolygon())
+	case TypeGeometryCollection:
+		return c.geometryCollectionsEq(g1.AsGeometryCollection(), g2.AsGeometryCollection())
+	default:
+		panic("unknown geometry type: " + typ.String())
+	}
+}
+
+func (c equalsExactComparator) curvesEq(c1, c2 Sequence) bool {
 	// Must have the same number of points and be of the same coordinate type.
 	n := c1.Length()
 	if n != c2.Length() {
@@ -81,13 +114,12 @@ func curvesExactEqual(c1, c2 Sequence, opts []EqualsExactOption) bool {
 
 	// Allow curves to be compared using a point index mapping, allowing
 	// curves to be compared under a rotation or point reversal.
-	os := newEqualsExactOptionSet(opts)
 	type curveMapping func(int) int
 	sameCurve := func(m1, m2 curveMapping) bool {
 		for i := 0; i < n; i++ {
 			c1 := c1.Get(m1(i))
 			c2 := c2.Get(m2(i))
-			if !os.eq(c1, c2) {
+			if !c.eq(c1, c2) {
 				return false
 			}
 		}
@@ -97,7 +129,7 @@ func curvesExactEqual(c1, c2 Sequence, opts []EqualsExactOption) bool {
 	// First check the regular pointwise comparison. No accounting for
 	// reversal or ring offsets.
 	identity := func(i int) int { return i }
-	if equal := sameCurve(identity, identity); equal || !os.ignoreOrder {
+	if equal := sameCurve(identity, identity); equal || !c.ignoreOrder {
 		return equal
 	}
 
@@ -126,7 +158,13 @@ func isRing(c Sequence) bool {
 	return ptA == ptB
 }
 
-func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
+func (c equalsExactComparator) pointsEq(p1, p2 Point) bool {
+	c1, ok1 := p1.Coordinates()
+	c2, ok2 := p2.Coordinates()
+	return ok1 == ok2 && (!ok1 || c.eq(c1, c2))
+}
+
+func (c equalsExactComparator) multiPointsEq(mp1, mp2 MultiPoint) bool {
 	n := mp1.NumPoints()
 	if mp2.NumPoints() != n {
 		return false
@@ -134,7 +172,6 @@ func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
 	if mp1.CoordinatesType() != mp2.CoordinatesType() {
 		return false
 	}
-	os := newEqualsExactOptionSet(opts)
 	ptsEq := func(i, j int) bool {
 		cA, okA := mp1.PointN(i).Coordinates()
 		cB, okB := mp2.PointN(j).Coordinates()
@@ -144,36 +181,34 @@ func multiPointExactEqual(mp1, mp2 MultiPoint, opts []EqualsExactOption) bool {
 		if !okA {
 			return true // both empty
 		}
-		return os.eq(cA, cB)
+		return c.eq(cA, cB)
 	}
-	return structureEqual(n, ptsEq, os.ignoreOrder)
+	return c.structureEq(n, ptsEq)
 }
 
-func polygonExactEqual(p1, p2 Polygon, opts []EqualsExactOption) bool {
+func (c equalsExactComparator) polygonsEq(p1, p2 Polygon) bool {
 	n := p1.NumInteriorRings()
 	if n != p2.NumInteriorRings() {
 		return false
 	}
-	if !curvesExactEqual(
+	if !c.curvesEq(
 		p1.ExteriorRing().Coordinates(),
 		p2.ExteriorRing().Coordinates(),
-		opts,
 	) {
 		return false
 	}
 	ringsEq := func(i, j int) bool {
 		ringA := p1.InteriorRingN(i)
 		ringB := p2.InteriorRingN(j)
-		return curvesExactEqual(
+		return c.curvesEq(
 			ringA.Coordinates(),
 			ringB.Coordinates(),
-			opts,
 		)
 	}
-	return structureEqual(n, ringsEq, ignoreOrder(opts))
+	return c.structureEq(n, ringsEq)
 }
 
-func multiLineStringExactEqual(mls1, mls2 MultiLineString, opts []EqualsExactOption) bool {
+func (c equalsExactComparator) multiLineStringsEq(mls1, mls2 MultiLineString) bool {
 	n := mls1.NumLineStrings()
 	if n != mls2.NumLineStrings() {
 		return false
@@ -184,12 +219,12 @@ func multiLineStringExactEqual(mls1, mls2 MultiLineString, opts []EqualsExactOpt
 	lsEq := func(i, j int) bool {
 		lsA := mls1.LineStringN(i)
 		lsB := mls2.LineStringN(j)
-		return curvesExactEqual(lsA.Coordinates(), lsB.Coordinates(), opts)
+		return c.curvesEq(lsA.Coordinates(), lsB.Coordinates())
 	}
-	return structureEqual(n, lsEq, ignoreOrder(opts))
+	return c.structureEq(n, lsEq)
 }
 
-func multiPolygonExactEqual(mp1, mp2 MultiPolygon, opts []EqualsExactOption) bool {
+func (c equalsExactComparator) multiPolygonsEq(mp1, mp2 MultiPolygon) bool {
 	n := mp1.NumPolygons()
 	if n != mp2.NumPolygons() {
 		return false
@@ -200,12 +235,12 @@ func multiPolygonExactEqual(mp1, mp2 MultiPolygon, opts []EqualsExactOption) boo
 	polyEq := func(i, j int) bool {
 		pA := mp1.PolygonN(i)
 		pB := mp2.PolygonN(j)
-		return polygonExactEqual(pA, pB, opts)
+		return c.polygonsEq(pA, pB)
 	}
-	return structureEqual(n, polyEq, ignoreOrder(opts))
+	return c.structureEq(n, polyEq)
 }
 
-func geometryCollectionExactEqual(gc1, gc2 GeometryCollection, opts []EqualsExactOption) bool {
+func (c equalsExactComparator) geometryCollectionsEq(gc1, gc2 GeometryCollection) bool {
 	n := gc1.NumGeometries()
 	if n != gc2.NumGeometries() {
 		return false
@@ -216,16 +251,16 @@ func geometryCollectionExactEqual(gc1, gc2 GeometryCollection, opts []EqualsExac
 	eq := func(i, j int) bool {
 		gA := gc1.GeometryN(i)
 		gB := gc2.GeometryN(j)
-		return gA.EqualsExact(gB, opts...)
+		return c.geometriesEq(gA, gB)
 	}
-	return structureEqual(n, eq, ignoreOrder(opts))
+	return c.structureEq(n, eq)
 }
 
-// structureEqual checks if the structure of two geometries each with n sub
+// structureEq checks if the structure of two geometries each with n sub
 // elements are equal. The eq function should check if sub element i from the
 // first geometry is equal to sub element j from the second geometry.
-func structureEqual(n int, eq func(i, j int) bool, ignoreOrder bool) bool {
-	if ignoreOrder {
+func (c equalsExactComparator) structureEq(n int, eq func(i, j int) bool) bool {
+	if c.ignoreOrder {
 		return validPermutation(n, eq)
 	}
 	for i := 0; i < n; i++ {

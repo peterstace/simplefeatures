@@ -704,7 +704,7 @@ func TestCentroid(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := geomFromWKT(t, tt.input).Centroid()
 			want := geomFromWKT(t, tt.output)
-			if !want.EqualsExact(got.AsGeometry(), ToleranceXY(0.00000001)) {
+			if !EqualsExact(want, got.AsGeometry(), ToleranceXY(0.00000001)) {
 				t.Log(tt.input)
 				t.Errorf("got=%v want=%v", got.AsText(), tt.output)
 			}
@@ -716,7 +716,7 @@ func TestLineStringToMultiLineString(t *testing.T) {
 	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").AsLineString()
 	got := ls.AsMultiLineString()
 	want := geomFromWKT(t, "MULTILINESTRING((1 2,3 4,5 6))")
-	if !got.EqualsExact(want) {
+	if !EqualsExact(got.AsGeometry(), want) {
 		t.Errorf("want=%v got=%v", want, got)
 	}
 }

@@ -202,7 +202,7 @@ func TestEqualsExact(t *testing.T) {
 			t.Run(key, func(t *testing.T) {
 				g := geomFromWKT(t, wkt)
 				t.Run("no options", func(t *testing.T) {
-					if !g.EqualsExact(g) {
+					if !geom.EqualsExact(g, g) {
 						t.Logf("WKT: %v", wkt)
 						t.Errorf("should be equal to itself")
 					}
@@ -226,7 +226,7 @@ func TestEqualsExact(t *testing.T) {
 					}
 					gA := geomFromWKT(t, wkts[keyA])
 					gB := geomFromWKT(t, wkts[keyB])
-					got := gA.EqualsExact(gB, geom.ToleranceXY(0.125))
+					got := geom.EqualsExact(gA, gB, geom.ToleranceXY(0.125))
 					if got != want {
 						t.Logf("WKT A: %v", wkts[keyA])
 						t.Logf("WKT B: %v", wkts[keyB])
@@ -252,7 +252,7 @@ func TestEqualsExact(t *testing.T) {
 					}
 					gA := geomFromWKT(t, wkts[keyA])
 					gB := geomFromWKT(t, wkts[keyB])
-					got := gA.EqualsExact(gB, geom.IgnoreOrder)
+					got := geom.EqualsExact(gA, gB, geom.IgnoreOrder)
 					if got != want {
 						t.Logf("WKT A: %v", wkts[keyA])
 						t.Logf("WKT B: %v", wkts[keyB])

@@ -68,7 +68,7 @@ func TestReNode(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if !gotA.EqualsExact(wantA) || !gotB.EqualsExact(wantB) {
+			if !EqualsExact(gotA, wantA) || !EqualsExact(gotB, wantB) {
 				t.Logf("INPUT A: %v\n", inA.AsText())
 				t.Logf("INPUT B: %v\n", inB.AsText())
 				t.Logf("WANT  A: %v\n", wantA.AsText())
