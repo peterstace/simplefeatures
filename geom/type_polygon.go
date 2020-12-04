@@ -216,12 +216,6 @@ func (p Polygon) IsSimple() bool {
 	return true
 }
 
-// Intersects return true if and only if this geometry intersects with the
-// other, i.e. they shared at least one common point.
-func (p Polygon) Intersects(g Geometry) bool {
-	return hasIntersection(p.AsGeometry(), g)
-}
-
 // IsEmpty returns true if and only if this Polygon is the empty Polygon. The
 // empty Polygon doesn't have any rings and doesn't enclose any area.
 func (p Polygon) IsEmpty() bool {

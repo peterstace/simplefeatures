@@ -609,7 +609,7 @@ func checkIntersects(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 		}
 		return err
 	}
-	got := g1.Intersects(g2)
+	got := geom.Intersects(g1, g2)
 
 	if want != got {
 		log.Printf("want: %v", want)

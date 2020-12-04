@@ -214,12 +214,6 @@ func (m MultiPolygon) IsSimple() bool {
 	return true
 }
 
-// Intersects return true if and only if this geometry intersects with the
-// other, i.e. they shared at least one common point.
-func (m MultiPolygon) Intersects(g Geometry) bool {
-	return hasIntersection(m.AsGeometry(), g)
-}
-
 // IsEmpty return true if and only if this MultiPolygon doesn't contain any
 // Polygons, or only contains empty Polygons.
 func (m MultiPolygon) IsEmpty() bool {

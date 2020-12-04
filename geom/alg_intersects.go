@@ -6,7 +6,10 @@ import (
 	"github.com/peterstace/simplefeatures/rtree"
 )
 
-func hasIntersection(g1, g2 Geometry) bool {
+// Intersects return true if and only the two geometries intersect with each
+// other, i.e. the point sets that the geometries represent have at least one
+// common point.
+func Intersects(g1, g2 Geometry) bool {
 	if rank(g1) > rank(g2) {
 		g1, g2 = g2, g1
 	}
@@ -16,7 +19,7 @@ func hasIntersection(g1, g2 Geometry) bool {
 		n := gc.NumGeometries()
 		for i := 0; i < n; i++ {
 			g := gc.GeometryN(i)
-			if g1.Intersects(g) {
+			if Intersects(g1, g) {
 				return true
 			}
 		}

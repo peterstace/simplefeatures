@@ -118,12 +118,6 @@ func (m MultiPoint) IsSimple() bool {
 	return true
 }
 
-// Intersects return true if and only if this geometry intersects with the
-// other, i.e. they shared at least one common point.
-func (m MultiPoint) Intersects(g Geometry) bool {
-	return hasIntersection(m.AsGeometry(), g)
-}
-
 // IsEmpty return true if and only if this MultiPoint doesn't contain any
 // Points, or only contains empty Points.
 func (m MultiPoint) IsEmpty() bool {

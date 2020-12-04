@@ -411,12 +411,6 @@ func (g Geometry) ConvexHull() Geometry {
 	return convexHull(g)
 }
 
-// Intersects return true if and only if this geometry intersects with the
-// other, i.e. they shared at least one common point.
-func (g Geometry) Intersects(other Geometry) bool {
-	return hasIntersection(g, other)
-}
-
 // TransformXY transforms this Geometry into another geometry according the
 // mapping provided by the XY function. Some classes of mappings (such as
 // affine transformations) will preserve the validity this Geometry in the

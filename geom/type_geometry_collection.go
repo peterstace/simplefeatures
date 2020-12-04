@@ -75,12 +75,6 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-// Intersects return true if and only if this geometry intersects with the
-// other, i.e. they shared at least one common point.
-func (c GeometryCollection) Intersects(g Geometry) bool {
-	return hasIntersection(c.AsGeometry(), g)
-}
-
 // IsEmpty return true if and only if this GeometryCollection doesn't contain
 // any elements, or only contains empty elements.
 func (c GeometryCollection) IsEmpty() bool {

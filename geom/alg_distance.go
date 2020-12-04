@@ -13,7 +13,7 @@ import (
 func Distance(g1, g2 Geometry) (float64, bool) {
 	// If the geometries intersect with each other, then the distance between
 	// them is trivially zero.
-	if g1.Intersects(g2) {
+	if Intersects(g1, g2) {
 		return 0, true
 	}
 

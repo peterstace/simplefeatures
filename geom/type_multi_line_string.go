@@ -134,12 +134,6 @@ func (m MultiLineString) IsSimple() bool {
 	return true
 }
 
-// Intersects return true if and only if this geometry intersects with the
-// other, i.e. they shared at least one common point.
-func (m MultiLineString) Intersects(g Geometry) bool {
-	return hasIntersection(m.AsGeometry(), g)
-}
-
 // IsEmpty return true if and only if this MultiLineString doesn't contain any
 // LineStrings, or only contains empty LineStrings.
 func (m MultiLineString) IsEmpty() bool {
