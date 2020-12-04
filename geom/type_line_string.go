@@ -173,12 +173,6 @@ func (s LineString) IsClosed() bool {
 	return !s.IsEmpty() && s.seq.GetXY(0) == s.seq.GetXY(s.seq.Length()-1)
 }
 
-// Intersects return true if and only if this geometry intersects with the
-// other, i.e. they shared at least one common point.
-func (s LineString) Intersects(g Geometry) bool {
-	return hasIntersection(s.AsGeometry(), g)
-}
-
 // IsEmpty returns true if and only if this LineString is the empty LineString.
 // The empty LineString is defined by a zero length coordinates sequence.
 func (s LineString) IsEmpty() bool {

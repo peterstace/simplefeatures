@@ -81,12 +81,6 @@ func (p Point) IsSimple() bool {
 	return true
 }
 
-// Intersects return true if and only if this geometry intersects with the
-// other, i.e. they shared at least one common point.
-func (p Point) Intersects(g Geometry) bool {
-	return hasIntersection(p.AsGeometry(), g)
-}
-
 // Envelope returns a zero area Envelope covering the Point. If the Point is
 // empty, then false is returned.
 func (p Point) Envelope() (Envelope, bool) {

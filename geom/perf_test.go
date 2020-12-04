@@ -86,11 +86,12 @@ func BenchmarkIntersectsLineStringWithLineString(b *testing.B) {
 			if err != nil {
 				b.Fatal(err)
 			}
-			b.ResetTimer()
+			ls1g := ls1.AsGeometry()
 			ls2g := ls2.AsGeometry()
+			b.ResetTimer()
 
 			for i := 0; i < b.N; i++ {
-				if ls1.Intersects(ls2g) {
+				if Intersects(ls1g, ls2g) {
 					b.Fatal("should not intersect")
 				}
 			}
