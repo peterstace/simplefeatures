@@ -217,12 +217,6 @@ func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mult
 	return NewMultiPointWithEmptyMask(transformed, m.empty, opts...), nil
 }
 
-// EqualsExact checks if this MultiPoint is exactly equal to another MultiPoint.
-func (m MultiPoint) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	return other.IsMultiPoint() &&
-		multiPointExactEqual(m, other.AsMultiPoint(), opts)
-}
-
 // Centroid gives the centroid of the coordinates of the MultiPoint.
 func (m MultiPoint) Centroid() Point {
 	var sum XY

@@ -157,7 +157,7 @@ func TestFindInteractionPoints(t *testing.T) {
 			}
 			got := NewMultiPoint(NewSequence(gotCoords, DimXY)).AsGeometry()
 
-			if !want.EqualsExact(got, IgnoreOrder) {
+			if !ExactEquals(want, got, IgnoreOrder) {
 				for _, input := range tt.inputWKTs {
 					t.Logf("input: %v", input)
 				}

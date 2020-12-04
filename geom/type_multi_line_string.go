@@ -100,7 +100,7 @@ func (m MultiLineString) IsSimple() bool {
 			// behaviour. The OGC spec is ambiguous around this case, so it's
 			// just easier to follow other implementations for better
 			// interoperability.
-			if m.lines[i].EqualsExact(m.lines[j].AsGeometry(), IgnoreOrder) {
+			if ExactEquals(m.lines[i].AsGeometry(), m.lines[j].AsGeometry(), IgnoreOrder) {
 				continue
 			}
 
@@ -126,7 +126,7 @@ func (m MultiLineString) IsSimple() bool {
 				m.lines[i].Boundary(),
 				m.lines[j].Boundary(),
 			)
-			if !interMP.EqualsExact(bound.AsGeometry(), IgnoreOrder) {
+			if !ExactEquals(interMP.AsGeometry(), bound.AsGeometry(), IgnoreOrder) {
 				return false
 			}
 		}
@@ -275,12 +275,6 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 		}
 	}
 	return NewMultiLineStringFromLineStrings(transformed, opts...), nil
-}
-
-// EqualsExact checks if this MultiLineString is exactly equal to another MultiLineString.
-func (m MultiLineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	return other.IsMultiLineString() &&
-		multiLineStringExactEqual(m, other.AsMultiLineString(), opts)
 }
 
 // Length gives the sum of the lengths of the constituent members of the multi

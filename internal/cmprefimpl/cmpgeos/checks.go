@@ -205,7 +205,7 @@ func checkFromText(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return err
 	}
 
-	if !got.EqualsExact(want) {
+	if !geom.ExactEquals(got, want) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
 		return mismatchErr
@@ -272,7 +272,7 @@ func checkFromBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return err
 	}
 
-	if !want.EqualsExact(got) {
+	if !geom.ExactEquals(want, got) {
 		return mismatchErr
 	}
 	return nil
@@ -392,7 +392,7 @@ func checkBoundary(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	if !want.EqualsExact(got, geom.IgnoreOrder) {
+	if !geom.ExactEquals(want, got, geom.IgnoreOrder) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
 		return mismatchErr
@@ -414,7 +414,7 @@ func checkConvexHull(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	if !want.EqualsExact(got, geom.IgnoreOrder) {
+	if !geom.ExactEquals(want, got, geom.IgnoreOrder) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
 		return mismatchErr
@@ -496,7 +496,7 @@ func checkCentroid(h *Handle, g geom.Geometry, log *log.Logger) error {
 	}
 	got := g.Centroid().AsGeometry()
 
-	if !want.EqualsExact(got, geom.ToleranceXY(1e-9)) {
+	if !geom.ExactEquals(want, got, geom.ToleranceXY(1e-9)) {
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
 		return mismatchErr
@@ -561,8 +561,8 @@ func binaryChecks(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 		return err
 	}
 
-	log.Println("checking EqualsExact")
-	if err := checkEqualsExact(h, g1, g2, log); err != nil {
+	log.Println("checking ExactEquals")
+	if err := checkExactEquals(h, g1, g2, log); err != nil {
 		return err
 	}
 
@@ -619,12 +619,12 @@ func checkIntersects(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkEqualsExact(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
-	want, err := h.EqualsExact(g1, g2)
+func checkExactEquals(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+	want, err := h.ExactEquals(g1, g2)
 	if err != nil {
 		return err
 	}
-	got := g1.EqualsExact(g2)
+	got := geom.ExactEquals(g1, g2)
 
 	if want != got {
 		log.Printf("want: %v", want)

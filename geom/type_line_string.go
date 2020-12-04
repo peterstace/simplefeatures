@@ -264,15 +264,6 @@ func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Line
 	return NewLineString(transformed, opts...)
 }
 
-// EqualsExact checks if this LineString is exactly equal to another curve.
-func (s LineString) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	return other.IsLineString() && curvesExactEqual(
-		s.Coordinates(),
-		other.AsLineString().Coordinates(),
-		opts,
-	)
-}
-
 // IsRing returns true iff this LineString is both simple and closed (i.e. is a
 // linear ring).
 func (s LineString) IsRing() bool {

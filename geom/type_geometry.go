@@ -405,34 +405,6 @@ func (g Geometry) Boundary() Geometry {
 	}
 }
 
-// EqualsExact checks if this geometry is equal to another geometry from a
-// structural pointwise equality perspective. Geometries that are
-// structurally equal are defined by exactly same control points in the
-// same order. Note that even if two geometries are spatially equal (i.e.
-// represent the same point set), they may not be defined by exactly the
-// same way. Ordering differences and numeric tolerances can be accounted
-// for using options.
-func (g Geometry) EqualsExact(other Geometry, opts ...EqualsExactOption) bool {
-	switch g.gtype {
-	case TypeGeometryCollection:
-		return g.AsGeometryCollection().EqualsExact(other, opts...)
-	case TypePoint:
-		return g.AsPoint().EqualsExact(other, opts...)
-	case TypeLineString:
-		return g.AsLineString().EqualsExact(other, opts...)
-	case TypePolygon:
-		return g.AsPolygon().EqualsExact(other, opts...)
-	case TypeMultiPoint:
-		return g.AsMultiPoint().EqualsExact(other, opts...)
-	case TypeMultiLineString:
-		return g.AsMultiLineString().EqualsExact(other, opts...)
-	case TypeMultiPolygon:
-		return g.AsMultiPolygon().EqualsExact(other, opts...)
-	default:
-		panic("unknown geometry: " + g.gtype.String())
-	}
-}
-
 // ConvexHull returns the geometry representing the smallest convex geometry
 // that contains this geometry.
 func (g Geometry) ConvexHull() Geometry {

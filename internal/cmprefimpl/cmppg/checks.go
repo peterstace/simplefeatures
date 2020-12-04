@@ -260,7 +260,7 @@ func CheckEnvelope(t *testing.T, want UnaryResult, g geom.Geometry) {
 		got := env.AsGeometry()
 		want := want.Envelope
 
-		if !got.EqualsExact(want) {
+		if !geom.ExactEquals(got, want) {
 			t.Logf("got:  %v", got.AsText())
 			t.Logf("want: %v", want.AsText())
 			t.Error("mismatch")
@@ -302,7 +302,7 @@ func CheckBoundary(t *testing.T, want UnaryResult, g geom.Geometry) {
 		// Simplefeatures doesn't retain boundary Z values.
 		want := want.Boundary.Geometry.Force2D()
 
-		if !got.EqualsExact(want, geom.IgnoreOrder, geom.ToleranceXY(1e-13)) {
+		if !geom.ExactEquals(got, want, geom.IgnoreOrder, geom.ToleranceXY(1e-13)) {
 			t.Logf("input: %v", g.AsText())
 			t.Logf("got:   %v", got.AsText())
 			t.Logf("want:  %v", want.AsText())
@@ -320,7 +320,7 @@ func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 		// incorrect according to the OGC spec.
 		want = want.Force2D()
 
-		if !got.EqualsExact(want, geom.IgnoreOrder, geom.ToleranceXY(1e-9)) {
+		if !geom.ExactEquals(got, want, geom.IgnoreOrder, geom.ToleranceXY(1e-9)) {
 			t.Logf("input: %v", g.AsText())
 			t.Logf("got:   %v", got.AsText())
 			t.Logf("want:  %v", want.AsText())
@@ -407,7 +407,7 @@ func CheckCentroid(t *testing.T, want UnaryResult, g geom.Geometry) {
 		// values.
 		want := want.Centroid.Force2D()
 
-		if !got.EqualsExact(want, geom.ToleranceXY(0.000000001)) {
+		if !geom.ExactEquals(got.AsGeometry(), want, geom.ToleranceXY(0.000000001)) {
 			t.Logf("input: %v", g.AsText())
 			t.Logf("got:   %v", got.AsText())
 			t.Logf("want:  %v", want.AsText())
@@ -420,7 +420,7 @@ func CheckReverse(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckReverse", func(t *testing.T) {
 		got := g.Reverse()
 		want := want.Reverse
-		if !got.EqualsExact(want, geom.ToleranceXY(1e-9)) {
+		if !geom.ExactEquals(got, want, geom.ToleranceXY(1e-9)) {
 			t.Logf("input: %v", g.AsText())
 			t.Logf("got:   %v", got.AsText())
 			t.Logf("want:  %v", want.AsText())
@@ -464,7 +464,7 @@ func CheckForceOrientation(t *testing.T, want UnaryResult, g geom.Geometry) {
 		t.Run("CW", func(t *testing.T) {
 			got := g.ForceCW()
 			want := want.ForceCW
-			if !got.EqualsExact(want) {
+			if !geom.ExactEquals(got, want) {
 				t.Logf("got:  %s", got.AsText())
 				t.Logf("want: %s", want.AsText())
 				t.Error("mismatch")
@@ -473,7 +473,7 @@ func CheckForceOrientation(t *testing.T, want UnaryResult, g geom.Geometry) {
 		t.Run("CCW", func(t *testing.T) {
 			got := g.ForceCCW()
 			want := want.ForceCCW
-			if !got.EqualsExact(want) {
+			if !geom.ExactEquals(got, want) {
 				t.Logf("got:  %s", got.AsText())
 				t.Logf("want: %s", want.AsText())
 				t.Error("mismatch")
@@ -550,7 +550,7 @@ func CheckForceCoordinatesDimension(t *testing.T, want UnaryResult, g geom.Geome
 					}
 					return
 				}
-				if !tt.got.EqualsExact(tt.want) {
+				if !geom.ExactEquals(tt.got, tt.want) {
 					t.Logf("input:%s", g.AsText())
 					t.Logf("got:  %s", tt.got.AsText())
 					t.Logf("want: %v", tt.want.AsText())
