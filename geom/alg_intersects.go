@@ -7,7 +7,7 @@ import (
 )
 
 // Intersects return true if and only the two geometries intersect with each
-// other, i.e. the point sets that the geometries represent shared at least one
+// other, i.e. the point sets that the geometries represent have at least one
 // common point.
 func Intersects(g1, g2 Geometry) bool {
 	if rank(g1) > rank(g2) {
