@@ -6,7 +6,7 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-func TestEqualsExact(t *testing.T) {
+func TestExactEquals(t *testing.T) {
 	wkts := map[string]string{
 		"pt_a": "POINT(2 3)",
 		"pt_b": "POINT(3 -1)",
@@ -202,7 +202,7 @@ func TestEqualsExact(t *testing.T) {
 			t.Run(key, func(t *testing.T) {
 				g := geomFromWKT(t, wkt)
 				t.Run("no options", func(t *testing.T) {
-					if !geom.EqualsExact(g, g) {
+					if !geom.ExactEquals(g, g) {
 						t.Logf("WKT: %v", wkt)
 						t.Errorf("should be equal to itself")
 					}
@@ -226,7 +226,7 @@ func TestEqualsExact(t *testing.T) {
 					}
 					gA := geomFromWKT(t, wkts[keyA])
 					gB := geomFromWKT(t, wkts[keyB])
-					got := geom.EqualsExact(gA, gB, geom.ToleranceXY(0.125))
+					got := geom.ExactEquals(gA, gB, geom.ToleranceXY(0.125))
 					if got != want {
 						t.Logf("WKT A: %v", wkts[keyA])
 						t.Logf("WKT B: %v", wkts[keyB])
@@ -252,7 +252,7 @@ func TestEqualsExact(t *testing.T) {
 					}
 					gA := geomFromWKT(t, wkts[keyA])
 					gB := geomFromWKT(t, wkts[keyB])
-					got := geom.EqualsExact(gA, gB, geom.IgnoreOrder)
+					got := geom.ExactEquals(gA, gB, geom.IgnoreOrder)
 					if got != want {
 						t.Logf("WKT A: %v", wkts[keyA])
 						t.Logf("WKT B: %v", wkts[keyB])

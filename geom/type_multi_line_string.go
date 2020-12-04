@@ -100,7 +100,7 @@ func (m MultiLineString) IsSimple() bool {
 			// behaviour. The OGC spec is ambiguous around this case, so it's
 			// just easier to follow other implementations for better
 			// interoperability.
-			if EqualsExact(m.lines[i].AsGeometry(), m.lines[j].AsGeometry(), IgnoreOrder) {
+			if ExactEquals(m.lines[i].AsGeometry(), m.lines[j].AsGeometry(), IgnoreOrder) {
 				continue
 			}
 
@@ -126,7 +126,7 @@ func (m MultiLineString) IsSimple() bool {
 				m.lines[i].Boundary(),
 				m.lines[j].Boundary(),
 			)
-			if !EqualsExact(interMP.AsGeometry(), bound.AsGeometry(), IgnoreOrder) {
+			if !ExactEquals(interMP.AsGeometry(), bound.AsGeometry(), IgnoreOrder) {
 				return false
 			}
 		}

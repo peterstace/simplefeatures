@@ -731,7 +731,7 @@ func (h *Handle) Intersects(g1, g2 geom.Geometry) (bool, error) {
 	return h.boolErr(C.GEOSIntersects_r(h.context, gh1, gh2))
 }
 
-func (h *Handle) EqualsExact(g1, g2 geom.Geometry) (bool, error) {
+func (h *Handle) ExactEquals(g1, g2 geom.Geometry) (bool, error) {
 	if isNonEmptyGeometryCollection(g1) || isNonEmptyGeometryCollection(g2) {
 		return false, NonEmptyGeometryCollectionNotSupportedError
 	}
