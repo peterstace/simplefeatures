@@ -49,10 +49,9 @@ func (c exactEqualsComparator) eq(a, b Coordinates) bool {
 //
 // For Points, there is no ordering, so this option does nothing.
 //
-// For curves (Line, LineString, and LinearRing), the direction of the curve
-// (start to end or end to start) is ignored. For curves that are rings (i.e.
-// are simple and closed), the location of the start and end point of the ring
-// is also ignored.
+// For LineStrings, the direction of the curve (start to end or end to start)
+// is ignored. If the LineStrings are rings, (i.e. are simple and closed), the
+// location of the start and end point of the ring is also ignored.
 //
 // For polygons the ordering between any interior rings is ignored, as is the
 // ordering inside the rings themselves.
@@ -88,7 +87,7 @@ func (c exactEqualsComparator) geometriesEq(g1, g2 Geometry) bool {
 	case TypeMultiPoint:
 		return c.multiPointsEq(g1.AsMultiPoint(), g2.AsMultiPoint())
 	case TypeLineString:
-		return c.curvesEq(g1.AsLineString().Coordinates(), g2.AsLineString().Coordinates())
+		return c.lineStringsEq(g1.AsLineString(), g2.AsLineString())
 	case TypeMultiLineString:
 		return c.multiLineStringsEq(g1.AsMultiLineString(), g2.AsMultiLineString())
 	case TypePolygon:
@@ -102,7 +101,10 @@ func (c exactEqualsComparator) geometriesEq(g1, g2 Geometry) bool {
 	}
 }
 
-func (c exactEqualsComparator) curvesEq(c1, c2 Sequence) bool {
+func (c exactEqualsComparator) lineStringsEq(ls1, ls2 LineString) bool {
+	c1 := ls1.Coordinates()
+	c2 := ls2.Coordinates()
+
 	// Must have the same number of points and be of the same coordinate type.
 	n := c1.Length()
 	if n != c2.Length() {
@@ -135,7 +137,7 @@ func (c exactEqualsComparator) curvesEq(c1, c2 Sequence) bool {
 
 	// Next check if one ring is just the reversal of the other.
 	reversed := func(i int) int { return n - i - 1 }
-	areRings := isRing(c1) && isRing(c2)
+	areRings := ls1.IsRing() && ls2.IsRing()
 	if revEq := sameCurve(identity, reversed); revEq || !areRings {
 		return revEq
 	}
@@ -150,12 +152,6 @@ func (c exactEqualsComparator) curvesEq(c1, c2 Sequence) bool {
 		}
 	}
 	return false
-}
-
-func isRing(c Sequence) bool {
-	ptA := c.GetXY(0)
-	ptB := c.GetXY(c.Length() - 1)
-	return ptA == ptB
 }
 
 func (c exactEqualsComparator) pointsEq(p1, p2 Point) bool {
@@ -191,19 +187,13 @@ func (c exactEqualsComparator) polygonsEq(p1, p2 Polygon) bool {
 	if n != p2.NumInteriorRings() {
 		return false
 	}
-	if !c.curvesEq(
-		p1.ExteriorRing().Coordinates(),
-		p2.ExteriorRing().Coordinates(),
-	) {
+	if !c.lineStringsEq(p1.ExteriorRing(), p2.ExteriorRing()) {
 		return false
 	}
 	ringsEq := func(i, j int) bool {
 		ringA := p1.InteriorRingN(i)
 		ringB := p2.InteriorRingN(j)
-		return c.curvesEq(
-			ringA.Coordinates(),
-			ringB.Coordinates(),
-		)
+		return c.lineStringsEq(ringA, ringB)
 	}
 	return c.structureEq(n, ringsEq)
 }
@@ -219,7 +209,7 @@ func (c exactEqualsComparator) multiLineStringsEq(mls1, mls2 MultiLineString) bo
 	lsEq := func(i, j int) bool {
 		lsA := mls1.LineStringN(i)
 		lsB := mls2.LineStringN(j)
-		return c.curvesEq(lsA.Coordinates(), lsB.Coordinates())
+		return c.lineStringsEq(lsA, lsB)
 	}
 	return c.structureEq(n, lsEq)
 }
