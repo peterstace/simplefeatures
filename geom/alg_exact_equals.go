@@ -74,8 +74,8 @@ var IgnoreOrder = ExactEqualsOption(
 // may not be defined by exactly the same way. Ordering differences and numeric
 // tolerances can be accounted for using options.
 func ExactEquals(g1, g2 Geometry, opts ...ExactEqualsOption) bool {
-	os := newExactEqualsComparator(opts)
-	return os.geometriesEq(g1, g2)
+	c := newExactEqualsComparator(opts)
+	return c.geometriesEq(g1, g2)
 }
 
 func (c exactEqualsComparator) geometriesEq(g1, g2 Geometry) bool {
