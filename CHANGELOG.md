@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.24.0
+
+2020-12-07
+
+- More optimisations for DCEL operations (`Intersection`, `Union`,
+  `Difference`, and `SymmetricDifference`). The improvements result in a 25%
+  speed improvement.
+
+- **Breaking change**: `Intersects` is now a top level function rather than a
+  method. This is to make it consistent with other operations that act on two
+  geometries.
+
+- **Breaking change**: `ExactEquals` is now a top level function rather than a
+  method. This is to make it consistent with other operations that act on two
+  geometries. It was also renamed from `EqualsExact` to `ExactEquals`. This is
+  inconsistent with the corresponding function in GEOS, but reads more
+  fluently.
+
 ## v0.23.0
 
 2020-12-02
