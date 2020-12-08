@@ -32,6 +32,8 @@ func (w *wktLexer) next() (string, error) {
 	}
 	isEOF := w.scn.Scan() == scanner.EOF
 	if err != nil {
+		// This error is from the original io.Reader, so no need to use a
+		// structured error.
 		return "", err
 	}
 	if isEOF {
@@ -46,6 +48,8 @@ func (w *wktLexer) peek() (string, error) {
 	}
 	tok, err := w.next()
 	if err != nil {
+		// This error is from the original io.Reader, so no need to use a
+		// structured error.
 		return "", err
 	}
 	w.peeked = tok

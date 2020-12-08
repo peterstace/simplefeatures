@@ -24,11 +24,19 @@ func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 	}
 
 	if tok, err := p.lexer.next(); err == nil {
-		return Geometry{}, fmt.Errorf("expected EOF but encountered %v", tok)
+		// TODO: test for this particular error?
+		return Geometry{}, wantButGot("EOF", tok)
 	} else if err != io.EOF {
 		return Geometry{}, err
 	}
 	return geom, nil
+}
+
+func wantButGot(wantTok, gotTok string) SyntaxError {
+	return SyntaxError{fmt.Sprintf(
+		"expected %s but got %v",
+		wantTok, gotTok,
+	)}
 }
 
 func newParser(wkt string, opts []ConstructorOption) *parser {
