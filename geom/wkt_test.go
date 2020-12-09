@@ -37,6 +37,7 @@ func TestUnmarshalWKTInvalidGrammar(t *testing.T) {
 		{"left unbalanced point", "point ( 1 2"},
 		{"right unbalanced point", "point 1 2 )"},
 		{"point no parens", "point 1 1"},
+		{"left unbalance multipoint", "MULTIPOINT((0 0 X)"},
 
 		{"mixed empty", "LINESTRING(0 0, EMPTY, 2 2)"},
 		{"foo internal point", "LINESTRING(0 0, foo, 2 2)"},

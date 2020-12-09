@@ -2,7 +2,6 @@ package geom
 
 import (
 	"fmt"
-	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -17,318 +16,371 @@ import (
 // UnmarshalWKT parses a Well Known Text (WKT), and returns the corresponding
 // Geometry.
 func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
-	return UnmarshalWKTFromReader(strings.NewReader(wkt), opts...)
-}
-
-// UnmarshalWKTFromReader parses a Well Known Text (WKT), and returns the
-// corresponding Geometry. It the same as UnmarshalWKT, but allows an io.Reader
-// to be used instead of a string.
-func UnmarshalWKTFromReader(r io.Reader, opts ...ConstructorOption) (Geometry, error) {
-	p := newParser(r, opts)
-	geom := p.nextGeometryTaggedText()
-	p.checkEOF()
-	if p.err != nil {
-		return Geometry{}, p.err
+	p := newParser(wkt, opts)
+	geom, err := p.nextGeometryTaggedText()
+	if err != nil {
+		return Geometry{}, err
+	}
+	if tok := p.lexer.next(); tok != "EOF" {
+		return Geometry{}, fmt.Errorf("expected EOF but encountered %v", tok)
 	}
 	return geom, nil
 }
 
-func newParser(r io.Reader, opts []ConstructorOption) *parser {
-	return &parser{lexer: newWKTLexer(r), opts: opts}
+func newParser(wkt string, opts []ConstructorOption) *parser {
+	return &parser{lexer: newWKTLexer(wkt), opts: opts}
 }
 
 type parser struct {
-	lexer *wktLexer
+	lexer wktLexer
 	opts  []ConstructorOption
-	err   error
 }
 
-func (p *parser) check(err error) {
-	if err != nil && p.err == nil {
-		p.err = err
-	}
-}
-
-func (p *parser) errorf(format string, args ...interface{}) {
-	p.check(fmt.Errorf(format, args...))
-}
-
-func (p *parser) nextToken() string {
-	tok, err := p.lexer.next()
-	if err == io.EOF {
-		err = io.ErrUnexpectedEOF
-	}
-	p.check(err)
-	return tok
-}
-
-func (p *parser) peekToken() string {
-	tok, err := p.lexer.peek()
-	if err == io.EOF {
-		err = io.ErrUnexpectedEOF
-	}
-	p.check(err)
-	return tok
-}
-
-func (p *parser) checkEOF() {
-	tok, err := p.lexer.next()
-	if err != io.EOF {
-		p.check(fmt.Errorf("expected EOF but encountered %v", tok))
-	}
-}
-
-func (p *parser) nextGeometryTaggedText() Geometry {
+func (p *parser) nextGeometryTaggedText() (Geometry, error) {
 	geomType, ctype := p.nextGeomTag()
 	switch geomType {
 	case "POINT":
-		c, ok := p.nextPointText(ctype)
-		if !ok {
-			return NewEmptyPoint(ctype).AsGeometry()
+		c, ok, err := p.nextPointText(ctype)
+		if err != nil {
+			return Geometry{}, err
 		}
-		return NewPoint(c, p.opts...).AsGeometry()
+		if !ok {
+			return NewEmptyPoint(ctype).AsGeometry(), nil
+		}
+		return NewPoint(c, p.opts...).AsGeometry(), nil
 	case "LINESTRING":
-		return p.nextLineStringText(ctype).AsGeometry()
+		ls, err := p.nextLineStringText(ctype)
+		return ls.AsGeometry(), err
 	case "POLYGON":
-		return p.nextPolygonText(ctype).AsGeometry()
+		p, err := p.nextPolygonText(ctype)
+		return p.AsGeometry(), err
 	case "MULTIPOINT":
-		return p.nextMultiPointText(ctype).AsGeometry()
+		mp, err := p.nextMultiPointText(ctype)
+		return mp.AsGeometry(), err
 	case "MULTILINESTRING":
-		return p.nextMultiLineString(ctype).AsGeometry()
+		mls, err := p.nextMultiLineString(ctype)
+		return mls.AsGeometry(), err
 	case "MULTIPOLYGON":
-		return p.nextMultiPolygonText(ctype).AsGeometry()
+		mp, err := p.nextMultiPolygonText(ctype)
+		return mp.AsGeometry(), err
 	case "GEOMETRYCOLLECTION":
-		return p.nextGeometryCollectionText(ctype).AsGeometry()
+		gc, err := p.nextGeometryCollectionText(ctype)
+		return gc.AsGeometry(), err
 	default:
-		p.errorf("unexpected token: %v", geomType)
-		return Geometry{}
+		return Geometry{}, fmt.Errorf("unexpected token: %v", geomType)
 	}
 }
 
 func (p *parser) nextGeomTag() (string, CoordinatesType) {
-	geomType := strings.ToUpper(p.nextToken())
-	switch p.peekToken() {
+	geomType := strings.ToUpper(p.lexer.next())
+	switch p.lexer.peek() {
 	case "Z":
-		p.nextToken()
+		p.lexer.next()
 		return geomType, DimXYZ
 	case "M":
-		p.nextToken()
+		p.lexer.next()
 		return geomType, DimXYM
 	case "ZM":
-		p.nextToken()
+		p.lexer.next()
 		return geomType, DimXYZM
 	default:
 		return geomType, DimXY
 	}
 }
 
-func (p *parser) nextEmptySetOrLeftParen() string {
-	tok := p.nextToken()
+func (p *parser) nextEmptySetOrLeftParen() (string, error) {
+	tok := p.lexer.next()
 	if tok != "EMPTY" && tok != "(" {
-		p.errorf("expected 'EMPTY' or '(' but encountered %v", tok)
+		return "", fmt.Errorf("expected 'EMPTY' or '(' but encountered %v", tok)
 	}
-	return tok
+	return tok, nil
 }
 
-func (p *parser) nextRightParen() {
-	tok := p.nextToken()
+func (p *parser) nextRightParen() error {
+	tok := p.lexer.next()
 	if tok != ")" {
-		p.check(fmt.Errorf("expected ')' but encountered %v", tok))
+		return fmt.Errorf("expected ')' but encountered %v", tok)
 	}
+	return nil
 }
 
-func (p *parser) nextCommaOrRightParen() string {
-	tok := p.nextToken()
+func (p *parser) nextCommaOrRightParen() (string, error) {
+	tok := p.lexer.next()
 	if tok != ")" && tok != "," {
-		p.check(fmt.Errorf("expected ')' or ',' but encountered %v", tok))
+		return "", fmt.Errorf("expected ')' or ',' but encountered %v", tok)
 	}
-	return tok
+	return tok, nil
 }
 
-func (p *parser) nextPoint(ctype CoordinatesType) Coordinates {
+func (p *parser) nextPoint(ctype CoordinatesType) (Coordinates, error) {
+	var err error
 	var c Coordinates
 	c.Type = ctype
-	c.X = p.nextSignedNumericLiteral()
-	c.Y = p.nextSignedNumericLiteral()
+	c.X, err = p.nextSignedNumericLiteral()
+	if err != nil {
+		return Coordinates{}, err
+	}
+	c.Y, err = p.nextSignedNumericLiteral()
+	if err != nil {
+		return Coordinates{}, err
+	}
 	if ctype.Is3D() {
-		c.Z = p.nextSignedNumericLiteral()
+		c.Z, err = p.nextSignedNumericLiteral()
+		if err != nil {
+			return Coordinates{}, err
+		}
 	}
 	if ctype.IsMeasured() {
-		c.M = p.nextSignedNumericLiteral()
+		c.M, err = p.nextSignedNumericLiteral()
+		if err != nil {
+			return Coordinates{}, err
+		}
 	}
-	return c
+	return c, nil
 }
 
-func (p *parser) nextPointAppend(dst []float64, ctype CoordinatesType) []float64 {
+func (p *parser) nextPointAppend(dst []float64, ctype CoordinatesType) ([]float64, error) {
 	for i := 0; i < ctype.Dimension(); i++ {
-		dst = append(dst, p.nextSignedNumericLiteral())
+		flt, err := p.nextSignedNumericLiteral()
+		if err != nil {
+			return nil, err
+		}
+		dst = append(dst, flt)
 	}
-	return dst
+	return dst, nil
 }
 
-func (p *parser) nextSignedNumericLiteral() float64 {
+func (p *parser) nextSignedNumericLiteral() (float64, error) {
 	var negative bool
-	tok := p.nextToken()
+	tok := p.lexer.next()
 	if tok == "-" {
 		negative = true
-		tok = p.nextToken()
+		tok = p.lexer.next()
 	}
 	f, err := strconv.ParseFloat(tok, 64)
-	p.check(err)
+	if err != nil {
+		return 0, err
+	}
 	// NaNs and Infs are not allowed by the WKT grammar.
 	if math.IsNaN(f) || math.IsInf(f, 0) {
-		p.errorf("invalid signed numeric literal: %s", tok)
+		return 0, fmt.Errorf("invalid signed numeric literal: %s", tok)
 	}
 	if negative {
 		f *= -1
 	}
-	return f
+	return f, nil
 }
 
-func (p *parser) nextPointText(ctype CoordinatesType) (Coordinates, bool) {
-	tok := p.nextEmptySetOrLeftParen()
-	if tok == "EMPTY" {
-		return Coordinates{}, false
+func (p *parser) nextPointText(ctype CoordinatesType) (Coordinates, bool, error) {
+	tok, err := p.nextEmptySetOrLeftParen()
+	if err != nil {
+		return Coordinates{}, false, err
 	}
-	c := p.nextPoint(ctype)
-	p.nextRightParen()
-	return c, true
+	if tok == "EMPTY" {
+		return Coordinates{}, false, nil
+	}
+	c, err := p.nextPoint(ctype)
+	if err != nil {
+		return Coordinates{}, false, err
+	}
+	if err := p.nextRightParen(); err != nil {
+		return Coordinates{}, false, err
+	}
+	return c, true, nil
 }
 
-func (p *parser) nextLineStringText(ctype CoordinatesType) LineString {
+func (p *parser) nextLineStringText(ctype CoordinatesType) (LineString, error) {
 	var floats []float64
-	tok := p.nextEmptySetOrLeftParen()
+	tok, err := p.nextEmptySetOrLeftParen()
+	if err != nil {
+		return LineString{}, err
+	}
 	if tok == "(" {
-		floats = p.nextPointAppend(floats, ctype)
+		floats, err = p.nextPointAppend(floats, ctype)
+		if err != nil {
+			return LineString{}, err
+		}
 		for {
-			tok := p.nextCommaOrRightParen()
+			tok, err := p.nextCommaOrRightParen()
+			if err != nil {
+				return LineString{}, err
+			}
 			if tok == "," {
-				floats = p.nextPointAppend(floats, ctype)
+				floats, err = p.nextPointAppend(floats, ctype)
+				if err != nil {
+					return LineString{}, err
+				}
 			} else {
 				break
 			}
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	ls, err := NewLineString(seq, p.opts...)
-	p.check(err)
-	return ls
+	return NewLineString(seq, p.opts...)
 }
 
-func (p *parser) nextPolygonText(ctype CoordinatesType) Polygon {
-	rings := p.nextPolygonOrMultiLineStringText(ctype)
+func (p *parser) nextPolygonText(ctype CoordinatesType) (Polygon, error) {
+	rings, err := p.nextPolygonOrMultiLineStringText(ctype)
+	if err != nil {
+		return Polygon{}, err
+	}
 	if len(rings) == 0 {
-		return Polygon{}.ForceCoordinatesType(ctype)
+		return Polygon{}.ForceCoordinatesType(ctype), nil
 	}
-	poly, err := NewPolygonFromRings(rings, p.opts...)
-	p.check(err)
-	return poly
+	return NewPolygonFromRings(rings, p.opts...)
 }
 
-func (p *parser) nextMultiLineString(ctype CoordinatesType) MultiLineString {
-	lss := p.nextPolygonOrMultiLineStringText(ctype)
+func (p *parser) nextMultiLineString(ctype CoordinatesType) (MultiLineString, error) {
+	lss, err := p.nextPolygonOrMultiLineStringText(ctype)
+	if err != nil {
+		return MultiLineString{}, err
+	}
 	if len(lss) == 0 {
-		return MultiLineString{}.ForceCoordinatesType(ctype)
+		return MultiLineString{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewMultiLineStringFromLineStrings(lss, p.opts...)
+	return NewMultiLineStringFromLineStrings(lss, p.opts...), nil
 }
 
-func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType) []LineString {
-	tok := p.nextEmptySetOrLeftParen()
-	if tok == "EMPTY" {
-		return nil
+func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType) ([]LineString, error) {
+	tok, err := p.nextEmptySetOrLeftParen()
+	if err != nil {
+		return nil, err
 	}
-	ls := p.nextLineStringText(ctype)
+	if tok == "EMPTY" {
+		return nil, nil
+	}
+	ls, err := p.nextLineStringText(ctype)
+	if err != nil {
+		return nil, err
+	}
 	lss := []LineString{ls}
 	for {
-		tok := p.nextCommaOrRightParen()
+		tok, err := p.nextCommaOrRightParen()
+		if err != nil {
+			return nil, err
+		}
 		if tok == "," {
-			lss = append(lss, p.nextLineStringText(ctype))
+			ls, err := p.nextLineStringText(ctype)
+			if err != nil {
+				return nil, err
+			}
+			lss = append(lss, ls)
 		} else {
 			break
 		}
 	}
-	return lss
+	return lss, nil
 }
 
-func (p *parser) nextMultiPointText(ctype CoordinatesType) MultiPoint {
+func (p *parser) nextMultiPointText(ctype CoordinatesType) (MultiPoint, error) {
 	var floats []float64
 	var empty BitSet
-	tok := p.nextEmptySetOrLeftParen()
+	tok, err := p.nextEmptySetOrLeftParen()
+	if err != nil {
+		return MultiPoint{}, err
+	}
 	if tok == "(" {
 		for i := 0; true; i++ {
-			if p.peekToken() == "EMPTY" {
-				p.nextToken()
+			if p.lexer.peek() == "EMPTY" {
+				p.lexer.next()
 				for j := 0; j < ctype.Dimension(); j++ {
 					floats = append(floats, 0)
 				}
 				empty.Set(i, true)
 			} else {
-				floats = p.nextMultiPointStylePointAppend(floats, ctype)
+				floats, err = p.nextMultiPointStylePointAppend(floats, ctype)
+				if err != nil {
+					return MultiPoint{}, err
+				}
 			}
-			tok := p.nextCommaOrRightParen()
+			tok, err := p.nextCommaOrRightParen()
+			if err != nil {
+				return MultiPoint{}, err
+			}
 			if tok != "," {
 				break
 			}
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	return NewMultiPointWithEmptyMask(seq, empty, p.opts...)
+	return NewMultiPointWithEmptyMask(seq, empty, p.opts...), nil
 }
 
-func (p *parser) nextMultiPointStylePointAppend(dst []float64, ctype CoordinatesType) []float64 {
+func (p *parser) nextMultiPointStylePointAppend(dst []float64, ctype CoordinatesType) ([]float64, error) {
 	// This is an extension of the spec, and is required to handle WKT output
 	// from non-complying implementations. In particular, PostGIS doesn't
 	// comply to the spec (it outputs points as part of a multipoint without
 	// their surrounding parentheses).
 	var useParens bool
-	if p.peekToken() == "(" {
-		p.nextToken()
+	if p.lexer.peek() == "(" {
+		p.lexer.next()
 		useParens = true
 	}
-	dst = p.nextPointAppend(dst, ctype)
-	if useParens {
-		p.nextRightParen()
+	var err error
+	dst, err = p.nextPointAppend(dst, ctype)
+	if err != nil {
+		return nil, err
 	}
-	return dst
+	if useParens {
+		if err := p.nextRightParen(); err != nil {
+			return nil, err
+		}
+	}
+	return dst, nil
 }
 
-func (p *parser) nextMultiPolygonText(ctype CoordinatesType) MultiPolygon {
+func (p *parser) nextMultiPolygonText(ctype CoordinatesType) (MultiPolygon, error) {
 	var polys []Polygon
-	tok := p.nextEmptySetOrLeftParen()
+	tok, err := p.nextEmptySetOrLeftParen()
+	if err != nil {
+		return MultiPolygon{}, err
+	}
 	if tok == "(" {
 		for {
-			poly := p.nextPolygonText(ctype)
+			poly, err := p.nextPolygonText(ctype)
+			if err != nil {
+				return MultiPolygon{}, err
+			}
 			polys = append(polys, poly)
-			tok := p.nextCommaOrRightParen()
+			tok, err := p.nextCommaOrRightParen()
+			if err != nil {
+				return MultiPolygon{}, err
+			}
 			if tok != "," {
 				break
 			}
 		}
 	}
 	if len(polys) == 0 {
-		return MultiPolygon{}.ForceCoordinatesType(ctype)
+		return MultiPolygon{}.ForceCoordinatesType(ctype), nil
 	}
-	mp, err := NewMultiPolygonFromPolygons(polys, p.opts...)
-	p.check(err)
-	return mp
+	return NewMultiPolygonFromPolygons(polys, p.opts...)
 }
 
-func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) GeometryCollection {
+func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryCollection, error) {
 	var geoms []Geometry
-	tok := p.nextEmptySetOrLeftParen()
+	tok, err := p.nextEmptySetOrLeftParen()
+	if err != nil {
+		return GeometryCollection{}, err
+	}
 	if tok == "(" {
 		for {
-			g := p.nextGeometryTaggedText()
+			g, err := p.nextGeometryTaggedText()
+			if err != nil {
+				return GeometryCollection{}, err
+			}
 			geoms = append(geoms, g)
-			tok := p.nextCommaOrRightParen()
+			tok, err := p.nextCommaOrRightParen()
+			if err != nil {
+				return GeometryCollection{}, err
+			}
 			if tok != "," {
 				break
 			}
 		}
 	}
 	if len(geoms) == 0 {
-		return GeometryCollection{}.ForceCoordinatesType(ctype)
+		return GeometryCollection{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewGeometryCollection(geoms, p.opts...)
+	return NewGeometryCollection(geoms, p.opts...), nil
 }

@@ -1,54 +1,50 @@
 package geom
 
 import (
-	"errors"
-	"io"
+	"strings"
 	"text/scanner"
 )
 
 type wktLexer struct {
-	scn       scanner.Scanner
-	peeked    bool
-	nextToken string
+	scn    scanner.Scanner
+	peeked string
 }
 
-func newWKTLexer(r io.Reader) *wktLexer {
+func newWKTLexer(wkt string) wktLexer {
 	var scn scanner.Scanner
-	scn.Init(r)
-	return &wktLexer{scn: scn}
+	scn.Init(strings.NewReader(wkt))
+	return wktLexer{scn: scn}
 }
 
-func (w *wktLexer) next() (string, error) {
-	if w.peeked {
-		tok := w.nextToken
-		w.peeked = false
-		w.nextToken = ""
-		return tok, nil
+func (w *wktLexer) next() string {
+	if w.peeked != "" {
+		tok := w.peeked
+		w.peeked = ""
+		return tok
 	}
 
-	var err error
 	w.scn.Error = func(_ *scanner.Scanner, msg string) {
-		err = errors.New(msg)
+		panic(msg)
 	}
-	isEOF := w.scn.Scan() == scanner.EOF
-	if err != nil {
-		return "", err
+	if w.scn.Scan() == scanner.EOF {
+		// The special "EOF" token indicates the end of stream.
+		return "EOF"
 	}
-	if isEOF {
-		return "", io.EOF
+	tok := w.scn.TokenText()
+	if tok == "EOF" {
+		// If for some reason there is a literal "EOF" in the input, we replace
+		// it with something else to differentiate it from the true end of
+		// stream marker (EOF). EOF doesn't appear naturally within an WKT, so
+		// this is okay to do.
+		tok = "<EOF>"
 	}
-	return w.scn.TokenText(), nil
+	return tok
 }
 
-func (w *wktLexer) peek() (string, error) {
-	if w.peeked {
-		return w.nextToken, nil
+func (w *wktLexer) peek() string {
+	if w.peeked != "" {
+		return w.peeked
 	}
-	tok, err := w.next()
-	if err != nil {
-		return "", err
-	}
-	w.peeked = true
-	w.nextToken = tok
-	return tok, nil
+	w.peeked = w.next()
+	return w.peeked
 }
