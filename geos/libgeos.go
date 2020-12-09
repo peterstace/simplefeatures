@@ -27,7 +27,6 @@ GEOSGeometry const *noop(GEOSContextHandle_t handle, const GEOSGeometry *g) {
 import "C"
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"strings"
@@ -625,10 +624,11 @@ func (h *handle) decode(gh *C.GEOSGeometry, opts []geom.ConstructorOption) (geom
 		return geom.Geometry{}, h.err()
 	}
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(serialised))
-	byts := C.GoBytes(unsafe.Pointer(serialised), C.int(size))
 
 	if isWKT != 0 {
-		return geom.UnmarshalWKTFromReader(bytes.NewReader(byts), opts...)
+		wkt := C.GoStringN(serialised, C.int(size))
+		return geom.UnmarshalWKT(wkt, opts...)
 	}
-	return geom.UnmarshalWKB(byts, opts...)
+	wkb := C.GoBytes(unsafe.Pointer(serialised), C.int(size))
+	return geom.UnmarshalWKB(wkb, opts...)
 }
