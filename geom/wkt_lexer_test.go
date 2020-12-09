@@ -23,6 +23,22 @@ func TestWKTLexer(t *testing.T) {
 			"POINT EOF",
 			[]string{"POINT", "<EOF>"},
 		},
+		{
+			`"hello`,
+			[]string{`"`, "hello"},
+		},
+		{
+			`/*hello*/ foo`,
+			[]string{`/`, `*`, `hello`, `*`, `/`, `foo`},
+		},
+		{
+			`3.14`,
+			[]string{`3.14`},
+		},
+		{
+			`3.`,
+			[]string{`3.`},
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			lexer := newWKTLexer(tc.wkt)

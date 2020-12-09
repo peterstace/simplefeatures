@@ -13,6 +13,7 @@ type wktLexer struct {
 func newWKTLexer(wkt string) wktLexer {
 	var scn scanner.Scanner
 	scn.Init(strings.NewReader(wkt))
+	scn.Mode = scanner.ScanInts | scanner.ScanFloats | scanner.ScanIdents
 	return wktLexer{scn: scn}
 }
 
