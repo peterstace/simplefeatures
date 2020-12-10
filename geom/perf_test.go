@@ -337,3 +337,23 @@ func BenchmarkIntersection(b *testing.B) {
 		})
 	}
 }
+
+func BenchmarkWKTParsing(b *testing.B) {
+	for _, tc := range []struct {
+		desc string
+		wkt  string
+	}{
+		{
+			"point",
+			"POINT(-3.14159265359 3.14159265359)",
+		},
+	} {
+		b.Run(tc.desc, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				if _, err := UnmarshalWKT(tc.wkt); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
