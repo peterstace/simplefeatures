@@ -2,7 +2,6 @@ package geom
 
 import (
 	"fmt"
-	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -24,9 +23,8 @@ func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 	}
 
 	if tok, err := p.lexer.next(); err == nil {
-		// TODO: test for this particular error?
 		return Geometry{}, wantButGot("EOF", tok)
-	} else if err != io.EOF {
+	} else if err != errEOF {
 		return Geometry{}, err
 	}
 	return geom, nil
@@ -34,8 +32,8 @@ func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 
 func wantButGot(wantTok, gotTok string) SyntaxError {
 	return SyntaxError{fmt.Sprintf(
-		"expected %s but got %v",
-		wantTok, gotTok,
+		"unexpected token: '%s' (expected %s)",
+		gotTok, wantTok,
 	)}
 }
 
@@ -82,7 +80,7 @@ func (p *parser) nextGeometryTaggedText() (Geometry, error) {
 		gc, err := p.nextGeometryCollectionText(ctype)
 		return gc.AsGeometry(), err
 	default:
-		return Geometry{}, fmt.Errorf("unexpected token: %v", geomType)
+		return Geometry{}, wantButGot("geometry tag", geomType)
 	}
 }
 
@@ -121,7 +119,7 @@ func (p *parser) nextEmptySetOrLeftParen() (string, error) {
 		return "", err
 	}
 	if tok != "EMPTY" && tok != "(" {
-		return "", fmt.Errorf("expected 'EMPTY' or '(' but encountered %v", tok)
+		return "", wantButGot("'EMPTY' or '('", tok)
 	}
 	return tok, nil
 }
@@ -132,7 +130,7 @@ func (p *parser) nextRightParen() error {
 		return err
 	}
 	if tok != ")" {
-		return fmt.Errorf("expected ')' but encountered %v", tok)
+		return wantButGot("')'", tok)
 	}
 	return nil
 }
@@ -143,7 +141,7 @@ func (p *parser) nextCommaOrRightParen() (string, error) {
 		return "", err
 	}
 	if tok != ")" && tok != "," {
-		return "", fmt.Errorf("expected ')' or ',' but encountered %v", tok)
+		return "", wantButGot("')' or ','", tok)
 	}
 	return tok, nil
 }
@@ -201,11 +199,11 @@ func (p *parser) nextSignedNumericLiteral() (float64, error) {
 	}
 	f, err := strconv.ParseFloat(tok, 64)
 	if err != nil {
-		return 0, err
+		return 0, SyntaxError{err.Error()}
 	}
 	// NaNs and Infs are not allowed by the WKT grammar.
 	if math.IsNaN(f) || math.IsInf(f, 0) {
-		return 0, fmt.Errorf("invalid signed numeric literal: %s", tok)
+		return 0, SyntaxError{"invalid numeric literal: " + tok}
 	}
 	if negative {
 		f *= -1

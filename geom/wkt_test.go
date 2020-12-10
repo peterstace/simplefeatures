@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/peterstace/simplefeatures/geom"
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
@@ -27,35 +28,121 @@ func TestUnmarshalWKTValidGrammar(t *testing.T) {
 	}
 }
 
-func TestUnmarshalWKTInvalidGrammar(t *testing.T) {
+func TestUnmarshalWKTSyntaxErrors(t *testing.T) {
 	for _, tt := range []struct {
-		name, wkt string
+		description, wkt string
+		errorText        string
 	}{
-		{"NaN coord", "point(NaN NaN)"},
-		{"+Inf coord", "point(+Inf +Inf)"},
-		{"-Inf coord", "point(-Inf -Inf)"},
-		{"left unbalanced point", "point ( 1 2"},
-		{"right unbalanced point", "point 1 2 )"},
-		{"point no parens", "point 1 1"},
-		{"left unbalance multipoint", "MULTIPOINT((0 0 X)"},
+		{
+			"missing EOF after WKT",
+			"POINT(0 0) MORE",
+			"unexpected token: 'MORE' (expected EOF)",
+		},
+		{
+			"unknown geometry type",
+			"LINESTRANG(0 0,1 1)",
+			"unexpected token: 'LINESTRANG' (expected geometry tag)",
+		},
+		{
+			"square opening bracket instead of paren",
+			"POINT[0 0)",
+			"unexpected token: '[' (expected 'EMPTY' or '(')",
+		},
+		{
+			"square closing bracket instead of paren",
+			"POINT(0 0]",
+			"unexpected token: ']' (expected ')')",
+		},
+		{
+			"- instead of ,",
+			"LINESTRING(0 0-1 1)",
+			"unexpected token: '-' (expected ')' or ',')",
+		},
+		{
+			"invalid float64",
+			"POINT(X Y)",
+			`strconv.ParseFloat: parsing "X": invalid syntax`,
+		},
+		{
+			"Inf not allowed",
+			"POINT(Inf 0)",
+			`invalid numeric literal: Inf`,
+		},
+		{
+			"NaN not allowed",
+			"POINT(NaN 0)",
+			`invalid numeric literal: NaN`,
+		},
+		{
+			"unexpected EOF",
+			"POINT(0 0",
+			"unexpected EOF",
+		},
+		{
+			"token contains invalid octal digit",
+			"POINT(08, 0)",
+			"invalid token: '08' (invalid digit '8' in octal literal)",
+		},
 
-		{"mixed empty", "LINESTRING(0 0, EMPTY, 2 2)"},
-		{"foo internal point", "LINESTRING(0 0, foo, 2 2)"},
-
-		{"point no coords", "POINT()"},
-		{"line string no coords", "LINESTRING()"},
-		{"polygon no coords", "POLYGON()"},
-		{"multi point no coords", "MULTIPOINT()"},
-		{"multi linestring no coords", "MULTILINESTRING()"},
-		{"multi polygon no coords", "MULTIPOLYGON()"},
-		{"geometry collection no coords", "GEOMETRYCOLLECTION()"},
+		{
+			"mixed empty",
+			"LINESTRING(0 0, EMPTY, 2 2)",
+			"strconv.ParseFloat: parsing \"EMPTY\": invalid syntax",
+		},
+		{
+			"point no coords",
+			"POINT()",
+			"strconv.ParseFloat: parsing \")\": invalid syntax",
+		},
+		{
+			"line string no coords",
+			"LINESTRING()",
+			"strconv.ParseFloat: parsing \")\": invalid syntax",
+		},
+		{
+			"polygon no coords",
+			"POLYGON()",
+			"unexpected token: ')' (expected 'EMPTY' or '(')",
+		},
+		{
+			"multi point no coords",
+			"MULTIPOINT()",
+			"strconv.ParseFloat: parsing \")\": invalid syntax",
+		},
+		{
+			"multi linestring no coords",
+			"MULTILINESTRING()",
+			"unexpected token: ')' (expected 'EMPTY' or '(')",
+		},
+		{
+			"multi polygon no coords",
+			"MULTIPOLYGON()",
+			"unexpected token: ')' (expected 'EMPTY' or '(')",
+		},
+		{
+			"geometry collection no coords",
+			"GEOMETRYCOLLECTION()",
+			// This is a slightly unexpected error here. It occurs because we
+			// take the ')' token as the geometry type and then immediately
+			// peek to see if we got a Z, M, or ZM. But this triggers an
+			// unexpected EOF error because there is no next token to peek. We
+			// _could_ alter the code to give a more accurate error message,
+			// but I think it's ok because this is an extreme edge case.
+			"unexpected EOF",
+		},
 	} {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.description, func(t *testing.T) {
 			_, err := UnmarshalWKT(tt.wkt)
 			if err == nil {
 				t.Fatalf("expected error but got nil")
-			} else {
-				t.Logf("got error: %v", err)
+			}
+			if _, isSynErr := err.(geom.SyntaxError); !isSynErr {
+				t.Fatalf("expected a SyntaxError but instead got %v", err)
+			}
+			if err.Error() != tt.errorText {
+				t.Logf("got:  %q", err.Error())
+				t.Logf("want: %q", tt.errorText)
+				t.Errorf("mismatch")
 			}
 		})
 	}
