@@ -3,26 +3,26 @@ package geom
 import (
 	"errors"
 	"io"
+	"strings"
 	"text/scanner"
 )
 
 type wktLexer struct {
-	scn       scanner.Scanner
-	peeked    bool
-	nextToken string
+	scn    scanner.Scanner
+	peeked string
 }
 
-func newWKTLexer(r io.Reader) *wktLexer {
+func newWKTLexer(wkt string) wktLexer {
 	var scn scanner.Scanner
-	scn.Init(r)
-	return &wktLexer{scn: scn}
+	scn.Init(strings.NewReader(wkt))
+	scn.Mode = scanner.ScanInts | scanner.ScanFloats | scanner.ScanIdents
+	return wktLexer{scn: scn}
 }
 
 func (w *wktLexer) next() (string, error) {
-	if w.peeked {
-		tok := w.nextToken
-		w.peeked = false
-		w.nextToken = ""
+	if w.peeked != "" {
+		tok := w.peeked
+		w.peeked = ""
 		return tok, nil
 	}
 
@@ -41,14 +41,13 @@ func (w *wktLexer) next() (string, error) {
 }
 
 func (w *wktLexer) peek() (string, error) {
-	if w.peeked {
-		return w.nextToken, nil
+	if w.peeked != "" {
+		return w.peeked, nil
 	}
 	tok, err := w.next()
 	if err != nil {
 		return "", err
 	}
-	w.peeked = true
-	w.nextToken = tok
+	w.peeked = tok
 	return tok, nil
 }
