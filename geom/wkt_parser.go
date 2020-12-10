@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -21,8 +22,11 @@ func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 	if err != nil {
 		return Geometry{}, err
 	}
-	if tok := p.lexer.next(); tok != "EOF" {
+
+	if tok, err := p.lexer.next(); err == nil {
 		return Geometry{}, fmt.Errorf("expected EOF but encountered %v", tok)
+	} else if err != io.EOF {
+		return Geometry{}, err
 	}
 	return geom, nil
 }
@@ -37,7 +41,10 @@ type parser struct {
 }
 
 func (p *parser) nextGeometryTaggedText() (Geometry, error) {
-	geomType, ctype := p.nextGeomTag()
+	geomType, ctype, err := p.nextGeomTag()
+	if err != nil {
+		return Geometry{}, err
+	}
 	switch geomType {
 	case "POINT":
 		c, ok, err := p.nextPointText(ctype)
@@ -71,25 +78,40 @@ func (p *parser) nextGeometryTaggedText() (Geometry, error) {
 	}
 }
 
-func (p *parser) nextGeomTag() (string, CoordinatesType) {
-	geomType := strings.ToUpper(p.lexer.next())
-	switch p.lexer.peek() {
-	case "Z":
-		p.lexer.next()
-		return geomType, DimXYZ
-	case "M":
-		p.lexer.next()
-		return geomType, DimXYM
-	case "ZM":
-		p.lexer.next()
-		return geomType, DimXYZM
-	default:
-		return geomType, DimXY
+func (p *parser) nextGeomTag() (string, CoordinatesType, error) {
+	tok, err := p.lexer.next()
+	if err != nil {
+		return "", 0, err
 	}
+	geomType := strings.ToUpper(tok)
+
+	tok, err = p.lexer.peek()
+	if err != nil {
+		return "", 0, err
+	}
+	dim := DimXY
+	switch tok {
+	case "Z":
+		dim = DimXYZ
+	case "M":
+		dim = DimXYM
+	case "ZM":
+		dim = DimXYZM
+	}
+	if dim != DimXY {
+		if _, err := p.lexer.next(); err != nil {
+			return "", 0, err
+		}
+	}
+
+	return geomType, dim, nil
 }
 
 func (p *parser) nextEmptySetOrLeftParen() (string, error) {
-	tok := p.lexer.next()
+	tok, err := p.lexer.next()
+	if err != nil {
+		return "", err
+	}
 	if tok != "EMPTY" && tok != "(" {
 		return "", fmt.Errorf("expected 'EMPTY' or '(' but encountered %v", tok)
 	}
@@ -97,7 +119,10 @@ func (p *parser) nextEmptySetOrLeftParen() (string, error) {
 }
 
 func (p *parser) nextRightParen() error {
-	tok := p.lexer.next()
+	tok, err := p.lexer.next()
+	if err != nil {
+		return err
+	}
 	if tok != ")" {
 		return fmt.Errorf("expected ')' but encountered %v", tok)
 	}
@@ -105,7 +130,10 @@ func (p *parser) nextRightParen() error {
 }
 
 func (p *parser) nextCommaOrRightParen() (string, error) {
-	tok := p.lexer.next()
+	tok, err := p.lexer.next()
+	if err != nil {
+		return "", err
+	}
 	if tok != ")" && tok != "," {
 		return "", fmt.Errorf("expected ')' or ',' but encountered %v", tok)
 	}
@@ -152,10 +180,16 @@ func (p *parser) nextPointAppend(dst []float64, ctype CoordinatesType) ([]float6
 
 func (p *parser) nextSignedNumericLiteral() (float64, error) {
 	var negative bool
-	tok := p.lexer.next()
+	tok, err := p.lexer.next()
+	if err != nil {
+		return 0, err
+	}
 	if tok == "-" {
 		negative = true
-		tok = p.lexer.next()
+		tok, err = p.lexer.next()
+		if err != nil {
+			return 0, err
+		}
 	}
 	f, err := strconv.ParseFloat(tok, 64)
 	if err != nil {
@@ -281,8 +315,14 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) (MultiPoint, error) {
 	}
 	if tok == "(" {
 		for i := 0; true; i++ {
-			if p.lexer.peek() == "EMPTY" {
-				p.lexer.next()
+			tok, err := p.lexer.peek()
+			if err != nil {
+				return MultiPoint{}, err
+			}
+			if tok == "EMPTY" {
+				if _, err := p.lexer.next(); err != nil {
+					return MultiPoint{}, err
+				}
 				for j := 0; j < ctype.Dimension(); j++ {
 					floats = append(floats, 0)
 				}
@@ -293,7 +333,7 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) (MultiPoint, error) {
 					return MultiPoint{}, err
 				}
 			}
-			tok, err := p.nextCommaOrRightParen()
+			tok, err = p.nextCommaOrRightParen()
 			if err != nil {
 				return MultiPoint{}, err
 			}
@@ -312,11 +352,16 @@ func (p *parser) nextMultiPointStylePointAppend(dst []float64, ctype Coordinates
 	// comply to the spec (it outputs points as part of a multipoint without
 	// their surrounding parentheses).
 	var useParens bool
-	if p.lexer.peek() == "(" {
-		p.lexer.next()
+	tok, err := p.lexer.peek()
+	if err != nil {
+		return nil, err
+	}
+	if tok == "(" {
+		if _, err := p.lexer.next(); err != nil {
+			return nil, err
+		}
 		useParens = true
 	}
-	var err error
 	dst, err = p.nextPointAppend(dst, ctype)
 	if err != nil {
 		return nil, err

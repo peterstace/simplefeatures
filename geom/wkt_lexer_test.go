@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"io"
 	"reflect"
 	"strconv"
 	"testing"
@@ -21,7 +22,7 @@ func TestWKTLexer(t *testing.T) {
 			// differentiate it with "EOF" which is emitted at the end of
 			// stream.
 			"POINT EOF",
-			[]string{"POINT", "<EOF>"},
+			[]string{"POINT", "EOF"},
 		},
 		{
 			`"hello`,
@@ -44,9 +45,12 @@ func TestWKTLexer(t *testing.T) {
 			lexer := newWKTLexer(tc.wkt)
 			var got []string
 			for {
-				tok := lexer.next()
-				if tok == "EOF" {
-					break
+				tok, err := lexer.next()
+				if err != nil {
+					if err == io.EOF {
+						break
+					}
+					t.Fatal(err)
 				}
 				got = append(got, tok)
 			}

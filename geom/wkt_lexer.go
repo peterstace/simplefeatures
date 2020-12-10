@@ -1,6 +1,8 @@
 package geom
 
 import (
+	"errors"
+	"io"
 	"strings"
 	"text/scanner"
 )
@@ -17,35 +19,35 @@ func newWKTLexer(wkt string) wktLexer {
 	return wktLexer{scn: scn}
 }
 
-func (w *wktLexer) next() string {
+func (w *wktLexer) next() (string, error) {
 	if w.peeked != "" {
 		tok := w.peeked
 		w.peeked = ""
-		return tok
+		return tok, nil
 	}
 
+	var err error
 	w.scn.Error = func(_ *scanner.Scanner, msg string) {
-		panic(msg)
+		err = errors.New(msg)
 	}
-	if w.scn.Scan() == scanner.EOF {
-		// The special "EOF" token indicates the end of stream.
-		return "EOF"
+	isEOF := w.scn.Scan() == scanner.EOF
+	if err != nil {
+		return "", err
 	}
-	tok := w.scn.TokenText()
-	if tok == "EOF" {
-		// If for some reason there is a literal "EOF" in the input, we replace
-		// it with something else to differentiate it from the true end of
-		// stream marker (EOF). EOF doesn't appear naturally within an WKT, so
-		// this is okay to do.
-		tok = "<EOF>"
+	if isEOF {
+		return "", io.EOF
 	}
-	return tok
+	return w.scn.TokenText(), nil
 }
 
-func (w *wktLexer) peek() string {
+func (w *wktLexer) peek() (string, error) {
 	if w.peeked != "" {
-		return w.peeked
+		return w.peeked, nil
 	}
-	w.peeked = w.next()
-	return w.peeked
+	tok, err := w.next()
+	if err != nil {
+		return "", err
+	}
+	w.peeked = tok
+	return tok, nil
 }
