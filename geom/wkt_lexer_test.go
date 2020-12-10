@@ -17,10 +17,6 @@ func TestWKTLexer(t *testing.T) {
 			[]string{"POINT", "(", "1", "2", ")"},
 		},
 		{
-			// If for some reason the user puts a literal "EOF" in the input
-			// WKT, it's replaced with an "<EOF>" in the token stream to
-			// differentiate it with "EOF" which is emitted at the end of
-			// stream.
 			"POINT EOF",
 			[]string{"POINT", "EOF"},
 		},
