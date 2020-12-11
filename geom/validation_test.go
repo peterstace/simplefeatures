@@ -25,6 +25,9 @@ func TestLineStringValidation(t *testing.T) {
 			if err == nil {
 				t.Error("expected error")
 			}
+			if _, ok := err.(TopologyError); !ok {
+				t.Error("expected a TopologyError")
+			}
 		})
 	}
 }
@@ -106,6 +109,9 @@ func TestPolygonValidation(t *testing.T) {
 			if err == nil {
 				t.Log("WKT", wkt)
 				t.Error("expected error")
+			}
+			if _, ok := err.(TopologyError); !ok {
+				t.Error("expected a TopologyError")
 			}
 		})
 	}
@@ -195,6 +201,9 @@ func TestMultiPolygonValidation(t *testing.T) {
 			if err == nil {
 				t.Log(wkt)
 				t.Error("expected error")
+			}
+			if _, ok := err.(TopologyError); !ok {
+				t.Error("expected a TopologyError")
 			}
 		})
 	}

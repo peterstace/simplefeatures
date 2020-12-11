@@ -2,7 +2,6 @@ package geom
 
 import (
 	"database/sql/driver"
-	"errors"
 	"math"
 	"unsafe"
 
@@ -65,10 +64,10 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 
 	for _, r := range rings {
 		if !r.IsClosed() {
-			return errors.New("polygon rings must be closed")
+			return TopologyError{"polygon rings must be closed"}
 		}
 		if !r.IsSimple() {
-			return errors.New("polygon rings must be simple")
+			return TopologyError{"polygon rings must be simple"}
 		}
 	}
 
@@ -82,7 +81,9 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	for i, currentRing := range rings {
 		env, ok := currentRing.Envelope()
 		if !ok {
-			return errors.New("polygon rings must not be empty")
+			// Cannot occur, because we have already checked to ensure rings
+			// are closed. Closed rings by definition are non-empty.
+			panic("unexpected empty ring")
 		}
 		box := env.box()
 		if err := tree.RangeSearch(box, func(j int) error {
@@ -95,7 +96,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 				nestedFwd := relatePointToRing(startCurrent, otherRing) == interior
 				nestedRev := relatePointToRing(startOther, currentRing) == interior
 				if nestedFwd || nestedRev {
-					return errors.New("polygon must not have nested rings")
+					return TopologyError{"polygon must not have nested rings"}
 				}
 			}
 
@@ -106,7 +107,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 				return nil
 			}
 			if ext.multiplePoints {
-				return errors.New("polygon rings must not intersect at multiple points")
+				return TopologyError{"polygon rings must not intersect at multiple points"}
 			}
 
 			interVert, ok := interVerts[ext.singlePoint]
@@ -132,7 +133,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 		for i := 0; i < holeLen; i++ {
 			xy := holeSeq.GetXY(i)
 			if relatePointToRing(xy, rings[0]) == exterior {
-				return errors.New("hole must be inside outer ring")
+				return TopologyError{"hole must be inside outer ring"}
 			}
 		}
 	}
@@ -143,7 +144,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	// intersection. The interior of the polygon is connected iff the graph
 	// does not contain a cycle.
 	if graph.hasCycle() {
-		return errors.New("polygon interiors must be connected")
+		return TopologyError{"polygon interiors must be connected"}
 	}
 	return nil
 }
