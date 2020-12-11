@@ -265,7 +265,7 @@ func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) (MultiPoint, error) {
 	if n == 0 {
 		return MultiPoint{}.ForceCoordinatesType(ctype), nil
 	}
-	var pts []Point
+	pts := make([]Point, n)
 	for i := uint32(0); i < n; i++ {
 		geom, err := p.inner()
 		if err != nil {
@@ -274,7 +274,7 @@ func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) (MultiPoint, error) {
 		if !geom.IsPoint() {
 			return MultiPoint{}, SyntaxError{"MultiPoint contains non-Point element"}
 		}
-		pts = append(pts, geom.AsPoint())
+		pts[i] = geom.AsPoint()
 	}
 	return NewMultiPointFromPoints(pts, p.opts...), nil
 }
@@ -287,7 +287,7 @@ func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) (MultiLineString
 	if n == 0 {
 		return MultiLineString{}.ForceCoordinatesType(ctype), nil
 	}
-	var lss []LineString
+	lss := make([]LineString, n)
 	for i := uint32(0); i < n; i++ {
 		geom, err := p.inner()
 		if err != nil {
@@ -296,7 +296,7 @@ func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) (MultiLineString
 		if !geom.IsLineString() {
 			return MultiLineString{}, SyntaxError{"MultiLineString contains non-LineString element"}
 		}
-		lss = append(lss, geom.AsLineString())
+		lss[i] = geom.AsLineString()
 	}
 	return NewMultiLineStringFromLineStrings(lss, p.opts...), nil
 }
@@ -309,7 +309,7 @@ func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) (MultiPolygon, erro
 	if n == 0 {
 		return MultiPolygon{}.ForceCoordinatesType(ctype), nil
 	}
-	var polys []Polygon
+	polys := make([]Polygon, n)
 	for i := uint32(0); i < n; i++ {
 		geom, err := p.inner()
 		if err != nil {
@@ -318,7 +318,7 @@ func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) (MultiPolygon, erro
 		if !geom.IsPolygon() {
 			return MultiPolygon{}, SyntaxError{"MultiPolygon contains non-Polygon element"}
 		}
-		polys = append(polys, geom.AsPolygon())
+		polys[i] = geom.AsPolygon()
 	}
 	return NewMultiPolygonFromPolygons(polys, p.opts...)
 }
@@ -331,13 +331,12 @@ func (p *wkbParser) parseGeometryCollection(ctype CoordinatesType) (GeometryColl
 	if n == 0 {
 		return GeometryCollection{}.ForceCoordinatesType(ctype), nil
 	}
-	var geoms []Geometry
+	geoms := make([]Geometry, n)
 	for i := uint32(0); i < n; i++ {
-		geom, err := p.inner()
+		geoms[i], err = p.inner()
 		if err != nil {
 			return GeometryCollection{}, err
 		}
-		geoms = append(geoms, geom)
 	}
 	return NewGeometryCollection(geoms, p.opts...), nil
 }
