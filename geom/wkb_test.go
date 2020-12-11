@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/peterstace/simplefeatures/geom"
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
@@ -386,6 +387,121 @@ func TestWKBParseValid(t *testing.T) {
 			geom, err := UnmarshalWKB(hexStringToBytes(t, tt.wkb))
 			expectNoErr(t, err)
 			expectGeomEq(t, geom, geomFromWKT(t, tt.wkt))
+		})
+	}
+}
+
+func TestWKBParserSyntaxError(t *testing.T) {
+	for _, tc := range []struct {
+		description string
+		wkbHex      string
+		errorText   string
+	}{
+		{
+			"empty byte stream",
+			"",
+			"unexpected EOF",
+		},
+		{
+			"invalid byte order",
+			// Same as POINT(1 2) but with byte order set to 0xff.
+			"ff01000000000000000000f03f0000000000000040",
+			"invalid byte order: 0xff",
+		},
+		{
+			"invalid coord type",
+			// Same as POINT(1 2) but with geometry/coord type 4001 (invalid coord type)
+			"01a10f0000000000000000f03f0000000000000040",
+			"invalid coordinates type in geom code: 4001",
+		},
+		{
+			"invalid geom type",
+			// Same as POINT(1 2) but with geometry/coord type 8 (invalid geom type)
+			"0108000000000000000000f03f0000000000000040",
+			"invalid geometry type in geom code: 8",
+		},
+		{
+			"short read on uint32",
+			// Same as POINT(1 2) but truncated to half way through geom/coord type
+			"010100",
+			"unexpected EOF",
+		},
+		{
+			"short read on float64",
+			// Same as POINT(1 2) but truncated to half way through the first float64
+			"010100000000000000",
+			"unexpected EOF",
+		},
+		{
+			"mixed NaN point",
+			"01" + // POINT(1 NaN)
+				"01000000" +
+				"000000000000f03f" + // 1
+				"010000000000f87f", // NaN
+			"point contains mixed NaN values",
+		},
+		{
+			"not enough float64s in linestring",
+			"00" + // LINESTRING(0 0,1 1)
+				"00000002" + // LineString XY
+				"00000003" + // n=3 (but we only have 2 points below, so we'll get a short read)
+				"0000000000000000" + // 0
+				"0000000000000000" + // 0
+				"3ff0000000000000" + // 1
+				"3ff0000000000000", // 1
+			"unexpected EOF",
+		},
+		{
+			"multipoint contains non-points",
+			"00" + // Big endian
+				"00000004" + // MultiPoint XY
+				"00000001" + // n=1
+				"00" + // Big endian
+				"00000002" + // LineString XY
+				"00000002" + // n=2
+				"0000000000000000" + // 0
+				"0000000000000000" + // 0
+				"3ff0000000000000" + // 1
+				"3ff0000000000000", // 1
+			"MultiPoint contains non-Point element",
+		},
+		{
+			"multilinestring contains non-linestring",
+			"00" + // Big endian
+				"00000005" + // MultiLineString XY
+				"00000001" + // n=1
+				"00" + // Big endian
+				"00000001" + // Point XY
+				"0000000000000000" + // 0
+				"0000000000000000", // 0
+			"MultiLineString contains non-LineString element",
+		},
+		{
+			"multipolygon contains non-polygon",
+			"00" + // Big endian
+				"00000006" + // MultiPolygon XY
+				"00000001" + // n=1
+				"00" + // Big endian
+				"00000001" + // Point XY
+				"0000000000000000" + // 0
+				"0000000000000000", // 0
+			"MultiPolygon contains non-Polygon element",
+		},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			wkb := hexStringToBytes(t, tc.wkbHex)
+			_, err := UnmarshalWKB(wkb)
+			if err == nil {
+				t.Fatal("expected an error but got nil")
+			}
+			if _, isSynErr := err.(geom.SyntaxError); !isSynErr {
+				t.Fatalf("expected a SyntaxError but instead got %v", err)
+			}
+			if err.Error() != tc.errorText {
+				t.Logf("got:  %q", err.Error())
+				t.Logf("want: %q", tc.errorText)
+				t.Errorf("mismatch")
+			}
 		})
 	}
 }
