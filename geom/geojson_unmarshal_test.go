@@ -227,6 +227,117 @@ func TestGeoJSONUnmarshalValidAllowAdditionalCoordDimensions(t *testing.T) {
 	}
 }
 
+func TestGeoJSONSyntaxError(t *testing.T) {
+	for _, tc := range []struct {
+		description string
+		geojson     string
+		errorText   string
+	}{
+		{
+			"invalid json",
+			`{zort}`,
+			"invalid character 'z' looking for beginning of object key string",
+		},
+		{
+			"unknown geometry type",
+			`{"type":"foo","coordinates":[[0,0],[1,1]]}`,
+			"unknown geometry type: 'foo'",
+		},
+
+		{
+			"bad coordinate length - point 1",
+			`{"type":"Point","coordinates":[0]}`,
+			"invalid geojson coordinate length: 1",
+		},
+		{
+			"bad coordinate length - linestring 0",
+			`{"type":"LineString","coordinates":[[],[0]]}`,
+			"invalid geojson coordinate length: 0",
+		},
+		{
+			"bad coordinate length - linestring 1",
+			`{"type":"LineString","coordinates":[[0],[0]]}`,
+			"invalid geojson coordinate length: 1",
+		},
+		{
+			"bad coordinate length - polygon 0",
+			`{"type":"Polygon","coordinates":[[[],[0]]]}`,
+			"invalid geojson coordinate length: 0",
+		},
+		{
+			"bad coordinate length - polygon 1",
+			`{"type":"Polygon","coordinates":[[[0],[0]]]}`,
+			"invalid geojson coordinate length: 1",
+		},
+		{
+			"bad coordinate length - multipoint 0",
+			`{"type":"MultiPoint","coordinates":[[],[0]]}`,
+			"invalid geojson coordinate length: 0",
+		},
+		{
+			"bad coordinate length - multipoint 1",
+			`{"type":"MultiPoint","coordinates":[[0],[0]]}`,
+			"invalid geojson coordinate length: 1",
+		},
+		{
+			"bad coordinate length - multilinestring 0",
+			`{"type":"MultiLineString","coordinates":[[[],[0]]]}`,
+			"invalid geojson coordinate length: 0",
+		},
+		{
+			"bad coordinate length - multilinestring 1",
+			`{"type":"MultiLineString","coordinates":[[[0],[0]]]}`,
+			"invalid geojson coordinate length: 1",
+		},
+		{
+			"bad coordinate length - multipolygon 0",
+			`{"type":"MultiPolygon","coordinates":[[[[],[0]]]]}`,
+			"invalid geojson coordinate length: 0",
+		},
+		{
+			"bad coordinate length - multipolygon 1",
+			`{"type":"MultiPolygon","coordinates":[[[[0],[0]]]]}`,
+			"invalid geojson coordinate length: 1",
+		},
+
+		{
+			"bad coordinates shape - point",
+			`{"type":"Point","coordinates":[[0,0]]}`,
+			"json: cannot unmarshal array into Go value of type float64",
+		},
+		{
+			"bad coordinates shape - linestring",
+			`{"type":"LineString","coordinates":[[[0,0]]]}`,
+			"json: cannot unmarshal array into Go value of type float64",
+		},
+		{
+			"bad coordinates shape - polygon",
+			`{"type":"Polygon","coordinates":[[0,0]]}`,
+			"json: cannot unmarshal number into Go value of type []float64",
+		},
+		{
+			"bad coordinates shape - multipolygon",
+			`{"type":"MultiPolygon","coordinates":[[0,0]]}`,
+			"json: cannot unmarshal number into Go value of type [][]float64",
+		},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			_, err := UnmarshalGeoJSON([]byte(tc.geojson))
+			if err == nil {
+				t.Fatal("expected an error but got nil")
+			}
+			if _, isSynErr := err.(geom.SyntaxError); !isSynErr {
+				t.Fatalf("expected a SyntaxError but instead got %v", err)
+			}
+			if err.Error() != tc.errorText {
+				t.Logf("got:  %q", err.Error())
+				t.Logf("want: %q", tc.errorText)
+				t.Errorf("mismatch")
+			}
+		})
+	}
+}
+
 func TestGeoJSONUnmarshalInvalid(t *testing.T) {
 	for i, geojson := range []string{
 		// GeoJSON cannot represent empty points in MultiPoints. When parsing,

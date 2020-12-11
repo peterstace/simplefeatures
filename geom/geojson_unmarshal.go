@@ -9,7 +9,7 @@ import (
 func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error) {
 	var root geojsonNode
 	if err := json.Unmarshal(input, &root); err != nil {
-		return Geometry{}, err
+		return Geometry{}, SyntaxError{err.Error()}
 	}
 
 	rootObj, err := decodeGeoJSON(root)
@@ -127,33 +127,45 @@ func decodeGeoJSON(node geojsonNode) (interface{}, error) {
 		}
 		return parent, nil
 	default:
-		return nil, fmt.Errorf("unknown geojson type: %s", node.Type)
+		return nil, SyntaxError{fmt.Sprintf("unknown geometry type: '%s'", node.Type)}
 	}
 }
 
 func extract1DimFloat64s(coords json.RawMessage) ([]float64, error) {
 	var result []float64
-	err := json.Unmarshal(coords, &result)
-	return result, err
+	if err := json.Unmarshal(coords, &result); err != nil {
+		return nil, SyntaxError{err.Error()}
+	}
+	return result, nil
 
 }
 
 func extract2DimFloat64s(coords json.RawMessage) ([][]float64, error) {
 	var result [][]float64
-	err := json.Unmarshal(coords, &result)
-	return result, err
+	if err := json.Unmarshal(coords, &result); err != nil {
+		return nil, SyntaxError{err.Error()}
+	}
+	return result, nil
 }
 
 func extract3DimFloat64s(coords json.RawMessage) ([][][]float64, error) {
 	var result [][][]float64
-	err := json.Unmarshal(coords, &result)
-	return result, err
+	if err := json.Unmarshal(coords, &result); err != nil {
+		return nil, SyntaxError{err.Error()}
+	}
+	return result, nil
 }
 
 func extract4DimFloat64s(coords json.RawMessage) ([][][][]float64, error) {
 	var result [][][][]float64
-	err := json.Unmarshal(coords, &result)
-	return result, err
+	if err := json.Unmarshal(coords, &result); err != nil {
+		return nil, SyntaxError{err.Error()}
+	}
+	return result, nil
+}
+
+func geojsonInvalidCoordinatesLengthError(n int) SyntaxError {
+	return SyntaxError{fmt.Sprintf("invalid geojson coordinate length: %d", n)}
 }
 
 func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
@@ -162,7 +174,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 		n := len(node.coords)
 		hasLength[n] = true
 		if n == 1 {
-			return geojsonInvalidCoordinatesLengthError{n}
+			return geojsonInvalidCoordinatesLengthError(n)
 		}
 		return nil
 	case geojsonLineString:
@@ -170,7 +182,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 			n := len(c)
 			hasLength[n] = true
 			if n < 2 {
-				return geojsonInvalidCoordinatesLengthError{n}
+				return geojsonInvalidCoordinatesLengthError(n)
 			}
 		}
 		return nil
@@ -180,7 +192,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 				n := len(inner)
 				hasLength[n] = true
 				if n < 2 {
-					return geojsonInvalidCoordinatesLengthError{n}
+					return geojsonInvalidCoordinatesLengthError(n)
 				}
 			}
 		}
@@ -191,7 +203,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 			n := len(c)
 			hasLength[n] = true
 			if n < 2 {
-				return geojsonInvalidCoordinatesLengthError{n}
+				return geojsonInvalidCoordinatesLengthError(n)
 			}
 		}
 		return nil
@@ -201,7 +213,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 				n := len(inner)
 				hasLength[n] = true
 				if n < 2 {
-					return geojsonInvalidCoordinatesLengthError{n}
+					return geojsonInvalidCoordinatesLengthError(n)
 				}
 			}
 		}
@@ -213,7 +225,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 					n := len(inner)
 					hasLength[n] = true
 					if n < 2 {
-						return geojsonInvalidCoordinatesLengthError{n}
+						return geojsonInvalidCoordinatesLengthError(n)
 					}
 				}
 			}
