@@ -5,15 +5,12 @@ import (
 	"sort"
 )
 
-func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) error {
+func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 	d.overlayVertices(other)
 	d.overlayEdges(other)
 	d.fixVertices()
-	if err := d.reAssignFaces(); err != nil {
-		return err
-	}
+	d.reAssignFaces()
 	d.fixLabels()
-	return nil
 }
 
 func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -93,7 +90,7 @@ func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 
 // reAssignFaces clears the DCEL face list and creates new faces based on the
 // half edge loops.
-func (d *doublyConnectedEdgeList) reAssignFaces() error {
+func (d *doublyConnectedEdgeList) reAssignFaces() {
 	// Find all cycles.
 	var cycles []*halfEdgeRecord
 	seen := make(map[*halfEdgeRecord]bool)
@@ -124,7 +121,6 @@ func (d *doublyConnectedEdgeList) reAssignFaces() error {
 	for _, face := range d.faces {
 		d.completePartialFaceLabel(face)
 	}
-	return nil
 }
 
 // completePartialFaceLabel checks to see if the face label for the given face

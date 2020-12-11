@@ -21,7 +21,7 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) (Geo
 		}
 		mp, err := NewMultiPolygonFromPolygons(areals)
 		if err != nil {
-			return Geometry{}, fmt.Errorf("could not extract areal geometry from DCEL: %v", err)
+			return Geometry{}, TopologyError{"could not combine areal geometries from DECL: " + err.Error()}
 		}
 		return mp.AsGeometry(), nil
 	case len(areals) == 0 && len(linears) > 0 && len(points) == 0:
@@ -180,9 +180,6 @@ func orderCCWRingFirst(rings []LineString) {
 	}
 }
 
-// TODO: Line extracting currently pulls out single line segments, without any
-// joining. It would be better to return []line, and then do joining in a
-// separate routine.
 func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) ([]LineString, error) {
 	var lss []LineString
 	for _, e := range d.halfEdges {
