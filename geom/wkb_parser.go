@@ -9,7 +9,9 @@ import (
 )
 
 // UnmarshalWKB reads the Well Known Binary (WKB), and returns the
-// corresponding Geometry.
+// corresponding Geometry. If the WKB doesn't follow valid WKB grammar, then a
+// SyntaxError will be returned. If the WKB has the correct grammar but doesn't
+// encode a valid geometry, then a TopologyError will be returned.
 func UnmarshalWKB(wkb []byte, opts ...ConstructorOption) (Geometry, error) {
 	p := wkbParser{body: wkb, opts: opts}
 	return p.run()

@@ -204,6 +204,11 @@ func (g Geometry) MarshalJSON() ([]byte, error) {
 // ConstructionOptions are needed, then the value should be unmarshalled into a
 // json.RawMessage value and then UnmarshalJSON called manually (passing in the
 // ConstructionOptions as desired).
+//
+// As with UnmarshalGeoJSON, if the input doesn't follow the geojson grammar
+// then a SyntaxError will be returned. If the grammar is correct but the
+// encoded geometry is otherwise invalid, then a TopologyError will be
+// returned.
 func (g *Geometry) UnmarshalJSON(p []byte) error {
 	geom, err := UnmarshalGeoJSON(p)
 	if err != nil {

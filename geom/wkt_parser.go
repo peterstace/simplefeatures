@@ -14,7 +14,9 @@ import (
 // next production in the grammar.
 
 // UnmarshalWKT parses a Well Known Text (WKT), and returns the corresponding
-// Geometry.
+// Geometry. If the WKT doesn't follow valid WKT grammar, then a SyntaxError
+// will be returned. If the WKT has the correct grammar but doesn't encode a
+// valid geometry, then a TopologyError will be returned.
 func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 	p := newParser(wkt, opts)
 	geom, err := p.nextGeometryTaggedText()

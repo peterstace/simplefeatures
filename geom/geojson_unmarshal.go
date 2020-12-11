@@ -5,7 +5,10 @@ import (
 	"fmt"
 )
 
-// UnmarshalGeoJSON unmarshals a geometry that is encoded as a GeoJSON Geometry Object.
+// UnmarshalGeoJSON unmarshals a geometry that is encoded as a GeoJSON Geometry
+// Object. If the input doesn't follow the geojson grammar, then a SyntaxError
+// will be returned. If the grammar is correct but the encoded geometry is
+// otherwise invalid, then a TopologyError will be returned.
 func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error) {
 	var root geojsonNode
 	if err := json.Unmarshal(input, &root); err != nil {
