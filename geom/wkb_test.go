@@ -506,18 +506,6 @@ func TestWKBParserSyntaxError(t *testing.T) {
 	}
 }
 
-func TestWKBParserInvalidGeometryType(t *testing.T) {
-	// Same as POINT(1 2), but with the geometry type byte set to 0xff.
-	const wkb = "01ff000000000000000000f03f0000000000000040"
-	_, err := UnmarshalWKB(hexStringToBytes(t, wkb))
-	if err == nil {
-		t.Errorf("expected an error but got nil")
-	}
-	if !strings.Contains(err.Error(), "invalid geometry type") {
-		t.Errorf("expected to be an error about unknown geometry type, but got: %v", err)
-	}
-}
-
 func TestWKBMarshalValid(t *testing.T) {
 	for i, wkt := range []string{
 		"POINT EMPTY",
