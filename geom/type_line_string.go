@@ -102,27 +102,46 @@ func (s LineString) IsSimple() bool {
 		return true
 	}
 
-	// We need to track the index of the previous line segments, so that we can
-	// ignore the case where adjacent line segments intersect at a point (due
-	// to their construction). We can't just subtract 1 from the current index,
-	// since there could be duplicated vertices in the middle of the sequence.
-	prev := -1
-
-	var tree rtree.RTree
 	n := s.seq.Length()
+	items := make([]rtree.BulkItem, 0, n-1)
 	for i := 0; i < n; i++ {
 		ln, ok := getLine(s.seq, i)
 		if !ok {
 			continue
 		}
+		items = append(items, rtree.BulkItem{ln.envelope().box(), i})
+	}
+	tree := rtree.BulkLoad(items)
+
+	for i := 0; i < n; i++ {
+		ln, ok := getLine(s.seq, i)
+		if !ok {
+			continue
+		}
+
+		prev, ok := previousLine(s.seq, i)
+		if !ok {
+			prev = -1
+		}
+		next, ok := nextLine(s.seq, i)
+		if !ok {
+			next = -1
+		}
+
 		simple := true // assume simple until proven otherwise
-		box := ln.envelope().box()
-		tree.RangeSearch(box, func(j int) error {
+		tree.RangeSearch(ln.envelope().box(), func(j int) error {
+			// Skip finding the original line (i == j) or cases where we have
+			// already checked that pair (i > j).
+			if i >= j {
+				return nil
+			}
+
+			// Extract the other line from the sequence. We previously were
+			// able to access line j (otherwise we wouldn't have been able to
+			// put it into the tree). So if we can't access it now, something
+			// has gone horribly wrong.
 			other, ok := getLine(s.seq, j)
 			if !ok {
-				// We previously were able to access line j (otherwise we
-				// wouldn't have been able to put it into the tree). So if we
-				// can't access it now, something has gone horribly wrong.
 				panic("couldn't get line")
 			}
 
@@ -137,18 +156,19 @@ func (s LineString) IsSimple() bool {
 			}
 
 			// The dimension must be 1. Since the intersection is between two
-			// lines, the intersection must be a *single* point.
+			// lines, the intersection must be a *single* point in the cases
+			// from this point onwards.
 
-			if j == prev {
-				// Adjacent lines will intersect at a point due to
-				// construction, so this case is okay.
+			// Adjacent lines will intersect at a point due to construction, so
+			// these cases are okay.
+			if j == prev || j == next {
 				return nil
 			}
 
 			// The first and last segment are allowed to intersect at a point,
 			// so long as that point is the start of the first segment and the
 			// end of the last segment (i.e. the line string is closed).
-			if i == last && j == first && s.IsClosed() {
+			if s.IsClosed() && i == first && j == last {
 				return nil
 			}
 
@@ -161,8 +181,6 @@ func (s LineString) IsSimple() bool {
 		if !simple {
 			return false
 		}
-		tree.Insert(box, i)
-		prev = i
 	}
 	return true
 }

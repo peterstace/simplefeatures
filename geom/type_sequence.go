@@ -163,3 +163,32 @@ func firstAndLastLines(seq Sequence) (int, int, bool) {
 	}
 	return first, last, first != -1 && last != -1
 }
+
+// previousLine finds the index of the line segment previous to line segment i.
+// This may not be i-1 in the case where there are duplicate points. If there
+// is no previous line, then false will be returned.
+func previousLine(seq Sequence, i int) (int, bool) {
+	i--
+	for i >= 0 {
+		if _, ok := getLine(seq, i); ok {
+			return i, true
+		}
+		i--
+	}
+	return 0, false
+}
+
+// nextLine finds the index of the line segment after line segment i.  This may
+// not be i+1 in the case where there are duplicate points. If there is no next
+// line, then false will be returned.
+func nextLine(seq Sequence, i int) (int, bool) {
+	n := seq.Length()
+	i++
+	for i < n {
+		if _, ok := getLine(seq, i); ok {
+			return i, true
+		}
+		i++
+	}
+	return 0, false
+}
