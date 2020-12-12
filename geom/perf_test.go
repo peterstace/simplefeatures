@@ -99,6 +99,27 @@ func BenchmarkIntersectsLineStringWithLineString(b *testing.B) {
 	}
 }
 
+func BenchmarkIntersectsMultiPointWithMultiPoint(b *testing.B) {
+	for _, sz := range []int{10, 100, 1000, 10000} {
+		b.Run(fmt.Sprintf("n=%d", 4*sz), func(b *testing.B) {
+			rnd := rand.New(rand.NewSource(0))
+			var coordsA, coordsB []float64
+			for i := 0; i < sz; i++ {
+				coordsA = append(coordsA, rnd.Float64(), rnd.Float64())
+				coordsB = append(coordsB, rnd.Float64(), rnd.Float64())
+			}
+			mpA := NewMultiPoint(NewSequence(coordsA, DimXY)).AsGeometry()
+			mpB := NewMultiPoint(NewSequence(coordsB, DimXY)).AsGeometry()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				if Intersects(mpA, mpB) {
+					b.Fatal("shouldn't have intersected")
+				}
+			}
+		})
+	}
+}
+
 func BenchmarkLineStringIsSimpleZigZag(b *testing.B) {
 	for _, sz := range []int{10, 100, 1000, 10000} {
 		b.Run(strconv.Itoa(sz), func(b *testing.B) {
