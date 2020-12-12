@@ -228,6 +228,22 @@ func BenchmarkPolygonZigZagRingsValidation(b *testing.B) {
 	}
 }
 
+func BenchmarkPolygonAnnulusValidation(b *testing.B) {
+	for _, sz := range []int{10, 100, 1000, 10000} {
+		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+			outer := regularPolygon(XY{}, 1.0, sz/2).ExteriorRing()
+			inner := regularPolygon(XY{}, 0.5, sz/2).ExteriorRing()
+			rings := []LineString{outer, inner}
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				if _, err := NewPolygonFromRings(rings); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
 func BenchmarkMultipolygonValidation(b *testing.B) {
 	for _, sz := range []int{1, 2, 4, 8, 16, 32} {
 		b.Run(fmt.Sprintf("n=%d", sz*sz), func(b *testing.B) {
