@@ -125,15 +125,16 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 		tree.Insert(box, i)
 	}
 
-	// All inner rings must be inside the outer ring.
+	// All inner rings must be inside the outer ring. We can just check an
+	// arbitrary point in each inner ring because we have already made sure
+	// that the rings don't intersect at multiple points.
 	for _, hole := range rings[1:] {
-		holeSeq := hole.Coordinates()
-		holeLen := holeSeq.Length()
-		for i := 0; i < holeLen; i++ {
-			xy := holeSeq.GetXY(i)
-			if relatePointToRing(xy, rings[0]) == exterior {
-				return errors.New("hole must be inside outer ring")
-			}
+		xy, ok := hole.StartPoint().XY()
+		if !ok {
+			continue
+		}
+		if relatePointToRing(xy, rings[0]) == exterior {
+			return errors.New("hole must be inside outer ring")
 		}
 	}
 
