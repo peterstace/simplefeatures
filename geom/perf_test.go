@@ -2,7 +2,6 @@ package geom_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math"
 	"math/rand"
 	"strconv"
@@ -372,19 +371,5 @@ func BenchmarkWKTParsing(b *testing.B) {
 				}
 			}
 		})
-	}
-}
-
-func BenchmarkMultiPolygonValidation(b *testing.B) {
-	wkt, err := ioutil.ReadFile("/home/petsta/boundary_wkt.txt")
-	if err != nil {
-		b.Fatal(err)
-	}
-	wktStr := string(wkt)
-
-	for i := 0; i < b.N; i++ {
-		if _, err := UnmarshalWKT(wktStr); err != nil {
-			b.Fatal(err)
-		}
 	}
 }
