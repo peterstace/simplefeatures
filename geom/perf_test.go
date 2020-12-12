@@ -101,7 +101,7 @@ func BenchmarkIntersectsLineStringWithLineString(b *testing.B) {
 
 func BenchmarkIntersectsMultiPointWithMultiPoint(b *testing.B) {
 	for _, sz := range []int{10, 100, 1000, 10000} {
-		b.Run(fmt.Sprintf("n=%d", 4*sz), func(b *testing.B) {
+		b.Run(fmt.Sprintf("n=%d", 2*sz), func(b *testing.B) {
 			rnd := rand.New(rand.NewSource(0))
 			var coordsA, coordsB []float64
 			for i := 0; i < sz; i++ {
