@@ -326,9 +326,6 @@ func TestGeoJSONSyntaxError(t *testing.T) {
 			if err == nil {
 				t.Fatal("expected an error but got nil")
 			}
-			if _, isSynErr := err.(geom.SyntaxError); !isSynErr {
-				t.Fatalf("expected a SyntaxError but instead got %v", err)
-			}
 			if err.Error() != tc.errorText {
 				t.Logf("got:  %q", err.Error())
 				t.Logf("want: %q", tc.errorText)

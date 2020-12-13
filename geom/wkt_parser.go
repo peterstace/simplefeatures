@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -14,9 +15,7 @@ import (
 // next production in the grammar.
 
 // UnmarshalWKT parses a Well Known Text (WKT), and returns the corresponding
-// Geometry. If the WKT doesn't follow valid WKT grammar, then a SyntaxError
-// will be returned. If the WKT has the correct grammar but doesn't encode a
-// valid geometry, then a TopologyError will be returned.
+// Geometry.
 func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 	p := newParser(wkt, opts)
 	geom, err := p.nextGeometryTaggedText()
@@ -26,17 +25,17 @@ func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 
 	if tok, err := p.lexer.next(); err == nil {
 		return Geometry{}, wantButGot("EOF", tok)
-	} else if err != errEOF {
+	} else if err != io.ErrUnexpectedEOF {
 		return Geometry{}, err
 	}
 	return geom, nil
 }
 
-func wantButGot(wantTok, gotTok string) SyntaxError {
-	return SyntaxError{fmt.Sprintf(
+func wantButGot(wantTok, gotTok string) error {
+	return fmt.Errorf(
 		"unexpected token: '%s' (expected %s)",
 		gotTok, wantTok,
-	)}
+	)
 }
 
 func newParser(wkt string, opts []ConstructorOption) *parser {
@@ -201,11 +200,11 @@ func (p *parser) nextSignedNumericLiteral() (float64, error) {
 	}
 	f, err := strconv.ParseFloat(tok, 64)
 	if err != nil {
-		return 0, SyntaxError{err.Error()}
+		return 0, err
 	}
 	// NaNs and Infs are not allowed by the WKT grammar.
 	if math.IsNaN(f) || math.IsInf(f, 0) {
-		return 0, SyntaxError{"invalid numeric literal: " + tok}
+		return 0, fmt.Errorf("invalid numeric literal: %v", tok)
 	}
 	if negative {
 		f *= -1

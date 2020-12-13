@@ -2,16 +2,16 @@ package geom
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
+	"io"
 	"math"
 	"reflect"
 	"unsafe"
 )
 
 // UnmarshalWKB reads the Well Known Binary (WKB), and returns the
-// corresponding Geometry. If the WKB doesn't follow valid WKB grammar, then a
-// SyntaxError will be returned. If the WKB has the correct grammar but doesn't
-// encode a valid geometry, then a TopologyError will be returned.
+// corresponding Geometry.
 func UnmarshalWKB(wkb []byte, opts ...ConstructorOption) (Geometry, error) {
 	p := wkbParser{body: wkb, opts: opts}
 	return p.run()
@@ -57,13 +57,13 @@ func (p *wkbParser) parseByteOrder() error {
 		p.bo = binary.LittleEndian
 		return nil
 	default:
-		return SyntaxError{fmt.Sprintf("invalid byte order: %#x", b)}
+		return fmt.Errorf("invalid byte order: %#x", b)
 	}
 }
 
 func (p *wkbParser) readByte() (byte, error) {
 	if len(p.body) == 0 {
-		return 0, errEOF
+		return 0, io.ErrUnexpectedEOF
 	}
 	b := p.body[0]
 	p.body = p.body[1:]
@@ -72,7 +72,7 @@ func (p *wkbParser) readByte() (byte, error) {
 
 func (p *wkbParser) parseUint32() (uint32, error) {
 	if len(p.body) < 4 {
-		return 0, errEOF
+		return 0, io.ErrUnexpectedEOF
 	}
 	x := p.bo.Uint32(p.body)
 	p.body = p.body[4:]
@@ -101,7 +101,7 @@ func (p *wkbParser) parseGeomAndCoordType() (GeometryType, CoordinatesType, erro
 	case 7:
 		gtype = TypeGeometryCollection
 	default:
-		return 0, 0, SyntaxError{fmt.Sprintf("invalid geometry type in geom code: %v", geomCode)}
+		return 0, 0, fmt.Errorf("invalid geometry type in geom code: %v", geomCode)
 	}
 
 	var ctype CoordinatesType
@@ -115,7 +115,7 @@ func (p *wkbParser) parseGeomAndCoordType() (GeometryType, CoordinatesType, erro
 	case 3:
 		ctype = DimXYZM
 	default:
-		return 0, 0, SyntaxError{fmt.Sprintf("invalid coordinates type in geom code: %v", geomCode)}
+		return 0, 0, fmt.Errorf("invalid coordinates type in geom code: %v", geomCode)
 	}
 
 	return gtype, ctype, nil
@@ -145,13 +145,13 @@ func (p *wkbParser) parseGeomRoot(gtype GeometryType, ctype CoordinatesType) (Ge
 		gc, err := p.parseGeometryCollection(ctype)
 		return gc.AsGeometry(), err
 	default:
-		panic(fmt.Sprintf("unknown geometry type: %d", gtype))
+		return Geometry{}, fmt.Errorf("unknown geometry type: %d", gtype)
 	}
 }
 
 func (p *wkbParser) parseFloat64() (float64, error) {
 	if len(p.body) < 8 {
-		return 0, errEOF
+		return 0, io.ErrUnexpectedEOF
 	}
 	u := p.bo.Uint64(p.body)
 	p.body = p.body[8:]
@@ -188,7 +188,7 @@ func (p *wkbParser) parsePoint(ctype CoordinatesType) (Point, error) {
 		return Point{}.ForceCoordinatesType(ctype), nil
 	}
 	if math.IsNaN(c.X) || math.IsNaN(c.Y) {
-		return Point{}, SyntaxError{"point contains mixed NaN values"}
+		return Point{}, errors.New("point contains mixed NaN values")
 	}
 	return NewPoint(c, p.opts...), nil
 }
@@ -201,7 +201,7 @@ func (p *wkbParser) parseLineString(ctype CoordinatesType) (LineString, error) {
 	floats := make([]float64, int(n)*ctype.Dimension())
 
 	if len(p.body) < 8*len(floats) {
-		return LineString{}, errEOF
+		return LineString{}, io.ErrUnexpectedEOF
 	}
 
 	var seqData []byte
@@ -274,7 +274,7 @@ func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) (MultiPoint, error) {
 			return MultiPoint{}, err
 		}
 		if !geom.IsPoint() {
-			return MultiPoint{}, SyntaxError{"MultiPoint contains non-Point element"}
+			return MultiPoint{}, errors.New("MultiPoint contains non-Point element")
 		}
 		pts[i] = geom.AsPoint()
 	}
@@ -296,7 +296,7 @@ func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) (MultiLineString
 			return MultiLineString{}, err
 		}
 		if !geom.IsLineString() {
-			return MultiLineString{}, SyntaxError{"MultiLineString contains non-LineString element"}
+			return MultiLineString{}, errors.New("MultiLineString contains non-LineString element")
 		}
 		lss[i] = geom.AsLineString()
 	}
@@ -318,7 +318,7 @@ func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) (MultiPolygon, erro
 			return MultiPolygon{}, err
 		}
 		if !geom.IsPolygon() {
-			return MultiPolygon{}, SyntaxError{"MultiPolygon contains non-Polygon element"}
+			return MultiPolygon{}, errors.New("MultiPolygon contains non-Polygon element")
 		}
 		polys[i] = geom.AsPolygon()
 	}

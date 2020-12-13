@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/peterstace/simplefeatures/geom"
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
@@ -135,9 +134,6 @@ func TestUnmarshalWKTSyntaxErrors(t *testing.T) {
 			_, err := UnmarshalWKT(tt.wkt)
 			if err == nil {
 				t.Fatalf("expected error but got nil")
-			}
-			if _, isSynErr := err.(geom.SyntaxError); !isSynErr {
-				t.Fatalf("expected a SyntaxError but instead got %v", err)
 			}
 			if err.Error() != tt.errorText {
 				t.Logf("got:  %q", err.Error())

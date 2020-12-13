@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"errors"
 	"math"
 	"unsafe"
 
@@ -40,8 +41,8 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 		return LineString{}, nil
 	}
 
-	return LineString{}, TopologyError{"non-empty LineStrings " +
-		"must contain at least 2 points with distinct XY values"}
+	return LineString{}, errors.New("non-empty LineStrings " +
+		"must contain at least 2 points with distinct XY values")
 }
 
 // Type returns the GeometryType for a LineString

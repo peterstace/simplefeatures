@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/peterstace/simplefeatures/geom"
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
@@ -493,9 +492,6 @@ func TestWKBParserSyntaxError(t *testing.T) {
 			_, err := UnmarshalWKB(wkb)
 			if err == nil {
 				t.Fatal("expected an error but got nil")
-			}
-			if _, isSynErr := err.(geom.SyntaxError); !isSynErr {
-				t.Fatalf("expected a SyntaxError but instead got %v", err)
 			}
 			if err.Error() != tc.errorText {
 				t.Logf("got:  %q", err.Error())

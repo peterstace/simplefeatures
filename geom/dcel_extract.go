@@ -21,7 +21,7 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) (Geo
 		}
 		mp, err := NewMultiPolygonFromPolygons(areals)
 		if err != nil {
-			return Geometry{}, TopologyError{"could not combine areal geometries from DECL: " + err.Error()}
+			return Geometry{}, fmt.Errorf("could not extract areal geometry from DCEL: %v", err)
 		}
 		return mp.AsGeometry(), nil
 	case len(areals) == 0 && len(linears) > 0 && len(points) == 0:

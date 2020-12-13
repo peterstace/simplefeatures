@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"errors"
 	"math"
 	"unsafe"
 
@@ -64,10 +65,10 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 
 	for _, r := range rings {
 		if !r.IsClosed() {
-			return TopologyError{"polygon rings must be closed"}
+			return errors.New("polygon rings must be closed")
 		}
 		if !r.IsSimple() {
-			return TopologyError{"polygon rings must be simple"}
+			return errors.New("polygon rings must be simple")
 		}
 	}
 
@@ -96,7 +97,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 				nestedFwd := relatePointToRing(startCurrent, otherRing) == interior
 				nestedRev := relatePointToRing(startOther, currentRing) == interior
 				if nestedFwd || nestedRev {
-					return TopologyError{"polygon must not have nested rings"}
+					return errors.New("polygon must not have nested rings")
 				}
 			}
 
@@ -107,7 +108,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 				return nil
 			}
 			if ext.multiplePoints {
-				return TopologyError{"polygon rings must not intersect at multiple points"}
+				return errors.New("polygon rings must not intersect at multiple points")
 			}
 
 			interVert, ok := interVerts[ext.singlePoint]
@@ -135,7 +136,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 			continue
 		}
 		if relatePointToRing(xy, rings[0]) == exterior {
-			return TopologyError{"hole must be inside outer ring"}
+			return errors.New("hole must be inside outer ring")
 		}
 	}
 
@@ -145,7 +146,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	// intersection. The interior of the polygon is connected iff the graph
 	// does not contain a cycle.
 	if graph.hasCycle() {
-		return TopologyError{"polygon interiors must be connected"}
+		return errors.New("polygon interiors must be connected")
 	}
 	return nil
 }

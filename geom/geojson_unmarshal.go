@@ -5,14 +5,11 @@ import (
 	"fmt"
 )
 
-// UnmarshalGeoJSON unmarshals a geometry that is encoded as a GeoJSON Geometry
-// Object. If the input doesn't follow the geojson grammar, then a SyntaxError
-// will be returned. If the grammar is correct but the encoded geometry is
-// otherwise invalid, then a TopologyError will be returned.
+// UnmarshalGeoJSON unmarshals a geometry that is encoded as a GeoJSON Geometry Object.
 func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error) {
 	var root geojsonNode
 	if err := json.Unmarshal(input, &root); err != nil {
-		return Geometry{}, SyntaxError{err.Error()}
+		return Geometry{}, err
 	}
 
 	rootObj, err := decodeGeoJSON(root)
@@ -130,45 +127,37 @@ func decodeGeoJSON(node geojsonNode) (interface{}, error) {
 		}
 		return parent, nil
 	default:
-		return nil, SyntaxError{fmt.Sprintf("unknown geometry type: '%s'", node.Type)}
+		return nil, fmt.Errorf("unknown geometry type: '%s'", node.Type)
 	}
 }
 
 func extract1DimFloat64s(coords json.RawMessage) ([]float64, error) {
 	var result []float64
-	if err := json.Unmarshal(coords, &result); err != nil {
-		return nil, SyntaxError{err.Error()}
-	}
-	return result, nil
+	err := json.Unmarshal(coords, &result)
+	return result, err
 
 }
 
 func extract2DimFloat64s(coords json.RawMessage) ([][]float64, error) {
 	var result [][]float64
-	if err := json.Unmarshal(coords, &result); err != nil {
-		return nil, SyntaxError{err.Error()}
-	}
-	return result, nil
+	err := json.Unmarshal(coords, &result)
+	return result, err
 }
 
 func extract3DimFloat64s(coords json.RawMessage) ([][][]float64, error) {
 	var result [][][]float64
-	if err := json.Unmarshal(coords, &result); err != nil {
-		return nil, SyntaxError{err.Error()}
-	}
-	return result, nil
+	err := json.Unmarshal(coords, &result)
+	return result, err
 }
 
 func extract4DimFloat64s(coords json.RawMessage) ([][][][]float64, error) {
 	var result [][][][]float64
-	if err := json.Unmarshal(coords, &result); err != nil {
-		return nil, SyntaxError{err.Error()}
-	}
-	return result, nil
+	err := json.Unmarshal(coords, &result)
+	return result, err
 }
 
-func geojsonInvalidCoordinatesLengthError(n int) SyntaxError {
-	return SyntaxError{fmt.Sprintf("invalid geojson coordinate length: %d", n)}
+func geojsonInvalidCoordinatesLengthError(n int) error {
+	return fmt.Errorf("invalid geojson coordinate length: %d", n)
 }
 
 func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
