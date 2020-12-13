@@ -19,11 +19,6 @@ func newWKTLexer(wkt string) wktLexer {
 	return wktLexer{scn: scn}
 }
 
-func (w *wktLexer) isEOF() bool {
-	_, err := w.peek()
-	return err == io.ErrUnexpectedEOF
-}
-
 func (w *wktLexer) next() (string, error) {
 	if w.peeked != "" {
 		tok := w.peeked
