@@ -99,6 +99,27 @@ func BenchmarkIntersectsLineStringWithLineString(b *testing.B) {
 	}
 }
 
+func BenchmarkIntersectsMultiPointWithMultiPoint(b *testing.B) {
+	for _, sz := range []int{10, 100, 1000, 10000} {
+		b.Run(fmt.Sprintf("n=%d", 2*sz), func(b *testing.B) {
+			rnd := rand.New(rand.NewSource(0))
+			var coordsA, coordsB []float64
+			for i := 0; i < sz; i++ {
+				coordsA = append(coordsA, rnd.Float64(), rnd.Float64())
+				coordsB = append(coordsB, rnd.Float64(), rnd.Float64())
+			}
+			mpA := NewMultiPoint(NewSequence(coordsA, DimXY)).AsGeometry()
+			mpB := NewMultiPoint(NewSequence(coordsB, DimXY)).AsGeometry()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				if Intersects(mpA, mpB) {
+					b.Fatal("shouldn't have intersected")
+				}
+			}
+		})
+	}
+}
+
 func BenchmarkLineStringIsSimpleZigZag(b *testing.B) {
 	for _, sz := range []int{10, 100, 1000, 10000} {
 		b.Run(strconv.Itoa(sz), func(b *testing.B) {
@@ -220,6 +241,22 @@ func BenchmarkPolygonZigZagRingsValidation(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				_, err := NewPolygonFromRings([]LineString{outerRing, leftRing, rightRing})
 				if err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
+func BenchmarkPolygonAnnulusValidation(b *testing.B) {
+	for _, sz := range []int{10, 100, 1000, 10000} {
+		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+			outer := regularPolygon(XY{}, 1.0, sz/2).ExteriorRing()
+			inner := regularPolygon(XY{}, 0.5, sz/2).ExteriorRing()
+			rings := []LineString{outer, inner}
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				if _, err := NewPolygonFromRings(rings); err != nil {
 					b.Fatal(err)
 				}
 			}

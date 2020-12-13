@@ -298,11 +298,18 @@ func hasIntersectionPointWithLineString(pt Point, ls LineString) bool {
 }
 
 func hasIntersectionMultiPointWithMultiPoint(mp1, mp2 MultiPoint) bool {
-	// To do: improve the speed efficiency, it's currently O(n1*n2)
-	for i := 0; i < mp1.NumPoints(); i++ {
-		pt := mp1.PointN(i)
-		if hasIntersectionPointWithMultiPoint(pt, mp2) {
-			return true // Point and MultiPoint both have dimension 0
+	mp1N := mp1.NumPoints()
+	set := make(map[XY]bool, mp1N)
+	for i := 0; i < mp1N; i++ {
+		if xy, ok := mp1.PointN(i).XY(); ok {
+			set[xy] = true
+		}
+	}
+
+	mp2N := mp2.NumPoints()
+	for i := 0; i < mp2N; i++ {
+		if xy, ok := mp2.PointN(i).XY(); ok && set[xy] {
+			return true
 		}
 	}
 	return false
