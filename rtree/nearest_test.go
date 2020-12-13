@@ -3,6 +3,7 @@ package rtree
 import (
 	"errors"
 	"fmt"
+	"math"
 	"math/rand"
 	"sort"
 	"testing"
@@ -14,12 +15,38 @@ func TestNearest(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
 			rt, boxes := testBulkLoad(rnd, population, 0.9, 0.1)
 			checkInvariants(t, rt, boxes)
+			checkPrioritySearch(t, rt, boxes, rnd)
 			checkNearest(t, rt, boxes, rnd)
 		})
 	}
 }
 
 func checkNearest(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
+	for i := 0; i < 10; i++ {
+		originBB := randomBox(rnd, 0.9, 0.1)
+		got, ok := rt.Nearest(originBB)
+
+		if ok && len(boxes) == 0 {
+			t.Fatal("found nearest but no boxes")
+		}
+		if !ok && len(boxes) != 0 {
+			t.Fatal("could not find nearest but have some boxes")
+		}
+		if !ok {
+			continue
+		}
+
+		bestDist := math.Inf(+1)
+		for j := range boxes {
+			bestDist = math.Min(bestDist, squaredEuclideanDistance(originBB, boxes[j]))
+		}
+		if bestDist != squaredEuclideanDistance(originBB, boxes[got]) {
+			t.Errorf("mismatched distance")
+		}
+	}
+}
+
+func checkPrioritySearch(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
 	for i := 0; i < 10; i++ {
 		var got []int
 		originBB := randomBox(rnd, 0.9, 0.1)
@@ -43,7 +70,7 @@ func checkNearest(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
 	}
 }
 
-func TestNearestEarlyStop(t *testing.T) {
+func TestPrioritySearchEarlyStop(t *testing.T) {
 	rnd := rand.New(rand.NewSource(0))
 	boxes := make([]Box, 100)
 	for i := range boxes {
@@ -58,7 +85,7 @@ func TestNearestEarlyStop(t *testing.T) {
 	rt := BulkLoad(inserts)
 	origin := randomBox(rnd, 0.9, 0.1)
 
-	t.Run("stop using sentinal", func(t *testing.T) {
+	t.Run("stop using sentinel", func(t *testing.T) {
 		var count int
 		err := rt.PrioritySearch(origin, func(int) error {
 			count++
