@@ -199,6 +199,7 @@ func hasIntersectionBetweenLines(
 	bool, mlsWithMLSIntersectsExtension,
 ) {
 	// TODO: Should we conditionally reorder lines1 and lines2?
+	// TODO: Yes, we should. This actually makes a decent amount of difference.
 
 	bulk := make([]rtree.BulkItem, len(lines1))
 	for i, ln := range lines1 {
