@@ -82,7 +82,9 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	for i, currentRing := range rings {
 		env, ok := currentRing.Envelope()
 		if !ok {
-			return errors.New("polygon rings must not be empty")
+			// Cannot occur, because we have already checked to ensure rings
+			// are closed. Closed rings by definition are non-empty.
+			panic("unexpected empty ring")
 		}
 		box := env.box()
 		if err := tree.RangeSearch(box, func(j int) error {

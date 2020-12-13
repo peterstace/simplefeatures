@@ -57,7 +57,7 @@ func NewMultiPoint(seq Sequence, opts ...ConstructorOption) MultiPoint {
 func NewMultiPointWithEmptyMask(seq Sequence, empty BitSet, opts ...ConstructorOption) MultiPoint {
 	return MultiPoint{
 		seq,
-		empty.Clone(), // clone so that the caller doesn't have access to the interal empty set
+		empty.Clone(), // clone so that the caller doesn't have access to the internal empty set
 	}
 }
 

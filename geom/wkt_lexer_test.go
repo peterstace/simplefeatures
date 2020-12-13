@@ -43,7 +43,7 @@ func TestWKTLexer(t *testing.T) {
 			for {
 				tok, err := lexer.next()
 				if err != nil {
-					if err == io.EOF {
+					if err == io.ErrUnexpectedEOF {
 						break
 					}
 					t.Fatal(err)

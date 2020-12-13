@@ -95,7 +95,7 @@ func TestGeoJSONFeatureCollectionInvalidUnmarshal(t *testing.T) {
 		},
 		{
 			input:       `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"ZORT","coordinates":[1,2]}}]}`,
-			errFragment: "unknown geojson type: ZORT",
+			errFragment: "unknown geometry type: 'ZORT'",
 		},
 		{
 			input:       `{"type":"FeatureCollection","features":[{"type":"Feature"}]}`,

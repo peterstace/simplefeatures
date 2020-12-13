@@ -127,7 +127,7 @@ func decodeGeoJSON(node geojsonNode) (interface{}, error) {
 		}
 		return parent, nil
 	default:
-		return nil, fmt.Errorf("unknown geojson type: %s", node.Type)
+		return nil, fmt.Errorf("unknown geometry type: '%s'", node.Type)
 	}
 }
 
@@ -156,13 +156,17 @@ func extract4DimFloat64s(coords json.RawMessage) ([][][][]float64, error) {
 	return result, err
 }
 
+func geojsonInvalidCoordinatesLengthError(n int) error {
+	return fmt.Errorf("invalid geojson coordinate length: %d", n)
+}
+
 func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 	switch node := node.(type) {
 	case geojsonPoint:
 		n := len(node.coords)
 		hasLength[n] = true
 		if n == 1 {
-			return geojsonInvalidCoordinatesLengthError{n}
+			return geojsonInvalidCoordinatesLengthError(n)
 		}
 		return nil
 	case geojsonLineString:
@@ -170,7 +174,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 			n := len(c)
 			hasLength[n] = true
 			if n < 2 {
-				return geojsonInvalidCoordinatesLengthError{n}
+				return geojsonInvalidCoordinatesLengthError(n)
 			}
 		}
 		return nil
@@ -180,7 +184,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 				n := len(inner)
 				hasLength[n] = true
 				if n < 2 {
-					return geojsonInvalidCoordinatesLengthError{n}
+					return geojsonInvalidCoordinatesLengthError(n)
 				}
 			}
 		}
@@ -191,7 +195,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 			n := len(c)
 			hasLength[n] = true
 			if n < 2 {
-				return geojsonInvalidCoordinatesLengthError{n}
+				return geojsonInvalidCoordinatesLengthError(n)
 			}
 		}
 		return nil
@@ -201,7 +205,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 				n := len(inner)
 				hasLength[n] = true
 				if n < 2 {
-					return geojsonInvalidCoordinatesLengthError{n}
+					return geojsonInvalidCoordinatesLengthError(n)
 				}
 			}
 		}
@@ -213,7 +217,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 					n := len(inner)
 					hasLength[n] = true
 					if n < 2 {
-						return geojsonInvalidCoordinatesLengthError{n}
+						return geojsonInvalidCoordinatesLengthError(n)
 					}
 				}
 			}

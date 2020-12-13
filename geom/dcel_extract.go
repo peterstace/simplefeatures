@@ -180,9 +180,6 @@ func orderCCWRingFirst(rings []LineString) {
 	}
 }
 
-// TODO: Line extracting currently pulls out single line segments, without any
-// joining. It would be better to return []line, and then do joining in a
-// separate routine.
 func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) ([]LineString, error) {
 	var lss []LineString
 	for _, e := range d.halfEdges {

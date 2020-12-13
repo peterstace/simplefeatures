@@ -1,7 +1,7 @@
 package geom
 
 import (
-	"errors"
+	"fmt"
 	"io"
 	"strings"
 	"text/scanner"
@@ -28,14 +28,14 @@ func (w *wktLexer) next() (string, error) {
 
 	var err error
 	w.scn.Error = func(_ *scanner.Scanner, msg string) {
-		err = errors.New(msg)
+		err = fmt.Errorf("invalid token: '%s' (%s)", w.scn.TokenText(), msg)
 	}
 	isEOF := w.scn.Scan() == scanner.EOF
 	if err != nil {
 		return "", err
 	}
 	if isEOF {
-		return "", io.EOF
+		return "", io.ErrUnexpectedEOF
 	}
 	return w.scn.TokenText(), nil
 }
