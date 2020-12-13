@@ -53,6 +53,15 @@ func CheckWKBParse(t *testing.T, pg PostGIS, candidates []string) {
 		}
 		any = true
 		t.Run(fmt.Sprintf("CheckWKBParse_%d", i), func(t *testing.T) {
+			if len(wkb) >= 10 {
+				if strings.HasPrefix(wkb, "0108000000") {
+					t.Skip("PostGIS accepts geomType 8 but SF doesn't")
+				}
+				if strings.HasPrefix(wkb, "01a10f0000") {
+					t.Skip("PostGIS accepts geomType 4001 but SF doesn't")
+				}
+			}
+
 			_, sfErr := geom.UnmarshalWKB(buf)
 			isValid, reason := pg.WKBIsValidWithReason(t, wkb)
 			if (sfErr == nil) != isValid {
@@ -97,6 +106,11 @@ func CheckGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
 			//
 			// Simplefeatures chooses to accept this as an empty point, but
 			// Postgres rejects it.
+			continue
+		}
+		if geojson == `{"type":"MultiPolygon","coordinates":[[0,0]]}` {
+			// PostGIS erroneously accepts this as a valid geometry, but
+			// simplefeatures correctly rejects it.
 			continue
 		}
 		any = true

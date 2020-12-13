@@ -417,7 +417,7 @@ func TestWKBParserSyntaxError(t *testing.T) {
 			"invalid geom type",
 			// Same as POINT(1 2) but with geometry/coord type 8 (invalid geom type)
 			"0108000000000000000000f03f0000000000000040",
-			"invalid geometry type in geom code: 8",
+			"invalid or unknown geometry type in geom code: 8",
 		},
 		{
 			"short read on uint32",

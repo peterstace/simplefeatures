@@ -101,7 +101,7 @@ func (p *wkbParser) parseGeomAndCoordType() (GeometryType, CoordinatesType, erro
 	case 7:
 		gtype = TypeGeometryCollection
 	default:
-		return 0, 0, fmt.Errorf("invalid geometry type in geom code: %v", geomCode)
+		return 0, 0, fmt.Errorf("invalid or unknown geometry type in geom code: %v", geomCode)
 	}
 
 	var ctype CoordinatesType
