@@ -156,6 +156,10 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 	}
 	t.Log("---")
 
+	if got := rt.Count(); got != len(boxes) {
+		t.Fatalf("Count: want=%v got=%v", len(boxes), got)
+	}
+
 	unfound := make(map[int]struct{})
 	for i := range boxes {
 		unfound[i] = struct{}{}

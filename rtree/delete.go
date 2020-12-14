@@ -40,6 +40,7 @@ func (t *RTree) Delete(box Box, recordID int) bool {
 	}
 
 	// D2 [Delete record]
+	originalCount := t.count
 	deleteEntry(foundNode, foundEntryIndex)
 
 	// D3 [Propagate changes]
@@ -51,6 +52,7 @@ func (t *RTree) Delete(box Box, recordID int) bool {
 		t.root.parent = nil
 	}
 
+	t.count = originalCount - 1
 	return true
 }
 

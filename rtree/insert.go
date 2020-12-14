@@ -12,6 +12,8 @@ const (
 
 // Insert adds a new record to the RTree.
 func (t *RTree) Insert(box Box, recordID int) {
+	t.count++
+
 	if t.root == nil {
 		t.root = &node{isLeaf: true}
 	}
