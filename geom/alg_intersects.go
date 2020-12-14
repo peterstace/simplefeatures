@@ -198,7 +198,10 @@ func hasIntersectionBetweenLines(
 ) (
 	bool, mlsWithMLSIntersectsExtension,
 ) {
-	// TODO: Should we conditionally reorder lines1 and lines2?
+	// Put the larger out of the two inputs into the RTree.
+	if len(lines1) > len(lines2) {
+		lines1, lines2 = lines2, lines1
+	}
 
 	bulk := make([]rtree.BulkItem, len(lines1))
 	for i, ln := range lines1 {
