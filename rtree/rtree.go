@@ -48,7 +48,8 @@ func (n *node) depth() int {
 // responsible for storing their own records). Its zero value is an empty
 // R-Tree.
 type RTree struct {
-	root *node
+	root  *node
+	count int
 }
 
 // Stop is a special sentinal error that can be used to stop a search operation
@@ -96,4 +97,9 @@ func (t *RTree) Extent() (Box, bool) {
 		return Box{}, false
 	}
 	return calculateBound(t.root), true
+}
+
+// Count gives the number of entries in the RTree.
+func (t *RTree) Count() int {
+	return t.count
 }

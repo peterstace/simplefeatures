@@ -15,7 +15,7 @@ func BulkLoad(items []BulkItem) *RTree {
 	}
 
 	levels := calculateLevels(len(items))
-	return &RTree{bulkInsert(items, levels)}
+	return &RTree{bulkInsert(items, levels), len(items)}
 }
 
 func calculateLevels(numItems int) int {
