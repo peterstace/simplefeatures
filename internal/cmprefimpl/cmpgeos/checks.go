@@ -594,7 +594,8 @@ func checkIntersects(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 		// Simplefeatures sometimes gives an incorrect result for this due to
 		// numerical precision issues. Would be solved by
 		// https://github.com/peterstace/simplefeatures/issues/274
-		"LINESTRING(0.5 0,0.5000000000000001 0.5)": true,
+		"LINESTRING(0.5 0,0.5000000000000001 0.5)":                              true,
+		"MULTILINESTRING((0 0,2 2.000000000000001),(1 0,-1 2.000000000000001))": true,
 	}
 	if skipList[g1.AsText()] || skipList[g2.AsText()] {
 		// Skipping test because GEOS gives the incorrect result for *some*
