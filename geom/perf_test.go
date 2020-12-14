@@ -394,3 +394,37 @@ func BenchmarkWKTParsing(b *testing.B) {
 		})
 	}
 }
+
+func BenchmarkDistancePolygonToPolygonOrdering(b *testing.B) {
+	for _, sz := range []int{100, 1000} {
+		for _, swap := range []bool{false, true} {
+			b.Run(fmt.Sprintf("n=%d_swap=%t", sz, swap), func(b *testing.B) {
+				p1 := regularPolygon(geom.XY{0, 0}, 1.0, sz/10).AsGeometry()
+				p2 := regularPolygon(geom.XY{3, 0}, 1.0, sz).AsGeometry()
+				if swap {
+					p1, p2 = p2, p1
+				}
+				for i := 0; i < b.N; i++ {
+					Distance(p1, p2)
+				}
+			})
+		}
+	}
+}
+
+func BenchmarkIntersectionPolygonWithPolygonOrdering(b *testing.B) {
+	for _, sz := range []int{100, 1000} {
+		for _, swap := range []bool{false, true} {
+			b.Run(fmt.Sprintf("n=%d_swap=%t", sz, swap), func(b *testing.B) {
+				p1 := regularPolygon(geom.XY{0, 0}, 1.0, sz/10).AsGeometry()
+				p2 := regularPolygon(geom.XY{1, 0}, 1.0, sz).AsGeometry()
+				if swap {
+					p1, p2 = p2, p1
+				}
+				for i := 0; i < b.N; i++ {
+					Distance(p1, p2)
+				}
+			})
+		}
+	}
+}

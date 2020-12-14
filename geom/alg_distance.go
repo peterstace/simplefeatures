@@ -28,12 +28,16 @@ func Distance(g1, g2 Geometry) (float64, bool) {
 	//    geometry. We can stop searching if the bounding box in the RTree is
 	//    further away than the best distance so far.
 
-	// TODO: Swap g1 and g2 so that the indexed geometry is the "smaller" one.
-	// This is a performance optimization, so would need a benchmark to
-	// justify.
-
 	xys1, lns1 := extractXYsAndLines(g1)
 	xys2, lns2 := extractXYsAndLines(g2)
+
+	// Swap order so that the larger geometry goes into the RTree.
+	if len(xys1)+len(lns1) > len(xys2)+len(lns2) {
+		xys1, xys2 = xys2, xys1
+		lns1, lns2 = lns2, lns1
+		g1, g2 = g2, g1
+	}
+
 	tr := loadTree(xys2, lns2)
 	minDist := math.Inf(+1)
 
