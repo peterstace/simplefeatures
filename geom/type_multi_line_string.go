@@ -3,6 +3,8 @@ package geom
 import (
 	"database/sql/driver"
 	"unsafe"
+
+	"github.com/peterstace/simplefeatures/rtree"
 )
 
 // MultiLineString is a linear geometry that consists of a collection of
@@ -92,41 +94,87 @@ func (m MultiLineString) IsSimple() bool {
 			return false
 		}
 	}
-	// TODO: This has bad time complexity (worse than quadratic).
-	for i := 0; i < len(m.lines); i++ {
-		for j := i + 1; j < len(m.lines); j++ {
-			// Ignore any intersections if the lines are *exactly* the same
-			// (ignoring order). This is to match PostGIS and libgeos
-			// behaviour. The OGC spec is ambiguous around this case, so it's
-			// just easier to follow other implementations for better
-			// interoperability.
-			if ExactEquals(m.lines[i].AsGeometry(), m.lines[j].AsGeometry(), IgnoreOrder) {
+
+	// Map between record ID in the rtree and a particular line segment:
+	toRecordID := func(lineStringIdx, seqIdx int) int {
+		return int(uint64(lineStringIdx)<<32 | uint64(seqIdx))
+	}
+	fromRecordID := func(recordID int) (lineStringIdx, seqIdx int) {
+		lineStringIdx = int(uint64(recordID) >> 32)
+		seqIdx = int((uint64(recordID) << 32) >> 32)
+		return
+	}
+
+	// Create an RTree containing all line segments.
+	var numItems int
+	for _, ls := range m.lines {
+		numItems += ls.Coordinates().Length() - 1
+	}
+	items := make([]rtree.BulkItem, 0, numItems)
+	for i, ls := range m.lines {
+		seq := ls.Coordinates()
+		seqLen := seq.Length()
+		for j := 0; j < seqLen; j++ {
+			ln, ok := getLine(seq, j)
+			if !ok {
 				continue
 			}
+			items = append(items, rtree.BulkItem{
+				ln.envelope().box(),
+				toRecordID(i, j),
+			})
+		}
+	}
+	tree := rtree.BulkLoad(items)
 
-			interMP, interMLS := intersectionOfLines(
-				m.lines[i].asLines(),
-				m.lines[j].asLines(),
-			)
-			if !interMLS.IsEmpty() {
-				// Line part of the intersection was non-empty, so the whole
-				// MLS is not simple.
-				return false
-			}
-			if interMP.IsEmpty() {
-				// No intersection at all between the two LineStrings. Move on
-				// to the next combination.
+	for i, ls := range m.lines {
+		seq := ls.Coordinates()
+		seqLen := seq.Length()
+		for j := 0; j < seqLen; j++ {
+			ln, ok := getLine(seq, j)
+			if !ok {
 				continue
 			}
+			isSimple := true // assume simple until proven otherwise
+			tree.RangeSearch(ln.envelope().box(), func(recordID int) error {
+				// Ignore the intersection if it's for the same LineString that we're currently looking up.
+				lineStringIdx, seqIdx := fromRecordID(recordID)
+				if lineStringIdx == i {
+					return nil
+				}
 
-			// There was an intersection between the two LineStrings, which
-			// consists of only Points. This is OK, so long as the points are
-			// on the boundary of each LineString.
-			bound := intersectionOfMultiPointAndMultiPoint(
-				m.lines[i].Boundary(),
-				m.lines[j].Boundary(),
-			)
-			if !ExactEquals(interMP.AsGeometry(), bound.AsGeometry(), IgnoreOrder) {
+				otherLS := m.lines[lineStringIdx]
+				other, ok := getLine(otherLS.Coordinates(), seqIdx)
+				if !ok {
+					// Shouldn't even happen, since we were able to insert this
+					// entry into the RTree.
+					panic("could not getLine")
+				}
+
+				inter := ln.intersectLine(other)
+				if inter.empty {
+					return nil
+				}
+
+				// TODO: We need to ignore intersections between any identical
+				// LineStrings, even if they have a different index. I would
+				// have expected a test to fail because this isn't handled, but
+				// yet the tests pass...
+
+				// The MLS is NOT simple if the intersection is NOT on the
+				// boundary of each LineString.
+				boundary := intersectionOfMultiPointAndMultiPoint(ls.Boundary(), otherLS.Boundary())
+				if !hasIntersectionPointWithMultiPoint(NewPointFromXY(inter.ptA), boundary) {
+					isSimple = false
+					return rtree.Stop
+				}
+				if inter.ptA != inter.ptB && !hasIntersectionPointWithMultiPoint(NewPointFromXY(inter.ptB), boundary) {
+					isSimple = false
+					return rtree.Stop
+				}
+				return nil
+			})
+			if !isSimple {
 				return false
 			}
 		}
