@@ -614,12 +614,12 @@ func TestUnion(t *testing.T) {
 		{
 			"MULTIPOINT(EMPTY)",
 			"MULTIPOINT(EMPTY)",
-			"MULTIPOINT EMPTY",
+			"POINT EMPTY",
 		},
 		{
 			"GEOMETRYCOLLECTION(POINT EMPTY)",
 			"GEOMETRYCOLLECTION(POINT EMPTY)",
-			"GEOMETRYCOLLECTION EMPTY",
+			"POINT EMPTY",
 		},
 		{
 			"POLYGON((0 0,0 2,2 2,2 0,0 0))",
@@ -641,8 +641,8 @@ func TestUnion(t *testing.T) {
 
 func TestIntersection(t *testing.T) {
 	RunBinaryOperationTest(t, Intersection, []BinaryOperationTestCase{
-		{"POINT EMPTY", "POINT EMPTY", "GEOMETRYCOLLECTION EMPTY"},
-		{"POINT(1 2)", "POINT EMPTY", "GEOMETRYCOLLECTION EMPTY"},
+		{"POINT EMPTY", "POINT EMPTY", "POINT EMPTY"},
+		{"POINT(1 2)", "POINT EMPTY", "POINT EMPTY"},
 		{"POINT(1 2)", "POINT(1 2)", "POINT(1 2)"},
 		{
 			"POLYGON((0 0,3 0,3 3,2 3,2 1,0 1,0 0))",
@@ -716,7 +716,7 @@ func TestBuffer(t *testing.T) {
 			t.Logf("WKT: %v", g.AsText())
 			got, err := Buffer(g, tt.radius, tt.opts...)
 			expectNoErr(t, err)
-			expectGeomEq(t, got, geomFromWKT(t, tt.want), geom.IgnoreOrder)
+			expectGeomEq(t, got, geomFromWKT(t, tt.want), geom.IgnoreOrder, geom.ToleranceXY(1e-13))
 		})
 	}
 }
