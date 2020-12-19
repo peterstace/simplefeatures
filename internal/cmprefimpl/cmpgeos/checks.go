@@ -214,26 +214,22 @@ func checkFromText(h *Handle, g geom.Geometry, log *log.Logger) error {
 }
 
 func checkAsBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
-	var wantDefined bool
 	want, err := h.AsBinary(g)
-	if err == nil {
-		wantDefined = true
-	}
-	hasPointEmpty := hasEmptyPoint(g)
-	if !wantDefined && !hasPointEmpty {
-		return errors.New("AsBinary wasn't defined by libgeos and the test is " +
-			"NOT for a geometry containing a POINT EMPTY, which is unexpected",
-		)
-	}
-	if !wantDefined {
-		// Skip the test, since we don't have a WKB from libgeos to compare to.
-		// This is only for the POINT EMPTY case. Simplefeatures _does_ produce
-		// a WKB for POINT EMPTY although this is strictly an extension to the
-		// spec.
-		return nil
+	if err != nil {
+		return err
 	}
 
+	// GEOS uses a different NaN representation compared to Go (both are valid
+	// NaNs). We can account for this by simply updating the WKBs to the Go NaN
+	// representation. This could technically cause problems because the
+	// replacement is not WKB syntax aware, but hasn't caused any problems so
+	// far.
 	got := g.AsBinary()
+	got = bytes.ReplaceAll(got,
+		[]byte{0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f},
+		[]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f},
+	)
+
 	if bytes.Compare(want, got) != 0 {
 		log.Printf("want:\n%s", hex.Dump(want))
 		log.Printf("got:\n%s", hex.Dump(got))
