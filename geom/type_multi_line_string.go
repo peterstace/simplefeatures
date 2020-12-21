@@ -108,7 +108,7 @@ func (m MultiLineString) IsSimple() bool {
 	// Create an RTree containing all line segments.
 	var numItems int
 	for _, ls := range m.lines {
-		numItems += ls.Coordinates().Length() - 1
+		numItems += max(0, ls.Coordinates().Length()-1)
 	}
 	items := make([]rtree.BulkItem, 0, numItems)
 	for i, ls := range m.lines {
