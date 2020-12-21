@@ -156,11 +156,6 @@ func (m MultiLineString) IsSimple() bool {
 					return nil
 				}
 
-				// TODO: We need to ignore intersections between any identical
-				// LineStrings, even if they have a different index. I would
-				// have expected a test to fail because this isn't handled, but
-				// yet the tests pass...
-
 				// The MLS is NOT simple if the intersection is NOT on the
 				// boundary of each LineString.
 				boundary := intersectionOfMultiPointAndMultiPoint(ls.Boundary(), otherLS.Boundary())
