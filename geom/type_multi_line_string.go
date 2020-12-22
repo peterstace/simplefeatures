@@ -158,12 +158,14 @@ func (m MultiLineString) IsSimple() bool {
 
 				// The MLS is NOT simple if the intersection is NOT on the
 				// boundary of each LineString.
-				boundary := intersectionOfMultiPointAndMultiPoint(ls.Boundary(), otherLS.Boundary())
-				if !hasIntersectionPointWithMultiPoint(NewPointFromXY(inter.ptA), boundary) {
+				if inter.ptA != inter.ptB {
+					// Intersection is a line segment, so CANNOT be only on the
+					// boundary.
 					isSimple = false
 					return rtree.Stop
 				}
-				if inter.ptA != inter.ptB && !hasIntersectionPointWithMultiPoint(NewPointFromXY(inter.ptB), boundary) {
+				boundary := intersectionOfMultiPointAndMultiPoint(ls.Boundary(), otherLS.Boundary())
+				if !hasIntersectionPointWithMultiPoint(NewPointFromXY(inter.ptA), boundary) {
 					isSimple = false
 					return rtree.Stop
 				}
