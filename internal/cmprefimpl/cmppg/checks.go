@@ -282,25 +282,6 @@ func CheckEnvelope(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckIsSimple(t *testing.T, want UnaryResult, g geom.Geometry) {
-	t.Run("CheckIsSimple", func(t *testing.T) {
-		got, ok := g.IsSimple()
-		if ok != want.IsSimple.Valid {
-			t.Fatalf("Unexpected IsSimple validity, want "+
-				"valid %v, got valid %v", want.IsSimple.Valid, ok)
-		}
-		if !want.IsSimple.Valid {
-			return
-		}
-		want := want.IsSimple.Bool // want.IsSimple.Valid already checked
-		if got != want {
-			t.Logf("got:  %v", got)
-			t.Logf("want: %v", want)
-			t.Error("mismatch")
-		}
-	})
-}
-
 func CheckBoundary(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckBoundary", func(t *testing.T) {
 		if g.IsGeometryCollection() == want.Boundary.Valid {
