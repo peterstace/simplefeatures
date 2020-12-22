@@ -30,7 +30,7 @@ used those libraries before.
 | Geometry           | TODO | TODO |
 | Envelope           | TODO | TODO |
 
-![TEST](./hidden/assets/test.svg)
+![TEST](./.hidden/assets/test.svg)
 
 ### Marshalling and Unmarshalling
 
