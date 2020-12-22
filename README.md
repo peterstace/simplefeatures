@@ -18,7 +18,6 @@ used those libraries before.
 
 ### Geometry Types
 
-|                    |      |      |
 | ---                | ---  | ---  |
 | Point              | TODO | TODO |
 | MultiPoint         | TODO | TODO |
