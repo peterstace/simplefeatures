@@ -1,37 +1,42 @@
 # Simple Features
 
-[![Build Status](https://github.com/peterstace/simplefeatures/workflows/build/badge.svg)](https://github.com/peterstace/simplefeatures/actions)
 [![Documentation](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat)](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom?tab=doc)
+[![Build Status](https://github.com/peterstace/simplefeatures/workflows/build/badge.svg)](https://github.com/peterstace/simplefeatures/actions)
+[![Go Report
+Card](https://goreportcard.com/badge/github.com/peterstace/simplefeatures)](https://goreportcard.com/report/github.com/peterstace/simplefeatures)
 
-Simple Features is a pure Go Implementation of the OpenGIS Simple Feature Access
-Specification (which can be found
-[here](http://www.opengeospatial.org/standards/sfa)).
+Simple Features is a 2D geometry library. It provides Go types that model
+geometries, as well as algorithms that operate on them.
 
-The specification describes a common access and storage model for 2-dimensional
-geometries. This is the same access and storage model used by libraries such as
-[GEOS](https://trac.osgeo.org/geos),
-[JTS](https://locationtech.github.io/jts/), and
-[PostGIS](https://postgis.net/).
+Simple Features is a pure Go Implementation of the OpenGIS Consortium's Simple
+Feature Access Specification (which can be found
+[here](http://www.opengeospatial.org/standards/sfa)). This is the same
+specification that [GEOS](https://trac.osgeo.org/geos),
+[JTS](https://locationtech.github.io/jts/), and [PostGIS](https://postgis.net/)
+implement, so the Simple Features API will be familiar to developers who have
+used those libraries before.
 
-Simple Features also provides spatial analysis algorithms that operate on
-2-dimensional geometries.
+### Geometry Types
 
-### Changelog
+|                    |      |      |
+| ---                | ---  | ---  |
+| Point              | TODO | TODO |
+| MultiPoint         | TODO | TODO |
+| LineString         | TODO | TODO |
+| MultiLineString    | TODO | TODO |
+| Polygon            | TODO | TODO |
+| MultiPolygon       | TODO | TODO |
+| GeometryCollection | TODO | TODO |
+| Geometry           | TODO | TODO |
+| Envelope           | TODO | TODO |
 
-The changelog can be found [here](CHANGELOG.md).
+### Marshalling and Unmarshalling
 
-### Library Features (native Go)
+TODO
 
-- Marshalling/unmarshalling (WKT, WKB, GeoJSON).
+### Geometry Algorithms
 
-- 3D and Measure coordinates.
-
-- Spatial analysis (geometry validation, boundary calculation, envelopes,
-  convex hull, equality, is simple, intersects, length, closed, ring, area,
-centroid, point on surface).
-
-- Geometry manipulation (reverse, pointwise transform, force coordinates
-  types).
+TODO
 
 ### GEOS Wrapper
 
@@ -41,3 +46,9 @@ is implemented in a separate
 package](https://pkg.go.dev/github.com/peterstace/simplefeatures/geos?tab=doc),
 meaning that library users who don't need this additional functionality don't
 need to expose themselves to CGO.
+
+### FAQs
+
+**Q:** Why create Simple Features when the GEOS library already exists?
+
+**A:** TODO
