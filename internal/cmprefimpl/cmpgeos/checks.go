@@ -342,6 +342,13 @@ func checkEnvelope(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
+var isSimpleFlipResult = map[string]bool{
+	// In some cases GEOS gives an incorrect result. In particular, the
+	// following geometries are NOT simple, however GEOS reports that they are.
+	"MULTILINESTRING((1 1,2 2),(1 1,2 2))": true,
+	"MULTILINESTRING((1 1,2 2),(2 2,1 1))": true,
+}
+
 func checkIsSimple(h *Handle, g geom.Geometry, log *log.Logger) error {
 	want, wantDefined, err := h.IsSimple(g)
 	if err != nil {
@@ -352,6 +359,7 @@ func checkIsSimple(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return err
 	}
 	got, gotDefined := g.IsSimple()
+	want = want != isSimpleFlipResult[g.AsText()]
 
 	if wantDefined != gotDefined {
 		log.Printf("want defined: %v", wantDefined)
@@ -361,6 +369,7 @@ func checkIsSimple(h *Handle, g geom.Geometry, log *log.Logger) error {
 	if !gotDefined {
 		return nil
 	}
+
 	if want != got {
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)

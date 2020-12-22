@@ -172,11 +172,13 @@ func TestIsSimple(t *testing.T) {
 		{"POLYGON EMPTY", true},
 
 		{"MULTILINESTRING EMPTY", true},
+		{"MULTILINESTRING(EMPTY)", true},
 		{"MULTILINESTRING((0 0,1 0))", true},
 		{"MULTILINESTRING((0 0,1 0,0 1,0 0))", true},
 		{"MULTILINESTRING((0 0,1 1,2 2),(0 2,1 1,2 0))", false},
 		{"MULTILINESTRING((0 0,2 1,4 2),(4 2,2 3,0 4))", true},
 		{"MULTILINESTRING((0 0,2 0,4 0),(2 0,2 1))", false},
+		{"MULTILINESTRING((1 1,0 0,3 3,2 2),(1 1,2 2))", false},
 
 		// Cases for reproducing bugs.
 		{"MULTILINESTRING((0 0,0 1,1 1),(0 1,0 0,1 0))", false},
@@ -184,23 +186,22 @@ func TestIsSimple(t *testing.T) {
 		{"MULTILINESTRING((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))", true},
 		{"MULTILINESTRING((1 1,1 0,0 0),(1 1,0 1,0 0))", true},
 
-		// Cases for behaviour around duplicated lines. These cases are to
-		// match PostGIS and libgeos behaviour (the OGC spec is unclear about
-		// what the behaviour should be).
-		{"MULTILINESTRING((1 1,2 2),(1 1,2 2))", true},
-		{"MULTILINESTRING((1 1,2 2),(2 2,1 1))", true},
+		// Cases for behaviour around duplicated lines.
+		{"MULTILINESTRING((1 1,2 2),(1 1,2 2))", false},
+		{"MULTILINESTRING((1 1,2 2),(2 2,1 1))", false},
+		{"MULTILINESTRING((1 1,2 2,3 3),(1 1,2 2,3 3))", false},
 		{"MULTILINESTRING((1 1,2 2),(1 1,2 2,3 3))", false},
 		{"MULTILINESTRING((1 1,2 2),(2 2,1 1,3 1))", false},
 
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)))", true},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			t.Logf("wkt: %s", tt.wkt)
 			got, defined := geomFromWKT(t, tt.wkt).IsSimple()
 			if !defined {
 				t.Fatal("not defined")
 			}
 			if got != tt.wantSimple {
-				t.Logf("wkt: %s", tt.wkt)
 				t.Errorf("got=%v want=%v", got, tt.wantSimple)
 			}
 		})

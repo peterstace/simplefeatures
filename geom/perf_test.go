@@ -428,3 +428,30 @@ func BenchmarkIntersectionPolygonWithPolygonOrdering(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkMultiLineStringIsSimpleManyLineStrings(b *testing.B) {
+	for _, sz := range []int{100, 1000} {
+		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+			var lss []LineString
+			for i := 0; i < sz; i++ {
+				seq := NewSequence([]float64{
+					float64(2*i + 0),
+					float64(2*i + 0),
+					float64(2*i + 1),
+					float64(2*i + 1),
+				}, DimXY)
+				ls, err := NewLineString(seq)
+				if err != nil {
+					b.Fatal(err)
+				}
+				lss = append(lss, ls)
+			}
+			mls := NewMultiLineStringFromLineStrings(lss)
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				mls.IsSimple()
+			}
+		})
+	}
+}
