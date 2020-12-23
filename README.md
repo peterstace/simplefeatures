@@ -77,7 +77,7 @@ used those libraries before.
 </table>
 
 ![TEST](./.hidden/assets/test.svg)
-<img src="./.hidden/assets/test.svg">
+<img src="./.hidden/assets/test.svg?sanitize=true">
 
 ### Marshalling and Unmarshalling
 
