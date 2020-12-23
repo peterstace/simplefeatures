@@ -78,6 +78,7 @@ used those libraries before.
 
 ![TEST](./.hidden/assets/test.svg)
 <img src="./.hidden/assets/test.svg?sanitize=true">
+<img src="https://raw.githubusercontent.com/peterstace/simplefeatures/revamp_readme/.hidden/assets/test.svg?sanitize=true"/>
 
 ### Marshalling and Unmarshalling
 
