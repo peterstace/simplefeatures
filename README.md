@@ -18,17 +18,63 @@ used those libraries before.
 
 ### Geometry Types
 
-|                    |      |      |
-| ---                | ---  | ---  |
-| Point              | TODO | TODO |
-| MultiPoint         | TODO | TODO |
-| LineString         | TODO | TODO |
-| MultiLineString    | TODO | TODO |
-| Polygon            | TODO | TODO |
-| MultiPolygon       | TODO | TODO |
-| GeometryCollection | TODO | TODO |
-| Geometry           | TODO | TODO |
-| Envelope           | TODO | TODO |
+<table>
+
+<tr>
+<td>Point</td>
+<td>TODO</td>
+<td>TODO</td>
+</tr>
+
+<tr>
+<td>MultiPoint</td>
+<td>TODO</td>
+<td>TODO</td>
+</tr>
+
+<tr>
+<td>LineString</td>
+<td>TODO</td>
+<td>TODO</td>
+</tr>
+
+<tr>
+<td>MultiLineString</td>
+<td>TODO</td>
+<td>TODO</td>
+</tr>
+
+<tr>
+<td>Polygon</td>
+<td>TODO</td>
+<td>TODO</td>
+</tr>
+
+<tr>
+<td>MultiPolygon</td>
+<td>TODO</td>
+<td>TODO</td>
+</tr>
+
+<tr>
+<td>GeometryCollection</td>
+<td>TODO</td>
+<td>TODO</td>
+</tr>
+
+<tr>
+<td>Geometry</td>
+<td>TODO</td>
+<td>TODO</td>
+</tr>
+
+<tr>
+<td>Envelope</td>
+<td>TODO</td>
+<td>TODO</td>
+</tr>
+
+</table>
 
 ![TEST](./.hidden/assets/test.svg)
 <img src="./.hidden/assets/test.svg">
