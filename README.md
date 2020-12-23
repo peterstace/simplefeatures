@@ -22,64 +22,59 @@ used those libraries before.
 
 <tr>
 <td>Point</td>
-<td>TODO</td>
+<td><img src="./.hidden/assets/point.svg"></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>MultiPoint</td>
-<td>TODO</td>
+<td><img src="./.hidden/assets/multipoint.svg"></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>LineString</td>
-<td><img src="./.hidden/assets/test.svg"></td>
+<td><img src="./.hidden/assets/linestring.svg"></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>MultiLineString</td>
-<td>TODO</td>
+<td><img src="./.hidden/assets/multilinestring.svg"></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>Polygon</td>
-<td>TODO</td>
+<td><img src="./.hidden/assets/polygon.svg"></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>MultiPolygon</td>
-<td>TODO</td>
+<td><img src="./.hidden/assets/multipolygon.svg"></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>GeometryCollection</td>
-<td>TODO</td>
+<td><img src="./.hidden/assets/geometrycollection.svg"></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>Geometry</td>
-<td>TODO</td>
+<td><img src="./.hidden/assets/geometry.svg"></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>Envelope</td>
-<td>TODO</td>
+<td><img src="./.hidden/assets/envelope.svg"></td>
 <td>TODO</td>
 </tr>
 
 </table>
-
-![TEST](./.hidden/assets/test.svg)
-<img src="./.hidden/assets/test.svg">
-<img src="./.hidden/assets/test.svg?sanitize=true">
-<img src="https://raw.githubusercontent.com/peterstace/simplefeatures/revamp_readme/.hidden/assets/test.svg"/>
 
 ### Marshalling and Unmarshalling
 
