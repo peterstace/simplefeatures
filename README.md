@@ -28,7 +28,17 @@ used those libraries before.
 
 <tr>
 <td>MultiPoint</td>
-<td>TODO</td>
+<td>
+<svg xmlns="http://www.w3.org/2000/svg"
+ width="467" height="462">
+  <rect x="80" y="60" width="250" height="250" rx="20"
+      style="fill:#00ff00; stroke:#000000;stroke-width:2px;" />
+  
+  <rect x="140" y="120" width="250" height="250" rx="40"
+      style="fill:#0000ff; stroke:#000000; stroke-width:2px;
+      fill-opacity:0.7;" />
+</svg>
+</td>
 <td>TODO</td>
 </tr>
 
@@ -77,6 +87,7 @@ used those libraries before.
 </table>
 
 ![TEST](./.hidden/assets/test.svg)
+<img src="./.hidden/assets/test.svg">
 <img src="./.hidden/assets/test.svg?sanitize=true">
 <img src="https://raw.githubusercontent.com/peterstace/simplefeatures/revamp_readme/.hidden/assets/test.svg"/>
 
