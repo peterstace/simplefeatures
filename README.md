@@ -46,7 +46,7 @@ used those libraries before.
 
 <tr>
 <td>Polygon</td>
-<td><img src="./.hidden/assets/polygon.svg"></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"></a></td>
 <td>TODO</td>
 </tr>
 
