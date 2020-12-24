@@ -22,25 +22,25 @@ used those libraries before.
 
 <tr>
 <td>Point</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Point.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Point.svg"></a></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>MultiPoint</td>
-<td><img src="./.hidden/assets/multipoint.svg"></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/d/d6/SFA_MultiPoint.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/SFA_MultiPoint.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>LineString</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_MultiPoint.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_MultiPoint.svg"></a></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/b/b9/SFA_MultiPoint.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/SFA_MultiPoint.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>MultiLineString</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_MultiLineString.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_MultiLineString.svg"></a></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/8/86/SFA_MultiLineString.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/8/86/SFA_MultiLineString.svg"></a></td>
 <td>TODO</td>
 </tr>
 
@@ -52,25 +52,19 @@ used those libraries before.
 
 <tr>
 <td>MultiPolygon</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_MultiPolygon_with_hole.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_MultiPolygon_with_hole.svg"></a></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/3/3b/SFA_MultiPolygon_with_hole.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/SFA_MultiPolygon_with_hole.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>GeometryCollection</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_GeometryCollection.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_GeometryCollection.svg"></a></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/1/1d/SFA_GeometryCollection.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1d/SFA_GeometryCollection.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>Geometry</td>
-<td><img src="./.hidden/assets/geometry.svg"></td>
-<td>TODO</td>
-</tr>
-
-<tr>
-<td>Envelope</td>
-<td><img src="./.hidden/assets/envelope.svg"></td>
+<td></td>
 <td>TODO</td>
 </tr>
 
