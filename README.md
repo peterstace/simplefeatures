@@ -34,7 +34,7 @@ used those libraries before.
 
 <tr>
 <td>LineString</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/b/b9/SFA_MultiPoint.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/SFA_MultiPoint.svg"></a></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/b/b9/SFA_LineString.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/SFA_LineString.svg"></a></td>
 <td>TODO</td>
 </tr>
 
