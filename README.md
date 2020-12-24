@@ -22,7 +22,7 @@ used those libraries before.
 
 <tr>
 <td>Point</td>
-<td><img src="./.hidden/assets/point.svg"></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Point.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Point.svg"></a></td>
 <td>TODO</td>
 </tr>
 
@@ -34,13 +34,13 @@ used those libraries before.
 
 <tr>
 <td>LineString</td>
-<td><img src="./.hidden/assets/linestring.svg"></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_MultiPoint.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_MultiPoint.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>MultiLineString</td>
-<td><img src="./.hidden/assets/multilinestring.svg"></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_MultiLineString.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_MultiLineString.svg"></a></td>
 <td>TODO</td>
 </tr>
 
@@ -52,13 +52,13 @@ used those libraries before.
 
 <tr>
 <td>MultiPolygon</td>
-<td><img src="./.hidden/assets/multipolygon.svg"></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_MultiPolygon_with_hole.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_MultiPolygon_with_hole.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>GeometryCollection</td>
-<td><img src="./.hidden/assets/geometrycollection.svg"></td>
+<td><a href="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_GeometryCollection.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_GeometryCollection.svg"></a></td>
 <td>TODO</td>
 </tr>
 
