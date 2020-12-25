@@ -22,49 +22,43 @@ used those libraries before.
 
 <tr>
 <td>Point</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg"></a></td>
+<td><a href="https://commons.wikimedia.org/wiki/File:SFA_Point.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>MultiPoint</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/d/d6/SFA_MultiPoint.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/SFA_MultiPoint.svg"></a></td>
+<td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiPoint.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/SFA_MultiPoint.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>LineString</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/b/b9/SFA_LineString.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/SFA_LineString.svg"></a></td>
+<td><a href="https://commons.wikimedia.org/wiki/File:SFA_LineString.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/SFA_LineString.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>MultiLineString</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/8/86/SFA_MultiLineString.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/8/86/SFA_MultiLineString.svg"></a></td>
+<td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiLineString.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/8/86/SFA_MultiLineString.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>Polygon</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"></a></td>
+<td><a href="https://commons.wikimedia.org/wiki/File:SFA_Polygon.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>MultiPolygon</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/3/3b/SFA_MultiPolygon_with_hole.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/SFA_MultiPolygon_with_hole.svg"></a></td>
+<td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiPolygon.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/SFA_MultiPolygon_with_hole.svg"></a></td>
 <td>TODO</td>
 </tr>
 
 <tr>
 <td>GeometryCollection</td>
-<td><a href="https://upload.wikimedia.org/wikipedia/commons/1/1d/SFA_GeometryCollection.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1d/SFA_GeometryCollection.svg"></a></td>
-<td>TODO</td>
-</tr>
-
-<tr>
-<td>Geometry</td>
-<td></td>
+<td><a href="https://commons.wikimedia.org/wiki/File:SFA_GeometryCollection.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1d/SFA_GeometryCollection.svg"></a></td>
 <td>TODO</td>
 </tr>
 
