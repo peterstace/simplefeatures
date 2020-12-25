@@ -22,7 +22,7 @@ used those libraries before.
 
 <tr>
 <td>Point</td>
-<td><a href="https://commons.wikimedia.org/wiki/File:SFA_Point.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg" width="100%"></a></td>
+<td><a href="https://commons.wikimedia.org/wiki/File:SFA_Point.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg"></a></td>
 <td>Point is a single location in space.</td>
 </tr>
 
@@ -65,15 +65,8 @@ control points.</td>
 
 <tr>
 <td>Geometry</td>
-<td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiPolygon.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/SFA_MultiPolygon_with_hole.svg"></a></td>
-<td>Geometry holds any type of geometry (Point, MultiPoint, LineString,
-MultiLineString, Polygon, MultiPolygon, or GeometryCollection).</td>
-</tr>
-
-<tr>
-<td>Geometry</td>
 <td></td>
-<td>Geometry holds a single geometry of unconstrained type (Point, MultiPoint, LineString,
+<td>Geometry holds any type of geometry (Point, MultiPoint, LineString,
 MultiLineString, Polygon, MultiPolygon, or GeometryCollection).</td>
 </tr>
 
