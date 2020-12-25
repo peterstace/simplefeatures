@@ -23,43 +23,64 @@ used those libraries before.
 <tr>
 <td>Point</td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_Point.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg"></a></td>
-<td>TODO</td>
+<td>Point is a single location in space.</td>
 </tr>
 
 <tr>
 <td>MultiPoint</td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiPoint.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/SFA_MultiPoint.svg"></a></td>
-<td>TODO</td>
+<td>MultiPoint is collection of points in space.</td>
 </tr>
 
 <tr>
 <td>LineString</td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_LineString.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/SFA_LineString.svg"></a></td>
-<td>TODO</td>
+<td>LineString is curve defined by linear interpolation between a set of
+control points.</td>
 </tr>
 
 <tr>
 <td>MultiLineString</td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiLineString.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/8/86/SFA_MultiLineString.svg"></a></td>
-<td>TODO</td>
+<td>MultiLineString is a collection of LineStrings.</td>
 </tr>
 
 <tr>
 <td>Polygon</td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_Polygon.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"></a></td>
-<td>TODO</td>
+<td>Polygon is a planar surface geometry that bounds some area. It may have holes.</td>
 </tr>
 
 <tr>
 <td>MultiPolygon</td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiPolygon.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/SFA_MultiPolygon_with_hole.svg"></a></td>
-<td>TODO</td>
+<td>Polygon is collection of Polygons (with some constraints on how the Polygons interact with each other).</td>
 </tr>
 
 <tr>
 <td>GeometryCollection</td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_GeometryCollection.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1d/SFA_GeometryCollection.svg"></a></td>
-<td>TODO</td>
+<td>GeometryCollection is an unconstrained collection of geometries.</td>
+</tr>
+
+<tr>
+<td>Geometry</td>
+<td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiPolygon.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/SFA_MultiPolygon_with_hole.svg"></a></td>
+<td>Geometry holds any type of geometry (Point, MultiPoint, LineString,
+MultiLineString, Polygon, MultiPolygon, or GeometryCollection).</td>
+</tr>
+
+<tr>
+<td>Geometry</td>
+<td></td>
+<td>Geometry holds a single geometry of unconstrained type (Point, MultiPoint, LineString,
+MultiLineString, Polygon, MultiPolygon, or GeometryCollection).</td>
+</tr>
+
+<tr>
+<td>Envelope</td>
+<td><img src="./.hidden/assets/envelope.svg"></td>
+<td>Envelope is an axis aligned bounding box typically used to describe the spatial extent of other geometric entities.</td>
 </tr>
 
 </table>
