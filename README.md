@@ -29,57 +29,56 @@ used those libraries before.
 </thead>
 
 <tr>
-<td>Point</td>
+<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Point">Point</a></td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_Point.svg"><img width=51 height=51 src="https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg"></a></td>
 <td>Point is a single location in space.</td>
 </tr>
 
 <tr>
-<td>MultiPoint</td>
+<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#MultiPoint">MultiPoint</a></td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiPoint.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/d/d6/SFA_MultiPoint.svg"></a></td>
 <td>MultiPoint is collection of points in space.</td>
 </tr>
 
 <tr>
-<td>LineString</td>
+<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#LineString">LineString</a></td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_LineString.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/b/b9/SFA_LineString.svg"></a></td>
 <td>LineString is curve defined by linear interpolation between a set of
 control points.</td>
 </tr>
 
 <tr>
-<td>MultiLineString</td>
+<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#MultiLineString">MultiLineString</a></td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiLineString.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/8/86/SFA_MultiLineString.svg"></a></td>
 <td>MultiLineString is a collection of LineStrings.</td>
 </tr>
 
 <tr>
-<td>Polygon</td>
+<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Polygon">Polygon</a></td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_Polygon.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"></a></td>
 <td>Polygon is a planar surface geometry that bounds some area. It may have holes.</td>
 </tr>
 
 <tr>
-<td>MultiPolygon</td>
+<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#MultiPolygon">MultiPolygon</a></td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiPolygon.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/3/3b/SFA_MultiPolygon_with_hole.svg"></a></td>
 <td>Polygon is collection of Polygons (with some constraints on how the Polygons interact with each other).</td>
 </tr>
 
 <tr>
-<td>GeometryCollection</td>
+<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#GeometryCollection">GeometryCollection</a></td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_GeometryCollection.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/1/1d/SFA_GeometryCollection.svg"></a></td>
 <td>GeometryCollection is an unconstrained collection of geometries.</td>
 </tr>
 
 <tr>
-<td>Geometry</td>
-<td><a href="https://commons.wikimedia.org/wiki/File:SFA_Polygon.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"></td>
-<td>Geometry holds any type of geometry (Point, MultiPoint, LineString,
-MultiLineString, Polygon, MultiPolygon, or GeometryCollection).</td>
+<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry">Geometry</a></td>
+<td><a href="https://commons.wikimedia.org/wiki/File:SFA_Polygon.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"></a></td>
+<td>Geometry holds any type of geometry (Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon, or GeometryCollection).</td>
 </tr>
 
 <tr>
-<td>Envelope</td>
+<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Envelope">Envelope</a></td>
 <td><img src="./.hidden/assets/envelope.svg"></td>
 <td>Envelope is an axis aligned bounding box typically used to describe the spatial extent of other geometric entities.</td>
 </tr>
