@@ -73,7 +73,7 @@ control points.</td>
 
 <tr>
 <td>Geometry</td>
-<td></td>
+<td><a href="https://commons.wikimedia.org/wiki/File:SFA_Polygon.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"></td>
 <td>Geometry holds any type of geometry (Point, MultiPoint, LineString,
 MultiLineString, Polygon, MultiPolygon, or GeometryCollection).</td>
 </tr>
