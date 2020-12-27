@@ -24,11 +24,11 @@ used those libraries before.
 
 <table>
 
-<th>
+<thead>
 <td>Type</td>
 <td>Example</td>
 <td>Description</td>
-</th>
+</thead>
 
 <tr>
 <td>Point</td>
