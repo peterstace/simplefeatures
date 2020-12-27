@@ -18,6 +18,10 @@ used those libraries before.
 
 ### Geometry Types
 
+| Type  | Example                                                                     | Description                          |
+| ---   | ---                                                                         | ---                                  |
+| Point | ![Point](https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg) | Point is a single location in space. |
+
 <table>
 
 <tr>
