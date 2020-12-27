@@ -16,6 +16,8 @@ specification that [GEOS](https://trac.osgeo.org/geos),
 implement, so the Simple Features API will be familiar to developers who have
 used those libraries before.
 
+TODO: Table of contents
+
 ### Geometry Types
 
 <table>
@@ -119,7 +121,25 @@ fmt.Println(output)
 
 #### WKB
 
-TODO: Examples for each.
+[Well Known
+Binary](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry#Well-known_binary)
+is a machine readable format that is efficient for computers to use (both from
+a processing and storage space perspective).
+
+To marshal and unmarshal WKB:
+
+```
+TODO
+```
+
+WKB is a good choice for transferring geometries to and from PostGIS and other
+databases that support geometric types. The `Geometry` type implements the
+`database/sql/driver.Valuer` and `database/sql.Scanner` interfaces by
+marshalling and unmarshalling to WKB:
+
+```
+TODO
+```
 
 #### GeoJSON
 
