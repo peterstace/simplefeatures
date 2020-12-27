@@ -25,9 +25,11 @@ used those libraries before.
 <table>
 
 <thead>
+<tr>
 <td>Type</td>
 <td>Example</td>
 <td>Description</td>
+</tr>
 </thead>
 
 <tr>
