@@ -24,9 +24,15 @@ used those libraries before.
 
 <table>
 
+<th>
+<td>Type</td>
+<td>Example</td>
+<td>Description</td>
+</th>
+
 <tr>
 <td>Point</td>
-<td><a href="https://commons.wikimedia.org/wiki/File:SFA_Point.svg"><img min-width=51 height=51 src="https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg"></a></td>
+<td><a href="https://commons.wikimedia.org/wiki/File:SFA_Point.svg"><img width=51 height=51 src="https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg"></a></td>
 <td>Point is a single location in space.</td>
 </tr>
 
