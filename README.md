@@ -74,7 +74,7 @@ control points.</td>
 <tr>
 <td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry">Geometry</a></td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_Polygon.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"></a></td>
-<td>Geometry holds any type of geometry (Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon, or GeometryCollection).</td>
+<td>Geometry holds any type of geometry (Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon, or GeometryCollection). It's the type that the Simple Features library uses when it needs to represent geometries in a generic way.</td>
 </tr>
 
 <tr>
@@ -87,7 +87,25 @@ control points.</td>
 
 ### Marshalling and Unmarshalling
 
-TODO
+Simple features supports the following external geometry representation formats:
+
+| Format  | Example                                                              | Description                                                      |
+| ---     | ---                                                                  | ---                                                              |
+| WKT     | `POLYGON((0 0,0 1,1 1,1 0,0 0))`                                     | Well Known Text. A human readable format for storing geometries. |
+| WKB     | `<binary>`                                                           | Well Known Binary. A fast and efficient machine readable format. |
+| GeoJSON | `{"type":"Polygon","coordinates":[[[0,0],[0,1],[1,1],[1,0],[0,0]]]}` | A web-friendly format, useful with JSON payloads.                |
+
+#### WKT
+
+TODO: Examples for each.
+
+#### WKB
+
+TODO: Examples for each.
+
+#### GeoJSON
+
+TODO: Examples for each.
 
 ### Geometry Algorithms
 
