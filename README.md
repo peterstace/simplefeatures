@@ -93,11 +93,29 @@ Simple features supports the following external geometry representation formats:
 | ---     | ---                                                                  | ---                                                              |
 | WKT     | `POLYGON((0 0,0 1,1 1,1 0,0 0))`                                     | Well Known Text. A human readable format for storing geometries. |
 | WKB     | `<binary>`                                                           | Well Known Binary. A fast and efficient machine readable format. |
-| GeoJSON | `{"type":"Polygon","coordinates":[[[0,0],[0,1],[1,1],[1,0],[0,0]]]}` | A web-friendly format, useful with JSON payloads.                |
+| GeoJSON | `{"type":"Polygon","coordinates":[[[0,0],[0,1],[1,1],[1,0],[0,0]]]}` | GeoJSON. A web-friendly format.                                  |
 
 #### WKT
 
-TODO: Examples for each.
+[Well Known
+Text](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry)
+is the lowest common denominator geometry representation format. It's a useful
+default format to choose when integrating with external GIS systems.
+
+Example:
+
+```
+// Unmarshal from WKT
+input := "POLYGON((0 0,0 1,1 1,1 0,0 0))"
+g, err := geom.UnmarshalWKT(input)
+if err != nil {
+    log.Fatal("could not unmarshal WKT: %v", err)
+}
+
+// Marshal to WKT
+output := g.AsText()
+fmt.Println(output)
+```
 
 #### WKB
 
