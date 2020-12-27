@@ -26,9 +26,9 @@ used those libraries before.
 
 <thead>
 <tr>
-<tr>Type</tr>
-<tr>Example</tr>
-<tr>Description</tr>
+<th>Type</th>
+<th>Example</th>
+<th>Description</th>
 </tr>
 </thead>
 
