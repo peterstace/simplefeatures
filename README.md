@@ -125,7 +125,7 @@ brevity).
 
 Encoding and decoding WKT:
 
-```
+```go
 // Unmarshal from WKT
 input := "POLYGON((0 0,0 1,1 1,1 0,0 0))"
 g, _ := geom.UnmarshalWKT(input)
@@ -139,7 +139,7 @@ fmt.Println(output) // Prints: POLYGON((0 0,0 1,1 1,1 0,0 0))
 
 Encoding and decoding WKB directly:
 
-```
+```go
 // Marshal as WKB
 pt := geom.NewPointFromXY(geom.XY{1.5, 2.5})
 wkb := pt.AsBinary()
@@ -152,7 +152,7 @@ fmt.Println(fromWKB.AsText()) // POINT(1.5 2.5)
 
 Encoding and decoding WKB for integration with PostGIS:
 
-```
+```go
 db, _ := sql.Open("postgres", "postgres://...")
 
 db.Exec(`
@@ -185,7 +185,7 @@ fmt.Println(location.AsText(), population) // Prints: POINT(-74 40.7) 8.4e+06
 
 Encoding and decoding GeoJSON directly:
 
-```
+```go
 // Unmarshal geometry from GeoJSON.
 raw := `{"type":"Point","coordinates":[-74.0,40.7]}`
 var g geom.Geometry
@@ -199,7 +199,7 @@ enc.Encode(g) // Prints: {"type":"Point","coordinates":[-74,40.7]}
 
 Geometries can also be part of larger structs:
 
-```
+```go
 type CityPopulation struct {
     Location   geom.Geometry `json:"loc"`
     Population int           `json:"pop"`
