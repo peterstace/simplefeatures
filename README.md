@@ -91,18 +91,14 @@ control points.</td>
 
 Simple features supports the following external geometry representation formats:
 
-| Format  | Example                                                              | Description                                                      |
-| ---     | ---                                                                  | ---                                                              |
-| WKT     | `POLYGON((0 0,0 1,1 1,1 0,0 0))`                                     | Well Known Text. A human readable format for storing geometries. |
-| WKB     | `<binary>`                                                           | Well Known Binary. A fast and efficient machine readable format. |
-| GeoJSON | `{"type":"Polygon","coordinates":[[[0,0],[0,1],[1,1],[1,0],[0,0]]]}` | GeoJSON. A web-friendly format.                                  |
+| Format  | Example                                                              | Description                                                                                                                                                                                                                                                                                                                                                        |
+| ---     | ---                                                                  | ---                                                                                                                                                                                                                                                                                                                                                                |
+| WKT     | `POLYGON((0 0,0 1,1 1,1 0,0 0))`                                     | [Well Known Text](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) is a human readable format for storing geometries. It's often the lowest common denominator geometry format, and is useful for integration with other GIS applications.                                                                                                |
+| WKB     | `<binary>`                                                           | [Well Known Binary](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry#Well-known_binary) is a machine readable format that is efficient for computers to use (both from a processing and storage space perspective). WKB is a good choice for transferring geometries to and from PostGIS and other databases that support geometric types. |
+| GeoJSON | `{"type":"Polygon","coordinates":[[[0,0],[0,1],[1,1],[1,0],[0,0]]]}` | [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON) represents geometries in a similar way to WKB, but is based on the JSON format. This makes it ideal to use with web APIs or other situations where JSON would normally be used.                                                                                                                                   |
 
 #### WKT
 
-[Well Known
-Text](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry)
-is the lowest common denominator geometry representation format. It's a useful
-default format to choose when integrating with external GIS systems.
 
 Example:
 
@@ -121,21 +117,11 @@ fmt.Println(output)
 
 #### WKB
 
-[Well Known
-Binary](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry#Well-known_binary)
-is a machine readable format that is efficient for computers to use (both from
-a processing and storage space perspective).
-
 To marshal and unmarshal WKB:
 
 ```
 TODO
 ```
-
-WKB is a good choice for transferring geometries to and from PostGIS and other
-databases that support geometric types. The `Geometry` type implements the
-`database/sql/driver.Valuer` and `database/sql.Scanner` interfaces by
-marshalling and unmarshalling to WKB:
 
 ```
 TODO
@@ -143,7 +129,17 @@ TODO
 
 #### GeoJSON
 
-TODO: Examples for each.
+Example: decoding directly
+
+Example: encoding directly
+
+Example: decoding into a Geometry
+
+Example: encoding out of a Geometry
+
+Example: decoding into a more general struct
+
+Example: encoding out of a more general struct
 
 ### Geometry Algorithms
 
