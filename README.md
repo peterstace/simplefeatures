@@ -118,49 +118,83 @@ need to expose themselves to CGO.
 
 ### Examples
 
+The following examples show some common operations (errors are omitted for
+brevity).
+
 #### WKT
 
-Example:
+Encoding and decoding WKT:
 
 ```
 // Unmarshal from WKT
 input := "POLYGON((0 0,0 1,1 1,1 0,0 0))"
-g, err := geom.UnmarshalWKT(input)
-if err != nil {
-    log.Fatal("could not unmarshal WKT: %v", err)
-}
+g, _ := geom.UnmarshalWKT(input)
 
 // Marshal to WKT
 output := g.AsText()
-fmt.Println(output)
+fmt.Println(output) // Prints: POLYGON((0 0,0 1,1 1,1 0,0 0))
 ```
 
 #### WKB
 
-To marshal and unmarshal WKB:
+Encoding and decoding WKB directly:
 
 ```
-TODO
+// Marshal as WKB
+pt := geom.NewPointFromXY(geom.XY{1.5, 2.5})
+wkb := pt.AsBinary()
+fmt.Println(wkb) // Prints: [1 1 0 0 0 0 0 0 0 0 0 248 63 0 0 0 0 0 0 4 64]
+
+// Unmarshal from WKB
+fromWKB, _ := geom.UnmarshalWKB(wkb)
+fmt.Println(fromWKB.AsText()) // POINT(1.5 2.5)
 ```
 
+Encoding and decoding WKB for integration with PostGIS:
+
 ```
-TODO
+db, _ := sql.Open("postgres", "postgres://...")
+
+db.Exec(`
+    CREATE TABLE my_table (
+        my_geom geometry(geometry, 4326),
+        population double precision
+    )`,
+)
+
+// Insert our geometry and population data into PostGIS via WKB.
+nyc := geom.NewPointFromXY(geom.XY{-74.0, 40.7})
+db.Exec(`
+    INSERT INTO my_table
+    (my_geom, population)
+    VALUES (ST_GeomFromWKB($1, 4326), $2)`,
+    nyc, 8.4e6,
+)
+
+// Get the geometry and population data back out of PostGIS via WKB.
+var location geom.Geometry
+var population float64
+db.QueryRow(`
+    SELECT ST_AsBinary(my_geom), population
+    FROM my_table LIMIT 1`,
+).Scan(&location, &population)
+fmt.Println(location.AsText(), population) // Prints: POINT(-74 40.7) 8.4e+06
 ```
 
 #### GeoJSON
 
-Example: decoding directly
+Encoding and decoding GeoJSON directly:
 
-Example: encoding directly
+```
+TODO
+```
 
-Example: decoding into a Geometry
+Encoding and decoding via the `encoding/json` package:
 
-Example: encoding out of a Geometry
 
-Example: decoding into a more general struct
-
-Example: encoding out of a more general struct
-
+```
+TODO: (both via a struct, and via a Geometry)
+```
 
 ### FAQs
 
