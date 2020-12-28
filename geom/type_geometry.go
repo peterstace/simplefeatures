@@ -6,7 +6,7 @@ import (
 	"unsafe"
 )
 
-// Geometry is a single geometry of any type. It's zero value is valid and is
+// Geometry is a single geometry of any type. Its zero value is valid and is
 // an empty GeometryCollection. It is immutable after creation.
 type Geometry struct {
 	gtype GeometryType

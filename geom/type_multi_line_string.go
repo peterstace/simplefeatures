@@ -8,7 +8,7 @@ import (
 )
 
 // MultiLineString is a linear geometry that consists of a collection of
-// LineStrings. It's zero value is the empty MultiLineString (i.e. the
+// LineStrings. Its zero value is the empty MultiLineString (i.e. the
 // collection of zero LineStrings) of 2D coordinate type. It is immutable after
 // creation.
 type MultiLineString struct {
