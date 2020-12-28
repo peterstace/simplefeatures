@@ -5,10 +5,10 @@
 [![Go Report
 Card](https://goreportcard.com/badge/github.com/peterstace/simplefeatures)](https://goreportcard.com/report/github.com/peterstace/simplefeatures)
 
-Simple Features is a 2D geometry library. It provides Go types that model
+Simple Features is a 2D geometry library that provides Go types that model
 geometries, as well as algorithms that operate on them.
 
-Simple Features is a pure Go Implementation of the OpenGIS Consortium's Simple
+It's a pure Go Implementation of the OpenGIS Consortium's Simple
 Feature Access Specification (which can be found
 [here](http://www.opengeospatial.org/standards/sfa)). This is the same
 specification that [GEOS](https://trac.osgeo.org/geos),
@@ -87,7 +87,7 @@ control points.</td>
 
 <tr>
 <td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Envelope">Envelope</a></td>
-<td><img src="./.hidden/assets/envelope.svg"></td>
+<td><img src="./.ci/assets/envelope.svg"></td>
 <td>Envelope is an axis aligned bounding box typically used to describe the spatial extent of other geometric entities.</td>
 </tr>
 
