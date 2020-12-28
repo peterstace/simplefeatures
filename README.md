@@ -16,8 +16,6 @@ specification that [GEOS](https://trac.osgeo.org/geos),
 implement, so the Simple Features API will be familiar to developers who have
 used those libraries before.
 
-**TODO:** Table of contents
-
 #### Table of Contents
 
 - [Geometry Types](#geometry-types)
@@ -25,7 +23,6 @@ used those libraries before.
 - [Geometry Algorithms](#geometry-algorithms)
 - [GEOS Wrapper](#geos-wrapper)
 - [Examples](#examples)
-- [FAQs](#faqs)
 
 ### Geometry Types
 
@@ -235,9 +232,3 @@ fmt.Println(v.Population)        // Prints: 8400000
 enc := json.NewEncoder(os.Stdout)
 enc.Encode(v) // Prints: {"loc":{"type":"Point","coordinates":[-74,40.7]},"pop":8400000}
 ```
-
-### FAQs
-
-**Q:** Why create Simple Features when the GEOS library already exists?
-
-**A:** TODO
