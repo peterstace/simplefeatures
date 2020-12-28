@@ -97,8 +97,22 @@ Simple features supports the following external geometry representation formats:
 | WKB     | `<binary>`                                                           | [Well Known Binary](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry#Well-known_binary) is a machine readable format that is efficient for computers to use (both from a processing and storage space perspective). WKB is a good choice for transferring geometries to and from PostGIS and other databases that support geometric types. |
 | GeoJSON | `{"type":"Polygon","coordinates":[[[0,0],[0,1],[1,1],[1,0],[0,0]]]}` | [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON) represents geometries in a similar way to WKB, but is based on the JSON format. This makes it ideal to use with web APIs or other situations where JSON would normally be used.                                                                                                                                   |
 
-#### WKT
+### Geometry Algorithms
 
+TODO
+
+### GEOS Wrapper
+
+A [GEOS](https://www.osgeo.org/projects/geos/) CGO wrapper is also provided,
+giving access to functionality not yet implemented natively in Go. The [wrapper
+is implemented in a separate
+package](https://pkg.go.dev/github.com/peterstace/simplefeatures/geos?tab=doc),
+meaning that library users who don't need this additional functionality don't
+need to expose themselves to CGO.
+
+### Examples
+
+#### WKT
 
 Example:
 
@@ -141,18 +155,6 @@ Example: decoding into a more general struct
 
 Example: encoding out of a more general struct
 
-### Geometry Algorithms
-
-TODO
-
-### GEOS Wrapper
-
-A [GEOS](https://www.osgeo.org/projects/geos/) CGO wrapper is also provided,
-giving access to functionality not yet implemented natively in Go. The [wrapper
-is implemented in a separate
-package](https://pkg.go.dev/github.com/peterstace/simplefeatures/geos?tab=doc),
-meaning that library users who don't need this additional functionality don't
-need to expose themselves to CGO.
 
 ### FAQs
 
