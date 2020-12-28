@@ -8,4 +8,4 @@ jobs:
     - uses: actions/checkout@v2
     - name: CI
       run: |
-        "$GITHUB_WORKSPACE/.ci/run_ci.sh"
+        "$GITHUB_WORKSPACE/run_ci.sh"
