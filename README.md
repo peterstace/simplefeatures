@@ -186,14 +186,35 @@ fmt.Println(location.AsText(), population) // Prints: POINT(-74 40.7) 8.4e+06
 Encoding and decoding GeoJSON directly:
 
 ```
-TODO
+// Unmarshal geometry from GeoJSON.
+raw := `{"type":"Point","coordinates":[-74.0,40.7]}`
+var g geom.Geometry
+json.NewDecoder(strings.NewReader(raw)).Decode(&g)
+fmt.Println(g.AsText()) // Prints: POINT(-74 40.7)
+
+// Marshal back to GeoJSON.
+enc := json.NewEncoder(os.Stdout)
+enc.Encode(g) // Prints: {"type":"Point","coordinates":[-74,40.7]}
 ```
 
-Encoding and decoding via the `encoding/json` package:
-
+Geometries can also be part of larger structs:
 
 ```
-TODO: (both via a struct, and via a Geometry)
+type CityPopulation struct {
+    Location   geom.Geometry `json:"loc"`
+    Population int           `json:"pop"`
+}
+
+// Unmarshal geometry from GeoJSON.
+raw := `{"loc":{"type":"Point","coordinates":[-74.0,40.7]},"pop":8400000}`
+var v CityPopulation
+json.NewDecoder(strings.NewReader(raw)).Decode(&v)
+fmt.Println(v.Location.AsText()) // Prints: POINT(-74 40.7)
+fmt.Println(v.Population)        // Prints: 8400000
+
+// Marshal back to GeoJSON.
+enc := json.NewEncoder(os.Stdout)
+enc.Encode(v) // Prints: {"loc":{"type":"Point","coordinates":[-74,40.7]},"pop":8400000}
 ```
 
 ### FAQs
