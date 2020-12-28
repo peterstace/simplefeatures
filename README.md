@@ -20,12 +20,12 @@ used those libraries before.
 
 #### Table of Contents
 
-- [Geometry Types]()
-- [Marshalling and Unmarshalling](#Marshalling and Unmarshalling)
-- [Geometry Algorithms](#Geometry Algorithms)
-- [GEOS Wrapper](#GEOS Wrapper)
-- [Examples](#Examples)
-- [FAQs](#FAQs)
+- [Geometry Types](#geometry-types)
+- [Marshalling and Unmarshalling](#marshalling-and-unmarshalling)
+- [Geometry Algorithms](#geometry-algorithms)
+- [GEOS Wrapper](#geos-wrapper)
+- [Examples](#examples)
+- [FAQs](#faqs)
 
 ### Geometry Types
 
