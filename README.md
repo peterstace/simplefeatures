@@ -16,7 +16,7 @@ specification that [GEOS](https://trac.osgeo.org/geos),
 implement, so the Simple Features API will be familiar to developers who have
 used those libraries before.
 
-TODO: Table of contents
+**TODO:** Table of contents
 
 ### Geometry Types
 
@@ -99,7 +99,13 @@ Simple features supports the following external geometry representation formats:
 
 ### Geometry Algorithms
 
-TODO
+The following algorithms are supported:
+
+| Algorithm                                                                         | Description                                         |
+| ---                                                                               | ---                                                 |
+| [Distance](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Distance) | Finds the shortest distance between two geometries. |
+
+**TODO:** Add other algorithms to this table.
 
 ### GEOS Wrapper
 
