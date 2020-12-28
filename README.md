@@ -18,6 +18,15 @@ used those libraries before.
 
 **TODO:** Table of contents
 
+#### Table of Contents
+
+- [Geometry Types]()
+- [Marshalling and Unmarshalling](#Marshalling and Unmarshalling)
+- [Geometry Algorithms](#Geometry Algorithms)
+- [GEOS Wrapper](#GEOS Wrapper)
+- [Examples](#Examples)
+- [FAQs](#FAQs)
+
 ### Geometry Types
 
 <table>
