@@ -375,6 +375,20 @@ func BenchmarkIntersection(b *testing.B) {
 	}
 }
 
+// TODO: Remove me
+func TestIntersection(t *testing.T) {
+	for _, sz := range []int{10000} {
+		t.Run(fmt.Sprintf("n=%d", sz), func(t *testing.T) {
+			p1 := regularPolygon(geom.XY{0, 0}, 1.0, sz).AsGeometry()
+			p2 := regularPolygon(geom.XY{1, 0}, 1.0, sz).AsGeometry()
+			_, err := Intersection(p1, p2)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
 func BenchmarkWKTParsing(b *testing.B) {
 	for _, tc := range []struct {
 		desc string

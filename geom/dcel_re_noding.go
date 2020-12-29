@@ -34,10 +34,14 @@ func appendNewNodesFromLinePointIntersection(dst []XY, ln line, pt XY, eps float
 	return dst
 }
 
+var appendNewNodeCount int
+
 // appendNewNode appends xy to dst (and returns dst) after creating it as a
 // node. But it only does so if the node is *not* already an endpoint of ln
 // (since those nodes already exist).
 func appendNewNode(dst []XY, nodes nodeSet, ln line, xy XY) []XY {
+	appendNewNodeCount++
+
 	// Because ln is already noded, we can skip the nodes lookup if xy is
 	// _exactly_ on the nodes. This will be the case for adjacent lines, and
 	// provides a significant performance boost.
@@ -145,6 +149,8 @@ func newCutSet(g Geometry, nodes nodeSet) cutSet {
 	}
 }
 
+var appendLinesInsertOrGetCount int
+
 func appendLines(lines []line, g Geometry, nodes nodeSet) []line {
 	switch g.Type() {
 	case TypeLineString:
@@ -153,6 +159,7 @@ func appendLines(lines []line, g Geometry, nodes nodeSet) []line {
 		for i := 0; i < n; i++ {
 			ln, ok := getLine(seq, i)
 			if ok {
+				appendLinesInsertOrGetCount += 2
 				ln.a = nodes.insertOrGet(ln.a)
 				ln.b = nodes.insertOrGet(ln.b)
 				if ln.a != ln.b {
@@ -203,6 +210,8 @@ func appendPoints(points []XY, g Geometry, nodes nodeSet) []XY {
 	return points
 }
 
+var reNodeLineStringInsertOrGetCount int
+
 func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, error) {
 	var newCoords []float64
 	seq := ls.Coordinates()
@@ -212,6 +221,7 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 		if !ok {
 			continue
 		}
+		reNodeLineStringInsertOrGetCount += 2
 		ln.a = nodes.insertOrGet(ln.a)
 		ln.b = nodes.insertOrGet(ln.b)
 		if ln.a == ln.b {
@@ -238,6 +248,7 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 
 		// Uniquify and sort cut locations.
 		xys = sortAndUniquifyXYs(xys)
+		reNodeLineStringInsertOrGetCount++
 		sortOrigin := nodes.insertOrGet(ln.a)
 		sort.Slice(xys, func(i, j int) bool {
 			distI := sortOrigin.distanceSquaredTo(xys[i])
@@ -356,7 +367,11 @@ type nodeBucket struct {
 	x, y int
 }
 
+var insertOrGetCount int
+
 func (s nodeSet) insertOrGet(xy XY) XY {
+	insertOrGetCount++
+
 	bucket := nodeBucket{
 		int(math.Floor(xy.X / s.bucketSize)),
 		int(math.Floor(xy.Y / s.bucketSize)),
