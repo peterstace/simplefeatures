@@ -70,7 +70,8 @@ func ulpSizeForLine(ln line) float64 {
 // reNodeGeometries returns the input geometries, but with additional
 // intermediate nodes (i.e. control points). The additional nodes are created
 // such that when the two geometries are overlaid the only interactions
-// (including self-interactions) between geometries are at nodes.
+// (including self-interactions) between geometries are at nodes. Nodes that
+// are close to each other are also snapped together.
 func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry, MultiLineString, error) {
 	// Calculate the maximum ULP size over all control points in the input
 	// geometries. This size is a good indication of the precision that we
@@ -85,6 +86,9 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 			ulpSize(math.Abs(xy.Y)),
 		))
 	})
+
+	// TODO: transform g1, g2, and mls via the node set. And then we don't have
+	// to use the node set for anything other than new intersections later.
 
 	nodes := newNodeSet(maxULPSize, xyCount)
 	cut := newCutSet(all, nodes)
