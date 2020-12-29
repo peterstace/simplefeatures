@@ -38,11 +38,14 @@ func appendNewNodesFromLinePointIntersection(dst []XY, ln line, pt XY, eps float
 // node. But it only does so if the node is *not* already an endpoint of ln
 // (since those nodes already exist).
 func appendNewNode(dst []XY, nodes nodeSet, ln line, xy XY) []XY {
-	xy = nodes.insertOrGet(xy)
-	if xy != ln.a && xy != ln.b && (len(dst) == 0 || xy != dst[len(dst)-1]) {
-		dst = append(dst, xy)
+	if xy == ln.a || xy == ln.b {
+		return dst
 	}
-	return dst
+	xy = nodes.insertOrGet(xy)
+	if xy == ln.a || xy == ln.b {
+		return dst
+	}
+	return append(dst, xy)
 }
 
 // ulpSizeForLine finds the maximum ULP out of the 4 float64s that make a line.
