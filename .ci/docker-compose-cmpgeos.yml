@@ -7,6 +7,6 @@ services:
     working_dir: /go/src/github.com/peterstace/simplefeatures
     entrypoint: sh -c "go install ./internal/cmprefimpl/cmpgeos && cmpgeos"
     volumes:
-      - .:/go/src/github.com/peterstace/simplefeatures
+      - ..:/go/src/github.com/peterstace/simplefeatures
     environment:
       - GO111MODULE=on
