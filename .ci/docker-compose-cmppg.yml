@@ -12,7 +12,7 @@ services:
     working_dir: /go/src/github.com/peterstace/simplefeatures
     entrypoint: go test -test.count=1 -test.timeout=30m -test.run=. ./internal/cmprefimpl/cmppg
     volumes:
-      - .:/go/src/github.com/peterstace/simplefeatures
+      - ..:/go/src/github.com/peterstace/simplefeatures
     environment:
       - GO111MODULE=on
     depends_on:

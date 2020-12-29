@@ -1,12 +1,12 @@
-version: "2.1"
+version: "3.7"
 services:
-  geostests:
+  cmprefimpl:
     build:
       context: .
       dockerfile: geos.Dockerfile
     working_dir: /go/src/github.com/peterstace/simplefeatures
-    entrypoint: go test -test.count=1 -test.run=. ./geos
+    entrypoint: sh -c "go install ./internal/cmprefimpl/cmpgeos && cmpgeos"
     volumes:
-      - .:/go/src/github.com/peterstace/simplefeatures
+      - ..:/go/src/github.com/peterstace/simplefeatures
     environment:
       - GO111MODULE=on

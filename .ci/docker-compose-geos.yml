@@ -1,12 +1,12 @@
 version: "2.1"
 services:
-  lint:
+  geostests:
     build:
       context: .
-      dockerfile: golint.Dockerfile
+      dockerfile: geos.Dockerfile
     working_dir: /go/src/github.com/peterstace/simplefeatures
-    entrypoint: golint -set_exit_status ./geom ./geos
+    entrypoint: go test -test.count=1 -test.run=. ./geos
     volumes:
-      - .:/go/src/github.com/peterstace/simplefeatures
+      - ..:/go/src/github.com/peterstace/simplefeatures
     environment:
       - GO111MODULE=on
