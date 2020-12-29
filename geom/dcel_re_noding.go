@@ -38,9 +38,15 @@ func appendNewNodesFromLinePointIntersection(dst []XY, ln line, pt XY, eps float
 // node. But it only does so if the node is *not* already an endpoint of ln
 // (since those nodes already exist).
 func appendNewNode(dst []XY, nodes nodeSet, ln line, xy XY) []XY {
+	// Because ln is already noded, we can skip the nodes lookup if xy is
+	// _exactly_ on the nodes. This will be the case for adjacent lines, and
+	// provides a significant performance boost.
 	if xy == ln.a || xy == ln.b {
 		return dst
 	}
+
+	// Now we perform the regular noding of xy, and check it against the line
+	// endpoints.
 	xy = nodes.insertOrGet(xy)
 	if xy == ln.a || xy == ln.b {
 		return dst
