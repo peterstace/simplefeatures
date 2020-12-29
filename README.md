@@ -111,7 +111,7 @@ The following algorithms are supported:
 | ---                                                                                                     | ---                                                                       |
 | [Area](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Area)                      | Finds the area of the geometry (for Polygons and MultiPolygons).          |
 | [Centroid](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Centroid)              | Finds the centroid of the geometry.                                       |
-| [ConvexHull](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.ConvexHull)j         | Finds the convex hull of the geometry.                                    |
+| [ConvexHull](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.ConvexHull)          | Finds the convex hull of the geometry.                                    |
 | [Difference](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Difference)                   | Finds the parts of a geometry that are not also part of another geometry. |
 | [Distance](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Distance)                       | Finds the shortest distance between two geometries.                       |
 | [Envelope](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Envelope)              | Finds the smallest axis-aligned bounding-box that surrounds the geometry. |
