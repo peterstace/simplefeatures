@@ -7,6 +7,6 @@ services:
     working_dir: /go/src/github.com/peterstace/simplefeatures
     entrypoint: golint -set_exit_status ./geom ./geos
     volumes:
-      - .:/go/src/github.com/peterstace/simplefeatures
+      - ..:/go/src/github.com/peterstace/simplefeatures
     environment:
       - GO111MODULE=on
