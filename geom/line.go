@@ -13,8 +13,17 @@ type line struct {
 }
 
 func (ln line) envelope() Envelope {
-	e := NewEnvelope(ln.a)
-	return e.ExtendToIncludePoint(ln.b)
+	e := Envelope{
+		min: ln.a,
+		max: ln.b,
+	}
+	if e.min.X > e.max.X {
+		e.min.X, e.max.X = e.max.X, e.min.X
+	}
+	if e.min.Y > e.max.Y {
+		e.min.Y, e.max.Y = e.max.Y, e.min.Y
+	}
+	return e
 }
 
 func (ln line) reverse() line {
