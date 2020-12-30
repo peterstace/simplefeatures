@@ -69,8 +69,8 @@ func BenchmarkSetOperation(b *testing.B) {
 }
 
 func adaptGEOSSetOp(
-	setOp func(geom.Geometry, geom.Geometry, ...geom.ConstructorOption) (geom.Geometry, error),
-) func(geom.Geometry, geom.Geometry) (geom.Geometry, error) {
+	setOp func(_, _ geom.Geometry, _ ...geom.ConstructorOption) (geom.Geometry, error),
+) func(_, _ geom.Geometry) (geom.Geometry, error) {
 	return func(g1, g2 geom.Geometry) (geom.Geometry, error) {
 		return setOp(g1, g2)
 	}
