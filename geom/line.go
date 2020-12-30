@@ -13,8 +13,9 @@ type line struct {
 }
 
 func (ln line) envelope() Envelope {
-	e := NewEnvelope(ln.a)
-	return e.ExtendToIncludePoint(ln.b)
+	ln.a.X, ln.b.X = sortFloat64Pair(ln.a.X, ln.b.X)
+	ln.a.Y, ln.b.Y = sortFloat64Pair(ln.a.Y, ln.b.Y)
+	return Envelope{ln.a, ln.b}
 }
 
 func (ln line) reverse() line {
