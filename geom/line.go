@@ -36,11 +36,11 @@ func (ln line) centroid() XY {
 }
 
 func (ln line) minX() float64 {
-	return math.Min(ln.a.X, ln.b.X)
+	return fastMin(ln.a.X, ln.b.X)
 }
 
 func (ln line) maxX() float64 {
-	return math.Max(ln.a.X, ln.b.X)
+	return fastMax(ln.a.X, ln.b.X)
 }
 
 func (ln line) asLineString() LineString {
@@ -138,10 +138,10 @@ func (ln line) intersectLine(other line) lineWithLineIntersection {
 // onSegement checks if point r on the segment formed by p and q.
 // p, q and r should be collinear
 func onSegment(p XY, q XY, r XY) bool {
-	return r.X <= math.Max(p.X, q.X) &&
-		r.X >= math.Min(p.X, q.X) &&
-		r.Y <= math.Max(p.Y, q.Y) &&
-		r.Y >= math.Min(p.Y, q.Y)
+	return r.X <= fastMax(p.X, q.X) &&
+		r.X >= fastMin(p.X, q.X) &&
+		r.Y <= fastMax(p.Y, q.Y) &&
+		r.Y >= fastMin(p.Y, q.Y)
 }
 
 // rightmostThenHighestIndex finds the rightmost-then-highest point

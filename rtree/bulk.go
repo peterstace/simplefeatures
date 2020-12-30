@@ -191,32 +191,32 @@ func quickPartition(items []BulkItem, k int, horizontal bool) {
 }
 
 func itemsAreHorizontal(items []BulkItem) bool {
-	// quickMin is used rather than Box's combine method to avoid math.Min and
-	// math.Max calls (which are more expensive).
+	// fastMin and fastMax are used rather than Box's combine method to avoid
+	// math.Min and math.Max calls (which are more expensive).
 	minX := items[0].Box.MinX
 	maxX := items[0].Box.MaxX
 	minY := items[0].Box.MinY
 	maxY := items[0].Box.MaxY
 	for _, item := range items[1:] {
 		box := item.Box
-		minX = quickMin(minX, box.MinX)
-		maxX = quickMax(maxX, box.MaxX)
-		minY = quickMin(minY, box.MinY)
-		maxY = quickMax(maxY, box.MaxY)
+		minX = fastMin(minX, box.MinX)
+		maxX = fastMax(maxX, box.MaxX)
+		minY = fastMin(minY, box.MinY)
+		maxY = fastMax(maxY, box.MaxY)
 	}
 	return maxX-minX > maxY-minY
 }
 
-// quickMin is a faster but not functionally identical version of math.Min.
-func quickMin(a, b float64) float64 {
+// fastMin is a faster but not functionally identical version of math.Min.
+func fastMin(a, b float64) float64 {
 	if a < b {
 		return a
 	}
 	return b
 }
 
-// quickMax is a faster but not functionally identical version of math.Max.
-func quickMax(a, b float64) float64 {
+// fastMax is a faster but not functionally identical version of math.Max.
+func fastMax(a, b float64) float64 {
 	if a > b {
 		return a
 	}

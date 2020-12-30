@@ -97,8 +97,8 @@ func (e Envelope) Max() XY {
 // points in this envelope along with the provided point.
 func (e Envelope) ExtendToIncludePoint(point XY) Envelope {
 	return Envelope{
-		min: XY{math.Min(e.min.X, point.X), math.Min(e.min.Y, point.Y)},
-		max: XY{math.Max(e.max.X, point.X), math.Max(e.max.Y, point.Y)},
+		min: XY{fastMin(e.min.X, point.X), fastMin(e.min.Y, point.Y)},
+		max: XY{fastMax(e.max.X, point.X), fastMax(e.max.Y, point.Y)},
 	}
 }
 
@@ -106,8 +106,8 @@ func (e Envelope) ExtendToIncludePoint(point XY) Envelope {
 // the points in this envelope and another envelope.
 func (e Envelope) ExpandToIncludeEnvelope(other Envelope) Envelope {
 	return Envelope{
-		min: XY{math.Min(e.min.X, other.min.X), math.Min(e.min.Y, other.min.Y)},
-		max: XY{math.Max(e.max.X, other.max.X), math.Max(e.max.Y, other.max.Y)},
+		min: XY{fastMin(e.min.X, other.min.X), fastMin(e.min.Y, other.min.Y)},
+		max: XY{fastMax(e.max.X, other.max.X), fastMax(e.max.Y, other.max.Y)},
 	}
 }
 
@@ -179,8 +179,8 @@ func (e Envelope) ExpandBy(x, y float64) (Envelope, bool) {
 // envelope. If the envelopes intersect with each other, then the returned
 // distance is 0.
 func (e Envelope) Distance(o Envelope) float64 {
-	dx := math.Max(0, math.Max(o.min.X-e.max.X, e.min.X-o.max.X))
-	dy := math.Max(0, math.Max(o.min.Y-e.max.Y, e.min.Y-o.max.Y))
+	dx := fastMax(0, fastMax(o.min.X-e.max.X, e.min.X-o.max.X))
+	dy := fastMax(0, fastMax(o.min.Y-e.max.Y, e.min.Y-o.max.Y))
 	return math.Sqrt(dx*dx + dy*dy)
 }
 
