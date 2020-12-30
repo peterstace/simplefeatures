@@ -49,7 +49,7 @@ func appendNewNode(dst []XY, nodes nodeSet, ln line, xy XY) []XY {
 
 // ulpSizeForLine finds the maximum ULP out of the 4 float64s that make a line.
 func ulpSizeForLine(ln line) float64 {
-	return math.Max(math.Max(math.Max(
+	return fastMax(fastMax(fastMax(
 		ulpSize(ln.a.X),
 		ulpSize(ln.a.Y)),
 		ulpSize(ln.b.X)),
@@ -70,7 +70,7 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 	var xyCount int
 	walk(all, func(xy XY) {
 		xyCount++
-		maxULPSize = math.Max(maxULPSize, math.Max(
+		maxULPSize = fastMax(maxULPSize, fastMax(
 			ulpSize(math.Abs(xy.X)),
 			ulpSize(math.Abs(xy.Y)),
 		))

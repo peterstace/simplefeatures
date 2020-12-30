@@ -66,9 +66,9 @@ func Distance(g1, g2 Geometry) (float64, bool) {
 		// See if the current item in the tree is better than our current best
 		// distance.
 		if recordID > 0 {
-			minDist = math.Min(minDist, xyDist(xyIdx))
+			minDist = fastMin(minDist, xyDist(xyIdx))
 		} else {
-			minDist = math.Min(minDist, lnDist(lnIdx))
+			minDist = fastMin(minDist, lnDist(lnIdx))
 		}
 		return nil
 	}
@@ -179,7 +179,7 @@ func distBetweenLineAndLine(ln1, ln2 line) float64 {
 		distBetweenXYAndLine(ln2.a, ln1),
 		distBetweenXYAndLine(ln2.b, ln1),
 	} {
-		minDist = math.Min(minDist, dist)
+		minDist = fastMin(minDist, dist)
 	}
 	return minDist
 }
