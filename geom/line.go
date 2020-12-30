@@ -13,8 +13,8 @@ type line struct {
 }
 
 func (ln line) envelope() Envelope {
-	ln.a.X, ln.b.X = sort2(ln.a.X, ln.b.X)
-	ln.a.Y, ln.b.Y = sort2(ln.a.Y, ln.b.Y)
+	ln.a.X, ln.b.X = sortFloat64Pair(ln.a.X, ln.b.X)
+	ln.a.Y, ln.b.Y = sortFloat64Pair(ln.a.Y, ln.b.Y)
 	return Envelope{ln.a, ln.b}
 }
 

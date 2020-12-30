@@ -103,7 +103,8 @@ func fastMax(a, b float64) float64 {
 	return b
 }
 
-func sort2(a, b float64) (float64, float64) {
+// sortFloat64Pair returns a and b in sorted order.
+func sortFloat64Pair(a, b float64) (float64, float64) {
 	if a > b {
 		return b, a
 	}
