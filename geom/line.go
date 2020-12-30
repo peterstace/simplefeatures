@@ -65,6 +65,10 @@ func (ln line) intersectsXY(xy XY) bool {
 	return lhs == rhs
 }
 
+func (ln line) hasEndpoint(xy XY) bool {
+	return ln.a == xy || ln.b == xy
+}
+
 // lineWithLineIntersection represents the result of intersecting two line
 // segments together. It can either be empty (flag set), a single point (both
 // points set the same), or a line segment (defined by the two points).

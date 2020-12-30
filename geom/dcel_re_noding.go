@@ -9,16 +9,18 @@ import (
 // appendNewNodesFromLineLineIntersection finds the new nodes that would be
 // created on a line when it is intersected with another line.
 func appendNewNodesFromLineLineIntersection(dst []XY, ln, other line, eps float64, nodes nodeSet) []XY {
-	if distBetweenXYAndLine(other.a, ln) < eps {
+	if !ln.hasEndpoint(other.a) && distBetweenXYAndLine(other.a, ln) < eps {
 		dst = appendNewNode(dst, nodes, ln, other.a)
 	}
-	if distBetweenXYAndLine(other.b, ln) < eps {
+	if !ln.hasEndpoint(other.b) && distBetweenXYAndLine(other.b, ln) < eps {
 		dst = appendNewNode(dst, nodes, ln, other.b)
 	}
 	inter := ln.intersectLine(other)
 	if !inter.empty {
-		dst = appendNewNode(dst, nodes, ln, inter.ptA)
-		if inter.ptA != inter.ptB {
+		if !ln.hasEndpoint(inter.ptA) {
+			dst = appendNewNode(dst, nodes, ln, inter.ptA)
+		}
+		if inter.ptA != inter.ptB && !ln.hasEndpoint(inter.ptB) {
 			dst = appendNewNode(dst, nodes, ln, inter.ptB)
 		}
 	}
@@ -28,7 +30,7 @@ func appendNewNodesFromLineLineIntersection(dst []XY, ln, other line, eps float6
 // appendNewNodesFromLinePointIntersection finds the new nodes that would be
 // created on a line when it is intersected with a point.
 func appendNewNodesFromLinePointIntersection(dst []XY, ln line, pt XY, eps float64, nodes nodeSet) []XY {
-	if distBetweenXYAndLine(pt, ln) < eps {
+	if !ln.hasEndpoint(pt) && distBetweenXYAndLine(pt, ln) < eps {
 		dst = appendNewNode(dst, nodes, ln, pt)
 	}
 	return dst
@@ -38,15 +40,6 @@ func appendNewNodesFromLinePointIntersection(dst []XY, ln line, pt XY, eps float
 // node. But it only does so if the node is *not* already an endpoint of ln
 // (since those nodes already exist).
 func appendNewNode(dst []XY, nodes nodeSet, ln line, xy XY) []XY {
-	// Because ln is already noded, we can skip the nodes lookup if xy is
-	// _exactly_ on the nodes. This will be the case for adjacent lines, and
-	// provides a significant performance boost.
-	if xy == ln.a || xy == ln.b {
-		return dst
-	}
-
-	// Now we perform the regular noding of xy, and check it against the line
-	// endpoints.
 	xy = nodes.insertOrGet(xy)
 	if xy == ln.a || xy == ln.b {
 		return dst
@@ -66,7 +59,8 @@ func ulpSizeForLine(ln line) float64 {
 // reNodeGeometries returns the input geometries, but with additional
 // intermediate nodes (i.e. control points). The additional nodes are created
 // such that when the two geometries are overlaid the only interactions
-// (including self-interactions) between geometries are at nodes.
+// (including self-interactions) between geometries are at nodes. Nodes that
+// are close to each other are also snapped together.
 func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry, MultiLineString, error) {
 	// Calculate the maximum ULP size over all control points in the input
 	// geometries. This size is a good indication of the precision that we
@@ -82,22 +76,37 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 		))
 	})
 
+	// Snap vertices together if they are very close.
 	nodes := newNodeSet(maxULPSize, xyCount)
-	cut := newCutSet(all, nodes)
+	var err error
+	g1, err = g1.TransformXY(nodes.insertOrGet, DisableAllValidations)
+	if err != nil {
+		return Geometry{}, Geometry{}, MultiLineString{}, err
+	}
+	g2, err = g2.TransformXY(nodes.insertOrGet, DisableAllValidations)
+	if err != nil {
+		return Geometry{}, Geometry{}, MultiLineString{}, err
+	}
+	mls, err = mls.TransformXY(nodes.insertOrGet, DisableAllValidations)
+	if err != nil {
+		return Geometry{}, Geometry{}, MultiLineString{}, err
+	}
 
-	a, err := reNodeGeometry(g1, cut, nodes)
+	// Create additional nodes for crossings.
+	cut := newCutSet(all)
+	g1, err = reNodeGeometry(g1, cut, nodes)
 	if err != nil {
 		return Geometry{}, Geometry{}, MultiLineString{}, err
 	}
-	b, err := reNodeGeometry(g2, cut, nodes)
+	g2, err = reNodeGeometry(g2, cut, nodes)
 	if err != nil {
 		return Geometry{}, Geometry{}, MultiLineString{}, err
 	}
-	c, err := reNodeMultiLineString(mls, cut, nodes)
+	mls, err = reNodeMultiLineString(mls, cut, nodes)
 	if err != nil {
 		return Geometry{}, Geometry{}, MultiLineString{}, err
 	}
-	return a, b, c, nil
+	return g1, g2, mls, nil
 }
 
 // reNodeGeometry re-nodes a single geometry, using a common cut set and node
@@ -119,10 +128,8 @@ func reNodeGeometry(g Geometry, cut cutSet, nodes nodeSet) (Geometry, error) {
 	case TypeMultiPolygon:
 		mp, err := reNodeMultiPolygonString(g.AsMultiPolygon(), cut, nodes)
 		return mp.AsGeometry(), err
-	case TypePoint:
-		return reNodeMultiPoint(g.AsPoint().AsMultiPoint(), nodes).AsGeometry(), nil
-	case TypeMultiPoint:
-		return reNodeMultiPoint(g.AsMultiPoint(), nodes).AsGeometry(), nil
+	case TypePoint, TypeMultiPoint:
+		return g, nil
 	default:
 		panic(fmt.Sprintf("unknown geometry type %v", g.Type()))
 	}
@@ -136,16 +143,16 @@ type cutSet struct {
 	ptIndex indexedPoints
 }
 
-func newCutSet(g Geometry, nodes nodeSet) cutSet {
-	lines := appendLines(nil, g, nodes)
-	points := appendPoints(nil, g, nodes)
+func newCutSet(g Geometry) cutSet {
+	lines := appendLines(nil, g)
+	points := appendPoints(nil, g)
 	return cutSet{
 		lnIndex: newIndexedLines(lines),
 		ptIndex: newIndexedPoints(points),
 	}
 }
 
-func appendLines(lines []line, g Geometry, nodes nodeSet) []line {
+func appendLines(lines []line, g Geometry) []line {
 	switch g.Type() {
 	case TypeLineString:
 		seq := g.AsLineString().Coordinates()
@@ -153,51 +160,47 @@ func appendLines(lines []line, g Geometry, nodes nodeSet) []line {
 		for i := 0; i < n; i++ {
 			ln, ok := getLine(seq, i)
 			if ok {
-				ln.a = nodes.insertOrGet(ln.a)
-				ln.b = nodes.insertOrGet(ln.b)
-				if ln.a != ln.b {
-					lines = append(lines, ln)
-				}
+				lines = append(lines, ln)
 			}
 		}
 	case TypeMultiLineString:
 		mls := g.AsMultiLineString()
 		for i := 0; i < mls.NumLineStrings(); i++ {
 			ls := mls.LineStringN(i)
-			lines = appendLines(lines, ls.AsGeometry(), nodes)
+			lines = appendLines(lines, ls.AsGeometry())
 		}
 	case TypePolygon:
-		lines = appendLines(lines, g.AsPolygon().Boundary().AsGeometry(), nodes)
+		lines = appendLines(lines, g.AsPolygon().Boundary().AsGeometry())
 	case TypeMultiPolygon:
-		lines = appendLines(lines, g.AsMultiPolygon().Boundary().AsGeometry(), nodes)
+		lines = appendLines(lines, g.AsMultiPolygon().Boundary().AsGeometry())
 	case TypeGeometryCollection:
 		gc := g.AsGeometryCollection()
 		n := gc.NumGeometries()
 		for i := 0; i < n; i++ {
-			lines = appendLines(lines, gc.GeometryN(i), nodes)
+			lines = appendLines(lines, gc.GeometryN(i))
 		}
 	}
 	return lines
 }
 
-func appendPoints(points []XY, g Geometry, nodes nodeSet) []XY {
+func appendPoints(points []XY, g Geometry) []XY {
 	switch g.Type() {
 	case TypePoint:
 		coords, ok := g.AsPoint().Coordinates()
 		if ok {
-			points = append(points, nodes.insertOrGet(coords.XY))
+			points = append(points, coords.XY)
 		}
 	case TypeMultiPoint:
 		mp := g.AsMultiPoint()
 		n := mp.NumPoints()
 		for i := 0; i < n; i++ {
-			points = appendPoints(points, mp.PointN(i).AsGeometry(), nodes)
+			points = appendPoints(points, mp.PointN(i).AsGeometry())
 		}
 	case TypeGeometryCollection:
 		gc := g.AsGeometryCollection()
 		n := gc.NumGeometries()
 		for i := 0; i < n; i++ {
-			points = appendPoints(points, gc.GeometryN(i), nodes)
+			points = appendPoints(points, gc.GeometryN(i))
 		}
 	}
 	return points
@@ -210,11 +213,6 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 	for lnIdx := 0; lnIdx < n; lnIdx++ {
 		ln, ok := getLine(seq, lnIdx)
 		if !ok {
-			continue
-		}
-		ln.a = nodes.insertOrGet(ln.a)
-		ln.b = nodes.insertOrGet(ln.b)
-		if ln.a == ln.b {
 			continue
 		}
 
@@ -238,10 +236,9 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 
 		// Uniquify and sort cut locations.
 		xys = sortAndUniquifyXYs(xys)
-		sortOrigin := nodes.insertOrGet(ln.a)
 		sort.Slice(xys, func(i, j int) bool {
-			distI := sortOrigin.distanceSquaredTo(xys[i])
-			distJ := sortOrigin.distanceSquaredTo(xys[j])
+			distI := ln.a.distanceSquaredTo(xys[i])
+			distJ := ln.a.distanceSquaredTo(xys[j])
 			return distI < distJ
 		})
 
@@ -253,7 +250,7 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 
 	// Copy over final point.
 	if n > 0 {
-		last := nodes.insertOrGet(seq.GetXY(n - 1))
+		last := seq.GetXY(n - 1)
 		newCoords = append(newCoords, last.X, last.Y)
 	}
 
@@ -309,19 +306,6 @@ func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet) (Multi
 		return MultiPolygon{}, err
 	}
 	return reNodedMP, nil
-}
-
-func reNodeMultiPoint(mp MultiPoint, nodes nodeSet) MultiPoint {
-	n := mp.NumPoints()
-	coords := make([]float64, 0, n*2)
-	for i := 0; i < n; i++ {
-		xy, ok := mp.PointN(i).XY()
-		if ok {
-			node := nodes.insertOrGet(xy)
-			coords = append(coords, node.X, node.Y)
-		}
-	}
-	return NewMultiPoint(NewSequence(coords, DimXY))
 }
 
 func reNodeGeometryCollection(gc GeometryCollection, cut cutSet, nodes nodeSet) (GeometryCollection, error) {
