@@ -13,17 +13,9 @@ type line struct {
 }
 
 func (ln line) envelope() Envelope {
-	e := Envelope{
-		min: ln.a,
-		max: ln.b,
-	}
-	if e.min.X > e.max.X {
-		e.min.X, e.max.X = e.max.X, e.min.X
-	}
-	if e.min.Y > e.max.Y {
-		e.min.Y, e.max.Y = e.max.Y, e.min.Y
-	}
-	return e
+	ln.a.X, ln.b.X = sort2(ln.a.X, ln.b.X)
+	ln.a.Y, ln.b.Y = sort2(ln.a.Y, ln.b.Y)
+	return Envelope{ln.a, ln.b}
 }
 
 func (ln line) reverse() line {

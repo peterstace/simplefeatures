@@ -86,3 +86,26 @@ func reverseXYs(fwd []XY) []XY {
 	}
 	return rev
 }
+
+// fastMin is a faster but not functionally identical version of math.Min.
+func fastMin(a, b float64) float64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// fastMax is a faster but not functionally identical version of math.Max.
+func fastMax(a, b float64) float64 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func sort2(a, b float64) (float64, float64) {
+	if a > b {
+		return b, a
+	}
+	return a, b
+}
