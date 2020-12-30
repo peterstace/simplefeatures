@@ -666,3 +666,28 @@ func (g Geometry) forceOrientation(forceCW bool) Geometry {
 		return g
 	}
 }
+
+func (g Geometry) controlPoints() int {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		var sum int
+		for _, g := range g.AsGeometryCollection().geoms {
+			sum += g.controlPoints()
+		}
+		return sum
+	case TypePoint:
+		return 1
+	case TypeLineString:
+		return g.AsLineString().Coordinates().Length()
+	case TypePolygon:
+		return g.AsPolygon().Boundary().controlPoints()
+	case TypeMultiPoint:
+		return g.AsMultiPoint().NumPoints()
+	case TypeMultiLineString:
+		return g.AsMultiLineString().controlPoints()
+	case TypeMultiPolygon:
+		return g.AsMultiPolygon().Boundary().controlPoints()
+	default:
+		panic("unknown geometry: " + g.gtype.String())
+	}
+}
