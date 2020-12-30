@@ -419,3 +419,11 @@ func (m MultiLineString) PointOnSurface() Point {
 	}
 	return nearest.point
 }
+
+func (m MultiLineString) controlPoints() int {
+	var sum int
+	for _, ls := range m.lines {
+		sum += ls.Coordinates().Length()
+	}
+	return sum
+}

@@ -436,3 +436,11 @@ func (m MultiPolygon) forceOrientation(forceCW bool) MultiPolygon {
 	}
 	return MultiPolygon{polys, m.ctype}
 }
+
+func (m MultiPolygon) controlPoints() int {
+	var sum int
+	for _, p := range m.polys {
+		sum += p.controlPoints()
+	}
+	return sum
+}
