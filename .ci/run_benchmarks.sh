@@ -14,8 +14,8 @@ old="$(mktemp)"
 new="$(mktemp)"
 trap "rm -f $new $old" EXIT
 
-package="./geom"
-bench="Intersection\$"
+package="./..."
+bench="."
 
 for (( i = 0; i < 15; i++ )); do
 	echo
@@ -25,13 +25,13 @@ for (( i = 0; i < 15; i++ )); do
 	echo "OLD"
 	git checkout "$old_git_sha1"
 	echo
-	go test "$package" -test.run='^$' -benchtime=5.0s -benchmem -bench="$bench" | tee -a "$old"
+	go test "$package" -test.run='^$' -benchtime=0.1s -benchmem -bench="$bench" | tee -a "$old"
 
 	echo
 	echo "NEW"
 	git checkout "$new_git_sha1"
 	echo
-	go test "$package" -test.run='^$' -benchtime=5.0s -benchmem -bench="$bench" | tee -a "$new"
+	go test "$package" -test.run='^$' -benchtime=0.1s -benchmem -bench="$bench" | tee -a "$new"
 done
 
 echo
