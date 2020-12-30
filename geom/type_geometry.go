@@ -680,13 +680,13 @@ func (g Geometry) controlPoints() int {
 	case TypeLineString:
 		return g.AsLineString().Coordinates().Length()
 	case TypePolygon:
-		return g.AsPolygon().Boundary().controlPoints()
+		return g.AsPolygon().controlPoints()
 	case TypeMultiPoint:
 		return g.AsMultiPoint().NumPoints()
 	case TypeMultiLineString:
 		return g.AsMultiLineString().controlPoints()
 	case TypeMultiPolygon:
-		return g.AsMultiPolygon().Boundary().controlPoints()
+		return g.AsMultiPolygon().controlPoints()
 	default:
 		panic("unknown geometry: " + g.gtype.String())
 	}

@@ -517,3 +517,11 @@ func (p Polygon) forceOrientation(forceCW bool) Polygon {
 	}
 	return Polygon{orientedRings, p.ctype}
 }
+
+func (p Polygon) controlPoints() int {
+	var sum int
+	for _, r := range p.rings {
+		sum += r.Coordinates().Length()
+	}
+	return sum
+}
