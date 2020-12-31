@@ -6,6 +6,13 @@ set operations (pure Go) and the corresponding GEOS set operations.
 To re-run the reports, use the `run.sh` script (it generates the markdown
 tables below).
 
+The source code for the benchmarks below is [here](../perf). The benchmarks
+create two regular polygons, each with `n` sides (where `n` is the input size
+in the tables below). The polygons partially overlap with each other. The set
+operation on the two regular polygons is what is actually timed.
+
+**Operation:** Intersection
+
 | Input Size | Simple Features | GEOS | Ratio |
 | ---        | ---             | ---  | ---   |
 | 2<sup>2</sup> | 39.2µs | 46.7µs | 0.8 |
