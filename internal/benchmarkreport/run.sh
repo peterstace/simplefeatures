@@ -6,7 +6,7 @@ here="$(dirname "$(readlink -f "$0")")"
 
 tmp="$(mktemp)"
 
-for ((i = 0; i < 1; i++)); do
+for ((i = 0; i < 50; i++)); do
 	go test \
 		github.com/peterstace/simplefeatures/internal/perf \
 		-run=^\$ -bench=SetOperation \
