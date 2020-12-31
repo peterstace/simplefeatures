@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.25.0
+
+2020-12-31
+
+- Internal refactor for WKT unmarshalling to simplify error handling.
+
+- Performance improvements for Polygon validation (quicker 'ring in ring' check).
+
+- Performance improvements for the LineString IsSimple method.
+
+- Performance improvements for MultiPoint/MultiPoint intersection check.
+
+- Adds a `Nearest` method to `RTree`, which finds the nearest entry to a given
+  box.
+
+- Performance improvements to the `Distance` and `Intersection` functions,
+  based on conditionally swapping the order of the inputs.
+
+- Adds a `Count` method to `RTree`, which gives the number of entries in the
+  tree.
+
+- Performance improvements to the MultiLineString IsSimple method.
+
+- Performance improvements to set operations (Union, Intersection, Difference,
+  SymmetricDifference).
+
 ## v0.24.0
 
 2020-12-07
