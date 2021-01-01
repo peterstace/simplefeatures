@@ -5,8 +5,6 @@ import (
 	"errors"
 	"math"
 	"unsafe"
-
-	"github.com/peterstace/simplefeatures/rtree"
 )
 
 // LineString is a linear geometry defined by linear interpolation between a
@@ -90,99 +88,6 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 		return appendWKTEmpty(dst)
 	}
 	return appendWKTSequence(dst, s.seq, false, BitSet{})
-}
-
-// IsSimple returns true if this geometry contains no anomalous geometry
-// points, such as self intersection or self tangency. LineStrings are simple
-// if and only if the curve defined by the LineString doesn't pass through the
-// same point twice (with the except of the two endpoints being coincident).
-func (s LineString) IsSimple() bool {
-	first, last, ok := firstAndLastLines(s.seq)
-	if !ok {
-		return true
-	}
-
-	n := s.seq.Length()
-	items := make([]rtree.BulkItem, 0, n-1)
-	for i := 0; i < n; i++ {
-		ln, ok := getLine(s.seq, i)
-		if !ok {
-			continue
-		}
-		items = append(items, rtree.BulkItem{ln.envelope().box(), i})
-	}
-	tree := rtree.BulkLoad(items)
-
-	for i := 0; i < n; i++ {
-		ln, ok := getLine(s.seq, i)
-		if !ok {
-			continue
-		}
-
-		prev, ok := previousLine(s.seq, i)
-		if !ok {
-			prev = -1
-		}
-		next, ok := nextLine(s.seq, i)
-		if !ok {
-			next = -1
-		}
-
-		simple := true // assume simple until proven otherwise
-		tree.RangeSearch(ln.envelope().box(), func(j int) error {
-			// Skip finding the original line (i == j) or cases where we have
-			// already checked that pair (i > j).
-			if i >= j {
-				return nil
-			}
-
-			// Extract the other line from the sequence. We previously were
-			// able to access line j (otherwise we wouldn't have been able to
-			// put it into the tree). So if we can't access it now, something
-			// has gone horribly wrong.
-			other, ok := getLine(s.seq, j)
-			if !ok {
-				panic("couldn't get line")
-			}
-
-			inter := ln.intersectLine(other)
-			if inter.empty {
-				return nil
-			}
-			if inter.ptA != inter.ptB {
-				// Two overlapping line segments.
-				simple = false
-				return rtree.Stop
-			}
-
-			// The dimension must be 1. Since the intersection is between two
-			// lines, the intersection must be a *single* point in the cases
-			// from this point onwards.
-
-			// Adjacent lines will intersect at a point due to construction, so
-			// these cases are okay.
-			if j == prev || j == next {
-				return nil
-			}
-
-			// The first and last segment are allowed to intersect at a point,
-			// so long as that point is the start of the first segment and the
-			// end of the last segment (i.e. the line string is closed).
-			if s.IsClosed() && i == first && j == last {
-				return nil
-			}
-
-			// Any other point intersection (e.g. looping back on
-			// itself at a point) is disallowed for simple linestrings.
-			simple = false
-			return rtree.Stop
-		})
-
-		if !simple {
-			return false
-		}
-	}
-	return true
 }
 
 // IsClosed returns true if and only if this LineString is not empty and its

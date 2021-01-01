@@ -120,6 +120,21 @@ func BenchmarkIntersectsMultiPointWithMultiPoint(b *testing.B) {
 	}
 }
 
+var dummyBool bool
+
+func BenchmarkLineStringIsSimpleCircle(b *testing.B) {
+	for _, sz := range []int{10, 100, 1000, 10000} {
+		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+			circ := regularPolygon(XY{}, 1.0, sz)
+			ring := circ.ExteriorRing()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				dummyBool = ring.IsSimple()
+			}
+		})
+	}
+}
+
 func BenchmarkLineStringIsSimpleZigZag(b *testing.B) {
 	for _, sz := range []int{10, 100, 1000, 10000} {
 		b.Run(strconv.Itoa(sz), func(b *testing.B) {

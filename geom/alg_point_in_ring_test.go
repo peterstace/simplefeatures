@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"fmt"
 	"strconv"
 	"testing"
 )
@@ -138,42 +137,46 @@ func TestPointInRing(t *testing.T) {
 			},
 		},
 	} {
-		g, err := UnmarshalWKT(tc.wkt)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if !g.IsPolygon() {
-			t.Fatal("expected a polygon")
-		}
-		poly := g.AsPolygon()
-		ring := poly.ExteriorRing()
-
-		for j, st := range tc.subTests {
-			pt, err := UnmarshalWKT(st.pointWKT)
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g, err := UnmarshalWKT(tc.wkt)
 			if err != nil {
 				t.Fatal(err)
 			}
-			xy, ok := pt.AsPoint().XY()
-			if !ok {
-				panic("point empty not expected in this test")
+
+			if !g.IsPolygon() {
+				t.Fatal("expected a polygon")
 			}
-			t.Run(fmt.Sprintf("non-indexed_%d_%d", i, j), func(t *testing.T) {
-				if got := relatePointToRing(xy, ring); got != st.side {
-					t.Log(tc.wkt)
-					t.Log(st.pointWKT)
-					t.Errorf("want=%v got=%v", st.side, got)
-				}
-			})
-			t.Run(fmt.Sprintf("indexed_%d_%d", i, j), func(t *testing.T) {
-				il := newIndexedLines(poly.Boundary().asLines())
-				if got := relatePointToPolygon(xy, il); got != st.side {
-					t.Log(tc.wkt)
-					t.Log(st.pointWKT)
-					t.Errorf("want=%v got=%v", st.side, got)
-				}
-			})
-		}
+			poly := g.AsPolygon()
+			ring := poly.ExteriorRing()
+
+			for j, st := range tc.subTests {
+				t.Run(strconv.Itoa(j), func(t *testing.T) {
+					pt, err := UnmarshalWKT(st.pointWKT)
+					if err != nil {
+						t.Fatal(err)
+					}
+					xy, ok := pt.AsPoint().XY()
+					if !ok {
+						panic("point empty not expected in this test")
+					}
+					t.Run("non-indexed", func(t *testing.T) {
+						if got := relatePointToRing(xy, ring); got != st.side {
+							t.Log(tc.wkt)
+							t.Log(st.pointWKT)
+							t.Errorf("want=%v got=%v", st.side, got)
+						}
+					})
+					t.Run("indexed", func(t *testing.T) {
+						il := newIndexedLines(poly.Boundary().asLines())
+						if got := relatePointToPolygon(xy, il); got != st.side {
+							t.Log(tc.wkt)
+							t.Log(st.pointWKT)
+							t.Errorf("want=%v got=%v", st.side, got)
+						}
+					})
+				})
+			}
+		})
 	}
 }
 
