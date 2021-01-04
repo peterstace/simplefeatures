@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/peterstace/simplefeatures/internal/redblack"
@@ -11,6 +12,13 @@ import (
 // if and only if the curve defined by the LineString doesn't pass through the
 // same point twice (with the exception of the two endpoints being coincident).
 func (s LineString) IsSimple() bool {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("IsSimple:", s.AsText())
+			panic(r)
+		}
+	}()
+
 	type event struct {
 		XY
 		idx   int
