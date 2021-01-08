@@ -32,10 +32,12 @@ func TestDisableValidation(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			_, err := geom.UnmarshalWKT(wkt)
 			if err == nil {
+				t.Logf("wkt: %v", wkt)
 				t.Fatal("expected validation error unmarshalling wkt")
 			}
 			_, err = geom.UnmarshalWKT(wkt, geom.DisableAllValidations)
 			if err != nil {
+				t.Logf("wkt: %v", wkt)
 				t.Errorf("disabling validations still gave an error: %v", err)
 			}
 		})
