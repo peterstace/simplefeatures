@@ -77,33 +77,41 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	interVerts := make(map[XY]int)
 	graph := newGraph()
 
-	// Check each pair of rings (skipping any pairs that could not possibly intersect).
-	var tree rtree.RTree
-	for i, currentRing := range rings {
-		env, ok := currentRing.Envelope()
+	// Construct RTree of rings.
+	boxes := make([]rtree.Box, len(rings))
+	items := make([]rtree.BulkItem, len(rings))
+	for i, r := range rings {
+		env, ok := r.Envelope()
 		if !ok {
 			// Cannot occur, because we have already checked to ensure rings
 			// are closed. Closed rings by definition are non-empty.
 			panic("unexpected empty ring")
 		}
-		box := env.box()
-		if err := tree.RangeSearch(box, func(j int) error {
-			otherRing := rings[j]
+		boxes[i] = env.box()
+		items[i] = rtree.BulkItem{Box: boxes[i], RecordID: i}
+	}
+	tree := rtree.BulkLoad(items)
+
+	// Check each pair of rings (skipping any pairs that could not possibly intersect).
+	for i := range rings {
+		if err := tree.RangeSearch(boxes[i], func(j int) error {
+			// Only compare each pair once.
+			if i <= j {
+				return nil
+			}
 			if i > 0 && j > 0 { // Check is skipped if the outer ring is involved.
 				// It's ok to access the first coord (index 0), since we've
 				// already checked to ensure that no ring is empty.
-				startCurrent := currentRing.Coordinates().GetXY(0)
-				startOther := otherRing.Coordinates().GetXY(0)
-				nestedFwd := relatePointToRing(startCurrent, otherRing) == interior
-				nestedRev := relatePointToRing(startOther, currentRing) == interior
+				iStart := rings[i].Coordinates().GetXY(0)
+				jStart := rings[j].Coordinates().GetXY(0)
+				nestedFwd := relatePointToRing(iStart, rings[j]) == interior
+				nestedRev := relatePointToRing(jStart, rings[i]) == interior
 				if nestedFwd || nestedRev {
 					return errors.New("polygon must not have nested rings")
 				}
 			}
 
-			intersects, ext := hasIntersectionLineStringWithLineString(
-				currentRing, otherRing, true,
-			)
+			intersects, ext := hasIntersectionLineStringWithLineString(rings[i], rings[j], true)
 			if !intersects {
 				return nil
 			}
@@ -123,8 +131,6 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 		}); err != nil {
 			return err
 		}
-
-		tree.Insert(box, i)
 	}
 
 	// All inner rings must be inside the outer ring. We can just check an
