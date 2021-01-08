@@ -61,22 +61,35 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 	polyBoundaries := make([]indexedLines, len(polys))
 	polyBoundaryPopulated := make([]bool, len(polys))
 
-	var tree rtree.RTree
+	// Construct RTree of Polygons.
+	boxes := make([]rtree.Box, len(polys))
+	items := make([]rtree.BulkItem, 0, len(polys))
+	for i, p := range polys {
+		env, ok := p.Envelope()
+		if ok {
+			boxes[i] = env.box()
+			item := rtree.BulkItem{Box: boxes[i], RecordID: i}
+			items = append(items, item)
+		}
+	}
+	tree := rtree.BulkLoad(items)
+
 	for i := range polys {
-		env, ok := polys[i].Envelope()
-		if !ok {
+		if polys[i].IsEmpty() {
 			continue
 		}
-		box := env.box()
+		err := tree.RangeSearch(boxes[i], func(j int) error {
+			// Only consider each pair of polygons once.
+			if i <= j {
+				return nil
+			}
 
-		err := tree.RangeSearch(box, func(j int) error {
 			for _, k := range [...]int{i, j} {
 				if !polyBoundaryPopulated[k] {
 					polyBoundaries[k] = newIndexedLines(polys[k].Boundary().asLines())
 					polyBoundaryPopulated[k] = true
 				}
 			}
-
 			interMP, interMLS := intersectionOfIndexedLines(
 				polyBoundaries[i],
 				polyBoundaries[j],
@@ -118,8 +131,6 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 		if err != nil {
 			return err
 		}
-
-		tree.Insert(box, i)
 	}
 	return nil
 }
