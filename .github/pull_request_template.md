@@ -19,3 +19,13 @@ Have you:
 
 - Please paste benchmark results here. The benchmarks can be run using the
   `run_benchmarks.sh` script.
+
+<details>
+
+<summary>Click to expand</summary>
+
+```
+PASTE BENCHMARKS HERE
+```
+
+</details>
