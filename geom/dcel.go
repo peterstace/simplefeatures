@@ -55,6 +55,7 @@ type vertexRecord struct {
 	coords    XY
 	incidents []*halfEdgeRecord
 	label     uint8
+	locLabel  uint8
 }
 
 func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
@@ -122,7 +123,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8, interactions map[XY]st
 					continue
 				}
 				if _, ok := dcel.vertices[xy]; !ok {
-					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask}
+					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask, mask & locBoundary}
 				}
 			}
 		}
@@ -186,13 +187,20 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		ls := mls.LineStringN(i)
 		seq := ls.Coordinates()
-		for j := 0; j < seq.Length(); j++ {
+		n := seq.Length()
+		for j := 0; j < n; j++ {
 			xy := seq.GetXY(j)
 			if _, ok := interactions[xy]; !ok {
 				continue
 			}
+			loc := locInterior
+			if (j == 0 || j == n-1) && !ls.IsClosed() {
+				// TODO: what should the value be if an endpoint is the same as
+				// as existing vertex? Is that an exterior or an interior?
+				loc = locBoundary
+			}
 			if _, ok := dcel.vertices[xy]; !ok {
-				dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask}
+				dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask, mask & loc}
 			}
 		}
 	}
@@ -264,7 +272,12 @@ func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
 			record = &vertexRecord{
 				coords:    xy,
 				incidents: nil,
-				label:     0,
+
+				// TODO: why not just set label here and remove label
+				// adjustment below? The current way seems a bit weird...
+				label: 0,
+
+				locLabel: mask & locInterior,
 			}
 			dcel.vertices[xy] = record
 		}

@@ -18,6 +18,7 @@ func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList
 		vert, ok := d.vertices[xy]
 		if ok {
 			vert.label |= otherVert.label
+			vert.locLabel |= otherVert.locLabel
 		} else {
 			d.vertices[xy] = otherVert
 		}

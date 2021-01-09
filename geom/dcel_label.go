@@ -17,6 +17,12 @@ const (
 	extracted uint8 = 0b010000
 )
 
+const (
+	locInterior uint8 = 0b0101
+	locBoundary uint8 = 0b1010
+	// NOTE: We don't explicitly track exterior locations (they have to be inferred).
+)
+
 func assertPresenceBits(label uint8) {
 	if populatedMask&label != populatedMask {
 		panic(fmt.Sprintf("all presence bits in label not set: %v", label))
