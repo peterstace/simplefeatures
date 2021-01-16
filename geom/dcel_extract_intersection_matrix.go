@@ -50,11 +50,14 @@ func (e *halfEdgeRecord) location(sideMask uint8) de9im.Location {
 }
 
 func (v *vertexRecord) location(sideMask uint8) de9im.Location {
+	// NOTE: It's important that we check the Boundary flag before the Interior
+	// flag, since both might be set. In that case, we want to treat the
+	// location as a Boundary, since the boundary is a more specific case.
 	switch {
-	case (v.locLabel & sideMask & locInterior) != 0:
-		return de9im.Interior
 	case (v.locLabel & sideMask & locBoundary) != 0:
 		return de9im.Boundary
+	case (v.locLabel & sideMask & locInterior) != 0:
+		return de9im.Interior
 	default:
 		// We don't know the location of the point. But it must be either
 		// Exterior or Interior because if it were Boundary, then we would know

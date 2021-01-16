@@ -195,11 +195,11 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 			}
 			loc := locInterior
 			if (j == 0 || j == n-1) && !ls.IsClosed() {
-				// TODO: what should the value be if an endpoint is the same as
-				// as existing vertex? Is that an exterior or an interior?
 				loc = locBoundary
 			}
-			if _, ok := dcel.vertices[xy]; !ok {
+			if v, ok := dcel.vertices[xy]; ok {
+				v.locLabel |= mask & loc
+			} else {
 				dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask, mask & loc}
 			}
 		}
