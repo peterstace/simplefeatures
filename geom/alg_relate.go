@@ -6,6 +6,8 @@ import (
 	"github.com/peterstace/simplefeatures/de9im"
 )
 
+// Relate calculates the DE-9IM matrix between two geometries, describing how
+// the two geometries relate to each other.
 func Relate(a, b Geometry) (de9im.Matrix, error) {
 	if a.IsEmpty() || b.IsEmpty() {
 		return de9im.Matrix(0), nil
