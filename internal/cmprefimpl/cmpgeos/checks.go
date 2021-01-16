@@ -759,6 +759,12 @@ func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error
 			return err
 		}
 	}
+
+	log.Println("checking Relate")
+	if err := checkRelate(h, g1, g2, log); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -847,5 +853,51 @@ func checkEqualityHeuristic(want, got geom.Geometry, log *log.Logger) error {
 		log.Printf("gotArea:  %v\n", gotArea)
 		return mismatchErr
 	}
+	return nil
+}
+
+var skipRelate = map[string]bool{
+	// Topological inaccuracies due to numeric precision.
+	"LINESTRING(-0.5 0.5,-0.070710678118655 0.070710678118655)":                                     true,
+	"MULTILINESTRING((0 0,0.5 0.5,1 1,2 2.000000000000001),(1 0,0.5 0.5,0 1,-1 2.000000000000001))": true,
+	"MULTILINESTRING((0 0,2 2.000000000000001),(1 0,-1 2.000000000000001))":                         true,
+	"POINT(0.3333333333 0.6666666667)":                                                              true,
+}
+
+func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+	got, err := geom.Relate(g1, g2)
+	if err != nil {
+		return err
+	}
+	want, err := h.Relate(g1, g2)
+	if err != nil {
+		if err == LibgeosCrashError {
+			// Skip any tests that would cause libgeos to crash.
+			return nil
+		}
+		return err
+	}
+
+	if skipRelate[g1.AsText()] || skipRelate[g2.AsText()] {
+		// Simple features has different node snapping rules compared to GEOS,
+		// so we need to skip some geometries trigger that different behaviour.
+		// Because Relate is a topological operation, there's not really
+		// anything (heuristic etc) we can use as a workaround.
+		return nil
+	}
+
+	// There is a bug in GEOS that triggers when linear elements have no
+	// boundary (e.g. due to the mod-2 rule).  The result of the bug is that
+	// the EB (or BE) is reported as 0 rather than F.
+	if g1.Dimension() == 1 && g2.Dimension() == 1 && (g1.Boundary().IsEmpty() || g2.Boundary().IsEmpty()) {
+		return nil
+	}
+
+	if got.StringCode() != want {
+		log.Printf("want: %v", want)
+		log.Printf("got:  %v", got.StringCode())
+		return mismatchErr
+	}
+
 	return nil
 }
