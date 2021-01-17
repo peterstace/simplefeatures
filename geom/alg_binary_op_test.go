@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/peterstace/simplefeatures/de9im"
 	"github.com/peterstace/simplefeatures/geom"
 )
 
@@ -747,6 +748,11 @@ func TestBinaryOp(t *testing.T) {
 			relate:  "0F1FF0102",
 		},
 
+		// Empty cases for relate.
+		{input1: "POINT EMPTY", input2: "POINT(0 0)", relate: "FFFFFF0F2"},
+		{input1: "POINT EMPTY", input2: "LINESTRING(0 0,1 1)", relate: "FFFFFF102"},
+		{input1: "POINT EMPTY", input2: "POLYGON((0 0,0 1,1 0,0 0))", relate: "FFFFFF212"},
+
 		// Bug reproductions:
 		{
 			input1:  "LINESTRING(-1 1,1 -1)",
@@ -896,12 +902,39 @@ func TestBinaryOp(t *testing.T) {
 				if geomCase.relate == "" {
 					t.Skip("Skipping test because it's not specified or is commented out")
 				}
-				got, err := geom.Relate(g1, g2)
-				if err != nil {
-					t.Fatal("could not perform relate op")
-				}
-				if got.StringCode() != geomCase.relate {
-					t.Errorf("\nwant: %v\ngot:  %v\n", geomCase.relate, got.StringCode())
+				for _, swap := range []struct {
+					description string
+					reverse     bool
+				}{
+					{"fwd", false},
+					{"rev", true},
+				} {
+					t.Run(swap.description, func(t *testing.T) {
+						var (
+							got de9im.Matrix
+							err error
+						)
+						if swap.reverse {
+							got, err = geom.Relate(g2, g1)
+						} else {
+							got, err = geom.Relate(g1, g2)
+						}
+						if err != nil {
+							t.Fatal("could not perform relate op")
+						}
+
+						want := geomCase.relate
+						if swap.reverse {
+							want = ""
+							for j := 0; j < 9; j++ {
+								k := 3*(j%3) + j/3
+								want += geomCase.relate[k : k+1]
+							}
+						}
+						if got.StringCode() != want {
+							t.Errorf("\nwant: %v\ngot:  %v\n", want, got.StringCode())
+						}
+					})
 				}
 			})
 		})
@@ -948,8 +981,8 @@ func TestBinaryOpEmptyInputs(t *testing.T) {
 				if err != nil {
 					t.Fatal("could not perform relate op")
 				}
-				if got.StringCode() != "FFFFFFFFF" {
-					t.Errorf("got=%v but want=FFFFFFFFF", got.StringCode())
+				if got.StringCode() != "FFFFFFFF2" {
+					t.Errorf("got=%v but want=FFFFFFFF2", got.StringCode())
 				}
 			})
 
