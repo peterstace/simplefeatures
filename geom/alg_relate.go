@@ -21,7 +21,10 @@ func Relate(a, b Geometry) (de9im.Matrix, error) {
 				m = m.With(de9im.Exterior, de9im.Boundary, de9im.Empty)
 			case 1:
 				m = m.With(de9im.Exterior, de9im.Interior, de9im.Dim1)
-				m = m.With(de9im.Exterior, de9im.Boundary, de9im.Dim0)
+				// TODO: Consider 'mod-2' boundary node rule in non-empty scenarios.
+				if !b.Boundary().IsEmpty() {
+					m = m.With(de9im.Exterior, de9im.Boundary, de9im.Dim0)
+				}
 			case 2:
 				m = m.With(de9im.Exterior, de9im.Interior, de9im.Dim2)
 				m = m.With(de9im.Exterior, de9im.Boundary, de9im.Dim1)
@@ -34,7 +37,10 @@ func Relate(a, b Geometry) (de9im.Matrix, error) {
 				m = m.With(de9im.Boundary, de9im.Exterior, de9im.Empty)
 			case 1:
 				m = m.With(de9im.Interior, de9im.Exterior, de9im.Dim1)
-				m = m.With(de9im.Boundary, de9im.Exterior, de9im.Dim0)
+				// TODO: Consider 'mod-2' boundary node rule in non-empty scenarios.
+				if !a.Boundary().IsEmpty() {
+					m = m.With(de9im.Boundary, de9im.Exterior, de9im.Dim0)
+				}
 			case 2:
 				m = m.With(de9im.Interior, de9im.Exterior, de9im.Dim2)
 				m = m.With(de9im.Boundary, de9im.Exterior, de9im.Dim1)

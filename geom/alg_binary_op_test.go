@@ -751,6 +751,7 @@ func TestBinaryOp(t *testing.T) {
 		// Empty cases for relate.
 		{input1: "POINT EMPTY", input2: "POINT(0 0)", relate: "FFFFFF0F2"},
 		{input1: "POINT EMPTY", input2: "LINESTRING(0 0,1 1)", relate: "FFFFFF102"},
+		{input1: "POINT EMPTY", input2: "LINESTRING(0 0,0 1,1 0,0 0)", relate: "FFFFFF1F2"},
 		{input1: "POINT EMPTY", input2: "POLYGON((0 0,0 1,1 0,0 0))", relate: "FFFFFF212"},
 
 		// Bug reproductions:
