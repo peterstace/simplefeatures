@@ -31,7 +31,7 @@ func (s nodeSet) insertOrGet(xy XY) XY {
 		int(math.Floor(xy.X / s.bucketWidth)),
 		int(math.Floor(xy.Y / s.bucketWidth)),
 	}
-	for _, x := range [...]nodeBucket{
+	for _, offset := range [...]nodeBucket{
 		b,
 		{b.x - 1, b.y - 1},
 		{b.x - 1, b.y},
@@ -42,7 +42,7 @@ func (s nodeSet) insertOrGet(xy XY) XY {
 		{b.x + 1, b.y},
 		{b.x + 1, b.y + 1},
 	} {
-		if node, ok := s.nodes[x]; ok {
+		if node, ok := s.nodes[offset]; ok {
 			return node
 		}
 	}
