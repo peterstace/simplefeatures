@@ -36,14 +36,6 @@ func (w XY) Scale(s float64) XY {
 	}
 }
 
-// InverseScale returns the XY where the X and Y have been scaled by 1/s.
-func (w XY) InverseScale(s float64) XY {
-	return XY{
-		w.X / s,
-		w.Y / s,
-	}
-}
-
 // Cross returns the 2D cross product of this and another XY. This is defined
 // as the 'z' coordinate of the regular 3D cross product.
 func (w XY) Cross(o XY) float64 {
