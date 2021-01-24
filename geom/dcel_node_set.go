@@ -38,13 +38,30 @@ type nodeBucket struct {
 }
 
 func (s nodeSet) insertOrGet(xy XY) XY {
-	bucketA := nodeBucket{
-		int(math.Floor(xy.X / s.bucketWidth)),
-		int(math.Floor(xy.Y / s.bucketWidth)),
+	// Convert from geometry coordinates to continuous bucket coordinates.
+	scaled := xy.InverseScale(s.bucketWidth)
+
+	// Calculate integer coordinates of the bucket.
+	floor := XY{
+		math.Floor(scaled.X),
+		math.Floor(scaled.Y),
 	}
-	bucketB := nodeBucket{
-		int(math.Floor((xy.X + s.bucketWidth/2) / s.bucketWidth)),
-		int(math.Floor((xy.Y + s.bucketWidth/2) / s.bucketWidth)),
+
+	// The first bucket is just the integer coordinates in bucket space.
+	bucketA := nodeBucket{
+		int(floor.X),
+		int(floor.Y),
+	}
+
+	// The second bucket is offset by half a bucket width.
+	bucketB := bucketA
+	halfBucket := s.bucketWidth / 2
+	residual := scaled.Sub(floor)
+	if residual.X > halfBucket {
+		bucketB.x++
+	}
+	if residual.Y > halfBucket {
+		bucketB.y++
 	}
 
 	nodeA, okA := s.nodesA[bucketA]
