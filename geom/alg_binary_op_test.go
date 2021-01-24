@@ -838,6 +838,41 @@ func TestBinaryOp(t *testing.T) {
 	}
 }
 
+func TestBinaryOpNoCrash(t *testing.T) {
+	for i, tc := range []struct {
+		inputA, inputB string
+	}{
+		// Reproduces a node set crash.
+		{
+			"MULTIPOLYGON(((-73.85559633603238 40.65821829792369,-73.8555908203125 40.6580545462853,-73.85559350252151 40.65822190464714,-73.85559616790695 40.65821836616974,-73.85559633603238 40.65821829792369)),((-73.83276962411851 40.670198784066336,-73.83329428732395 40.66733238233316,-73.83007764816284 40.668112089039745,-73.83276962411851 40.670198784066336),(-73.83250952988594 40.66826467245589,-73.83246950805187 40.66828298244238,-73.83250169456005 40.66826467245589,-73.83250952988594 40.66826467245589),(-73.83128821933425 40.66879546275945,-73.83135303854942 40.668798203056376,-73.83129335939884 40.668798711663115,-73.83128821933425 40.66879546275945)),((-73.82322192192078 40.6723059714534,-73.8232085108757 40.67231004009312,-73.82320448756218 40.67231410873261,-73.82322192192078 40.6723059714534)))",
+			"POLYGON((-73.84494431798483 40.65179671514794,-73.84493172168732 40.651798908464365,-73.84487807750702 40.651802469618836,-73.84494431798483 40.65179671514794))",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			gA, err := geom.UnmarshalWKT(tc.inputA)
+			expectNoErr(t, err)
+			gB, err := geom.UnmarshalWKT(tc.inputB)
+			expectNoErr(t, err)
+
+			for _, op := range []struct {
+				name string
+				op   func(_, _ geom.Geometry) (geom.Geometry, error)
+			}{
+				{"union", geom.Union},
+				{"intersection", geom.Intersection},
+				{"difference", geom.Difference},
+				{"symmetric_difference", geom.SymmetricDifference},
+			} {
+				t.Run(op.name, func(t *testing.T) {
+					if _, err := op.op(gA, gB); err != nil {
+						t.Errorf("unexpected error: %v", err)
+					}
+				})
+			}
+		})
+	}
+}
+
 func TestBinaryOpEmptyInputs(t *testing.T) {
 	for i, wkt := range []string{
 		"POINT EMPTY",
