@@ -1083,18 +1083,18 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 	   | f2  |
 	   |     |
 	  v13---v14
-	   | `,
-	   |f9 `,
-	  v12---v19---v11
-	   |  f4   `,f8|
-	   |         `,|
+	   |
+	   |
+	  v12---------v11    f0
+	   |  f4       |
+	   |           |
 	   |    v4----v18----v3
-	   |     | f5  | `,f7|    f0
-	   |     |     |   `,|
-	  v9----v17---v10   v20   v8-----v7
-	         |           | `,  | f1  |
-	         |  f3       |f6 `,|     |
-	   o    v1-----------v2---v5-----v6
+	   |     | f5  |     |
+	   |     |     |     |
+	  v9----v17---v10    |    v8-----v7
+	   `, f6 |           |     | f1  |
+	     `,  |  f3       |     |     |
+	   o   `v1-----------v2---v5-----v6
 	*/
 
 	v1 := XY{1, 0}
@@ -1115,17 +1115,15 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 	v16 := XY{0, 5}
 	v17 := XY{1, 1}
 	v18 := XY{2, 2}
-	v19 := XY{1, 3}
-	v20 := XY{3, 1}
 
 	CheckDCEL(t, overlay, DCELSpec{
-		NumVerts: 10,
-		NumEdges: 36,
-		NumFaces: 10,
+		NumVerts: 8,
+		NumEdges: 26,
+		NumFaces: 7,
 		Vertices: []VertexSpec{
 			{
 				Label:    populatedMask | inputAInSet,
-				Vertices: []XY{v1, v20, v2, v5},
+				Vertices: []XY{v1, v2, v5},
 			},
 			{
 				Label:    populatedMask | inSetMask,
@@ -1133,24 +1131,14 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 			},
 			{
 				Label:    populatedMask | inputBInSet,
-				Vertices: []XY{v9, v19, v12, v13},
+				Vertices: []XY{v9, v12, v13},
 			},
 		},
 		Edges: []EdgeSpec{
 			{
 				EdgeLabel: populatedMask,
 				FaceLabel: 0,
-				Sequence:  []XY{v20, v5},
-			},
-			{
-				EdgeLabel: populatedMask,
-				FaceLabel: 0,
 				Sequence:  []XY{v5, v2},
-			},
-			{
-				EdgeLabel: populatedMask,
-				FaceLabel: 0,
-				Sequence:  []XY{v5, v20},
 			},
 			{
 				EdgeLabel: populatedMask,
@@ -1165,17 +1153,7 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 			{
 				EdgeLabel: populatedMask,
 				FaceLabel: 0,
-				Sequence:  []XY{v13, v19},
-			},
-			{
-				EdgeLabel: populatedMask,
-				FaceLabel: 0,
 				Sequence:  []XY{v13, v12},
-			},
-			{
-				EdgeLabel: populatedMask,
-				FaceLabel: 0,
-				Sequence:  []XY{v19, v13},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
@@ -1200,16 +1178,6 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated,
-				Sequence:  []XY{v18, v3, v20},
-			},
-			{
-				EdgeLabel: populatedMask | inputAInSet,
-				FaceLabel: inputAPopulated,
-				Sequence:  []XY{v20, v2},
-			},
-			{
-				EdgeLabel: populatedMask | inputAInSet,
-				FaceLabel: inputAPopulated,
 				Sequence:  []XY{v2, v1},
 			},
 			{
@@ -1228,16 +1196,6 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 				Sequence:  []XY{v9, v12},
 			},
 			{
-				EdgeLabel: populatedMask | inputBInSet,
-				FaceLabel: inputBPopulated,
-				Sequence:  []XY{v12, v19},
-			},
-			{
-				EdgeLabel: populatedMask | inputBInSet,
-				FaceLabel: inputBPopulated,
-				Sequence:  []XY{v19, v11, v18},
-			},
-			{
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated | inputAInSet,
 				Sequence:  []XY{v17, v1},
@@ -1246,26 +1204,6 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 				EdgeLabel: populatedMask | inputAInSet,
 				FaceLabel: inputAPopulated | inputAInSet,
 				Sequence:  []XY{v1, v2},
-			},
-			{
-				EdgeLabel: populatedMask | inputAInSet,
-				FaceLabel: inputAPopulated | inputAInSet,
-				Sequence:  []XY{v2, v20},
-			},
-			{
-				EdgeLabel: populatedMask | inputAInSet,
-				FaceLabel: inputAPopulated | inputAInSet,
-				Sequence:  []XY{v20, v3, v18},
-			},
-			{
-				EdgeLabel: populatedMask | inputBInSet,
-				FaceLabel: inputBPopulated | inputBInSet,
-				Sequence:  []XY{v18, v11, v19},
-			},
-			{
-				EdgeLabel: populatedMask | inputBInSet,
-				FaceLabel: inputBPopulated | inputBInSet,
-				Sequence:  []XY{v19, v12},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
@@ -1298,35 +1236,46 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 				Sequence:  []XY{v18, v4, v17},
 			},
 			{
-				EdgeLabel: populatedMask | inputAInSet,
+				EdgeLabel: populatedMask,
 				FaceLabel: 0,
-				Sequence:  []XY{v20, v18},
+				Sequence:  []XY{v1, v9},
+			},
+			{
+				EdgeLabel: populatedMask,
+				FaceLabel: 0,
+				Sequence:  []XY{v9, v1},
 			},
 			{
 				EdgeLabel: populatedMask | inputAInSet,
-				FaceLabel: 0,
-				Sequence:  []XY{v18, v20},
+				FaceLabel: inputAPopulated,
+				Sequence:  []XY{v18, v3, v2},
+			},
+			{
+				EdgeLabel: populatedMask | inputAInSet,
+				FaceLabel: inputAPopulated | inputAInSet,
+				Sequence:  []XY{v2, v3, v18},
+			},
+
+			{
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+				Sequence:  []XY{v18, v11, v12},
 			},
 			{
 				EdgeLabel: populatedMask | inputBInSet,
-				FaceLabel: 0,
-				Sequence:  []XY{v19, v18},
-			},
-			{
-				EdgeLabel: populatedMask | inputBInSet,
-				FaceLabel: 0,
-				Sequence:  []XY{v18, v19},
+				FaceLabel: inputBPopulated,
+				Sequence:  []XY{v12, v11, v18},
 			},
 		},
 		Faces: []FaceSpec{
 			{
 				// f0
-				First:  v19,
+				First:  v12,
 				Second: v11,
 				Cycle: []XY{
-					v19, v11, v18, v3, v20, v5, v8, v7,
-					v6, v5, v2, v1, v17, v9, v12,
-					v13, v16, v15, v14, v13, v19,
+					v12, v11, v18, v3, v2, v5, v8, v7,
+					v6, v5, v2, v1, v9, v12,
+					v13, v16, v15, v14, v13, v12,
 				},
 				Label: inputBPopulated | inputAPopulated,
 			},
@@ -1348,14 +1297,14 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 				// f3
 				First:  v1,
 				Second: v2,
-				Cycle:  []XY{v1, v2, v20, v18, v10, v17, v1},
+				Cycle:  []XY{v1, v2, v3, v18, v10, v17, v1},
 				Label:  inputBPopulated | inputAPopulated | inputAInSet,
 			},
 			{
 				// f4
 				First:  v17,
 				Second: v4,
-				Cycle:  []XY{v17, v4, v18, v19, v12, v9, v17},
+				Cycle:  []XY{v17, v4, v18, v11, v12, v9, v17},
 				Label:  inputBPopulated | inputAPopulated | inputBInSet,
 			},
 			{
@@ -1367,30 +1316,9 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 			},
 			{
 				// f6
-				First:  v2,
-				Second: v5,
-				Cycle:  []XY{v2, v5, v20, v2},
-				Label:  populatedMask,
-			},
-			{
-				// f7
-				First:  v20,
-				Second: v3,
-				Cycle:  []XY{v20, v3, v18, v20},
-				Label:  inputBPopulated | inputAPopulated | inputAInSet,
-			},
-			{
-				// f8
-				First:  v18,
-				Second: v11,
-				Cycle:  []XY{v18, v11, v19, v18},
-				Label:  inputBPopulated | inputAPopulated | inputBInSet,
-			},
-			{
-				// f9
-				First:  v12,
-				Second: v19,
-				Cycle:  []XY{v12, v19, v13, v12},
+				First:  v1,
+				Second: v17,
+				Cycle:  []XY{v1, v17, v9, v1},
 				Label:  populatedMask,
 			},
 		},
@@ -1760,9 +1688,13 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 	/*
 	  v3------v2    v7------v6
 	   |`, f2 |      |      |
-	   |  `,  |  f0  |  f3  |
-	   | f1 `,|      |      |
-	  v0------v1----v4------v5
+	   |\ `,  |  f0  |  f4  |
+	   | \  `,|      |      |
+	   |  \f1 v8     |      |
+	   |   \  | `,   |      |
+	   | f3 \ |   `, |      |
+	   |     \|     `|      |
+	  v0------v1    v4------v5
 	*/
 
 	v0 := XY{0, 0}
@@ -1773,18 +1705,19 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 	v5 := XY{3, 0}
 	v6 := XY{3, 1}
 	v7 := XY{2, 1}
+	v8 := XY{1, 0.5}
 
 	CheckDCEL(t, overlay, DCELSpec{
-		NumVerts: 4,
-		NumEdges: 12,
-		NumFaces: 4,
+		NumVerts: 5,
+		NumEdges: 16,
+		NumFaces: 5,
 		Vertices: []VertexSpec{
 			{
 				Vertices: []XY{v1, v3},
 				Label:    populatedMask | inSetMask,
 			},
 			{
-				Vertices: []XY{v0, v4},
+				Vertices: []XY{v0, v4, v8},
 				Label:    populatedMask | inputBInSet,
 			},
 		},
@@ -1805,9 +1738,9 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 				FaceLabel: inputBPopulated | inputBInSet,
 			},
 			{
-				Sequence:  []XY{v1, v2, v3},
+				Sequence:  []XY{v1, v0},
 				EdgeLabel: populatedMask | inputBInSet,
-				FaceLabel: inputBPopulated | inputBInSet,
+				FaceLabel: inputBPopulated,
 			},
 			{
 				Sequence:  []XY{v3, v0},
@@ -1816,16 +1749,6 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 			},
 			{
 				Sequence:  []XY{v0, v3},
-				EdgeLabel: populatedMask | inputBInSet,
-				FaceLabel: inputBPopulated,
-			},
-			{
-				Sequence:  []XY{v3, v2, v1},
-				EdgeLabel: populatedMask | inputBInSet,
-				FaceLabel: inputBPopulated,
-			},
-			{
-				Sequence:  []XY{v1, v0},
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated,
 			},
@@ -1839,15 +1762,49 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 				EdgeLabel: populatedMask | inputBInSet,
 				FaceLabel: inputBPopulated,
 			},
+
 			{
-				Sequence:  []XY{v4, v1},
+				Sequence:  []XY{v1, v8},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+			},
+			{
+				Sequence:  []XY{v8, v1},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
+			},
+
+			{
+				Sequence:  []XY{v4, v8},
 				EdgeLabel: populatedMask,
 				FaceLabel: 0,
 			},
 			{
-				Sequence:  []XY{v1, v4},
+				Sequence:  []XY{v8, v4},
 				EdgeLabel: populatedMask,
 				FaceLabel: 0,
+			},
+
+			{
+				Sequence:  []XY{v3, v8},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: 0,
+			},
+			{
+				Sequence:  []XY{v8, v3},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: 0,
+			},
+
+			{
+				Sequence:  []XY{v8, v2, v3},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated | inputBInSet,
+			},
+			{
+				Sequence:  []XY{v3, v2, v8},
+				EdgeLabel: populatedMask | inputBInSet,
+				FaceLabel: inputBPopulated,
 			},
 		},
 		Faces: []FaceSpec{
@@ -1855,25 +1812,32 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 				// f0
 				First:  v1,
 				Second: v0,
-				Cycle:  []XY{v1, v0, v3, v2, v1, v4, v7, v6, v5, v4, v1},
+				Cycle:  []XY{v1, v0, v3, v2, v8, v4, v7, v6, v5, v4, v8, v1},
 				Label:  populatedMask,
 			},
 			{
 				// f1
+				First:  v1,
+				Second: v8,
+				Cycle:  []XY{v1, v8, v3, v1},
+				Label:  populatedMask | inputBInSet,
+			},
+			{
+				// f2
+				First:  v8,
+				Second: v2,
+				Cycle:  []XY{v8, v2, v3, v8},
+				Label:  populatedMask | inputBInSet,
+			},
+			{
+				// f3
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v3, v0},
 				Label:  populatedMask | inputBInSet,
 			},
 			{
-				// f2
-				First:  v1,
-				Second: v2,
-				Cycle:  []XY{v1, v2, v3, v1},
-				Label:  populatedMask | inputBInSet,
-			},
-			{
-				// f3
+				// f4
 				First:  v4,
 				Second: v5,
 				Cycle:  []XY{v4, v5, v6, v7, v4},
