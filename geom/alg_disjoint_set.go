@@ -9,10 +9,10 @@ type disjointSet struct {
 	rank   []int
 }
 
-// newDistointSet creates a new disjoint set containing size sets, each with a
-// single item. The items are 0 (inclusive) through to size (exclusive).
-func newDisjointSet(size int) disjointSet {
-	set := disjointSet{make([]int, size), make([]int, size)}
+// newDistointSet creates a new disjoint set containing n sets, each with a
+// single item. The items are 0 (inclusive) through to n (exclusive).
+func newDisjointSet(n int) disjointSet {
+	set := disjointSet{make([]int, n), make([]int, n)}
 	for i := range set.parent {
 		set.parent[i] = i
 	}
