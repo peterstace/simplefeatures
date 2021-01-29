@@ -1,152 +1,122 @@
 package geom
 
-import "fmt"
+import (
+	"fmt"
 
-func connectGeometry(g Geometry) MultiLineString {
-	var ghostLSs []LineString
-	var seenFirst bool
-	var first XY
-	addComponent := func(pt Point) {
-		xy, ok := pt.XY()
-		if !ok {
-			return
-		}
-		if seenFirst {
-			if first != xy {
-				seq := NewSequence([]float64{first.X, first.Y, xy.X, xy.Y}, DimXY)
-				ghostLS, err := NewLineString(seq)
-				if err != nil {
-					// Can't happen, since first and pt are not the same.
-					panic(fmt.Sprintf("could not construct LineString: %v", err))
-				}
-				ghostLSs = append(ghostLSs, ghostLS)
-			}
-		} else {
-			seenFirst = true
-			first = xy
-		}
+	"github.com/peterstace/simplefeatures/rtree"
+)
+
+// spanningTree creates a near-minimum spanning tree (using the euclidean
+// distance metric) over the supplied points. The tree will consist of N-1
+// lines, where N is the number of _distinct_ xys supplied.
+//
+// It's a 'near' minimum spanning tree rather than a spanning tree, because we
+// use a simple greedy algorithm rather than a proper minimum spanning tree
+// algorithm.
+func spanningTree(xys []XY) MultiLineString {
+	if len(xys) <= 1 {
+		return MultiLineString{}
 	}
 
+	// Load points into r-tree.
+	xys = sortAndUniquifyXYs(xys)
+	items := make([]rtree.BulkItem, len(xys))
+	for i, xy := range xys {
+		items[i] = rtree.BulkItem{Box: xy.box(), RecordID: i}
+	}
+	tree := rtree.BulkLoad(items)
+
+	// The disjoint set keeps track of which points have been joined together
+	// so far. Two entries in dset are in the same set iff they are connected
+	// in the incrementally-built spanning tree.
+	dset := newDisjointSet(len(xys))
+	lss := make([]LineString, 0, len(xys)-1)
+
+	for i, xyi := range xys {
+		if i == len(xys)-1 {
+			// Skip the last point, since a tree is formed from N-1 edges
+			// rather than N edges. The last point will be included by virtue
+			// of being the closest to another point.
+			continue
+		}
+		tree.PrioritySearch(xyi.box(), func(j int) error {
+			// We don't want to include a new edge in the spanning tree if it
+			// would cause a cycle (i.e. the two endpoints are already in the
+			// same tree). This is checked via dset.
+			if i == j || dset.find(i) == dset.find(j) {
+				return nil
+			}
+			dset.union(i, j)
+			xyj := xys[j]
+			lss = append(lss, line{xyi, xyj}.asLineString())
+			return rtree.Stop
+		})
+	}
+
+	return NewMultiLineStringFromLineStrings(lss)
+}
+
+func appendXYForPoint(xys []XY, pt Point) []XY {
+	if xy, ok := pt.XY(); ok {
+		xys = append(xys, xy)
+	}
+	return xys
+}
+
+func appendXYForLineString(xys []XY, ls LineString) []XY {
+	return appendXYForPoint(xys, ls.StartPoint())
+}
+
+func appendXYsForPolygon(xys []XY, poly Polygon) []XY {
+	xys = appendXYForLineString(xys, poly.ExteriorRing())
+	n := poly.NumInteriorRings()
+	for i := 0; i < n; i++ {
+		xys = appendXYForLineString(xys, poly.InteriorRingN(i))
+	}
+	return xys
+}
+
+func appendComponentPoints(xys []XY, g Geometry) []XY {
 	switch g.Type() {
 	case TypePoint:
-		// A single Point is already trivially connected.
+		return appendXYForPoint(xys, g.AsPoint())
 	case TypeMultiPoint:
 		mp := g.AsMultiPoint()
 		n := mp.NumPoints()
 		for i := 0; i < n; i++ {
-			addComponent(mp.PointN(i))
+			xys = appendXYForPoint(xys, mp.PointN(i))
 		}
+		return xys
 	case TypeLineString:
-		// LineStrings are already connected.
+		ls := g.AsLineString()
+		return appendXYForLineString(xys, ls)
 	case TypeMultiLineString:
 		mls := g.AsMultiLineString()
 		n := mls.NumLineStrings()
 		for i := 0; i < n; i++ {
 			ls := mls.LineStringN(i)
-			addComponent(ls.StartPoint())
+			xys = appendXYForLineString(xys, ls)
 		}
+		return xys
 	case TypePolygon:
 		poly := g.AsPolygon()
-		addComponent(poly.ExteriorRing().StartPoint())
-		n := poly.NumInteriorRings()
-		for i := 0; i < n; i++ {
-			addComponent(poly.InteriorRingN(i).StartPoint())
-		}
+		return appendXYsForPolygon(xys, poly)
 	case TypeMultiPolygon:
 		mp := g.AsMultiPolygon()
 		n := mp.NumPolygons()
 		for i := 0; i < n; i++ {
 			poly := mp.PolygonN(i)
-			addComponent(poly.ExteriorRing().StartPoint())
-			m := poly.NumInteriorRings()
-			for j := 0; j < m; j++ {
-				addComponent(poly.InteriorRingN(j).StartPoint())
-			}
+			xys = appendXYsForPolygon(xys, poly)
 		}
+		return xys
 	case TypeGeometryCollection:
 		gc := g.AsGeometryCollection()
 		n := gc.NumGeometries()
 		for i := 0; i < n; i++ {
-			addComponent(pointOnGeometry(gc.GeometryN(i)))
+			xys = appendComponentPoints(xys, gc.GeometryN(i))
 		}
+		return xys
 	default:
 		panic(fmt.Sprintf("unknown geometry type: %v", g.Type()))
 	}
-
-	return NewMultiLineStringFromLineStrings(ghostLSs)
-}
-
-func connectGeometries(g1, g2 Geometry) LineString {
-	pt1 := pointOnGeometry(g1)
-	pt2 := pointOnGeometry(g2)
-
-	xy1, ok1 := pt1.XY()
-	xy2, ok2 := pt2.XY()
-	if !ok1 || !ok2 || xy1 == xy2 {
-		return LineString{}
-	}
-
-	coords := []float64{xy1.X, xy1.Y, xy2.X, xy2.Y}
-	ls, err := NewLineString(NewSequence(coords, DimXY))
-	if err != nil {
-		// Can't happen, since we have already checked that xy1 != xy2.
-		panic(fmt.Sprintf("could not create lines string: %v", err))
-	}
-	return ls
-}
-
-func pointOnGeometry(g Geometry) Point {
-	switch g.Type() {
-	case TypePoint:
-		return g.AsPoint()
-	case TypeMultiPoint:
-		mp := g.AsMultiPoint()
-		n := mp.NumPoints()
-		for i := 0; i < n; i++ {
-			pt := mp.PointN(i)
-			if !pt.IsEmpty() {
-				return pt
-			}
-		}
-		return Point{}
-	case TypeLineString:
-		return g.AsLineString().StartPoint()
-	case TypeMultiLineString:
-		mls := g.AsMultiLineString()
-		n := mls.NumLineStrings()
-		for i := 0; i < n; i++ {
-			pt := mls.LineStringN(i).StartPoint()
-			if !pt.IsEmpty() {
-				return pt
-			}
-		}
-		return Point{}
-	case TypePolygon:
-		return pointOnGeometry(g.Boundary())
-	case TypeMultiPolygon:
-		return pointOnGeometry(g.Boundary())
-	case TypeGeometryCollection:
-		gc := g.AsGeometryCollection()
-		n := gc.NumGeometries()
-		for i := 0; i < n; i++ {
-			pt := pointOnGeometry(gc.GeometryN(i))
-			if !pt.IsEmpty() {
-				return pt
-			}
-		}
-		return Point{}
-	default:
-		panic(fmt.Sprintf("unknown geometry type: %v", g.Type()))
-	}
-}
-
-func mergeMultiLineStrings(mlss []MultiLineString) MultiLineString {
-	var lss []LineString
-	for _, mls := range mlss {
-		n := mls.NumLineStrings()
-		for i := 0; i < n; i++ {
-			lss = append(lss, mls.LineStringN(i))
-		}
-	}
-	return NewMultiLineStringFromLineStrings(lss)
 }
