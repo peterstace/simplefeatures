@@ -2,6 +2,8 @@ package geom
 
 import (
 	"math"
+
+	"github.com/peterstace/simplefeatures/rtree"
 )
 
 // XY represents a pair of X and Y coordinates. This can either represent a
@@ -81,4 +83,13 @@ func (w XY) distanceTo(o XY) float64 {
 func (w XY) distanceSquaredTo(o XY) float64 {
 	delta := o.Sub(w)
 	return delta.Dot(delta)
+}
+
+func (w XY) box() rtree.Box {
+	return rtree.Box{
+		MinX: w.X,
+		MinY: w.Y,
+		MaxX: w.X,
+		MaxY: w.Y,
+	}
 }

@@ -66,6 +66,7 @@ func binaryOp(a, b Geometry, include func(uint8) bool) (Geometry, error) {
 	if err != nil {
 		return Geometry{}, fmt.Errorf("internal error creating overlay: %v", err)
 	}
+
 	g, err := overlay.extractGeometry(include)
 	if err != nil {
 		return Geometry{}, fmt.Errorf("internal error extracting geometry: %v", err)
@@ -78,10 +79,10 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 		return nil, errors.New("GeometryCollection argument not supported")
 	}
 
-	aGhost := connectGeometry(a)
-	bGhost := connectGeometry(b)
-	joinGhost := connectGeometries(a, b)
-	ghosts := mergeMultiLineStrings([]MultiLineString{aGhost, bGhost, joinGhost.AsMultiLineString()})
+	var points []XY
+	points = appendComponentPoints(points, a)
+	points = appendComponentPoints(points, b)
+	ghosts := spanningTree(points)
 
 	a, b, ghosts, err := reNodeGeometries(a, b, ghosts)
 	if err != nil {

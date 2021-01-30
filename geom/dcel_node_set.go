@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -12,7 +11,6 @@ func newNodeSet(maxULPSize float64, sizeHint int) nodeSet {
 	return nodeSet{
 		bucketSize,
 		make(map[nodeBucket]XY, sizeHint),
-		make(map[nodeBucket]XY, sizeHint),
 	}
 }
 
@@ -21,16 +19,7 @@ func newNodeSet(maxULPSize float64, sizeHint int) nodeSet {
 // the new XY _not_ inserted). The two XYs essentially merge together.
 type nodeSet struct {
 	bucketWidth float64
-
-	// Keep track of the nodes via two maps. The maps have identical structure,
-	// but the buckets of the second node map are offset by half a bucket
-	// width. This is to detect cases where two XYs are in adjacent buckets,
-	// but still very close together.
-	//
-	// It's an invariant that entries for overlapping buckets in nodesA and
-	// nodesB have the same node value.
-	nodesA map[nodeBucket]XY
-	nodesB map[nodeBucket]XY
+	nodes       map[nodeBucket]XY
 }
 
 type nodeBucket struct {
@@ -38,35 +27,25 @@ type nodeBucket struct {
 }
 
 func (s nodeSet) insertOrGet(xy XY) XY {
-	bucketA := nodeBucket{
+	b := nodeBucket{
 		int(math.Floor(xy.X / s.bucketWidth)),
 		int(math.Floor(xy.Y / s.bucketWidth)),
 	}
-	bucketB := nodeBucket{
-		int(math.Floor((xy.X + s.bucketWidth/2) / s.bucketWidth)),
-		int(math.Floor((xy.Y + s.bucketWidth/2) / s.bucketWidth)),
-	}
-
-	nodeA, okA := s.nodesA[bucketA]
-	nodeB, okB := s.nodesB[bucketB]
-
-	if okA && okB {
-		if nodeA != nodeB {
-			panic(fmt.Sprintf("nodeA != nodeB: %v vs %v", nodeA, nodeB))
+	for _, offset := range [...]nodeBucket{
+		b,
+		{b.x - 1, b.y - 1},
+		{b.x - 1, b.y},
+		{b.x - 1, b.y + 1},
+		{b.x, b.y - 1},
+		{b.x, b.y + 1},
+		{b.x + 1, b.y - 1},
+		{b.x + 1, b.y},
+		{b.x + 1, b.y + 1},
+	} {
+		if node, ok := s.nodes[offset]; ok {
+			return node
 		}
-		return nodeA
 	}
-
-	if okA && !okB {
-		s.nodesB[bucketB] = nodeA
-		return nodeA
-	}
-	if okB && !okA {
-		s.nodesA[bucketA] = nodeB
-		return nodeB
-	}
-
-	s.nodesA[bucketA] = xy
-	s.nodesB[bucketB] = xy
+	s.nodes[b] = xy
 	return xy
 }
