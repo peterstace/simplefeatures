@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.25.1
+
+2021-01-31
+
+- Fixes a noding bug in DCEL operations (`Intersection`, `Union`, `Difference`,
+  and `SymmetricDifference`) that occasionally caused a panic.
+
+- Changes the strategy for joining together geometries in DCEL operations using
+  "ghost lines". Geometries were previously joining using a naive radial line
+  approach, but are now joining using a euclidean minimum spanning tree. This
+  greatly reduces the number of additional crossing control points introduced
+  by DCEL operations.
+
 ## v0.25.0
 
 2020-12-31
