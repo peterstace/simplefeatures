@@ -198,8 +198,15 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 				loc = locBoundary
 			}
 			if v, ok := dcel.vertices[xy]; ok {
-				// TODO: We need to flip between interior and boundary using the mod-2 rule.
-				v.locLabel |= mask & loc
+				if loc == locBoundary && (v.locLabel&mask&locBoundary) != 0 {
+					// Handle mod-2 rule (the boundary passes through the point
+					// an even number of times, then it should be treated as an
+					// interior point).
+					v.locLabel &= ^mask
+					v.locLabel |= mask & locInterior
+				} else {
+					v.locLabel |= mask & loc
+				}
 			} else {
 				dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask, mask & loc}
 			}
