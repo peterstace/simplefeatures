@@ -856,14 +856,6 @@ func checkEqualityHeuristic(want, got geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-var skipRelate = map[string]bool{
-	// Topological inaccuracies due to numeric precision.
-	"LINESTRING(-0.5 0.5,-0.070710678118655 0.070710678118655)":                                     true,
-	"MULTILINESTRING((0 0,0.5 0.5,1 1,2 2.000000000000001),(1 0,0.5 0.5,0 1,-1 2.000000000000001))": true,
-	"MULTILINESTRING((0 0,2 2.000000000000001),(1 0,-1 2.000000000000001))":                         true,
-	"POINT(0.3333333333 0.6666666667)":                                                              true,
-}
-
 func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	got, err := geom.Relate(g1, g2)
 	if err != nil {
@@ -878,11 +870,10 @@ func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 		return err
 	}
 
-	if skipRelate[g1.AsText()] || skipRelate[g2.AsText()] {
-		// Simple features has different node snapping rules compared to GEOS,
-		// so we need to skip some geometries trigger that different behaviour.
-		// Because Relate is a topological operation, there's not really
-		// anything (heuristic etc) we can use as a workaround.
+	if !mantissaTerminatesQuickly(g1) || !mantissaTerminatesQuickly(g2) {
+		// Numerical precision issues cause a large number of geometries to
+		// differ compared to GEOS. There aren't really any heuristics that we
+		// can fall back to, so we just have to skip these sorts of geometries.
 		return nil
 	}
 
