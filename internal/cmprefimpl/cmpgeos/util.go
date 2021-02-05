@@ -265,3 +265,8 @@ func mantissaTerminatesQuickly(g geom.Geometry) bool {
 		panic(fmt.Sprintf("unknown type: %v", g.Type()))
 	}
 }
+
+func linearAndNonSimple(g geom.Geometry) bool {
+	simple, wellDefined := g.IsSimple()
+	return g.Dimension() == 1 && wellDefined && !simple
+}

@@ -870,6 +870,13 @@ func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 		return err
 	}
 
+	// Skip any linear and non-simple geometries. This is because GEOS has
+	// inconsistent behaviour with the generated relate matrix, making it hard
+	// to match the exact behavour.
+	if linearAndNonSimple(g1) || linearAndNonSimple(g2) {
+		return nil
+	}
+
 	if !mantissaTerminatesQuickly(g1) || !mantissaTerminatesQuickly(g2) {
 		// Numerical precision issues cause a large number of geometries to
 		// differ compared to GEOS. There aren't really any heuristics that we
