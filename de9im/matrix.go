@@ -60,7 +60,7 @@ func MatrixFromStringCode(code string) (Matrix, error) {
 
 // StringCode returns the standard code representation of the Matrix. It is a 9
 // character string containing the characters '0', '1', '2', and 'F'. The order
-// of the digits in the string is II, IB, IE, BI, BB, BE, EI, EB, EE.
+// of the digits in the string is II, BI, EI, IB, BB, EB, IE, BE, EE.
 func (m Matrix) StringCode() string {
 	var buf [9]byte
 	for i := 0; i < 9; i++ {
