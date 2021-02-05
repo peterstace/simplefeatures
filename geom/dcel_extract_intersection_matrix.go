@@ -1,8 +1,6 @@
 package geom
 
 import (
-	"fmt"
-
 	"github.com/peterstace/simplefeatures/de9im"
 )
 
@@ -31,28 +29,10 @@ func (d *doublyConnectedEdgeList) extractIntersectionMatrix() de9im.Matrix {
 	}
 
 	for _, v := range d.vertices {
-		aI, aB, aE := v.isOnIBE(inputAMask)
-		bI, bB, bE := v.isOnIBE(inputBMask)
-		for _, pair := range []struct {
-			update     bool
-			locA, locB de9im.Location
-		}{
-			{aI && bI, de9im.Interior, de9im.Interior},
-			{aI && bB, de9im.Interior, de9im.Boundary},
-			{aI && bE, de9im.Interior, de9im.Exterior},
-			{aB && bI, de9im.Boundary, de9im.Interior},
-			{aB && bB, de9im.Boundary, de9im.Boundary},
-			{aB && bE, de9im.Boundary, de9im.Exterior},
-			{aE && bI, de9im.Exterior, de9im.Interior},
-			{aE && bB, de9im.Exterior, de9im.Boundary},
-			{aE && bE, de9im.Exterior, de9im.Exterior},
-		} {
-			if pair.update {
-				oldDim := m.Get(pair.locA, pair.locB)
-				newDim := de9im.MaxDimension(de9im.Dim0, oldDim)
-				m = m.With(pair.locA, pair.locB, newDim)
-			}
-		}
+		locA := v.location(inputAMask)
+		locB := v.location(inputBMask)
+		newDim := de9im.MaxDimension(de9im.Dim0, m.Get(locA, locB))
+		m = m.With(locA, locB, newDim)
 	}
 	return m
 }
@@ -69,32 +49,23 @@ func (e *halfEdgeRecord) location(sideMask uint8) de9im.Location {
 	return de9im.Interior
 }
 
-// isOnIBE calculates if the vertex is on the Interior, Boundary, or Exterior
-// of the geometry on the given side. Note that the three locations are not
-// mutually exclusive.
-func (v *vertexRecord) isOnIBE(sideMask uint8) (bool, bool, bool) {
-	if (v.locLabel & sideMask) == 0 {
+func (v *vertexRecord) location(sideMask uint8) de9im.Location {
+	// NOTE: It's important that we check the Boundary flag before the Interior
+	// flag, since both might be set. In that case, we want to treat the
+	// location as a Boundary, since the boundary is a more specific case.
+	switch {
+	case (v.locLabel & sideMask & locBoundary) != 0:
+		return de9im.Boundary
+	case (v.locLabel & sideMask & locInterior) != 0:
+		return de9im.Interior
+	default:
 		// We don't know the location of the point. But it must be either
 		// Exterior or Interior because if it were Boundary, then we would know
 		// that. We can just use the location of one of the incident edges,
 		// since that would have the same location.
-		if len(v.incidents) == 0 {
-			// Can't happen, due to ghost edges.
-			panic("point has no incidents")
+		for _, e := range v.incidents {
+			return e.location(sideMask)
 		}
-		switch loc := v.incidents[0].location(sideMask); loc {
-		case de9im.Interior:
-			return true, false, false
-		case de9im.Boundary:
-			return false, true, false
-		case de9im.Exterior:
-			return false, false, true
-		default:
-			panic(fmt.Sprintf("invalid location: %v", loc))
-		}
+		panic("point has no incidents") // Can't happen, due to ghost edges.
 	}
-
-	isOnI := (v.locLabel & sideMask & locInterior) != 0
-	isOnB := (v.locLabel & sideMask & locBoundary) != 0
-	return isOnI, isOnB, false
 }
