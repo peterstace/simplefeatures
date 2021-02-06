@@ -887,7 +887,7 @@ func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	// There is a bug in GEOS that triggers when linear elements have no
 	// boundary (e.g. due to the mod-2 rule).  The result of the bug is that
 	// the EB (or BE) is reported as 0 rather than F.
-	if g1.Dimension() == 1 && g2.Dimension() == 1 && (g1.Boundary().IsEmpty() || g2.Boundary().IsEmpty()) {
+	if linearAndEmptyBoundary(g1) || linearAndEmptyBoundary(g2) {
 		return nil
 	}
 
