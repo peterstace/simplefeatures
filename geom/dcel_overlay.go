@@ -119,6 +119,16 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 		})
 	}
 
+	// If we couldn't find any cycles, then we wouldn't have constructed any
+	// faces. This happens in the case where there are only point geometries.
+	// We need to artificially create an infinite face.
+	if len(d.faces) == 0 {
+		d.faces = append(d.faces, &faceRecord{
+			cycle: nil,
+			label: populatedMask,
+		})
+	}
+
 	for _, face := range d.faces {
 		d.completePartialFaceLabel(face)
 	}
