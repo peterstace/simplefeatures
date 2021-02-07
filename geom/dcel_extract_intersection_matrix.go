@@ -2,33 +2,29 @@ package geom
 
 func (d *doublyConnectedEdgeList) extractIntersectionMatrix() IntersectionMatrix {
 	var m IntersectionMatrix
-
 	for _, f := range d.faces {
-		assertPresenceBits(f.label)
-		locA, locB := imExterior, imExterior
-		if f.label&inputAInSet != 0 {
-			locA = imInterior
-		}
-		if f.label&inputBInSet != 0 {
-			locB = imInterior
-		}
-		if m.get(locA, locB) == imEntryF {
-			m = m.with(locA, locB, imEntry2)
-		}
+		locA := f.location(inputAMask)
+		locB := f.location(inputBMask)
+		m = m.upgradeEntry(locA, locB, imEntry2)
 	}
-
 	for _, e := range d.halfEdges {
 		locA := e.location(inputAMask)
 		locB := e.location(inputBMask)
 		m = m.upgradeEntry(locA, locB, imEntry1)
 	}
-
 	for _, v := range d.vertices {
 		locA := v.location(inputAMask)
 		locB := v.location(inputBMask)
 		m = m.upgradeEntry(locA, locB, imEntry0)
 	}
 	return m
+}
+
+func (f *faceRecord) location(sideMask uint8) imLocation {
+	if (f.label & inSetMask & sideMask) == 0 {
+		return imExterior
+	}
+	return imInterior
 }
 
 func (e *halfEdgeRecord) location(sideMask uint8) imLocation {

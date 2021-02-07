@@ -280,16 +280,13 @@ func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
 			record = &vertexRecord{
 				coords:    xy,
 				incidents: nil,
-
-				// TODO: why not just set label here and remove label
-				// adjustment below? The current way seems a bit weird...
-				label: 0,
-
-				locLabel: mask & locInterior,
+				label:     0, // set below
+				locLabel:  0, // set below
 			}
 			dcel.vertices[xy] = record
 		}
 		record.label |= mask
+		record.locLabel |= mask & locInterior
 	}
 	return dcel
 }

@@ -19,7 +19,6 @@ func Relate(a, b Geometry) (IntersectionMatrix, error) {
 				m = m.with(imExterior, imBoundary, imEntryF)
 			case 1:
 				m = m.with(imExterior, imInterior, imEntry1)
-				// TODO: Consider 'mod-2' boundary node rule in non-empty scenarios.
 				if !b.Boundary().IsEmpty() {
 					m = m.with(imExterior, imBoundary, imEntry0)
 				}
@@ -35,7 +34,6 @@ func Relate(a, b Geometry) (IntersectionMatrix, error) {
 				m = m.with(imBoundary, imExterior, imEntryF)
 			case 1:
 				m = m.with(imInterior, imExterior, imEntry1)
-				// TODO: Consider 'mod-2' boundary node rule in non-empty scenarios.
 				if !a.Boundary().IsEmpty() {
 					m = m.with(imBoundary, imExterior, imEntry0)
 				}
