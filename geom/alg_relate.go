@@ -49,7 +49,7 @@ func Relate(a, b Geometry) (IntersectionMatrix, error) {
 
 	overlay, err := createOverlay(a, b)
 	if err != nil {
-		return 0, fmt.Errorf("internal error creating overlay: %v", err)
+		return IntersectionMatrix{}, fmt.Errorf("internal error creating overlay: %v", err)
 	}
 	return overlay.extractIntersectionMatrix(), nil
 }

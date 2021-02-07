@@ -19,19 +19,13 @@ import "fmt"
 //
 // The zero value of IntersectionMatrix is valid, and contains F entries everywhere
 // (representing the empty intersection between two disjoint geometries).
-//
-// TODO: make this a struct with a non-exported field so that it's not
-// modifiable by users.
-type IntersectionMatrix uint32
-
-// Implementation detail for Matrix:
-//
-// Matrix is a bit field, where each matrix entry occupies 4 bit. The order of
-// the encoding is: II, IB, IE, BI, BB, BE, EI, EB, EE. II is stored in the 2
-// least significant bits. This uses 18 bits total, leaving the 14 most
-// significant bits unused. Users SHOULD NOT manipulate the bits in a Matrix
-// manually and treat the Matrix type opaquely. This is because the type's
-// implementation details may change in the future.
+type IntersectionMatrix struct {
+	// Implementation details: The Matrix is stored in a bit field, where each
+	// entry occupies 4 bits.  The order of the encoding is: II, IB, IE, BI,
+	// BB, BE, EI, EB, EE.  II is stored in the 2 least significant bits. This
+	// uses 18 bits total, leaving the 14 most significant bits unused.
+	bits uint32
+}
 
 // IntersectionMatrixFromStringCode creates a matrix from its standard code
 // representation.  The standard code representation is a 9 digit string
@@ -39,7 +33,7 @@ type IntersectionMatrix uint32
 // the string is II, IB, IE, BI, BB, BE, EI, EB, EE.
 func IntersectionMatrixFromStringCode(code string) (IntersectionMatrix, error) {
 	if len(code) != 9 {
-		return 0, fmt.Errorf("code length %d is invalid (must be 9)", len(code))
+		return IntersectionMatrix{}, fmt.Errorf("code length %d is invalid (must be 9)", len(code))
 	}
 	var m IntersectionMatrix
 	for i, c := range code {
@@ -54,9 +48,9 @@ func IntersectionMatrixFromStringCode(code string) (IntersectionMatrix, error) {
 		case '2':
 			dim = imEntry2
 		default:
-			return 0, fmt.Errorf("code is invalid, contains byte %d", c)
+			return IntersectionMatrix{}, fmt.Errorf("code is invalid, contains byte %d", c)
 		}
-		m |= IntersectionMatrix(dim) << (i * 2)
+		m.bits |= uint32(dim) << (i * 2)
 	}
 	return m, nil
 }
@@ -69,7 +63,7 @@ func (m IntersectionMatrix) StringCode() string {
 	var buf [9]byte
 	for i := 0; i < 9; i++ {
 		shift := i * 2
-		raw := byte((m & (3 << shift)) >> shift)
+		raw := byte((m.bits & (3 << shift)) >> shift)
 		buf[i] = [...]byte{'F', '0', '1', '2'}[raw]
 	}
 	return string(buf[:])
@@ -84,21 +78,6 @@ const (
 	imBoundary imLocation = 1
 	imExterior imLocation = 2
 )
-
-// String gives a textual representation of the location, returning "I"
-// (Interior), "B" (Boundary), or "E" (Exterior).
-func (o imLocation) String() string {
-	switch o {
-	case imInterior:
-		return "I"
-	case imBoundary:
-		return "B"
-	case imExterior:
-		return "E"
-	default:
-		return fmt.Sprintf("unknown_location(%d)", o)
-	}
-}
 
 // imEntry is the value of an entry in an intersection matrix. It represents
 // the dimension of the set formed when two sets intersect.
@@ -122,28 +101,19 @@ const (
 	imEntry2 imEntry = 3
 )
 
-// maxDimension finds the maximum dimension out of the two input
-// dimensions.
-func maxDimension(dimA, dimB imEntry) imEntry {
-	if dimA > dimB {
-		return dimA
-	}
-	return dimB
-}
-
 // with returns a new Matrix that has a single entry changed compared to the
 // original. The original is not changed.
 func (m IntersectionMatrix) with(locA, locB imLocation, dim imEntry) IntersectionMatrix {
 	shift := (3*locA + locB) * 2
-	var mask IntersectionMatrix = 3 << shift
-	return (m & ^mask) | IntersectionMatrix(dim<<shift)
+	var mask uint32 = 3 << shift
+	return IntersectionMatrix{(m.bits & ^mask) | (uint32(dim) << shift)}
 }
 
 // get returns an entry from the matrix.
 func (m IntersectionMatrix) get(locA, locB imLocation) imEntry {
 	shift := (3*locA + locB) * 2
-	var mask IntersectionMatrix = 3 << shift
-	raw := (m & mask) >> shift
+	var mask uint32 = 3 << shift
+	raw := (m.bits & mask) >> shift
 	return imEntry(raw)
 }
 
@@ -151,7 +121,9 @@ func (m IntersectionMatrix) get(locA, locB imLocation) imEntry {
 // to a new dimension. If the new dimension would be lower than the existing
 // one, then the original intersection matrix is returned.
 func (m IntersectionMatrix) upgradeEntry(locA, locB imLocation, dim imEntry) IntersectionMatrix {
-	oldEntry := m.get(locA, locB)
-	newEntry := maxDimension(oldEntry, dim)
-	return m.with(locA, locB, newEntry)
+	entry := m.get(locA, locB)
+	if dim > entry {
+		return m.with(locA, locB, dim)
+	}
+	return m
 }
