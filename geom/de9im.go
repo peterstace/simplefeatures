@@ -127,3 +127,15 @@ func (m IntersectionMatrix) upgradeEntry(locA, locB imLocation, dim imEntry) Int
 	}
 	return m
 }
+
+// transpose returns the original intersection matrix, but flipped along its
+// diagonal.
+func (m IntersectionMatrix) transpose() IntersectionMatrix {
+	var t IntersectionMatrix
+	for _, locA := range []imLocation{imInterior, imBoundary, imExterior} {
+		for _, locB := range []imLocation{imInterior, imBoundary, imExterior} {
+			t = t.with(locB, locA, m.get(locA, locB))
+		}
+	}
+	return t
+}
