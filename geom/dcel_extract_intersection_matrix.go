@@ -1,63 +1,57 @@
 package geom
 
-import (
-	"github.com/peterstace/simplefeatures/de9im"
-)
-
-func (d *doublyConnectedEdgeList) extractIntersectionMatrix() de9im.Matrix {
-	var m de9im.Matrix
+func (d *doublyConnectedEdgeList) extractIntersectionMatrix() IntersectionMatrix {
+	var m IntersectionMatrix
 
 	for _, f := range d.faces {
 		assertPresenceBits(f.label)
-		locA, locB := de9im.Exterior, de9im.Exterior
+		locA, locB := imExterior, imExterior
 		if f.label&inputAInSet != 0 {
-			locA = de9im.Interior
+			locA = imInterior
 		}
 		if f.label&inputBInSet != 0 {
-			locB = de9im.Interior
+			locB = imInterior
 		}
-		if m.Get(locA, locB) == de9im.Empty {
-			m = m.With(locA, locB, de9im.Dim2)
+		if m.get(locA, locB) == imEntryF {
+			m = m.with(locA, locB, imEntry2)
 		}
 	}
 
 	for _, e := range d.halfEdges {
 		locA := e.location(inputAMask)
 		locB := e.location(inputBMask)
-		newDim := de9im.MaxDimension(de9im.Dim1, m.Get(locA, locB))
-		m = m.With(locA, locB, newDim)
+		m = m.upgradeEntry(locA, locB, imEntry1)
 	}
 
 	for _, v := range d.vertices {
 		locA := v.location(inputAMask)
 		locB := v.location(inputBMask)
-		newDim := de9im.MaxDimension(de9im.Dim0, m.Get(locA, locB))
-		m = m.With(locA, locB, newDim)
+		m = m.upgradeEntry(locA, locB, imEntry0)
 	}
 	return m
 }
 
-func (e *halfEdgeRecord) location(sideMask uint8) de9im.Location {
+func (e *halfEdgeRecord) location(sideMask uint8) imLocation {
 	if (e.edgeLabel & inSetMask & sideMask) == 0 {
-		return de9im.Exterior
+		return imExterior
 	}
 	face1Present := (e.incident.label & inSetMask & sideMask) != 0
 	face2Present := (e.twin.incident.label & inSetMask & sideMask) != 0
 	if face1Present != face2Present {
-		return de9im.Boundary
+		return imBoundary
 	}
-	return de9im.Interior
+	return imInterior
 }
 
-func (v *vertexRecord) location(sideMask uint8) de9im.Location {
+func (v *vertexRecord) location(sideMask uint8) imLocation {
 	// NOTE: It's important that we check the Boundary flag before the Interior
 	// flag, since both might be set. In that case, we want to treat the
 	// location as a Boundary, since the boundary is a more specific case.
 	switch {
 	case (v.locLabel & sideMask & locBoundary) != 0:
-		return de9im.Boundary
+		return imBoundary
 	case (v.locLabel & sideMask & locInterior) != 0:
-		return de9im.Interior
+		return imInterior
 	default:
 		// We don't know the location of the point. But it must be either
 		// Exterior or Interior because if it were Boundary, then we would know
