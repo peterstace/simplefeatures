@@ -2,48 +2,46 @@ package geom
 
 import (
 	"fmt"
-
-	"github.com/peterstace/simplefeatures/de9im"
 )
 
 // Relate calculates the DE-9IM matrix between two geometries, describing how
 // the two geometries relate to each other.
-func Relate(a, b Geometry) (de9im.Matrix, error) {
+func Relate(a, b Geometry) (IntersectionMatrix, error) {
 	if a.IsEmpty() || b.IsEmpty() {
 		// TODO: Eliminate duplication here. There might be a more elegant way
 		// to do this.
-		var m de9im.Matrix
-		m = m.With(de9im.Exterior, de9im.Exterior, de9im.Dim2)
+		var m IntersectionMatrix
+		m = m.with(imExterior, imExterior, imEntry2)
 		if !b.IsEmpty() {
 			switch b.Dimension() {
 			case 0:
-				m = m.With(de9im.Exterior, de9im.Interior, de9im.Dim0)
-				m = m.With(de9im.Exterior, de9im.Boundary, de9im.Empty)
+				m = m.with(imExterior, imInterior, imEntry0)
+				m = m.with(imExterior, imBoundary, imEntryF)
 			case 1:
-				m = m.With(de9im.Exterior, de9im.Interior, de9im.Dim1)
+				m = m.with(imExterior, imInterior, imEntry1)
 				// TODO: Consider 'mod-2' boundary node rule in non-empty scenarios.
 				if !b.Boundary().IsEmpty() {
-					m = m.With(de9im.Exterior, de9im.Boundary, de9im.Dim0)
+					m = m.with(imExterior, imBoundary, imEntry0)
 				}
 			case 2:
-				m = m.With(de9im.Exterior, de9im.Interior, de9im.Dim2)
-				m = m.With(de9im.Exterior, de9im.Boundary, de9im.Dim1)
+				m = m.with(imExterior, imInterior, imEntry2)
+				m = m.with(imExterior, imBoundary, imEntry1)
 			}
 		}
 		if !a.IsEmpty() {
 			switch a.Dimension() {
 			case 0:
-				m = m.With(de9im.Interior, de9im.Exterior, de9im.Dim0)
-				m = m.With(de9im.Boundary, de9im.Exterior, de9im.Empty)
+				m = m.with(imInterior, imExterior, imEntry0)
+				m = m.with(imBoundary, imExterior, imEntryF)
 			case 1:
-				m = m.With(de9im.Interior, de9im.Exterior, de9im.Dim1)
+				m = m.with(imInterior, imExterior, imEntry1)
 				// TODO: Consider 'mod-2' boundary node rule in non-empty scenarios.
 				if !a.Boundary().IsEmpty() {
-					m = m.With(de9im.Boundary, de9im.Exterior, de9im.Dim0)
+					m = m.with(imBoundary, imExterior, imEntry0)
 				}
 			case 2:
-				m = m.With(de9im.Interior, de9im.Exterior, de9im.Dim2)
-				m = m.With(de9im.Boundary, de9im.Exterior, de9im.Dim1)
+				m = m.with(imInterior, imExterior, imEntry2)
+				m = m.with(imBoundary, imExterior, imEntry1)
 			}
 		}
 		return m, nil

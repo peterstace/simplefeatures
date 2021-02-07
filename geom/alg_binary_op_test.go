@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/peterstace/simplefeatures/de9im"
 	"github.com/peterstace/simplefeatures/geom"
 )
 
@@ -927,7 +926,7 @@ func TestBinaryOp(t *testing.T) {
 				} {
 					t.Run(swap.description, func(t *testing.T) {
 						var (
-							got de9im.Matrix
+							got geom.IntersectionMatrix
 							err error
 						)
 						if swap.reverse {
