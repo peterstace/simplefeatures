@@ -17,10 +17,11 @@ import "fmt"
 // intersecting the boundary of the first geometry and the interior of the
 // second geometry has dimension 1.
 //
-// The zero value of IntersectionMatrix is valid, and contains F entries everywhere
-// (representing the empty intersection between two disjoint geometries).
+// The zero value of IntersectionMatrix is well defined and contains F entries
+// everywhere (although it doesn't represent a sensible intersection between 2
+// geometries).
 type IntersectionMatrix struct {
-	// Implementation details: The Matrix is stored in a bit field, where each
+	// Implementation details: The matrix is stored in a bit field, where each
 	// entry occupies 4 bits.  The order of the encoding is: II, IB, IE, BI,
 	// BB, BE, EI, EB, EE.  II is stored in the 2 least significant bits. This
 	// uses 18 bits total, leaving the 14 most significant bits unused.
@@ -101,8 +102,8 @@ const (
 	imEntry2 imEntry = 3
 )
 
-// with returns a new Matrix that has a single entry changed compared to the
-// original. The original is not changed.
+// with returns a new IntersectionMatrix that has a single entry changed
+// compared to the original. The original is not changed.
 func (m IntersectionMatrix) with(locA, locB imLocation, dim imEntry) IntersectionMatrix {
 	shift := (3*locA + locB) * 2
 	var mask uint32 = 3 << shift
