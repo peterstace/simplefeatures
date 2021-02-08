@@ -117,17 +117,6 @@ func (m IntersectionMatrix) get(locA, locB imLocation) imEntry {
 	return imEntry(raw)
 }
 
-// upgradeEntry returns a new intersection matrix that has a single entry set
-// to a new dimension. If the new dimension would be lower than the existing
-// one, then the original intersection matrix is returned.
-func (m IntersectionMatrix) upgradeEntry(locA, locB imLocation, dim imEntry) IntersectionMatrix {
-	entry := m.get(locA, locB)
-	if dim > entry {
-		return m.with(locA, locB, dim)
-	}
-	return m
-}
-
 // transpose returns the original intersection matrix, but flipped along its
 // diagonal.
 func (m IntersectionMatrix) transpose() IntersectionMatrix {

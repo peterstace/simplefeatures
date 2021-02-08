@@ -2,20 +2,20 @@ package geom
 
 func (d *doublyConnectedEdgeList) extractIntersectionMatrix() IntersectionMatrix {
 	var m IntersectionMatrix
-	for _, f := range d.faces {
-		locA := f.location(inputAMask)
-		locB := f.location(inputBMask)
-		m = m.upgradeEntry(locA, locB, imEntry2)
+	for _, v := range d.vertices {
+		locA := v.location(inputAMask)
+		locB := v.location(inputBMask)
+		m = m.with(locA, locB, imEntry0)
 	}
 	for _, e := range d.halfEdges {
 		locA := e.location(inputAMask)
 		locB := e.location(inputBMask)
-		m = m.upgradeEntry(locA, locB, imEntry1)
+		m = m.with(locA, locB, imEntry1)
 	}
-	for _, v := range d.vertices {
-		locA := v.location(inputAMask)
-		locB := v.location(inputBMask)
-		m = m.upgradeEntry(locA, locB, imEntry0)
+	for _, f := range d.faces {
+		locA := f.location(inputAMask)
+		locB := f.location(inputBMask)
+		m = m.with(locA, locB, imEntry2)
 	}
 	return m
 }
