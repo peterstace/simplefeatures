@@ -759,6 +759,12 @@ func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error
 			return err
 		}
 	}
+
+	log.Println("checking Relate")
+	if err := checkRelate(h, g1, g2, log); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -847,5 +853,49 @@ func checkEqualityHeuristic(want, got geom.Geometry, log *log.Logger) error {
 		log.Printf("gotArea:  %v\n", gotArea)
 		return mismatchErr
 	}
+	return nil
+}
+
+func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+	got, err := geom.Relate(g1, g2)
+	if err != nil {
+		return err
+	}
+	want, err := h.Relate(g1, g2)
+	if err != nil {
+		if err == LibgeosCrashError {
+			// Skip any tests that would cause libgeos to crash.
+			return nil
+		}
+		return err
+	}
+
+	// Skip any linear and non-simple geometries. This is because GEOS has
+	// inconsistent behaviour with the generated relate matrix, making it hard
+	// to match the exact behavour.
+	if linearAndNonSimple(g1) || linearAndNonSimple(g2) {
+		return nil
+	}
+
+	if !mantissaTerminatesQuickly(g1) || !mantissaTerminatesQuickly(g2) {
+		// Numerical precision issues cause a large number of geometries to
+		// differ compared to GEOS. There aren't really any heuristics that we
+		// can fall back to, so we just have to skip these sorts of geometries.
+		return nil
+	}
+
+	// There is a bug in GEOS that triggers when linear elements have no
+	// boundary (e.g. due to the mod-2 rule).  The result of the bug is that
+	// the EB (or BE) is reported as 0 rather than F.
+	if linearAndEmptyBoundary(g1) || linearAndEmptyBoundary(g2) {
+		return nil
+	}
+
+	if got.StringCode() != want {
+		log.Printf("want: %v", want)
+		log.Printf("got:  %v", got.StringCode())
+		return mismatchErr
+	}
+
 	return nil
 }

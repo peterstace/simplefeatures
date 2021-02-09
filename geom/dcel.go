@@ -55,6 +55,7 @@ type vertexRecord struct {
 	coords    XY
 	incidents []*halfEdgeRecord
 	label     uint8
+	locLabel  uint8
 }
 
 func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
@@ -122,7 +123,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8, interactions map[XY]st
 					continue
 				}
 				if _, ok := dcel.vertices[xy]; !ok {
-					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask}
+					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask, mask & locBoundary}
 				}
 			}
 		}
@@ -186,13 +187,28 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		ls := mls.LineStringN(i)
 		seq := ls.Coordinates()
-		for j := 0; j < seq.Length(); j++ {
+		n := seq.Length()
+		for j := 0; j < n; j++ {
 			xy := seq.GetXY(j)
 			if _, ok := interactions[xy]; !ok {
 				continue
 			}
-			if _, ok := dcel.vertices[xy]; !ok {
-				dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask}
+			loc := locInterior
+			if (j == 0 || j == n-1) && !ls.IsClosed() {
+				loc = locBoundary
+			}
+			if v, ok := dcel.vertices[xy]; ok {
+				if loc == locBoundary && (v.locLabel&mask&locBoundary) != 0 {
+					// Handle mod-2 rule (the boundary passes through the point
+					// an even number of times, then it should be treated as an
+					// interior point).
+					v.locLabel &= ^mask
+					v.locLabel |= mask & locInterior
+				} else {
+					v.locLabel |= mask & loc
+				}
+			} else {
+				dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask, mask & loc}
 			}
 		}
 	}
@@ -264,11 +280,13 @@ func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
 			record = &vertexRecord{
 				coords:    xy,
 				incidents: nil,
-				label:     0,
+				label:     0, // set below
+				locLabel:  0, // set below
 			}
 			dcel.vertices[xy] = record
 		}
 		record.label |= mask
+		record.locLabel |= mask & locInterior
 	}
 	return dcel
 }

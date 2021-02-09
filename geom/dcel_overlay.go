@@ -18,6 +18,7 @@ func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList
 		vert, ok := d.vertices[xy]
 		if ok {
 			vert.label |= otherVert.label
+			vert.locLabel |= otherVert.locLabel
 		} else {
 			d.vertices[xy] = otherVert
 		}
@@ -115,6 +116,16 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 		forEachEdge(cycle, func(e *halfEdgeRecord) {
 			f.label |= e.faceLabel
 			e.incident = f
+		})
+	}
+
+	// If we couldn't find any cycles, then we wouldn't have constructed any
+	// faces. This happens in the case where there are only point geometries.
+	// We need to artificially create an infinite face.
+	if len(d.faces) == 0 {
+		d.faces = append(d.faces, &faceRecord{
+			cycle: nil,
+			label: populatedMask,
 		})
 	}
 

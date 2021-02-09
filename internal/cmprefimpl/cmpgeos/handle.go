@@ -848,3 +848,28 @@ func (h *Handle) SymmetricDifference(g1, g2 geom.Geometry) (geom.Geometry, error
 
 	return h.decodeGeomHandle(union)
 }
+
+func (h *Handle) Relate(g1, g2 geom.Geometry) (string, error) {
+	if containsMultiPointWithEmptyPoint(g1) || containsMultiPointWithEmptyPoint(g2) {
+		// GEOS crashes on these inputs.
+		return "", LibgeosCrashError
+	}
+
+	gh1, err := h.createGeomHandle(g1)
+	if err != nil {
+		return "", h.err()
+	}
+	defer C.GEOSGeom_destroy(gh1)
+	gh2, err := h.createGeomHandle(g2)
+	if err != nil {
+		return "", h.err()
+	}
+	defer C.GEOSGeom_destroy(gh2)
+
+	matrix := C.GEOSRelate_r(h.context, gh1, gh2)
+	if matrix == nil {
+		return "", h.err()
+	}
+	defer C.GEOSFree_r(h.context, unsafe.Pointer(matrix))
+	return C.GoString(matrix), nil
+}
