@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -43,4 +44,59 @@ func Relate(a, b Geometry) (IntersectionMatrix, error) {
 		return IntersectionMatrix{}, fmt.Errorf("internal error creating overlay: %v", err)
 	}
 	return overlay.extractIntersectionMatrix(), nil
+}
+
+func relateWithMask(a, b Geometry, mask string) (bool, error) {
+	return false, errors.New("not implemented")
+}
+
+func Equals(a, b Geometry) (bool, error) {
+	if a.IsEmpty() && b.IsEmpty() {
+		// Part of the mask is 'dim(I(a) ∩ I(b)) = T'.  If both inputs are
+		// empty, then their interiors will be empty, and thus 'dim(I(a) ∩ I(b)
+		// = F'. However, we want to return 'true' for this case. So we just
+		// return true manually rather than using DE-9IM.
+		return true, nil
+	}
+	return relateWithMask(a, b, "T*F**FFF*")
+}
+
+func Disjoint(a, b Geometry) (bool, error) {
+	// TODO
+	return false, errors.New("not implemented")
+}
+
+func Touches(a, b Geometry) (bool, error) {
+	// TODO
+	return false, errors.New("not implemented")
+}
+
+func Contains(a, b Geometry) (bool, error) {
+	// TODO
+	return false, errors.New("not implemented")
+}
+
+func Covers(a, b Geometry) (bool, error) {
+	// TODO
+	return false, errors.New("not implemented")
+}
+
+func Within(a, b Geometry) (bool, error) {
+	// TODO
+	return false, errors.New("not implemented")
+}
+
+func CoveredBy(a, b Geometry) (bool, error) {
+	// TODO
+	return false, errors.New("not implemented")
+}
+
+func Crosses(a, b Geometry) (bool, error) {
+	// TODO
+	return false, errors.New("not implemented")
+}
+
+func Overlaps(a, b Geometry) (bool, error) {
+	// TODO
+	return false, errors.New("not implemented")
 }

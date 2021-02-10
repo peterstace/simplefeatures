@@ -1,6 +1,9 @@
 package geom
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // IntersectionMatrix is a 3 by 3 matrix that describes the intersection
 // between two geometries. Specifically, it considers the Interior (I),
@@ -128,4 +131,46 @@ func (m IntersectionMatrix) transpose() IntersectionMatrix {
 		}
 	}
 	return t
+}
+
+// IntersectionMask is a 3 by 3 matrix mask describing a spatial predicate
+// between two geometries. It is a mask for an IntersectionMatrix. Each entry
+// is one of 'F', '0', '1', '2', 'T', or '*'.
+//
+// The spatial predicate between two geometries represented by the mask is true
+// if and only if each entry of the mask matches the corresponding entry in the
+// intersection matrix. The matching rules are:
+//
+// 1. 'F' matches against 'F' or '*'.
+//
+// 2. '0' matches against '0', 'T', or '*'.
+//
+// 3. '1' matches against '1', 'T', or '*'.
+//
+// 4. '2' matches against '2', 'T', or '*'.
+//
+// The zero value of IntersectionMask is well defined and contains all 'F'
+// entries.
+type IntersectionMask struct {
+	// Implementation details: the mask matrix is stored as a bit field, with
+	// each entry storing 6 possible values ('F', '0', '1', '2', 'T', or '*').
+	// We need 3 bits per entry, so 27 bits total. This leaves 5 bits unused.
+	bits uint32
+}
+
+// Matches checks if all entries in the intersection matrix match against the
+// corresponding entries in the intersection mask. If Matches returns true,
+// then the spatial predicate described by the mask is true for the pair of
+// geometries used to create the intersection matrix.
+func (m IntersectionMask) Matches(im IntersectionMatrix) bool {
+	return false // TODO
+}
+
+func IntersectionMaskFromStringCode(code string) (IntersectionMask, error) {
+	// TODO
+	return IntersectionMask{}, errors.New("not implemented")
+}
+
+func (m IntersectionMask) StringCode() string {
+	return "NOT IMPLEMENTED" // TODO
 }
