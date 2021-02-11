@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestMatrixZeroValue(t *testing.T) {
+func TestIntersectionMatrixZeroValue(t *testing.T) {
 	var m IntersectionMatrix
 	const want = "FFFFFFFFF"
 	got := m.StringCode()
@@ -14,7 +14,7 @@ func TestMatrixZeroValue(t *testing.T) {
 	}
 }
 
-func TestMatrixWith(t *testing.T) {
+func TestIntersectionMatrixWith(t *testing.T) {
 	for i, tc := range []struct {
 		code   string
 		matrix func() IntersectionMatrix
@@ -57,7 +57,7 @@ func TestMatrixWith(t *testing.T) {
 	}
 }
 
-func TestMatrixFromStringCode(t *testing.T) {
+func TestIntersectionMatrixFromStringCode(t *testing.T) {
 	t.Run("successful", func(t *testing.T) {
 		const code = "F01F200F1"
 		m, err := IntersectionMatrixFromStringCode(code)
@@ -85,7 +85,7 @@ func TestMatrixFromStringCode(t *testing.T) {
 	})
 }
 
-func TestMatrixGet(t *testing.T) {
+func TestIntersectionMatrixGet(t *testing.T) {
 	m, err := IntersectionMatrixFromStringCode("2121012F2")
 	if err != nil {
 		t.Fatal(err)
@@ -106,4 +106,16 @@ func TestMatrixGet(t *testing.T) {
 	checkGet(imExterior, imInterior, imEntry2)
 	checkGet(imExterior, imBoundary, imEntryF)
 	checkGet(imExterior, imExterior, imEntry2)
+}
+
+func TestIntersectionMaskCode(t *testing.T) {
+	// TODO: test pass through for string (back and forth)
+}
+
+func TestIntersectionMaskCodeInvalid(t *testing.T) {
+	// TODO: test invalid masks
+}
+
+func TestIntersectionMaskMatches(t *testing.T) {
+	// TODO: test match/no-match scenarios
 }
