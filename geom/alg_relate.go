@@ -50,6 +50,8 @@ func relateWithMask(a, b Geometry, mask string) (bool, error) {
 	return false, errors.New("not implemented")
 }
 
+// Equals returns true if and only if the input geometries are spatially equal,
+// i.e. they represent exactly the same set of points.
 func Equals(a, b Geometry) (bool, error) {
 	if a.IsEmpty() && b.IsEmpty() {
 		// Part of the mask is 'dim(I(a) ∩ I(b)) = T'.  If both inputs are
@@ -61,41 +63,93 @@ func Equals(a, b Geometry) (bool, error) {
 	return relateWithMask(a, b, "T*F**FFF*")
 }
 
+// Disjoint returns true if and only if the input geometries have no points in
+// common.
 func Disjoint(a, b Geometry) (bool, error) {
 	// TODO
 	return false, errors.New("not implemented")
 }
 
+// Touches returns true if and only if the geometries have at least 1 point in
+// common, but their interiors don't intersect.
 func Touches(a, b Geometry) (bool, error) {
 	// TODO
 	return false, errors.New("not implemented")
 }
 
+// Contains returns true if and only if geometry A contains geometry B.
+// Formally, the following two conditions must hold:
+//
+// 1. No points of B lies on the exterior of geometry A. That is, B must only
+// be in the exterior or boundary of A.
+//
+// 2 .At least one point of the interior of B lies on the interior of A. That
+// is, they can't *only* intersect at their boundaries.
 func Contains(a, b Geometry) (bool, error) {
 	// TODO
 	return false, errors.New("not implemented")
 }
 
+// Covers returns true if and only if geometry A covers geometry B. Formally,
+// the following two conditions must hold:
+//
+// 1. No points of B lies on the exterior of geometry A. That is, B must only
+// be in the exterior or boundary of A.
+//
+// 2. At least one point of B lies on A (either its interior or boundary).
 func Covers(a, b Geometry) (bool, error) {
 	// TODO
 	return false, errors.New("not implemented")
 }
 
+// Within returns true if and only if geometry A is completely within geometry
+// B. Formally, the following two conditions must hold:
+//
+// 1. No points of A lies on the exterior of geometry B. That is, A must only
+// be in the exterior or boundary of B.
+//
+// 2.At least one point of the interior of A lies on the interior of B. That
+// is, they can't *only* intersect at their boundaries.
 func Within(a, b Geometry) (bool, error) {
 	// TODO
 	return false, errors.New("not implemented")
 }
 
+// CoveredBy returns true if and only if geometry A is covered by geometry B.
+// Formally, the following two conditions must hold:
+//
+// 1. No points of A lies on the exterior of geometry B. That is, A must only
+// be in the exterior or boundary of B.
+//
+// 2. At least one point of A lies on B (either its interior or boundary).
 func CoveredBy(a, b Geometry) (bool, error) {
 	// TODO
 	return false, errors.New("not implemented")
 }
 
+// Crosses returns true if and only if geometry A and B cross each other.
+// Formally, the following conditions must hold:
+//
+// 1. The geometries must have some but not all interior points in common.
+//
+// 2. The dimensionality of the intersection must be less than the maximum
+// dimension of the input geometries.
+//
+// 3. The intersection must not equal either of the input geometries.
 func Crosses(a, b Geometry) (bool, error) {
 	// TODO
 	return false, errors.New("not implemented")
 }
 
+// Overlaps returns true if and only if geometry A and B overlap with each
+// other. Formally, the following conditions must hold:
+//
+// 1. The geometries must have the same dimension.
+//
+// 2. The geometries must have some but not all points in common.
+//
+// 3. The intersection of the geometries must have the same dimension as the
+// geometries themselves.
 func Overlaps(a, b Geometry) (bool, error) {
 	// TODO
 	return false, errors.New("not implemented")

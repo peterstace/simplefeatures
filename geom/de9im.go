@@ -166,11 +166,16 @@ func (m IntersectionMask) Matches(im IntersectionMatrix) bool {
 	return false // TODO
 }
 
+// IntersectionMaskFromStringCode creates a new intersection mask from its
+// code. The code should be 9 characters long and consist of only 'F', '0',
+// '1', '2', 'T', and '*'.
 func IntersectionMaskFromStringCode(code string) (IntersectionMask, error) {
 	// TODO
 	return IntersectionMask{}, errors.New("not implemented")
 }
 
+// StringCode returns the 9 character string code representing the intersection
+// matrix.
 func (m IntersectionMask) StringCode() string {
 	return "NOT IMPLEMENTED" // TODO
 }
