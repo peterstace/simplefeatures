@@ -91,7 +91,7 @@ func TestIntersectionMatrixGet(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	checkGet := func(locA, locB imLocation, dim imEntry) {
+	checkGet := func(locA, locB imLocation, dim uint32) {
 		got := m.get(locA, locB)
 		if got != dim {
 			t.Errorf("%v %v want=%v got=%v", locA, locB, dim, got)
@@ -109,7 +109,26 @@ func TestIntersectionMatrixGet(t *testing.T) {
 }
 
 func TestIntersectionMaskCode(t *testing.T) {
-	// TODO: test pass through for string (back and forth)
+	for i, code := range []string{
+		"FFFFFFFFF",
+		"000000000",
+		"111111111",
+		"222222222",
+		"TTTTTTTTT",
+		"*********",
+		"F012T*F01",
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			mask, err := IntersectionMaskFromStringCode(code)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := mask.StringCode()
+			if got != code {
+				t.Errorf("got=%v want=%v", got, code)
+			}
+		})
+	}
 }
 
 func TestIntersectionMaskCodeInvalid(t *testing.T) {
