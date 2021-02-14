@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -47,15 +46,20 @@ func Relate(a, b Geometry) (IntersectionMatrix, error) {
 }
 
 func relateMatchesAnyPattern(a, b Geometry, patterns ...string) (bool, error) {
-	//intersectionMatrix, err := Relate(a, b)
-	//if err != nil {
-	//return false, err
-	//}
-	//for _, pat := range patterns {
-	// TODO: check against pattern
-	//}
-	//return true, nil
-	return false, errors.New("not implemented")
+	mat, err := Relate(a, b)
+	if err != nil {
+		return false, err
+	}
+	for _, pat := range patterns {
+		match, err := RelateMatches(mat.StringCode(), pat)
+		if err != nil {
+			return false, err
+		}
+		if !match {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 
 // Equals returns true if and only if the input geometries are spatially equal,
