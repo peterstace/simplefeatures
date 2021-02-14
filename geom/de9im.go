@@ -40,7 +40,7 @@ func IntersectionMatrixFromStringCode(code string) (IntersectionMatrix, error) {
 	}
 	var m IntersectionMatrix
 	for i, c := range code {
-		var dim imEntry
+		var dim uint32
 		switch c {
 		case 'F':
 			dim = imEntryF
@@ -53,7 +53,7 @@ func IntersectionMatrixFromStringCode(code string) (IntersectionMatrix, error) {
 		default:
 			return IntersectionMatrix{}, fmt.Errorf("code is invalid, contains byte %d", c)
 		}
-		m.bits |= uint32(dim) << (i * 2)
+		m.bits |= dim << (i * 2)
 	}
 	return m, nil
 }
@@ -82,42 +82,33 @@ const (
 	imExterior imLocation = 2
 )
 
-// imEntry is the value of an entry in an intersection matrix. It represents
-// the dimension of the set formed when two sets intersect.
-type imEntry uint32
-
+// These constants represent the entries of the IntersectionMatrix (0 to 3) and
+// IntersectionMask (0 to 5).
 const (
-	// imEntryF indicates that two intersecting sets are disjoint.
-	imEntryF imEntry = 0
-
-	// imEntry0 indicates that the two sets intersect, but only at points (no
-	// linear elements or areal elements).
-	imEntry0 imEntry = 1
-
-	// imEntry1 indicates that the set formed when two sets intersect contains
-	// linear elements but no areal elements. Point elements may or may not be
-	// present.
-	imEntry1 imEntry = 2
-
-	// imEntry2 indicatse that the set formed when two sets intersect contains
-	// areal elements. Point and linear elements may or may not be present.
-	imEntry2 imEntry = 3
+	imEntryF uint32 = 0
+	imEntry0 uint32 = 1
+	imEntry1 uint32 = 2
+	imEntry2 uint32 = 3
+	imEntryT uint32 = 4
+	imEntryA uint32 = 5
 )
 
 // with returns a new IntersectionMatrix that has a single entry changed
 // compared to the original. The original is not changed.
-func (m IntersectionMatrix) with(locA, locB imLocation, dim imEntry) IntersectionMatrix {
+func (m IntersectionMatrix) with(locA, locB imLocation, dim uint32) IntersectionMatrix {
+	if dim >= imEntryT {
+		panic(fmt.Sprintf("invalid dim: %d", dim))
+	}
 	shift := (3*locA + locB) * 2
 	var mask uint32 = 3 << shift
-	return IntersectionMatrix{(m.bits & ^mask) | (uint32(dim) << shift)}
+	return IntersectionMatrix{(m.bits & ^mask) | (dim << shift)}
 }
 
 // get returns an entry from the matrix.
-func (m IntersectionMatrix) get(locA, locB imLocation) imEntry {
+func (m IntersectionMatrix) get(locA, locB imLocation) uint32 {
 	shift := (3*locA + locB) * 2
 	var mask uint32 = 3 << shift
-	raw := (m.bits & mask) >> shift
-	return imEntry(raw)
+	return (m.bits & mask) >> shift
 }
 
 // transpose returns the original intersection matrix, but flipped along its
