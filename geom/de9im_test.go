@@ -107,34 +107,3 @@ func TestIntersectionMatrixGet(t *testing.T) {
 	checkGet(imExterior, imBoundary, imEntryF)
 	checkGet(imExterior, imExterior, imEntry2)
 }
-
-func TestIntersectionMaskCode(t *testing.T) {
-	for i, code := range []string{
-		"FFFFFFFFF",
-		"000000000",
-		"111111111",
-		"222222222",
-		"TTTTTTTTT",
-		"*********",
-		"F012T*F01",
-	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			mask, err := IntersectionMaskFromStringCode(code)
-			if err != nil {
-				t.Fatal(err)
-			}
-			got := mask.StringCode()
-			if got != code {
-				t.Errorf("got=%v want=%v", got, code)
-			}
-		})
-	}
-}
-
-func TestIntersectionMaskCodeInvalid(t *testing.T) {
-	// TODO: test invalid masks
-}
-
-func TestIntersectionMaskMatches(t *testing.T) {
-	// TODO: test match/no-match scenarios
-}
