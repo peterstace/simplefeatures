@@ -6,12 +6,30 @@ import (
 
 // Relate calculates the DE-9IM matrix between two geometries, describing how
 // the two geometries relate to each other.
-func Relate(a, b Geometry) (IntersectionMatrix, error) {
+//
+// A DE-9IM matrix is a 3 by 3 matrix that describes the intersection
+// between two geometries. Specifically, it considers the Interior (I),
+// Boundary (B), and Exterior (E) of each geometry separately, and shows how
+// each part intersects with the 3 parts of the other geometry.
+//
+// Each entry in the matrix holds the dimension of the set formed when a
+// specific combination of I, B, and E (one from each geometry) are intersected
+// with each other. The entries are 2 for an areal intersection, 1 for a linear
+// intersection, and 0 for a point intersection. The entry is F if there is no
+// intersection at all (F stands for 'False').
+//
+// For example, the BI entry could contain a 1 if the set formed by
+// intersecting the boundary of the first geometry and the interior of the
+// second geometry has dimension 1.
+//
+// The matrix is represented by a 9 character string, with entries in row-major
+// order (i.e. entries are ordered II, IB, IE, BI, BB, BE, EI, EB, EE).
+func Relate(a, b Geometry) (string, error) {
 	if a.IsEmpty() || b.IsEmpty() {
 		var m IntersectionMatrix
 		m = m.with(imExterior, imExterior, imEntry2)
 		if a.IsEmpty() && b.IsEmpty() {
-			return m, nil
+			return m.StringCode(), nil
 		}
 
 		var flip bool
@@ -35,14 +53,14 @@ func Relate(a, b Geometry) (IntersectionMatrix, error) {
 		if flip {
 			m = m.transpose()
 		}
-		return m, nil
+		return m.StringCode(), nil
 	}
 
 	overlay, err := createOverlay(a, b)
 	if err != nil {
-		return IntersectionMatrix{}, fmt.Errorf("internal error creating overlay: %v", err)
+		return "", fmt.Errorf("internal error creating overlay: %v", err)
 	}
-	return overlay.extractIntersectionMatrix(), nil
+	return overlay.extractIntersectionMatrix().StringCode(), nil
 }
 
 func relateMatchesAnyPattern(a, b Geometry, patterns ...string) (bool, error) {
@@ -51,7 +69,7 @@ func relateMatchesAnyPattern(a, b Geometry, patterns ...string) (bool, error) {
 		return false, err
 	}
 	for _, pat := range patterns {
-		match, err := RelateMatches(mat.StringCode(), pat)
+		match, err := RelateMatches(mat, pat)
 		if err != nil {
 			return false, err
 		}
