@@ -55,11 +55,11 @@ func relateMatchesAnyPattern(a, b Geometry, patterns ...string) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		if !match {
-			return false, nil
+		if match {
+			return true, nil
 		}
 	}
-	return true, nil
+	return false, nil
 }
 
 // Equals returns true if and only if the input geometries are spatially equal,
