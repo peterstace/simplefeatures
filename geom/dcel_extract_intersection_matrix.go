@@ -1,23 +1,23 @@
 package geom
 
-func (d *doublyConnectedEdgeList) extractIntersectionMatrix() IntersectionMatrix {
-	var m IntersectionMatrix
+func (d *doublyConnectedEdgeList) extractIntersectionMatrix() [9]byte {
+	im := [9]byte{'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F'}
 	for _, v := range d.vertices {
 		locA := v.location(inputAMask)
 		locB := v.location(inputBMask)
-		m = m.with(locA, locB, imEntry0)
+		im[imIndex(locA, locB)] = '0'
 	}
 	for _, e := range d.halfEdges {
 		locA := e.location(inputAMask)
 		locB := e.location(inputBMask)
-		m = m.with(locA, locB, imEntry1)
+		im[imIndex(locA, locB)] = '1'
 	}
 	for _, f := range d.faces {
 		locA := f.location(inputAMask)
 		locB := f.location(inputBMask)
-		m = m.with(locA, locB, imEntry2)
+		im[imIndex(locA, locB)] = '2'
 	}
-	return m
+	return im
 }
 
 func (f *faceRecord) location(sideMask uint8) imLocation {
