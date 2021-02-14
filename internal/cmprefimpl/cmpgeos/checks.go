@@ -902,7 +902,7 @@ func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 }
 
 func checkRelateMatch(h *Handle, log *log.Logger) error {
-	for i := 0; i < 10_000; i++ {
+	for i := 0; i < 1_000_000; i++ {
 		mat := rand9("F012")
 		pat := rand9("F012T*")
 		want, err := h.RelateMatch(mat, pat)
@@ -923,7 +923,7 @@ func checkRelateMatch(h *Handle, log *log.Logger) error {
 			return mismatchErr
 		}
 	}
-	return errors.New("not implemented")
+	return nil
 }
 
 func rand9(alphabet string) string {
