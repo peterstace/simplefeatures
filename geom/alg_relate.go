@@ -46,7 +46,15 @@ func Relate(a, b Geometry) (IntersectionMatrix, error) {
 	return overlay.extractIntersectionMatrix(), nil
 }
 
-func relateWithMask(a, b Geometry, mask string) (bool, error) {
+func relateMatchesAnyPattern(a, b Geometry, patterns ...string) (bool, error) {
+	//intersectionMatrix, err := Relate(a, b)
+	//if err != nil {
+	//return false, err
+	//}
+	//for _, pat := range patterns {
+	// TODO: check against pattern
+	//}
+	//return true, nil
 	return false, errors.New("not implemented")
 }
 
@@ -60,21 +68,24 @@ func Equals(a, b Geometry) (bool, error) {
 		// return true manually rather than using DE-9IM.
 		return true, nil
 	}
-	return relateWithMask(a, b, "T*F**FFF*")
+	return relateMatchesAnyPattern(a, b, "T*F**FFF*")
 }
 
 // Disjoint returns true if and only if the input geometries have no points in
 // common.
 func Disjoint(a, b Geometry) (bool, error) {
-	// TODO
-	return false, errors.New("not implemented")
+	return relateMatchesAnyPattern(a, b, "FF*FF****")
 }
 
 // Touches returns true if and only if the geometries have at least 1 point in
 // common, but their interiors don't intersect.
 func Touches(a, b Geometry) (bool, error) {
-	// TODO
-	return false, errors.New("not implemented")
+	return relateMatchesAnyPattern(
+		a, b,
+		"FT*******",
+		"F**T*****",
+		"F***T****",
+	)
 }
 
 // Contains returns true if and only if geometry A contains geometry B.
@@ -86,8 +97,7 @@ func Touches(a, b Geometry) (bool, error) {
 // 2 .At least one point of the interior of B lies on the interior of A. That
 // is, they can't *only* intersect at their boundaries.
 func Contains(a, b Geometry) (bool, error) {
-	// TODO
-	return false, errors.New("not implemented")
+	return relateMatchesAnyPattern(a, b, "T*****FF*")
 }
 
 // Covers returns true if and only if geometry A covers geometry B. Formally,
@@ -98,8 +108,13 @@ func Contains(a, b Geometry) (bool, error) {
 //
 // 2. At least one point of B lies on A (either its interior or boundary).
 func Covers(a, b Geometry) (bool, error) {
-	// TODO
-	return false, errors.New("not implemented")
+	return relateMatchesAnyPattern(
+		a, b,
+		"T*****FF*",
+		"*T****FF*",
+		"***T**FF*",
+		"****T*FF*",
+	)
 }
 
 // Within returns true if and only if geometry A is completely within geometry
@@ -111,8 +126,7 @@ func Covers(a, b Geometry) (bool, error) {
 // 2.At least one point of the interior of A lies on the interior of B. That
 // is, they can't *only* intersect at their boundaries.
 func Within(a, b Geometry) (bool, error) {
-	// TODO
-	return false, errors.New("not implemented")
+	return relateMatchesAnyPattern(a, b, "T*F**F***")
 }
 
 // CoveredBy returns true if and only if geometry A is covered by geometry B.
@@ -123,8 +137,13 @@ func Within(a, b Geometry) (bool, error) {
 //
 // 2. At least one point of A lies on B (either its interior or boundary).
 func CoveredBy(a, b Geometry) (bool, error) {
-	// TODO
-	return false, errors.New("not implemented")
+	return relateMatchesAnyPattern(
+		a, b,
+		"T*F**F***",
+		"*TF**F***",
+		"**FT*F***",
+		"**F*TF***",
+	)
 }
 
 // Crosses returns true if and only if geometry A and B cross each other.
@@ -137,8 +156,18 @@ func CoveredBy(a, b Geometry) (bool, error) {
 //
 // 3. The intersection must not equal either of the input geometries.
 func Crosses(a, b Geometry) (bool, error) {
-	// TODO
-	return false, errors.New("not implemented")
+	dimA := a.Dimension()
+	dimB := b.Dimension()
+	switch {
+	case dimA < dimB: // Point/Line, Point/Area, Line/Area
+		return relateMatchesAnyPattern(a, b, "T*T******")
+	case dimA > dimB: // Line/Point, Area/Point, Area/Line
+		return relateMatchesAnyPattern(a, b, "T*****T**")
+	case dimA == 1 && dimB == 1: // Line/Line
+		return relateMatchesAnyPattern(a, b, "0********")
+	default:
+		return false, nil
+	}
 }
 
 // Overlaps returns true if and only if geometry A and B overlap with each
@@ -151,6 +180,14 @@ func Crosses(a, b Geometry) (bool, error) {
 // 3. The intersection of the geometries must have the same dimension as the
 // geometries themselves.
 func Overlaps(a, b Geometry) (bool, error) {
-	// TODO
-	return false, errors.New("not implemented")
+	dimA := a.Dimension()
+	dimB := b.Dimension()
+	switch {
+	case (dimA == 0 && dimB == 0) || (dimA == 2 && dimB == 2):
+		return relateMatchesAnyPattern(a, b, "T*T***T**")
+	case (dimA == 1 && dimB == 1):
+		return relateMatchesAnyPattern(a, b, "1*T***T**")
+	default:
+		return false, nil
+	}
 }
