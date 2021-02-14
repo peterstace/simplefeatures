@@ -14,22 +14,37 @@ const (
 	imExterior imLocation = 2
 )
 
-// imIndex finds the index in the 9-character representation of an intersection
-// matrix.
-func imIndex(locA, locB imLocation) int {
+type matrix [9]byte
+
+func newMatrix() matrix {
+	return [9]byte{'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F'}
+}
+
+func (m *matrix) set(locA, locB imLocation, entry byte) {
+	idx := m.index(locA, locB)
+	m[idx] = entry
+}
+
+func (m *matrix) get(locA, locB imLocation) byte {
+	idx := m.index(locA, locB)
+	return m[idx]
+}
+
+func (m *matrix) code() string {
+	return string(m[:])
+}
+
+func (matrix) index(locA, locB imLocation) int {
 	return int(3*locA + locB)
 }
 
-// transposeIM returns the transposed 9-character representation of an
-// intersection matrix.
-func transposeIM(mat [9]byte) [9]byte {
-	var buf [9]byte
+func (m *matrix) transpose() {
+	cp := *m
 	for _, locA := range []imLocation{imInterior, imBoundary, imExterior} {
 		for _, locB := range []imLocation{imInterior, imBoundary, imExterior} {
-			buf[imIndex(locB, locA)] = mat[imIndex(locA, locB)]
+			m.set(locB, locA, cp.get(locA, locB))
 		}
 	}
-	return buf
 }
 
 // RelateMatches checks to see if an intersection matrix matches against an

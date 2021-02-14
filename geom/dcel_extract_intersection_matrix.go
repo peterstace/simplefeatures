@@ -1,21 +1,21 @@
 package geom
 
-func (d *doublyConnectedEdgeList) extractIntersectionMatrix() [9]byte {
-	im := [9]byte{'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F'}
+func (d *doublyConnectedEdgeList) extractIntersectionMatrix() matrix {
+	im := newMatrix()
 	for _, v := range d.vertices {
 		locA := v.location(inputAMask)
 		locB := v.location(inputBMask)
-		im[imIndex(locA, locB)] = '0'
+		im.set(locA, locB, '0')
 	}
 	for _, e := range d.halfEdges {
 		locA := e.location(inputAMask)
 		locB := e.location(inputBMask)
-		im[imIndex(locA, locB)] = '1'
+		im.set(locA, locB, '1')
 	}
 	for _, f := range d.faces {
 		locA := f.location(inputAMask)
 		locB := f.location(inputBMask)
-		im[imIndex(locA, locB)] = '2'
+		im.set(locA, locB, '2')
 	}
 	return im
 }

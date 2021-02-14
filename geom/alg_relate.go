@@ -26,9 +26,10 @@ import (
 // order (i.e. entries are ordered II, IB, IE, BI, BB, BE, EI, EB, EE).
 func Relate(a, b Geometry) (string, error) {
 	if a.IsEmpty() || b.IsEmpty() {
-		im := [9]byte{'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', '2'}
+		im := newMatrix()
+		im.set(imExterior, imExterior, '2')
 		if a.IsEmpty() && b.IsEmpty() {
-			return string(im[:]), nil
+			return im.code(), nil
 		}
 
 		var flip bool
@@ -38,21 +39,21 @@ func Relate(a, b Geometry) (string, error) {
 		}
 		switch b.Dimension() {
 		case 0:
-			im[imIndex(imExterior, imInterior)] = '0'
-			im[imIndex(imExterior, imBoundary)] = 'F'
+			im.set(imExterior, imInterior, '0')
+			im.set(imExterior, imBoundary, 'F')
 		case 1:
-			im[imIndex(imExterior, imInterior)] = '1'
+			im.set(imExterior, imInterior, '1')
 			if !b.Boundary().IsEmpty() {
-				im[imIndex(imExterior, imBoundary)] = '0'
+				im.set(imExterior, imBoundary, '0')
 			}
 		case 2:
-			im[imIndex(imExterior, imInterior)] = '2'
-			im[imIndex(imExterior, imBoundary)] = '1'
+			im.set(imExterior, imInterior, '2')
+			im.set(imExterior, imBoundary, '1')
 		}
 		if flip {
-			im = transposeIM(im)
+			im.transpose()
 		}
-		return string(im[:]), nil
+		return im.code(), nil
 	}
 
 	overlay, err := createOverlay(a, b)
@@ -60,7 +61,7 @@ func Relate(a, b Geometry) (string, error) {
 		return "", fmt.Errorf("internal error creating overlay: %v", err)
 	}
 	im := overlay.extractIntersectionMatrix()
-	return string(im[:]), nil
+	return im.code(), nil
 }
 
 func relateMatchesAnyPattern(a, b Geometry, patterns ...string) (bool, error) {
