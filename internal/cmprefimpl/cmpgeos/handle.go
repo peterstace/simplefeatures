@@ -873,3 +873,11 @@ func (h *Handle) Relate(g1, g2 geom.Geometry) (string, error) {
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(matrix))
 	return C.GoString(matrix), nil
 }
+
+func (h *Handle) RelateMatch(mat, pat string) (bool, error) {
+	cMat := C.CString(mat)
+	cPat := C.CString(mat)
+	defer C.free(unsafe.Pointer(cMat))
+	defer C.free(unsafe.Pointer(cPat))
+	return h.boolErr(C.GEOSRelatePatternMatch_r(h.context, cMat, cPat))
+}

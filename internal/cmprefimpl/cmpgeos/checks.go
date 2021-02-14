@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"strconv"
 	"strings"
 
@@ -898,4 +899,37 @@ func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	}
 
 	return nil
+}
+
+func checkRelateMatch(h *Handle, log *log.Logger) error {
+	for i := 0; i < 10_000; i++ {
+		mat := rand9("F012")
+		pat := rand9("F012T*")
+		want, err := h.RelateMatch(mat, pat)
+		if err != nil {
+			log.Printf("could not calculate want: %v", err)
+			return err
+		}
+		got, err := geom.RelateMatches(mat, pat)
+		if err != nil {
+			log.Printf("could not calculate got: %v", err)
+			return err
+		}
+		if got != want {
+			log.Printf("mat:  %v", mat)
+			log.Printf("pat:  %v", pat)
+			log.Printf("want: %v", want)
+			log.Printf("got:  %v", got)
+			return mismatchErr
+		}
+	}
+	return errors.New("not implemented")
+}
+
+func rand9(alphabet string) string {
+	var buf [9]byte
+	for i := range buf {
+		buf[i] = alphabet[rand.Intn(len(alphabet))]
+	}
+	return string(buf[:])
 }
