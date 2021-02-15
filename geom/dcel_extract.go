@@ -3,7 +3,7 @@ package geom
 import "fmt"
 
 // extractGeometry converts the DECL into a Geometry that represents it.
-func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) (Geometry, error) {
+func (d *doublyConnectedEdgeList) extractGeometry(include func([2]label) bool) (Geometry, error) {
 	areals, err := d.extractPolygons(include)
 	if err != nil {
 		return Geometry{}, err
@@ -54,12 +54,12 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func(uint8) bool) (Geo
 	}
 }
 
-func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) ([]Polygon, error) {
+func (d *doublyConnectedEdgeList) extractPolygons(include func([2]label) bool) ([]Polygon, error) {
 	var polys []Polygon
 	for _, face := range d.faces {
 		// Skip any faces not selected to be include in the output geometry, or
 		// any faces already extracted.
-		if !include(face.label) || face.label&extracted != 0 {
+		if !include(face.labels) || face.extracted {
 			continue
 		}
 
@@ -70,20 +70,20 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func(uint8) bool) ([]P
 		var rings []LineString
 		seen := make(map[*halfEdgeRecord]bool)
 		for f := range facesInPoly {
-			f.label |= extracted
+			f.extracted = true
 			forEachEdge(f.cycle, func(edge *halfEdgeRecord) {
 
 				// Mark all edges and vertices intersecting with the polygon as
 				// being extracted.  This will prevent them being considered
 				// during linear and point geometry extraction.
-				edge.edgeLabel |= extracted
-				edge.twin.edgeLabel |= extracted
-				edge.origin.label |= extracted
+				edge.extracted = true
+				edge.twin.extracted = true
+				edge.origin.extracted = true
 
 				if seen[edge] {
 					return
 				}
-				if include(edge.twin.incident.label) {
+				if include(edge.twin.incident.labels) {
 					// Adjacent face is in the polygon, so this edge cannot be part
 					// of the boundary.
 					seen[edge] = true
@@ -138,7 +138,7 @@ func extractPolygonBoundary(faceSet map[*faceRecord]bool, start *halfEdgeRecord,
 
 // findFacesMakingPolygon finds all faces that belong to the polygon that
 // contains the start face (according to the given inclusion criteria).
-func findFacesMakingPolygon(include func(uint8) bool, start *faceRecord) map[*faceRecord]bool {
+func findFacesMakingPolygon(include func([2]label) bool, start *faceRecord) map[*faceRecord]bool {
 	expanded := make(map[*faceRecord]bool)
 	toExpand := make(map[*faceRecord]bool)
 	toExpand[start] = true
@@ -154,7 +154,7 @@ func findFacesMakingPolygon(include func(uint8) bool, start *faceRecord) map[*fa
 		adj := adjacentFaces(popped)
 		expanded[popped] = true
 		for _, f := range adj {
-			if !include(f.label) {
+			if !include(f.labels) {
 				continue
 			}
 			if expanded[f] {
@@ -180,14 +180,14 @@ func orderCCWRingFirst(rings []LineString) {
 	}
 }
 
-func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) ([]LineString, error) {
+func (d *doublyConnectedEdgeList) extractLineStrings(include func([2]label) bool) ([]LineString, error) {
 	var lss []LineString
 	for _, e := range d.halfEdges {
 		if shouldExtractLine(e, include) {
-			e.edgeLabel |= extracted
-			e.twin.edgeLabel |= extracted
-			e.origin.label |= extracted
-			e.twin.origin.label |= extracted
+			e.extracted = true
+			e.twin.extracted = true
+			e.origin.extracted = true
+			e.twin.origin.extracted = true
 
 			coords := make([]float64, 4+2*len(e.intermediate))
 			coords[0] = e.origin.coords.X
@@ -210,18 +210,21 @@ func (d *doublyConnectedEdgeList) extractLineStrings(include func(uint8) bool) (
 	return lss, nil
 }
 
-func shouldExtractLine(e *halfEdgeRecord, include func(uint8) bool) bool {
-	return (e.edgeLabel&extracted == 0) && include(e.edgeLabel) && !include(e.incident.label) && !include(e.twin.incident.label)
+func shouldExtractLine(e *halfEdgeRecord, include func([2]label) bool) bool {
+	return !e.extracted &&
+		include(e.edgeLabels) &&
+		!include(e.incident.labels) &&
+		!include(e.twin.incident.labels)
 }
 
 // extractPoints extracts any vertices in the DCEL that should be part of the
 // output geometry, but aren't yet represented as part of any previously
 // extracted geometries.
-func (d *doublyConnectedEdgeList) extractPoints(include func(uint8) bool) []XY {
+func (d *doublyConnectedEdgeList) extractPoints(include func([2]label) bool) []XY {
 	var xys []XY
 	for _, vert := range d.vertices {
-		if include(vert.label) && vert.label&extracted == 0 {
-			vert.label |= extracted
+		if include(vert.labels) && !vert.extracted {
+			vert.extracted = true
 			xys = append(xys, vert.coords)
 		}
 	}

@@ -61,7 +61,7 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 	return binaryOp(a, b, selectSymmetricDifference)
 }
 
-func binaryOp(a, b Geometry, include func(uint8) bool) (Geometry, error) {
+func binaryOp(a, b Geometry, include func([2]label) bool) (Geometry, error) {
 	overlay, err := createOverlay(a, b)
 	if err != nil {
 		return Geometry{}, fmt.Errorf("internal error creating overlay: %v", err)
@@ -91,8 +91,8 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 
 	interactionPoints := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
 
-	dcelA := newDCELFromGeometry(a, ghosts, inputAMask, interactionPoints)
-	dcelB := newDCELFromGeometry(b, ghosts, inputBMask, interactionPoints)
+	dcelA := newDCELFromGeometry(a, ghosts, operandA, interactionPoints)
+	dcelB := newDCELFromGeometry(b, ghosts, operandB, interactionPoints)
 
 	dcelA.overlay(dcelB)
 	return dcelA, nil
