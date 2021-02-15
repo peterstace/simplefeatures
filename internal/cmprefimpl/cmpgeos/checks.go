@@ -892,9 +892,9 @@ func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	if got.StringCode() != want {
+	if got != want {
 		log.Printf("want: %v", want)
-		log.Printf("got:  %v", got.StringCode())
+		log.Printf("got:  %v", got)
 		return mismatchErr
 	}
 

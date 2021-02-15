@@ -6,12 +6,30 @@ import (
 
 // Relate calculates the DE-9IM matrix between two geometries, describing how
 // the two geometries relate to each other.
-func Relate(a, b Geometry) (IntersectionMatrix, error) {
+//
+// A DE-9IM matrix is a 3 by 3 matrix that describes the intersection
+// between two geometries. Specifically, it considers the Interior (I),
+// Boundary (B), and Exterior (E) of each geometry separately, and shows how
+// each part intersects with the 3 parts of the other geometry.
+//
+// Each entry in the matrix holds the dimension of the set formed when a
+// specific combination of I, B, and E (one from each geometry) are intersected
+// with each other. The entries are 2 for an areal intersection, 1 for a linear
+// intersection, and 0 for a point intersection. The entry is F if there is no
+// intersection at all (F stands for 'False').
+//
+// For example, the BI entry could contain a 1 if the set formed by
+// intersecting the boundary of the first geometry and the interior of the
+// second geometry has dimension 1.
+//
+// The matrix is represented by a 9 character string, with entries in row-major
+// order (i.e. entries are ordered II, IB, IE, BI, BB, BE, EI, EB, EE).
+func Relate(a, b Geometry) (string, error) {
 	if a.IsEmpty() || b.IsEmpty() {
-		var m IntersectionMatrix
-		m = m.with(imExterior, imExterior, imEntry2)
+		im := newMatrix()
+		im.set(imExterior, imExterior, '2')
 		if a.IsEmpty() && b.IsEmpty() {
-			return m, nil
+			return im.code(), nil
 		}
 
 		var flip bool
@@ -21,28 +39,29 @@ func Relate(a, b Geometry) (IntersectionMatrix, error) {
 		}
 		switch b.Dimension() {
 		case 0:
-			m = m.with(imExterior, imInterior, imEntry0)
-			m = m.with(imExterior, imBoundary, imEntryF)
+			im.set(imExterior, imInterior, '0')
+			im.set(imExterior, imBoundary, 'F')
 		case 1:
-			m = m.with(imExterior, imInterior, imEntry1)
+			im.set(imExterior, imInterior, '1')
 			if !b.Boundary().IsEmpty() {
-				m = m.with(imExterior, imBoundary, imEntry0)
+				im.set(imExterior, imBoundary, '0')
 			}
 		case 2:
-			m = m.with(imExterior, imInterior, imEntry2)
-			m = m.with(imExterior, imBoundary, imEntry1)
+			im.set(imExterior, imInterior, '2')
+			im.set(imExterior, imBoundary, '1')
 		}
 		if flip {
-			m = m.transpose()
+			im.transpose()
 		}
-		return m, nil
+		return im.code(), nil
 	}
 
 	overlay, err := createOverlay(a, b)
 	if err != nil {
-		return IntersectionMatrix{}, fmt.Errorf("internal error creating overlay: %v", err)
+		return "", fmt.Errorf("internal error creating overlay: %v", err)
 	}
-	return overlay.extractIntersectionMatrix(), nil
+	im := overlay.extractIntersectionMatrix()
+	return im.code(), nil
 }
 
 func relateMatchesAnyPattern(a, b Geometry, patterns ...string) (bool, error) {
@@ -51,7 +70,7 @@ func relateMatchesAnyPattern(a, b Geometry, patterns ...string) (bool, error) {
 		return false, err
 	}
 	for _, pat := range patterns {
-		match, err := RelateMatches(mat.StringCode(), pat)
+		match, err := RelateMatches(mat, pat)
 		if err != nil {
 			return false, err
 		}
