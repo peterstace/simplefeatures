@@ -203,9 +203,23 @@ func newDCELFromMultiLineString(mls MultiLineString, operand operand, interactio
 				continue
 			}
 
-			if (j == 0 || j == n-1) && !ls.IsClosed() {
-				// Boundary
-				if v, ok := dcel.vertices[xy]; ok {
+			onBoundary := (j == 0 || j == n-1) && !ls.IsClosed()
+			if v, ok := dcel.vertices[xy]; !ok {
+				var locs [2]location
+				if onBoundary {
+					locs[operand].boundary = true
+				} else {
+					locs[operand].interior = true
+				}
+				dcel.vertices[xy] = &vertexRecord{
+					xy,
+					nil, // populated later
+					newHalfPopulatedLabels(operand, true),
+					locs,
+					false,
+				}
+			} else {
+				if onBoundary {
 					if v.locations[operand].boundary {
 						// Handle mod-2 rule (the boundary passes through the point
 						// an even number of times, then it should be treated as an
@@ -214,31 +228,12 @@ func newDCELFromMultiLineString(mls MultiLineString, operand operand, interactio
 						v.locations[operand].interior = true
 					} else {
 						v.locations[operand].boundary = true
+						v.locations[operand].interior = false
 					}
 				} else {
-					dcel.vertices[xy] = &vertexRecord{
-						xy,
-						nil, // populated later
-						newHalfPopulatedLabels(operand, true),
-						newLocationsOnBoundary(operand),
-						false,
-					}
-				}
-			} else {
-				// Interior
-				if v, ok := dcel.vertices[xy]; ok {
 					v.locations[operand].interior = true
-				} else {
-					dcel.vertices[xy] = &vertexRecord{
-						xy,
-						nil, // populated later
-						newHalfPopulatedLabels(operand, true),
-						newLocationsOnInterior(operand),
-						false,
-					}
 				}
 			}
-
 		}
 	}
 
@@ -309,7 +304,7 @@ func newDCELFromMultiPoint(mp MultiPoint, operand operand) *doublyConnectedEdgeL
 			record = &vertexRecord{
 				coords:    xy,
 				incidents: nil,
-				labels:    [2]label{},       // set below
+				labels:    [2]label{},    // set below
 				locations: [2]location{}, // set below
 			}
 			dcel.vertices[xy] = record
