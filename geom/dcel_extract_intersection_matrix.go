@@ -21,7 +21,7 @@ func (d *doublyConnectedEdgeList) extractIntersectionMatrix() matrix {
 }
 
 func (f *faceRecord) location(operand operand) imLocation {
-	// TODO: Should we assert isPopulated?
+	assertPresence(f.labels)
 	if !f.labels[operand].inSet {
 		return imExterior
 	}
@@ -29,10 +29,15 @@ func (f *faceRecord) location(operand operand) imLocation {
 }
 
 func (e *halfEdgeRecord) location(operand operand) imLocation {
-	// TODO: Should we assert isPopulated?
+	assertPresence(e.edgeLabels)
+
 	if !e.edgeLabels[operand].inSet {
 		return imExterior
 	}
+
+	assertPresence(e.incident.labels)
+	assertPresence(e.twin.incident.labels)
+
 	face1Present := e.incident.labels[operand].inSet
 	face2Present := e.twin.incident.labels[operand].inSet
 	if face1Present != face2Present {
@@ -42,8 +47,6 @@ func (e *halfEdgeRecord) location(operand operand) imLocation {
 }
 
 func (v *vertexRecord) location(operand operand) imLocation {
-	// TODO: Should we assert isPopulated?
-
 	// NOTE: It's important that we check the Boundary flag before the Interior
 	// flag, since both might be set. In that case, we want to treat the
 	// location as a Boundary, since the boundary is a more specific case.
