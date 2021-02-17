@@ -43,26 +43,26 @@ func mergeLabels(dst *[2]label, src [2]label) {
 	dst[1].inSet = dst[1].inSet || src[1].inSet
 }
 
-type hasLocation struct {
+type location struct {
 	interior bool
 	boundary bool
 }
 
-func mergeLocations(dst *[2]hasLocation, src [2]hasLocation) {
+func mergeLocations(dst *[2]location, src [2]location) {
 	dst[0].interior = dst[0].interior || src[0].interior
 	dst[1].interior = dst[1].interior || src[1].interior
 	dst[0].boundary = dst[0].boundary || src[0].boundary
 	dst[1].boundary = dst[1].boundary || src[1].boundary
 }
 
-func newLocationsOnBoundary(operand operand) [2]hasLocation {
-	var locs [2]hasLocation
+func newLocationsOnBoundary(operand operand) [2]location {
+	var locs [2]location
 	locs[operand].boundary = true
 	return locs
 }
 
-func newLocationsOnInterior(operand operand) [2]hasLocation {
-	var locs [2]hasLocation
+func newLocationsOnInterior(operand operand) [2]location {
+	var locs [2]location
 	locs[operand].interior = true
 	return locs
 }

@@ -57,7 +57,7 @@ type vertexRecord struct {
 	coords    XY
 	incidents []*halfEdgeRecord
 	labels    [2]label
-	locations [2]hasLocation
+	locations [2]location
 	extracted bool
 }
 
@@ -310,7 +310,7 @@ func newDCELFromMultiPoint(mp MultiPoint, operand operand) *doublyConnectedEdgeL
 				coords:    xy,
 				incidents: nil,
 				labels:    [2]label{},       // set below
-				locations: [2]hasLocation{}, // set below
+				locations: [2]location{}, // set below
 			}
 			dcel.vertices[xy] = record
 		}
