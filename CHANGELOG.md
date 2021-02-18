@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.26.0
+
+2021-02-19
+
+- Adds a `Relate` top level function, which calculates the DE-9IM matrix
+  describing the relationship between two geometries.
+
+- Adds named spatial predicate top level functions, implemented in terms of
+  DE-9IM matches. These are `Equals`, `Intersects`, `Disjoint`, `Contains`,
+  `CoveredBy`, `Covers`, `Overlaps`, `Touches`, `Within`, and `Crosses`.
+
 ## v0.25.1
 
 2021-01-31
