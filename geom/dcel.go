@@ -11,8 +11,9 @@ type doublyConnectedEdgeList struct {
 }
 
 type faceRecord struct {
-	cycle *halfEdgeRecord
-	label uint8
+	cycle     *halfEdgeRecord
+	labels    [2]label
+	extracted bool
 }
 
 func (f *faceRecord) String() string {
@@ -28,8 +29,9 @@ type halfEdgeRecord struct {
 	incident     *faceRecord // only populated in the overlay
 	next, prev   *halfEdgeRecord
 	intermediate []XY
-	edgeLabel    uint8
-	faceLabel    uint8
+	edgeLabels   [2]label
+	faceLabels   [2]label
+	extracted    bool
 }
 
 // secondXY gives the second (1-indexed) XY in the edge. This is either the
@@ -54,8 +56,9 @@ func (e *halfEdgeRecord) String() string {
 type vertexRecord struct {
 	coords    XY
 	incidents []*halfEdgeRecord
-	label     uint8
-	locLabel  uint8
+	labels    [2]label
+	locations [2]location
+	extracted bool
 }
 
 func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
@@ -69,38 +72,38 @@ func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
 	}
 }
 
-func newDCELFromGeometry(g Geometry, ghosts MultiLineString, mask uint8, interactions map[XY]struct{}) *doublyConnectedEdgeList {
+func newDCELFromGeometry(g Geometry, ghosts MultiLineString, operand operand, interactions map[XY]struct{}) *doublyConnectedEdgeList {
 	var dcel *doublyConnectedEdgeList
 	switch g.Type() {
 	case TypePolygon:
 		poly := g.AsPolygon()
-		dcel = newDCELFromMultiPolygon(poly.AsMultiPolygon(), mask, interactions)
+		dcel = newDCELFromMultiPolygon(poly.AsMultiPolygon(), operand, interactions)
 	case TypeMultiPolygon:
 		mp := g.AsMultiPolygon()
-		dcel = newDCELFromMultiPolygon(mp, mask, interactions)
+		dcel = newDCELFromMultiPolygon(mp, operand, interactions)
 	case TypeLineString:
 		mls := g.AsLineString().AsMultiLineString()
-		dcel = newDCELFromMultiLineString(mls, mask, interactions)
+		dcel = newDCELFromMultiLineString(mls, operand, interactions)
 	case TypeMultiLineString:
 		mls := g.AsMultiLineString()
-		dcel = newDCELFromMultiLineString(mls, mask, interactions)
+		dcel = newDCELFromMultiLineString(mls, operand, interactions)
 	case TypePoint:
 		mp := NewMultiPointFromPoints([]Point{g.AsPoint()})
-		dcel = newDCELFromMultiPoint(mp, mask)
+		dcel = newDCELFromMultiPoint(mp, operand)
 	case TypeMultiPoint:
 		mp := g.AsMultiPoint()
-		dcel = newDCELFromMultiPoint(mp, mask)
+		dcel = newDCELFromMultiPoint(mp, operand)
 	case TypeGeometryCollection:
 		panic("geometry collection not supported")
 	default:
 		panic(fmt.Sprintf("unknown geometry type: %v", g.Type()))
 	}
 
-	dcel.addGhosts(ghosts, mask, interactions)
+	dcel.addGhosts(ghosts, operand, interactions)
 	return dcel
 }
 
-func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8, interactions map[XY]struct{}) *doublyConnectedEdgeList {
+func newDCELFromMultiPolygon(mp MultiPolygon, operand operand, interactions map[XY]struct{}) *doublyConnectedEdgeList {
 	mp = mp.ForceCCW()
 
 	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
@@ -123,7 +126,13 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8, interactions map[XY]st
 					continue
 				}
 				if _, ok := dcel.vertices[xy]; !ok {
-					dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask, mask & locBoundary}
+					vr := &vertexRecord{
+						coords:    xy,
+						incidents: nil, // populated later
+						labels:    newHalfPopulatedLabels(operand, true),
+						locations: newLocationsOnBoundary(operand),
+					}
+					dcel.vertices[xy] = vr
 				}
 			}
 		}
@@ -145,8 +154,8 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8, interactions map[XY]st
 					next:         nil, // populated later
 					prev:         nil, // populated later
 					intermediate: intermediateFwd,
-					edgeLabel:    mask,
-					faceLabel:    mask,
+					edgeLabels:   newHalfPopulatedLabels(operand, true),
+					faceLabels:   newHalfPopulatedLabels(operand, true),
 				}
 				externalEdge := &halfEdgeRecord{
 					origin:       vertB,
@@ -155,8 +164,8 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8, interactions map[XY]st
 					next:         nil, // populated later
 					prev:         nil, // populated later
 					intermediate: intermediateRev,
-					edgeLabel:    mask,
-					faceLabel:    mask & populatedMask,
+					edgeLabels:   newHalfPopulatedLabels(operand, true),
+					faceLabels:   newHalfPopulatedLabels(operand, false),
 				}
 				internalEdge.twin = externalEdge
 				vertA.incidents = append(vertA.incidents, internalEdge)
@@ -178,7 +187,7 @@ func newDCELFromMultiPolygon(mp MultiPolygon, mask uint8, interactions map[XY]st
 	return dcel
 }
 
-func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions map[XY]struct{}) *doublyConnectedEdgeList {
+func newDCELFromMultiLineString(mls MultiLineString, operand operand, interactions map[XY]struct{}) *doublyConnectedEdgeList {
 	dcel := &doublyConnectedEdgeList{
 		vertices: make(map[XY]*vertexRecord),
 	}
@@ -193,22 +202,37 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 			if _, ok := interactions[xy]; !ok {
 				continue
 			}
-			loc := locInterior
-			if (j == 0 || j == n-1) && !ls.IsClosed() {
-				loc = locBoundary
-			}
-			if v, ok := dcel.vertices[xy]; ok {
-				if loc == locBoundary && (v.locLabel&mask&locBoundary) != 0 {
-					// Handle mod-2 rule (the boundary passes through the point
-					// an even number of times, then it should be treated as an
-					// interior point).
-					v.locLabel &= ^mask
-					v.locLabel |= mask & locInterior
+
+			onBoundary := (j == 0 || j == n-1) && !ls.IsClosed()
+			if v, ok := dcel.vertices[xy]; !ok {
+				var locs [2]location
+				if onBoundary {
+					locs[operand].boundary = true
 				} else {
-					v.locLabel |= mask & loc
+					locs[operand].interior = true
+				}
+				dcel.vertices[xy] = &vertexRecord{
+					xy,
+					nil, // populated later
+					newHalfPopulatedLabels(operand, true),
+					locs,
+					false,
 				}
 			} else {
-				dcel.vertices[xy] = &vertexRecord{xy, nil /* populated later */, mask, mask & loc}
+				if onBoundary {
+					if v.locations[operand].boundary {
+						// Handle mod-2 rule (the boundary passes through the point
+						// an even number of times, then it should be treated as an
+						// interior point).
+						v.locations[operand].boundary = false
+						v.locations[operand].interior = true
+					} else {
+						v.locations[operand].boundary = true
+						v.locations[operand].interior = false
+					}
+				} else {
+					v.locations[operand].interior = true
+				}
 			}
 		}
 	}
@@ -241,8 +265,8 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 				next:         nil, // set later
 				prev:         nil, // set later
 				intermediate: intermediateFwd,
-				edgeLabel:    mask,
-				faceLabel:    mask & populatedMask,
+				edgeLabels:   newHalfPopulatedLabels(operand, true),
+				faceLabels:   newHalfPopulatedLabels(operand, false),
 			}
 			rev := &halfEdgeRecord{
 				origin:       vDestin,
@@ -251,8 +275,8 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 				next:         fwd,
 				prev:         fwd,
 				intermediate: intermediateRev,
-				edgeLabel:    mask,
-				faceLabel:    mask & populatedMask,
+				edgeLabels:   newHalfPopulatedLabels(operand, true),
+				faceLabels:   newHalfPopulatedLabels(operand, false),
 			}
 			fwd.twin = rev
 			fwd.next = rev
@@ -267,7 +291,7 @@ func newDCELFromMultiLineString(mls MultiLineString, mask uint8, interactions ma
 	return dcel
 }
 
-func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
+func newDCELFromMultiPoint(mp MultiPoint, operand operand) *doublyConnectedEdgeList {
 	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
 	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
@@ -280,18 +304,18 @@ func newDCELFromMultiPoint(mp MultiPoint, mask uint8) *doublyConnectedEdgeList {
 			record = &vertexRecord{
 				coords:    xy,
 				incidents: nil,
-				label:     0, // set below
-				locLabel:  0, // set below
+				labels:    [2]label{},    // set below
+				locations: [2]location{}, // set below
 			}
 			dcel.vertices[xy] = record
 		}
-		record.label |= mask
-		record.locLabel |= mask & locInterior
+		record.labels[operand] = label{populated: true, inSet: true}
+		record.locations[operand].interior = true
 	}
 	return dcel
 }
 
-func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, mask uint8, interactions map[XY]struct{}) {
+func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, operand operand, interactions map[XY]struct{}) {
 	edges := make(edgeSet)
 	for _, e := range d.halfEdges {
 		edges.insertEdge(e)
@@ -306,10 +330,10 @@ func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, mask uint8, int
 			intermediateRev := reverseXYs(intermediateFwd)
 
 			if _, ok := d.vertices[startXY]; !ok {
-				d.vertices[startXY] = &vertexRecord{coords: startXY, incidents: nil, label: 0}
+				d.vertices[startXY] = &vertexRecord{coords: startXY, incidents: nil, labels: [2]label{}}
 			}
 			if _, ok := d.vertices[endXY]; !ok {
-				d.vertices[endXY] = &vertexRecord{coords: endXY, incidents: nil, label: 0}
+				d.vertices[endXY] = &vertexRecord{coords: endXY, incidents: nil, labels: [2]label{}}
 			}
 
 			if edges.containsStartIntermediateEnd(startXY, intermediateFwd, endXY) {
@@ -319,12 +343,12 @@ func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, mask uint8, int
 			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY)
 			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY)
 
-			d.addGhostLine(startXY, intermediateFwd, intermediateRev, endXY, mask)
+			d.addGhostLine(startXY, intermediateFwd, intermediateRev, endXY, operand)
 		})
 	}
 }
 
-func (d *doublyConnectedEdgeList) addGhostLine(startXY XY, intermediateFwd, intermediateRev []XY, endXY XY, mask uint8) {
+func (d *doublyConnectedEdgeList) addGhostLine(startXY XY, intermediateFwd, intermediateRev []XY, endXY XY, operand operand) {
 	vertA := d.vertices[startXY]
 	vertB := d.vertices[endXY]
 
@@ -335,8 +359,8 @@ func (d *doublyConnectedEdgeList) addGhostLine(startXY XY, intermediateFwd, inte
 		next:         nil, // popluated later
 		prev:         nil, // populated later
 		intermediate: intermediateFwd,
-		edgeLabel:    mask & populatedMask,
-		faceLabel:    0,
+		edgeLabels:   newHalfPopulatedLabels(operand, false),
+		faceLabels:   [2]label{},
 	}
 	e2 := &halfEdgeRecord{
 		origin:       vertB,
@@ -345,8 +369,8 @@ func (d *doublyConnectedEdgeList) addGhostLine(startXY XY, intermediateFwd, inte
 		next:         e1,
 		prev:         e1,
 		intermediate: intermediateRev,
-		edgeLabel:    mask & populatedMask,
-		faceLabel:    0,
+		edgeLabels:   newHalfPopulatedLabels(operand, false),
+		faceLabels:   [2]label{},
 	}
 	e1.twin = e2
 	e1.next = e2
