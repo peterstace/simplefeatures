@@ -107,21 +107,38 @@ Simple features supports the following external geometry representation formats:
 
 The following algorithms are supported:
 
-| Algorithm                                                                                               | Description                                                               |
+| Miscellaneous Algorithms                                                                               | Description                                                                            |
+| ---                                                                                                    | ---                                                                                    |
+| [Area](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Area)                     | Finds the area of the geometry (for Polygons and MultiPolygons).                       |
+| [Centroid](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Centroid)             | Finds the centroid of the geometry.                                                    |
+| [ConvexHull](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.ConvexHull)         | Finds the convex hull of the geometry.                                                 |
+| [Distance](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Distance)                      | Finds the shortest distance between two geometries.                                    |
+| [Envelope](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Envelope)             | Finds the smallest axis-aligned bounding-box that surrounds the geometry.              |
+| [ExactEquals](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#ExactEquals)                | Determines if two geometries are structurally equal.                                   |
+| [Length](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Length)                 | Finds the length of the geometry (for LineStrings and MultiLineStrings).               |
+| [PointOnSurface](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.PointOnSurface) | Finds a point that lies inside the geometry.                                           |
+| [Relate](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Relate)                          | Calculates the DE-9IM intersection describing the relationship between two geometries. |
+
+| Set Operations                                                                                          | Description                                                               |
 | ---                                                                                                     | ---                                                                       |
-| [Area](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Area)                      | Finds the area of the geometry (for Polygons and MultiPolygons).          |
-| [Centroid](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Centroid)              | Finds the centroid of the geometry.                                       |
-| [ConvexHull](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.ConvexHull)          | Finds the convex hull of the geometry.                                    |
-| [Difference](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Difference)                   | Finds the parts of a geometry that are not also part of another geometry. |
-| [Distance](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Distance)                       | Finds the shortest distance between two geometries.                       |
-| [Envelope](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Envelope)              | Finds the smallest axis-aligned bounding-box that surrounds the geometry. |
-| [ExactEquals](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#ExactEquals)                 | Determines if two geometries are structurally equal.                      |
-| [Intersection](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Intersection)               | Finds the parts of two geometries that are in common.                     |
-| [Intersects](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Intersects)                   | Determines if two geometries intersect with each other.                   |
-| [Length](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Length)                  | Finds the length of the geometry (for LineStrings and MultiLineStrings).  |
-| [PointOnSurface](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.PointOnSurface)  | Finds a point that lies inside the geometry.                              |
-| [SymmetricDifference](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#SymmetricDifference) | Finds the parts of two geometries that are not in common.                 |
 | [Union](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Union)                             | Joins the parts from two geometries together.                             |
+| [Intersection](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Intersection)               | Finds the parts of two geometries that are in common.                     |
+| [Difference](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Difference)                   | Finds the parts of a geometry that are not also part of another geometry. |
+| [SymmetricDifference](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#SymmetricDifference) | Finds the parts of two geometries that are not in common.                 |
+
+
+| Named Spatial Predicates                                                              | Description                                             |
+| ---                                                                                   | ---                                                     |
+| [Equals](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Equals)         | Determines if two geometries are topologically equal.   |
+| [Intersects](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Intersects) | Determines if two geometries intersect with each other. |
+| [Disjoint](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Disjoint)     | Determines if two geometries have no common points.     |
+| [Contains](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Contains)     | Determines if one geometry contains another.            |
+| [CoveredBy](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#CoveredBy)   | Determines if one geometry is covered by another.       |
+| [Covers](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Covers)         | Determines if one geometry covers another.              |
+| [Overlaps](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Overlaps)     | Determines if one geometry overlaps another.            |
+| [Touches](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Touches)       | Determines if one geometry touches another.             |
+| [Within](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Within)         | Determines if one geometry is within another.           |
+| [Crosses](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Crosses)       | Determines if one geometry crosses another.             |
 
 ### GEOS Wrapper
 
