@@ -372,14 +372,6 @@ func (g Geometry) Envelope() (Envelope, bool) {
 // (see the documentation of each concrete Geometry's Boundary method for
 // details).
 func (g Geometry) Boundary() Geometry {
-	// TODO: Investigate to see if the behaviour from libgeos would make more
-	// sense to use here (which is to return the same geometry type that would
-	// normally be returned in the non-empty case).
-	if g.IsEmpty() {
-		// Match PostGIS behaviour.
-		return g.Force2D()
-	}
-
 	switch g.gtype {
 	case TypeGeometryCollection:
 		return g.AsGeometryCollection().Boundary().AsGeometry()

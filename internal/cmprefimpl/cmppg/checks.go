@@ -282,30 +282,6 @@ func CheckEnvelope(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckBoundary(t *testing.T, want UnaryResult, g geom.Geometry) {
-	t.Run("CheckBoundary", func(t *testing.T) {
-		if g.IsGeometryCollection() == want.Boundary.Valid {
-			t.Fatal("Unexpected boundary: "+
-				"IsGeometryCollection=%v WantBoundaryValid=%v",
-				g.IsGeometryCollection(), want.Boundary.Valid)
-		}
-		if !want.Boundary.Valid {
-			return
-		}
-
-		got := g.Boundary()
-		// Simplefeatures doesn't retain boundary Z values.
-		want := want.Boundary.Geometry.Force2D()
-
-		if !geom.ExactEquals(got, want, geom.IgnoreOrder, geom.ToleranceXY(1e-13)) {
-			t.Logf("input: %v", g.AsText())
-			t.Logf("got:   %v", got.AsText())
-			t.Logf("want:  %v", want.AsText())
-			t.Error("mismatch")
-		}
-	})
-}
-
 func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckConvexHull", func(t *testing.T) {
 		got := g.ConvexHull()

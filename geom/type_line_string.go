@@ -216,14 +216,14 @@ func (s LineString) Envelope() (Envelope, bool) {
 // XY value), this is the empty MultiPoint. For non-closed LineStrings, this is
 // the MultiPoint containing the two endpoints of the LineString.
 func (s LineString) Boundary() MultiPoint {
-	var fs []float64
-	if !s.IsClosed() {
-		xy1 := s.seq.GetXY(0)
-		xy2 := s.seq.GetXY(s.seq.Length() - 1)
-		fs = []float64{
-			xy1.X, xy1.Y,
-			xy2.X, xy2.Y,
-		}
+	if s.IsEmpty() || s.IsClosed() {
+		return MultiPoint{}
+	}
+	first := s.seq.GetXY(0)
+	last := s.seq.GetXY(s.seq.Length() - 1)
+	fs := []float64{
+		first.X, first.Y,
+		last.X, last.Y,
 	}
 	return NewMultiPoint(NewSequence(fs, DimXY))
 }
