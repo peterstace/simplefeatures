@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -18,7 +17,7 @@ func Union(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	return binaryOp(a, b, selectUnion)
+	return setOp(a, b, selectUnion)
 }
 
 // Intersection returns a geometry that represents the parts that are common to
@@ -28,7 +27,7 @@ func Intersection(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() || b.IsEmpty() {
 		return Geometry{}, nil
 	}
-	return binaryOp(a, b, selectIntersection)
+	return setOp(a, b, selectIntersection)
 }
 
 // Difference returns a geometry that represents the parts of input geometry A
@@ -42,7 +41,7 @@ func Difference(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	return binaryOp(a, b, selectDifference)
+	return setOp(a, b, selectDifference)
 }
 
 // SymmetricDifference returns a geometry that represents the parts of geometry
@@ -58,10 +57,10 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	return binaryOp(a, b, selectSymmetricDifference)
+	return setOp(a, b, selectSymmetricDifference)
 }
 
-func binaryOp(a, b Geometry, include func([2]label) bool) (Geometry, error) {
+func setOp(a, b Geometry, include func([2]label) bool) (Geometry, error) {
 	overlay, err := createOverlay(a, b)
 	if err != nil {
 		return Geometry{}, fmt.Errorf("internal error creating overlay: %v", err)
@@ -72,28 +71,4 @@ func binaryOp(a, b Geometry, include func([2]label) bool) (Geometry, error) {
 		return Geometry{}, fmt.Errorf("internal error extracting geometry: %v", err)
 	}
 	return g, nil
-}
-
-func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
-	if a.IsGeometryCollection() || b.IsGeometryCollection() {
-		return nil, errors.New("GeometryCollection argument not supported")
-	}
-
-	var points []XY
-	points = appendComponentPoints(points, a)
-	points = appendComponentPoints(points, b)
-	ghosts := spanningTree(points)
-
-	a, b, ghosts, err := reNodeGeometries(a, b, ghosts)
-	if err != nil {
-		return nil, err
-	}
-
-	interactionPoints := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
-
-	dcelA := newDCELFromGeometry(a, ghosts, operandA, interactionPoints)
-	dcelB := newDCELFromGeometry(b, ghosts, operandB, interactionPoints)
-
-	dcelA.overlay(dcelB)
-	return dcelA, nil
 }
