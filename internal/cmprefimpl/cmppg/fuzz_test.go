@@ -49,7 +49,6 @@ func TestFuzz(t *testing.T) {
 			CheckIsEmpty(t, want, g)
 			CheckDimension(t, want, g)
 			CheckEnvelope(t, want, g)
-			CheckBoundary(t, want, g)
 			CheckConvexHull(t, want, g)
 			CheckIsRing(t, want, g)
 			CheckLength(t, want, g)
