@@ -1,9 +1,34 @@
 package geom
 
 import (
+	"errors"
 	"math"
 	"sort"
 )
+
+func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
+	if a.IsGeometryCollection() || b.IsGeometryCollection() {
+		return nil, errors.New("GeometryCollection argument not supported")
+	}
+
+	var points []XY
+	points = appendComponentPoints(points, a)
+	points = appendComponentPoints(points, b)
+	ghosts := spanningTree(points)
+
+	a, b, ghosts, err := reNodeGeometries(a, b, ghosts)
+	if err != nil {
+		return nil, err
+	}
+
+	interactionPoints := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
+
+	dcelA := newDCELFromGeometry(a, ghosts, operandA, interactionPoints)
+	dcelB := newDCELFromGeometry(b, ghosts, operandB, interactionPoints)
+
+	dcelA.overlay(dcelB)
+	return dcelA, nil
+}
 
 func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
 	d.overlayVertices(other)
