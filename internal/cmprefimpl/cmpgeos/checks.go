@@ -395,9 +395,8 @@ func checkBoundary(h *Handle, g geom.Geometry, log *log.Logger) error {
 
 	got := g.Boundary()
 
-	// PostGIS and libgeos have different behaviour for Boundary.
-	// Simplefeatures currently uses the PostGIS behaviour (the difference in
-	// behaviour has to do with the geometry type of empty geometries).
+	// There are some slight differences in the behaviour for empty inputs, so
+	// we don't check these cases (so long as the output is also empty).
 	if got.IsEmpty() && want.IsEmpty() {
 		return nil
 	}
