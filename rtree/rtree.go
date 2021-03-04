@@ -4,11 +4,6 @@ import (
 	"errors"
 )
 
-const (
-	minChildren = 2
-	maxChildren = 4
-)
-
 // node is a node in an R-Tree. nodes can either be leaf nodes holding entries
 // for terminal items, or intermediate nodes holding entries for more nodes.
 type node struct {
