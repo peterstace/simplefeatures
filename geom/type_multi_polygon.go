@@ -278,6 +278,19 @@ func (m MultiPolygon) Value() (driver.Value, error) {
 	return m.AsBinary(), nil
 }
 
+// Scan implements the database/sql.Scanner interface by parsing the src value
+// as WKB (Well Known Binary).
+//
+// If the WKB doesn't represent a MultiPolygon geometry, then an error is returned.
+//
+// It constructs the resultant geometry with no ConstructionOptions. If
+// ConstructionOptions are needed, then the value should be scanned into a byte
+// slice and then UnmarshalWKB called manually (passing in the
+// ConstructionOptions as desired).
+func (m *MultiPolygon) Scan(src interface{}) error {
+	return scanAsType(src, m, TypeMultiPolygon)
+}
+
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
 func (m MultiPolygon) AsBinary() []byte {
 	return m.AppendWKB(nil)

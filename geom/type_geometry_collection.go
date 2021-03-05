@@ -146,6 +146,20 @@ func (c GeometryCollection) Value() (driver.Value, error) {
 	return c.AsBinary(), nil
 }
 
+// Scan implements the database/sql.Scanner interface by parsing the src value
+// as WKB (Well Known Binary).
+//
+// If the WKB doesn't represent a GeometryCollection geometry, then an error is
+// returned.
+//
+// It constructs the resultant geometry with no ConstructionOptions. If
+// ConstructionOptions are needed, then the value should be scanned into a byte
+// slice and then UnmarshalWKB called manually (passing in the
+// ConstructionOptions as desired).
+func (c *GeometryCollection) Scan(src interface{}) error {
+	return scanAsType(src, c, TypeGeometryCollection)
+}
+
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
 func (c GeometryCollection) AsBinary() []byte {
 	return c.AppendWKB(nil)

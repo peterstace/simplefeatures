@@ -103,6 +103,19 @@ func (p Point) Value() (driver.Value, error) {
 	return p.AsBinary(), nil
 }
 
+// Scan implements the database/sql.Scanner interface by parsing the src value
+// as WKB (Well Known Binary).
+//
+// If the WKB doesn't represent a Point geometry, then an error is returned.
+//
+// It constructs the resultant geometry with no ConstructionOptions. If
+// ConstructionOptions are needed, then the value should be scanned into a byte
+// slice and then UnmarshalWKB called manually (passing in the
+// ConstructionOptions as desired).
+func (p *Point) Scan(src interface{}) error {
+	return scanAsType(src, p, TypePoint)
+}
+
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
 func (p Point) AsBinary() []byte {
 	return p.AppendWKB(nil)
