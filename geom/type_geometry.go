@@ -300,6 +300,39 @@ func (g *Geometry) Scan(src interface{}) error {
 	return nil
 }
 
+// scanAsType helps to implement the sql.Scanner interface for concrete
+// geometry types. The src should be the input to Scan, typ should be the
+// concrete geometry type, and dst should be a pointer to the concrete geometry
+// to update (e.g. *LineString).
+func scanAsType(src interface{}, dst interface{}, typ GeometryType) error {
+	var g Geometry
+	if err := g.Scan(src); err != nil {
+		return err
+	}
+	if g.Type() != typ {
+		return fmt.Errorf("scanned geometry is a %s rather than a %s", g.Type(), typ)
+	}
+	switch typ {
+	case TypeGeometryCollection:
+		*dst.(*GeometryCollection) = g.AsGeometryCollection()
+	case TypePoint:
+		*dst.(*Point) = g.AsPoint()
+	case TypeLineString:
+		*dst.(*LineString) = g.AsLineString()
+	case TypePolygon:
+		*dst.(*Polygon) = g.AsPolygon()
+	case TypeMultiPoint:
+		*dst.(*MultiPoint) = g.AsMultiPoint()
+	case TypeMultiLineString:
+		*dst.(*MultiLineString) = g.AsMultiLineString()
+	case TypeMultiPolygon:
+		*dst.(*MultiPolygon) = g.AsMultiPolygon()
+	default:
+		panic("unknown geometry type: " + typ.String())
+	}
+	return nil
+}
+
 // Dimension returns the dimension of the Geometry. This is  0 for Points and
 // MultiPoints, 1 for LineStrings and MultiLineStrings, and 2 for Polygons and
 // MultiPolygons (regardless of whether or not they are empty). For
