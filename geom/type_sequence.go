@@ -93,6 +93,13 @@ func (s Sequence) Reverse() Sequence {
 	return Sequence{s.ctype, reversed}
 }
 
+// Slice creates a new Sequence that is a subslice of this Sequence. Indexing
+// rules work in the same way as Go Slices.
+func (s Sequence) Slice(i, j int) Sequence {
+	stride := s.ctype.Dimension()
+	return Sequence{s.ctype, s.floats[i*stride : j*stride]}
+}
+
 // ForceCoordinatesType returns a new Sequence with a different CoordinatesType. If a
 // dimension is added, then its new value is set to zero for each point
 // location in the Sequence.

@@ -10,17 +10,7 @@ func Simplify(g Geometry, threshold float64) (Geometry, error) {
 	}
 
 	seq := g.AsLineString().Coordinates()
-	n := seq.Length()
-	xys := make([]XY, n)
-	for i := 0; i < n; i++ {
-		xys[i] = seq.GetXY(i)
-	}
-
-	xys = ramerDouglasPeucker(xys, threshold)
-	var floats []float64
-	for _, xy := range xys {
-		floats = append(floats, xy.X, xy.Y)
-	}
+	floats := ramerDouglasPeucker(nil, seq, threshold)
 	seq = NewSequence(floats, DimXY)
 	if seq.Length() > 0 && !hasAtLeast2DistinctPoints(seq) {
 		return LineString{}.AsGeometry(), nil
@@ -31,13 +21,17 @@ func Simplify(g Geometry, threshold float64) (Geometry, error) {
 
 // TODO: handle Z and M.
 
-func ramerDouglasPeucker(seq []XY, threshold float64) []XY {
-	if len(seq) <= 2 {
-		return seq
+func ramerDouglasPeucker(dst []float64, seq Sequence, threshold float64) []float64 {
+	n := seq.Length()
+	if n <= 2 {
+		for i := 0; i < n; i++ {
+			xy := seq.GetXY(i)
+			dst = append(dst, xy.X, xy.Y)
+		}
+		return dst
 	}
 
-	n := len(seq)
-	first, last := seq[0], seq[n-1]
+	first, last := seq.GetXY(0), seq.GetXY(n-1)
 
 	var calcDist func(pt XY) float64
 	if first != last {
@@ -53,19 +47,20 @@ func ramerDouglasPeucker(seq []XY, threshold float64) []XY {
 	var maxDist float64
 	var maxDistIdx int
 	for i := 0; i < n; i++ {
-		if dist := calcDist(seq[i]); dist > maxDist {
+		if dist := calcDist(seq.GetXY(i)); dist > maxDist {
 			maxDist = dist
 			maxDistIdx = i
 		}
 	}
 
 	if maxDist <= threshold {
-		return []XY{first, last}
+		return append(dst, first.X, first.Y, last.X, last.Y)
 	}
 
-	h1 := ramerDouglasPeucker(seq[:maxDistIdx+1], threshold)
-	h2 := ramerDouglasPeucker(seq[maxDistIdx:], threshold)
-	return append(h1, h2[1:]...)
+	dst = ramerDouglasPeucker(dst, seq.Slice(0, maxDistIdx+1), threshold)
+	dst = dst[:len(dst)-2]
+	dst = ramerDouglasPeucker(dst, seq.Slice(maxDistIdx, n), threshold)
+	return dst
 }
 
 // perpendicularDistance is the distance from p to the infinite line going
