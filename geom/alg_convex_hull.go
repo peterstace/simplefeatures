@@ -13,7 +13,8 @@ func convexHull(g Geometry) Geometry {
 		return g.Force2D()
 	}
 	pts := convexHullPointSet(g)
-	hull := grahamScan(pts)
+
+	hull := monotoneChain(pts)
 	switch len(hull) {
 	case 0:
 		return GeometryCollection{}.AsGeometry()
@@ -21,7 +22,7 @@ func convexHull(g Geometry) Geometry {
 		return NewPointFromXY(hull[0]).AsGeometry()
 	case 2:
 		if hull[0] == hull[1] {
-			panic(fmt.Sprintf("bug in grahamScan routine - output 2 coincident points: %v", hull))
+			panic(fmt.Sprintf("bug in monotoneChain routine - output 2 coincident points: %v", hull))
 		}
 		ln := line{hull[0], hull[1]}
 		return ln.asLineString().AsGeometry()
@@ -34,11 +35,11 @@ func convexHull(g Geometry) Geometry {
 		seq := NewSequence(floats, DimXY)
 		ring, err := NewLineString(seq)
 		if err != nil {
-			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid ring: %v", err))
+			panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid ring: %v", err))
 		}
 		poly, err := NewPolygonFromRings([]LineString{ring})
 		if err != nil {
-			panic(fmt.Errorf("bug in grahamScan routine - didn't produce a valid polygon: %v", err))
+			panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid polygon: %v", err))
 		}
 		return poly.AsGeometry()
 	}
@@ -114,135 +115,38 @@ func convexHullPointSet(g Geometry) []XY {
 	}
 }
 
-type pointStack []XY
+func monotoneChain(ps []XY) []XY {
+	// TODO precondition: there must be at least 3 points
 
-func (s *pointStack) push(p XY) {
-	(*s) = append(*s, p)
-}
-
-func (s *pointStack) pop() XY {
-	p := s.top()
-	(*s) = (*s)[:len(*s)-1]
-	return p
-}
-
-func (s *pointStack) top() XY {
-	return (*s)[len(*s)-1]
-}
-
-func (s *pointStack) underTop() XY {
-	return (*s)[len(*s)-2]
-}
-
-// grahamScan returns the convex hull of the input points. It will either
-// represent the empty set (zero points), a point (one point), a line (2
-// points), or a closed polygon (>= 3 points).
-func grahamScan(ps []XY) []XY {
-	if len(ps) <= 1 {
-		return ps
-	}
-
-	sortByPolarAngle(ps)
-
-	// Append the lowest-then-leftmost point so that the polygon will be closed.
-	ps = append(ps, ps[0])
-
-	// Populate the stack with the first 2 distict points.
-	var i int // tracks progress through the ps slice
-	var stack pointStack
-	stack.push(ps[0])
-	i++
-	for i < len(ps) && len(stack) < 2 {
-		if stack.top() != ps[i] {
-			stack.push(ps[i])
-		}
-		i++
-	}
-
-	for i < len(ps) {
-		ori := orientation(stack.underTop(), stack.top(), ps[i])
-		switch ori {
-		case leftTurn:
-			// This point _might_ be part of the convex hull. It will be popped
-			// later if it actually isn't part of the convex hull.
-			stack.push(ps[i])
-		case collinear:
-			// This point is part of the convex hull, so long as it extends the
-			// current line segment (in which case the preceding point is
-			// _not_ part of the convex hull).
-			if distanceSq(stack.underTop(), ps[i]) > distanceSq(stack.underTop(), stack.top()) {
-				stack.pop()
-				stack.push(ps[i])
-			}
-		default:
-			// The preceding point was _not_ part of the convex hull (so it is
-			// popped). Potentially the new point reveals that other previous
-			// points are also not part of the hull (so pop those as well).
-			stack.pop()
-			for orientation(stack.underTop(), stack.top(), ps[i]) != leftTurn {
-				stack.pop()
-			}
-			stack.push(ps[i])
-		}
-		i++
-	}
-	return stack
-}
-
-// sortByPolarAngle sorts the points by their polar angle relative to the
-// lowest-then-leftmost anchor point.
-func sortByPolarAngle(ps []XY) {
-	// the lowest-then-leftmost (anchor) point comes first
-	ltlp := lowestThenLeftmost(ps)
-	ps[ltlp], ps[0] = ps[0], ps[ltlp]
-	anchor := ps[0]
-
-	ps = ps[1:] // only sort the remaining points
 	sort.Slice(ps, func(i, j int) bool {
-		// If any point is equal to the anchor point, then always put it first.
-		// This allows those duplicated points to be removed when the results
-		// stack is initiated.
-		if anchor == ps[i] {
-			return true
+		if ps[i].X != ps[j].X {
+			return ps[i].X < ps[j].X
 		}
-		if anchor == ps[j] {
-			return false
-		}
-
-		// In the normal case, check which order the points are in relative to
-		// the anchor.
-		switch ori := orientation(anchor, ps[i], ps[j]); ori {
-		case leftTurn:
-			return true
-		case rightTurn:
-			return false
-		case collinear:
-			// When collinear, the point closest to the anchor comes first.
-			// This is to prevent some cases where numerical inconsistencies
-			// can occur. For example, calls to orientation(A,B,C) being
-			// collinear but calls to orientation(A,C,B) NOT being collinear.
-			ptI := anchor.Sub(ps[i])
-			ptJ := anchor.Sub(ps[j])
-			return ptI.Dot(ptI) < ptJ.Dot(ptJ)
-		default:
-			panic(ori)
-		}
+		return ps[i].Y < ps[j].Y
 	})
-}
 
-// lowestThenLeftmost finds the index of the lowest-then-leftmost point.
-func lowestThenLeftmost(ps []XY) int {
-	rpi := 0
-	for i := 1; i < len(ps); i++ {
-		if ps[i].Y < ps[rpi].Y || (ps[i].Y == ps[rpi].Y && ps[i].X < ps[rpi].X) {
-			rpi = i
+	var U, L []XY
+
+	for _, p := range ps {
+		for len(L) >= 2 && orientation(L[len(L)-2], L[len(L)-1], p) != leftTurn {
+			L = L[:len(L)-1]
 		}
+		L = append(L, p)
 	}
-	return rpi
-}
 
-// distanceSq gives the square of the distance between p and q.
-func distanceSq(p, q XY) float64 {
-	pSubQ := p.Sub(q)
-	return pSubQ.Dot(pSubQ)
+	for i := len(ps) - 1; i >= 0; i-- {
+		for len(U) >= 2 && orientation(U[len(U)-2], U[len(U)-1], ps[i]) != leftTurn {
+			U = U[:len(U)-1]
+		}
+		U = append(U, ps[i])
+	}
+
+	if len(L) > 0 {
+		L = L[:len(L)-1]
+	}
+	if len(U) > 0 {
+		U = U[:len(U)-1]
+	}
+
+	return append(L, U...)
 }
