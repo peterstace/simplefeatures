@@ -8,41 +8,61 @@ import (
 func convexHull(g Geometry) Geometry {
 	if g.IsEmpty() {
 		// Any empty geometry could be returned here to to give correct
-		// behaviour. However, to replicate PostGIS behaviour, we always return
-		// the original geometry.
+		// behaviour. However, to replicate PostGIS/GEOS behaviour, we always
+		// return the original geometry.
 		return g.Force2D()
 	}
+
 	pts := convexHullPointSet(g)
 
-	hull := monotoneChain(pts)
-	switch len(hull) {
-	case 0:
-		return GeometryCollection{}.AsGeometry()
-	case 1:
-		return NewPointFromXY(hull[0]).AsGeometry()
-	case 2:
-		if hull[0] == hull[1] {
-			panic(fmt.Sprintf("bug in monotoneChain routine - output 2 coincident points: %v", hull))
-		}
-		ln := line{hull[0], hull[1]}
-		return ln.asLineString().AsGeometry()
-	default:
-		floats := make([]float64, 2*len(hull))
-		for i := range hull {
-			floats[2*i+0] = hull[i].X
-			floats[2*i+1] = hull[i].Y
-		}
-		seq := NewSequence(floats, DimXY)
-		ring, err := NewLineString(seq)
-		if err != nil {
-			panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid ring: %v", err))
-		}
-		poly, err := NewPolygonFromRings([]LineString{ring})
-		if err != nil {
-			panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid polygon: %v", err))
-		}
-		return poly.AsGeometry()
+	if !hasAtLeast2DistinctPoints(pts) {
+		return NewPointFromXY(pts[0]).AsGeometry()
 	}
+
+	hull := monotoneChain(pts)
+
+	if half, ok := isLinearHull(hull); ok {
+		return line{half[0], half[len(half)-1]}.asLineString().AsGeometry()
+	}
+
+	floats := make([]float64, 2*len(hull))
+	for i := range hull {
+		floats[2*i+0] = hull[i].X
+		floats[2*i+1] = hull[i].Y
+	}
+	seq := NewSequence(floats, DimXY)
+	ring, err := NewLineString(seq)
+	if err != nil {
+		panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid ring: %v", err))
+	}
+	poly, err := NewPolygonFromRings([]LineString{ring})
+	if err != nil {
+		panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid polygon: %v", err))
+	}
+	return poly.AsGeometry()
+}
+
+func hasAtLeast2DistinctPoints(pts []XY) bool {
+	if len(pts) <= 1 {
+		return false
+	}
+	for _, pt := range pts[1:] {
+		if pt != pts[0] {
+			return true
+		}
+	}
+	return false
+}
+
+func isLinearHull(hull []XY) ([]XY, bool) {
+	if len(hull)%2 == 0 {
+		return nil, false
+	}
+	i := len(hull) / 2
+	if hull[i-1] != hull[i+1] {
+		return nil, false
+	}
+	return hull[:i+1], true
 }
 
 func convexHullPointSet(g Geometry) []XY {
@@ -115,38 +135,33 @@ func convexHullPointSet(g Geometry) []XY {
 	}
 }
 
-func monotoneChain(ps []XY) []XY {
-	// TODO precondition: there must be at least 3 points
-
-	sort.Slice(ps, func(i, j int) bool {
-		if ps[i].X != ps[j].X {
-			return ps[i].X < ps[j].X
+func monotoneChain(pts []XY) []XY {
+	sort.Slice(pts, func(i, j int) bool {
+		if pts[i].X != pts[j].X {
+			return pts[i].X < pts[j].X
 		}
-		return ps[i].Y < ps[j].Y
+		return pts[i].Y < pts[j].Y
 	})
 
-	var U, L []XY
-
-	for _, p := range ps {
-		for len(L) >= 2 && orientation(L[len(L)-2], L[len(L)-1], p) != leftTurn {
-			L = L[:len(L)-1]
+	// Calculate lower hull.
+	var lower []XY
+	for _, p := range pts {
+		for len(lower) >= 2 && orientation(lower[len(lower)-2], lower[len(lower)-1], p) != leftTurn {
+			lower = lower[:len(lower)-1]
 		}
-		L = append(L, p)
+		lower = append(lower, p)
 	}
 
-	for i := len(ps) - 1; i >= 0; i-- {
-		for len(U) >= 2 && orientation(U[len(U)-2], U[len(U)-1], ps[i]) != leftTurn {
-			U = U[:len(U)-1]
+	// Calculate upper hull.
+	var upper []XY
+	for i := len(pts) - 1; i >= 0; i-- {
+		for len(upper) >= 2 && orientation(upper[len(upper)-2], upper[len(upper)-1], pts[i]) != leftTurn {
+			upper = upper[:len(upper)-1]
 		}
-		U = append(U, ps[i])
+		upper = append(upper, pts[i])
 	}
 
-	if len(L) > 0 {
-		L = L[:len(L)-1]
-	}
-	if len(U) > 0 {
-		U = U[:len(U)-1]
-	}
-
-	return append(L, U...)
+	// Join the upper and lower hulls, ignoring the first point in the upper
+	// hull since it will be same as the last point in the lower hull.
+	return append(lower, upper[1:]...)
 }
