@@ -8,8 +8,8 @@ import (
 func convexHull(g Geometry) Geometry {
 	if g.IsEmpty() {
 		// Any empty geometry could be returned here to to give correct
-		// behaviour. However, to replicate PostGIS/GEOS behaviour, we always
-		// return the original geometry.
+		// behaviour. However, to replicate GEOS behaviour, we always return
+		// the original geometry.
 		return g.Force2D()
 	}
 
