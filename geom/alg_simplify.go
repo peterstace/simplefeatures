@@ -5,18 +5,35 @@ import "errors"
 // Simplify returns a simplified version of the geometry using the
 // Ramer-Douglas-Peucker algorithm.
 func Simplify(g Geometry, threshold float64) (Geometry, error) {
-	if !g.IsLineString() {
+	switch g.gtype {
+	case TypeGeometryCollection:
 		return Geometry{}, errors.New("not implemented")
+	case TypePoint:
+		return Geometry{}, errors.New("not implemented")
+	case TypeLineString:
+		ls, err := simplifyLineString(g.AsLineString(), threshold)
+		return ls.AsGeometry(), err
+	case TypePolygon:
+		return Geometry{}, errors.New("not implemented")
+	case TypeMultiPoint:
+		return Geometry{}, errors.New("not implemented")
+	case TypeMultiLineString:
+		return Geometry{}, errors.New("not implemented")
+	case TypeMultiPolygon:
+		return Geometry{}, errors.New("not implemented")
+	default:
+		panic("unknown geometry: " + g.gtype.String())
 	}
+}
 
-	seq := g.AsLineString().Coordinates()
+func simplifyLineString(ls LineString, threshold float64) (LineString, error) {
+	seq := ls.Coordinates()
 	floats := ramerDouglasPeucker(nil, seq, threshold)
 	seq = NewSequence(floats, DimXY)
 	if seq.Length() > 0 && !hasAtLeast2DistinctPoints(seq) {
-		return LineString{}.AsGeometry(), nil
+		return LineString{}, nil
 	}
-	ls, err := NewLineString(seq)
-	return ls.AsGeometry(), err
+	return NewLineString(seq)
 }
 
 // TODO: handle Z and M.
