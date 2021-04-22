@@ -9,14 +9,14 @@ func Simplify(g Geometry, threshold float64) (Geometry, error) {
 	case TypeGeometryCollection:
 		return Geometry{}, errors.New("not implemented")
 	case TypePoint:
-		return Geometry{}, errors.New("not implemented")
+		return g, nil
 	case TypeLineString:
 		ls, err := simplifyLineString(g.AsLineString(), threshold)
 		return ls.AsGeometry(), err
 	case TypePolygon:
 		return Geometry{}, errors.New("not implemented")
 	case TypeMultiPoint:
-		return Geometry{}, errors.New("not implemented")
+		return g, nil
 	case TypeMultiLineString:
 		return Geometry{}, errors.New("not implemented")
 	case TypeMultiPolygon:

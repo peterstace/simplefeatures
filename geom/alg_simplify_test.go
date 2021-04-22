@@ -13,6 +13,18 @@ func TestSimplify(t *testing.T) {
 		threshold float64
 		output    string
 	}{
+		// Points and MultiPoints pass through unchanged.
+		{"POINT(0 1)", 0, "POINT(0 1)"},
+		{"POINT(0 1)", 0.5, "POINT(0 1)"},
+		{"POINT(0 1)", 1, "POINT(0 1)"},
+		{"POINT(0 1)", 2, "POINT(0 1)"},
+		{"POINT EMPTY", 0, "POINT EMPTY"},
+		{"POINT EMPTY", 0.5, "POINT EMPTY"},
+		{"POINT EMPTY", 1, "POINT EMPTY"},
+		{"POINT EMPTY", 2, "POINT EMPTY"},
+		{"MULTIPOINT(0 0,1 1)", 0.5, "MULTIPOINT(0 0,1 1)"},
+		{"MULTIPOINT(0 0,1 1)", 2, "MULTIPOINT(0 0,1 1)"},
+
 		{"LINESTRING(0 0,1 1)", 0.0, "LINESTRING(0 0,1 1)"},
 		{"LINESTRING(0 0,1 1)", 1.0, "LINESTRING(0 0,1 1)"},
 		{"LINESTRING(0 0,1 1)", 2.0, "LINESTRING(0 0,1 1)"},
