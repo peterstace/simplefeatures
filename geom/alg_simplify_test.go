@@ -40,6 +40,12 @@ func TestSimplify(t *testing.T) {
 		{"LINESTRING(0 0,0 1,1 0,0 0)", 0.5, "LINESTRING(0 0,0 1,1 0,0 0)"},
 		{"LINESTRING(0 0,0 1,1 0,0 0)", 1.0, "LINESTRING EMPTY"},
 		{"LINESTRING(0 0,0 1,1 0,0 0)", 1.5, "LINESTRING EMPTY"},
+
+		// For MultiLineStrings, each child is treated separately.
+		{"MULTILINESTRING((0 0,1 1),(0 0,0 1,1 1,1 0))", 1.5, "MULTILINESTRING((0 0,1 1),(0 0,1 0))"},
+		{"MULTILINESTRING((0 0,0 1,1 0,0 0))", 1.5, "MULTILINESTRING EMPTY"},
+		{"MULTILINESTRING((0 0,0 1,1 0,0 0),(0 0,0 1,1 1,1 0))", 1.5, "MULTILINESTRING((0 0,1 0))"},
+		{"MULTILINESTRING((0 0,0 1,1 1,1 0),(0 0,0 1,1 0,0 0))", 1.5, "MULTILINESTRING((0 0,1 0))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in := geomFromWKT(t, tc.input)

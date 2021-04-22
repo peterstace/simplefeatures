@@ -18,7 +18,8 @@ func Simplify(g Geometry, threshold float64) (Geometry, error) {
 	case TypeMultiPoint:
 		return g, nil
 	case TypeMultiLineString:
-		return Geometry{}, errors.New("not implemented")
+		mls, err := simplifyMultiLineString(g.AsMultiLineString(), threshold)
+		return mls.AsGeometry(), err
 	case TypeMultiPolygon:
 		return Geometry{}, errors.New("not implemented")
 	default:
@@ -34,6 +35,22 @@ func simplifyLineString(ls LineString, threshold float64) (LineString, error) {
 		return LineString{}, nil
 	}
 	return NewLineString(seq)
+}
+
+func simplifyMultiLineString(mls MultiLineString, threshold float64) (MultiLineString, error) {
+	n := mls.NumLineStrings()
+	lss := make([]LineString, 0, n)
+	for i := 0; i < n; i++ {
+		ls := mls.LineStringN(i)
+		ls, err := simplifyLineString(ls, threshold)
+		if err != nil {
+			return MultiLineString{}, err
+		}
+		if !ls.IsEmpty() {
+			lss = append(lss, ls)
+		}
+	}
+	return NewMultiLineStringFromLineStrings(lss), nil
 }
 
 // TODO: handle Z and M.
