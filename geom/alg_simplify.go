@@ -24,7 +24,8 @@ func Simplify(g Geometry, threshold float64) (Geometry, error) {
 		mls, err := simplifyMultiLineString(g.AsMultiLineString(), threshold)
 		return mls.AsGeometry(), err
 	case TypeMultiPolygon:
-		return Geometry{}, errors.New("not implemented")
+		mp, err := simplifyMultiPolygon(g.AsMultiPolygon(), threshold)
+		return mp.AsGeometry(), err
 	default:
 		panic("unknown geometry: " + g.gtype.String())
 	}
@@ -78,6 +79,21 @@ func simplifyPolygon(poly Polygon, threshold float64) (Polygon, error) {
 		}
 	}
 	return NewPolygonFromRings(rings)
+}
+
+func simplifyMultiPolygon(mp MultiPolygon, threshold float64) (MultiPolygon, error) {
+	n := mp.NumPolygons()
+	polys := make([]Polygon, 0, n)
+	for i := 0; i < n; i++ {
+		poly, err := simplifyPolygon(mp.PolygonN(i), threshold)
+		if err != nil {
+			return MultiPolygon{}, err
+		}
+		if !poly.IsEmpty() {
+			polys = append(polys, poly)
+		}
+	}
+	return NewMultiPolygonFromPolygons(polys)
 }
 
 // TODO: handle Z and M.

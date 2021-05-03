@@ -55,6 +55,15 @@ func TestSimplify(t *testing.T) {
 		{"MULTILINESTRING((0 0,0 1,1 0,0 0))", 1.5, "MULTILINESTRING EMPTY"},
 		{"MULTILINESTRING((0 0,0 1,1 0,0 0),(0 0,0 1,1 1,1 0))", 1.5, "MULTILINESTRING((0 0,1 0))"},
 		{"MULTILINESTRING((0 0,0 1,1 1,1 0),(0 0,0 1,1 0,0 0))", 1.5, "MULTILINESTRING((0 0,1 0))"},
+
+		// MultiPolygons
+		{"MULTIPOLYGON EMPTY", 1.0, "MULTIPOLYGON EMPTY"},
+		{"MULTIPOLYGON(EMPTY)", 1.0, "MULTIPOLYGON EMPTY"},
+		{"MULTIPOLYGON(EMPTY,EMPTY)", 1.0, "MULTIPOLYGON EMPTY"},
+		{"MULTIPOLYGON(EMPTY,((0 0,0 2,2 2,2 0,0 0)))", 1.0, "MULTIPOLYGON(((0 0,0 2,2 2,2 0,0 0)))"},
+		{"MULTIPOLYGON(((0 0,0 2,2 2,2 0,0 0)),EMPTY)", 1.0, "MULTIPOLYGON(((0 0,0 2,2 2,2 0,0 0)))"},
+		{"MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))", 1.0, "MULTIPOLYGON EMPTY"},
+		{"MULTIPOLYGON(((0 0,0 2,2 2,2 0,0 0)))", 1.0, "MULTIPOLYGON(((0 0,0 2,2 2,2 0,0 0)))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in := geomFromWKT(t, tc.input)
