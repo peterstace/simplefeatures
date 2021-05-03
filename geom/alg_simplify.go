@@ -1,6 +1,8 @@
 package geom
 
-import "errors"
+import (
+	"errors"
+)
 
 // Simplify returns a simplified version of the geometry using the
 // Ramer-Douglas-Peucker algorithm.
@@ -14,7 +16,8 @@ func Simplify(g Geometry, threshold float64) (Geometry, error) {
 		ls, err := simplifyLineString(g.AsLineString(), threshold)
 		return ls.AsGeometry(), err
 	case TypePolygon:
-		return Geometry{}, errors.New("not implemented")
+		poly, err := simplifyPolygon(g.AsPolygon(), threshold)
+		return poly.AsGeometry(), err
 	case TypeMultiPoint:
 		return g, nil
 	case TypeMultiLineString:
@@ -51,6 +54,30 @@ func simplifyMultiLineString(mls MultiLineString, threshold float64) (MultiLineS
 		}
 	}
 	return NewMultiLineStringFromLineStrings(lss), nil
+}
+
+func simplifyPolygon(poly Polygon, threshold float64) (Polygon, error) {
+	exterior, err := simplifyLineString(poly.ExteriorRing(), threshold)
+	if err != nil {
+		return Polygon{}, err
+	}
+	if !exterior.IsRing() {
+		return Polygon{}, nil
+	}
+
+	n := poly.NumInteriorRings()
+	rings := make([]LineString, 0, n+1)
+	rings = append(rings, exterior)
+	for i := 0; i < n; i++ {
+		interior, err := simplifyLineString(poly.InteriorRingN(i), threshold)
+		if err != nil {
+			return Polygon{}, err
+		}
+		if interior.IsRing() {
+			rings = append(rings, interior)
+		}
+	}
+	return NewPolygonFromRings(rings)
 }
 
 // TODO: handle Z and M.

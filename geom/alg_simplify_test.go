@@ -25,6 +25,8 @@ func TestSimplify(t *testing.T) {
 		{"MULTIPOINT(0 0,1 1)", 0.5, "MULTIPOINT(0 0,1 1)"},
 		{"MULTIPOINT(0 0,1 1)", 2, "MULTIPOINT(0 0,1 1)"},
 
+		// LineStrings
+
 		{"LINESTRING(0 0,1 1)", 0.0, "LINESTRING(0 0,1 1)"},
 		{"LINESTRING(0 0,1 1)", 1.0, "LINESTRING(0 0,1 1)"},
 		{"LINESTRING(0 0,1 1)", 2.0, "LINESTRING(0 0,1 1)"},
@@ -40,6 +42,13 @@ func TestSimplify(t *testing.T) {
 		{"LINESTRING(0 0,0 1,1 0,0 0)", 0.5, "LINESTRING(0 0,0 1,1 0,0 0)"},
 		{"LINESTRING(0 0,0 1,1 0,0 0)", 1.0, "LINESTRING EMPTY"},
 		{"LINESTRING(0 0,0 1,1 0,0 0)", 1.5, "LINESTRING EMPTY"},
+
+		// Polygons
+		{"POLYGON EMPTY", 1.0, "POLYGON EMPTY"},
+		{"POLYGON((0 0,0 1,1 0,0 0))", 1.0, "POLYGON EMPTY"},
+		{"POLYGON((0 0,0 2,2 0,0 0))", 1.0, "POLYGON((0 0,0 2,2 0,0 0))"},
+		{"POLYGON((2 2,2 3,3 3,3 2,2 2))", 1.0, "POLYGON EMPTY"},
+		{"POLYGON((0 0,0 5,5 5,5 0,0 0),(2 2,2 3,3 3,3 2,2 2)) ", 1.0, "POLYGON((0 0,0 5,5 5,5 0,0 0))"},
 
 		// For MultiLineStrings, each child is treated separately.
 		{"MULTILINESTRING((0 0,1 1),(0 0,0 1,1 1,1 0))", 1.5, "MULTILINESTRING((0 0,1 1),(0 0,1 0))"},
