@@ -1,15 +1,12 @@
 package geom
 
-import (
-	"errors"
-)
-
 // Simplify returns a simplified version of the geometry using the
 // Ramer-Douglas-Peucker algorithm.
 func Simplify(g Geometry, threshold float64) (Geometry, error) {
 	switch g.gtype {
 	case TypeGeometryCollection:
-		return Geometry{}, errors.New("not implemented")
+		gc, err := simplifyGeometryCollection(g.AsGeometryCollection(), threshold)
+		return gc.AsGeometry(), err
 	case TypePoint:
 		return g, nil
 	case TypeLineString:
@@ -94,6 +91,19 @@ func simplifyMultiPolygon(mp MultiPolygon, threshold float64) (MultiPolygon, err
 		}
 	}
 	return NewMultiPolygonFromPolygons(polys)
+}
+
+func simplifyGeometryCollection(gc GeometryCollection, threshold float64) (GeometryCollection, error) {
+	n := gc.NumGeometries()
+	geoms := make([]Geometry, n)
+	for i := 0; i < n; i++ {
+		var err error
+		geoms[i], err = Simplify(gc.GeometryN(i), threshold)
+		if err != nil {
+			return GeometryCollection{}, err
+		}
+	}
+	return NewGeometryCollection(geoms), nil
 }
 
 // TODO: handle Z and M.
