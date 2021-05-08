@@ -82,6 +82,11 @@ func unaryChecks(h *Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkPointOnSurface(h, g, log); err != nil {
 		return err
 	}
+	log.Println("checking Simplify")
+	if err := checkSimplify(h, g, log); err != nil {
+		return err
+	}
+
 	return nil
 
 	// TODO: Reverse isn't checked yet. There is some significant behaviour
@@ -553,6 +558,30 @@ func checkPointOnSurface(h *Handle, g geom.Geometry, log *log.Logger) error {
 		}
 	}
 
+	return nil
+}
+
+func checkSimplify(h *Handle, g geom.Geometry, log *log.Logger) error {
+	const threshold = 1.0
+
+	got, err := geos.Simplify(g, threshold)
+	if err != nil {
+		// TODO: Is it sometimes OK to get an error? Yes, probably.
+		return err
+	}
+
+	want, err := h.Simplify(g, threshold)
+	if err != nil {
+		// TODO: Is it sometimes OK to get an error? Yes, probably.
+		return err
+	}
+
+	if !geom.ExactEquals(got, want) {
+		log.Printf("Simplify results not equal")
+		log.Printf("want: %v", want.AsText())
+		log.Printf("got:  %v", got.AsText())
+		return mismatchErr
+	}
 	return nil
 }
 
