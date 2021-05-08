@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.27.0
+
+2021-04-11
+
+- Changes the `Boundary` method to use GEOS style behaviour rather than PostGIS
+  style behaviour for empty geometries. This means that `Boundary` now always
+  returns a consistent geometry type.
+
+- Adds back the RTree `Insert` and `Delete` methods. These were previously
+  removed in v0.25.1.
+
+- Adds `Scan` methods to each concrete geometry type, so that that they
+  implement the `database/sql.Scanner` interface.
+
 ## v0.26.0
 
 2021-02-19
