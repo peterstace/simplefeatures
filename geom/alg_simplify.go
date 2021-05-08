@@ -32,7 +32,7 @@ func simplifyLineString(ls LineString, threshold float64) (LineString, error) {
 	seq := ls.Coordinates()
 	floats := ramerDouglasPeucker(nil, seq, threshold)
 	seq = NewSequence(floats, DimXY)
-	if seq.Length() > 0 && !hasAtLeast2DistinctPoints(seq) {
+	if seq.Length() > 0 && !hasAtLeast2DistinctPointsInSeq(seq) {
 		return LineString{}, nil
 	}
 	return NewLineString(seq)

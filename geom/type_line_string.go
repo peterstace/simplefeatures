@@ -30,7 +30,7 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 	}
 
 	// Valid non-empty LineStrings must have at least 2 *distinct* points.
-	if hasAtLeast2DistinctPoints(seq) {
+	if hasAtLeast2DistinctPointsInSeq(seq) {
 		return LineString{seq}, nil
 	}
 
@@ -42,7 +42,7 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 		"must contain at least 2 points with distinct XY values")
 }
 
-func hasAtLeast2DistinctPoints(seq Sequence) bool {
+func hasAtLeast2DistinctPointsInSeq(seq Sequence) bool {
 	n := seq.Length()
 	if n == 0 {
 		return false

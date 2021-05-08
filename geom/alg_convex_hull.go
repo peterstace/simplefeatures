@@ -16,7 +16,7 @@ func convexHull(g Geometry) Geometry {
 	pts := convexHullPointSet(g)
 
 	// Check for point case:
-	if !hasAtLeast2DistinctPoints(pts) {
+	if !hasAtLeast2DistinctPointsInXYs(pts) {
 		return NewPointFromXY(pts[0]).AsGeometry()
 	}
 
@@ -47,7 +47,7 @@ func convexHull(g Geometry) Geometry {
 	return poly.AsGeometry()
 }
 
-func hasAtLeast2DistinctPoints(pts []XY) bool {
+func hasAtLeast2DistinctPointsInXYs(pts []XY) bool {
 	if len(pts) <= 1 {
 		return false
 	}
