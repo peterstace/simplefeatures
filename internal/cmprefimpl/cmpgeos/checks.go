@@ -564,19 +564,22 @@ func checkPointOnSurface(h *Handle, g geom.Geometry, log *log.Logger) error {
 func checkSimplify(h *Handle, g geom.Geometry, log *log.Logger) error {
 	const threshold = 1.0
 
-	got, err := geos.Simplify(g, threshold)
-	if err != nil {
-		// TODO: Is it sometimes OK to get an error? Yes, probably.
-		return err
-	}
-
+	// If we get an error from GEOS, then we may or may not get an error from
+	// simplefeatures.
 	want, err := h.Simplify(g, threshold)
-	if err != nil {
-		// TODO: Is it sometimes OK to get an error? Yes, probably.
-		return err
+	wantIsValid := err == nil
+
+	// Even if GEOS couldn't simplify, we still want to attempt to simplify
+	// with simplefeatures to ensure it doesn't crash (even if it may give an
+	// error).
+	got, err := geos.Simplify(g, threshold)
+	gotIsValid := err == nil
+
+	if wantIsValid && !gotIsValid {
+		return fmt.Errorf("GEOS could simplify but simplefeatures could not: %w", err)
 	}
 
-	if !geom.ExactEquals(got, want) {
+	if gotIsValid && wantIsValid && !geom.ExactEquals(got, want) {
 		log.Printf("Simplify results not equal")
 		log.Printf("want: %v", want.AsText())
 		log.Printf("got:  %v", got.AsText())
