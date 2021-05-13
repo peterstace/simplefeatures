@@ -26,7 +26,6 @@ func TestSimplify(t *testing.T) {
 		{"MULTIPOINT(0 0,1 1)", 2, "MULTIPOINT(0 0,1 1)"},
 
 		// LineStrings
-
 		{"LINESTRING(0 0,1 1)", 0.0, "LINESTRING(0 0,1 1)"},
 		{"LINESTRING(0 0,1 1)", 1.0, "LINESTRING(0 0,1 1)"},
 		{"LINESTRING(0 0,1 1)", 2.0, "LINESTRING(0 0,1 1)"},
@@ -85,6 +84,22 @@ func TestSimplify(t *testing.T) {
 			expectNoErr(t, err)
 			t.Logf("got:       %v", got.AsText())
 			expectGeomEq(t, got, want, geom.IgnoreOrder)
+		})
+	}
+}
+
+func TestSimplifyErrorCases(t *testing.T) {
+	for i, tc := range []struct {
+		wkt       string
+		threshold float64
+	}{
+		// Simplification results in the inner and outer rings intersecting.
+		{"POLYGON((0 0,0 1,-0.5 1.5,0 2,0 3,3 3,3 0,0 0),(-0.1 1.5,2 2,2 1,-0.1 1.5))", 0.5},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			in := geomFromWKT(t, tc.wkt)
+			_, err := geom.Simplify(in, tc.threshold)
+			expectErr(t, err)
 		})
 	}
 }
