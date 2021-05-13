@@ -1,49 +1,52 @@
 package geom
 
 // Simplify returns a simplified version of the geometry using the
-// Ramer-Douglas-Peucker algorithm.
-func Simplify(g Geometry, threshold float64) (Geometry, error) {
+// Ramer-Douglas-Peucker algorithm. Sometimes a simplified geometry can become
+// invalid, in which case an error is returned rather than attempting to fix
+// the geometry. Validation of the result can be skipped by making use of the
+// geometry constructor options.
+func Simplify(g Geometry, threshold float64, opts ...ConstructorOption) (Geometry, error) {
 	switch g.gtype {
 	case TypeGeometryCollection:
-		gc, err := simplifyGeometryCollection(g.AsGeometryCollection(), threshold)
+		gc, err := simplifyGeometryCollection(g.AsGeometryCollection(), threshold, opts)
 		return gc.AsGeometry(), err
 	case TypePoint:
 		return g, nil
 	case TypeLineString:
-		ls, err := simplifyLineString(g.AsLineString(), threshold)
+		ls, err := simplifyLineString(g.AsLineString(), threshold, opts)
 		return ls.AsGeometry(), err
 	case TypePolygon:
-		poly, err := simplifyPolygon(g.AsPolygon(), threshold)
+		poly, err := simplifyPolygon(g.AsPolygon(), threshold, opts)
 		return poly.AsGeometry(), err
 	case TypeMultiPoint:
 		return g, nil
 	case TypeMultiLineString:
-		mls, err := simplifyMultiLineString(g.AsMultiLineString(), threshold)
+		mls, err := simplifyMultiLineString(g.AsMultiLineString(), threshold, opts)
 		return mls.AsGeometry(), err
 	case TypeMultiPolygon:
-		mp, err := simplifyMultiPolygon(g.AsMultiPolygon(), threshold)
+		mp, err := simplifyMultiPolygon(g.AsMultiPolygon(), threshold, opts)
 		return mp.AsGeometry(), err
 	default:
 		panic("unknown geometry: " + g.gtype.String())
 	}
 }
 
-func simplifyLineString(ls LineString, threshold float64) (LineString, error) {
+func simplifyLineString(ls LineString, threshold float64, opts []ConstructorOption) (LineString, error) {
 	seq := ls.Coordinates()
 	floats := ramerDouglasPeucker(nil, seq, threshold)
 	seq = NewSequence(floats, seq.CoordinatesType())
 	if seq.Length() > 0 && !hasAtLeast2DistinctPointsInSeq(seq) {
 		return LineString{}, nil
 	}
-	return NewLineString(seq)
+	return NewLineString(seq, opts...)
 }
 
-func simplifyMultiLineString(mls MultiLineString, threshold float64) (MultiLineString, error) {
+func simplifyMultiLineString(mls MultiLineString, threshold float64, opts []ConstructorOption) (MultiLineString, error) {
 	n := mls.NumLineStrings()
 	lss := make([]LineString, 0, n)
 	for i := 0; i < n; i++ {
 		ls := mls.LineStringN(i)
-		ls, err := simplifyLineString(ls, threshold)
+		ls, err := simplifyLineString(ls, threshold, opts)
 		if err != nil {
 			return MultiLineString{}, err
 		}
@@ -51,11 +54,11 @@ func simplifyMultiLineString(mls MultiLineString, threshold float64) (MultiLineS
 			lss = append(lss, ls)
 		}
 	}
-	return NewMultiLineStringFromLineStrings(lss), nil
+	return NewMultiLineStringFromLineStrings(lss, opts...), nil
 }
 
-func simplifyPolygon(poly Polygon, threshold float64) (Polygon, error) {
-	exterior, err := simplifyLineString(poly.ExteriorRing(), threshold)
+func simplifyPolygon(poly Polygon, threshold float64, opts []ConstructorOption) (Polygon, error) {
+	exterior, err := simplifyLineString(poly.ExteriorRing(), threshold, opts)
 	if err != nil {
 		return Polygon{}, err
 	}
@@ -67,7 +70,7 @@ func simplifyPolygon(poly Polygon, threshold float64) (Polygon, error) {
 	rings := make([]LineString, 0, n+1)
 	rings = append(rings, exterior)
 	for i := 0; i < n; i++ {
-		interior, err := simplifyLineString(poly.InteriorRingN(i), threshold)
+		interior, err := simplifyLineString(poly.InteriorRingN(i), threshold, opts)
 		if err != nil {
 			return Polygon{}, err
 		}
@@ -75,14 +78,14 @@ func simplifyPolygon(poly Polygon, threshold float64) (Polygon, error) {
 			rings = append(rings, interior)
 		}
 	}
-	return NewPolygonFromRings(rings)
+	return NewPolygonFromRings(rings, opts...)
 }
 
-func simplifyMultiPolygon(mp MultiPolygon, threshold float64) (MultiPolygon, error) {
+func simplifyMultiPolygon(mp MultiPolygon, threshold float64, opts []ConstructorOption) (MultiPolygon, error) {
 	n := mp.NumPolygons()
 	polys := make([]Polygon, 0, n)
 	for i := 0; i < n; i++ {
-		poly, err := simplifyPolygon(mp.PolygonN(i), threshold)
+		poly, err := simplifyPolygon(mp.PolygonN(i), threshold, opts)
 		if err != nil {
 			return MultiPolygon{}, err
 		}
@@ -90,10 +93,10 @@ func simplifyMultiPolygon(mp MultiPolygon, threshold float64) (MultiPolygon, err
 			polys = append(polys, poly)
 		}
 	}
-	return NewMultiPolygonFromPolygons(polys)
+	return NewMultiPolygonFromPolygons(polys, opts...)
 }
 
-func simplifyGeometryCollection(gc GeometryCollection, threshold float64) (GeometryCollection, error) {
+func simplifyGeometryCollection(gc GeometryCollection, threshold float64, opts []ConstructorOption) (GeometryCollection, error) {
 	n := gc.NumGeometries()
 	geoms := make([]Geometry, n)
 	for i := 0; i < n; i++ {
@@ -103,7 +106,7 @@ func simplifyGeometryCollection(gc GeometryCollection, threshold float64) (Geome
 			return GeometryCollection{}, err
 		}
 	}
-	return NewGeometryCollection(geoms), nil
+	return NewGeometryCollection(geoms, opts...), nil
 }
 
 func ramerDouglasPeucker(dst []float64, seq Sequence, threshold float64) []float64 {
