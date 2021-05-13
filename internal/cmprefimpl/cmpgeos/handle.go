@@ -703,6 +703,9 @@ func (h *Handle) Simplify(g geom.Geometry, threshold float64) (geom.Geometry, er
 	defer C.GEOSGeom_destroy(gh)
 
 	simp := C.GEOSSimplify_r(h.context, gh, C.double(threshold))
+	if simp == nil {
+		return geom.Geometry{}, h.err()
+	}
 	defer C.GEOSGeom_destroy_r(h.context, simp)
 
 	return h.decodeGeomHandle(simp)
