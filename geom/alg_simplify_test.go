@@ -73,6 +73,21 @@ func TestSimplify(t *testing.T) {
 			1.0,
 			"GEOMETRYCOLLECTION(POINT(1 2),POLYGON EMPTY)",
 		},
+
+		// Z, M, and ZM
+		{"POINT Z(0 1 10)", 0, "POINT Z(0 1 10)"},
+		{"POINT M(0 1 10)", 0, "POINT M(0 1 10)"},
+		{"POINT ZM(0 1 10 11)", 0, "POINT ZM(0 1 10 11)"},
+		{"LINESTRING Z(0 0 10,1 1 20)", 0.0, "LINESTRING Z(0 0 10,1 1 20)"},
+		{"LINESTRING M(0 0 10,1 1 20)", 0.0, "LINESTRING M(0 0 10,1 1 20)"},
+		{"LINESTRING ZM(0 0 10 11,1 1 20 21)", 0.0, "LINESTRING ZM(0 0 10 11,1 1 20 21)"},
+		{"LINESTRING Z(0 0 10,1 1 20,2 0 30)", 1.0, "LINESTRING Z(0 0 10,2 0 30)"},
+		{"LINESTRING M(0 0 10,1 1 20,2 0 30)", 1.0, "LINESTRING M(0 0 10,2 0 30)"},
+		{"LINESTRING ZM(0 0 10 11,1 1 20 21,2 0 30 31)", 1.0, "LINESTRING ZM(0 0 10 11,2 0 30 31)"},
+
+		{"POLYGON Z((2 2 10,2 3 20,3 3 30,3 2 40,2 2 10))", 0.0, "POLYGON Z((2 2 10,2 3 20,3 3 30,3 2 40,2 2 10))"},
+		{"POLYGON M((2 2 10,2 3 20,3 3 30,3 2 40,2 2 10))", 0.0, "POLYGON M((2 2 10,2 3 20,3 3 30,3 2 40,2 2 10))"},
+		{"POLYGON ZM((2 2 10 11,2 3 20 21,3 3 30 31,3 2 40 41,2 2 10 11))", 0.0, "POLYGON ZM((2 2 10 11,2 3 20 21,3 3 30 31,3 2 40 41,2 2 10 11))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in := geomFromWKT(t, tc.input)

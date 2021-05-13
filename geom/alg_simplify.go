@@ -31,7 +31,7 @@ func Simplify(g Geometry, threshold float64) (Geometry, error) {
 func simplifyLineString(ls LineString, threshold float64) (LineString, error) {
 	seq := ls.Coordinates()
 	floats := ramerDouglasPeucker(nil, seq, threshold)
-	seq = NewSequence(floats, DimXY)
+	seq = NewSequence(floats, seq.CoordinatesType())
 	if seq.Length() > 0 && !hasAtLeast2DistinctPointsInSeq(seq) {
 		return LineString{}, nil
 	}
@@ -106,16 +106,10 @@ func simplifyGeometryCollection(gc GeometryCollection, threshold float64) (Geome
 	return NewGeometryCollection(geoms), nil
 }
 
-// TODO: handle Z and M.
-
 func ramerDouglasPeucker(dst []float64, seq Sequence, threshold float64) []float64 {
 	n := seq.Length()
 	if n <= 2 {
-		for i := 0; i < n; i++ {
-			xy := seq.GetXY(i)
-			dst = append(dst, xy.X, xy.Y)
-		}
-		return dst
+		return seq.appendAllPoints(dst)
 	}
 
 	first, last := seq.GetXY(0), seq.GetXY(n-1)
@@ -141,11 +135,14 @@ func ramerDouglasPeucker(dst []float64, seq Sequence, threshold float64) []float
 	}
 
 	if maxDist <= threshold {
-		return append(dst, first.X, first.Y, last.X, last.Y)
+		dst = seq.appendPoint(dst, 0)
+		dst = seq.appendPoint(dst, n-1)
+		return dst
 	}
 
 	dst = ramerDouglasPeucker(dst, seq.Slice(0, maxDistIdx+1), threshold)
-	dst = dst[:len(dst)-2]
+	stride := seq.CoordinatesType().Dimension()
+	dst = dst[:len(dst)-stride]
 	dst = ramerDouglasPeucker(dst, seq.Slice(maxDistIdx, n), threshold)
 	return dst
 }

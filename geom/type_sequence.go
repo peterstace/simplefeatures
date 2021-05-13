@@ -136,6 +136,18 @@ func (s Sequence) Force2D() Sequence {
 	return s.ForceCoordinatesType(DimXY)
 }
 
+// appendAllPoints appends the float64 coordinates of all points (in order) to
+// dst.
+func (s Sequence) appendAllPoints(dst []float64) []float64 {
+	return append(dst, s.floats...)
+}
+
+// appendPoint appends the float64 coordinates of the ith point to dst.
+func (s Sequence) appendPoint(dst []float64, i int) []float64 {
+	stride := s.ctype.Dimension()
+	return append(dst, s.floats[i*stride:(i+1)*stride]...)
+}
+
 // getLine extracts a 2D line segment from a sequence by joining together
 // adjacent locations in the sequence. It is designed to be called with i equal
 // to each index in the sequence (from 0 to n-1, both inclusive). The flag
