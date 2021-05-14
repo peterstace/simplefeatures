@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.28.0
+
+2021-05-14
+
+- Reimplements the `ConvexHull` operation using a more robust and numerically
+  stable algorithm. The new algorithm is the Monotone Chain algorithm (also
+  known as Andrew's Algorithm).
+
+- Adds a new `Simplify` function that simplifies geometries using the Ramer
+  Douglas Peucker algorithm.
+
 ## v0.27.0
 
 2021-04-11
