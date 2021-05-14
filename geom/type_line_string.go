@@ -30,11 +30,8 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 	}
 
 	// Valid non-empty LineStrings must have at least 2 *distinct* points.
-	first := seq.GetXY(0)
-	for i := 1; i < n; i++ {
-		if seq.GetXY(i) != first {
-			return LineString{seq}, nil
-		}
+	if hasAtLeast2DistinctPointsInSeq(seq) {
+		return LineString{seq}, nil
 	}
 
 	if ctorOpts.omitInvalid {
@@ -43,6 +40,20 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 
 	return LineString{}, errors.New("non-empty LineStrings " +
 		"must contain at least 2 points with distinct XY values")
+}
+
+func hasAtLeast2DistinctPointsInSeq(seq Sequence) bool {
+	n := seq.Length()
+	if n == 0 {
+		return false
+	}
+	first := seq.GetXY(0)
+	for i := 1; i < n; i++ {
+		if seq.GetXY(i) != first {
+			return true
+		}
+	}
+	return false
 }
 
 // Type returns the GeometryType for a LineString

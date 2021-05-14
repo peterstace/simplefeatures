@@ -82,6 +82,11 @@ func unaryChecks(h *Handle, g geom.Geometry, log *log.Logger) error {
 	if err := checkPointOnSurface(h, g, log); err != nil {
 		return err
 	}
+	log.Println("checking Simplify")
+	if err := checkSimplify(h, g, log); err != nil {
+		return err
+	}
+
 	return nil
 
 	// TODO: Reverse isn't checked yet. There is some significant behaviour
@@ -553,6 +558,33 @@ func checkPointOnSurface(h *Handle, g geom.Geometry, log *log.Logger) error {
 		}
 	}
 
+	return nil
+}
+
+func checkSimplify(h *Handle, g geom.Geometry, log *log.Logger) error {
+	for _, threshold := range []float64{0.125, 0.25, 0.5, 1, 2, 4, 8, 16} {
+		// If we get an error from GEOS, then we may or may not get an error from
+		// simplefeatures.
+		want, err := h.Simplify(g, threshold)
+		wantIsValid := err == nil
+
+		// Even if GEOS couldn't simplify, we still want to attempt to simplify
+		// with simplefeatures to ensure it doesn't crash (even if it may give an
+		// error).
+		got, err := geos.Simplify(g, threshold)
+		gotIsValid := err == nil
+
+		if wantIsValid && !gotIsValid {
+			return fmt.Errorf("GEOS could simplify but simplefeatures could not: %w", err)
+		}
+
+		if gotIsValid && wantIsValid && !geom.ExactEquals(got, want) {
+			log.Printf("Simplify results not equal for threshold=%v", threshold)
+			log.Printf("want: %v", want.AsText())
+			log.Printf("got:  %v", got.AsText())
+			return mismatchErr
+		}
+	}
 	return nil
 }
 

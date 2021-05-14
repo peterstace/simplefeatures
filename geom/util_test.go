@@ -37,6 +37,13 @@ func expectNoErr(t *testing.T, err error) {
 	}
 }
 
+func expectErr(t *testing.T, err error) {
+	t.Helper()
+	if err == nil {
+		t.Fatal("expected error but got nil")
+	}
+}
+
 func expectGeomEq(t *testing.T, got, want Geometry, opts ...ExactEqualsOption) {
 	t.Helper()
 	if !ExactEquals(got, want, opts...) {

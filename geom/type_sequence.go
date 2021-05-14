@@ -93,6 +93,13 @@ func (s Sequence) Reverse() Sequence {
 	return Sequence{s.ctype, reversed}
 }
 
+// Slice creates a new Sequence that is a subslice of this Sequence. Indexing
+// rules work in the same way as Go Slices.
+func (s Sequence) Slice(i, j int) Sequence {
+	stride := s.ctype.Dimension()
+	return Sequence{s.ctype, s.floats[i*stride : j*stride]}
+}
+
 // ForceCoordinatesType returns a new Sequence with a different CoordinatesType. If a
 // dimension is added, then its new value is set to zero for each point
 // location in the Sequence.
@@ -127,6 +134,18 @@ func (s Sequence) ForceCoordinatesType(newCType CoordinatesType) Sequence {
 // Force2D returns a new Sequence with Z and M values removed (if present).
 func (s Sequence) Force2D() Sequence {
 	return s.ForceCoordinatesType(DimXY)
+}
+
+// appendAllPoints appends the float64 coordinates of all points (in order) to
+// dst.
+func (s Sequence) appendAllPoints(dst []float64) []float64 {
+	return append(dst, s.floats...)
+}
+
+// appendPoint appends the float64 coordinates of the ith point to dst.
+func (s Sequence) appendPoint(dst []float64, i int) []float64 {
+	stride := s.ctype.Dimension()
+	return append(dst, s.floats[i*stride:(i+1)*stride]...)
 }
 
 // getLine extracts a 2D line segment from a sequence by joining together

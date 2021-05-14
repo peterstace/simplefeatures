@@ -695,6 +695,22 @@ func (h *Handle) Reverse(g geom.Geometry) (geom.Geometry, error) {
 	return h.decodeGeomHandle(env)
 }
 
+func (h *Handle) Simplify(g geom.Geometry, threshold float64) (geom.Geometry, error) {
+	gh, err := h.createGeomHandle(g)
+	if err != nil {
+		return geom.Geometry{}, err
+	}
+	defer C.GEOSGeom_destroy(gh)
+
+	simp := C.GEOSSimplify_r(h.context, gh, C.double(threshold))
+	if simp == nil {
+		return geom.Geometry{}, h.err()
+	}
+	defer C.GEOSGeom_destroy_r(h.context, simp)
+
+	return h.decodeGeomHandle(simp)
+}
+
 func (h *Handle) Intersects(g1, g2 geom.Geometry) (bool, error) {
 	if isNonEmptyGeometryCollection(g1) || isNonEmptyGeometryCollection(g2) {
 		return false, NonEmptyGeometryCollectionNotSupportedError
