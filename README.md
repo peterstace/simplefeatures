@@ -118,6 +118,7 @@ The following algorithms are supported:
 | [Length](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Length)                 | Finds the length of the geometry (for LineStrings and MultiLineStrings).               |
 | [PointOnSurface](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.PointOnSurface) | Finds a point that lies inside the geometry.                                           |
 | [Relate](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Relate)                          | Calculates the DE-9IM intersection describing the relationship between two geometries. |
+| [Simplify](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Simplify)                      | Simplifies a geometry using the Ramer–Douglas–Peucker algorithm.                       |
 
 | Set Operations                                                                                          | Description                                                               |
 | ---                                                                                                     | ---                                                                       |
