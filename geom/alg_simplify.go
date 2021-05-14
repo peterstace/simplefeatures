@@ -116,51 +116,50 @@ func (s simplifier) simplifyGeometryCollection(gc GeometryCollection) (GeometryC
 }
 
 func (s simplifier) ramerDouglasPeucker(dst []float64, seq Sequence) []float64 {
-	n := seq.Length()
-	if n <= 2 {
+	if seq.Length() <= 2 {
 		return seq.appendAllPoints(dst)
 	}
 
-	first, last := seq.GetXY(0), seq.GetXY(n-1)
+	start := 0
+	end := seq.Length() - 1
 
-	var calcDist func(pt XY) float64
-	if first != last {
-		calcDist = func(pt XY) float64 {
-			return perpendicularDistance(pt, line{first, last})
+	for start < end {
+		dst = seq.appendPoint(dst, start)
+		newEnd := end
+		for {
+			var maxDist float64
+			var maxDistIdx int
+			for i := start + 1; i < newEnd; i++ {
+				if d := perpendicularDistance(
+					seq.GetXY(i),
+					seq.GetXY(start),
+					seq.GetXY(newEnd),
+				); d > maxDist {
+					maxDistIdx = i
+					maxDist = d
+				}
+			}
+			if maxDist <= s.threshold {
+				break
+			}
+			newEnd = maxDistIdx
 		}
-	} else {
-		calcDist = func(pt XY) float64 {
-			return pt.Sub(first).Length()
-		}
+		start = newEnd
 	}
-
-	var maxDist float64
-	var maxDistIdx int
-	for i := 0; i < n; i++ {
-		if dist := calcDist(seq.GetXY(i)); dist > maxDist {
-			maxDist = dist
-			maxDistIdx = i
-		}
-	}
-
-	if maxDist <= s.threshold {
-		dst = seq.appendPoint(dst, 0)
-		dst = seq.appendPoint(dst, n-1)
-		return dst
-	}
-
-	dst = s.ramerDouglasPeucker(dst, seq.Slice(0, maxDistIdx+1))
-	stride := seq.CoordinatesType().Dimension()
-	dst = dst[:len(dst)-stride]
-	dst = s.ramerDouglasPeucker(dst, seq.Slice(maxDistIdx, n))
+	dst = seq.appendPoint(dst, end)
 	return dst
 }
 
-// perpendicularDistance is the distance from p to the infinite line going
-// through ln.
-func perpendicularDistance(p XY, ln line) float64 {
-	aSubP := ln.a.Sub(p)
-	unit := ln.b.Sub(ln.a).Scale(1 / ln.length())
+// perpendicularDistance is the distance from 'p' to the infinite line going
+// through 'a' and 'b'. If 'a' and 'b' are the same, then the distance between
+// 'a'/'b' and 'p' is returned.
+func perpendicularDistance(p, a, b XY) float64 {
+	if a == b {
+		return p.Sub(a).Length()
+	}
+	aSubP := a.Sub(p)
+	bSubA := b.Sub(a)
+	unit := bSubA.Scale(1 / bSubA.Length())
 	perpendicular := aSubP.Sub(unit.Scale(aSubP.Dot(unit)))
 	return perpendicular.Length()
 }
