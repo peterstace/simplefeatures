@@ -68,7 +68,11 @@ func (s simplifier) simplifyPolygon(poly Polygon) (Polygon, error) {
 	if err != nil {
 		return Polygon{}, err
 	}
-	if !exterior.IsRing() {
+
+	// If we don't have at least 4 coordinates, then we can't form a ring, and
+	// the polygon has collapsed either to a point or a single linear element.
+	// Both cases are represented by an empty polygon.
+	if exterior.Coordinates().Length() < 4 {
 		return Polygon{}, nil
 	}
 

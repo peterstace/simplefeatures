@@ -110,6 +110,19 @@ func TestSimplifyErrorCases(t *testing.T) {
 	}{
 		// Simplification results in the inner and outer rings intersecting.
 		{"POLYGON((0 0,0 1,-0.5 1.5,0 2,0 3,3 3,3 0,0 0),(-0.1 1.5,2 2,2 1,-0.1 1.5))", 0.5},
+
+		// Reproduces a bug. The outer ring becomes invalid after simplification.
+		{
+			`POLYGON((
+				151.1897065219023 -33.87468129434335,
+				151.191808198953 -33.8734269493667,
+				151.19232406823 -33.8738879421183,
+				151.19237538770165 -33.873935599348954,
+				151.192324067988 -33.8738879424094,
+				151.1897065219023 -33.87468129434335
+			))`,
+			1e-5,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in := geomFromWKT(t, tc.wkt)
