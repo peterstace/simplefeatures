@@ -27,7 +27,6 @@ GEOSGeometry const *noop(GEOSContextHandle_t handle, const GEOSGeometry *g) {
 import "C"
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"unsafe"
@@ -162,29 +161,17 @@ func Crosses(a, b geom.Geometry) (bool, error) {
 // Relate returns a 9-character DE9-IM string that describes the relationship
 // between two geometries.
 func Relate(g1, g2 geom.Geometry) (string, error) {
-	h, err := newHandle()
+	ctx, err := newBinaryOpContext(g1, g2)
+	defer ctx.release()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to setup Relate: %v", err)
 	}
-	defer h.release()
 
-	gh1, err := h.createGeometryHandle(g1)
-	if err != nil {
-		return "", err
-	}
-	defer C.GEOSGeom_destroy(gh1)
-
-	gh2, err := h.createGeometryHandle(g2)
-	if err != nil {
-		return "", err
-	}
-	defer C.GEOSGeom_destroy(gh2)
-
-	cstr := C.GEOSRelate_r(h.context, gh1, gh2)
+	cstr := C.GEOSRelate_r(ctx.h.context, ctx.ghs[0], ctx.ghs[1])
 	if cstr == nil {
-		return "", h.err()
+		return "", ctx.h.err()
 	}
-	defer C.GEOSFree_r(h.context, unsafe.Pointer(cstr))
+	defer C.GEOSFree_r(ctx.h.context, unsafe.Pointer(cstr))
 
 	return C.GoString(cstr), nil
 }
@@ -385,19 +372,19 @@ func newHandle() (*handle, error) {
 	h.errBuf = (*C.char)(C.malloc(1024))
 	if h.errBuf == nil {
 		h.release()
-		return nil, errors.New("malloc failed")
+		return nil, errBadMalloc
 	}
 
 	h.context = C.sf_init(unsafe.Pointer(h.errBuf))
 	if h.context == nil {
 		h.release()
-		return nil, errors.New("could not create GEOS context")
+		return nil, errGEOSContextNotCreated
 	}
 
 	h.reader = C.GEOSWKBReader_create_r(h.context)
 	if h.reader == nil {
 		h.release()
-		return nil, h.err()
+		return nil, fmt.Errorf("could not create GEOS WKB reader: %v", h.err())
 	}
 
 	return h, nil
@@ -411,10 +398,13 @@ func (h *handle) err() error {
 	if msg == "" {
 		// No error stored, which indicates that the error handler didn't get
 		// trigged. The best we can do is give a generic error.
-		msg = "GEOS internal error"
+		msg = "missing error message"
 	}
+
+	// TODO: why don't we zero out the buffer inside the errMsg function?
 	C.memset((unsafe.Pointer)(h.errBuf), 0, 1024) // Reset the buffer for the next error message.
-	return errors.New(strings.TrimSpace(msg))
+
+	return errGEOSInternalFailure(strings.TrimSpace(msg))
 }
 
 // errMsg gets the textual representation of the last error message reported by
@@ -457,17 +447,17 @@ func (h *handle) createGeometryHandle(g geom.Geometry) (*C.GEOSGeometry, error) 
 		C.ulong(len(wkb)),
 	)
 	if gh == nil {
-		return nil, h.err()
+		return nil, fmt.Errorf("could not create GEOS geometry handle: %v", h.err())
 	}
 	return gh, nil
 }
 
 // relatesAny checks if the two geometries are related using any of the masks.
 func relatesAny(g1, g2 geom.Geometry, masks ...string) (bool, error) {
-	for _, m := range masks {
+	for i, m := range masks {
 		r, err := relate(g1, g2, m)
 		if err != nil {
-			return false, err
+			return false, fmt.Errorf("could not relate mask %d of %d: %v", i+1, len(masks), err)
 		}
 		if r {
 			return true, nil
@@ -476,48 +466,32 @@ func relatesAny(g1, g2 geom.Geometry, masks ...string) (bool, error) {
 	return false, nil
 }
 
-// ErrGeometryCollectionNotSupported indicates that a GeometryCollection was
-// passed to a function that does not support GeometryCollections.
-var ErrGeometryCollectionNotSupported = errors.New("GeometryCollection not supported")
-
 // relate invokes the GEOS GEOSRelatePattern function, which checks if two
 // geometries are related according to a DE-9IM 'relates' mask.
 func relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 	if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
-		return false, ErrGeometryCollectionNotSupported
+		return false, errGeometryCollectionNotSupported
 	}
 	if len(mask) != 9 {
-		return false, fmt.Errorf("mask has invalid length: %q", mask)
+		return false, errInvalidMaskLength(mask)
 	}
-
-	h, err := newHandle()
-	if err != nil {
-		return false, err
-	}
-	defer h.release()
 
 	// Not all versions of GEOS can handle Z and M geometries correctly. For
 	// Relates, we only need 2D geometries anyway.
 	g1 = g1.Force2D()
 	g2 = g2.Force2D()
 
-	gh1, err := h.createGeometryHandle(g1)
+	ctx, err := newBinaryOpContext(g1, g2)
+	defer ctx.release()
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to setup relate: %v", err)
 	}
-	defer C.GEOSGeom_destroy(gh1)
-
-	gh2, err := h.createGeometryHandle(g2)
-	if err != nil {
-		return false, err
-	}
-	defer C.GEOSGeom_destroy(gh2)
 
 	var cmask [10]byte
 	copy(cmask[:], mask)
 
-	return h.boolErr(C.GEOSRelatePattern_r(
-		h.context, gh1, gh2,
+	return ctx.h.boolErr(C.GEOSRelatePattern_r(
+		ctx.h.context, ctx.ghs[0], ctx.ghs[1],
 		(*C.char)(unsafe.Pointer(&cmask)),
 	))
 }
@@ -537,9 +511,9 @@ func (h *handle) boolErr(c C.char) (bool, error) {
 	case 1:
 		return true, nil
 	case 2:
-		return false, h.err()
+		return false, errGEOSInternalFailure(h.err().Error())
 	default:
-		return false, fmt.Errorf("illegal result from GEOS: %v", c)
+		return false, errGEOSIllegalReturnValue(c)
 	}
 }
 
@@ -553,31 +527,19 @@ func binaryOperation(
 	g1 = g1.Force2D()
 	g2 = g2.Force2D()
 
-	h, err := newHandle()
+	ctx, err := newBinaryOpContext(g1, g2)
+	defer ctx.release()
 	if err != nil {
-		return geom.Geometry{}, err
+		return geom.Geometry{}, fmt.Errorf("could not setup binary operation: %v", err)
 	}
-	defer h.release()
 
-	gh1, err := h.createGeometryHandle(g1)
-	if err != nil {
-		return geom.Geometry{}, err
-	}
-	defer C.GEOSGeom_destroy(gh1)
-
-	gh2, err := h.createGeometryHandle(g2)
-	if err != nil {
-		return geom.Geometry{}, err
-	}
-	defer C.GEOSGeom_destroy(gh2)
-
-	resultGH := op(h.context, gh1, gh2)
+	resultGH := op(ctx.h.context, ctx.ghs[0], ctx.ghs[1])
 	if resultGH == nil {
-		return geom.Geometry{}, h.err()
+		return geom.Geometry{}, errGEOSInternalFailure(ctx.h.err().Error())
 	}
 	defer C.GEOSGeom_destroy(resultGH)
 
-	return h.decode(resultGH, opts)
+	return ctx.h.decode(resultGH, opts)
 }
 
 func unaryOperation(
@@ -631,4 +593,49 @@ func (h *handle) decode(gh *C.GEOSGeometry, opts []geom.ConstructorOption) (geom
 	}
 	wkb := C.GoBytes(unsafe.Pointer(serialised), C.int(size))
 	return geom.UnmarshalWKB(wkb, opts...)
+}
+
+type binaryOpContext struct {
+	h   *handle
+	ghs [2]*C.GEOSGeometry
+}
+
+// newBinaryOpContext creates the handles needed to perform an operation on two
+// geometries. The returned context should have its release method called to
+// free resources, even if newBinaryOpContext returns an error.
+func newBinaryOpContext(g1, g2 geom.Geometry) (binaryOpContext, error) {
+	var err error
+	var ctx binaryOpContext
+	ctx.h, err = newHandle()
+	if err != nil {
+		return binaryOpContext{}, fmt.Errorf("could not create GEOS handle: %v", err)
+	}
+	ctx.ghs[0], err = ctx.h.createGeometryHandle(g1)
+	if err != nil {
+		return binaryOpContext{}, fmt.Errorf("could not create GEOS handle for first geometry: %v", err)
+	}
+	ctx.ghs[1], err = ctx.h.createGeometryHandle(g2)
+	if err != nil {
+		return binaryOpContext{}, fmt.Errorf("could not create GEOS handle for second geometry: %v", err)
+	}
+	return ctx, nil
+}
+
+func (c binaryOpContext) release() {
+	// Defer calls just in case something panics (so that we at least attempt
+	// to destroy everything).
+	defer func() {
+		if c.h != nil {
+			c.h.release()
+		}
+	}()
+	for _, gh := range c.ghs {
+		if gh == nil {
+			continue
+		}
+		gh := gh
+		defer func() {
+			C.GEOSGeom_destroy(gh)
+		}()
+	}
 }
