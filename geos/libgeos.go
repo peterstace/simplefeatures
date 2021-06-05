@@ -166,7 +166,7 @@ func Relate(g1, g2 geom.Geometry) (string, error) {
 	err := binaryOpE(g1, g2, func(h *handle, gh1, gh2 *C.GEOSGeometry) error {
 		cstr := C.GEOSRelate_r(h.context, gh1, gh2)
 		if cstr == nil {
-			return h.err()
+			return wrap(h.err(), "executing GEOSRelate_r")
 		}
 		defer C.GEOSFree_r(h.context, unsafe.Pointer(cstr))
 		result = C.GoString(cstr)
@@ -383,7 +383,7 @@ func newHandle() (*handle, error) {
 	h.reader = C.GEOSWKBReader_create_r(h.context)
 	if h.reader == nil {
 		h.release()
-		return nil, fmt.Errorf("could not create GEOS WKB reader: %v", h.err())
+		return nil, wrap(h.err(), "creating GEOS WKB reader")
 	}
 
 	return h, nil
@@ -403,7 +403,7 @@ func (h *handle) err() error {
 	// TODO: why don't we zero out the buffer inside the errMsg function?
 	C.memset((unsafe.Pointer)(h.errBuf), 0, 1024) // Reset the buffer for the next error message.
 
-	return errors.New(strings.TrimSpace(msg))
+	return fmt.Errorf("GEOS internal error: %v", strings.TrimSpace(msg))
 }
 
 // errMsg gets the textual representation of the last error message reported by
@@ -446,7 +446,7 @@ func (h *handle) createGeometryHandle(g geom.Geometry) (*C.GEOSGeometry, error) 
 		C.ulong(len(wkb)),
 	)
 	if gh == nil {
-		return nil, fmt.Errorf("could not create GEOS geometry handle: %v", h.err())
+		return nil, wrap(h.err(), "executing GEOSWKBReader_read_r")
 	}
 	return gh, nil
 }
@@ -491,7 +491,7 @@ func relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 		result, err = h.boolErr(C.GEOSRelatePattern_r(
 			h.context, gh1, gh2, (*C.char)(unsafe.Pointer(&cmask)),
 		))
-		return err
+		return wrap(err, "executing GEOSRelatePattern_r")
 	})
 	return result, err
 }
@@ -513,7 +513,7 @@ func (h *handle) boolErr(c C.char) (bool, error) {
 	case 2:
 		return false, h.err()
 	default:
-		return false, fmt.Errorf("illegal result from GEOS: %v", c)
+		return false, wrap(h.err(), "illegal result %v from GEOS", c)
 	}
 }
 
@@ -529,13 +529,13 @@ func binaryOpE(
 
 	gh1, err := h.createGeometryHandle(g1)
 	if err != nil {
-		return err
+		return wrap(err, "converting first geom argument")
 	}
 	defer C.GEOSGeom_destroy(gh1)
 
 	gh2, err := h.createGeometryHandle(g2)
 	if err != nil {
-		return err
+		return wrap(err, "converting second geom argument")
 	}
 	defer C.GEOSGeom_destroy(gh2)
 
@@ -561,7 +561,7 @@ func binaryOpG(
 		defer C.GEOSGeom_destroy(resultGH)
 		var err error
 		result, err = h.decode(resultGH, opts)
-		return err
+		return wrap(err, "decoding result")
 	})
 	return result, err
 }
@@ -575,7 +575,7 @@ func unaryOpE(g geom.Geometry, op func(*handle, *C.GEOSGeometry) error) error {
 
 	gh, err := h.createGeometryHandle(g)
 	if err != nil {
-		return err
+		return wrap(err, "converting geom argument")
 	}
 	defer C.GEOSGeom_destroy(gh)
 
@@ -605,7 +605,7 @@ func unaryOpG(
 		}
 		var err error
 		result, err = h.decode(resultGH, opts)
-		return err
+		return wrap(err, "decoding result")
 	})
 	return result, err
 }
@@ -617,14 +617,23 @@ func (h *handle) decode(gh *C.GEOSGeometry, opts []geom.ConstructorOption) (geom
 	)
 	serialised := C.marshal(h.context, gh, &size, &isWKT)
 	if serialised == nil {
-		return geom.Geometry{}, h.err()
+		return geom.Geometry{}, wrap(h.err(), "marshalling result")
 	}
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(serialised))
 
 	if isWKT != 0 {
 		wkt := C.GoStringN(serialised, C.int(size))
-		return geom.UnmarshalWKT(wkt, opts...)
+		g, err := geom.UnmarshalWKT(wkt, opts...)
+		return g, wrap(err, "failed to unmarshal GEOS WKT result")
 	}
 	wkb := C.GoBytes(unsafe.Pointer(serialised), C.int(size))
-	return geom.UnmarshalWKB(wkb, opts...)
+	g, err := geom.UnmarshalWKB(wkb, opts...)
+	return g, wrap(err, "failed to unmarshal GEOS WKB result")
+}
+
+func wrap(err error, format string, args ...interface{}) error {
+	if err == nil {
+		return nil
+	}
+	return fmt.Errorf(format+": %v", append(args, err))
 }
