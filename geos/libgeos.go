@@ -161,19 +161,17 @@ func Crosses(a, b geom.Geometry) (bool, error) {
 // Relate returns a 9-character DE9-IM string that describes the relationship
 // between two geometries.
 func Relate(g1, g2 geom.Geometry) (string, error) {
-	ctx, err := newBinaryOpContext(g1, g2)
-	defer ctx.release()
-	if err != nil {
-		return "", fmt.Errorf("failed to setup Relate: %v", err)
-	}
-
-	cstr := C.GEOSRelate_r(ctx.h.context, ctx.ghs[0], ctx.ghs[1])
-	if cstr == nil {
-		return "", ctx.h.err()
-	}
-	defer C.GEOSFree_r(ctx.h.context, unsafe.Pointer(cstr))
-
-	return C.GoString(cstr), nil
+	var result string
+	err := binOp(g1, g2, func(h *handle, gh1, gh2 *C.GEOSGeometry) error {
+		cstr := C.GEOSRelate_r(h.context, gh1, gh2)
+		if cstr == nil {
+			return h.err()
+		}
+		defer C.GEOSFree_r(h.context, unsafe.Pointer(cstr))
+		result = C.GoString(cstr)
+		return nil
+	})
+	return result, err
 }
 
 // Overlaps returns true if and only if geometry A and B overlap with each
@@ -481,19 +479,20 @@ func relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 	g1 = g1.Force2D()
 	g2 = g2.Force2D()
 
-	ctx, err := newBinaryOpContext(g1, g2)
-	defer ctx.release()
-	if err != nil {
-		return false, fmt.Errorf("failed to setup relate: %v", err)
-	}
-
+	// The bytes in cmask represent a NULL terminated string, hence it's 10
+	// chars long (rather than 9) and the last char is left as 0.
 	var cmask [10]byte
 	copy(cmask[:], mask)
 
-	return ctx.h.boolErr(C.GEOSRelatePattern_r(
-		ctx.h.context, ctx.ghs[0], ctx.ghs[1],
-		(*C.char)(unsafe.Pointer(&cmask)),
-	))
+	var result bool
+	err := binOp(g1, g2, func(h *handle, gh1, gh2 *C.GEOSGeometry) error {
+		var err error
+		result, err = h.boolErr(C.GEOSRelatePattern_r(
+			h.context, gh1, gh2, (*C.char)(unsafe.Pointer(&cmask)),
+		))
+		return err
+	})
+	return result, err
 }
 
 // boolErr converts a char result from GEOS into a boolean result.
@@ -517,6 +516,28 @@ func (h *handle) boolErr(c C.char) (bool, error) {
 	}
 }
 
+func binOp(g1, g2 geom.Geometry, op func(*handle, *C.GEOSGeometry, *C.GEOSGeometry) error) error {
+	h, err := newHandle()
+	if err != nil {
+		return err
+	}
+	defer h.release()
+
+	gh1, err := h.createGeometryHandle(g1)
+	if err != nil {
+		return err
+	}
+	defer C.GEOSGeom_destroy(gh1)
+
+	gh2, err := h.createGeometryHandle(g2)
+	if err != nil {
+		return err
+	}
+	defer C.GEOSGeom_destroy(gh2)
+
+	return op(h, gh1, gh2)
+}
+
 func binaryOperation(
 	g1, g2 geom.Geometry,
 	opts []geom.ConstructorOption,
@@ -527,19 +548,18 @@ func binaryOperation(
 	g1 = g1.Force2D()
 	g2 = g2.Force2D()
 
-	ctx, err := newBinaryOpContext(g1, g2)
-	defer ctx.release()
-	if err != nil {
-		return geom.Geometry{}, fmt.Errorf("could not setup binary operation: %v", err)
-	}
-
-	resultGH := op(ctx.h.context, ctx.ghs[0], ctx.ghs[1])
-	if resultGH == nil {
-		return geom.Geometry{}, errGEOSInternalFailure(ctx.h.err().Error())
-	}
-	defer C.GEOSGeom_destroy(resultGH)
-
-	return ctx.h.decode(resultGH, opts)
+	var result geom.Geometry
+	err := binOp(g1, g2, func(h *handle, gh1, gh2 *C.GEOSGeometry) error {
+		resultGH := op(h.context, gh1, gh2)
+		if resultGH == nil {
+			return errGEOSInternalFailure(h.err().Error())
+		}
+		defer C.GEOSGeom_destroy(resultGH)
+		var err error
+		result, err = h.decode(resultGH, opts)
+		return err
+	})
+	return result, err
 }
 
 func unaryOperation(
@@ -593,49 +613,4 @@ func (h *handle) decode(gh *C.GEOSGeometry, opts []geom.ConstructorOption) (geom
 	}
 	wkb := C.GoBytes(unsafe.Pointer(serialised), C.int(size))
 	return geom.UnmarshalWKB(wkb, opts...)
-}
-
-type binaryOpContext struct {
-	h   *handle
-	ghs [2]*C.GEOSGeometry
-}
-
-// newBinaryOpContext creates the handles needed to perform an operation on two
-// geometries. The returned context should have its release method called to
-// free resources, even if newBinaryOpContext returns an error.
-func newBinaryOpContext(g1, g2 geom.Geometry) (binaryOpContext, error) {
-	var err error
-	var ctx binaryOpContext
-	ctx.h, err = newHandle()
-	if err != nil {
-		return binaryOpContext{}, fmt.Errorf("could not create GEOS handle: %v", err)
-	}
-	ctx.ghs[0], err = ctx.h.createGeometryHandle(g1)
-	if err != nil {
-		return binaryOpContext{}, fmt.Errorf("could not create GEOS handle for first geometry: %v", err)
-	}
-	ctx.ghs[1], err = ctx.h.createGeometryHandle(g2)
-	if err != nil {
-		return binaryOpContext{}, fmt.Errorf("could not create GEOS handle for second geometry: %v", err)
-	}
-	return ctx, nil
-}
-
-func (c binaryOpContext) release() {
-	// Defer calls just in case something panics (so that we at least attempt
-	// to destroy everything).
-	defer func() {
-		if c.h != nil {
-			c.h.release()
-		}
-	}()
-	for _, gh := range c.ghs {
-		if gh == nil {
-			continue
-		}
-		gh := gh
-		defer func() {
-			C.GEOSGeom_destroy(gh)
-		}()
-	}
 }
