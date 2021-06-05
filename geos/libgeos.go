@@ -453,7 +453,7 @@ func relatesAny(g1, g2 geom.Geometry, masks ...string) (bool, error) {
 	for i, m := range masks {
 		r, err := relate(g1, g2, m)
 		if err != nil {
-			return false, fmt.Errorf("could not relate mask %d of %d: %v", i+1, len(masks), err)
+			return false, wrap(err, "could not relate mask %d of %d", i+1, len(masks))
 		}
 		if r {
 			return true, nil
