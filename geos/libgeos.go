@@ -399,10 +399,7 @@ func (h *handle) err() error {
 		// trigged. The best we can do is give a generic error.
 		msg = "missing error message"
 	}
-
-	// TODO: why don't we zero out the buffer inside the errMsg function?
 	C.memset((unsafe.Pointer)(h.errBuf), 0, 1024) // Reset the buffer for the next error message.
-
 	return fmt.Errorf("GEOS internal error: %v", strings.TrimSpace(msg))
 }
 
