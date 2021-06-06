@@ -162,31 +162,17 @@ func Crosses(a, b geom.Geometry) (bool, error) {
 // Relate returns a 9-character DE9-IM string that describes the relationship
 // between two geometries.
 func Relate(g1, g2 geom.Geometry) (string, error) {
-	h, err := newHandle()
-	if err != nil {
-		return "", err
-	}
-	defer h.release()
-
-	gh1, err := h.createGeometryHandle(g1)
-	if err != nil {
-		return "", err
-	}
-	defer C.GEOSGeom_destroy(gh1)
-
-	gh2, err := h.createGeometryHandle(g2)
-	if err != nil {
-		return "", err
-	}
-	defer C.GEOSGeom_destroy(gh2)
-
-	cstr := C.GEOSRelate_r(h.context, gh1, gh2)
-	if cstr == nil {
-		return "", h.err()
-	}
-	defer C.GEOSFree_r(h.context, unsafe.Pointer(cstr))
-
-	return C.GoString(cstr), nil
+	var result string
+	err := binaryOpE(g1, g2, func(h *handle, gh1, gh2 *C.GEOSGeometry) error {
+		cstr := C.GEOSRelate_r(h.context, gh1, gh2)
+		if cstr == nil {
+			return wrap(h.err(), "executing GEOSRelate_r")
+		}
+		defer C.GEOSFree_r(h.context, unsafe.Pointer(cstr))
+		result = C.GoString(cstr)
+		return nil
+	})
+	return result, err
 }
 
 // Overlaps returns true if and only if geometry A and B overlap with each
@@ -216,18 +202,20 @@ func Overlaps(a, b geom.Geometry) (bool, error) {
 // Formally, the returned geometry will contain a particular point X if and
 // only if X is present in either geometry (or both).
 func Union(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return binaryOperation(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+	g, err := binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSUnion_r(ctx, a, b)
 	})
+	return g, wrap(err, "executing GEOSUnion_r")
 }
 
 // Intersection returns a geometry that is the intersection of the input
 // geometries. Formally, the returned geometry will contain a particular point
 // X if and only if X is present in both geometries.
 func Intersection(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return binaryOperation(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+	g, err := binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSIntersection_r(ctx, a, b)
 	})
+	return g, wrap(err, "executing GEOSIntersection_r")
 }
 
 // BufferOption allows the behaviour of the Buffer operation to be modified.
@@ -324,7 +312,7 @@ func BufferConstructorOption(opts ...geom.ConstructorOption) BufferOption {
 // of the input geometry.
 func Buffer(g geom.Geometry, radius float64, opts ...BufferOption) (geom.Geometry, error) {
 	optSet := newBufferOptionSet(opts)
-	return unaryOperation(g, optSet.ctorOpts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := unaryOpG(g, optSet.ctorOpts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSBufferWithStyle_r(
 			ctx, gh, C.double(radius),
 			C.int(optSet.quadSegments),
@@ -333,6 +321,7 @@ func Buffer(g geom.Geometry, radius float64, opts ...BufferOption) (geom.Geometr
 			C.double(optSet.mitreLimit),
 		)
 	})
+	return result, wrap(err, "executing GEOSBufferWithStyle_r")
 }
 
 // Simplify creates a simplified version of a geometry using the
@@ -340,34 +329,38 @@ func Buffer(g geom.Geometry, radius float64, opts ...BufferOption) (geom.Geometr
 // e.g. polygons can collapse into linestrings, and holes in polygons may be
 // lost.
 func Simplify(g geom.Geometry, tolerance float64, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return unaryOperation(g, opts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSSimplify_r(ctx, gh, C.double(tolerance))
 	})
+	return result, wrap(err, "executing GEOSSimplify_r")
 }
 
 // Difference returns the geometry that represents the parts of input geometry
 // A that are not part of input geometry B.
 func Difference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return binaryOperation(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSDifference_r(ctx, a, b)
 	})
+	return result, wrap(err, "executing GEOSDifference_r")
 }
 
 // SymmetricDifference returns the geometry that represents the parts of the
 // input geometries that are not part of the other input geometry.
 func SymmetricDifference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return binaryOperation(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSSymDifference_r(ctx, a, b)
 	})
+	return result, wrap(err, "executing GEOSSymDifference_r")
 }
 
 // noop returns the geometry unaltered, via conversion to and from GEOS. This
 // function is only for benchmarking purposes, hence it is not exported or used
 // outside of benchmark tests.
 func noop(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return unaryOperation(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.noop(ctx, g)
 	})
+	return result, wrap(err, "executing noop")
 }
 
 // handle is an opaque handle that can be used to invoke GEOS operations.
@@ -397,7 +390,7 @@ func newHandle() (*handle, error) {
 	h.reader = C.GEOSWKBReader_create_r(h.context)
 	if h.reader == nil {
 		h.release()
-		return nil, h.err()
+		return nil, wrap(h.err(), "creating GEOS WKB reader")
 	}
 
 	return h, nil
@@ -411,10 +404,10 @@ func (h *handle) err() error {
 	if msg == "" {
 		// No error stored, which indicates that the error handler didn't get
 		// trigged. The best we can do is give a generic error.
-		msg = "GEOS internal error"
+		msg = "missing error message"
 	}
 	C.memset((unsafe.Pointer)(h.errBuf), 0, 1024) // Reset the buffer for the next error message.
-	return errors.New(strings.TrimSpace(msg))
+	return fmt.Errorf("GEOS internal error: %v", strings.TrimSpace(msg))
 }
 
 // errMsg gets the textual representation of the last error message reported by
@@ -457,17 +450,17 @@ func (h *handle) createGeometryHandle(g geom.Geometry) (*C.GEOSGeometry, error) 
 		C.ulong(len(wkb)),
 	)
 	if gh == nil {
-		return nil, h.err()
+		return nil, wrap(h.err(), "executing GEOSWKBReader_read_r")
 	}
 	return gh, nil
 }
 
 // relatesAny checks if the two geometries are related using any of the masks.
 func relatesAny(g1, g2 geom.Geometry, masks ...string) (bool, error) {
-	for _, m := range masks {
+	for i, m := range masks {
 		r, err := relate(g1, g2, m)
 		if err != nil {
-			return false, err
+			return false, wrap(err, "could not relate mask %d of %d", i+1, len(masks))
 		}
 		if r {
 			return true, nil
@@ -476,50 +469,35 @@ func relatesAny(g1, g2 geom.Geometry, masks ...string) (bool, error) {
 	return false, nil
 }
 
-// ErrGeometryCollectionNotSupported indicates that a GeometryCollection was
-// passed to a function that does not support GeometryCollections.
-var ErrGeometryCollectionNotSupported = errors.New("GeometryCollection not supported")
-
 // relate invokes the GEOS GEOSRelatePattern function, which checks if two
 // geometries are related according to a DE-9IM 'relates' mask.
 func relate(g1, g2 geom.Geometry, mask string) (bool, error) {
 	if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
-		return false, ErrGeometryCollectionNotSupported
+		return false, errors.New("GeometryCollection not supported")
 	}
 	if len(mask) != 9 {
-		return false, fmt.Errorf("mask has invalid length: %q", mask)
+		return false, fmt.Errorf("mask has invalid length %d (must be 9)", len(mask))
 	}
-
-	h, err := newHandle()
-	if err != nil {
-		return false, err
-	}
-	defer h.release()
 
 	// Not all versions of GEOS can handle Z and M geometries correctly. For
 	// Relates, we only need 2D geometries anyway.
 	g1 = g1.Force2D()
 	g2 = g2.Force2D()
 
-	gh1, err := h.createGeometryHandle(g1)
-	if err != nil {
-		return false, err
-	}
-	defer C.GEOSGeom_destroy(gh1)
-
-	gh2, err := h.createGeometryHandle(g2)
-	if err != nil {
-		return false, err
-	}
-	defer C.GEOSGeom_destroy(gh2)
-
+	// The bytes in cmask represent a NULL terminated string, hence it's 10
+	// chars long (rather than 9) and the last char is left as 0.
 	var cmask [10]byte
 	copy(cmask[:], mask)
 
-	return h.boolErr(C.GEOSRelatePattern_r(
-		h.context, gh1, gh2,
-		(*C.char)(unsafe.Pointer(&cmask)),
-	))
+	var result bool
+	err := binaryOpE(g1, g2, func(h *handle, gh1, gh2 *C.GEOSGeometry) error {
+		var err error
+		result, err = h.boolErr(C.GEOSRelatePattern_r(
+			h.context, gh1, gh2, (*C.char)(unsafe.Pointer(&cmask)),
+		))
+		return wrap(err, "executing GEOSRelatePattern_r")
+	})
+	return result, err
 }
 
 // boolErr converts a char result from GEOS into a boolean result.
@@ -539,11 +517,36 @@ func (h *handle) boolErr(c C.char) (bool, error) {
 	case 2:
 		return false, h.err()
 	default:
-		return false, fmt.Errorf("illegal result from GEOS: %v", c)
+		return false, wrap(h.err(), "illegal result %v from GEOS", c)
 	}
 }
 
-func binaryOperation(
+func binaryOpE(
+	g1, g2 geom.Geometry,
+	op func(*handle, *C.GEOSGeometry, *C.GEOSGeometry) error,
+) error {
+	h, err := newHandle()
+	if err != nil {
+		return err
+	}
+	defer h.release()
+
+	gh1, err := h.createGeometryHandle(g1)
+	if err != nil {
+		return wrap(err, "converting first geom argument")
+	}
+	defer C.GEOSGeom_destroy(gh1)
+
+	gh2, err := h.createGeometryHandle(g2)
+	if err != nil {
+		return wrap(err, "converting second geom argument")
+	}
+	defer C.GEOSGeom_destroy(gh2)
+
+	return op(h, gh1, gh2)
+}
+
+func binaryOpG(
 	g1, g2 geom.Geometry,
 	opts []geom.ConstructorOption,
 	op func(C.GEOSContextHandle_t, *C.GEOSGeometry, *C.GEOSGeometry) *C.GEOSGeometry,
@@ -553,34 +556,37 @@ func binaryOperation(
 	g1 = g1.Force2D()
 	g2 = g2.Force2D()
 
+	var result geom.Geometry
+	err := binaryOpE(g1, g2, func(h *handle, gh1, gh2 *C.GEOSGeometry) error {
+		resultGH := op(h.context, gh1, gh2)
+		if resultGH == nil {
+			return h.err()
+		}
+		defer C.GEOSGeom_destroy(resultGH)
+		var err error
+		result, err = h.decode(resultGH, opts)
+		return wrap(err, "decoding result")
+	})
+	return result, err
+}
+
+func unaryOpE(g geom.Geometry, op func(*handle, *C.GEOSGeometry) error) error {
 	h, err := newHandle()
 	if err != nil {
-		return geom.Geometry{}, err
+		return err
 	}
 	defer h.release()
 
-	gh1, err := h.createGeometryHandle(g1)
+	gh, err := h.createGeometryHandle(g)
 	if err != nil {
-		return geom.Geometry{}, err
+		return wrap(err, "converting geom argument")
 	}
-	defer C.GEOSGeom_destroy(gh1)
+	defer C.GEOSGeom_destroy(gh)
 
-	gh2, err := h.createGeometryHandle(g2)
-	if err != nil {
-		return geom.Geometry{}, err
-	}
-	defer C.GEOSGeom_destroy(gh2)
-
-	resultGH := op(h.context, gh1, gh2)
-	if resultGH == nil {
-		return geom.Geometry{}, h.err()
-	}
-	defer C.GEOSGeom_destroy(resultGH)
-
-	return h.decode(resultGH, opts)
+	return op(h, gh)
 }
 
-func unaryOperation(
+func unaryOpG(
 	g geom.Geometry,
 	opts []geom.ConstructorOption,
 	op func(C.GEOSContextHandle_t, *C.GEOSGeometry) *C.GEOSGeometry,
@@ -589,29 +595,23 @@ func unaryOperation(
 	// unary operations, we only need 2D geometries anyway.
 	g = g.Force2D()
 
-	h, err := newHandle()
-	if err != nil {
-		return geom.Geometry{}, err
-	}
-	defer h.release()
-
-	gh, err := h.createGeometryHandle(g)
-	if err != nil {
-		return geom.Geometry{}, err
-	}
-	defer C.GEOSGeom_destroy(gh)
-
-	resultGH := op(h.context, gh)
-	if resultGH == nil {
-		return geom.Geometry{}, h.err()
-	}
-	if gh != resultGH {
-		// gh and resultGH will be the same if op is the noop function that
-		// just returns its input.
-		defer C.GEOSGeom_destroy(resultGH)
-	}
-
-	return h.decode(resultGH, opts)
+	var result geom.Geometry
+	err := unaryOpE(g, func(h *handle, gh *C.GEOSGeometry) error {
+		resultGH := op(h.context, gh)
+		if resultGH == nil {
+			return h.err()
+		}
+		if gh != resultGH {
+			// gh and resultGH will be the same if op is the noop function that
+			// just returns its input. We need to avoid destroying resultGH in
+			// that case otherwise we will do a double-free.
+			defer C.GEOSGeom_destroy(resultGH)
+		}
+		var err error
+		result, err = h.decode(resultGH, opts)
+		return wrap(err, "decoding result")
+	})
+	return result, err
 }
 
 func (h *handle) decode(gh *C.GEOSGeometry, opts []geom.ConstructorOption) (geom.Geometry, error) {
@@ -621,14 +621,23 @@ func (h *handle) decode(gh *C.GEOSGeometry, opts []geom.ConstructorOption) (geom
 	)
 	serialised := C.marshal(h.context, gh, &size, &isWKT)
 	if serialised == nil {
-		return geom.Geometry{}, h.err()
+		return geom.Geometry{}, wrap(h.err(), "marshalling result")
 	}
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(serialised))
 
 	if isWKT != 0 {
 		wkt := C.GoStringN(serialised, C.int(size))
-		return geom.UnmarshalWKT(wkt, opts...)
+		g, err := geom.UnmarshalWKT(wkt, opts...)
+		return g, wrap(err, "failed to unmarshal GEOS WKT result")
 	}
 	wkb := C.GoBytes(unsafe.Pointer(serialised), C.int(size))
-	return geom.UnmarshalWKB(wkb, opts...)
+	g, err := geom.UnmarshalWKB(wkb, opts...)
+	return g, wrap(err, "failed to unmarshal GEOS WKB result")
+}
+
+func wrap(err error, format string, args ...interface{}) error {
+	if err == nil {
+		return nil
+	}
+	return fmt.Errorf(format+": %v", append(args, err)...)
 }
