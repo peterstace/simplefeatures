@@ -1,5 +1,12 @@
 package geos
 
+/*
+#cgo LDFLAGS: -lgeos_c
+#cgo CFLAGS: -Wall
+#include "geos_c.h"
+*/
+import "C"
+
 import (
 	"errors"
 	"fmt"
