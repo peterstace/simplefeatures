@@ -202,18 +202,20 @@ func Overlaps(a, b geom.Geometry) (bool, error) {
 // Formally, the returned geometry will contain a particular point X if and
 // only if X is present in either geometry (or both).
 func Union(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+	g, err := binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSUnion_r(ctx, a, b)
 	})
+	return g, wrap(err, "executing GEOSUnion_r")
 }
 
 // Intersection returns a geometry that is the intersection of the input
 // geometries. Formally, the returned geometry will contain a particular point
 // X if and only if X is present in both geometries.
 func Intersection(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+	g, err := binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSIntersection_r(ctx, a, b)
 	})
+	return g, wrap(err, "executing GEOSIntersection_r")
 }
 
 // BufferOption allows the behaviour of the Buffer operation to be modified.
@@ -310,7 +312,7 @@ func BufferConstructorOption(opts ...geom.ConstructorOption) BufferOption {
 // of the input geometry.
 func Buffer(g geom.Geometry, radius float64, opts ...BufferOption) (geom.Geometry, error) {
 	optSet := newBufferOptionSet(opts)
-	return unaryOpG(g, optSet.ctorOpts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := unaryOpG(g, optSet.ctorOpts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSBufferWithStyle_r(
 			ctx, gh, C.double(radius),
 			C.int(optSet.quadSegments),
@@ -319,6 +321,7 @@ func Buffer(g geom.Geometry, radius float64, opts ...BufferOption) (geom.Geometr
 			C.double(optSet.mitreLimit),
 		)
 	})
+	return result, wrap(err, "executing GEOSBufferWithStyle_r")
 }
 
 // Simplify creates a simplified version of a geometry using the
@@ -326,34 +329,38 @@ func Buffer(g geom.Geometry, radius float64, opts ...BufferOption) (geom.Geometr
 // e.g. polygons can collapse into linestrings, and holes in polygons may be
 // lost.
 func Simplify(g geom.Geometry, tolerance float64, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSSimplify_r(ctx, gh, C.double(tolerance))
 	})
+	return result, wrap(err, "executing GEOSSimplify_r")
 }
 
 // Difference returns the geometry that represents the parts of input geometry
 // A that are not part of input geometry B.
 func Difference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSDifference_r(ctx, a, b)
 	})
+	return result, wrap(err, "executing GEOSDifference_r")
 }
 
 // SymmetricDifference returns the geometry that represents the parts of the
 // input geometries that are not part of the other input geometry.
 func SymmetricDifference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSSymDifference_r(ctx, a, b)
 	})
+	return result, wrap(err, "executing GEOSSymDifference_r")
 }
 
 // noop returns the geometry unaltered, via conversion to and from GEOS. This
 // function is only for benchmarking purposes, hence it is not exported or used
 // outside of benchmark tests.
 func noop(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	return unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.noop(ctx, g)
 	})
+	return result, wrap(err, "executing noop")
 }
 
 // handle is an opaque handle that can be used to invoke GEOS operations.
