@@ -15,32 +15,29 @@ import (
 
 // Equals returns true if and only if the input geometries are spatially equal,
 // i.e. they represent exactly the same set of points.
-func Equals(g1, g2 geom.Geometry) (bool, error) {
-	if g1.IsEmpty() && g2.IsEmpty() {
-		// Part of the mask is 'dim(I(a) ∩ I(b)) = T'.  If both inputs are
-		// empty, then their interiors will be empty, and thus
-		// 'dim(I(a) ∩ I(b) = F'. However, we want to return 'true' for this
-		// case. So we just return true manually rather than using DE-9IM.
-		return true, nil
-	}
-	return relate(g1, g2, "T*F**FFF*")
+func Equals(a, b geom.Geometry) (bool, error) {
+	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
+		return C.GEOSEquals_r(h, a, b)
+	})
+	return result, wrap(err, "executing GEOSEquals_r")
 }
 
 // Disjoint returns true if and only if the input geometries have no points in
 // common.
-func Disjoint(g1, g2 geom.Geometry) (bool, error) {
-	return relate(g1, g2, "FF*FF****")
+func Disjoint(a, b geom.Geometry) (bool, error) {
+	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
+		return C.GEOSDisjoint_r(h, a, b)
+	})
+	return result, wrap(err, "executing GEOSDisjoint_r")
 }
 
 // Touches returns true if and only if the geometries have at least 1 point in
 // common, but their interiors don't intersect.
-func Touches(g1, g2 geom.Geometry) (bool, error) {
-	return relatesAny(
-		g1, g2,
-		"FT*******",
-		"F**T*****",
-		"F***T****",
-	)
+func Touches(a, b geom.Geometry) (bool, error) {
+	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
+		return C.GEOSTouches_r(h, a, b)
+	})
+	return result, wrap(err, "executing GEOSTouches_r")
 }
 
 // Contains returns true if and only if geometry A contains geometry B.
@@ -52,7 +49,10 @@ func Touches(g1, g2 geom.Geometry) (bool, error) {
 // 2 .At least one point of the interior of B lies on the interior of A. That
 // is, they can't *only* intersect at their boundaries.
 func Contains(a, b geom.Geometry) (bool, error) {
-	return relate(a, b, "T*****FF*")
+	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
+		return C.GEOSContains_r(h, a, b)
+	})
+	return result, wrap(err, "executing GEOSContains_r")
 }
 
 // Covers returns true if and only if geometry A covers geometry B. Formally,
@@ -63,25 +63,19 @@ func Contains(a, b geom.Geometry) (bool, error) {
 //
 // 2. At least one point of B lies on A (either its interior or boundary).
 func Covers(a, b geom.Geometry) (bool, error) {
-	return relatesAny(
-		a, b,
-		"T*****FF*",
-		"*T****FF*",
-		"***T**FF*",
-		"****T*FF*",
-	)
+	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
+		return C.GEOSCovers_r(h, a, b)
+	})
+	return result, wrap(err, "executing GEOSCovers_r")
 }
 
 // Intersects returns true if and only if the geometries share at least one
 // point in common.
 func Intersects(a, b geom.Geometry) (bool, error) {
-	return relatesAny(
-		a, b,
-		"T********",
-		"*T*******",
-		"***T*****",
-		"****T****",
-	)
+	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
+		return C.GEOSIntersects_r(h, a, b)
+	})
+	return result, wrap(err, "executing GEOSIntersects_r")
 }
 
 // Within returns true if and only if geometry A is completely within geometry
@@ -93,7 +87,10 @@ func Intersects(a, b geom.Geometry) (bool, error) {
 // 2.At least one point of the interior of A lies on the interior of B. That
 // is, they can't *only* intersect at their boundaries.
 func Within(a, b geom.Geometry) (bool, error) {
-	return relate(a, b, "T*F**F***")
+	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
+		return C.GEOSWithin_r(h, a, b)
+	})
+	return result, wrap(err, "executing GEOSWithin_r")
 }
 
 // CoveredBy returns true if and only if geometry A is covered by geometry B.
@@ -104,13 +101,10 @@ func Within(a, b geom.Geometry) (bool, error) {
 //
 // 2. At least one point of A lies on B (either its interior or boundary).
 func CoveredBy(a, b geom.Geometry) (bool, error) {
-	return relatesAny(
-		a, b,
-		"T*F**F***",
-		"*TF**F***",
-		"**FT*F***",
-		"**F*TF***",
-	)
+	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
+		return C.GEOSCoveredBy_r(h, a, b)
+	})
+	return result, wrap(err, "executing GEOSCoveredBy_r")
 }
 
 // Crosses returns true if and only if geometry A and B cross each other.
@@ -123,18 +117,10 @@ func CoveredBy(a, b geom.Geometry) (bool, error) {
 //
 // 3. The intersection must not equal either of the input geometries.
 func Crosses(a, b geom.Geometry) (bool, error) {
-	dimA := a.Dimension()
-	dimB := b.Dimension()
-	switch {
-	case dimA < dimB: // Point/Line, Point/Area, Line/Area
-		return relate(a, b, "T*T******")
-	case dimA > dimB: // Line/Point, Area/Point, Area/Line
-		return relate(a, b, "T*****T**")
-	case dimA == 1 && dimB == 1: // Line/Line
-		return relate(a, b, "0********")
-	default:
-		return false, nil
-	}
+	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
+		return C.GEOSCrosses_r(h, a, b)
+	})
+	return result, wrap(err, "executing GEOSCrosses_r")
 }
 
 // Relate returns a 9-character DE9-IM string that describes the relationship
@@ -163,17 +149,10 @@ func Relate(g1, g2 geom.Geometry) (string, error) {
 // 3. The intersection of the geometries must have the same dimension as the
 // geometries themselves.
 func Overlaps(a, b geom.Geometry) (bool, error) {
-	dimA := a.Dimension()
-	dimB := b.Dimension()
-	switch {
-	case (dimA == 0 && dimB == 0) || (dimA == 2 && dimB == 2):
-		return relate(a, b, "T*T***T**")
-	case (dimA == 1 && dimB == 1):
-		return relate(a, b, "1*T***T**")
-	default:
-		return false, nil
-	}
-
+	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
+		return C.GEOSOverlaps_r(h, a, b)
+	})
+	return result, wrap(err, "executing GEOSOverlaps_r")
 }
 
 // Union returns a geometry that is the union of the input geometries.
