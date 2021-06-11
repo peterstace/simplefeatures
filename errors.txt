@@ -1,0 +1,18 @@
+[x] geom/geojson_unmarshal.go
+[ ] geom/alg_set_op.go
+[ ] geom/dcel_extract.go
+[ ] geom/dcel_re_noding.go
+[ ] geom/type_line_string.go
+[ ] geom/dcel_overlay.go
+[ ] geom/type_geometry_collection.go
+[ ] geom/de9im.go
+[ ] geom/wkb_parser.go
+[ ] geom/alg_relate.go
+[ ] geom/type_geometry.go
+[ ] geom/type_multi_line_string.go
+[ ] geom/type_polygon.go
+[ ] geom/wkt_lexer.go
+[ ] geom/type_multi_polygon.go
+[ ] geom/wkt_parser.go
+[ ] geom/geojson_feature_collection.go
+[ ] geom/alg_simplify.go

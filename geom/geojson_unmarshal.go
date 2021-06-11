@@ -9,12 +9,12 @@ import (
 func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error) {
 	var root geojsonNode
 	if err := json.Unmarshal(input, &root); err != nil {
-		return Geometry{}, err
+		return Geometry{}, wrap(err, "unmarshalling JSON")
 	}
 
 	rootObj, err := decodeGeoJSON(root)
 	if err != nil {
-		return Geometry{}, err
+		return Geometry{}, wrap(err, "unmarshalling GeoJSON")
 	}
 
 	hasLength := make(map[int]bool)
@@ -98,22 +98,22 @@ func decodeGeoJSON(node geojsonNode) (interface{}, error) {
 	switch node.Type {
 	case "Point":
 		c, err := extract1DimFloat64s(node.Coords)
-		return geojsonPoint{c}, err
+		return geojsonPoint{c}, wrap(err, "unmarshalling Point coords")
 	case "LineString":
 		c, err := extract2DimFloat64s(node.Coords)
-		return geojsonLineString{c}, err
+		return geojsonLineString{c}, wrap(err, "unmarshalling LineString coords")
 	case "Polygon":
 		c, err := extract3DimFloat64s(node.Coords)
-		return geojsonPolygon{c}, err
+		return geojsonPolygon{c}, wrap(err, "unmarshalling Polygon coords")
 	case "MultiPoint":
 		c, err := extract2DimFloat64s(node.Coords)
-		return geojsonMultiPoint{c}, err
+		return geojsonMultiPoint{c}, wrap(err, "unmarshalling MultiPoint coords")
 	case "MultiLineString":
 		c, err := extract3DimFloat64s(node.Coords)
-		return geojsonMultiLineString{c}, err
+		return geojsonMultiLineString{c}, wrap(err, "unmarshalling MultiLineString coords")
 	case "MultiPolygon":
 		c, err := extract4DimFloat64s(node.Coords)
-		return geojsonMultiPolygon{c}, err
+		return geojsonMultiPolygon{c}, wrap(err, "unmarshalling MultiPolygon coords")
 	case "GeometryCollection":
 		parent := geojsonGeometryCollection{
 			geoms: make([]interface{}, len(node.Geoms)),
@@ -121,7 +121,8 @@ func decodeGeoJSON(node geojsonNode) (interface{}, error) {
 		for i, g := range node.Geoms {
 			child, err := decodeGeoJSON(g)
 			if err != nil {
-				return nil, err
+				return nil, wrap(err, "unmarshalling GeometryCollection"+
+					" geometry %d of %d", i+1, len(node.Geoms))
 			}
 			parent.geoms[i] = child
 		}
@@ -134,26 +135,26 @@ func decodeGeoJSON(node geojsonNode) (interface{}, error) {
 func extract1DimFloat64s(coords json.RawMessage) ([]float64, error) {
 	var result []float64
 	err := json.Unmarshal(coords, &result)
-	return result, err
+	return result, wrap(err, "unmarshalling 1D numeric array")
 
 }
 
 func extract2DimFloat64s(coords json.RawMessage) ([][]float64, error) {
 	var result [][]float64
 	err := json.Unmarshal(coords, &result)
-	return result, err
+	return result, wrap(err, "unmarshalling 2D numeric array")
 }
 
 func extract3DimFloat64s(coords json.RawMessage) ([][][]float64, error) {
 	var result [][][]float64
 	err := json.Unmarshal(coords, &result)
-	return result, err
+	return result, wrap(err, "unmarshalling 3D numeric array")
 }
 
 func extract4DimFloat64s(coords json.RawMessage) ([][][][]float64, error) {
 	var result [][][][]float64
 	err := json.Unmarshal(coords, &result)
-	return result, err
+	return result, wrap(err, "unmarshalling 4D numeric array")
 }
 
 func geojsonInvalidCoordinatesLengthError(n int) error {
