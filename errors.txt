@@ -1,5 +1,5 @@
 [x] geom/geojson_unmarshal.go
-[ ] geom/alg_set_op.go
+[x] geom/alg_set_op.go
 [ ] geom/dcel_extract.go
 [ ] geom/dcel_re_noding.go
 [ ] geom/type_line_string.go

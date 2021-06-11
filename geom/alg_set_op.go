@@ -1,9 +1,5 @@
 package geom
 
-import (
-	"fmt"
-)
-
 // Union returns a geometry that represents the parts from either geometry A or
 // geometry B (or both). An error may be returned in pathological cases of
 // numerical degeneracy. GeometryCollections are not supported.
@@ -17,7 +13,8 @@ func Union(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	return setOp(a, b, selectUnion)
+	g, err := setOp(a, b, selectUnion)
+	return g, wrap(err, "executing union")
 }
 
 // Intersection returns a geometry that represents the parts that are common to
@@ -27,7 +24,8 @@ func Intersection(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() || b.IsEmpty() {
 		return Geometry{}, nil
 	}
-	return setOp(a, b, selectIntersection)
+	g, err := setOp(a, b, selectIntersection)
+	return g, wrap(err, "executing intersection")
 }
 
 // Difference returns a geometry that represents the parts of input geometry A
@@ -41,7 +39,8 @@ func Difference(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	return setOp(a, b, selectDifference)
+	g, err := setOp(a, b, selectDifference)
+	return g, wrap(err, "executing difference")
 }
 
 // SymmetricDifference returns a geometry that represents the parts of geometry
@@ -57,18 +56,19 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	return setOp(a, b, selectSymmetricDifference)
+	g, err := setOp(a, b, selectSymmetricDifference)
+	return g, wrap(err, "executing symmetric difference")
 }
 
 func setOp(a, b Geometry, include func([2]label) bool) (Geometry, error) {
 	overlay, err := createOverlay(a, b)
 	if err != nil {
-		return Geometry{}, fmt.Errorf("internal error creating overlay: %v", err)
+		return Geometry{}, wrap(err, "internal error creating overlay")
 	}
 
 	g, err := overlay.extractGeometry(include)
 	if err != nil {
-		return Geometry{}, fmt.Errorf("internal error extracting geometry: %v", err)
+		return Geometry{}, wrap(err, "internal error extracting geometry")
 	}
 	return g, nil
 }
