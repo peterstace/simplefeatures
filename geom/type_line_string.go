@@ -2,7 +2,6 @@ package geom
 
 import (
 	"database/sql/driver"
-	"errors"
 	"math"
 	"unsafe"
 
@@ -38,8 +37,9 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 		return LineString{}, nil
 	}
 
-	return LineString{}, errors.New("non-empty LineStrings " +
-		"must contain at least 2 points with distinct XY values")
+	return LineString{}, validationError{TypeMultiLineString,
+		"non-empty LineStrings must contain at " +
+			"least 2 points with distinct XY values"}
 }
 
 func hasAtLeast2DistinctPointsInSeq(seq Sequence) bool {

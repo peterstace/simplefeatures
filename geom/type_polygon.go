@@ -2,7 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
-	"errors"
+	"fmt"
 	"math"
 	"unsafe"
 
@@ -58,17 +58,24 @@ func NewPolygonFromRings(rings []LineString, opts ...ConstructorOption) (Polygon
 	return Polygon{rings, ctype}, nil
 }
 
+func ringName(i int) string {
+	if i == 0 {
+		return "exterior ring"
+	}
+	return fmt.Sprintf("interior ring %d", i)
+}
+
 func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	if len(rings) == 0 || opts.skipValidations {
 		return nil
 	}
 
-	for _, r := range rings {
+	for i, r := range rings {
 		if !r.IsClosed() {
-			return errors.New("polygon rings must be closed")
+			return validationError{TypePolygon, ringName(i) + " is not closed"}
 		}
 		if !r.IsSimple() {
-			return errors.New("polygon rings must be simple")
+			return validationError{TypePolygon, ringName(i) + " is not simple"}
 		}
 	}
 
@@ -107,7 +114,8 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 				nestedFwd := relatePointToRing(iStart, rings[j]) == interior
 				nestedRev := relatePointToRing(jStart, rings[i]) == interior
 				if nestedFwd || nestedRev {
-					return errors.New("polygon must not have nested rings")
+					return validationError{TypePolygon, fmt.Sprintf(
+						"%s and %s are nested", ringName(i), ringName(j))}
 				}
 			}
 
@@ -116,7 +124,8 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 				return nil
 			}
 			if ext.multiplePoints {
-				return errors.New("polygon rings must not intersect at multiple points")
+				return validationError{TypePolygon, fmt.Sprintf(
+					"%s and %s intersect at multiple points", ringName(i), ringName(j))}
 			}
 
 			interVert, ok := interVerts[ext.singlePoint]
@@ -136,13 +145,13 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	// All inner rings must be inside the outer ring. We can just check an
 	// arbitrary point in each inner ring because we have already made sure
 	// that the rings don't intersect at multiple points.
-	for _, hole := range rings[1:] {
+	for i, hole := range rings[1:] {
 		xy, ok := hole.StartPoint().XY()
 		if !ok {
 			continue
 		}
 		if relatePointToRing(xy, rings[0]) == exterior {
-			return errors.New("hole must be inside outer ring")
+			return validationError{TypePolygon, fmt.Sprintf("%s outside of %s", i, ringName(0))}
 		}
 	}
 
@@ -152,7 +161,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	// intersection. The interior of the polygon is connected iff the graph
 	// does not contain a cycle.
 	if graph.hasCycle() {
-		return errors.New("polygon interiors must be connected")
+		return validationError{TypePolygon, "interior is disconnected"}
 	}
 	return nil
 }

@@ -2,17 +2,17 @@
 [x] geom/alg_set_op.go
 [x] geom/dcel_extract.go
 [x] geom/dcel_re_noding.go
-[ ] geom/type_line_string.go
+[x] geom/type_line_string.go
 [x] geom/dcel_overlay.go
 [ ] geom/type_geometry_collection.go
 [x] geom/de9im.go
-[ ] geom/wkb_parser.go
+[x] geom/wkb_parser.go
 [x] geom/alg_relate.go
 [ ] geom/type_geometry.go
 [ ] geom/type_multi_line_string.go
-[ ] geom/type_polygon.go
-[ ] geom/wkt_lexer.go
+[x] geom/type_polygon.go
+[x] geom/wkt_lexer.go
 [ ] geom/type_multi_polygon.go
-[ ] geom/wkt_parser.go
+[x] geom/wkt_parser.go
 [x] geom/geojson_feature_collection.go
 [x] geom/alg_simplify.go
