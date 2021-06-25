@@ -8,3 +8,9 @@ func wrap(err error, format string, args ...interface{}) error {
 	}
 	return fmt.Errorf(format+": %v", append(args, err)...)
 }
+
+// wrapTransformed wraps errors to indicate that they occurred as the result of
+// pointwise-transforming a geometry.
+func wrapTransformed(err error) error {
+	return wrap(err, "transformed geometry")
+}

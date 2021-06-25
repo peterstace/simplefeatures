@@ -297,7 +297,8 @@ func (s LineString) Coordinates() Sequence {
 // TransformXY transforms this LineString into another LineString according to fn.
 func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (LineString, error) {
 	transformed := transformSequence(s.seq, fn)
-	return NewLineString(transformed, opts...)
+	ls, err := NewLineString(transformed, opts...)
+	return ls, wrapTransformed(err)
 }
 
 // IsRing returns true iff this LineString is both simple and closed (i.e. is a

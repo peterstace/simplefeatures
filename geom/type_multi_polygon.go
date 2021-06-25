@@ -344,12 +344,12 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mu
 	for i := range polys {
 		transformed, err := m.PolygonN(i).TransformXY(fn, opts...)
 		if err != nil {
-			return MultiPolygon{}, err
+			return MultiPolygon{}, wrapTransformed(err)
 		}
 		polys[i] = transformed
 	}
 	mp, err := NewMultiPolygonFromPolygons(polys, opts...)
-	return mp.ForceCoordinatesType(m.ctype), err
+	return mp.ForceCoordinatesType(m.ctype), wrapTransformed(err)
 }
 
 // Area in the case of a MultiPolygon is the sum of the areas of its polygons.

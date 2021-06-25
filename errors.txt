@@ -14,5 +14,5 @@
 [ ] geom/wkt_lexer.go
 [ ] geom/type_multi_polygon.go
 [ ] geom/wkt_parser.go
-[ ] geom/geojson_feature_collection.go
+[x] geom/geojson_feature_collection.go
 [x] geom/alg_simplify.go

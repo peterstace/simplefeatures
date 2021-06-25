@@ -321,11 +321,11 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon
 			opts...,
 		)
 		if err != nil {
-			return Polygon{}, err
+			return Polygon{}, wrapTransformed(err)
 		}
 	}
 	poly, err := NewPolygonFromRings(transformed, opts...)
-	return poly.ForceCoordinatesType(p.ctype), err
+	return poly.ForceCoordinatesType(p.ctype), wrapTransformed(err)
 }
 
 // AreaOption allows the behaviour of area calculations to be modified.
