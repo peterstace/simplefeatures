@@ -14,3 +14,9 @@ func wrap(err error, format string, args ...interface{}) error {
 func wrapTransformed(err error) error {
 	return wrap(err, "transformed geometry")
 }
+
+// wrapSimplified wraps errors to indicate that they occurred as a result of no
+// longer being valid after simplification.
+func wrapSimplified(err error) error {
+	return wrap(err, "simplified geometry")
+}
