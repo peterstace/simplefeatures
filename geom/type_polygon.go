@@ -151,7 +151,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 			continue
 		}
 		if relatePointToRing(xy, rings[0]) == exterior {
-			return validationError{TypePolygon, fmt.Sprintf("%s outside of %s", i, ringName(0))}
+			return validationError{TypePolygon, fmt.Sprintf("%s outside of %s", ringName(i), ringName(0))}
 		}
 	}
 
