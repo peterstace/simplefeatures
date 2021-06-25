@@ -7,7 +7,7 @@
 [ ] geom/type_geometry_collection.go
 [x] geom/de9im.go
 [ ] geom/wkb_parser.go
-[ ] geom/alg_relate.go
+[x] geom/alg_relate.go
 [ ] geom/type_geometry.go
 [ ] geom/type_multi_line_string.go
 [ ] geom/type_polygon.go
