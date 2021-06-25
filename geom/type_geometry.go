@@ -287,14 +287,14 @@ func (g *Geometry) Scan(src interface{}) error {
 	default:
 		// nil is specifically not supported. It _could_ map to an empty
 		// geometry, however then the caller wouldn't be able to differentiate
-		// between a real empty geometry and a NULL. Instead, we should
-		// additionally provide a NullableGeometry type with an IsValid flag.
+		// between a real empty geometry and a NULL. Users needing this
+		// functionality should use the NullGeometry type.
 		return fmt.Errorf("unsupported src type in Scan: %T", src)
 	}
 
 	unmarshalled, err := UnmarshalWKB(wkb)
 	if err != nil {
-		return err
+		return wrap(err, "scanning as WKB")
 	}
 	*g = unmarshalled
 	return nil

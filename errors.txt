@@ -8,11 +8,11 @@
 [x] geom/de9im.go
 [x] geom/wkb_parser.go
 [x] geom/alg_relate.go
-[ ] geom/type_geometry.go
-[ ] geom/type_multi_line_string.go
+[x] geom/type_geometry.go
+[x] geom/type_multi_line_string.go
 [x] geom/type_polygon.go
 [x] geom/wkt_lexer.go
-[ ] geom/type_multi_polygon.go
+[x] geom/type_multi_polygon.go
 [x] geom/wkt_parser.go
 [x] geom/geojson_feature_collection.go
 [x] geom/alg_simplify.go

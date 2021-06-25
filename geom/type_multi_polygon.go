@@ -2,7 +2,6 @@ package geom
 
 import (
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"unsafe"
 
@@ -95,8 +94,8 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 				polyBoundaries[j],
 			)
 			if !interMLS.IsEmpty() {
-				return errors.New("the boundaries of the polygon elements" +
-					" of multipolygons must only intersect at points")
+				return validationError{TypeMultiPolygon, fmt.Sprintf(
+					"boundaries of child polygon %d and %d intersect at multiple points", i, j)}
 			}
 
 			// Fast case: If both the point and line parts of the intersection
@@ -111,7 +110,8 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 				ptJ := polys[j].ExteriorRing().Coordinates().GetXY(0)
 				if relatePointToPolygon(ptI, polyBoundaries[j]) != exterior ||
 					relatePointToPolygon(ptJ, polyBoundaries[i]) != exterior {
-					return errors.New("polygons must not be nested")
+					return validationError{MultiPolygon, fmt.Sprintf(
+						"child polygon %d and %d are nested", i, j)}
 				}
 				return nil
 			}
@@ -168,8 +168,9 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 		for k := 0; k+1 < len(pts); k++ {
 			midpoint := pts[k].Add(pts[k+1]).Scale(0.5)
 			if relatePointToPolygon(midpoint, p1) == interior {
-				return fmt.Errorf("polygon interiors intersect at %s",
-					NewPointFromXY(midpoint).AsText())
+				return validationError{TypeMultiPolygon, fmt.Sprintf(
+					"interiors of child polygon %d and %d intersect at %s",
+					i, j, NewPointFromXY(midpoint).AsText())}
 			}
 		}
 	}
