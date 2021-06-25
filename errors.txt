@@ -4,7 +4,7 @@
 [x] geom/dcel_re_noding.go
 [x] geom/type_line_string.go
 [x] geom/dcel_overlay.go
-[ ] geom/type_geometry_collection.go
+[x] geom/type_geometry_collection.go
 [x] geom/de9im.go
 [x] geom/wkb_parser.go
 [x] geom/alg_relate.go
