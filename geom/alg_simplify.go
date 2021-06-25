@@ -10,23 +10,23 @@ func Simplify(g Geometry, threshold float64, opts ...ConstructorOption) (Geometr
 	switch g.gtype {
 	case TypeGeometryCollection:
 		gc, err := s.simplifyGeometryCollection(g.AsGeometryCollection())
-		return gc.AsGeometry(), err
+		return gc.AsGeometry(), wrap(err, "simplified geometry invalid")
 	case TypePoint:
 		return g, nil
 	case TypeLineString:
 		ls, err := s.simplifyLineString(g.AsLineString())
-		return ls.AsGeometry(), err
+		return ls.AsGeometry(), wrap(err, "simplified geometry invalid")
 	case TypePolygon:
 		poly, err := s.simplifyPolygon(g.AsPolygon())
-		return poly.AsGeometry(), err
+		return poly.AsGeometry(), wrap(err, "simplified geometry invalid")
 	case TypeMultiPoint:
 		return g, nil
 	case TypeMultiLineString:
 		mls, err := s.simplifyMultiLineString(g.AsMultiLineString())
-		return mls.AsGeometry(), err
+		return mls.AsGeometry(), wrap(err, "simplified geometry invalid")
 	case TypeMultiPolygon:
 		mp, err := s.simplifyMultiPolygon(g.AsMultiPolygon())
-		return mp.AsGeometry(), err
+		return mp.AsGeometry(), wrap(err, "simplified geometry invalid")
 	default:
 		panic("unknown geometry: " + g.gtype.String())
 	}
