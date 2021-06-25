@@ -1,9 +1,9 @@
 [x] geom/geojson_unmarshal.go
 [x] geom/alg_set_op.go
-[ ] geom/dcel_extract.go
-[ ] geom/dcel_re_noding.go
+[x] geom/dcel_extract.go
+[x] geom/dcel_re_noding.go
 [ ] geom/type_line_string.go
-[ ] geom/dcel_overlay.go
+[x] geom/dcel_overlay.go
 [ ] geom/type_geometry_collection.go
 [x] geom/de9im.go
 [ ] geom/wkb_parser.go
