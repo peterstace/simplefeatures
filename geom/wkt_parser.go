@@ -261,7 +261,7 @@ func (p *parser) nextLineStringText(ctype CoordinatesType) (LineString, error) {
 }
 
 func (p *parser) nextPolygonText(ctype CoordinatesType) (Polygon, error) {
-	rings, err := p.nextPolygonOrMultiLineStringText(ctype)
+	rings, err := p.nextPolygonOrMultiLineStringText(ctype, TypePolygon)
 	if err != nil {
 		return Polygon{}, err
 	}
@@ -272,7 +272,7 @@ func (p *parser) nextPolygonText(ctype CoordinatesType) (Polygon, error) {
 }
 
 func (p *parser) nextMultiLineString(ctype CoordinatesType) (MultiLineString, error) {
-	lss, err := p.nextPolygonOrMultiLineStringText(ctype)
+	lss, err := p.nextPolygonOrMultiLineStringText(ctype, TypeMultiLineString)
 	if err != nil {
 		return MultiLineString{}, err
 	}
@@ -282,7 +282,7 @@ func (p *parser) nextMultiLineString(ctype CoordinatesType) (MultiLineString, er
 	return NewMultiLineStringFromLineStrings(lss, p.opts...), nil
 }
 
-func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType) ([]LineString, error) {
+func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType, gtype GeometryType) ([]LineString, error) {
 	tok, err := p.nextEmptySetOrLeftParen()
 	if err != nil {
 		return nil, err
@@ -292,10 +292,10 @@ func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType) ([]Line
 	}
 	ls, err := p.nextLineStringText(ctype)
 	if err != nil {
-		return nil, err
+		return nil, childValidationError{gtype, 0, err}
 	}
 	lss := []LineString{ls}
-	for {
+	for i := 1; true; i++ {
 		tok, err := p.nextCommaOrRightParen()
 		if err != nil {
 			return nil, err
@@ -303,7 +303,7 @@ func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType) ([]Line
 		if tok == "," {
 			ls, err := p.nextLineStringText(ctype)
 			if err != nil {
-				return nil, err
+				return nil, childValidationError{gtype, i, err}
 			}
 			lss = append(lss, ls)
 		} else {
@@ -388,10 +388,10 @@ func (p *parser) nextMultiPolygonText(ctype CoordinatesType) (MultiPolygon, erro
 		return MultiPolygon{}, err
 	}
 	if tok == "(" {
-		for {
+		for i := 0; true; i++ {
 			poly, err := p.nextPolygonText(ctype)
 			if err != nil {
-				return MultiPolygon{}, err
+				return MultiPolygon{}, childValidationError{TypeMultiPolygon, i, err}
 			}
 			polys = append(polys, poly)
 			tok, err := p.nextCommaOrRightParen()
@@ -416,10 +416,10 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryColl
 		return GeometryCollection{}, err
 	}
 	if tok == "(" {
-		for {
+		for i := 0; true; i++ {
 			g, err := p.nextGeometryTaggedText()
 			if err != nil {
-				return GeometryCollection{}, err
+				return GeometryCollection{}, childValidationError{TypeGeometryCollection, i, err}
 			}
 			geoms = append(geoms, g)
 			tok, err := p.nextCommaOrRightParen()

@@ -257,7 +257,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 			var err error
 			rings[i], err = NewLineString(seq, opts...)
 			if err != nil {
-				return Geometry{}, err
+				return Geometry{}, childValidationError{TypePolygon, i, err}
 			}
 		}
 		poly, err := NewPolygonFromRings(rings, opts...)
@@ -276,7 +276,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 			var err error
 			lss[i], err = NewLineString(seq, opts...)
 			if err != nil {
-				return Geometry{}, err
+				return Geometry{}, childValidationError{TypeMultiLineString, i, err}
 			}
 		}
 		return NewMultiLineStringFromLineStrings(lss, opts...).AsGeometry(), nil
@@ -292,13 +292,15 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 				var err error
 				rings[j], err = NewLineString(seq, opts...)
 				if err != nil {
-					return Geometry{}, err
+					ringErr := childValidationError{TypePolygon, j, err}
+					childErr := childValidationError{TypeMultiPolygon, i, ringErr}
+					return Geometry{}, childErr
 				}
 			}
 			var err error
 			polys[i], err = NewPolygonFromRings(rings, opts...)
 			if err != nil {
-				return Geometry{}, err
+				return Geometry{}, childValidationError{TypeMultiPolygon, i, err}
 			}
 			polys[i] = polys[i].ForceCoordinatesType(ctype)
 		}
@@ -313,7 +315,8 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 			var err error
 			children[i], err = geojsonNodeToGeometry(child, ctype, opts)
 			if err != nil {
-				return Geometry{}, err
+				childErr := childValidationError{TypeGeometryCollection, i, err}
+				return Geometry{}, childErr
 			}
 		}
 		return NewGeometryCollection(children, opts...).AsGeometry(), nil

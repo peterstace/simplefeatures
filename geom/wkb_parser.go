@@ -253,7 +253,7 @@ func (p *wkbParser) parsePolygon(ctype CoordinatesType) (Polygon, error) {
 	for i := range rings {
 		rings[i], err = p.parseLineString(ctype)
 		if err != nil {
-			return Polygon{}, err
+			return Polygon{}, childValidationError{TypePolygon, i, err}
 		}
 	}
 	return NewPolygonFromRings(rings, p.opts...)
@@ -293,10 +293,11 @@ func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) (MultiLineString
 	for i := uint32(0); i < n; i++ {
 		geom, err := p.inner()
 		if err != nil {
-			return MultiLineString{}, err
+			return MultiLineString{}, childValidationError{TypeMultiLineString, int(i), err}
 		}
 		if !geom.IsLineString() {
-			return MultiLineString{}, errors.New("MultiLineString contains non-LineString element")
+			return MultiLineString{}, childValidationError{TypeMultiLineString, int(i),
+				errors.New("MultiLineString contains non-LineString element")}
 		}
 		lss[i] = geom.AsLineString()
 	}
@@ -315,10 +316,11 @@ func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) (MultiPolygon, erro
 	for i := uint32(0); i < n; i++ {
 		geom, err := p.inner()
 		if err != nil {
-			return MultiPolygon{}, err
+			return MultiPolygon{}, childValidationError{TypeMultiPolygon, int(i), err}
 		}
 		if !geom.IsPolygon() {
-			return MultiPolygon{}, errors.New("MultiPolygon contains non-Polygon element")
+			return MultiPolygon{}, childValidationError{TypeMultiPolygon, int(i),
+				errors.New("MultiPolygon contains non-Polygon element")}
 		}
 		polys[i] = geom.AsPolygon()
 	}
@@ -337,7 +339,7 @@ func (p *wkbParser) parseGeometryCollection(ctype CoordinatesType) (GeometryColl
 	for i := uint32(0); i < n; i++ {
 		geoms[i], err = p.inner()
 		if err != nil {
-			return GeometryCollection{}, err
+			return GeometryCollection{}, childValidationError{TypeGeometryCollection, int(i), err}
 		}
 	}
 	return NewGeometryCollection(geoms, p.opts...), nil
