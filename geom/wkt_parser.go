@@ -2,7 +2,6 @@ package geom
 
 import (
 	"fmt"
-	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -25,17 +24,17 @@ func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 
 	if tok, err := p.lexer.next(); err == nil {
 		return Geometry{}, wantButGot("EOF", tok)
-	} else if err != io.ErrUnexpectedEOF {
+	} else if err != wktUnexpectedEOF {
 		return Geometry{}, err
 	}
 	return geom, nil
 }
 
 func wantButGot(wantTok, gotTok string) error {
-	return fmt.Errorf(
+	return wktSyntaxError{fmt.Sprintf(
 		"unexpected token: '%s' (expected %s)",
 		gotTok, wantTok,
-	)
+	)}
 }
 
 func newParser(wkt string, opts []ConstructorOption) *parser {
@@ -200,11 +199,11 @@ func (p *parser) nextSignedNumericLiteral() (float64, error) {
 	}
 	f, err := strconv.ParseFloat(tok, 64)
 	if err != nil {
-		return 0, err
+		return 0, wktSyntaxError{err.Error()}
 	}
 	// NaNs and Infs are not allowed by the WKT grammar.
 	if math.IsNaN(f) || math.IsInf(f, 0) {
-		return 0, fmt.Errorf("invalid numeric literal: %v", tok)
+		return 0, wktSyntaxError{fmt.Sprintf("invalid numeric literal: %v", tok)}
 	}
 	if negative {
 		f *= -1
@@ -292,7 +291,7 @@ func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType, gtype G
 	}
 	ls, err := p.nextLineStringText(ctype)
 	if err != nil {
-		return nil, childValidationError{gtype, 0, err}
+		return nil, err
 	}
 	lss := []LineString{ls}
 	for i := 1; true; i++ {
@@ -303,7 +302,7 @@ func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType, gtype G
 		if tok == "," {
 			ls, err := p.nextLineStringText(ctype)
 			if err != nil {
-				return nil, childValidationError{gtype, i, err}
+				return nil, err
 			}
 			lss = append(lss, ls)
 		} else {
@@ -391,7 +390,7 @@ func (p *parser) nextMultiPolygonText(ctype CoordinatesType) (MultiPolygon, erro
 		for i := 0; true; i++ {
 			poly, err := p.nextPolygonText(ctype)
 			if err != nil {
-				return MultiPolygon{}, childValidationError{TypeMultiPolygon, i, err}
+				return MultiPolygon{}, err
 			}
 			polys = append(polys, poly)
 			tok, err := p.nextCommaOrRightParen()
@@ -419,7 +418,7 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryColl
 		for i := 0; true; i++ {
 			g, err := p.nextGeometryTaggedText()
 			if err != nil {
-				return GeometryCollection{}, childValidationError{TypeGeometryCollection, i, err}
+				return GeometryCollection{}, err
 			}
 			geoms = append(geoms, g)
 			tok, err := p.nextCommaOrRightParen()

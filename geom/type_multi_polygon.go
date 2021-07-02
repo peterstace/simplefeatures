@@ -94,7 +94,7 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 				polyBoundaries[j],
 			)
 			if !interMLS.IsEmpty() {
-				return validationError{TypeMultiPolygon, fmt.Sprintf(
+				return validationError{fmt.Sprintf(
 					"boundaries of child polygon %d and %d intersect at multiple points", i, j)}
 			}
 
@@ -110,7 +110,7 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 				ptJ := polys[j].ExteriorRing().Coordinates().GetXY(0)
 				if relatePointToPolygon(ptI, polyBoundaries[j]) != exterior ||
 					relatePointToPolygon(ptJ, polyBoundaries[i]) != exterior {
-					return validationError{TypeMultiPolygon, fmt.Sprintf(
+					return validationError{fmt.Sprintf(
 						"child polygon %d and %d are nested", i, j)}
 				}
 				return nil
@@ -168,7 +168,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 		for k := 0; k+1 < len(pts); k++ {
 			midpoint := pts[k].Add(pts[k+1]).Scale(0.5)
 			if relatePointToPolygon(midpoint, p1) == interior {
-				return validationError{TypeMultiPolygon, fmt.Sprintf(
+				return validationError{fmt.Sprintf(
 					"interiors of child polygon %d and another child polygon intersect at %s",
 					j, NewPointFromXY(midpoint).AsText())}
 			}

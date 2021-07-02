@@ -80,7 +80,7 @@ func TestUnmarshalWKTSyntaxErrors(t *testing.T) {
 		{
 			"token contains invalid octal digit",
 			"POINT(08, 0)",
-			"invalid token: '08' (invalid digit '8' in octal literal)",
+			"invalid token '08' (invalid digit '8' in octal literal)",
 		},
 
 		{
@@ -135,9 +135,10 @@ func TestUnmarshalWKTSyntaxErrors(t *testing.T) {
 			if err == nil {
 				t.Fatalf("expected error but got nil")
 			}
-			if err.Error() != tt.errorText {
+			want := "invalid WKT syntax: " + tt.errorText
+			if err.Error() != want {
 				t.Logf("got:  %q", err.Error())
-				t.Logf("want: %q", tt.errorText)
+				t.Logf("want: %q", want)
 				t.Errorf("mismatch")
 			}
 		})

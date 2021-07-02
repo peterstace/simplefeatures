@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"io"
 	"reflect"
 	"strconv"
 	"testing"
@@ -43,7 +42,7 @@ func TestWKTLexer(t *testing.T) {
 			for {
 				tok, err := lexer.next()
 				if err != nil {
-					if err == io.ErrUnexpectedEOF {
+					if err == wktUnexpectedEOF {
 						break
 					}
 					t.Fatal(err)

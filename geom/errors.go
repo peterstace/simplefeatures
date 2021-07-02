@@ -24,9 +24,6 @@ func wrapSimplified(err error) error {
 // validationError is an error used to indicate that a geometry could not be
 // created because it didn't pass all validation checks.
 type validationError struct {
-	// gtype is the type of geometry that was attempted to be created.
-	gtype GeometryType
-
 	// reason should describe the invalid state (as opposed to describing the
 	// validation rule). E.g. "non-closed ring" rather than "rings must be
 	// closed".
@@ -34,29 +31,48 @@ type validationError struct {
 }
 
 func (e validationError) Error() string {
-	return fmt.Sprintf("invalid %s: %s", e.gtype, e.reason)
+	return fmt.Sprintf("failed geometry constraint: %s", e.reason)
 }
 
-// childValidationError is an error is used in 2 cases:
-//
-// 1. To indicate that multi-geometry (MultiPoint, MultiLineString,
-// MultiPolygon, or GeometryCollection) could not be created because one of its
-// children did not pass all validation checks.
-//
-// 2. To indicate that Polygon could not be created because of its rings is not
-// a valid LineString.
-type childValidationError struct {
-	gtype    GeometryType // type of multi-geometry or Polygon that was attempted to be created
-	childIdx int          // 0-based index of the child
-	childErr error        // error returned when attempting to validate the child
+// wkbSyntaxError is an error used to indicate that a serialised WKB geometry
+// cannot be unmarshalled because some aspect of it's syntax is invalid.
+type wkbSyntaxError struct {
+	// reason should describe the invalid syntax (as opposed to describing the
+	// syntax rule that was broken).
+	reason string
 }
 
-func (e childValidationError) Error() string {
-	var subject string
-	if e.gtype == TypePolygon {
-		subject = ringName(e.childIdx)
-	} else {
-		subject = fmt.Sprintf("child with index %d", e.childIdx)
+func (e wkbSyntaxError) Error() string {
+	return fmt.Sprintf("invalid WKB syntax: %s", e.reason)
+}
+
+// wktSyntaxError is an error used to indicate that a serialised WKT geometry
+// cannot be unmarshalled because some aspect of it's syntax is invalid.
+type wktSyntaxError struct {
+	// reason should describe the invalid syntax (as opposed to describing the
+	// syntax rule that was broken).
+	reason string
+}
+
+func (e wktSyntaxError) Error() string {
+	return fmt.Sprintf("invalid WKT syntax: %s", e.reason)
+}
+
+// geojsonSyntaxError is an error used to indicate that a serialised GeoJSON geometry
+// cannot be unmarshalled because some aspect of it's syntax is invalid.
+type geojsonSyntaxError struct {
+	// reason should describe the invalid syntax (as opposed to describing the
+	// syntax rule that was broken).
+	reason string
+}
+
+func (e geojsonSyntaxError) Error() string {
+	return fmt.Sprintf("invalid GeoJSON syntax: %s", e.reason)
+}
+
+func wrapWithGeoJSONSyntaxError(err error) error {
+	if err == nil {
+		return nil
 	}
-	return fmt.Sprintf("invalid %s, %s is invalid: %s", e.gtype, subject, e.childErr.Error())
+	return geojsonSyntaxError{err.Error()}
 }

@@ -37,7 +37,7 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 		return LineString{}, nil
 	}
 
-	return LineString{}, validationError{TypeMultiLineString,
+	return LineString{}, validationError{
 		"non-empty LineStrings must contain at " +
 			"least 2 points with distinct XY values"}
 }
