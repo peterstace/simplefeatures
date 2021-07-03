@@ -106,7 +106,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 				nestedFwd := relatePointToRing(iStart, rings[j]) == interior
 				nestedRev := relatePointToRing(jStart, rings[i]) == interior
 				if nestedFwd || nestedRev {
-					return validationError{"nested rings"}
+					return validationError{"polygon has nested rings"}
 				}
 			}
 
@@ -115,7 +115,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 				return nil
 			}
 			if ext.multiplePoints {
-				return validationError{"rings intersect at multiple points"}
+				return validationError{"polygon rings intersect at multiple points"}
 			}
 
 			interVert, ok := interVerts[ext.singlePoint]
@@ -141,7 +141,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 			continue
 		}
 		if relatePointToRing(xy, rings[0]) == exterior {
-			return validationError{"hole outside of outer ring"}
+			return validationError{"polygon interior ring outside of exterior ring"}
 		}
 	}
 
@@ -151,7 +151,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	// intersection. The interior of the polygon is connected iff the graph
 	// does not contain a cycle.
 	if graph.hasCycle() {
-		return validationError{"disconnected interior"}
+		return validationError{"polygon has disconnected interior"}
 	}
 	return nil
 }

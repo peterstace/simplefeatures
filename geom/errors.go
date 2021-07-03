@@ -24,9 +24,10 @@ func wrapSimplified(err error) error {
 // validationError is an error used to indicate that a geometry could not be
 // created because it didn't pass all validation checks.
 type validationError struct {
-	// reason should describe the invalid state (as opposed to describing the
-	// validation rule). E.g. "non-closed ring" rather than "rings must be
-	// closed".
+	// reason should begin with the name of the invalid geometry being created,
+	// and describe the invalid state (as opposed to describing the validation
+	// rule). E.g. "polygon has non-closed ring" rather than "polygon rings
+	// must be closed".
 	reason string
 }
 
