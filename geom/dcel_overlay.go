@@ -18,7 +18,7 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 
 	a, b, ghosts, err := reNodeGeometries(a, b, ghosts)
 	if err != nil {
-		return nil, err
+		return nil, wrap(err, "re-noding")
 	}
 
 	interactionPoints := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})

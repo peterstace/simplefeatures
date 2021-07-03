@@ -2,7 +2,6 @@ package geom
 
 import (
 	"database/sql/driver"
-	"errors"
 	"math"
 	"unsafe"
 
@@ -65,10 +64,10 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 
 	for _, r := range rings {
 		if !r.IsClosed() {
-			return errors.New("polygon rings must be closed")
+			return validationError{"polygon ring not closed"}
 		}
 		if !r.IsSimple() {
-			return errors.New("polygon rings must be simple")
+			return validationError{"polygon ring not simple"}
 		}
 	}
 
@@ -107,7 +106,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 				nestedFwd := relatePointToRing(iStart, rings[j]) == interior
 				nestedRev := relatePointToRing(jStart, rings[i]) == interior
 				if nestedFwd || nestedRev {
-					return errors.New("polygon must not have nested rings")
+					return validationError{"polygon has nested rings"}
 				}
 			}
 
@@ -116,7 +115,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 				return nil
 			}
 			if ext.multiplePoints {
-				return errors.New("polygon rings must not intersect at multiple points")
+				return validationError{"polygon rings intersect at multiple points"}
 			}
 
 			interVert, ok := interVerts[ext.singlePoint]
@@ -142,7 +141,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 			continue
 		}
 		if relatePointToRing(xy, rings[0]) == exterior {
-			return errors.New("hole must be inside outer ring")
+			return validationError{"polygon interior ring outside of exterior ring"}
 		}
 	}
 
@@ -152,7 +151,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	// intersection. The interior of the polygon is connected iff the graph
 	// does not contain a cycle.
 	if graph.hasCycle() {
-		return errors.New("polygon interiors must be connected")
+		return validationError{"polygon has disconnected interior"}
 	}
 	return nil
 }
@@ -321,11 +320,11 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon
 			opts...,
 		)
 		if err != nil {
-			return Polygon{}, err
+			return Polygon{}, wrapTransformed(err)
 		}
 	}
 	poly, err := NewPolygonFromRings(transformed, opts...)
-	return poly.ForceCoordinatesType(p.ctype), err
+	return poly.ForceCoordinatesType(p.ctype), wrapTransformed(err)
 }
 
 // AreaOption allows the behaviour of area calculations to be modified.

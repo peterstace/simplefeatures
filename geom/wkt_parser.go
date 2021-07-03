@@ -2,7 +2,6 @@ package geom
 
 import (
 	"fmt"
-	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -25,17 +24,17 @@ func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 
 	if tok, err := p.lexer.next(); err == nil {
 		return Geometry{}, wantButGot("EOF", tok)
-	} else if err != io.ErrUnexpectedEOF {
+	} else if err != wktUnexpectedEOF {
 		return Geometry{}, err
 	}
 	return geom, nil
 }
 
 func wantButGot(wantTok, gotTok string) error {
-	return fmt.Errorf(
+	return wktSyntaxError{fmt.Sprintf(
 		"unexpected token: '%s' (expected %s)",
 		gotTok, wantTok,
-	)
+	)}
 }
 
 func newParser(wkt string, opts []ConstructorOption) *parser {
@@ -200,11 +199,11 @@ func (p *parser) nextSignedNumericLiteral() (float64, error) {
 	}
 	f, err := strconv.ParseFloat(tok, 64)
 	if err != nil {
-		return 0, err
+		return 0, wktSyntaxError{err.Error()}
 	}
 	// NaNs and Infs are not allowed by the WKT grammar.
 	if math.IsNaN(f) || math.IsInf(f, 0) {
-		return 0, fmt.Errorf("invalid numeric literal: %v", tok)
+		return 0, wktSyntaxError{fmt.Sprintf("invalid numeric literal: %v", tok)}
 	}
 	if negative {
 		f *= -1
@@ -388,7 +387,7 @@ func (p *parser) nextMultiPolygonText(ctype CoordinatesType) (MultiPolygon, erro
 		return MultiPolygon{}, err
 	}
 	if tok == "(" {
-		for {
+		for i := 0; true; i++ {
 			poly, err := p.nextPolygonText(ctype)
 			if err != nil {
 				return MultiPolygon{}, err

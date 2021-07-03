@@ -1,9 +1,5 @@
 package geom
 
-import (
-	"fmt"
-)
-
 // Relate calculates the DE-9IM matrix between two geometries, describing how
 // the two geometries relate to each other.
 //
@@ -58,7 +54,7 @@ func Relate(a, b Geometry) (string, error) {
 
 	overlay, err := createOverlay(a, b)
 	if err != nil {
-		return "", fmt.Errorf("internal error creating overlay: %v", err)
+		return "", wrap(err, "internal error creating overlay")
 	}
 	im := overlay.extractIntersectionMatrix()
 	return im.code(), nil

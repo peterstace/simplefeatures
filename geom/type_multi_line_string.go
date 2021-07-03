@@ -323,7 +323,7 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 			opts...,
 		)
 		if err != nil {
-			return MultiLineString{}, err
+			return MultiLineString{}, wrapTransformed(err)
 		}
 	}
 	return NewMultiLineStringFromLineStrings(transformed, opts...), nil

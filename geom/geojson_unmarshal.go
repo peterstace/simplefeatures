@@ -9,7 +9,7 @@ import (
 func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error) {
 	var root geojsonNode
 	if err := json.Unmarshal(input, &root); err != nil {
-		return Geometry{}, err
+		return Geometry{}, wrapWithGeoJSONSyntaxError(err)
 	}
 
 	rootObj, err := decodeGeoJSON(root)
@@ -127,37 +127,36 @@ func decodeGeoJSON(node geojsonNode) (interface{}, error) {
 		}
 		return parent, nil
 	default:
-		return nil, fmt.Errorf("unknown geometry type: '%s'", node.Type)
+		return nil, geojsonSyntaxError{fmt.Sprintf("unknown geometry type: '%s'", node.Type)}
 	}
 }
 
 func extract1DimFloat64s(coords json.RawMessage) ([]float64, error) {
 	var result []float64
 	err := json.Unmarshal(coords, &result)
-	return result, err
-
+	return result, wrapWithGeoJSONSyntaxError(err)
 }
 
 func extract2DimFloat64s(coords json.RawMessage) ([][]float64, error) {
 	var result [][]float64
 	err := json.Unmarshal(coords, &result)
-	return result, err
+	return result, wrapWithGeoJSONSyntaxError(err)
 }
 
 func extract3DimFloat64s(coords json.RawMessage) ([][][]float64, error) {
 	var result [][][]float64
 	err := json.Unmarshal(coords, &result)
-	return result, err
+	return result, wrapWithGeoJSONSyntaxError(err)
 }
 
 func extract4DimFloat64s(coords json.RawMessage) ([][][][]float64, error) {
 	var result [][][][]float64
 	err := json.Unmarshal(coords, &result)
-	return result, err
+	return result, wrapWithGeoJSONSyntaxError(err)
 }
 
 func geojsonInvalidCoordinatesLengthError(n int) error {
-	return fmt.Errorf("invalid geojson coordinate length: %d", n)
+	return geojsonSyntaxError{fmt.Sprintf("invalid geojson coordinate length: %d", n)}
 }
 
 func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {

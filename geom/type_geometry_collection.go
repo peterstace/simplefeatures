@@ -210,7 +210,7 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 		var err error
 		transformed[i], err = c.geoms[i].TransformXY(fn, opts...)
 		if err != nil {
-			return GeometryCollection{}, err
+			return GeometryCollection{}, wrapTransformed(err)
 		}
 	}
 	return GeometryCollection{transformed, c.ctype}, nil

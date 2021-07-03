@@ -493,9 +493,10 @@ func TestWKBParserSyntaxError(t *testing.T) {
 			if err == nil {
 				t.Fatal("expected an error but got nil")
 			}
-			if err.Error() != tc.errorText {
+			want := "invalid WKB syntax: " + tc.errorText
+			if err.Error() != want {
 				t.Logf("got:  %q", err.Error())
-				t.Logf("want: %q", tc.errorText)
+				t.Logf("want: %q", want)
 				t.Errorf("mismatch")
 			}
 		})

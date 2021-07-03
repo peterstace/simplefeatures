@@ -2,7 +2,6 @@ package geom
 
 import (
 	"fmt"
-	"io"
 	"strings"
 	"text/scanner"
 )
@@ -19,6 +18,8 @@ func newWKTLexer(wkt string) wktLexer {
 	return wktLexer{scn: scn}
 }
 
+var wktUnexpectedEOF = wktSyntaxError{"unexpected EOF"}
+
 func (w *wktLexer) next() (string, error) {
 	if w.peeked != "" {
 		tok := w.peeked
@@ -28,14 +29,14 @@ func (w *wktLexer) next() (string, error) {
 
 	var err error
 	w.scn.Error = func(_ *scanner.Scanner, msg string) {
-		err = fmt.Errorf("invalid token: '%s' (%s)", w.scn.TokenText(), msg)
+		err = wktSyntaxError{fmt.Sprintf("invalid token '%s' (%s)", w.scn.TokenText(), msg)}
 	}
 	isEOF := w.scn.Scan() == scanner.EOF
 	if err != nil {
 		return "", err
 	}
 	if isEOF {
-		return "", io.ErrUnexpectedEOF
+		return "", wktUnexpectedEOF
 	}
 	return w.scn.TokenText(), nil
 }

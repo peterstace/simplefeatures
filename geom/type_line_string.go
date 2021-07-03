@@ -2,7 +2,6 @@ package geom
 
 import (
 	"database/sql/driver"
-	"errors"
 	"math"
 	"unsafe"
 
@@ -38,8 +37,8 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 		return LineString{}, nil
 	}
 
-	return LineString{}, errors.New("non-empty LineStrings " +
-		"must contain at least 2 points with distinct XY values")
+	return LineString{}, validationError{
+		"non-empty linestring contains only one distinct XY value"}
 }
 
 func hasAtLeast2DistinctPointsInSeq(seq Sequence) bool {
@@ -297,7 +296,8 @@ func (s LineString) Coordinates() Sequence {
 // TransformXY transforms this LineString into another LineString according to fn.
 func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (LineString, error) {
 	transformed := transformSequence(s.seq, fn)
-	return NewLineString(transformed, opts...)
+	ls, err := NewLineString(transformed, opts...)
+	return ls, wrapTransformed(err)
 }
 
 // IsRing returns true iff this LineString is both simple and closed (i.e. is a

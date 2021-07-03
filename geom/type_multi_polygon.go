@@ -2,7 +2,6 @@ package geom
 
 import (
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"unsafe"
 
@@ -95,8 +94,8 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 				polyBoundaries[j],
 			)
 			if !interMLS.IsEmpty() {
-				return errors.New("the boundaries of the polygon elements" +
-					" of multipolygons must only intersect at points")
+				return validationError{"multipolygon child polygon " +
+					"boundaries intersect at multiple points"}
 			}
 
 			// Fast case: If both the point and line parts of the intersection
@@ -111,7 +110,7 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 				ptJ := polys[j].ExteriorRing().Coordinates().GetXY(0)
 				if relatePointToPolygon(ptI, polyBoundaries[j]) != exterior ||
 					relatePointToPolygon(ptJ, polyBoundaries[i]) != exterior {
-					return errors.New("polygons must not be nested")
+					return validationError{"multipolygon has nested child polygons"}
 				}
 				return nil
 			}
@@ -168,8 +167,8 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 		for k := 0; k+1 < len(pts); k++ {
 			midpoint := pts[k].Add(pts[k+1]).Scale(0.5)
 			if relatePointToPolygon(midpoint, p1) == interior {
-				return fmt.Errorf("polygon interiors intersect at %s",
-					NewPointFromXY(midpoint).AsText())
+				return validationError{fmt.Sprintf("multipolygon child polygon "+
+					"interiors intersect at %s", NewPointFromXY(midpoint).AsText())}
 			}
 		}
 	}
@@ -344,12 +343,12 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mu
 	for i := range polys {
 		transformed, err := m.PolygonN(i).TransformXY(fn, opts...)
 		if err != nil {
-			return MultiPolygon{}, err
+			return MultiPolygon{}, wrapTransformed(err)
 		}
 		polys[i] = transformed
 	}
 	mp, err := NewMultiPolygonFromPolygons(polys, opts...)
-	return mp.ForceCoordinatesType(m.ctype), err
+	return mp.ForceCoordinatesType(m.ctype), wrapTransformed(err)
 }
 
 // Area in the case of a MultiPolygon is the sum of the areas of its polygons.
