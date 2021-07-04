@@ -1,6 +1,25 @@
 # Changelog
 
+## v0.29.0
+
+2021-07-04
+
+- Modifies error string formatting to be more consistent. Errors should treated
+  opaquely by users, so this change is only cosmetic.
+
+- Modifies the GEOS wrapper functions for testing spatial relationships between
+  geometries to use direct pass through to their GEOS equivalents. These
+  functions are `Equals`, `Disjoint`, `Touches`, `Contains`, `Covers`,
+  `Intersects`, `Within`, `CoveredBy`, `Crosses`, and `Overlaps` (all in the
+  `geos` package). Previously, these functions passed through to
+  `GEOSRelatePattern_r` (which calculates a DE-9IM Intersection Matrix), and
+  the intersection relationship was calculated in Go afterwards. Using a more
+  direct passthrough allows the GEOS library to make better optimisations in
+  same case.
+
 ## v0.28.1
+
+2021-05-14
 
 - Modifies the `Simplify` function to use an iterative rather than recursive
   approach. This prevents crashes for complex geometries.
