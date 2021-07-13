@@ -3,7 +3,7 @@ services:
   tests:
     image: golang:1.15
     working_dir: /go/src/github.com/peterstace/simplefeatures
-    entrypoint: go test -test.count=1 -test.run=. ./geom ./rtree
+    entrypoint: go test -covermode=count -coverprofile=coverage.out -test.count=1 -test.run=. ./geom ./rtree
     volumes:
       - ..:/go/src/github.com/peterstace/simplefeatures
     environment:
