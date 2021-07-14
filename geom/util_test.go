@@ -1,6 +1,7 @@
 package geom_test
 
 import (
+	"bytes"
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
@@ -89,6 +90,13 @@ func expectXYEq(t *testing.T, got, want XY) {
 func expectCoordinatesTypeEq(t *testing.T, got, want CoordinatesType) {
 	t.Helper()
 	if got != want {
+		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+	}
+}
+
+func expectBytesEq(t *testing.T, got, want []byte) {
+	t.Helper()
+	if !bytes.Equal(got, want) {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
