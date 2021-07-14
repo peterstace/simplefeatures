@@ -2,6 +2,7 @@ package geom_test
 
 import (
 	"bytes"
+	"math"
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
@@ -83,6 +84,12 @@ func expectBoolEq(t *testing.T, got, want bool) {
 func expectXYEq(t *testing.T, got, want XY) {
 	t.Helper()
 	if got != want {
+		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+	}
+}
+func expectXYWithinTolerance(t *testing.T, got, want XY, tolerance float64) {
+	t.Helper()
+	if delta := math.Abs(got.Sub(want).Length()); delta > tolerance {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
