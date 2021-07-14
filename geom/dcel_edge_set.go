@@ -9,12 +9,6 @@ package geom
 // point of the next edge.
 type edgeSet map[[3]XY]*halfEdgeRecord
 
-func (s edgeSet) containsEdge(e *halfEdgeRecord) bool {
-	k := s.key(e.origin.coords, e.intermediate, e.next.origin.coords)
-	_, ok := s[k]
-	return ok
-}
-
 func (s edgeSet) containsStartIntermediateEnd(start XY, intermediate []XY, end XY) bool {
 	_, ok := s[s.key(start, intermediate, end)]
 	return ok
@@ -32,12 +26,6 @@ func (s edgeSet) insertStartIntermediateEnd(start XY, intermediate []XY, end XY)
 
 func (s edgeSet) lookupEdge(e *halfEdgeRecord) (*halfEdgeRecord, bool) {
 	k := s.key(e.origin.coords, e.intermediate, e.next.origin.coords)
-	e, ok := s[k]
-	return e, ok
-}
-
-func (s edgeSet) lookupStartIntermediateEnd(start XY, intermediate []XY, end XY) (*halfEdgeRecord, bool) {
-	k := s.key(start, intermediate, end)
 	e, ok := s[k]
 	return e, ok
 }

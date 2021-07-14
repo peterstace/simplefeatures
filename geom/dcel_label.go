@@ -61,12 +61,6 @@ func newLocationsOnBoundary(operand operand) [2]location {
 	return locs
 }
 
-func newLocationsOnInterior(operand operand) [2]location {
-	var locs [2]location
-	locs[operand].interior = true
-	return locs
-}
-
 const (
 	inputAInSet     uint8 = 0b0001
 	inputAPopulated uint8 = 0b0010
