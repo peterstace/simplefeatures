@@ -81,6 +81,16 @@ func expectBoolEq(t *testing.T, got, want bool) {
 	}
 }
 
+func expectTrue(t *testing.T, got bool) {
+	t.Helper()
+	expectBoolEq(t, got, true)
+}
+
+func expectFalse(t *testing.T, got bool) {
+	t.Helper()
+	expectBoolEq(t, got, false)
+}
+
 func expectXYEq(t *testing.T, got, want XY) {
 	t.Helper()
 	if got != want {

@@ -27,11 +27,11 @@ func (b *BitSet) Set(i int, newVal bool) {
 				make([]uint64, idx-len(b.masks)+1)...,
 			)
 		}
-		b.masks[idx] |= (1 << i % 64)
+		b.masks[idx] |= (1 << (i % 64))
 	} else {
 		idx := i / 64
 		if idx < len(b.masks) {
-			b.masks[i] &= ^(1 << (i % 64))
+			b.masks[idx] &= ^(1 << (i % 64))
 		}
 	}
 }
