@@ -69,3 +69,24 @@ func TestGeometryType(t *testing.T) {
 		})
 	}
 }
+
+func TestGeometryTypeString(t *testing.T) {
+	for _, tc := range []struct {
+		typ  GeometryType
+		want string
+	}{
+		{TypeGeometryCollection, "GeometryCollection"},
+		{TypePoint, "Point"},
+		{TypeMultiPoint, "MultiPoint"},
+		{TypeLineString, "LineString"},
+		{TypeMultiLineString, "MultiLineString"},
+		{TypePolygon, "Polygon"},
+		{TypeMultiPolygon, "MultiPolygon"},
+		{99, "invalid"},
+	} {
+		t.Run(tc.want, func(t *testing.T) {
+			got := tc.typ.String()
+			expectStringEq(t, got, tc.want)
+		})
+	}
+}
