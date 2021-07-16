@@ -18,10 +18,6 @@ func (ln line) envelope() Envelope {
 	return Envelope{ln.a, ln.b}
 }
 
-func (ln line) reverse() line {
-	return line{ln.b, ln.a}
-}
-
 func (ln line) length() float64 {
 	dx := ln.b.X - ln.a.X
 	dy := ln.b.Y - ln.a.Y
@@ -33,14 +29,6 @@ func (ln line) centroid() XY {
 		0.5 * (ln.a.X + ln.b.X),
 		0.5 * (ln.a.Y + ln.b.Y),
 	}
-}
-
-func (ln line) minX() float64 {
-	return fastMin(ln.a.X, ln.b.X)
-}
-
-func (ln line) maxX() float64 {
-	return fastMax(ln.a.X, ln.b.X)
 }
 
 func (ln line) asLineString() LineString {

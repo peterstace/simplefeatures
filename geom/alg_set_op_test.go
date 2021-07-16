@@ -995,7 +995,7 @@ func TestBinaryOpNoCrash(t *testing.T) {
 	}
 }
 
-func TestBinaryOpEmptyInputs(t *testing.T) {
+func TestBinaryOpBothInputsEmpty(t *testing.T) {
 	for i, wkt := range []string{
 		"POINT EMPTY",
 		"MULTIPOINT EMPTY",
@@ -1040,6 +1040,41 @@ func TestBinaryOpEmptyInputs(t *testing.T) {
 				}
 			})
 
+		})
+	}
+}
+
+func reverseArgs(fn func(_, _ geom.Geometry) (geom.Geometry, error)) func(_, _ geom.Geometry) (geom.Geometry, error) {
+	return func(a, b geom.Geometry) (geom.Geometry, error) {
+		return fn(b, a)
+	}
+}
+
+func TestBinaryOpOneInputEmpty(t *testing.T) {
+	for _, opCase := range []struct {
+		opName    string
+		op        func(geom.Geometry, geom.Geometry) (geom.Geometry, error)
+		wantEmpty bool
+	}{
+		{"fwd_union", geom.Union, false},
+		{"rev_union", reverseArgs(geom.Union), false},
+		{"fwd_inter", geom.Intersection, true},
+		{"rev_inter", reverseArgs(geom.Intersection), true},
+		{"fwd_diff", geom.Difference, false},
+		{"rev_diff", reverseArgs(geom.Difference), true},
+		{"fwd_sym_diff", geom.SymmetricDifference, false},
+		{"rev_sym_diff", reverseArgs(geom.SymmetricDifference), false},
+	} {
+		t.Run(opCase.opName, func(t *testing.T) {
+			poly := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))")
+			empty := geom.Polygon{}.AsGeometry()
+			got, err := opCase.op(poly, empty)
+			expectNoErr(t, err)
+			if opCase.wantEmpty {
+				expectTrue(t, got.IsEmpty())
+			} else {
+				expectGeomEq(t, got, poly)
+			}
 		})
 	}
 }
