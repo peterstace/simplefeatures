@@ -284,3 +284,13 @@ func (m MultiPoint) asXYs() []XY {
 	}
 	return xys
 }
+
+// Dump returns the MultiPoint represented as a Point slice.
+func (m MultiPoint) Dump() []Point {
+	n := m.seq.Length()
+	pts := make([]Point, n)
+	for i := 0; i < n; i++ {
+		pts[i] = m.PointN(i)
+	}
+	return pts
+}

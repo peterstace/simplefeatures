@@ -467,3 +467,10 @@ func (m MultiPolygon) controlPoints() int {
 	}
 	return sum
 }
+
+// Dump returns the MultiPolygon represented as a Polygon slice.
+func (m MultiPolygon) Dump() []Polygon {
+	ps := make([]Polygon, len(m.polys))
+	copy(ps, m.polys)
+	return ps
+}

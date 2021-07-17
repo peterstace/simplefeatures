@@ -440,3 +440,10 @@ func (m MultiLineString) controlPoints() int {
 	}
 	return sum
 }
+
+// Dump returns the MultiLineString represented as a LineString slice.
+func (m MultiLineString) Dump() []LineString {
+	lss := make([]LineString, len(m.lines))
+	copy(lss, m.lines)
+	return lss
+}
