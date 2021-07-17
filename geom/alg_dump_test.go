@@ -3,8 +3,6 @@ package geom_test
 import (
 	"strconv"
 	"testing"
-
-	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestDumpGeometry(t *testing.T) {
@@ -121,10 +119,7 @@ func TestDumpMultiPoint(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			want := geomsFromWKTs(t, tc.wantOutputWKT)
-			var got []geom.Geometry
-			for _, pt := range geomFromWKT(t, tc.inputWKT).AsMultiPoint().Dump() {
-				got = append(got, pt.AsGeometry())
-			}
+			got := upcastPoints(geomFromWKT(t, tc.inputWKT).AsMultiPoint().Dump())
 			expectGeomsEq(t, got, want)
 		})
 	}
@@ -158,10 +153,7 @@ func TestDumpMultiLineString(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			want := geomsFromWKTs(t, tc.wantOutputWKT)
-			var got []geom.Geometry
-			for _, ls := range geomFromWKT(t, tc.inputWKT).AsMultiLineString().Dump() {
-				got = append(got, ls.AsGeometry())
-			}
+			got := upcastLineStrings(geomFromWKT(t, tc.inputWKT).AsMultiLineString().Dump())
 			expectGeomsEq(t, got, want)
 		})
 	}
@@ -187,10 +179,7 @@ func TestDumpMultiPolygon(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			want := geomsFromWKTs(t, tc.wantOutputWKT)
-			var got []geom.Geometry
-			for _, poly := range geomFromWKT(t, tc.inputWKT).AsMultiPolygon().Dump() {
-				got = append(got, poly.AsGeometry())
-			}
+			got := upcastPolygons(geomFromWKT(t, tc.inputWKT).AsMultiPolygon().Dump())
 			expectGeomsEq(t, got, want)
 		})
 	}

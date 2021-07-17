@@ -34,6 +34,30 @@ func xyCoords(x, y float64) Coordinates {
 	return Coordinates{XY: XY{x, y}, Type: DimXY}
 }
 
+func upcastPoints(ps []Point) []Geometry {
+	gs := make([]Geometry, len(ps))
+	for i, p := range ps {
+		gs[i] = p.AsGeometry()
+	}
+	return gs
+}
+
+func upcastLineStrings(lss []LineString) []Geometry {
+	gs := make([]Geometry, len(lss))
+	for i, ls := range lss {
+		gs[i] = ls.AsGeometry()
+	}
+	return gs
+}
+
+func upcastPolygons(ps []Polygon) []Geometry {
+	gs := make([]Geometry, len(ps))
+	for i, p := range ps {
+		gs[i] = p.AsGeometry()
+	}
+	return gs
+}
+
 func expectPanics(t *testing.T, fn func()) {
 	t.Helper()
 	defer func() {
