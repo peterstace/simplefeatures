@@ -444,7 +444,7 @@ func (c GeometryCollection) forceOrientation(forceCW bool) GeometryCollection {
 func (c GeometryCollection) Dump() []Geometry {
 	var gs []Geometry
 	for _, g := range c.geoms {
-		gs = append(gs, g.Dump()...)
+		gs = g.appendDump(gs)
 	}
 	return gs
 }
