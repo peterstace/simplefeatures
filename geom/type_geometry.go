@@ -34,19 +34,24 @@ const (
 )
 
 func (t GeometryType) String() string {
-	s, ok := map[GeometryType]string{
-		TypeGeometryCollection: "GeometryCollection",
-		TypePoint:              "Point",
-		TypeLineString:         "LineString",
-		TypePolygon:            "Polygon",
-		TypeMultiPoint:         "MultiPoint",
-		TypeMultiLineString:    "MultiLineString",
-		TypeMultiPolygon:       "MultiPolygon",
-	}[t]
-	if !ok {
+	switch t {
+	case TypeGeometryCollection:
+		return "GeometryCollection"
+	case TypePoint:
+		return "Point"
+	case TypeLineString:
+		return "LineString"
+	case TypePolygon:
+		return "Polygon"
+	case TypeMultiPoint:
+		return "MultiPoint"
+	case TypeMultiLineString:
+		return "MultiLineString"
+	case TypeMultiPolygon:
+		return "MultiPolygon"
+	default:
 		return "invalid"
 	}
-	return s
 }
 
 // Type returns a string representation of the geometry's type.
