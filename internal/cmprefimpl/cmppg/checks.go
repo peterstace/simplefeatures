@@ -453,6 +453,39 @@ func CheckForceOrientation(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
+func CheckDump(t *testing.T, want UnaryResult, g geom.Geometry) {
+	if g.IsEmpty() {
+		// For empty geometries, PostGIS just returns no dumped geometries.
+		// Simplefeatures chooses not to do this behaviour to provide better
+		// consistency when it comes to Multi or GeometryCollections that
+		// contain only empty elements. If we were to follow the PostGIS
+		// behaviour, then 'MULTIPOLYGON(EMPTY)' would return 0 dumped
+		// geometries, whereas 'MULTIPOLYGON(((0 0,0 1,1 0,0 0)),EMPTY)' would
+		// return 2 dumped geometries (triangle, and empty polygon).
+		return
+	}
+	t.Run("CheckDump", func(t *testing.T) {
+		got := g.Dump()
+		if len(got) != len(want.Dump) {
+			for i, g := range got {
+				t.Logf("got %d: %s", i, g.AsText())
+			}
+			for i, g := range want.Dump {
+				t.Logf("want %d: %s", i, g.AsText())
+			}
+			t.Errorf("length mismatch, got=%d want=%d", len(got), len(want.Dump))
+		} else {
+			for i, g := range got {
+				if !geom.ExactEquals(g, want.Dump[i], geom.ToleranceXY(0.00001)) {
+					t.Logf("got:  %s", g.AsText())
+					t.Logf("want: %s", want.Dump[i].AsText())
+					t.Errorf("mismatch at position %d", i)
+				}
+			}
+		}
+	})
+}
+
 func containsOnlyPolygonsOrMultiPolygons(g geom.Geometry) bool {
 	switch g.Type() {
 	case geom.TypePolygon, geom.TypeMultiPolygon:
