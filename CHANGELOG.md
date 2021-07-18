@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.30.0
+
+2021-07-18
+
+- Adds `Dump` methods to `Geometry`, `MultiPoint`, `MultiLineString`,
+  `MultiPolygon`, and `GeometryCollection` types. These methods break down
+  composite geometries into their constituent non-multi type parts (i.e.
+  `Points`, `LineStrings`, and `Polygons`) and return them as a slice.
+
+- Fixes a bug in the `BitSet` data structure. This data structure is used to
+  specify which Points within a MultiPoint are empty during manual
+  construction.
+
 ## v0.29.0
 
 2021-07-04
