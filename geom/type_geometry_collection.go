@@ -436,3 +436,15 @@ func (c GeometryCollection) forceOrientation(forceCW bool) GeometryCollection {
 	}
 	return GeometryCollection{geoms, c.ctype}
 }
+
+// Dump breaks this GeometryCollection into its constituent non-multi types
+// (Points, LineStrings, and Polygons).
+//
+// The returned slice will only ever contain Points, LineStrings, and Polygons.
+func (c GeometryCollection) Dump() []Geometry {
+	var gs []Geometry
+	for _, g := range c.geoms {
+		gs = g.appendDump(gs)
+	}
+	return gs
+}

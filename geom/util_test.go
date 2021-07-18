@@ -17,8 +17,45 @@ func geomFromWKT(t *testing.T, wkt string) Geometry {
 	return geom
 }
 
+func geomsFromWKTs(t *testing.T, wkts []string) []Geometry {
+	t.Helper()
+	var gs []Geometry
+	for _, wkt := range wkts {
+		g, err := UnmarshalWKT(wkt)
+		if err != nil {
+			t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
+		}
+		gs = append(gs, g)
+	}
+	return gs
+}
+
 func xyCoords(x, y float64) Coordinates {
 	return Coordinates{XY: XY{x, y}, Type: DimXY}
+}
+
+func upcastPoints(ps []Point) []Geometry {
+	gs := make([]Geometry, len(ps))
+	for i, p := range ps {
+		gs[i] = p.AsGeometry()
+	}
+	return gs
+}
+
+func upcastLineStrings(lss []LineString) []Geometry {
+	gs := make([]Geometry, len(lss))
+	for i, ls := range lss {
+		gs[i] = ls.AsGeometry()
+	}
+	return gs
+}
+
+func upcastPolygons(ps []Polygon) []Geometry {
+	gs := make([]Geometry, len(ps))
+	for i, p := range ps {
+		gs[i] = p.AsGeometry()
+	}
+	return gs
 }
 
 func expectPanics(t *testing.T, fn func()) {
@@ -50,6 +87,18 @@ func expectGeomEq(t *testing.T, got, want Geometry, opts ...ExactEqualsOption) {
 	t.Helper()
 	if !ExactEquals(got, want, opts...) {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
+	}
+}
+
+func expectGeomsEq(t *testing.T, got, want []Geometry, opts ...ExactEqualsOption) {
+	t.Helper()
+	if len(got) != len(want) {
+		t.Errorf("\ngot:  len %d\nwant: len %d\n", len(got), len(want))
+	}
+	for i := range got {
+		if !ExactEquals(got[i], want[i], opts...) {
+			t.Errorf("\ngot:  %v\nwant: %v\n", got[i].AsText(), want[i].AsText())
+		}
 	}
 }
 

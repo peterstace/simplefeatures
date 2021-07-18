@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"strings"
 
+	"github.com/lib/pq"
 	"github.com/peterstace/simplefeatures/geom"
 )
 
@@ -33,6 +34,7 @@ type UnaryResult struct {
 	Force4D    geom.Geometry
 	ForceCW    geom.Geometry
 	ForceCCW   geom.Geometry
+	Dump       []geom.Geometry
 }
 
 const (
@@ -47,6 +49,7 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 	var boundaryWKT sql.NullString
 	var convexHullWKT string
 	var reverseWKT string
+	var dumpWKTs []string
 
 	var result UnaryResult
 	err := p.db.QueryRow(`
@@ -110,7 +113,9 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		ST_AsBinary(ST_Force4D(ST_GeomFromWKB($1))),
 
 		ST_AsBinary(ST_ForcePolygonCW(ST_GeomFromWKB($1))),
-		ST_AsBinary(ST_ForcePolygonCCW(ST_GeomFromWKB($1)))
+		ST_AsBinary(ST_ForcePolygonCCW(ST_GeomFromWKB($1))),
+
+		array_agg(ST_AsText(geom)) FROM ST_Dump(ST_GeomFromWKB($1))
 
 		`, g, isNestedGeometryCollection(g), g.AsText(),
 	).Scan(
@@ -135,6 +140,7 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 		&result.Force4D,
 		&result.ForceCW,
 		&result.ForceCCW,
+		pq.Array(&dumpWKTs),
 	)
 	if err != nil {
 		return result, err
@@ -160,6 +166,14 @@ func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 
 	// remove ST_ prefix that ST_GeometryType returned, since we don't want ST_ prefix in our type
 	result.Type = strings.TrimPrefix(result.Type, postgisTypePrefix)
+
+	for _, wkt := range dumpWKTs {
+		dumpGeom, err := geom.UnmarshalWKT(wkt)
+		if err != nil {
+			return result, err
+		}
+		result.Dump = append(result.Dump, dumpGeom)
+	}
 	return result, nil
 }
 

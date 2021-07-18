@@ -721,3 +721,49 @@ func (g Geometry) controlPoints() int {
 		panic("unknown geometry: " + g.gtype.String())
 	}
 }
+
+// Dump breaks multi types (MultiPoints, MultiLineStrings, and MultiPolygons)
+// and GeometryCollections into their constituent non-multi types (Points,
+// LineStrings, and Polygons).
+//
+// The returned slice will only ever contain Points, LineStrings, and Polygons.
+//
+// When called on a Point, LineString, or Polygon is input, the original value
+// is returned in a slice of length 1.
+func (g Geometry) Dump() []Geometry {
+	return g.appendDump(nil)
+}
+
+func (g Geometry) appendDump(gs []Geometry) []Geometry {
+	switch g.Type() {
+	case TypePoint, TypeLineString, TypePolygon:
+		gs = append(gs, g)
+	case TypeMultiPoint:
+		mp := g.AsMultiPoint()
+		n := mp.NumPoints()
+		for i := 0; i < n; i++ {
+			gs = append(gs, mp.PointN(i).AsGeometry())
+		}
+	case TypeMultiLineString:
+		mls := g.AsMultiLineString()
+		n := mls.NumLineStrings()
+		for i := 0; i < n; i++ {
+			gs = append(gs, mls.LineStringN(i).AsGeometry())
+		}
+	case TypeMultiPolygon:
+		mp := g.AsMultiPolygon()
+		n := mp.NumPolygons()
+		for i := 0; i < n; i++ {
+			gs = append(gs, mp.PolygonN(i).AsGeometry())
+		}
+	case TypeGeometryCollection:
+		gc := g.AsGeometryCollection()
+		n := gc.NumGeometries()
+		for i := 0; i < n; i++ {
+			gs = gc.GeometryN(i).appendDump(gs)
+		}
+	default:
+		panic("unknown type: " + g.Type().String())
+	}
+	return gs
+}
