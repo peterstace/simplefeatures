@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"math"
 	"unsafe"
 )
@@ -211,6 +212,22 @@ func (p Point) Force2D() Point {
 // PointOnSurface returns the original Point.
 func (p Point) PointOnSurface() Point {
 	return p.Force2D()
+}
+
+// Summary returns a text summary of the Point following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (p Point) Summary() string {
+	var numPoints int
+	pluralSuffix := "s"
+	if !p.IsEmpty() {
+		numPoints = 1
+		pluralSuffix = ""
+	}
+	return fmt.Sprintf("%s[%s] with %d point%s", p.Type(), p.CoordinatesType(), numPoints, pluralSuffix)
+}
+
+// String returns the string representation of the Point.
+func (p Point) String() string {
+	return p.Summary()
 }
 
 func (p Point) asXYs() []XY {
