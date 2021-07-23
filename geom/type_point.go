@@ -216,7 +216,7 @@ func (p Point) PointOnSurface() Point {
 
 // Summary returns a text summary of the Point following a similar format to https://postgis.net/docs/ST_Summary.html.
 func (p Point) Summary() string {
-	var numPoints int
+	numPoints := 0
 	pluralSuffix := "s"
 	if !p.IsEmpty() {
 		numPoints = 1
