@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"math"
 	"unsafe"
 
@@ -401,5 +402,20 @@ func (s LineString) PointOnSurface() Point {
 	nearest.consider(s.StartPoint().Force2D())
 	nearest.consider(s.EndPoint().Force2D())
 	return nearest.point
+}
 
+// Summary returns a text summary of the Point following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (s LineString) Summary() string {
+	numPoints := 1
+	pluralSuffix := ""
+	if s.Coordinates().Length() != 1 {
+		pluralSuffix = "s"
+		numPoints = s.Coordinates().Length()
+	}
+	return fmt.Sprintf("%s[%s] with %d point%s", s.Type(), s.CoordinatesType(), numPoints, pluralSuffix)
+}
+
+// String returns the string representation of the Point.
+func (s LineString) String() string {
+	return s.Summary()
 }

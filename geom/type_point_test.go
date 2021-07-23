@@ -8,7 +8,6 @@ import (
 
 func TestPointSummary(t *testing.T) {
 	for _, tc := range []struct {
-		name string
 		p geom.Point
 		wantSummary string
 	}{
@@ -21,7 +20,7 @@ func TestPointSummary(t *testing.T) {
 		{p: geom.NewEmptyPoint(geom.DimXYM), wantSummary: "Point[XYM] with 0 points"},
 		{p: geom.NewEmptyPoint(geom.DimXYZM), wantSummary: "Point[XYZM] with 0 points"},
 	}{
-		t.Run(tc.name, func(t *testing.T) {
+		t.Run(tc.wantSummary, func(t *testing.T) {
 			expectStringEq(t, tc.p.Summary(), tc.wantSummary)
 			expectStringEq(t, tc.p.String(), tc.wantSummary)
 		})
