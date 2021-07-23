@@ -404,18 +404,12 @@ func (s LineString) PointOnSurface() Point {
 	return nearest.point
 }
 
-// Summary returns a text summary of the Point following a similar format to https://postgis.net/docs/ST_Summary.html.
+// Summary returns a text summary of the LineString following a similar format to https://postgis.net/docs/ST_Summary.html.
 func (s LineString) Summary() string {
-	numPoints := 1
-	pluralSuffix := ""
-	if s.Coordinates().Length() != 1 {
-		pluralSuffix = "s"
-		numPoints = s.Coordinates().Length()
-	}
-	return fmt.Sprintf("%s[%s] with %d point%s", s.Type(), s.CoordinatesType(), numPoints, pluralSuffix)
+	return fmt.Sprintf("%s[%s] with %d points", s.Type(), s.CoordinatesType(), s.Coordinates().Length())
 }
 
-// String returns the string representation of the Point.
+// String returns the string representation of the LineString.
 func (s LineString) String() string {
 	return s.Summary()
 }

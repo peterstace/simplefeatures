@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"math"
 	"unsafe"
 
@@ -542,4 +543,26 @@ func (p Polygon) controlPoints() int {
 		sum += r.Coordinates().Length()
 	}
 	return sum
+}
+
+
+// Summary returns a text summary of the Polygon following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (p Polygon) Summary() string {
+	numRings := 1
+	ringSuffix := ""
+	var numPoints int
+	for _, seq := range p.Coordinates(){
+		numPoints += seq.Length()
+	}
+	if p.NumInteriorRings() != 1 {
+		ringSuffix = "s"
+		numRings = p.NumInteriorRings()
+	}
+	return fmt.Sprintf("%s[%s] with %d ring%s consisting of %d total points",
+		p.Type(), p.CoordinatesType(), numRings, ringSuffix, numPoints)
+}
+
+// String returns the string representation of the Polygon.
+func (p Polygon) String() string {
+	return p.Summary()
 }

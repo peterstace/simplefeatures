@@ -217,12 +217,12 @@ func (p Point) PointOnSurface() Point {
 // Summary returns a text summary of the Point following a similar format to https://postgis.net/docs/ST_Summary.html.
 func (p Point) Summary() string {
 	numPoints := 1
-	pluralSuffix := ""
+	pointSuffix := ""
 	if p.IsEmpty() {
 		numPoints = 0
-		pluralSuffix = "s"
+		pointSuffix = "s"
 	}
-	return fmt.Sprintf("%s[%s] with %d point%s", p.Type(), p.CoordinatesType(), numPoints, pluralSuffix)
+	return fmt.Sprintf("%s[%s] with %d point%s", p.Type(), p.CoordinatesType(), numPoints, pointSuffix)
 }
 
 // String returns the string representation of the Point.
