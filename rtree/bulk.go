@@ -127,7 +127,7 @@ func quickPartition(items []BulkItem, k int, horizontal bool) {
 		bj := items[j].Box
 		lhs, rhs := bi.MinX+bi.MaxY, bj.MinX+bj.MaxY
 		if horizontal {
-			lhs, rhs := bi.MinX+bi.MaxX, bj.MinX+bj.MaxX
+			lhs, rhs = bi.MinX+bi.MaxX, bj.MinX+bj.MaxX
 		}
 		return lhs < rhs
 	}
