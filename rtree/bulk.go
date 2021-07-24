@@ -125,11 +125,11 @@ func quickPartition(items []BulkItem, k int, horizontal bool) {
 	less := func(i, j int) bool {
 		bi := items[i].Box
 		bj := items[j].Box
+		lhs, rhs := bi.MinX+bi.MaxY, bj.MinX+bj.MaxY
 		if horizontal {
-			return bi.MinX+bi.MaxX < bj.MinX+bj.MaxX
-		} else {
-			return bi.MinY+bi.MaxY < bj.MinY+bj.MaxY
+			lhs, rhs := bi.MinX+bi.MaxX, bj.MinX+bj.MaxX
 		}
+		return lhs < rhs
 	}
 	swap := func(i, j int) {
 		items[i], items[j] = items[j], items[i]

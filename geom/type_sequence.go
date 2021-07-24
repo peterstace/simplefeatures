@@ -23,7 +23,7 @@ type Sequence struct {
 // followed by Y, then Z (if using XYZ or XYZM), then M (if using XYM or XYZM).
 //
 // The length of the coordinates slice must be a multiple of the dimensionality
-// of the coordiantes type. If the length is not a multiple, then this is a
+// of the coordinates type. If the length is not a multiple, then this is a
 // programming error and the function will panic.
 func NewSequence(coordinates []float64, ctype CoordinatesType) Sequence {
 	if len(coordinates)%ctype.Dimension() != 0 {

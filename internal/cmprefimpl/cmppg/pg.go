@@ -8,10 +8,13 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
+// BatchPostGIS is a DB access type allowing batch based interactions with a
+// PostGIS database.
 type BatchPostGIS struct {
 	db *sql.DB
 }
 
+// UnaryResult holds the result of unary (single input) PostGIS operations.
 type UnaryResult struct {
 	AsText     string
 	AsBinary   []byte
@@ -41,6 +44,7 @@ const (
 	postgisTypePrefix = "ST_"
 )
 
+// Unary runs a batch of unary operations on a geometry.
 func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
 	// WKB and WKB forms returned from PostGIS don't _always_ give the same
 	// result (usually differences around empty geometries). In the case of
