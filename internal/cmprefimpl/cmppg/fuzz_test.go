@@ -21,9 +21,9 @@ func TestFuzz(t *testing.T) {
 	pg := setupDB(t)
 	candidates := extractStringsFromSource(t)
 
-	CheckWKTParse(t, pg, candidates)
-	CheckWKBParse(t, pg, candidates)
-	CheckGeoJSONParse(t, pg, candidates)
+	checkWKTParse(t, pg, candidates)
+	checkWKBParse(t, pg, candidates)
+	checkGeoJSONParse(t, pg, candidates)
 
 	geoms := convertToGeometries(t, candidates)
 
@@ -44,20 +44,20 @@ func TestFuzz(t *testing.T) {
 			if err != nil {
 				t.Fatalf("could not get result from postgis: %v", err)
 			}
-			CheckWKB(t, want, g)
-			CheckGeoJSON(t, want, g)
-			CheckIsEmpty(t, want, g)
-			CheckDimension(t, want, g)
-			CheckEnvelope(t, want, g)
-			CheckConvexHull(t, want, g)
-			CheckIsRing(t, want, g)
-			CheckLength(t, want, g)
-			CheckArea(t, want, g)
-			CheckCentroid(t, want, g)
-			CheckReverse(t, want, g)
-			CheckType(t, want, g)
-			CheckForceOrientation(t, want, g)
-			CheckDump(t, want, g)
+			checkWKB(t, want, g)
+			checkGeoJSON(t, want, g)
+			checkIsEmpty(t, want, g)
+			checkDimension(t, want, g)
+			checkEnvelope(t, want, g)
+			checkConvexHull(t, want, g)
+			checkIsRing(t, want, g)
+			checkLength(t, want, g)
+			checkArea(t, want, g)
+			checkCentroid(t, want, g)
+			checkReverse(t, want, g)
+			checkType(t, want, g)
+			checkForceOrientation(t, want, g)
+			checkDump(t, want, g)
 		})
 	}
 }

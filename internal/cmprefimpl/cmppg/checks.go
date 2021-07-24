@@ -14,7 +14,7 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-func CheckWKTParse(t *testing.T, pg PostGIS, candidates []string) {
+func checkWKTParse(t *testing.T, pg PostGIS, candidates []string) {
 	var any bool
 	for i, wkt := range candidates {
 		any = true
@@ -44,7 +44,7 @@ func CheckWKTParse(t *testing.T, pg PostGIS, candidates []string) {
 	}
 }
 
-func CheckWKBParse(t *testing.T, pg PostGIS, candidates []string) {
+func checkWKBParse(t *testing.T, pg PostGIS, candidates []string) {
 	var any bool
 	for i, wkb := range candidates {
 		buf, err := hexStringToBytes(wkb)
@@ -95,7 +95,7 @@ func hexStringToBytes(s string) ([]byte, error) {
 	return buf, nil
 }
 
-func CheckGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
+func checkGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
 	var any bool
 	for i, geojson := range candidates {
 		if geojson == `{"type":"Point","coordinates":[]}` {
@@ -133,7 +133,7 @@ func CheckGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
 	}
 }
 
-func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckWKB", func(t *testing.T) {
 		if g.IsEmpty() && ((g.IsGeometryCollection() && g.AsGeometryCollection().NumGeometries() > 0) ||
 			(g.IsMultiPoint() && g.AsMultiPoint().NumPoints() > 0) ||
@@ -164,7 +164,7 @@ func CheckWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckGeoJSON(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkGeoJSON(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckGeoJSON", func(t *testing.T) {
 		if containsMultiPointContainingEmptyPoint(g) {
 			// PostGIS gives completely wrong GeoJSON in this case (it's not
@@ -234,7 +234,7 @@ func tokenize(str string) []string {
 	return tokens
 }
 
-func CheckIsEmpty(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkIsEmpty(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckIsEmpty", func(t *testing.T) {
 		got := g.IsEmpty()
 		want := want.IsEmpty
@@ -246,7 +246,7 @@ func CheckIsEmpty(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckDimension(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkDimension(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckDimension", func(t *testing.T) {
 		got := g.Dimension()
 		want := want.Dimension
@@ -258,7 +258,7 @@ func CheckDimension(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckEnvelope(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkEnvelope(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckEnvelope", func(t *testing.T) {
 		if g.IsEmpty() {
 			// PostGIS allows envelopes on empty geometries, but they are empty
@@ -282,7 +282,7 @@ func CheckEnvelope(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckConvexHull", func(t *testing.T) {
 		got := g.ConvexHull()
 		want := want.ConvexHull
@@ -300,7 +300,7 @@ func CheckConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckIsRing(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkIsRing(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckIsRing", func(t *testing.T) {
 		isDefined := g.IsLineString()
 		if want.IsRing.Valid != isDefined {
@@ -324,7 +324,7 @@ func CheckIsRing(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckLength(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkLength(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckLength", func(t *testing.T) {
 		got := g.Length()
 		if math.Abs(got-want.Length) > 1e-6 {
@@ -355,7 +355,7 @@ func containsMultiPointContainingEmptyPoint(g geom.Geometry) bool {
 	return false
 }
 
-func CheckArea(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkArea(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckArea", func(t *testing.T) {
 		got := g.Area()
 		want := want.Area
@@ -368,7 +368,7 @@ func CheckArea(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckCentroid(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkCentroid(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckCentroid", func(t *testing.T) {
 		got := g.Centroid()
 
@@ -387,7 +387,7 @@ func CheckCentroid(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckReverse(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkReverse(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckReverse", func(t *testing.T) {
 		got := g.Reverse()
 		want := want.Reverse
@@ -400,7 +400,7 @@ func CheckReverse(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckType(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkType(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckType", func(t *testing.T) {
 		got := g.Type().String()
 		want := want.Type
@@ -413,7 +413,7 @@ func CheckType(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckForceOrientation(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkForceOrientation(t *testing.T, want UnaryResult, g geom.Geometry) {
 	if !containsOnlyPolygonsOrMultiPolygons(g) {
 		// Skip geometries that contain things other than areal components.
 		// PostGIS does some weird things with LineStrings when it forces
@@ -453,7 +453,7 @@ func CheckForceOrientation(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func CheckDump(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkDump(t *testing.T, want UnaryResult, g geom.Geometry) {
 	if g.IsEmpty() {
 		// For empty geometries, PostGIS just returns no dumped geometries.
 		// Simplefeatures chooses not to do this behaviour to provide better
@@ -503,7 +503,7 @@ func containsOnlyPolygonsOrMultiPolygons(g geom.Geometry) bool {
 	}
 }
 
-func CheckForceCoordinatesDimension(t *testing.T, want UnaryResult, g geom.Geometry) {
+func checkForceCoordinatesDimension(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckForceCoordinatesDimension", func(t *testing.T) {
 
 		// In the case where a collection has some elements but they are all
