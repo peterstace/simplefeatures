@@ -43,7 +43,7 @@ func (c GeometryCollection) AsGeometry() Geometry {
 	return Geometry{TypeGeometryCollection, unsafe.Pointer(&c)}
 }
 
-// NumGeometries gives the number of Geomety elements is the GeometryCollection.
+// NumGeometries gives the number of Geometry elements in the GeometryCollection.
 func (c GeometryCollection) NumGeometries() int {
 	return len(c.geoms)
 }

@@ -11,13 +11,13 @@ const (
 	// DimXY coordinates only contain X and Y values.
 	DimXY CoordinatesType = 0b00
 
-	// DimXYZ coordiantes contain X, Y, and Z (height) values.
+	// DimXYZ coordinates contain X, Y, and Z (height) values.
 	DimXYZ CoordinatesType = 0b01
 
-	// DimXYM coordiantes contain X, Y, and M (measure) values.
+	// DimXYM coordinates contain X, Y, and M (measure) values.
 	DimXYM CoordinatesType = 0b10
 
-	// DimXYZM coordiantes contain X, Y, Z (height), and M (measure) values.
+	// DimXYZM coordinates contain X, Y, Z (height), and M (measure) values.
 	DimXYZM CoordinatesType = 0b11
 )
 

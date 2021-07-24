@@ -53,8 +53,8 @@ func (t *RTree) adjustBoxesUpwards(node *node, box Box) {
 func (t *RTree) joinRoots(r1, r2 *node) {
 	newRoot := &node{
 		entries: [1 + maxChildren]entry{
-			entry{box: calculateBound(r1), child: r1},
-			entry{box: calculateBound(r2), child: r2},
+			{box: calculateBound(r1), child: r1},
+			{box: calculateBound(r2), child: r2},
 		},
 		numEntries: 2,
 		parent:     nil,
