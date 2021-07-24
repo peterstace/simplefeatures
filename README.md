@@ -5,7 +5,7 @@
 [![Go Report
 Card](https://goreportcard.com/badge/github.com/peterstace/simplefeatures)](https://goreportcard.com/report/github.com/peterstace/simplefeatures)
 [![Coverage
-Status](https://coveralls.io/repos/github/peterstace/simplefeatures/badge.svg?branch=add_coveralls)](https://coveralls.io/github/peterstace/simplefeatures)
+Status](https://coveralls.io/repos/github/peterstace/simplefeatures/badge.svg?branch=master)](https://coveralls.io/github/peterstace/simplefeatures?branch=master)
 
 Simple Features is a 2D geometry library that provides Go types that model
 geometries, as well as algorithms that operate on them.
