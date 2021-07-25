@@ -1,4 +1,4 @@
-package bentlyottmann
+package exact
 
 type Callback func(int, int, XY)
 

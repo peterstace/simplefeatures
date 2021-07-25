@@ -1,4 +1,4 @@
-package bentlyottmann
+package exact
 
 import (
 	"fmt"

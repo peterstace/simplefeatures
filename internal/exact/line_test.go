@@ -1,10 +1,10 @@
-package bentlyottmann_test
+package exact_test
 
 import (
 	"fmt"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures/internal/bentlyottmann"
+	. "github.com/peterstace/simplefeatures/internal/exact"
 )
 
 func TestLineIntersection(t *testing.T) {
