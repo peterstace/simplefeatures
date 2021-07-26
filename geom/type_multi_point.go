@@ -294,3 +294,17 @@ func (m MultiPoint) Dump() []Point {
 	}
 	return pts
 }
+
+// DumpCoordinates returns the MultiPoint represented as a slice of
+// coordinates.
+func (m MultiPoint) DumpCoordinates() []Coordinates {
+	n := m.seq.Length()
+	coords := make([]Coordinates, 0, n)
+	for i := 0; i < n; i++ {
+		if m.empty.Get(i) {
+			continue
+		}
+		coords = append(coords, m.seq.Get(i))
+	}
+	return coords
+}

@@ -166,3 +166,29 @@ func expectBytesEq(t *testing.T, got, want []byte) {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
+
+func expectCoordinateSliceEq(t *testing.T, got, want []Coordinates) {
+	t.Helper()
+	show := func() {
+		t.Logf("len(got): %d", len(got))
+		for i, c := range got {
+			t.Logf("got[%d]: %v", i, c)
+		}
+		t.Logf("len(want): %d", len(want))
+		for i, c := range want {
+			t.Logf("want[%d]: %v", i, c)
+		}
+	}
+
+	if len(want) != len(got) {
+		t.Errorf("length mismatch: got=%d want=%d", len(got), len(want))
+		show()
+		return
+	}
+	for i, g := range got {
+		w := want[i]
+		if g != w {
+			t.Errorf("mismatch at %d: got:%v want:%v", i, g, w)
+		}
+	}
+}
