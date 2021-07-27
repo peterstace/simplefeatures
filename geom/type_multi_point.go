@@ -299,13 +299,7 @@ func (m MultiPoint) Dump() []Point {
 // a Sequence.
 func (m MultiPoint) DumpCoordinates() Sequence {
 	n := m.seq.Length()
-	var empty int
-	for i := 0; i < n; i++ {
-		if m.empty.Get(i) {
-			empty++
-		}
-	}
-
+	empty := m.empty.CountTrue()
 	nonEmpty := make([]float64, 0, n-empty)
 	for i := 0; i < n; i++ {
 		if m.empty.Get(i) {
@@ -313,7 +307,6 @@ func (m MultiPoint) DumpCoordinates() Sequence {
 		}
 		nonEmpty = m.seq.Get(i).appendFloat64s(nonEmpty)
 	}
-
 	seq := NewSequence(nonEmpty, m.seq.CoordinatesType())
 	seq.assertNoUnusedCapacity()
 	return seq
