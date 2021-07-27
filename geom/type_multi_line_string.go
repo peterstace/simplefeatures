@@ -301,7 +301,7 @@ func (m MultiLineString) MarshalJSON() ([]byte, error) {
 	return dst, nil
 }
 
-// Coordinates returns the coordinates of each constintuent LineString in the
+// Coordinates returns the coordinates of each constituent LineString in the
 // MultiLineString.
 func (m MultiLineString) Coordinates() []Sequence {
 	n := m.NumLineStrings()
@@ -446,4 +446,20 @@ func (m MultiLineString) Dump() []LineString {
 	lss := make([]LineString, len(m.lines))
 	copy(lss, m.lines)
 	return lss
+}
+
+// DumpCoordinates returns the coordinates (as a Sequence) that constitute the
+// MultiLineString.
+func (m MultiLineString) DumpCoordinates() Sequence {
+	var n int
+	for _, ls := range m.lines {
+		n += ls.seq.Length() * m.ctype.Dimension()
+	}
+	coords := make([]float64, 0, n)
+	for _, ls := range m.lines {
+		coords = append(ls.Coordinates().appendAllPoints(coords))
+	}
+	seq := NewSequence(coords, m.ctype)
+	seq.assertNoUnusedCapacity()
+	return seq
 }
