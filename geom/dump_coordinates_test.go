@@ -10,66 +10,52 @@ func TestDumpCoordinatesMultiPoint(t *testing.T) {
 	for _, tc := range []struct {
 		description string
 		inputWKT    string
-		want        []Coordinates
+		want        Sequence
 	}{
 		{
 			description: "empty",
 			inputWKT:    "MULTIPOINT EMPTY",
-			want:        nil,
+			want:        NewSequence(nil, DimXY),
 		},
 		{
 			description: "contains empty point",
 			inputWKT:    "MULTIPOINT(EMPTY)",
-			want:        nil,
+			want:        NewSequence(nil, DimXY),
 		},
 		{
 			description: "single non-empty point",
 			inputWKT:    "MULTIPOINT(1 2)",
-			want: []Coordinates{
-				NewXYCoordinates(1, 2),
-			},
+			want:        NewSequence([]float64{1, 2}, DimXY),
 		},
 		{
 			description: "multiple non-empty points",
 			inputWKT:    "MULTIPOINT(1 2,3 4)",
-			want: []Coordinates{
-				NewXYCoordinates(1, 2),
-				NewXYCoordinates(3, 4),
-			},
+			want:        NewSequence([]float64{1, 2, 3, 4}, DimXY),
 		},
 		{
 			description: "mix of empty and non-empty points",
 			inputWKT:    "MULTIPOINT(EMPTY,3 4)",
-			want: []Coordinates{
-				NewXYCoordinates(3, 4),
-			},
+			want:        NewSequence([]float64{3, 4}, DimXY),
 		},
 		{
 			description: "Z coordinates",
 			inputWKT:    "MULTIPOINT Z(3 4 5)",
-			want: []Coordinates{
-				NewXYZCoordinates(3, 4, 5),
-			},
+			want:        NewSequence([]float64{3, 4, 5}, DimXYZ),
 		},
 		{
 			description: "M coordinates",
 			inputWKT:    "MULTIPOINT M(3 4 6)",
-			want: []Coordinates{
-				NewXYMCoordinates(3, 4, 6),
-			},
+			want:        NewSequence([]float64{3, 4, 6}, DimXYM),
 		},
 		{
 			description: "ZM coordinates",
 			inputWKT:    "MULTIPOINT ZM(3 4 5 6)",
-			want: []Coordinates{
-				NewXYZMCoordinates(3, 4, 5, 6),
-			},
+			want:        NewSequence([]float64{3, 4, 5, 6}, DimXYZM),
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
-			mp := geomFromWKT(t, tc.inputWKT).AsMultiPoint()
-			got := mp.DumpCoordinates()
-			expectCoordinateSliceEq(t, got, tc.want)
+			got := geomFromWKT(t, tc.inputWKT).AsMultiPoint().DumpCoordinates()
+			expectSequenceEq(t, got, tc.want)
 		})
 	}
 }

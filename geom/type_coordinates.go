@@ -21,6 +21,23 @@ type Coordinates struct {
 	Type CoordinatesType
 }
 
+// appendFloat64s appends the coordinates to dst, taking into
+// consideration the coordinate type.
+func (c Coordinates) appendFloat64s(dst []float64) []float64 {
+	switch c.Type {
+	case DimXY:
+		return append(dst, c.X, c.Y)
+	case DimXYZ:
+		return append(dst, c.X, c.Y, c.Z)
+	case DimXYM:
+		return append(dst, c.X, c.Y, c.M)
+	case DimXYZM:
+		return append(dst, c.X, c.Y, c.Z, c.M)
+	default:
+		panic(c.Type.String())
+	}
+}
+
 // NewXYCoordinates constructs a new set of coordinates of type XY.
 func NewXYCoordinates(x, y float64) Coordinates {
 	return Coordinates{

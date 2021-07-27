@@ -1,5 +1,7 @@
 package geom
 
+import "fmt"
+
 // CoordinatesType controls the dimensionality and type of data used to encode
 // a point location.  At minimum, a point location is defined by X and Y
 // coordinates. It may optionally include a Z value, representing height. It
@@ -23,7 +25,10 @@ const (
 
 // String gives a string representation of a CoordinatesType.
 func (t CoordinatesType) String() string {
-	return [4]string{"XY", "XYZ", "XYM", "XYZM"}[t]
+	if t >= 0 && t < 4 {
+		return [4]string{"XY", "XYZ", "XYM", "XYZM"}[t]
+	}
+	return fmt.Sprintf("unknown coordinate type (%d)", t)
 }
 
 // Dimension returns the number of float64 coordinates required to encode a

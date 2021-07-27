@@ -167,26 +167,26 @@ func expectBytesEq(t *testing.T, got, want []byte) {
 	}
 }
 
-func expectCoordinateSliceEq(t *testing.T, got, want []Coordinates) {
+func expectSequenceEq(t *testing.T, got, want Sequence) {
 	t.Helper()
 	show := func() {
-		t.Logf("len(got): %d", len(got))
-		for i, c := range got {
-			t.Logf("got[%d]: %v", i, c)
+		t.Logf("len(got): %d", got.Length())
+		for i := 0; i < got.Length(); i++ {
+			t.Logf("got[%d]: %v", i, got.Get(i))
 		}
-		t.Logf("len(want): %d", len(want))
-		for i, c := range want {
-			t.Logf("want[%d]: %v", i, c)
+		t.Logf("len(want): %d", want.Length())
+		for i := 0; i < want.Length(); i++ {
+			t.Logf("want[%d]: %v", i, want.Get(i))
 		}
 	}
-
-	if len(want) != len(got) {
-		t.Errorf("length mismatch: got=%d want=%d", len(got), len(want))
+	if got.Length() != want.Length() {
+		t.Errorf("length mismatch: got=%d want=%d", got.Length(), want.Length())
 		show()
 		return
 	}
-	for i, g := range got {
-		w := want[i]
+	for i := 0; i < got.Length(); i++ {
+		w := want.Get(i)
+		g := got.Get(i)
 		if g != w {
 			t.Errorf("mismatch at %d: got:%v want:%v", i, g, w)
 		}

@@ -295,16 +295,16 @@ func (m MultiPoint) Dump() []Point {
 	return pts
 }
 
-// DumpCoordinates returns the MultiPoint represented as a slice of
-// coordinates.
-func (m MultiPoint) DumpCoordinates() []Coordinates {
+// DumpCoordinates returns the non-empty points in a MultiPoint represented as
+// a Sequence.
+func (m MultiPoint) DumpCoordinates() Sequence {
 	n := m.seq.Length()
-	coords := make([]Coordinates, 0, n)
+	var nonEmpty []float64
 	for i := 0; i < n; i++ {
 		if m.empty.Get(i) {
 			continue
 		}
-		coords = append(coords, m.seq.Get(i))
+		nonEmpty = m.seq.Get(i).appendFloat64s(nonEmpty)
 	}
-	return coords
+	return NewSequence(nonEmpty, m.seq.CoordinatesType())
 }
