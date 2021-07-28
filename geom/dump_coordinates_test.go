@@ -52,6 +52,11 @@ func TestDumpCoordinatesMultiPoint(t *testing.T) {
 			inputWKT:    "MULTIPOINT ZM(3 4 5 6)",
 			want:        NewSequence([]float64{3, 4, 5, 6}, DimXYZM),
 		},
+		{
+			description: "reproduce bug",
+			inputWKT:    "MULTIPOINT Z(3 4 5,6 7 8)",
+			want:        NewSequence([]float64{3, 4, 5, 6, 7, 8}, DimXYZ),
+		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
 			got := geomFromWKT(t, tc.inputWKT).AsMultiPoint().DumpCoordinates()
