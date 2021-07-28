@@ -118,3 +118,57 @@ func TestDumpCoordinatesMultiLineString(t *testing.T) {
 		})
 	}
 }
+
+func TestDumpCoordinatesPolygon(t *testing.T) {
+	for _, tc := range []struct {
+		description string
+		inputWKT    string
+		want        Sequence
+	}{
+		{
+			description: "empty",
+			inputWKT:    "POLYGON EMPTY",
+			want:        NewSequence(nil, DimXY),
+		},
+		{
+			description: "contains single ring",
+			inputWKT:    "POLYGON((0 0,0 1,1 0,0 0))",
+			want:        NewSequence([]float64{0, 0, 0, 1, 1, 0, 0, 0}, DimXY),
+		},
+		{
+			description: "multiple rings",
+			inputWKT:    "POLYGON((0 0,0 10,10 0,0 0),(1 1,1 2,2 2,2 1,1 1))",
+			want:        NewSequence([]float64{0, 0, 0, 10, 10, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1}, DimXY),
+		},
+		{
+			description: "Z coordinates",
+			inputWKT:    "POLYGON Z((0 0 -1,0 10 -1,10 0 -1,0 0 -1),(1 1 -1,1 2 -1,2 2 -1,2 1 -1,1 1 -1))",
+			want: NewSequence([]float64{
+				0, 0, -1,
+				0, 10, -1,
+				10, 0, -1,
+				0, 0, -1,
+				1, 1, -1,
+				1, 2, -1,
+				2, 2, -1,
+				2, 1, -1,
+				1, 1, -1,
+			}, DimXYZ),
+		},
+		{
+			description: "M coordinates",
+			inputWKT:    "POLYGON M((0 0 10,0 1 10,1 0 10,0 0 10))",
+			want:        NewSequence([]float64{0, 0, 10, 0, 1, 10, 1, 0, 10, 0, 0, 10}, DimXYM),
+		},
+		{
+			description: "ZM coordinates",
+			inputWKT:    "POLYGON ZM((0 0 10 20,0 1 10 20,1 0 10 20,0 0 10 20))",
+			want:        NewSequence([]float64{0, 0, 10, 20, 0, 1, 10, 20, 1, 0, 10, 20, 0, 0, 10, 20}, DimXYZM),
+		},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			got := geomFromWKT(t, tc.inputWKT).AsPolygon().DumpCoordinates()
+			expectSequenceEq(t, got, tc.want)
+		})
+	}
+}
