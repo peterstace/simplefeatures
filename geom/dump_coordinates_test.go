@@ -172,3 +172,57 @@ func TestDumpCoordinatesPolygon(t *testing.T) {
 		})
 	}
 }
+
+func TestDumpCoordinatesMultiPolygon(t *testing.T) {
+	for _, tc := range []struct {
+		description string
+		inputWKT    string
+		want        Sequence
+	}{
+		{
+			description: "empty",
+			inputWKT:    "MULTIPOLYGON EMPTY",
+			want:        NewSequence(nil, DimXY),
+		},
+		{
+			description: "multi polygon with empty polygon",
+			inputWKT:    "MULTIPOLYGON(EMPTY)",
+			want:        NewSequence(nil, DimXY),
+		},
+		{
+			description: "contains single ring",
+			inputWKT:    "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))",
+			want:        NewSequence([]float64{0, 0, 0, 1, 1, 0, 0, 0}, DimXY),
+		},
+		{
+			description: "multiple rings in a single polygon",
+			inputWKT:    "MULTIPOLYGON(((0 0,0 10,10 0,0 0),(1 1,1 2,2 2,2 1,1 1)))",
+			want:        NewSequence([]float64{0, 0, 0, 10, 10, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1}, DimXY),
+		},
+		{
+			description: "multiple polygons",
+			inputWKT:    "MULTIPOLYGON(((0 0,0 1,1 0,0 0)),((10 10,10 11,11 10,10 10)))",
+			want:        NewSequence([]float64{0, 0, 0, 1, 1, 0, 0, 0, 10, 10, 10, 11, 11, 10, 10, 10}, DimXY),
+		},
+		{
+			description: "Z coordinates",
+			inputWKT:    "MULTIPOLYGON Z(((0 0 10,0 1 10,1 0 10,0 0 10)))",
+			want:        NewSequence([]float64{0, 0, 10, 0, 1, 10, 1, 0, 10, 0, 0, 10}, DimXYZ),
+		},
+		{
+			description: "M coordinates",
+			inputWKT:    "MULTIPOLYGON M(((0 0 10,0 1 10,1 0 10,0 0 10)))",
+			want:        NewSequence([]float64{0, 0, 10, 0, 1, 10, 1, 0, 10, 0, 0, 10}, DimXYM),
+		},
+		{
+			description: "ZM coordinates",
+			inputWKT:    "MULTIPOLYGON ZM(((0 0 20 10,0 1 20 10,1 0 20 10,0 0 20 10)))",
+			want:        NewSequence([]float64{0, 0, 20, 10, 0, 1, 20, 10, 1, 0, 20, 10, 0, 0, 20, 10}, DimXYZM),
+		},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			got := geomFromWKT(t, tc.inputWKT).AsMultiPolygon().DumpCoordinates()
+			expectSequenceEq(t, got, tc.want)
+		})
+	}
+}
