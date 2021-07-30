@@ -6,6 +6,60 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
+func TestDumpCoordinatesPoint(t *testing.T) {
+	for _, tc := range []struct {
+		description string
+		inputWKT    string
+		want        Sequence
+	}{
+		{
+			description: "empty",
+			inputWKT:    "POINT EMPTY",
+			want:        NewSequence(nil, DimXY),
+		},
+		{
+			description: "empty z",
+			inputWKT:    "POINT Z EMPTY",
+			want:        NewSequence(nil, DimXYZ),
+		},
+		{
+			description: "empty m",
+			inputWKT:    "POINT M EMPTY",
+			want:        NewSequence(nil, DimXYM),
+		},
+		{
+			description: "empty zm",
+			inputWKT:    "POINT ZM EMPTY",
+			want:        NewSequence(nil, DimXYZM),
+		},
+		{
+			description: "non-empty",
+			inputWKT:    "POINT(1 2)",
+			want:        NewSequence([]float64{1, 2}, DimXY),
+		},
+		{
+			description: "non-empty z",
+			inputWKT:    "POINT Z(1 2 3)",
+			want:        NewSequence([]float64{1, 2, 3}, DimXYZ),
+		},
+		{
+			description: "non-empty m",
+			inputWKT:    "POINT M(1 2 3)",
+			want:        NewSequence([]float64{1, 2, 3}, DimXYM),
+		},
+		{
+			description: "non-empty zm",
+			inputWKT:    "POINT ZM(1 2 3 4)",
+			want:        NewSequence([]float64{1, 2, 3, 4}, DimXYZM),
+		},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			got := geomFromWKT(t, tc.inputWKT).AsPoint().DumpCoordinates()
+			expectSequenceEq(t, got, tc.want)
+		})
+	}
+}
+
 func TestDumpCoordinatesMultiPoint(t *testing.T) {
 	for _, tc := range []struct {
 		description string
