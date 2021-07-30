@@ -280,3 +280,52 @@ func TestDumpCoordinatesMultiPolygon(t *testing.T) {
 		})
 	}
 }
+
+func TestDumpCoordinatesGeometry(t *testing.T) {
+	for _, tc := range []struct {
+		description string
+		inputWKT    string
+		want        Sequence
+	}{
+		{
+			description: "Point",
+			inputWKT:    "POINT Z(0 1 2)",
+			want:        NewSequence([]float64{0, 1, 2}, DimXYZ),
+		},
+		{
+			description: "LineString",
+			inputWKT:    "LINESTRING Z(0 1 2,3 4 5)",
+			want:        NewSequence([]float64{0, 1, 2, 3, 4, 5}, DimXYZ),
+		},
+		{
+			description: "Polygon",
+			inputWKT:    "POLYGON Z((0 0 1,0 1 1,1 0 1,0 0 1))",
+			want:        NewSequence([]float64{0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1}, DimXYZ),
+		},
+		{
+			description: "MultiPoint",
+			inputWKT:    "MULTIPOINT Z(0 1 2,3 4 5)",
+			want:        NewSequence([]float64{0, 1, 2, 3, 4, 5}, DimXYZ),
+		},
+		{
+			description: "MultiLineString",
+			inputWKT:    "MULTILINESTRING Z((0 1 2,3 4 5))",
+			want:        NewSequence([]float64{0, 1, 2, 3, 4, 5}, DimXYZ),
+		},
+		{
+			description: "MultiPolygon",
+			inputWKT:    "MULTIPOLYGON Z(((0 0 1,0 1 1,1 0 1,0 0 1)))",
+			want:        NewSequence([]float64{0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1}, DimXYZ),
+		},
+		//{
+		//	description: "GeometryCollection",
+		//	inputWKT:    "GEOMETRYCOLLECTION Z(POINT Z(0 1 2))",
+		//	want:        NewSequence([]float64{0, 1, 2}, DimXYZ),
+		//},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			got := geomFromWKT(t, tc.inputWKT).DumpCoordinates()
+			expectSequenceEq(t, got, tc.want)
+		})
+	}
+}
