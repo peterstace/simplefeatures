@@ -773,7 +773,7 @@ func (g Geometry) appendDump(gs []Geometry) []Geometry {
 func (g Geometry) DumpCoordinates() Sequence {
 	switch g.gtype {
 	case TypeGeometryCollection:
-		panic("GeometryCollection not yet handled")
+		return g.AsGeometryCollection().DumpCoordinates()
 	case TypePoint:
 		return g.AsPoint().DumpCoordinates()
 	case TypeLineString:
@@ -787,6 +787,6 @@ func (g Geometry) DumpCoordinates() Sequence {
 	case TypeMultiPolygon:
 		return g.AsMultiPolygon().DumpCoordinates()
 	default:
-		panic("invalid")
+		panic("unknown type: " + g.Type().String())
 	}
 }

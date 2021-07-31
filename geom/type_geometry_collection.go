@@ -448,3 +448,13 @@ func (c GeometryCollection) Dump() []Geometry {
 	}
 	return gs
 }
+
+// DumpCoordinates returns a Sequence holding all control points in the
+// GeometryCollection.
+func (c GeometryCollection) DumpCoordinates() Sequence {
+	var coords []float64
+	for _, g := range c.geoms {
+		coords = g.DumpCoordinates().appendAllPoints(coords)
+	}
+	return NewSequence(coords, c.ctype)
+}
