@@ -9,31 +9,31 @@ import (
 
 func TestLineIntersection(t *testing.T) {
 	var (
-		p00 = XY{X: 0, Y: 0}
-		p10 = XY{X: 1, Y: 0}
-		p01 = XY{X: 0, Y: 1}
-		p11 = XY{X: 1, Y: 1}
-		p21 = XY{X: 2, Y: 1}
-		p02 = XY{X: 0, Y: 2}
-		p22 = XY{X: 2, Y: 2}
-		p20 = XY{X: 2, Y: 0}
-		p40 = XY{X: 4, Y: 0}
-		p60 = XY{X: 6, Y: 0}
-		p42 = XY{X: 4, Y: 2}
-		p63 = XY{X: 6, Y: 3}
+		p00 = XY64{X: 0, Y: 0}
+		p10 = XY64{X: 1, Y: 0}
+		p01 = XY64{X: 0, Y: 1}
+		p11 = XY64{X: 1, Y: 1}
+		p21 = XY64{X: 2, Y: 1}
+		p02 = XY64{X: 0, Y: 2}
+		p22 = XY64{X: 2, Y: 2}
+		p20 = XY64{X: 2, Y: 0}
+		p40 = XY64{X: 4, Y: 0}
+		p60 = XY64{X: 6, Y: 0}
+		p42 = XY64{X: 4, Y: 2}
+		p63 = XY64{X: 6, Y: 3}
 	)
-	ln := func(a, b XY) Line {
+	ln := func(a, b XY64) Line {
 		return Line{A: a, B: b}
 	}
 
-	e := func(xy XY) XY {
+	e := func(xy XY64) XY64 {
 		return xy
 	}
-	p := func(xy XY) XY {
-		return XY{X: -xy.Y, Y: xy.X}
+	p := func(xy XY64) XY64 {
+		return XY64{X: -xy.Y, Y: xy.X}
 	}
-	q := func(xy XY) XY {
-		return XY{X: -xy.X, Y: xy.Y}
+	q := func(xy XY64) XY64 {
+		return XY64{X: -xy.X, Y: xy.Y}
 	}
 
 	for _, tc := range []struct {
@@ -162,7 +162,7 @@ func TestLineIntersection(t *testing.T) {
 	} {
 		t.Run(tc.description, func(t *testing.T) {
 			for flip := 0; flip < 8; flip++ {
-				for groupIdx, group := range [][]func(XY) XY{
+				for groupIdx, group := range [][]func(XY64) XY64{
 					{e},
 					{p},
 					{p, p},
