@@ -1,6 +1,6 @@
 package exact
 
-type Line struct {
+type Segment struct {
 	A, B XY64
 }
 
@@ -9,17 +9,17 @@ type Intersection struct {
 	A, B  XY64
 }
 
-func LineIntersection(lineA, lineB Line) Intersection {
+func SegmentIntersection(segA, segB Segment) Intersection {
 	// Algorithm from https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
 
-	if lineA.A == lineA.B || lineB.A == lineB.B {
-		panic("invalid line")
+	if segA.A == segA.B || segB.A == segB.B {
+		panic("invalid segment")
 	}
 
-	v1 := lineA.A.ToRat()
-	v2 := lineA.B.ToRat()
-	v3 := lineB.A.ToRat()
-	v4 := lineB.B.ToRat()
+	v1 := segA.A.ToRat()
+	v2 := segA.B.ToRat()
+	v3 := segB.A.ToRat()
+	v4 := segB.B.ToRat()
 
 	// d := (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4)
 	sub12 := v1.Sub(v2)
