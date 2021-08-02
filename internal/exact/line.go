@@ -27,7 +27,8 @@ func LineIntersection(lineA, lineB Line) Intersection {
 	d := sub12.Cross(sub34)
 
 	if d.Sign() == 0 {
-		if !collinear(v1, v2, v3) {
+		sub23 := v2.Sub(v3)
+		if sub12.Cross(sub23).Sign() != 0 {
 			return Intersection{Empty: true}
 		}
 
@@ -54,7 +55,7 @@ func LineIntersection(lineA, lineB Line) Intersection {
 	t := div(sub13.Cross(sub34), d)
 
 	// u := [(x2-x1)*(y1-y3)-(y2-y1)*(x1-x3)] / d
-	sub21 := v2.Sub(v1)
+	sub21 := sub12.Neg()
 	u := div(sub21.Cross(sub13), d)
 
 	if inUnitInterval(t) && inUnitInterval(u) {
@@ -63,10 +64,4 @@ func LineIntersection(lineA, lineB Line) Intersection {
 	}
 
 	return Intersection{Empty: true}
-}
-
-func collinear(v1, v2, v3 XYRat) bool {
-	sub21 := v2.Sub(v1)
-	sub32 := v3.Sub(v2)
-	return sub21.Cross(sub32).Sign() == 0
 }

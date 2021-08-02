@@ -38,6 +38,13 @@ func (r XYRat) Add(o XYRat) XYRat {
 	}
 }
 
+func (r XYRat) Neg() XYRat {
+	return XYRat{
+		neg(r.X),
+		neg(r.Y),
+	}
+}
+
 func (r XYRat) Max(o XYRat) XYRat {
 	if r.Less(o) {
 		return o

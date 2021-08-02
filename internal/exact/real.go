@@ -32,6 +32,12 @@ func add(a, b *big.Rat) *big.Rat {
 	return tmp
 }
 
+func neg(r *big.Rat) *big.Rat {
+	tmp := new(big.Rat).Set(r)
+	tmp.Neg(tmp)
+	return tmp
+}
+
 func inUnitInterval(r *big.Rat) bool {
 	return r.Sign() >= 0 && r.Cmp(one) <= 0
 }
