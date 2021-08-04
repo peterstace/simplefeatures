@@ -62,39 +62,3 @@ func (c Coordinates) appendFloat64s(dst []float64) []float64 {
 		panic(c.Type.String())
 	}
 }
-
-// NewXYCoordinates constructs a new set of coordinates of type XY.
-func NewXYCoordinates(x, y float64) Coordinates {
-	return Coordinates{
-		Type: DimXY,
-		XY:   XY{x, y},
-	}
-}
-
-// NewXYZCoordinates constructs a new set of coordinates of type XYZ.
-func NewXYZCoordinates(x, y, z float64) Coordinates {
-	return Coordinates{
-		Type: DimXYZ,
-		XY:   XY{x, y},
-		Z:    z,
-	}
-}
-
-// NewXYMCoordinates constructs a new set of coordinates of type XYM.
-func NewXYMCoordinates(x, y, m float64) Coordinates {
-	return Coordinates{
-		Type: DimXYM,
-		XY:   XY{x, y},
-		M:    m,
-	}
-}
-
-// NewXYZMCoordinates constructs a new set of coordinates of type XYZM.
-func NewXYZMCoordinates(x, y, z, m float64) Coordinates {
-	return Coordinates{
-		Type: DimXYZM,
-		XY:   XY{x, y},
-		Z:    z,
-		M:    m,
-	}
-}
