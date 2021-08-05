@@ -82,7 +82,7 @@ func (m MultiPoint) PointN(n int) Point {
 		return NewEmptyPoint(m.CoordinatesType())
 	}
 	c := m.seq.Get(n)
-	return NewPoint(c)
+	return mustNewPoint(c)
 }
 
 // AsText returns the WKT (Well Known Text) representation of this geometry.
@@ -238,7 +238,7 @@ func (m MultiPoint) Centroid() Point {
 	if n == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return NewPointFromXY(sum.Scale(1 / float64(n)))
+	return mustNewPointFromXY(sum.Scale(1 / float64(n)))
 }
 
 // Reverse in the case of MultiPoint outputs each component point in their

@@ -31,7 +31,8 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]label) bool) (
 		return NewMultiLineStringFromLineStrings(linears).AsGeometry(), nil
 	case len(areals) == 0 && len(linears) == 0 && len(points) > 0:
 		if len(points) == 1 {
-			return NewPointFromXY(points[0]).AsGeometry(), nil
+			pt, err := NewPointFromXY(points[0])
+			return pt.AsGeometry(), err
 		}
 		coords := make([]float64, 2*len(points))
 		for i, xy := range points {
@@ -48,7 +49,11 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]label) bool) (
 			geoms = append(geoms, ls.AsGeometry())
 		}
 		for _, xy := range points {
-			geoms = append(geoms, NewPointFromXY(xy).AsGeometry())
+			pt, err := NewPointFromXY(xy)
+			if err != nil {
+				return Geometry{}, err
+			}
+			geoms = append(geoms, pt.AsGeometry())
 		}
 		return NewGeometryCollection(geoms).AsGeometry(), nil
 	}

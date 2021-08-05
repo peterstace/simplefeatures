@@ -60,7 +60,8 @@ func (p *parser) nextGeometryTaggedText() (Geometry, error) {
 		if !ok {
 			return NewEmptyPoint(ctype).AsGeometry(), nil
 		}
-		return NewPoint(c, p.opts...).AsGeometry(), nil
+		pt, err := NewPoint(c, p.opts...)
+		return pt.AsGeometry(), err
 	case "LINESTRING":
 		ls, err := p.nextLineStringText(ctype)
 		return ls.AsGeometry(), err

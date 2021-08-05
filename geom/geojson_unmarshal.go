@@ -239,7 +239,8 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 	case geojsonPoint:
 		coords, ok := oneDimFloat64sToCoordinates(node.coords, ctype)
 		if ok {
-			return NewPoint(coords, opts...).AsGeometry(), nil
+			pt, err := NewPoint(coords, opts...)
+			return pt.AsGeometry(), err
 		}
 		return NewEmptyPoint(ctype).AsGeometry(), nil
 	case geojsonLineString:

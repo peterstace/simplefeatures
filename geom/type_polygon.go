@@ -422,7 +422,7 @@ func (p Polygon) Centroid() Point {
 		centroid = centroid.Add(
 			weightedCentroid(p.InteriorRingN(i), areas[i+1], sumAreas))
 	}
-	return NewPointFromXY(centroid)
+	return mustNewPointFromXY(centroid)
 }
 
 func weightedCentroid(ring LineString, ringArea, totalArea float64) XY {

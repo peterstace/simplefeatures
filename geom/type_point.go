@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"math"
 	"unsafe"
 )
@@ -18,8 +19,17 @@ type Point struct {
 }
 
 // NewPoint creates a new point gives its Coordinates.
-func NewPoint(c Coordinates, _ ...ConstructorOption) Point {
-	return Point{c, true}
+func NewPoint(c Coordinates, _ ...ConstructorOption) (Point, error) {
+	// TODO: validation
+	return Point{c, true}, nil
+}
+
+func mustNewPoint(c Coordinates, opts ...ConstructorOption) Point {
+	pt, err := NewPoint(c, opts...)
+	if err != nil {
+		panic(fmt.Sprintf("could not construct point from coordinates: %v", err))
+	}
+	return pt
 }
 
 // NewEmptyPoint creates a Point that is empty.
@@ -28,8 +38,16 @@ func NewEmptyPoint(ctype CoordinatesType) Point {
 }
 
 // NewPointFromXY creates a new point from an XY.
-func NewPointFromXY(xy XY, _ ...ConstructorOption) Point {
-	return Point{Coordinates{XY: xy, Type: DimXY}, true}
+func NewPointFromXY(xy XY, _ ...ConstructorOption) (Point, error) {
+	return NewPoint(Coordinates{XY: xy, Type: DimXY})
+}
+
+func mustNewPointFromXY(xy XY, opts ...ConstructorOption) Point {
+	pt, err := NewPointFromXY(xy, opts...)
+	if err != nil {
+		panic(fmt.Sprintf("could not construct point from xy: %v", err))
+	}
+	return pt
 }
 
 // Type returns the GeometryType for a Point
@@ -163,7 +181,7 @@ func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, er
 	}
 	newC := p.coords
 	newC.XY = fn(newC.XY)
-	return NewPoint(newC, opts...), nil
+	return NewPoint(newC, opts...)
 }
 
 // Centroid of a point is that point.

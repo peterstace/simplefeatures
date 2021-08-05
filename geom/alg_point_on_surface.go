@@ -127,7 +127,7 @@ func pointOnAreaSurface(poly Polygon) (Point, float64) {
 	}
 	midX := (bestA + bestB) / 2
 
-	return NewPointFromXY(XY{midX, midY}), bestB - bestA
+	return mustNewPointFromXY(XY{midX, midY}), bestB - bestA
 }
 
 func sortAndUniquifyFloats(fs []float64) []float64 {
