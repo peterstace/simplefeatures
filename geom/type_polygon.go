@@ -543,3 +543,20 @@ func (p Polygon) controlPoints() int {
 	}
 	return sum
 }
+
+// DumpCoordinates returns the points making up the rings in a Polygon as a
+// Sequence.
+func (p Polygon) DumpCoordinates() Sequence {
+	var n int
+	for _, r := range p.rings {
+		n += r.Coordinates().Length()
+	}
+	ctype := p.CoordinatesType()
+	coords := make([]float64, 0, n*ctype.Dimension())
+	for _, r := range p.rings {
+		coords = r.Coordinates().appendAllPoints(coords)
+	}
+	seq := NewSequence(coords, ctype)
+	seq.assertNoUnusedCapacity()
+	return seq
+}

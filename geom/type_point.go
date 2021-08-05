@@ -219,3 +219,19 @@ func (p Point) asXYs() []XY {
 	}
 	return nil
 }
+
+// DumpCoordinates returns a Sequence representing the point. For an empty
+// Point, the Sequence will be empty. For a non-empty Point, the Sequence will
+// contain the single set of coordinates representing the point.
+func (p Point) DumpCoordinates() Sequence {
+	ctype := p.CoordinatesType()
+	var floats []float64
+	coords, ok := p.Coordinates()
+	if ok {
+		n := ctype.Dimension()
+		floats = coords.appendFloat64s(make([]float64, 0, n))
+	}
+	seq := NewSequence(floats, ctype)
+	seq.assertNoUnusedCapacity()
+	return seq
+}

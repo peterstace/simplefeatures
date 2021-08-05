@@ -767,3 +767,26 @@ func (g Geometry) appendDump(gs []Geometry) []Geometry {
 	}
 	return gs
 }
+
+// DumpCoordinates returns the control points making up the geometry as a
+// Sequence.
+func (g Geometry) DumpCoordinates() Sequence {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		return g.AsGeometryCollection().DumpCoordinates()
+	case TypePoint:
+		return g.AsPoint().DumpCoordinates()
+	case TypeLineString:
+		return g.AsLineString().Coordinates()
+	case TypePolygon:
+		return g.AsPolygon().DumpCoordinates()
+	case TypeMultiPoint:
+		return g.AsMultiPoint().DumpCoordinates()
+	case TypeMultiLineString:
+		return g.AsMultiLineString().DumpCoordinates()
+	case TypeMultiPolygon:
+		return g.AsMultiPolygon().DumpCoordinates()
+	default:
+		panic("unknown type: " + g.Type().String())
+	}
+}

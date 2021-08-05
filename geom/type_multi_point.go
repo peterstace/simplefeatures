@@ -294,3 +294,21 @@ func (m MultiPoint) Dump() []Point {
 	}
 	return pts
 }
+
+// DumpCoordinates returns the non-empty points in a MultiPoint represented as
+// a Sequence.
+func (m MultiPoint) DumpCoordinates() Sequence {
+	ctype := m.CoordinatesType()
+	n := m.seq.Length()
+	empty := m.empty.CountTrue()
+	nonEmpty := make([]float64, 0, ctype.Dimension()*(n-empty))
+	for i := 0; i < n; i++ {
+		if m.empty.Get(i) {
+			continue
+		}
+		nonEmpty = m.seq.Get(i).appendFloat64s(nonEmpty)
+	}
+	seq := NewSequence(nonEmpty, ctype)
+	seq.assertNoUnusedCapacity()
+	return seq
+}

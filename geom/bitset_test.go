@@ -16,8 +16,10 @@ func TestBitSet(t *testing.T) {
 				expectFalse(t, s.Get(i))
 				s.Set(i, true)
 				expectTrue(t, s.Get(i))
+				expectIntEq(t, s.CountTrue(), 1)
 				s.Set(i, false)
 				expectFalse(t, s.Get(i))
+				expectIntEq(t, s.CountTrue(), 0)
 			})
 		}
 	})
@@ -30,9 +32,14 @@ func TestBitSet(t *testing.T) {
 			choice := rnd.Intn(n)
 			want[choice] = !want[choice]
 			s.Set(choice, want[choice])
+			var wantCountTrue int
 			for j := 0; j < n; j++ {
 				expectBoolEq(t, s.Get(j), want[j])
+				if want[j] {
+					wantCountTrue++
+				}
 			}
+			expectIntEq(t, s.CountTrue(), wantCountTrue)
 		}
 	})
 }

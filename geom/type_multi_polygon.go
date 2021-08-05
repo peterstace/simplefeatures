@@ -474,3 +474,26 @@ func (m MultiPolygon) Dump() []Polygon {
 	copy(ps, m.polys)
 	return ps
 }
+
+// DumpCoordinates returns the points making up the rings in a MultiPolygon as
+// a Sequence.
+func (m MultiPolygon) DumpCoordinates() Sequence {
+	var n int
+	for _, p := range m.polys {
+		for _, r := range p.rings {
+			n += r.Coordinates().Length()
+		}
+	}
+	ctype := m.CoordinatesType()
+	coords := make([]float64, 0, n*ctype.Dimension())
+
+	for _, p := range m.polys {
+		for _, r := range p.rings {
+			coords = r.Coordinates().appendAllPoints(coords)
+		}
+	}
+
+	seq := NewSequence(coords, ctype)
+	seq.assertNoUnusedCapacity()
+	return seq
+}

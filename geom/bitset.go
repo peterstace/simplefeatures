@@ -1,5 +1,7 @@
 package geom
 
+import "math/bits"
+
 // BitSet is a set data structure that holds a mapping from non-negative
 // integers to boolean values (bits). The zero value is the BitSet with all
 // bits set to false.
@@ -34,6 +36,15 @@ func (b *BitSet) Set(i int, newVal bool) {
 			b.masks[idx] &= ^(1 << (i % 64))
 		}
 	}
+}
+
+// CountTrue counts the number of elements in the set that are true.
+func (b *BitSet) CountTrue() int {
+	var count int
+	for _, mask := range b.masks {
+		count += bits.OnesCount64(mask)
+	}
+	return count
 }
 
 // Clone makes a deep copy of the BitSet.
