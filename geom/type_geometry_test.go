@@ -21,7 +21,9 @@ func TestZeroGeometry(t *testing.T) {
 	expectNoErr(t, err)
 	expectStringEq(t, strings.TrimSpace(buf.String()), `{"type":"GeometryCollection","geometries":[]}`)
 
-	z = NewPointFromXY(XY{1, 2}).AsGeometry() // Set away from zero value
+	pt, err := NewPointFromXY(XY{1, 2}) // Set away from zero value
+	z = pt.AsGeometry()
+	expectNoErr(t, err)
 	expectBoolEq(t, z.IsPoint(), true)
 	err = json.NewDecoder(&buf).Decode(&z)
 	expectNoErr(t, err)
