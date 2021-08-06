@@ -13,7 +13,7 @@ func xy(x, y float64) Coordinates {
 	return Coordinates{Type: DimXY, XY: XY{x, y}}
 }
 
-func TestPointValidation(t *testing.T) {
+func TestPointAndMultiPointValidation(t *testing.T) {
 	nan := math.NaN()
 	inf := math.Inf(+1)
 	for i, tc := range []struct {
@@ -31,8 +31,18 @@ func TestPointValidation(t *testing.T) {
 		{false, xy(0, -inf)},
 		{false, xy(-inf, -inf)},
 	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("point_%d", i), func(t *testing.T) {
 			_, err := NewPoint(tc.input)
+			if tc.wantValid {
+				expectNoErr(t, err)
+			} else {
+				expectErr(t, err)
+			}
+		})
+		t.Run(fmt.Sprintf("multipoint_%d", i), func(t *testing.T) {
+			coords := []float64{tc.input.X, tc.input.Y}
+			seq := NewSequence(coords, DimXY)
+			_, err := NewMultiPoint(seq)
 			if tc.wantValid {
 				expectNoErr(t, err)
 			} else {
@@ -61,6 +71,17 @@ func TestOmityInvalidPoint(t *testing.T) {
 	pt, err := NewPoint(c, OmitInvalid)
 	expectNoErr(t, err)
 	expectTrue(t, pt.IsEmpty())
+}
+
+func TestDisableAllMultiPointValidations(t *testing.T) {
+	coords := []float64{2.0, math.NaN()}
+	seq := NewSequence(coords, DimXY)
+	_, err := NewMultiPoint(seq, DisableAllValidations)
+	expectNoErr(t, err)
+}
+
+func TestOmityInvalidMultiPoint(t *testing.T) {
+	// TODO
 }
 
 func TestLineStringValidation(t *testing.T) {

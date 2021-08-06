@@ -60,7 +60,6 @@ func NewMultiPoint(seq Sequence, opts ...ConstructorOption) (MultiPoint, error) 
 }
 
 func mustNewMultiPoint(seq Sequence, opts ...ConstructorOption) MultiPoint {
-	// TODO: validation
 	mp, err := NewMultiPoint(seq, opts...)
 	if err != nil {
 		panic(fmt.Sprintf("failed to construct multipoint: %v", err))
@@ -73,6 +72,13 @@ func mustNewMultiPoint(seq Sequence, opts ...ConstructorOption) MultiPoint {
 // used to indicate that the corresponding point in the sequence is an empty
 // point.
 func NewMultiPointWithEmptyMask(seq Sequence, empty BitSet, opts ...ConstructorOption) (MultiPoint, error) {
+	os := newOptionSet(opts)
+	if !os.skipValidations {
+		if err := seq.validate(); err != nil {
+			// TODO: ctor options
+			return MultiPoint{}, err
+		}
+	}
 	return MultiPoint{
 		seq,
 		empty.Clone(), // clone so that the caller doesn't have access to the internal empty set
