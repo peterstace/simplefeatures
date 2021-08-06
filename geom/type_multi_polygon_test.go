@@ -14,10 +14,9 @@ func TestMultiPolygonSummary(t *testing.T) {
 		wantSummary             string
 	}{
 		{
-			name:                    "Empty",
-			multiPolyPointSequences: [][][]float64{},
-			coordsType:              geom.DimXY,
-			wantSummary:             "MultiPolygon[XY] with 0 polygons consisting of 0 total rings and 0 total points",
+			name:        "Empty",
+			coordsType:  geom.DimXY,
+			wantSummary: "MultiPolygon[XY] with 0 polygons consisting of 0 total rings and 0 total points",
 		},
 
 		// Basic single polygon without inner rings.

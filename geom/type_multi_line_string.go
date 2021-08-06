@@ -467,8 +467,9 @@ func (m MultiLineString) DumpCoordinates() Sequence {
 
 // Summary returns a text summary of the MultiLineString following a similar format to https://postgis.net/docs/ST_Summary.html.
 func (m MultiLineString) Summary() string {
-	var lineStringSuffix string
 	numPoints := m.DumpCoordinates().Length()
+
+	var lineStringSuffix string
 	numLineStrings := m.NumLineStrings()
 	if numLineStrings != 1 {
 		lineStringSuffix = "s"

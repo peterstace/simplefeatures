@@ -13,6 +13,12 @@ func TestMultiPointSummary(t *testing.T) {
 		wantSummary string
 	}{
 		{
+			name:        "Empty",
+			wantSummary: "MultiPoint[XY] with 0 points",
+		},
+
+		// Single point.
+		{
 			name: "XY single point",
 			ps: []geom.Point{
 				geom.NewPoint(geom.Coordinates{XY: geom.XY{X: 0, Y: 0}, Type: geom.DimXY}),
@@ -33,6 +39,8 @@ func TestMultiPointSummary(t *testing.T) {
 			},
 			wantSummary: "MultiPoint[XYM] with 1 point",
 		},
+
+		// Multiple points.
 		{
 			name: "XY 2 points",
 			ps: []geom.Point{
@@ -65,16 +73,11 @@ func TestMultiPointSummary(t *testing.T) {
 			},
 			wantSummary: "MultiPoint[XY] with 2 points",
 		},
-		{
-			name:        "No points",
-			ps:          []geom.Point{},
-			wantSummary: "MultiPoint[XY] with 0 points",
-		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			mp := geom.NewMultiPointFromPoints(tc.ps)
-			expectStringEq(t, mp.Summary(), tc.wantSummary)
-			expectStringEq(t, mp.String(), tc.wantSummary)
+			g := geom.NewMultiPointFromPoints(tc.ps)
+			expectStringEq(t, g.Summary(), tc.wantSummary)
+			expectStringEq(t, g.String(), tc.wantSummary)
 		})
 	}
 }

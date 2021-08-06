@@ -15,10 +15,8 @@ func TestMultiLineStringSummary(t *testing.T) {
 	}{
 		// Empty.
 		{
-			name:             "Empty",
-			lineStringCoords: [][]float64{},
-			coordsType:       geom.DimXY,
-			wantSummary:      "MultiLineString[XY] with 0 linestrings consisting of 0 total points",
+			name:        "Empty",
+			wantSummary: "MultiLineString[XY] with 0 linestrings consisting of 0 total points",
 		},
 
 		// Single line string.

@@ -18,8 +18,6 @@ func TestMultiGeometrySummary(t *testing.T) {
 	}{
 		{
 			name:        "Empty",
-			geoms:       []geom.Geometry{},
-			coordsType:  geom.DimXY,
 			wantSummary: "GeometryCollection[XY] with 0 child geometries consisting of 0 total points",
 		},
 
@@ -57,14 +55,15 @@ func TestMultiGeometrySummary(t *testing.T) {
 			wantSummary: "GeometryCollection[XYZM] with 1 child geometry consisting of 1 total point",
 		},
 
+		// Multiple geometries and points.
 		{
-			name:        "XY single linestring",
+			name:        "XY single line string",
 			geoms:       []geom.Geometry{ls.AsGeometry()},
 			coordsType:  geom.DimXY,
 			wantSummary: "GeometryCollection[XY] with 1 child geometry consisting of 2 total points",
 		},
 		{
-			name:        "XY 2 linestrings",
+			name:        "XY 2 line strings",
 			geoms:       []geom.Geometry{ls.AsGeometry(), ls.AsGeometry()},
 			coordsType:  geom.DimXY,
 			wantSummary: "GeometryCollection[XY] with 2 child geometries consisting of 4 total points",
