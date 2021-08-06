@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -10,6 +11,17 @@ import (
 // location on the XY plane, or a 2D vector in the real vector space.
 type XY struct {
 	X, Y float64
+}
+
+// validate checks if the XY value contains NaN, -inf, or +inf.
+func (w XY) validate() error {
+	if math.IsNaN(w.X) || math.IsInf(w.X, 0) {
+		return fmt.Errorf("invalid X value: %v", w.X)
+	}
+	if math.IsNaN(w.Y) || math.IsInf(w.Y, 0) {
+		return fmt.Errorf("invalid Y value: %v", w.Y)
+	}
+	return nil
 }
 
 // Sub returns the result of subtracting the other XY from this XY (in the same

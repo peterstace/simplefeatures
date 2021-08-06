@@ -18,9 +18,17 @@ type Point struct {
 	full   bool
 }
 
-// NewPoint creates a new point gives its Coordinates.
-func NewPoint(c Coordinates, _ ...ConstructorOption) (Point, error) {
-	// TODO: validation
+// NewPoint creates a new point given its Coordinates.
+func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
+	os := newOptionSet(opts)
+	if !os.skipValidations {
+		if err := c.XY.validate(); err != nil {
+			if os.omitInvalid {
+				return Point{}, nil
+			}
+			return Point{}, err
+		}
+	}
 	return Point{c, true}, nil
 }
 
