@@ -13,9 +13,8 @@ func TestMultiPolygonSummary(t *testing.T) {
 		coordsType              geom.CoordinatesType
 		wantSummary             string
 	}{
-		// Empty.
 		{
-			name:                    "Empty polygon",
+			name:                    "Empty",
 			multiPolyPointSequences: [][][]float64{},
 			coordsType:              geom.DimXY,
 			wantSummary:             "MultiPolygon[XY] with 0 polygons consisting of 0 total rings and 0 total points",
@@ -200,10 +199,10 @@ func TestMultiPolygonSummary(t *testing.T) {
 				polygons[i] = p
 			}
 
-			mp, err := geom.NewMultiPolygonFromPolygons(polygons)
+			g, err := geom.NewMultiPolygonFromPolygons(polygons)
 			expectNoErr(t, err)
-			expectStringEq(t, mp.Summary(), tc.wantSummary)
-			expectStringEq(t, mp.String(), tc.wantSummary)
+			expectStringEq(t, g.Summary(), tc.wantSummary)
+			expectStringEq(t, g.String(), tc.wantSummary)
 		})
 	}
 }

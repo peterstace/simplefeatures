@@ -3,6 +3,7 @@ package geom
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"unsafe"
 )
 
@@ -457,4 +458,27 @@ func (c GeometryCollection) DumpCoordinates() Sequence {
 		coords = g.DumpCoordinates().appendAllPoints(coords)
 	}
 	return NewSequence(coords, c.ctype)
+}
+
+// Summary returns a text summary of the GeometryCollection following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (c GeometryCollection) Summary() string {
+	var pointSuffix string
+	numPoints := c.DumpCoordinates().Length()
+	if numPoints != 1 {
+		pointSuffix = "s"
+	}
+
+	geometrySuffix := "y"
+	numGeometries := c.NumGeometries()
+	if numGeometries != 1 {
+		geometrySuffix = "ies"
+	}
+
+	return fmt.Sprintf("%s[%s] with %d child geometr%s consisting of %d total point%s",
+		c.Type(), c.CoordinatesType(), numGeometries, geometrySuffix, numPoints, pointSuffix)
+}
+
+// String returns the string representation of the MultiPolygon.
+func (c GeometryCollection) String() string {
+	return c.Summary()
 }

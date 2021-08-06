@@ -142,10 +142,10 @@ func TestPolygonSummary(t *testing.T) {
 				expectNoErr(t, err)
 				lineStrings = append(lineStrings, ls)
 			}
-			p, err := geom.NewPolygonFromRings(lineStrings)
+			g, err := geom.NewPolygonFromRings(lineStrings)
 			expectNoErr(t, err)
-			expectStringEq(t, p.Summary(), tc.wantSummary)
-			expectStringEq(t, p.String(), tc.wantSummary)
+			expectStringEq(t, g.Summary(), tc.wantSummary)
+			expectStringEq(t, g.String(), tc.wantSummary)
 		})
 	}
 }
