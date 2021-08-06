@@ -181,6 +181,14 @@ func (p Polygon) NumInteriorRings() int {
 	return max(0, len(p.rings)-1)
 }
 
+// NumRings gives the total number of rings: ExternalRing + NumInterRings().
+func (p Polygon) NumRings() int {
+	if p.IsEmpty() {
+		return 0
+	}
+	return 1 + p.NumInteriorRings()
+}
+
 // InteriorRingN gives the nth (zero indexed) interior ring in the polygon
 // boundary. It will panic if n is out of bounds with respect to the number of
 // interior rings.
@@ -564,9 +572,10 @@ func (p Polygon) DumpCoordinates() Sequence {
 
 // Summary returns a text summary of the Polygon following a similar format to https://postgis.net/docs/ST_Summary.html.
 func (p Polygon) Summary() string {
-	var ringSuffix string
 	numPoints := p.DumpCoordinates().Length()
-	numRings := p.NumInteriorRings()
+
+	var ringSuffix string
+	numRings := p.NumRings()
 	if numRings != 1 {
 		ringSuffix = "s"
 	}
