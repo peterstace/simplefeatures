@@ -229,13 +229,10 @@ func (s LineString) Boundary() MultiPoint {
 	if s.IsEmpty() || s.IsClosed() {
 		return MultiPoint{}
 	}
-	first := s.seq.GetXY(0)
-	last := s.seq.GetXY(s.seq.Length() - 1)
-	fs := []float64{
-		first.X, first.Y,
-		last.X, last.Y,
-	}
-	return NewMultiPoint(NewSequence(fs, DimXY))
+	return NewMultiPoint([]Point{
+		s.StartPoint(),
+		s.EndPoint(),
+	})
 }
 
 // Value implements the database/sql/driver.Valuer interface by returning the

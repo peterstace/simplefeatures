@@ -33,12 +33,11 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]label) bool) (
 		if len(points) == 1 {
 			return NewPointFromXY(points[0]).AsGeometry(), nil
 		}
-		coords := make([]float64, 2*len(points))
+		pts := make([]Point, len(points))
 		for i, xy := range points {
-			coords[i*2+0] = xy.X
-			coords[i*2+1] = xy.Y
+			pts[i] = NewPointFromXY(xy)
 		}
-		return NewMultiPoint(NewSequence(coords, DimXY)).AsGeometry(), nil
+		return NewMultiPoint(pts).AsGeometry(), nil
 	default:
 		geoms := make([]Geometry, 0, len(areals)+len(linears)+len(points))
 		for _, poly := range areals {

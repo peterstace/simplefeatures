@@ -358,16 +358,11 @@ func TestCoordinatesSequence(t *testing.T) {
 
 	})
 	t.Run("multipoint", func(t *testing.T) {
-		seq, empty := geomFromWKT(t, "MULTIPOINT(0 1,2 3,EMPTY,4 5)").AsMultiPoint().Coordinates()
-		expectIntEq(t, seq.Length(), 4)
+		seq := geomFromWKT(t, "MULTIPOINT(0 1,2 3,EMPTY,4 5)").AsMultiPoint().Coordinates()
+		expectIntEq(t, seq.Length(), 3)
 		expectXYEq(t, seq.GetXY(0), XY{0, 1})
 		expectXYEq(t, seq.GetXY(1), XY{2, 3})
-		expectXYEq(t, seq.GetXY(2), XY{0, 0})
-		expectXYEq(t, seq.GetXY(3), XY{4, 5})
-		expectBoolEq(t, empty.Get(0), false)
-		expectBoolEq(t, empty.Get(1), false)
-		expectBoolEq(t, empty.Get(2), true)
-		expectBoolEq(t, empty.Get(3), false)
+		expectXYEq(t, seq.GetXY(2), XY{4, 5})
 	})
 	t.Run("multilinestring", func(t *testing.T) {
 		seq := geomFromWKT(t, "MULTILINESTRING((0 0,0 10,10 0,0 0),(2 2,2 8,8 2,2 2))").AsMultiLineString().Coordinates()

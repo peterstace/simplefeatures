@@ -18,11 +18,11 @@ func walk(g Geometry, fn func(XY)) {
 	case TypePolygon:
 		walk(g.Boundary(), fn)
 	case TypeMultiPoint:
-		seq, empty := g.AsMultiPoint().Coordinates()
-		n := seq.Length()
+		mp := g.AsMultiPoint()
+		n := mp.NumPoints()
 		for i := 0; i < n; i++ {
-			if !empty.Get(i) {
-				fn(seq.GetXY(i))
+			if xy, ok := mp.PointN(i).XY(); ok {
+				fn(xy)
 			}
 		}
 	case TypeMultiLineString:

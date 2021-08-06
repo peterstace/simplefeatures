@@ -63,6 +63,10 @@ func (p Point) AsText() string {
 // to the input byte slice.
 func (p Point) AppendWKT(dst []byte) []byte {
 	dst = appendWKTHeader(dst, "POINT", p.coords.Type)
+	return p.appendWKTBody(dst)
+}
+
+func (p Point) appendWKTBody(dst []byte) []byte {
 	if !p.full {
 		return appendWKTEmpty(dst)
 	}
@@ -179,7 +183,7 @@ func (p Point) Reverse() Point {
 // AsMultiPoint is a convenience function that converts this Point into a
 // MultiPoint.
 func (p Point) AsMultiPoint() MultiPoint {
-	return NewMultiPointFromPoints([]Point{p})
+	return NewMultiPoint([]Point{p})
 }
 
 // CoordinatesType returns the CoordinatesType used to represent the Point.
