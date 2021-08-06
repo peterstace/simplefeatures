@@ -26,7 +26,7 @@ func intersectionOfIndexedLines(
 			return nil
 		})
 	}
-	return NewMultiPoint(NewSequence(ptFloats, DimXY)),
+	return mustNewMultiPoint(NewSequence(ptFloats, DimXY)),
 		NewMultiLineStringFromLineStrings(lss)
 }
 
@@ -45,5 +45,5 @@ func intersectionOfMultiPointAndMultiPoint(mp1, mp2 MultiPoint) MultiPoint {
 			floats = append(floats, xy.X, xy.Y)
 		}
 	}
-	return NewMultiPoint(NewSequence(floats, DimXY))
+	return mustNewMultiPoint(NewSequence(floats, DimXY))
 }

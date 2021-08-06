@@ -205,7 +205,7 @@ func (p Point) Reverse() Point {
 // AsMultiPoint is a convenience function that converts this Point into a
 // MultiPoint.
 func (p Point) AsMultiPoint() MultiPoint {
-	return NewMultiPointFromPoints([]Point{p})
+	return mustNewMultiPointFromPoints([]Point{p})
 }
 
 // CoordinatesType returns the CoordinatesType used to represent the Point.

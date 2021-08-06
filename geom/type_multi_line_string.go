@@ -243,7 +243,7 @@ func (m MultiLineString) Boundary() MultiPoint {
 		}
 	}
 	seq := NewSequence(floats, DimXY)
-	return NewMultiPoint(seq)
+	return mustNewMultiPoint(seq)
 }
 
 // Value implements the database/sql/driver.Valuer interface by returning the

@@ -350,7 +350,7 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) (MultiPoint, error) {
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	return NewMultiPointWithEmptyMask(seq, empty, p.opts...), nil
+	return NewMultiPointWithEmptyMask(seq, empty, p.opts...)
 }
 
 func (p *parser) nextMultiPointStylePointAppend(dst []float64, ctype CoordinatesType) ([]float64, error) {

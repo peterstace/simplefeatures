@@ -235,7 +235,7 @@ func (s LineString) Boundary() MultiPoint {
 		first.X, first.Y,
 		last.X, last.Y,
 	}
-	return NewMultiPoint(NewSequence(fs, DimXY))
+	return mustNewMultiPoint(NewSequence(fs, DimXY))
 }
 
 // Value implements the database/sql/driver.Valuer interface by returning the

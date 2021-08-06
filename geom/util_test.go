@@ -8,6 +8,11 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
+type fatalHelper interface {
+	Helper()
+	Fatalf(format string, args ...interface{})
+}
+
 func geomFromWKT(t *testing.T, wkt string) Geometry {
 	t.Helper()
 	geom, err := UnmarshalWKT(wkt)
@@ -69,7 +74,7 @@ func expectPanics(t *testing.T, fn func()) {
 	fn()
 }
 
-func expectNoErr(t *testing.T, err error) {
+func expectNoErr(t fatalHelper, err error) {
 	t.Helper()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

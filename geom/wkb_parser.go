@@ -281,7 +281,7 @@ func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) (MultiPoint, error) {
 		}
 		pts[i] = geom.AsPoint()
 	}
-	return NewMultiPointFromPoints(pts, p.opts...), nil
+	return NewMultiPointFromPoints(pts, p.opts...)
 }
 
 func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) (MultiLineString, error) {

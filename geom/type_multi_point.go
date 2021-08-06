@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"unsafe"
 )
 
@@ -16,9 +17,9 @@ type MultiPoint struct {
 // NewMultiPointFromPoints creates a MultiPoint from a list of Points. The
 // coordinate type of the MultiPoint is the lowest common coordinates type of
 // its Points.
-func NewMultiPointFromPoints(pts []Point, opts ...ConstructorOption) MultiPoint {
+func NewMultiPointFromPoints(pts []Point, opts ...ConstructorOption) (MultiPoint, error) {
 	if len(pts) == 0 {
-		return MultiPoint{}
+		return MultiPoint{}, nil
 	}
 
 	ctype := DimXYZM
@@ -45,20 +46,37 @@ func NewMultiPointFromPoints(pts []Point, opts ...ConstructorOption) MultiPoint 
 	return NewMultiPointWithEmptyMask(seq, empty, opts...)
 }
 
+func mustNewMultiPointFromPoints(pts []Point, opts ...ConstructorOption) MultiPoint {
+	mp, err := NewMultiPointFromPoints(pts, opts...)
+	if err != nil {
+		panic(fmt.Sprintf("failed to construct multipoint: %v", err))
+	}
+	return mp
+}
+
 // NewMultiPoint creates a new MultiPoint from a sequence of Coordinates.
-func NewMultiPoint(seq Sequence, opts ...ConstructorOption) MultiPoint {
-	return MultiPoint{seq, BitSet{}}
+func NewMultiPoint(seq Sequence, opts ...ConstructorOption) (MultiPoint, error) {
+	return NewMultiPointWithEmptyMask(seq, BitSet{}, opts...)
+}
+
+func mustNewMultiPoint(seq Sequence, opts ...ConstructorOption) MultiPoint {
+	// TODO: validation
+	mp, err := NewMultiPoint(seq, opts...)
+	if err != nil {
+		panic(fmt.Sprintf("failed to construct multipoint: %v", err))
+	}
+	return mp
 }
 
 // NewMultiPointWithEmptyMask creates a new MultiPoint from a sequence of
 // coordinates. If there are any positions set in the BitSet, then these are
 // used to indicate that the corresponding point in the sequence is an empty
 // point.
-func NewMultiPointWithEmptyMask(seq Sequence, empty BitSet, opts ...ConstructorOption) MultiPoint {
+func NewMultiPointWithEmptyMask(seq Sequence, empty BitSet, opts ...ConstructorOption) (MultiPoint, error) {
 	return MultiPoint{
 		seq,
 		empty.Clone(), // clone so that the caller doesn't have access to the internal empty set
-	}
+	}, nil
 }
 
 // Type returns the GeometryType for a MultiPoint
@@ -221,7 +239,7 @@ func (m MultiPoint) Coordinates() (seq Sequence, empty BitSet) {
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
 func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPoint, error) {
 	transformed := transformSequence(m.seq, fn)
-	return NewMultiPointWithEmptyMask(transformed, m.empty, opts...), nil
+	return NewMultiPointWithEmptyMask(transformed, m.empty, opts...)
 }
 
 // Centroid gives the centroid of the coordinates of the MultiPoint.
