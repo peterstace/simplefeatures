@@ -564,15 +564,11 @@ func (p Polygon) DumpCoordinates() Sequence {
 
 // Summary returns a text summary of the Polygon following a similar format to https://postgis.net/docs/ST_Summary.html.
 func (p Polygon) Summary() string {
-	numRings := 1
-	ringSuffix := ""
-	var numPoints int
-	for _, seq := range p.Coordinates() {
-		numPoints += seq.Length()
-	}
-	if p.NumInteriorRings() != 1 {
+	var ringSuffix string
+	numPoints := p.DumpCoordinates().Length()
+	numRings := p.NumInteriorRings()
+	if numRings != 1 {
 		ringSuffix = "s"
-		numRings = p.NumInteriorRings()
 	}
 	return fmt.Sprintf("%s[%s] with %d ring%s consisting of %d total points",
 		p.Type(), p.CoordinatesType(), numRings, ringSuffix, numPoints)

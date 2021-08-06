@@ -316,10 +316,9 @@ func (m MultiPoint) DumpCoordinates() Sequence {
 
 // Summary returns a text summary of the MultiPoint following a similar format to https://postgis.net/docs/ST_Summary.html.
 func (m MultiPoint) Summary() string {
-	numPoints := 1
-	pointSuffix := ""
-	if m.NumPoints() != 1 {
-		numPoints = m.NumPoints()
+	var pointSuffix string
+	numPoints := m.NumPoints()
+	if numPoints != 1 {
 		pointSuffix = "s"
 	}
 	return fmt.Sprintf("%s[%s] with %d point%s", m.Type(), m.CoordinatesType(), numPoints, pointSuffix)

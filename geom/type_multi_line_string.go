@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"unsafe"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -462,4 +463,21 @@ func (m MultiLineString) DumpCoordinates() Sequence {
 	seq := NewSequence(coords, m.ctype)
 	seq.assertNoUnusedCapacity()
 	return seq
+}
+
+// Summary returns a text summary of the MultiLineString following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (m MultiLineString) Summary() string {
+	var lineStringSuffix string
+	numPoints := m.DumpCoordinates().Length()
+	numLineStrings := m.NumLineStrings()
+	if numLineStrings != 1 {
+		lineStringSuffix = "s"
+	}
+	return fmt.Sprintf("%s[%s] with %d linestring%s consisting of %d total points",
+		m.Type(), m.CoordinatesType(), numLineStrings, lineStringSuffix, numPoints)
+}
+
+// String returns the string representation of the MultiLineString.
+func (m MultiLineString) String() string {
+	return m.Summary()
 }

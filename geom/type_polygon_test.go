@@ -13,6 +13,14 @@ func TestPolygonSummary(t *testing.T) {
 		coordsType    geom.CoordinatesType
 		wantSummary   string
 	}{
+		// Empty.
+		{
+			name:          "Empty polygon",
+			pointSequence: [][]float64{},
+			coordsType:    geom.DimXY,
+			wantSummary:   "Polygon[XY] with 0 rings consisting of 0 total points",
+		},
+
 		// Basic single polygon without inner rings.
 		{
 			name: "XY square polygon",
