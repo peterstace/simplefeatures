@@ -43,7 +43,7 @@ func (c GeometryCollection) AsGeometry() Geometry {
 	return Geometry{TypeGeometryCollection, unsafe.Pointer(&c)}
 }
 
-// NumGeometries gives the number of Geomety elements is the GeometryCollection.
+// NumGeometries gives the number of Geometry elements in the GeometryCollection.
 func (c GeometryCollection) NumGeometries() int {
 	return len(c.geoms)
 }
@@ -447,4 +447,14 @@ func (c GeometryCollection) Dump() []Geometry {
 		gs = g.appendDump(gs)
 	}
 	return gs
+}
+
+// DumpCoordinates returns a Sequence holding all control points in the
+// GeometryCollection.
+func (c GeometryCollection) DumpCoordinates() Sequence {
+	var coords []float64
+	for _, g := range c.geoms {
+		coords = g.DumpCoordinates().appendAllPoints(coords)
+	}
+	return NewSequence(coords, c.ctype)
 }

@@ -114,6 +114,11 @@ func TestWKBParseValid(t *testing.T) {
 			wkt: "POINT EMPTY",
 		},
 		{
+			// Trailing byte
+			wkb: "0101000000000000000000f87f000000000000f87f00",
+			wkt: "POINT EMPTY",
+		},
+		{
 			wkb: "01e9030000000000000000f87f000000000000f87f000000000000f87f",
 			wkt: "POINT Z EMPTY",
 		},

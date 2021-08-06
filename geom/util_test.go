@@ -166,3 +166,34 @@ func expectBytesEq(t *testing.T, got, want []byte) {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
+
+func expectSequenceEq(t *testing.T, got, want Sequence) {
+	t.Helper()
+	show := func() {
+		t.Logf("len(got): %d, ct(got): %s", got.Length(), got.CoordinatesType())
+		for i := 0; i < got.Length(); i++ {
+			t.Logf("got[%d]: %v", i, got.Get(i))
+		}
+		t.Logf("len(want): %d, ct(want): %s", want.Length(), want.CoordinatesType())
+		for i := 0; i < want.Length(); i++ {
+			t.Logf("want[%d]: %v", i, want.Get(i))
+		}
+	}
+	if got.CoordinatesType() != want.CoordinatesType() {
+		t.Errorf("mismatched coordinate type")
+		show()
+		return
+	}
+	if got.Length() != want.Length() {
+		t.Errorf("length mismatch")
+		show()
+		return
+	}
+	for i := 0; i < got.Length(); i++ {
+		w := want.Get(i)
+		g := got.Get(i)
+		if g != w {
+			t.Errorf("mismatch at %d: got:%v want:%v", i, g, w)
+		}
+	}
+}

@@ -1,5 +1,7 @@
 package geom
 
+import "fmt"
+
 // Sequence represents a list of point locations.  It is immutable after
 // creation.  All locations in the Sequence are specified using the same
 // coordinates type.
@@ -23,7 +25,7 @@ type Sequence struct {
 // followed by Y, then Z (if using XYZ or XYZM), then M (if using XYM or XYZM).
 //
 // The length of the coordinates slice must be a multiple of the dimensionality
-// of the coordiantes type. If the length is not a multiple, then this is a
+// of the coordinates type. If the length is not a multiple, then this is a
 // programming error and the function will panic.
 func NewSequence(coordinates []float64, ctype CoordinatesType) Sequence {
 	if len(coordinates)%ctype.Dimension() != 0 {
@@ -146,6 +148,15 @@ func (s Sequence) appendAllPoints(dst []float64) []float64 {
 func (s Sequence) appendPoint(dst []float64, i int) []float64 {
 	stride := s.ctype.Dimension()
 	return append(dst, s.floats[i*stride:(i+1)*stride]...)
+}
+
+// assertNoUnusedCapacity panics if the backing slice contains any unused
+// capacity.
+func (s Sequence) assertNoUnusedCapacity() {
+	if cap(s.floats)-len(s.floats) != 0 {
+		panic(fmt.Sprintf("unused capacity assertion "+
+			"failure: cap=%d len=%d", cap(s.floats), len(s.floats)))
+	}
 }
 
 // getLine extracts a 2D line segment from a sequence by joining together

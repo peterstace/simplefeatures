@@ -24,8 +24,8 @@ func combine(box1, box2 Box) Box {
 	}
 }
 
-// enlargment returns how much additional area the existing Box would have to
-// enlarge by to accomodate the additional Box.
+// enlargement returns how much additional area the existing Box would have to
+// enlarge by to accommodate the additional Box.
 func enlargement(existing, additional Box) float64 {
 	return area(combine(existing, additional)) - area(existing)
 }

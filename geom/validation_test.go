@@ -14,10 +14,10 @@ func xy(x, y float64) Coordinates {
 
 func TestLineStringValidation(t *testing.T) {
 	for i, pts := range [][]float64{
-		[]float64{0, 0},
-		[]float64{1, 1},
-		[]float64{0, 0, 0, 0},
-		[]float64{1, 1, 1, 1},
+		{0, 0},
+		{1, 1},
+		{0, 0, 0, 0},
+		{1, 1, 1, 1},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			seq := NewSequence(pts, DimXY)
