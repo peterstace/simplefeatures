@@ -478,7 +478,7 @@ func (c GeometryCollection) Summary() string {
 		c.Type(), c.CoordinatesType(), numGeometries, geometrySuffix, numPoints, pointSuffix)
 }
 
-// String returns the string representation of the MultiPolygon.
+// String returns the string representation of the GeometryCollection.
 func (c GeometryCollection) String() string {
 	return c.Summary()
 }

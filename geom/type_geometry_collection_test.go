@@ -6,7 +6,7 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-func TestMultiGeometrySummary(t *testing.T) {
+func TestGeometryCollectionSummary(t *testing.T) {
 	ls, err := geom.NewLineString(geom.NewSequence([]float64{1, 2, 3, 4}, geom.DimXY))
 	expectNoErr(t, err)
 
