@@ -99,7 +99,7 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 	if s.IsEmpty() {
 		return appendWKTEmpty(dst)
 	}
-	return appendWKTSequence(dst, s.seq, false, BitSet{})
+	return appendWKTSequence(dst, s.seq, false)
 }
 
 // IsSimple returns true if this geometry contains no anomalous geometry
@@ -280,7 +280,7 @@ func (s LineString) ConvexHull() Geometry {
 func (s LineString) MarshalJSON() ([]byte, error) {
 	var dst []byte
 	dst = append(dst, `{"type":"LineString","coordinates":`...)
-	dst = appendGeoJSONSequence(dst, s.seq, BitSet{})
+	dst = appendGeoJSONSequence(dst, s.seq)
 	dst = append(dst, '}')
 	return dst, nil
 }
