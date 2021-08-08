@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.31.0
+
+2021-08-09
+
+- Fixes some minor linting (and other similar) issues identified by Go Report
+  Card.
+
+- Adds a new `DumpCoordinates` method to geometry types. This method returns a
+  `Sequence` containing all of the control points that define the geometry.
+
+- Adds a new `Summary` method to all geometry types. This method gives a short
+  and human readable summary of geometry values. The summary includes the
+  geometry type, coordinates type, and component cardinalities where
+  appropriate (e.g. number of rings in a polygon).
+
+- Adds a new `NumRings` method to the `Polygon` type. This method gives the
+  total number of rings that make the polygon.
+
+__Special thanks to Albert Teoh for contributing to this release.__
+
 ## v0.30.0
 
 2021-07-18
