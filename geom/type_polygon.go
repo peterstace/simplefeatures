@@ -181,7 +181,7 @@ func (p Polygon) NumInteriorRings() int {
 	return max(0, len(p.rings)-1)
 }
 
-// NumRings gives the total number of rings: ExternalRing + NumInterRings().
+// NumRings gives the total number of rings: ExternalRing + NumInteriorRings().
 func (p Polygon) NumRings() int {
 	if p.IsEmpty() {
 		return 0

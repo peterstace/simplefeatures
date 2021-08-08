@@ -49,6 +49,18 @@ func (c GeometryCollection) NumGeometries() int {
 	return len(c.geoms)
 }
 
+// NumTotalGeometries gives the total number of Geometry elements in the GeometryCollection.
+// If there are GeometryCollection-type child geometries, this will recursively count its children.
+func (c GeometryCollection) NumTotalGeometries() int {
+	var n int
+	for _, geom := range c.geoms {
+		if geom.IsGeometryCollection() {
+			n += geom.AsGeometryCollection().NumTotalGeometries()
+		}
+	}
+	return n + c.NumGeometries()
+}
+
 // GeometryN gives the nth (zero based) Geometry in the GeometryCollection.
 func (c GeometryCollection) GeometryN(n int) Geometry {
 	return c.geoms[n]
@@ -469,7 +481,7 @@ func (c GeometryCollection) Summary() string {
 	}
 
 	geometrySuffix := "y"
-	numGeometries := c.NumGeometries()
+	numGeometries := c.NumTotalGeometries()
 	if numGeometries != 1 {
 		geometrySuffix = "ies"
 	}
