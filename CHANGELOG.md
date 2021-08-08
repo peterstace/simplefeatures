@@ -15,6 +15,10 @@
   geometry type, coordinates type, and component cardinalities where
   appropriate (e.g. number of rings in a polygon).
 
+- Adds a new `String` method to all geometry types, implementing the
+  `fmt.Stringer` interface. The method returns the same string as that returned
+  by the `Summary` method.
+
 - Adds a new `NumRings` method to the `Polygon` type. This method gives the
   total number of rings that make the polygon.
 
