@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"unsafe"
 )
 
@@ -311,4 +312,19 @@ func (m MultiPoint) DumpCoordinates() Sequence {
 	seq := NewSequence(nonEmpty, ctype)
 	seq.assertNoUnusedCapacity()
 	return seq
+}
+
+// Summary returns a text summary of the MultiPoint following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (m MultiPoint) Summary() string {
+	var pointSuffix string
+	numPoints := m.NumPoints()
+	if numPoints != 1 {
+		pointSuffix = "s"
+	}
+	return fmt.Sprintf("%s[%s] with %d point%s", m.Type(), m.CoordinatesType(), numPoints, pointSuffix)
+}
+
+// String returns the string representation of the MultiPoint.
+func (m MultiPoint) String() string {
+	return m.Summary()
 }

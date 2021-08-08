@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"math"
 	"unsafe"
 )
@@ -234,4 +235,20 @@ func (p Point) DumpCoordinates() Sequence {
 	seq := NewSequence(floats, ctype)
 	seq.assertNoUnusedCapacity()
 	return seq
+}
+
+// Summary returns a text summary of the Point following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (p Point) Summary() string {
+	var pointSuffix string
+	numPoints := 1
+	if p.IsEmpty() {
+		numPoints = 0
+		pointSuffix = "s"
+	}
+	return fmt.Sprintf("%s[%s] with %d point%s", p.Type(), p.CoordinatesType(), numPoints, pointSuffix)
+}
+
+// String returns the string representation of the Point.
+func (p Point) String() string {
+	return p.Summary()
 }
