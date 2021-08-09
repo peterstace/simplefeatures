@@ -498,3 +498,31 @@ func (m MultiPolygon) DumpCoordinates() Sequence {
 	seq.assertNoUnusedCapacity()
 	return seq
 }
+
+// Summary returns a text summary of the MultiPolygon following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (m MultiPolygon) Summary() string {
+	numPoints := m.DumpCoordinates().Length()
+
+	var polygonSuffix string
+	numPolygons := m.NumPolygons()
+	if numPolygons != 1 {
+		polygonSuffix = "s"
+	}
+
+	var numRings int
+	for _, polygon := range m.polys {
+		numRings += polygon.NumRings()
+	}
+
+	var ringSuffix string
+	if numRings != 1 {
+		ringSuffix = "s"
+	}
+	return fmt.Sprintf("%s[%s] with %d polygon%s consisting of %d total ring%s and %d total points",
+		m.Type(), m.CoordinatesType(), numPolygons, polygonSuffix, numRings, ringSuffix, numPoints)
+}
+
+// String returns the string representation of the MultiPolygon.
+func (m MultiPolygon) String() string {
+	return m.Summary()
+}

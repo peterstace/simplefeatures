@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"math"
 	"unsafe"
 
@@ -178,6 +179,14 @@ func (p Polygon) ExteriorRing() LineString {
 // NumInteriorRings gives the number of interior rings in the polygon boundary.
 func (p Polygon) NumInteriorRings() int {
 	return max(0, len(p.rings)-1)
+}
+
+// NumRings gives the total number of rings: ExternalRing + NumInteriorRings().
+func (p Polygon) NumRings() int {
+	if p.IsEmpty() {
+		return 0
+	}
+	return 1 + p.NumInteriorRings()
 }
 
 // InteriorRingN gives the nth (zero indexed) interior ring in the polygon
@@ -559,4 +568,22 @@ func (p Polygon) DumpCoordinates() Sequence {
 	seq := NewSequence(coords, ctype)
 	seq.assertNoUnusedCapacity()
 	return seq
+}
+
+// Summary returns a text summary of the Polygon following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (p Polygon) Summary() string {
+	numPoints := p.DumpCoordinates().Length()
+
+	var ringSuffix string
+	numRings := p.NumRings()
+	if numRings != 1 {
+		ringSuffix = "s"
+	}
+	return fmt.Sprintf("%s[%s] with %d ring%s consisting of %d total points",
+		p.Type(), p.CoordinatesType(), numRings, ringSuffix, numPoints)
+}
+
+// String returns the string representation of the Polygon.
+func (p Polygon) String() string {
+	return p.Summary()
 }

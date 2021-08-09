@@ -1165,3 +1165,414 @@ func TestForceWindingDirection(t *testing.T) {
 		})
 	}
 }
+
+func TestSummary(t *testing.T) {
+	for _, tc := range []struct {
+		name        string
+		wkt         string
+		wantSummary string
+	}{
+		// POINT
+		{wkt: "POINT EMPTY", wantSummary: "Point[XY] with 0 points"},
+		{wkt: "POINT Z EMPTY", wantSummary: "Point[XYZ] with 0 points"},
+		{wkt: "POINT M EMPTY", wantSummary: "Point[XYM] with 0 points"},
+		{wkt: "POINT ZM EMPTY", wantSummary: "Point[XYZM] with 0 points"},
+
+		{wkt: "POINT(0 0)", wantSummary: "Point[XY] with 1 point"},
+		{wkt: "POINT Z(0 0 0.5)", wantSummary: "Point[XYZ] with 1 point"},
+		{wkt: "POINT M(0 0 0.8)", wantSummary: "Point[XYM] with 1 point"},
+		{wkt: "POINT ZM(0 0 0.5 0.8)", wantSummary: "Point[XYZM] with 1 point"},
+
+		// LINESTRING
+		{name: "XY 0-point line", wkt: "LINESTRING EMPTY", wantSummary: "LineString[XY] with 0 points"},
+		{name: "XYZ 0-point line", wkt: "LINESTRING Z EMPTY", wantSummary: "LineString[XYZ] with 0 points"},
+		{name: "XYM 0-point line", wkt: "LINESTRING M EMPTY", wantSummary: "LineString[XYM] with 0 points"},
+		{name: "XYZM 0-point line", wkt: "LINESTRING ZM EMPTY", wantSummary: "LineString[XYZM] with 0 points"},
+
+		{name: "XY 2-point line", wkt: "LINESTRING(0 0, 1 1)", wantSummary: "LineString[XY] with 2 points"},
+		{name: "XYZ 2-point line", wkt: "LINESTRING Z(0 0 0.5, 1 1 0.5)", wantSummary: "LineString[XYZ] with 2 points"},
+		{name: "XYM 2-point line", wkt: "LINESTRING M(0 0 0.8, 1 1 0.8)", wantSummary: "LineString[XYM] with 2 points"},
+		{name: "XYZM 2-point line", wkt: "LINESTRING ZM(0 0 0.5 0.8, 1 1 0.5 0.8)", wantSummary: "LineString[XYZM] with 2 points"},
+
+		// POLYGON
+		{
+			name:        "Empty",
+			wkt:         `POLYGON EMPTY`,
+			wantSummary: "Polygon[XY] with 0 rings consisting of 0 total points",
+		},
+
+		// Basic single polygon without inner rings.
+		{
+			name:        "XY square polygon",
+			wkt:         `POLYGON((-1 1, 1 1, 1 -1, -1 -1, -1 1))`,
+			wantSummary: "Polygon[XY] with 1 ring consisting of 5 total points",
+		},
+		{
+			name:        "XYZ square polygon",
+			wkt:         `POLYGON Z((-1 1 0.5, 1 1 0.5, 1 -1 0.5, -1 -1 0.5, -1 1 0.5))`,
+			wantSummary: "Polygon[XYZ] with 1 ring consisting of 5 total points",
+		},
+		{
+			name:        "XYM square polygon",
+			wkt:         `POLYGON M((-1 1 0.8, 1 1 0.8, 1 -1 0.8, -1 -1 0.8, -1 1 0.8))`,
+			wantSummary: "Polygon[XYM] with 1 ring consisting of 5 total points",
+		},
+		{
+			name:        "XYMZ square polygon",
+			wkt:         `POLYGON ZM((-1 1 0.5 0.8, 1 1 0.5 0.8, 1 -1 0.5 0.8, -1 -1 0.5 0.8, -1 1 0.5 0.8))`,
+			wantSummary: "Polygon[XYZM] with 1 ring consisting of 5 total points",
+		},
+
+		// Polygon with single inner ring.
+		{
+			name: "XY 1 square within a square polygon",
+			wkt: `POLYGON(
+				(-100 100, 100 100, 100 -100, -100 -100, -100 100),
+				(-1 1, 1 1, 1 -1, -1 -1, -1 1)
+			)`,
+			wantSummary: "Polygon[XY] with 2 rings consisting of 10 total points",
+		},
+		{
+			name: "XYZ 1 square within a square polygon",
+			wkt: `POLYGON Z(
+				(-100 100 0.5, 100 100 0.5, 100 -100 0.5, -100 -100 0.5, -100 100 0.5),
+				(-1 1 0.5, 1 1 0.5, 1 -1 0.5, -1 -1 0.5, -1 1 0.5)
+			)`,
+			wantSummary: "Polygon[XYZ] with 2 rings consisting of 10 total points",
+		},
+		{
+			name: "XYM 1 square within a square polygon",
+			wkt: `POLYGON M(
+				(-100 100 0.8, 100 100 0.8, 100 -100 0.8, -100 -100 0.8, -100 100 0.8),
+				(-1 1 0.8, 1 1 0.8, 1 -1 0.8, -1 -1 0.8, -1 1 0.8)
+			)`,
+			wantSummary: "Polygon[XYM] with 2 rings consisting of 10 total points",
+		},
+		{
+			name: "XYMZ 1 square within a square polygon",
+			wkt: `POLYGON ZM(
+				(-100 100 0.5 0.8, 100 100 0.5 0.8, 100 -100 0.5 0.8, -100 -100 0.5 0.8, -100 100 0.5 0.8),
+				(-1 1 0.5 0.8, 1 1 0.5 0.8, 1 -1 0.5 0.8, -1 -1 0.5 0.8, -1 1 0.5 0.8)
+			)`,
+			wantSummary: "Polygon[XYZM] with 2 rings consisting of 10 total points",
+		},
+
+		// Polygon with multiple inner rings.
+		{
+			name: "XY 2 squares within a square polygon",
+			wkt: `POLYGON(
+				(-100 100, 100 100, 100 -100, -100 -100, -100 100),
+				(-1 1, 1 1, 1 -1, -1 -1, -1 1),
+				(10 10, 11 10, 11 9, 10 9, 10 10)
+			)`,
+			wantSummary: "Polygon[XY] with 3 rings consisting of 15 total points",
+		},
+		{
+			name: "XYZ 2 squares within a square polygon",
+			wkt: `POLYGON Z(
+				(-100 100 0.5, 100 100 0.5, 100 -100 0.5, -100 -100 0.5, -100 100 0.5),
+				(-1 1 0.5, 1 1 0.5, 1 -1 0.5, -1 -1 0.5, -1 1 0.5),
+				(10 10 0.5, 11 10 0.5, 11 9 0.5, 10 9 0.5, 10 10 0.5)
+			)`,
+			wantSummary: "Polygon[XYZ] with 3 rings consisting of 15 total points",
+		},
+		{
+			name: "XYM 2 squares within a square polygon",
+			wkt: `POLYGON M(
+				(-100 100 0.8, 100 100 0.8, 100 -100 0.8, -100 -100 0.8, -100 100 0.8),
+				(-1 1 0.8, 1 1 0.8, 1 -1 0.8, -1 -1 0.8, -1 1 0.8),
+				(10 10 0.8, 11 10 0.8, 11 9 0.8, 10 9 0.8, 10 10 0.8)
+			)`,
+			wantSummary: "Polygon[XYM] with 3 rings consisting of 15 total points",
+		},
+		{
+			name: "XYMZ 2 squares within a square polygon",
+			wkt: `POLYGON ZM(
+				(-100 100 0.5 0.8, 100 100 0.5 0.8, 100 -100 0.5 0.8, -100 -100 0.5 0.8, -100 100 0.5 0.8),
+				(-1 1 0.5 0.8, 1 1 0.5 0.8, 1 -1 0.5 0.8, -1 -1 0.5 0.8, -1 1 0.5 0.8),
+				(10 10 0.5 0.8, 11 10 0.5 0.8, 11 9 0.5 0.8, 10 9 0.5 0.8, 10 10 0.5 0.8)
+			)`,
+			wantSummary: "Polygon[XYZM] with 3 rings consisting of 15 total points",
+		},
+
+		// MULTIPOINT
+		{
+			name:        "Empty",
+			wkt:         "MULTIPOINT EMPTY",
+			wantSummary: "MultiPoint[XY] with 0 points",
+		},
+
+		// Single point.
+		{
+			name:        "XY single point",
+			wkt:         "MULTIPOINT ((0 0))",
+			wantSummary: "MultiPoint[XY] with 1 point",
+		},
+		{
+			name:        "XYZ single point",
+			wkt:         "MULTIPOINT Z((0 0 0.5))",
+			wantSummary: "MultiPoint[XYZ] with 1 point",
+		},
+		{
+			name:        "XYM single point",
+			wkt:         "MULTIPOINT M((0 0 0.8))",
+			wantSummary: "MultiPoint[XYM] with 1 point",
+		},
+
+		// Multiple points.
+		{
+			name:        "XY 2 points",
+			wkt:         "MULTIPOINT ((0 0), (1 1))",
+			wantSummary: "MultiPoint[XY] with 2 points",
+		},
+		{
+			name:        "XYZ 2 points",
+			wkt:         "MULTIPOINT Z((0 0 0.5), (1 1 0.5))",
+			wantSummary: "MultiPoint[XYZ] with 2 points",
+		},
+		{
+			name:        "XYM 2 points",
+			wkt:         "MULTIPOINT M((0 0 0.8), (1 1 0.8))",
+			wantSummary: "MultiPoint[XYM] with 2 points",
+		},
+		{
+			name:        "XYZM 2 points",
+			wkt:         "MULTIPOINT ZM((0 0 0.5 0.8), (1 1 0.5 0.8))",
+			wantSummary: "MultiPoint[XYZM] with 2 points",
+		},
+		{
+			name:        "XY 2 points same coordinates",
+			wkt:         "MULTIPOINT ((0 0), (0 0))",
+			wantSummary: "MultiPoint[XY] with 2 points",
+		},
+
+		// MULTILINESTRING
+		{
+			name:        "Empty",
+			wkt:         "MULTILINESTRING EMPTY",
+			wantSummary: "MultiLineString[XY] with 0 linestrings consisting of 0 total points",
+		},
+
+		// Single line string.
+		{
+			name:        "XY single 2-point lines",
+			wkt:         "MULTILINESTRING((0 0, 1 1))",
+			wantSummary: "MultiLineString[XY] with 1 linestring consisting of 2 total points",
+		},
+		{
+			name:        "XYZ single 2-point lines",
+			wkt:         "MULTILINESTRING Z((0 0 0.5, 1 1 0.5))",
+			wantSummary: "MultiLineString[XYZ] with 1 linestring consisting of 2 total points",
+		},
+		{
+			name:        "XYM single 2-point lines",
+			wkt:         "MULTILINESTRING M((0 0 0.8, 1 1 0.8))",
+			wantSummary: "MultiLineString[XYM] with 1 linestring consisting of 2 total points",
+		},
+		{
+			name:        "XYZM single 2-point lines",
+			wkt:         "MULTILINESTRING ZM((0 0 0.5 0.8, 1 1 0.5 0.8))",
+			wantSummary: "MultiLineString[XYZM] with 1 linestring consisting of 2 total points",
+		},
+
+		// Multiple line strings.
+		{
+			name:        "XY multiple 2-point lines",
+			wkt:         "MULTILINESTRING( (0 0, 1 1), (0 0, -1 -1) )",
+			wantSummary: "MultiLineString[XY] with 2 linestrings consisting of 4 total points",
+		},
+		{
+			name:        "XYZ single 2-point lines",
+			wkt:         "MULTILINESTRING Z( (0 0 0.5, 1 1 0.5), (0 0 0.5, -1 -1 0.5) )",
+			wantSummary: "MultiLineString[XYZ] with 2 linestrings consisting of 4 total points",
+		},
+		{
+			name:        "XYM single 2-point lines",
+			wkt:         "MULTILINESTRING M( (0 0 0.8, 1 1 0.8), (0 0 0.8, -1 -1 0.8) )",
+			wantSummary: "MultiLineString[XYM] with 2 linestrings consisting of 4 total points",
+		},
+		{
+			name:        "XYZM single 2-point lines",
+			wkt:         "MULTILINESTRING ZM( (0 0 0.5 0.8, 1 1 0.5 0.8), (0 0 0.5 0.8, -1 -1 0.5 0.8) )",
+			wantSummary: "MultiLineString[XYZM] with 2 linestrings consisting of 4 total points",
+		},
+
+		// MULTIPOLYGON
+		{
+			name:        "Empty",
+			wkt:         `MULTIPOLYGON EMPTY`,
+			wantSummary: "MultiPolygon[XY] with 0 polygons consisting of 0 total rings and 0 total points",
+		},
+
+		// Basic single polygon without inner rings.
+		{
+			name:        "XY 1 square polygon",
+			wkt:         `MULTIPOLYGON(((-1 1, 1 1, 1 -1, -1 -1, -1 1)))`,
+			wantSummary: "MultiPolygon[XY] with 1 polygon consisting of 1 total ring and 5 total points",
+		},
+		{
+			name:        "XYZ 1 square polygon",
+			wkt:         `MULTIPOLYGON Z(((-1 1 0.5, 1 1 0.5, 1 -1 0.5, -1 -1 0.5, -1 1 0.5)))`,
+			wantSummary: "MultiPolygon[XYZ] with 1 polygon consisting of 1 total ring and 5 total points",
+		},
+		{
+			name:        "XYM 1 square polygon",
+			wkt:         `MULTIPOLYGON M(((-1 1 0.8, 1 1 0.8, 1 -1 0.8, -1 -1 0.8, -1 1 0.8)))`,
+			wantSummary: "MultiPolygon[XYM] with 1 polygon consisting of 1 total ring and 5 total points",
+		},
+		{
+			name:        "XYMZ 1 square polygon",
+			wkt:         `MULTIPOLYGON ZM(((-1 1 0.5 0.8, 1 1 0.5 0.8, 1 -1 0.5 0.8, -1 -1 0.5 0.8, -1 1 0.5 0.8)))`,
+			wantSummary: "MultiPolygon[XYZM] with 1 polygon consisting of 1 total ring and 5 total points",
+		},
+
+		// Multiple basic polygon without inner rings.
+		{
+			name: "XY 2 square polygons",
+			wkt: `MULTIPOLYGON(
+				((-1 1, 1 1, 1 -1, -1 -1, -1 1)),
+				((9 11, 11 11, 11 9, 9 9, 9 11))
+			)`,
+			wantSummary: "MultiPolygon[XY] with 2 polygons consisting of 2 total rings and 10 total points",
+		},
+		{
+			name: "XYZ 2 square polygons",
+			wkt: `MULTIPOLYGON Z(
+				((-1 1 0.5, 1 1 0.5, 1 -1 0.5, -1 -1 0.5, -1 1 0.5)),
+				((9 11 0.5, 11 11 0.5, 11 9 0.5, 9 9 0.5, 9 11 0.5))
+			)`,
+			wantSummary: "MultiPolygon[XYZ] with 2 polygons consisting of 2 total rings and 10 total points",
+		},
+		{
+			name: "XYM 2 square polygons",
+			wkt: `MULTIPOLYGON M(
+				((-1 1 0.8, 1 1 0.8, 1 -1 0.8, -1 -1 0.8, -1 1 0.8)),
+				((9 11 0.8, 11 11 0.8, 11 9 0.8, 9 9 0.8, 9 11 0.8))
+			)`,
+			wantSummary: "MultiPolygon[XYM] with 2 polygons consisting of 2 total rings and 10 total points",
+		},
+		{
+			name: "XYMZ 2 square polygons",
+			wkt: `MULTIPOLYGON ZM(
+				((-1 1 0.5 0.8, 1 1 0.5 0.8, 1 -1 0.5 0.8, -1 -1 0.5 0.8, -1 1 0.5 0.8)),
+				((9 11 0.5 0.8, 11 11 0.5 0.8, 11 9 0.5 0.8, 9 9 0.5 0.8, 9 11 0.5 0.8))
+			)`,
+			wantSummary: "MultiPolygon[XYZM] with 2 polygons consisting of 2 total rings and 10 total points",
+		},
+
+		// Single polygons with multiple inner rings.
+		{
+			name: "XY 2 squares within a square polygon",
+			wkt: `MULTIPOLYGON(
+				(
+					(-100 100, 100 100, 100 -100, -100 -100, -100 100),
+					(-1 1, 1 1, 1 -1, -1 -1, -1 1),
+					(10 10, 11 10, 11 9, 10 9, 10 10)
+				)
+			)`,
+			wantSummary: "MultiPolygon[XY] with 1 polygon consisting of 3 total rings and 15 total points",
+		},
+		{
+			name: "XYZ 2 squares within a square polygon",
+			wkt: `MULTIPOLYGON Z(
+				(
+					(-100 100 0.5, 100 100 0.5, 100 -100 0.5, -100 -100 0.5, -100 100 0.5),
+					(-1 1 0.5, 1 1 0.5, 1 -1 0.5, -1 -1 0.5, -1 1 0.5),
+					(10 10 0.5, 11 10 0.5, 11 9 0.5, 10 9 0.5, 10 10 0.5)
+				)
+			)`,
+			wantSummary: "MultiPolygon[XYZ] with 1 polygon consisting of 3 total rings and 15 total points",
+		},
+		{
+			name: "XYM 2 squares within a square polygon",
+			wkt: `MULTIPOLYGON M(
+				(
+					(-100 100 0.8, 100 100 0.8, 100 -100 0.8, -100 -100 0.8, -100 100 0.8),
+					(-1 1 0.8, 1 1 0.8, 1 -1 0.8, -1 -1 0.8, -1 1 0.8),
+					(10 10 0.8, 11 10 0.8, 11 9 0.8, 10 9 0.8, 10 10 0.8)
+				)
+			)`,
+			wantSummary: "MultiPolygon[XYM] with 1 polygon consisting of 3 total rings and 15 total points",
+		},
+		{
+			name: "XYMZ 2 squares within a square polygon",
+			wkt: `MULTIPOLYGON ZM(
+				(
+					(-100 100 0.5 0.8, 100 100 0.5 0.8, 100 -100 0.5 0.8, -100 -100 0.5 0.8, -100 100 0.5 0.8),
+					(-1 1 0.5 0.8, 1 1 0.5 0.8, 1 -1 0.5 0.8, -1 -1 0.5 0.8, -1 1 0.5 0.8),
+					(10 10 0.5 0.8, 11 10 0.5 0.8, 11 9 0.5 0.8, 10 9 0.5 0.8, 10 10 0.5 0.8)
+				)
+			)`,
+			wantSummary: "MultiPolygon[XYZM] with 1 polygon consisting of 3 total rings and 15 total points",
+		},
+
+		// Multiple polygons with multiple inner rings.
+		{
+			name: "XY 2 squares within each of 2 square polygons",
+			wkt: `MULTIPOLYGON(
+				(
+					(-100 100, 100 100, 100 -100, -100 -100, -100 100),
+					(-1 1, 1 1, 1 -1, -1 -1, -1 1),
+					(10 10, 11 10, 11 9, 10 9, 10 10)
+				),
+				(
+					(100 -100, 200 -100, 200 -200, 100 -200, 100 -100),
+					(101 -101, 102 -101, 102 -102, 101 -102, 101 -101),
+					(110 -110, 111 -110, 111 -111, 110 -111, 110 -110)
+				)
+			)`,
+			wantSummary: "MultiPolygon[XY] with 2 polygons consisting of 6 total rings and 30 total points",
+		},
+
+		// GEOMETRYCOLLECTION
+		{
+			name:        "Empty",
+			wkt:         "GEOMETRYCOLLECTION EMPTY",
+			wantSummary: "GeometryCollection[XY] with 0 child geometries consisting of 0 total points",
+		},
+		{
+			name:        "XY single point",
+			wkt:         "GEOMETRYCOLLECTION(POINT(0 0))",
+			wantSummary: "GeometryCollection[XY] with 1 child geometry consisting of 1 total point",
+		},
+		{
+			name:        "XYZ single point",
+			wkt:         "GEOMETRYCOLLECTION (POINT Z(0 0 0.5))",
+			wantSummary: "GeometryCollection[XYZ] with 1 child geometry consisting of 1 total point",
+		},
+		{
+			name:        "XYM single point",
+			wkt:         "GEOMETRYCOLLECTION (POINT M(0 0 0.8))",
+			wantSummary: "GeometryCollection[XYM] with 1 child geometry consisting of 1 total point",
+		},
+		{
+			name:        "XYZM single point",
+			wkt:         "GEOMETRYCOLLECTION (POINT ZM(0 0 0.5 0.8))",
+			wantSummary: "GeometryCollection[XYZM] with 1 child geometry consisting of 1 total point",
+		},
+		{
+			name:        "XY single line string",
+			wkt:         "GEOMETRYCOLLECTION(LINESTRING(1 2, 3 4))",
+			wantSummary: "GeometryCollection[XY] with 1 child geometry consisting of 2 total points",
+		},
+		{
+			name:        "XY 2 line strings",
+			wkt:         "GEOMETRYCOLLECTION(LINESTRING(1 2, 3 4), LINESTRING(1 2, 3 4))",
+			wantSummary: "GeometryCollection[XY] with 2 child geometries consisting of 4 total points",
+		},
+		{
+			name: "XY 2 geometry collections containing 2 points each",
+			wkt: `GEOMETRYCOLLECTION(
+				GEOMETRYCOLLECTION(POINT(1 2), POINT(3 4)),
+				GEOMETRYCOLLECTION(POINT(5 6), POINT(7 8))
+			)`,
+			wantSummary: "GeometryCollection[XY] with 6 child geometries consisting of 4 total points",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			g := geomFromWKT(t, tc.wkt)
+			expectStringEq(t, g.Summary(), tc.wantSummary)
+			expectStringEq(t, g.String(), tc.wantSummary)
+		})
+	}
+}
