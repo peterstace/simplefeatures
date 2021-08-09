@@ -25,11 +25,8 @@ func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 		ctype &= p.CoordinatesType()
 	}
 
-	cp := make([]Point, len(pts))
-	for i := range cp {
-		cp[i] = pts[i].ForceCoordinatesType(ctype)
-	}
-	return MultiPoint{cp, ctype}
+	forced := forceCoordinatesTypeOfPointSlice(pts, ctype)
+	return MultiPoint{forced, ctype}
 }
 
 // Type returns the GeometryType for a MultiPoint
@@ -253,11 +250,18 @@ func (m MultiPoint) CoordinatesType() CoordinatesType {
 // ForceCoordinatesType returns a new MultiPoint with a different CoordinatesType. If a
 // dimension is added, then new values are populated with 0.
 func (m MultiPoint) ForceCoordinatesType(newCType CoordinatesType) MultiPoint {
-	cp := make([]Point, len(m.points))
-	for i, pt := range m.points {
-		cp[i] = pt.ForceCoordinatesType(newCType)
+	newPoints := forceCoordinatesTypeOfPointSlice(m.points, newCType)
+	return MultiPoint{newPoints, newCType}
+}
+
+// forceCoordinatesTypeOfPointSlice creates a new slice of Points, each forced
+// to a new coordinates type.
+func forceCoordinatesTypeOfPointSlice(pts []Point, ctype CoordinatesType) []Point {
+	cp := make([]Point, len(pts))
+	for i, pt := range pts {
+		cp[i] = pt.ForceCoordinatesType(ctype)
 	}
-	return MultiPoint{cp, newCType}
+	return cp
 }
 
 // Force2D returns a copy of the MultiPoint with Z and M values removed.
