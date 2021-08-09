@@ -10,6 +10,7 @@ import (
 // value is the empty GeometryCollection (i.e. a collection of zero
 // geometries).
 type GeometryCollection struct {
+	// Invariant: ctype matches the coordinates type of each geometry.
 	geoms []Geometry
 	ctype CoordinatesType
 }

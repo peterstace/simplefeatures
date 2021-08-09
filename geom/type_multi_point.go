@@ -9,6 +9,7 @@ import (
 // zero value is the empty MultiPoint (i.e. a collection of zero points) with
 // 2D coordinates type. It is immutable after creation.
 type MultiPoint struct {
+	// Invariant: ctype matches the coordinates type of each point.
 	points []Point
 	ctype  CoordinatesType
 }

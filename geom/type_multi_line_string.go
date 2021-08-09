@@ -12,6 +12,7 @@ import (
 // collection of zero LineStrings) of 2D coordinate type. It is immutable after
 // creation.
 type MultiLineString struct {
+	// Invariant: ctype matches the coordinates type of each line.
 	lines []LineString
 	ctype CoordinatesType
 }
