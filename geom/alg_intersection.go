@@ -17,7 +17,7 @@ func intersectionOfIndexedLines(
 			}
 			if inter.ptA == inter.ptB {
 				if pt := inter.ptA; !seen[pt] {
-					pts = append(pts, NewPointFromXY(pt))
+					pts = append(pts, mustNewPointFromXY(pt))
 					seen[pt] = true
 				}
 			} else {
@@ -39,9 +39,10 @@ func intersectionOfMultiPointAndMultiPoint(mp1, mp2 MultiPoint) MultiPoint {
 	}
 	var pts []Point
 	for i := 0; i < mp2.NumPoints(); i++ {
-		xy, ok := mp2.PointN(i).XY()
+		pt := mp2.PointN(i)
+		xy, ok := pt.XY()
 		if ok && inMP1[xy] {
-			pts = append(pts, NewPointFromXY(xy))
+			pts = append(pts, pt)
 		}
 	}
 	return NewMultiPoint(pts)

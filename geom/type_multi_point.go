@@ -17,7 +17,7 @@ type MultiPoint struct {
 // type of the MultiPoint is the lowest common coordinates type of its Points.
 func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 	if len(pts) == 0 {
-		return MultiPoint{}, nil
+		return MultiPoint{}
 	}
 
 	ctype := DimXYZM
@@ -213,7 +213,11 @@ func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mult
 	for i, pt := range m.points {
 		if c, ok := pt.Coordinates(); ok {
 			c.XY = fn(c.XY)
-			txPoints[i] = NewPoint(c, opts...)
+			var err error
+			txPoints[i], err = NewPoint(c, opts...)
+			if err != nil {
+				return MultiPoint{}, err
+			}
 		} else {
 			txPoints[i] = pt
 		}

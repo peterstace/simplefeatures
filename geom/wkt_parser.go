@@ -326,7 +326,11 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) (MultiPoint, error) {
 				return MultiPoint{}, err
 			}
 			if ok {
-				points = append(points, NewPoint(coords, p.opts...))
+				pt, err := NewPoint(coords, p.opts...)
+				if err != nil {
+					return MultiPoint{}, err
+				}
+				points = append(points, pt)
 			} else {
 				points = append(points, NewEmptyPoint(ctype))
 			}

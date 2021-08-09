@@ -36,7 +36,7 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]label) bool) (
 		}
 		pts := make([]Point, len(points))
 		for i, xy := range points {
-			pts[i] = NewPointFromXY(xy)
+			pts[i] = mustNewPointFromXY(xy)
 		}
 		return NewMultiPoint(pts).AsGeometry(), nil
 	default:

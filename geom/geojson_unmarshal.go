@@ -271,7 +271,11 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 		for i, coords := range node.coords {
 			coords, ok := oneDimFloat64sToCoordinates(coords, ctype)
 			if ok {
-				points[i] = NewPoint(coords, opts...)
+				var err error
+				points[i], err = NewPoint(coords, opts...)
+				if err != nil {
+					return Geometry{}, err
+				}
 			} else {
 				points[i] = NewEmptyPoint(ctype)
 			}

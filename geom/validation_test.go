@@ -39,16 +39,6 @@ func TestPointAndMultiPointValidation(t *testing.T) {
 				expectErr(t, err)
 			}
 		})
-		t.Run(fmt.Sprintf("multipoint_%d", i), func(t *testing.T) {
-			coords := []float64{tc.input.X, tc.input.Y}
-			seq := NewSequence(coords, DimXY)
-			_, err := NewMultiPoint(seq)
-			if tc.wantValid {
-				expectNoErr(t, err)
-			} else {
-				expectErr(t, err)
-			}
-		})
 	}
 }
 
@@ -71,17 +61,6 @@ func TestOmityInvalidPoint(t *testing.T) {
 	pt, err := NewPoint(c, OmitInvalid)
 	expectNoErr(t, err)
 	expectTrue(t, pt.IsEmpty())
-}
-
-func TestDisableAllMultiPointValidations(t *testing.T) {
-	coords := []float64{2.0, math.NaN()}
-	seq := NewSequence(coords, DimXY)
-	_, err := NewMultiPoint(seq, DisableAllValidations)
-	expectNoErr(t, err)
-}
-
-func TestOmityInvalidMultiPoint(t *testing.T) {
-	// TODO
 }
 
 func TestLineStringValidation(t *testing.T) {
