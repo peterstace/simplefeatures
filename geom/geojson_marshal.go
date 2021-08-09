@@ -13,20 +13,14 @@ func appendGeoJSONCoordinate(dst []byte, coords Coordinates) []byte {
 	return append(dst, ']')
 }
 
-func appendGeoJSONSequence(dst []byte, seq Sequence, empty BitSet) []byte {
+func appendGeoJSONSequence(dst []byte, seq Sequence) []byte {
 	dst = append(dst, '[')
 	n := seq.Length()
-	var seenFirst bool
 	for i := 0; i < n; i++ {
-		if empty.Get(i) {
-			// GeoJSON doesn't support empty Points within MultiPoints.
-			continue
-		}
-		if seenFirst {
+		if i > 0 {
 			dst = append(dst, ',')
 		}
 		dst = appendGeoJSONCoordinate(dst, seq.Get(i))
-		seenFirst = true
 	}
 	dst = append(dst, ']')
 	return dst
@@ -38,7 +32,7 @@ func appendGeoJSONSequences(dst []byte, seqs []Sequence) []byte {
 		if i > 0 {
 			dst = append(dst, ',')
 		}
-		dst = appendGeoJSONSequence(dst, seq, BitSet{})
+		dst = appendGeoJSONSequence(dst, seq)
 	}
 	dst = append(dst, ']')
 	return dst

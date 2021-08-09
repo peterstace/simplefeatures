@@ -7,7 +7,7 @@ func intersectionOfIndexedLines(
 ) {
 	// TODO: Investigate potential speed up of swapping lines.
 	var lss []LineString
-	var ptFloats []float64
+	var pts []Point
 	seen := make(map[XY]bool)
 	for i := range lines1.lines {
 		lines2.tree.RangeSearch(lines1.lines[i].envelope().box(), func(j int) error {
@@ -17,7 +17,7 @@ func intersectionOfIndexedLines(
 			}
 			if inter.ptA == inter.ptB {
 				if pt := inter.ptA; !seen[pt] {
-					ptFloats = append(ptFloats, pt.X, pt.Y)
+					pts = append(pts, NewPointFromXY(pt))
 					seen[pt] = true
 				}
 			} else {
@@ -26,8 +26,7 @@ func intersectionOfIndexedLines(
 			return nil
 		})
 	}
-	return mustNewMultiPoint(NewSequence(ptFloats, DimXY)),
-		NewMultiLineStringFromLineStrings(lss)
+	return NewMultiPoint(pts), NewMultiLineStringFromLineStrings(lss)
 }
 
 func intersectionOfMultiPointAndMultiPoint(mp1, mp2 MultiPoint) MultiPoint {
@@ -38,12 +37,12 @@ func intersectionOfMultiPointAndMultiPoint(mp1, mp2 MultiPoint) MultiPoint {
 			inMP1[xy] = true
 		}
 	}
-	var floats []float64
+	var pts []Point
 	for i := 0; i < mp2.NumPoints(); i++ {
 		xy, ok := mp2.PointN(i).XY()
 		if ok && inMP1[xy] {
-			floats = append(floats, xy.X, xy.Y)
+			pts = append(pts, NewPointFromXY(xy))
 		}
 	}
-	return mustNewMultiPoint(NewSequence(floats, DimXY))
+	return NewMultiPoint(pts)
 }

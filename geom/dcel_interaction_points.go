@@ -109,11 +109,10 @@ func addPointInteractions(pt Point, interactions map[XY]struct{}) {
 }
 
 func addMultiPointInteractions(mp MultiPoint, interactions map[XY]struct{}) {
-	seq, empty := mp.Coordinates()
-	n := seq.Length()
+	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
-		if !empty.Get(i) {
-			xy := seq.GetXY(i)
+		xy, ok := mp.PointN(i).XY()
+		if ok {
 			interactions[xy] = struct{}{}
 		}
 	}

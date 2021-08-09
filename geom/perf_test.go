@@ -102,15 +102,13 @@ func BenchmarkIntersectsMultiPointWithMultiPoint(b *testing.B) {
 	for _, sz := range []int{10, 100, 1000, 10000} {
 		b.Run(fmt.Sprintf("n=%d", 2*sz), func(b *testing.B) {
 			rnd := rand.New(rand.NewSource(0))
-			var coordsA, coordsB []float64
+			var pointsA, pointsB []Point
 			for i := 0; i < sz; i++ {
-				coordsA = append(coordsA, rnd.Float64(), rnd.Float64())
-				coordsB = append(coordsB, rnd.Float64(), rnd.Float64())
+				pointsA = append(pointsA, NewPointFromXY(XY{X: rnd.Float64(), Y: rnd.Float64()}))
+				pointsB = append(pointsB, NewPointFromXY(XY{X: rnd.Float64(), Y: rnd.Float64()}))
 			}
-			mpA, err := NewMultiPoint(NewSequence(coordsA, DimXY))
-			expectNoErr(b, err)
-			mpB, err := NewMultiPoint(NewSequence(coordsB, DimXY))
-			expectNoErr(b, err)
+			mpA := NewMultiPoint(pointsA).AsGeometry()
+			mpB := NewMultiPoint(pointsB).AsGeometry()
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				if Intersects(mpA.AsGeometry(), mpB.AsGeometry()) {

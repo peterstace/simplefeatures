@@ -99,7 +99,7 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 	if s.IsEmpty() {
 		return appendWKTEmpty(dst)
 	}
-	return appendWKTSequence(dst, s.seq, false, BitSet{})
+	return appendWKTSequence(dst, s.seq, false)
 }
 
 // IsSimple returns true if this geometry contains no anomalous geometry
@@ -229,13 +229,10 @@ func (s LineString) Boundary() MultiPoint {
 	if s.IsEmpty() || s.IsClosed() {
 		return MultiPoint{}
 	}
-	first := s.seq.GetXY(0)
-	last := s.seq.GetXY(s.seq.Length() - 1)
-	fs := []float64{
-		first.X, first.Y,
-		last.X, last.Y,
-	}
-	return mustNewMultiPoint(NewSequence(fs, DimXY))
+	return NewMultiPoint([]Point{
+		s.StartPoint(),
+		s.EndPoint(),
+	})
 }
 
 // Value implements the database/sql/driver.Valuer interface by returning the
@@ -283,7 +280,7 @@ func (s LineString) ConvexHull() Geometry {
 func (s LineString) MarshalJSON() ([]byte, error) {
 	var dst []byte
 	dst = append(dst, `{"type":"LineString","coordinates":`...)
-	dst = appendGeoJSONSequence(dst, s.seq, BitSet{})
+	dst = appendGeoJSONSequence(dst, s.seq)
 	dst = append(dst, '}')
 	return dst, nil
 }

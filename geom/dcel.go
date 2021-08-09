@@ -88,7 +88,7 @@ func newDCELFromGeometry(g Geometry, ghosts MultiLineString, operand operand, in
 		mls := g.AsMultiLineString()
 		dcel = newDCELFromMultiLineString(mls, operand, interactions)
 	case TypePoint:
-		mp := mustNewMultiPointFromPoints([]Point{g.AsPoint()})
+		mp := g.AsPoint().AsMultiPoint()
 		dcel = newDCELFromMultiPoint(mp, operand)
 	case TypeMultiPoint:
 		mp := g.AsMultiPoint()

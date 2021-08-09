@@ -781,7 +781,7 @@ func (g Geometry) DumpCoordinates() Sequence {
 	case TypePolygon:
 		return g.AsPolygon().DumpCoordinates()
 	case TypeMultiPoint:
-		return g.AsMultiPoint().DumpCoordinates()
+		return g.AsMultiPoint().Coordinates()
 	case TypeMultiLineString:
 		return g.AsMultiLineString().DumpCoordinates()
 	case TypeMultiPolygon:

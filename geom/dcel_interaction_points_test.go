@@ -151,11 +151,11 @@ func TestFindInteractionPoints(t *testing.T) {
 			}
 
 			gotXYs := findInteractionPoints(inputs)
-			gotCoords := make([]float64, 0, 2*len(gotXYs))
+			var gotPoints []Point
 			for xy := range gotXYs {
-				gotCoords = append(gotCoords, xy.X, xy.Y)
+				gotPoints = append(gotPoints, NewPointFromXY(xy))
 			}
-			got := mustNewMultiPoint(NewSequence(gotCoords, DimXY)).AsGeometry()
+			got := NewMultiPoint(gotPoints).AsGeometry()
 
 			if !ExactEquals(want, got, IgnoreOrder) {
 				for _, input := range tt.inputWKTs {

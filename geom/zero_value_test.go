@@ -52,8 +52,7 @@ func TestEmptySliceConstructors(t *testing.T) {
 		expectCoordinatesTypeEq(t, p.CoordinatesType(), DimXY)
 	})
 	t.Run("MultiPoint", func(t *testing.T) {
-		mp, err := NewMultiPointFromPoints(nil)
-		expectNoErr(t, err)
+		mp := NewMultiPoint(nil)
 		expectIntEq(t, mp.NumPoints(), 0)
 		expectCoordinatesTypeEq(t, mp.CoordinatesType(), DimXY)
 	})

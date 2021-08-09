@@ -293,8 +293,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 				subPoints[i] = subPointAsGeom.AsPoint()
 			}
 		}
-		mp, err := geom.NewMultiPointFromPoints(subPoints)
-		return mp.AsGeometry(), err
+		return geom.NewMultiPoint(subPoints).AsGeometry(), nil
 	case "MultiPolygon":
 		n := C.GEOSGetNumGeometries_r(h.context, gh)
 		if n == -1 {
