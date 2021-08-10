@@ -20,6 +20,7 @@ import (
 //
 // 3. The boundaries of any two polygons may touch only at a finite number of points.
 type MultiPolygon struct {
+	// Invariant: ctype matches the coordinates type of each polygon.
 	polys []Polygon
 	ctype CoordinatesType
 }

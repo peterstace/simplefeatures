@@ -13,6 +13,7 @@ import (
 // collection of zero LineStrings) of 2D coordinate type. It is immutable after
 // creation.
 type MultiLineString struct {
+	// Invariant: ctype matches the coordinates type of each line.
 	lines []LineString
 	ctype CoordinatesType
 }
@@ -213,11 +214,11 @@ func (m MultiLineString) Envelope() (Envelope, bool) {
 
 // Boundary returns the spatial boundary of this MultiLineString. This is
 // calculated using the "mod 2 rule". The rule states that a Point is included
-// as part of the boundary if and only if it appears on the boundry of an odd
+// as part of the boundary if and only if it appears on the boundary of an odd
 // number of members in the collection.
 func (m MultiLineString) Boundary() MultiPoint {
 	counts := make(map[XY]int)
-	var uniqueEndpoints []XY
+	var uniqueEndpoints []Point
 	for _, ls := range m.lines {
 		if ls.IsClosed() {
 			continue
@@ -231,20 +232,24 @@ func (m MultiLineString) Boundary() MultiPoint {
 				continue
 			}
 			if counts[xy] == 0 {
-				uniqueEndpoints = append(uniqueEndpoints, xy)
+				uniqueEndpoints = append(uniqueEndpoints, pt)
 			}
 			counts[xy]++
 		}
 	}
 
-	var floats []float64
-	for _, xy := range uniqueEndpoints {
+	var mod2Points []Point
+	for _, pt := range uniqueEndpoints {
+		xy, ok := pt.XY()
+		if !ok {
+			// Can't happen, because we already check to make sure pt is not empty.
+			panic("MultiLineString Boundary internal error")
+		}
 		if counts[xy]%2 == 1 {
-			floats = append(floats, xy.X, xy.Y)
+			mod2Points = append(mod2Points, pt)
 		}
 	}
-	seq := NewSequence(floats, DimXY)
-	return NewMultiPoint(seq)
+	return NewMultiPoint(mod2Points)
 }
 
 // Value implements the database/sql/driver.Valuer interface by returning the

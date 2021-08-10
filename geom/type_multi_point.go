@@ -10,14 +10,14 @@ import (
 // zero value is the empty MultiPoint (i.e. a collection of zero points) with
 // 2D coordinates type. It is immutable after creation.
 type MultiPoint struct {
-	seq   Sequence
-	empty BitSet
+	// Invariant: ctype matches the coordinates type of each point.
+	points []Point
+	ctype  CoordinatesType
 }
 
-// NewMultiPointFromPoints creates a MultiPoint from a list of Points. The
-// coordinate type of the MultiPoint is the lowest common coordinates type of
-// its Points.
-func NewMultiPointFromPoints(pts []Point, opts ...ConstructorOption) MultiPoint {
+// NewMultiPoint creates a MultiPoint from a list of Points. The coordinate
+// type of the MultiPoint is the lowest common coordinates type of its Points.
+func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 	if len(pts) == 0 {
 		return MultiPoint{}
 	}
@@ -27,39 +27,8 @@ func NewMultiPointFromPoints(pts []Point, opts ...ConstructorOption) MultiPoint 
 		ctype &= p.CoordinatesType()
 	}
 
-	var empty BitSet
-	floats := make([]float64, 0, len(pts)*ctype.Dimension())
-	for i, pt := range pts {
-		c, ok := pt.Coordinates()
-		if !ok {
-			empty.Set(i, true)
-		}
-		floats = append(floats, c.X, c.Y)
-		if ctype.Is3D() {
-			floats = append(floats, c.Z)
-		}
-		if ctype.IsMeasured() {
-			floats = append(floats, c.M)
-		}
-	}
-	seq := NewSequence(floats, ctype)
-	return NewMultiPointWithEmptyMask(seq, empty, opts...)
-}
-
-// NewMultiPoint creates a new MultiPoint from a sequence of Coordinates.
-func NewMultiPoint(seq Sequence, opts ...ConstructorOption) MultiPoint {
-	return MultiPoint{seq, BitSet{}}
-}
-
-// NewMultiPointWithEmptyMask creates a new MultiPoint from a sequence of
-// coordinates. If there are any positions set in the BitSet, then these are
-// used to indicate that the corresponding point in the sequence is an empty
-// point.
-func NewMultiPointWithEmptyMask(seq Sequence, empty BitSet, opts ...ConstructorOption) MultiPoint {
-	return MultiPoint{
-		seq,
-		empty.Clone(), // clone so that the caller doesn't have access to the internal empty set
-	}
+	forced := forceCoordinatesTypeOfPointSlice(pts, ctype)
+	return MultiPoint{forced, ctype}
 }
 
 // Type returns the GeometryType for a MultiPoint
@@ -74,16 +43,12 @@ func (m MultiPoint) AsGeometry() Geometry {
 
 // NumPoints gives the number of element points making up the MultiPoint.
 func (m MultiPoint) NumPoints() int {
-	return m.seq.Length()
+	return len(m.points)
 }
 
 // PointN gives the nth (zero indexed) Point.
 func (m MultiPoint) PointN(n int) Point {
-	if m.empty.Get(n) {
-		return NewEmptyPoint(m.CoordinatesType())
-	}
-	c := m.seq.Get(n)
-	return NewPoint(c)
+	return m.points[n]
 }
 
 // AsText returns the WKT (Well Known Text) representation of this geometry.
@@ -95,10 +60,17 @@ func (m MultiPoint) AsText() string {
 // to the input byte slice.
 func (m MultiPoint) AppendWKT(dst []byte) []byte {
 	dst = appendWKTHeader(dst, "MULTIPOINT", m.CoordinatesType())
-	if m.NumPoints() == 0 {
+	if len(m.points) == 0 {
 		return appendWKTEmpty(dst)
 	}
-	return appendWKTSequence(dst, m.seq, true, m.empty)
+	dst = append(dst, '(')
+	for i, pt := range m.points {
+		if i > 0 {
+			dst = append(dst, ',')
+		}
+		dst = pt.appendWKTBody(dst)
+	}
+	return append(dst, ')')
 }
 
 // IsSimple returns true if this geometry contains no anomalous geometry
@@ -122,8 +94,8 @@ func (m MultiPoint) IsSimple() bool {
 // IsEmpty return true if and only if this MultiPoint doesn't contain any
 // Points, or only contains empty Points.
 func (m MultiPoint) IsEmpty() bool {
-	for i := 0; i < m.NumPoints(); i++ {
-		if !m.empty.Get(i) {
+	for _, pt := range m.points {
+		if !pt.IsEmpty() {
 			return false
 		}
 	}
@@ -205,24 +177,47 @@ func (m MultiPoint) ConvexHull() Geometry {
 // this geometry as a GeoJSON geometry object.
 func (m MultiPoint) MarshalJSON() ([]byte, error) {
 	var dst []byte
-	dst = append(dst, `{"type":"MultiPoint","coordinates":`...)
-	dst = appendGeoJSONSequence(dst, m.seq, m.empty)
-	dst = append(dst, '}')
+	dst = append(dst, `{"type":"MultiPoint","coordinates":[`...)
+	first := true
+	for _, pt := range m.points {
+		c, ok := pt.Coordinates()
+		if ok {
+			if !first {
+				dst = append(dst, ',')
+			}
+			first = false
+			dst = appendGeoJSONCoordinate(dst, c)
+		}
+	}
+	dst = append(dst, "]}"...)
 	return dst, nil
 }
 
-// Coordinates returns the coordinates of the points represented by the
-// MultiPoint. If a point has its corresponding bit set to true in the BitSet,
-// then that point is empty.
-func (m MultiPoint) Coordinates() (seq Sequence, empty BitSet) {
-	// TODO: If we had a read-only BitSet, then we could avoid the clone here.
-	return m.seq, m.empty.Clone()
+// Coordinates returns the coordinates of the non-empty points represented by
+// the MultiPoint.
+func (m MultiPoint) Coordinates() Sequence {
+	ctype := m.CoordinatesType()
+	coords := make([]float64, 0, len(m.points)*ctype.Dimension())
+	for _, pt := range m.points {
+		if c, ok := pt.Coordinates(); ok {
+			coords = c.appendFloat64s(coords)
+		}
+	}
+	return NewSequence(coords, ctype)
 }
 
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
 func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPoint, error) {
-	transformed := transformSequence(m.seq, fn)
-	return NewMultiPointWithEmptyMask(transformed, m.empty, opts...), nil
+	txPoints := make([]Point, len(m.points))
+	for i, pt := range m.points {
+		if c, ok := pt.Coordinates(); ok {
+			c.XY = fn(c.XY)
+			txPoints[i] = NewPoint(c, opts...)
+		} else {
+			txPoints[i] = pt
+		}
+	}
+	return NewMultiPoint(txPoints), nil
 }
 
 // Centroid gives the centroid of the coordinates of the MultiPoint.
@@ -251,13 +246,24 @@ func (m MultiPoint) Reverse() MultiPoint {
 // CoordinatesType returns the CoordinatesType used to represent points making
 // up the geometry.
 func (m MultiPoint) CoordinatesType() CoordinatesType {
-	return m.seq.CoordinatesType()
+	return m.ctype
 }
 
 // ForceCoordinatesType returns a new MultiPoint with a different CoordinatesType. If a
 // dimension is added, then new values are populated with 0.
 func (m MultiPoint) ForceCoordinatesType(newCType CoordinatesType) MultiPoint {
-	return MultiPoint{m.seq.ForceCoordinatesType(newCType), m.empty}
+	newPoints := forceCoordinatesTypeOfPointSlice(m.points, newCType)
+	return MultiPoint{newPoints, newCType}
+}
+
+// forceCoordinatesTypeOfPointSlice creates a new slice of Points, each forced
+// to a new coordinates type.
+func forceCoordinatesTypeOfPointSlice(pts []Point, ctype CoordinatesType) []Point {
+	cp := make([]Point, len(pts))
+	for i, pt := range pts {
+		cp[i] = pt.ForceCoordinatesType(ctype)
+	}
+	return cp
 }
 
 // Force2D returns a copy of the MultiPoint with Z and M values removed.
@@ -276,11 +282,10 @@ func (m MultiPoint) PointOnSurface() Point {
 }
 
 func (m MultiPoint) asXYs() []XY {
-	n := m.seq.Length()
-	xys := make([]XY, 0, n)
-	for i := 0; i < n; i++ {
-		if !m.empty.Get(i) {
-			xys = append(xys, m.seq.GetXY(i))
+	xys := make([]XY, 0, len(m.points))
+	for _, pt := range m.points {
+		if xy, ok := pt.XY(); ok {
+			xys = append(xys, xy)
 		}
 	}
 	return xys
@@ -288,11 +293,8 @@ func (m MultiPoint) asXYs() []XY {
 
 // Dump returns the MultiPoint represented as a Point slice.
 func (m MultiPoint) Dump() []Point {
-	n := m.seq.Length()
-	pts := make([]Point, n)
-	for i := 0; i < n; i++ {
-		pts[i] = m.PointN(i)
-	}
+	pts := make([]Point, len(m.points))
+	copy(pts, m.points)
 	return pts
 }
 
@@ -300,17 +302,13 @@ func (m MultiPoint) Dump() []Point {
 // a Sequence.
 func (m MultiPoint) DumpCoordinates() Sequence {
 	ctype := m.CoordinatesType()
-	n := m.seq.Length()
-	empty := m.empty.CountTrue()
-	nonEmpty := make([]float64, 0, ctype.Dimension()*(n-empty))
-	for i := 0; i < n; i++ {
-		if m.empty.Get(i) {
-			continue
+	nonEmpty := make([]float64, 0, len(m.points)*ctype.Dimension())
+	for _, pt := range m.points {
+		if c, ok := pt.Coordinates(); ok {
+			nonEmpty = c.appendFloat64s(nonEmpty)
 		}
-		nonEmpty = m.seq.Get(i).appendFloat64s(nonEmpty)
 	}
 	seq := NewSequence(nonEmpty, ctype)
-	seq.assertNoUnusedCapacity()
 	return seq
 }
 
