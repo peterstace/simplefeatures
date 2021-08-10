@@ -409,7 +409,7 @@ func signedAreaOfLinearRing(lr LineString, transform func(XY) XY) float64 {
 // the Polygon is empty.
 func (p Polygon) Centroid() Point {
 	if p.IsEmpty() {
-		return NewEmptyPoint(DimXY)
+		return Point{}
 	}
 
 	// The basis of this approach is taken from:
@@ -431,7 +431,7 @@ func (p Polygon) Centroid() Point {
 		centroid = centroid.Add(
 			weightedCentroid(p.InteriorRingN(i), areas[i+1], sumAreas))
 	}
-	return NewPointFromXY(centroid)
+	return centroid.AsPoint()
 }
 
 func weightedCentroid(ring LineString, ringArea, totalArea float64) XY {

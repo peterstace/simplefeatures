@@ -53,12 +53,9 @@ func (p *parser) nextGeometryTaggedText() (Geometry, error) {
 	}
 	switch geomType {
 	case "POINT":
-		c, ok, err := p.nextPointText(ctype)
+		c, err := p.nextPointText(ctype)
 		if err != nil {
 			return Geometry{}, err
-		}
-		if !ok {
-			return NewEmptyPoint(ctype).AsGeometry(), nil
 		}
 		return NewPoint(c, p.opts...).AsGeometry(), nil
 	case "LINESTRING":
@@ -211,22 +208,22 @@ func (p *parser) nextSignedNumericLiteral() (float64, error) {
 	return f, nil
 }
 
-func (p *parser) nextPointText(ctype CoordinatesType) (Coordinates, bool, error) {
+func (p *parser) nextPointText(ctype CoordinatesType) (OptionalCoordinates, error) {
 	tok, err := p.nextEmptySetOrLeftParen()
 	if err != nil {
-		return Coordinates{}, false, err
+		return OptionalCoordinates{}, err
 	}
 	if tok == "EMPTY" {
-		return Coordinates{}, false, nil
+		return OptionalCoordinates{Type: ctype, Empty: true}, nil
 	}
 	c, err := p.nextPoint(ctype)
 	if err != nil {
-		return Coordinates{}, false, err
+		return OptionalCoordinates{}, err
 	}
 	if err := p.nextRightParen(); err != nil {
-		return Coordinates{}, false, err
+		return OptionalCoordinates{}, err
 	}
-	return c, true, nil
+	return c.AsOptionalCoordinates(), nil
 }
 
 func (p *parser) nextLineStringText(ctype CoordinatesType) (LineString, error) {
@@ -320,15 +317,11 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) (MultiPoint, error) {
 	var points []Point
 	if tok == "(" {
 		for {
-			coords, ok, err := p.nextMultiPointStylePoint(ctype)
+			coords, err := p.nextMultiPointStylePoint(ctype)
 			if err != nil {
 				return MultiPoint{}, err
 			}
-			if ok {
-				points = append(points, NewPoint(coords, p.opts...))
-			} else {
-				points = append(points, NewEmptyPoint(ctype))
-			}
+			points = append(points, NewPoint(coords, p.opts...))
 			tok, err = p.nextCommaOrRightParen()
 			if err != nil {
 				return MultiPoint{}, err
@@ -344,38 +337,38 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) (MultiPoint, error) {
 	return NewMultiPoint(points, p.opts...), nil
 }
 
-func (p *parser) nextMultiPointStylePoint(ctype CoordinatesType) (Coordinates, bool, error) {
+func (p *parser) nextMultiPointStylePoint(ctype CoordinatesType) (OptionalCoordinates, error) {
 	// Allowing parentheses to be omitted is an extension of the spec, and is
 	// required to handle WKT output from non-complying implementations. In
 	// particular, PostGIS doesn't comply to the spec (it outputs points as
 	// part of a multipoint without their surrounding parentheses).
 	tok, err := p.lexer.peek()
 	if err != nil {
-		return Coordinates{}, false, err
+		return OptionalCoordinates{}, err
 	}
 
 	var useParens bool
 	switch tok {
 	case "(":
 		if _, err := p.lexer.next(); err != nil {
-			return Coordinates{}, false, err
+			return OptionalCoordinates{}, err
 		}
 		useParens = true
 	case "EMPTY":
 		_, err := p.lexer.next()
-		return Coordinates{}, false, err
+		return OptionalCoordinates{Type: ctype, Empty: true}, err
 	}
 
 	coords, err := p.nextPoint(ctype)
 	if err != nil {
-		return Coordinates{}, false, err
+		return OptionalCoordinates{}, err
 	}
 	if useParens {
 		if err := p.nextRightParen(); err != nil {
-			return Coordinates{}, false, err
+			return OptionalCoordinates{}, err
 		}
 	}
-	return coords, true, nil
+	return coords.AsOptionalCoordinates(), nil
 }
 
 func (p *parser) nextMultiPolygonText(ctype CoordinatesType) (MultiPolygon, error) {

@@ -168,8 +168,8 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 		for k := 0; k+1 < len(pts); k++ {
 			midpoint := pts[k].Add(pts[k+1]).Scale(0.5)
 			if relatePointToPolygon(midpoint, p1) == interior {
-				return validationError{fmt.Sprintf("multipolygon child polygon "+
-					"interiors intersect at %s", NewPointFromXY(midpoint).AsText())}
+				msg := fmt.Sprintf("multipolygon child polygon interiors intersect at %v", midpoint)
+				return validationError{msg}
 			}
 		}
 	}
@@ -366,7 +366,7 @@ func (m MultiPolygon) Area(opts ...AreaOption) float64 {
 // Point if the multi polygon is empty.
 func (m MultiPolygon) Centroid() Point {
 	if m.IsEmpty() {
-		return NewEmptyPoint(DimXY)
+		return Point{}
 	}
 
 	areas := make([]float64, m.NumPolygons())
@@ -384,7 +384,7 @@ func (m MultiPolygon) Centroid() Point {
 			weightedCentroid = weightedCentroid.Add(centroid.Scale(areas[i] / totalArea))
 		}
 	}
-	return NewPointFromXY(weightedCentroid)
+	return weightedCentroid.AsPoint()
 }
 
 // Reverse in the case of MultiPolygon outputs the component polygons in their original order,

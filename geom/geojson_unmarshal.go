@@ -237,11 +237,8 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []ConstructorOption) (Geometry, error) {
 	switch node := node.(type) {
 	case geojsonPoint:
-		coords, ok := oneDimFloat64sToCoordinates(node.coords, ctype)
-		if ok {
-			return NewPoint(coords, opts...).AsGeometry(), nil
-		}
-		return NewEmptyPoint(ctype).AsGeometry(), nil
+		coords := oneDimFloat64sToCoordinates(node.coords, ctype)
+		return NewPoint(coords).AsGeometry(), nil
 	case geojsonLineString:
 		seq := twoDimFloat64sToSequence(node.coords, ctype)
 		ls, err := NewLineString(seq, opts...)
@@ -268,12 +265,8 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 		}
 		points := make([]Point, len(node.coords))
 		for i, coords := range node.coords {
-			coords, ok := oneDimFloat64sToCoordinates(coords, ctype)
-			if ok {
-				points[i] = NewPoint(coords, opts...)
-			} else {
-				points[i] = NewEmptyPoint(ctype)
-			}
+			coords := oneDimFloat64sToCoordinates(coords, ctype)
+			points[i] = NewPoint(coords)
 		}
 		return NewMultiPoint(points).AsGeometry(), nil
 	case geojsonMultiLineString:
@@ -332,18 +325,18 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 	}
 }
 
-func oneDimFloat64sToCoordinates(fs []float64, ctype CoordinatesType) (Coordinates, bool) {
+func oneDimFloat64sToCoordinates(fs []float64, ctype CoordinatesType) OptionalCoordinates {
 	if len(fs) == 0 {
-		return Coordinates{}, false
+		return OptionalCoordinates{Type: ctype, Empty: true}
 	}
-	coords := Coordinates{
-		XY:   XY{fs[0], fs[1]},
+	coords := OptionalCoordinates{
 		Type: ctype,
+		XY:   XY{fs[0], fs[1]},
 	}
 	if ctype.Is3D() {
 		coords.Z = fs[2]
 	}
-	return coords, true
+	return coords
 }
 
 func twoDimFloat64sToSequence(input [][]float64, ctype CoordinatesType) Sequence {

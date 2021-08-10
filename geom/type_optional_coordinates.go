@@ -8,8 +8,8 @@ import (
 // OptionalCoordinates represent a point location that may be empty.
 type OptionalCoordinates struct {
 	// Type indicates the coordinates type, and therefore whether or not Z and
-	// M are populated. Type has semantic meaning even if the coordinates are
-	// empty.
+	// M are populated. Type must be populated even when the coordinates are
+	// empty (i.e. empty coordinates have a well defined type).
 	Type CoordinatesType
 
 	// Empty indicates if the coordinates are empty or not.

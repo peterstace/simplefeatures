@@ -212,7 +212,8 @@ func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mult
 	for i, pt := range m.points {
 		if c, ok := pt.Coordinates(); ok {
 			c.XY = fn(c.XY)
-			txPoints[i] = NewPoint(c, opts...)
+			oc := c.AsOptionalCoordinates()
+			txPoints[i] = NewPoint(oc, opts...)
 		} else {
 			txPoints[i] = pt
 		}
@@ -232,9 +233,9 @@ func (m MultiPoint) Centroid() Point {
 		}
 	}
 	if n == 0 {
-		return NewEmptyPoint(DimXY)
+		return Point{}
 	}
-	return NewPointFromXY(sum.Scale(1 / float64(n)))
+	return sum.Scale(1 / float64(n)).AsPoint()
 }
 
 // Reverse in the case of MultiPoint outputs each component point in their

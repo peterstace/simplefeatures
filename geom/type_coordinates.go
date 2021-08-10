@@ -23,6 +23,18 @@ type Coordinates struct {
 	Type CoordinatesType
 }
 
+// AsOptionalCoordinates is a convenience method to convert this set of
+// Coordinates into a populated set of OptionalCoordinates.
+func (c Coordinates) AsOptionalCoordinates() OptionalCoordinates {
+	return OptionalCoordinates{
+		Type:  c.Type,
+		Empty: false,
+		XY:    c.XY,
+		Z:     c.Z,
+		M:     c.M,
+	}
+}
+
 // String gives a string representation of the coordinates.
 func (c Coordinates) String() string {
 	var sb strings.Builder

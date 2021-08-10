@@ -12,6 +12,12 @@ type XY struct {
 	X, Y float64
 }
 
+// AsPoint is a convenience function to the XY value into a Point
+// geometry.
+func (w XY) AsPoint() Point {
+	return NewPoint(OptionalCoordinates{XY: w})
+}
+
 // Sub returns the result of subtracting the other XY from this XY (in the same
 // manner as vector subtraction).
 func (w XY) Sub(o XY) XY {

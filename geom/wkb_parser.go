@@ -161,7 +161,7 @@ func (p *wkbParser) parseFloat64() (float64, error) {
 }
 
 func (p *wkbParser) parsePoint(ctype CoordinatesType) (Point, error) {
-	c := Coordinates{Type: ctype}
+	c := OptionalCoordinates{Type: ctype}
 	var err error
 	c.X, err = p.parseFloat64()
 	if err != nil {
@@ -187,7 +187,10 @@ func (p *wkbParser) parsePoint(ctype CoordinatesType) (Point, error) {
 
 	if math.IsNaN(c.X) && math.IsNaN(c.Y) {
 		// Empty points are represented as NaN,NaN in WKB.
-		return Point{}.ForceCoordinatesType(ctype), nil
+		c.Empty = true
+		c.XY = XY{}
+		c.Z = 0
+		c.M = 0
 	}
 	if math.IsNaN(c.X) || math.IsNaN(c.Y) {
 		return Point{}, wkbSyntaxError{"point contains mixed NaN values"}

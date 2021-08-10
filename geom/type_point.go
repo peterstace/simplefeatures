@@ -19,18 +19,9 @@ type Point struct {
 }
 
 // NewPoint creates a new point gives its Coordinates.
-func NewPoint(c Coordinates, _ ...ConstructorOption) Point {
-	return Point{c, true}
-}
-
-// NewEmptyPoint creates a Point that is empty.
-func NewEmptyPoint(ctype CoordinatesType) Point {
-	return Point{Coordinates{Type: ctype}, false}
-}
-
-// NewPointFromXY creates a new point from an XY.
-func NewPointFromXY(xy XY, _ ...ConstructorOption) Point {
-	return Point{Coordinates{XY: xy, Type: DimXY}, true}
+func NewPoint(oc OptionalCoordinates, _ ...ConstructorOption) Point {
+	c := Coordinates{oc.XY, oc.Z, oc.M, oc.Type}
+	return Point{c, !oc.Empty}
 }
 
 // Type returns the GeometryType for a Point
@@ -168,7 +159,8 @@ func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, er
 	}
 	newC := p.coords
 	newC.XY = fn(newC.XY)
-	return NewPoint(newC, opts...), nil
+	newOC := newC.AsOptionalCoordinates()
+	return NewPoint(newOC, opts...), nil
 }
 
 // Centroid of a point is that point.
@@ -196,7 +188,7 @@ func (p Point) CoordinatesType() CoordinatesType {
 // is added, then new values are populated with 0.
 func (p Point) ForceCoordinatesType(newCType CoordinatesType) Point {
 	if !p.full {
-		return NewEmptyPoint(newCType)
+		return Point{coords: Coordinates{Type: newCType}}
 	}
 	if newCType.Is3D() != p.coords.Type.Is3D() {
 		p.coords.Z = 0
