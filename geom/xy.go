@@ -12,7 +12,7 @@ type XY struct {
 	X, Y float64
 }
 
-// AsPoint is a convenience function to the XY value into a Point
+// AsPoint is a convenience function to convert this XY value into a Point
 // geometry.
 func (w XY) AsPoint() Point {
 	return NewPoint(OptionalCoordinates{XY: w})
