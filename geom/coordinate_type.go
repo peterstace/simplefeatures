@@ -7,6 +7,8 @@ import "fmt"
 // coordinates. It may optionally include a Z value, representing height. It
 // may also optionally include an M value, traditionally representing an
 // arbitrary user defined measurement associated with each point location.
+//
+// The zero value of CoordinatesType is DimXY.
 type CoordinatesType byte
 
 const (
