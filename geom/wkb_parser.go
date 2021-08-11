@@ -187,10 +187,7 @@ func (p *wkbParser) parsePoint(ctype CoordinatesType) (Point, error) {
 
 	if math.IsNaN(c.X) && math.IsNaN(c.Y) {
 		// Empty points are represented as NaN,NaN in WKB.
-		c.Empty = true
-		c.XY = XY{}
-		c.Z = 0
-		c.M = 0
+		c = OptionalCoordinates{Type: ctype, Empty: true}
 	}
 	if math.IsNaN(c.X) || math.IsNaN(c.Y) {
 		return Point{}, wkbSyntaxError{"point contains mixed NaN values"}
