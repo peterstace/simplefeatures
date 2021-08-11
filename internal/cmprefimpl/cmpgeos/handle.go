@@ -261,7 +261,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 			return geom.Geometry{}, err
 		}
 		if isEmpty {
-			return geom.NewEmptyPoint(geom.DimXY).AsGeometry(), nil
+			return geom.Point{}.AsGeometry(), nil
 		}
 		return h.decodeGeomHandleUsingWKB(gh)
 	case "MultiPoint":
@@ -280,7 +280,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 				return geom.Geometry{}, err
 			}
 			if isEmpty {
-				subPoints[i] = geom.NewEmptyPoint(geom.DimXY)
+				subPoints[i] = geom.Point{}
 			} else {
 				subPointAsGeom, err := h.decodeGeomHandleUsingWKB(sub)
 				if err != nil {

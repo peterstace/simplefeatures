@@ -177,7 +177,8 @@ Encoding and decoding WKB directly:
 
 ```go
 // Marshal as WKB
-pt := geom.NewPointFromXY(geom.XY{1.5, 2.5})
+coords := geom.OptionalCoordinates{XY: geom.XY{1.5, 2.5}}
+pt := geom.NewPoint(coords)
 wkb := pt.AsBinary()
 fmt.Println(wkb) // Prints: [1 1 0 0 0 0 0 0 0 0 0 248 63 0 0 0 0 0 0 4 64]
 
@@ -199,7 +200,8 @@ db.Exec(`
 )
 
 // Insert our geometry and population data into PostGIS via WKB.
-nyc := geom.NewPointFromXY(geom.XY{-74.0, 40.7})
+coords := geom.OptionalCoordinates{XY: geom.XY{-74.0, 40.7}}
+nyc := geom.NewPoint(coords)
 db.Exec(`
     INSERT INTO my_table
     (my_geom, population)
