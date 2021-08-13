@@ -17,7 +17,7 @@ func convexHull(g Geometry) Geometry {
 
 	// Check for point case:
 	if !hasAtLeast2DistinctPointsInXYs(pts) {
-		return NewPointFromXY(pts[0]).AsGeometry()
+		return pts[0].AsPoint().AsGeometry()
 	}
 
 	hull := monotoneChain(pts)

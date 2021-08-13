@@ -153,7 +153,7 @@ func TestFindInteractionPoints(t *testing.T) {
 			gotXYs := findInteractionPoints(inputs)
 			var gotPoints []Point
 			for xy := range gotXYs {
-				gotPoints = append(gotPoints, NewPointFromXY(xy))
+				gotPoints = append(gotPoints, xy.AsPoint())
 			}
 			got := NewMultiPoint(gotPoints).AsGeometry()
 
