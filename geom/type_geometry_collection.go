@@ -325,7 +325,7 @@ func (c GeometryCollection) pointCentroid() Point {
 			}
 		}
 	})
-	return NewPointFromXY(sumPoints.Scale(1 / float64(numPoints)))
+	return sumPoints.Scale(1 / float64(numPoints)).AsPoint()
 }
 
 func (c GeometryCollection) linearCentroid() Point {
@@ -356,7 +356,7 @@ func (c GeometryCollection) linearCentroid() Point {
 			}
 		}
 	})
-	return NewPointFromXY(weightedCentroid.Scale(1 / lengthSum))
+	return weightedCentroid.Scale(1 / lengthSum).AsPoint()
 }
 
 func (c GeometryCollection) arealCentroid() Point {
@@ -379,7 +379,7 @@ func (c GeometryCollection) arealCentroid() Point {
 				centroid.Scale(area / areaSum))
 		}
 	})
-	return NewPointFromXY(weightedCentroid)
+	return weightedCentroid.AsPoint()
 }
 
 // CoordinatesType returns the CoordinatesType used to represent points making

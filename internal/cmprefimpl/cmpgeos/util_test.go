@@ -25,7 +25,7 @@ func TestMantissaTerminatesQuickly(t *testing.T) {
 		{math.Pi, false},
 	} {
 		t.Run(fmt.Sprintf("%v", tt.f), func(t *testing.T) {
-			pt := geom.NewPointFromXY(geom.XY{X: tt.f, Y: tt.f}).AsGeometry()
+			pt := geom.XY{X: tt.f, Y: tt.f}.AsPoint().AsGeometry()
 			got := mantissaTerminatesQuickly(pt)
 			if got != tt.want {
 				t.Errorf("got=%v want=%v", got, tt.want)

@@ -28,11 +28,6 @@ func NewEmptyPoint(ctype CoordinatesType) Point {
 	return Point{Coordinates{Type: ctype}, false}
 }
 
-// NewPointFromXY creates a new point from an XY.
-func NewPointFromXY(xy XY, _ ...ConstructorOption) Point {
-	return Point{Coordinates{XY: xy, Type: DimXY}, true}
-}
-
 // Type returns the GeometryType for a Point
 func (p Point) Type() GeometryType {
 	return TypePoint

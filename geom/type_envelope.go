@@ -56,7 +56,7 @@ func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 // LineString or Point geometry is returned.
 func (e Envelope) AsGeometry() Geometry {
 	if e.min == e.max {
-		return NewPointFromXY(e.min).AsGeometry()
+		return e.min.AsPoint().AsGeometry()
 	}
 
 	if e.min.X == e.max.X || e.min.Y == e.max.Y {
