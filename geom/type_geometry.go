@@ -790,3 +790,30 @@ func (g Geometry) DumpCoordinates() Sequence {
 		panic("unknown type: " + g.Type().String())
 	}
 }
+
+// Summary returns a text summary of the Geometry following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (g Geometry) Summary() string {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		return g.AsGeometryCollection().Summary()
+	case TypePoint:
+		return g.AsPoint().Summary()
+	case TypeLineString:
+		return g.AsLineString().Summary()
+	case TypePolygon:
+		return g.AsPolygon().Summary()
+	case TypeMultiPoint:
+		return g.AsMultiPoint().Summary()
+	case TypeMultiLineString:
+		return g.AsMultiLineString().Summary()
+	case TypeMultiPolygon:
+		return g.AsMultiPolygon().Summary()
+	default:
+		panic("unknown type: " + g.Type().String())
+	}
+}
+
+// String returns the string representation of the Geometry.
+func (g Geometry) String() string {
+	return g.Summary()
+}

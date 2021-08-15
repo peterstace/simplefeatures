@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"math"
 	"unsafe"
 
@@ -322,7 +323,7 @@ func (s LineString) Centroid() Point {
 	if sumLength == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return mustNewPointFromXY(sumXY.Scale(1.0 / sumLength))
+	return sumXY.Scale(1.0 / sumLength).AsPoint()
 }
 
 func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64) {
@@ -387,7 +388,7 @@ func (s LineString) PointOnSurface() Point {
 	n := s.seq.Length()
 	nearest := newNearestPointAccumulator(s.Centroid())
 	for i := 1; i < n-1; i++ {
-		candidate := mustNewPointFromXY(s.seq.GetXY(i))
+		candidate := s.seq.GetXY(i).AsPoint()
 		nearest.consider(candidate)
 	}
 	if !nearest.point.IsEmpty() {
@@ -398,5 +399,14 @@ func (s LineString) PointOnSurface() Point {
 	nearest.consider(s.StartPoint().Force2D())
 	nearest.consider(s.EndPoint().Force2D())
 	return nearest.point
+}
 
+// Summary returns a text summary of the LineString following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (s LineString) Summary() string {
+	return fmt.Sprintf("%s[%s] with %d points", s.Type(), s.CoordinatesType(), s.Coordinates().Length())
+}
+
+// String returns the string representation of the LineString.
+func (s LineString) String() string {
+	return s.Summary()
 }

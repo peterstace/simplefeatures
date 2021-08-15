@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"unsafe"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -12,6 +13,7 @@ import (
 // collection of zero LineStrings) of 2D coordinate type. It is immutable after
 // creation.
 type MultiLineString struct {
+	// Invariant: ctype matches the coordinates type of each line.
 	lines []LineString
 	ctype CoordinatesType
 }
@@ -165,7 +167,7 @@ func (m MultiLineString) IsSimple() bool {
 					return rtree.Stop
 				}
 				boundary := intersectionOfMultiPointAndMultiPoint(ls.Boundary(), otherLS.Boundary())
-				if !hasIntersectionPointWithMultiPoint(mustNewPointFromXY(inter.ptA), boundary) {
+				if !hasIntersectionPointWithMultiPoint(inter.ptA.AsPoint(), boundary) {
 					isSimple = false
 					return rtree.Stop
 				}
@@ -356,7 +358,7 @@ func (m MultiLineString) Centroid() Point {
 	if sumLength == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return mustNewPointFromXY(sumXY.Scale(1.0 / sumLength))
+	return sumXY.Scale(1.0 / sumLength).AsPoint()
 }
 
 // Reverse in the case of MultiLineString outputs each component line string in their
@@ -420,7 +422,7 @@ func (m MultiLineString) PointOnSurface() Point {
 		seq := m.LineStringN(i).Coordinates()
 		n := seq.Length()
 		for j := 1; j < n-1; j++ {
-			candidate := mustNewPointFromXY(seq.GetXY(j))
+			candidate := seq.GetXY(j).AsPoint()
 			nearest.consider(candidate)
 		}
 	}
@@ -466,4 +468,22 @@ func (m MultiLineString) DumpCoordinates() Sequence {
 	seq := NewSequence(coords, m.ctype)
 	seq.assertNoUnusedCapacity()
 	return seq
+}
+
+// Summary returns a text summary of the MultiLineString following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (m MultiLineString) Summary() string {
+	numPoints := m.DumpCoordinates().Length()
+
+	var lineStringSuffix string
+	numLineStrings := m.NumLineStrings()
+	if numLineStrings != 1 {
+		lineStringSuffix = "s"
+	}
+	return fmt.Sprintf("%s[%s] with %d linestring%s consisting of %d total points",
+		m.Type(), m.CoordinatesType(), numLineStrings, lineStringSuffix, numPoints)
+}
+
+// String returns the string representation of the MultiLineString.
+func (m MultiLineString) String() string {
+	return m.Summary()
 }

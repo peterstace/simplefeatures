@@ -24,6 +24,12 @@ func (w XY) validate() error {
 	return nil
 }
 
+// AsPoint is a convenience function to convert this XY value into a Point
+// geometry.
+func (w XY) AsPoint() Point {
+	return NewPoint(Coordinates{XY: w, Type: DimXY})
+}
+
 // Sub returns the result of subtracting the other XY from this XY (in the same
 // manner as vector subtraction).
 func (w XY) Sub(o XY) XY {

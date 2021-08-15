@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"unsafe"
 )
 
@@ -9,6 +10,7 @@ import (
 // zero value is the empty MultiPoint (i.e. a collection of zero points) with
 // 2D coordinates type. It is immutable after creation.
 type MultiPoint struct {
+	// Invariant: ctype matches the coordinates type of each point.
 	points []Point
 	ctype  CoordinatesType
 }
@@ -25,11 +27,8 @@ func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 		ctype &= p.CoordinatesType()
 	}
 
-	cp := make([]Point, len(pts))
-	for i := range cp {
-		cp[i] = pts[i].ForceCoordinatesType(ctype)
-	}
-	return MultiPoint{cp, ctype}
+	forced := forceCoordinatesTypeOfPointSlice(pts, ctype)
+	return MultiPoint{forced, ctype}
 }
 
 // Type returns the GeometryType for a MultiPoint
@@ -239,7 +238,7 @@ func (m MultiPoint) Centroid() Point {
 	if n == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return mustNewPointFromXY(sum.Scale(1 / float64(n)))
+	return sum.Scale(1 / float64(n)).AsPoint()
 }
 
 // Reverse in the case of MultiPoint outputs each component point in their
@@ -257,11 +256,18 @@ func (m MultiPoint) CoordinatesType() CoordinatesType {
 // ForceCoordinatesType returns a new MultiPoint with a different CoordinatesType. If a
 // dimension is added, then new values are populated with 0.
 func (m MultiPoint) ForceCoordinatesType(newCType CoordinatesType) MultiPoint {
-	cp := make([]Point, len(m.points))
-	for i, pt := range m.points {
-		cp[i] = pt.ForceCoordinatesType(newCType)
+	newPoints := forceCoordinatesTypeOfPointSlice(m.points, newCType)
+	return MultiPoint{newPoints, newCType}
+}
+
+// forceCoordinatesTypeOfPointSlice creates a new slice of Points, each forced
+// to a new coordinates type.
+func forceCoordinatesTypeOfPointSlice(pts []Point, ctype CoordinatesType) []Point {
+	cp := make([]Point, len(pts))
+	for i, pt := range pts {
+		cp[i] = pt.ForceCoordinatesType(ctype)
 	}
-	return MultiPoint{cp, newCType}
+	return cp
 }
 
 // Force2D returns a copy of the MultiPoint with Z and M values removed.
@@ -294,4 +300,33 @@ func (m MultiPoint) Dump() []Point {
 	pts := make([]Point, len(m.points))
 	copy(pts, m.points)
 	return pts
+}
+
+// DumpCoordinates returns the non-empty points in a MultiPoint represented as
+// a Sequence.
+func (m MultiPoint) DumpCoordinates() Sequence {
+	ctype := m.CoordinatesType()
+	nonEmpty := make([]float64, 0, len(m.points)*ctype.Dimension())
+	for _, pt := range m.points {
+		if c, ok := pt.Coordinates(); ok {
+			nonEmpty = c.appendFloat64s(nonEmpty)
+		}
+	}
+	seq := NewSequence(nonEmpty, ctype)
+	return seq
+}
+
+// Summary returns a text summary of the MultiPoint following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (m MultiPoint) Summary() string {
+	var pointSuffix string
+	numPoints := m.NumPoints()
+	if numPoints != 1 {
+		pointSuffix = "s"
+	}
+	return fmt.Sprintf("%s[%s] with %d point%s", m.Type(), m.CoordinatesType(), numPoints, pointSuffix)
+}
+
+// String returns the string representation of the MultiPoint.
+func (m MultiPoint) String() string {
+	return m.Summary()
 }

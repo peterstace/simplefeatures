@@ -3,6 +3,7 @@ package geom
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"unsafe"
 )
 
@@ -10,6 +11,7 @@ import (
 // value is the empty GeometryCollection (i.e. a collection of zero
 // geometries).
 type GeometryCollection struct {
+	// Invariant: ctype matches the coordinates type of each geometry.
 	geoms []Geometry
 	ctype CoordinatesType
 }
@@ -46,6 +48,18 @@ func (c GeometryCollection) AsGeometry() Geometry {
 // NumGeometries gives the number of Geometry elements in the GeometryCollection.
 func (c GeometryCollection) NumGeometries() int {
 	return len(c.geoms)
+}
+
+// NumTotalGeometries gives the total number of Geometry elements in the GeometryCollection.
+// If there are GeometryCollection-type child geometries, this will recursively count its children.
+func (c GeometryCollection) NumTotalGeometries() int {
+	var n int
+	for _, geom := range c.geoms {
+		if geom.IsGeometryCollection() {
+			n += geom.AsGeometryCollection().NumTotalGeometries()
+		}
+	}
+	return n + c.NumGeometries()
 }
 
 // GeometryN gives the nth (zero based) Geometry in the GeometryCollection.
@@ -311,7 +325,7 @@ func (c GeometryCollection) pointCentroid() Point {
 			}
 		}
 	})
-	return mustNewPointFromXY(sumPoints.Scale(1 / float64(numPoints)))
+	return sumPoints.Scale(1 / float64(numPoints)).AsPoint()
 }
 
 func (c GeometryCollection) linearCentroid() Point {
@@ -342,7 +356,7 @@ func (c GeometryCollection) linearCentroid() Point {
 			}
 		}
 	})
-	return mustNewPointFromXY(weightedCentroid.Scale(1 / lengthSum))
+	return weightedCentroid.Scale(1 / lengthSum).AsPoint()
 }
 
 func (c GeometryCollection) arealCentroid() Point {
@@ -365,7 +379,7 @@ func (c GeometryCollection) arealCentroid() Point {
 				centroid.Scale(area / areaSum))
 		}
 	})
-	return mustNewPointFromXY(weightedCentroid)
+	return weightedCentroid.AsPoint()
 }
 
 // CoordinatesType returns the CoordinatesType used to represent points making
@@ -457,4 +471,27 @@ func (c GeometryCollection) DumpCoordinates() Sequence {
 		coords = g.DumpCoordinates().appendAllPoints(coords)
 	}
 	return NewSequence(coords, c.ctype)
+}
+
+// Summary returns a text summary of the GeometryCollection following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (c GeometryCollection) Summary() string {
+	var pointSuffix string
+	numPoints := c.DumpCoordinates().Length()
+	if numPoints != 1 {
+		pointSuffix = "s"
+	}
+
+	geometrySuffix := "y"
+	numGeometries := c.NumTotalGeometries()
+	if numGeometries != 1 {
+		geometrySuffix = "ies"
+	}
+
+	return fmt.Sprintf("%s[%s] with %d child geometr%s consisting of %d total point%s",
+		c.Type(), c.CoordinatesType(), numGeometries, geometrySuffix, numPoints, pointSuffix)
+}
+
+// String returns the string representation of the GeometryCollection.
+func (c GeometryCollection) String() string {
+	return c.Summary()
 }
