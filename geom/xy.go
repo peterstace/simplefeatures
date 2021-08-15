@@ -27,7 +27,11 @@ func (w XY) validate() error {
 // AsPoint is a convenience function to convert this XY value into a Point
 // geometry.
 func (w XY) AsPoint() Point {
-	return NewPoint(Coordinates{XY: w, Type: DimXY})
+	pt, err := NewPoint(Coordinates{XY: w, Type: DimXY})
+	if err != nil {
+		panic("could not construct point: " + err.Error())
+	}
+	return pt
 }
 
 // Sub returns the result of subtracting the other XY from this XY (in the same
