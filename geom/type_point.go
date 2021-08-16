@@ -29,15 +29,13 @@ func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
 			return Point{}, err
 		}
 	}
-	return Point{c, true}, nil
+	return newUncheckedPoint(c), nil
 }
 
-func mustNewPoint(c Coordinates, opts ...ConstructorOption) Point {
-	pt, err := NewPoint(c, opts...)
-	if err != nil {
-		panic(fmt.Sprintf("could not construct point from coordinates: %v", err))
-	}
-	return pt
+// newUncheckedPoint constructs a point without checking any validations. It
+// may be used internally when the caller is sure that the point will be valid.
+func newUncheckedPoint(c Coordinates) Point {
+	return Point{c, true}
 }
 
 // NewEmptyPoint creates a Point that is empty.

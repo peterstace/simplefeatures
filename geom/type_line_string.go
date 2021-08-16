@@ -72,7 +72,11 @@ func (s LineString) StartPoint() Point {
 	if s.IsEmpty() {
 		return NewEmptyPoint(s.CoordinatesType())
 	}
-	return mustNewPoint(s.seq.Get(0))
+
+	// The LineString can be assumed valid, so its endpoint should be valid
+	// too, hence we can use newUncheckedPoint.
+	c := s.seq.Get(0)
+	return newUncheckedPoint(c)
 }
 
 // EndPoint gives the last point of the LineString. If the LineString is empty
@@ -81,7 +85,12 @@ func (s LineString) EndPoint() Point {
 	if s.IsEmpty() {
 		return NewEmptyPoint(s.CoordinatesType())
 	}
-	return mustNewPoint(s.seq.Get(s.seq.Length() - 1))
+
+	// The LineString can be assumed valid, so its endpoint should be valid
+	// too, hence we can use newUncheckedPoint.
+	end := s.seq.Length() - 1
+	c := s.seq.Get(end)
+	return newUncheckedPoint(c)
 }
 
 // AsText returns the WKT (Well Known Text) representation of this geometry.

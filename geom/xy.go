@@ -26,6 +26,8 @@ func (w XY) validate() error {
 
 // AsPoint is a convenience function to convert this XY value into a Point
 // geometry.
+//
+// TODO: should return an error
 func (w XY) AsPoint() Point {
 	pt, err := NewPoint(Coordinates{XY: w, Type: DimXY})
 	if err != nil {
