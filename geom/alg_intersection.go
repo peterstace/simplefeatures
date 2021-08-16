@@ -39,8 +39,7 @@ func intersectionOfMultiPointAndMultiPoint(mp1, mp2 MultiPoint) MultiPoint {
 	}
 	var pts []Point
 	for i := 0; i < mp2.NumPoints(); i++ {
-		pt := mp2.PointN(i)
-		xy, ok := pt.XY()
+		xy, ok := mp2.PointN(i).XY()
 		if ok && inMP1[xy] {
 			pts = append(pts, xy.AsPoint())
 		}
