@@ -24,7 +24,7 @@ func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
 	if !os.skipValidations {
 		if err := c.XY.validate(); err != nil {
 			if os.omitInvalid {
-				return Point{}, nil
+				return NewEmptyPoint(c.Type), nil
 			}
 			return Point{}, err
 		}

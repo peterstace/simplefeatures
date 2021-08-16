@@ -53,14 +53,27 @@ func TestDisableAllPointValidations(t *testing.T) {
 }
 
 func TestOmityInvalidPoint(t *testing.T) {
-	c := xy(2, math.NaN())
+	t.Run("DimXY", func(t *testing.T) {
+		c := xy(2, math.NaN())
 
-	_, err := NewPoint(c)
-	expectErr(t, err)
+		_, err := NewPoint(c)
+		expectErr(t, err)
 
-	pt, err := NewPoint(c, OmitInvalid)
-	expectNoErr(t, err)
-	expectTrue(t, pt.IsEmpty())
+		pt, err := NewPoint(c, OmitInvalid)
+		expectNoErr(t, err)
+		expectTrue(t, pt.IsEmpty())
+	})
+	t.Run("DimXYZ", func(t *testing.T) {
+		c := Coordinates{Type: DimXYZ, XY: XY{2, math.NaN()}}
+
+		_, err := NewPoint(c)
+		expectErr(t, err)
+
+		pt, err := NewPoint(c, OmitInvalid)
+		expectNoErr(t, err)
+		expectTrue(t, pt.IsEmpty())
+		expectCoordinatesTypeEq(t, pt.CoordinatesType(), DimXYZ)
+	})
 }
 
 func TestLineStringValidation(t *testing.T) {
