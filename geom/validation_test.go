@@ -13,7 +13,7 @@ func xy(x, y float64) Coordinates {
 	return Coordinates{Type: DimXY, XY: XY{x, y}}
 }
 
-func TestPointAndMultiPointValidation(t *testing.T) {
+func TestPointValidation(t *testing.T) {
 	nan := math.NaN()
 	inf := math.Inf(+1)
 	for i, tc := range []struct {
