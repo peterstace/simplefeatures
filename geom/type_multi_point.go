@@ -238,7 +238,7 @@ func (m MultiPoint) Centroid() Point {
 	if n == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return sum.Scale(1 / float64(n)).AsPoint()
+	return sum.Scale(1 / float64(n)).asUncheckedPoint()
 }
 
 // Reverse in the case of MultiPoint outputs each component point in their

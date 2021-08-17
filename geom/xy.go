@@ -26,14 +26,18 @@ func (w XY) validate() error {
 
 // AsPoint is a convenience function to convert this XY value into a Point
 // geometry.
-//
-// TODO: should return an error
-func (w XY) AsPoint() Point {
-	pt, err := NewPoint(Coordinates{XY: w, Type: DimXY})
-	if err != nil {
-		panic("could not construct point: " + err.Error())
-	}
-	return pt
+func (w XY) AsPoint(opts ...ConstructorOption) (Point, error) {
+	coords := Coordinates{XY: w, Type: DimXY}
+	return NewPoint(coords, opts...)
+}
+
+// asUncheckedPoint is a convenience function to convert this XY value into a
+// Point. The Point is constructed without checking any validations. It may be
+// used internally when the caller is sure that the XY value doesn't come
+// directly from outside of the library without first being validated.
+func (w XY) asUncheckedPoint() Point {
+	coords := Coordinates{XY: w, Type: DimXY}
+	return newUncheckedPoint(coords)
 }
 
 // Sub returns the result of subtracting the other XY from this XY (in the same

@@ -431,7 +431,7 @@ func (p Polygon) Centroid() Point {
 		centroid = centroid.Add(
 			weightedCentroid(p.InteriorRingN(i), areas[i+1], sumAreas))
 	}
-	return centroid.AsPoint()
+	return centroid.asUncheckedPoint()
 }
 
 func weightedCentroid(ring LineString, ringArea, totalArea float64) XY {

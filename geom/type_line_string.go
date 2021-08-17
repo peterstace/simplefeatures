@@ -332,7 +332,7 @@ func (s LineString) Centroid() Point {
 	if sumLength == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return sumXY.Scale(1.0 / sumLength).AsPoint()
+	return sumXY.Scale(1.0 / sumLength).asUncheckedPoint()
 }
 
 func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64) {
@@ -397,7 +397,7 @@ func (s LineString) PointOnSurface() Point {
 	n := s.seq.Length()
 	nearest := newNearestPointAccumulator(s.Centroid())
 	for i := 1; i < n-1; i++ {
-		candidate := s.seq.GetXY(i).AsPoint()
+		candidate := s.seq.GetXY(i).asUncheckedPoint()
 		nearest.consider(candidate)
 	}
 	if !nearest.point.IsEmpty() {

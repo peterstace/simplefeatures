@@ -33,7 +33,21 @@ func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
 }
 
 // newUncheckedPoint constructs a point without checking any validations. It
-// may be used internally when the caller is sure that the point will be valid.
+// may be used internally when the caller is sure that the coordinates don't
+// come directly from outside the library, or have already otherwise been
+// validated.
+//
+// An examples of valid use:
+//
+// - The coordinates have just been validated.
+//
+// - The coordinates are taken directly from the control points of a geometry
+// that has been validated.
+//
+// - The coordinates are derived from calculations based on control points of a
+// geometry that has been validated. Technically, these calculations could
+// overflow to +/- inf. However if control points are originally close to
+// infinity, many of the algorithms will be already broken in many other ways.
 func newUncheckedPoint(c Coordinates) Point {
 	return Point{c, true}
 }

@@ -78,7 +78,7 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 		if polys[i].IsEmpty() {
 			continue
 		}
-		err := tree.RangeSearch(boxes[i], func(j int) error {
+		if err := tree.RangeSearch(boxes[i], func(j int) error {
 			// Only consider each pair of polygons once.
 			if i <= j {
 				return nil
@@ -90,10 +90,13 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 					polyBoundaryPopulated[k] = true
 				}
 			}
-			interMP, interMLS := intersectionOfIndexedLines(
+			interMP, interMLS, err := intersectionOfIndexedLines(
 				polyBoundaries[i],
 				polyBoundaries[j],
 			)
+			if err != nil {
+				return err
+			}
 			if !interMLS.IsEmpty() {
 				return validationError{"multipolygon child polygon " +
 					"boundaries intersect at multiple points"}
@@ -127,8 +130,7 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 				}
 			}
 			return nil
-		})
-		if err != nil {
+		}); err != nil {
 			return err
 		}
 	}
@@ -169,7 +171,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 			midpoint := pts[k].Add(pts[k+1]).Scale(0.5)
 			if relatePointToPolygon(midpoint, p1) == interior {
 				return validationError{fmt.Sprintf("multipolygon child polygon "+
-					"interiors intersect at %s", midpoint.AsPoint().AsText())}
+					"interiors intersect at %v", midpoint)}
 			}
 		}
 	}
@@ -384,7 +386,7 @@ func (m MultiPolygon) Centroid() Point {
 			weightedCentroid = weightedCentroid.Add(centroid.Scale(areas[i] / totalArea))
 		}
 	}
-	return weightedCentroid.AsPoint()
+	return weightedCentroid.asUncheckedPoint()
 }
 
 // Reverse in the case of MultiPolygon outputs the component polygons in their original order,
