@@ -39,7 +39,7 @@ func (s Sequence) validate() error {
 	n := s.Length()
 	for i := 0; i < n; i++ {
 		if err := s.GetXY(i).validate(); err != nil {
-			return err
+			return wrap(err, "invalid XY at index %d", i)
 		}
 	}
 	return nil

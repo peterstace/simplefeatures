@@ -52,7 +52,7 @@ func TestDisableAllPointValidations(t *testing.T) {
 	expectNoErr(t, err)
 }
 
-func TestOmityInvalidPoint(t *testing.T) {
+func TestOmitInvalidPoint(t *testing.T) {
 	t.Run("DimXY", func(t *testing.T) {
 		c := xy(2, math.NaN())
 
@@ -76,19 +76,30 @@ func TestOmityInvalidPoint(t *testing.T) {
 	})
 }
 
-func TestLineStringValidation(t *testing.T) {
+func TestLineStringValidationInvalidFromRawCoords(t *testing.T) {
+	nan := math.NaN()
+	inf := math.Inf(+1)
 	for i, pts := range [][]float64{
 		{0, 0},
 		{1, 1},
 		{0, 0, 0, 0},
 		{1, 1, 1, 1},
+		{0, 0, 1, 1, 2, nan},
+		{0, 0, 1, 1, nan, 2},
+		{0, 0, 1, 1, 2, inf},
+		{0, 0, 1, 1, inf, 2},
+		{0, 0, 1, 1, 2, -inf},
+		{0, 0, 1, 1, -inf, 2},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			seq := NewSequence(pts, DimXY)
 			_, err := NewLineString(seq)
-			if err == nil {
-				t.Error("expected error")
-			}
+			expectErr(t, err)
+			_, err = NewLineString(seq, DisableAllValidations)
+			expectNoErr(t, err)
+			ls, err := NewLineString(seq, OmitInvalid)
+			expectNoErr(t, err)
+			expectTrue(t, ls.IsEmpty())
 		})
 	}
 }

@@ -26,7 +26,7 @@ func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
 			if os.omitInvalid {
 				return NewEmptyPoint(c.Type), nil
 			}
-			return Point{}, err
+			return Point{}, validationError{err.Error()}
 		}
 	}
 	return newUncheckedPoint(c), nil

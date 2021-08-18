@@ -30,16 +30,23 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 	}
 
 	// Valid non-empty LineStrings must have at least 2 *distinct* points.
-	if hasAtLeast2DistinctPointsInSeq(seq) {
-		return LineString{seq}, nil
+	if !hasAtLeast2DistinctPointsInSeq(seq) {
+		if ctorOpts.omitInvalid {
+			return LineString{}, nil
+		}
+		return LineString{}, validationError{
+			"non-empty linestring contains only one distinct XY value"}
 	}
 
-	if ctorOpts.omitInvalid {
-		return LineString{}, nil
+	// All XY values must be valid.
+	if err := seq.validate(); err != nil {
+		if ctorOpts.omitInvalid {
+			return LineString{}, nil
+		}
+		return LineString{}, validationError{err.Error()}
 	}
 
-	return LineString{}, validationError{
-		"non-empty linestring contains only one distinct XY value"}
+	return LineString{seq}, nil
 }
 
 func hasAtLeast2DistinctPointsInSeq(seq Sequence) bool {
@@ -72,9 +79,6 @@ func (s LineString) StartPoint() Point {
 	if s.IsEmpty() {
 		return NewEmptyPoint(s.CoordinatesType())
 	}
-
-	// The LineString can be assumed valid, so its endpoint should be valid
-	// too, hence we can use newUncheckedPoint.
 	c := s.seq.Get(0)
 	return newUncheckedPoint(c)
 }
@@ -85,9 +89,6 @@ func (s LineString) EndPoint() Point {
 	if s.IsEmpty() {
 		return NewEmptyPoint(s.CoordinatesType())
 	}
-
-	// The LineString can be assumed valid, so its endpoint should be valid
-	// too, hence we can use newUncheckedPoint.
 	end := s.seq.Length() - 1
 	c := s.seq.Get(end)
 	return newUncheckedPoint(c)
