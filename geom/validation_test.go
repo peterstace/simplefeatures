@@ -8,10 +8,6 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-func xy(x, y float64) Coordinates {
-	return Coordinates{Type: DimXY, XY: XY{x, y}}
-}
-
 func TestLineStringValidation(t *testing.T) {
 	for i, pts := range [][]float64{
 		{0, 0},

@@ -61,6 +61,7 @@ func newLocationsOnBoundary(operand operand) [2]location {
 	return locs
 }
 
+// nolint
 const (
 	inputAInSet     uint8 = 0b0001
 	inputAPopulated uint8 = 0b0010
@@ -74,9 +75,7 @@ const (
 	inputBMask uint8 = 0b1100
 
 	extracted uint8 = 0b010000
-)
 
-const (
 	locInterior uint8 = 0b0101
 	locBoundary uint8 = 0b1010
 	// NOTE: We don't explicitly track exterior locations (they have to be inferred).
