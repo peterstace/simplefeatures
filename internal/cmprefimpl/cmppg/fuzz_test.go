@@ -40,7 +40,7 @@ func TestFuzz(t *testing.T) {
 				t.Skip("Causes unmarshalling to fail for derivative geometry")
 			}
 
-			want, err := BatchPostGIS{pg.db}.Unary(g)
+			want, err := BatchPostGIS(pg).Unary(g)
 			if err != nil {
 				t.Fatalf("could not get result from postgis: %v", err)
 			}
