@@ -6,7 +6,6 @@ on:
     branches:
       - master
       - main
-      - add-golangci-lint
   pull_request:
 jobs:
   golangci:
