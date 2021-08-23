@@ -61,7 +61,7 @@ func newLocationsOnBoundary(operand operand) [2]location {
 	return locs
 }
 
-// nolint
+//nolint
 const (
 	inputAInSet     uint8 = 0b0001
 	inputAPopulated uint8 = 0b0010
