@@ -135,6 +135,7 @@ func expectTrue(t testing.TB, got bool) {
 	expectBoolEq(t, got, true)
 }
 
+//nolint:deadcode,unused
 func expectFalse(t testing.TB, got bool) {
 	t.Helper()
 	expectBoolEq(t, got, false)
