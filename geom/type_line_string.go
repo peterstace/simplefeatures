@@ -130,7 +130,7 @@ func (s LineString) IsSimple() bool {
 		if !ok {
 			continue
 		}
-		items = append(items, rtree.BulkItem{ln.envelope().box(), i})
+		items = append(items, rtree.BulkItem{ln.uncheckedEnvelope().box(), i})
 	}
 	tree := rtree.BulkLoad(items)
 
@@ -150,7 +150,7 @@ func (s LineString) IsSimple() bool {
 		}
 
 		simple := true // assume simple until proven otherwise
-		tree.RangeSearch(ln.envelope().box(), func(j int) error {
+		tree.RangeSearch(ln.uncheckedEnvelope().box(), func(j int) error {
 			// Skip finding the original line (i == j) or cases where we have
 			// already checked that pair (i > j).
 			if i >= j {
@@ -225,9 +225,9 @@ func (s LineString) Envelope() (Envelope, bool) {
 	if n == 0 {
 		return Envelope{}, false
 	}
-	env := NewEnvelope(s.seq.GetXY(0))
+	env := s.seq.GetXY(0).uncheckedEnvelope()
 	for i := 1; i < n; i++ {
-		env = env.ExtendToIncludePoint(s.seq.GetXY(i))
+		env = env.uncheckedExtend(s.seq.GetXY(i))
 	}
 	return env, true
 }

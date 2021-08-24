@@ -40,6 +40,15 @@ func (w XY) asUncheckedPoint() Point {
 	return newUncheckedPoint(coords)
 }
 
+// uncheckedEnvelope is a convenience function to convert this XY value into
+// a (degenerate) envelope that represents a single XY location (i.e. a zero
+// area envelope). It may be used internally when the caller is sure that the
+// XY value doesn't come directly from outline the library without first being
+// validated.
+func (w XY) uncheckedEnvelope() Envelope {
+	return Envelope{w, w}
+}
+
 // Sub returns the result of subtracting the other XY from this XY (in the same
 // manner as vector subtraction).
 func (w XY) Sub(o XY) XY {

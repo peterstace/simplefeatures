@@ -505,7 +505,8 @@ func (h *Handle) envelope(g geom.Geometry) (geom.Envelope, bool, error) {
 		if C.GEOSGeomGetY_r(h.context, env, &y) == 0 {
 			return geom.Envelope{}, false, h.err()
 		}
-		return geom.NewEnvelope(geom.XY{X: float64(x), Y: float64(y)}), true, nil
+		env, err := geom.NewEnvelope(geom.XY{X: float64(x), Y: float64(y)})
+		return env, true, err
 	}
 
 	ring := C.GEOSGetExteriorRing_r(h.context, env)
@@ -541,9 +542,17 @@ func (h *Handle) envelope(g geom.Geometry) (geom.Envelope, bool, error) {
 		}
 		xy := geom.XY{X: float64(x), Y: float64(y)}
 		if i == 0 {
-			sfEnv = geom.NewEnvelope(xy)
+			var err error
+			sfEnv, err = geom.NewEnvelope(xy)
+			if err != nil {
+				return geom.Envelope{}, false, err
+			}
 		} else {
-			sfEnv = sfEnv.ExtendToIncludePoint(xy)
+			var err error
+			sfEnv, err = sfEnv.ExtendToIncludeXY(xy)
+			if err != nil {
+				return geom.Envelope{}, false, err
+			}
 		}
 	}
 

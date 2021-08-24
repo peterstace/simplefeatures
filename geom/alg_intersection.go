@@ -10,7 +10,7 @@ func intersectionOfIndexedLines(
 	var pts []Point
 	seen := make(map[XY]bool)
 	for i := range lines1.lines {
-		if err := lines2.tree.RangeSearch(lines1.lines[i].envelope().box(), func(j int) error {
+		if err := lines2.tree.RangeSearch(lines1.lines[i].uncheckedEnvelope().box(), func(j int) error {
 			inter := lines1.lines[i].intersectLine(lines2.lines[j])
 			if inter.empty {
 				return nil

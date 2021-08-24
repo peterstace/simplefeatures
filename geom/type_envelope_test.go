@@ -10,10 +10,11 @@ import (
 )
 
 func TestEnvelopeContains(t *testing.T) {
-	env := NewEnvelope(
+	env, err := NewEnvelope(
 		XY{12, 4},
 		XY{14, 2},
 	)
+	expectNoErr(t, err)
 	for x := 11; x <= 15; x++ {
 		for y := 1; y <= 5; y++ {
 			t.Run(fmt.Sprintf("%d_%d", x, y), func(t *testing.T) {
@@ -30,22 +31,28 @@ func TestEnvelopeContains(t *testing.T) {
 
 func TestEnvelopeAsGeometry(t *testing.T) {
 	for _, tt := range []struct {
-		env     Envelope
+		xys     []XY
 		wantWKT string
 	}{
-		{NewEnvelope(XY{5, 8}), "POINT(5 8)"},
-		{NewEnvelope(XY{1, 2}, XY{5, 2}), "LINESTRING(1 2,5 2)"},
-		{NewEnvelope(XY{1, 2}, XY{1, 7}), "LINESTRING(1 2,1 7)"},
-		{NewEnvelope(XY{3, 4}, XY{8, 0}), "POLYGON((3 0,3 4,8 4,8 0,3 0))"},
+		{[]XY{{5, 8}}, "POINT(5 8)"},
+		{[]XY{{1, 2}, {5, 2}}, "LINESTRING(1 2,5 2)"},
+		{[]XY{{1, 2}, {1, 7}}, "LINESTRING(1 2,1 7)"},
+		{[]XY{{3, 4}, {8, 0}}, "POLYGON((3 0,3 4,8 4,8 0,3 0))"},
 	} {
-		got := tt.env.AsGeometry()
+		env, err := NewEnvelope(tt.xys[0], tt.xys[1:]...)
+		expectNoErr(t, err)
+		got := env.AsGeometry()
 		expectGeomEq(t, got, geomFromWKT(t, tt.wantWKT))
 	}
 }
 
 // env is a helper to create an envelope in a compact way.
 func env(x1, y1, x2, y2 float64) Envelope {
-	return NewEnvelope(XY{x1, y1}, XY{x2, y2})
+	e, err := NewEnvelope(XY{x1, y1}, XY{x2, y2})
+	if err != nil {
+		panic("could not construct env: " + err.Error())
+	}
+	return e
 }
 
 func TestEnvelopeIntersects(t *testing.T) {

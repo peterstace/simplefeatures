@@ -122,7 +122,7 @@ func (m MultiLineString) IsSimple() bool {
 				continue
 			}
 			items = append(items, rtree.BulkItem{
-				ln.envelope().box(),
+				ln.uncheckedEnvelope().box(),
 				toRecordID(i, j),
 			})
 		}
@@ -138,7 +138,7 @@ func (m MultiLineString) IsSimple() bool {
 				continue
 			}
 			isSimple := true // assume simple until proven otherwise
-			tree.RangeSearch(ln.envelope().box(), func(recordID int) error {
+			tree.RangeSearch(ln.uncheckedEnvelope().box(), func(recordID int) error {
 				// Ignore the intersection if it's for the same LineString that we're currently looking up.
 				lineStringIdx, seqIdx := fromRecordID(recordID)
 				if lineStringIdx == i {

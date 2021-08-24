@@ -117,7 +117,7 @@ func (p Point) Envelope() (Envelope, bool) {
 	if !ok {
 		return Envelope{}, false
 	}
-	return NewEnvelope(xy), true
+	return xy.uncheckedEnvelope(), true
 }
 
 // Boundary returns the spatial boundary for this Point, which is always the

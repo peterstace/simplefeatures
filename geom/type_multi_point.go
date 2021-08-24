@@ -113,9 +113,9 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 			continue
 		}
 		if has {
-			env = env.ExtendToIncludePoint(xy)
+			env = env.uncheckedExtend(xy)
 		} else {
-			env = NewEnvelope(xy)
+			env = xy.uncheckedEnvelope()
 			has = true
 		}
 	}

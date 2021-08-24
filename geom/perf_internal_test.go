@@ -16,7 +16,7 @@ func BenchmarkLineEnvelope(b *testing.B) {
 	} {
 		b.Run(strconv.Itoa(i), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				dummyEnv = ln.envelope()
+				dummyEnv = ln.uncheckedEnvelope()
 			}
 		})
 	}
