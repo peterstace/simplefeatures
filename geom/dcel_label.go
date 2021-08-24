@@ -61,26 +61,6 @@ func newLocationsOnBoundary(operand operand) [2]location {
 	return locs
 }
 
-//nolint
-const (
-	inputAInSet     uint8 = 0b0001
-	inputAPopulated uint8 = 0b0010
-	inputBInSet     uint8 = 0b0100
-	inputBPopulated uint8 = 0b1000
-
-	populatedMask uint8 = 0b1010
-	inSetMask     uint8 = 0b0101
-
-	inputAMask uint8 = 0b0011
-	inputBMask uint8 = 0b1100
-
-	extracted uint8 = 0b010000
-
-	locInterior uint8 = 0b0101
-	locBoundary uint8 = 0b1010
-	// NOTE: We don't explicitly track exterior locations (they have to be inferred).
-)
-
 func assertPresence(labels [2]label) {
 	if !labels[0].populated || !labels[1].populated {
 		panic(fmt.Sprintf("all presence flags in labels not set: %v", labels))
