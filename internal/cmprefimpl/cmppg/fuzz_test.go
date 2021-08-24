@@ -58,6 +58,7 @@ func TestFuzz(t *testing.T) {
 			checkType(t, want, g)
 			checkForceOrientation(t, want, g)
 			checkDump(t, want, g)
+			checkForceCoordinatesDimension(t, want, g)
 		})
 	}
 }
