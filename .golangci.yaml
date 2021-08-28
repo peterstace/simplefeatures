@@ -1,0 +1,16 @@
+run:
+  timeout: 5m
+
+linter-settings:
+  gosimple:
+    go: "1.16"
+    checks: ["all"]
+
+linters:
+  fast: false
+  disable:
+    - errcheck
+  enable:
+    - govet
+    - gofmt
+    - goimports

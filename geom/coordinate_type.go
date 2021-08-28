@@ -25,7 +25,7 @@ const (
 
 // String gives a string representation of a CoordinatesType.
 func (t CoordinatesType) String() string {
-	if t >= 0 && t < 4 {
+	if t < 4 {
 		return [4]string{"XY", "XYZ", "XYM", "XYZM"}[t]
 	}
 	return fmt.Sprintf("unknown coordinate type (%d)", t)

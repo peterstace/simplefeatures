@@ -240,7 +240,7 @@ func checkAsBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
 	}
 
 	got := g.AsBinary()
-	if bytes.Compare(want, got) != 0 {
+	if !bytes.Equal(want, got) {
 		log.Printf("want:\n%s", hex.Dump(want))
 		log.Printf("got:\n%s", hex.Dump(got))
 		return errMismatch

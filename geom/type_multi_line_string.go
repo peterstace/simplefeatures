@@ -122,8 +122,8 @@ func (m MultiLineString) IsSimple() bool {
 				continue
 			}
 			items = append(items, rtree.BulkItem{
-				ln.uncheckedEnvelope().box(),
-				toRecordID(i, j),
+				Box:      ln.uncheckedEnvelope().box(),
+				RecordID: toRecordID(i, j),
 			})
 		}
 	}
@@ -463,7 +463,7 @@ func (m MultiLineString) DumpCoordinates() Sequence {
 	}
 	coords := make([]float64, 0, n)
 	for _, ls := range m.lines {
-		coords = append(ls.Coordinates().appendAllPoints(coords))
+		coords = ls.Coordinates().appendAllPoints(coords)
 	}
 	seq := NewSequence(coords, m.ctype)
 	seq.assertNoUnusedCapacity()

@@ -130,7 +130,7 @@ func (s LineString) IsSimple() bool {
 		if !ok {
 			continue
 		}
-		items = append(items, rtree.BulkItem{ln.uncheckedEnvelope().box(), i})
+		items = append(items, rtree.BulkItem{Box: ln.uncheckedEnvelope().box(), RecordID: i})
 	}
 	tree := rtree.BulkLoad(items)
 

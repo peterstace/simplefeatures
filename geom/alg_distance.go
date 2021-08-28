@@ -35,7 +35,6 @@ func Distance(g1, g2 Geometry) (float64, bool) {
 	if len(xys1)+len(lns1) > len(xys2)+len(lns2) {
 		xys1, xys2 = xys2, xys1
 		lns1, lns2 = lns2, lns1
-		g1, g2 = g2, g1
 	}
 
 	tr := loadTree(xys2, lns2)

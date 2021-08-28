@@ -14,8 +14,8 @@ import (
 func BenchmarkSetOperation(b *testing.B) {
 	for i := 2; i <= 14; i++ {
 		sz := 1 << i
-		p1 := regularPolygon(geom.XY{0, 0}, 1.0, sz).AsGeometry()
-		p2 := regularPolygon(geom.XY{1, 0}, 1.0, sz).AsGeometry()
+		p1 := regularPolygon(geom.XY{X: 0, Y: 0}, 1.0, sz).AsGeometry()
+		p2 := regularPolygon(geom.XY{X: 1, Y: 0}, 1.0, sz).AsGeometry()
 		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
 			for _, op := range []struct {
 				name string
