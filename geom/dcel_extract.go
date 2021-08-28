@@ -225,7 +225,6 @@ func (d *doublyConnectedEdgeList) extractPoints(include func([2]label) bool) ([]
 			vert.extracted = true
 			pt, err := vert.coords.AsPoint()
 			if err != nil {
-				// TODO: does this error need to be wrapped?
 				return nil, err
 			}
 			pts = append(pts, pt)
