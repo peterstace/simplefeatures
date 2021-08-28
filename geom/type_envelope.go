@@ -134,7 +134,7 @@ func (e Envelope) ExpandToIncludeEnvelope(other Envelope) Envelope {
 
 // Contains returns true iff this envelope contains the given point.
 func (e Envelope) Contains(p XY) bool {
-	return true &&
+	return p.validate() == nil &&
 		p.X >= e.min.X && p.X <= e.max.X &&
 		p.Y >= e.min.Y && p.Y <= e.max.Y
 }
@@ -176,24 +176,6 @@ func (e Envelope) Height() float64 {
 // Area returns the area covered by the envelope.
 func (e Envelope) Area() float64 {
 	return (e.max.X - e.min.X) * (e.max.Y - e.min.Y)
-}
-
-// ExpandBy calculates a new version of this envelope that is expanded in the x
-// and y dimensions. Both the minimum and maximum points in the envelope are
-// expanded by the supplied x and y amounts. Positive values increase the size
-// of the envelope and negative amounts decrease the size of the envelope. If a
-// decrease in envelope size would result in an invalid envelope (where min is
-// greater than max), then false is returned and no envelope is calculated.
-func (e Envelope) ExpandBy(x, y float64) (Envelope, bool) {
-	delta := XY{x, y}
-	env := Envelope{
-		min: e.min.Sub(delta),
-		max: e.max.Add(delta),
-	}
-	if env.min.X > env.max.X || env.min.Y > env.max.Y {
-		return Envelope{}, false
-	}
-	return env, true
 }
 
 // Distance calculates the shortest distance between this envelope and another

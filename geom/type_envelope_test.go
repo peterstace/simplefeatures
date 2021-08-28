@@ -9,6 +9,42 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
+func TestEnvelopeInvalidXYInteractions(t *testing.T) {
+	nan := math.NaN()
+	inf := math.Inf(+1)
+	for i, tc := range []XY{
+		{0, nan},
+		{nan, 0},
+		{nan, nan},
+		{0, inf},
+		{inf, 0},
+		{inf, inf},
+		{0, -inf},
+		{-inf, 0},
+		{-inf, -inf},
+	} {
+		t.Run(fmt.Sprintf("new_envelope_with_first_arg_invalid_%d", i), func(t *testing.T) {
+			_, err := NewEnvelope(tc)
+			expectErr(t, err)
+		})
+		t.Run(fmt.Sprintf("new_envelope_with_second_arg_invalid_%d", i), func(t *testing.T) {
+			_, err := NewEnvelope(XY{}, tc)
+			expectErr(t, err)
+		})
+		t.Run(fmt.Sprintf("extend_to_include_invalid_xy_%d", i), func(t *testing.T) {
+			env, err := NewEnvelope(XY{-1, -1}, XY{1, 1})
+			expectNoErr(t, err)
+			env, err = env.ExtendToIncludeXY(tc)
+			expectErr(t, err)
+		})
+		t.Run(fmt.Sprintf("contains_invalid_xy_%d", i), func(t *testing.T) {
+			env, err := NewEnvelope(XY{-1, -1}, XY{1, 1})
+			expectNoErr(t, err)
+			expectFalse(t, env.Contains(tc))
+		})
+	}
+}
+
 func TestEnvelopeContains(t *testing.T) {
 	env, err := NewEnvelope(
 		XY{12, 4},
