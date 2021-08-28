@@ -90,13 +90,10 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 					polyBoundaryPopulated[k] = true
 				}
 			}
-			interMP, interMLS, err := intersectionOfIndexedLines(
+			interMP, interMLS := intersectionOfIndexedLines(
 				polyBoundaries[i],
 				polyBoundaries[j],
 			)
-			if err != nil {
-				return err
-			}
 			if !interMLS.IsEmpty() {
 				return validationError{"multipolygon child polygon " +
 					"boundaries intersect at multiple points"}
