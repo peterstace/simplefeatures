@@ -194,30 +194,6 @@ func TestEnvelopeWidthHeightArea(t *testing.T) {
 	}
 }
 
-func TestEnvelopeExpandBy(t *testing.T) {
-	for i, tt := range []struct {
-		in      Envelope
-		x, y    float64
-		wantOK  bool
-		wantEnv Envelope
-	}{
-		{env(4, 5, 4, 5), 1.5, 3.5, true, env(2.5, 1.5, 5.5, 8.5)},
-		{env(0, 0, 1, 2), -0.5, -1.0, true, env(0.5, 1.0, 0.5, 1.0)},
-		{env(0, 0, 1, 2), -0.5, -1.1, false, Envelope{}},
-		{env(0, 0, 1, 2), -0.6, -1.0, false, Envelope{}},
-	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, ok := tt.in.ExpandBy(tt.x, tt.y)
-			if ok != tt.wantOK {
-				t.Fatalf("got=%v want=%v", ok, tt.wantOK)
-			}
-			if ok && got != tt.wantEnv {
-				t.Errorf("got=%v want=%v", got, tt.wantEnv)
-			}
-		})
-	}
-}
-
 func TestEnvelopeDistance(t *testing.T) {
 	for i, tt := range []struct {
 		env1, env2 Envelope
