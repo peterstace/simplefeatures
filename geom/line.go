@@ -14,7 +14,8 @@ type line struct {
 
 // uncheckedEnvelope directly constructs an Envelope that bounds the line. It
 // skips envelope validation because line coordinates never come directly from
-// users.
+// users. Instead, line coordinates come directly from pre-validated
+// LineStrings, or from operations on pre-validated geometries.
 func (ln line) uncheckedEnvelope() Envelope {
 	ln.a.X, ln.b.X = sortFloat64Pair(ln.a.X, ln.b.X)
 	ln.a.Y, ln.b.Y = sortFloat64Pair(ln.a.Y, ln.b.Y)
