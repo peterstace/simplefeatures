@@ -21,13 +21,14 @@ type Point struct {
 // NewPoint creates a new point given its Coordinates.
 func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
 	os := newOptionSet(opts)
-	if !os.skipValidations {
-		if err := c.XY.validate(); err != nil {
-			if os.omitInvalid {
-				return NewEmptyPoint(c.Type), nil
-			}
-			return Point{}, validationError{err.Error()}
+	if os.skipValidations {
+		return newUncheckedPoint(c), nil
+	}
+	if err := c.XY.validate(); err != nil {
+		if os.omitInvalid {
+			return NewEmptyPoint(c.Type), nil
 		}
+		return Point{}, validationError{err.Error()}
 	}
 	return newUncheckedPoint(c), nil
 }
