@@ -19,7 +19,7 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]label) bool) (
 		if len(areals) == 1 {
 			return areals[0].AsGeometry(), nil
 		}
-		mp, err := NewMultiPolygonFromPolygons(areals)
+		mp, err := NewMultiPolygon(areals)
 		if err != nil {
 			return Geometry{}, fmt.Errorf("could not extract areal geometry from DCEL: %v", err)
 		}
@@ -28,7 +28,7 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]label) bool) (
 		if len(linears) == 1 {
 			return linears[0].AsGeometry(), nil
 		}
-		return NewMultiLineStringFromLineStrings(linears).AsGeometry(), nil
+		return NewMultiLineString(linears).AsGeometry(), nil
 	case len(areals) == 0 && len(linears) == 0 && len(points) > 0:
 		if len(points) == 1 {
 			return points[0].AsPoint().AsGeometry(), nil
@@ -99,7 +99,7 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func([2]label) bool) (
 
 		// Construct the polygon.
 		orderCCWRingFirst(rings)
-		poly, err := NewPolygonFromRings(rings)
+		poly, err := NewPolygon(rings)
 		if err != nil {
 			return nil, err
 		}
