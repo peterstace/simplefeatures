@@ -271,7 +271,7 @@ func reNodeMultiLineString(mls MultiLineString, cut cutSet, nodes nodeSet) (Mult
 			return MultiLineString{}, err
 		}
 	}
-	return NewMultiLineStringFromLineStrings(lss, DisableAllValidations), nil
+	return NewMultiLineString(lss, DisableAllValidations), nil
 }
 
 func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) (Polygon, error) {
@@ -284,7 +284,7 @@ func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) (Polygon, error) {
 	for i := 0; i < n; i++ {
 		rings[i] = reNodedBoundary.LineStringN(i)
 	}
-	reNodedPoly, err := NewPolygonFromRings(rings, DisableAllValidations)
+	reNodedPoly, err := NewPolygon(rings, DisableAllValidations)
 	if err != nil {
 		return Polygon{}, err
 	}
@@ -301,7 +301,7 @@ func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet) (Multi
 			return MultiPolygon{}, err
 		}
 	}
-	reNodedMP, err := NewMultiPolygonFromPolygons(polys, DisableAllValidations)
+	reNodedMP, err := NewMultiPolygon(polys, DisableAllValidations)
 	if err != nil {
 		return MultiPolygon{}, err
 	}

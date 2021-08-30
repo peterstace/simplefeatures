@@ -25,11 +25,11 @@ type MultiPolygon struct {
 	ctype CoordinatesType
 }
 
-// NewMultiPolygonFromPolygons creates a MultiPolygon from its constituent
-// Polygons. It gives an error if any of the MultiPolygon assertions are not
-// maintained. The coordinates type of the MultiPolygon is the lowest common
-// coordinates type its Polygons.
-func NewMultiPolygonFromPolygons(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
+// NewMultiPolygon creates a MultiPolygon from its constituent Polygons. It
+// gives an error if any of the MultiPolygon assertions are not maintained. The
+// coordinates type of the MultiPolygon is the lowest common coordinates type
+// its Polygons.
+func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
 	if len(polys) == 0 {
 		return MultiPolygon{}, nil
 	}
@@ -269,7 +269,7 @@ func (m MultiPolygon) Boundary() MultiLineString {
 			bounds = append(bounds, r.Force2D())
 		}
 	}
-	return NewMultiLineStringFromLineStrings(bounds)
+	return NewMultiLineString(bounds)
 }
 
 // Value implements the database/sql/driver.Valuer interface by returning the
@@ -348,7 +348,7 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mu
 		}
 		polys[i] = transformed
 	}
-	mp, err := NewMultiPolygonFromPolygons(polys, opts...)
+	mp, err := NewMultiPolygon(polys, opts...)
 	return mp.ForceCoordinatesType(m.ctype), wrapTransformed(err)
 }
 

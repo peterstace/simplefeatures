@@ -315,7 +315,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 			}
 			subPolys[i] = subPolyAsGeom.AsPolygon()
 		}
-		mp, err := geom.NewMultiPolygonFromPolygons(subPolys)
+		mp, err := geom.NewMultiPolygon(subPolys)
 		return mp.AsGeometry(), err
 	case "GeometryCollection":
 		n := C.GEOSGetNumGeometries_r(h.context, gh)

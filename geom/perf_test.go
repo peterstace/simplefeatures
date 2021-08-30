@@ -28,7 +28,7 @@ func regularPolygon(center XY, radius float64, sides int) Polygon {
 	if err != nil {
 		panic(err)
 	}
-	poly, err := NewPolygonFromRings([]LineString{ring}, geom.DisableAllValidations)
+	poly, err := NewPolygon([]LineString{ring}, geom.DisableAllValidations)
 	if err != nil {
 		panic(err)
 	}
@@ -138,7 +138,7 @@ func BenchmarkPolygonSingleRingValidation(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				if _, err := NewPolygonFromRings(rings); err != nil {
+				if _, err := NewPolygon(rings); err != nil {
 					b.Fatal(err)
 				}
 			}
@@ -177,7 +177,7 @@ func BenchmarkPolygonMultipleRingsValidation(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				if _, err := NewPolygonFromRings(rings); err != nil {
+				if _, err := NewPolygon(rings); err != nil {
 					b.Fatal(err)
 				}
 			}
@@ -215,7 +215,7 @@ func BenchmarkPolygonZigZagRingsValidation(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				_, err := NewPolygonFromRings([]LineString{outerRing, leftRing, rightRing})
+				_, err := NewPolygon([]LineString{outerRing, leftRing, rightRing})
 				if err != nil {
 					b.Fatal(err)
 				}
@@ -232,7 +232,7 @@ func BenchmarkPolygonAnnulusValidation(b *testing.B) {
 			rings := []LineString{outer, inner}
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				if _, err := NewPolygonFromRings(rings); err != nil {
+				if _, err := NewPolygon(rings); err != nil {
 					b.Fatal(err)
 				}
 			}
@@ -260,7 +260,7 @@ func BenchmarkMultipolygonValidation(b *testing.B) {
 				if err != nil {
 					b.Fatal(err)
 				}
-				polys[i], err = NewPolygonFromRings([]LineString{ring})
+				polys[i], err = NewPolygon([]LineString{ring})
 				if err != nil {
 					b.Fatal(err)
 				}
@@ -268,7 +268,7 @@ func BenchmarkMultipolygonValidation(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				if _, err := NewMultiPolygonFromPolygons(polys); err != nil {
+				if _, err := NewMultiPolygon(polys); err != nil {
 					b.Fatal(err)
 				}
 			}
@@ -286,7 +286,7 @@ func BenchmarkMultiPolygonTwoCircles(b *testing.B) {
 			}
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				if _, err := NewMultiPolygonFromPolygons(polys); err != nil {
+				if _, err := NewMultiPolygon(polys); err != nil {
 					b.Fatal(err)
 				}
 			}
@@ -314,11 +314,11 @@ func BenchmarkMultiPolygonMultipleTouchingPoints(b *testing.B) {
 			if err != nil {
 				b.Fatal(err)
 			}
-			p1, err := NewPolygonFromRings([]LineString{ls1})
+			p1, err := NewPolygon([]LineString{ls1})
 			if err != nil {
 				b.Fatal(err)
 			}
-			p2, err := NewPolygonFromRings([]LineString{ls2})
+			p2, err := NewPolygon([]LineString{ls2})
 			if err != nil {
 				b.Fatal(err)
 			}
@@ -326,7 +326,7 @@ func BenchmarkMultiPolygonMultipleTouchingPoints(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				_, err := NewMultiPolygonFromPolygons(polys)
+				_, err := NewMultiPolygon(polys)
 				if err != nil {
 					b.Fatal(err)
 				}
@@ -406,7 +406,7 @@ func BenchmarkMultiLineStringIsSimpleManyLineStrings(b *testing.B) {
 				}
 				lss = append(lss, ls)
 			}
-			mls := NewMultiLineStringFromLineStrings(lss)
+			mls := NewMultiLineString(lss)
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {

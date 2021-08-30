@@ -26,7 +26,7 @@ func intersectionOfIndexedLines(
 			return nil
 		})
 	}
-	return NewMultiPoint(pts), NewMultiLineStringFromLineStrings(lss)
+	return NewMultiPoint(pts), NewMultiLineString(lss)
 }
 
 func intersectionOfMultiPointAndMultiPoint(mp1, mp2 MultiPoint) MultiPoint {

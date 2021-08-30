@@ -344,7 +344,7 @@ func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64
 // AsMultiLineString is a convenience function that converts this LineString
 // into a MultiLineString.
 func (s LineString) AsMultiLineString() MultiLineString {
-	return NewMultiLineStringFromLineStrings([]LineString{s})
+	return NewMultiLineString([]LineString{s})
 }
 
 // Reverse in the case of LineString outputs the coordinates in reverse order.
