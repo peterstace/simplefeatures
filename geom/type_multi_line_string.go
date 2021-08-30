@@ -18,9 +18,9 @@ type MultiLineString struct {
 	ctype CoordinatesType
 }
 
-// NewMultiLineString creates a MultiLineString from its
-// constituent LineStrings. The coordinates type of the MultiLineString is the
-// lowest common coordinates type of its LineStrings.
+// NewMultiLineString creates a MultiLineString from its constituent
+// LineStrings. The coordinates type of the MultiLineString is the lowest
+// common coordinates type of its LineStrings.
 func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLineString {
 	if len(lines) == 0 {
 		return MultiLineString{}

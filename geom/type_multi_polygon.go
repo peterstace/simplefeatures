@@ -25,10 +25,10 @@ type MultiPolygon struct {
 	ctype CoordinatesType
 }
 
-// NewMultiPolygon creates a MultiPolygon from its constituent
-// Polygons. It gives an error if any of the MultiPolygon assertions are not
-// maintained. The coordinates type of the MultiPolygon is the lowest common
-// coordinates type its Polygons.
+// NewMultiPolygon creates a MultiPolygon from its constituent Polygons. It
+// gives an error if any of the MultiPolygon assertions are not maintained. The
+// coordinates type of the MultiPolygon is the lowest common coordinates type
+// its Polygons.
 func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
 	if len(polys) == 0 {
 		return MultiPolygon{}, nil
