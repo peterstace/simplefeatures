@@ -65,12 +65,13 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 	boxes := make([]rtree.Box, len(polys))
 	items := make([]rtree.BulkItem, 0, len(polys))
 	for i, p := range polys {
-		env, ok := p.Envelope()
-		if ok {
-			boxes[i] = env.box()
-			item := rtree.BulkItem{Box: boxes[i], RecordID: i}
-			items = append(items, item)
+		box, ok := p.Envelope().box()
+		if !ok {
+			continue
 		}
+		boxes[i] = box
+		item := rtree.BulkItem{Box: boxes[i], RecordID: i}
+		items = append(items, item)
 	}
 	tree := rtree.BulkLoad(items)
 
@@ -143,7 +144,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 	for j := range p2.lines {
 		// Find intersection points.
 		var pts []XY
-		p1.tree.RangeSearch(p2.lines[j].uncheckedEnvelope().box(), func(i int) error {
+		p1.tree.RangeSearch(p2.lines[j].box(), func(i int) error {
 			inter := p1.lines[i].intersectLine(p2.lines[j])
 			if inter.empty {
 				return nil
@@ -235,24 +236,13 @@ func (m MultiPolygon) IsEmpty() bool {
 	return true
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry. If
-// the geometry is empty, then false is returned.
-func (m MultiPolygon) Envelope() (Envelope, bool) {
+// Envelope returns the Envelope that most tightly surrounds the geometry.
+func (m MultiPolygon) Envelope() Envelope {
 	var env Envelope
-	var has bool
 	for _, poly := range m.polys {
-		e, ok := poly.Envelope()
-		if !ok {
-			continue
-		}
-		if has {
-			env = env.ExpandToIncludeEnvelope(e)
-		} else {
-			env = e
-			has = true
-		}
+		env = env.ExpandToIncludeEnvelope(poly.Envelope())
 	}
-	return env, has
+	return env
 }
 
 // Boundary returns the spatial boundary of this MultiPolygon. This is the

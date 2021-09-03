@@ -3,6 +3,8 @@ package geom
 import (
 	"fmt"
 	"math"
+
+	"github.com/peterstace/simplefeatures/rtree"
 )
 
 // line represents a line segment between two XY locations. It's an invariant
@@ -19,7 +21,18 @@ type line struct {
 func (ln line) uncheckedEnvelope() Envelope {
 	ln.a.X, ln.b.X = sortFloat64Pair(ln.a.X, ln.b.X)
 	ln.a.Y, ln.b.Y = sortFloat64Pair(ln.a.Y, ln.b.Y)
-	return Envelope{ln.a, ln.b}
+	return Envelope{true, ln.a, ln.b}
+}
+
+func (ln line) box() rtree.Box {
+	ln.a.X, ln.b.X = sortFloat64Pair(ln.a.X, ln.b.X)
+	ln.a.Y, ln.b.Y = sortFloat64Pair(ln.a.Y, ln.b.Y)
+	return rtree.Box{
+		MinX: ln.a.X,
+		MinY: ln.a.Y,
+		MaxX: ln.b.X,
+		MaxY: ln.b.Y,
+	}
 }
 
 func (ln line) length() float64 {

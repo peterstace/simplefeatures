@@ -124,18 +124,13 @@ func (c GeometryCollection) walk(fn func(Geometry)) {
 	}
 }
 
-func (c GeometryCollection) flatten() []Geometry {
-	var geoms []Geometry
-	c.walk(func(g Geometry) {
-		geoms = append(geoms, g)
-	})
-	return geoms
-}
-
-// Envelope returns the Envelope that most tightly surrounds the geometry. If
-// the geometry is empty, then false is returned.
-func (c GeometryCollection) Envelope() (Envelope, bool) {
-	return EnvelopeFromGeoms(c.flatten()...)
+// Envelope returns the Envelope that most tightly surrounds the geometry.
+func (c GeometryCollection) Envelope() Envelope {
+	var env Envelope
+	for _, g := range c.geoms {
+		env = env.ExpandToIncludeEnvelope(g.Envelope())
+	}
+	return env
 }
 
 // Boundary returns the spatial boundary of this GeometryCollection. This is

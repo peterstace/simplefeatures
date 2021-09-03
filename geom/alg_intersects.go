@@ -206,7 +206,7 @@ func hasIntersectionBetweenLines(
 	bulk := make([]rtree.BulkItem, len(lines1))
 	for i, ln := range lines1 {
 		bulk[i] = rtree.BulkItem{
-			Box:      ln.uncheckedEnvelope().box(),
+			Box:      ln.box(),
 			RecordID: i,
 		}
 	}
@@ -218,7 +218,7 @@ func hasIntersectionBetweenLines(
 	var envPopulated bool
 
 	for _, lnA := range lines2 {
-		tree.RangeSearch(lnA.uncheckedEnvelope().box(), func(i int) error {
+		tree.RangeSearch(lnA.box(), func(i int) error {
 			lnB := lines1[i]
 			inter := lnA.intersectLine(lnB)
 			if inter.empty {
@@ -248,7 +248,7 @@ func hasIntersectionBetweenLines(
 			}
 
 			env = env.uncheckedExtend(inter.ptA)
-			if env.Min() != env.Max() {
+			if !env.IsPoint() {
 				return rtree.Stop
 			}
 			return nil
@@ -257,9 +257,13 @@ func hasIntersectionBetweenLines(
 
 	var ext mlsWithMLSIntersectsExtension
 	if populateExtension {
+		var single XY
+		if xy, ok := env.Min().XY(); ok {
+			single = xy
+		}
 		ext = mlsWithMLSIntersectsExtension{
-			multiplePoints: envPopulated && env.Min() != env.Max(),
-			singlePoint:    env.Min(),
+			multiplePoints: envPopulated && !env.IsPoint(),
+			singlePoint:    single,
 		}
 	}
 	return envPopulated, ext

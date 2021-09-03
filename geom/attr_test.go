@@ -94,16 +94,15 @@ func TestEnvelope(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("wkt:", tt.wkt)
 			g := geomFromWKT(t, tt.wkt)
-			env, have := g.Envelope()
-			if !have {
-				t.Fatalf("expected to have envelope but didn't")
-			}
-			if env.Min() != tt.min {
-				t.Errorf("min: got=%v want=%v", env.Min(), tt.min)
-			}
-			if env.Max() != tt.max {
-				t.Errorf("max: got=%v want=%v", env.Max(), tt.max)
-			}
+			env := g.Envelope()
+
+			gotMin, ok := env.Min().XY()
+			expectTrue(t, ok)
+			expectXYEq(t, gotMin, tt.min)
+
+			gotMax, ok := env.Max().XY()
+			expectTrue(t, ok)
+			expectXYEq(t, gotMax, tt.max)
 		})
 	}
 }
@@ -127,9 +126,8 @@ func TestNoEnvelope(t *testing.T) {
 	} {
 		t.Run(wkt, func(t *testing.T) {
 			g := geomFromWKT(t, wkt)
-			if _, have := g.Envelope(); have {
-				t.Errorf("have envelope but expected not to")
-			}
+			got := g.Envelope()
+			expectTrue(t, got.IsEmpty())
 		})
 	}
 }

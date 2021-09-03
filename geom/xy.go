@@ -46,7 +46,7 @@ func (w XY) asUncheckedPoint() Point {
 // XY value doesn't come directly from outline the library without first being
 // validated.
 func (w XY) uncheckedEnvelope() Envelope {
-	return Envelope{w, w}
+	return Envelope{true, w, w}
 }
 
 // Sub returns the result of subtracting the other XY from this XY (in the same

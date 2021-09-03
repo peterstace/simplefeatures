@@ -102,24 +102,13 @@ func (m MultiPoint) IsEmpty() bool {
 	return true
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry. If
-// the geometry is empty, then false is returned.
-func (m MultiPoint) Envelope() (Envelope, bool) {
-	var has bool
+// Envelope returns the Envelope that most tightly surrounds the geometry.
+func (m MultiPoint) Envelope() Envelope {
 	var env Envelope
-	for i := 0; i < m.NumPoints(); i++ {
-		xy, ok := m.PointN(i).XY()
-		if !ok {
-			continue
-		}
-		if has {
-			env = env.uncheckedExtend(xy)
-		} else {
-			env = xy.uncheckedEnvelope()
-			has = true
-		}
+	for _, pt := range m.points {
+		env = env.ExpandToIncludeEnvelope(pt.Envelope())
 	}
-	return env, has
+	return env
 }
 
 // Boundary returns the spatial boundary for this MultiPoint, which is always

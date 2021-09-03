@@ -81,13 +81,13 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	boxes := make([]rtree.Box, len(rings))
 	items := make([]rtree.BulkItem, len(rings))
 	for i, r := range rings {
-		env, ok := r.Envelope()
+		box, ok := r.Envelope().box()
 		if !ok {
 			// Cannot occur, because we have already checked to ensure rings
 			// are closed. Closed rings by definition are non-empty.
 			panic("unexpected empty ring")
 		}
-		boxes[i] = env.box()
+		boxes[i] = box
 		items[i] = rtree.BulkItem{Box: boxes[i], RecordID: i}
 	}
 	tree := rtree.BulkLoad(items)
@@ -241,9 +241,8 @@ func (p Polygon) IsEmpty() bool {
 	return len(p.rings) == 0
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry. If
-// the geometry is empty, then false is returned.
-func (p Polygon) Envelope() (Envelope, bool) {
+// Envelope returns the Envelope that most tightly surrounds the geometry.
+func (p Polygon) Envelope() Envelope {
 	return p.ExteriorRing().Envelope()
 }
 
