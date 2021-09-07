@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -12,10 +13,40 @@ type XY struct {
 	X, Y float64
 }
 
+// validate checks if the XY value contains NaN, -inf, or +inf.
+func (w XY) validate() error {
+	if math.IsNaN(w.X) || math.IsInf(w.X, 0) {
+		return fmt.Errorf("invalid X value: %v", w.X)
+	}
+	if math.IsNaN(w.Y) || math.IsInf(w.Y, 0) {
+		return fmt.Errorf("invalid Y value: %v", w.Y)
+	}
+	return nil
+}
+
 // AsPoint is a convenience function to convert this XY value into a Point
 // geometry.
-func (w XY) AsPoint() Point {
-	return NewPoint(Coordinates{XY: w, Type: DimXY})
+func (w XY) AsPoint(opts ...ConstructorOption) (Point, error) {
+	coords := Coordinates{XY: w, Type: DimXY}
+	return NewPoint(coords, opts...)
+}
+
+// asUncheckedPoint is a convenience function to convert this XY value into a
+// Point. The Point is constructed without checking any validations. It may be
+// used internally when the caller is sure that the XY value doesn't come
+// directly from outside of the library without first being validated.
+func (w XY) asUncheckedPoint() Point {
+	coords := Coordinates{XY: w, Type: DimXY}
+	return newUncheckedPoint(coords)
+}
+
+// uncheckedEnvelope is a convenience function to convert this XY value into
+// a (degenerate) envelope that represents a single XY location (i.e. a zero
+// area envelope). It may be used internally when the caller is sure that the
+// XY value doesn't come directly from outline the library without first being
+// validated.
+func (w XY) uncheckedEnvelope() Envelope {
+	return Envelope{w, w}
 }
 
 // Sub returns the result of subtracting the other XY from this XY (in the same

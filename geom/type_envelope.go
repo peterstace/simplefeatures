@@ -10,22 +10,32 @@ import (
 // Envelope is an axis-aligned rectangle (also known as an Axis Aligned
 // Bounding Box or Minimum Bounding Rectangle). It usually represents a 2D area
 // with non-zero width and height, but can also represent degenerate cases
-// where the width or height (or both) are zero.
+// where the width or height (or both) are zero. Its bounds are validated so as
+// to not be NaN or +/- Infinity.
 type Envelope struct {
 	min XY
 	max XY
 }
 
 // NewEnvelope returns the smallest envelope that contains all provided points.
-func NewEnvelope(first XY, others ...XY) Envelope {
+// It returns an error if any of the XYs contains NaN or +/- Infinity
+// coordinates.
+func NewEnvelope(first XY, others ...XY) (Envelope, error) {
+	if err := first.validate(); err != nil {
+		return Envelope{}, err
+	}
 	env := Envelope{
 		min: first,
 		max: first,
 	}
-	for _, pt := range others {
-		env = env.ExtendToIncludePoint(pt)
+	for _, xy := range others {
+		var err error
+		env, err = env.ExtendToIncludeXY(xy)
+		if err != nil {
+			return Envelope{}, err
+		}
 	}
-	return env
+	return env, nil
 }
 
 // EnvelopeFromGeoms returns the smallest envelope that contains all points
@@ -56,7 +66,7 @@ func EnvelopeFromGeoms(geoms ...Geometry) (Envelope, bool) {
 // LineString or Point geometry is returned.
 func (e Envelope) AsGeometry() Geometry {
 	if e.min == e.max {
-		return e.min.AsPoint().AsGeometry()
+		return e.min.asUncheckedPoint().AsGeometry()
 	}
 
 	if e.min.X == e.max.X || e.min.Y == e.max.Y {
@@ -93,12 +103,23 @@ func (e Envelope) Max() XY {
 	return e.max
 }
 
-// ExtendToIncludePoint returns the smallest envelope that contains all of the
-// points in this envelope along with the provided point.
-func (e Envelope) ExtendToIncludePoint(point XY) Envelope {
+// ExtendToIncludeXY returns the smallest envelope that contains all of the
+// points in this envelope along with the provided point. It gives an error if
+// the XY contains NaN or +/- Infinite coordinates.
+func (e Envelope) ExtendToIncludeXY(xy XY) (Envelope, error) {
+	if err := xy.validate(); err != nil {
+		return Envelope{}, err
+	}
+	return e.uncheckedExtend(xy), nil
+}
+
+// uncheckedExtend extends the envelope in the same manner as
+// ExtendToIncludeXY but doesn't validate the XY. It should only be used
+// when the XY doesn't come directly from user input.
+func (e Envelope) uncheckedExtend(xy XY) Envelope {
 	return Envelope{
-		min: XY{fastMin(e.min.X, point.X), fastMin(e.min.Y, point.Y)},
-		max: XY{fastMax(e.max.X, point.X), fastMax(e.max.Y, point.Y)},
+		min: XY{fastMin(e.min.X, xy.X), fastMin(e.min.Y, xy.Y)},
+		max: XY{fastMax(e.max.X, xy.X), fastMax(e.max.Y, xy.Y)},
 	}
 }
 
@@ -113,7 +134,7 @@ func (e Envelope) ExpandToIncludeEnvelope(other Envelope) Envelope {
 
 // Contains returns true iff this envelope contains the given point.
 func (e Envelope) Contains(p XY) bool {
-	return true &&
+	return p.validate() == nil &&
 		p.X >= e.min.X && p.X <= e.max.X &&
 		p.Y >= e.min.Y && p.Y <= e.max.Y
 }
@@ -157,25 +178,7 @@ func (e Envelope) Area() float64 {
 	return (e.max.X - e.min.X) * (e.max.Y - e.min.Y)
 }
 
-// ExpandBy calculates a new version of this envelope that is expanded in the x
-// and y dimensions. Both the minimum and maximum points in the envelope are
-// expanded by the supplied x and y amounts. Positive values increase the size
-// of the envelope and negative amounts decrease the size of the envelope. If a
-// decrease in envelope size would result in an invalid envelope (where min is
-// greater than max), then false is returned and no envelope is calculated.
-func (e Envelope) ExpandBy(x, y float64) (Envelope, bool) {
-	delta := XY{x, y}
-	env := Envelope{
-		min: e.min.Sub(delta),
-		max: e.max.Add(delta),
-	}
-	if env.min.X > env.max.X || env.min.Y > env.max.Y {
-		return Envelope{}, false
-	}
-	return env, true
-}
-
-// Distance calculates the stortest distance between this envelope and another
+// Distance calculates the shortest distance between this envelope and another
 // envelope. If the envelopes intersect with each other, then the returned
 // distance is 0.
 func (e Envelope) Distance(o Envelope) float64 {

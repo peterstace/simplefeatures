@@ -48,7 +48,7 @@ func hasCrossing(pt XY, ln line) (crossing, onLine bool) {
 	o := orientation(lower, upper, pt)
 
 	crossing = pt.Y >= lower.Y && pt.Y < upper.Y && o == rightTurn
-	onLine = ln.envelope().Contains(pt) && o == collinear
+	onLine = ln.uncheckedEnvelope().Contains(pt) && o == collinear
 	return
 }
 

@@ -12,7 +12,11 @@ type line struct {
 	a, b XY
 }
 
-func (ln line) envelope() Envelope {
+// uncheckedEnvelope directly constructs an Envelope that bounds the line. It
+// skips envelope validation because line coordinates never come directly from
+// users. Instead, line coordinates come directly from pre-validated
+// LineStrings, or from operations on pre-validated geometries.
+func (ln line) uncheckedEnvelope() Envelope {
 	ln.a.X, ln.b.X = sortFloat64Pair(ln.a.X, ln.b.X)
 	ln.a.Y, ln.b.Y = sortFloat64Pair(ln.a.Y, ln.b.Y)
 	return Envelope{ln.a, ln.b}
@@ -45,7 +49,7 @@ func (ln line) asLineString() LineString {
 
 func (ln line) intersectsXY(xy XY) bool {
 	// Speed is O(1) using a bounding box check then a point-on-line check.
-	env := ln.envelope()
+	env := ln.uncheckedEnvelope()
 	if !env.Contains(xy) {
 		return false
 	}

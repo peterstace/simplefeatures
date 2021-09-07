@@ -223,12 +223,12 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 		// Collect cut locations that are *interior* to ln.
 		eps := 0xFF * ulpSizeForLine(ln)
 		var xys []XY
-		cut.lnIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
+		cut.lnIndex.tree.RangeSearch(ln.uncheckedEnvelope().box(), func(i int) error {
 			other := cut.lnIndex.lines[i]
 			xys = appendNewNodesFromLineLineIntersection(xys, ln, other, eps, nodes)
 			return nil
 		})
-		cut.ptIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
+		cut.ptIndex.tree.RangeSearch(ln.uncheckedEnvelope().box(), func(i int) error {
 			other := cut.ptIndex.points[i]
 			xys = appendNewNodesFromLinePointIntersection(xys, ln, other, eps, nodes)
 			return nil

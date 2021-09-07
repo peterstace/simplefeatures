@@ -192,7 +192,7 @@ func (p *wkbParser) parsePoint(ctype CoordinatesType) (Point, error) {
 	if math.IsNaN(c.X) || math.IsNaN(c.Y) {
 		return Point{}, wkbSyntaxError{"point contains mixed NaN values"}
 	}
-	return NewPoint(c, p.opts...), nil
+	return NewPoint(c, p.opts...)
 }
 
 func (p *wkbParser) parseLineString(ctype CoordinatesType) (LineString, error) {

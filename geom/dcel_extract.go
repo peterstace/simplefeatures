@@ -12,7 +12,10 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]label) bool) (
 	if err != nil {
 		return Geometry{}, err
 	}
-	points := d.extractPoints(include)
+	points, err := d.extractPoints(include)
+	if err != nil {
+		return Geometry{}, err
+	}
 
 	switch {
 	case len(areals) > 0 && len(linears) == 0 && len(points) == 0:
@@ -21,7 +24,7 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]label) bool) (
 		}
 		mp, err := NewMultiPolygon(areals)
 		if err != nil {
-			return Geometry{}, fmt.Errorf("could not extract areal geometry from DCEL: %v", err)
+			return Geometry{}, wrap(err, "could not extract areal geometry from DCEL")
 		}
 		return mp.AsGeometry(), nil
 	case len(areals) == 0 && len(linears) > 0 && len(points) == 0:
@@ -31,13 +34,9 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]label) bool) (
 		return NewMultiLineString(linears).AsGeometry(), nil
 	case len(areals) == 0 && len(linears) == 0 && len(points) > 0:
 		if len(points) == 1 {
-			return points[0].AsPoint().AsGeometry(), nil
+			return points[0].AsGeometry(), nil
 		}
-		pts := make([]Point, len(points))
-		for i, xy := range points {
-			pts[i] = xy.AsPoint()
-		}
-		return NewMultiPoint(pts).AsGeometry(), nil
+		return NewMultiPoint(points).AsGeometry(), nil
 	default:
 		geoms := make([]Geometry, 0, len(areals)+len(linears)+len(points))
 		for _, poly := range areals {
@@ -46,8 +45,8 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]label) bool) (
 		for _, ls := range linears {
 			geoms = append(geoms, ls.AsGeometry())
 		}
-		for _, xy := range points {
-			geoms = append(geoms, xy.AsPoint().AsGeometry())
+		for _, pt := range points {
+			geoms = append(geoms, pt.AsGeometry())
 		}
 		return NewGeometryCollection(geoms).AsGeometry(), nil
 	}
@@ -219,13 +218,17 @@ func shouldExtractLine(e *halfEdgeRecord, include func([2]label) bool) bool {
 // extractPoints extracts any vertices in the DCEL that should be part of the
 // output geometry, but aren't yet represented as part of any previously
 // extracted geometries.
-func (d *doublyConnectedEdgeList) extractPoints(include func([2]label) bool) []XY {
-	var xys []XY
+func (d *doublyConnectedEdgeList) extractPoints(include func([2]label) bool) ([]Point, error) {
+	var pts []Point
 	for _, vert := range d.vertices {
 		if include(vert.labels) && !vert.extracted {
 			vert.extracted = true
-			xys = append(xys, vert.coords)
+			pt, err := vert.coords.AsPoint()
+			if err != nil {
+				return nil, err
+			}
+			pts = append(pts, pt)
 		}
 	}
-	return xys
+	return pts, nil
 }

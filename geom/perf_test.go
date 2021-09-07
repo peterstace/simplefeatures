@@ -104,8 +104,12 @@ func BenchmarkIntersectsMultiPointWithMultiPoint(b *testing.B) {
 			rnd := rand.New(rand.NewSource(0))
 			var pointsA, pointsB []Point
 			for i := 0; i < sz; i++ {
-				pointsA = append(pointsA, XY{X: rnd.Float64(), Y: rnd.Float64()}.AsPoint())
-				pointsB = append(pointsB, XY{X: rnd.Float64(), Y: rnd.Float64()}.AsPoint())
+				ptA, err := XY{X: rnd.Float64(), Y: rnd.Float64()}.AsPoint()
+				expectNoErr(b, err)
+				pointsA = append(pointsA, ptA)
+				ptB, err := XY{X: rnd.Float64(), Y: rnd.Float64()}.AsPoint()
+				expectNoErr(b, err)
+				pointsB = append(pointsB, ptB)
 			}
 			mpA := NewMultiPoint(pointsA).AsGeometry()
 			mpB := NewMultiPoint(pointsB).AsGeometry()
@@ -188,7 +192,9 @@ func BenchmarkPolygonMultipleRingsValidation(b *testing.B) {
 func BenchmarkPolygonZigZagRingsValidation(b *testing.B) {
 	for _, sz := range []int{10, 100, 1000, 10000} {
 		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
-			outerRing := NewEnvelope(XY{}, XY{7, float64(sz + 1)}).AsGeometry().AsPolygon().ExteriorRing()
+			outerRingEnv, err := NewEnvelope(XY{}, XY{7, float64(sz + 1)})
+			expectNoErr(b, err)
+			outerRing := outerRingEnv.AsGeometry().AsPolygon().ExteriorRing()
 			var leftFloats, rightFloats []float64
 			for i := 0; i < sz; i++ {
 				leftFloats = append(leftFloats, float64(2+(i%2)*2), float64(1+i))

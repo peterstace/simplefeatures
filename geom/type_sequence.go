@@ -34,6 +34,17 @@ func NewSequence(coordinates []float64, ctype CoordinatesType) Sequence {
 	return Sequence{ctype, coordinates}
 }
 
+// validate checks the X and Y values in the sequence for NaNs and infinities.
+func (s Sequence) validate() error {
+	n := s.Length()
+	for i := 0; i < n; i++ {
+		if err := s.GetXY(i).validate(); err != nil {
+			return wrap(err, "invalid XY at index %d", i)
+		}
+	}
+	return nil
+}
+
 // CoordinatesType returns the coordinates type used to represent point
 // locations in the Sequence.
 func (s Sequence) CoordinatesType() CoordinatesType {

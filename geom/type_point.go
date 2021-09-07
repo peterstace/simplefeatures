@@ -18,8 +18,38 @@ type Point struct {
 	full   bool
 }
 
-// NewPoint creates a new point gives its Coordinates.
-func NewPoint(c Coordinates, _ ...ConstructorOption) Point {
+// NewPoint creates a new point given its Coordinates.
+func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
+	os := newOptionSet(opts)
+	if os.skipValidations {
+		return newUncheckedPoint(c), nil
+	}
+	if err := c.XY.validate(); err != nil {
+		if os.omitInvalid {
+			return NewEmptyPoint(c.Type), nil
+		}
+		return Point{}, validationError{err.Error()}
+	}
+	return newUncheckedPoint(c), nil
+}
+
+// newUncheckedPoint constructs a point without checking any validations. It
+// may be used internally when the caller is sure that the coordinates don't
+// come directly from outside the library, or have already otherwise been
+// validated.
+//
+// An examples of valid use:
+//
+// - The coordinates have just been validated.
+//
+// - The coordinates are taken directly from the control points of a geometry
+// that has been validated.
+//
+// - The coordinates are derived from calculations based on control points of a
+// geometry that has been validated. Technically, these calculations could
+// overflow to +/- inf. However if control points are originally close to
+// infinity, many of the algorithms will be already broken in many other ways.
+func newUncheckedPoint(c Coordinates) Point {
 	return Point{c, true}
 }
 
@@ -88,7 +118,7 @@ func (p Point) Envelope() (Envelope, bool) {
 	if !ok {
 		return Envelope{}, false
 	}
-	return NewEnvelope(xy), true
+	return xy.uncheckedEnvelope(), true
 }
 
 // Boundary returns the spatial boundary for this Point, which is always the
@@ -163,7 +193,7 @@ func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, er
 	}
 	newC := p.coords
 	newC.XY = fn(newC.XY)
-	return NewPoint(newC, opts...), nil
+	return NewPoint(newC, opts...)
 }
 
 // Centroid of a point is that point.

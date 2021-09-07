@@ -113,9 +113,9 @@ func (m MultiPoint) Envelope() (Envelope, bool) {
 			continue
 		}
 		if has {
-			env = env.ExtendToIncludePoint(xy)
+			env = env.uncheckedExtend(xy)
 		} else {
-			env = NewEnvelope(xy)
+			env = xy.uncheckedEnvelope()
 			has = true
 		}
 	}
@@ -212,7 +212,11 @@ func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mult
 	for i, pt := range m.points {
 		if c, ok := pt.Coordinates(); ok {
 			c.XY = fn(c.XY)
-			txPoints[i] = NewPoint(c, opts...)
+			var err error
+			txPoints[i], err = NewPoint(c, opts...)
+			if err != nil {
+				return MultiPoint{}, err
+			}
 		} else {
 			txPoints[i] = pt
 		}
@@ -234,7 +238,7 @@ func (m MultiPoint) Centroid() Point {
 	if n == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return sum.Scale(1 / float64(n)).AsPoint()
+	return sum.Scale(1 / float64(n)).asUncheckedPoint()
 }
 
 // Reverse in the case of MultiPoint outputs each component point in their

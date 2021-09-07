@@ -30,16 +30,23 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 	}
 
 	// Valid non-empty LineStrings must have at least 2 *distinct* points.
-	if hasAtLeast2DistinctPointsInSeq(seq) {
-		return LineString{seq}, nil
+	if !hasAtLeast2DistinctPointsInSeq(seq) {
+		if ctorOpts.omitInvalid {
+			return LineString{}, nil
+		}
+		return LineString{}, validationError{
+			"non-empty linestring contains only one distinct XY value"}
 	}
 
-	if ctorOpts.omitInvalid {
-		return LineString{}, nil
+	// All XY values must be valid.
+	if err := seq.validate(); err != nil {
+		if ctorOpts.omitInvalid {
+			return LineString{}, nil
+		}
+		return LineString{}, validationError{err.Error()}
 	}
 
-	return LineString{}, validationError{
-		"non-empty linestring contains only one distinct XY value"}
+	return LineString{seq}, nil
 }
 
 func hasAtLeast2DistinctPointsInSeq(seq Sequence) bool {
@@ -72,7 +79,8 @@ func (s LineString) StartPoint() Point {
 	if s.IsEmpty() {
 		return NewEmptyPoint(s.CoordinatesType())
 	}
-	return NewPoint(s.seq.Get(0))
+	c := s.seq.Get(0)
+	return newUncheckedPoint(c)
 }
 
 // EndPoint gives the last point of the LineString. If the LineString is empty
@@ -81,7 +89,9 @@ func (s LineString) EndPoint() Point {
 	if s.IsEmpty() {
 		return NewEmptyPoint(s.CoordinatesType())
 	}
-	return NewPoint(s.seq.Get(s.seq.Length() - 1))
+	end := s.seq.Length() - 1
+	c := s.seq.Get(end)
+	return newUncheckedPoint(c)
 }
 
 // AsText returns the WKT (Well Known Text) representation of this geometry.
@@ -120,7 +130,7 @@ func (s LineString) IsSimple() bool {
 		if !ok {
 			continue
 		}
-		items = append(items, rtree.BulkItem{Box: ln.envelope().box(), RecordID: i})
+		items = append(items, rtree.BulkItem{Box: ln.uncheckedEnvelope().box(), RecordID: i})
 	}
 	tree := rtree.BulkLoad(items)
 
@@ -140,7 +150,7 @@ func (s LineString) IsSimple() bool {
 		}
 
 		simple := true // assume simple until proven otherwise
-		tree.RangeSearch(ln.envelope().box(), func(j int) error {
+		tree.RangeSearch(ln.uncheckedEnvelope().box(), func(j int) error {
 			// Skip finding the original line (i == j) or cases where we have
 			// already checked that pair (i > j).
 			if i >= j {
@@ -215,9 +225,9 @@ func (s LineString) Envelope() (Envelope, bool) {
 	if n == 0 {
 		return Envelope{}, false
 	}
-	env := NewEnvelope(s.seq.GetXY(0))
+	env := s.seq.GetXY(0).uncheckedEnvelope()
 	for i := 1; i < n; i++ {
-		env = env.ExtendToIncludePoint(s.seq.GetXY(i))
+		env = env.uncheckedExtend(s.seq.GetXY(i))
 	}
 	return env, true
 }
@@ -323,7 +333,7 @@ func (s LineString) Centroid() Point {
 	if sumLength == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return sumXY.Scale(1.0 / sumLength).AsPoint()
+	return sumXY.Scale(1.0 / sumLength).asUncheckedPoint()
 }
 
 func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64) {
@@ -388,7 +398,7 @@ func (s LineString) PointOnSurface() Point {
 	n := s.seq.Length()
 	nearest := newNearestPointAccumulator(s.Centroid())
 	for i := 1; i < n-1; i++ {
-		candidate := s.seq.GetXY(i).AsPoint()
+		candidate := s.seq.GetXY(i).asUncheckedPoint()
 		nearest.consider(candidate)
 	}
 	if !nearest.point.IsEmpty() {
