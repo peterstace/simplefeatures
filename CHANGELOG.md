@@ -1,8 +1,35 @@
 # Changelog
 
+## v0.32.0
+
+2021-09-08
+
+__Special thanks to Albert Teoh for contributing to this release.__
+
+- **Breaking change**: Consolidates `MultiPoint` constructors and simplifies
+  `MultiPoint` internal representation. Removes the `BitSet` type, previously
+  used for `MultiPoint` construction. Removes the `NewMultiPointFromPoints` and
+  `NewMultiPointWithEmptyMask` functions. Modifies the `NewMultiPoint` function
+  to accept a slice of `Point`s rather than a `Sequence`.
+
+- **Breaking change**: Consolidates `Point` construction. Removes the
+  `NewPointFromXY` function. It is replaced by a new `AsPoint` method on the
+  `XY` type.
+
+- Refactors internal test helpers.
+
+- Adds linting to CI using `golangci-lint`.
+
+- **Breaking change**: Renames geometry constructors for consistency.
+  `NewPolygonFromRings` is renamed to `NewPolygon`.
+  `NewMultiLineStringFromLineStrings` is renamed to `NewMultiLineString`.
+  `NewMultiPolygonFromPolygons` is renamed to `NewMultiPolygon`.
+
 ## v0.31.0
 
 2021-08-09
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - Fixes some minor linting (and other similar) issues identified by Go Report
   Card.
@@ -21,8 +48,6 @@
 
 - Adds a new `NumRings` method to the `Polygon` type. This method gives the
   total number of rings that make the polygon.
-
-__Special thanks to Albert Teoh for contributing to this release.__
 
 ## v0.30.0
 
