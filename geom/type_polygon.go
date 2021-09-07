@@ -30,11 +30,11 @@ type Polygon struct {
 	ctype CoordinatesType
 }
 
-// NewPolygonFromRings creates a polygon given its rings. The outer ring is
-// first, and any inner rings follow. If no rings are provided, then the
-// returned Polygon is the empty Polygon. The coordinate type of the polygon is
-// the lowest common coordinate type of its rings.
-func NewPolygonFromRings(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
+// NewPolygon creates a polygon given its rings. The outer ring is first, and
+// any inner rings follow. If no rings are provided, then the returned Polygon
+// is the empty Polygon. The coordinate type of the polygon is the lowest
+// common coordinate type of its rings.
+func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
 	if len(rings) == 0 {
 		return Polygon{}, nil
 	}
@@ -251,7 +251,7 @@ func (p Polygon) Envelope() (Envelope, bool) {
 // Polygons, this is the MultiLineString collection containing all of the
 // rings.
 func (p Polygon) Boundary() MultiLineString {
-	return NewMultiLineStringFromLineStrings(p.rings).Force2D()
+	return NewMultiLineString(p.rings).Force2D()
 }
 
 // Value implements the database/sql/driver.Valuer interface by returning the
@@ -332,7 +332,7 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon
 			return Polygon{}, wrapTransformed(err)
 		}
 	}
-	poly, err := NewPolygonFromRings(transformed, opts...)
+	poly, err := NewPolygon(transformed, opts...)
 	return poly.ForceCoordinatesType(p.ctype), wrapTransformed(err)
 }
 
@@ -472,7 +472,7 @@ func (p Polygon) AsMultiPolygon() MultiPolygon {
 	if !p.IsEmpty() {
 		polys = []Polygon{p}
 	}
-	mp, err := NewMultiPolygonFromPolygons(polys)
+	mp, err := NewMultiPolygon(polys)
 	if err != nil {
 		// Cannot occur due to construction. A valid polygon will always be a
 		// valid multipolygon.

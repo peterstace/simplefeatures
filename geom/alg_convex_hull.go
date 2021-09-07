@@ -40,7 +40,7 @@ func convexHull(g Geometry) Geometry {
 	if err != nil {
 		panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid ring: %v", err))
 	}
-	poly, err := NewPolygonFromRings([]LineString{ring})
+	poly, err := NewPolygon([]LineString{ring})
 	if err != nil {
 		panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid polygon: %v", err))
 	}

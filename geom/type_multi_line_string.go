@@ -18,10 +18,10 @@ type MultiLineString struct {
 	ctype CoordinatesType
 }
 
-// NewMultiLineStringFromLineStrings creates a MultiLineString from its
-// constituent LineStrings. The coordinates type of the MultiLineString is the
-// lowest common coordinates type of its LineStrings.
-func NewMultiLineStringFromLineStrings(lines []LineString, opts ...ConstructorOption) MultiLineString {
+// NewMultiLineString creates a MultiLineString from its constituent
+// LineStrings. The coordinates type of the MultiLineString is the lowest
+// common coordinates type of its LineStrings.
+func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLineString {
 	if len(lines) == 0 {
 		return MultiLineString{}
 	}
@@ -332,7 +332,7 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 			return MultiLineString{}, wrapTransformed(err)
 		}
 	}
-	return NewMultiLineStringFromLineStrings(transformed, opts...), nil
+	return NewMultiLineString(transformed, opts...), nil
 }
 
 // Length gives the sum of the lengths of the constituent members of the multi

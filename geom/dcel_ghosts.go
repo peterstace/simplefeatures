@@ -53,7 +53,7 @@ func spanningTree(xys []XY) MultiLineString {
 		})
 	}
 
-	return NewMultiLineStringFromLineStrings(lss)
+	return NewMultiLineString(lss)
 }
 
 func appendXYForPoint(xys []XY, pt Point) []XY {

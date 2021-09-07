@@ -86,7 +86,7 @@ func (e Envelope) AsGeometry() Geometry {
 	if err != nil {
 		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
 	}
-	poly, err := NewPolygonFromRings([]LineString{ls})
+	poly, err := NewPolygon([]LineString{ls})
 	if err != nil {
 		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
 	}
