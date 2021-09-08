@@ -25,18 +25,29 @@ __Special thanks to Albert Teoh for contributing to this release.__
   `NewMultiLineStringFromLineStrings` is renamed to `NewMultiLineString`.
   `NewMultiPolygonFromPolygons` is renamed to `NewMultiPolygon`.
 
-- **Breaking change**: Adds checks for NaN and Infinity during geometry
-  construction. If these values are present, then an error will be where one
-  previously wasn't. The `NewPoint` function now returns an error, which is
-  non-nil when the inputs contain NaN or +/- infinity. The `OmitInvalid`
-  constructor option now has an impact on `Point` and `MultiPoint`
-  constructors. The `NewEnvelope` function now returns an error, which is
-  non-nil if any inputs contain NaN or +/- infinity. The `Envelope` type's
-  `ExtendToIncludePoint` method is renamed to `ExtendToIncludeXY` (better
-  fitting what it does), and now returns an error, which is non-nil if any
-  inputs contain NaN or +/- infinity. The `Envelope` type's `ExpandBy` method
-  is removed due to its limited utility and complex interactions with NaNs and
-  +/- infinity.
+- **Breaking change**: Adds checks for anomalous `float64` values (NaN and +/-
+  infinity) during geometry construction.
+
+	- The `NewPoint` function now returns `(Point, error)` rather than `Point`.
+	  The returned error is non-nil when the inputs contain anomalous values.
+
+	- The `NewLineString` function's signature doesn't change, but now returns
+	  a non-nil error if the input `Sequence` contains anomalous values.
+
+	- The `OmitInvalid` constructor option now has implications when
+	  constructing `Point` and `MultiPoint` types.
+
+	- The `NewEnvelope` function now returns `(Envelope, error)` rather than
+	  `Envelope`. The returned error is non-nil when when the input XYs contain
+	  anomalous values.
+
+	- The `Envelope` type's `ExtendToIncludePoint` method is renamed to
+	  `ExtendToIncludeXY` (better matching its argument type). It now returns
+	  `(Envelope, erorr)` rather than `Envelope`. The returned error is non-nil
+	  if the inputs contain any anomalous values.
+
+	- The `Envelope` type's `ExpandBy` method is removed due to its limited
+	  utility and complex interactions with anomalous values.
 
 ## v0.31.0
 
