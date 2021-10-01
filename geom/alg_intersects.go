@@ -215,7 +215,6 @@ func hasIntersectionBetweenLines(
 	// Keep track of an envelope of all of the points that are in the
 	// intersection.
 	var env Envelope
-	var envPopulated bool
 
 	for _, lnA := range lines2 {
 		tree.RangeSearch(lnA.box(), func(i int) error {
@@ -226,26 +225,18 @@ func hasIntersectionBetweenLines(
 			}
 
 			if !populateExtension {
-				envPopulated = true
 				env = inter.ptA.uncheckedEnvelope()
 				env = env.uncheckedExtend(inter.ptB)
 				return rtree.Stop
 			}
 
 			if inter.ptA != inter.ptB {
-				envPopulated = true
 				env = inter.ptA.uncheckedEnvelope()
 				env = env.uncheckedExtend(inter.ptB)
 				return rtree.Stop
 			}
 
 			// Single point intersection case from here onwards:
-
-			if !envPopulated {
-				envPopulated = true
-				env = inter.ptA.uncheckedEnvelope()
-				return nil
-			}
 
 			env = env.uncheckedExtend(inter.ptA)
 			if !env.IsPoint() {
@@ -262,11 +253,11 @@ func hasIntersectionBetweenLines(
 			single = xy
 		}
 		ext = mlsWithMLSIntersectsExtension{
-			multiplePoints: envPopulated && !env.IsPoint(),
+			multiplePoints: !env.IsEmpty() && !env.IsPoint(),
 			singlePoint:    single,
 		}
 	}
-	return envPopulated, ext
+	return !env.IsEmpty(), ext
 }
 
 func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp MultiPolygon) bool {
