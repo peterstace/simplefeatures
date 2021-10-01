@@ -11,6 +11,8 @@ Have you:
 
 - Add cmprefimpl tests? (if appropriate?)
 
+- Updated release notes? (if appropriate?)
+
 ## Related Issue
 
 - Please link to the related issue(s).

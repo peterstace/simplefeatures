@@ -60,7 +60,7 @@ func (s simplifier) simplifyMultiLineString(mls MultiLineString) (MultiLineStrin
 			lss = append(lss, ls)
 		}
 	}
-	return NewMultiLineStringFromLineStrings(lss, s.opts...), nil
+	return NewMultiLineString(lss, s.opts...), nil
 }
 
 func (s simplifier) simplifyPolygon(poly Polygon) (Polygon, error) {
@@ -88,7 +88,7 @@ func (s simplifier) simplifyPolygon(poly Polygon) (Polygon, error) {
 			rings = append(rings, interior)
 		}
 	}
-	return NewPolygonFromRings(rings, s.opts...)
+	return NewPolygon(rings, s.opts...)
 }
 
 func (s simplifier) simplifyMultiPolygon(mp MultiPolygon) (MultiPolygon, error) {
@@ -103,7 +103,7 @@ func (s simplifier) simplifyMultiPolygon(mp MultiPolygon) (MultiPolygon, error) 
 			polys = append(polys, poly)
 		}
 	}
-	return NewMultiPolygonFromPolygons(polys, s.opts...)
+	return NewMultiPolygon(polys, s.opts...)
 }
 
 func (s simplifier) simplifyGeometryCollection(gc GeometryCollection) (GeometryCollection, error) {

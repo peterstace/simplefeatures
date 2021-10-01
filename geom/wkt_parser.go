@@ -268,7 +268,7 @@ func (p *parser) nextPolygonText(ctype CoordinatesType) (Polygon, error) {
 	if len(rings) == 0 {
 		return Polygon{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewPolygonFromRings(rings, p.opts...)
+	return NewPolygon(rings, p.opts...)
 }
 
 func (p *parser) nextMultiLineString(ctype CoordinatesType) (MultiLineString, error) {
@@ -279,7 +279,7 @@ func (p *parser) nextMultiLineString(ctype CoordinatesType) (MultiLineString, er
 	if len(lss) == 0 {
 		return MultiLineString{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewMultiLineStringFromLineStrings(lss, p.opts...), nil
+	return NewMultiLineString(lss, p.opts...), nil
 }
 
 func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType) ([]LineString, error) {
@@ -408,7 +408,7 @@ func (p *parser) nextMultiPolygonText(ctype CoordinatesType) (MultiPolygon, erro
 	if len(polys) == 0 {
 		return MultiPolygon{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewMultiPolygonFromPolygons(polys, p.opts...)
+	return NewMultiPolygon(polys, p.opts...)
 }
 
 func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryCollection, error) {

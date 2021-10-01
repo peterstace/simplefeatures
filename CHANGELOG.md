@@ -1,8 +1,59 @@
 # Changelog
 
+## v0.32.0
+
+2021-09-08
+
+__Special thanks to Albert Teoh for contributing to this release.__
+
+- **Breaking change**: Consolidates `MultiPoint` constructors and simplifies
+  `MultiPoint` internal representation. Removes the `BitSet` type, previously
+  used for `MultiPoint` construction. Removes the `NewMultiPointFromPoints` and
+  `NewMultiPointWithEmptyMask` functions. Modifies the `NewMultiPoint` function
+  to accept a slice of `Point`s rather than a `Sequence`.
+
+- **Breaking change**: Consolidates `Point` construction. Removes the
+  `NewPointFromXY` function. It is replaced by a new `AsPoint` method on the
+  `XY` type.
+
+- Refactors internal test helpers.
+
+- Adds linting to CI using `golangci-lint`.
+
+- **Breaking change**: Renames geometry constructors for consistency.
+  `NewPolygonFromRings` is renamed to `NewPolygon`.
+  `NewMultiLineStringFromLineStrings` is renamed to `NewMultiLineString`.
+  `NewMultiPolygonFromPolygons` is renamed to `NewMultiPolygon`.
+
+- **Breaking change**: Adds checks for anomalous `float64` values (NaN and +/-
+  infinity) during geometry construction.
+
+	- The `NewPoint` function now returns `(Point, error)` rather than `Point`.
+	  The returned error is non-nil when the inputs contain anomalous values.
+
+	- The `NewLineString` function's signature doesn't change, but now returns
+	  a non-nil error if the input `Sequence` contains anomalous values.
+
+	- The `OmitInvalid` constructor option now has implications when
+	  constructing `Point` and `MultiPoint` types.
+
+	- The `NewEnvelope` function now returns `(Envelope, error)` rather than
+	  `Envelope`. The returned error is non-nil when when the input XYs contain
+	  anomalous values.
+
+	- The `Envelope` type's `ExtendToIncludePoint` method is renamed to
+	  `ExtendToIncludeXY` (better matching its argument type). It now returns
+	  `(Envelope, erorr)` rather than `Envelope`. The returned error is non-nil
+	  if the inputs contain any anomalous values.
+
+	- The `Envelope` type's `ExpandBy` method is removed due to its limited
+	  utility and complex interactions with anomalous values.
+
 ## v0.31.0
 
 2021-08-09
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - Fixes some minor linting (and other similar) issues identified by Go Report
   Card.
@@ -21,8 +72,6 @@
 
 - Adds a new `NumRings` method to the `Polygon` type. This method gives the
   total number of rings that make the polygon.
-
-__Special thanks to Albert Teoh for contributing to this release.__
 
 ## v0.30.0
 

@@ -260,7 +260,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 				return Geometry{}, err
 			}
 		}
-		poly, err := NewPolygonFromRings(rings, opts...)
+		poly, err := NewPolygon(rings, opts...)
 		return poly.AsGeometry(), err
 	case geojsonMultiPoint:
 		// GeoJSON MultiPoints cannot contain empty Points.
@@ -294,7 +294,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 				return Geometry{}, err
 			}
 		}
-		return NewMultiLineStringFromLineStrings(lss, opts...).AsGeometry(), nil
+		return NewMultiLineString(lss, opts...).AsGeometry(), nil
 	case geojsonMultiPolygon:
 		if len(node.coords) == 0 {
 			return MultiPolygon{}.ForceCoordinatesType(ctype).AsGeometry(), nil
@@ -311,13 +311,13 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 				}
 			}
 			var err error
-			polys[i], err = NewPolygonFromRings(rings, opts...)
+			polys[i], err = NewPolygon(rings, opts...)
 			if err != nil {
 				return Geometry{}, err
 			}
 			polys[i] = polys[i].ForceCoordinatesType(ctype)
 		}
-		mp, err := NewMultiPolygonFromPolygons(polys, opts...)
+		mp, err := NewMultiPolygon(polys, opts...)
 		return mp.AsGeometry(), err
 	case geojsonGeometryCollection:
 		if len(node.geoms) == 0 {
