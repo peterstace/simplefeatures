@@ -324,22 +324,12 @@ func checkDimension(h *Handle, g geom.Geometry, log *log.Logger) error {
 }
 
 func checkEnvelope(h *Handle, g geom.Geometry, log *log.Logger) error {
-	want, wantDefined, err := h.envelope(g)
+	want, err := h.envelope(g)
 	if err != nil {
 		return err
 	}
-	got, gotDefined := g.Envelope()
+	got := g.Envelope()
 
-	if wantDefined != gotDefined {
-		log.Println("disagreement about envelope being defined")
-		log.Printf("simplefeatures: %v", gotDefined)
-		log.Printf("libgeos: %v", wantDefined)
-		return errMismatch
-	}
-
-	if !wantDefined {
-		return nil
-	}
 	if want.Min() != got.Min() || want.Max() != got.Max() {
 		log.Printf("want: %v", want.AsGeometry().AsText())
 		log.Printf("got:  %v", got.AsGeometry().AsText())

@@ -260,19 +260,15 @@ func checkDimension(t *testing.T, want UnaryResult, g geom.Geometry) {
 
 func checkEnvelope(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckEnvelope", func(t *testing.T) {
-		if g.IsEmpty() {
-			// PostGIS allows envelopes on empty geometries, but they are empty
-			// envelopes. In simplefeatures, an envelope is never empty, so we
-			// skip testing that case.
+		got := g.Envelope().AsGeometry()
+		want := want.Envelope
+
+		// The geometry type for empty envelopers is different for
+		// simplefeatures vs PostGIS. We consider "both empty" to be equivalent
+		// for the purpose of this test.
+		if got.IsEmpty() && want.IsEmpty() {
 			return
 		}
-		env, ok := g.Envelope()
-		if !ok {
-			// We just checked IsEmpty, so this should never happen.
-			panic("could not get envelope")
-		}
-		got := env.AsGeometry()
-		want := want.Envelope
 
 		if !geom.ExactEquals(got, want) {
 			t.Logf("got:  %v", got.AsText())
