@@ -65,13 +65,11 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 	boxes := make([]rtree.Box, len(polys))
 	items := make([]rtree.BulkItem, 0, len(polys))
 	for i, p := range polys {
-		box, ok := p.Envelope().box()
-		if !ok {
-			continue
+		if box, ok := p.Envelope().box(); ok {
+			boxes[i] = box
+			item := rtree.BulkItem{Box: boxes[i], RecordID: i}
+			items = append(items, item)
 		}
-		boxes[i] = box
-		item := rtree.BulkItem{Box: boxes[i], RecordID: i}
-		items = append(items, item)
 	}
 	tree := rtree.BulkLoad(items)
 
