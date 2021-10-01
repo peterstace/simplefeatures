@@ -234,16 +234,16 @@ func TestEnvelopeContains(t *testing.T) {
 		{
 			env: Envelope{},
 			subtests: map[XY]bool{
-				XY{}:     false,
-				XY{1, 2}: false,
+				{}:     false,
+				{1, 2}: false,
 			},
 		},
 		{
 			env: onePtEnv(1, 2),
 			subtests: map[XY]bool{
-				XY{}:     false,
-				XY{1, 2}: true,
-				XY{3, 1}: false,
+				{}:     false,
+				{1, 2}: true,
+				{3, 1}: false,
 			},
 		},
 		{
