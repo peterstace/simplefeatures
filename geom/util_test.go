@@ -183,14 +183,15 @@ func expectFloat64Eq(t testing.TB, got, want float64) {
 
 func expectEnvEq(t testing.TB, got, want Envelope) {
 	t.Helper()
-	if !ExactEquals(got.Min().AsGeometry(), want.Min().AsGeometry()) ||
-		!ExactEquals(got.Max().AsGeometry(), want.Max().AsGeometry()) {
-		t.Errorf(
-			"\ngot:  %v\nwant: %v\n",
-			got.AsGeometry().AsText(),
-			want.AsGeometry().AsText(),
-		)
+	if ExactEquals(got.Min().AsGeometry(), want.Min().AsGeometry()) &&
+		ExactEquals(got.Max().AsGeometry(), want.Max().AsGeometry()) {
+		return
 	}
+	t.Errorf(
+		"\ngot:  %v\nwant: %v\n",
+		got.AsGeometry().AsText(),
+		want.AsGeometry().AsText(),
+	)
 }
 
 func expectSequenceEq(t testing.TB, got, want Sequence) {
