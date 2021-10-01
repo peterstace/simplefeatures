@@ -263,7 +263,7 @@ func checkEnvelope(t *testing.T, want UnaryResult, g geom.Geometry) {
 		got := g.Envelope().AsGeometry()
 		want := want.Envelope
 
-		// The geometry type for empty envelopers is different for
+		// The geometry type for empty envelopes is different for
 		// simplefeatures vs PostGIS. We consider "both empty" to be equivalent
 		// for the purpose of this test.
 		if got.IsEmpty() && want.IsEmpty() {

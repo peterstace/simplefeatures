@@ -11,7 +11,7 @@
 - **Breaking change**: The `NewEnvelope` function signature has changed. It now
   accepts a slice of `geom.XY` as the sole argument. The behaviour of the
   function is the same as before, except that if no XY values are provided then
-  an empty envelope is returned.
+  an empty envelope is returned without error.
 
 - The `Envelope` type now has `IsEmpty`, `IsPoint`, `IsLine`, and
   `IsRectanagle` methods. These correspond to the 4 possible envelope
