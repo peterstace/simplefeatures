@@ -21,7 +21,7 @@ type line struct {
 func (ln line) uncheckedEnvelope() Envelope {
 	ln.a.X, ln.b.X = sortFloat64Pair(ln.a.X, ln.b.X)
 	ln.a.Y, ln.b.Y = sortFloat64Pair(ln.a.Y, ln.b.Y)
-	return Envelope{true, ln.a, ln.b}
+	return newUncheckedEnvelope(ln.a, ln.b)
 }
 
 func (ln line) box() rtree.Box {
