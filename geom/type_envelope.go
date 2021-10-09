@@ -31,7 +31,7 @@ type Envelope struct {
 	maxY float64
 }
 
-const nan = 0x7FF8000000000001
+var nan = math.Float64bits(math.NaN())
 
 // encodeFloat64WithNaN encodes a float64 by XORing it with NaN.
 func encodeFloat64WithNaN(f float64) uint64 {
