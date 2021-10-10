@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.33.0
+
+2021-10-11
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - **Breaking change**: The `Envelope` type can now be an empty envelope.
   Previously, it was only able to represent a rectangle with some area, a
@@ -12,10 +16,6 @@
   accepts a slice of `geom.XY` as the sole argument. The behaviour of the
   function is the same as before, except that if no XY values are provided then
   an empty envelope is returned without error.
-
-- The `Envelope` type now has `IsEmpty`, `IsPoint`, `IsLine`, and
-  `IsRectanagle` methods. These correspond to the 4 possible envelope
-  categories.
 
 - **Breaking change**: The `Envelope` type's `EnvelopeFromGeoms` method has
   been removed. To replicate the behaviour of this method, users can construct
@@ -35,6 +35,10 @@
   `MultiLineString`, and `MultiPolygon` types now return `Envelope` instead of
   `(Envelope, bool)`. The empty vs non-empty status is encoded inside the
   envelope instead of via an explicit boolean.
+
+- The `Envelope` type now has `IsEmpty`, `IsPoint`, `IsLine`, and
+  `IsRectanagle` methods. These correspond to the 4 possible envelope
+  categories.
 
 ## v0.32.0
 
