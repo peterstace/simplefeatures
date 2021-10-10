@@ -130,7 +130,7 @@ func (s LineString) IsSimple() bool {
 		if !ok {
 			continue
 		}
-		items = append(items, rtree.BulkItem{Box: ln.uncheckedEnvelope().box(), RecordID: i})
+		items = append(items, rtree.BulkItem{Box: ln.box(), RecordID: i})
 	}
 	tree := rtree.BulkLoad(items)
 
@@ -150,7 +150,7 @@ func (s LineString) IsSimple() bool {
 		}
 
 		simple := true // assume simple until proven otherwise
-		tree.RangeSearch(ln.uncheckedEnvelope().box(), func(j int) error {
+		tree.RangeSearch(ln.box(), func(j int) error {
 			// Skip finding the original line (i == j) or cases where we have
 			// already checked that pair (i > j).
 			if i >= j {
@@ -218,18 +218,14 @@ func (s LineString) IsEmpty() bool {
 	return s.seq.Length() == 0
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry. If
-// the geometry is empty, then false is returned.
-func (s LineString) Envelope() (Envelope, bool) {
+// Envelope returns the Envelope that most tightly surrounds the geometry.
+func (s LineString) Envelope() Envelope {
+	var env Envelope
 	n := s.seq.Length()
-	if n == 0 {
-		return Envelope{}, false
-	}
-	env := s.seq.GetXY(0).uncheckedEnvelope()
-	for i := 1; i < n; i++ {
+	for i := 0; i < n; i++ {
 		env = env.uncheckedExtend(s.seq.GetXY(i))
 	}
-	return env, true
+	return env
 }
 
 // Boundary returns the spatial boundary of this LineString. For closed

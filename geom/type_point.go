@@ -111,14 +111,13 @@ func (p Point) IsSimple() bool {
 	return true
 }
 
-// Envelope returns a zero area Envelope covering the Point. If the Point is
-// empty, then false is returned.
-func (p Point) Envelope() (Envelope, bool) {
-	xy, ok := p.XY()
-	if !ok {
-		return Envelope{}, false
+// Envelope returns the envelope best fitting the Point (either an empty
+// envelope, or an envelope covering a single point).
+func (p Point) Envelope() Envelope {
+	if xy, ok := p.XY(); ok {
+		return Envelope{}.uncheckedExtend(xy)
 	}
-	return xy.uncheckedEnvelope(), true
+	return Envelope{}
 }
 
 // Boundary returns the spatial boundary for this Point, which is always the

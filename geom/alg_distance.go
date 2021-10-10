@@ -58,7 +58,7 @@ func Distance(g1, g2 Geometry) (float64, bool) {
 		} else {
 			recordEnv = lns2[lnIdx].uncheckedEnvelope()
 		}
-		if recordEnv.Distance(env) > minDist {
+		if d, ok := recordEnv.Distance(env); ok && d > minDist {
 			return rtree.Stop
 		}
 
@@ -73,7 +73,7 @@ func Distance(g1, g2 Geometry) (float64, bool) {
 	}
 	for _, xy := range xys1 {
 		xyEnv := xy.uncheckedEnvelope()
-		tr.PrioritySearch(xyEnv.box(), func(recordID int) error {
+		tr.PrioritySearch(xy.box(), func(recordID int) error {
 			return searchBody(
 				xyEnv,
 				recordID,
@@ -84,7 +84,7 @@ func Distance(g1, g2 Geometry) (float64, bool) {
 	}
 	for _, ln := range lns1 {
 		lnEnv := ln.uncheckedEnvelope()
-		tr.PrioritySearch(lnEnv.box(), func(recordID int) error {
+		tr.PrioritySearch(ln.box(), func(recordID int) error {
 			return searchBody(
 				lnEnv,
 				recordID,
@@ -136,13 +136,13 @@ func loadTree(xys []XY, lns []line) *rtree.RTree {
 	items := make([]rtree.BulkItem, len(xys)+len(lns))
 	for i, xy := range xys {
 		items[i] = rtree.BulkItem{
-			Box:      xy.uncheckedEnvelope().box(),
+			Box:      xy.box(),
 			RecordID: i + 1,
 		}
 	}
 	for i, ln := range lns {
 		items[i+len(xys)] = rtree.BulkItem{
-			Box:      ln.uncheckedEnvelope().box(),
+			Box:      ln.box(),
 			RecordID: -(i + 1),
 		}
 	}

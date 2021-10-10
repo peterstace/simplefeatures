@@ -469,23 +469,23 @@ func (h *Handle) dimension(g geom.Geometry) (int, error) {
 	return dim, nil
 }
 
-func (h *Handle) envelope(g geom.Geometry) (geom.Envelope, bool, error) {
+func (h *Handle) envelope(g geom.Geometry) (geom.Envelope, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
-		return geom.Envelope{}, false, err
+		return geom.Envelope{}, err
 	}
 	defer C.GEOSGeom_destroy(gh)
 
 	env := C.GEOSEnvelope_r(h.context, gh)
 	if env == nil {
-		return geom.Envelope{}, false, h.err()
+		return geom.Envelope{}, h.err()
 	}
 	defer C.GEOSGeom_destroy_r(h.context, env)
 
 	if isEmpty, err := h.boolErr(C.GEOSisEmpty_r(h.context, env)); err != nil {
-		return geom.Envelope{}, false, err
+		return geom.Envelope{}, err
 	} else if isEmpty {
-		return geom.Envelope{}, false, nil
+		return geom.Envelope{}, nil
 	}
 
 	// libgeos will return either a Point or a Polygon. In the case where the
@@ -493,40 +493,45 @@ func (h *Handle) envelope(g geom.Geometry) (geom.Envelope, bool, error) {
 	// invalid Polygon is returned.
 	geomType := C.GEOSGeomType_r(h.context, env)
 	if geomType == nil {
-		return geom.Envelope{}, false, h.err()
+		return geom.Envelope{}, h.err()
 	}
 	defer C.free(unsafe.Pointer(geomType))
-	if C.GoString(geomType) == "Point" {
+	switch gTypeStr := C.GoString(geomType); gTypeStr {
+	case "Point":
 		var x C.double
 		if C.GEOSGeomGetX_r(h.context, env, &x) == 0 {
-			return geom.Envelope{}, false, h.err()
+			return geom.Envelope{}, h.err()
 		}
 		var y C.double
 		if C.GEOSGeomGetY_r(h.context, env, &y) == 0 {
-			return geom.Envelope{}, false, h.err()
+			return geom.Envelope{}, h.err()
 		}
-		env, err := geom.NewEnvelope(geom.XY{X: float64(x), Y: float64(y)})
-		return env, true, err
+		return geom.NewEnvelope([]geom.XY{{X: float64(x), Y: float64(y)}})
+	case "Polygon":
+		// Continues below
+	default:
+		return geom.Envelope{}, fmt.Errorf(
+			"unexpected geometry type from GEOSEnvelope_r: %v", gTypeStr)
 	}
 
 	ring := C.GEOSGetExteriorRing_r(h.context, env)
 	if ring == nil {
-		return geom.Envelope{}, false, h.err()
+		return geom.Envelope{}, h.err()
 	}
 	// ring belongs to env, so doesn't need to be destroyed.
 
 	seq := C.GEOSGeom_getCoordSeq_r(h.context, ring)
 	if seq == nil {
-		return geom.Envelope{}, false, h.err()
+		return geom.Envelope{}, h.err()
 	}
 	// seq belongs to ring, so doesn't need to be destroyed.
 
 	var size C.uint
 	if C.GEOSCoordSeq_getSize_r(h.context, seq, &size) == 0 {
-		return geom.Envelope{}, false, h.err()
+		return geom.Envelope{}, h.err()
 	}
 	if size == 0 {
-		return geom.Envelope{}, false, errors.New(
+		return geom.Envelope{}, errors.New(
 			"coordinate sequence doesn't contain any points")
 	}
 
@@ -534,29 +539,20 @@ func (h *Handle) envelope(g geom.Geometry) (geom.Envelope, bool, error) {
 	for i := C.uint(0); i < size; i++ {
 		var x C.double
 		if C.GEOSCoordSeq_getX_r(h.context, seq, i, &x) == 0 {
-			return geom.Envelope{}, false, h.err()
+			return geom.Envelope{}, h.err()
 		}
 		var y C.double
 		if C.GEOSCoordSeq_getY_r(h.context, seq, i, &y) == 0 {
-			return geom.Envelope{}, false, h.err()
+			return geom.Envelope{}, h.err()
 		}
 		xy := geom.XY{X: float64(x), Y: float64(y)}
-		if i == 0 {
-			var err error
-			sfEnv, err = geom.NewEnvelope(xy)
-			if err != nil {
-				return geom.Envelope{}, false, err
-			}
-		} else {
-			var err error
-			sfEnv, err = sfEnv.ExtendToIncludeXY(xy)
-			if err != nil {
-				return geom.Envelope{}, false, err
-			}
+		sfEnv, err = sfEnv.ExtendToIncludeXY(xy)
+		if err != nil {
+			return geom.Envelope{}, err
 		}
 	}
 
-	return sfEnv, true, nil
+	return sfEnv, nil
 }
 
 func (h *Handle) isSimple(g geom.Geometry) (isSimple bool, defined bool, err error) {

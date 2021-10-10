@@ -122,7 +122,7 @@ func (m MultiLineString) IsSimple() bool {
 				continue
 			}
 			items = append(items, rtree.BulkItem{
-				Box:      ln.uncheckedEnvelope().box(),
+				Box:      ln.box(),
 				RecordID: toRecordID(i, j),
 			})
 		}
@@ -138,7 +138,7 @@ func (m MultiLineString) IsSimple() bool {
 				continue
 			}
 			isSimple := true // assume simple until proven otherwise
-			tree.RangeSearch(ln.uncheckedEnvelope().box(), func(recordID int) error {
+			tree.RangeSearch(ln.box(), func(recordID int) error {
 				// Ignore the intersection if it's for the same LineString that we're currently looking up.
 				lineStringIdx, seqIdx := fromRecordID(recordID)
 				if lineStringIdx == i {
@@ -192,24 +192,13 @@ func (m MultiLineString) IsEmpty() bool {
 	return true
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry. If
-// the geometry is empty, then false is returned.
-func (m MultiLineString) Envelope() (Envelope, bool) {
+// Envelope returns the Envelope that most tightly surrounds the geometry.
+func (m MultiLineString) Envelope() Envelope {
 	var env Envelope
-	var has bool
 	for _, ls := range m.lines {
-		e, ok := ls.Envelope()
-		if !ok {
-			continue
-		}
-		if has {
-			env = env.ExpandToIncludeEnvelope(e)
-		} else {
-			env = e
-			has = true
-		}
+		env = env.ExpandToIncludeEnvelope(ls.Envelope())
 	}
-	return env, has
+	return env
 }
 
 // Boundary returns the spatial boundary of this MultiLineString. This is

@@ -1,5 +1,41 @@
 # Changelog
 
+## Unreleased
+
+- **Breaking change**: The `Envelope` type can now be an empty envelope.
+  Previously, it was only able to represent a rectangle with some area, a
+  horizontal or vertical line, or a single point. Its `AsGeometry` returns
+  an empty `GeometryCollection` in the case where it's empty. The result of
+  `AsGeometry` is unchanged for non-empty envelopes.
+
+- **Breaking change**: The `NewEnvelope` function signature has changed. It now
+  accepts a slice of `geom.XY` as the sole argument. The behaviour of the
+  function is the same as before, except that if no XY values are provided then
+  an empty envelope is returned without error.
+
+- The `Envelope` type now has `IsEmpty`, `IsPoint`, `IsLine`, and
+  `IsRectanagle` methods. These correspond to the 4 possible envelope
+  categories.
+
+- **Breaking change**: The `Envelope` type's `EnvelopeFromGeoms` method has
+  been removed. To replicate the behaviour of this method, users can construct
+  a `GeometryCollection` and call its `Envelope` method.
+
+- **Breaking change**: The `Envelope` type's `Min`, `Max`, and `Center` methods
+  now return `Point`s rather than `XY`s. When the envelope is empty, `Min`,
+  `Max`, and `Center` return empty points.
+
+- **Breaking change**: The `Envelope` type's `Distance` method now returns
+  `(float64, bool)` rather than `float64`. The returned boolean is only true if
+  the distance between the two envelopes is defined (i.e. when they are both
+  non-empty).
+
+- **Breaking change**: The `Envelope` method on the `Geometry`,
+  `GeometryCollection`, `Point`, `LineString`, `Polygon`, `MultiPoint`,
+  `MultiLineString`, and `MultiPolygon` types now return `Envelope` instead of
+  `(Envelope, bool)`. The empty vs non-empty status is encoded inside the
+  envelope instead of via an explicit boolean.
+
 ## v0.32.0
 
 2021-09-08

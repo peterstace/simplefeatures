@@ -90,6 +90,12 @@ func expectGeomEq(t testing.TB, got, want Geometry, opts ...ExactEqualsOption) {
 	}
 }
 
+func expectGeomEqWKT(t testing.TB, got Geometry, wantWKT string, opts ...ExactEqualsOption) {
+	t.Helper()
+	want := geomFromWKT(t, wantWKT)
+	expectGeomEq(t, got, want, opts...)
+}
+
 func expectGeomsEq(t testing.TB, got, want []Geometry, opts ...ExactEqualsOption) {
 	t.Helper()
 	if len(got) != len(want) {
@@ -166,6 +172,26 @@ func expectBytesEq(t testing.TB, got, want []byte) {
 	if !bytes.Equal(got, want) {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
+}
+
+func expectFloat64Eq(t testing.TB, got, want float64) {
+	t.Helper()
+	if got != want {
+		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+	}
+}
+
+func expectEnvEq(t testing.TB, got, want Envelope) {
+	t.Helper()
+	if ExactEquals(got.Min().AsGeometry(), want.Min().AsGeometry()) &&
+		ExactEquals(got.Max().AsGeometry(), want.Max().AsGeometry()) {
+		return
+	}
+	t.Errorf(
+		"\ngot:  %v\nwant: %v\n",
+		got.AsGeometry().AsText(),
+		want.AsGeometry().AsText(),
+	)
 }
 
 func expectSequenceEq(t testing.TB, got, want Sequence) {

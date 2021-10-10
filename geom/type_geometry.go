@@ -382,9 +382,8 @@ func (g Geometry) IsEmpty() bool {
 }
 
 // Envelope returns the axis aligned bounding box that most tightly surrounds
-// the geometry. Envelopes are not defined for empty geometries, in which case
-// the returned flag will be false.
-func (g Geometry) Envelope() (Envelope, bool) {
+// the geometry.
+func (g Geometry) Envelope() Envelope {
 	switch g.gtype {
 	case TypeGeometryCollection:
 		return g.AsGeometryCollection().Envelope()
