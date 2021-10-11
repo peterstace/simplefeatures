@@ -83,9 +83,8 @@ func pointOnAreaSurface(poly Polygon) (Point, float64) {
 	}
 
 	// Create bisector.
-	envMin, minOK := env.Min().XY()
-	envMax, maxOK := env.Max().XY()
-	if !minOK || !maxOK {
+	envMin, envMax, ok := env.MinMaxXYs()
+	if !ok {
 		return Point{}, 0
 	}
 

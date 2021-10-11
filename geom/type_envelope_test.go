@@ -186,6 +186,19 @@ func TestEnvelopeAttributes(t *testing.T) {
 			t.Run("Max", func(t *testing.T) {
 				expectGeomEqWKT(t, tc.env.Max().AsGeometry(), tc.max)
 			})
+			t.Run("MinMaxXYs", func(t *testing.T) {
+				gotMin, gotMax, gotOK := tc.env.MinMaxXYs()
+				expectBoolEq(t, gotOK, !tc.isEmpty)
+				if gotOK {
+					wantMin, minOK := geomFromWKT(t, tc.min).AsPoint().XY()
+					expectTrue(t, minOK)
+					expectXYEq(t, gotMin, wantMin)
+
+					wantMax, maxOK := geomFromWKT(t, tc.max).AsPoint().XY()
+					expectTrue(t, maxOK)
+					expectXYEq(t, gotMax, wantMax)
+				}
+			})
 			t.Run("AsGeometry", func(t *testing.T) {
 				expectGeomEqWKT(t, tc.env.AsGeometry(), tc.geom, IgnoreOrder)
 			})
