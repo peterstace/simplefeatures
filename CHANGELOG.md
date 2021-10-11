@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Adds a new method `MinMaxXYs (XY, XY, bool)` to the `Envelope` type. The
+  first two return values are the minimum and maximum XY values in the
+  envelope, and the third return value indicates whether or not the first two
+  are defined (they are only defined for non-empty envelopes).
+
 ## v0.33.0
 
 2021-10-11
