@@ -150,6 +150,17 @@ func (e Envelope) Max() Point {
 	return e.max().asUncheckedPoint()
 }
 
+// MinMaxXYs returns the two XY values in the envelope that contain the minimum
+// (first return value) and maximum (second return value) X and Y values in the
+// envelope. The third return value is true if and only if the Envelope is
+// non-empty and thus the first two return values are populated.
+func (e Envelope) MinMaxXYs() (XY, XY, bool) {
+	if e.IsEmpty() {
+		return XY{}, XY{}, false
+	}
+	return e.min(), e.max(), true
+}
+
 // ExtendToIncludeXY returns the smallest envelope that contains all of the
 // points in this envelope along with the provided point. It gives an error if
 // the XY contains NaN or +/- Infinite coordinates.
