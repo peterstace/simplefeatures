@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.33.1
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - Adds a new method `MinMaxXYs (XY, XY, bool)` to the `Envelope` type. The
   first two return values are the minimum and maximum XY values in the
