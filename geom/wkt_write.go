@@ -38,19 +38,14 @@ func appendWKTEmpty(dst []byte) []byte {
 	return append(dst, "EMPTY"...)
 }
 
-func appendWKTSequence(dst []byte, seq Sequence, parens bool, empty BitSet) []byte {
+func appendWKTSequence(dst []byte, seq Sequence, parens bool) []byte {
 	n := seq.Length()
 	dst = append(dst, '(')
 	for i := 0; i < n; i++ {
 		if i > 0 {
 			dst = append(dst, ',')
 		}
-		if empty.Get(i) {
-			dst = appendWKTEmpty(dst)
-		} else {
-			c := seq.Get(i)
-			dst = appendWKTCoords(dst, c, parens)
-		}
+		dst = appendWKTCoords(dst, seq.Get(i), parens)
 	}
 	dst = append(dst, ')')
 	return dst

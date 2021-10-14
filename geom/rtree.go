@@ -14,7 +14,7 @@ func newIndexedLines(lines []line) indexedLines {
 	bulk := make([]rtree.BulkItem, len(lines))
 	for i, ln := range lines {
 		bulk[i] = rtree.BulkItem{
-			Box:      ln.envelope().box(),
+			Box:      ln.box(),
 			RecordID: i,
 		}
 	}

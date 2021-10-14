@@ -382,9 +382,8 @@ func (g Geometry) IsEmpty() bool {
 }
 
 // Envelope returns the axis aligned bounding box that most tightly surrounds
-// the geometry. Envelopes are not defined for empty geometries, in which case
-// the returned flag will be false.
-func (g Geometry) Envelope() (Envelope, bool) {
+// the geometry.
+func (g Geometry) Envelope() Envelope {
 	switch g.gtype {
 	case TypeGeometryCollection:
 		return g.AsGeometryCollection().Envelope()
@@ -766,4 +765,54 @@ func (g Geometry) appendDump(gs []Geometry) []Geometry {
 		panic("unknown type: " + g.Type().String())
 	}
 	return gs
+}
+
+// DumpCoordinates returns the control points making up the geometry as a
+// Sequence.
+func (g Geometry) DumpCoordinates() Sequence {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		return g.AsGeometryCollection().DumpCoordinates()
+	case TypePoint:
+		return g.AsPoint().DumpCoordinates()
+	case TypeLineString:
+		return g.AsLineString().Coordinates()
+	case TypePolygon:
+		return g.AsPolygon().DumpCoordinates()
+	case TypeMultiPoint:
+		return g.AsMultiPoint().Coordinates()
+	case TypeMultiLineString:
+		return g.AsMultiLineString().DumpCoordinates()
+	case TypeMultiPolygon:
+		return g.AsMultiPolygon().DumpCoordinates()
+	default:
+		panic("unknown type: " + g.Type().String())
+	}
+}
+
+// Summary returns a text summary of the Geometry following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (g Geometry) Summary() string {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		return g.AsGeometryCollection().Summary()
+	case TypePoint:
+		return g.AsPoint().Summary()
+	case TypeLineString:
+		return g.AsLineString().Summary()
+	case TypePolygon:
+		return g.AsPolygon().Summary()
+	case TypeMultiPoint:
+		return g.AsMultiPoint().Summary()
+	case TypeMultiLineString:
+		return g.AsMultiLineString().Summary()
+	case TypeMultiPolygon:
+		return g.AsMultiPolygon().Summary()
+	default:
+		panic("unknown type: " + g.Type().String())
+	}
+}
+
+// String returns the string representation of the Geometry.
+func (g Geometry) String() string {
+	return g.Summary()
 }

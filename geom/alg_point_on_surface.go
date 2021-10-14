@@ -56,11 +56,12 @@ func pointOnAreaSurface(poly Polygon) (Point, float64) {
 	// 5. The PointOnSurface is the midpoint of that largest portion.
 
 	// Find envelope midpoint.
-	env, ok := poly.Envelope()
+	env := poly.Envelope()
+	mid, ok := env.Center().XY()
 	if !ok {
 		return Point{}, 0
 	}
-	midY := env.Center().Y
+	midY := mid.Y
 
 	// Adjust mid-y value if a control point has the same Y.
 	var midYMatchesNode bool
@@ -82,9 +83,14 @@ func pointOnAreaSurface(poly Polygon) (Point, float64) {
 	}
 
 	// Create bisector.
+	envMin, envMax, ok := env.MinMaxXYs()
+	if !ok {
+		return Point{}, 0
+	}
+
 	bisector := line{
-		XY{env.Min().X - 1, midY},
-		XY{env.Max().X + 1, midY},
+		XY{envMin.X - 1, midY},
+		XY{envMax.X + 1, midY},
 	}
 
 	// Find intersection points between the bisector and the polygon.
@@ -127,7 +133,7 @@ func pointOnAreaSurface(poly Polygon) (Point, float64) {
 	}
 	midX := (bestA + bestB) / 2
 
-	return NewPointFromXY(XY{midX, midY}), bestB - bestA
+	return XY{midX, midY}.asUncheckedPoint(), bestB - bestA
 }
 
 func sortAndUniquifyFloats(fs []float64) []float64 {

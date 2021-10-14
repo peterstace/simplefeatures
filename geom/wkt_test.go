@@ -17,8 +17,29 @@ func TestUnmarshalWKTValidGrammar(t *testing.T) {
 		{"lower case", "point (1 1)"},
 		{"no space between tag and coord", "point(1 1)"},
 		{"exponent", "point (1e3 1.5e2)"},
+		{
+			"multipoint with single empty point",
+			"MULTIPOINT(EMPTY)",
+		},
+		{
+			"multipoint with empty point and non-empty point, empty first",
+			"MULTIPOINT(EMPTY,1 2)",
+		},
+		{
+			"multipoint with empty point and non-empty point, empty second",
+			"MULTIPOINT(1 2,EMPTY)",
+		},
+		{
+			"multipoint with empty point and non-empty point with parens, empty first",
+			"MULTIPOINT(EMPTY,(1 2))",
+		},
+		{
+			"multipoint with empty point and non-empty point with parens, empty second",
+			"MULTIPOINT((1 2),EMPTY)",
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Logf("WKT: %v", tt.wkt)
 			_, err := UnmarshalWKT(tt.wkt)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -128,6 +149,11 @@ func TestUnmarshalWKTSyntaxErrors(t *testing.T) {
 			// _could_ alter the code to give a more accurate error message,
 			// but I think it's ok because this is an extreme edge case.
 			"unexpected EOF",
+		},
+		{
+			"multipoint with parenthesis around empty point",
+			"MULTIPOINT((1 2),(EMPTY))",
+			"strconv.ParseFloat: parsing \"EMPTY\": invalid syntax",
 		},
 	} {
 		t.Run(tt.description, func(t *testing.T) {

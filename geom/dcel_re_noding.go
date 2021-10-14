@@ -223,12 +223,12 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 		// Collect cut locations that are *interior* to ln.
 		eps := 0xFF * ulpSizeForLine(ln)
 		var xys []XY
-		cut.lnIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
+		cut.lnIndex.tree.RangeSearch(ln.box(), func(i int) error {
 			other := cut.lnIndex.lines[i]
 			xys = appendNewNodesFromLineLineIntersection(xys, ln, other, eps, nodes)
 			return nil
 		})
-		cut.ptIndex.tree.RangeSearch(ln.envelope().box(), func(i int) error {
+		cut.ptIndex.tree.RangeSearch(ln.box(), func(i int) error {
 			other := cut.ptIndex.points[i]
 			xys = appendNewNodesFromLinePointIntersection(xys, ln, other, eps, nodes)
 			return nil
@@ -271,7 +271,7 @@ func reNodeMultiLineString(mls MultiLineString, cut cutSet, nodes nodeSet) (Mult
 			return MultiLineString{}, err
 		}
 	}
-	return NewMultiLineStringFromLineStrings(lss, DisableAllValidations), nil
+	return NewMultiLineString(lss, DisableAllValidations), nil
 }
 
 func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) (Polygon, error) {
@@ -284,7 +284,7 @@ func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) (Polygon, error) {
 	for i := 0; i < n; i++ {
 		rings[i] = reNodedBoundary.LineStringN(i)
 	}
-	reNodedPoly, err := NewPolygonFromRings(rings, DisableAllValidations)
+	reNodedPoly, err := NewPolygon(rings, DisableAllValidations)
 	if err != nil {
 		return Polygon{}, err
 	}
@@ -301,7 +301,7 @@ func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet) (Multi
 			return MultiPolygon{}, err
 		}
 	}
-	reNodedMP, err := NewMultiPolygonFromPolygons(polys, DisableAllValidations)
+	reNodedMP, err := NewMultiPolygon(polys, DisableAllValidations)
 	if err != nil {
 		return MultiPolygon{}, err
 	}

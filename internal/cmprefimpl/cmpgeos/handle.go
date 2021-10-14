@@ -30,9 +30,9 @@ GEOSContextHandle_t sf_geos_init(void *userdata) {
 import "C"
 
 var (
-	NonEmptyGeometryCollectionNotSupportedError = errors.New(
+	errNonEmptyGeometryCollectionNotSupported = errors.New(
 		"non-empty GeometryCollection not supported")
-	LibgeosCrashError = errors.New(
+	errLibgeosCrash = errors.New(
 		"libgeos would crash with this input")
 )
 
@@ -66,7 +66,7 @@ func NewHandle() (*Handle, error) {
 }
 
 // Close cleans up memory resources associated with the handle. If Close is not
-// called, then a memory leak will occurr.
+// called, then a memory leak will occur.
 func (h *Handle) Close() {
 	C.GEOSWKBWriter_destroy_r(h.context, h.wkbWriter)
 	C.GEOSWKBReader_destroy_r(h.context, h.wkbReader)
@@ -293,7 +293,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 				subPoints[i] = subPointAsGeom.AsPoint()
 			}
 		}
-		return geom.NewMultiPointFromPoints(subPoints).AsGeometry(), nil
+		return geom.NewMultiPoint(subPoints).AsGeometry(), nil
 	case "MultiPolygon":
 		n := C.GEOSGetNumGeometries_r(h.context, gh)
 		if n == -1 {
@@ -315,7 +315,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 			}
 			subPolys[i] = subPolyAsGeom.AsPolygon()
 		}
-		mp, err := geom.NewMultiPolygonFromPolygons(subPolys)
+		mp, err := geom.NewMultiPolygon(subPolys)
 		return mp.AsGeometry(), err
 	case "GeometryCollection":
 		n := C.GEOSGetNumGeometries_r(h.context, gh)
@@ -342,9 +342,9 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 	}
 }
 
-// ErrInvalidAccordingToGEOS indicates that the geometry or geometry resulting
+// errInvalidAccordingToGEOS indicates that the geometry or geometry resulting
 // from an operation is invalid according to GEOS.
-var ErrInvalidAccordingToGEOS = errors.New("invalid geometry according to GEOS")
+var errInvalidAccordingToGEOS = errors.New("invalid geometry according to GEOS")
 
 func (h *Handle) decodeGeomHandleUsingWKB(gh *C.GEOSGeometry) (geom.Geometry, error) {
 	// Check to see if GEOS thinks the geometry is invalid. Sometimes the
@@ -356,7 +356,7 @@ func (h *Handle) decodeGeomHandleUsingWKB(gh *C.GEOSGeometry) (geom.Geometry, er
 		return geom.Geometry{}, err
 	}
 	if !isValid {
-		return geom.Geometry{}, ErrInvalidAccordingToGEOS
+		return geom.Geometry{}, errInvalidAccordingToGEOS
 	}
 
 	var size C.size_t
@@ -370,7 +370,7 @@ func (h *Handle) decodeGeomHandleUsingWKB(gh *C.GEOSGeometry) (geom.Geometry, er
 	return geom.UnmarshalWKB(byts)
 }
 
-func (h *Handle) AsText(g geom.Geometry) (string, error) {
+func (h *Handle) asText(g geom.Geometry) (string, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return "", err
@@ -392,7 +392,7 @@ func (h *Handle) AsText(g geom.Geometry) (string, error) {
 	return C.GoString(wkt), nil
 }
 
-func (h *Handle) FromText(wkt string) (geom.Geometry, error) {
+func (h *Handle) fromText(wkt string) (geom.Geometry, error) {
 	reader := C.GEOSWKTReader_create_r(h.context)
 	if reader == nil {
 		return geom.Geometry{}, fmt.Errorf("creating wkt reader: %v", h.err())
@@ -410,7 +410,7 @@ func (h *Handle) FromText(wkt string) (geom.Geometry, error) {
 	return h.decodeGeomHandle(gh)
 }
 
-func (h *Handle) AsBinary(g geom.Geometry) ([]byte, error) {
+func (h *Handle) asBinary(g geom.Geometry) ([]byte, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return nil, err
@@ -431,7 +431,7 @@ func (h *Handle) AsBinary(g geom.Geometry) ([]byte, error) {
 	return C.GoBytes(unsafe.Pointer(wkb), C.int(size)), nil
 }
 
-func (h *Handle) FromBinary(wkb []byte) (geom.Geometry, error) {
+func (h *Handle) fromBinary(wkb []byte) (geom.Geometry, error) {
 	gh := C.GEOSWKBReader_read_r(
 		h.context,
 		h.wkbReader,
@@ -445,7 +445,7 @@ func (h *Handle) FromBinary(wkb []byte) (geom.Geometry, error) {
 	return h.decodeGeomHandle(gh)
 }
 
-func (h *Handle) IsEmpty(g geom.Geometry) (bool, error) {
+func (h *Handle) isEmpty(g geom.Geometry) (bool, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return false, err
@@ -455,7 +455,7 @@ func (h *Handle) IsEmpty(g geom.Geometry) (bool, error) {
 	return h.boolErr(C.GEOSisEmpty_r(h.context, gh))
 }
 
-func (h *Handle) Dimension(g geom.Geometry) (int, error) {
+func (h *Handle) dimension(g geom.Geometry) (int, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return 0, err
@@ -469,23 +469,23 @@ func (h *Handle) Dimension(g geom.Geometry) (int, error) {
 	return dim, nil
 }
 
-func (h *Handle) Envelope(g geom.Geometry) (geom.Envelope, bool, error) {
+func (h *Handle) envelope(g geom.Geometry) (geom.Envelope, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
-		return geom.Envelope{}, false, err
+		return geom.Envelope{}, err
 	}
 	defer C.GEOSGeom_destroy(gh)
 
 	env := C.GEOSEnvelope_r(h.context, gh)
 	if env == nil {
-		return geom.Envelope{}, false, h.err()
+		return geom.Envelope{}, h.err()
 	}
 	defer C.GEOSGeom_destroy_r(h.context, env)
 
 	if isEmpty, err := h.boolErr(C.GEOSisEmpty_r(h.context, env)); err != nil {
-		return geom.Envelope{}, false, err
+		return geom.Envelope{}, err
 	} else if isEmpty {
-		return geom.Envelope{}, false, nil
+		return geom.Envelope{}, nil
 	}
 
 	// libgeos will return either a Point or a Polygon. In the case where the
@@ -493,39 +493,45 @@ func (h *Handle) Envelope(g geom.Geometry) (geom.Envelope, bool, error) {
 	// invalid Polygon is returned.
 	geomType := C.GEOSGeomType_r(h.context, env)
 	if geomType == nil {
-		return geom.Envelope{}, false, h.err()
+		return geom.Envelope{}, h.err()
 	}
 	defer C.free(unsafe.Pointer(geomType))
-	if C.GoString(geomType) == "Point" {
+	switch gTypeStr := C.GoString(geomType); gTypeStr {
+	case "Point":
 		var x C.double
 		if C.GEOSGeomGetX_r(h.context, env, &x) == 0 {
-			return geom.Envelope{}, false, h.err()
+			return geom.Envelope{}, h.err()
 		}
 		var y C.double
 		if C.GEOSGeomGetY_r(h.context, env, &y) == 0 {
-			return geom.Envelope{}, false, h.err()
+			return geom.Envelope{}, h.err()
 		}
-		return geom.NewEnvelope(geom.XY{X: float64(x), Y: float64(y)}), true, nil
+		return geom.NewEnvelope([]geom.XY{{X: float64(x), Y: float64(y)}})
+	case "Polygon":
+		// Continues below
+	default:
+		return geom.Envelope{}, fmt.Errorf(
+			"unexpected geometry type from GEOSEnvelope_r: %v", gTypeStr)
 	}
 
 	ring := C.GEOSGetExteriorRing_r(h.context, env)
 	if ring == nil {
-		return geom.Envelope{}, false, h.err()
+		return geom.Envelope{}, h.err()
 	}
 	// ring belongs to env, so doesn't need to be destroyed.
 
 	seq := C.GEOSGeom_getCoordSeq_r(h.context, ring)
 	if seq == nil {
-		return geom.Envelope{}, false, h.err()
+		return geom.Envelope{}, h.err()
 	}
 	// seq belongs to ring, so doesn't need to be destroyed.
 
 	var size C.uint
 	if C.GEOSCoordSeq_getSize_r(h.context, seq, &size) == 0 {
-		return geom.Envelope{}, false, h.err()
+		return geom.Envelope{}, h.err()
 	}
 	if size == 0 {
-		return geom.Envelope{}, false, errors.New(
+		return geom.Envelope{}, errors.New(
 			"coordinate sequence doesn't contain any points")
 	}
 
@@ -533,28 +539,27 @@ func (h *Handle) Envelope(g geom.Geometry) (geom.Envelope, bool, error) {
 	for i := C.uint(0); i < size; i++ {
 		var x C.double
 		if C.GEOSCoordSeq_getX_r(h.context, seq, i, &x) == 0 {
-			return geom.Envelope{}, false, h.err()
+			return geom.Envelope{}, h.err()
 		}
 		var y C.double
 		if C.GEOSCoordSeq_getY_r(h.context, seq, i, &y) == 0 {
-			return geom.Envelope{}, false, h.err()
+			return geom.Envelope{}, h.err()
 		}
 		xy := geom.XY{X: float64(x), Y: float64(y)}
-		if i == 0 {
-			sfEnv = geom.NewEnvelope(xy)
-		} else {
-			sfEnv = sfEnv.ExtendToIncludePoint(xy)
+		sfEnv, err = sfEnv.ExtendToIncludeXY(xy)
+		if err != nil {
+			return geom.Envelope{}, err
 		}
 	}
 
-	return sfEnv, true, nil
+	return sfEnv, nil
 }
 
-func (h *Handle) IsSimple(g geom.Geometry) (isSimple bool, defined bool, err error) {
+func (h *Handle) isSimple(g geom.Geometry) (isSimple bool, defined bool, err error) {
 	// libgeos crashes when GEOSisSimple_r is called with MultiPoints
 	// containing empty Points.
 	if containsMultiPointWithEmptyPoint(g) {
-		return false, false, LibgeosCrashError
+		return false, false, errLibgeosCrash
 	}
 
 	gh, err := h.createGeomHandle(g)
@@ -577,7 +582,7 @@ func (h *Handle) IsSimple(g geom.Geometry) (isSimple bool, defined bool, err err
 	return isSimple, true, err
 }
 
-func (h *Handle) Boundary(g geom.Geometry) (geom.Geometry, bool, error) {
+func (h *Handle) boundary(g geom.Geometry) (geom.Geometry, bool, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return geom.Geometry{}, false, err
@@ -603,7 +608,7 @@ func (h *Handle) Boundary(g geom.Geometry) (geom.Geometry, bool, error) {
 	return sfBound, true, err
 }
 
-func (h *Handle) ConvexHull(g geom.Geometry) (geom.Geometry, error) {
+func (h *Handle) convexHull(g geom.Geometry) (geom.Geometry, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return geom.Geometry{}, err
@@ -619,7 +624,7 @@ func (h *Handle) ConvexHull(g geom.Geometry) (geom.Geometry, error) {
 	return h.decodeGeomHandle(env)
 }
 
-func (h *Handle) IsValid(g geom.Geometry) (bool, error) {
+func (h *Handle) isValid(g geom.Geometry) (bool, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return false, err
@@ -629,7 +634,7 @@ func (h *Handle) IsValid(g geom.Geometry) (bool, error) {
 	return h.boolErr(C.GEOSisValid_r(h.context, gh))
 }
 
-func (h *Handle) IsRing(g geom.Geometry) (bool, error) {
+func (h *Handle) isRing(g geom.Geometry) (bool, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return false, err
@@ -639,7 +644,7 @@ func (h *Handle) IsRing(g geom.Geometry) (bool, error) {
 	return h.boolErr(C.GEOSisRing_r(h.context, gh))
 }
 
-func (h *Handle) Length(g geom.Geometry) (float64, error) {
+func (h *Handle) length(g geom.Geometry) (float64, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return 0, err
@@ -651,7 +656,7 @@ func (h *Handle) Length(g geom.Geometry) (float64, error) {
 	return length, h.intToErr(errInt)
 }
 
-func (h *Handle) Area(g geom.Geometry) (float64, error) {
+func (h *Handle) area(g geom.Geometry) (float64, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return 0, err
@@ -663,7 +668,7 @@ func (h *Handle) Area(g geom.Geometry) (float64, error) {
 	return area, h.intToErr(errInt)
 }
 
-func (h *Handle) Centroid(g geom.Geometry) (geom.Geometry, error) {
+func (h *Handle) centroid(g geom.Geometry) (geom.Geometry, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return geom.Geometry{}, err
@@ -679,7 +684,7 @@ func (h *Handle) Centroid(g geom.Geometry) (geom.Geometry, error) {
 	return h.decodeGeomHandle(env)
 }
 
-func (h *Handle) Reverse(g geom.Geometry) (geom.Geometry, error) {
+func (h *Handle) reverse(g geom.Geometry) (geom.Geometry, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return geom.Geometry{}, err
@@ -695,7 +700,7 @@ func (h *Handle) Reverse(g geom.Geometry) (geom.Geometry, error) {
 	return h.decodeGeomHandle(env)
 }
 
-func (h *Handle) Simplify(g geom.Geometry, threshold float64) (geom.Geometry, error) {
+func (h *Handle) simplify(g geom.Geometry, threshold float64) (geom.Geometry, error) {
 	gh, err := h.createGeomHandle(g)
 	if err != nil {
 		return geom.Geometry{}, err
@@ -711,14 +716,14 @@ func (h *Handle) Simplify(g geom.Geometry, threshold float64) (geom.Geometry, er
 	return h.decodeGeomHandle(simp)
 }
 
-func (h *Handle) Intersects(g1, g2 geom.Geometry) (bool, error) {
+func (h *Handle) intersects(g1, g2 geom.Geometry) (bool, error) {
 	if isNonEmptyGeometryCollection(g1) || isNonEmptyGeometryCollection(g2) {
-		return false, NonEmptyGeometryCollectionNotSupportedError
+		return false, errNonEmptyGeometryCollectionNotSupported
 	}
 	// libgeos crashes when GEOSIntersects_r is called with MultiPoints
 	// containing empty Points.
 	if containsMultiPointWithEmptyPoint(g1) || containsMultiPointWithEmptyPoint(g2) {
-		return false, LibgeosCrashError
+		return false, errLibgeosCrash
 	}
 
 	gh1, err := h.createGeomHandle(g1)
@@ -735,9 +740,9 @@ func (h *Handle) Intersects(g1, g2 geom.Geometry) (bool, error) {
 	return h.boolErr(C.GEOSIntersects_r(h.context, gh1, gh2))
 }
 
-func (h *Handle) ExactEquals(g1, g2 geom.Geometry) (bool, error) {
+func (h *Handle) exactEquals(g1, g2 geom.Geometry) (bool, error) {
 	if isNonEmptyGeometryCollection(g1) || isNonEmptyGeometryCollection(g2) {
-		return false, NonEmptyGeometryCollectionNotSupportedError
+		return false, errNonEmptyGeometryCollectionNotSupported
 	}
 
 	gh1, err := h.createGeomHandle(g1)
@@ -754,7 +759,7 @@ func (h *Handle) ExactEquals(g1, g2 geom.Geometry) (bool, error) {
 	return h.boolErr(C.GEOSEqualsExact_r(h.context, gh1, gh2, 0.0))
 }
 
-func (h *Handle) Distance(g1, g2 geom.Geometry) (float64, error) {
+func (h *Handle) distance(g1, g2 geom.Geometry) (float64, error) {
 	if containsMultiLineStringWithEmptyLineString(g1) ||
 		containsMultiLineStringWithEmptyLineString(g2) ||
 		containsMultiPointWithEmptyPoint(g1) ||
@@ -762,7 +767,7 @@ func (h *Handle) Distance(g1, g2 geom.Geometry) (float64, error) {
 		containsMultiPolygonWithEmptyPolygon(g1) ||
 		containsMultiPolygonWithEmptyPolygon(g2) {
 		// GEOS crashes on these inputs.
-		return 0, LibgeosCrashError
+		return 0, errLibgeosCrash
 	}
 
 	gh1, err := h.createGeomHandle(g1)
@@ -781,7 +786,7 @@ func (h *Handle) Distance(g1, g2 geom.Geometry) (float64, error) {
 	return float64(dist), err
 }
 
-func (h *Handle) Union(g1, g2 geom.Geometry) (geom.Geometry, error) {
+func (h *Handle) union(g1, g2 geom.Geometry) (geom.Geometry, error) {
 	gh1, err := h.createGeomHandle(g1)
 	if err != nil {
 		return geom.Geometry{}, h.err()
@@ -802,7 +807,7 @@ func (h *Handle) Union(g1, g2 geom.Geometry) (geom.Geometry, error) {
 	return h.decodeGeomHandle(union)
 }
 
-func (h *Handle) Intersection(g1, g2 geom.Geometry) (geom.Geometry, error) {
+func (h *Handle) intersection(g1, g2 geom.Geometry) (geom.Geometry, error) {
 	gh1, err := h.createGeomHandle(g1)
 	if err != nil {
 		return geom.Geometry{}, h.err()
@@ -823,7 +828,7 @@ func (h *Handle) Intersection(g1, g2 geom.Geometry) (geom.Geometry, error) {
 	return h.decodeGeomHandle(union)
 }
 
-func (h *Handle) Difference(g1, g2 geom.Geometry) (geom.Geometry, error) {
+func (h *Handle) difference(g1, g2 geom.Geometry) (geom.Geometry, error) {
 	gh1, err := h.createGeomHandle(g1)
 	if err != nil {
 		return geom.Geometry{}, h.err()
@@ -844,7 +849,7 @@ func (h *Handle) Difference(g1, g2 geom.Geometry) (geom.Geometry, error) {
 	return h.decodeGeomHandle(union)
 }
 
-func (h *Handle) SymmetricDifference(g1, g2 geom.Geometry) (geom.Geometry, error) {
+func (h *Handle) symmetricDifference(g1, g2 geom.Geometry) (geom.Geometry, error) {
 	gh1, err := h.createGeomHandle(g1)
 	if err != nil {
 		return geom.Geometry{}, h.err()
@@ -865,10 +870,10 @@ func (h *Handle) SymmetricDifference(g1, g2 geom.Geometry) (geom.Geometry, error
 	return h.decodeGeomHandle(union)
 }
 
-func (h *Handle) Relate(g1, g2 geom.Geometry) (string, error) {
+func (h *Handle) relate(g1, g2 geom.Geometry) (string, error) {
 	if containsMultiPointWithEmptyPoint(g1) || containsMultiPointWithEmptyPoint(g2) {
 		// GEOS crashes on these inputs.
-		return "", LibgeosCrashError
+		return "", errLibgeosCrash
 	}
 
 	gh1, err := h.createGeomHandle(g1)
@@ -890,7 +895,7 @@ func (h *Handle) Relate(g1, g2 geom.Geometry) (string, error) {
 	return C.GoString(matrix), nil
 }
 
-func (h *Handle) RelateMatch(mat, pat string) (bool, error) {
+func (h *Handle) relateMatch(mat, pat string) (bool, error) {
 	cMat := C.CString(mat)
 	cPat := C.CString(pat)
 	defer C.free(unsafe.Pointer(cMat))

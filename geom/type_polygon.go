@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"math"
 	"unsafe"
 
@@ -29,11 +30,11 @@ type Polygon struct {
 	ctype CoordinatesType
 }
 
-// NewPolygonFromRings creates a polygon given its rings. The outer ring is
-// first, and any inner rings follow. If no rings are provided, then the
-// returned Polygon is the empty Polygon. The coordinate type of the polygon is
-// the lowest common coordinate type of its rings.
-func NewPolygonFromRings(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
+// NewPolygon creates a polygon given its rings. The outer ring is first, and
+// any inner rings follow. If no rings are provided, then the returned Polygon
+// is the empty Polygon. The coordinate type of the polygon is the lowest
+// common coordinate type of its rings.
+func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
 	if len(rings) == 0 {
 		return Polygon{}, nil
 	}
@@ -80,13 +81,13 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	boxes := make([]rtree.Box, len(rings))
 	items := make([]rtree.BulkItem, len(rings))
 	for i, r := range rings {
-		env, ok := r.Envelope()
+		box, ok := r.Envelope().box()
 		if !ok {
 			// Cannot occur, because we have already checked to ensure rings
 			// are closed. Closed rings by definition are non-empty.
 			panic("unexpected empty ring")
 		}
-		boxes[i] = env.box()
+		boxes[i] = box
 		items[i] = rtree.BulkItem{Box: boxes[i], RecordID: i}
 	}
 	tree := rtree.BulkLoad(items)
@@ -180,6 +181,14 @@ func (p Polygon) NumInteriorRings() int {
 	return max(0, len(p.rings)-1)
 }
 
+// NumRings gives the total number of rings: ExternalRing + NumInteriorRings().
+func (p Polygon) NumRings() int {
+	if p.IsEmpty() {
+		return 0
+	}
+	return 1 + p.NumInteriorRings()
+}
+
 // InteriorRingN gives the nth (zero indexed) interior ring in the polygon
 // boundary. It will panic if n is out of bounds with respect to the number of
 // interior rings.
@@ -232,9 +241,8 @@ func (p Polygon) IsEmpty() bool {
 	return len(p.rings) == 0
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry. If
-// the geometry is empty, then false is returned.
-func (p Polygon) Envelope() (Envelope, bool) {
+// Envelope returns the Envelope that most tightly surrounds the geometry.
+func (p Polygon) Envelope() Envelope {
 	return p.ExteriorRing().Envelope()
 }
 
@@ -242,7 +250,7 @@ func (p Polygon) Envelope() (Envelope, bool) {
 // Polygons, this is the MultiLineString collection containing all of the
 // rings.
 func (p Polygon) Boundary() MultiLineString {
-	return NewMultiLineStringFromLineStrings(p.rings).Force2D()
+	return NewMultiLineString(p.rings).Force2D()
 }
 
 // Value implements the database/sql/driver.Valuer interface by returning the
@@ -323,7 +331,7 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon
 			return Polygon{}, wrapTransformed(err)
 		}
 	}
-	poly, err := NewPolygonFromRings(transformed, opts...)
+	poly, err := NewPolygon(transformed, opts...)
 	return poly.ForceCoordinatesType(p.ctype), wrapTransformed(err)
 }
 
@@ -422,7 +430,7 @@ func (p Polygon) Centroid() Point {
 		centroid = centroid.Add(
 			weightedCentroid(p.InteriorRingN(i), areas[i+1], sumAreas))
 	}
-	return NewPointFromXY(centroid)
+	return centroid.asUncheckedPoint()
 }
 
 func weightedCentroid(ring LineString, ringArea, totalArea float64) XY {
@@ -463,7 +471,7 @@ func (p Polygon) AsMultiPolygon() MultiPolygon {
 	if !p.IsEmpty() {
 		polys = []Polygon{p}
 	}
-	mp, err := NewMultiPolygonFromPolygons(polys)
+	mp, err := NewMultiPolygon(polys)
 	if err != nil {
 		// Cannot occur due to construction. A valid polygon will always be a
 		// valid multipolygon.
@@ -542,4 +550,39 @@ func (p Polygon) controlPoints() int {
 		sum += r.Coordinates().Length()
 	}
 	return sum
+}
+
+// DumpCoordinates returns the points making up the rings in a Polygon as a
+// Sequence.
+func (p Polygon) DumpCoordinates() Sequence {
+	var n int
+	for _, r := range p.rings {
+		n += r.Coordinates().Length()
+	}
+	ctype := p.CoordinatesType()
+	coords := make([]float64, 0, n*ctype.Dimension())
+	for _, r := range p.rings {
+		coords = r.Coordinates().appendAllPoints(coords)
+	}
+	seq := NewSequence(coords, ctype)
+	seq.assertNoUnusedCapacity()
+	return seq
+}
+
+// Summary returns a text summary of the Polygon following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (p Polygon) Summary() string {
+	numPoints := p.DumpCoordinates().Length()
+
+	var ringSuffix string
+	numRings := p.NumRings()
+	if numRings != 1 {
+		ringSuffix = "s"
+	}
+	return fmt.Sprintf("%s[%s] with %d ring%s consisting of %d total points",
+		p.Type(), p.CoordinatesType(), numRings, ringSuffix, numPoints)
+}
+
+// String returns the string representation of the Polygon.
+func (p Polygon) String() string {
+	return p.Summary()
 }

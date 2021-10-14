@@ -1,5 +1,127 @@
 # Changelog
 
+## v0.33.1
+
+__Special thanks to Albert Teoh for contributing to this release.__
+
+- Adds a new method `MinMaxXYs (XY, XY, bool)` to the `Envelope` type. The
+  first two return values are the minimum and maximum XY values in the
+  envelope, and the third return value indicates whether or not the first two
+  are defined (they are only defined for non-empty envelopes).
+
+## v0.33.0
+
+2021-10-11
+
+__Special thanks to Albert Teoh for contributing to this release.__
+
+- **Breaking change**: The `Envelope` type can now be an empty envelope.
+  Previously, it was only able to represent a rectangle with some area, a
+  horizontal or vertical line, or a single point. Its `AsGeometry` returns
+  an empty `GeometryCollection` in the case where it's empty. The result of
+  `AsGeometry` is unchanged for non-empty envelopes.
+
+- **Breaking change**: The `NewEnvelope` function signature has changed. It now
+  accepts a slice of `geom.XY` as the sole argument. The behaviour of the
+  function is the same as before, except that if no XY values are provided then
+  an empty envelope is returned without error.
+
+- **Breaking change**: The `Envelope` type's `EnvelopeFromGeoms` method has
+  been removed. To replicate the behaviour of this method, users can construct
+  a `GeometryCollection` and call its `Envelope` method.
+
+- **Breaking change**: The `Envelope` type's `Min`, `Max`, and `Center` methods
+  now return `Point`s rather than `XY`s. When the envelope is empty, `Min`,
+  `Max`, and `Center` return empty points.
+
+- **Breaking change**: The `Envelope` type's `Distance` method now returns
+  `(float64, bool)` rather than `float64`. The returned boolean is only true if
+  the distance between the two envelopes is defined (i.e. when they are both
+  non-empty).
+
+- **Breaking change**: The `Envelope` method on the `Geometry`,
+  `GeometryCollection`, `Point`, `LineString`, `Polygon`, `MultiPoint`,
+  `MultiLineString`, and `MultiPolygon` types now return `Envelope` instead of
+  `(Envelope, bool)`. The empty vs non-empty status is encoded inside the
+  envelope instead of via an explicit boolean.
+
+- The `Envelope` type now has `IsEmpty`, `IsPoint`, `IsLine`, and
+  `IsRectanagle` methods. These correspond to the 4 possible envelope
+  categories.
+
+## v0.32.0
+
+2021-09-08
+
+__Special thanks to Albert Teoh for contributing to this release.__
+
+- **Breaking change**: Consolidates `MultiPoint` constructors and simplifies
+  `MultiPoint` internal representation. Removes the `BitSet` type, previously
+  used for `MultiPoint` construction. Removes the `NewMultiPointFromPoints` and
+  `NewMultiPointWithEmptyMask` functions. Modifies the `NewMultiPoint` function
+  to accept a slice of `Point`s rather than a `Sequence`.
+
+- **Breaking change**: Consolidates `Point` construction. Removes the
+  `NewPointFromXY` function. It is replaced by a new `AsPoint` method on the
+  `XY` type.
+
+- Refactors internal test helpers.
+
+- Adds linting to CI using `golangci-lint`.
+
+- **Breaking change**: Renames geometry constructors for consistency.
+  `NewPolygonFromRings` is renamed to `NewPolygon`.
+  `NewMultiLineStringFromLineStrings` is renamed to `NewMultiLineString`.
+  `NewMultiPolygonFromPolygons` is renamed to `NewMultiPolygon`.
+
+- **Breaking change**: Adds checks for anomalous `float64` values (NaN and +/-
+  infinity) during geometry construction.
+
+	- The `NewPoint` function now returns `(Point, error)` rather than `Point`.
+	  The returned error is non-nil when the inputs contain anomalous values.
+
+	- The `NewLineString` function's signature doesn't change, but now returns
+	  a non-nil error if the input `Sequence` contains anomalous values.
+
+	- The `OmitInvalid` constructor option now has implications when
+	  constructing `Point` and `MultiPoint` types.
+
+	- The `NewEnvelope` function now returns `(Envelope, error)` rather than
+	  `Envelope`. The returned error is non-nil when when the input XYs contain
+	  anomalous values.
+
+	- The `Envelope` type's `ExtendToIncludePoint` method is renamed to
+	  `ExtendToIncludeXY` (better matching its argument type). It now returns
+	  `(Envelope, erorr)` rather than `Envelope`. The returned error is non-nil
+	  if the inputs contain any anomalous values.
+
+	- The `Envelope` type's `ExpandBy` method is removed due to its limited
+	  utility and complex interactions with anomalous values.
+
+## v0.31.0
+
+2021-08-09
+
+__Special thanks to Albert Teoh for contributing to this release.__
+
+- Fixes some minor linting (and other similar) issues identified by Go Report
+  Card.
+
+- Adds a new `DumpCoordinates` method to geometry types. This method returns a
+  `Sequence` containing all of the control points that define the geometry.
+
+- Adds a new `Summary` method to all geometry types. This method gives a short
+  and human readable summary of geometry values. The summary includes the
+  geometry type, coordinates type, and component cardinalities where
+  appropriate (e.g. number of rings in a polygon).
+
+- Adds a new `String` method to all geometry types, implementing the
+  `fmt.Stringer` interface. The method returns the same string as that returned
+  by the `Summary` method.
+
+- Adds a new `NumRings` method to the `Polygon` type. This method gives the
+  total number of rings that make the polygon.
+
 ## v0.30.0
 
 2021-07-18

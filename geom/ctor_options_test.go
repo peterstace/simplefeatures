@@ -9,7 +9,7 @@ import (
 
 func TestDisableValidation(t *testing.T) {
 	for i, wkt := range []string{
-		// Point -- has no validations
+		// Point -- has no geometric validations
 		"LINESTRING(1 2,1 2)",                // same point
 		"LINESTRING(1 2,1 2,1 2)",            // same point
 		"POLYGON((1 2,1 2,1 2))",             // same point

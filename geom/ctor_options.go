@@ -25,8 +25,10 @@ func DisableAllValidations(o *ctorOptionSet) {
 //
 // The behaviour for each geometry type is:
 //
-// * Point and MultiPoint: no effect (because Point and MultiPoint don't have
-// geometry constraints).
+// * Point: if the Point is invalid, then it is replaced with an empty Point.
+//
+// * MultiPoint: if a child Point is invalid, then it is replace with an empty
+// Point within the MultiPoint.
 //
 // * LineString: if the LineString is invalid (e.g. doesn't contain at least 2
 // distinct points), then it is replaced with an empty LineString.

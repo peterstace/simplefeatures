@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"unsafe"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -12,14 +13,15 @@ import (
 // collection of zero LineStrings) of 2D coordinate type. It is immutable after
 // creation.
 type MultiLineString struct {
+	// Invariant: ctype matches the coordinates type of each line.
 	lines []LineString
 	ctype CoordinatesType
 }
 
-// NewMultiLineStringFromLineStrings creates a MultiLineString from its
-// constituent LineStrings. The coordinates type of the MultiLineString is the
-// lowest common coordinates type of its LineStrings.
-func NewMultiLineStringFromLineStrings(lines []LineString, opts ...ConstructorOption) MultiLineString {
+// NewMultiLineString creates a MultiLineString from its constituent
+// LineStrings. The coordinates type of the MultiLineString is the lowest
+// common coordinates type of its LineStrings.
+func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLineString {
 	if len(lines) == 0 {
 		return MultiLineString{}
 	}
@@ -120,8 +122,8 @@ func (m MultiLineString) IsSimple() bool {
 				continue
 			}
 			items = append(items, rtree.BulkItem{
-				ln.envelope().box(),
-				toRecordID(i, j),
+				Box:      ln.box(),
+				RecordID: toRecordID(i, j),
 			})
 		}
 	}
@@ -136,7 +138,7 @@ func (m MultiLineString) IsSimple() bool {
 				continue
 			}
 			isSimple := true // assume simple until proven otherwise
-			tree.RangeSearch(ln.envelope().box(), func(recordID int) error {
+			tree.RangeSearch(ln.box(), func(recordID int) error {
 				// Ignore the intersection if it's for the same LineString that we're currently looking up.
 				lineStringIdx, seqIdx := fromRecordID(recordID)
 				if lineStringIdx == i {
@@ -165,7 +167,7 @@ func (m MultiLineString) IsSimple() bool {
 					return rtree.Stop
 				}
 				boundary := intersectionOfMultiPointAndMultiPoint(ls.Boundary(), otherLS.Boundary())
-				if !hasIntersectionPointWithMultiPoint(NewPointFromXY(inter.ptA), boundary) {
+				if !hasIntersectionPointWithMultiPoint(inter.ptA.asUncheckedPoint(), boundary) {
 					isSimple = false
 					return rtree.Stop
 				}
@@ -190,33 +192,22 @@ func (m MultiLineString) IsEmpty() bool {
 	return true
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry. If
-// the geometry is empty, then false is returned.
-func (m MultiLineString) Envelope() (Envelope, bool) {
+// Envelope returns the Envelope that most tightly surrounds the geometry.
+func (m MultiLineString) Envelope() Envelope {
 	var env Envelope
-	var has bool
 	for _, ls := range m.lines {
-		e, ok := ls.Envelope()
-		if !ok {
-			continue
-		}
-		if has {
-			env = env.ExpandToIncludeEnvelope(e)
-		} else {
-			env = e
-			has = true
-		}
+		env = env.ExpandToIncludeEnvelope(ls.Envelope())
 	}
-	return env, has
+	return env
 }
 
 // Boundary returns the spatial boundary of this MultiLineString. This is
 // calculated using the "mod 2 rule". The rule states that a Point is included
-// as part of the boundary if and only if it appears on the boundry of an odd
+// as part of the boundary if and only if it appears on the boundary of an odd
 // number of members in the collection.
 func (m MultiLineString) Boundary() MultiPoint {
 	counts := make(map[XY]int)
-	var uniqueEndpoints []XY
+	var uniqueEndpoints []Point
 	for _, ls := range m.lines {
 		if ls.IsClosed() {
 			continue
@@ -230,20 +221,24 @@ func (m MultiLineString) Boundary() MultiPoint {
 				continue
 			}
 			if counts[xy] == 0 {
-				uniqueEndpoints = append(uniqueEndpoints, xy)
+				uniqueEndpoints = append(uniqueEndpoints, pt)
 			}
 			counts[xy]++
 		}
 	}
 
-	var floats []float64
-	for _, xy := range uniqueEndpoints {
+	var mod2Points []Point
+	for _, pt := range uniqueEndpoints {
+		xy, ok := pt.XY()
+		if !ok {
+			// Can't happen, because we already check to make sure pt is not empty.
+			panic("MultiLineString Boundary internal error")
+		}
 		if counts[xy]%2 == 1 {
-			floats = append(floats, xy.X, xy.Y)
+			mod2Points = append(mod2Points, pt)
 		}
 	}
-	seq := NewSequence(floats, DimXY)
-	return NewMultiPoint(seq)
+	return NewMultiPoint(mod2Points)
 }
 
 // Value implements the database/sql/driver.Valuer interface by returning the
@@ -301,7 +296,7 @@ func (m MultiLineString) MarshalJSON() ([]byte, error) {
 	return dst, nil
 }
 
-// Coordinates returns the coordinates of each constintuent LineString in the
+// Coordinates returns the coordinates of each constituent LineString in the
 // MultiLineString.
 func (m MultiLineString) Coordinates() []Sequence {
 	n := m.NumLineStrings()
@@ -326,7 +321,7 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 			return MultiLineString{}, wrapTransformed(err)
 		}
 	}
-	return NewMultiLineStringFromLineStrings(transformed, opts...), nil
+	return NewMultiLineString(transformed, opts...), nil
 }
 
 // Length gives the sum of the lengths of the constituent members of the multi
@@ -352,7 +347,7 @@ func (m MultiLineString) Centroid() Point {
 	if sumLength == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return NewPointFromXY(sumXY.Scale(1.0 / sumLength))
+	return sumXY.Scale(1.0 / sumLength).asUncheckedPoint()
 }
 
 // Reverse in the case of MultiLineString outputs each component line string in their
@@ -416,7 +411,7 @@ func (m MultiLineString) PointOnSurface() Point {
 		seq := m.LineStringN(i).Coordinates()
 		n := seq.Length()
 		for j := 1; j < n-1; j++ {
-			candidate := NewPointFromXY(seq.GetXY(j))
+			candidate := seq.GetXY(j).asUncheckedPoint()
 			nearest.consider(candidate)
 		}
 	}
@@ -446,4 +441,38 @@ func (m MultiLineString) Dump() []LineString {
 	lss := make([]LineString, len(m.lines))
 	copy(lss, m.lines)
 	return lss
+}
+
+// DumpCoordinates returns the coordinates (as a Sequence) that constitute the
+// MultiLineString.
+func (m MultiLineString) DumpCoordinates() Sequence {
+	var n int
+	for _, ls := range m.lines {
+		n += ls.seq.Length() * m.ctype.Dimension()
+	}
+	coords := make([]float64, 0, n)
+	for _, ls := range m.lines {
+		coords = ls.Coordinates().appendAllPoints(coords)
+	}
+	seq := NewSequence(coords, m.ctype)
+	seq.assertNoUnusedCapacity()
+	return seq
+}
+
+// Summary returns a text summary of the MultiLineString following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (m MultiLineString) Summary() string {
+	numPoints := m.DumpCoordinates().Length()
+
+	var lineStringSuffix string
+	numLineStrings := m.NumLineStrings()
+	if numLineStrings != 1 {
+		lineStringSuffix = "s"
+	}
+	return fmt.Sprintf("%s[%s] with %d linestring%s consisting of %d total points",
+		m.Type(), m.CoordinatesType(), numLineStrings, lineStringSuffix, numPoints)
+}
+
+// String returns the string representation of the MultiLineString.
+func (m MultiLineString) String() string {
+	return m.Summary()
 }

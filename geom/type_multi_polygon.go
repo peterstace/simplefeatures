@@ -20,15 +20,16 @@ import (
 //
 // 3. The boundaries of any two polygons may touch only at a finite number of points.
 type MultiPolygon struct {
+	// Invariant: ctype matches the coordinates type of each polygon.
 	polys []Polygon
 	ctype CoordinatesType
 }
 
-// NewMultiPolygonFromPolygons creates a MultiPolygon from its constituent
-// Polygons. It gives an error if any of the MultiPolygon assertions are not
-// maintained. The coordinates type of the MultiPolygon is the lowest common
-// coordinates type its Polygons.
-func NewMultiPolygonFromPolygons(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
+// NewMultiPolygon creates a MultiPolygon from its constituent Polygons. It
+// gives an error if any of the MultiPolygon assertions are not maintained. The
+// coordinates type of the MultiPolygon is the lowest common coordinates type
+// its Polygons.
+func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
 	if len(polys) == 0 {
 		return MultiPolygon{}, nil
 	}
@@ -64,9 +65,8 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 	boxes := make([]rtree.Box, len(polys))
 	items := make([]rtree.BulkItem, 0, len(polys))
 	for i, p := range polys {
-		env, ok := p.Envelope()
-		if ok {
-			boxes[i] = env.box()
+		if box, ok := p.Envelope().box(); ok {
+			boxes[i] = box
 			item := rtree.BulkItem{Box: boxes[i], RecordID: i}
 			items = append(items, item)
 		}
@@ -77,7 +77,7 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 		if polys[i].IsEmpty() {
 			continue
 		}
-		err := tree.RangeSearch(boxes[i], func(j int) error {
+		if err := tree.RangeSearch(boxes[i], func(j int) error {
 			// Only consider each pair of polygons once.
 			if i <= j {
 				return nil
@@ -126,8 +126,7 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 				}
 			}
 			return nil
-		})
-		if err != nil {
+		}); err != nil {
 			return err
 		}
 	}
@@ -143,7 +142,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 	for j := range p2.lines {
 		// Find intersection points.
 		var pts []XY
-		p1.tree.RangeSearch(p2.lines[j].envelope().box(), func(i int) error {
+		p1.tree.RangeSearch(p2.lines[j].box(), func(i int) error {
 			inter := p1.lines[i].intersectLine(p2.lines[j])
 			if inter.empty {
 				return nil
@@ -168,7 +167,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 			midpoint := pts[k].Add(pts[k+1]).Scale(0.5)
 			if relatePointToPolygon(midpoint, p1) == interior {
 				return validationError{fmt.Sprintf("multipolygon child polygon "+
-					"interiors intersect at %s", NewPointFromXY(midpoint).AsText())}
+					"interiors intersect at %v", midpoint)}
 			}
 		}
 	}
@@ -235,24 +234,13 @@ func (m MultiPolygon) IsEmpty() bool {
 	return true
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry. If
-// the geometry is empty, then false is returned.
-func (m MultiPolygon) Envelope() (Envelope, bool) {
+// Envelope returns the Envelope that most tightly surrounds the geometry.
+func (m MultiPolygon) Envelope() Envelope {
 	var env Envelope
-	var has bool
 	for _, poly := range m.polys {
-		e, ok := poly.Envelope()
-		if !ok {
-			continue
-		}
-		if has {
-			env = env.ExpandToIncludeEnvelope(e)
-		} else {
-			env = e
-			has = true
-		}
+		env = env.ExpandToIncludeEnvelope(poly.Envelope())
 	}
-	return env, has
+	return env
 }
 
 // Boundary returns the spatial boundary of this MultiPolygon. This is the
@@ -268,7 +256,7 @@ func (m MultiPolygon) Boundary() MultiLineString {
 			bounds = append(bounds, r.Force2D())
 		}
 	}
-	return NewMultiLineStringFromLineStrings(bounds)
+	return NewMultiLineString(bounds)
 }
 
 // Value implements the database/sql/driver.Valuer interface by returning the
@@ -347,7 +335,7 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mu
 		}
 		polys[i] = transformed
 	}
-	mp, err := NewMultiPolygonFromPolygons(polys, opts...)
+	mp, err := NewMultiPolygon(polys, opts...)
 	return mp.ForceCoordinatesType(m.ctype), wrapTransformed(err)
 }
 
@@ -383,7 +371,7 @@ func (m MultiPolygon) Centroid() Point {
 			weightedCentroid = weightedCentroid.Add(centroid.Scale(areas[i] / totalArea))
 		}
 	}
-	return NewPointFromXY(weightedCentroid)
+	return weightedCentroid.asUncheckedPoint()
 }
 
 // Reverse in the case of MultiPolygon outputs the component polygons in their original order,
@@ -473,4 +461,55 @@ func (m MultiPolygon) Dump() []Polygon {
 	ps := make([]Polygon, len(m.polys))
 	copy(ps, m.polys)
 	return ps
+}
+
+// DumpCoordinates returns the points making up the rings in a MultiPolygon as
+// a Sequence.
+func (m MultiPolygon) DumpCoordinates() Sequence {
+	var n int
+	for _, p := range m.polys {
+		for _, r := range p.rings {
+			n += r.Coordinates().Length()
+		}
+	}
+	ctype := m.CoordinatesType()
+	coords := make([]float64, 0, n*ctype.Dimension())
+
+	for _, p := range m.polys {
+		for _, r := range p.rings {
+			coords = r.Coordinates().appendAllPoints(coords)
+		}
+	}
+
+	seq := NewSequence(coords, ctype)
+	seq.assertNoUnusedCapacity()
+	return seq
+}
+
+// Summary returns a text summary of the MultiPolygon following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (m MultiPolygon) Summary() string {
+	numPoints := m.DumpCoordinates().Length()
+
+	var polygonSuffix string
+	numPolygons := m.NumPolygons()
+	if numPolygons != 1 {
+		polygonSuffix = "s"
+	}
+
+	var numRings int
+	for _, polygon := range m.polys {
+		numRings += polygon.NumRings()
+	}
+
+	var ringSuffix string
+	if numRings != 1 {
+		ringSuffix = "s"
+	}
+	return fmt.Sprintf("%s[%s] with %d polygon%s consisting of %d total ring%s and %d total points",
+		m.Type(), m.CoordinatesType(), numPolygons, polygonSuffix, numRings, ringSuffix, numPoints)
+}
+
+// String returns the string representation of the MultiPolygon.
+func (m MultiPolygon) String() string {
+	return m.Summary()
 }

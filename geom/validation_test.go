@@ -2,6 +2,7 @@ package geom_test
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"testing"
 
@@ -12,19 +13,93 @@ func xy(x, y float64) Coordinates {
 	return Coordinates{Type: DimXY, XY: XY{x, y}}
 }
 
-func TestLineStringValidation(t *testing.T) {
+func TestPointValidation(t *testing.T) {
+	nan := math.NaN()
+	inf := math.Inf(+1)
+	for i, tc := range []struct {
+		wantValid bool
+		input     Coordinates
+	}{
+		{true, xy(0, 0)},
+		{false, xy(nan, 0)},
+		{false, xy(0, nan)},
+		{false, xy(nan, nan)},
+		{false, xy(inf, 0)},
+		{false, xy(0, inf)},
+		{false, xy(inf, inf)},
+		{false, xy(-inf, 0)},
+		{false, xy(0, -inf)},
+		{false, xy(-inf, -inf)},
+	} {
+		t.Run(fmt.Sprintf("point_%d", i), func(t *testing.T) {
+			_, err := NewPoint(tc.input)
+			if tc.wantValid {
+				expectNoErr(t, err)
+			} else {
+				expectErr(t, err)
+			}
+		})
+	}
+}
+
+func TestDisableAllPointValidations(t *testing.T) {
+	c := xy(2, math.NaN())
+
+	_, err := NewPoint(c)
+	expectErr(t, err)
+
+	_, err = NewPoint(c, DisableAllValidations)
+	expectNoErr(t, err)
+}
+
+func TestOmitInvalidPoint(t *testing.T) {
+	t.Run("DimXY", func(t *testing.T) {
+		c := xy(2, math.NaN())
+
+		_, err := NewPoint(c)
+		expectErr(t, err)
+
+		pt, err := NewPoint(c, OmitInvalid)
+		expectNoErr(t, err)
+		expectTrue(t, pt.IsEmpty())
+	})
+	t.Run("DimXYZ", func(t *testing.T) {
+		c := Coordinates{Type: DimXYZ, XY: XY{2, math.NaN()}}
+
+		_, err := NewPoint(c)
+		expectErr(t, err)
+
+		pt, err := NewPoint(c, OmitInvalid)
+		expectNoErr(t, err)
+		expectTrue(t, pt.IsEmpty())
+		expectCoordinatesTypeEq(t, pt.CoordinatesType(), DimXYZ)
+	})
+}
+
+func TestLineStringValidationInvalidFromRawCoords(t *testing.T) {
+	nan := math.NaN()
+	inf := math.Inf(+1)
 	for i, pts := range [][]float64{
-		[]float64{0, 0},
-		[]float64{1, 1},
-		[]float64{0, 0, 0, 0},
-		[]float64{1, 1, 1, 1},
+		{0, 0},
+		{1, 1},
+		{0, 0, 0, 0},
+		{1, 1, 1, 1},
+		{0, 0, 1, 1, 2, nan},
+		{0, 0, 1, 1, nan, 2},
+		{0, 0, 1, 1, 2, inf},
+		{0, 0, 1, 1, inf, 2},
+		{0, 0, 1, 1, 2, -inf},
+		{0, 0, 1, 1, -inf, 2},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			seq := NewSequence(pts, DimXY)
 			_, err := NewLineString(seq)
-			if err == nil {
-				t.Error("expected error")
-			}
+			expectErr(t, err)
+			_, err = NewLineString(seq, DisableAllValidations)
+			expectNoErr(t, err)
+			ls, err := NewLineString(seq, OmitInvalid)
+			expectNoErr(t, err)
+			expectTrue(t, ls.IsEmpty())
 		})
 	}
 }

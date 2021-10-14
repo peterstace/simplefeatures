@@ -2,6 +2,7 @@ package geom
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"math"
 	"unsafe"
 )
@@ -17,19 +18,44 @@ type Point struct {
 	full   bool
 }
 
-// NewPoint creates a new point gives its Coordinates.
-func NewPoint(c Coordinates, _ ...ConstructorOption) Point {
+// NewPoint creates a new point given its Coordinates.
+func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
+	os := newOptionSet(opts)
+	if os.skipValidations {
+		return newUncheckedPoint(c), nil
+	}
+	if err := c.XY.validate(); err != nil {
+		if os.omitInvalid {
+			return NewEmptyPoint(c.Type), nil
+		}
+		return Point{}, validationError{err.Error()}
+	}
+	return newUncheckedPoint(c), nil
+}
+
+// newUncheckedPoint constructs a point without checking any validations. It
+// may be used internally when the caller is sure that the coordinates don't
+// come directly from outside the library, or have already otherwise been
+// validated.
+//
+// An examples of valid use:
+//
+// - The coordinates have just been validated.
+//
+// - The coordinates are taken directly from the control points of a geometry
+// that has been validated.
+//
+// - The coordinates are derived from calculations based on control points of a
+// geometry that has been validated. Technically, these calculations could
+// overflow to +/- inf. However if control points are originally close to
+// infinity, many of the algorithms will be already broken in many other ways.
+func newUncheckedPoint(c Coordinates) Point {
 	return Point{c, true}
 }
 
 // NewEmptyPoint creates a Point that is empty.
 func NewEmptyPoint(ctype CoordinatesType) Point {
 	return Point{Coordinates{Type: ctype}, false}
-}
-
-// NewPointFromXY creates a new point from an XY.
-func NewPointFromXY(xy XY, _ ...ConstructorOption) Point {
-	return Point{Coordinates{XY: xy, Type: DimXY}, true}
 }
 
 // Type returns the GeometryType for a Point
@@ -63,6 +89,10 @@ func (p Point) AsText() string {
 // to the input byte slice.
 func (p Point) AppendWKT(dst []byte) []byte {
 	dst = appendWKTHeader(dst, "POINT", p.coords.Type)
+	return p.appendWKTBody(dst)
+}
+
+func (p Point) appendWKTBody(dst []byte) []byte {
 	if !p.full {
 		return appendWKTEmpty(dst)
 	}
@@ -81,14 +111,13 @@ func (p Point) IsSimple() bool {
 	return true
 }
 
-// Envelope returns a zero area Envelope covering the Point. If the Point is
-// empty, then false is returned.
-func (p Point) Envelope() (Envelope, bool) {
-	xy, ok := p.XY()
-	if !ok {
-		return Envelope{}, false
+// Envelope returns the envelope best fitting the Point (either an empty
+// envelope, or an envelope covering a single point).
+func (p Point) Envelope() Envelope {
+	if xy, ok := p.XY(); ok {
+		return Envelope{}.uncheckedExtend(xy)
 	}
-	return NewEnvelope(xy), true
+	return Envelope{}
 }
 
 // Boundary returns the spatial boundary for this Point, which is always the
@@ -163,7 +192,7 @@ func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, er
 	}
 	newC := p.coords
 	newC.XY = fn(newC.XY)
-	return NewPoint(newC, opts...), nil
+	return NewPoint(newC, opts...)
 }
 
 // Centroid of a point is that point.
@@ -179,7 +208,7 @@ func (p Point) Reverse() Point {
 // AsMultiPoint is a convenience function that converts this Point into a
 // MultiPoint.
 func (p Point) AsMultiPoint() MultiPoint {
-	return NewMultiPointFromPoints([]Point{p})
+	return NewMultiPoint([]Point{p})
 }
 
 // CoordinatesType returns the CoordinatesType used to represent the Point.
@@ -218,4 +247,36 @@ func (p Point) asXYs() []XY {
 		return []XY{xy}
 	}
 	return nil
+}
+
+// DumpCoordinates returns a Sequence representing the point. For an empty
+// Point, the Sequence will be empty. For a non-empty Point, the Sequence will
+// contain the single set of coordinates representing the point.
+func (p Point) DumpCoordinates() Sequence {
+	ctype := p.CoordinatesType()
+	var floats []float64
+	coords, ok := p.Coordinates()
+	if ok {
+		n := ctype.Dimension()
+		floats = coords.appendFloat64s(make([]float64, 0, n))
+	}
+	seq := NewSequence(floats, ctype)
+	seq.assertNoUnusedCapacity()
+	return seq
+}
+
+// Summary returns a text summary of the Point following a similar format to https://postgis.net/docs/ST_Summary.html.
+func (p Point) Summary() string {
+	var pointSuffix string
+	numPoints := 1
+	if p.IsEmpty() {
+		numPoints = 0
+		pointSuffix = "s"
+	}
+	return fmt.Sprintf("%s[%s] with %d point%s", p.Type(), p.CoordinatesType(), numPoints, pointSuffix)
+}
+
+// String returns the string representation of the Point.
+func (p Point) String() string {
+	return p.Summary()
 }

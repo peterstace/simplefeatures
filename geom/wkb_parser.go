@@ -192,7 +192,7 @@ func (p *wkbParser) parsePoint(ctype CoordinatesType) (Point, error) {
 	if math.IsNaN(c.X) || math.IsNaN(c.Y) {
 		return Point{}, wkbSyntaxError{"point contains mixed NaN values"}
 	}
-	return NewPoint(c, p.opts...), nil
+	return NewPoint(c, p.opts...)
 }
 
 func (p *wkbParser) parseLineString(ctype CoordinatesType) (LineString, error) {
@@ -258,7 +258,7 @@ func (p *wkbParser) parsePolygon(ctype CoordinatesType) (Polygon, error) {
 			return Polygon{}, err
 		}
 	}
-	return NewPolygonFromRings(rings, p.opts...)
+	return NewPolygon(rings, p.opts...)
 }
 
 func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) (MultiPoint, error) {
@@ -280,7 +280,7 @@ func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) (MultiPoint, error) {
 		}
 		pts[i] = geom.AsPoint()
 	}
-	return NewMultiPointFromPoints(pts, p.opts...), nil
+	return NewMultiPoint(pts, p.opts...), nil
 }
 
 func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) (MultiLineString, error) {
@@ -302,7 +302,7 @@ func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) (MultiLineString
 		}
 		lss[i] = geom.AsLineString()
 	}
-	return NewMultiLineStringFromLineStrings(lss, p.opts...), nil
+	return NewMultiLineString(lss, p.opts...), nil
 }
 
 func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) (MultiPolygon, error) {
@@ -324,7 +324,7 @@ func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) (MultiPolygon, erro
 		}
 		polys[i] = geom.AsPolygon()
 	}
-	return NewMultiPolygonFromPolygons(polys, p.opts...)
+	return NewMultiPolygon(polys, p.opts...)
 }
 
 func (p *wkbParser) parseGeometryCollection(ctype CoordinatesType) (GeometryCollection, error) {

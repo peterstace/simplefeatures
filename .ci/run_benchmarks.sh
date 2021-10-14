@@ -17,6 +17,10 @@ trap "rm -f $new $old" EXIT
 package="./..."
 bench="."
 
+pushd "$HOME"
+go get golang.org/x/perf/cmd/benchstat
+popd
+
 for (( i = 0; i < 15; i++ )); do
 	echo
 	echo "RUN $i"
