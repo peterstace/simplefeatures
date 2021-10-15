@@ -15,7 +15,8 @@ func (t *RTree) Insert(box Box, recordID int) {
 	t.count++
 
 	if t.root == nil {
-		t.root = &node{isLeaf: true}
+		t.root = newNode()
+		*t.root = node{isLeaf: true}
 	}
 
 	level := t.root.depth() - 1
@@ -51,7 +52,8 @@ func (t *RTree) adjustBoxesUpwards(node *node, box Box) {
 }
 
 func (t *RTree) joinRoots(r1, r2 *node) {
-	newRoot := &node{
+	newRoot := newNode()
+	*newRoot = node{
 		entries: [1 + maxChildren]entry{
 			{box: calculateBound(r1), child: r1},
 			{box: calculateBound(r2), child: r2},
@@ -142,7 +144,8 @@ func (t *RTree) splitNode(n *node) *node {
 
 	// Use the existing node for the 0 bits in the split, and a new node for
 	// the 1 bits in the split.
-	newNode := &node{isLeaf: n.isLeaf}
+	newNode := newNode()
+	*newNode = node{isLeaf: n.isLeaf}
 	totalEntries := n.numEntries
 	n.numEntries = 0
 	for i := 0; i < totalEntries; i++ {

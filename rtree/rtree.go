@@ -2,9 +2,10 @@ package rtree
 
 import (
 	"errors"
+	"sync"
 )
 
-// node is a node in an R-Tree. nodes can either be leaf nodes holding entries
+// node is a node in an R-Tree. Nodes can either be leaf nodes holding entries
 // for terminal items, or intermediate nodes holding entries for more nodes.
 type node struct {
 	entries    [1 + maxChildren]entry
@@ -20,6 +21,19 @@ type entry struct {
 	// For leaf nodes, recordID is populated. For non-leaf nodes, child is populated.
 	child    *node
 	recordID int
+}
+
+var nodePool sync.Pool = sync.Pool{
+	New: func() interface{} { return new(node) },
+}
+
+func newNode() *node {
+	return nodePool.Get().(*node)
+}
+
+func (n *node) release() {
+	*n = node{}
+	nodePool.Put(n)
 }
 
 func (n *node) appendRecord(box Box, recordID int) {
@@ -102,4 +116,26 @@ func (t *RTree) Extent() (Box, bool) {
 // Count gives the number of entries in the RTree.
 func (t *RTree) Count() int {
 	return t.count
+}
+
+// Truncate removes all elements from the RTree. It recovers internally
+// allocated memory, allowing it to be used for future tree operations. It
+// should be called after an RTree is done with, but it isn't a bug to forget
+// to do this.
+func (t *RTree) Truncate() {
+	var recurse func(*node)
+	recurse = func(n *node) {
+		if n == nil {
+			return
+		}
+		for i := 0; i < n.numEntries; i++ {
+			if child := n.entries[i].child; child != nil {
+				recurse(child)
+			}
+		}
+		n.release()
+	}
+	if t.root != nil {
+		recurse(t.root)
+	}
 }

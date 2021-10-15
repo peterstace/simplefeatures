@@ -35,7 +35,8 @@ func calculateLevels(numItems int) int {
 
 func bulkInsert(items []BulkItem, levels int) *node {
 	if levels == 1 {
-		root := &node{isLeaf: true, numEntries: len(items)}
+		root := newNode()
+		*root = node{isLeaf: true, numEntries: len(items)}
 		for i, item := range items {
 			root.entries[i] = entry{
 				box:      item.Box,
@@ -72,7 +73,8 @@ func bulkInsert(items []BulkItem, levels int) *node {
 }
 
 func bulkNode(levels int, parts ...[]BulkItem) *node {
-	root := &node{
+	root := newNode()
+	*root = node{
 		numEntries: len(parts),
 		parent:     nil,
 		isLeaf:     false,

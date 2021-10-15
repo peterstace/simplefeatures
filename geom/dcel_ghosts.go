@@ -25,6 +25,7 @@ func spanningTree(xys []XY) MultiLineString {
 		items[i] = rtree.BulkItem{Box: xy.box(), RecordID: i}
 	}
 	tree := rtree.BulkLoad(items)
+	defer tree.Truncate()
 
 	// The disjoint set keeps track of which points have been joined together
 	// so far. Two entries in dset are in the same set iff they are connected

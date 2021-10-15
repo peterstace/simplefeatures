@@ -38,6 +38,7 @@ func Distance(g1, g2 Geometry) (float64, bool) {
 	}
 
 	tr := loadTree(xys2, lns2)
+	defer tr.Truncate()
 	minDist := math.Inf(+1)
 
 	searchBody := func(

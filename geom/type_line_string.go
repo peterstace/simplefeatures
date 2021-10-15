@@ -133,6 +133,7 @@ func (s LineString) IsSimple() bool {
 		items = append(items, rtree.BulkItem{Box: ln.box(), RecordID: i})
 	}
 	tree := rtree.BulkLoad(items)
+	defer tree.Truncate()
 
 	for i := 0; i < n; i++ {
 		ln, ok := getLine(s.seq, i)

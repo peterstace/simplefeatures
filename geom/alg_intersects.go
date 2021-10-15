@@ -211,6 +211,7 @@ func hasIntersectionBetweenLines(
 		}
 	}
 	tree := rtree.BulkLoad(bulk)
+	defer tree.Truncate()
 
 	// Keep track of an envelope of all of the points that are in the
 	// intersection.

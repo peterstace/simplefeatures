@@ -20,6 +20,11 @@ func BenchmarkDelete(b *testing.B) {
 				rnd := rand.New(rand.NewSource(0))
 				trees[i], boxes = testBulkLoad(rnd, pop, 0.9, 0.1)
 			}
+			b.Cleanup(func() {
+				for _, tree := range trees {
+					tree.Truncate()
+				}
+			})
 			runtime.GC()
 			b.ResetTimer()
 
@@ -48,7 +53,8 @@ func BenchmarkBulk(b *testing.B) {
 		}
 		b.Run(fmt.Sprintf("n=%d", pop), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				BulkLoad(inserts)
+				tr := BulkLoad(inserts)
+				tr.Truncate()
 			}
 		})
 	}
@@ -69,6 +75,7 @@ func BenchmarkInsert(b *testing.B) {
 				for j, b := range boxes {
 					tree.Insert(b, j)
 				}
+				tree.Truncate()
 			}
 		})
 	}
@@ -79,6 +86,7 @@ func BenchmarkRangeSearch(b *testing.B) {
 		b.Run(fmt.Sprintf("n=%d", pop), func(b *testing.B) {
 			rnd := rand.New(rand.NewSource(0))
 			tree, _ := testBulkLoad(rnd, pop, 0.9, 0.1)
+			b.Cleanup(func() { tree.Truncate() })
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				tree.RangeSearch(Box{0.5, 0.5, 0.5, 0.5}, func(int) error { return nil })

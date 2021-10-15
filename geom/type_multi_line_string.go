@@ -128,6 +128,7 @@ func (m MultiLineString) IsSimple() bool {
 		}
 	}
 	tree := rtree.BulkLoad(items)
+	defer tree.Truncate()
 
 	for i, ls := range m.lines {
 		seq := ls.Coordinates()

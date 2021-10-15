@@ -60,6 +60,13 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 
 	polyBoundaries := make([]indexedLines, len(polys))
 	polyBoundaryPopulated := make([]bool, len(polys))
+	defer func() {
+		for i := range polyBoundaries {
+			if polyBoundaryPopulated[i] {
+				polyBoundaries[i].tree.Truncate()
+			}
+		}
+	}()
 
 	// Construct RTree of Polygons.
 	boxes := make([]rtree.Box, len(polys))
@@ -72,6 +79,7 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 		}
 	}
 	tree := rtree.BulkLoad(items)
+	defer tree.Truncate()
 
 	for i := range polys {
 		if polys[i].IsEmpty() {

@@ -94,6 +94,8 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 
 	// Create additional nodes for crossings.
 	cut := newCutSet(all)
+	defer cut.lnIndex.tree.Truncate()
+	defer cut.ptIndex.tree.Truncate()
 	g1, err = reNodeGeometry(g1, cut, nodes)
 	if err != nil {
 		return Geometry{}, Geometry{}, MultiLineString{}, err

@@ -91,6 +91,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 		items[i] = rtree.BulkItem{Box: boxes[i], RecordID: i}
 	}
 	tree := rtree.BulkLoad(items)
+	defer tree.Truncate()
 
 	// Check each pair of rings (skipping any pairs that could not possibly intersect).
 	for i := range rings {
