@@ -1,12 +1,12 @@
 package exact
 
 type Segment struct {
-	A, B XY64
+	A, B XYRat
 }
 
 type Intersection struct {
 	Empty bool
-	A, B  XY64
+	A, B  XYRat
 }
 
 func SegmentIntersection(segA, segB Segment) Intersection {
@@ -16,10 +16,10 @@ func SegmentIntersection(segA, segB Segment) Intersection {
 		panic("invalid segment")
 	}
 
-	v1 := segA.A.ToRat()
-	v2 := segA.B.ToRat()
-	v3 := segB.A.ToRat()
-	v4 := segB.B.ToRat()
+	v1 := segA.A
+	v2 := segA.B
+	v3 := segB.A
+	v4 := segB.B
 
 	// d := (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4)
 	sub12 := v1.Sub(v2)
@@ -42,11 +42,9 @@ func SegmentIntersection(segA, segB Segment) Intersection {
 		if v2.Less(v3) || v4.Less(v1) {
 			return Intersection{Empty: true}
 		}
-		min := v2.Min(v4)
-		max := v1.Max(v3)
 		return Intersection{
-			A: max.ToXY64(),
-			B: min.ToXY64(),
+			A: v1.Max(v3),
+			B: v2.Min(v4),
 		}
 	}
 
@@ -59,7 +57,7 @@ func SegmentIntersection(segA, segB Segment) Intersection {
 	u := div(sub21.Cross(sub13), d)
 
 	if inUnitInterval(t) && inUnitInterval(u) {
-		pt := sub21.Scale(t).Add(v1).ToXY64()
+		pt := sub21.Scale(t).Add(v1)
 		return Intersection{A: pt, B: pt}
 	}
 

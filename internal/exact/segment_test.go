@@ -4,36 +4,41 @@ import (
 	"fmt"
 	"testing"
 
+	"math/big"
+
 	. "github.com/peterstace/simplefeatures/internal/exact"
 )
 
 func TestSegmentIntersection(t *testing.T) {
 	var (
-		p00 = XY64{X: 0, Y: 0}
-		p10 = XY64{X: 1, Y: 0}
-		p01 = XY64{X: 0, Y: 1}
-		p11 = XY64{X: 1, Y: 1}
-		p21 = XY64{X: 2, Y: 1}
-		p02 = XY64{X: 0, Y: 2}
-		p22 = XY64{X: 2, Y: 2}
-		p20 = XY64{X: 2, Y: 0}
-		p40 = XY64{X: 4, Y: 0}
-		p60 = XY64{X: 6, Y: 0}
-		p42 = XY64{X: 4, Y: 2}
-		p63 = XY64{X: 6, Y: 3}
+		p00 = XY64{X: 0, Y: 0}.ToRat()
+		p10 = XY64{X: 1, Y: 0}.ToRat()
+		p01 = XY64{X: 0, Y: 1}.ToRat()
+		p11 = XY64{X: 1, Y: 1}.ToRat()
+		p21 = XY64{X: 2, Y: 1}.ToRat()
+		p02 = XY64{X: 0, Y: 2}.ToRat()
+		p22 = XY64{X: 2, Y: 2}.ToRat()
+		p20 = XY64{X: 2, Y: 0}.ToRat()
+		p40 = XY64{X: 4, Y: 0}.ToRat()
+		p60 = XY64{X: 6, Y: 0}.ToRat()
+		p42 = XY64{X: 4, Y: 2}.ToRat()
+		p63 = XY64{X: 6, Y: 3}.ToRat()
 	)
-	ln := func(a, b XY64) Segment {
+	ln := func(a, b XYRat) Segment {
 		return Segment{A: a, B: b}
 	}
 
-	e := func(xy XY64) XY64 {
+	neg := func(r *big.Rat) *big.Rat {
+		return new(big.Rat).Neg(r)
+	}
+	e := func(xy XYRat) XYRat {
 		return xy
 	}
-	p := func(xy XY64) XY64 {
-		return XY64{X: -xy.Y, Y: xy.X}
+	p := func(xy XYRat) XYRat {
+		return XYRat{X: neg(xy.Y), Y: xy.X}
 	}
-	q := func(xy XY64) XY64 {
-		return XY64{X: -xy.X, Y: xy.Y}
+	q := func(xy XYRat) XYRat {
+		return XYRat{X: neg(xy.X), Y: xy.Y}
 	}
 
 	for _, tc := range []struct {
@@ -162,7 +167,7 @@ func TestSegmentIntersection(t *testing.T) {
 	} {
 		t.Run(tc.description, func(t *testing.T) {
 			for flip := 0; flip < 8; flip++ {
-				for groupIdx, group := range [][]func(XY64) XY64{
+				for groupIdx, group := range [][]func(XYRat) XYRat{
 					{e},
 					{p},
 					{p, p},
@@ -186,13 +191,15 @@ func TestSegmentIntersection(t *testing.T) {
 						}
 
 						want := tc.inter
-						for _, fn := range group {
-							want.A = fn(want.A)
-							want.B = fn(want.B)
-							segA.A = fn(segA.A)
-							segA.B = fn(segA.B)
-							segB.A = fn(segB.A)
-							segB.B = fn(segB.B)
+						if !want.Empty {
+							for _, fn := range group {
+								want.A = fn(want.A)
+								want.B = fn(want.B)
+								segA.A = fn(segA.A)
+								segA.B = fn(segA.B)
+								segB.A = fn(segB.A)
+								segB.B = fn(segB.B)
+							}
 						}
 
 						got := SegmentIntersection(segA, segB)

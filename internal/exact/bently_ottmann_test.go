@@ -21,14 +21,8 @@ func TestBentlyOttmann(t *testing.T) {
 			description: "single segments",
 			segments: []exact.Segment{
 				{
-					A: exact.XY64{
-						X: 0,
-						Y: 0,
-					},
-					B: exact.XY64{
-						X: 1,
-						Y: 1,
-					},
+					A: exact.XY64{X: 0, Y: 0}.ToRat(),
+					B: exact.XY64{X: 1, Y: 1}.ToRat(),
 				},
 			},
 			want: nil,
