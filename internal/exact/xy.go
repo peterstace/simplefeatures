@@ -17,6 +17,10 @@ type XYRat struct {
 	X, Y *big.Rat
 }
 
+func (r XYRat) Equals(o XYRat) bool {
+	return r.X.Cmp(o.X) == 0 && r.Y.Cmp(o.Y) == 0
+}
+
 func (r XYRat) Less(o XYRat) bool {
 	if xCmp := r.X.Cmp(o.X); xCmp != 0 {
 		return xCmp < 0

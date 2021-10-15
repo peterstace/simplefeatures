@@ -207,7 +207,7 @@ func TestSegmentIntersection(t *testing.T) {
 							t.Fatalf("got_empty:%v want_empty:%v", got.Empty, want.Empty)
 						}
 						if !got.Empty {
-							if (want.A != got.A || want.B != got.B) && (want.A != got.B || want.B != got.A) {
+							if (!want.A.Equals(got.A) || !want.B.Equals(got.B)) && (!want.A.Equals(got.B) || !want.B.Equals(got.A)) {
 								t.Fatalf("got:%v want:%v", got, want)
 							}
 						}
