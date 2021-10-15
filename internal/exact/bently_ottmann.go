@@ -33,9 +33,9 @@ type eventQueue struct {
 	events []event
 }
 
-func (q *eventQueue) empty() bool {
-	return len(q.events) == 0
-}
+//func (q *eventQueue) empty() bool {
+//	return len(q.events) == 0
+//}
 
 func (q *eventQueue) push(e event) {
 	q.events = append(q.events, e)
@@ -44,8 +44,8 @@ func (q *eventQueue) push(e event) {
 	})
 }
 
-func (q *eventQueue) pop() event {
-	e := q.events[len(q.events)-1]
-	q.events = q.events[:len(q.events)-1]
-	return e
-}
+//func (q *eventQueue) pop() event {
+//	e := q.events[len(q.events)-1]
+//	q.events = q.events[:len(q.events)-1]
+//	return e
+//}

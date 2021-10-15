@@ -3,8 +3,7 @@ package exact
 import "math/big"
 
 var (
-	zero = new(big.Rat)
-	one  = new(big.Rat).SetFloat64(1.0)
+	one = new(big.Rat).SetFloat64(1.0)
 )
 
 func sub(a, b *big.Rat) *big.Rat {
