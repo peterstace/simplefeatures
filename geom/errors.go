@@ -6,7 +6,7 @@ func wrap(err error, format string, args ...interface{}) error {
 	if err == nil {
 		return nil
 	}
-	return fmt.Errorf(format+": %v", append(args, err)...)
+	return fmt.Errorf(format+": %w", append(args, err)...)
 }
 
 // wrapTransformed wraps errors to indicate that they occurred as the result of

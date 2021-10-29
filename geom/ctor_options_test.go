@@ -38,7 +38,7 @@ func TestDisableValidation(t *testing.T) {
 			_, err = geom.UnmarshalWKT(wkt, geom.DisableAllValidations)
 			if err != nil {
 				t.Logf("wkt: %v", wkt)
-				t.Errorf("disabling validations still gave an error: %v", err)
+				t.Errorf("disabling validations still gave an error: %w", err)
 			}
 		})
 	}
