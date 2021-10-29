@@ -56,7 +56,7 @@ func (c GeometryCollection) NumTotalGeometries() int {
 	var n int
 	for _, geom := range c.geoms {
 		if geom.IsGeometryCollection() {
-			n += geom.AsGeometryCollection().NumTotalGeometries()
+			n += geom.MustAsGeometryCollection().NumTotalGeometries()
 		}
 	}
 	return n + c.NumGeometries()
@@ -117,7 +117,7 @@ func (c GeometryCollection) Dimension() int {
 func (c GeometryCollection) walk(fn func(Geometry)) {
 	for _, g := range c.geoms {
 		if g.IsGeometryCollection() {
-			g.AsGeometryCollection().walk(fn)
+			g.MustAsGeometryCollection().walk(fn)
 		} else {
 			fn(g)
 		}
@@ -271,7 +271,7 @@ func highestDimensionIgnoreEmpties(g Geometry) int {
 	if !g.IsGeometryCollection() {
 		return g.Dimension()
 	}
-	c := g.AsGeometryCollection()
+	c := g.MustAsGeometryCollection()
 	highestDim := 0
 	for _, g2 := range c.geoms {
 		highestDim = max(highestDim, highestDimensionIgnoreEmpties(g2))
@@ -304,13 +304,13 @@ func (c GeometryCollection) pointCentroid() Point {
 	c.walk(func(g Geometry) {
 		switch {
 		case g.IsPoint():
-			xy, ok := g.AsPoint().XY()
+			xy, ok := g.MustAsPoint().XY()
 			if ok {
 				numPoints++
 				sumPoints = sumPoints.Add(xy)
 			}
 		case g.IsMultiPoint():
-			mp := g.AsMultiPoint()
+			mp := g.MustAsMultiPoint()
 			for i := 0; i < mp.NumPoints(); i++ {
 				xy, ok := mp.PointN(i).XY()
 				if ok {
@@ -331,7 +331,7 @@ func (c GeometryCollection) linearCentroid() Point {
 	c.walk(func(g Geometry) {
 		switch {
 		case g.IsLineString():
-			ls := g.AsLineString()
+			ls := g.MustAsLineString()
 			centroid, ok := ls.Centroid().XY()
 			if ok {
 				length := ls.Length()
@@ -339,7 +339,7 @@ func (c GeometryCollection) linearCentroid() Point {
 				weightedCentroid = weightedCentroid.Add(centroid.Scale(length))
 			}
 		case g.IsMultiLineString():
-			mls := g.AsMultiLineString()
+			mls := g.MustAsMultiLineString()
 			for i := 0; i < mls.NumLineStrings(); i++ {
 				ls := mls.LineStringN(i)
 				centroid, ok := ls.Centroid().XY()

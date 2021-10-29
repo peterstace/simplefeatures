@@ -316,24 +316,24 @@ func TestBoundary(t *testing.T) {
 func TestCoordinatesSequence(t *testing.T) {
 	t.Run("point", func(t *testing.T) {
 		t.Run("populated", func(t *testing.T) {
-			c, ok := geomFromWKT(t, "POINT(1 2)").AsPoint().Coordinates()
+			c, ok := geomFromWKT(t, "POINT(1 2)").MustAsPoint().Coordinates()
 			expectBoolEq(t, ok, true)
 			expectXYEq(t, c.XY, XY{1, 2})
 		})
 		t.Run("empty", func(t *testing.T) {
-			_, ok := geomFromWKT(t, "POINT EMPTY").AsPoint().Coordinates()
+			_, ok := geomFromWKT(t, "POINT EMPTY").MustAsPoint().Coordinates()
 			expectBoolEq(t, ok, false)
 		})
 	})
 	t.Run("linestring", func(t *testing.T) {
-		seq := geomFromWKT(t, "LINESTRING(0 1,2 3,4 5)").AsLineString().Coordinates()
+		seq := geomFromWKT(t, "LINESTRING(0 1,2 3,4 5)").MustAsLineString().Coordinates()
 		expectIntEq(t, seq.Length(), 3)
 		expectXYEq(t, seq.GetXY(0), XY{0, 1})
 		expectXYEq(t, seq.GetXY(1), XY{2, 3})
 		expectXYEq(t, seq.GetXY(2), XY{4, 5})
 	})
 	t.Run("linestring with dupe", func(t *testing.T) {
-		seq := geomFromWKT(t, "LINESTRING(1 5,5 2,5 2,4 9)").AsLineString().Coordinates()
+		seq := geomFromWKT(t, "LINESTRING(1 5,5 2,5 2,4 9)").MustAsLineString().Coordinates()
 		expectIntEq(t, seq.Length(), 4)
 		expectXYEq(t, seq.GetXY(0), XY{1, 5})
 		expectXYEq(t, seq.GetXY(1), XY{5, 2})
@@ -341,7 +341,7 @@ func TestCoordinatesSequence(t *testing.T) {
 		expectXYEq(t, seq.GetXY(3), XY{4, 9})
 	})
 	t.Run("polygon", func(t *testing.T) {
-		seq := geomFromWKT(t, "POLYGON((0 0,0 10,10 0,0 0),(2 2,2 7,7 2,2 2))").AsPolygon().Coordinates()
+		seq := geomFromWKT(t, "POLYGON((0 0,0 10,10 0,0 0),(2 2,2 7,7 2,2 2))").MustAsPolygon().Coordinates()
 		expectIntEq(t, len(seq), 2)
 		expectIntEq(t, seq[0].Length(), 4)
 		expectXYEq(t, seq[0].GetXY(0), XY{0, 0})
@@ -356,14 +356,14 @@ func TestCoordinatesSequence(t *testing.T) {
 
 	})
 	t.Run("multipoint", func(t *testing.T) {
-		seq := geomFromWKT(t, "MULTIPOINT(0 1,2 3,EMPTY,4 5)").AsMultiPoint().Coordinates()
+		seq := geomFromWKT(t, "MULTIPOINT(0 1,2 3,EMPTY,4 5)").MustAsMultiPoint().Coordinates()
 		expectIntEq(t, seq.Length(), 3)
 		expectXYEq(t, seq.GetXY(0), XY{0, 1})
 		expectXYEq(t, seq.GetXY(1), XY{2, 3})
 		expectXYEq(t, seq.GetXY(2), XY{4, 5})
 	})
 	t.Run("multilinestring", func(t *testing.T) {
-		seq := geomFromWKT(t, "MULTILINESTRING((0 0,0 10,10 0,0 0),(2 2,2 8,8 2,2 2))").AsMultiLineString().Coordinates()
+		seq := geomFromWKT(t, "MULTILINESTRING((0 0,0 10,10 0,0 0),(2 2,2 8,8 2,2 2))").MustAsMultiLineString().Coordinates()
 		expectIntEq(t, len(seq), 2)
 		expectIntEq(t, seq[0].Length(), 4)
 		expectXYEq(t, seq[0].GetXY(0), XY{0, 0})
@@ -388,7 +388,7 @@ func TestCoordinatesSequence(t *testing.T) {
 					(102 102,102 107,107 102,102 102)
 				)
 			)`,
-		).AsMultiPolygon().Coordinates()
+		).MustAsMultiPolygon().Coordinates()
 		expectIntEq(t, len(seq), 2)
 
 		expectIntEq(t, len(seq[0]), 2)
@@ -465,7 +465,7 @@ func TestIsRing(t *testing.T) {
 		{"LINESTRING(0 0,1 0,1 1,0 1)", false},     // not closed
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := geomFromWKT(t, tt.wkt).AsLineString().IsRing()
+			got := geomFromWKT(t, tt.wkt).MustAsLineString().IsRing()
 			if got != tt.want {
 				t.Logf("WKT: %v", tt.wkt)
 				t.Errorf("got=%v want=%v", got, tt.want)
@@ -484,7 +484,7 @@ func TestIsClosed(t *testing.T) {
 		{"LINESTRING(0 0,1 0,1 1,0 1)", false},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := geomFromWKT(t, tt.wkt).AsLineString().IsClosed()
+			got := geomFromWKT(t, tt.wkt).MustAsLineString().IsClosed()
 			if got != tt.want {
 				t.Logf("WKT: %v", tt.wkt)
 				t.Errorf("got=%v want=%v", got, tt.want)
@@ -710,7 +710,7 @@ func TestCentroid(t *testing.T) {
 }
 
 func TestLineStringToMultiLineString(t *testing.T) {
-	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").AsLineString()
+	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").MustAsLineString()
 	got := ls.AsMultiLineString()
 	want := geomFromWKT(t, "MULTILINESTRING((1 2,3 4,5 6))")
 	if !ExactEquals(got.AsGeometry(), want) {
@@ -719,7 +719,7 @@ func TestLineStringToMultiLineString(t *testing.T) {
 }
 
 func TestPolygonToMultiPolygon(t *testing.T) {
-	p := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))").AsPolygon()
+	p := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))").MustAsPolygon()
 	mp := p.AsMultiPolygon()
 	if mp.AsText() != "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))" {
 		t.Errorf("got %v", mp.AsText())

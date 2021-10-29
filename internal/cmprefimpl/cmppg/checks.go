@@ -135,10 +135,10 @@ func checkGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
 
 func checkWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckWKB", func(t *testing.T) {
-		if g.IsEmpty() && ((g.IsGeometryCollection() && g.AsGeometryCollection().NumGeometries() > 0) ||
-			(g.IsMultiPoint() && g.AsMultiPoint().NumPoints() > 0) ||
-			(g.IsMultiLineString() && g.AsMultiLineString().NumLineStrings() > 0) ||
-			(g.IsMultiPolygon() && g.AsMultiPolygon().NumPolygons() > 0)) {
+		if g.IsEmpty() && ((g.IsGeometryCollection() && g.MustAsGeometryCollection().NumGeometries() > 0) ||
+			(g.IsMultiPoint() && g.MustAsMultiPoint().NumPoints() > 0) ||
+			(g.IsMultiLineString() && g.MustAsMultiLineString().NumLineStrings() > 0) ||
+			(g.IsMultiPolygon() && g.MustAsMultiPolygon().NumPolygons() > 0)) {
 			// The behaviour for collections in PostGIS is to just give the
 			// collection with zero elements (even if there are some empty
 			// elements). This doesn't seem like correct behaviour, so these
@@ -309,7 +309,7 @@ func checkIsRing(t *testing.T, want UnaryResult, g geom.Geometry) {
 		}
 		var got bool // Defaults to false for Line case.
 		if g.IsLineString() {
-			got = g.AsLineString().IsRing()
+			got = g.MustAsLineString().IsRing()
 		}
 		want := want.IsRing.Bool
 		if got != want {
@@ -334,14 +334,14 @@ func checkLength(t *testing.T, want UnaryResult, g geom.Geometry) {
 func containsMultiPointContainingEmptyPoint(g geom.Geometry) bool {
 	switch {
 	case g.IsMultiPoint():
-		mp := g.AsMultiPoint()
+		mp := g.MustAsMultiPoint()
 		for i := 0; i < mp.NumPoints(); i++ {
 			if mp.PointN(i).IsEmpty() {
 				return true
 			}
 		}
 	case g.IsGeometryCollection():
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		for i := 0; i < gc.NumGeometries(); i++ {
 			if containsMultiPointContainingEmptyPoint(gc.GeometryN(i)) {
 				return true
@@ -487,7 +487,7 @@ func containsOnlyPolygonsOrMultiPolygons(g geom.Geometry) bool {
 	case geom.TypePolygon, geom.TypeMultiPolygon:
 		return true
 	case geom.TypeGeometryCollection:
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		for i := 0; i < gc.NumGeometries(); i++ {
 			if !containsOnlyPolygonsOrMultiPolygons(gc.GeometryN(i)) {
 				return false

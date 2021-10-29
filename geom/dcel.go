@@ -76,22 +76,22 @@ func newDCELFromGeometry(g Geometry, ghosts MultiLineString, operand operand, in
 	var dcel *doublyConnectedEdgeList
 	switch g.Type() {
 	case TypePolygon:
-		poly := g.AsPolygon()
+		poly := g.MustAsPolygon()
 		dcel = newDCELFromMultiPolygon(poly.AsMultiPolygon(), operand, interactions)
 	case TypeMultiPolygon:
-		mp := g.AsMultiPolygon()
+		mp := g.MustAsMultiPolygon()
 		dcel = newDCELFromMultiPolygon(mp, operand, interactions)
 	case TypeLineString:
-		mls := g.AsLineString().AsMultiLineString()
+		mls := g.MustAsLineString().AsMultiLineString()
 		dcel = newDCELFromMultiLineString(mls, operand, interactions)
 	case TypeMultiLineString:
-		mls := g.AsMultiLineString()
+		mls := g.MustAsMultiLineString()
 		dcel = newDCELFromMultiLineString(mls, operand, interactions)
 	case TypePoint:
-		mp := g.AsPoint().AsMultiPoint()
+		mp := g.MustAsPoint().AsMultiPoint()
 		dcel = newDCELFromMultiPoint(mp, operand)
 	case TypeMultiPoint:
-		mp := g.AsMultiPoint()
+		mp := g.MustAsMultiPoint()
 		dcel = newDCELFromMultiPoint(mp, operand)
 	case TypeGeometryCollection:
 		panic("geometry collection not supported")

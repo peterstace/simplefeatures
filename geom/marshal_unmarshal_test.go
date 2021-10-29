@@ -221,7 +221,7 @@ func TestMarshalUnmarshal(t *testing.T) {
 			// in GeoJSON as per the spec.
 			if original.IsMultiPoint() {
 				var hasEmptyPointInMultiPoint bool
-				mp := original.AsMultiPoint()
+				mp := original.MustAsMultiPoint()
 				for j := 0; j < mp.NumPoints(); j++ {
 					if mp.PointN(j).IsEmpty() {
 						hasEmptyPointInMultiPoint = true

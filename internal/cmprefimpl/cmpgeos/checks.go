@@ -195,8 +195,8 @@ func checkFromText(h *Handle, g geom.Geometry, log *log.Logger) error {
 	// gives the following error: ParseException: Unexpected token: WORD EMPTY.
 	// Skip the check in that case.
 	if g.IsMultiPoint() &&
-		g.AsMultiPoint().NumPoints() > 0 &&
-		g.AsMultiPoint().PointN(0).IsEmpty() {
+		g.MustAsMultiPoint().NumPoints() > 0 &&
+		g.MustAsMultiPoint().PointN(0).IsEmpty() {
 		return nil
 	}
 
@@ -259,7 +259,7 @@ func checkFromBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
 	// Skip any MultiPoints that contain empty Points. Libgeos seems has
 	// trouble handling these.
 	if g.IsMultiPoint() {
-		mp := g.AsMultiPoint()
+		mp := g.MustAsMultiPoint()
 		n := mp.NumPoints()
 		for i := 0; i < n; i++ {
 			if mp.PointN(i).IsEmpty() {
@@ -431,7 +431,7 @@ func checkIsRing(h *Handle, g geom.Geometry, log *log.Logger) error {
 	if err != nil {
 		return err
 	}
-	got := g.IsLineString() && g.AsLineString().IsRing()
+	got := g.IsLineString() && g.MustAsLineString().IsRing()
 
 	if want != got {
 		log.Printf("want: %v", want)
@@ -468,7 +468,7 @@ func isArealGeometry(g geom.Geometry) bool {
 	case g.IsPolygon() || g.IsMultiPolygon():
 		return true
 	case g.IsGeometryCollection():
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		for i := 0; i < gc.NumGeometries(); i++ {
 			if isArealGeometry(gc.GeometryN(i)) {
 				return true

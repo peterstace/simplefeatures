@@ -185,7 +185,7 @@ func isNestedGeometryCollection(g geom.Geometry) bool {
 	if !g.IsGeometryCollection() {
 		return false
 	}
-	gc := g.AsGeometryCollection()
+	gc := g.MustAsGeometryCollection()
 	for i := 0; i < gc.NumGeometries(); i++ {
 		if gc.GeometryN(i).IsGeometryCollection() {
 			return true

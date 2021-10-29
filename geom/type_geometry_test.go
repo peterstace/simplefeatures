@@ -13,7 +13,7 @@ import (
 func TestZeroGeometry(t *testing.T) {
 	var z Geometry
 	expectBoolEq(t, z.IsGeometryCollection(), true)
-	z.AsGeometryCollection() // Doesn't crash.
+	z.MustAsGeometryCollection() // Doesn't crash.
 	expectStringEq(t, z.AsText(), "GEOMETRYCOLLECTION EMPTY")
 
 	var buf bytes.Buffer

@@ -194,7 +194,7 @@ func BenchmarkPolygonZigZagRingsValidation(b *testing.B) {
 		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
 			outerRingEnv, err := NewEnvelope([]XY{{}, {7, float64(sz + 1)}})
 			expectNoErr(b, err)
-			outerRing := outerRingEnv.AsGeometry().AsPolygon().ExteriorRing()
+			outerRing := outerRingEnv.AsGeometry().MustAsPolygon().ExteriorRing()
 			var leftFloats, rightFloats []float64
 			for i := 0; i < sz; i++ {
 				leftFloats = append(leftFloats, float64(2+(i%2)*2), float64(1+i))

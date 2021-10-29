@@ -114,19 +114,19 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 func reNodeGeometry(g Geometry, cut cutSet, nodes nodeSet) (Geometry, error) {
 	switch g.Type() {
 	case TypeGeometryCollection:
-		gc, err := reNodeGeometryCollection(g.AsGeometryCollection(), cut, nodes)
+		gc, err := reNodeGeometryCollection(g.MustAsGeometryCollection(), cut, nodes)
 		return gc.AsGeometry(), err
 	case TypeLineString:
-		ls, err := reNodeLineString(g.AsLineString(), cut, nodes)
+		ls, err := reNodeLineString(g.MustAsLineString(), cut, nodes)
 		return ls.AsGeometry(), err
 	case TypePolygon:
-		poly, err := reNodePolygon(g.AsPolygon(), cut, nodes)
+		poly, err := reNodePolygon(g.MustAsPolygon(), cut, nodes)
 		return poly.AsGeometry(), err
 	case TypeMultiLineString:
-		mls, err := reNodeMultiLineString(g.AsMultiLineString(), cut, nodes)
+		mls, err := reNodeMultiLineString(g.MustAsMultiLineString(), cut, nodes)
 		return mls.AsGeometry(), err
 	case TypeMultiPolygon:
-		mp, err := reNodeMultiPolygonString(g.AsMultiPolygon(), cut, nodes)
+		mp, err := reNodeMultiPolygonString(g.MustAsMultiPolygon(), cut, nodes)
 		return mp.AsGeometry(), err
 	case TypePoint, TypeMultiPoint:
 		return g, nil
@@ -155,7 +155,7 @@ func newCutSet(g Geometry) cutSet {
 func appendLines(lines []line, g Geometry) []line {
 	switch g.Type() {
 	case TypeLineString:
-		seq := g.AsLineString().Coordinates()
+		seq := g.MustAsLineString().Coordinates()
 		n := seq.Length()
 		for i := 0; i < n; i++ {
 			ln, ok := getLine(seq, i)
@@ -164,17 +164,17 @@ func appendLines(lines []line, g Geometry) []line {
 			}
 		}
 	case TypeMultiLineString:
-		mls := g.AsMultiLineString()
+		mls := g.MustAsMultiLineString()
 		for i := 0; i < mls.NumLineStrings(); i++ {
 			ls := mls.LineStringN(i)
 			lines = appendLines(lines, ls.AsGeometry())
 		}
 	case TypePolygon:
-		lines = appendLines(lines, g.AsPolygon().Boundary().AsGeometry())
+		lines = appendLines(lines, g.MustAsPolygon().Boundary().AsGeometry())
 	case TypeMultiPolygon:
-		lines = appendLines(lines, g.AsMultiPolygon().Boundary().AsGeometry())
+		lines = appendLines(lines, g.MustAsMultiPolygon().Boundary().AsGeometry())
 	case TypeGeometryCollection:
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		n := gc.NumGeometries()
 		for i := 0; i < n; i++ {
 			lines = appendLines(lines, gc.GeometryN(i))
@@ -186,18 +186,18 @@ func appendLines(lines []line, g Geometry) []line {
 func appendPoints(points []XY, g Geometry) []XY {
 	switch g.Type() {
 	case TypePoint:
-		coords, ok := g.AsPoint().Coordinates()
+		coords, ok := g.MustAsPoint().Coordinates()
 		if ok {
 			points = append(points, coords.XY)
 		}
 	case TypeMultiPoint:
-		mp := g.AsMultiPoint()
+		mp := g.MustAsMultiPoint()
 		n := mp.NumPoints()
 		for i := 0; i < n; i++ {
 			points = appendPoints(points, mp.PointN(i).AsGeometry())
 		}
 	case TypeGeometryCollection:
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		n := gc.NumGeometries()
 		for i := 0; i < n; i++ {
 			points = appendPoints(points, gc.GeometryN(i))
