@@ -157,6 +157,74 @@ func (g Geometry) MustAsMultiPolygon() MultiPolygon {
 	return *(*MultiPolygon)(g.ptr)
 }
 
+// AsGeometryCollection checks if the geometry is a GeometryCollection, and
+// returns it as a GeometryCollection if it is. The returned flag indicates if
+// the conversion was successful.
+func (g Geometry) AsGeometryCollection() (GeometryCollection, bool) {
+	if !g.IsGeometryCollection() {
+		return GeometryCollection{}, false
+	}
+	return g.MustAsGeometryCollection(), true
+}
+
+// AsPoint checks if the geometry is a Point, and returns it as a Point if it
+// is. The returned flag indicates if the conversion was successful.
+func (g Geometry) AsPoint() (Point, bool) {
+	if !g.IsPoint() {
+		return Point{}, false
+	}
+	return g.MustAsPoint(), true
+}
+
+// AsLineString checks if the geometry is a LineString, and returns it as a
+// LineString if it is. The returned flag indicates if the conversion was
+// successful.
+func (g Geometry) AsLineString() (LineString, bool) {
+	if !g.IsLineString() {
+		return LineString{}, false
+	}
+	return g.MustAsLineString(), true
+}
+
+// AsPolygon checks if the geometry is a Polygon, and returns it as a Polygon
+// if it is. The returned flag indicates if the conversion was successful.
+func (g Geometry) AsPolygon() (Polygon, bool) {
+	if !g.IsPolygon() {
+		return Polygon{}, false
+	}
+	return g.MustAsPolygon(), true
+}
+
+// AsMultiPoint checks if the geometry is a MultiPoint, and returns it as a
+// MultiPoint if it is. The returned flag indicates if the conversion was
+// successful.
+func (g Geometry) AsMultiPoint() (MultiPoint, bool) {
+	if !g.IsMultiPoint() {
+		return MultiPoint{}, false
+	}
+	return g.MustAsMultiPoint(), true
+}
+
+// AsMultiLineString checks if the geometry is a MultiLineString, and returns
+// it as a MultiLineString if it is. The returned flag indicates if the
+// conversion was successful.
+func (g Geometry) AsMultiLineString() (MultiLineString, bool) {
+	if !g.IsMultiLineString() {
+		return MultiLineString{}, false
+	}
+	return g.MustAsMultiLineString(), true
+}
+
+// AsMultiPolygon checks if the geometry is a MultiPolygon, and returns it as a
+// MultiPolygon if it is. The returned flag indicates if the conversion was
+// successful.
+func (g Geometry) AsMultiPolygon() (MultiPolygon, bool) {
+	if !g.IsMultiPolygon() {
+		return MultiPolygon{}, false
+	}
+	return g.MustAsMultiPolygon(), true
+}
+
 // AsText returns the WKT (Well Known Text) representation of this geometry.
 func (g Geometry) AsText() string {
 	switch g.gtype {
