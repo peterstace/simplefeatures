@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+- **Breaking change**: Renames the `AsFoo` methods of the Geometry type to
+  `MustAsFoo` (where `Foo` is a concrete geometry type such as `Point`). This
+  follows the go convention that methods and functions prefixed with Must may
+  panic if preconditions are not met. Note that there's no change in behaviour
+  here, it's simply a rename (these methods previously panicked). Users may
+  resolve this breaking change by just updating the names of any `AsFoo`
+  methods they are calling to `MustAsFoo`.
+
+- **Breaking change**: Adds new methods named `AsFoo` to the Geometry type.
+  These methods have the signature `AsFoo() (Foo, bool)`. The boolean return
+  value indicates if the conversion was successful or not. These methods are
+  useful because they allow concrete geometries to be extracted from a Geometry
+  value, with the concrete type for the `Is` and `As` call only specified once.
+  Users now just have to call `AsFoo`, and can then check the flag. This helps
+  to eliminate the class of bugs there the type specified with `IsFoo`
+  erroneously differs from the type specified by `AsFoo`.
+
 ## v0.33.1
 
 __Special thanks to Albert Teoh for contributing to this release.__

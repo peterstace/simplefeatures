@@ -12,14 +12,14 @@ import (
 func containsNonEmptyPointInMultiPoint(g geom.Geometry) bool {
 	switch {
 	case g.IsGeometryCollection():
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		for i := 0; i < gc.NumGeometries(); i++ {
 			if containsNonEmptyPointInMultiPoint(gc.GeometryN(i)) {
 				return true
 			}
 		}
 	case g.IsMultiPoint():
-		mp := g.AsMultiPoint()
+		mp := g.MustAsMultiPoint()
 		for i := 0; i < mp.NumPoints(); i++ {
 			if !mp.PointN(i).IsEmpty() {
 				return true
@@ -32,7 +32,7 @@ func containsNonEmptyPointInMultiPoint(g geom.Geometry) bool {
 func containsCollectionWithOnlyEmptyElements(g geom.Geometry) bool {
 	switch {
 	case g.IsGeometryCollection():
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		if gc.IsEmpty() && gc.NumGeometries() > 0 {
 			return true
 		}
@@ -43,13 +43,13 @@ func containsCollectionWithOnlyEmptyElements(g geom.Geometry) bool {
 		}
 		return false
 	case g.IsMultiPoint():
-		mp := g.AsMultiPoint()
+		mp := g.MustAsMultiPoint()
 		return mp.IsEmpty() && mp.NumPoints() > 0
 	case g.IsMultiLineString():
-		mls := g.AsMultiLineString()
+		mls := g.MustAsMultiLineString()
 		return mls.IsEmpty() && mls.NumLineStrings() > 0
 	case g.IsMultiPolygon():
-		mp := g.AsMultiPolygon()
+		mp := g.MustAsMultiPolygon()
 		return mp.IsEmpty() && mp.NumPolygons() > 0
 	default:
 		return false
@@ -60,7 +60,7 @@ func containsOnlyGeometryCollections(g geom.Geometry) bool {
 	if !g.IsGeometryCollection() {
 		return false
 	}
-	gc := g.AsGeometryCollection()
+	gc := g.MustAsGeometryCollection()
 	for i := 0; i < gc.NumGeometries(); i++ {
 		if !containsOnlyGeometryCollections(gc.GeometryN(i)) {
 			return false
@@ -72,7 +72,7 @@ func containsOnlyGeometryCollections(g geom.Geometry) bool {
 func containsMultiPolygonWithEmptyPolygon(g geom.Geometry) bool {
 	switch {
 	case g.IsMultiPolygon():
-		mp := g.AsMultiPolygon()
+		mp := g.MustAsMultiPolygon()
 		for i := 0; i < mp.NumPolygons(); i++ {
 			if mp.PolygonN(i).IsEmpty() {
 				return true
@@ -80,7 +80,7 @@ func containsMultiPolygonWithEmptyPolygon(g geom.Geometry) bool {
 		}
 		return false
 	case g.IsGeometryCollection():
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		for i := 0; i < gc.NumGeometries(); i++ {
 			if containsMultiPolygonWithEmptyPolygon(gc.GeometryN(i)) {
 				return true
@@ -95,14 +95,14 @@ func containsMultiPolygonWithEmptyPolygon(g geom.Geometry) bool {
 func containsMultiPointWithEmptyPoint(g geom.Geometry) bool {
 	switch {
 	case g.IsMultiPoint():
-		mp := g.AsMultiPoint()
+		mp := g.MustAsMultiPoint()
 		for i := 0; i < mp.NumPoints(); i++ {
 			if mp.PointN(i).IsEmpty() {
 				return true
 			}
 		}
 	case g.IsGeometryCollection():
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		for i := 0; i < gc.NumGeometries(); i++ {
 			if containsMultiPointWithEmptyPoint(gc.GeometryN(i)) {
 				return true
@@ -115,14 +115,14 @@ func containsMultiPointWithEmptyPoint(g geom.Geometry) bool {
 func containsMultiLineStringWithEmptyLineString(g geom.Geometry) bool {
 	switch {
 	case g.IsMultiLineString():
-		mls := g.AsMultiLineString()
+		mls := g.MustAsMultiLineString()
 		for i := 0; i < mls.NumLineStrings(); i++ {
 			if mls.LineStringN(i).IsEmpty() {
 				return true
 			}
 		}
 	case g.IsGeometryCollection():
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		for i := 0; i < gc.NumGeometries(); i++ {
 			if containsMultiLineStringWithEmptyLineString(gc.GeometryN(i)) {
 				return true
@@ -137,7 +137,7 @@ func hasEmptyRing(g geom.Geometry) bool {
 	// called with invalid geometries.
 	switch {
 	case g.IsPolygon():
-		p := g.AsPolygon()
+		p := g.MustAsPolygon()
 		if p.ExteriorRing().IsEmpty() {
 			return true
 		}
@@ -147,14 +147,14 @@ func hasEmptyRing(g geom.Geometry) bool {
 			}
 		}
 	case g.IsMultiPolygon():
-		mp := g.AsMultiPolygon()
+		mp := g.MustAsMultiPolygon()
 		for i := 0; i < mp.NumPolygons(); i++ {
 			if hasEmptyRing(mp.PolygonN(i).AsGeometry()) {
 				return true
 			}
 		}
 	case g.IsGeometryCollection():
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		for i := 0; i < gc.NumGeometries(); i++ {
 			if hasEmptyRing(gc.GeometryN(i)) {
 				return true
@@ -169,7 +169,7 @@ func hasEmptyPoint(g geom.Geometry) bool {
 	case g.IsPoint():
 		return g.IsEmpty()
 	case g.IsMultiPoint():
-		mp := g.AsMultiPoint()
+		mp := g.MustAsMultiPoint()
 		n := mp.NumPoints()
 		for i := 0; i < n; i++ {
 			if mp.PointN(i).IsEmpty() {
@@ -177,7 +177,7 @@ func hasEmptyPoint(g geom.Geometry) bool {
 			}
 		}
 	case g.IsGeometryCollection():
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		n := gc.NumGeometries()
 		for i := 0; i < n; i++ {
 			if hasEmptyPoint(gc.GeometryN(i)) {
@@ -220,10 +220,10 @@ func mantissaTerminatesQuickly(g geom.Geometry) bool {
 
 	switch g.Type() {
 	case geom.TypePoint:
-		xy, ok := g.AsPoint().XY()
+		xy, ok := g.MustAsPoint().XY()
 		return !ok || termXY(xy)
 	case geom.TypeLineString:
-		seq := g.AsLineString().Coordinates()
+		seq := g.MustAsLineString().Coordinates()
 		for i := 0; i < seq.Length(); i++ {
 			if !termXY(seq.GetXY(i)) {
 				return false
@@ -233,7 +233,7 @@ func mantissaTerminatesQuickly(g geom.Geometry) bool {
 	case geom.TypePolygon:
 		return g.IsEmpty() || mantissaTerminatesQuickly(g.Boundary())
 	case geom.TypeMultiPoint:
-		mp := g.AsMultiPoint()
+		mp := g.MustAsMultiPoint()
 		for i := 0; i < mp.NumPoints(); i++ {
 			pt := mp.PointN(i)
 			if !mantissaTerminatesQuickly(pt.AsGeometry()) {
@@ -242,7 +242,7 @@ func mantissaTerminatesQuickly(g geom.Geometry) bool {
 		}
 		return true
 	case geom.TypeMultiLineString:
-		mls := g.AsMultiLineString()
+		mls := g.MustAsMultiLineString()
 		for i := 0; i < mls.NumLineStrings(); i++ {
 			ls := mls.LineStringN(i)
 			if !mantissaTerminatesQuickly(ls.AsGeometry()) {
@@ -253,7 +253,7 @@ func mantissaTerminatesQuickly(g geom.Geometry) bool {
 	case geom.TypeMultiPolygon:
 		return g.IsEmpty() || mantissaTerminatesQuickly(g.Boundary())
 	case geom.TypeGeometryCollection:
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		for i := 0; i < gc.NumGeometries(); i++ {
 			g := gc.GeometryN(i)
 			if !mantissaTerminatesQuickly(g) {

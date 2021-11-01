@@ -123,13 +123,13 @@ func (h *Handle) intToErr(i C.int) error {
 func (h *Handle) createGeomHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
 	switch {
 	case g.IsPoint():
-		return h.createGeomHandleForPoint(g.AsPoint())
+		return h.createGeomHandleForPoint(g.MustAsPoint())
 	case g.IsMultiPoint():
-		return h.createGeomHandleForMultiPoint(g.AsMultiPoint())
+		return h.createGeomHandleForMultiPoint(g.MustAsMultiPoint())
 	case g.IsMultiPolygon():
-		return h.createGeomHandleForMultiPolygon(g.AsMultiPolygon())
+		return h.createGeomHandleForMultiPolygon(g.MustAsMultiPolygon())
 	case g.IsGeometryCollection():
-		return h.createGeomHandleForGeometryCollection(g.AsGeometryCollection())
+		return h.createGeomHandleForGeometryCollection(g.MustAsGeometryCollection())
 	default:
 		return h.createGeomHandleUsingWKB(g)
 	}
@@ -290,7 +290,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 					return geom.Geometry{}, errors.New(
 						"internal error: expected point")
 				}
-				subPoints[i] = subPointAsGeom.AsPoint()
+				subPoints[i] = subPointAsGeom.MustAsPoint()
 			}
 		}
 		return geom.NewMultiPoint(subPoints).AsGeometry(), nil
@@ -313,7 +313,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 				return geom.Geometry{}, errors.New(
 					"internal error: expected polygon")
 			}
-			subPolys[i] = subPolyAsGeom.AsPolygon()
+			subPolys[i] = subPolyAsGeom.MustAsPolygon()
 		}
 		mp, err := geom.NewMultiPolygon(subPolys)
 		return mp.AsGeometry(), err

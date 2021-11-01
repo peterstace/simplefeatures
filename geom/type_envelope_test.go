@@ -190,11 +190,11 @@ func TestEnvelopeAttributes(t *testing.T) {
 				gotMin, gotMax, gotOK := tc.env.MinMaxXYs()
 				expectBoolEq(t, gotOK, !tc.isEmpty)
 				if gotOK {
-					wantMin, minOK := geomFromWKT(t, tc.min).AsPoint().XY()
+					wantMin, minOK := geomFromWKT(t, tc.min).MustAsPoint().XY()
 					expectTrue(t, minOK)
 					expectXYEq(t, gotMin, wantMin)
 
-					wantMax, maxOK := geomFromWKT(t, tc.max).AsPoint().XY()
+					wantMax, maxOK := geomFromWKT(t, tc.max).MustAsPoint().XY()
 					expectTrue(t, maxOK)
 					expectXYEq(t, gotMax, wantMax)
 				}

@@ -146,7 +146,7 @@ func TestPointInRing(t *testing.T) {
 		if !g.IsPolygon() {
 			t.Fatal("expected a polygon")
 		}
-		poly := g.AsPolygon()
+		poly := g.MustAsPolygon()
 		ring := poly.ExteriorRing()
 
 		for j, st := range tc.subTests {
@@ -154,7 +154,7 @@ func TestPointInRing(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			xy, ok := pt.AsPoint().XY()
+			xy, ok := pt.MustAsPoint().XY()
 			if !ok {
 				panic("point empty not expected in this test")
 			}
@@ -185,7 +185,7 @@ func TestPointInPolygon(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	poly := g.AsPolygon()
+	poly := g.MustAsPolygon()
 	il := newIndexedLines(poly.Boundary().asLines())
 
 	for i, tt := range []struct {

@@ -278,7 +278,7 @@ func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) (MultiPoint, error) {
 		if !geom.IsPoint() {
 			return MultiPoint{}, wkbSyntaxError{"MultiPoint contains non-Point element"}
 		}
-		pts[i] = geom.AsPoint()
+		pts[i] = geom.MustAsPoint()
 	}
 	return NewMultiPoint(pts, p.opts...), nil
 }
@@ -300,7 +300,7 @@ func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) (MultiLineString
 		if !geom.IsLineString() {
 			return MultiLineString{}, wkbSyntaxError{"MultiLineString contains non-LineString element"}
 		}
-		lss[i] = geom.AsLineString()
+		lss[i] = geom.MustAsLineString()
 	}
 	return NewMultiLineString(lss, p.opts...), nil
 }
@@ -322,7 +322,7 @@ func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) (MultiPolygon, erro
 		if !geom.IsPolygon() {
 			return MultiPolygon{}, wkbSyntaxError{"MultiPolygon contains non-Polygon element"}
 		}
-		polys[i] = geom.AsPolygon()
+		polys[i] = geom.MustAsPolygon()
 	}
 	return NewMultiPolygon(polys, p.opts...)
 }

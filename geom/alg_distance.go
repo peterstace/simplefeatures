@@ -103,21 +103,21 @@ func Distance(g1, g2 Geometry) (float64, bool) {
 func extractXYsAndLines(g Geometry) ([]XY, []line) {
 	switch g.Type() {
 	case TypePoint:
-		return g.AsPoint().asXYs(), nil
+		return g.MustAsPoint().asXYs(), nil
 	case TypeLineString:
-		return nil, g.AsLineString().asLines()
+		return nil, g.MustAsLineString().asLines()
 	case TypePolygon:
-		return nil, g.AsPolygon().Boundary().asLines()
+		return nil, g.MustAsPolygon().Boundary().asLines()
 	case TypeMultiPoint:
-		return g.AsMultiPoint().asXYs(), nil
+		return g.MustAsMultiPoint().asXYs(), nil
 	case TypeMultiLineString:
-		return nil, g.AsMultiLineString().asLines()
+		return nil, g.MustAsMultiLineString().asLines()
 	case TypeMultiPolygon:
-		return nil, g.AsMultiPolygon().Boundary().asLines()
+		return nil, g.MustAsMultiPolygon().Boundary().asLines()
 	case TypeGeometryCollection:
 		var allXYs []XY
 		var allLines []line
-		g.AsGeometryCollection().walk(func(child Geometry) {
+		g.MustAsGeometryCollection().walk(func(child Geometry) {
 			xys, lns := extractXYsAndLines(child)
 			allXYs = append(allXYs, xys...)
 			allLines = append(allLines, lns...)

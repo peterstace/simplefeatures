@@ -79,19 +79,19 @@ func appendXYsForPolygon(xys []XY, poly Polygon) []XY {
 func appendComponentPoints(xys []XY, g Geometry) []XY {
 	switch g.Type() {
 	case TypePoint:
-		return appendXYForPoint(xys, g.AsPoint())
+		return appendXYForPoint(xys, g.MustAsPoint())
 	case TypeMultiPoint:
-		mp := g.AsMultiPoint()
+		mp := g.MustAsMultiPoint()
 		n := mp.NumPoints()
 		for i := 0; i < n; i++ {
 			xys = appendXYForPoint(xys, mp.PointN(i))
 		}
 		return xys
 	case TypeLineString:
-		ls := g.AsLineString()
+		ls := g.MustAsLineString()
 		return appendXYForLineString(xys, ls)
 	case TypeMultiLineString:
-		mls := g.AsMultiLineString()
+		mls := g.MustAsMultiLineString()
 		n := mls.NumLineStrings()
 		for i := 0; i < n; i++ {
 			ls := mls.LineStringN(i)
@@ -99,10 +99,10 @@ func appendComponentPoints(xys []XY, g Geometry) []XY {
 		}
 		return xys
 	case TypePolygon:
-		poly := g.AsPolygon()
+		poly := g.MustAsPolygon()
 		return appendXYsForPolygon(xys, poly)
 	case TypeMultiPolygon:
-		mp := g.AsMultiPolygon()
+		mp := g.MustAsMultiPolygon()
 		n := mp.NumPolygons()
 		for i := 0; i < n; i++ {
 			poly := mp.PolygonN(i)
@@ -110,7 +110,7 @@ func appendComponentPoints(xys []XY, g Geometry) []XY {
 		}
 		return xys
 	case TypeGeometryCollection:
-		gc := g.AsGeometryCollection()
+		gc := g.MustAsGeometryCollection()
 		n := gc.NumGeometries()
 		for i := 0; i < n; i++ {
 			xys = appendComponentPoints(xys, gc.GeometryN(i))
