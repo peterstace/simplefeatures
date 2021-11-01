@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.34.0
+
+2021-11-02
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - **Breaking change**: Renames the `AsFoo` methods of the Geometry type to
   `MustAsFoo` (where `Foo` is a concrete geometry type such as `Point`). This
@@ -20,6 +24,8 @@
   erroneously differs from the type specified by `AsFoo`.
 
 ## v0.33.1
+
+2021-10-14
 
 __Special thanks to Albert Teoh for contributing to this release.__
 
