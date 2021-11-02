@@ -25,15 +25,15 @@ func init() {
 
 }
 
-type wkbMarshaller struct {
+type wkbMarshaler struct {
 	buf []byte
 }
 
-func newWKBMarshaller(buf []byte) *wkbMarshaller {
-	return &wkbMarshaller{buf}
+func newWKBMarshaler(buf []byte) *wkbMarshaler {
+	return &wkbMarshaler{buf}
 }
 
-func (m *wkbMarshaller) writeByteOrder() {
+func (m *wkbMarshaler) writeByteOrder() {
 	if nativeOrder == binary.LittleEndian {
 		m.buf = append(m.buf, 1)
 	} else {
@@ -41,26 +41,26 @@ func (m *wkbMarshaller) writeByteOrder() {
 	}
 }
 
-func (m *wkbMarshaller) writeGeomType(geomType GeometryType, ctype CoordinatesType) {
+func (m *wkbMarshaler) writeGeomType(geomType GeometryType, ctype CoordinatesType) {
 	gt := [...]uint32{7, 1, 2, 3, 4, 5, 6}[geomType]
 	var buf [4]byte
 	nativeOrder.PutUint32(buf[:], uint32(ctype)*1000+gt)
 	m.buf = append(m.buf, buf[:]...)
 }
 
-func (m *wkbMarshaller) writeFloat64(f float64) {
+func (m *wkbMarshaler) writeFloat64(f float64) {
 	var buf [8]byte
 	nativeOrder.PutUint64(buf[:], math.Float64bits(f))
 	m.buf = append(m.buf, buf[:]...)
 }
 
-func (m *wkbMarshaller) writeCount(n int) {
+func (m *wkbMarshaler) writeCount(n int) {
 	var buf [4]byte
 	nativeOrder.PutUint32(buf[:], uint32(n))
 	m.buf = append(m.buf, buf[:]...)
 }
 
-func (m *wkbMarshaller) writeCoordinates(c Coordinates) {
+func (m *wkbMarshaler) writeCoordinates(c Coordinates) {
 	m.writeFloat64(c.X)
 	m.writeFloat64(c.Y)
 	if c.Type.Is3D() {
@@ -71,7 +71,7 @@ func (m *wkbMarshaller) writeCoordinates(c Coordinates) {
 	}
 }
 
-func (m *wkbMarshaller) writeSequence(seq Sequence) {
+func (m *wkbMarshaler) writeSequence(seq Sequence) {
 	n := seq.Length()
 	m.writeCount(n)
 
