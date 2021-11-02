@@ -185,6 +185,23 @@ func (p Point) MarshalJSON() ([]byte, error) {
 	return append(dst, '}'), nil
 }
 
+// UnmarshalJSON implements the encoding/json.Unmarshaler
+func (p *Point) UnmarshalJSON(buf []byte) error {
+	g, err := UnmarshalGeoJSON(buf)
+	if err != nil {
+		return err
+	}
+	pt, ok := g.AsPoint()
+	if !ok {
+		return wrongTypeDuringUnmarshalError{
+			destType:   TypePoint,
+			actualType: g.Type(),
+		}
+	}
+	*p = pt
+	return nil
+}
+
 // TransformXY transforms this Point into another Point according to fn.
 func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, error) {
 	if !p.full {

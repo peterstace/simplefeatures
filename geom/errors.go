@@ -77,3 +77,12 @@ func wrapWithGeoJSONSyntaxError(err error) error {
 	}
 	return geojsonSyntaxError{err.Error()}
 }
+
+type wrongTypeDuringUnmarshalError struct {
+	destType   GeometryType
+	actualType GeometryType
+}
+
+func (e wrongTypeDuringUnmarshalError) Error() string {
+	return fmt.Sprintf("cannot unmarshal %s into %s", e.actualType, e.destType)
+}

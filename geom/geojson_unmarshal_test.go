@@ -377,3 +377,26 @@ func TestGeoJSONUnmarshalDisableAllValidations(t *testing.T) {
 		})
 	}
 }
+
+func TestGeoJSONUnmarshalIntoConcreteGeometryValid(t *testing.T) {
+	for i, tc := range []struct {
+		target interface {
+			json.Unmarshaler
+			AsGeometry() geom.Geometry
+		}
+		geojson string
+		wantWKT string
+	}{
+		{
+			target:  new(Point),
+			geojson: `{"type":"Point","coordinates":[1,2]}`,
+			wantWKT: "POINT(1 2)",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			err := json.Unmarshal([]byte(tc.geojson), tc.target)
+			expectNoErr(t, err)
+			expectGeomEq(t, tc.target.AsGeometry(), geomFromWKT(t, tc.wantWKT))
+		})
+	}
+}
