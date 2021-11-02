@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Fix spelling of "Marshaller" when referring to the interface defined in the
+  `encoding/json` package.
+
 ## v0.34.0
 
 2021-11-02
