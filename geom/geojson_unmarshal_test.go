@@ -400,3 +400,37 @@ func TestGeoJSONUnmarshalIntoConcreteGeometryValid(t *testing.T) {
 		})
 	}
 }
+
+func TestGeoJSONUnmarshalIntoConcreteGeometryWrongType(t *testing.T) {
+	for _, tc := range []struct {
+		dest interface {
+			json.Unmarshaler
+			Type() GeometryType
+		}
+	}{
+		{new(Point)},
+	} {
+		t.Run("dest_"+tc.dest.Type().String(), func(t *testing.T) {
+			for _, geojson := range []string{
+				`{"type":"Point","coordinates":[1,2]}`,
+				`{"type":"MultiPoint","coordinates":[[1,2]]}`,
+				`{"type":"LineString","coordinates":[[1,2],[3,4]]}`,
+				`{"type":"MultiLineString","coordinates":[[[1,2],[3,4]]]}`,
+				`{"type":"Polygon","coordinates":[[[0,0],[0,1],[1,0],[0,0]]]}`,
+				`{"type":"MultiPolygon","coordinates":[[[[0,0],[0,1],[1,0],[0,0]]]]}`,
+				`{"type":"GeometryCollection","geometries":[{"type":"Point","coordinates":[1,2]}]}`,
+			} {
+				srcTyp := geomFromGeoJSON(t, geojson).Type()
+				t.Run("source_"+srcTyp.String(), func(t *testing.T) {
+					if srcTyp == tc.dest.Type() {
+						// This test suite is for negative test cases, however
+						// this test case would always succeed.
+						return
+					}
+					err := json.Unmarshal([]byte(geojson), tc.dest)
+					expectErr(t, err)
+				})
+			}
+		})
+	}
+}
