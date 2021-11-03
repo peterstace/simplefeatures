@@ -269,7 +269,7 @@ func (s LineString) AsBinary() []byte {
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry
 // to the input slice.
 func (s LineString) AppendWKB(dst []byte) []byte {
-	marsh := newWKBMarshaller(dst)
+	marsh := newWKBMarshaler(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(TypeLineString, s.CoordinatesType())
 	marsh.writeSequence(s.seq)
@@ -282,7 +282,7 @@ func (s LineString) ConvexHull() Geometry {
 	return convexHull(s.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// MarshalJSON implements the encoding/json.Marshaler interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (s LineString) MarshalJSON() ([]byte, error) {
 	var dst []byte

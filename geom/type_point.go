@@ -153,7 +153,7 @@ func (p Point) AsBinary() []byte {
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry
 // to the input slice.
 func (p Point) AppendWKB(dst []byte) []byte {
-	marsh := newWKBMarshaller(dst)
+	marsh := newWKBMarshaler(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(TypePoint, p.CoordinatesType())
 	if !p.full {
@@ -172,7 +172,7 @@ func (p Point) ConvexHull() Geometry {
 	return convexHull(p.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// MarshalJSON implements the encoding/json.Marshaler interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (p Point) MarshalJSON() ([]byte, error) {
 	var dst []byte

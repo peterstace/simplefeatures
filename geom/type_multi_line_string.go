@@ -268,7 +268,7 @@ func (m MultiLineString) AsBinary() []byte {
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry
 // to the input slice.
 func (m MultiLineString) AppendWKB(dst []byte) []byte {
-	marsh := newWKBMarshaller(dst)
+	marsh := newWKBMarshaler(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(TypeMultiLineString, m.ctype)
 	n := m.NumLineStrings()
@@ -286,7 +286,7 @@ func (m MultiLineString) ConvexHull() Geometry {
 	return convexHull(m.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// MarshalJSON implements the encoding/json.Marshaler interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (m MultiLineString) MarshalJSON() ([]byte, error) {
 	var dst []byte
