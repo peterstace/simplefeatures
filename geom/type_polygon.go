@@ -307,6 +307,24 @@ func (p Polygon) MarshalJSON() ([]byte, error) {
 	return dst, nil
 }
 
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a Polygon.
+func (p *Polygon) UnmarshalJSON(buf []byte) error {
+	g, err := UnmarshalGeoJSON(buf)
+	if err != nil {
+		return err
+	}
+	poly, ok := g.AsPolygon()
+	if !ok {
+		return wrongTypeDuringUnmarshalError{
+			destType:   TypePoint,
+			actualType: g.Type(),
+		}
+	}
+	*p = poly
+	return nil
+}
+
 // Coordinates returns the coordinates of the rings making up the Polygon
 // (external ring first, then internal rings after).
 func (p Polygon) Coordinates() []Sequence {

@@ -182,6 +182,24 @@ func (m MultiPoint) MarshalJSON() ([]byte, error) {
 	return dst, nil
 }
 
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a MultiPoint.
+func (mp *MultiPoint) UnmarshalJSON(buf []byte) error {
+	g, err := UnmarshalGeoJSON(buf)
+	if err != nil {
+		return err
+	}
+	multiPt, ok := g.AsMultiPoint()
+	if !ok {
+		return wrongTypeDuringUnmarshalError{
+			destType:   TypeMultiPoint,
+			actualType: g.Type(),
+		}
+	}
+	*mp = multiPt
+	return nil
+}
+
 // Coordinates returns the coordinates of the non-empty points represented by
 // the MultiPoint.
 func (m MultiPoint) Coordinates() Sequence {

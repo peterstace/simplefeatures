@@ -185,7 +185,8 @@ func (p Point) MarshalJSON() ([]byte, error) {
 	return append(dst, '}'), nil
 }
 
-// UnmarshalJSON implements the encoding/json.Unmarshaler
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a Point.
 func (p *Point) UnmarshalJSON(buf []byte) error {
 	g, err := UnmarshalGeoJSON(buf)
 	if err != nil {

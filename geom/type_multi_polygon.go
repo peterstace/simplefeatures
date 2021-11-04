@@ -314,6 +314,24 @@ func (m MultiPolygon) MarshalJSON() ([]byte, error) {
 	return dst, nil
 }
 
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a MultiPolygon.
+func (m *MultiPolygon) UnmarshalJSON(buf []byte) error {
+	g, err := UnmarshalGeoJSON(buf)
+	if err != nil {
+		return err
+	}
+	mp, ok := g.AsMultiPolygon()
+	if !ok {
+		return wrongTypeDuringUnmarshalError{
+			destType:   TypeMultiPolygon,
+			actualType: g.Type(),
+		}
+	}
+	*m = mp
+	return nil
+}
+
 // Coordinates returns the coordinates of each constituent Polygon of the
 // MultiPolygon.
 func (m MultiPolygon) Coordinates() [][]Sequence {

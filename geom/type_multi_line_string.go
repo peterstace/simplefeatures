@@ -296,6 +296,24 @@ func (m MultiLineString) MarshalJSON() ([]byte, error) {
 	return dst, nil
 }
 
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a MultiLineString.
+func (m *MultiLineString) UnmarshalJSON(buf []byte) error {
+	g, err := UnmarshalGeoJSON(buf)
+	if err != nil {
+		return err
+	}
+	mls, ok := g.AsMultiLineString()
+	if !ok {
+		return wrongTypeDuringUnmarshalError{
+			destType:   TypeMultiLineString,
+			actualType: g.Type(),
+		}
+	}
+	*m = mls
+	return nil
+}
+
 // Coordinates returns the coordinates of each constituent LineString in the
 // MultiLineString.
 func (m MultiLineString) Coordinates() []Sequence {

@@ -379,21 +379,52 @@ func TestGeoJSONUnmarshalDisableAllValidations(t *testing.T) {
 }
 
 func TestGeoJSONUnmarshalIntoConcreteGeometryValid(t *testing.T) {
-	for i, tc := range []struct {
+	for _, tc := range []struct {
 		target interface {
 			json.Unmarshaler
 			AsGeometry() geom.Geometry
+			Type() GeometryType
 		}
 		geojson string
 		wantWKT string
 	}{
 		{
+			target:  new(GeometryCollection),
+			geojson: `{"type":"GeometryCollection","geometries":[{"type":"Point","coordinates":[1,2]}]}`,
+			wantWKT: "GEOMETRYCOLLECTION(POINT(1 2))",
+		},
+		{
 			target:  new(Point),
 			geojson: `{"type":"Point","coordinates":[1,2]}`,
 			wantWKT: "POINT(1 2)",
 		},
+		{
+			target:  new(LineString),
+			geojson: `{"type":"LineString","coordinates":[[1,2],[3,4]]}`,
+			wantWKT: "LINESTRING(1 2,3 4)",
+		},
+		{
+			target:  new(Polygon),
+			geojson: `{"type":"Polygon","coordinates":[[[0,0],[0,1],[1,0],[0,0]]]}`,
+			wantWKT: "POLYGON((0 0,0 1,1 0,0 0))",
+		},
+		{
+			target:  new(MultiPoint),
+			geojson: `{"type":"MultiPoint","coordinates":[[1,2]]}`,
+			wantWKT: "MULTIPOINT((1 2))",
+		},
+		{
+			target:  new(MultiLineString),
+			geojson: `{"type":"MultiLineString","coordinates":[[[1,2],[3,4]]]}`,
+			wantWKT: "MULTILINESTRING((1 2,3 4))",
+		},
+		{
+			target:  new(MultiPolygon),
+			geojson: `{"type":"MultiPolygon","coordinates":[[[[0,0],[0,1],[1,0],[0,0]]]]}`,
+			wantWKT: "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))",
+		},
 	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
+		t.Run(tc.target.Type().String(), func(t *testing.T) {
 			err := json.Unmarshal([]byte(tc.geojson), tc.target)
 			expectNoErr(t, err)
 			expectGeomEq(t, tc.target.AsGeometry(), geomFromWKT(t, tc.wantWKT))
@@ -408,7 +439,13 @@ func TestGeoJSONUnmarshalIntoConcreteGeometryWrongType(t *testing.T) {
 			Type() GeometryType
 		}
 	}{
+		{new(GeometryCollection)},
 		{new(Point)},
+		{new(LineString)},
+		{new(Polygon)},
+		{new(MultiPoint)},
+		{new(MultiLineString)},
+		{new(MultiPolygon)},
 	} {
 		t.Run("dest_"+tc.dest.Type().String(), func(t *testing.T) {
 			for _, geojson := range []string{

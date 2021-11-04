@@ -292,6 +292,24 @@ func (s LineString) MarshalJSON() ([]byte, error) {
 	return dst, nil
 }
 
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a LineString.
+func (s *LineString) UnmarshalJSON(buf []byte) error {
+	g, err := UnmarshalGeoJSON(buf)
+	if err != nil {
+		return err
+	}
+	ls, ok := g.AsLineString()
+	if !ok {
+		return wrongTypeDuringUnmarshalError{
+			destType:   TypeLineString,
+			actualType: g.Type(),
+		}
+	}
+	*s = ls
+	return nil
+}
+
 // Coordinates returns the coordinates of each point along the LineString.
 func (s LineString) Coordinates() Sequence {
 	return s.seq

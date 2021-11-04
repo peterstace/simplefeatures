@@ -212,6 +212,24 @@ func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 	return buf, nil
 }
 
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a GeometryCollection.
+func (c *GeometryCollection) UnmarshalJSON(buf []byte) error {
+	g, err := UnmarshalGeoJSON(buf)
+	if err != nil {
+		return err
+	}
+	gc, ok := g.AsGeometryCollection()
+	if !ok {
+		return wrongTypeDuringUnmarshalError{
+			destType:   TypeGeometryCollection,
+			actualType: g.Type(),
+		}
+	}
+	*c = gc
+	return nil
+}
+
 // TransformXY transforms this GeometryCollection into another GeometryCollection according to fn.
 func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryCollection, error) {
 	transformed := make([]Geometry, len(c.geoms))
