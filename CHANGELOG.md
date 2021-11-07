@@ -5,6 +5,12 @@
 - Fix spelling of "Marshaller" when referring to the interface defined in the
   `encoding/json` package.
 
+- Add `UnmarshalJSON` methods to each concrete geometry type
+  (`GeometryCollection`, `Point`, `MultiPoint`, `LineString`,
+  `MultiLineString`, `Polygon`, `MultiPolygon`). This causes these types to
+  implement the `encoding/json.Unmarshaler` interface. GeoJSON can now be
+  unmarshalled directly into a concrete geometry type.
+
 ## v0.34.0
 
 2021-11-02
