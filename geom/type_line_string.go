@@ -301,7 +301,7 @@ func (s *LineString) UnmarshalJSON(buf []byte) error {
 	}
 	ls, ok := g.AsLineString()
 	if !ok {
-		return wrongTypeDuringUnmarshalError{
+		return badUnmarshalDestError{
 			destType:   TypeLineString,
 			actualType: g.Type(),
 		}

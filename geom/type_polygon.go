@@ -316,7 +316,7 @@ func (p *Polygon) UnmarshalJSON(buf []byte) error {
 	}
 	poly, ok := g.AsPolygon()
 	if !ok {
-		return wrongTypeDuringUnmarshalError{
+		return badUnmarshalDestError{
 			destType:   TypePoint,
 			actualType: g.Type(),
 		}

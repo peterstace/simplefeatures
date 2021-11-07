@@ -191,7 +191,7 @@ func (m *MultiPoint) UnmarshalJSON(buf []byte) error {
 	}
 	mp, ok := g.AsMultiPoint()
 	if !ok {
-		return wrongTypeDuringUnmarshalError{
+		return badUnmarshalDestError{
 			destType:   TypeMultiPoint,
 			actualType: g.Type(),
 		}

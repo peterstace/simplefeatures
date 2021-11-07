@@ -323,7 +323,7 @@ func (m *MultiPolygon) UnmarshalJSON(buf []byte) error {
 	}
 	mp, ok := g.AsMultiPolygon()
 	if !ok {
-		return wrongTypeDuringUnmarshalError{
+		return badUnmarshalDestError{
 			destType:   TypeMultiPolygon,
 			actualType: g.Type(),
 		}

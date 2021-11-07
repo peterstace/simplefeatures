@@ -194,7 +194,7 @@ func (p *Point) UnmarshalJSON(buf []byte) error {
 	}
 	pt, ok := g.AsPoint()
 	if !ok {
-		return wrongTypeDuringUnmarshalError{
+		return badUnmarshalDestError{
 			destType:   TypePoint,
 			actualType: g.Type(),
 		}

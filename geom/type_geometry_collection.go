@@ -221,7 +221,7 @@ func (c *GeometryCollection) UnmarshalJSON(buf []byte) error {
 	}
 	gc, ok := g.AsGeometryCollection()
 	if !ok {
-		return wrongTypeDuringUnmarshalError{
+		return badUnmarshalDestError{
 			destType:   TypeGeometryCollection,
 			actualType: g.Type(),
 		}

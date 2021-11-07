@@ -305,7 +305,7 @@ func (m *MultiLineString) UnmarshalJSON(buf []byte) error {
 	}
 	mls, ok := g.AsMultiLineString()
 	if !ok {
-		return wrongTypeDuringUnmarshalError{
+		return badUnmarshalDestError{
 			destType:   TypeMultiLineString,
 			actualType: g.Type(),
 		}
