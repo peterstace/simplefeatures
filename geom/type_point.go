@@ -4,7 +4,6 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
-	"reflect"
 	"unsafe"
 )
 
@@ -189,33 +188,18 @@ func (p Point) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
 // the GeoJSON representation of a Point.
 func (p *Point) UnmarshalJSON(buf []byte) error {
-	return geojsonUnmarshalConcrete(buf, p)
-}
-
-// geojsonUnmarshalConcrete is a helper that unmarshals the GeoJSON in buf into
-// dest (which must be a pointer to a concrete geometry type).
-func geojsonUnmarshalConcrete(buf []byte, dest interface{}) error {
 	g, err := UnmarshalGeoJSON(buf)
 	if err != nil {
 		return err
 	}
-
-	destType := dest.(interface{ Type() GeometryType }).Type()
-
-	gVal := reflect.ValueOf(g)
-	methodName := "As" + destType.String()
-	methodResults := gVal.MethodByName(methodName).Call(nil)
-	concreteVal := methodResults[0]
-	ok := methodResults[1].Interface().(bool)
+	pt, ok := g.AsPoint()
 	if !ok {
 		return badUnmarshalDestError{
-			destType:   destType,
+			destType:   TypePoint,
 			actualType: g.Type(),
 		}
 	}
-
-	destVal := reflect.ValueOf(dest)
-	destVal.Elem().Set(concreteVal)
+	*p = pt
 	return nil
 }
 
