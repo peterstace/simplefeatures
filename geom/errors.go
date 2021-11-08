@@ -77,15 +77,3 @@ func wrapWithGeoJSONSyntaxError(err error) error {
 	}
 	return geojsonSyntaxError{err.Error()}
 }
-
-// badUnmarshalDestError indicates that the serialised geometry being
-// unmarshalled doesn't have the correct type compared to the unmarshal
-// destination type.
-type badUnmarshalDestError struct {
-	destType   GeometryType
-	actualType GeometryType
-}
-
-func (e badUnmarshalDestError) Error() string {
-	return fmt.Sprintf("cannot unmarshal %s into %s", e.actualType, e.destType)
-}

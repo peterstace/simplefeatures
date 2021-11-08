@@ -275,7 +275,7 @@ func (m MultiPolygon) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (m *MultiPolygon) Scan(src interface{}) error {
-	return scanAsType(src, m, TypeMultiPolygon)
+	return scanAsType(src, m)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -317,19 +317,7 @@ func (m MultiPolygon) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
 // the GeoJSON representation of a MultiPolygon.
 func (m *MultiPolygon) UnmarshalJSON(buf []byte) error {
-	g, err := UnmarshalGeoJSON(buf)
-	if err != nil {
-		return err
-	}
-	mp, ok := g.AsMultiPolygon()
-	if !ok {
-		return badUnmarshalDestError{
-			destType:   TypeMultiPolygon,
-			actualType: g.Type(),
-		}
-	}
-	*m = mp
-	return nil
+	return unmarshalGeoJSONAsType(buf, m)
 }
 
 // Coordinates returns the coordinates of each constituent Polygon of the

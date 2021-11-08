@@ -269,7 +269,7 @@ func (p Polygon) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (p *Polygon) Scan(src interface{}) error {
-	return scanAsType(src, p, TypePolygon)
+	return scanAsType(src, p)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -310,19 +310,7 @@ func (p Polygon) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
 // the GeoJSON representation of a Polygon.
 func (p *Polygon) UnmarshalJSON(buf []byte) error {
-	g, err := UnmarshalGeoJSON(buf)
-	if err != nil {
-		return err
-	}
-	poly, ok := g.AsPolygon()
-	if !ok {
-		return badUnmarshalDestError{
-			destType:   TypePoint,
-			actualType: g.Type(),
-		}
-	}
-	*p = poly
-	return nil
+	return unmarshalGeoJSONAsType(buf, p)
 }
 
 // Coordinates returns the coordinates of the rings making up the Polygon

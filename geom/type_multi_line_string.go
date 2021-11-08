@@ -257,7 +257,7 @@ func (m MultiLineString) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (m *MultiLineString) Scan(src interface{}) error {
-	return scanAsType(src, m, TypeMultiLineString)
+	return scanAsType(src, m)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -299,19 +299,7 @@ func (m MultiLineString) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
 // the GeoJSON representation of a MultiLineString.
 func (m *MultiLineString) UnmarshalJSON(buf []byte) error {
-	g, err := UnmarshalGeoJSON(buf)
-	if err != nil {
-		return err
-	}
-	mls, ok := g.AsMultiLineString()
-	if !ok {
-		return badUnmarshalDestError{
-			destType:   TypeMultiLineString,
-			actualType: g.Type(),
-		}
-	}
-	*m = mls
-	return nil
+	return unmarshalGeoJSONAsType(buf, m)
 }
 
 // Coordinates returns the coordinates of each constituent LineString in the

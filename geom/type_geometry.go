@@ -286,6 +286,22 @@ func (g *Geometry) UnmarshalJSON(p []byte) error {
 	return nil
 }
 
+// unmarshalGeoJSONAsType unmarshals GeoJSON directly into the concrete
+// geometry specified by dst (which should be a pointer to the concrete
+// geometry type).
+func unmarshalGeoJSONAsType(p []byte, dst interface{}) error {
+	g, err := UnmarshalGeoJSON(p)
+	if err != nil {
+		return err
+	}
+	dstType := dst.(interface{ Type() GeometryType }).Type()
+	if g.Type() != dstType {
+		return fmt.Errorf("cannot unmarshal GeoJSON of type %s into %s", g.Type(), dstType)
+	}
+	assignToConcrete(dst, g)
+	return nil
+}
+
 // AppendWKT appends the WKT (Well Known Text) representation of this geometry
 // to the input byte slice.
 func (g Geometry) AppendWKT(dst []byte) []byte {
@@ -377,15 +393,24 @@ func (g *Geometry) Scan(src interface{}) error {
 // geometry types. The src should be the input to Scan, typ should be the
 // concrete geometry type, and dst should be a pointer to the concrete geometry
 // to update (e.g. *LineString).
-func scanAsType(src interface{}, dst interface{}, typ GeometryType) error {
+func scanAsType(src interface{}, dst interface{}) error {
 	var g Geometry
 	if err := g.Scan(src); err != nil {
 		return err
 	}
-	if g.Type() != typ {
-		return fmt.Errorf("scanned geometry is a %s rather than a %s", g.Type(), typ)
+	dstType := dst.(interface{ Type() GeometryType }).Type()
+	if g.Type() != dstType {
+		return fmt.Errorf("scanned geometry is a %s rather than a %s", g.Type(), dstType)
 	}
-	switch typ {
+	assignToConcrete(dst, g)
+	return nil
+}
+
+// assignToConcrete assigns the geometry stored in g to the concrete geometry
+// pointed to by dst (i.e. dst must be a pointer to a concrete geometry). It
+// panics if the type of dst doesn't match the geometry stored in g.
+func assignToConcrete(dst interface{}, g Geometry) {
+	switch g.Type() {
 	case TypeGeometryCollection:
 		*dst.(*GeometryCollection) = g.MustAsGeometryCollection()
 	case TypePoint:
@@ -401,9 +426,8 @@ func scanAsType(src interface{}, dst interface{}, typ GeometryType) error {
 	case TypeMultiPolygon:
 		*dst.(*MultiPolygon) = g.MustAsMultiPolygon()
 	default:
-		panic("unknown geometry type: " + typ.String())
+		panic("unknown geometry type: " + g.Type().String())
 	}
-	return nil
 }
 
 // Dimension returns the dimension of the Geometry. This is  0 for Points and

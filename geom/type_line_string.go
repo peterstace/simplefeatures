@@ -258,7 +258,7 @@ func (s LineString) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (s *LineString) Scan(src interface{}) error {
-	return scanAsType(src, s, TypeLineString)
+	return scanAsType(src, s)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -295,19 +295,7 @@ func (s LineString) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
 // the GeoJSON representation of a LineString.
 func (s *LineString) UnmarshalJSON(buf []byte) error {
-	g, err := UnmarshalGeoJSON(buf)
-	if err != nil {
-		return err
-	}
-	ls, ok := g.AsLineString()
-	if !ok {
-		return badUnmarshalDestError{
-			destType:   TypeLineString,
-			actualType: g.Type(),
-		}
-	}
-	*s = ls
-	return nil
+	return unmarshalGeoJSONAsType(buf, s)
 }
 
 // Coordinates returns the coordinates of each point along the LineString.
