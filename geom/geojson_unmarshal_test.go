@@ -377,3 +377,132 @@ func TestGeoJSONUnmarshalDisableAllValidations(t *testing.T) {
 		})
 	}
 }
+
+func TestGeoJSONUnmarshalIntoConcreteGeometryValid(t *testing.T) {
+	for _, tc := range []struct {
+		target interface {
+			json.Unmarshaler
+			AsGeometry() geom.Geometry
+			Type() GeometryType
+		}
+		geojson string
+		wantWKT string
+	}{
+		{
+			target:  new(GeometryCollection),
+			geojson: `{"type":"GeometryCollection","geometries":[{"type":"Point","coordinates":[1,2]}]}`,
+			wantWKT: "GEOMETRYCOLLECTION(POINT(1 2))",
+		},
+		{
+			target:  new(Point),
+			geojson: `{"type":"Point","coordinates":[1,2]}`,
+			wantWKT: "POINT(1 2)",
+		},
+		{
+			target:  new(LineString),
+			geojson: `{"type":"LineString","coordinates":[[1,2],[3,4]]}`,
+			wantWKT: "LINESTRING(1 2,3 4)",
+		},
+		{
+			target:  new(Polygon),
+			geojson: `{"type":"Polygon","coordinates":[[[0,0],[0,1],[1,0],[0,0]]]}`,
+			wantWKT: "POLYGON((0 0,0 1,1 0,0 0))",
+		},
+		{
+			target:  new(MultiPoint),
+			geojson: `{"type":"MultiPoint","coordinates":[[1,2]]}`,
+			wantWKT: "MULTIPOINT((1 2))",
+		},
+		{
+			target:  new(MultiLineString),
+			geojson: `{"type":"MultiLineString","coordinates":[[[1,2],[3,4]]]}`,
+			wantWKT: "MULTILINESTRING((1 2,3 4))",
+		},
+		{
+			target:  new(MultiPolygon),
+			geojson: `{"type":"MultiPolygon","coordinates":[[[[0,0],[0,1],[1,0],[0,0]]]]}`,
+			wantWKT: "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))",
+		},
+	} {
+		t.Run(tc.target.Type().String(), func(t *testing.T) {
+			err := json.Unmarshal([]byte(tc.geojson), tc.target)
+			expectNoErr(t, err)
+			expectGeomEq(t, tc.target.AsGeometry(), geomFromWKT(t, tc.wantWKT))
+		})
+	}
+}
+
+func TestGeoJSONUnmarshalIntoConcreteGeometryWrongType(t *testing.T) {
+	for _, tc := range []struct {
+		dest interface {
+			json.Unmarshaler
+			Type() GeometryType
+		}
+	}{
+		{new(GeometryCollection)},
+		{new(Point)},
+		{new(LineString)},
+		{new(Polygon)},
+		{new(MultiPoint)},
+		{new(MultiLineString)},
+		{new(MultiPolygon)},
+	} {
+		t.Run("dest_"+tc.dest.Type().String(), func(t *testing.T) {
+			for _, geojson := range []string{
+				`{"type":"Point","coordinates":[1,2]}`,
+				`{"type":"MultiPoint","coordinates":[[1,2]]}`,
+				`{"type":"LineString","coordinates":[[1,2],[3,4]]}`,
+				`{"type":"MultiLineString","coordinates":[[[1,2],[3,4]]]}`,
+				`{"type":"Polygon","coordinates":[[[0,0],[0,1],[1,0],[0,0]]]}`,
+				`{"type":"MultiPolygon","coordinates":[[[[0,0],[0,1],[1,0],[0,0]]]]}`,
+				`{"type":"GeometryCollection","geometries":[{"type":"Point","coordinates":[1,2]}]}`,
+			} {
+				srcTyp := geomFromGeoJSON(t, geojson).Type()
+				t.Run("source_"+srcTyp.String(), func(t *testing.T) {
+					if srcTyp == tc.dest.Type() {
+						// This test suite is for negative test cases, however
+						// this test case would always succeed.
+						return
+					}
+					err := json.Unmarshal([]byte(geojson), tc.dest)
+					expectErr(t, err)
+				})
+			}
+		})
+	}
+}
+
+func TestGeoJSONUnmarshalIntoConcreteGeometryDoesNotAlterParent(t *testing.T) {
+	t.Run("MultiPoint", func(t *testing.T) {
+		const parentWKT = "MULTIPOINT((1 2))"
+		parent := geomFromWKT(t, parentWKT).MustAsMultiPoint()
+		child := parent.PointN(0)
+		err := json.Unmarshal([]byte(`{"type":"Point","coordinates":[9,9]}`), &child)
+		expectNoErr(t, err)
+		expectGeomEq(t, parent.AsGeometry(), geomFromWKT(t, parentWKT))
+	})
+	t.Run("MultiLineString", func(t *testing.T) {
+		const parentWKT = "MULTILINESTRING((1 2,3 4))"
+		parent := geomFromWKT(t, parentWKT).MustAsMultiLineString()
+		child := parent.LineStringN(0)
+		err := json.Unmarshal([]byte(`{"type":"LineString","coordinates":[[9,9],[8,8]]}`), &child)
+		expectNoErr(t, err)
+		expectGeomEq(t, parent.AsGeometry(), geomFromWKT(t, parentWKT))
+	})
+	t.Run("MultiPolygon", func(t *testing.T) {
+		const parentWKT = "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))"
+		parent := geomFromWKT(t, parentWKT).MustAsMultiPolygon()
+		child := parent.PolygonN(0)
+		err := json.Unmarshal([]byte(`{"type":"Polygon","coordinates":[[[4,4],[4,5],[5,4],[4,4]]]}`), &child)
+		expectNoErr(t, err)
+		expectGeomEq(t, parent.AsGeometry(), geomFromWKT(t, parentWKT))
+	})
+	t.Run("GeometryCollection", func(t *testing.T) {
+		const parentWKT = "GEOMETRYCOLLECTION(POINT(1 2))"
+		parent := geomFromWKT(t, parentWKT).MustAsGeometryCollection()
+		child := parent.GeometryN(0)
+		err := json.Unmarshal([]byte(`{"type":"Point","coordinates":[9,9]}`), &child)
+		expectNoErr(t, err)
+		expectGeomEq(t, parent.AsGeometry(), geomFromWKT(t, parentWKT))
+	})
+}

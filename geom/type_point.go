@@ -142,7 +142,7 @@ func (p Point) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (p *Point) Scan(src interface{}) error {
-	return scanAsType(src, p, TypePoint)
+	return scanAsType(src, p)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -183,6 +183,12 @@ func (p Point) MarshalJSON() ([]byte, error) {
 		dst = append(dst, '[', ']')
 	}
 	return append(dst, '}'), nil
+}
+
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a Point.
+func (p *Point) UnmarshalJSON(buf []byte) error {
+	return unmarshalGeoJSONAsType(buf, p)
 }
 
 // TransformXY transforms this Point into another Point according to fn.

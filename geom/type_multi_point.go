@@ -133,7 +133,7 @@ func (m MultiPoint) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (m *MultiPoint) Scan(src interface{}) error {
-	return scanAsType(src, m, TypeMultiPoint)
+	return scanAsType(src, m)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -180,6 +180,12 @@ func (m MultiPoint) MarshalJSON() ([]byte, error) {
 	}
 	dst = append(dst, "]}"...)
 	return dst, nil
+}
+
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a MultiPoint.
+func (m *MultiPoint) UnmarshalJSON(buf []byte) error {
+	return unmarshalGeoJSONAsType(buf, m)
 }
 
 // Coordinates returns the coordinates of the non-empty points represented by

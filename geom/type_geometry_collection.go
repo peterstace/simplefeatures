@@ -166,7 +166,7 @@ func (c GeometryCollection) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (c *GeometryCollection) Scan(src interface{}) error {
-	return scanAsType(src, c, TypeGeometryCollection)
+	return scanAsType(src, c)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -210,6 +210,12 @@ func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 	buf = append(buf, geomsJSON...)
 	buf = append(buf, '}')
 	return buf, nil
+}
+
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a GeometryCollection.
+func (c *GeometryCollection) UnmarshalJSON(buf []byte) error {
+	return unmarshalGeoJSONAsType(buf, c)
 }
 
 // TransformXY transforms this GeometryCollection into another GeometryCollection according to fn.

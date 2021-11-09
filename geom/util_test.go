@@ -2,6 +2,7 @@ package geom_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"math"
 	"testing"
 
@@ -28,6 +29,15 @@ func geomsFromWKTs(t testing.TB, wkts []string) []Geometry {
 		gs = append(gs, g)
 	}
 	return gs
+}
+
+func geomFromGeoJSON(t testing.TB, geojson string) Geometry {
+	t.Helper()
+	var g Geometry
+	if err := json.Unmarshal([]byte(geojson), &g); err != nil {
+		t.Fatalf("could not unmarshal GeoJSON:\n geojson: %s\n     err: %v", geojson, err)
+	}
+	return g
 }
 
 func xyCoords(x, y float64) Coordinates {
