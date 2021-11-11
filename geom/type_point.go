@@ -142,7 +142,7 @@ func (p Point) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (p *Point) Scan(src interface{}) error {
-	return scanAsType(src, p, TypePoint)
+	return scanAsType(src, p)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -153,7 +153,7 @@ func (p Point) AsBinary() []byte {
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry
 // to the input slice.
 func (p Point) AppendWKB(dst []byte) []byte {
-	marsh := newWKBMarshaller(dst)
+	marsh := newWKBMarshaler(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(TypePoint, p.CoordinatesType())
 	if !p.full {
@@ -172,7 +172,7 @@ func (p Point) ConvexHull() Geometry {
 	return convexHull(p.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// MarshalJSON implements the encoding/json.Marshaler interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (p Point) MarshalJSON() ([]byte, error) {
 	var dst []byte
@@ -183,6 +183,12 @@ func (p Point) MarshalJSON() ([]byte, error) {
 		dst = append(dst, '[', ']')
 	}
 	return append(dst, '}'), nil
+}
+
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a Point.
+func (p *Point) UnmarshalJSON(buf []byte) error {
+	return unmarshalGeoJSONAsType(buf, p)
 }
 
 // TransformXY transforms this Point into another Point according to fn.

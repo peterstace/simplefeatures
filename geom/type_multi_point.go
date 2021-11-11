@@ -133,7 +133,7 @@ func (m MultiPoint) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (m *MultiPoint) Scan(src interface{}) error {
-	return scanAsType(src, m, TypeMultiPoint)
+	return scanAsType(src, m)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -144,7 +144,7 @@ func (m MultiPoint) AsBinary() []byte {
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry
 // to the input slice.
 func (m MultiPoint) AppendWKB(dst []byte) []byte {
-	marsh := newWKBMarshaller(dst)
+	marsh := newWKBMarshaler(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(TypeMultiPoint, m.CoordinatesType())
 	n := m.NumPoints()
@@ -162,7 +162,7 @@ func (m MultiPoint) ConvexHull() Geometry {
 	return convexHull(m.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// MarshalJSON implements the encoding/json.Marshaler interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (m MultiPoint) MarshalJSON() ([]byte, error) {
 	var dst []byte
@@ -180,6 +180,12 @@ func (m MultiPoint) MarshalJSON() ([]byte, error) {
 	}
 	dst = append(dst, "]}"...)
 	return dst, nil
+}
+
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a MultiPoint.
+func (m *MultiPoint) UnmarshalJSON(buf []byte) error {
+	return unmarshalGeoJSONAsType(buf, m)
 }
 
 // Coordinates returns the coordinates of the non-empty points represented by

@@ -258,7 +258,7 @@ func (s LineString) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (s *LineString) Scan(src interface{}) error {
-	return scanAsType(src, s, TypeLineString)
+	return scanAsType(src, s)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -269,7 +269,7 @@ func (s LineString) AsBinary() []byte {
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry
 // to the input slice.
 func (s LineString) AppendWKB(dst []byte) []byte {
-	marsh := newWKBMarshaller(dst)
+	marsh := newWKBMarshaler(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(TypeLineString, s.CoordinatesType())
 	marsh.writeSequence(s.seq)
@@ -282,7 +282,7 @@ func (s LineString) ConvexHull() Geometry {
 	return convexHull(s.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// MarshalJSON implements the encoding/json.Marshaler interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (s LineString) MarshalJSON() ([]byte, error) {
 	var dst []byte
@@ -290,6 +290,12 @@ func (s LineString) MarshalJSON() ([]byte, error) {
 	dst = appendGeoJSONSequence(dst, s.seq)
 	dst = append(dst, '}')
 	return dst, nil
+}
+
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a LineString.
+func (s *LineString) UnmarshalJSON(buf []byte) error {
+	return unmarshalGeoJSONAsType(buf, s)
 }
 
 // Coordinates returns the coordinates of each point along the LineString.

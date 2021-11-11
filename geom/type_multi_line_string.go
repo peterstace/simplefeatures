@@ -257,7 +257,7 @@ func (m MultiLineString) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (m *MultiLineString) Scan(src interface{}) error {
-	return scanAsType(src, m, TypeMultiLineString)
+	return scanAsType(src, m)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -268,7 +268,7 @@ func (m MultiLineString) AsBinary() []byte {
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry
 // to the input slice.
 func (m MultiLineString) AppendWKB(dst []byte) []byte {
-	marsh := newWKBMarshaller(dst)
+	marsh := newWKBMarshaler(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(TypeMultiLineString, m.ctype)
 	n := m.NumLineStrings()
@@ -286,7 +286,7 @@ func (m MultiLineString) ConvexHull() Geometry {
 	return convexHull(m.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// MarshalJSON implements the encoding/json.Marshaler interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (m MultiLineString) MarshalJSON() ([]byte, error) {
 	var dst []byte
@@ -294,6 +294,12 @@ func (m MultiLineString) MarshalJSON() ([]byte, error) {
 	dst = appendGeoJSONSequences(dst, m.Coordinates())
 	dst = append(dst, '}')
 	return dst, nil
+}
+
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a MultiLineString.
+func (m *MultiLineString) UnmarshalJSON(buf []byte) error {
+	return unmarshalGeoJSONAsType(buf, m)
 }
 
 // Coordinates returns the coordinates of each constituent LineString in the

@@ -269,7 +269,7 @@ func (p Polygon) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (p *Polygon) Scan(src interface{}) error {
-	return scanAsType(src, p, TypePolygon)
+	return scanAsType(src, p)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -280,7 +280,7 @@ func (p Polygon) AsBinary() []byte {
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry
 // to the input slice.
 func (p Polygon) AppendWKB(dst []byte) []byte {
-	marsh := newWKBMarshaller(dst)
+	marsh := newWKBMarshaler(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(TypePolygon, p.ctype)
 	marsh.writeCount(len(p.rings))
@@ -297,7 +297,7 @@ func (p Polygon) ConvexHull() Geometry {
 	return convexHull(p.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// MarshalJSON implements the encoding/json.Marshaler interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (p Polygon) MarshalJSON() ([]byte, error) {
 	var dst []byte
@@ -305,6 +305,12 @@ func (p Polygon) MarshalJSON() ([]byte, error) {
 	dst = appendGeoJSONSequences(dst, p.Coordinates())
 	dst = append(dst, '}')
 	return dst, nil
+}
+
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a Polygon.
+func (p *Polygon) UnmarshalJSON(buf []byte) error {
+	return unmarshalGeoJSONAsType(buf, p)
 }
 
 // Coordinates returns the coordinates of the rings making up the Polygon

@@ -13,8 +13,11 @@ import (
 func TestZeroGeometry(t *testing.T) {
 	var z Geometry
 	expectBoolEq(t, z.IsGeometryCollection(), true)
-	z.AsGeometryCollection() // Doesn't crash.
+	z.MustAsGeometryCollection() // Doesn't crash.
 	expectStringEq(t, z.AsText(), "GEOMETRYCOLLECTION EMPTY")
+	gc, ok := z.AsGeometryCollection()
+	expectTrue(t, ok)
+	expectIntEq(t, gc.NumGeometries(), 0)
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(z)
@@ -89,6 +92,85 @@ func TestGeometryTypeString(t *testing.T) {
 		t.Run(tc.want, func(t *testing.T) {
 			got := tc.typ.String()
 			expectStringEq(t, got, tc.want)
+		})
+	}
+}
+
+func TestAsConcreteType(t *testing.T) {
+	for _, wkt := range []string{
+		"GEOMETRYCOLLECTION(POINT(1 2))",
+		"POINT(1 2)",
+		"LINESTRING(1 2,3 4)",
+		"POLYGON((0 0,0 1,1 0,0 0))",
+		"MULTIPOINT((1 2))",
+		"MULTILINESTRING((1 2,3 4))",
+		"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))",
+	} {
+		t.Run(wkt, func(t *testing.T) {
+			g := geomFromWKT(t, wkt)
+
+			if g.IsGeometryCollection() {
+				concrete, ok := g.AsGeometryCollection()
+				expectTrue(t, ok)
+				expectFalse(t, concrete.IsEmpty())
+			} else {
+				_, ok := g.AsGeometryCollection()
+				expectFalse(t, ok)
+			}
+
+			if g.IsPoint() {
+				concrete, ok := g.AsPoint()
+				expectTrue(t, ok)
+				expectFalse(t, concrete.IsEmpty())
+			} else {
+				_, ok := g.AsPoint()
+				expectFalse(t, ok)
+			}
+
+			if g.IsLineString() {
+				concrete, ok := g.AsLineString()
+				expectTrue(t, ok)
+				expectFalse(t, concrete.IsEmpty())
+			} else {
+				_, ok := g.AsLineString()
+				expectFalse(t, ok)
+			}
+
+			if g.IsPolygon() {
+				concrete, ok := g.AsPolygon()
+				expectTrue(t, ok)
+				expectFalse(t, concrete.IsEmpty())
+			} else {
+				_, ok := g.AsPolygon()
+				expectFalse(t, ok)
+			}
+
+			if g.IsMultiPoint() {
+				concrete, ok := g.AsMultiPoint()
+				expectTrue(t, ok)
+				expectFalse(t, concrete.IsEmpty())
+			} else {
+				_, ok := g.AsMultiPoint()
+				expectFalse(t, ok)
+			}
+
+			if g.IsMultiLineString() {
+				concrete, ok := g.AsMultiLineString()
+				expectTrue(t, ok)
+				expectFalse(t, concrete.IsEmpty())
+			} else {
+				_, ok := g.AsMultiLineString()
+				expectFalse(t, ok)
+			}
+
+			if g.IsMultiPolygon() {
+				concrete, ok := g.AsMultiPolygon()
+				expectTrue(t, ok)
+				expectFalse(t, concrete.IsEmpty())
+			} else {
+				_, ok := g.AsMultiPolygon()
+				expectFalse(t, ok)
+			}
 		})
 	}
 }

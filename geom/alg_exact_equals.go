@@ -83,19 +83,19 @@ func (c exactEqualsComparator) geometriesEq(g1, g2 Geometry) bool {
 	}
 	switch typ := g1.Type(); typ {
 	case TypePoint:
-		return c.pointsEq(g1.AsPoint(), g2.AsPoint())
+		return c.pointsEq(g1.MustAsPoint(), g2.MustAsPoint())
 	case TypeMultiPoint:
-		return c.multiPointsEq(g1.AsMultiPoint(), g2.AsMultiPoint())
+		return c.multiPointsEq(g1.MustAsMultiPoint(), g2.MustAsMultiPoint())
 	case TypeLineString:
-		return c.lineStringsEq(g1.AsLineString(), g2.AsLineString())
+		return c.lineStringsEq(g1.MustAsLineString(), g2.MustAsLineString())
 	case TypeMultiLineString:
-		return c.multiLineStringsEq(g1.AsMultiLineString(), g2.AsMultiLineString())
+		return c.multiLineStringsEq(g1.MustAsMultiLineString(), g2.MustAsMultiLineString())
 	case TypePolygon:
-		return c.polygonsEq(g1.AsPolygon(), g2.AsPolygon())
+		return c.polygonsEq(g1.MustAsPolygon(), g2.MustAsPolygon())
 	case TypeMultiPolygon:
-		return c.multiPolygonsEq(g1.AsMultiPolygon(), g2.AsMultiPolygon())
+		return c.multiPolygonsEq(g1.MustAsMultiPolygon(), g2.MustAsMultiPolygon())
 	case TypeGeometryCollection:
-		return c.geometryCollectionsEq(g1.AsGeometryCollection(), g2.AsGeometryCollection())
+		return c.geometryCollectionsEq(g1.MustAsGeometryCollection(), g2.MustAsGeometryCollection())
 	default:
 		panic("unknown geometry type: " + typ.String())
 	}

@@ -56,7 +56,7 @@ func (c GeometryCollection) NumTotalGeometries() int {
 	var n int
 	for _, geom := range c.geoms {
 		if geom.IsGeometryCollection() {
-			n += geom.AsGeometryCollection().NumTotalGeometries()
+			n += geom.MustAsGeometryCollection().NumTotalGeometries()
 		}
 	}
 	return n + c.NumGeometries()
@@ -117,7 +117,7 @@ func (c GeometryCollection) Dimension() int {
 func (c GeometryCollection) walk(fn func(Geometry)) {
 	for _, g := range c.geoms {
 		if g.IsGeometryCollection() {
-			g.AsGeometryCollection().walk(fn)
+			g.MustAsGeometryCollection().walk(fn)
 		} else {
 			fn(g)
 		}
@@ -166,7 +166,7 @@ func (c GeometryCollection) Value() (driver.Value, error) {
 // slice and then UnmarshalWKB called manually (passing in the
 // ConstructionOptions as desired).
 func (c *GeometryCollection) Scan(src interface{}) error {
-	return scanAsType(src, c, TypeGeometryCollection)
+	return scanAsType(src, c)
 }
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
@@ -177,7 +177,7 @@ func (c GeometryCollection) AsBinary() []byte {
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry
 // to the input slice.
 func (c GeometryCollection) AppendWKB(dst []byte) []byte {
-	marsh := newWKBMarshaller(dst)
+	marsh := newWKBMarshaler(dst)
 	marsh.writeByteOrder()
 	marsh.writeGeomType(TypeGeometryCollection, c.ctype)
 	n := c.NumGeometries()
@@ -195,7 +195,7 @@ func (c GeometryCollection) ConvexHull() Geometry {
 	return convexHull(c.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaller interface by encoding
+// MarshalJSON implements the encoding/json.Marshaler interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 	buf := []byte(`{"type":"GeometryCollection","geometries":`)
@@ -210,6 +210,12 @@ func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 	buf = append(buf, geomsJSON...)
 	buf = append(buf, '}')
 	return buf, nil
+}
+
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// the GeoJSON representation of a GeometryCollection.
+func (c *GeometryCollection) UnmarshalJSON(buf []byte) error {
+	return unmarshalGeoJSONAsType(buf, c)
 }
 
 // TransformXY transforms this GeometryCollection into another GeometryCollection according to fn.
@@ -271,7 +277,7 @@ func highestDimensionIgnoreEmpties(g Geometry) int {
 	if !g.IsGeometryCollection() {
 		return g.Dimension()
 	}
-	c := g.AsGeometryCollection()
+	c := g.MustAsGeometryCollection()
 	highestDim := 0
 	for _, g2 := range c.geoms {
 		highestDim = max(highestDim, highestDimensionIgnoreEmpties(g2))
@@ -304,13 +310,13 @@ func (c GeometryCollection) pointCentroid() Point {
 	c.walk(func(g Geometry) {
 		switch {
 		case g.IsPoint():
-			xy, ok := g.AsPoint().XY()
+			xy, ok := g.MustAsPoint().XY()
 			if ok {
 				numPoints++
 				sumPoints = sumPoints.Add(xy)
 			}
 		case g.IsMultiPoint():
-			mp := g.AsMultiPoint()
+			mp := g.MustAsMultiPoint()
 			for i := 0; i < mp.NumPoints(); i++ {
 				xy, ok := mp.PointN(i).XY()
 				if ok {
@@ -331,7 +337,7 @@ func (c GeometryCollection) linearCentroid() Point {
 	c.walk(func(g Geometry) {
 		switch {
 		case g.IsLineString():
-			ls := g.AsLineString()
+			ls := g.MustAsLineString()
 			centroid, ok := ls.Centroid().XY()
 			if ok {
 				length := ls.Length()
@@ -339,7 +345,7 @@ func (c GeometryCollection) linearCentroid() Point {
 				weightedCentroid = weightedCentroid.Add(centroid.Scale(length))
 			}
 		case g.IsMultiLineString():
-			mls := g.AsMultiLineString()
+			mls := g.MustAsMultiLineString()
 			for i := 0; i < mls.NumLineStrings(); i++ {
 				ls := mls.LineStringN(i)
 				centroid, ok := ls.Centroid().XY()

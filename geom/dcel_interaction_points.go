@@ -38,17 +38,17 @@ type xyPair struct {
 func addGeometryInteractions(g Geometry, adjacents map[XY]xyPair, interactions map[XY]struct{}) {
 	switch g.Type() {
 	case TypePoint:
-		addPointInteractions(g.AsPoint(), interactions)
+		addPointInteractions(g.MustAsPoint(), interactions)
 	case TypeMultiPoint:
-		addMultiPointInteractions(g.AsMultiPoint(), interactions)
+		addMultiPointInteractions(g.MustAsMultiPoint(), interactions)
 	case TypeLineString:
-		addLineStringInteractions(g.AsLineString(), adjacents, interactions)
+		addLineStringInteractions(g.MustAsLineString(), adjacents, interactions)
 	case TypeMultiLineString:
-		addMultiLineStringInteractions(g.AsMultiLineString(), adjacents, interactions)
+		addMultiLineStringInteractions(g.MustAsMultiLineString(), adjacents, interactions)
 	case TypePolygon:
-		addMultiLineStringInteractions(g.AsPolygon().Boundary(), adjacents, interactions)
+		addMultiLineStringInteractions(g.MustAsPolygon().Boundary(), adjacents, interactions)
 	case TypeMultiPolygon:
-		addMultiLineStringInteractions(g.AsMultiPolygon().Boundary(), adjacents, interactions)
+		addMultiLineStringInteractions(g.MustAsMultiPolygon().Boundary(), adjacents, interactions)
 	case TypeGeometryCollection:
 		panic("geometry collection not supported")
 	default:

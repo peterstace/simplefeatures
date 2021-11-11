@@ -339,7 +339,7 @@ func TestGraphTriangle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), operandA, findInteractionPoints([]Geometry{poly}))
+	dcel := newDCELFromMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandA, findInteractionPoints([]Geometry{poly}))
 
 	/*
 
@@ -407,7 +407,7 @@ func TestGraphWithHoles(t *testing.T) {
 
 	*/
 
-	dcel := newDCELFromMultiPolygon(poly.AsPolygon().AsMultiPolygon(), operandB, findInteractionPoints([]Geometry{poly}))
+	dcel := newDCELFromMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandB, findInteractionPoints([]Geometry{poly}))
 
 	v0 := XY{0, 0}
 	v1 := XY{5, 0}
@@ -480,7 +480,7 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 	  v0-----v1   v4-----v5
 	*/
 
-	dcel := newDCELFromMultiPolygon(mp.AsMultiPolygon(), operandB, findInteractionPoints([]Geometry{mp}))
+	dcel := newDCELFromMultiPolygon(mp.MustAsMultiPolygon(), operandB, findInteractionPoints([]Geometry{mp}))
 
 	v0 := XY{0, 0}
 	v1 := XY{1, 0}
@@ -675,7 +675,7 @@ func TestGraphGhostDeduplication(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dcel := newDCELFromGeometry(ls, ghost.AsMultiLineString(), operandA, findInteractionPoints([]Geometry{ls, ghost}))
+	dcel := newDCELFromGeometry(ls, ghost.MustAsMultiLineString(), operandA, findInteractionPoints([]Geometry{ls, ghost}))
 
 	v0 := XY{0, 0}
 	v1 := XY{1, 0}

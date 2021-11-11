@@ -80,7 +80,7 @@ func convexHullPointSet(g Geometry) []XY {
 	switch {
 	case g.IsGeometryCollection():
 		var points []XY
-		c := g.AsGeometryCollection()
+		c := g.MustAsGeometryCollection()
 		n := c.NumGeometries()
 		for i := 0; i < n; i++ {
 			points = append(
@@ -90,13 +90,13 @@ func convexHullPointSet(g Geometry) []XY {
 		}
 		return points
 	case g.IsPoint():
-		xy, ok := g.AsPoint().XY()
+		xy, ok := g.MustAsPoint().XY()
 		if !ok {
 			return nil
 		}
 		return []XY{xy}
 	case g.IsLineString():
-		cs := g.AsLineString().Coordinates()
+		cs := g.MustAsLineString().Coordinates()
 		n := cs.Length()
 		points := make([]XY, n)
 		for i := 0; i < n; i++ {
@@ -104,10 +104,10 @@ func convexHullPointSet(g Geometry) []XY {
 		}
 		return points
 	case g.IsPolygon():
-		p := g.AsPolygon()
+		p := g.MustAsPolygon()
 		return convexHullPointSet(p.ExteriorRing().AsGeometry())
 	case g.IsMultiPoint():
-		m := g.AsMultiPoint()
+		m := g.MustAsMultiPoint()
 		n := m.NumPoints()
 		points := make([]XY, 0, n)
 		for i := 0; i < n; i++ {
@@ -118,7 +118,7 @@ func convexHullPointSet(g Geometry) []XY {
 		}
 		return points
 	case g.IsMultiLineString():
-		m := g.AsMultiLineString()
+		m := g.MustAsMultiLineString()
 		var points []XY
 		n := m.NumLineStrings()
 		for i := 0; i < n; i++ {
@@ -130,7 +130,7 @@ func convexHullPointSet(g Geometry) []XY {
 		}
 		return points
 	case g.IsMultiPolygon():
-		m := g.AsMultiPolygon()
+		m := g.MustAsMultiPolygon()
 		var points []XY
 		numPolys := m.NumPolygons()
 		for i := 0; i < numPolys; i++ {

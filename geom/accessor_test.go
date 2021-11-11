@@ -7,18 +7,18 @@ import (
 )
 
 func TestPointAccessorNonEmpty(t *testing.T) {
-	xy, ok := geomFromWKT(t, "POINT(1 2)").AsPoint().XY()
+	xy, ok := geomFromWKT(t, "POINT(1 2)").MustAsPoint().XY()
 	expectBoolEq(t, ok, true)
 	expectXYEq(t, xy, XY{1, 2})
 }
 
 func TestPointAccessorEmpty(t *testing.T) {
-	_, ok := geomFromWKT(t, "POINT EMPTY").AsPoint().XY()
+	_, ok := geomFromWKT(t, "POINT EMPTY").MustAsPoint().XY()
 	expectBoolEq(t, ok, false)
 }
 
 func TestLineStringAccessor(t *testing.T) {
-	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").AsLineString()
+	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").MustAsLineString()
 	seq := ls.Coordinates()
 	pt12 := xyCoords(1, 2)
 	pt34 := xyCoords(3, 4)
@@ -47,7 +47,7 @@ func TestLineStringAccessor(t *testing.T) {
 }
 
 func TestLineStringEmptyAccessor(t *testing.T) {
-	ls := geomFromWKT(t, "LINESTRING EMPTY").AsLineString()
+	ls := geomFromWKT(t, "LINESTRING EMPTY").MustAsLineString()
 	seq := ls.Coordinates()
 	emptyPoint := geomFromWKT(t, "POINT EMPTY")
 
@@ -68,7 +68,7 @@ func TestLineStringEmptyAccessor(t *testing.T) {
 }
 
 func TestLineStringAccessorWithDuplicates(t *testing.T) {
-	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,3 4,5 6)").AsLineString()
+	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,3 4,5 6)").MustAsLineString()
 	seq := ls.Coordinates()
 	pt12 := xyCoords(1, 2)
 	pt34 := xyCoords(3, 4)
@@ -88,7 +88,7 @@ func TestLineStringAccessorWithDuplicates(t *testing.T) {
 }
 
 func TestLineStringAccessorWithMoreDuplicates(t *testing.T) {
-	ls := geomFromWKT(t, "LINESTRING(1 2,1 2,3 4,3 4,3 4,5 6,5 6)").AsLineString()
+	ls := geomFromWKT(t, "LINESTRING(1 2,1 2,3 4,3 4,3 4,5 6,5 6)").MustAsLineString()
 	seq := ls.Coordinates()
 	pt12 := xyCoords(1, 2)
 	pt34 := xyCoords(3, 4)
@@ -111,7 +111,7 @@ func TestLineStringAccessorWithMoreDuplicates(t *testing.T) {
 }
 
 func TestPolygonAccessor(t *testing.T) {
-	poly := geomFromWKT(t, "POLYGON((0 0,5 0,5 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1),(3 1,4 1,4 2,3 2,3 1))").AsPolygon()
+	poly := geomFromWKT(t, "POLYGON((0 0,5 0,5 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1),(3 1,4 1,4 2,3 2,3 1))").MustAsPolygon()
 	outer := geomFromWKT(t, "LINESTRING(0 0,5 0,5 3,0 3,0 0)")
 	inner0 := geomFromWKT(t, "LINESTRING(1 1,2 1,2 2,1 2,1 1)")
 	inner1 := geomFromWKT(t, "LINESTRING(3 1,4 1,4 2,3 2,3 1)")
@@ -125,7 +125,7 @@ func TestPolygonAccessor(t *testing.T) {
 }
 
 func TestMultiPointAccessor(t *testing.T) {
-	mp := geomFromWKT(t, "MULTIPOINT((4 5),(2 3),(8 7))").AsMultiPoint()
+	mp := geomFromWKT(t, "MULTIPOINT((4 5),(2 3),(8 7))").MustAsMultiPoint()
 	pt0 := geomFromWKT(t, "POINT(4 5)")
 	pt1 := geomFromWKT(t, "POINT(2 3)")
 	pt2 := geomFromWKT(t, "POINT(8 7)")
@@ -139,7 +139,7 @@ func TestMultiPointAccessor(t *testing.T) {
 }
 
 func TestMultiLineStringAccessors(t *testing.T) {
-	mls := geomFromWKT(t, "MULTILINESTRING((1 2,3 4,5 6),(7 8,9 10,11 12))").AsMultiLineString()
+	mls := geomFromWKT(t, "MULTILINESTRING((1 2,3 4,5 6),(7 8,9 10,11 12))").MustAsMultiLineString()
 	ls0 := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)")
 	ls1 := geomFromWKT(t, "LINESTRING(7 8,9 10,11 12)")
 
@@ -151,7 +151,7 @@ func TestMultiLineStringAccessors(t *testing.T) {
 }
 
 func TestMultiPolygonAccessors(t *testing.T) {
-	polys := geomFromWKT(t, "MULTIPOLYGON(((0 0,0 1,1 0,0 0)),((2 0,2 1,3 0,2 0)))").AsMultiPolygon()
+	polys := geomFromWKT(t, "MULTIPOLYGON(((0 0,0 1,1 0,0 0)),((2 0,2 1,3 0,2 0)))").MustAsMultiPolygon()
 	poly0 := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))")
 	poly1 := geomFromWKT(t, "POLYGON((2 0,2 1,3 0,2 0))")
 
@@ -163,7 +163,7 @@ func TestMultiPolygonAccessors(t *testing.T) {
 }
 
 func TestGeometryCollectionAccessors(t *testing.T) {
-	geoms := geomFromWKT(t, "GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)),POLYGON((2 0,2 1,3 0,2 0)))").AsGeometryCollection()
+	geoms := geomFromWKT(t, "GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)),POLYGON((2 0,2 1,3 0,2 0)))").MustAsGeometryCollection()
 	geom0 := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))")
 	geom1 := geomFromWKT(t, "POLYGON((2 0,2 1,3 0,2 0))")
 

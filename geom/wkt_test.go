@@ -174,7 +174,7 @@ func TestUnmarshalWKTSyntaxErrors(t *testing.T) {
 func TestUnmarshalWKT(t *testing.T) {
 	t.Run("multi line string containing an empty line string", func(t *testing.T) {
 		g := geomFromWKT(t, "MULTILINESTRING((1 2,3 4),EMPTY,(5 6,7 8))")
-		mls := g.AsMultiLineString()
+		mls := g.MustAsMultiLineString()
 		expectIntEq(t, mls.NumLineStrings(), 3)
 		expectGeomEq(t,
 			mls.LineStringN(0).AsGeometry(),
