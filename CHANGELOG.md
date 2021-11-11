@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+__Special thanks to Albert Teoh and Sameera Perera for contributing to this release.__
+
 - Fix spelling of "Marshaller" when referring to the interface defined in the
   `encoding/json` package.
 
@@ -10,6 +12,9 @@
   `MultiLineString`, `Polygon`, `MultiPolygon`). This causes these types to
   implement the `encoding/json.Unmarshaler` interface. GeoJSON can now be
   unmarshalled directly into a concrete geometry type.
+
+- Use the `%w` verb for wrapping errors internally. Note that simplefeatures
+  does not yet currently expose any sentinel errors or error types.
 
 ## v0.34.0
 
