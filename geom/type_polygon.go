@@ -592,3 +592,32 @@ func (p Polygon) Summary() string {
 func (p Polygon) String() string {
 	return p.Summary()
 }
+
+func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon, error) {
+	exterior, err := p.ExteriorRing().Simplify(threshold, opts...)
+	if err != nil {
+		return Polygon{}, wrapSimplified(err)
+	}
+
+	// If we don't have at least 4 coordinates, then we can't form a ring, and
+	// the polygon has collapsed either to a point or a single linear element.
+	// Both cases are represented by an empty polygon.
+	if exterior.Coordinates().Length() < 4 {
+		return Polygon{}, nil
+	}
+
+	n := p.NumInteriorRings()
+	rings := make([]LineString, 0, n+1)
+	rings = append(rings, exterior)
+	for i := 0; i < n; i++ {
+		interior, err := p.InteriorRingN(i).Simplify(threshold, opts...)
+		if err != nil {
+			return Polygon{}, wrapSimplified(err)
+		}
+		if interior.IsRing() {
+			rings = append(rings, interior)
+		}
+	}
+	simpl, err := NewPolygon(rings, opts...)
+	return simpl, wrapSimplified(err)
+}

@@ -95,7 +95,7 @@ func TestSimplify(t *testing.T) {
 			t.Logf("input:     %v", in.AsText())
 			t.Logf("threshold: %v", tc.threshold)
 			t.Logf("want:      %v", want.AsText())
-			got, err := geom.Simplify(in, tc.threshold)
+			got, err := in.Simplify(tc.threshold)
 			expectNoErr(t, err)
 			t.Logf("got:       %v", got.AsText())
 			expectGeomEq(t, got, want, geom.IgnoreOrder)
@@ -126,7 +126,7 @@ func TestSimplifyErrorCases(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in := geomFromWKT(t, tc.wkt)
-			_, err := geom.Simplify(in, tc.threshold)
+			_, err := in.Simplify(tc.threshold)
 			expectErr(t, err)
 		})
 	}

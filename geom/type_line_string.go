@@ -422,3 +422,14 @@ func (s LineString) Summary() string {
 func (s LineString) String() string {
 	return s.Summary()
 }
+
+func (s LineString) Simplify(threshold float64, opts ...ConstructorOption) (LineString, error) {
+	seq := s.Coordinates()
+	floats := ramerDouglasPeucker(nil, seq, threshold)
+	seq = NewSequence(floats, seq.CoordinatesType())
+	if seq.Length() > 0 && !hasAtLeast2DistinctPointsInSeq(seq) {
+		return LineString{}, nil
+	}
+	simp, err := NewLineString(seq, opts...)
+	return simp, wrapSimplified(err)
+}

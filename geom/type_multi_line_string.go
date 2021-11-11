@@ -482,3 +482,18 @@ func (m MultiLineString) Summary() string {
 func (m MultiLineString) String() string {
 	return m.Summary()
 }
+
+func (m MultiLineString) Simplify(threshold float64, opts ...ConstructorOption) (MultiLineString, error) {
+	n := m.NumLineStrings()
+	lss := make([]LineString, 0, n)
+	for i := 0; i < n; i++ {
+		ls, err := m.LineStringN(i).Simplify(threshold, opts...)
+		if err != nil {
+			return MultiLineString{}, wrapSimplified(err)
+		}
+		if !ls.IsEmpty() {
+			lss = append(lss, ls)
+		}
+	}
+	return NewMultiLineString(lss, opts...), nil
+}
