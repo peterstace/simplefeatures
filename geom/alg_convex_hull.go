@@ -38,11 +38,11 @@ func convexHull(g Geometry) Geometry {
 	seq := NewSequence(floats, DimXY)
 	ring, err := NewLineString(seq)
 	if err != nil {
-		panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid ring: %v", err))
+		panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid ring: %w", err))
 	}
 	poly, err := NewPolygon([]LineString{ring})
 	if err != nil {
-		panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid polygon: %v", err))
+		panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid polygon: %w", err))
 	}
 	return poly.AsGeometry()
 }
