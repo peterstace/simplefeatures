@@ -922,16 +922,15 @@ func (g Geometry) Simplify(threshold float64, opts ...ConstructorOption) (Geomet
 	case TypePoint:
 		return g, nil
 	case TypeLineString:
-		c, err := g.MustAsLineString().Simplify(threshold, opts...)
-		return c.AsGeometry(), err
+		c := g.MustAsLineString().Simplify(threshold)
+		return c.AsGeometry(), nil
 	case TypePolygon:
 		c, err := g.MustAsPolygon().Simplify(threshold, opts...)
 		return c.AsGeometry(), err
 	case TypeMultiPoint:
 		return g, nil
 	case TypeMultiLineString:
-		c, err := g.MustAsMultiLineString().Simplify(threshold, opts...)
-		return c.AsGeometry(), err
+		return g.MustAsMultiLineString().Simplify(threshold).AsGeometry(), nil
 	case TypeMultiPolygon:
 		c, err := g.MustAsMultiPolygon().Simplify(threshold, opts...)
 		return c.AsGeometry(), err

@@ -483,17 +483,19 @@ func (m MultiLineString) String() string {
 	return m.Summary()
 }
 
-func (m MultiLineString) Simplify(threshold float64, opts ...ConstructorOption) (MultiLineString, error) {
+// Simplify returns a simplified version of the MultiLineString by using the
+// Ramer-Douglas-Peucker algorithm on each of the child LineStrings. If the
+// Ramer-Douglas-Peucker were to create an invalid child LineString (i.e. one
+// having only a single distinct point), then it is omitted in the output.
+// Empty child LineStrings are also omitted from the output.
+func (m MultiLineString) Simplify(threshold float64) MultiLineString {
 	n := m.NumLineStrings()
 	lss := make([]LineString, 0, n)
 	for i := 0; i < n; i++ {
-		ls, err := m.LineStringN(i).Simplify(threshold, opts...)
-		if err != nil {
-			return MultiLineString{}, wrapSimplified(err)
-		}
+		ls := m.LineStringN(i).Simplify(threshold)
 		if !ls.IsEmpty() {
 			lss = append(lss, ls)
 		}
 	}
-	return NewMultiLineString(lss, opts...), nil
+	return NewMultiLineString(lss)
 }

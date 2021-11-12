@@ -32,6 +32,7 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 	// Valid non-empty LineStrings must have at least 2 *distinct* points.
 	if !hasAtLeast2DistinctPointsInSeq(seq) {
 		if ctorOpts.omitInvalid {
+			// TODO: Should the coordinates type match the input seq?
 			return LineString{}, nil
 		}
 		return LineString{}, validationError{
@@ -423,13 +424,18 @@ func (s LineString) String() string {
 	return s.Summary()
 }
 
-func (s LineString) Simplify(threshold float64, opts ...ConstructorOption) (LineString, error) {
+// Simplify returns a simplified version of the LineString using the
+// Ramer-Douglas-Peucker algorithm. If the Ramer-Douglas-Peucker were to create
+// an invalid LineString (i.e. one having only a single distinct point), then
+// the empty LineString is returned.
+func (s LineString) Simplify(threshold float64) LineString {
 	seq := s.Coordinates()
 	floats := ramerDouglasPeucker(nil, seq, threshold)
 	seq = NewSequence(floats, seq.CoordinatesType())
-	if seq.Length() > 0 && !hasAtLeast2DistinctPointsInSeq(seq) {
-		return LineString{}, nil
+
+	simp, err := NewLineString(seq, OmitInvalid)
+	if err != nil {
+		panic("OmitInvalid used, so cannot panic: " + err.Error())
 	}
-	simp, err := NewLineString(seq, opts...)
-	return simp, wrapSimplified(err)
+	return simp
 }

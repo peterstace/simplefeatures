@@ -593,11 +593,19 @@ func (p Polygon) String() string {
 	return p.Summary()
 }
 
+// Simplify returns a simplified version of the Polygon by applying the
+// Ramer-Douglas-Peucker algorithm to each constituent ring. If the exterior
+// ring collapses to a point or single linear element, the empty Polygon is
+// returned. If any interior ring collapses to a point or a single linear
+// element, then it is omitted from the final output. The output Polygon will
+// be invalid if any rings in the input become non-rings (e.g. via self
+// intersection) in the output, or if any two rings to to interact in ways
+// prohibited by Polygon validation rules (such as intersecting at more than
+// one point). In these cases, an error is returned. Construction behaviour of
+// the output (which includes omitting errors) may be controlled via
+// ConstructorOptions.
 func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon, error) {
-	exterior, err := p.ExteriorRing().Simplify(threshold, opts...)
-	if err != nil {
-		return Polygon{}, wrapSimplified(err)
-	}
+	exterior := p.ExteriorRing().Simplify(threshold)
 
 	// If we don't have at least 4 coordinates, then we can't form a ring, and
 	// the polygon has collapsed either to a point or a single linear element.
@@ -610,10 +618,8 @@ func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon
 	rings := make([]LineString, 0, n+1)
 	rings = append(rings, exterior)
 	for i := 0; i < n; i++ {
-		interior, err := p.InteriorRingN(i).Simplify(threshold, opts...)
-		if err != nil {
-			return Polygon{}, wrapSimplified(err)
-		}
+		interior := p.InteriorRingN(i).Simplify(threshold)
+		// TODO: Should we check for collapse instead of IsRing?
 		if interior.IsRing() {
 			rings = append(rings, interior)
 		}
