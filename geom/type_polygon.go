@@ -599,7 +599,7 @@ func (p Polygon) String() string {
 // returned. If any interior ring collapses to a point or a single linear
 // element, then it is omitted from the final output. The output Polygon will
 // be invalid if any rings in the input become non-rings (e.g. via self
-// intersection) in the output, or if any two rings to to interact in ways
+// intersection) in the output, or if any two rings were to interact in ways
 // prohibited by Polygon validation rules (such as intersecting at more than
 // one point). In these cases, an error is returned. Construction behaviour of
 // the output (which includes omitting errors) may be controlled via
