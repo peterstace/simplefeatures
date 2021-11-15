@@ -27,6 +27,9 @@ __Special thanks to Albert Teoh and Sameera Perera for contributing to this rele
   rather than converting to a `Geometry`, calling `Simplify`, then converting
   back to the concrete geometry type.
 
+- Fixes a bug in Simplify where invalid interior rings would be omitted rather
+  than producing an error.
+
 ## v0.34.0
 
 2021-11-02
