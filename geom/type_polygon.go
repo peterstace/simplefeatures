@@ -610,7 +610,10 @@ func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon
 	// If we don't have at least 4 coordinates, then we can't form a ring, and
 	// the polygon has collapsed either to a point or a single linear element.
 	// Both cases are represented by an empty polygon.
-	if exterior.Coordinates().Length() < 4 {
+	hasCollapsed := func(ring LineString) bool {
+		return ring.Coordinates().Length() < 4
+	}
+	if hasCollapsed(exterior) {
 		return Polygon{}, nil
 	}
 
@@ -619,8 +622,7 @@ func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon
 	rings = append(rings, exterior)
 	for i := 0; i < n; i++ {
 		interior := p.InteriorRingN(i).Simplify(threshold)
-		// TODO: Should we check for collapse instead of IsRing?
-		if interior.IsRing() {
+		if !hasCollapsed(interior) {
 			rings = append(rings, interior)
 		}
 	}

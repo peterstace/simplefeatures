@@ -123,6 +123,18 @@ func TestSimplifyErrorCases(t *testing.T) {
 			))`,
 			1e-5,
 		},
+
+		// Second case for "outer ring becomes invalid after simplification".
+		{`POLYGON((0 0,0 1,0.9 1,1 1.1,1.1 1,2 1,2 0,1 1.05,0 0))`, 0.2},
+
+		// Inner ring becomes invalid after simplification.
+		{
+			`POLYGON(
+				(-1 -1,-1 3,3 3,3 -1,-1 -1),
+				(0 0,0 1,0.9 1,1 1.1,1.1 1,2 1,2 0,1 1.05,0 0)
+			)`,
+			0.2,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in := geomFromWKT(t, tc.wkt)
