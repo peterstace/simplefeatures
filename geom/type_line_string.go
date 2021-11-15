@@ -425,7 +425,7 @@ func (s LineString) String() string {
 }
 
 // Simplify returns a simplified version of the LineString using the
-// Ramer-Douglas-Peucker algorithm. If the Ramer-Douglas-Peucker were to create
+// Ramer-Douglas-Peucker algorithm. If the Ramer-Douglas-Peucker algorithm were to create
 // an invalid LineString (i.e. one having only a single distinct point), then
 // the empty LineString is returned.
 func (s LineString) Simplify(threshold float64) LineString {
