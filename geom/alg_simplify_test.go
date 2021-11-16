@@ -125,6 +125,9 @@ func TestSimplifyErrorCases(t *testing.T) {
 		},
 
 		// Second case for "outer ring becomes invalid after simplification".
+		// The outer ring becomes invalid because the Ramer-Douglas-Peucker
+		// algorithm causes the ring (when considered as a LineString) to
+		// become self-intersected.
 		{`POLYGON((0 0,0 1,0.9 1,1 1.1,1.1 1,2 1,2 0,1 1.05,0 0))`, 0.2},
 
 		// Inner ring becomes invalid after simplification.
