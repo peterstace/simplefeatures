@@ -23,30 +23,39 @@ type LineString struct {
 // sequence must contain exactly 0 points, or at least 2 points with distinct
 // XY values (otherwise an error is returned).
 func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) {
-	n := seq.Length()
 	ctorOpts := newOptionSet(opts)
-	if ctorOpts.skipValidations || n == 0 {
+	if ctorOpts.skipValidations {
 		return LineString{seq}, nil
 	}
+	if ctorOpts.omitInvalid {
+		return newLineStringWithOmitInvalid(seq), nil
+	}
 
-	// Valid non-empty LineStrings must have at least 2 *distinct* points.
+	if err := validateLineStringSeq(seq); err != nil {
+		return LineString{}, err
+	}
+	return LineString{seq}, nil
+}
+
+func newLineStringWithOmitInvalid(seq Sequence) LineString {
+	if err := validateLineStringSeq(seq); err != nil {
+		return LineString{}
+	}
+	return LineString{seq}
+}
+
+func validateLineStringSeq(seq Sequence) error {
+	if seq.Length() == 0 {
+		return nil
+	}
 	if !hasAtLeast2DistinctPointsInSeq(seq) {
-		if ctorOpts.omitInvalid {
-			return LineString{}, nil
-		}
-		return LineString{}, validationError{
+		return validationError{
 			"non-empty linestring contains only one distinct XY value"}
 	}
-
-	// All XY values must be valid.
 	if err := seq.validate(); err != nil {
-		if ctorOpts.omitInvalid {
-			return LineString{}, nil
-		}
-		return LineString{}, validationError{err.Error()}
+		return validationError{err.Error()}
 	}
-
-	return LineString{seq}, nil
+	return nil
 }
 
 func hasAtLeast2DistinctPointsInSeq(seq Sequence) bool {
@@ -421,4 +430,15 @@ func (s LineString) Summary() string {
 // String returns the string representation of the LineString.
 func (s LineString) String() string {
 	return s.Summary()
+}
+
+// Simplify returns a simplified version of the LineString using the
+// Ramer-Douglas-Peucker algorithm. If the Ramer-Douglas-Peucker algorithm were to create
+// an invalid LineString (i.e. one having only a single distinct point), then
+// the empty LineString is returned.
+func (s LineString) Simplify(threshold float64) LineString {
+	seq := s.Coordinates()
+	floats := ramerDouglasPeucker(nil, seq, threshold)
+	seq = NewSequence(floats, seq.CoordinatesType())
+	return newLineStringWithOmitInvalid(seq)
 }

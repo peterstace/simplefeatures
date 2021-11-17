@@ -16,6 +16,20 @@ __Special thanks to Albert Teoh and Sameera Perera for contributing to this rele
 - Use the `%w` verb for wrapping errors internally. Note that simplefeatures
   does not yet currently expose any sentinel errors or error types.
 
+- **Breaking change**: Changes the `Simplify` package level function to become
+  a method on the `Geometry` type. Users upgrading can just change function
+  invocations that look like `simp, err := geom.Simplify(g, tolerance)` to
+  method invocations that look like `simp, err := g.Simplify(tolerance)`.
+
+- Adds `Simplify` methods to the concrete geometry types `LineString`,
+  `MultiLineString`, `Polygon`, `MultiPolygon`, and `GeometryCollection`. These
+  methods may be used if one of these concrete geometries is to be simplified,
+  rather than converting to a `Geometry`, calling `Simplify`, then converting
+  back to the concrete geometry type.
+
+- Fixes a bug in Simplify where invalid interior rings would be omitted rather
+  than producing an error.
+
 ## v0.34.0
 
 2021-11-02

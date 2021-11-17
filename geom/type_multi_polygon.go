@@ -519,3 +519,23 @@ func (m MultiPolygon) Summary() string {
 func (m MultiPolygon) String() string {
 	return m.Summary()
 }
+
+// Simplify returns a simplified version of the MultiPolygon by applying
+// Simplify to each child Polygon and constructing a new MultiPolygon from the
+// result. Any supplied ConstructorOptions will be used when simplifying each
+// child Polygon, or constructing the final MultiPolygon output.
+func (m MultiPolygon) Simplify(threshold float64, opts ...ConstructorOption) (MultiPolygon, error) {
+	n := m.NumPolygons()
+	polys := make([]Polygon, 0, n)
+	for i := 0; i < n; i++ {
+		poly, err := m.PolygonN(i).Simplify(threshold, opts...)
+		if err != nil {
+			return MultiPolygon{}, err
+		}
+		if !poly.IsEmpty() {
+			polys = append(polys, poly)
+		}
+	}
+	simpl, err := NewMultiPolygon(polys, opts...)
+	return simpl, wrapSimplified(err)
+}

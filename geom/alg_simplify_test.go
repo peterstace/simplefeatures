@@ -95,7 +95,7 @@ func TestSimplify(t *testing.T) {
 			t.Logf("input:     %v", in.AsText())
 			t.Logf("threshold: %v", tc.threshold)
 			t.Logf("want:      %v", want.AsText())
-			got, err := geom.Simplify(in, tc.threshold)
+			got, err := in.Simplify(tc.threshold)
 			expectNoErr(t, err)
 			t.Logf("got:       %v", got.AsText())
 			expectGeomEq(t, got, want, geom.IgnoreOrder)
@@ -123,10 +123,25 @@ func TestSimplifyErrorCases(t *testing.T) {
 			))`,
 			1e-5,
 		},
+
+		// Second case for "outer ring becomes invalid after simplification".
+		// The outer ring becomes invalid because the Ramer-Douglas-Peucker
+		// algorithm causes the ring (when considered as a LineString) to
+		// become self-intersected.
+		{`POLYGON((0 0,0 1,0.9 1,1 1.1,1.1 1,2 1,2 0,1 1.05,0 0))`, 0.2},
+
+		// Inner ring becomes invalid after simplification.
+		{
+			`POLYGON(
+				(-1 -1,-1 3,3 3,3 -1,-1 -1),
+				(0 0,0 1,0.9 1,1 1.1,1.1 1,2 1,2 0,1 1.05,0 0)
+			)`,
+			0.2,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in := geomFromWKT(t, tc.wkt)
-			_, err := geom.Simplify(in, tc.threshold)
+			_, err := in.Simplify(tc.threshold)
 			expectErr(t, err)
 		})
 	}

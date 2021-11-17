@@ -496,3 +496,19 @@ func (c GeometryCollection) Summary() string {
 func (c GeometryCollection) String() string {
 	return c.Summary()
 }
+
+// Simplify returns a simplified version of the GeometryCollection by applying
+// Simplify to each child geometry. Any supplied ConstructorOptions will be
+// used when simplifying each child geometry.
+func (c GeometryCollection) Simplify(threshold float64, opts ...ConstructorOption) (GeometryCollection, error) {
+	n := c.NumGeometries()
+	geoms := make([]Geometry, n)
+	for i := 0; i < n; i++ {
+		var err error
+		geoms[i], err = c.GeometryN(i).Simplify(threshold, opts...)
+		if err != nil {
+			return GeometryCollection{}, wrapSimplified(err)
+		}
+	}
+	return NewGeometryCollection(geoms, opts...), nil
+}
