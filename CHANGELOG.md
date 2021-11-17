@@ -30,6 +30,9 @@ __Special thanks to Albert Teoh and Sameera Perera for contributing to this rele
 - Fixes a bug in Simplify where invalid interior rings would be omitted rather
   than producing an error.
 
+- Adds a wrapper in the `geos` package for the `GEOSMakeValid_r` function
+  (exposed as `MakeValid`).
+
 ## v0.34.0
 
 2021-11-02
