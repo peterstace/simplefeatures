@@ -7,9 +7,9 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-func geomFromWKT(t *testing.T, wkt string) geom.Geometry {
+func geomFromWKT(t *testing.T, wkt string, opts ...geom.ConstructorOption) geom.Geometry {
 	t.Helper()
-	geom, err := geom.UnmarshalWKT(wkt)
+	geom, err := geom.UnmarshalWKT(wkt, opts...)
 	if err != nil {
 		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 	}
@@ -766,4 +766,24 @@ func TestSymmetricDifference(t *testing.T) {
 	want := geomFromWKT(t, "MULTIPOLYGON(((0 0,0 2,1 2,1 1,2 1,2 0,0 0)),((2 1,3 1,3 3,1 3,1 2,2 2,2 1)))")
 
 	expectGeomEq(t, got, want, geom.IgnoreOrder)
+}
+
+func TestMakeValid(t *testing.T) {
+	for i, tt := range []struct {
+		input      string
+		wantOutput string
+	}{
+		{
+			"POLYGON((0 0,2 2,2 0,0 2,0 0))",
+			"MULTIPOLYGON(((0 0,0 2,1 1,0 0)),((2 0,1 1,2 2,2 0)))",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			in := geomFromWKT(t, tt.input, geom.DisableAllValidations)
+			gotGeom, err := MakeValid(in)
+			expectNoErr(t, err)
+			wantGeom := geomFromWKT(t, tt.wantOutput)
+			expectGeomEq(t, gotGeom, wantGeom)
+		})
+	}
 }
