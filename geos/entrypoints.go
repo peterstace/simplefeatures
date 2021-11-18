@@ -11,7 +11,7 @@ package geos
 	(GEOS_VERSION_MAJOR == 3 && GEOS_VERSION_MINOR < 8) \
 )
 #if MAKE_VALID_MISSING
-// This stub implementation also fails
+// This stub implementation always fails:
 GEOSGeometry *GEOSMakeValid_r(GEOSContextHandle_t handle, const GEOSGeometry* g) { return NULL; }
 #endif
 
