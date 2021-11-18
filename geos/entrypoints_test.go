@@ -781,6 +781,9 @@ func TestMakeValid(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in := geomFromWKT(t, tt.input, geom.DisableAllValidations)
 			gotGeom, err := MakeValid(in)
+			if _, ok := err.(unsupportedGEOSVersionError); ok {
+				t.Skip(err)
+			}
 			expectNoErr(t, err)
 			wantGeom := geomFromWKT(t, tt.wantOutput)
 			expectGeomEq(t, gotGeom, wantGeom)

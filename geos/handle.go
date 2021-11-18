@@ -22,7 +22,6 @@ char *marshal(GEOSContextHandle_t handle, const GEOSGeometry *g, size_t *size, c
 GEOSGeometry const *noop(GEOSContextHandle_t handle, const GEOSGeometry *g) {
 	return g;
 }
-
 */
 import "C"
 
@@ -62,6 +61,7 @@ func newHandle() (*handle, error) {
 		h.release()
 		return nil, errors.New("malloc failed")
 	}
+	C.memset((unsafe.Pointer)(h.errBuf), 0, 1024)
 
 	h.context = C.sf_init(unsafe.Pointer(h.errBuf))
 	if h.context == nil {
