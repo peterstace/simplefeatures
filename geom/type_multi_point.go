@@ -325,3 +325,24 @@ func (m MultiPoint) Summary() string {
 func (m MultiPoint) String() string {
 	return m.Summary()
 }
+
+func (m MultiPoint) RemoveRepeatedPoints() MultiPoint {
+	var nonRepeatedPoints []Point
+	var seenEmpty bool
+	seenXY := make(map[XY]bool)
+	for _, pt := range m.points {
+		if xy, ok := pt.XY(); ok {
+			if seenXY[xy] {
+				continue
+			}
+			seenXY[xy] = true
+		} else {
+			if seenEmpty {
+				continue
+			}
+			seenEmpty = true
+		}
+		nonRepeatedPoints = append(nonRepeatedPoints, pt)
+	}
+	return NewMultiPoint(nonRepeatedPoints)
+}

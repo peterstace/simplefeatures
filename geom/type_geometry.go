@@ -938,3 +938,24 @@ func (g Geometry) Simplify(threshold float64, opts ...ConstructorOption) (Geomet
 		panic("unknown type: " + g.Type().String())
 	}
 }
+
+func (g Geometry) RemoveRepeatedPoints() Geometry {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		return g
+	case TypePoint:
+		return g
+	case TypeLineString:
+		return g
+	case TypePolygon:
+		return g
+	case TypeMultiPoint:
+		return g.MustAsMultiPoint().RemoveRepeatedPoints().AsGeometry()
+	case TypeMultiLineString:
+		return g
+	case TypeMultiPolygon:
+		return g
+	default:
+		panic("unknown type: " + g.Type().String())
+	}
+}

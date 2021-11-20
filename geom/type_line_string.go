@@ -442,3 +442,7 @@ func (s LineString) Simplify(threshold float64) LineString {
 	seq = NewSequence(floats, seq.CoordinatesType())
 	return newLineStringWithOmitInvalid(seq)
 }
+
+func (s LineString) RemoveRepeatedPoints() LineString {
+	return s
+}
