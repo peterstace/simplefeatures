@@ -23,6 +23,13 @@ func expectNoErr(t *testing.T, err error) {
 	}
 }
 
+func expectErr(t *testing.T, err error) {
+	t.Helper()
+	if err == nil {
+		t.Fatal("unexpected error but got nil")
+	}
+}
+
 func expectGeomEq(t *testing.T, got, want geom.Geometry, opts ...geom.ExactEqualsOption) {
 	t.Helper()
 	if !geom.ExactEquals(got, want, opts...) {
@@ -779,6 +786,8 @@ func TestMakeValid(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			_, err := geom.UnmarshalWKT(tt.input)
+			expectErr(t, err)
 			in := geomFromWKT(t, tt.input, geom.DisableAllValidations)
 			gotGeom, err := MakeValid(in)
 			if _, ok := err.(unsupportedGEOSVersionError); ok {
