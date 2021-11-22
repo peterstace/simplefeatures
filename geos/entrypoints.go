@@ -4,6 +4,17 @@ package geos
 #cgo LDFLAGS: -lgeos_c
 #cgo CFLAGS: -Wall
 #include "geos_c.h"
+
+#define MAKE_VALID_MIN_VERSION "3.8.0"
+#define MAKE_VALID_MISSING ( \
+	GEOS_VERSION_MAJOR < 3 || \
+	(GEOS_VERSION_MAJOR == 3 && GEOS_VERSION_MINOR < 8) \
+)
+#if MAKE_VALID_MISSING
+// This stub implementation always fails:
+GEOSGeometry *GEOSMakeValid_r(GEOSContextHandle_t handle, const GEOSGeometry* g) { return NULL; }
+#endif
+
 */
 import "C"
 
@@ -308,4 +319,20 @@ func SymmetricDifference(a, b geom.Geometry, opts ...geom.ConstructorOption) (ge
 		return C.GEOSSymDifference_r(ctx, a, b)
 	})
 	return result, wrap(err, "executing GEOSSymDifference_r")
+}
+
+// MakeValid can be used to convert an invalid geometry into a valid geometry.
+// It does this by keeping the original control points and constructing a new
+// geometry that is valid and similar (but not the same as) the original
+// invalid geometry. If the input geometry is valid, then it is returned
+// unaltered.
+func MakeValid(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	if C.MAKE_VALID_MISSING != 0 {
+		return geom.Geometry{}, unsupportedGEOSVersionError{
+			C.MAKE_VALID_MIN_VERSION, "MakeValid"}
+	}
+	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSMakeValid_r(ctx, g)
+	})
+	return result, wrap(err, "executing GEOSMakeValid_r")
 }
