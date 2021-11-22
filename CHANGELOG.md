@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.35.0
+
+2021-11-23
 
 __Special thanks to Albert Teoh and Sameera Perera for contributing to this release.__
 
