@@ -443,7 +443,39 @@ func (s LineString) Simplify(threshold float64) LineString {
 	return newLineStringWithOmitInvalid(seq)
 }
 
-// RemoveRepeatedPoints ...
+// RemoveRepeatedPoints returns a version of the LineString that has adjacent
+// control points with equal XY value collapsed into one. If adjacent control
+// points with equal XY values have differing M or Z values, then the first M
+// and Z values (in the direction from start to end) are used.
 func (s LineString) RemoveRepeatedPoints() LineString {
-	return s
+	if !s.hasRepeatedPoints() {
+		return s
+	}
+
+	var coords []float64
+	seq := s.Coordinates()
+	n := seq.Length()
+	if n > 0 {
+		coords = seq.appendPoint(coords, 0)
+	}
+	for i := 1; i < n; i++ {
+		if seq.GetXY(i-1) != seq.GetXY(i) {
+			coords = seq.appendPoint(coords, i)
+		}
+	}
+
+	// Construct the new LineString directly, since removal of repeated points
+	// doesn't change validity.
+	return LineString{NewSequence(coords, seq.CoordinatesType())}
+}
+
+func (s LineString) hasRepeatedPoints() bool {
+	seq := s.Coordinates()
+	n := seq.Length()
+	for i := 0; i+1 < n; i++ {
+		if seq.GetXY(i) != seq.GetXY(i+1) {
+			return true
+		}
+	}
+	return false
 }

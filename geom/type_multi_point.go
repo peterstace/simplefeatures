@@ -326,7 +326,10 @@ func (m MultiPoint) String() string {
 	return m.Summary()
 }
 
-// RemoveRepeatedPoints ...
+// RemoveRepeatedPoints returns a version of the MultiPoint that has any points
+// with the same XY value collapsed into one. If control points with equal XY
+// values have differing M or Z values, then the M and Z values from the first
+// point are used.
 func (m MultiPoint) RemoveRepeatedPoints() MultiPoint {
 	var nonRepeatedPoints []Point
 	var seenEmpty bool

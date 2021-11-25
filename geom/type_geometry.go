@@ -939,7 +939,11 @@ func (g Geometry) Simplify(threshold float64, opts ...ConstructorOption) (Geomet
 	}
 }
 
-// RemoveRepeatedPoints ...
+// RemoveRepeatedPoints returns a version of the Geometry that has control
+// points with equal XY value collapsed into one. If control points with equal
+// XY values have differing M or Z values, then the first M and Z values are
+// used. The precise behaviour differs per geometry type. See the documentation
+// on each concrete geometry's RemoveRepeatedPoints method for details.
 func (g Geometry) RemoveRepeatedPoints() Geometry {
 	switch g.gtype {
 	case TypeGeometryCollection:
@@ -947,7 +951,7 @@ func (g Geometry) RemoveRepeatedPoints() Geometry {
 	case TypePoint:
 		return g
 	case TypeLineString:
-		return g
+		return g.MustAsLineString().RemoveRepeatedPoints().AsGeometry()
 	case TypePolygon:
 		return g
 	case TypeMultiPoint:
