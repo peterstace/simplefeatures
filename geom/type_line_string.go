@@ -443,6 +443,7 @@ func (s LineString) Simplify(threshold float64) LineString {
 	return newLineStringWithOmitInvalid(seq)
 }
 
+// RemoveRepeatedPoints ...
 func (s LineString) RemoveRepeatedPoints() LineString {
 	return s
 }

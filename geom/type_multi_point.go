@@ -326,6 +326,7 @@ func (m MultiPoint) String() string {
 	return m.Summary()
 }
 
+// RemoveRepeatedPoints ...
 func (m MultiPoint) RemoveRepeatedPoints() MultiPoint {
 	var nonRepeatedPoints []Point
 	var seenEmpty bool
