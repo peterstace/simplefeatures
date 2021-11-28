@@ -539,3 +539,13 @@ func (m MultiPolygon) Simplify(threshold float64, opts ...ConstructorOption) (Mu
 	simpl, err := NewMultiPolygon(polys, opts...)
 	return simpl, wrapSimplified(err)
 }
+
+// RemoveRepeatedPoints returns a version of the MultiPolygon that has has
+// repeated points removed from its child Polygons.
+func (m MultiPolygon) RemoveRepeatedPoints() MultiPolygon {
+	ps := make([]Polygon, m.NumPolygons())
+	for i := range ps {
+		ps[i] = m.PolygonN(i).RemoveRepeatedPoints()
+	}
+	return MultiPolygon{ps, m.ctype}
+}

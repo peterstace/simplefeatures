@@ -959,7 +959,7 @@ func (g Geometry) RemoveRepeatedPoints() Geometry {
 	case TypeMultiLineString:
 		return g.MustAsMultiLineString().RemoveRepeatedPoints().AsGeometry()
 	case TypeMultiPolygon:
-		return g
+		return g.MustAsMultiPolygon().RemoveRepeatedPoints().AsGeometry()
 	default:
 		panic("unknown type: " + g.Type().String())
 	}

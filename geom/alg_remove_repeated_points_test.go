@@ -48,6 +48,19 @@ func TestRemoveRepeatedPoints(t *testing.T) {
 			"POLYGON((-1 -1,-1 3,-1 3,3 -1,-1 -1),(0 0,0 1,1 0,0 0,0 0))",
 			"POLYGON((-1 -1,-1 3,3 -1,-1 -1),(0 0,0 1,1 0,0 0))",
 		},
+
+		{"MULTIPOLYGON EMPTY", "MULTIPOLYGON EMPTY"},
+		{"MULTIPOLYGON(EMPTY)", "MULTIPOLYGON(EMPTY)"},
+		{"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))"},
+		{"MULTIPOLYGON(((0 0,0 1,1 0,1 0,0 0)))", "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))"},
+		{
+			"MULTIPOLYGON(((-1 -1,-1 3,3 -1,-1 -1),(0 0,0 1,1 0,0 0)))",
+			"MULTIPOLYGON(((-1 -1,-1 3,3 -1,-1 -1),(0 0,0 1,1 0,0 0)))",
+		},
+		{
+			"MULTIPOLYGON(((-1 -1,-1 3,-1 3,3 -1,-1 -1),(0 0,0 1,1 0,0 0,0 0)))",
+			"MULTIPOLYGON(((-1 -1,-1 3,3 -1,-1 -1),(0 0,0 1,1 0,0 0)))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			inputG := geomFromWKT(t, tt.input)
