@@ -629,3 +629,13 @@ func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon
 	simpl, err := NewPolygon(rings, opts...)
 	return simpl, wrapSimplified(err)
 }
+
+// RemoveRepeatedPoints returns a version of the Polygon that has had repeated
+// points removed from its rings.
+func (p Polygon) RemoveRepeatedPoints() Polygon {
+	rings := make([]LineString, p.NumRings())
+	for i, r := range p.rings {
+		rings[i] = r.RemoveRepeatedPoints()
+	}
+	return Polygon{rings, p.ctype}
+}
