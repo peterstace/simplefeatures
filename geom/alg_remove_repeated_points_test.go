@@ -61,6 +61,13 @@ func TestRemoveRepeatedPoints(t *testing.T) {
 			"MULTIPOLYGON(((-1 -1,-1 3,-1 3,3 -1,-1 -1),(0 0,0 1,1 0,0 0,0 0)))",
 			"MULTIPOLYGON(((-1 -1,-1 3,3 -1,-1 -1),(0 0,0 1,1 0,0 0)))",
 		},
+
+		{"GEOMETRYCOLLECTION EMPTY", "GEOMETRYCOLLECTION EMPTY"},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", "GEOMETRYCOLLECTION(POINT(1 2))"},
+		{
+			"GEOMETRYCOLLECTION(POINT(1 2),LINESTRING(0 1,2 3,2 3,4 5))",
+			"GEOMETRYCOLLECTION(POINT(1 2),LINESTRING(0 1,2 3,4 5))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			inputG := geomFromWKT(t, tt.input)

@@ -947,7 +947,7 @@ func (g Geometry) Simplify(threshold float64, opts ...ConstructorOption) (Geomet
 func (g Geometry) RemoveRepeatedPoints() Geometry {
 	switch g.gtype {
 	case TypeGeometryCollection:
-		return g
+		return g.MustAsGeometryCollection().RemoveRepeatedPoints().AsGeometry()
 	case TypePoint:
 		return g
 	case TypeLineString:

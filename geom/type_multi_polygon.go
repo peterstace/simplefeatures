@@ -541,7 +541,7 @@ func (m MultiPolygon) Simplify(threshold float64, opts ...ConstructorOption) (Mu
 }
 
 // RemoveRepeatedPoints returns a version of the MultiPolygon that has has
-// repeated points removed from its child Polygons.
+// repeated points removed from its child Polygons in an element wise fashion.
 func (m MultiPolygon) RemoveRepeatedPoints() MultiPolygon {
 	ps := make([]Polygon, m.NumPolygons())
 	for i := range ps {

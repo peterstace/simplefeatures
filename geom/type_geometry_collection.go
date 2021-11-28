@@ -512,3 +512,14 @@ func (c GeometryCollection) Simplify(threshold float64, opts ...ConstructorOptio
 	}
 	return NewGeometryCollection(geoms, opts...), nil
 }
+
+// RemoveRepeatedPoints returns a version of the GeometryCollection that has
+// had repeated points removed from its child geometries in an element-wise
+// fashion.
+func (c GeometryCollection) RemoveRepeatedPoints() GeometryCollection {
+	gs := make([]Geometry, c.NumGeometries())
+	for i := range gs {
+		gs[i] = c.GeometryN(i).RemoveRepeatedPoints()
+	}
+	return GeometryCollection{gs, c.ctype}
+}

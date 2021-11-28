@@ -501,7 +501,7 @@ func (m MultiLineString) Simplify(threshold float64) MultiLineString {
 }
 
 // RemoveRepeatedPoints returns a version of the MultiLineString that has had
-// repeated points in its child LineStrings removed.
+// repeated points in its child LineStrings removed (in a child wise fashion).
 func (m MultiLineString) RemoveRepeatedPoints() MultiLineString {
 	lss := make([]LineString, m.NumLineStrings())
 	for i := range lss {
