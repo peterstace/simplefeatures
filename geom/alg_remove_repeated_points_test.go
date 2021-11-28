@@ -29,6 +29,13 @@ func TestRemoveRepeatedPoints(t *testing.T) {
 		{"LINESTRING M(0 0 0,0 0 1,1 1 1)", "LINESTRING M(0 0 0,1 1 1)"},
 		{"LINESTRING Z(0 0 0,0 0 1,1 1 1)", "LINESTRING Z(0 0 0,1 1 1)"},
 		{"LINESTRING ZM(0 0 1 2,0 0 2 3,1 1 4 5)", "LINESTRING ZM(0 0 1 2,1 1 4 5)"},
+
+		{"MULTILINESTRING EMPTY", "MULTILINESTRING EMPTY"},
+		{"MULTILINESTRING(EMPTY)", "MULTILINESTRING(EMPTY)"},
+		{"MULTILINESTRING((0 0,1 1))", "MULTILINESTRING((0 0,1 1))"},
+		{"MULTILINESTRING((0 0,0 0,1 1))", "MULTILINESTRING((0 0,1 1))"},
+		{"MULTILINESTRING((0 0,1 1))", "MULTILINESTRING((0 0,1 1))"},
+		{"MULTILINESTRING((0 0,1 1),(2 2,3 3))", "MULTILINESTRING((0 0,1 1),(2 2,3 3))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			inputG := geomFromWKT(t, tt.input)
