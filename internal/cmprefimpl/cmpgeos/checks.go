@@ -804,7 +804,7 @@ func checkDCELOp(
 
 	got, err := op(g1, g2)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not perform op using simplefeatures: %w", err)
 	}
 
 	// Some geometries give results that are not topologically equivalent to
@@ -825,7 +825,7 @@ func checkDCELOp(
 			// case.
 			return nil
 		}
-		return err
+		return fmt.Errorf("could not perform op using GEOS: %w", err)
 	}
 
 	if !mantissaTerminatesQuickly(got) || !mantissaTerminatesQuickly(want) {
