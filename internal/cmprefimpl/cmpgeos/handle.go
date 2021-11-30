@@ -367,7 +367,18 @@ func (h *Handle) decodeGeomHandleUsingWKB(gh *C.GEOSGeometry) (geom.Geometry, er
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
 	byts := C.GoBytes(unsafe.Pointer(wkb), C.int(size))
 
-	return geom.UnmarshalWKB(byts)
+	output, err := geom.UnmarshalWKB(byts)
+	if err != nil {
+		invalidWKT := "unknown"
+		if invalid, err := geom.UnmarshalWKB(byts, geom.DisableAllValidations); err == nil {
+			invalidWKT = invalid.AsText()
+		}
+		return geom.Geometry{}, fmt.Errorf(
+			"output WKB [%s] invalid according to simplefeatures: %v",
+			invalidWKT, err,
+		)
+	}
+	return output, nil
 }
 
 func (h *Handle) asText(g geom.Geometry) (string, error) {
