@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Eliminate redundant calls to the optional user supplied transform func during
+  area calculations.
+
 ## v0.35.0
 
 2021-11-23
