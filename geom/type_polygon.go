@@ -398,13 +398,22 @@ func signedAreaOfLinearRing(lr LineString, transform func(XY) XY) float64 {
 	var sum float64
 	seq := lr.Coordinates()
 	n := seq.Length()
-	for i := 0; i < n; i++ {
-		pt0 := seq.GetXY(i)
-		pt1 := seq.GetXY((i + 1) % n)
+	if n == 0 {
+		return 0
+	}
+
+	nthPt := func(i int) XY {
+		pt := seq.GetXY(i)
 		if transform != nil {
-			pt0 = transform(pt0)
-			pt1 = transform(pt1)
+			pt = transform(pt)
 		}
+		return pt
+	}
+
+	pt1 := nthPt(0)
+	for i := 0; i < n-1; i++ {
+		pt0 := pt1
+		pt1 = nthPt(i + 1)
 		sum += (pt1.X + pt0.X) * (pt1.Y - pt0.Y)
 	}
 	return sum / 2

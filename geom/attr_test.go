@@ -642,6 +642,18 @@ func TestTransformedArea(t *testing.T) {
 	}
 }
 
+func TestTransformedAreaInvocationCount(t *testing.T) {
+	g := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))")
+	var count int
+	g.Area(WithTransform(func(xy XY) XY {
+		count++
+		return xy
+	}))
+
+	// Each of the 4 points making up the polygon get transformed once each.
+	expectIntEq(t, count, 4)
+}
+
 func TestCentroid(t *testing.T) {
 	for i, tt := range []struct {
 		input  string
