@@ -35,6 +35,13 @@ func (e validationError) Error() string {
 	return fmt.Sprintf("failed geometry constraint: %s", e.reason)
 }
 
+func wrapValidationError(err error) error {
+	if err == nil {
+		return nil
+	}
+	return validationError{err.Error()}
+}
+
 // wkbSyntaxError is an error used to indicate that a serialised WKB geometry
 // cannot be unmarshalled because some aspect of it's syntax is invalid.
 type wkbSyntaxError struct {

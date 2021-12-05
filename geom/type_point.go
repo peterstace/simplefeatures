@@ -13,6 +13,9 @@ import (
 // The Point may be empty.
 //
 // The zero value of Point is a 2D empty Point.
+//
+// For a Point to be valid, its coordinates must not contain NaN or
+// positive/negative infinity.
 type Point struct {
 	coords Coordinates
 	full   bool
@@ -20,17 +23,18 @@ type Point struct {
 
 // NewPoint creates a new point given its Coordinates.
 func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
+	pt := newUncheckedPoint(c)
 	os := newOptionSet(opts)
 	if os.skipValidations {
-		return newUncheckedPoint(c), nil
+		return pt, nil
 	}
-	if err := c.XY.validate(); err != nil {
+	if err := pt.Validate(); err != nil {
 		if os.omitInvalid {
 			return NewEmptyPoint(c.Type), nil
 		}
-		return Point{}, validationError{err.Error()}
+		return Point{}, err
 	}
-	return newUncheckedPoint(c), nil
+	return pt, nil
 }
 
 // newUncheckedPoint constructs a point without checking any validations. It
@@ -56,6 +60,18 @@ func newUncheckedPoint(c Coordinates) Point {
 // NewEmptyPoint creates a Point that is empty.
 func NewEmptyPoint(ctype CoordinatesType) Point {
 	return Point{Coordinates{Type: ctype}, false}
+}
+
+// Validate checks if this point is valid according to its validation rules (see
+// the comment on the Point type for details). Note that because validation is
+// checked during construction unless explicitly disabled, this method is only
+// useful when validation during constructor is disabled.
+func (p Point) Validate() error {
+	if p.full {
+		err := p.coords.XY.validate()
+		return wrapValidationError(err)
+	}
+	return nil
 }
 
 // Type returns the GeometryType for a Point
