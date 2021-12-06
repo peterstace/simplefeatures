@@ -23,36 +23,45 @@ type LineString struct {
 // sequence must contain exactly 0 points, or at least 2 points with distinct
 // XY values (otherwise an error is returned).
 func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) {
-	ctorOpts := newOptionSet(opts)
-	if ctorOpts.skipValidations {
-		return LineString{seq}, nil
+	ls := newUncheckedLineString(seq)
+	os := newOptionSet(opts)
+	if os.skipValidations {
+		return ls, nil
 	}
-	if ctorOpts.omitInvalid {
-		return newLineStringWithOmitInvalid(seq), nil
+	if os.omitInvalid {
+		return ls.omitInvalid(), nil
 	}
-
-	if err := validateLineStringSeq(seq); err != nil {
+	if err := ls.Validate(); err != nil {
 		return LineString{}, err
 	}
-	return LineString{seq}, nil
+	return ls, nil
 }
 
-func newLineStringWithOmitInvalid(seq Sequence) LineString {
-	if err := validateLineStringSeq(seq); err != nil {
-		return LineString{}
-	}
+func newUncheckedLineString(seq Sequence) LineString {
 	return LineString{seq}
 }
 
-func validateLineStringSeq(seq Sequence) error {
-	if seq.Length() == 0 {
+// omitInvalid returns an empty version of the LineString if the original is invalid.
+func (s LineString) omitInvalid() LineString {
+	if err := s.Validate(); err != nil {
+		return LineString{}
+	}
+	return s
+}
+
+// Validate checks if this LineString is valid according to its validation rules
+// (see the comment on the LineString type for details). Because validation is
+// checked during construction unless explicitly disabled, this method is only
+// useful when validation during constructor is disabled.
+func (s LineString) Validate() error {
+	if s.seq.Length() == 0 {
 		return nil
 	}
-	if !hasAtLeast2DistinctPointsInSeq(seq) {
+	if !hasAtLeast2DistinctPointsInSeq(s.seq) {
 		return validationError{
 			"non-empty linestring contains only one distinct XY value"}
 	}
-	if err := seq.validate(); err != nil {
+	if err := s.seq.validate(); err != nil {
 		return validationError{err.Error()}
 	}
 	return nil
@@ -440,5 +449,5 @@ func (s LineString) Simplify(threshold float64) LineString {
 	seq := s.Coordinates()
 	floats := ramerDouglasPeucker(nil, seq, threshold)
 	seq = NewSequence(floats, seq.CoordinatesType())
-	return newLineStringWithOmitInvalid(seq)
+	return newUncheckedLineString(seq).omitInvalid()
 }

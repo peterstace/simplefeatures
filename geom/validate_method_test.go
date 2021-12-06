@@ -20,8 +20,13 @@ func TestValidate(t *testing.T) {
 		wkt       string
 	}{
 		{true, "POINT(1 2)"},
+
+		{true, "LINESTRING(1 2,3 4)"},
+		{false, "LINESTRING(1 2,1 2)"},
+		{false, "LINESTRING(1 2)"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			t.Log(tc.wkt)
 			if tc.wantValid {
 				g, err := geom.UnmarshalWKT(tc.wkt)
 				expectNoErr(t, err)

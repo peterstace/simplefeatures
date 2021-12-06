@@ -941,9 +941,9 @@ func (g Geometry) Simplify(threshold float64, opts ...ConstructorOption) (Geomet
 
 // Validate checks if this Geometry is valid according to its validation rules.
 // The validation rules differ for each concrete geometry type (see the comment
-// on each concrete type for details). Note that because validation is checked
-// during construction unless explicitly disabled, this method is only useful
-// when validation during construction is disabled.
+// on each concrete type for details). Because validation is checked during
+// construction unless explicitly disabled, this method is only useful when
+// validation during construction is disabled.
 func (g Geometry) Validate() error {
 	switch g.Type() {
 	case TypeGeometryCollection:
@@ -951,7 +951,7 @@ func (g Geometry) Validate() error {
 	case TypePoint:
 		return g.MustAsPoint().Validate()
 	case TypeLineString:
-		return fmt.Errorf("not implemented")
+		return g.MustAsLineString().Validate()
 	case TypePolygon:
 		return fmt.Errorf("not implemented")
 	case TypeMultiPoint:

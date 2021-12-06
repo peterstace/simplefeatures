@@ -62,8 +62,8 @@ func NewEmptyPoint(ctype CoordinatesType) Point {
 	return Point{Coordinates{Type: ctype}, false}
 }
 
-// Validate checks if this point is valid according to its validation rules (see
-// the comment on the Point type for details). Note that because validation is
+// Validate checks if this Point is valid according to its validation rules
+// (see the comment on the Point type for details). Because validation is
 // checked during construction unless explicitly disabled, this method is only
 // useful when validation during constructor is disabled.
 func (p Point) Validate() error {
