@@ -953,7 +953,7 @@ func (g Geometry) Validate() error {
 	case TypeLineString:
 		return g.MustAsLineString().Validate()
 	case TypePolygon:
-		return fmt.Errorf("not implemented")
+		return g.MustAsPolygon().Validate()
 	case TypeMultiPoint:
 		return fmt.Errorf("not implemented")
 	case TypeMultiLineString:

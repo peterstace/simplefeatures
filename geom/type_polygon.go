@@ -48,22 +48,31 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 		rings[i] = rings[i].ForceCoordinatesType(ctype)
 	}
 
-	ctorOpts := newOptionSet(opts)
-	if err := validatePolygon(rings, ctorOpts); err != nil {
-		if ctorOpts.omitInvalid {
+	poly := Polygon{rings, ctype}
+	os := newOptionSet(opts)
+	if os.skipValidations {
+		return poly, nil
+	}
+
+	if err := poly.Validate(); err != nil {
+		if os.omitInvalid {
 			return Polygon{}, nil
 		}
 		return Polygon{}, err
 	}
-	return Polygon{rings, ctype}, nil
+	return poly, nil
 }
 
-func validatePolygon(rings []LineString, opts ctorOptionSet) error {
-	if len(rings) == 0 || opts.skipValidations {
+// Validate checks if this Polygon is valid according to its validation rules
+// (see the comment on the Polygon type for details). Because validation is
+// checked during construction unless explicitly disabled, this method is only
+// useful when validation during constructor is disabled.
+func (p Polygon) Validate() error {
+	if len(p.rings) == 0 {
 		return nil
 	}
 
-	for _, r := range rings {
+	for _, r := range p.rings {
 		if !r.IsClosed() {
 			return validationError{"polygon ring not closed"}
 		}
@@ -71,16 +80,19 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 			return validationError{"polygon ring not simple"}
 		}
 	}
+	if len(p.rings) == 1 {
+		return nil
+	}
 
 	// Data structures used to track connectedness.
-	nextInterVert := len(rings)
+	nextInterVert := len(p.rings)
 	interVerts := make(map[XY]int)
 	graph := newGraph()
 
 	// Construct RTree of rings.
-	boxes := make([]rtree.Box, len(rings))
-	items := make([]rtree.BulkItem, len(rings))
-	for i, r := range rings {
+	boxes := make([]rtree.Box, len(p.rings))
+	items := make([]rtree.BulkItem, len(p.rings))
+	for i, r := range p.rings {
 		box, ok := r.Envelope().box()
 		if !ok {
 			// Cannot occur, because we have already checked to ensure rings
@@ -93,7 +105,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	tree := rtree.BulkLoad(items)
 
 	// Check each pair of rings (skipping any pairs that could not possibly intersect).
-	for i := range rings {
+	for i := range p.rings {
 		if err := tree.RangeSearch(boxes[i], func(j int) error {
 			// Only compare each pair once.
 			if i <= j {
@@ -102,16 +114,16 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 			if i > 0 && j > 0 { // Check is skipped if the outer ring is involved.
 				// It's ok to access the first coord (index 0), since we've
 				// already checked to ensure that no ring is empty.
-				iStart := rings[i].Coordinates().GetXY(0)
-				jStart := rings[j].Coordinates().GetXY(0)
-				nestedFwd := relatePointToRing(iStart, rings[j]) == interior
-				nestedRev := relatePointToRing(jStart, rings[i]) == interior
+				iStart := p.rings[i].Coordinates().GetXY(0)
+				jStart := p.rings[j].Coordinates().GetXY(0)
+				nestedFwd := relatePointToRing(iStart, p.rings[j]) == interior
+				nestedRev := relatePointToRing(jStart, p.rings[i]) == interior
 				if nestedFwd || nestedRev {
 					return validationError{"polygon has nested rings"}
 				}
 			}
 
-			intersects, ext := hasIntersectionLineStringWithLineString(rings[i], rings[j], true)
+			intersects, ext := hasIntersectionLineStringWithLineString(p.rings[i], p.rings[j], true)
 			if !intersects {
 				return nil
 			}
@@ -136,12 +148,12 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	// All inner rings must be inside the outer ring. We can just check an
 	// arbitrary point in each inner ring because we have already made sure
 	// that the rings don't intersect at multiple points.
-	for _, hole := range rings[1:] {
+	for _, hole := range p.rings[1:] {
 		xy, ok := hole.StartPoint().XY()
 		if !ok {
 			continue
 		}
-		if relatePointToRing(xy, rings[0]) == exterior {
+		if relatePointToRing(xy, p.rings[0]) == exterior {
 			return validationError{"polygon interior ring outside of exterior ring"}
 		}
 	}

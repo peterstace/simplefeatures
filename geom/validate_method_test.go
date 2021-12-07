@@ -24,6 +24,9 @@ func TestValidate(t *testing.T) {
 		{true, "LINESTRING(1 2,3 4)"},
 		{false, "LINESTRING(1 2,1 2)"},
 		{false, "LINESTRING(1 2)"},
+
+		{true, "POLYGON((0 0,0 1,1 0,0 0))"},
+		{false, "POLYGON((0 0,1 1,0 1,1 0,0 0))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log(tc.wkt)
