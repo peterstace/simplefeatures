@@ -455,11 +455,8 @@ func (m MultiPolygon) forceOrientation(forceCW bool) MultiPolygon {
 }
 
 // IsCW returns true iff all contained polygons are CW.
-// An empty multipolygon returns false.
+// An empty multipolygon returns true.
 func (m MultiPolygon) IsCW() bool {
-	if m.IsEmpty() {
-		return false
-	}
 	for _, poly := range m.polys {
 		if !poly.IsCW() {
 			return false
@@ -469,11 +466,8 @@ func (m MultiPolygon) IsCW() bool {
 }
 
 // IsCCW returns true iff all contained polygons are CCW.
-// An empty multipolygon returns false.
+// An empty multipolygon returns true.
 func (m MultiPolygon) IsCCW() bool {
-	if m.IsEmpty() {
-		return false
-	}
 	for _, poly := range m.polys {
 		if !poly.IsCCW() {
 			return false

@@ -789,7 +789,7 @@ func (g Geometry) forceOrientation(forceCW bool) Geometry {
 }
 
 // IsCW returns true iff the underlying geometry is CW.
-// For geometries (such as points) where this is undefined, return false.
+// For geometries (such as points) where this is undefined, return true.
 func (g Geometry) IsCW() bool {
 	switch g.gtype {
 	case TypePolygon:
@@ -799,12 +799,12 @@ func (g Geometry) IsCW() bool {
 	case TypeGeometryCollection:
 		return g.MustAsGeometryCollection().IsCW()
 	default:
-		return false
+		return true
 	}
 }
 
 // IsCCW returns true iff the underlying geometry is CCW.
-// For geometries (such as points) where this is undefined, return false.
+// For geometries (such as points) where this is undefined, return true.
 func (g Geometry) IsCCW() bool {
 	switch g.gtype {
 	case TypePolygon:
@@ -814,7 +814,7 @@ func (g Geometry) IsCCW() bool {
 	case TypeGeometryCollection:
 		return g.MustAsGeometryCollection().IsCCW()
 	default:
-		return false
+		return true
 	}
 }
 

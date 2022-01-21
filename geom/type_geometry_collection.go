@@ -453,11 +453,8 @@ func (c GeometryCollection) forceOrientation(forceCW bool) GeometryCollection {
 }
 
 // IsCW returns true iff all contained geometries are CW.
-// An empty geometry collection returns false.
+// An empty geometry collection returns true.
 func (c GeometryCollection) IsCW() bool {
-	if c.IsEmpty() {
-		return false
-	}
 	for _, g := range c.geoms {
 		if !g.IsCW() {
 			return false
@@ -467,11 +464,8 @@ func (c GeometryCollection) IsCW() bool {
 }
 
 // IsCCW returns true iff all contained geometries are CCW.
-// An empty geometry collection returns false.
+// An empty geometry collection returns true.
 func (c GeometryCollection) IsCCW() bool {
-	if c.IsEmpty() {
-		return false
-	}
 	for _, g := range c.geoms {
 		if !g.IsCCW() {
 			return false

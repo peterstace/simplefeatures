@@ -563,11 +563,8 @@ func (p Polygon) forceOrientation(forceCW bool) Polygon {
 // Any linear ring with a negative signed area is assumed to be CW.
 // Any linear ring with a positive signed area is assumed to be CCW.
 // Any linear ring of zero area is assumed to be neither CW nor CCW.
-// An empty polygon returns false.
+// An empty polygon returns true.
 func (p Polygon) IsCW() bool {
-	if p.IsEmpty() {
-		return false
-	}
 	for i, ring := range p.rings {
 		isCW := signedAreaOfLinearRing(ring, nil) < 0
 		if (i == 0) != isCW {
@@ -581,11 +578,8 @@ func (p Polygon) IsCW() bool {
 // Any linear ring with a negative signed area is assumed to be CW.
 // Any linear ring with a positive signed area is assumed to be CCW.
 // Any linear ring of zero area is assumed to be neither CW nor CCW.
-// An empty polygon returns false.
+// An empty polygon returns true.
 func (p Polygon) IsCCW() bool {
-	if p.IsEmpty() {
-		return false
-	}
 	for i, ring := range p.rings {
 		isCCW := signedAreaOfLinearRing(ring, nil) > 0
 		if (i == 0) != isCCW {
