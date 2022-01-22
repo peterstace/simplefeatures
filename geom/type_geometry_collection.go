@@ -452,6 +452,28 @@ func (c GeometryCollection) forceOrientation(forceCW bool) GeometryCollection {
 	return GeometryCollection{geoms, c.ctype}
 }
 
+// IsCW returns true iff all contained geometries are CW.
+// An empty geometry collection returns true.
+func (c GeometryCollection) IsCW() bool {
+	for _, g := range c.geoms {
+		if !g.IsCW() {
+			return false
+		}
+	}
+	return true
+}
+
+// IsCCW returns true iff all contained geometries are CCW.
+// An empty geometry collection returns true.
+func (c GeometryCollection) IsCCW() bool {
+	for _, g := range c.geoms {
+		if !g.IsCCW() {
+			return false
+		}
+	}
+	return true
+}
+
 // Dump breaks this GeometryCollection into its constituent non-multi types
 // (Points, LineStrings, and Polygons).
 //
