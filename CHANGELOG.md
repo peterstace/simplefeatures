@@ -6,6 +6,8 @@ N/A
 
 ## v0.36.0
 
+2022-01-24
+
 __Special thanks to Lachlan Patrick and Albert Teoh for contributing to this release.__
 
 - Eliminate redundant calls to the optional user supplied transform func during
