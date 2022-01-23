@@ -2,8 +2,17 @@
 
 ## Unreleased
 
+N/A
+
+## v0.36.0
+
+__Special thanks to Lachlan Patrick and Albert Teoh for contributing to this release.__
+
 - Eliminate redundant calls to the optional user supplied transform func during
   area calculations.
+
+- Add `IsCW` and `IsCCW` methods, which check if geometries have consistent
+  clockwise or counterclockwise winding orientation.
 
 ## v0.35.0
 
