@@ -536,6 +536,9 @@ func (p Polygon) PointOnSurface() Point {
 // clockwise orientation and any inner rings in a counter-clockwise
 // orientation.
 func (p Polygon) ForceCW() Polygon {
+	if p.IsCW() {
+		return p
+	}
 	return p.forceOrientation(true)
 }
 
@@ -543,6 +546,9 @@ func (p Polygon) ForceCW() Polygon {
 // counter-clockwise orientation and any inner rings in a clockwise
 // orientation.
 func (p Polygon) ForceCCW() Polygon {
+	if p.IsCCW() {
+		return p
+	}
 	return p.forceOrientation(false)
 }
 

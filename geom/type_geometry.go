@@ -765,6 +765,9 @@ func (g Geometry) PointOnSurface() Point {
 // clockwise orientation and any inner rings in a counter-clockwise
 // orientation. Non-areal geometrys are returned as is.
 func (g Geometry) ForceCW() Geometry {
+	if g.IsCW() {
+		return g
+	}
 	return g.forceOrientation(true)
 }
 
@@ -772,6 +775,9 @@ func (g Geometry) ForceCW() Geometry {
 // counter-clockwise orientation and any inner rings in a clockwise
 // orientation. Non-areal geometrys are returned as is.
 func (g Geometry) ForceCCW() Geometry {
+	if g.IsCCW() {
+		return g
+	}
 	return g.forceOrientation(false)
 }
 

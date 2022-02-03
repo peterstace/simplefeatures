@@ -433,6 +433,9 @@ func (c GeometryCollection) PointOnSurface() Point {
 // exterior rings clockwise and interior rings counter-clockwise). Geometries
 // other that Polygons and MultiPolygons are unchanged.
 func (c GeometryCollection) ForceCW() GeometryCollection {
+	if c.IsCW() {
+		return c
+	}
 	return c.forceOrientation(true)
 }
 
@@ -441,6 +444,9 @@ func (c GeometryCollection) ForceCW() GeometryCollection {
 // exterior rings counter-clockwise and interior rings clockwise). Geometries
 // other that Polygons and MultiPolygons are unchanged.
 func (c GeometryCollection) ForceCCW() GeometryCollection {
+	if c.IsCCW() {
+		return c
+	}
 	return c.forceOrientation(false)
 }
 
