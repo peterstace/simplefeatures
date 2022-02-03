@@ -441,6 +441,8 @@ func BenchmarkForceCWandForceCCWalreadyOrientedCorrectly(b *testing.B) {
 	} {
 		b.Run(strconv.Itoa(i), func(b *testing.B) {
 			g := geomFromWKT(b, tc.wkt)
+
+			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				if tc.isCW {
 					g.ForceCW()
