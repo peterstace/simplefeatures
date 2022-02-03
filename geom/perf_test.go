@@ -423,8 +423,8 @@ func BenchmarkMultiLineStringIsSimpleManyLineStrings(b *testing.B) {
 	}
 }
 
-func BenchmarkForceCWandForceCCW(b *testing.B) {
-	for i, tt := range []struct {
+func BenchmarkForceCWandForceCCWalreadyOrientedCorrectly(b *testing.B) {
+	for i, tc := range []struct {
 		wkt     string
 		geoType GeometryType
 		isCW    bool
@@ -440,12 +440,14 @@ func BenchmarkForceCWandForceCCW(b *testing.B) {
 		{"GEOMETRYCOLLECTION(POLYGON((0 0,0 5,5 5,5 0,0 0)), MULTIPOLYGON(((40 40, 45 30, 20 45, 40 40)),((20 35, 45 20, 30 5, 10 10, 10 30, 20 35),(30 20, 20 25, 20 15, 30 20))))", TypeGeometryCollection, true, false, "all CW"},
 	} {
 		b.Run(strconv.Itoa(i), func(b *testing.B) {
-			g := geomFromWKT(b, tt.wkt)
+			g := geomFromWKT(b, tc.wkt)
 			for i := 0; i < b.N; i++ {
-				g.ForceCW()
-				g.ForceCCW()
+				if tc.isCW {
+					g.ForceCW()
+				} else if tc.isCCW {
+					g.ForceCCW()
+				}
 			}
 		})
 	}
-
 }
