@@ -101,47 +101,47 @@ func (p *TWKBParser) nextGeometry() (Geometry, error) {
 
 	switch p.kind {
 	case twkbTypePoint:
-		if pt, err := p.parsePoint(); err != nil {
+		pt, err := p.parsePoint()
+		if err != nil {
 			return Geometry{}, err
-		} else {
-			return pt.AsGeometry(), nil
 		}
+		return pt.AsGeometry(), nil
 	case twkbTypeLineString:
-		if ls, err := p.parseLineString(); err != nil {
+		ls, err := p.parseLineString()
+		if err != nil {
 			return Geometry{}, err
-		} else {
-			return ls.AsGeometry(), nil
 		}
+		return ls.AsGeometry(), nil
 	case twkbTypePolygon:
-		if poly, err := p.parsePolygon(); err != nil {
+		poly, err := p.parsePolygon()
+		if err != nil {
 			return Geometry{}, err
-		} else {
-			return poly.AsGeometry(), nil
 		}
+		return poly.AsGeometry(), nil
 	case twkbTypeMultiPoint:
-		if mp, err := p.parseMultiPoint(); err != nil {
+		mp, err := p.parseMultiPoint()
+		if err != nil {
 			return Geometry{}, err
-		} else {
-			return mp.AsGeometry(), nil
 		}
+		return mp.AsGeometry(), nil
 	case twkbTypeMultiLineString:
-		if ml, err := p.parseMultiLineString(); err != nil {
+		ml, err := p.parseMultiLineString()
+		if err != nil {
 			return Geometry{}, err
-		} else {
-			return ml.AsGeometry(), nil
 		}
+		return ml.AsGeometry(), nil
 	case twkbTypeMultiPolygon:
-		if mp, err := p.parseMultiPolygon(); err != nil {
+		mp, err := p.parseMultiPolygon()
+		if err != nil {
 			return Geometry{}, err
-		} else {
-			return mp.AsGeometry(), nil
 		}
+		return mp.AsGeometry(), nil
 	case twkbTypeGeometryCollection:
-		if gc, err := p.parseGeometryCollection(); err != nil {
+		gc, err := p.parseGeometryCollection()
+		if err != nil {
 			return Geometry{}, err
-		} else {
-			return gc.AsGeometry(), nil
 		}
+		return gc.AsGeometry(), nil
 	}
 
 	return Geometry{}, p.parserError("cannot unmarshal unsupported geometry type")
