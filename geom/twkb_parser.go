@@ -2,7 +2,6 @@ package geom
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"math"
 )
@@ -11,17 +10,17 @@ import (
 // See spec https://github.com/TWKB/Specification/blob/master/twkb.md
 
 const (
-	TWKB_TypePoint              = 1
-	TWKB_TypeLineString         = 2
-	TWKB_TypePolygon            = 3
-	TWKB_TypeMultiPoint         = 4
-	TWKB_TypeMultiLineString    = 5
-	TWKB_TypeMultiPolygon       = 6
-	TWKB_TypeGeometryCollection = 7
+	twkbTypePoint              = 1
+	twkbTypeLineString         = 2
+	twkbTypePolygon            = 3
+	twkbTypeMultiPoint         = 4
+	twkbTypeMultiLineString    = 5
+	twkbTypeMultiPolygon       = 6
+	twkbTypeGeometryCollection = 7
 )
 
 const (
-	TWKB_MaxDimensions = 4
+	twkbMaxDimensions = 4
 )
 
 // UnmarshalTWKB parses a Tiny Well Known Binary (TWKB), returning the
@@ -48,7 +47,7 @@ type TWKBParser struct {
 	hasM       bool
 	precZ      int
 	precM      int
-	scalings   [TWKB_MaxDimensions]float64
+	scalings   [twkbMaxDimensions]float64
 
 	hasBBox bool
 	hasSize bool
@@ -58,7 +57,7 @@ type TWKBParser struct {
 
 	bbox []int64
 
-	refpoint [TWKB_MaxDimensions]int64
+	refpoint [twkbMaxDimensions]int64
 }
 
 func newTWKBParser(twkb []byte, opts ...ConstructorOption) TWKBParser {
@@ -101,43 +100,43 @@ func (p *TWKBParser) nextGeometry() (Geometry, error) {
 	}
 
 	switch p.kind {
-	case TWKB_TypePoint:
+	case twkbTypePoint:
 		if pt, err := p.parsePoint(); err != nil {
 			return Geometry{}, err
 		} else {
 			return pt.AsGeometry(), nil
 		}
-	case TWKB_TypeLineString:
+	case twkbTypeLineString:
 		if ls, err := p.parseLineString(); err != nil {
 			return Geometry{}, err
 		} else {
 			return ls.AsGeometry(), nil
 		}
-	case TWKB_TypePolygon:
+	case twkbTypePolygon:
 		if poly, err := p.parsePolygon(); err != nil {
 			return Geometry{}, err
 		} else {
 			return poly.AsGeometry(), nil
 		}
-	case TWKB_TypeMultiPoint:
+	case twkbTypeMultiPoint:
 		if mp, err := p.parseMultiPoint(); err != nil {
 			return Geometry{}, err
 		} else {
 			return mp.AsGeometry(), nil
 		}
-	case TWKB_TypeMultiLineString:
+	case twkbTypeMultiLineString:
 		if ml, err := p.parseMultiLineString(); err != nil {
 			return Geometry{}, err
 		} else {
 			return ml.AsGeometry(), nil
 		}
-	case TWKB_TypeMultiPolygon:
+	case twkbTypeMultiPolygon:
 		if mp, err := p.parseMultiPolygon(); err != nil {
 			return Geometry{}, err
 		} else {
 			return mp.AsGeometry(), nil
 		}
-	case TWKB_TypeGeometryCollection:
+	case twkbTypeGeometryCollection:
 		if gc, err := p.parseGeometryCollection(); err != nil {
 			return Geometry{}, err
 		} else {
@@ -520,7 +519,7 @@ func (p *TWKBParser) parseSignedVarint() (int64, error) {
 
 func (p *TWKBParser) parserError(msg string, vals ...interface{}) error {
 	s := fmt.Sprintf("TWKB parser error at byte %d: %s", p.pos, msg)
-	return errors.New(fmt.Sprintf(s, vals...))
+	return fmt.Errorf(s, vals...)
 }
 
 func (p *TWKBParser) annotateError(err error) error {
@@ -530,18 +529,26 @@ func (p *TWKBParser) annotateError(err error) error {
 	return p.parserError(err.Error())
 }
 
+// DecodeZigZagInt32 accepts a uint32 and reverses the zigzag encoding
+// to produce the decoded signed int32 value.
 func DecodeZigZagInt32(z uint32) int32 {
 	return int32(z>>1) ^ -int32(z&1)
 }
 
+// DecodeZigZagInt64 accepts a uint64 and reverses the zigzag encoding
+// to produce the decoded signed int64 value.
 func DecodeZigZagInt64(z uint64) int64 {
 	return int64(z>>1) ^ -int64(z&1)
 }
 
+// EncodeZigZagInt32 accepts a signed int32 and zigzag encodes
+// it to produce an encoded uint32 value.
 func EncodeZigZagInt32(n int32) uint32 {
 	return uint32((n << 1) ^ (n >> 31))
 }
 
+// EncodeZigZagInt64 accepts a signed int64 and zigzag encodes
+// it to produce an encoded uint64 value.
 func EncodeZigZagInt64(n int64) uint64 {
 	return uint64((n << 1) ^ (n >> 63))
 }
