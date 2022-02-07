@@ -283,7 +283,7 @@ func (p *TWKBParser) parseLineString() (LineString, error) {
 }
 
 func (p *TWKBParser) nextLineString() (LineString, error) {
-	coords, err := p.parsePointCountAndArray()
+	coords, _, err := p.parsePointCountAndArray()
 	if err != nil {
 		return LineString{}, err
 	}
@@ -306,27 +306,33 @@ func (p *TWKBParser) nextPolygon() (Polygon, error) {
 
 	var rings []LineString
 	for r := uint64(0); r < numRings; r++ {
-		coords, err := p.parsePointCountAndArray()
+		coords, numPoints, err := p.parsePointCountAndArray()
 		if err != nil {
 			return Polygon{}, err
 		}
-		if len(coords) > 0 {
-			// Append first point to close the ring, as per the spec.
-			// "rings are assumed to be implicitly closed, so the first and
-			//  last point should not be the same"
-			//
-			// Note, the spec is unclear on what to do if the data indicates
-			// the ring is already closed, as seen in one of the example tests:
-			// See "03031b000400040205000004000004030000030500000002020000010100"
-			// from https://github.com/TWKB/twkb.js/blob/master/test/twkb.spec.js
-			// which closes each ring with a 5th point at the point (0,0).
-			// (Note the inner ring also touches the outer ring at that point,
-			// which violates polygon geometry constraints.)
-			//
-			// Currently, closed rings in the input aren't handled;
-			// they seems to violate the spec.
+		if numPoints >= 2 {
+			// The spec says rings may need to be closed:
+			// "rings are assumed to be implicitly closed, so the first
+			//  and last point should not be the same"
+
+			// Note, some implementations can generate TWKB with the rings
+			// already closed. We wish to gracefully parse these cases too.
+			// So determine if the first and final coords differ.
+			finalPointDiffersFromFirst := false
 			for d := 0; d < p.dimensions; d++ {
-				coords = append(coords, coords[0+d])
+				first := coords[0+d]
+				final := coords[(numPoints-1)*p.dimensions+d]
+				if first != final {
+					finalPointDiffersFromFirst = true
+					break
+				}
+			}
+
+			if finalPointDiffersFromFirst {
+				// Append first point again, to close the ring.
+				for d := 0; d < p.dimensions; d++ {
+					coords = append(coords, coords[0+d])
+				}
 			}
 		}
 		ls, err := NewLineString(NewSequence(coords, p.ctype), p.opts...)
@@ -452,13 +458,15 @@ func (p *TWKBParser) nextGeometryCollection() (GeometryCollection, error) {
 
 // Read a number of points then convert that many points from int to float coords.
 // Utilise and update the running memory of the previous reference point.
-func (p *TWKBParser) parsePointCountAndArray() ([]float64, error) {
+// Return the slice of coords, the number of points, and any error.
+func (p *TWKBParser) parsePointCountAndArray() ([]float64, int, error) {
 	numPoints, err := p.parseUnsignedVarint()
 	if err != nil {
-		return nil, p.parserError("cannot unmarshal num points varint malformed")
+		return nil, 0, p.parserError("cannot unmarshal num points varint malformed")
 	}
 
-	return p.parsePointArray(int(numPoints))
+	coords, err := p.parsePointArray(int(numPoints))
+	return coords, int(numPoints), err
 }
 
 // Convert a given number of points from integer to floating point coordinates.
