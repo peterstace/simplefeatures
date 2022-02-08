@@ -62,7 +62,7 @@ func (p *TWKBParser) annotateError(err error) error {
 	if err == nil {
 		return nil
 	}
-	return fmt.Errorf("TWKB parsing error at byte %d: %s", p.pos, err.Error())
+	return fmt.Errorf("TWKB parsing error at byte %d: %w", p.pos, err)
 }
 
 // Parse a geometry and return it, the number of bytes consumed, and any error.
@@ -214,7 +214,7 @@ func (p *TWKBParser) parseSize() error {
 	}
 	bytesRemaining, err := p.parseUnsignedVarint()
 	if err != nil {
-		return fmt.Errorf("size varint malformed: %s", err.Error())
+		return fmt.Errorf("size varint malformed: %w", err)
 	}
 	if uint64(p.pos)+bytesRemaining > uint64(len(p.twkb)) {
 		return fmt.Errorf("remaining input (%d bytes) smaller than size varint indicates (%d bytes)", len(p.twkb)-p.pos, bytesRemaining)
@@ -227,13 +227,13 @@ func (p *TWKBParser) parseBBox() error {
 	for i := 0; i < p.dimensions; i++ {
 		minVal, err := p.parseSignedVarint()
 		if err != nil {
-			return fmt.Errorf("BBox min varint malformed: %s", err.Error())
+			return fmt.Errorf("BBox min varint malformed: %w", err)
 		}
 		p.bbox = append(p.bbox, minVal)
 
 		deltaVal, err := p.parseSignedVarint()
 		if err != nil {
-			return fmt.Errorf("BBox delta varint malformed: %s", err.Error())
+			return fmt.Errorf("BBox delta varint malformed: %w", err)
 		}
 		p.bbox = append(p.bbox, deltaVal)
 	}
@@ -295,7 +295,7 @@ func (p *TWKBParser) parsePolygon() (Polygon, error) {
 func (p *TWKBParser) nextPolygon() (Polygon, error) {
 	numRings, err := p.parseUnsignedVarint()
 	if err != nil {
-		return Polygon{}, fmt.Errorf("num rings varint malformed: %s", err.Error())
+		return Polygon{}, fmt.Errorf("num rings varint malformed: %w", err)
 	}
 
 	var rings []LineString
@@ -348,7 +348,7 @@ func (p *TWKBParser) parseMultiPoint() (MultiPoint, error) {
 func (p *TWKBParser) nextMultiPoint() (MultiPoint, error) {
 	numPoints, err := p.parseUnsignedVarint()
 	if err != nil {
-		return MultiPoint{}, fmt.Errorf("num points varint malformed: %s", err.Error())
+		return MultiPoint{}, fmt.Errorf("num points varint malformed: %w", err)
 	}
 	_, err = p.parseIDList(int(numPoints))
 	if err != nil {
@@ -375,7 +375,7 @@ func (p *TWKBParser) parseMultiLineString() (MultiLineString, error) {
 func (p *TWKBParser) nextMultiLineString() (MultiLineString, error) {
 	numLineStrings, err := p.parseUnsignedVarint()
 	if err != nil {
-		return MultiLineString{}, fmt.Errorf("num linestrings varint malformed: %s", err.Error())
+		return MultiLineString{}, fmt.Errorf("num linestrings varint malformed: %w", err)
 	}
 	_, err = p.parseIDList(int(numLineStrings))
 	if err != nil {
@@ -402,7 +402,7 @@ func (p *TWKBParser) parseMultiPolygon() (MultiPolygon, error) {
 func (p *TWKBParser) nextMultiPolygon() (MultiPolygon, error) {
 	numPolygons, err := p.parseUnsignedVarint()
 	if err != nil {
-		return MultiPolygon{}, fmt.Errorf("num polygons varint malformed: %s", err.Error())
+		return MultiPolygon{}, fmt.Errorf("num polygons varint malformed: %w", err)
 	}
 	_, err = p.parseIDList(int(numPolygons))
 	if err != nil {
@@ -429,7 +429,7 @@ func (p *TWKBParser) parseGeometryCollection() (GeometryCollection, error) {
 func (p *TWKBParser) nextGeometryCollection() (GeometryCollection, error) {
 	numGeoms, err := p.parseUnsignedVarint()
 	if err != nil {
-		return GeometryCollection{}, fmt.Errorf("num polygons varint malformed: %s", err.Error())
+		return GeometryCollection{}, fmt.Errorf("num polygons varint malformed: %w", err)
 	}
 	_, err = p.parseIDList(int(numGeoms))
 	if err != nil {
@@ -455,7 +455,7 @@ func (p *TWKBParser) nextGeometryCollection() (GeometryCollection, error) {
 func (p *TWKBParser) parsePointCountAndArray() ([]float64, int, error) {
 	numPoints, err := p.parseUnsignedVarint()
 	if err != nil {
-		return nil, 0, fmt.Errorf("num points varint malformed: %s", err.Error())
+		return nil, 0, fmt.Errorf("num points varint malformed: %w", err)
 	}
 
 	coords, err := p.parsePointArray(int(numPoints))
@@ -472,7 +472,7 @@ func (p *TWKBParser) parsePointArray(numPoints int) ([]float64, error) {
 		for d := 0; d < p.dimensions; d++ {
 			val, err := p.parseSignedVarint()
 			if err != nil {
-				return nil, fmt.Errorf("point %d of %d coord %d varint malformed: %s", i, numPoints, d, err.Error())
+				return nil, fmt.Errorf("point %d of %d coord %d varint malformed: %w", i, numPoints, d, err)
 			}
 
 			p.refpoint[d] += val // Reverse coord differencing to find the true value.
@@ -491,7 +491,7 @@ func (p *TWKBParser) parseIDList(numIDs int) ([]int, error) {
 	for i := 0; i < numIDs; i++ {
 		id, err := p.parseSignedVarint()
 		if err != nil {
-			return nil, fmt.Errorf("ID list varint %d of %d malformed: %s", i, numIDs, err.Error())
+			return nil, fmt.Errorf("ID list varint %d of %d malformed: %w", i, numIDs, err)
 		}
 		ids = append(ids, int(id))
 	}
