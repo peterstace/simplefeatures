@@ -32,7 +32,7 @@ func TestUnmarshalTWKBValid(t *testing.T) {
 		{"polygon no rings", "030000", "POLYGON EMPTY"},
 		{"polygon unclosed rings", "030002040000060000060500040203000202000001", "POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,1 2,2 2,2 1,1 1))"},
 		{"polygon closed rings", "03000205000006000006050000050502020002020000010100", "POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,1 2,2 2,2 1,1 1))"},
-		{"polygon with size & bbox", "0303170003000302040000060000060500040203000202000001", "POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,1 2,2 2,2 1,1 1))"},
+		{"polygon with size & bbox", "0303170006000602040000060000060500040203000202000001", "POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,1 2,2 2,2 1,1 1))"},
 		{"multipoint lacking data", "0410", "MULTIPOINT EMPTY"},
 		{"multipoint no contents", "040000", "MULTIPOINT EMPTY"},
 		{"multipoint with size & bbox & ids", "04070b0004020402000200020404", "MULTIPOINT(0 1,2 3)"},
