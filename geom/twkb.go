@@ -3,26 +3,30 @@ package geom
 // Tiny Well Known Binary
 // See spec https://github.com/TWKB/Specification/blob/master/twkb.md
 
+type twkbGeometryType int
+
 const (
-	twkbTypePoint              = 1
-	twkbTypeLineString         = 2
-	twkbTypePolygon            = 3
-	twkbTypeMultiPoint         = 4
-	twkbTypeMultiLineString    = 5
-	twkbTypeMultiPolygon       = 6
-	twkbTypeGeometryCollection = 7
+	twkbTypePoint              twkbGeometryType = 1
+	twkbTypeLineString         twkbGeometryType = 2
+	twkbTypePolygon            twkbGeometryType = 3
+	twkbTypeMultiPoint         twkbGeometryType = 4
+	twkbTypeMultiLineString    twkbGeometryType = 5
+	twkbTypeMultiPolygon       twkbGeometryType = 6
+	twkbTypeGeometryCollection twkbGeometryType = 7
 )
 
 const (
 	twkbMaxDimensions = 4
 )
 
+type twkbMetadataHeader int
+
 const (
-	twkbHasBBox    = 1
-	twkbHasSize    = 2
-	twkbHasIDs     = 4
-	twkbHasExtPrec = 8
-	twkbIsEmpty    = 16
+	twkbHasBBox    twkbMetadataHeader = 1
+	twkbHasSize    twkbMetadataHeader = 2
+	twkbHasIDs     twkbMetadataHeader = 4
+	twkbHasExtPrec twkbMetadataHeader = 8
+	twkbIsEmpty    twkbMetadataHeader = 16
 )
 
 // DecodeZigZagInt32 accepts a uint32 and reverses the zigzag encoding

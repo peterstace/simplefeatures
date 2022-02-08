@@ -25,7 +25,7 @@ type TWKBParser struct {
 	pos  int
 	opts []ConstructorOption
 
-	kind  int
+	kind  twkbGeometryType
 	ctype CoordinatesType
 
 	dimensions int
@@ -149,7 +149,7 @@ func (p *TWKBParser) parseTypeAndPrecision() error {
 	typeprec := p.twkb[p.pos]
 	p.pos++
 
-	p.kind = int(typeprec & 0x0f)
+	p.kind = twkbGeometryType(typeprec & 0x0f)
 	p.precXY = int(DecodeZigZagInt32(uint32(typeprec) >> 4))
 
 	p.scalings[0] = math.Pow10(-p.precXY) // X
@@ -161,7 +161,7 @@ func (p *TWKBParser) parseMetadataHeader() error {
 	if len(p.twkb) <= p.pos {
 		return errors.New("lacking metadata header")
 	}
-	metaheader := p.twkb[p.pos]
+	metaheader := twkbMetadataHeader(p.twkb[p.pos])
 	p.pos++
 
 	p.hasBBox = (metaheader & twkbHasBBox) != 0
@@ -221,7 +221,7 @@ func (p *TWKBParser) parseSize() error {
 
 func (p *TWKBParser) parseBBox() error {
 	// Parse the bounding box, but do not otherwise use it.
-	for i := 0; i < p.dimensions; i++ {
+	for d := 0; d < p.dimensions; d++ {
 		minVal, err := p.parseSignedVarint()
 		if err != nil {
 			return fmt.Errorf("BBox min varint malformed: %w", err)
@@ -322,7 +322,7 @@ func (p *TWKBParser) nextPolygon() (Polygon, error) {
 			if finalPointDiffersFromFirst {
 				// Append first point again, to close the ring.
 				for d := 0; d < p.dimensions; d++ {
-					coords = append(coords, coords[0+d])
+					coords = append(coords, coords[d])
 				}
 			}
 		}
@@ -463,7 +463,7 @@ func (p *TWKBParser) parsePointCountAndArray() ([]float64, int, error) {
 // Utilise and update the running memory of the previous reference point.
 // The returned array will contain numPoints * the number of dimensions values.
 func (p *TWKBParser) parsePointArray(numPoints int) ([]float64, error) {
-	var coords = make([]float64, numPoints*p.dimensions)
+	var coords = make([]float64, numPoints*int(p.dimensions))
 	c := 0
 	for i := 0; i < numPoints; i++ {
 		for d := 0; d < p.dimensions; d++ {
