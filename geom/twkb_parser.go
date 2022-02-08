@@ -29,8 +29,7 @@ type TWKBParser struct {
 	ctype CoordinatesType
 
 	dimensions int
-	precX      int
-	precY      int
+	precXY     int
 	hasZ       bool
 	hasM       bool
 	precZ      int
@@ -151,12 +150,10 @@ func (p *TWKBParser) parseTypeAndPrecision() error {
 	p.pos++
 
 	p.kind = int(typeprec & 0x0f)
-	prec := int(DecodeZigZagInt32(uint32(typeprec) >> 4))
-	p.precX = prec
-	p.precY = prec
+	p.precXY = int(DecodeZigZagInt32(uint32(typeprec) >> 4))
 
-	p.scalings[0] = math.Pow10(-p.precX)
-	p.scalings[1] = math.Pow10(-p.precY)
+	p.scalings[0] = math.Pow10(-p.precXY) // X
+	p.scalings[1] = math.Pow10(-p.precXY) // Y
 	return nil
 }
 
