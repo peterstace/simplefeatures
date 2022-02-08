@@ -167,11 +167,11 @@ func (p *TWKBParser) parseMetadataHeader() error {
 	metaheader := p.twkb[p.pos]
 	p.pos++
 
-	p.hasBBox = (metaheader & 1) != 0
-	p.hasSize = (metaheader & 2) != 0
-	p.hasIDs = (metaheader & 4) != 0
-	p.hasExt = (metaheader & 8) != 0
-	p.isEmpty = (metaheader & 16) != 0
+	p.hasBBox = (metaheader & twkbHasBBox) != 0
+	p.hasSize = (metaheader & twkbHasSize) != 0
+	p.hasIDs = (metaheader & twkbHasIDs) != 0
+	p.hasExt = (metaheader & twkbHasExtPrec) != 0
+	p.isEmpty = (metaheader & twkbIsEmpty) != 0
 	return nil
 }
 

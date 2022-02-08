@@ -17,6 +17,14 @@ const (
 	twkbMaxDimensions = 4
 )
 
+const (
+	twkbHasBBox    = 1
+	twkbHasSize    = 2
+	twkbHasIDs     = 4
+	twkbHasExtPrec = 8
+	twkbIsEmpty    = 16
+)
+
 // DecodeZigZagInt32 accepts a uint32 and reverses the zigzag encoding
 // to produce the decoded signed int32 value.
 func DecodeZigZagInt32(z uint32) int32 {
