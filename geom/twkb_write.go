@@ -157,7 +157,7 @@ func (w *TWKBWriter) writePoint(pt Point) error {
 	}
 
 	if pt.IsEmpty() {
-		w.writeMetadataHeader(twkbIsEmpty)
+		w.writeIsEmptyHeader()
 		return nil
 	}
 	w.writeInitialHeaders()
@@ -189,7 +189,7 @@ func (w *TWKBWriter) writeLineString(ls LineString) error {
 	}
 
 	if ls.IsEmpty() {
-		w.writeMetadataHeader(twkbIsEmpty)
+		w.writeIsEmptyHeader()
 		return nil
 	}
 	w.writeInitialHeaders()
@@ -224,7 +224,7 @@ func (w *TWKBWriter) writePolygon(poly Polygon) error {
 	}
 
 	if poly.IsEmpty() {
-		w.writeMetadataHeader(twkbIsEmpty)
+		w.writeIsEmptyHeader()
 		return nil
 	}
 	w.writeInitialHeaders()
@@ -258,7 +258,7 @@ func (w *TWKBWriter) writeMultiPoint(mp MultiPoint) error {
 	}
 
 	if mp.IsEmpty() {
-		w.writeMetadataHeader(twkbIsEmpty)
+		w.writeIsEmptyHeader()
 		return nil
 	}
 	w.writeInitialHeaders()
@@ -285,7 +285,7 @@ func (w *TWKBWriter) writeMultiLineString(ml MultiLineString) error {
 	}
 
 	if ml.IsEmpty() {
-		w.writeMetadataHeader(twkbIsEmpty)
+		w.writeIsEmptyHeader()
 		return nil
 	}
 	w.writeInitialHeaders()
@@ -312,7 +312,7 @@ func (w *TWKBWriter) writeMultiPolygon(mp MultiPolygon) error {
 	}
 
 	if mp.IsEmpty() {
-		w.writeMetadataHeader(twkbIsEmpty)
+		w.writeIsEmptyHeader()
 		return nil
 	}
 	w.writeInitialHeaders()
@@ -339,7 +339,7 @@ func (w *TWKBWriter) writeGeometryCollection(gc GeometryCollection) error {
 	}
 
 	if gc.IsEmpty() {
-		w.writeMetadataHeader(twkbIsEmpty)
+		w.writeIsEmptyHeader()
 		return nil
 	}
 	w.writeInitialHeaders()
@@ -361,7 +361,14 @@ func (w *TWKBWriter) writeGeometryCollection(gc GeometryCollection) error {
 }
 
 func (w *TWKBWriter) writeTypeAndPrecision(kind twkbGeometryType) {
-	w.writeByte(byte(EncodeZigZagInt32(int32(w.precXY))<<4) | byte(kind))
+	w.kind = kind
+	w.writeByte(byte(EncodeZigZagInt32(int32(w.precXY))<<4) | byte(w.kind))
+}
+
+func (w *TWKBWriter) writeIsEmptyHeader() {
+	w.isEmpty = true
+	w.writeMetadataHeader(twkbIsEmpty)
+	// Do not write any extended info, bbox, size, or ids.
 }
 
 func (w *TWKBWriter) writeInitialHeaders() {
@@ -386,6 +393,9 @@ func (w *TWKBWriter) writeInitialHeaders() {
 }
 
 func (w *TWKBWriter) writeMetadataHeader(metaheader twkbMetadataHeader) {
+	if metaheader&twkbIsEmpty != 0 {
+		w.isEmpty = true
+	}
 	w.writeByte(byte(metaheader))
 }
 
