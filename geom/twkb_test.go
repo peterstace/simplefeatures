@@ -58,7 +58,7 @@ func TestUnmarshalTWKBValid(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
-			expectGeomEq(t, g, geomFromWKT(t, tc.wkt))
+			expectGeomEqWKT(t, g, tc.wkt)
 		})
 	}
 }
