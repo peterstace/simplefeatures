@@ -14,8 +14,17 @@ import (
 // corresponding Geometry.
 func UnmarshalTWKB(twkb []byte, opts ...ConstructorOption) (Geometry, error) {
 	p := newTWKBParser(twkb, opts...)
-	geom, err := p.nextGeometry()
-	return geom, p.annotateError(err)
+	g, err := p.nextGeometry()
+	return g, p.annotateError(err)
+}
+
+// UnmarshalTWKBWithHeaders parses a Tiny Well Known Binary (TWKB),
+// returning the corresponding Geometry, and any bounding box and any IDs
+// listed in its header information.
+func UnmarshalTWKBWithHeaders(twkb []byte, opts ...ConstructorOption) (g Geometry, bbox []int64, ids []int64, err error) {
+	p := newTWKBParser(twkb, opts...)
+	g, err = p.nextGeometry()
+	return g, p.bbox, p.idList, p.annotateError(err)
 }
 
 // TWKBParser holds all state information for interpreting TWKB buffers
@@ -42,7 +51,8 @@ type TWKBParser struct {
 	hasExt  bool
 	isEmpty bool
 
-	bbox []int64
+	bbox   []int64
+	idList []int64
 
 	refpoint [twkbMaxDimensions]int64
 }
@@ -66,8 +76,8 @@ func (p *TWKBParser) annotateError(err error) error {
 
 // Parse a geometry and return it, the number of bytes consumed, and any error.
 func (p *TWKBParser) parseGeometry() (Geometry, int, error) {
-	geom, err := p.nextGeometry()
-	return geom, p.pos, err
+	g, err := p.nextGeometry()
+	return g, p.pos, err
 }
 
 // Parse a geometry and return it and any error.
@@ -347,8 +357,7 @@ func (p *TWKBParser) nextMultiPoint() (MultiPoint, error) {
 	if err != nil {
 		return MultiPoint{}, fmt.Errorf("num points varint malformed: %w", err)
 	}
-	_, err = p.parseIDList(int(numPoints))
-	if err != nil {
+	if err := p.parseIDList(int(numPoints)); err != nil {
 		return MultiPoint{}, err
 	}
 	var pts []Point
@@ -374,8 +383,7 @@ func (p *TWKBParser) nextMultiLineString() (MultiLineString, error) {
 	if err != nil {
 		return MultiLineString{}, fmt.Errorf("num linestrings varint malformed: %w", err)
 	}
-	_, err = p.parseIDList(int(numLineStrings))
-	if err != nil {
+	if err := p.parseIDList(int(numLineStrings)); err != nil {
 		return MultiLineString{}, err
 	}
 	var lines []LineString
@@ -401,8 +409,7 @@ func (p *TWKBParser) nextMultiPolygon() (MultiPolygon, error) {
 	if err != nil {
 		return MultiPolygon{}, fmt.Errorf("num polygons varint malformed: %w", err)
 	}
-	_, err = p.parseIDList(int(numPolygons))
-	if err != nil {
+	if err := p.parseIDList(int(numPolygons)); err != nil {
 		return MultiPolygon{}, err
 	}
 	var polys []Polygon
@@ -428,20 +435,19 @@ func (p *TWKBParser) nextGeometryCollection() (GeometryCollection, error) {
 	if err != nil {
 		return GeometryCollection{}, fmt.Errorf("num polygons varint malformed: %w", err)
 	}
-	_, err = p.parseIDList(int(numGeoms))
-	if err != nil {
+	if err := p.parseIDList(int(numGeoms)); err != nil {
 		return GeometryCollection{}, err
 	}
 	var geoms []Geometry
 	for i := 0; i < int(numGeoms); i++ {
 		subParser := newTWKBParser(p.twkb[p.pos:], p.opts...)
-		geom, nbytes, err := subParser.parseGeometry()
+		g, nbytes, err := subParser.parseGeometry()
 		if err != nil {
 			p.pos += nbytes // Add sub-parser's last known position, for error reporting.
 			return GeometryCollection{}, err
 		}
 		p.pos += nbytes // Sub-parser's geometry has been read, so ensure it is skipped.
-		geoms = append(geoms, geom)
+		geoms = append(geoms, g)
 	}
 	return NewGeometryCollection(geoms, p.opts...), nil
 }
@@ -480,19 +486,19 @@ func (p *TWKBParser) parsePointArray(numPoints int) ([]float64, error) {
 	return coords, nil
 }
 
-func (p *TWKBParser) parseIDList(numIDs int) ([]int, error) {
+func (p *TWKBParser) parseIDList(numIDs int) error {
 	if !p.hasIDs {
-		return nil, nil
+		return nil
 	}
-	var ids = make([]int, numIDs)
+	p.idList = make([]int64, numIDs)
 	for i := 0; i < numIDs; i++ {
 		id, err := p.parseSignedVarint()
 		if err != nil {
-			return nil, fmt.Errorf("ID list varint %d of %d malformed: %w", i, numIDs, err)
+			return fmt.Errorf("ID list varint %d of %d malformed: %w", i, numIDs, err)
 		}
-		ids = append(ids, int(id))
+		p.idList[i] = id
 	}
-	return ids, nil
+	return nil
 }
 
 func (p *TWKBParser) parseUnsignedVarint() (uint64, error) {
