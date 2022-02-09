@@ -252,11 +252,40 @@ func TestUnmarshalTWKBValid(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			twkb := hexStringToBytes(t, tc.twkbHex)
 			t.Logf("TWKB (hex): %v", tc.twkbHex)
-			g, err := geom.UnmarshalTWKB(twkb)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
+
+			if !tc.skipDecode {
+				// Decode the TWKB and check its geometry matches the WKT's geometry.
+				g, err := geom.UnmarshalTWKB(twkb)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+				expectGeomEqWKT(t, g, tc.wkt)
+
+				if tc.hasBBox || tc.hasIDList {
+					_, bbox, ids, err := geom.UnmarshalTWKBWithHeaders(twkb)
+					if err != nil {
+						t.Fatalf("unexpected error: %v", err)
+					}
+
+					if len(bbox) != len(tc.listedBBox) {
+						t.Errorf("\ngot:  len(bbox) = %d\nwant: len(bbox) = %d\n", len(bbox), len(tc.listedBBox))
+					}
+					for i := 0; i < len(tc.listedBBox); i++ {
+						if bbox[i] != tc.listedBBox[i] {
+							t.Errorf("\ngot:  bbox[%d] = %d\nwant: bbox[%d] = %d\n", i, bbox[i], i, tc.listedBBox[i])
+						}
+					}
+
+					if len(ids) != len(tc.listedIDs) {
+						t.Errorf("\ngot:  len(ids) = %d\nwant: len(ids) = %d\n", len(ids), len(tc.listedIDs))
+					}
+					for i := 0; i < len(tc.listedIDs); i++ {
+						if ids[i] != tc.listedIDs[i] {
+							t.Errorf("\ngot:  ids[%d] = %d\nwant: ids[%d] = %d\n", i, ids[i], i, tc.listedIDs[i])
+						}
+					}
+				}
 			}
-			expectGeomEqWKT(t, g, tc.wkt)
 		})
 	}
 }
