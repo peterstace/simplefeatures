@@ -6,6 +6,7 @@ import (
 	"math"
 )
 
+// MarshalTWKB accepts a geometry and generates the corresponding TWKB byte slice.
 func MarshalTWKB(geom Geometry,
 	hasZ, hasM bool,
 	precXY, precZ, precM int,
@@ -19,6 +20,8 @@ func MarshalTWKB(geom Geometry,
 	return w.twkb, nil
 }
 
+// TWKBWriter holds all state information needed for generating TWKB data
+// including information such as the last reference point used in coord deltas.
 type TWKBWriter struct {
 	twkb []byte
 
@@ -206,7 +209,7 @@ func (w *TWKBWriter) writeRing(ls LineString) error {
 	coords := ls.Coordinates()
 	numPoints := coords.Length()
 	if !w.closeRings && numPoints >= 2 {
-		numPoints -= 1 // Omit the final point in the ring.
+		numPoints-- // Omit the final point in the ring.
 	}
 	w.writeUnsignedVarint(uint64(numPoints))
 	w.writePointArray(numPoints, coords.floats)
