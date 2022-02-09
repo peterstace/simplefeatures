@@ -1,13 +1,14 @@
 package geom_test
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-func TestUnmarshalTWKBValid(t *testing.T) {
+func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 	for _, tc := range []struct {
 		description, twkbHex, wkt string
 		hasZ, hasM                bool
@@ -284,6 +285,20 @@ func TestUnmarshalTWKBValid(t *testing.T) {
 							t.Errorf("\ngot:  ids[%d] = %d\nwant: ids[%d] = %d\n", i, ids[i], i, tc.listedIDs[i])
 						}
 					}
+				}
+			}
+
+			if !tc.skipEncode {
+				// Encode the WKT's geometry as TWKB and check its bytes match the expected TWKB bytes.
+				g := geomFromWKT(t, tc.wkt)
+				marshaled, err := geom.MarshalTWKB(g,
+					tc.hasZ, tc.hasM, tc.precXY, tc.precZ, tc.precM,
+					tc.hasSize, tc.hasBBox, tc.closeRings, tc.listedIDs)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+				if !bytes.Equal(twkb, marshaled) {
+					t.Errorf("MarshalTWKB %x result differs from expected TWKB %x", marshaled, twkb)
 				}
 			}
 		})
