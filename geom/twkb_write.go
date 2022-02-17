@@ -13,16 +13,16 @@ func MarshalTWKB(geom Geometry,
 	hasSize, hasBBox, closeRings bool,
 	idList []int64,
 ) ([]byte, error) {
-	w := newTWKBWriter(hasZ, hasM, precXY, precZ, precM, hasSize, hasBBox, closeRings, idList)
+	w := newtwkbWriter(hasZ, hasM, precXY, precZ, precM, hasSize, hasBBox, closeRings, idList)
 	if err := w.writeGeometry(geom); err != nil {
 		return nil, err
 	}
 	return w.twkb, nil
 }
 
-// TWKBWriter holds all state information needed for generating TWKB data
+// twkbWriter holds all state information needed for generating TWKB data
 // including information such as the last reference point used in coord deltas.
-type TWKBWriter struct {
+type twkbWriter struct {
 	twkb []byte
 
 	kind  twkbGeometryType
@@ -53,13 +53,13 @@ type TWKBWriter struct {
 	closeRings bool
 }
 
-func newTWKBWriter(
+func newtwkbWriter(
 	hasZ, hasM bool,
 	precXY, precZ, precM int,
 	hasSize, hasBBox, closeRings bool,
 	idList []int64,
-) *TWKBWriter {
-	w := TWKBWriter{
+) *twkbWriter {
+	w := twkbWriter{
 		hasSize:    hasSize,
 		hasBBox:    hasBBox,
 		closeRings: closeRings,
@@ -106,8 +106,8 @@ func newTWKBWriter(
 	return &w
 }
 
-func copyTWKBWriter(other *TWKBWriter) *TWKBWriter {
-	return newTWKBWriter(
+func copytwkbWriter(other *twkbWriter) *twkbWriter {
+	return newtwkbWriter(
 		other.hasZ,       // Assume child has same dimensionality as parent.
 		other.hasM,       // Assume child has same dimensionality as parent.
 		other.precXY,     // Same precision as in parent.
@@ -120,7 +120,7 @@ func copyTWKBWriter(other *TWKBWriter) *TWKBWriter {
 	)
 }
 
-func (w *TWKBWriter) writeGeometry(geom Geometry) error {
+func (w *twkbWriter) writeGeometry(geom Geometry) error {
 	if err := w.writeGeometryByType(geom); err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func (w *TWKBWriter) writeGeometry(geom Geometry) error {
 	return nil
 }
 
-func (w *TWKBWriter) writeGeometryByType(geom Geometry) error {
+func (w *twkbWriter) writeGeometryByType(geom Geometry) error {
 	switch geom.gtype {
 	case TypePoint:
 		return w.writePoint(geom.MustAsPoint())
@@ -149,7 +149,7 @@ func (w *TWKBWriter) writeGeometryByType(geom Geometry) error {
 	}
 }
 
-func (w *TWKBWriter) writePoint(pt Point) error {
+func (w *twkbWriter) writePoint(pt Point) error {
 	w.writeTypeAndPrecision(twkbTypePoint)
 
 	if ctype := pt.CoordinatesType(); ctype != w.ctype {
@@ -165,7 +165,7 @@ func (w *TWKBWriter) writePoint(pt Point) error {
 	return w.writePointCoords(pt)
 }
 
-func (w *TWKBWriter) writePointCoords(pt Point) error {
+func (w *twkbWriter) writePointCoords(pt Point) error {
 	switch pt.CoordinatesType() {
 	case DimXY:
 		w.writePoints(1, pt.coords.XY.X, pt.coords.XY.Y)
@@ -181,7 +181,7 @@ func (w *TWKBWriter) writePointCoords(pt Point) error {
 	return nil
 }
 
-func (w *TWKBWriter) writeLineString(ls LineString) error {
+func (w *twkbWriter) writeLineString(ls LineString) error {
 	w.writeTypeAndPrecision(twkbTypeLineString)
 
 	if ctype := ls.CoordinatesType(); ctype != w.ctype {
@@ -197,7 +197,7 @@ func (w *TWKBWriter) writeLineString(ls LineString) error {
 	return w.writeLineStringCoords(ls)
 }
 
-func (w *TWKBWriter) writeLineStringCoords(ls LineString) error {
+func (w *twkbWriter) writeLineStringCoords(ls LineString) error {
 	coords := ls.Coordinates()
 	numPoints := coords.Length()
 	w.writeUnsignedVarint(uint64(numPoints))
@@ -205,7 +205,7 @@ func (w *TWKBWriter) writeLineStringCoords(ls LineString) error {
 	return nil
 }
 
-func (w *TWKBWriter) writeRing(ls LineString) error {
+func (w *twkbWriter) writeRing(ls LineString) error {
 	coords := ls.Coordinates()
 	numPoints := coords.Length()
 	if !w.closeRings && numPoints >= 2 {
@@ -216,7 +216,7 @@ func (w *TWKBWriter) writeRing(ls LineString) error {
 	return nil
 }
 
-func (w *TWKBWriter) writePolygon(poly Polygon) error {
+func (w *twkbWriter) writePolygon(poly Polygon) error {
 	w.writeTypeAndPrecision(twkbTypePolygon)
 
 	if ctype := poly.CoordinatesType(); ctype != w.ctype {
@@ -232,7 +232,7 @@ func (w *TWKBWriter) writePolygon(poly Polygon) error {
 	return w.writePolygonRings(poly)
 }
 
-func (w *TWKBWriter) writePolygonRings(poly Polygon) error {
+func (w *twkbWriter) writePolygonRings(poly Polygon) error {
 	w.writeUnsignedVarint(uint64(poly.NumRings()))
 
 	if poly.NumRings() == 0 {
@@ -250,7 +250,7 @@ func (w *TWKBWriter) writePolygonRings(poly Polygon) error {
 	return nil
 }
 
-func (w *TWKBWriter) writeMultiPoint(mp MultiPoint) error {
+func (w *twkbWriter) writeMultiPoint(mp MultiPoint) error {
 	w.writeTypeAndPrecision(twkbTypeMultiPoint)
 
 	if ctype := mp.CoordinatesType(); ctype != w.ctype {
@@ -277,7 +277,7 @@ func (w *TWKBWriter) writeMultiPoint(mp MultiPoint) error {
 	return nil
 }
 
-func (w *TWKBWriter) writeMultiLineString(ml MultiLineString) error {
+func (w *twkbWriter) writeMultiLineString(ml MultiLineString) error {
 	w.writeTypeAndPrecision(twkbTypeMultiLineString)
 
 	if ctype := ml.CoordinatesType(); ctype != w.ctype {
@@ -304,7 +304,7 @@ func (w *TWKBWriter) writeMultiLineString(ml MultiLineString) error {
 	return nil
 }
 
-func (w *TWKBWriter) writeMultiPolygon(mp MultiPolygon) error {
+func (w *twkbWriter) writeMultiPolygon(mp MultiPolygon) error {
 	w.writeTypeAndPrecision(twkbTypeMultiPolygon)
 
 	if ctype := mp.CoordinatesType(); ctype != w.ctype {
@@ -331,7 +331,7 @@ func (w *TWKBWriter) writeMultiPolygon(mp MultiPolygon) error {
 	return nil
 }
 
-func (w *TWKBWriter) writeGeometryCollection(gc GeometryCollection) error {
+func (w *twkbWriter) writeGeometryCollection(gc GeometryCollection) error {
 	w.writeTypeAndPrecision(twkbTypeGeometryCollection)
 
 	if ctype := gc.CoordinatesType(); ctype != w.ctype {
@@ -352,7 +352,7 @@ func (w *TWKBWriter) writeGeometryCollection(gc GeometryCollection) error {
 	}
 
 	for i := 0; i < numGeometries; i++ {
-		subWriter := copyTWKBWriter(w)
+		subWriter := copytwkbWriter(w)
 		geom := gc.GeometryN(i)
 		subWriter.writeGeometry(geom)
 		w.twkb = append(w.twkb, subWriter.twkb...)
@@ -360,18 +360,18 @@ func (w *TWKBWriter) writeGeometryCollection(gc GeometryCollection) error {
 	return nil
 }
 
-func (w *TWKBWriter) writeTypeAndPrecision(kind twkbGeometryType) {
+func (w *twkbWriter) writeTypeAndPrecision(kind twkbGeometryType) {
 	w.kind = kind
 	w.writeByte(byte(EncodeZigZagInt32(int32(w.precXY))<<4) | byte(w.kind))
 }
 
-func (w *TWKBWriter) writeIsEmptyHeader() {
+func (w *twkbWriter) writeIsEmptyHeader() {
 	w.isEmpty = true
 	w.writeMetadataHeader(twkbIsEmpty)
 	// Do not write any extended info, bbox, size, or ids.
 }
 
-func (w *TWKBWriter) writeInitialHeaders() {
+func (w *twkbWriter) writeInitialHeaders() {
 	var metaheader twkbMetadataHeader
 	if w.hasExt {
 		metaheader |= twkbHasExtPrec
@@ -392,14 +392,14 @@ func (w *TWKBWriter) writeInitialHeaders() {
 	}
 }
 
-func (w *TWKBWriter) writeMetadataHeader(metaheader twkbMetadataHeader) {
+func (w *twkbWriter) writeMetadataHeader(metaheader twkbMetadataHeader) {
 	if metaheader&twkbIsEmpty != 0 {
 		w.isEmpty = true
 	}
 	w.writeByte(byte(metaheader))
 }
 
-func (w *TWKBWriter) writeExtendedPrecision() {
+func (w *twkbWriter) writeExtendedPrecision() {
 	var ext byte
 	if w.hasZ {
 		ext |= 0x01
@@ -412,14 +412,14 @@ func (w *TWKBWriter) writeExtendedPrecision() {
 	w.writeByte(ext)
 }
 
-func (w *TWKBWriter) writePoints(numPoints int, coords ...float64) {
+func (w *twkbWriter) writePoints(numPoints int, coords ...float64) {
 	w.writePointArray(numPoints, coords)
 }
 
 // Convert a given number of points from floating point to integer coordinates.
 // Utilise and update the running memory of the previous reference point.
 // The input coords must contain numPoints * the number of dimensions values.
-func (w *TWKBWriter) writePointArray(numPoints int, coords []float64) {
+func (w *twkbWriter) writePointArray(numPoints int, coords []float64) {
 	var buf [binary.MaxVarintLen64]byte
 	c := 0
 	for i := 0; i < numPoints; i++ {
@@ -449,7 +449,7 @@ func (w *TWKBWriter) writePointArray(numPoints int, coords []float64) {
 	}
 }
 
-func (w *TWKBWriter) writeAdditionalHeaders() {
+func (w *twkbWriter) writeAdditionalHeaders() {
 	// These are written in this order so that the size of the
 	// bbox is included in the size computation.
 	if w.hasBBox {
@@ -460,7 +460,7 @@ func (w *TWKBWriter) writeAdditionalHeaders() {
 	}
 }
 
-func (w *TWKBWriter) writeBBox() {
+func (w *twkbWriter) writeBBox() {
 	// Store bbox min and delta for each dimension.
 	var buf [twkbMaxDimensions * 2 * binary.MaxVarintLen64]byte
 	n := 0
@@ -481,7 +481,7 @@ func (w *TWKBWriter) writeBBox() {
 	w.twkb = temp
 }
 
-func (w *TWKBWriter) writeSize() {
+func (w *twkbWriter) writeSize() {
 	// Compute where to store the size data.
 	start := 2
 	if w.hasExt {
@@ -503,7 +503,7 @@ func (w *TWKBWriter) writeSize() {
 	w.twkb = temp
 }
 
-func (w *TWKBWriter) writeIDList(num int) error {
+func (w *twkbWriter) writeIDList(num int) error {
 	if !w.hasIDs {
 		return nil
 	}
@@ -516,20 +516,20 @@ func (w *TWKBWriter) writeIDList(num int) error {
 	return nil
 }
 
-func (w *TWKBWriter) writeSignedVarint(val int64) int {
+func (w *twkbWriter) writeSignedVarint(val int64) int {
 	var buf [binary.MaxVarintLen64]byte
 	n := binary.PutVarint(buf[:], val)
 	w.twkb = append(w.twkb, buf[:n]...)
 	return n
 }
 
-func (w *TWKBWriter) writeUnsignedVarint(val uint64) int {
+func (w *twkbWriter) writeUnsignedVarint(val uint64) int {
 	var buf [binary.MaxVarintLen64]byte
 	n := binary.PutUvarint(buf[:], val)
 	w.twkb = append(w.twkb, buf[:n]...)
 	return n
 }
 
-func (w *TWKBWriter) writeByte(b byte) {
+func (w *twkbWriter) writeByte(b byte) {
 	w.twkb = append(w.twkb, b)
 }

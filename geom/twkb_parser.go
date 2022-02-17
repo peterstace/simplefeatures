@@ -13,7 +13,7 @@ import (
 // UnmarshalTWKB parses a Tiny Well Known Binary (TWKB), returning the
 // corresponding Geometry.
 func UnmarshalTWKB(twkb []byte, opts ...ConstructorOption) (Geometry, error) {
-	p := newTWKBParser(twkb, opts...)
+	p := newtwkbParser(twkb, opts...)
 	g, err := p.nextGeometry()
 	return g, p.annotateError(err)
 }
@@ -22,14 +22,14 @@ func UnmarshalTWKB(twkb []byte, opts ...ConstructorOption) (Geometry, error) {
 // returning the corresponding Geometry, and any bounding box and any IDs
 // listed in its header information.
 func UnmarshalTWKBWithHeaders(twkb []byte, opts ...ConstructorOption) (g Geometry, bbox []int64, ids []int64, err error) {
-	p := newTWKBParser(twkb, opts...)
+	p := newtwkbParser(twkb, opts...)
 	g, err = p.nextGeometry()
 	return g, p.bbox, p.idList, p.annotateError(err)
 }
 
-// TWKBParser holds all state information for interpreting TWKB buffers
+// twkbParser holds all state information for interpreting TWKB buffers
 // including information such as the last reference point used in coord deltas.
-type TWKBParser struct {
+type twkbParser struct {
 	twkb []byte
 	pos  int
 	opts []ConstructorOption
@@ -57,8 +57,8 @@ type TWKBParser struct {
 	refpoint [twkbMaxDimensions]int64
 }
 
-func newTWKBParser(twkb []byte, opts ...ConstructorOption) TWKBParser {
-	return TWKBParser{
+func newtwkbParser(twkb []byte, opts ...ConstructorOption) twkbParser {
+	return twkbParser{
 		twkb:       twkb,
 		opts:       opts,
 		ctype:      DimXY,
@@ -67,7 +67,7 @@ func newTWKBParser(twkb []byte, opts ...ConstructorOption) TWKBParser {
 }
 
 // Annotate an error message with the byte offset where it happened.
-func (p *TWKBParser) annotateError(err error) error {
+func (p *twkbParser) annotateError(err error) error {
 	if err == nil {
 		return nil
 	}
@@ -75,13 +75,13 @@ func (p *TWKBParser) annotateError(err error) error {
 }
 
 // Parse a geometry and return it, the number of bytes consumed, and any error.
-func (p *TWKBParser) parseGeometry() (Geometry, int, error) {
+func (p *twkbParser) parseGeometry() (Geometry, int, error) {
 	g, err := p.nextGeometry()
 	return g, p.pos, err
 }
 
 // Parse a geometry and return it and any error.
-func (p *TWKBParser) nextGeometry() (Geometry, error) {
+func (p *twkbParser) nextGeometry() (Geometry, error) {
 	if err := p.parseTypeAndPrecision(); err != nil {
 		return Geometry{}, err
 	}
@@ -152,7 +152,7 @@ func (p *TWKBParser) nextGeometry() (Geometry, error) {
 	return Geometry{}, fmt.Errorf("unsupported geometry type %d", p.kind)
 }
 
-func (p *TWKBParser) parseTypeAndPrecision() error {
+func (p *twkbParser) parseTypeAndPrecision() error {
 	if len(p.twkb) <= p.pos {
 		return errors.New("empty buffer")
 	}
@@ -167,7 +167,7 @@ func (p *TWKBParser) parseTypeAndPrecision() error {
 	return nil
 }
 
-func (p *TWKBParser) parseMetadataHeader() error {
+func (p *twkbParser) parseMetadataHeader() error {
 	if len(p.twkb) <= p.pos {
 		return errors.New("lacking metadata header")
 	}
@@ -182,7 +182,7 @@ func (p *TWKBParser) parseMetadataHeader() error {
 	return nil
 }
 
-func (p *TWKBParser) parseExtendedPrecision() error {
+func (p *twkbParser) parseExtendedPrecision() error {
 	if len(p.twkb) <= p.pos {
 		return errors.New("lacking extended pecision byte")
 	}
@@ -215,7 +215,7 @@ func (p *TWKBParser) parseExtendedPrecision() error {
 	return nil
 }
 
-func (p *TWKBParser) parseSize() error {
+func (p *twkbParser) parseSize() error {
 	if len(p.twkb) <= p.pos {
 		return errors.New("lacking size varint")
 	}
@@ -229,7 +229,7 @@ func (p *TWKBParser) parseSize() error {
 	return nil
 }
 
-func (p *TWKBParser) parseBBox() error {
+func (p *twkbParser) parseBBox() error {
 	// Parse the bounding box, but do not otherwise use it.
 	for d := 0; d < p.dimensions; d++ {
 		minVal, err := p.parseSignedVarint()
@@ -247,14 +247,14 @@ func (p *TWKBParser) parseBBox() error {
 	return nil
 }
 
-func (p *TWKBParser) parsePoint() (Point, error) {
+func (p *twkbParser) parsePoint() (Point, error) {
 	if p.isEmpty {
 		return NewEmptyPoint(p.ctype), nil
 	}
 	return p.nextPoint()
 }
 
-func (p *TWKBParser) nextPoint() (Point, error) {
+func (p *twkbParser) nextPoint() (Point, error) {
 	var c Coordinates
 	c.Type = p.ctype
 
@@ -277,14 +277,14 @@ func (p *TWKBParser) nextPoint() (Point, error) {
 	return NewPoint(c, p.opts...)
 }
 
-func (p *TWKBParser) parseLineString() (LineString, error) {
+func (p *twkbParser) parseLineString() (LineString, error) {
 	if p.isEmpty {
 		return NewLineString(NewSequence(nil, p.ctype), p.opts...)
 	}
 	return p.nextLineString()
 }
 
-func (p *TWKBParser) nextLineString() (LineString, error) {
+func (p *twkbParser) nextLineString() (LineString, error) {
 	coords, _, err := p.parsePointCountAndArray()
 	if err != nil {
 		return LineString{}, err
@@ -292,14 +292,14 @@ func (p *TWKBParser) nextLineString() (LineString, error) {
 	return NewLineString(NewSequence(coords, p.ctype), p.opts...)
 }
 
-func (p *TWKBParser) parsePolygon() (Polygon, error) {
+func (p *twkbParser) parsePolygon() (Polygon, error) {
 	if p.isEmpty {
 		return NewPolygon(nil, p.opts...)
 	}
 	return p.nextPolygon()
 }
 
-func (p *TWKBParser) nextPolygon() (Polygon, error) {
+func (p *twkbParser) nextPolygon() (Polygon, error) {
 	numRings, err := p.parseUnsignedVarint()
 	if err != nil {
 		return Polygon{}, fmt.Errorf("num rings varint malformed: %w", err)
@@ -345,14 +345,14 @@ func (p *TWKBParser) nextPolygon() (Polygon, error) {
 	return NewPolygon(rings, p.opts...)
 }
 
-func (p *TWKBParser) parseMultiPoint() (MultiPoint, error) {
+func (p *twkbParser) parseMultiPoint() (MultiPoint, error) {
 	if p.isEmpty {
 		return NewMultiPoint(nil, p.opts...), nil
 	}
 	return p.nextMultiPoint()
 }
 
-func (p *TWKBParser) nextMultiPoint() (MultiPoint, error) {
+func (p *twkbParser) nextMultiPoint() (MultiPoint, error) {
 	numPoints, err := p.parseUnsignedVarint()
 	if err != nil {
 		return MultiPoint{}, fmt.Errorf("num points varint malformed: %w", err)
@@ -371,14 +371,14 @@ func (p *TWKBParser) nextMultiPoint() (MultiPoint, error) {
 	return NewMultiPoint(pts, p.opts...), nil
 }
 
-func (p *TWKBParser) parseMultiLineString() (MultiLineString, error) {
+func (p *twkbParser) parseMultiLineString() (MultiLineString, error) {
 	if p.isEmpty {
 		return NewMultiLineString(nil, p.opts...), nil
 	}
 	return p.nextMultiLineString()
 }
 
-func (p *TWKBParser) nextMultiLineString() (MultiLineString, error) {
+func (p *twkbParser) nextMultiLineString() (MultiLineString, error) {
 	numLineStrings, err := p.parseUnsignedVarint()
 	if err != nil {
 		return MultiLineString{}, fmt.Errorf("num linestrings varint malformed: %w", err)
@@ -397,14 +397,14 @@ func (p *TWKBParser) nextMultiLineString() (MultiLineString, error) {
 	return NewMultiLineString(lines, p.opts...), nil
 }
 
-func (p *TWKBParser) parseMultiPolygon() (MultiPolygon, error) {
+func (p *twkbParser) parseMultiPolygon() (MultiPolygon, error) {
 	if p.isEmpty {
 		return NewMultiPolygon(nil, p.opts...)
 	}
 	return p.nextMultiPolygon()
 }
 
-func (p *TWKBParser) nextMultiPolygon() (MultiPolygon, error) {
+func (p *twkbParser) nextMultiPolygon() (MultiPolygon, error) {
 	numPolygons, err := p.parseUnsignedVarint()
 	if err != nil {
 		return MultiPolygon{}, fmt.Errorf("num polygons varint malformed: %w", err)
@@ -423,14 +423,14 @@ func (p *TWKBParser) nextMultiPolygon() (MultiPolygon, error) {
 	return NewMultiPolygon(polys, p.opts...)
 }
 
-func (p *TWKBParser) parseGeometryCollection() (GeometryCollection, error) {
+func (p *twkbParser) parseGeometryCollection() (GeometryCollection, error) {
 	if p.isEmpty {
 		return NewGeometryCollection(nil, p.opts...), nil
 	}
 	return p.nextGeometryCollection()
 }
 
-func (p *TWKBParser) nextGeometryCollection() (GeometryCollection, error) {
+func (p *twkbParser) nextGeometryCollection() (GeometryCollection, error) {
 	numGeoms, err := p.parseUnsignedVarint()
 	if err != nil {
 		return GeometryCollection{}, fmt.Errorf("num polygons varint malformed: %w", err)
@@ -440,7 +440,7 @@ func (p *TWKBParser) nextGeometryCollection() (GeometryCollection, error) {
 	}
 	var geoms []Geometry
 	for i := 0; i < int(numGeoms); i++ {
-		subParser := newTWKBParser(p.twkb[p.pos:], p.opts...)
+		subParser := newtwkbParser(p.twkb[p.pos:], p.opts...)
 		g, nbytes, err := subParser.parseGeometry()
 		if err != nil {
 			p.pos += nbytes // Add sub-parser's last known position, for error reporting.
@@ -455,7 +455,7 @@ func (p *TWKBParser) nextGeometryCollection() (GeometryCollection, error) {
 // Read a number of points then convert that many points from int to float coords.
 // Utilise and update the running memory of the previous reference point.
 // Return the slice of coords, the number of points, and any error.
-func (p *TWKBParser) parsePointCountAndArray() ([]float64, int, error) {
+func (p *twkbParser) parsePointCountAndArray() ([]float64, int, error) {
 	numPoints, err := p.parseUnsignedVarint()
 	if err != nil {
 		return nil, 0, fmt.Errorf("num points varint malformed: %w", err)
@@ -468,7 +468,7 @@ func (p *TWKBParser) parsePointCountAndArray() ([]float64, int, error) {
 // Convert a given number of points from integer to floating point coordinates.
 // Utilise and update the running memory of the previous reference point.
 // The returned array will contain numPoints * the number of dimensions values.
-func (p *TWKBParser) parsePointArray(numPoints int) ([]float64, error) {
+func (p *twkbParser) parsePointArray(numPoints int) ([]float64, error) {
 	var coords = make([]float64, numPoints*int(p.dimensions))
 	c := 0
 	for i := 0; i < numPoints; i++ {
@@ -486,7 +486,7 @@ func (p *TWKBParser) parsePointArray(numPoints int) ([]float64, error) {
 	return coords, nil
 }
 
-func (p *TWKBParser) parseIDList(numIDs int) error {
+func (p *twkbParser) parseIDList(numIDs int) error {
 	if !p.hasIDs {
 		return nil
 	}
@@ -501,7 +501,7 @@ func (p *TWKBParser) parseIDList(numIDs int) error {
 	return nil
 }
 
-func (p *TWKBParser) parseUnsignedVarint() (uint64, error) {
+func (p *twkbParser) parseUnsignedVarint() (uint64, error) {
 	// LEB128.
 	val, n := binary.Uvarint(p.twkb[p.pos:])
 	if n == 0 {
@@ -514,7 +514,7 @@ func (p *TWKBParser) parseUnsignedVarint() (uint64, error) {
 	return val, nil
 }
 
-func (p *TWKBParser) parseSignedVarint() (int64, error) {
+func (p *twkbParser) parseSignedVarint() (int64, error) {
 	// LEB128 Zig-Zag encoded.
 	val, n := binary.Varint(p.twkb[p.pos:])
 	if n == 0 {
