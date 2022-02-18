@@ -3,12 +3,14 @@ package geom_test
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestTWKBUnmarshalMarshalValid(t *testing.T) {
+	sql := ""
 	for _, tc := range []struct {
 		description, twkbHex, wkt string
 		hasZ, hasM                bool
@@ -52,25 +54,25 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 			hasM:        true,
 		},
 		{
-			description: "point with prec -1",
+			description: "point with prec xy -1",
 			twkbHex:     "11000204",
 			wkt:         "POINT(10 20)",
 			precXY:      -1,
 		},
 		{
-			description: "point with prec 1",
+			description: "point with prec xy 1",
 			twkbHex:     "21000204",
 			wkt:         "POINT(0.1 0.2)",
 			precXY:      1,
 		},
 		{
-			description: "point with prec -2",
+			description: "point with prec xy -2",
 			twkbHex:     "31000204",
 			wkt:         "POINT(100 200)",
 			precXY:      -2,
 		},
 		{
-			description: "point with prec 2",
+			description: "point with prec xy 2",
 			twkbHex:     "41000204",
 			wkt:         "POINT(0.01 0.02)",
 			precXY:      2,
@@ -98,28 +100,28 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 			hasZ:        true,
 		},
 		{
-			description: "line string z with prec -1 & prec z 1",
-			twkbHex:     "12080902020202080808",
+			description: "line string z with prec xy -1 & prec z 1",
+			twkbHex:     "12080502020202080808",
 			wkt:         "LINESTRING Z(10 10 0.1,50 50 0.5)",
 			hasZ:        true,
 			precXY:      -1,
 			precZ:       1,
 		},
 		{
-			description: "line string z with prec 1 & prec z -2",
-			twkbHex:     "22080d02020202080808",
-			wkt:         "LINESTRING Z(0.1 0.1 100,0.5 0.5 500)",
+			description: "line string z with prec xy 1 & prec z 2",
+			twkbHex:     "22080902020202080808",
+			wkt:         "LINESTRING Z(0.1 0.1 0.01,0.5 0.5 0.05)",
 			hasZ:        true,
 			precXY:      1,
-			precZ:       -2,
+			precZ:       2,
 		},
 		{
-			description: "line string m with prec 2 & prec m -3",
-			twkbHex:     "4208a202020202080808",
-			wkt:         "LINESTRING M(0.01 0.01 1000,0.05 0.05 5000)",
+			description: "line string m with prec xy 2 & prec m 3",
+			twkbHex:     "42086202020202080808",
+			wkt:         "LINESTRING M(0.01 0.01 0.001,0.05 0.05 0.005)",
 			hasM:        true,
 			precXY:      2,
-			precM:       -3,
+			precM:       3,
 		},
 		{
 			description: "polygon lacking data",
@@ -254,6 +256,8 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 			twkb := hexStringToBytes(t, tc.twkbHex)
 			t.Logf("TWKB (hex): %v", tc.twkbHex)
 
+			sql += "/* " + tc.description + " */\n"
+
 			if !tc.skipDecode {
 				// Decode the TWKB and check its geometry matches the WKT's geometry.
 				g, err := geom.UnmarshalTWKB(twkb)
@@ -286,6 +290,8 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 						}
 					}
 				}
+
+				sql += fmt.Sprintf("select ST_AsText(ST_GeomFromTWKB(E'\\\\x%s'));\n", tc.twkbHex)
 			}
 
 			if !tc.skipEncode {
@@ -300,9 +306,14 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 				if !bytes.Equal(twkb, marshaled) {
 					t.Errorf("MarshalTWKB %x result differs from expected TWKB %x", marshaled, twkb)
 				}
+
+				sql += fmt.Sprintf("select ST_AsTWKB('%s'::geometry);\n", tc.wkt)
 			}
+			sql += "\n"
 		})
 	}
+
+	ioutil.WriteFile("twkb_sql.txt", []byte(sql), 0o644)
 }
 
 func TestZigZagInt(t *testing.T) {

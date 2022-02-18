@@ -13,6 +13,15 @@ func MarshalTWKB(geom Geometry,
 	hasSize, hasBBox, closeRings bool,
 	idList []int64,
 ) ([]byte, error) {
+	if precXY < -8 || precXY > 7 {
+		return []byte{}, fmt.Errorf("TWKB got precXY = %d, expected it to be between -8 and +7", precXY)
+	}
+	if precZ < 0 || precM > 7 {
+		return []byte{}, fmt.Errorf("TWKB got precZ = %d, expected it to be between -8 and +7", precZ)
+	}
+	if precM < 0 || precM > 7 {
+		return []byte{}, fmt.Errorf("TWKB got precM = %d, expected it to be between -8 and +7", precM)
+	}
 	w := newtwkbWriter(hasZ, hasM, precXY, precZ, precM, hasSize, hasBBox, closeRings, idList)
 	if err := w.writeGeometry(geom); err != nil {
 		return nil, fmt.Errorf("failed to marshal TWKB: %w", err)
@@ -414,11 +423,11 @@ func (w *twkbWriter) writeExtendedPrecision() {
 	var ext byte
 	if w.hasZ {
 		ext |= 0x01
-		ext |= byte(EncodeZigZagInt32(int32(w.precZ)) << 2)
+		ext |= byte(w.precZ << 2)
 	}
 	if w.hasM {
 		ext |= 0x02
-		ext |= byte(EncodeZigZagInt32(int32(w.precM)) << 5)
+		ext |= byte(w.precM << 5)
 	}
 	w.writeHeaderByte(ext)
 }

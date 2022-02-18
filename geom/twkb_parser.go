@@ -192,11 +192,11 @@ func (p *twkbParser) parseExtendedPrecision() error {
 	p.ctype = DimXY
 	if extprec&1 != 0 {
 		p.hasZ = true
-		p.precZ = int(DecodeZigZagInt32(uint32(extprec>>2) & 0x07))
+		p.precZ = int(extprec >> 2 & 0x07)
 	}
 	if extprec&2 != 0 {
 		p.hasM = true
-		p.precM = int(DecodeZigZagInt32(uint32(extprec>>5) & 0x07))
+		p.precM = int(extprec >> 5 & 0x07)
 	}
 	if p.hasZ && p.hasM {
 		p.ctype = DimXYZM
