@@ -3,14 +3,12 @@ package geom_test
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestTWKBUnmarshalMarshalValid(t *testing.T) {
-	sql := ""
 	for _, tc := range []struct {
 		description, twkbHex, wkt string
 		hasZ, hasM                bool
@@ -256,8 +254,6 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 			twkb := hexStringToBytes(t, tc.twkbHex)
 			t.Logf("TWKB (hex): %v", tc.twkbHex)
 
-			sql += "/* " + tc.description + " */\n"
-
 			if !tc.skipDecode {
 				// Decode the TWKB and check its geometry matches the WKT's geometry.
 				g, err := geom.UnmarshalTWKB(twkb)
@@ -290,8 +286,6 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 						}
 					}
 				}
-
-				sql += fmt.Sprintf("select ST_AsText(ST_GeomFromTWKB(E'\\\\x%s'));\n", tc.twkbHex)
 			}
 
 			if !tc.skipEncode {
@@ -306,14 +300,9 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 				if !bytes.Equal(twkb, marshaled) {
 					t.Errorf("MarshalTWKB %x result differs from expected TWKB %x", marshaled, twkb)
 				}
-
-				sql += fmt.Sprintf("select ST_AsTWKB('%s'::geometry);\n", tc.wkt)
 			}
-			sql += "\n"
 		})
 	}
-
-	ioutil.WriteFile("twkb_sql.txt", []byte(sql), 0o644)
 }
 
 func TestZigZagInt(t *testing.T) {
