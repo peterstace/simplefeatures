@@ -15,7 +15,7 @@ func MarshalTWKB(geom Geometry,
 ) ([]byte, error) {
 	w := newtwkbWriter(hasZ, hasM, precXY, precZ, precM, hasSize, hasBBox, closeRings, idList)
 	if err := w.writeGeometry(geom); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to marshal TWKB: %w", err)
 	}
 	return w.twkb, nil
 }
@@ -94,9 +94,7 @@ func newtwkbWriter(
 		w.ctype = DimXY
 	}
 
-	if hasZ || hasM {
-		w.hasExt = true
-	}
+	w.hasExt = hasZ || hasM
 
 	if len(idList) > 0 {
 		w.hasIDs = true
@@ -145,7 +143,7 @@ func (w *twkbWriter) writeGeometryByType(geom Geometry) error {
 	case TypeGeometryCollection:
 		return w.writeGeometryCollection(geom.MustAsGeometryCollection())
 	default:
-		return fmt.Errorf("geometry has unsupported type %s", geom.gtype)
+		return fmt.Errorf("geometry has unsupported type: %q", geom.gtype)
 	}
 }
 
@@ -153,7 +151,7 @@ func (w *twkbWriter) writePoint(pt Point) error {
 	w.writeTypeAndPrecision(twkbTypePoint)
 
 	if ctype := pt.CoordinatesType(); ctype != w.ctype {
-		return fmt.Errorf("mismatched coordinate dimensions got %s expected %s", ctype, w.ctype)
+		return fmt.Errorf("mismatched Point coordinate dimensions got %s expected %s", ctype, w.ctype)
 	}
 
 	if pt.IsEmpty() {
@@ -185,7 +183,7 @@ func (w *twkbWriter) writeLineString(ls LineString) error {
 	w.writeTypeAndPrecision(twkbTypeLineString)
 
 	if ctype := ls.CoordinatesType(); ctype != w.ctype {
-		return fmt.Errorf("mismatched coordinate dimensions got %s expected %s", ctype, w.ctype)
+		return fmt.Errorf("mismatched LineString coordinate dimensions got %s expected %s", ctype, w.ctype)
 	}
 
 	if ls.IsEmpty() {
@@ -220,7 +218,7 @@ func (w *twkbWriter) writePolygon(poly Polygon) error {
 	w.writeTypeAndPrecision(twkbTypePolygon)
 
 	if ctype := poly.CoordinatesType(); ctype != w.ctype {
-		return fmt.Errorf("mismatched coordinate dimensions got %s expected %s", ctype, w.ctype)
+		return fmt.Errorf("mismatched Polygon coordinate dimensions got %s expected %s", ctype, w.ctype)
 	}
 
 	if poly.IsEmpty() {
@@ -254,7 +252,7 @@ func (w *twkbWriter) writeMultiPoint(mp MultiPoint) error {
 	w.writeTypeAndPrecision(twkbTypeMultiPoint)
 
 	if ctype := mp.CoordinatesType(); ctype != w.ctype {
-		return fmt.Errorf("mismatched coordinate dimensions got %s expected %s", ctype, w.ctype)
+		return fmt.Errorf("mismatched MultiPoint coordinate dimensions got %s expected %s", ctype, w.ctype)
 	}
 
 	if mp.IsEmpty() {
@@ -281,7 +279,7 @@ func (w *twkbWriter) writeMultiLineString(ml MultiLineString) error {
 	w.writeTypeAndPrecision(twkbTypeMultiLineString)
 
 	if ctype := ml.CoordinatesType(); ctype != w.ctype {
-		return fmt.Errorf("mismatched coordinate dimensions got %s expected %s", ctype, w.ctype)
+		return fmt.Errorf("mismatched MultiLineString coordinate dimensions got %s expected %s", ctype, w.ctype)
 	}
 
 	if ml.IsEmpty() {
@@ -308,7 +306,7 @@ func (w *twkbWriter) writeMultiPolygon(mp MultiPolygon) error {
 	w.writeTypeAndPrecision(twkbTypeMultiPolygon)
 
 	if ctype := mp.CoordinatesType(); ctype != w.ctype {
-		return fmt.Errorf("mismatched coordinate dimensions got %s expected %s", ctype, w.ctype)
+		return fmt.Errorf("mismatched MultiPolygon coordinate dimensions got %s expected %s", ctype, w.ctype)
 	}
 
 	if mp.IsEmpty() {
@@ -335,7 +333,7 @@ func (w *twkbWriter) writeGeometryCollection(gc GeometryCollection) error {
 	w.writeTypeAndPrecision(twkbTypeGeometryCollection)
 
 	if ctype := gc.CoordinatesType(); ctype != w.ctype {
-		return fmt.Errorf("mismatched coordinate dimensions got %s expected %s", ctype, w.ctype)
+		return fmt.Errorf("mismatched GeometryCollection coordinate dimensions got %s expected %s", ctype, w.ctype)
 	}
 
 	if gc.IsEmpty() {
@@ -367,8 +365,10 @@ func (w *twkbWriter) writeTypeAndPrecision(kind twkbGeometryType) {
 
 func (w *twkbWriter) writeIsEmptyHeader() {
 	w.isEmpty = true
+	// Because this is an empty object, we only need to write the "is empty" bit.
+	// In particular, we do not write any extended info, size, bbox, or ids,
+	// even if those were available or requested.
 	w.writeMetadataHeader(twkbIsEmpty)
-	// Do not write any extended info, bbox, size, or ids.
 }
 
 func (w *twkbWriter) writeInitialHeaders() {
@@ -443,7 +443,8 @@ func (w *twkbWriter) writePointArray(numPoints int, coords []float64) {
 			w.refpoint[d] += ival
 			c++
 		}
-		if !w.bboxValid {
+		// After at least one point, the bounding box becomes valid.
+		if i == 0 {
 			w.bboxValid = true
 		}
 	}
@@ -469,11 +470,15 @@ func (w *twkbWriter) writeBBox() {
 		n += binary.PutVarint(buf[n:], w.bboxMax[d]-w.bboxMin[d])
 	}
 	// Build a new TWKB buffer with the bbox inserted after the header bytes.
+	// Note there are 2 header bytes that must already exist: the
+	// type and precision byte, and the metadata header byte.
+	// A third possible header, the extended precision byte, may also exist.
 	start := 2
 	if w.hasExt {
 		start++ // Ensure extended precision byte remains before the bbox values.
 	}
-	// Insert the bbox data.
+	// Insert the bbox data into the correct place in the buffer
+	// (namely after the first 2 or 3 header bytes and before all else).
 	var temp []byte
 	temp = append(temp, w.twkb[:start]...)
 	temp = append(temp, buf[:n]...)
@@ -483,6 +488,9 @@ func (w *twkbWriter) writeBBox() {
 
 func (w *twkbWriter) writeSize() {
 	// Compute where to store the size data.
+	// Note there are 2 header bytes that must already exist: the
+	// type and precision byte, and the metadata header byte.
+	// A third possible header, the extended precision byte, may also exist.
 	start := 2
 	if w.hasExt {
 		start++ // Ensure extended precision byte remains before the size value.
@@ -495,7 +503,8 @@ func (w *twkbWriter) writeSize() {
 	var buf [binary.MaxVarintLen64]byte
 	n := binary.PutUvarint(buf[:], uint64(numBytes))
 
-	// Insert the size data.
+	// Insert the size data into the correct place in the buffer
+	// (namely after the first 2 or 3 header bytes and before all else).
 	var temp []byte
 	temp = append(temp, w.twkb[:start]...)
 	temp = append(temp, buf[:n]...)
