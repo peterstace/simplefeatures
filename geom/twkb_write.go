@@ -17,13 +17,15 @@ func MarshalTWKB(geom Geometry,
 	if err := w.writeGeometry(geom); err != nil {
 		return nil, fmt.Errorf("failed to marshal TWKB: %w", err)
 	}
-	return w.twkb, nil
+	return w.formTWKB(), nil
 }
 
 // twkbWriter holds all state information needed for generating TWKB data
 // including information such as the last reference point used in coord deltas.
 type twkbWriter struct {
-	twkb []byte
+	twkbHeaders  []byte
+	twkbBBox     []byte
+	twkbContents []byte
 
 	kind  twkbGeometryType
 	ctype CoordinatesType
@@ -116,6 +118,14 @@ func copytwkbWriter(other *twkbWriter) *twkbWriter {
 		other.closeRings, // If parent requires closed rings, child should too.
 		nil,              // No ID list in sub-geometries.
 	)
+}
+
+func (w *twkbWriter) formTWKB() []byte {
+	var data []byte
+	data = append(data, w.twkbHeaders...)
+	data = append(data, w.twkbBBox...)
+	data = append(data, w.twkbContents...)
+	return data
 }
 
 func (w *twkbWriter) writeGeometry(geom Geometry) error {
@@ -353,14 +363,15 @@ func (w *twkbWriter) writeGeometryCollection(gc GeometryCollection) error {
 		subWriter := copytwkbWriter(w)
 		geom := gc.GeometryN(i)
 		subWriter.writeGeometry(geom)
-		w.twkb = append(w.twkb, subWriter.twkb...)
+		subTWKB := subWriter.formTWKB()
+		w.twkbContents = append(w.twkbContents, subTWKB...)
 	}
 	return nil
 }
 
 func (w *twkbWriter) writeTypeAndPrecision(kind twkbGeometryType) {
 	w.kind = kind
-	w.writeByte(byte(EncodeZigZagInt32(int32(w.precXY))<<4) | byte(w.kind))
+	w.writeHeaderByte(byte(EncodeZigZagInt32(int32(w.precXY))<<4) | byte(w.kind))
 }
 
 func (w *twkbWriter) writeIsEmptyHeader() {
@@ -396,7 +407,7 @@ func (w *twkbWriter) writeMetadataHeader(metaheader twkbMetadataHeader) {
 	if metaheader&twkbIsEmpty != 0 {
 		w.isEmpty = true
 	}
-	w.writeByte(byte(metaheader))
+	w.writeHeaderByte(byte(metaheader))
 }
 
 func (w *twkbWriter) writeExtendedPrecision() {
@@ -409,7 +420,7 @@ func (w *twkbWriter) writeExtendedPrecision() {
 		ext |= 0x02
 		ext |= byte(EncodeZigZagInt32(int32(w.precM)) << 5)
 	}
-	w.writeByte(ext)
+	w.writeHeaderByte(ext)
 }
 
 func (w *twkbWriter) writePoints(numPoints int, coords ...float64) {
@@ -439,7 +450,7 @@ func (w *twkbWriter) writePointArray(numPoints int, coords []float64) {
 			ival -= w.refpoint[d]
 			n := binary.PutVarint(buf[:], ival)
 
-			w.twkb = append(w.twkb, buf[:n]...)
+			w.twkbContents = append(w.twkbContents, buf[:n]...)
 			w.refpoint[d] += ival
 			c++
 		}
@@ -454,14 +465,14 @@ func (w *twkbWriter) writeAdditionalHeaders() {
 	// These are written in this order so that the size of the
 	// bbox is included in the size computation.
 	if w.hasBBox {
-		w.writeBBox()
+		w.writeBBoxHeader()
 	}
 	if w.hasSize {
-		w.writeSize()
+		w.writeSizeHeader(len(w.twkbBBox), len(w.twkbContents))
 	}
 }
 
-func (w *twkbWriter) writeBBox() {
+func (w *twkbWriter) writeBBoxHeader() {
 	// Store bbox min and delta for each dimension.
 	var buf [twkbMaxDimensions * 2 * binary.MaxVarintLen64]byte
 	n := 0
@@ -469,47 +480,17 @@ func (w *twkbWriter) writeBBox() {
 		n += binary.PutVarint(buf[n:], w.bboxMin[d])
 		n += binary.PutVarint(buf[n:], w.bboxMax[d]-w.bboxMin[d])
 	}
-	// Build a new TWKB buffer with the bbox inserted after the header bytes.
-	// Note there are 2 header bytes that must already exist: the
-	// type and precision byte, and the metadata header byte.
-	// A third possible header, the extended precision byte, may also exist.
-	start := 2
-	if w.hasExt {
-		start++ // Ensure extended precision byte remains before the bbox values.
-	}
-	// Insert the bbox data into the correct place in the buffer
-	// (namely after the first 2 or 3 header bytes and before all else).
-	var temp []byte
-	temp = append(temp, w.twkb[:start]...)
-	temp = append(temp, buf[:n]...)
-	temp = append(temp, w.twkb[start:]...)
-	w.twkb = temp
+	// Insert the bbox varints into the appropriate header.
+	w.twkbBBox = append(w.twkbBBox, buf[:n]...)
 }
 
-func (w *twkbWriter) writeSize() {
-	// Compute where to store the size data.
-	// Note there are 2 header bytes that must already exist: the
-	// type and precision byte, and the metadata header byte.
-	// A third possible header, the extended precision byte, may also exist.
-	start := 2
-	if w.hasExt {
-		start++ // Ensure extended precision byte remains before the size value.
-	}
-	numBytes := len(w.twkb) - start
-	if numBytes < 0 {
-		panic("attempt to add size value to buffer lacking TWKB header bytes")
-	}
-
+func (w *twkbWriter) writeSizeHeader(bboxLength, contentsLength int) {
+	// Form size header as a varint covering all data after
 	var buf [binary.MaxVarintLen64]byte
-	n := binary.PutUvarint(buf[:], uint64(numBytes))
+	n := binary.PutUvarint(buf[:], uint64(bboxLength+contentsLength))
 
-	// Insert the size data into the correct place in the buffer
-	// (namely after the first 2 or 3 header bytes and before all else).
-	var temp []byte
-	temp = append(temp, w.twkb[:start]...)
-	temp = append(temp, buf[:n]...)
-	temp = append(temp, w.twkb[start:]...)
-	w.twkb = temp
+	// Insert the size header after any other headers.
+	w.twkbHeaders = append(w.twkbHeaders, buf[:n]...)
 }
 
 func (w *twkbWriter) writeIDList(num int) error {
@@ -528,17 +509,17 @@ func (w *twkbWriter) writeIDList(num int) error {
 func (w *twkbWriter) writeSignedVarint(val int64) int {
 	var buf [binary.MaxVarintLen64]byte
 	n := binary.PutVarint(buf[:], val)
-	w.twkb = append(w.twkb, buf[:n]...)
+	w.twkbContents = append(w.twkbContents, buf[:n]...)
 	return n
 }
 
 func (w *twkbWriter) writeUnsignedVarint(val uint64) int {
 	var buf [binary.MaxVarintLen64]byte
 	n := binary.PutUvarint(buf[:], val)
-	w.twkb = append(w.twkb, buf[:n]...)
+	w.twkbContents = append(w.twkbContents, buf[:n]...)
 	return n
 }
 
-func (w *twkbWriter) writeByte(b byte) {
-	w.twkb = append(w.twkb, b)
+func (w *twkbWriter) writeHeaderByte(b byte) {
+	w.twkbHeaders = append(w.twkbHeaders, b)
 }
