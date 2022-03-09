@@ -380,7 +380,7 @@ func (w *twkbWriter) writeGeometryCollection(gc GeometryCollection) error {
 
 func (w *twkbWriter) writeTypeAndPrecision(kind twkbGeometryType) {
 	w.kind = kind
-	w.writeHeaderByte(byte(EncodeZigZagInt32(int32(w.precXY))<<4) | byte(w.kind))
+	w.writeHeaderByte(byte(encodeZigZagInt64(int64(w.precXY))<<4) | byte(w.kind))
 }
 
 func (w *twkbWriter) writeIsEmptyHeader() {

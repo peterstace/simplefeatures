@@ -377,8 +377,8 @@ func XTestWriteTWKBSQLFile(t *testing.T) {
 
 func TestZigZagInt(t *testing.T) {
 	for _, tc := range []struct {
-		n int32
-		z uint32
+		n int64
+		z uint64
 	}{
 		{0, 0},
 		{-1, 1},
@@ -395,24 +395,13 @@ func TestZigZagInt(t *testing.T) {
 		{32768, 65536},
 	} {
 		t.Run(fmt.Sprintf("%v", tc.n), func(t *testing.T) {
-			t.Logf("ZigZag encode int32: %v", tc.n)
-			z := geom.EncodeZigZagInt32(tc.n)
-			if tc.z != z {
-				t.Fatalf("expected: %v, got: %v", tc.z, z)
-			}
-			t.Logf("ZigZag decode int32: %v", tc.z)
-			n := geom.DecodeZigZagInt32(tc.z)
-			if tc.n != n {
-				t.Fatalf("expected: %v, got: %v", tc.n, n)
-			}
-
 			t.Logf("ZigZag encode int64: %v", tc.n)
-			z = uint32(geom.EncodeZigZagInt64(int64(tc.n)))
+			z := geom.EncodeZigZagInt64(tc.n)
 			if tc.z != z {
 				t.Fatalf("expected: %v, got: %v", tc.z, z)
 			}
 			t.Logf("ZigZag decode int64: %v", tc.z)
-			n = int32(geom.DecodeZigZagInt64(uint64(tc.z)))
+			n := geom.DecodeZigZagInt64(tc.z)
 			if tc.n != n {
 				t.Fatalf("expected: %v, got: %v", tc.n, n)
 			}

@@ -160,7 +160,7 @@ func (p *twkbParser) parseTypeAndPrecision() error {
 	p.pos++
 
 	p.kind = twkbGeometryType(typeprec & 0x0f)
-	p.precXY = int(DecodeZigZagInt32(uint32(typeprec) >> 4))
+	p.precXY = int(decodeZigZagInt64(uint64(typeprec) >> 4))
 
 	p.scalings[0] = math.Pow10(-p.precXY) // X
 	p.scalings[1] = math.Pow10(-p.precXY) // Y
