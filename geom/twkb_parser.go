@@ -60,19 +60,19 @@ func UnmarshalTWKBEnvelope(twkb []byte) (bbox Envelope, hasBBox bool, err error)
 	if err = p.parseHeaders(); err != nil {
 		return Envelope{}, false, p.annotateError(err)
 	}
-	if p.hasBBox {
-		return newUncheckedEnvelope(
-			XY{
-				p.scalings[0] * float64(p.bbox[0]),
-				p.scalings[1] * float64(p.bbox[2]),
-			},
-			XY{
-				p.scalings[0] * float64(p.bbox[0]+p.bbox[1]),
-				p.scalings[1] * float64(p.bbox[2]+p.bbox[3]),
-			},
-		), true, nil
+	if !p.hasBBox {
+		return Envelope{}, false, nil
 	}
-	return Envelope{}, false, nil
+	return newUncheckedEnvelope(
+		XY{
+			p.scalings[0] * float64(p.bbox[0]),
+			p.scalings[1] * float64(p.bbox[2]),
+		},
+		XY{
+			p.scalings[0] * float64(p.bbox[0]+p.bbox[1]),
+			p.scalings[1] * float64(p.bbox[2]+p.bbox[3]),
+		},
+	), true, nil
 }
 
 // twkbParser holds all state information for interpreting TWKB buffers
@@ -308,7 +308,7 @@ func (p *twkbParser) parseBBoxHeader(twkb []byte) (bbox []Point, err error) {
 		return nil, err
 	}
 	if !p.hasBBox {
-		return nil, err
+		return nil, nil
 	}
 	if p.hasZ && p.hasM {
 		minX := p.scalings[0] * float64(p.bbox[0])
@@ -362,7 +362,7 @@ func (p *twkbParser) parseBBoxHeader(twkb []byte) (bbox []Point, err error) {
 		maxPt := newUncheckedPoint(Coordinates{XY: XY{maxX, maxY}, Type: p.ctype})
 		bbox = []Point{minPt, maxPt}
 	}
-	return
+	return bbox, nil
 }
 
 func (p *twkbParser) parsePoint() (Point, error) {

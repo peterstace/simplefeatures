@@ -367,6 +367,9 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 				// Verify UnmarshalTWKBEnvelope returns only the min and max X and Y coordinates
 				// of the bounding box, if it exists.
 				envelope, hasEnvelope, err := geom.UnmarshalTWKBEnvelope(twkb)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
 				if hasEnvelope != tc.hasBBox {
 					t.Errorf("\ngot:  hasEnv = %v\nwant: %v\n", hasEnvelope, tc.hasBBox)
 				}
