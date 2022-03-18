@@ -19,7 +19,7 @@ var TWKBTestCases = []struct {
 	precXY, precZ, precM   int
 	hasSize                bool
 	hasBBox                bool
-	listedBBox             []int64
+	listedBBox             [2]string
 	hasIDList              bool
 	listedIDs              []int64
 	closeRings             bool
@@ -159,7 +159,7 @@ var TWKBTestCases = []struct {
 		wkt:         "POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,1 2,2 2,2 1,1 1))",
 		hasSize:     true,
 		hasBBox:     true,
-		listedBBox:  []int64{0, +3, 0, +3},
+		listedBBox:  [2]string{"POINT(0 0)", "POINT(3 3)"},
 	},
 	{
 		description: "polygon closed rings with size & bbox",
@@ -167,7 +167,7 @@ var TWKBTestCases = []struct {
 		wkt:         "POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,1 2,2 2,2 1,1 1))",
 		hasSize:     true,
 		hasBBox:     true,
-		listedBBox:  []int64{0, +3, 0, +3},
+		listedBBox:  [2]string{"POINT(0 0)", "POINT(3 3)"},
 		closeRings:  true,
 	},
 	{
@@ -182,13 +182,62 @@ var TWKBTestCases = []struct {
 		skipEncode:  true,
 	},
 	{
+		description: "multipoint with bbox",
+		twkbHex:     "04010408060803040604040404",
+		wkt:         "MULTIPOINT(2 3,4 5,6 7)",
+		postGIS:     "ARRAY ['POINT(2 3)'::geometry, 'POINT(4 5)'::geometry, 'POINT(6 7)'::geometry]",
+		hasBBox:     true,
+		listedBBox:  [2]string{"POINT(2 3)", "POINT(6 7)"},
+	},
+	{
+		description: "multipoint z with bbox",
+		twkbHex:     "040901040a030a0008020406080a0907",
+		wkt:         "MULTIPOINT Z(2 3 4,7 -2 0)",
+		hasZ:        true,
+		postGIS:     "ARRAY ['POINT Z (2 3 4)'::geometry, 'POINT Z (7 -2 0)'::geometry]",
+		hasBBox:     true,
+		listedBBox:  [2]string{"POINT Z (2 -2 0)", "POINT Z (7 3 4)"},
+	},
+	{
+		description: "multipoint m with bbox",
+		twkbHex:     "040902040a030a0008020406080a0907",
+		wkt:         "MULTIPOINT M(2 3 4,7 -2 0)",
+		hasM:        true,
+		postGIS:     "ARRAY ['POINT M (2 3 4)'::geometry, 'POINT M (7 -2 0)'::geometry]",
+		hasBBox:     true,
+		listedBBox:  [2]string{"POINT M (2 -2 0)", "POINT M (7 3 4)"},
+	},
+	{
+		description: "multipoint z m with bbox",
+		twkbHex:     "040903040a030a00080208020406080a0a090707",
+		wkt:         "MULTIPOINT ZM(2 3 4 5,7 -2 0 1)",
+		hasZ:        true,
+		hasM:        true,
+		postGIS:     "ARRAY ['POINT ZM (2 3 4 5)'::geometry, 'POINT ZM (7 -2 0 1)'::geometry]",
+		hasBBox:     true,
+		listedBBox:  [2]string{"POINT ZM (2 -2 0 1)", "POINT ZM (7 3 4 5)"},
+	},
+	{
+		description: "multipoint z m with prec xy -1 & prec z 2 & prec m 3 & bbox",
+		twkbHex:     "14096b040a030a00080208020406080a0a090707",
+		wkt:         "MULTIPOINT ZM(20 30 0.04 0.005,70 -20 0 0.001)",
+		hasZ:        true,
+		hasM:        true,
+		precXY:      -1,
+		precZ:       2,
+		precM:       3,
+		postGIS:     "ARRAY ['POINT ZM (20 30 0.04 0.005)'::geometry, 'POINT ZM (70 -20 0 0.001)'::geometry]",
+		hasBBox:     true,
+		listedBBox:  [2]string{"POINT ZM (20 -20 0 0.001)", "POINT ZM (70 30 0.04 0.005)"},
+	},
+	{
 		description: "multipoint with size & bbox & ids",
 		twkbHex:     "04070b0004020402000200020404",
 		wkt:         "MULTIPOINT(0 1,2 3)",
 		postGIS:     "ARRAY ['POINT(0 1)'::geometry, 'POINT(2 3)'::geometry]",
 		hasSize:     true,
 		hasBBox:     true,
-		listedBBox:  []int64{0, +2, 1, +2},
+		listedBBox:  [2]string{"POINT(0 1)", "POINT(2 3)"},
 		hasIDList:   true,
 		listedIDs:   []int64{0, 1},
 	},
@@ -292,21 +341,80 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 				}
 				expectGeomEqWKT(t, g, tc.wkt)
 
-				if tc.hasBBox || tc.hasIDList {
-					_, bbox, ids, err := geom.UnmarshalTWKBWithHeaders(twkb)
-					if err != nil {
-						t.Fatalf("unexpected error: %v", err)
-					}
+				// Verify UnmarshalTWKBBoundingBoxHeader returns the complete bounding box,
+				// if it exists.
+				bbox, err := geom.UnmarshalTWKBBoundingBoxHeader(twkb)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
 
-					if len(bbox) != len(tc.listedBBox) {
-						t.Errorf("\ngot:  len(bbox) = %d\nwant: len(bbox) = %d\n", len(bbox), len(tc.listedBBox))
+				hasBBox := (len(bbox) == 2)
+				if hasBBox != tc.hasBBox {
+					t.Errorf("\ngot:  hasBBox = %v\nwant: %v\n", hasBBox, tc.hasBBox)
+				}
+				var minPt, maxPt geom.Point
+				if hasBBox {
+					// Check the bounding box matches.
+					minPt, maxPt = bbox[0], bbox[1]
+					if minPt.AsText() != tc.listedBBox[0] {
+						t.Errorf("\ngot:  bbox min = %q\nwant: %q\n", minPt.AsText(), tc.listedBBox[0])
 					}
-					for i := 0; i < len(tc.listedBBox); i++ {
-						if bbox[i] != tc.listedBBox[i] {
-							t.Errorf("\ngot:  bbox[%d] = %d\nwant: bbox[%d] = %d\n", i, bbox[i], i, tc.listedBBox[i])
-						}
+					if maxPt.AsText() != tc.listedBBox[1] {
+						t.Errorf("\ngot:  bbox max = %q\nwant: %q\n", maxPt.AsText(), tc.listedBBox[1])
 					}
+				}
 
+				// Verify UnmarshalTWKBEnvelope returns only the min and max X and Y coordinates
+				// of the bounding box, if it exists.
+				envelope, hasEnvelope, err := geom.UnmarshalTWKBEnvelope(twkb)
+				if hasEnvelope != tc.hasBBox {
+					t.Errorf("\ngot:  hasEnv = %v\nwant: %v\n", hasEnvelope, tc.hasBBox)
+				}
+				if hasEnvelope {
+					minXY, exists := minPt.XY()
+					if !exists {
+						t.Errorf("\nproblem unpacking bounding box min point\n")
+					}
+					envXY, exists := envelope.Min().XY()
+					if !exists {
+						t.Errorf("\nproblem unpacking envelope min point\n")
+					}
+					if envXY.X != minXY.X || envXY.Y != minXY.Y {
+						t.Errorf("\ngot:  env min = {%f,%f}\nwant: {%f,%f}\n", envXY.X, envXY.Y, minXY.X, minXY.Y)
+					}
+					maxXY, exists := maxPt.XY()
+					if !exists {
+						t.Errorf("\nproblem unpacking bounding box max point\n")
+					}
+					envXY, exists = envelope.Max().XY()
+					if !exists {
+						t.Errorf("\nproblem unpacking envelope max point\n")
+					}
+					if envXY.X != maxXY.X || envXY.Y != maxXY.Y {
+						t.Errorf("\ngot:  env max = {%f,%f}\nwant: {%f,%f}\n", envXY.X, envXY.Y, maxXY.X, maxXY.Y)
+					}
+				}
+
+				// Verify UnmarshalTWKBWithHeaders returns the ID list correctly.
+				g2, bbox2, ids, err := geom.UnmarshalTWKBWithHeaders(twkb)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+				// Double-check the geometry from UnmarshalTWKBWithHeaders is correct.
+				expectGeomEqWKT(t, g2, tc.wkt)
+
+				if tc.hasBBox {
+					// Check the bounding box matches.
+					minPt, maxPt = bbox2[0], bbox2[1]
+					if minPt.AsText() != tc.listedBBox[0] {
+						t.Errorf("\ngot:  bbox min = %q\nwant: %q\n", minPt.AsText(), tc.listedBBox[0])
+					}
+					if maxPt.AsText() != tc.listedBBox[1] {
+						t.Errorf("\ngot:  bbox max = %q\nwant: %q\n", maxPt.AsText(), tc.listedBBox[1])
+					}
+				}
+				if tc.hasIDList {
+					// Check the ID list.
 					if len(ids) != len(tc.listedIDs) {
 						t.Errorf("\ngot:  len(ids) = %d\nwant: len(ids) = %d\n", len(ids), len(tc.listedIDs))
 					}

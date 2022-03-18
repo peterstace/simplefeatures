@@ -21,10 +21,58 @@ func UnmarshalTWKB(twkb []byte, opts ...ConstructorOption) (Geometry, error) {
 // UnmarshalTWKBWithHeaders parses a Tiny Well Known Binary (TWKB),
 // returning the corresponding Geometry, and any bounding box and any IDs
 // listed in its header information.
-func UnmarshalTWKBWithHeaders(twkb []byte, opts ...ConstructorOption) (g Geometry, bbox []int64, ids []int64, err error) {
+func UnmarshalTWKBWithHeaders(twkb []byte, opts ...ConstructorOption) (g Geometry, bbox []Point, ids []int64, err error) {
 	p := newtwkbParser(twkb, opts...)
 	g, err = p.nextGeometry()
-	return g, p.bbox, p.idList, p.annotateError(err)
+	if err != nil {
+		return Geometry{}, nil, nil, p.annotateError(err)
+	}
+	if p.hasBBox {
+		bbox, err = UnmarshalTWKBBoundingBoxHeader(twkb)
+		if err != nil {
+			return Geometry{}, nil, nil, p.annotateError(err)
+		}
+	}
+	return g, bbox, p.idList, p.annotateError(err)
+}
+
+// UnmarshalTWKBBoundingBoxHeader checks if the bounding box header
+// exists in the Tiny Well Known Binary (TWKB) and if it exists
+// returns its minimum and maximum points in the bbox array
+// (otherwise the array is empty).
+// Because the results are returned as Points, the X, Y, Z, and M values
+// can all be returned. Check the point type to see if the Z and M values
+// are valid.
+func UnmarshalTWKBBoundingBoxHeader(twkb []byte) (bbox []Point, err error) {
+	p := newtwkbParser(twkb)
+	bbox, err = p.parseBBoxHeader(twkb)
+	return bbox, p.annotateError(err)
+}
+
+// UnmarshalTWKBEnvelope checks if the bounding box header exists
+// in the Tiny Well Known Binary (TWKB) and iff it exists
+// returns it as an Envelope with a true result.
+// Note that due to the definition of Envelope, only the X and Y
+// coordinates will be returned this way, whereas any Z and M
+// coordinates will be silently ignored by this function.
+func UnmarshalTWKBEnvelope(twkb []byte) (bbox Envelope, hasBBox bool, err error) {
+	p := newtwkbParser(twkb)
+	if err = p.parseHeaders(); err != nil {
+		return Envelope{}, false, p.annotateError(err)
+	}
+	if p.hasBBox {
+		return newUncheckedEnvelope(
+			XY{
+				p.scalings[0] * float64(p.bbox[0]),
+				p.scalings[1] * float64(p.bbox[2]),
+			},
+			XY{
+				p.scalings[0] * float64(p.bbox[0]+p.bbox[1]),
+				p.scalings[1] * float64(p.bbox[2]+p.bbox[3]),
+			},
+		), true, nil
+	}
+	return Envelope{}, false, nil
 }
 
 // twkbParser holds all state information for interpreting TWKB buffers
@@ -82,26 +130,8 @@ func (p *twkbParser) parseGeometry() (Geometry, int, error) {
 
 // Parse a geometry and return it and any error.
 func (p *twkbParser) nextGeometry() (Geometry, error) {
-	if err := p.parseTypeAndPrecision(); err != nil {
+	if err := p.parseHeaders(); err != nil {
 		return Geometry{}, err
-	}
-	if err := p.parseMetadataHeader(); err != nil {
-		return Geometry{}, err
-	}
-	if p.hasExt {
-		if err := p.parseExtendedPrecision(); err != nil {
-			return Geometry{}, err
-		}
-	}
-	if p.hasSize {
-		if err := p.parseSize(); err != nil {
-			return Geometry{}, err
-		}
-	}
-	if p.hasBBox {
-		if err := p.parseBBox(); err != nil {
-			return Geometry{}, err
-		}
 	}
 
 	switch p.kind {
@@ -150,6 +180,32 @@ func (p *twkbParser) nextGeometry() (Geometry, error) {
 	}
 
 	return Geometry{}, fmt.Errorf("unsupported geometry type %d", p.kind)
+}
+
+// Parse a geometry's headers.
+func (p *twkbParser) parseHeaders() error {
+	if err := p.parseTypeAndPrecision(); err != nil {
+		return err
+	}
+	if err := p.parseMetadataHeader(); err != nil {
+		return err
+	}
+	if p.hasExt {
+		if err := p.parseExtendedPrecision(); err != nil {
+			return err
+		}
+	}
+	if p.hasSize {
+		if err := p.parseSize(); err != nil {
+			return err
+		}
+	}
+	if p.hasBBox {
+		if err := p.parseBBox(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (p *twkbParser) parseTypeAndPrecision() error {
@@ -245,6 +301,68 @@ func (p *twkbParser) parseBBox() error {
 		p.bbox = append(p.bbox, deltaVal)
 	}
 	return nil
+}
+
+func (p *twkbParser) parseBBoxHeader(twkb []byte) (bbox []Point, err error) {
+	if err = p.parseHeaders(); err != nil {
+		return nil, err
+	}
+	if !p.hasBBox {
+		return nil, err
+	}
+	if p.hasZ && p.hasM {
+		minX := p.scalings[0] * float64(p.bbox[0])
+		minY := p.scalings[1] * float64(p.bbox[2])
+		minZ := p.scalings[2] * float64(p.bbox[4])
+		minM := p.scalings[3] * float64(p.bbox[6])
+
+		maxX := p.scalings[0] * float64(p.bbox[0]+p.bbox[1])
+		maxY := p.scalings[1] * float64(p.bbox[2]+p.bbox[3])
+		maxZ := p.scalings[2] * float64(p.bbox[4]+p.bbox[5])
+		maxM := p.scalings[3] * float64(p.bbox[6]+p.bbox[7])
+
+		minPt := newUncheckedPoint(Coordinates{XY: XY{minX, minY}, Z: minZ, M: minM, Type: p.ctype})
+		maxPt := newUncheckedPoint(Coordinates{XY: XY{maxX, maxY}, Z: maxZ, M: maxM, Type: p.ctype})
+		bbox = []Point{minPt, maxPt}
+
+	} else if p.hasZ {
+		minX := p.scalings[0] * float64(p.bbox[0])
+		minY := p.scalings[1] * float64(p.bbox[2])
+		minZ := p.scalings[2] * float64(p.bbox[4])
+
+		maxX := p.scalings[0] * float64(p.bbox[0]+p.bbox[1])
+		maxY := p.scalings[1] * float64(p.bbox[2]+p.bbox[3])
+		maxZ := p.scalings[2] * float64(p.bbox[4]+p.bbox[5])
+
+		minPt := newUncheckedPoint(Coordinates{XY: XY{minX, minY}, Z: minZ, Type: p.ctype})
+		maxPt := newUncheckedPoint(Coordinates{XY: XY{maxX, maxY}, Z: maxZ, Type: p.ctype})
+		bbox = []Point{minPt, maxPt}
+
+	} else if p.hasM {
+		minX := p.scalings[0] * float64(p.bbox[0])
+		minY := p.scalings[1] * float64(p.bbox[2])
+		minM := p.scalings[2] * float64(p.bbox[4])
+
+		maxX := p.scalings[0] * float64(p.bbox[0]+p.bbox[1])
+		maxY := p.scalings[1] * float64(p.bbox[2]+p.bbox[3])
+		maxM := p.scalings[2] * float64(p.bbox[4]+p.bbox[5])
+
+		minPt := newUncheckedPoint(Coordinates{XY: XY{minX, minY}, M: minM, Type: p.ctype})
+		maxPt := newUncheckedPoint(Coordinates{XY: XY{maxX, maxY}, M: maxM, Type: p.ctype})
+		bbox = []Point{minPt, maxPt}
+
+	} else {
+		minX := p.scalings[0] * float64(p.bbox[0])
+		minY := p.scalings[1] * float64(p.bbox[2])
+
+		maxX := p.scalings[0] * float64(p.bbox[0]+p.bbox[1])
+		maxY := p.scalings[1] * float64(p.bbox[2]+p.bbox[3])
+
+		minPt := newUncheckedPoint(Coordinates{XY: XY{minX, minY}, Type: p.ctype})
+		maxPt := newUncheckedPoint(Coordinates{XY: XY{maxX, maxY}, Type: p.ctype})
+		bbox = []Point{minPt, maxPt}
+	}
+	return
 }
 
 func (p *twkbParser) parsePoint() (Point, error) {
