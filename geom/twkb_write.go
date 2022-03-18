@@ -7,26 +7,84 @@ import (
 )
 
 // MarshalTWKB accepts a geometry and generates the corresponding TWKB byte slice.
-func MarshalTWKB(geom Geometry,
-	hasZ, hasM bool,
-	precXY, precZ, precM int,
-	hasSize, hasBBox, closeRings bool,
-	idList []int64,
-) ([]byte, error) {
+func MarshalTWKB(geom Geometry, precXY int, opts ...TWKBWriterOption) ([]byte, error) {
+
+	var s twkbWriterOptionSet
+	for _, opt := range opts {
+		opt(&s)
+	}
+
 	if precXY < -8 || precXY > 7 {
 		return []byte{}, fmt.Errorf("TWKB got precXY = %d, expected it to be between -8 and +7", precXY)
 	}
-	if precZ < 0 || precM > 7 {
-		return []byte{}, fmt.Errorf("TWKB got precZ = %d, expected it to be between -8 and +7", precZ)
+	if s.precZ < 0 || s.precZ > 7 {
+		return []byte{}, fmt.Errorf("TWKB got precZ = %d, expected it to be between -8 and +7", s.precZ)
 	}
-	if precM < 0 || precM > 7 {
-		return []byte{}, fmt.Errorf("TWKB got precM = %d, expected it to be between -8 and +7", precM)
+	if s.precM < 0 || s.precM > 7 {
+		return []byte{}, fmt.Errorf("TWKB got precM = %d, expected it to be between -8 and +7", s.precM)
 	}
-	w := newtwkbWriter(hasZ, hasM, precXY, precZ, precM, hasSize, hasBBox, closeRings, idList)
+	w := newtwkbWriter(s.hasZ, s.hasM, precXY, s.precZ, s.precM, s.hasSize, s.hasBBox, s.closeRings, s.idList)
 	if err := w.writeGeometry(geom); err != nil {
 		return nil, fmt.Errorf("failed to marshal TWKB: %w", err)
 	}
 	return w.formTWKB(), nil
+}
+
+// TWKBWriterOption allows setting of optional encoding parameters.
+type TWKBWriterOption func(*twkbWriterOptionSet)
+
+type twkbWriterOptionSet struct {
+	hasZ, hasM       bool
+	precZ, precM     int
+	hasSize, hasBBox bool
+	closeRings       bool
+	idList           []int64
+}
+
+// TWKBPrecisionZ sets the Z precision to between 0 and 7 inclusive.
+func TWKBPrecisionZ(precZ int) TWKBWriterOption {
+	return func(s *twkbWriterOptionSet) {
+		s.hasZ = true
+		s.precZ = precZ
+	}
+}
+
+// TWKBPrecisionM sets the M precision to between 0 and 7 inclusive.
+func TWKBPrecisionM(precM int) TWKBWriterOption {
+	return func(s *twkbWriterOptionSet) {
+		s.hasM = true
+		s.precM = precM
+	}
+}
+
+// TWKBSizeHeader causes the writer to output a byte size header.
+func TWKBSizeHeader() TWKBWriterOption {
+	return func(s *twkbWriterOptionSet) {
+		s.hasSize = true
+	}
+}
+
+// TWKBBoundingBoxHeader causes the writer to output a bounding box header.
+func TWKBBoundingBoxHeader() TWKBWriterOption {
+	return func(s *twkbWriterOptionSet) {
+		s.hasBBox = true
+	}
+}
+
+// TWKBIDList specifies an ID list to be output as a header.
+func TWKBIDList(ids []int64) TWKBWriterOption {
+	return func(s *twkbWriterOptionSet) {
+		s.idList = ids
+	}
+}
+
+// TWKBCloseRings causes the writer to close all polygon rings
+// by outputting the first point again as the final point.
+// The spec says this shouldn't be done, but some implementations do.
+func TWKBCloseRings() TWKBWriterOption {
+	return func(s *twkbWriterOptionSet) {
+		s.closeRings = true
+	}
 }
 
 // twkbWriter holds all state information needed for generating TWKB data

@@ -432,9 +432,26 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 			if !tc.skipEncode {
 				// Encode the WKT's geometry as TWKB and check its bytes match the expected TWKB bytes.
 				g := geomFromWKT(t, tc.wkt)
-				marshaled, err := geom.MarshalTWKB(g,
-					tc.hasZ, tc.hasM, tc.precXY, tc.precZ, tc.precM,
-					tc.hasSize, tc.hasBBox, tc.closeRings, tc.listedIDs)
+				opts := []geom.TWKBWriterOption{}
+				if tc.hasZ {
+					opts = append(opts, geom.TWKBPrecisionZ(tc.precZ))
+				}
+				if tc.hasM {
+					opts = append(opts, geom.TWKBPrecisionM(tc.precM))
+				}
+				if tc.hasSize {
+					opts = append(opts, geom.TWKBSizeHeader())
+				}
+				if tc.hasBBox {
+					opts = append(opts, geom.TWKBBoundingBoxHeader())
+				}
+				if tc.closeRings {
+					opts = append(opts, geom.TWKBCloseRings())
+				}
+				if len(tc.listedIDs) > 0 {
+					opts = append(opts, geom.TWKBIDList(tc.listedIDs))
+				}
+				marshaled, err := geom.MarshalTWKB(g, tc.precXY, opts...)
 				if err != nil {
 					t.Fatalf("unexpected error: %v", err)
 				}
