@@ -130,7 +130,7 @@ func copytwkbWriter(other *twkbWriter) *twkbWriter {
 }
 
 func (w *twkbWriter) formTWKB() []byte {
-	var data []byte
+	data := make([]byte, 0, len(w.twkbHeaders)+len(w.twkbBBox)+len(w.twkbContents))
 	data = append(data, w.twkbHeaders...)
 	data = append(data, w.twkbBBox...)
 	data = append(data, w.twkbContents...)
