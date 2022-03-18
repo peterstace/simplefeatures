@@ -7,24 +7,37 @@ import (
 )
 
 // MarshalTWKB accepts a geometry and generates the corresponding TWKB byte slice.
-func MarshalTWKB(geom Geometry, precXY int, opts ...TWKBWriterOption) ([]byte, error) {
+func MarshalTWKB(g Geometry, precXY int, opts ...TWKBWriterOption) ([]byte, error) {
 
 	var s twkbWriterOptionSet
+	s.precZ = precXY // Default if not set by opt.
+	s.precM = precXY // Default if not set by opt.
 	for _, opt := range opts {
 		opt(&s)
 	}
-
+	ctype := g.CoordinatesType()
+	hasZ := ctype.Is3D()
+	hasM := ctype.IsMeasured()
+	if !hasZ {
+		// Set to zero if not needed, to avoid spurious data in a header.
+		s.precZ = 0
+	}
+	if !hasM {
+		// Set to zero if not needed, to avoid spurious data in a header.
+		s.precM = 0
+	}
 	if precXY < -8 || precXY > 7 {
 		return []byte{}, fmt.Errorf("TWKB got precXY = %d, expected it to be between -8 and +7", precXY)
 	}
 	if s.precZ < 0 || s.precZ > 7 {
-		return []byte{}, fmt.Errorf("TWKB got precZ = %d, expected it to be between -8 and +7", s.precZ)
+		return []byte{}, fmt.Errorf("TWKB got precZ = %d, expected it to be between 0 and +7", s.precZ)
 	}
 	if s.precM < 0 || s.precM > 7 {
-		return []byte{}, fmt.Errorf("TWKB got precM = %d, expected it to be between -8 and +7", s.precM)
+		return []byte{}, fmt.Errorf("TWKB got precM = %d, expected it to be between 0 and +7", s.precM)
 	}
-	w := newtwkbWriter(s.hasZ, s.hasM, precXY, s.precZ, s.precM, s.hasSize, s.hasBBox, s.closeRings, s.idList)
-	if err := w.writeGeometry(geom); err != nil {
+
+	w := newtwkbWriter(hasZ, hasM, precXY, s.precZ, s.precM, s.hasSize, s.hasBBox, s.closeRings, s.idList)
+	if err := w.writeGeometry(g); err != nil {
 		return nil, fmt.Errorf("failed to marshal TWKB: %w", err)
 	}
 	return w.formTWKB(), nil
@@ -34,7 +47,6 @@ func MarshalTWKB(geom Geometry, precXY int, opts ...TWKBWriterOption) ([]byte, e
 type TWKBWriterOption func(*twkbWriterOptionSet)
 
 type twkbWriterOptionSet struct {
-	hasZ, hasM       bool
 	precZ, precM     int
 	hasSize, hasBBox bool
 	closeRings       bool
@@ -44,7 +56,6 @@ type twkbWriterOptionSet struct {
 // TWKBPrecisionZ sets the Z precision to between 0 and 7 inclusive.
 func TWKBPrecisionZ(precZ int) TWKBWriterOption {
 	return func(s *twkbWriterOptionSet) {
-		s.hasZ = true
 		s.precZ = precZ
 	}
 }
@@ -52,7 +63,6 @@ func TWKBPrecisionZ(precZ int) TWKBWriterOption {
 // TWKBPrecisionM sets the M precision to between 0 and 7 inclusive.
 func TWKBPrecisionM(precM int) TWKBWriterOption {
 	return func(s *twkbWriterOptionSet) {
-		s.hasM = true
 		s.precM = precM
 	}
 }
@@ -195,32 +205,32 @@ func (w *twkbWriter) formTWKB() []byte {
 	return data
 }
 
-func (w *twkbWriter) writeGeometry(geom Geometry) error {
-	if err := w.writeGeometryByType(geom); err != nil {
+func (w *twkbWriter) writeGeometry(g Geometry) error {
+	if err := w.writeGeometryByType(g); err != nil {
 		return err
 	}
 	w.writeAdditionalHeaders()
 	return nil
 }
 
-func (w *twkbWriter) writeGeometryByType(geom Geometry) error {
-	switch geom.gtype {
+func (w *twkbWriter) writeGeometryByType(g Geometry) error {
+	switch g.gtype {
 	case TypePoint:
-		return w.writePoint(geom.MustAsPoint())
+		return w.writePoint(g.MustAsPoint())
 	case TypeLineString:
-		return w.writeLineString(geom.MustAsLineString())
+		return w.writeLineString(g.MustAsLineString())
 	case TypePolygon:
-		return w.writePolygon(geom.MustAsPolygon())
+		return w.writePolygon(g.MustAsPolygon())
 	case TypeMultiPoint:
-		return w.writeMultiPoint(geom.MustAsMultiPoint())
+		return w.writeMultiPoint(g.MustAsMultiPoint())
 	case TypeMultiLineString:
-		return w.writeMultiLineString(geom.MustAsMultiLineString())
+		return w.writeMultiLineString(g.MustAsMultiLineString())
 	case TypeMultiPolygon:
-		return w.writeMultiPolygon(geom.MustAsMultiPolygon())
+		return w.writeMultiPolygon(g.MustAsMultiPolygon())
 	case TypeGeometryCollection:
-		return w.writeGeometryCollection(geom.MustAsGeometryCollection())
+		return w.writeGeometryCollection(g.MustAsGeometryCollection())
 	default:
-		return fmt.Errorf("geometry has unsupported type: %q", geom.gtype)
+		return fmt.Errorf("geometry has unsupported type: %q", g.gtype)
 	}
 }
 
@@ -428,8 +438,8 @@ func (w *twkbWriter) writeGeometryCollection(gc GeometryCollection) error {
 
 	for i := 0; i < numGeometries; i++ {
 		subWriter := copytwkbWriter(w)
-		geom := gc.GeometryN(i)
-		subWriter.writeGeometry(geom)
+		g := gc.GeometryN(i)
+		subWriter.writeGeometry(g)
 		subTWKB := subWriter.formTWKB()
 		w.twkbContents = append(w.twkbContents, subTWKB...)
 	}
