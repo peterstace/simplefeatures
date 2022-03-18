@@ -7,6 +7,13 @@ import (
 )
 
 // MarshalTWKB accepts a geometry and generates the corresponding TWKB byte slice.
+//
+// The precision of the X and Y coordinates must be given, between -8 and +7..
+// A positive precision retains information to the right of the decimal place.
+// A negative precision rounds up to the left of the decimal place.
+//
+// Options can be supplied to control whether headers can be added, or
+// to control the precision of Z or M coordinates.
 func MarshalTWKB(g Geometry, precXY int, opts ...TWKBWriterOption) ([]byte, error) {
 
 	var s twkbWriterOptionSet

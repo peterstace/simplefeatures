@@ -21,6 +21,12 @@ func UnmarshalTWKB(twkb []byte, opts ...ConstructorOption) (Geometry, error) {
 // UnmarshalTWKBWithHeaders parses a Tiny Well Known Binary (TWKB),
 // returning the corresponding Geometry, and any bounding box and any IDs
 // listed in its header information.
+//
+// If there is a bounding box header, the bbox slice will be populated with
+// two points, a minimum then a maximum. Otherwise, the slice is empty.
+//
+// If there is an ID list header, the ids slice will be populated with the
+// IDs from that header. Otherwise, the slice is empty.
 func UnmarshalTWKBWithHeaders(twkb []byte, opts ...ConstructorOption) (g Geometry, bbox []Point, ids []int64, err error) {
 	p := newtwkbParser(twkb, opts...)
 	g, err = p.nextGeometry()
@@ -38,11 +44,15 @@ func UnmarshalTWKBWithHeaders(twkb []byte, opts ...ConstructorOption) (g Geometr
 
 // UnmarshalTWKBBoundingBoxHeader checks if the bounding box header
 // exists in the Tiny Well Known Binary (TWKB) and if it exists
-// returns its minimum and maximum points in the bbox array
-// (otherwise the array is empty).
+// returns its minimum and maximum points in the bbox slice
+// (otherwise the slice is empty).
+//
 // Because the results are returned as Points, the X, Y, Z, and M values
 // can all be returned. Check the point type to see if the Z and M values
 // are valid.
+//
+// The function returns immediately after parsing the headers.
+// Any remaining geometry is not parsed by this function.
 func UnmarshalTWKBBoundingBoxHeader(twkb []byte) (bbox []Point, err error) {
 	p := newtwkbParser(twkb)
 	bbox, err = p.parseBBoxHeader(twkb)
@@ -52,9 +62,13 @@ func UnmarshalTWKBBoundingBoxHeader(twkb []byte) (bbox []Point, err error) {
 // UnmarshalTWKBEnvelope checks if the bounding box header exists
 // in the Tiny Well Known Binary (TWKB) and iff it exists
 // returns it as an Envelope with a true result.
+//
 // Note that due to the definition of Envelope, only the X and Y
 // coordinates will be returned this way, whereas any Z and M
 // coordinates will be silently ignored by this function.
+//
+// The function returns immediately after parsing the headers.
+// Any remaining geometry is not parsed by this function.
 func UnmarshalTWKBEnvelope(twkb []byte) (bbox Envelope, hasBBox bool, err error) {
 	p := newtwkbParser(twkb)
 	if err = p.parseHeaders(); err != nil {
