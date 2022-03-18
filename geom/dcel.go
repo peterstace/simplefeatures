@@ -76,33 +76,37 @@ func newDCELFromGeometry(g Geometry, ghosts MultiLineString, operand operand, in
 	dcel := &doublyConnectedEdgeList{
 		vertices: make(map[XY]*vertexRecord),
 	}
+	dcel.addGeometry(g, operand, interactions)
+	dcel.addGhosts(ghosts, operand, interactions)
+	return dcel
+}
+
+func (d *doublyConnectedEdgeList) addGeometry(g Geometry, operand operand, interactions map[XY]struct{}) {
 	switch g.Type() {
 	case TypePolygon:
 		poly := g.MustAsPolygon()
-		dcel.addMultiPolygon(poly.AsMultiPolygon(), operand, interactions)
+		d.addMultiPolygon(poly.AsMultiPolygon(), operand, interactions)
 	case TypeMultiPolygon:
 		mp := g.MustAsMultiPolygon()
-		dcel.addMultiPolygon(mp, operand, interactions)
+		d.addMultiPolygon(mp, operand, interactions)
 	case TypeLineString:
 		mls := g.MustAsLineString().AsMultiLineString()
-		dcel.addMultiLineString(mls, operand, interactions)
+		d.addMultiLineString(mls, operand, interactions)
 	case TypeMultiLineString:
 		mls := g.MustAsMultiLineString()
-		dcel.addMultiLineString(mls, operand, interactions)
+		d.addMultiLineString(mls, operand, interactions)
 	case TypePoint:
 		mp := g.MustAsPoint().AsMultiPoint()
-		dcel.addMultiPoint(mp, operand)
+		d.addMultiPoint(mp, operand)
 	case TypeMultiPoint:
 		mp := g.MustAsMultiPoint()
-		dcel.addMultiPoint(mp, operand)
+		d.addMultiPoint(mp, operand)
 	case TypeGeometryCollection:
-		panic("geometry collection not supported")
+		gc := g.MustAsGeometryCollection()
+		d.addGeometryCollection(gc, operand, interactions)
 	default:
 		panic(fmt.Sprintf("unknown geometry type: %v", g.Type()))
 	}
-
-	dcel.addGhosts(ghosts, operand, interactions)
-	return dcel
 }
 
 func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand operand, interactions map[XY]struct{}) {
@@ -304,6 +308,13 @@ func (d *doublyConnectedEdgeList) addMultiPoint(mp MultiPoint, operand operand) 
 		}
 		record.labels[operand] = label{populated: true, inSet: true}
 		record.locations[operand].interior = true
+	}
+}
+
+func (d *doublyConnectedEdgeList) addGeometryCollection(gc GeometryCollection, operand operand, interactions map[XY]struct{}) {
+	n := gc.NumGeometries()
+	for i := 0; i < n; i++ {
+		d.addGeometry(gc.GeometryN(i), operand, interactions)
 	}
 }
 
