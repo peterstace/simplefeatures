@@ -339,7 +339,8 @@ func TestGraphTriangle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandA, findInteractionPoints([]Geometry{poly}))
+	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+	dcel.addMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandA, findInteractionPoints([]Geometry{poly}))
 
 	/*
 
@@ -407,7 +408,8 @@ func TestGraphWithHoles(t *testing.T) {
 
 	*/
 
-	dcel := newDCELFromMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandB, findInteractionPoints([]Geometry{poly}))
+	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+	dcel.addMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandB, findInteractionPoints([]Geometry{poly}))
 
 	v0 := XY{0, 0}
 	v1 := XY{5, 0}
@@ -480,7 +482,8 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 	  v0-----v1   v4-----v5
 	*/
 
-	dcel := newDCELFromMultiPolygon(mp.MustAsMultiPolygon(), operandB, findInteractionPoints([]Geometry{mp}))
+	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+	dcel.addMultiPolygon(mp.MustAsMultiPolygon(), operandB, findInteractionPoints([]Geometry{mp}))
 
 	v0 := XY{0, 0}
 	v1 := XY{1, 0}
