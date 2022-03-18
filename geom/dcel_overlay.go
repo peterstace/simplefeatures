@@ -1,16 +1,11 @@
 package geom
 
 import (
-	"errors"
 	"math"
 	"sort"
 )
 
 func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
-	if a.IsGeometryCollection() || b.IsGeometryCollection() {
-		return nil, errors.New("GeometryCollection argument not supported")
-	}
-
 	var points []XY
 	points = appendComponentPoints(points, a)
 	points = appendComponentPoints(points, b)

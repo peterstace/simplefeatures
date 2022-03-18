@@ -50,7 +50,7 @@ func addGeometryInteractions(g Geometry, adjacents map[XY]xyPair, interactions m
 	case TypeMultiPolygon:
 		addMultiLineStringInteractions(g.MustAsMultiPolygon().Boundary(), adjacents, interactions)
 	case TypeGeometryCollection:
-		addGeometryCollectionInteractions(g.MustAsGeometryCollection().Boundary(), adjacents, interactions)
+		addGeometryCollectionInteractions(g.MustAsGeometryCollection(), adjacents, interactions)
 	default:
 		panic("unknown geometry: " + g.Type().String())
 	}
