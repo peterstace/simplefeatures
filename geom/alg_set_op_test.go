@@ -765,6 +765,25 @@ func TestBinaryOp(t *testing.T) {
 			symDiff: "GEOMETRYCOLLECTION(POLYGON((1 0,2 1,3 2,1 2,1 1,1 0)),LINESTRING(0 1,1 1),LINESTRING(2 1,3 1))",
 			relate:  "1F20F1102",
 		},
+		{
+			/*
+				+-----+--+
+				| A   |C |
+				|  +--+--+
+				|  |  |  |
+				+--+--+  |
+				   |   B |
+				   +--+--+
+			*/
+			input1:  "GEOMETRYCOLLECTION(POLYGON((0 0,2 0,2 2,0 2,0 0)),POLYGON((1 1,3 1,3 3,1 3,1 1)))",
+			input2:  "POLYGON((2 0,3 0,3 1,2 1,2 0))",
+			union:   "POLYGON((0 0,2 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0))",
+			inter:   "MULTILINESTRING((2 0,2 1),(2 1,3 1))",
+			fwdDiff: "POLYGON((1 2,0 2,0 0,2 0,2 1,3 1,3 3,1 3,1 2))",
+			revDiff: "POLYGON((2 0,3 0,3 1,2 1,2 0))",
+			symDiff: "POLYGON((0 0,2 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0))",
+			relate:  "FF2F11212",
+		},
 
 		// Empty cases for relate.
 		{input1: "POINT EMPTY", input2: "POINT(0 0)", relate: "FFFFFF0F2"},
