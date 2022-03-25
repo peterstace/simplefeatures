@@ -79,11 +79,11 @@ func UnmarshalTWKBEnvelope(twkb []byte) (Envelope, error) {
 		return Envelope{}, nil
 	}
 	return NewEnvelope([]XY{
-		XY{
+		{
 			p.scalings[0] * float64(p.bbox[0]),
 			p.scalings[1] * float64(p.bbox[2]),
 		},
-		XY{
+		{
 			p.scalings[0] * float64(p.bbox[0]+p.bbox[1]),
 			p.scalings[1] * float64(p.bbox[2]+p.bbox[3]),
 		},
