@@ -60,8 +60,9 @@ func UnmarshalTWKBBoundingBoxHeader(twkb []byte) (bbox []Point, err error) {
 }
 
 // UnmarshalTWKBEnvelope checks if the bounding box header exists
-// in the Tiny Well Known Binary (TWKB) and iff it exists
-// returns it as an Envelope with a true result.
+// in the Tiny Well Known Binary (TWKB) and returns an Envelope
+// that is non-empty iff the header exists (thus the envelope
+// will not be computed from the data, only from a header).
 //
 // Note that due to the definition of Envelope, only the X and Y
 // coordinates will be returned this way, whereas any Z and M
@@ -69,15 +70,15 @@ func UnmarshalTWKBBoundingBoxHeader(twkb []byte) (bbox []Point, err error) {
 //
 // The function returns immediately after parsing the headers.
 // Any remaining geometry is not parsed by this function.
-func UnmarshalTWKBEnvelope(twkb []byte) (bbox Envelope, hasBBox bool, err error) {
+func UnmarshalTWKBEnvelope(twkb []byte) (Envelope, error) {
 	p := newtwkbParser(twkb)
-	if err = p.parseHeaders(); err != nil {
-		return Envelope{}, false, p.annotateError(err)
+	if err := p.parseHeaders(); err != nil {
+		return Envelope{}, p.annotateError(err)
 	}
 	if !p.hasBBox {
-		return Envelope{}, false, nil
+		return Envelope{}, nil
 	}
-	return newUncheckedEnvelope(
+	return NewEnvelope([]XY{
 		XY{
 			p.scalings[0] * float64(p.bbox[0]),
 			p.scalings[1] * float64(p.bbox[2]),
@@ -86,7 +87,7 @@ func UnmarshalTWKBEnvelope(twkb []byte) (bbox Envelope, hasBBox bool, err error)
 			p.scalings[0] * float64(p.bbox[0]+p.bbox[1]),
 			p.scalings[1] * float64(p.bbox[2]+p.bbox[3]),
 		},
-	), true, nil
+	})
 }
 
 // twkbParser holds all state information for interpreting TWKB buffers
