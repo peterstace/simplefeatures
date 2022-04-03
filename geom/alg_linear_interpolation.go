@@ -53,5 +53,5 @@ func (l linearInterpolator) interpolate(frac float64) Point {
 }
 
 func lerp(a, b, ratio float64) float64 {
-	return a*(1-ratio) + b*ratio
+	return a + ratio*(b-a)
 }
