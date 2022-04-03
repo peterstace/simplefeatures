@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Add initial linear referencing methods to `LineString`. The initial methods
+  are `InterpolatePoint` and `InterpolateEvenlySpacedPoints`.
+
 ## v0.37.0
 
 2022-03-29

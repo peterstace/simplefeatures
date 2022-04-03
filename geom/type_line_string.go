@@ -442,3 +442,52 @@ func (s LineString) Simplify(threshold float64) LineString {
 	seq = NewSequence(floats, seq.CoordinatesType())
 	return newLineStringWithOmitInvalid(seq)
 }
+
+// InterpolatePoint returns a Point interpolated along the LineString at the
+// given fraction. The fraction should be between 0 and 1, and will be clipped
+// to that range if outside of it. Z and M coordinates are also interpolated if
+// applicable.
+func (s LineString) InterpolatePoint(fraction float64) Point {
+	if s.IsEmpty() {
+		return Point{}.ForceCoordinatesType(s.CoordinatesType())
+	}
+	interp := newLinearInterpolator(s.Coordinates())
+	return interp.interpolate(fraction)
+}
+
+// InterpolateEvenlySpacedPoints returns a MultiPoint consisting of n Points
+// evenly spaced along the LineString. If n is negative or 0, then an empty
+// MultiPoint is returned. If n is 1, then a MultiPoint containing the
+// LineString midpoint is returned. If n is 2 or greater, then the returned
+// MultiPoint contains the LineString start point, n - 2 evenly spaced
+// intermediate Points, and the LineString end point (in that order).
+func (s LineString) InterpolateEvenlySpacedPoints(n int) MultiPoint {
+	if n < 0 {
+		n = 0
+	}
+	if n == 0 {
+		return MultiPoint{}.ForceCoordinatesType(s.CoordinatesType())
+	}
+
+	seq := s.Coordinates()
+	if seq.Length() == 0 {
+		pts := make([]Point, n)
+		for i := 0; i < n; i++ {
+			pts[i] = Point{}.ForceCoordinatesType(s.CoordinatesType())
+		}
+		return NewMultiPoint(pts)
+	}
+
+	if n == 1 {
+		interp := newLinearInterpolator(s.Coordinates())
+		return interp.interpolate(0.5).AsMultiPoint()
+	}
+
+	interp := newLinearInterpolator(s.Coordinates())
+	pts := make([]Point, n)
+	for i := 0; i < n; i++ {
+		frac := float64(i) / float64(n-1)
+		pts[i] = interp.interpolate(frac)
+	}
+	return NewMultiPoint(pts)
+}

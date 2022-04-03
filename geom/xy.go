@@ -112,6 +112,10 @@ func (w XY) Less(o XY) bool {
 	return w.Y < o.Y
 }
 
+func (w XY) distanceTo(o XY) float64 {
+	return math.Sqrt(w.distanceSquaredTo(o))
+}
+
 func (w XY) distanceSquaredTo(o XY) float64 {
 	delta := o.Sub(w)
 	return delta.Dot(delta)
