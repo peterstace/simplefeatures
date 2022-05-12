@@ -1030,7 +1030,7 @@ func TestBinaryOpNoCrash(t *testing.T) {
 			} {
 				t.Run(op.name, func(t *testing.T) {
 					if _, err := op.op(gA, gB); err != nil {
-						t.Errorf("unexpected error: %w", err)
+						t.Errorf("unexpected error: %v", err)
 					}
 				})
 			}
