@@ -12,8 +12,12 @@ func TestExactEquals(t *testing.T) {
 		"pt_b": "POINT(3 -1)",
 		"pt_c": "POINT(2.09 2.91)",
 		"pt_d": "POINT(2.08 2.92)",
-		"pt_e": "POINT EMPTY",
 		"pt_f": "POINT(3.125 -1)",
+
+		"pt_empty":    "POINT EMPTY",
+		"pt_empty_z":  "POINT Z EMPTY",
+		"pt_empty_m":  "POINT M EMPTY",
+		"pt_empty_zm": "POINT ZM EMPTY",
 
 		"pt_a_z":  "POINT Z (2 3 4)",
 		"pt_a_m":  "POINT M (2 3 4)",
@@ -24,7 +28,10 @@ func TestExactEquals(t *testing.T) {
 		"ln_c": "LINESTRING(1.1 2,3 4)",
 		"ln_d": "LINESTRING(3 4,1 2)",
 
-		"ls_empty": "LINESTRING EMPTY",
+		"ls_empty":    "LINESTRING EMPTY",
+		"ls_empty_z":  "LINESTRING Z EMPTY",
+		"ls_empty_m":  "LINESTRING M EMPTY",
+		"ls_empty_zm": "LINESTRING ZM EMPTY",
 
 		"ls_a": "LINESTRING(1 2,3 4,5 6)",
 		"ls_b": "LINESTRING(1 2,3 4,5 6.1)",
@@ -39,11 +46,15 @@ func TestExactEquals(t *testing.T) {
 		"ls_q": "LINESTRING(1 0,0 0,0 1,1 0)",
 		"ls_r": "LINESTRING(0 1,1 0,0 0,0 1)",
 
-		"p_empty": "POLYGON EMPTY",
-		"p_a":     "POLYGON((0 0,0 1,1 0,0 0))",
-		"p_b":     "POLYGON((0 0,1 0,0 1,0 0))",
-		"p_c":     "POLYGON((0 0,0 1,1 1,1 0,0 0))",
-		"p_d":     "POLYGON((0 0,0 1,1 1,1 0.1,0 0))",
+		"p_empty":    "POLYGON EMPTY",
+		"p_empty_z":  "POLYGON Z EMPTY",
+		"p_empty_m":  "POLYGON M EMPTY",
+		"p_empty_zm": "POLYGON ZM EMPTY",
+
+		"p_a": "POLYGON((0 0,0 1,1 0,0 0))",
+		"p_b": "POLYGON((0 0,1 0,0 1,0 0))",
+		"p_c": "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+		"p_d": "POLYGON((0 0,0 1,1 1,1 0.1,0 0))",
 
 		"p_e": `POLYGON(
 			(0 0,5 0,5 3,0 3,0 0),
@@ -56,7 +67,10 @@ func TestExactEquals(t *testing.T) {
 			(1 1,2 1,2 2,1 2,1 1)
 		)`,
 
-		"mp_empty": "MULTIPOINT EMPTY",
+		"mp_empty":    "MULTIPOINT EMPTY",
+		"mp_empty_z":  "MULTIPOINT Z EMPTY",
+		"mp_empty_m":  "MULTIPOINT M EMPTY",
+		"mp_empty_zm": "MULTIPOINT ZM EMPTY",
 
 		"mp_1_a": "MULTIPOINT(4 8)",
 		"mp_1_b": "MULTIPOINT(4 8.1)",
@@ -80,7 +94,10 @@ func TestExactEquals(t *testing.T) {
 		"mp_3_h": "MULTIPOINT(7 6,3 3,3 3)",
 		"mp_3_i": "MULTIPOINT(3 3,7 6,3 3)",
 
-		"mls_empty": "MULTILINESTRING EMPTY",
+		"mls_empty":    "MULTILINESTRING EMPTY",
+		"mls_empty_z":  "MULTILINESTRING Z EMPTY",
+		"mls_empty_m":  "MULTILINESTRING M EMPTY",
+		"mls_empty_zm": "MULTILINESTRING ZM EMPTY",
 
 		"mls_a": "MULTILINESTRING((0 1,2 3,4 5))",
 		"mls_b": "MULTILINESTRING((4 5,2 3,0 1))",
@@ -94,20 +111,28 @@ func TestExactEquals(t *testing.T) {
 			(5 3,4 8,1 2,9 8)
 		)`,
 
-		"mpo_empty": "MULTIPOLYGON EMPTY",
-		"mpo_1_a":   "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))",
-		"mpo_1_b":   "MULTIPOLYGON(((0 0,1 0,0 1,0 0)))",
-		"mpo_1_c":   "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))",
+		"mpo_empty":    "MULTIPOLYGON EMPTY",
+		"mpo_empty_z":  "MULTIPOLYGON Z EMPTY",
+		"mpo_empty_m":  "MULTIPOLYGON M EMPTY",
+		"mpo_empty_zm": "MULTIPOLYGON ZM EMPTY",
 
-		"g_empty": "GEOMETRYCOLLECTION EMPTY",
-		"g_1_a":   "GEOMETRYCOLLECTION(POINT(1 2))",
-		"g_1_b":   "GEOMETRYCOLLECTION(POINT(1 3))",
-		"g_1_c":   "GEOMETRYCOLLECTION(POINT(1.1 9))",
-		"g_1_d":   "GEOMETRYCOLLECTION(POINT(1.0 9))",
-		"g_2_a":   "GEOMETRYCOLLECTION(POINT(1 3),LINESTRING(1 2,3 4))",
-		"g_2_b":   "GEOMETRYCOLLECTION(LINESTRING(1 2,3 4),POINT(1 3))",
-		"g_2_c":   "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 5),LINESTRING(1 2,3 4)))",
-		"g_2_d":   "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(LINESTRING(1 2,3 4),POINT(1 5)))",
+		"mpo_1_a": "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))",
+		"mpo_1_b": "MULTIPOLYGON(((0 0,1 0,0 1,0 0)))",
+		"mpo_1_c": "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)))",
+
+		"g_empty":    "GEOMETRYCOLLECTION EMPTY",
+		"g_empty_z":  "GEOMETRYCOLLECTION Z EMPTY",
+		"g_empty_m":  "GEOMETRYCOLLECTION M EMPTY",
+		"g_empty_zm": "GEOMETRYCOLLECTION ZM EMPTY",
+
+		"g_1_a": "GEOMETRYCOLLECTION(POINT(1 2))",
+		"g_1_b": "GEOMETRYCOLLECTION(POINT(1 3))",
+		"g_1_c": "GEOMETRYCOLLECTION(POINT(1.1 9))",
+		"g_1_d": "GEOMETRYCOLLECTION(POINT(1.0 9))",
+		"g_2_a": "GEOMETRYCOLLECTION(POINT(1 3),LINESTRING(1 2,3 4))",
+		"g_2_b": "GEOMETRYCOLLECTION(LINESTRING(1 2,3 4),POINT(1 3))",
+		"g_2_c": "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 5),LINESTRING(1 2,3 4)))",
+		"g_2_d": "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(LINESTRING(1 2,3 4),POINT(1 5)))",
 
 		// Reproduces bugs from fuzz tests:
 		"b_1": "LINESTRING(0 0,1 1)",

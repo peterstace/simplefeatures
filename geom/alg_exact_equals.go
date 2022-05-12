@@ -155,9 +155,12 @@ func (c exactEqualsComparator) lineStringsEq(ls1, ls2 LineString) bool {
 }
 
 func (c exactEqualsComparator) pointsEq(p1, p2 Point) bool {
+	if p1.IsEmpty() && p2.IsEmpty() {
+		return p1.CoordinatesType() == p2.CoordinatesType()
+	}
 	c1, ok1 := p1.Coordinates()
 	c2, ok2 := p2.Coordinates()
-	return ok1 == ok2 && (!ok1 || c.eq(c1, c2))
+	return ok1 && ok2 && c.eq(c1, c2)
 }
 
 func (c exactEqualsComparator) multiPointsEq(mp1, mp2 MultiPoint) bool {

@@ -2,7 +2,24 @@
 
 ## Unreleased
 
-N/A
+- Add initial linear referencing methods to `LineString`. The initial methods
+  are `InterpolatePoint` and `InterpolateEvenlySpacedPoints`.
+
+## v0.37.0
+
+2022-03-29
+
+__Special thanks to Lachlan Patrick and Albert Teoh for contributing to this release.__
+
+- Improves performance of `ForceCW` and `ForceCCW` methods by eliminating
+  unneeded memory allocations.
+
+- Adds full support for TWKB (Tiny Well Known Binary) as a serialisation format.
+
+- Fixes a vet warning affecting Go 1.18 relating to printf verbs in tests.
+
+- Fixes a bug in `ExactEquals` that incorrectly compares empty points of unequal
+  coordinate type as being equal.
 
 ## v0.36.0
 
@@ -10,10 +27,10 @@ N/A
 
 __Special thanks to Lachlan Patrick and Albert Teoh for contributing to this release.__
 
-- Eliminate redundant calls to the optional user supplied transform func during
+- Eliminates redundant calls to the optional user supplied transform func during
   area calculations.
 
-- Add `IsCW` and `IsCCW` methods, which check if geometries have consistent
+- Adds `IsCW` and `IsCCW` methods, which check if geometries have consistent
   clockwise or counterclockwise winding orientation.
 
 ## v0.35.0
@@ -22,16 +39,16 @@ __Special thanks to Lachlan Patrick and Albert Teoh for contributing to this rel
 
 __Special thanks to Albert Teoh and Sameera Perera for contributing to this release.__
 
-- Fix spelling of "Marshaller" when referring to the interface defined in the
+- Fixes spelling of "Marshaller" when referring to the interface defined in the
   `encoding/json` package.
 
-- Add `UnmarshalJSON` methods to each concrete geometry type
+- Adds `UnmarshalJSON` methods to each concrete geometry type
   (`GeometryCollection`, `Point`, `MultiPoint`, `LineString`,
   `MultiLineString`, `Polygon`, `MultiPolygon`). This causes these types to
   implement the `encoding/json.Unmarshaler` interface. GeoJSON can now be
   unmarshalled directly into a concrete geometry type.
 
-- Use the `%w` verb for wrapping errors internally. Note that simplefeatures
+- Uses the `%w` verb for wrapping errors internally. Note that simplefeatures
   does not yet currently expose any sentinel errors or error types.
 
 - **Breaking change**: Changes the `Simplify` package level function to become
