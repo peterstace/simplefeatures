@@ -100,6 +100,17 @@ func expectGeomEq(t testing.TB, got, want Geometry, opts ...ExactEqualsOption) {
 	}
 }
 
+func expectGeomApproxEq(t testing.TB, got, want Geometry) {
+	t.Helper()
+	eq, err := Equals(got, want)
+	if err != nil {
+		t.Errorf("\ngot:  %v\nwant: %v\nerr: %v\n", got.AsText(), want.AsText(), err)
+	}
+	if !eq {
+		t.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
+	}
+}
+
 func expectGeomEqWKT(t testing.TB, got Geometry, wantWKT string, opts ...ExactEqualsOption) {
 	t.Helper()
 	want := geomFromWKT(t, wantWKT)

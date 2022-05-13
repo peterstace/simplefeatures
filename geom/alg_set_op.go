@@ -92,7 +92,7 @@ func merge(gc GeometryCollection) (Geometry, error) {
 	merged := Geometry{}
 	for _, g := range gc.geoms {
 		var err error
-		merged, err = Union(g, merged)
+		merged, err = Union(merged, g)
 		if err != nil {
 			return Geometry{}, err
 		}
