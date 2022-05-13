@@ -858,6 +858,7 @@ func TestBinaryOp(t *testing.T) {
 				LINESTRING(6 4,7 4),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 6,3 7))`,
+			// The 0.6666... here comes from ghost edges.
 			inter: `GEOMETRYCOLLECTION(
 				POLYGON((4 4,5 5,3 5,2 5,2 4.666666666666667,2 2,4 4)),
 				LINESTRING(4 4,6 4),
