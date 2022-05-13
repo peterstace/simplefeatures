@@ -767,12 +767,70 @@ func TestBinaryOp(t *testing.T) {
 		},
 		{
 			/*
+			        +  +
+			        |\ |
+			        | \|
+			     +  |  +
+			     |\ |  |\
+			     | \|  | \
+			     |  +  |  \
+			     |  |\ |   \
+			     |  | \|    \
+			  +--+--+--+-----+--+1B
+			     |  |  |\     \
+			     |  |  | \  2A \
+			     |  +--+--+-----+
+			     |     |   \
+			     | 1A  |    \
+			     +-----+-----+
+			           |
+			           |2B
+			           +
+			*/
+			input1: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,5 5,1 5,1 1)),
+				LINESTRING(0 3,6 3))`,
+			input2: `GEOMETRYCOLLECTION(
+				POLYGON((2 0,6 4,2 4,2 0)),
+				LINESTRING(3 0,3 6))`,
+			union: `GEOMETRYCOLLECTION(
+				POLYGON((3 5,1 5,1 3,1 1,2 2,2 0,3 1,5 3,6 4,4 4,5 5,3 5)),
+				LINESTRING(0 3,1 3),
+				LINESTRING(5 3,6 3),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 5,3 6))`,
+			inter: `GEOMETRYCOLLECTION(
+				POLYGON((2 2,3 3,2 3,2 2)),
+				POLYGON((3 3,4 4,3 4,3 3)),
+				LINESTRING(3 3,5 3),
+				LINESTRING(3 4,2 4,2 3),
+				LINESTRING(3 4,3 5))`,
+			fwdDiff: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,2 2,2 3,2 4,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
+				LINESTRING(0 3,1 3),
+				LINESTRING(5 3,6 3))`,
+			revDiff: `GEOMETRYCOLLECTION(
+				POLYGON((5 3,6 4,4 4,3 3,2 2,2 0,3 1,5 3)),
+				POLYGON((3 4,2 4,2 3,3 3,3 4)),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 5,3 6))`,
+			symDiff: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,2 2,2 3,3 3,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
+				POLYGON((3 3,2 2,2 0,3 1,5 3,6 4,4 4,3 3)),
+				LINESTRING(0 3,1 3),
+				LINESTRING(5 3,6 3),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 5,3 6))`,
+			relate: `212111212`,
+		},
+		{
+			/*
 				+-----+--+      +-----+--+
-				| A1  |B |      |        |
+				| 1A  |2 |      |        |
 				|  +--+--+      |        +
 				|  |  |  |  ->  |        |
 				+--+--+  |      +--+     |
-				   |  A2 |         |     |
+				   |  1B |         |     |
 				   +--+--+         +--+--+
 			*/
 			input1:  "GEOMETRYCOLLECTION(POLYGON((0 0,2 0,2 2,0 2,0 0)),POLYGON((1 1,3 1,3 3,1 3,1 1)))",
@@ -788,17 +846,17 @@ func TestBinaryOp(t *testing.T) {
 			/*
 				      +--------+                  +--------+
 				      |        |                  |        |
-				      |   A1   |                  |        |
+				      |   1A   |                  |        |
 				      |        |                  |        |
 				+-----+--+  +--+-----+      +-----+        +-----+
 				|     |  |  |  |     |      |                    |
 				|     +--+--+--+     |      |        +--+        |
-				|  B1    |  |    B2  |  ->  |        |  |        |
+				|  2A    |  |    2B  |  ->  |        |  |        |
 				|     +--+--+--+     |      |        +--+        |
 				|     |  |  |  |     |      |                    |
 				+-----+--+  +--+-----+      +-----+        +-----+
 				      |        |                  |        |
-				      |   A2   |                  |        |
+				      |   1B   |                  |        |
 				      |        |                  |        |
 				      +--------+                  +--------+
 			*/
