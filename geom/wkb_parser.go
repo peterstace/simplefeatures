@@ -223,6 +223,9 @@ func (p *wkbParser) parseLineString(ctype CoordinatesType) (LineString, error) {
 // bytesAsFloats reinterprets the bytes slice as a float64 slice in a similar
 // manner to reinterpret_cast in C++.
 func bytesAsFloats(byts []byte) []float64 {
+	if len(byts) == 0 {
+		return nil
+	}
 	return unsafe.Slice((*float64)(unsafe.Pointer(&byts[0])), len(byts)/8)
 }
 

@@ -86,5 +86,8 @@ func (m *wkbMarshaler) writeSequence(seq Sequence) {
 // floatsAsBytes reinterprets the floats slice as a bytes slice in a similar
 // manner to reinterpret_cast in C++.
 func floatsAsBytes(floats []float64) []byte {
+	if len(floats) == 0 {
+		return nil
+	}
 	return unsafe.Slice((*byte)(unsafe.Pointer(&floats[0])), 8*len(floats))
 }
