@@ -203,6 +203,9 @@ func (m MultiPoint) Coordinates() Sequence {
 
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
 func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPoint, error) {
+	if len(m.points) == 0 {
+		return MultiPoint{}.ForceCoordinatesType(m.CoordinatesType()), nil
+	}
 	txPoints := make([]Point, len(m.points))
 	for i, pt := range m.points {
 		if c, ok := pt.Coordinates(); ok {

@@ -620,6 +620,15 @@ func (p Polygon) DumpCoordinates() Sequence {
 	return seq
 }
 
+// DumpRings returns a copy of the Polygon's rings as a slice of LineStrings.
+// If the Polygon is empty, then the slice will have length zero. Otherwise,
+// the slice will consist of the exterior ring, followed by any interior rings.
+func (p Polygon) DumpRings() []LineString {
+	tmp := make([]LineString, len(p.rings))
+	copy(tmp, p.rings)
+	return tmp
+}
+
 // Summary returns a text summary of the Polygon following a similar format to https://postgis.net/docs/ST_Summary.html.
 func (p Polygon) Summary() string {
 	numPoints := p.DumpCoordinates().Length()
