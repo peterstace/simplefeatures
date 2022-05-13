@@ -799,6 +799,7 @@ func TestBinaryOp(t *testing.T) {
 				LINESTRING(5 3,6 3),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 5,3 6))`,
+			// Known bug: intersection should include POLYGON((2 3,3 3,3 4,2 4))
 			inter: `GEOMETRYCOLLECTION(
 				POLYGON((2 2,3 3,2 3,2 2)),
 				POLYGON((3 3,4 4,3 4,3 3)),
