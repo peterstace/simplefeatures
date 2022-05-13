@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
-	"reflect"
 	"unsafe"
 )
 
@@ -224,12 +223,7 @@ func (p *wkbParser) parseLineString(ctype CoordinatesType) (LineString, error) {
 // bytesAsFloats reinterprets the bytes slice as a float64 slice in a similar
 // manner to reinterpret_cast in C++.
 func bytesAsFloats(byts []byte) []float64 {
-	var floats []float64
-	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&floats))
-	hdr.Data = (*reflect.SliceHeader)(unsafe.Pointer(&byts)).Data
-	hdr.Len = len(byts) / 8
-	hdr.Cap = cap(byts) / 8
-	return floats
+	return unsafe.Slice((*float64)(unsafe.Pointer(&byts[0])), len(byts)/8)
 }
 
 // flipEndianessStride8 flips the endianess of the input bytes, assuming that
