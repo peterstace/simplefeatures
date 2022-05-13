@@ -2,6 +2,7 @@ name: golangci-lint
 on:
   push:
   pull_request:
+  workflow_dispatch:
 jobs:
   golangci:
     name: lint
@@ -9,9 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
-        run: sudo apt update && sudo sudo apt install libgdal-dev libgeos-dev libproj-dev
+        run: sudo apt update && sudo sudo apt install libgeos-dev
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
           # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
-          version: v1.42
+          version: v1.46
