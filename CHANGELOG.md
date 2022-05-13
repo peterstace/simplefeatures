@@ -5,6 +5,9 @@
 - Add initial linear referencing methods to `LineString`. The initial methods
   are `InterpolatePoint` and `InterpolateEvenlySpacedPoints`.
 
+- Add a new `DumpRings` method to the `Polygon` type, which gives the rings of
+  the polygon as a slice of `LineString`s.
+
 ## v0.37.0
 
 2022-03-29
