@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
-        run: sudo apt update && sudo sudo apt install libgdal-dev libgeos-dev libproj-dev
+        run: sudo apt update && sudo sudo apt install libgeos-dev
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
