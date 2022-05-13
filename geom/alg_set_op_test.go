@@ -799,12 +799,9 @@ func TestBinaryOp(t *testing.T) {
 				LINESTRING(5 3,6 3),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 5,3 6))`,
-			// Known bug: intersection should include POLYGON((2 3,3 3,3 4,2 4))
 			inter: `GEOMETRYCOLLECTION(
-				POLYGON((2 2,3 3,2 3,2 2)),
-				POLYGON((3 3,4 4,3 4,3 3)),
+				POLYGON((3 3,4 4,3 4,2 4,2 3,2 2,3 3)),
 				LINESTRING(3 3,5 3),
-				LINESTRING(3 4,2 4,2 3),
 				LINESTRING(3 4,3 5))`,
 			fwdDiff: `GEOMETRYCOLLECTION(
 				POLYGON((1 1,2 2,2 3,2 4,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
@@ -812,12 +809,11 @@ func TestBinaryOp(t *testing.T) {
 				LINESTRING(5 3,6 3))`,
 			revDiff: `GEOMETRYCOLLECTION(
 				POLYGON((5 3,6 4,4 4,3 3,2 2,2 0,3 1,5 3)),
-				POLYGON((3 4,2 4,2 3,3 3,3 4)),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 5,3 6))`,
 			symDiff: `GEOMETRYCOLLECTION(
-				POLYGON((1 1,2 2,2 3,3 3,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
-				POLYGON((3 3,2 2,2 0,3 1,5 3,6 4,4 4,3 3)),
+				POLYGON((3 1,5 3,6 4,4 4,3 3,2 2,2 0,3 1)),
+				POLYGON((4 4,5 5,3 5,1 5,1 3,1 1,2 2,2 3,2 4,3 4,4 4)),
 				LINESTRING(0 3,1 3),
 				LINESTRING(5 3,6 3),
 				LINESTRING(3 0,3 1),
@@ -862,26 +858,21 @@ func TestBinaryOp(t *testing.T) {
 				LINESTRING(6 4,7 4),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 6,3 7))`,
-			// Known bug
 			inter: `GEOMETRYCOLLECTION(
-				POLYGON((2 2,3 3,3 4,2 4,2 2)),
-				POLYGON((4 4,5 5,3 5,3 4,4 4)),
-				LINESTRING(3 3,4 4),
+				POLYGON((4 4,5 5,3 5,2 5,2 4.666666666666667,2 2,4 4)),
 				LINESTRING(4 4,6 4),
-				LINESTRING(3 5,2 5,2 4),
 				LINESTRING(3 5,3 6))`,
 			fwdDiff: `GEOMETRYCOLLECTION(
-				POLYGON((1 1,2 2,2 4,2 5,3 5,5 5,6 6,3 6,1 6,1 4,1 1)),
-				POLYGON((3 3,4 4,3 4,3 3)),
+				POLYGON((5 5,6 6,3 6,1 6,1 4.333333333333333,1 4,1 1,2 2,2 4.666666666666667,2 5,3 5,5 5)),
 				LINESTRING(0 4,1 4),
 				LINESTRING(6 4,7 4))`,
-			revDiff: `GEOMETRYCOLLECTION(POLYGON((2 0,3 1,6 4,7 5,5 5,4 4,3 3,2 2,2 0)),
-			POLYGON((3 5,2 5,2 4,3 4,3 5)),
-			LINESTRING(3 0,3 1),
-			LINESTRING(3 6,3 7))`,
+			revDiff: `GEOMETRYCOLLECTION(
+				POLYGON((6 4,7 5,5 5,4 4,2 2,2 0,3 1,3.3333333333333335 1.3333333333333333,6 4)),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 6,3 7))`,
 			symDiff: `GEOMETRYCOLLECTION(
-				POLYGON((2 4,3 4,3 5,5 5,6 6,3 6,1 6,1 4,1 1,2 2,2 4)),
-				POLYGON((3 3,2 2,2 0,3 1,6 4,7 5,5 5,4 4,3 4,3 3)),
+				POLYGON((5 5,4 4,2 2,2 0,3 1,3.3333333333333335 1.3333333333333333,6 4,7 5,5 5)),
+				POLYGON((5 5,6 6,3 6,1 6,1 4.333333333333333,1 4,1 1,2 2,2 4.666666666666667,2 5,3 5,5 5)),
 				LINESTRING(0 4,1 4),
 				LINESTRING(6 4,7 4),
 				LINESTRING(3 0,3 1),
@@ -901,7 +892,7 @@ func TestBinaryOp(t *testing.T) {
 			input1:  "GEOMETRYCOLLECTION(POLYGON((0 0,2 0,2 2,0 2,0 0)),POLYGON((1 1,3 1,3 3,1 3,1 1)))",
 			input2:  "POLYGON((2 0,3 0,3 1,2 1,2 0))",
 			union:   "POLYGON((0 0,2 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0))",
-			inter:   "MULTILINESTRING((2 0,2 1),(2 1,3 1))",
+			inter:   "LINESTRING(2 0,2 1,3 1)",
 			fwdDiff: "POLYGON((1 2,0 2,0 0,2 0,2 1,3 1,3 3,1 3,1 2))",
 			revDiff: "POLYGON((2 0,3 0,3 1,2 1,2 0))",
 			symDiff: "POLYGON((0 0,2 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0))",
