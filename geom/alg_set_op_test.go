@@ -767,6 +767,7 @@ func TestBinaryOp(t *testing.T) {
 		},
 		{
 			/*
+			    Reproduces a bug with set ops between self-intersecting GeometryCollections.
 			        +  +
 			        |\ |
 			        | \|
@@ -822,6 +823,7 @@ func TestBinaryOp(t *testing.T) {
 		},
 		{
 			/*
+			    Reproduces a bug with set ops between self-intersecting GeometryCollections.
 			    Similar to the previous case, but none of the crossing points are coincident.
 			        +  +
 			        |\ |

@@ -61,14 +61,17 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 
 func setOp(a, b Geometry, include func([2]label) bool, mergeFirst bool) (Geometry, error) {
 	if mergeFirst {
+		// If a or b are GeometryCollections, take the union of their elements.
+		// This is a workaround for an issue where if a GeometryCollection has
+		// elements that overlap, some set operations don't behave well.
 		var err error
 		a, err = merge(a)
 		if err != nil {
-			return Geometry{}, wrap(err, "error creating union of GeometryCollection")
+			return Geometry{}, wrap(err, "error merging GeometryCollection")
 		}
 		b, err = merge(b)
 		if err != nil {
-			return Geometry{}, wrap(err, "error creating union of GeometryCollection")
+			return Geometry{}, wrap(err, "error merging GeometryCollection")
 		}
 	}
 	overlay, err := createOverlay(a, b)
