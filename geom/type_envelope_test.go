@@ -378,7 +378,7 @@ func TestEnvelopeInvalidXYInteractions(t *testing.T) {
 			expectErr(t, err)
 		})
 		t.Run(fmt.Sprintf("extend_to_include_invalid_xy_%d", i), func(t *testing.T) {
-			_, err := NewEnvelope([]XY{{-1, -1}, {1, 1}})
+			env, err := NewEnvelope([]XY{{-1, -1}, {1, 1}})
 			expectNoErr(t, err)
 			_, err = env.ExtendToIncludeXY(tc)
 			expectErr(t, err)
