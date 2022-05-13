@@ -316,6 +316,9 @@ func (m MultiLineString) Coordinates() []Sequence {
 // TransformXY transforms this MultiLineString into another MultiLineString according to fn.
 func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiLineString, error) {
 	n := m.NumLineStrings()
+	if n == 0 {
+		return MultiLineString{}.ForceCoordinatesType(m.CoordinatesType()), nil
+	}
 	transformed := make([]LineString, n)
 	for i := 0; i < n; i++ {
 		var err error
