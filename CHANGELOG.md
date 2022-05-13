@@ -5,6 +5,9 @@
 - Add initial linear referencing methods to `LineString`. The initial methods
   are `InterpolatePoint` and `InterpolateEvenlySpacedPoints`.
 
+- Fixes a bug in the `TransformXY` method where empty `MultiPoint` and
+  `MultiLineString`s would have their coordinates type downgraded to XY.
+
 ## v0.37.0
 
 2022-03-29
