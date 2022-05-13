@@ -65,13 +65,15 @@ func setOp(a, b Geometry, include func([2]label) bool, mergeFirst bool) (Geometr
 		// This is a workaround for an issue where if a GeometryCollection has
 		// elements that overlap, some set operations don't behave well.
 		var err error
-		a, err = merge(a)
-		if err != nil {
-			return Geometry{}, wrap(err, "error merging GeometryCollection")
+		if gc, ok := a.AsGeometryCollection(); ok {
+			if a, err = merge(gc); err != nil {
+				return Geometry{}, wrap(err, "error merging GeometryCollection")
+			}
 		}
-		b, err = merge(b)
-		if err != nil {
-			return Geometry{}, wrap(err, "error merging GeometryCollection")
+		if gc, ok := b.AsGeometryCollection(); ok {
+			if b, err = merge(gc); err != nil {
+				return Geometry{}, wrap(err, "error merging GeometryCollection")
+			}
 		}
 	}
 	overlay, err := createOverlay(a, b)
@@ -86,15 +88,11 @@ func setOp(a, b Geometry, include func([2]label) bool, mergeFirst bool) (Geometr
 	return g, nil
 }
 
-func merge(g Geometry) (Geometry, error) {
-	gc, ok := g.AsGeometryCollection()
-	if !ok {
-		return g, nil
-	}
+func merge(gc GeometryCollection) (Geometry, error) {
 	merged := Geometry{}
-	for _, elem := range gc.geoms {
+	for _, g := range gc.geoms {
 		var err error
-		merged, err = Union(elem, merged)
+		merged, err = Union(g, merged)
 		if err != nil {
 			return Geometry{}, err
 		}
