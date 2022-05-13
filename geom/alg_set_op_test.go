@@ -826,6 +826,70 @@ func TestBinaryOp(t *testing.T) {
 		},
 		{
 			/*
+			    Similar to the previous case, but none of the crossing points are coincident.
+			        +  +
+			        |\ |
+			        | \|
+			     +  |  +
+			     |\ |  |\
+			     | \|  | \
+			     |  +  |  \
+			     |  |\ |   \
+			     |  | \|    \
+			     |  |  +     \
+			     |  |  |\     \
+			     |  |  | \     \
+			  +--+--+--+--+--+--+--+1B
+			     |  |  |   \     \
+			     |  |  |    \  2A \
+			     |  +--+-----+-----+
+			     |     |      \
+			     | 1A  |       \
+			     +-----+--------+
+			           |
+			           |2B
+			           +
+			*/
+			input1: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,6 6,1 6,1 1)),
+				LINESTRING(0 4,7 4))`,
+			input2: `GEOMETRYCOLLECTION(
+				POLYGON((2 0,7 5,2 5,2 0)),
+				LINESTRING(3 0,3 7))`,
+			union: `GEOMETRYCOLLECTION(
+				POLYGON((2 2,2 0,3 1,6 4,7 5,5 5,6 6,3 6,1 6,1 4,1 1,2 2)),
+				LINESTRING(0 4,1 4),
+				LINESTRING(6 4,7 4),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 6,3 7))`,
+			// Known bug
+			inter: `GEOMETRYCOLLECTION(
+				POLYGON((2 2,3 3,3 4,2 4,2 2)),
+				POLYGON((4 4,5 5,3 5,3 4,4 4)),
+				LINESTRING(3 3,4 4),
+				LINESTRING(4 4,6 4),
+				LINESTRING(3 5,2 5,2 4),
+				LINESTRING(3 5,3 6))`,
+			fwdDiff: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,2 2,2 4,2 5,3 5,5 5,6 6,3 6,1 6,1 4,1 1)),
+				POLYGON((3 3,4 4,3 4,3 3)),
+				LINESTRING(0 4,1 4),
+				LINESTRING(6 4,7 4))`,
+			revDiff: `GEOMETRYCOLLECTION(POLYGON((2 0,3 1,6 4,7 5,5 5,4 4,3 3,2 2,2 0)),
+			POLYGON((3 5,2 5,2 4,3 4,3 5)),
+			LINESTRING(3 0,3 1),
+			LINESTRING(3 6,3 7))`,
+			symDiff: `GEOMETRYCOLLECTION(
+				POLYGON((2 4,3 4,3 5,5 5,6 6,3 6,1 6,1 4,1 1,2 2,2 4)),
+				POLYGON((3 3,2 2,2 0,3 1,6 4,7 5,5 5,4 4,3 4,3 3)),
+				LINESTRING(0 4,1 4),
+				LINESTRING(6 4,7 4),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 6,3 7))`,
+			relate: `212111212`,
+		},
+		{
+			/*
 				+-----+--+      +-----+--+
 				| 1A  |2 |      |        |
 				|  +--+--+      |        +
