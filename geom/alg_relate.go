@@ -29,17 +29,18 @@ func Relate(a, b Geometry) (string, error) {
 		}
 
 		var flip bool
+		nonEmpty := b
 		if b.IsEmpty() {
-			b, a = a, b
+			nonEmpty = a
 			flip = true
 		}
-		switch b.Dimension() {
+		switch nonEmpty.Dimension() {
 		case 0:
 			im.set(imExterior, imInterior, '0')
 			im.set(imExterior, imBoundary, 'F')
 		case 1:
 			im.set(imExterior, imInterior, '1')
-			if !b.Boundary().IsEmpty() {
+			if !nonEmpty.Boundary().IsEmpty() {
 				im.set(imExterior, imBoundary, '0')
 			}
 		case 2:
