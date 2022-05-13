@@ -1594,3 +1594,51 @@ func TestSummary(t *testing.T) {
 		})
 	}
 }
+
+func TestPolygonDumpRings(t *testing.T) {
+	for i, tc := range []struct {
+		inputWKT     string
+		wantRingWKTs []string
+	}{
+		{
+			"POLYGON EMPTY",
+			nil,
+		},
+		{
+			"POLYGON ((0 0,0 1,1 0,0 0))",
+			[]string{"LINESTRING(0 0,0 1,1 0,0 0)"},
+		},
+		{
+			"POLYGON ((0 0,0 4,4 0,0 0),(1 1,1 2,2 1,1 1))",
+			[]string{
+				"LINESTRING(0 0,0 4,4 0,0 0)",
+				"LINESTRING(1 1,1 2,2 1,1 1)",
+			},
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			input := geomFromWKT(t, tc.inputWKT).MustAsPolygon()
+			wantRings := make([]LineString, len(tc.wantRingWKTs))
+			for j, wantRingWKT := range tc.wantRingWKTs {
+				wantRings[j] = geomFromWKT(t, wantRingWKT).MustAsLineString()
+			}
+
+			gotRings := input.DumpRings()
+
+			expectIntEq(t, len(gotRings), len(wantRings))
+			for j := range wantRings {
+				expectGeomEq(t,
+					gotRings[j].AsGeometry(),
+					wantRings[j].AsGeometry(),
+				)
+			}
+
+			// Ensure that we actually got copy of the slice's backing array
+			// rather than just a copy of its header:
+			otherRings := input.DumpRings()
+			if len(otherRings) > 0 {
+				expectTrue(t, &gotRings[0] != &otherRings[0])
+			}
+		})
+	}
+}

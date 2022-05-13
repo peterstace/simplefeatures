@@ -8,6 +8,9 @@
 - Fixes a bug in the `TransformXY` method where empty `MultiPoint` and
   `MultiLineString`s would have their coordinates type downgraded to XY.
 
+- Add a new `DumpRings` method to the `Polygon` type, which gives the rings of
+  the polygon as a slice of `LineString`s.
+
 ## v0.37.0
 
 2022-03-29
