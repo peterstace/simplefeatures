@@ -17,9 +17,7 @@ trap "rm -f $new $old" EXIT
 package="./..."
 bench="."
 
-pushd "$HOME"
-go get golang.org/x/perf/cmd/benchstat
-popd
+go install golang.org/x/perf/cmd/benchstat@latest
 
 for (( i = 0; i < 15; i++ )); do
 	echo
