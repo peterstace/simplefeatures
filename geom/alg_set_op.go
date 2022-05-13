@@ -13,7 +13,7 @@ func Union(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	g, err := setOp(a, b, selectUnion)
+	g, err := setOp(a, b, selectUnion, false)
 	return g, wrap(err, "executing union")
 }
 
@@ -24,7 +24,7 @@ func Intersection(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() || b.IsEmpty() {
 		return Geometry{}, nil
 	}
-	g, err := setOp(a, b, selectIntersection)
+	g, err := setOp(a, b, selectIntersection, true)
 	return g, wrap(err, "executing intersection")
 }
 
@@ -38,7 +38,7 @@ func Difference(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	g, err := setOp(a, b, selectDifference)
+	g, err := setOp(a, b, selectDifference, true)
 	return g, wrap(err, "executing difference")
 }
 
@@ -55,11 +55,22 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	g, err := setOp(a, b, selectSymmetricDifference)
+	g, err := setOp(a, b, selectSymmetricDifference, true)
 	return g, wrap(err, "executing symmetric difference")
 }
 
-func setOp(a, b Geometry, include func([2]label) bool) (Geometry, error) {
+func setOp(a, b Geometry, include func([2]label) bool, mergeFirst bool) (Geometry, error) {
+	if mergeFirst {
+		var err error
+		a, err = merge(a)
+		if err != nil {
+			return Geometry{}, wrap(err, "error creating union of GeometryCollection")
+		}
+		b, err = merge(b)
+		if err != nil {
+			return Geometry{}, wrap(err, "error creating union of GeometryCollection")
+		}
+	}
 	overlay, err := createOverlay(a, b)
 	if err != nil {
 		return Geometry{}, wrap(err, "internal error creating overlay")
@@ -70,4 +81,20 @@ func setOp(a, b Geometry, include func([2]label) bool) (Geometry, error) {
 		return Geometry{}, wrap(err, "internal error extracting geometry")
 	}
 	return g, nil
+}
+
+func merge(g Geometry) (Geometry, error) {
+	gc, ok := g.AsGeometryCollection()
+	if !ok {
+		return g, nil
+	}
+	merged := Geometry{}
+	for _, elem := range gc.geoms {
+		var err error
+		merged, err = Union(elem, merged)
+		if err != nil {
+			return Geometry{}, err
+		}
+	}
+	return merged, nil
 }
