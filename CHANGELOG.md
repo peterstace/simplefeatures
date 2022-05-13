@@ -5,6 +5,9 @@
 - Add initial linear referencing methods to `LineString`. The initial methods
   are `InterpolatePoint` and `InterpolateEvenlySpacedPoints`.
 
+- Adds support for `GeometryCollection`s in `Union`, `Intersection`,
+  `Difference` and `SymmetricDifference`.
+
 ## v0.37.0
 
 2022-03-29
