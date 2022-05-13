@@ -11,6 +11,9 @@
 - Add a new `DumpRings` method to the `Polygon` type, which gives the rings of
   the polygon as a slice of `LineString`s.
 
+- Uses `unsafe.Slice` for internal WKB conversions. This increases the minimum
+  Go version required to use simplefeatures from 1.14 to 1.17.
+
 ## v0.37.0
 
 2022-03-29
