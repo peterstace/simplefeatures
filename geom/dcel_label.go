@@ -20,6 +20,10 @@ type label struct {
 	inSet bool
 }
 
+func newUnpopulatedLabels() [2]label {
+	return [2]label{}
+}
+
 func newHalfPopulatedLabels(operand operand, inSet bool) [2]label {
 	var labels [2]label
 	labels[operand].populated = true

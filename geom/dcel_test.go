@@ -562,22 +562,22 @@ func TestGraphMultiLineString(t *testing.T) {
 		Edges: []EdgeSpec{
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v0, v1, v2},
 			},
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v2, v1, v0},
 			},
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v3, v4, v5},
 			},
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v5, v4, v3},
 			},
 		},
@@ -618,42 +618,42 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 		Edges: []EdgeSpec{
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v0, v1},
 			},
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v1, v0},
 			},
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v1, v2},
 			},
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v2, v1},
 			},
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v1, v3, v2},
 			},
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v2, v3, v1},
 			},
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v2, v4},
 			},
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v4, v2},
 			},
 		},
@@ -698,12 +698,12 @@ func TestGraphGhostDeduplication(t *testing.T) {
 		Edges: []EdgeSpec{
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v0, v1},
 			},
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 				Sequence:   []XY{v1, v0},
 			},
 			{
@@ -1695,22 +1695,22 @@ func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 			{
 				Sequence:   []XY{v1, v2},
 				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 			},
 			{
 				Sequence:   []XY{v2, v1},
 				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 			},
 			{
 				Sequence:   []XY{v0, v1},
 				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
+				FaceLabels: nil,
 			},
 			{
 				Sequence:   []XY{v1, v0},
 				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
+				FaceLabels: nil,
 			},
 		},
 		Faces: []FaceSpec{{
@@ -1768,12 +1768,12 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 			{
 				Sequence:   []XY{v1, v3},
 				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 			},
 			{
 				Sequence:   []XY{v3, v1},
 				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 			},
 			{
 				Sequence:   []XY{v0, v1},
@@ -1926,22 +1926,22 @@ func TestGraphOverlayReproducePointOnLineStringPrecisionBug(t *testing.T) {
 			{
 				Sequence:   []XY{v0, v1},
 				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 			},
 			{
 				Sequence:   []XY{v1, v2},
 				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 			},
 			{
 				Sequence:   []XY{v2, v1},
 				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 			},
 			{
 				Sequence:   []XY{v1, v0},
 				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
+				FaceLabels: nil,
 			},
 		},
 		Faces: []FaceSpec{
@@ -1993,12 +1993,12 @@ func TestGraphOverlayReproduceGhostOnGeometryBug(t *testing.T) {
 			{
 				Sequence:   []XY{v0, v1},
 				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(false), OperandB(true)},
+				FaceLabels: []LabelOption{OperandB(true)},
 			},
 			{
 				Sequence:   []XY{v1, v0},
 				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(false), OperandB(false)},
+				FaceLabels: []LabelOption{OperandB(false)},
 			},
 			{
 				Sequence:   []XY{v1, v2, v3},
@@ -2013,12 +2013,12 @@ func TestGraphOverlayReproduceGhostOnGeometryBug(t *testing.T) {
 			{
 				Sequence:   []XY{v3, v4, v0},
 				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(false), OperandB(true)},
+				FaceLabels: []LabelOption{OperandB(true)},
 			},
 			{
 				Sequence:   []XY{v0, v4, v3},
 				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(false), OperandB(false)},
+				FaceLabels: []LabelOption{OperandB(false)},
 			},
 		},
 		Faces: []FaceSpec{
