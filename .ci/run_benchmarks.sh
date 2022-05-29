@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -eo pipefail
+set -x
 
 if [ $# != 2 ]; then
 	echo "usage: $0 old_git_sh1 new_git_sha1"
@@ -18,7 +19,7 @@ package="./..."
 bench="."
 
 pushd "$HOME"
-go get golang.org/x/perf/cmd/benchstat
+go install golang.org/x/perf/cmd/benchstat@latest
 popd
 
 for (( i = 0; i < 15; i++ )); do
