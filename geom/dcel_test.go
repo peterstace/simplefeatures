@@ -2089,12 +2089,10 @@ func TestGraphWithGeometryCollection(t *testing.T) {
 		Edges: []EdgeSpec{
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
 				Sequence:   []XY{v1, v2},
 			},
 			{
 				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
 				Sequence:   []XY{v2, v1},
 			},
 			{
