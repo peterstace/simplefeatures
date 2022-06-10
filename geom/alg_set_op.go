@@ -13,7 +13,7 @@ func Union(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	g, err := setOp(a, b, selectUnion, false)
+	g, err := setOp(a, b, selectUnion)
 	return g, wrap(err, "executing union")
 }
 
@@ -24,7 +24,7 @@ func Intersection(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() || b.IsEmpty() {
 		return Geometry{}, nil
 	}
-	g, err := setOp(a, b, selectIntersection, true)
+	g, err := setOp(a, b, selectIntersection)
 	return g, wrap(err, "executing intersection")
 }
 
@@ -38,7 +38,7 @@ func Difference(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	g, err := setOp(a, b, selectDifference, true)
+	g, err := setOp(a, b, selectDifference)
 	return g, wrap(err, "executing difference")
 }
 
@@ -55,27 +55,11 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	g, err := setOp(a, b, selectSymmetricDifference, true)
+	g, err := setOp(a, b, selectSymmetricDifference)
 	return g, wrap(err, "executing symmetric difference")
 }
 
-func setOp(a, b Geometry, include func([2]label) bool, mergeFirst bool) (Geometry, error) {
-	if mergeFirst {
-		// If a or b are GeometryCollections, take the union of their elements.
-		// This is a workaround for an issue where if a GeometryCollection has
-		// elements that overlap, some set operations don't behave well.
-		var err error
-		if gc, ok := a.AsGeometryCollection(); ok {
-			if a, err = merge(gc); err != nil {
-				return Geometry{}, wrap(err, "error merging GeometryCollection")
-			}
-		}
-		if gc, ok := b.AsGeometryCollection(); ok {
-			if b, err = merge(gc); err != nil {
-				return Geometry{}, wrap(err, "error merging GeometryCollection")
-			}
-		}
-	}
+func setOp(a, b Geometry, include func([2]label) bool) (Geometry, error) {
 	overlay, err := createOverlay(a, b)
 	if err != nil {
 		return Geometry{}, wrap(err, "internal error creating overlay")
@@ -86,16 +70,4 @@ func setOp(a, b Geometry, include func([2]label) bool, mergeFirst bool) (Geometr
 		return Geometry{}, wrap(err, "internal error extracting geometry")
 	}
 	return g, nil
-}
-
-func merge(gc GeometryCollection) (Geometry, error) {
-	merged := Geometry{}
-	for _, g := range gc.geoms {
-		var err error
-		merged, err = Union(merged, g)
-		if err != nil {
-			return Geometry{}, err
-		}
-	}
-	return merged, nil
 }
