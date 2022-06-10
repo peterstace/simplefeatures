@@ -1,9 +1,14 @@
 # Changelog
 
-## Unreleased
+## v0.39.0
+
+2022-06-10
+
+__Special thanks to David McLeish and Albert Teoh for contributing to this
+release.__
 
 - Add support for `GeometryCollection`s in `Union`, `Intersection`,
-  `Difference` and `SymmetricDifference`.
+  `Difference`, `SymmetricDifference`, and `Relate`.
 
 ## v0.38.0
 
