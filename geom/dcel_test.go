@@ -339,7 +339,8 @@ func TestGraphTriangle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandA, findInteractionPoints([]Geometry{poly}))
+	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+	dcel.addMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandA, findInteractionPoints([]Geometry{poly}))
 
 	/*
 
@@ -407,7 +408,8 @@ func TestGraphWithHoles(t *testing.T) {
 
 	*/
 
-	dcel := newDCELFromMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandB, findInteractionPoints([]Geometry{poly}))
+	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+	dcel.addMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandB, findInteractionPoints([]Geometry{poly}))
 
 	v0 := XY{0, 0}
 	v1 := XY{5, 0}
@@ -480,7 +482,8 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 	  v0-----v1   v4-----v5
 	*/
 
-	dcel := newDCELFromMultiPolygon(mp.MustAsMultiPolygon(), operandB, findInteractionPoints([]Geometry{mp}))
+	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+	dcel.addMultiPolygon(mp.MustAsMultiPolygon(), operandB, findInteractionPoints([]Geometry{mp}))
 
 	v0 := XY{0, 0}
 	v1 := XY{1, 0}
@@ -2033,6 +2036,74 @@ func TestGraphOverlayReproduceGhostOnGeometryBug(t *testing.T) {
 				Second: v1,
 				Cycle:  []XY{v0, v1, v2, v3, v4, v0},
 				Labels: []LabelOption{OperandA(false), OperandB(true)},
+			},
+		},
+	})
+}
+
+func TestGraphWithEmptyGeometryCollection(t *testing.T) {
+	var gc GeometryCollection
+
+	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+	dcel.addGeometryCollection(gc, operandA, map[XY]struct{}{})
+
+	CheckDCEL(t, dcel, DCELSpec{})
+}
+
+func TestGraphWithGeometryCollection(t *testing.T) {
+	gc, err := UnmarshalWKT(`GEOMETRYCOLLECTION(
+		POINT(0 0),
+		LINESTRING(0 1,1 1),
+		POLYGON((2 0,3 0,3 1,2 1,2 0))
+	)`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+	dcel.addGeometryCollection(gc.MustAsGeometryCollection(), operandA, findInteractionPoints([]Geometry{gc}))
+
+	/*
+	  v0          v3-----v4
+	               |     |
+	               |     |
+	  v1----v2    v6-----v5
+	*/
+
+	v0 := XY{0, 0}
+	v1 := XY{0, 1}
+	v2 := XY{1, 1}
+	v3 := XY{2, 0}
+	v4 := XY{3, 0}
+	v5 := XY{3, 1}
+	v6 := XY{2, 1}
+
+	CheckDCEL(t, dcel, DCELSpec{
+		NumVerts: 4,
+		NumEdges: 4,
+		Vertices: []VertexSpec{
+			{
+				Labels:   []LabelOption{OperandA(true)},
+				Vertices: []XY{v0, v1, v2, v3},
+			},
+		},
+		Edges: []EdgeSpec{
+			{
+				EdgeLabels: []LabelOption{OperandA(true)},
+				Sequence:   []XY{v1, v2},
+			},
+			{
+				EdgeLabels: []LabelOption{OperandA(true)},
+				Sequence:   []XY{v2, v1},
+			},
+			{
+				EdgeLabels: []LabelOption{OperandA(true)},
+				FaceLabels: []LabelOption{OperandA(true)},
+				Sequence:   []XY{v3, v4, v5, v6, v3},
+			},
+			{
+				EdgeLabels: []LabelOption{OperandA(true)},
+				FaceLabels: []LabelOption{OperandA(false)},
+				Sequence:   []XY{v3, v6, v5, v4, v3},
 			},
 		},
 	})

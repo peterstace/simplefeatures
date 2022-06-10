@@ -73,40 +73,44 @@ func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
 }
 
 func newDCELFromGeometry(g Geometry, ghosts MultiLineString, operand operand, interactions map[XY]struct{}) *doublyConnectedEdgeList {
-	var dcel *doublyConnectedEdgeList
-	switch g.Type() {
-	case TypePolygon:
-		poly := g.MustAsPolygon()
-		dcel = newDCELFromMultiPolygon(poly.AsMultiPolygon(), operand, interactions)
-	case TypeMultiPolygon:
-		mp := g.MustAsMultiPolygon()
-		dcel = newDCELFromMultiPolygon(mp, operand, interactions)
-	case TypeLineString:
-		mls := g.MustAsLineString().AsMultiLineString()
-		dcel = newDCELFromMultiLineString(mls, operand, interactions)
-	case TypeMultiLineString:
-		mls := g.MustAsMultiLineString()
-		dcel = newDCELFromMultiLineString(mls, operand, interactions)
-	case TypePoint:
-		mp := g.MustAsPoint().AsMultiPoint()
-		dcel = newDCELFromMultiPoint(mp, operand)
-	case TypeMultiPoint:
-		mp := g.MustAsMultiPoint()
-		dcel = newDCELFromMultiPoint(mp, operand)
-	case TypeGeometryCollection:
-		panic("geometry collection not supported")
-	default:
-		panic(fmt.Sprintf("unknown geometry type: %v", g.Type()))
+	dcel := &doublyConnectedEdgeList{
+		vertices: make(map[XY]*vertexRecord),
 	}
-
+	dcel.addGeometry(g, operand, interactions)
 	dcel.addGhosts(ghosts, operand, interactions)
 	return dcel
 }
 
-func newDCELFromMultiPolygon(mp MultiPolygon, operand operand, interactions map[XY]struct{}) *doublyConnectedEdgeList {
-	mp = mp.ForceCCW()
+func (d *doublyConnectedEdgeList) addGeometry(g Geometry, operand operand, interactions map[XY]struct{}) {
+	switch g.Type() {
+	case TypePolygon:
+		poly := g.MustAsPolygon()
+		d.addMultiPolygon(poly.AsMultiPolygon(), operand, interactions)
+	case TypeMultiPolygon:
+		mp := g.MustAsMultiPolygon()
+		d.addMultiPolygon(mp, operand, interactions)
+	case TypeLineString:
+		mls := g.MustAsLineString().AsMultiLineString()
+		d.addMultiLineString(mls, operand, interactions)
+	case TypeMultiLineString:
+		mls := g.MustAsMultiLineString()
+		d.addMultiLineString(mls, operand, interactions)
+	case TypePoint:
+		mp := g.MustAsPoint().AsMultiPoint()
+		d.addMultiPoint(mp, operand)
+	case TypeMultiPoint:
+		mp := g.MustAsMultiPoint()
+		d.addMultiPoint(mp, operand)
+	case TypeGeometryCollection:
+		gc := g.MustAsGeometryCollection()
+		d.addGeometryCollection(gc, operand, interactions)
+	default:
+		panic(fmt.Sprintf("unknown geometry type: %v", g.Type()))
+	}
+}
 
-	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand operand, interactions map[XY]struct{}) {
+	mp = mp.ForceCCW()
 
 	for polyIdx := 0; polyIdx < mp.NumPolygons(); polyIdx++ {
 		poly := mp.PolygonN(polyIdx)
@@ -125,14 +129,14 @@ func newDCELFromMultiPolygon(mp MultiPolygon, operand operand, interactions map[
 				if _, ok := interactions[xy]; !ok {
 					continue
 				}
-				if _, ok := dcel.vertices[xy]; !ok {
+				if _, ok := d.vertices[xy]; !ok {
 					vr := &vertexRecord{
 						coords:    xy,
 						incidents: nil, // populated later
 						labels:    newHalfPopulatedLabels(operand, true),
 						locations: newLocationsOnBoundary(operand),
 					}
-					dcel.vertices[xy] = vr
+					d.vertices[xy] = vr
 				}
 			}
 		}
@@ -145,8 +149,8 @@ func newDCELFromMultiPolygon(mp MultiPolygon, operand operand, interactions map[
 				intermediateRev := reverseXYs(intermediateFwd)
 
 				// Build the edges (fwd and rev).
-				vertA := dcel.vertices[segment[0]]
-				vertB := dcel.vertices[segment[len(segment)-1]]
+				vertA := d.vertices[segment[0]]
+				vertB := d.vertices[segment[len(segment)-1]]
 				internalEdge := &halfEdgeRecord{
 					origin:       vertA,
 					twin:         nil, // populated later
@@ -181,17 +185,12 @@ func newDCELFromMultiPolygon(mp MultiPolygon, operand operand, interactions map[
 				newEdges[i*2+0].prev = newEdges[(2*i-2+numEdges)%numEdges]
 				newEdges[i*2+1].prev = newEdges[(2*i+3)%numEdges]
 			}
-			dcel.halfEdges = append(dcel.halfEdges, newEdges...)
+			d.halfEdges = append(d.halfEdges, newEdges...)
 		}
 	}
-	return dcel
 }
 
-func newDCELFromMultiLineString(mls MultiLineString, operand operand, interactions map[XY]struct{}) *doublyConnectedEdgeList {
-	dcel := &doublyConnectedEdgeList{
-		vertices: make(map[XY]*vertexRecord),
-	}
-
+func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operand operand, interactions map[XY]struct{}) {
 	// Add vertices.
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		ls := mls.LineStringN(i)
@@ -204,14 +203,14 @@ func newDCELFromMultiLineString(mls MultiLineString, operand operand, interactio
 			}
 
 			onBoundary := (j == 0 || j == n-1) && !ls.IsClosed()
-			if v, ok := dcel.vertices[xy]; !ok {
+			if v, ok := d.vertices[xy]; !ok {
 				var locs [2]location
 				if onBoundary {
 					locs[operand].boundary = true
 				} else {
 					locs[operand].interior = true
 				}
-				dcel.vertices[xy] = &vertexRecord{
+				d.vertices[xy] = &vertexRecord{
 					xy,
 					nil, // populated later
 					newHalfPopulatedLabels(operand, true),
@@ -255,8 +254,8 @@ func newDCELFromMultiLineString(mls MultiLineString, operand operand, interactio
 			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY)
 			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY)
 
-			vOrigin := dcel.vertices[startXY]
-			vDestin := dcel.vertices[endXY]
+			vOrigin := d.vertices[startXY]
+			vDestin := d.vertices[endXY]
 
 			fwd := &halfEdgeRecord{
 				origin:       vOrigin,
@@ -285,21 +284,19 @@ func newDCELFromMultiLineString(mls MultiLineString, operand operand, interactio
 			vOrigin.incidents = append(vOrigin.incidents, fwd)
 			vDestin.incidents = append(vDestin.incidents, rev)
 
-			dcel.halfEdges = append(dcel.halfEdges, fwd, rev)
+			d.halfEdges = append(d.halfEdges, fwd, rev)
 		})
 	}
-	return dcel
 }
 
-func newDCELFromMultiPoint(mp MultiPoint, operand operand) *doublyConnectedEdgeList {
-	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+func (d *doublyConnectedEdgeList) addMultiPoint(mp MultiPoint, operand operand) {
 	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
 		xy, ok := mp.PointN(i).XY()
 		if !ok {
 			continue
 		}
-		record, ok := dcel.vertices[xy]
+		record, ok := d.vertices[xy]
 		if !ok {
 			record = &vertexRecord{
 				coords:    xy,
@@ -307,12 +304,18 @@ func newDCELFromMultiPoint(mp MultiPoint, operand operand) *doublyConnectedEdgeL
 				labels:    [2]label{},    // set below
 				locations: [2]location{}, // set below
 			}
-			dcel.vertices[xy] = record
+			d.vertices[xy] = record
 		}
 		record.labels[operand] = label{populated: true, inSet: true}
 		record.locations[operand].interior = true
 	}
-	return dcel
+}
+
+func (d *doublyConnectedEdgeList) addGeometryCollection(gc GeometryCollection, operand operand, interactions map[XY]struct{}) {
+	n := gc.NumGeometries()
+	for i := 0; i < n; i++ {
+		d.addGeometry(gc.GeometryN(i), operand, interactions)
+	}
 }
 
 func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, operand operand, interactions map[XY]struct{}) {

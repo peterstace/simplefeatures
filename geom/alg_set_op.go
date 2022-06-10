@@ -2,7 +2,7 @@ package geom
 
 // Union returns a geometry that represents the parts from either geometry A or
 // geometry B (or both). An error may be returned in pathological cases of
-// numerical degeneracy. GeometryCollections are not supported.
+// numerical degeneracy.
 func Union(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() && b.IsEmpty() {
 		return Geometry{}, nil
@@ -19,7 +19,7 @@ func Union(a, b Geometry) (Geometry, error) {
 
 // Intersection returns a geometry that represents the parts that are common to
 // both geometry A and geometry B. An error may be returned in pathological
-// cases of numerical degeneracy. GeometryCollections are not supported.
+// cases of numerical degeneracy.
 func Intersection(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() || b.IsEmpty() {
 		return Geometry{}, nil
@@ -30,8 +30,7 @@ func Intersection(a, b Geometry) (Geometry, error) {
 
 // Difference returns a geometry that represents the parts of input geometry A
 // that are not part of input geometry B. An error may be returned in cases of
-// pathological cases of numerical degeneracy. GeometryCollections are not
-// supported.
+// pathological cases of numerical degeneracy.
 func Difference(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() {
 		return Geometry{}, nil
@@ -45,7 +44,7 @@ func Difference(a, b Geometry) (Geometry, error) {
 
 // SymmetricDifference returns a geometry that represents the parts of geometry
 // A and B that are not in common. An error may be returned in pathological
-// cases of numerical degeneracy. GeometryCollections are not supported.
+// cases of numerical degeneracy.
 func SymmetricDifference(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() && b.IsEmpty() {
 		return Geometry{}, nil

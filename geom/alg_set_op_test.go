@@ -746,6 +746,205 @@ func TestBinaryOp(t *testing.T) {
 			symDiff: "MULTILINESTRING((1 0,0.5 0.5),(0.5 0.5,0 1),(0 0,0.5 0.5),(0.5 0.5,1 1))",
 			relate:  "0F1FF0102",
 		},
+		{
+			/*
+			     +               +
+			     |\              |\
+			     | \             | \
+			  +--+--+--+  ->  +--+  +--+
+			     |   \           |   \
+			     |    \          |    \
+			     +-----+         +-----+
+			*/
+			input1:  "GEOMETRYCOLLECTION(POLYGON((1 0,3 2,1 2,1 0)))",
+			input2:  "GEOMETRYCOLLECTION(LINESTRING(0 1,3 1))",
+			union:   "GEOMETRYCOLLECTION(POLYGON((1 0,2 1,3 2,1 2,1 1,1 0)),LINESTRING(0 1,1 1),LINESTRING(2 1,3 1))",
+			inter:   "LINESTRING(1 1,2 1)",
+			fwdDiff: "POLYGON((1 0,2 1,3 2,1 2,1 1,1 0))",
+			revDiff: "MULTILINESTRING((0 1,1 1),(2 1,3 1))",
+			symDiff: "GEOMETRYCOLLECTION(POLYGON((1 0,2 1,3 2,1 2,1 1,1 0)),LINESTRING(0 1,1 1),LINESTRING(2 1,3 1))",
+			relate:  "1F20F1102",
+		},
+		{
+			/*
+			    Reproduces a bug with set ops between self-intersecting GeometryCollections.
+			        +  +
+			        |\ |
+			        | \|
+			     +  |  +
+			     |\ |  |\
+			     | \|  | \
+			     |  +  |  \
+			     |  |\ |   \
+			     |  | \|    \
+			  +--+--+--+-----+--+1B
+			     |  |  |\     \
+			     |  |  | \  2A \
+			     |  +--+--+-----+
+			     |     |   \
+			     | 1A  |    \
+			     +-----+-----+
+			           |
+			           |2B
+			           +
+			*/
+			input1: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,5 5,1 5,1 1)),
+				LINESTRING(0 3,6 3))`,
+			input2: `GEOMETRYCOLLECTION(
+				POLYGON((2 0,6 4,2 4,2 0)),
+				LINESTRING(3 0,3 6))`,
+			union: `GEOMETRYCOLLECTION(
+				POLYGON((2 2,2 0,3 1,5 3,6 4,4 4,5 5,3 5,1 5,1 3,1 1,2 2)),
+				LINESTRING(0 3,1 3),
+				LINESTRING(5 3,6 3),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 5,3 6))`,
+			inter: `GEOMETRYCOLLECTION(
+				POLYGON((2 2,3 3,4 4,3 4,2 4,2 3,2 2)),
+				LINESTRING(3 3,5 3),
+				LINESTRING(3 4,3 5))`,
+			fwdDiff: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,2 2,2 3,2 4,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
+				LINESTRING(0 3,1 3),
+				LINESTRING(5 3,6 3))`,
+			revDiff: `GEOMETRYCOLLECTION(
+				POLYGON((3 1,5 3,6 4,4 4,3 3,2 2,2 0,3 1)),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 5,3 6))`,
+			symDiff: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,2 2,2 3,2 4,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
+				POLYGON((3 1,5 3,6 4,4 4,3 3,2 2,2 0,3 1)),
+				LINESTRING(0 3,1 3),
+				LINESTRING(5 3,6 3),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 5,3 6))`,
+			relate: `212101212`,
+		},
+		{
+			/*
+			    Reproduces a bug with set ops between self-intersecting GeometryCollections.
+			    Similar to the previous case, but none of the crossing points are coincident.
+			        +  +
+			        |\ |
+			        | \|
+			     +  |  +
+			     |\ |  |\
+			     | \|  | \
+			     |  +  |  \
+			     |  |\ |   \
+			     |  | \|    \
+			     |  |  +     \
+			     |  |  |\     \
+			     |  |  | \     \
+			  +--+--+--+--+--+--+--+1B
+			     |  |  |   \     \
+			     |  |  |    \  2A \
+			     |  +--+-----+-----+
+			     |     |      \
+			     | 1A  |       \
+			     +-----+--------+
+			           |
+			           |2B
+			           +
+			*/
+			input1: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,6 6,1 6,1 1)),
+				LINESTRING(0 4,7 4))`,
+			input2: `GEOMETRYCOLLECTION(
+				POLYGON((2 0,7 5,2 5,2 0)),
+				LINESTRING(3 0,3 7))`,
+			union: `GEOMETRYCOLLECTION(
+				POLYGON((2 2,2 0,3 1,6 4,7 5,5 5,6 6,3 6,1 6,1 4,1 1,2 2)),
+				LINESTRING(0 4,1 4),
+				LINESTRING(6 4,7 4),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 6,3 7))`,
+			inter: `GEOMETRYCOLLECTION(
+				POLYGON((2 2,3 3,4 4,5 5,3 5,2 5,2 4,2 2)),
+				LINESTRING(4 4,6 4),
+				LINESTRING(3 5,3 6))`,
+			fwdDiff: `GEOMETRYCOLLECTION(
+				POLYGON((5 5,6 6,3 6,1 6,1 4,1 1,2 2,2 4,2 5,3 5,5 5)),
+				LINESTRING(0 4,1 4),
+				LINESTRING(6 4,7 4))`,
+			revDiff: `GEOMETRYCOLLECTION(
+				POLYGON((2 0,3 1,6 4,7 5,5 5,4 4,3 3,2 2,2 0)),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 6,3 7))`,
+			symDiff: `GEOMETRYCOLLECTION(
+				POLYGON((3 6,1 6,1 4,1 1,2 2,2 4,2 5,3 5,5 5,6 6,3 6)),
+				POLYGON((3 3,2 2,2 0,3 1,6 4,7 5,5 5,4 4,3 3)),
+				LINESTRING(0 4,1 4),
+				LINESTRING(6 4,7 4),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 6,3 7))`,
+			relate: `212101212`,
+		},
+		{
+			/*
+				+-----+--+      +-----+--+
+				| 1A  |2 |      |        |
+				|  +--+--+      |        +
+				|  |  |  |  ->  |        |
+				+--+--+  |      +--+     |
+				   |  1B |         |     |
+				   +--+--+         +--+--+
+			*/
+			input1:  "GEOMETRYCOLLECTION(POLYGON((0 0,2 0,2 2,0 2,0 0)),POLYGON((1 1,3 1,3 3,1 3,1 1)))",
+			input2:  "POLYGON((2 0,3 0,3 1,2 1,2 0))",
+			union:   "POLYGON((2 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0,2 0))",
+			inter:   "MULTILINESTRING((2 1,3 1),(2 0,2 1))",
+			fwdDiff: "POLYGON((1 2,0 2,0 0,2 0,2 1,3 1,3 3,1 3,1 2))",
+			revDiff: "POLYGON((2 0,3 0,3 1,2 1,2 0))",
+			symDiff: "POLYGON((0 0,2 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0))",
+			relate:  "FF2F11212",
+		},
+		{
+			/*
+				      +--------+                  +--------+
+				      |        |                  |        |
+				      |   1A   |                  |        |
+				      |        |                  |        |
+				+-----+--+  +--+-----+      +-----+        +-----+
+				|     |  |  |  |     |      |                    |
+				|     +--+--+--+     |      |        +--+        |
+				|  2A    |  |    2B  |  ->  |        |  |        |
+				|     +--+--+--+     |      |        +--+        |
+				|     |  |  |  |     |      |                    |
+				+-----+--+  +--+-----+      +-----+        +-----+
+				      |        |                  |        |
+				      |   1B   |                  |        |
+				      |        |                  |        |
+				      +--------+                  +--------+
+			*/
+			input1: `GEOMETRYCOLLECTION(
+				POLYGON((2 0,5 0,5 3,2 3,2 0)),
+				POLYGON((2 4,5 4,5 7,2 7,2 4)))`,
+			input2: `GEOMETRYCOLLECTION(
+				POLYGON((0 2,3 2,3 5,0 5,0 2)),
+				POLYGON((4 2,7 2,7 5,4 5,4 2)))`,
+			union: `POLYGON(
+				(0 2,2 2,2 0,5 0,5 2,7 2,7 5,5 5,5 7,2 7,2 5,0 5,0 2),
+				(3 3,3 4,4 4,4 3,3 3))`,
+			inter: `MULTIPOLYGON(
+				((2 2,3 2,3 3,2 3,2 2)),
+				((2 4,3 4,3 5,2 5,2 4)),
+				((4 2,5 2,5 3,4 3,4 2)),
+				((4 4,5 4,5 5,4 5,4 4)))`,
+			fwdDiff: `MULTIPOLYGON(
+				((2 0,5 0,5 2,4 2,4 3,3 3,3 2,2 2,2 0)),
+				((3 4,4 4,4 5,5 5,5 7,2 7,2 5,3 5,3 4)))`,
+			revDiff: `MULTIPOLYGON(
+				((0 2,2 2,2 3,3 3,3 4,2 4,2 5,0 5,0 2)),
+				((5 2,7 2,7 5,5 5,5 4,4 4,4 3,5 3,5 2)))`,
+			symDiff: `MULTIPOLYGON(
+				((2 0,5 0,5 2,4 2,4 3,3 3,3 2,2 2,2 0)),
+				((2 2,2 3,3 3,3 4,2 4,2 5,0 5,0 2,2 2)),
+				((3 4,4 4,4 5,5 5,5 7,2 7,2 5,3 5,3 4)),
+				((4 3,5 3,5 2,7 2,7 5,5 5,5 4,4 4,4 3)))`,
+			relate: "212101212",
+		},
 
 		// Empty cases for relate.
 		{input1: "POINT EMPTY", input2: "POINT(0 0)", relate: "FFFFFF0F2"},
@@ -884,6 +1083,11 @@ func TestBinaryOp(t *testing.T) {
 			input2: "POINT(0 0)",
 			relate: "0FFFFFFF2",
 		},
+		{
+			input1: "GEOMETRYCOLLECTION(POINT(0 0))",
+			input2: "GEOMETRYCOLLECTION(LINESTRING(2 0,2 1))",
+			union:  "GEOMETRYCOLLECTION(POINT(0 0),LINESTRING(2 0,2 1))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
@@ -1006,6 +1210,7 @@ func TestBinaryOpBothInputsEmpty(t *testing.T) {
 		"POLYGON EMPTY",
 		"MULTIPOLYGON EMPTY",
 		"MULTIPOLYGON(EMPTY)",
+		"GEOMETRYCOLLECTION EMPTY",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g := geomFromWKT(t, wkt)
@@ -1074,20 +1279,6 @@ func TestBinaryOpOneInputEmpty(t *testing.T) {
 				expectTrue(t, got.IsEmpty())
 			} else {
 				expectGeomEq(t, got, poly)
-			}
-		})
-	}
-}
-
-func TestBinaryOpGeometryCollection(t *testing.T) {
-	for i, wkt := range []string{
-		"GEOMETRYCOLLECTION(POINT(0 0))",
-	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := geomFromWKT(t, wkt)
-			_, err := geom.Union(g, g)
-			if err == nil {
-				t.Error("expected to fail, but not nil err")
 			}
 		})
 	}

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add support for `GeometryCollection`s in `Union`, `Intersection`,
+  `Difference` and `SymmetricDifference`.
+
 ## v0.38.0
 
 2022-05-27
