@@ -29,7 +29,6 @@ func TestBinaryOp(t *testing.T) {
 	for i, geomCase := range []struct {
 		input1, input2                                  string
 		union, inter, fwdDiff, revDiff, symDiff, relate string
-		approx                                          bool
 	}{
 		{
 			/*
@@ -796,32 +795,31 @@ func TestBinaryOp(t *testing.T) {
 				POLYGON((2 0,6 4,2 4,2 0)),
 				LINESTRING(3 0,3 6))`,
 			union: `GEOMETRYCOLLECTION(
-				POLYGON((1 5,1 1,2 2,2 0,6 4,4 4,5 5,1 5)),
+				POLYGON((2 2,2 0,3 1,5 3,6 4,4 4,5 5,3 5,1 5,1 3,1 1,2 2)),
 				LINESTRING(0 3,1 3),
 				LINESTRING(5 3,6 3),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 5,3 6))`,
 			inter: `GEOMETRYCOLLECTION(
-				POLYGON((2 2,4 4,2 4,2 2)),
+				POLYGON((2 2,3 3,4 4,3 4,2 4,2 3,2 2)),
 				LINESTRING(3 3,5 3),
 				LINESTRING(3 4,3 5))`,
 			fwdDiff: `GEOMETRYCOLLECTION(
-				POLYGON((1 1,2 2,2 4,4 4,5 5,1 5,1 1)),
+				POLYGON((1 1,2 2,2 3,2 4,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
 				LINESTRING(0 3,1 3),
 				LINESTRING(5 3,6 3))`,
 			revDiff: `GEOMETRYCOLLECTION(
-				POLYGON((2 0,6 4,4 4,2 2,2 0)),
+				POLYGON((3 1,5 3,6 4,4 4,3 3,2 2,2 0,3 1)),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 5,3 6))`,
 			symDiff: `GEOMETRYCOLLECTION(
-				POLYGON((2 4,4 4,5 5,1 5,1 1,2 2,2 4)),
-				POLYGON((2 2,2 0,6 4,4 4,2 2)),
+				POLYGON((1 1,2 2,2 3,2 4,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
+				POLYGON((3 1,5 3,6 4,4 4,3 3,2 2,2 0,3 1)),
 				LINESTRING(0 3,1 3),
 				LINESTRING(5 3,6 3),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 5,3 6))`,
 			relate: `212101212`,
-			approx: true,
 		},
 		{
 			/*
@@ -857,32 +855,31 @@ func TestBinaryOp(t *testing.T) {
 				POLYGON((2 0,7 5,2 5,2 0)),
 				LINESTRING(3 0,3 7))`,
 			union: `GEOMETRYCOLLECTION(
-				POLYGON((2 2,2 0,3 1,7 5,5 5,6 6,1 6,1 1,2 2)),
+				POLYGON((2 2,2 0,3 1,6 4,7 5,5 5,6 6,3 6,1 6,1 4,1 1,2 2)),
 				LINESTRING(0 4,1 4),
 				LINESTRING(6 4,7 4),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 6,3 7))`,
 			inter: `GEOMETRYCOLLECTION(
-				POLYGON((4 4,5 5,2 5,2 2,4 4)),
+				POLYGON((2 2,3 3,4 4,5 5,3 5,2 5,2 4,2 2)),
 				LINESTRING(4 4,6 4),
 				LINESTRING(3 5,3 6))`,
 			fwdDiff: `GEOMETRYCOLLECTION(
-				POLYGON((5 5,6 6,1 6,1 1,2 2,2 5,5 5)),
+				POLYGON((5 5,6 6,3 6,1 6,1 4,1 1,2 2,2 4,2 5,3 5,5 5)),
 				LINESTRING(0 4,1 4),
 				LINESTRING(6 4,7 4))`,
 			revDiff: `GEOMETRYCOLLECTION(
-				POLYGON((6 4,7 5,5 5,2 2,2 0,6 4)),
+				POLYGON((2 0,3 1,6 4,7 5,5 5,4 4,3 3,2 2,2 0)),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 6,3 7))`,
 			symDiff: `GEOMETRYCOLLECTION(
-				POLYGON((5 5,2 2,2 0,7 5,5 5)),
-				POLYGON((5 5,6 6,1 6,1 1,2 2,2 5,5 5)),
+				POLYGON((3 6,1 6,1 4,1 1,2 2,2 4,2 5,3 5,5 5,6 6,3 6)),
+				POLYGON((3 3,2 2,2 0,3 1,6 4,7 5,5 5,4 4,3 3)),
 				LINESTRING(0 4,1 4),
 				LINESTRING(6 4,7 4),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 6,3 7))`,
 			relate: `212101212`,
-			approx: true,
 		},
 		{
 			/*
@@ -896,13 +893,12 @@ func TestBinaryOp(t *testing.T) {
 			*/
 			input1:  "GEOMETRYCOLLECTION(POLYGON((0 0,2 0,2 2,0 2,0 0)),POLYGON((1 1,3 1,3 3,1 3,1 1)))",
 			input2:  "POLYGON((2 0,3 0,3 1,2 1,2 0))",
-			union:   "POLYGON((0 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0))",
+			union:   "POLYGON((2 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0,2 0))",
 			inter:   "MULTILINESTRING((2 1,3 1),(2 0,2 1))",
 			fwdDiff: "POLYGON((1 2,0 2,0 0,2 0,2 1,3 1,3 3,1 3,1 2))",
 			revDiff: "POLYGON((2 0,3 0,3 1,2 1,2 0))",
-			symDiff: "POLYGON((0 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0))",
+			symDiff: "POLYGON((0 0,2 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0))",
 			relate:  "FF2F11212",
-			approx:  true,
 		},
 		{
 			/*
@@ -948,7 +944,6 @@ func TestBinaryOp(t *testing.T) {
 				((3 4,4 4,4 5,5 5,5 7,2 7,2 5,3 5,3 4)),
 				((4 3,5 3,5 2,7 2,7 5,5 5,5 4,4 4,4 3)))`,
 			relate: "212101212",
-			approx: true,
 		},
 
 		// Empty cases for relate.
@@ -1119,11 +1114,7 @@ func TestBinaryOp(t *testing.T) {
 					if err != nil {
 						t.Fatalf("could not perform op: %v", err)
 					}
-					if geomCase.approx {
-						expectGeomApproxEq(t, got, want)
-					} else {
-						expectGeomEq(t, got, want, geom.IgnoreOrder, geom.ToleranceXY(1e-7))
-					}
+					expectGeomEq(t, got, want, geom.IgnoreOrder, geom.ToleranceXY(1e-7))
 				})
 			}
 			t.Run("relate", func(t *testing.T) {
