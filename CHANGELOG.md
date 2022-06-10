@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.38.0
+
+2022-05-27
+
+__Special thanks to Sameera Perera and Albert Teoh for contributing to this release.__
+
 - Add initial linear referencing methods to `LineString`. The initial methods
   are `InterpolatePoint` and `InterpolateEvenlySpacedPoints`.
 
@@ -10,6 +16,9 @@
 
 - Add a new `DumpRings` method to the `Polygon` type, which gives the rings of
   the polygon as a slice of `LineString`s.
+
+- Uses `unsafe.Slice` for internal WKB conversions. This increases the minimum
+  Go version required to use simplefeatures from 1.14 to 1.17.
 
 ## v0.37.0
 

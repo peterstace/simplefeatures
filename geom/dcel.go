@@ -261,7 +261,7 @@ func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operan
 				prev:         nil, // set later
 				intermediate: intermediateFwd,
 				edgeLabels:   newHalfPopulatedLabels(operand, true),
-				faceLabels:   newHalfPopulatedLabels(operand, false),
+				faceLabels:   newUnpopulatedLabels(),
 			}
 			rev := &halfEdgeRecord{
 				origin:       vDestin,
@@ -271,7 +271,7 @@ func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operan
 				prev:         fwd,
 				intermediate: intermediateRev,
 				edgeLabels:   newHalfPopulatedLabels(operand, true),
-				faceLabels:   newHalfPopulatedLabels(operand, false),
+				faceLabels:   newUnpopulatedLabels(),
 			}
 			fwd.twin = rev
 			fwd.next = rev
