@@ -820,7 +820,7 @@ func TestBinaryOp(t *testing.T) {
 				LINESTRING(5 3,6 3),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 5,3 6))`,
-			relate: `212111212`,
+			relate: `212101212`,
 			approx: true,
 		},
 		{
@@ -881,7 +881,7 @@ func TestBinaryOp(t *testing.T) {
 				LINESTRING(6 4,7 4),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 6,3 7))`,
-			relate: `212111212`,
+			relate: `212101212`,
 			approx: true,
 		},
 		{
