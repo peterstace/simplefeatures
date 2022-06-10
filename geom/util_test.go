@@ -100,6 +100,7 @@ func expectGeomEq(t testing.TB, got, want Geometry, opts ...ExactEqualsOption) {
 	}
 }
 
+//nolint:deadcode,unused
 func expectGeomApproxEq(t testing.TB, got, want Geometry) {
 	t.Helper()
 	eq, err := Equals(got, want)
