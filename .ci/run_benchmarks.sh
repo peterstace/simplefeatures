@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -eo pipefail
+set -x
 
 if [ $# != 2 ]; then
 	echo "usage: $0 old_git_sh1 new_git_sha1"
@@ -17,7 +18,13 @@ trap "rm -f $new $old" EXIT
 package="./..."
 bench="."
 
+<<<<<<< HEAD
 go install golang.org/x/perf/cmd/benchstat@latest
+=======
+pushd "$HOME"
+go install golang.org/x/perf/cmd/benchstat@latest
+popd
+>>>>>>> master
 
 for (( i = 0; i < 15; i++ )); do
 	echo

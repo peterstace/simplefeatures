@@ -1,7 +1,7 @@
 version: "2.1"
 services:
   tests:
-    image: golang:1.15
+    image: golang:1.17
     working_dir: /go/src/github.com/peterstace/simplefeatures
     entrypoint: go test -covermode=count -coverprofile=coverage.out -test.count=1 -test.run=. ./geom ./rtree
     volumes:

@@ -1,2 +1,2 @@
-FROM golang:1.14
+FROM golang:1.17
 RUN go get -u golang.org/x/lint/golint
