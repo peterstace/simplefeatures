@@ -39,7 +39,7 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 
 func newLineStringWithOmitInvalid(seq Sequence) LineString {
 	if err := validateLineStringSeq(seq); err != nil {
-		return LineString{}
+		return LineString{}.ForceCoordinatesType(seq.CoordinatesType())
 	}
 	return LineString{seq}
 }
