@@ -51,12 +51,12 @@ func (p *wkbParser) parseByteOrder() error {
 	if err != nil {
 		return err
 	}
+	p.bo = b
 	switch b {
 	case 0:
 		p.no = (nativeOrder == binary.BigEndian)
 		return nil
 	case 1:
-		p.bo = b
 		p.no = (nativeOrder == binary.LittleEndian)
 		return nil
 	default:
