@@ -51,7 +51,7 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 	ctorOpts := newOptionSet(opts)
 	if err := validatePolygon(rings, ctorOpts); err != nil {
 		if ctorOpts.omitInvalid {
-			return Polygon{}, nil
+			return Polygon{}.ForceCoordinatesType(ctype), nil
 		}
 		return Polygon{}, err
 	}
