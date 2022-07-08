@@ -5,6 +5,8 @@
 - Fix a bug where the original coordinates type was not retained when using the
   `OmitInvalid` constructor option on invalid `LineString`s and `Polygon`s.
 
+- Improves the performance of WKB parsing.
+
 ## v0.39.0
 
 2022-06-10
