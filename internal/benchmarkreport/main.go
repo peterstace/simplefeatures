@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"sort"
@@ -15,7 +14,7 @@ func main() {
 	if len(os.Args) != 2 {
 		log.Fatalf("usage: %v <raw_benchmark_output>\n", os.Args[0])
 	}
-	buf, err := ioutil.ReadFile(os.Args[1])
+	buf, err := os.ReadFile(os.Args[1])
 	if err != nil {
 		log.Fatalf("could not read file: %v", err)
 	}
