@@ -24,7 +24,6 @@ import (
 // 3. The interior of the polygon must be connected.
 //
 // 4. The holes must be fully inside the outer ring.
-//
 type Polygon struct {
 	rings []LineString
 	ctype CoordinatesType

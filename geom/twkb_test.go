@@ -3,7 +3,7 @@ package geom_test
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -501,7 +501,8 @@ func XTestWriteTWKBSQLFile(t *testing.T) {
 		sql += "\n\n"
 	}
 
-	ioutil.WriteFile("../twkb_sql.txt", []byte(sql), 0o644)
+	err := os.WriteFile("../twkb_sql.txt", []byte(sql), 0o644)
+	expectNoErr(t, err)
 }
 
 func TestZigZagInt(t *testing.T) {
