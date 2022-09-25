@@ -278,6 +278,15 @@ func (e Envelope) Distance(o Envelope) (float64, bool) {
 	return math.Sqrt(dx*dx + dy*dy), true
 }
 
+// TransformXY transforms this Envelope into another Envelope according to fn.
+func (e Envelope) TransformXY(fn func(XY) XY) (Envelope, error) {
+	min, max, ok := e.MinMaxXYs()
+	if !ok {
+		return Envelope{}, nil
+	}
+	return NewEnvelope([]XY{fn(min), fn(max)})
+}
+
 func (e Envelope) box() (rtree.Box, bool) {
 	return rtree.Box{
 		MinX: e.minX(),
