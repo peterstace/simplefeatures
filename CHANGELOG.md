@@ -7,6 +7,8 @@
 
 - Improves the performance of WKB parsing.
 
+- Add a `TransformXY` method to the `Envelope` type.
+
 ## v0.39.0
 
 2022-06-10
