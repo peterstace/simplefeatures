@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.40.0
+
+__Special thanks to @missinglink and Albert Teoh for contributing to this
+release.__
+
 - Fix a bug where the original coordinates type was not retained when using the
   `OmitInvalid` constructor option on invalid `LineString`s and `Polygon`s.
 
