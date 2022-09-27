@@ -4,6 +4,8 @@
 
 ## v0.40.0
 
+2022-09-28
+
 __Special thanks to @missinglink and Albert Teoh for contributing to this
 release.__
 
