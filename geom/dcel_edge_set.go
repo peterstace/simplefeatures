@@ -3,11 +3,10 @@ package geom
 // edgeSet represents a set of edges in a DCEL. It makes use of assumptions
 // around proper noding in conjunction with interaction points.
 //
-// Implementation detail: the map key is 3 XYs. The first is the start point of
-// the edge, the second is the first intermediate point (or a repeat of the
-// first XY if there are no intermediate points), and the third is the start
-// point of the next edge.
-type edgeSet map[[3]XY]*halfEdgeRecord
+// Implementation detail: the map key is 2 XYs. The first is the start point of
+// the edge, the second is the first intermediate point or the start point of
+// the next edge if there are no intermediate points.
+type edgeSet map[[2]XY]*halfEdgeRecord
 
 func (s edgeSet) containsStartIntermediateEnd(start XY, intermediate []XY, end XY) bool {
 	_, ok := s[s.key(start, intermediate, end)]
@@ -30,11 +29,9 @@ func (s edgeSet) lookupEdge(e *halfEdgeRecord) (*halfEdgeRecord, bool) {
 	return e, ok
 }
 
-// TODO: could key just be the start and then the next XY?
-func (edgeSet) key(start XY, intermediate []XY, end XY) [3]XY {
-	key := [3]XY{start, start, end}
-	if len(intermediate) > 0 {
-		key[1] = intermediate[0]
+func (edgeSet) key(start XY, intermediate []XY, end XY) [2]XY {
+	if len(intermediate) == 0 {
+		return [2]XY{start, end}
 	}
-	return key
+	return [2]XY{start, intermediate[0]}
 }
