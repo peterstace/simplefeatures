@@ -6,6 +6,8 @@ import (
 )
 
 func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
+	b = Point{}.AsGeometry()
+
 	var points []XY
 	points = appendComponentPoints(points, a)
 	points = appendComponentPoints(points, b)
@@ -27,7 +29,7 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 	dcel.reAssignFaces()
 	dcel.fixLabels()
 
-	//dcel.debug()
+	dcel.debug()
 
 	return dcel, nil
 }

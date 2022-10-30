@@ -160,7 +160,9 @@ func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand opera
 				mergeLabels(&e.fwd.edgeLabels, pop)
 				mergeLabels(&e.rev.edgeLabels, pop)
 				mergeLabels(&e.fwd.faceLabels, pop)
-				mergeLabels(&e.rev.faceLabels, pop) // TODO: BUG?? Shouldn't set this, since it's the external face.
+
+				// TODO: BUG?? face might be populated by another overlaid geometry soon, so this isn't really accurate.
+				mergeLabels(&e.rev.faceLabels, newHalfPopulatedLabels(operand, false))
 			})
 		}
 
