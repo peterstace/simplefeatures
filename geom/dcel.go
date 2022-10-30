@@ -279,8 +279,8 @@ func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operan
 			fwd.next = rev
 			fwd.prev = rev
 
-			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY, fwd)
-			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY, rev)
+			edges.insertEdge(fwd)
+			edges.insertEdge(rev)
 
 			vOrigin.incidents = append(vOrigin.incidents, fwd)
 			vDestin.incidents = append(vDestin.incidents, rev)
@@ -346,8 +346,8 @@ func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, operand operand
 			}
 
 			fwd, rev := d.addGhostLine(startXY, intermediateFwd, intermediateRev, endXY, operand)
-			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY, fwd)
-			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY, rev)
+			edges.insertEdge(fwd)
+			edges.insertEdge(rev)
 		})
 	}
 }

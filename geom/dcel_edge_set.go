@@ -18,11 +18,6 @@ func (s edgeSet) insertEdge(e *halfEdgeRecord) {
 	s[k] = e
 }
 
-func (s edgeSet) insertStartIntermediateEnd(start XY, intermediate []XY, end XY, e *halfEdgeRecord) {
-	k := s.key(start, intermediate, end)
-	s[k] = e
-}
-
 func (s edgeSet) lookupEdge(e *halfEdgeRecord) (*halfEdgeRecord, bool) {
 	k := s.key(e.origin.coords, e.intermediate, e.next.origin.coords)
 	e, ok := s[k]
