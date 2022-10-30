@@ -1,6 +1,8 @@
 package geom
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // extractGeometry converts the DECL into a Geometry that represents it.
 func (d *doublyConnectedEdgeList) extractGeometry(include func([2]label) bool) (Geometry, error) {

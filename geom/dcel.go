@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"log"
 )
 
 type doublyConnectedEdgeList struct {
@@ -18,6 +19,21 @@ func newDCEL() *doublyConnectedEdgeList {
 	}
 }
 
+func (d *doublyConnectedEdgeList) debug() {
+	log.Printf("faces: %d", len(d.faces))
+	for _, f := range d.faces {
+		log.Printf("\t%p: %s", f, f.String())
+	}
+	log.Printf("halfEdges: %d", len(d.halfEdgez))
+	for _, e := range d.halfEdgez {
+		log.Printf("\t%p: %v", e, e.String())
+	}
+	log.Printf("vertices: %d", len(d.vertices))
+	for _, v := range d.vertices {
+		log.Printf("\t%p: %v", v, v)
+	}
+}
+
 type faceRecord struct {
 	cycle     *halfEdgeRecord
 	labels    [2]label
@@ -28,7 +44,7 @@ func (f *faceRecord) String() string {
 	if f == nil {
 		return "nil"
 	}
-	return "[" + f.cycle.String() + "]"
+	return fmt.Sprintf("cycle:%p labels:%v", f.cycle, f.labels)
 }
 
 type halfEdgeRecord struct {
@@ -58,7 +74,9 @@ func (e *halfEdgeRecord) String() string {
 	if e == nil {
 		return "nil"
 	}
-	return fmt.Sprintf("%v->%v->%v", e.origin.coords, e.intermediate, e.twin.origin.coords)
+	return fmt.Sprintf(
+		"origin:%p twin:%p incident:%p next:%p prev:%p intermediate:%v edgeLabels:%v faceLabels:%v",
+		e.origin, e.twin, e.incident, e.next, e.prev, e.intermediate, e.edgeLabels, e.faceLabels)
 }
 
 type vertexRecord struct {
@@ -142,7 +160,7 @@ func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand opera
 				mergeLabels(&e.fwd.edgeLabels, pop)
 				mergeLabels(&e.rev.edgeLabels, pop)
 				mergeLabels(&e.fwd.faceLabels, pop)
-				mergeLabels(&e.rev.faceLabels, pop)
+				mergeLabels(&e.rev.faceLabels, pop) // TODO: BUG?? Shouldn't set this, since it's the external face.
 			})
 		}
 

@@ -20,6 +20,13 @@ type label struct {
 	inSet bool
 }
 
+func (l label) String() string {
+	if !l.populated {
+		return "{populated=false}"
+	}
+	return fmt.Sprintf("{inSet=%t}", l.inSet)
+}
+
 func newUnpopulatedLabels() [2]label {
 	return [2]label{}
 }
