@@ -1,5 +1,7 @@
 package geom
 
+import "fmt"
+
 // edgeSet represents a set of edges in a DCEL. It makes use of assumptions
 // around proper noding in conjunction with interaction points.
 //
@@ -8,13 +10,27 @@ package geom
 // the next edge if there are no intermediate points.
 type edgeSet map[[2]XY]*halfEdgeRecord
 
+// TODO: is this method needed?
 func (s edgeSet) containsStartIntermediateEnd(start XY, intermediate []XY, end XY) bool {
 	_, ok := s[s.key(start, intermediate, end)]
 	return ok
 }
 
+func (s edgeSet) addOrGet(start XY, intermediate []XY, end XY) (*halfEdgeRecord, bool) {
+	k := s.key(start, intermediate, end)
+	e, ok := s[k]
+	if !ok {
+		e = new(halfEdgeRecord)
+		s[k] = e
+	}
+	return e, !ok
+}
+
 func (s edgeSet) insertEdge(e *halfEdgeRecord) {
 	k := s.key(e.origin.coords, e.intermediate, e.next.origin.coords)
+	if _, ok := s[k]; ok {
+		panic(fmt.Sprintf("internal error: edge already exists: key=%v", k))
+	}
 	s[k] = e
 }
 

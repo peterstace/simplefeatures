@@ -180,7 +180,7 @@ func orderCCWRingFirst(rings []LineString) {
 
 func (d *doublyConnectedEdgeList) extractLineStrings(include func([2]label) bool) ([]LineString, error) {
 	var lss []LineString
-	for _, e := range d.halfEdges {
+	for _, e := range d.halfEdgez {
 		if shouldExtractLine(e, include) {
 			e.extracted = true
 			e.twin.extracted = true

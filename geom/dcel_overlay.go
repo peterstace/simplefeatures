@@ -16,69 +16,75 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 		return nil, wrap(err, "re-noding")
 	}
 
-	interactionPoints := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
+	interactions := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
+	_ = interactions
 
-	dcelA := newDCELFromGeometry(a, ghosts, operandA, interactionPoints)
-	dcelB := newDCELFromGeometry(b, ghosts, operandB, interactionPoints)
+	dcel := newDCEL()
+	dcel.addGhosts(ghosts, interactions)
+	dcel.addGeometry(a, operandA, interactions)
+	dcel.addGeometry(b, operandB, interactions)
 
-	dcelA.overlay(dcelB)
-	return dcelA, nil
+	dcel.fixVertices()
+	dcel.reAssignFaces()
+	dcel.fixLabels()
+
+	return dcel, nil
 }
 
-func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
-	d.overlayVertices(other)
-	d.overlayEdges(other)
-	d.fixVertices()
-	d.reAssignFaces()
-	d.fixLabels()
-}
-
-func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
-	for xy, otherVert := range other.vertices {
-		vert, ok := d.vertices[xy]
-		if ok {
-			mergeLabels(&vert.labels, otherVert.labels)
-			mergeLocations(&vert.locations, otherVert.locations)
-		} else {
-			d.vertices[xy] = otherVert
-		}
-	}
-	for _, e := range other.halfEdges {
-		if existing, ok := d.vertices[e.origin.coords]; ok {
-			e.origin = existing
-		} else {
-			d.vertices[e.origin.coords] = e.origin
-		}
-	}
-}
-
-func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) {
-	// Clear incidents lists, since we're going to re-compute them.
-	for _, vert := range d.vertices {
-		vert.incidents = nil
-	}
-	for _, vert := range other.vertices {
-		vert.incidents = nil
-	}
-
-	edges := make(edgeSet)
-	for _, e := range d.halfEdges {
-		edges.insertEdge(e)
-		e.origin.incidents = append(e.origin.incidents, e)
-	}
-
-	for _, e := range other.halfEdges {
-		if existing, ok := edges.lookupEdge(e); ok {
-			mergeLabels(&existing.edgeLabels, e.edgeLabels)
-			mergeLabels(&existing.faceLabels, e.faceLabels)
-		} else {
-			edges.insertEdge(e)
-			e.origin = d.vertices[e.origin.coords]
-			e.origin.incidents = append(e.origin.incidents, e)
-			d.halfEdges = append(d.halfEdges, e)
-		}
-	}
-}
+//func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
+//	d.overlayVertices(other)
+//	d.overlayEdges(other)
+//	d.fixVertices()
+//	d.reAssignFaces()
+//	d.fixLabels()
+//}
+//
+//func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
+//	for xy, otherVert := range other.vertices {
+//		vert, ok := d.vertices[xy]
+//		if ok {
+//			mergeLabels(&vert.labels, otherVert.labels)
+//			mergeLocations(&vert.locations, otherVert.locations)
+//		} else {
+//			d.vertices[xy] = otherVert
+//		}
+//	}
+//	for _, e := range other.halfEdgez {
+//		if existing, ok := d.vertices[e.origin.coords]; ok {
+//			e.origin = existing
+//		} else {
+//			d.vertices[e.origin.coords] = e.origin
+//		}
+//	}
+//}
+//
+//func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) {
+//	// Clear incidents lists, since we're going to re-compute them.
+//	for _, vert := range d.vertices {
+//		vert.incidents = nil
+//	}
+//	for _, vert := range other.vertices {
+//		vert.incidents = nil
+//	}
+//
+//	edges := make(edgeSet)
+//	for _, e := range d.halfEdges {
+//		edges.insertEdge(e)
+//		e.origin.incidents = append(e.origin.incidents, e)
+//	}
+//
+//	for _, e := range other.halfEdges {
+//		if existing, ok := edges.lookupEdge(e); ok {
+//			mergeLabels(&existing.edgeLabels, e.edgeLabels)
+//			mergeLabels(&existing.faceLabels, e.faceLabels)
+//		} else {
+//			edges.insertEdge(e)
+//			e.origin = d.vertices[e.origin.coords]
+//			e.origin.incidents = append(e.origin.incidents, e)
+//			d.halfEdges = append(d.halfEdges, e)
+//		}
+//	}
+//}
 
 func (d *doublyConnectedEdgeList) fixVertices() {
 	for _, vert := range d.vertices {
@@ -115,7 +121,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 	// Find all cycles.
 	var cycles []*halfEdgeRecord
 	seen := make(map[*halfEdgeRecord]bool)
-	for _, e := range d.halfEdges {
+	for _, e := range d.halfEdgez {
 		if seen[e] {
 			continue
 		}
@@ -220,7 +226,7 @@ func completeLabels(recipient, donor [2]label) [2]label {
 
 // fixLabels updates edge and vertex labels after performing an overlay.
 func (d *doublyConnectedEdgeList) fixLabels() {
-	for _, e := range d.halfEdges {
+	for _, e := range d.halfEdgez {
 		// Copy labels from incident faces into edge since the edge represents
 		// the (closed) border of the face.
 		mergeLabels(&e.edgeLabels, e.incident.labels)
