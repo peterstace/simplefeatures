@@ -251,8 +251,6 @@ func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operan
 			if edges.containsStartIntermediateEnd(startXY, intermediateFwd, endXY) {
 				return
 			}
-			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY)
-			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY)
 
 			vOrigin := d.vertices[startXY]
 			vDestin := d.vertices[endXY]
@@ -280,6 +278,9 @@ func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operan
 			fwd.twin = rev
 			fwd.next = rev
 			fwd.prev = rev
+
+			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY, fwd)
+			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY, rev)
 
 			vOrigin.incidents = append(vOrigin.incidents, fwd)
 			vDestin.incidents = append(vDestin.incidents, rev)
@@ -343,19 +344,19 @@ func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, operand operand
 				// Already exists, so shouldn't add.
 				return
 			}
-			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY)
-			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY)
 
-			d.addGhostLine(startXY, intermediateFwd, intermediateRev, endXY, operand)
+			fwd, rev := d.addGhostLine(startXY, intermediateFwd, intermediateRev, endXY, operand)
+			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY, fwd)
+			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY, rev)
 		})
 	}
 }
 
-func (d *doublyConnectedEdgeList) addGhostLine(startXY XY, intermediateFwd, intermediateRev []XY, endXY XY, operand operand) {
+func (d *doublyConnectedEdgeList) addGhostLine(startXY XY, intermediateFwd, intermediateRev []XY, endXY XY, operand operand) (*halfEdgeRecord, *halfEdgeRecord) {
 	vertA := d.vertices[startXY]
 	vertB := d.vertices[endXY]
 
-	e1 := &halfEdgeRecord{
+	fwd := &halfEdgeRecord{
 		origin:       vertA,
 		twin:         nil, // populated later
 		incident:     nil, // only populated in the overlay
@@ -365,27 +366,29 @@ func (d *doublyConnectedEdgeList) addGhostLine(startXY XY, intermediateFwd, inte
 		edgeLabels:   newHalfPopulatedLabels(operand, false),
 		faceLabels:   [2]label{},
 	}
-	e2 := &halfEdgeRecord{
+	rev := &halfEdgeRecord{
 		origin:       vertB,
-		twin:         e1,
+		twin:         fwd,
 		incident:     nil, // only populated in the overlay
-		next:         e1,
-		prev:         e1,
+		next:         fwd,
+		prev:         fwd,
 		intermediate: intermediateRev,
 		edgeLabels:   newHalfPopulatedLabels(operand, false),
 		faceLabels:   [2]label{},
 	}
-	e1.twin = e2
-	e1.next = e2
-	e1.prev = e2
+	fwd.twin = rev
+	fwd.next = rev
+	fwd.prev = rev
 
-	vertA.incidents = append(vertA.incidents, e1)
-	vertB.incidents = append(vertB.incidents, e2)
+	vertA.incidents = append(vertA.incidents, fwd)
+	vertB.incidents = append(vertB.incidents, rev)
 
-	d.halfEdges = append(d.halfEdges, e1, e2)
+	d.halfEdges = append(d.halfEdges, fwd, rev)
 
 	d.fixVertex(vertA)
 	d.fixVertex(vertB)
+
+	return fwd, rev
 }
 
 func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn func([]XY)) {

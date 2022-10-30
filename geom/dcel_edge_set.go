@@ -19,9 +19,9 @@ func (s edgeSet) insertEdge(e *halfEdgeRecord) {
 	s[k] = e
 }
 
-func (s edgeSet) insertStartIntermediateEnd(start XY, intermediate []XY, end XY) {
+func (s edgeSet) insertStartIntermediateEnd(start XY, intermediate []XY, end XY, e *halfEdgeRecord) {
 	k := s.key(start, intermediate, end)
-	s[k] = nil // TODO: this is a bit weird...
+	s[k] = e
 }
 
 func (s edgeSet) lookupEdge(e *halfEdgeRecord) (*halfEdgeRecord, bool) {
@@ -30,6 +30,7 @@ func (s edgeSet) lookupEdge(e *halfEdgeRecord) (*halfEdgeRecord, bool) {
 	return e, ok
 }
 
+// TODO: could key just be the start and then the next XY?
 func (edgeSet) key(start XY, intermediate []XY, end XY) [3]XY {
 	key := [3]XY{start, start, end}
 	if len(intermediate) > 0 {
