@@ -45,15 +45,15 @@ func (f *faceRecord) String() string {
 	if f == nil {
 		return "nil"
 	}
-	return fmt.Sprintf("cycle:%p inSet:%v", f.cycle, f.inSet)
+	return fmt.Sprintf("cycle:%p inSet:%v", f.cycle, bstoa(f.inSet))
 }
 
 type halfEdgeRecord struct {
-	origin       *vertexRecord
-	twin         *halfEdgeRecord
-	incident     *faceRecord // only populated in the overlay
-	next, prev   *halfEdgeRecord
-	intermediate []XY
+	origin     *vertexRecord
+	twin       *halfEdgeRecord
+	incident   *faceRecord // only populated in the overlay
+	next, prev *halfEdgeRecord
+	seq        Sequence
 
 	edgeInSet [2]bool
 	faceInSet [2]bool
@@ -64,10 +64,7 @@ type halfEdgeRecord struct {
 // first intermediate XY, or the origin of the next/twin edge in the case where
 // there are no intermediates.
 func (e *halfEdgeRecord) secondXY() XY {
-	if len(e.intermediate) == 0 {
-		return e.twin.origin.coords
-	}
-	return e.intermediate[0]
+	return e.seq.GetXY(1)
 }
 
 // String shows the origin and destination of the edge (for debugging
@@ -77,8 +74,38 @@ func (e *halfEdgeRecord) String() string {
 		return "nil"
 	}
 	return fmt.Sprintf(
-		"origin:%p twin:%p incident:%p next:%p prev:%p intermediate:%v edgeInSet:%v faceInSet:%v",
-		e.origin, e.twin, e.incident, e.next, e.prev, e.intermediate, e.edgeInSet, e.faceInSet)
+		"origin:%p twin:%p incident:%p next:%p prev:%p edgeInSet:%s faceInSet:%s xys:%v",
+		e.origin, e.twin, e.incident, e.next, e.prev, bstoa(e.edgeInSet), bstoa(e.faceInSet), e.xys())
+}
+
+func btoi(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func bstoa(b [2]bool) string {
+	var s string
+	if b[0] {
+		s += "1"
+	} else {
+		s += "0"
+	}
+	if b[1] {
+		s += "1"
+	} else {
+		s += "0"
+	}
+	return s
+}
+
+func (e *halfEdgeRecord) xys() []XY {
+	xys := make([]XY, e.seq.Length())
+	for i := range xys {
+		xys[i] = e.seq.GetXY(i)
+	}
+	return xys
 }
 
 type vertexRecord struct {
@@ -152,7 +179,7 @@ func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand opera
 		}
 
 		for _, ring := range rings {
-			forEachNonInteractingSegment(ring, interactions, func(segment []XY) {
+			forEachNonInteractingSegment(ring, interactions, func(segment Sequence) {
 				e := d.addOrGetEdge(segment)
 
 				e.start.inSet[operand] = true
@@ -237,7 +264,7 @@ func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operan
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		ls := mls.LineStringN(i)
 		seq := ls.Coordinates()
-		forEachNonInteractingSegment(seq, interactions, func(segment []XY) {
+		forEachNonInteractingSegment(seq, interactions, func(segment Sequence) {
 			edge := d.addOrGetEdge(segment)
 			edge.start.inSet[operand] = true
 			edge.end.inSet[operand] = true
@@ -378,7 +405,7 @@ func (d *doublyConnectedEdgeList) addGeometryCollection(gc GeometryCollection, o
 func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, interactions map[XY]struct{}) {
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		seq := mls.LineStringN(i).Coordinates()
-		forEachNonInteractingSegment(seq, interactions, func(segment []XY) {
+		forEachNonInteractingSegment(seq, interactions, func(segment Sequence) {
 			// No need to update labels/locations, since anything added is a "ghost" point.
 			_ = d.addOrGetEdge(segment)
 		})
@@ -460,18 +487,18 @@ type edge struct {
 	fwd, rev   *halfEdgeRecord
 }
 
-func (d *doublyConnectedEdgeList) addOrGetEdge(segment []XY) edge {
-	if len(segment) < 2 {
-		panic(fmt.Sprintf("segment of length less than 2: %d", len(segment)))
+func (d *doublyConnectedEdgeList) addOrGetEdge(segment Sequence) edge {
+	n := segment.Length()
+	if n < 2 {
+		panic(fmt.Sprintf("segment of length less than 2: %d", n))
 	}
 
-	startXY := segment[0]
-	endXY := segment[len(segment)-1]
-	intermediateFwd := segment[1 : len(segment)-1]
-	intermediateRev := reverseXYs(intermediateFwd)
+	startXY := segment.GetXY(0)
+	endXY := segment.GetXY(n - 1)
+	reverseSegment := reverseSequence(segment)
 
-	fwd, addedFwd := d.halfEdges.addOrGet(startXY, intermediateFwd, endXY)
-	rev, addedRev := d.halfEdges.addOrGet(endXY, intermediateRev, startXY)
+	fwd, addedFwd := d.halfEdges.addOrGet(segment)
+	rev, addedRev := d.halfEdges.addOrGet(reverseSegment)
 	if addedFwd != addedRev {
 		panic(fmt.Sprintf("addedFwd != addedRev: %t vs %t", addedFwd, addedRev))
 	}
@@ -499,8 +526,8 @@ func (d *doublyConnectedEdgeList) addOrGetEdge(segment []XY) edge {
 		fwd.prev = rev
 		rev.next = fwd
 		rev.prev = fwd
-		fwd.intermediate = intermediateFwd
-		rev.intermediate = intermediateRev
+		fwd.seq = segment
+		rev.seq = reverseSegment
 	}
 
 	return edge{
@@ -511,7 +538,7 @@ func (d *doublyConnectedEdgeList) addOrGetEdge(segment []XY) edge {
 	}
 }
 
-func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn func([]XY)) {
+func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn func(Sequence)) {
 	n := seq.Length()
 	i := 0
 	for i < n-1 {
@@ -527,10 +554,7 @@ func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn
 		}
 
 		// Construct the segment.
-		segment := make([]XY, end-start+1)
-		for j := range segment {
-			segment[j] = seq.GetXY(start + j)
-		}
+		segment := seq.Slice(start, end+1)
 
 		// Execute the callback with the segment.
 		fn(segment)

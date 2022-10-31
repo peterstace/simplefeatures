@@ -66,6 +66,16 @@ func reverseXYs(fwd []XY) []XY {
 	return rev
 }
 
+func reverseSequence(seq Sequence) Sequence {
+	n := seq.Length()
+	coords := make([]float64, 0, 2*n)
+	for i := n - 1; i >= 0; i-- {
+		xy := seq.GetXY(i)
+		coords = append(coords, xy.X, xy.Y)
+	}
+	return NewSequence(coords, DimXY)
+}
+
 // fastMin is a faster but not functionally identical version of math.Min.
 func fastMin(a, b float64) float64 {
 	if a < b {
