@@ -7,7 +7,7 @@ import (
 
 type doublyConnectedEdgeList struct {
 	faces     []*faceRecord // only populated in the overlay
-	halfEdges edgeSet       // TODO: rename back to halfEdges
+	halfEdges edgeSet
 	vertices  map[XY]*vertexRecord
 }
 
@@ -35,8 +35,9 @@ func (d *doublyConnectedEdgeList) debug() {
 }
 
 type faceRecord struct {
-	cycle     *halfEdgeRecord
-	labels    [2]label
+	cycle *halfEdgeRecord
+
+	inSet     [2]bool
 	extracted bool
 }
 
@@ -44,7 +45,7 @@ func (f *faceRecord) String() string {
 	if f == nil {
 		return "nil"
 	}
-	return fmt.Sprintf("cycle:%p labels:%v", f.cycle, f.labels)
+	return fmt.Sprintf("cycle:%p inSet:%v", f.cycle, f.inSet)
 }
 
 type halfEdgeRecord struct {
@@ -53,9 +54,10 @@ type halfEdgeRecord struct {
 	incident     *faceRecord // only populated in the overlay
 	next, prev   *halfEdgeRecord
 	intermediate []XY
-	edgeLabels   [2]label
-	faceLabels   [2]label
-	extracted    bool
+
+	edgeInSet [2]bool
+	faceInSet [2]bool
+	extracted bool
 }
 
 // secondXY gives the second (1-indexed) XY in the edge. This is either the
@@ -75,14 +77,15 @@ func (e *halfEdgeRecord) String() string {
 		return "nil"
 	}
 	return fmt.Sprintf(
-		"origin:%p twin:%p incident:%p next:%p prev:%p intermediate:%v edgeLabels:%v faceLabels:%v",
-		e.origin, e.twin, e.incident, e.next, e.prev, e.intermediate, e.edgeLabels, e.faceLabels)
+		"origin:%p twin:%p incident:%p next:%p prev:%p intermediate:%v edgeInSet:%v faceInSet:%v",
+		e.origin, e.twin, e.incident, e.next, e.prev, e.intermediate, e.edgeInSet, e.faceInSet)
 }
 
 type vertexRecord struct {
 	coords    XY
 	incidents []*halfEdgeRecord
-	labels    [2]label
+
+	inSet     [2]bool
 	locations [2]location
 	extracted bool
 }
@@ -137,7 +140,6 @@ func (d *doublyConnectedEdgeList) addGeometry(g Geometry, operand operand, inter
 
 func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand operand, interactions map[XY]struct{}) {
 	mp = mp.ForceCCW()
-	pop := newHalfPopulatedLabels(operand, true)
 
 	for polyIdx := 0; polyIdx < mp.NumPolygons(); polyIdx++ {
 		poly := mp.PolygonN(polyIdx)
@@ -153,16 +155,13 @@ func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand opera
 			forEachNonInteractingSegment(ring, interactions, func(segment []XY) {
 				e := d.addOrGetEdge(segment)
 
-				mergeLabels(&e.start.labels, pop)
-				mergeLabels(&e.end.labels, pop)
+				e.start.inSet[operand] = true
+				e.end.inSet[operand] = true
 				// TODO: set vert locations
 
-				mergeLabels(&e.fwd.edgeLabels, pop)
-				mergeLabels(&e.rev.edgeLabels, pop)
-				mergeLabels(&e.fwd.faceLabels, pop)
-
-				// TODO: BUG?? face might be populated by another overlaid geometry soon, so this isn't really accurate.
-				mergeLabels(&e.rev.faceLabels, newHalfPopulatedLabels(operand, false))
+				e.fwd.edgeInSet[operand] = true
+				e.rev.edgeInSet[operand] = true
+				e.fwd.faceInSet[operand] = true
 			})
 		}
 
@@ -235,20 +234,16 @@ func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand opera
 }
 
 func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operand operand, interactions map[XY]struct{}) {
-	pop := newHalfPopulatedLabels(operand, true)
-	unpop := newUnpopulatedLabels()
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		ls := mls.LineStringN(i)
 		seq := ls.Coordinates()
 		forEachNonInteractingSegment(seq, interactions, func(segment []XY) {
 			edge := d.addOrGetEdge(segment)
-			mergeLabels(&edge.start.labels, pop)
-			mergeLabels(&edge.end.labels, pop)
+			edge.start.inSet[operand] = true
+			edge.end.inSet[operand] = true
 			// TODO: set vert locations
-			mergeLabels(&edge.fwd.edgeLabels, pop)
-			mergeLabels(&edge.rev.edgeLabels, pop)
-			mergeLabels(&edge.fwd.faceLabels, unpop)
-			mergeLabels(&edge.rev.faceLabels, unpop)
+			edge.fwd.edgeInSet[operand] = true
+			edge.rev.edgeInSet[operand] = true
 		})
 	}
 
@@ -363,12 +358,12 @@ func (d *doublyConnectedEdgeList) addMultiPoint(mp MultiPoint, operand operand) 
 			record = &vertexRecord{
 				coords:    xy,
 				incidents: nil,
-				labels:    [2]label{},    // set below
+				inSet:     [2]bool{},     // set below
 				locations: [2]location{}, // set below
 			}
 			d.vertices[xy] = record
 		}
-		record.labels[operand] = label{populated: true, inSet: true}
+		record.inSet[operand] = true
 		record.locations[operand].interior = true
 	}
 }

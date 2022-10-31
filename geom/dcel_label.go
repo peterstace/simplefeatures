@@ -78,22 +78,22 @@ func assertPresence(labels [2]label) {
 	}
 }
 
-func selectUnion(labels [2]label) bool {
-	assertPresence(labels)
-	return labels[0].inSet || labels[1].inSet
+func selectUnion(inSet [2]bool) bool {
+	//assertPresence(inSet)
+	return inSet[0] || inSet[1]
 }
 
-func selectIntersection(labels [2]label) bool {
-	assertPresence(labels)
-	return labels[0].inSet && labels[1].inSet
+func selectIntersection(inSet [2]bool) bool {
+	//assertPresence(inSet)
+	return inSet[0] && inSet[1]
 }
 
-func selectDifference(labels [2]label) bool {
-	assertPresence(labels)
-	return labels[0].inSet && !labels[1].inSet
+func selectDifference(inSet [2]bool) bool {
+	//assertPresence(inSet)
+	return inSet[0] && !inSet[1]
 }
 
-func selectSymmetricDifference(labels [2]label) bool {
-	assertPresence(labels)
-	return labels[0].inSet != labels[1].inSet
+func selectSymmetricDifference(inSet [2]bool) bool {
+	//assertPresence(inSet)
+	return inSet[0] != inSet[1]
 }

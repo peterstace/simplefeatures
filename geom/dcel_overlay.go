@@ -6,7 +6,7 @@ import (
 )
 
 func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
-	b = Point{}.AsGeometry()
+	//b = Point{}.AsGeometry()
 
 	var points []XY
 	points = appendComponentPoints(points, a)
@@ -27,7 +27,7 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 
 	dcel.fixVertices()
 	dcel.reAssignFaces()
-	dcel.fixLabels()
+	//dcel.fixLabels()
 
 	dcel.debug()
 
@@ -138,12 +138,17 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 	d.faces = nil
 	for _, cycle := range cycles {
 		f := &faceRecord{
-			cycle:  cycle,
-			labels: [2]label{}, // populated below
+			cycle: cycle,
+			inSet: [2]bool{}, // populated below
 		}
 		d.faces = append(d.faces, f)
 		forEachEdge(cycle, func(e *halfEdgeRecord) {
-			mergeLabels(&f.labels, e.faceLabels)
+			if e.faceInSet[0] {
+				f.inSet[0] = true
+			}
+			if e.faceInSet[1] {
+				f.inSet[1] = true
+			}
 			e.incident = f
 		})
 	}
@@ -153,53 +158,53 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 	// We need to artificially create an infinite face.
 	if len(d.faces) == 0 {
 		d.faces = append(d.faces, &faceRecord{
-			cycle:  nil,
-			labels: newPopulatedLabels(false),
+			cycle: nil,
+			inSet: [2]bool{false, false},
 		})
 	}
 
-	for _, face := range d.faces {
-		d.completePartialFaceLabel(face)
-	}
+	// for _, face := range d.faces {
+	// 	d.completePartialFaceLabel(face)
+	// }
 }
 
-// completePartialFaceLabel checks to see if the face label for the given face
-// is complete (i.e. contains a part for both A and B). If it's not complete,
-// then in searches adjacent faces until it finds a face that it can copy the
-// missing part of the label from. This situation occurs whenever a face in the
-// overlay DCEL doesn't have any edges from one of the original geometries.
-func (d *doublyConnectedEdgeList) completePartialFaceLabel(face *faceRecord) {
-	labelIsComplete := func() bool {
-		return face.labels[0].populated && face.labels[1].populated
-	}
-	if labelIsComplete() {
-		return
-	}
-	expanded := make(map[*faceRecord]bool)
-	stack := []*faceRecord{face}
-	for len(stack) > 0 {
-		popped := stack[len(stack)-1]
-		stack = stack[:len(stack)-1]
-		adjacent := adjacentFaces(popped)
-		expanded[popped] = true
-		for _, adj := range adjacent {
-			face.labels = completeLabels(face.labels, adj.labels)
-			if labelIsComplete() {
-				return
-			}
-			if !expanded[adj] {
-				stack = append(stack, adj)
-			}
-		}
-	}
-
-	// It's possible that we're still missing part of the face label. This
-	// could happen if one of the inputs is a Point/MultiPoint input because
-	// its associated ghost lines would not add to the label pool. We can
-	// safely fill in the presence bits for this case.
-	face.labels[0].populated = true
-	face.labels[1].populated = true
-}
+// // completePartialFaceLabel checks to see if the face label for the given face
+// // is complete (i.e. contains a part for both A and B). If it's not complete,
+// // then in searches adjacent faces until it finds a face that it can copy the
+// // missing part of the label from. This situation occurs whenever a face in the
+// // overlay DCEL doesn't have any edges from one of the original geometries.
+// func (d *doublyConnectedEdgeList) completePartialFaceLabel(face *faceRecord) {
+// 	labelIsComplete := func() bool {
+// 		return face.labels[0].populated && face.labels[1].populated
+// 	}
+// 	if labelIsComplete() {
+// 		return
+// 	}
+// 	expanded := make(map[*faceRecord]bool)
+// 	stack := []*faceRecord{face}
+// 	for len(stack) > 0 {
+// 		popped := stack[len(stack)-1]
+// 		stack = stack[:len(stack)-1]
+// 		adjacent := adjacentFaces(popped)
+// 		expanded[popped] = true
+// 		for _, adj := range adjacent {
+// 			face.labels = completeLabels(face.labels, adj.labels)
+// 			if labelIsComplete() {
+// 				return
+// 			}
+// 			if !expanded[adj] {
+// 				stack = append(stack, adj)
+// 			}
+// 		}
+// 	}
+//
+// 	// It's possible that we're still missing part of the face label. This
+// 	// could happen if one of the inputs is a Point/MultiPoint input because
+// 	// its associated ghost lines would not add to the label pool. We can
+// 	// safely fill in the presence bits for this case.
+// 	face.labels[0].populated = true
+// 	face.labels[1].populated = true
+// }
 
 // adjacentFaces finds all of the faces that adjacent to f.
 func adjacentFaces(f *faceRecord) []*faceRecord {
@@ -227,24 +232,24 @@ func completeLabels(recipient, donor [2]label) [2]label {
 	return recipient
 }
 
-// fixLabels updates edge and vertex labels after performing an overlay.
-func (d *doublyConnectedEdgeList) fixLabels() {
-	for _, e := range d.halfEdges {
-		// Copy labels from incident faces into edge since the edge represents
-		// the (closed) border of the face.
-		mergeLabels(&e.edgeLabels, e.incident.labels)
-		mergeLabels(&e.edgeLabels, e.twin.incident.labels)
-
-		// If we haven't seen an edge label yet for one of the two input
-		// geometries, we can assume that we'll never see it. So we mark off
-		// that side as having the bit populated.
-		e.edgeLabels[0].populated = true
-		e.edgeLabels[1].populated = true
-
-		// Copy edge labels onto the labels of adjacent vertices. This is
-		// because the vertices represent the endpoints of the edges, and
-		// should have at least those bits set.
-		mergeLabels(&e.origin.labels, e.edgeLabels)
-		mergeLabels(&e.origin.labels, e.prev.edgeLabels)
-	}
-}
+// // fixLabels updates edge and vertex labels after performing an overlay.
+// func (d *doublyConnectedEdgeList) fixLabels() {
+// 	for _, e := range d.halfEdges {
+// 		// Copy labels from incident faces into edge since the edge represents
+// 		// the (closed) border of the face.
+// 		mergeLabels(&e.edgeLabels, e.incident.labels)
+// 		mergeLabels(&e.edgeLabels, e.twin.incident.labels)
+//
+// 		// If we haven't seen an edge label yet for one of the two input
+// 		// geometries, we can assume that we'll never see it. So we mark off
+// 		// that side as having the bit populated.
+// 		e.edgeLabels[0].populated = true
+// 		e.edgeLabels[1].populated = true
+//
+// 		// Copy edge labels onto the labels of adjacent vertices. This is
+// 		// because the vertices represent the endpoints of the edges, and
+// 		// should have at least those bits set.
+// 		mergeLabels(&e.origin.labels, e.edgeLabels)
+// 		mergeLabels(&e.origin.labels, e.prev.edgeLabels)
+// 	}
+// }

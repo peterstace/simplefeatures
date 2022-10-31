@@ -59,7 +59,7 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 	return g, wrap(err, "executing symmetric difference")
 }
 
-func setOp(a, b Geometry, include func([2]label) bool) (Geometry, error) {
+func setOp(a, b Geometry, include func([2]bool) bool) (Geometry, error) {
 	overlay, err := createOverlay(a, b)
 	if err != nil {
 		return Geometry{}, wrap(err, "internal error creating overlay")

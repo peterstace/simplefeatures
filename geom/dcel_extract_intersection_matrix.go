@@ -21,25 +21,25 @@ func (d *doublyConnectedEdgeList) extractIntersectionMatrix() matrix {
 }
 
 func (f *faceRecord) location(operand operand) imLocation {
-	assertPresence(f.labels)
-	if !f.labels[operand].inSet {
+	//assertPresence(f.labels)
+	if !f.inSet[operand] {
 		return imExterior
 	}
 	return imInterior
 }
 
 func (e *halfEdgeRecord) location(operand operand) imLocation {
-	assertPresence(e.edgeLabels)
+	//assertPresence(e.edgeLabels)
 
-	if !e.edgeLabels[operand].inSet {
+	if !e.edgeInSet[operand] {
 		return imExterior
 	}
 
-	assertPresence(e.incident.labels)
-	assertPresence(e.twin.incident.labels)
+	//assertPresence(e.incident.labels)
+	//assertPresence(e.twin.incident.labels)
 
-	face1Present := e.incident.labels[operand].inSet
-	face2Present := e.twin.incident.labels[operand].inSet
+	face1Present := e.incident.inSet[operand]
+	face2Present := e.twin.incident.inSet[operand]
 	if face1Present != face2Present {
 		return imBoundary
 	}
