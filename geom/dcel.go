@@ -7,14 +7,14 @@ import (
 
 type doublyConnectedEdgeList struct {
 	faces     []*faceRecord // only populated in the overlay
-	halfEdgez edgeSet       // TODO: rename back to halfEdges
+	halfEdges edgeSet       // TODO: rename back to halfEdges
 	vertices  map[XY]*vertexRecord
 }
 
 func newDCEL() *doublyConnectedEdgeList {
 	return &doublyConnectedEdgeList{
 		faces:     nil,
-		halfEdgez: make(map[[2]XY]*halfEdgeRecord),
+		halfEdges: make(map[[2]XY]*halfEdgeRecord),
 		vertices:  make(map[XY]*vertexRecord),
 	}
 }
@@ -24,8 +24,8 @@ func (d *doublyConnectedEdgeList) debug() {
 	for _, f := range d.faces {
 		log.Printf("\t%p: %s", f, f.String())
 	}
-	log.Printf("halfEdges: %d", len(d.halfEdgez))
-	for _, e := range d.halfEdgez {
+	log.Printf("halfEdges: %d", len(d.halfEdges))
+	for _, e := range d.halfEdges {
 		log.Printf("\t%p: %v", e, e.String())
 	}
 	log.Printf("vertices: %d", len(d.vertices))
@@ -475,8 +475,8 @@ func (d *doublyConnectedEdgeList) addOrGetEdge(segment []XY) edge {
 	intermediateFwd := segment[1 : len(segment)-1]
 	intermediateRev := reverseXYs(intermediateFwd)
 
-	fwd, addedFwd := d.halfEdgez.addOrGet(startXY, intermediateFwd, endXY)
-	rev, addedRev := d.halfEdgez.addOrGet(endXY, intermediateRev, startXY)
+	fwd, addedFwd := d.halfEdges.addOrGet(startXY, intermediateFwd, endXY)
+	rev, addedRev := d.halfEdges.addOrGet(endXY, intermediateRev, startXY)
 	if addedFwd != addedRev {
 		panic(fmt.Sprintf("addedFwd != addedRev: %t vs %t", addedFwd, addedRev))
 	}

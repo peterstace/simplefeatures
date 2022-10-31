@@ -124,7 +124,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 	// Find all cycles.
 	var cycles []*halfEdgeRecord
 	seen := make(map[*halfEdgeRecord]bool)
-	for _, e := range d.halfEdgez {
+	for _, e := range d.halfEdges {
 		if seen[e] {
 			continue
 		}
@@ -229,7 +229,7 @@ func completeLabels(recipient, donor [2]label) [2]label {
 
 // fixLabels updates edge and vertex labels after performing an overlay.
 func (d *doublyConnectedEdgeList) fixLabels() {
-	for _, e := range d.halfEdgez {
+	for _, e := range d.halfEdges {
 		// Copy labels from incident faces into edge since the edge represents
 		// the (closed) border of the face.
 		mergeLabels(&e.edgeLabels, e.incident.labels)

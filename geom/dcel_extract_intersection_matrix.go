@@ -7,7 +7,7 @@ func (d *doublyConnectedEdgeList) extractIntersectionMatrix() matrix {
 		locB := v.location(operandB)
 		im.set(locA, locB, '0')
 	}
-	for _, e := range d.halfEdgez {
+	for _, e := range d.halfEdges {
 		locA := e.location(operandA)
 		locB := e.location(operandB)
 		im.set(locA, locB, '1')
