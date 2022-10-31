@@ -2,7 +2,6 @@ package geom
 
 import (
 	"fmt"
-	"log"
 )
 
 type doublyConnectedEdgeList struct {
@@ -19,21 +18,6 @@ func newDCEL() *doublyConnectedEdgeList {
 	}
 }
 
-func (d *doublyConnectedEdgeList) debug() {
-	log.Printf("faces: %d", len(d.faces))
-	for _, f := range d.faces {
-		log.Printf("\t%p: %s", f, f.String())
-	}
-	log.Printf("halfEdges: %d", len(d.halfEdges))
-	for _, e := range d.halfEdges {
-		log.Printf("\t%p: %v", e, e.String())
-	}
-	log.Printf("vertices: %d", len(d.vertices))
-	for _, v := range d.vertices {
-		log.Printf("\t%p: %v", v, v)
-	}
-}
-
 type faceRecord struct {
 	cycle *halfEdgeRecord
 
@@ -41,11 +25,8 @@ type faceRecord struct {
 	extracted bool
 }
 
-func (f *faceRecord) String() string {
-	if f == nil {
-		return "nil"
-	}
-	return fmt.Sprintf("cycle:%p inSet:%v", f.cycle, bstoa(f.inSet))
+func (f *faceRecord) less(o *faceRecord) bool {
+	return f.cycle.less(o.cycle)
 }
 
 type halfEdgeRecord struct {
@@ -60,44 +41,20 @@ type halfEdgeRecord struct {
 	extracted bool
 }
 
+func (e *halfEdgeRecord) less(o *halfEdgeRecord) bool {
+	seqI := e.seq
+	seqJ := o.seq
+	if seqI.GetXY(0) != seqJ.GetXY(0) {
+		return seqI.GetXY(0).Less(seqJ.GetXY(0))
+	}
+	return seqI.GetXY(1).Less(seqJ.GetXY(1))
+}
+
 // secondXY gives the second (1-indexed) XY in the edge. This is either the
 // first intermediate XY, or the origin of the next/twin edge in the case where
 // there are no intermediates.
 func (e *halfEdgeRecord) secondXY() XY {
 	return e.seq.GetXY(1)
-}
-
-// String shows the origin and destination of the edge (for debugging
-// purposes). We can remove this once DCEL active development is completed.
-func (e *halfEdgeRecord) String() string {
-	if e == nil {
-		return "nil"
-	}
-	return fmt.Sprintf(
-		"origin:%p twin:%p incident:%p next:%p prev:%p edgeInSet:%s faceInSet:%s xys:%v",
-		e.origin, e.twin, e.incident, e.next, e.prev, bstoa(e.edgeInSet), bstoa(e.faceInSet), e.xys())
-}
-
-func btoi(b bool) int {
-	if b {
-		return 1
-	}
-	return 0
-}
-
-func bstoa(b [2]bool) string {
-	var s string
-	if b[0] {
-		s += "1"
-	} else {
-		s += "0"
-	}
-	if b[1] {
-		s += "1"
-	} else {
-		s += "0"
-	}
-	return s
 }
 
 func (e *halfEdgeRecord) xys() []XY {
@@ -115,6 +72,10 @@ type vertexRecord struct {
 	inSet     [2]bool
 	locations [2]location
 	extracted bool
+}
+
+func (v *vertexRecord) less(o *vertexRecord) bool {
+	return v.coords.Less(o.coords)
 }
 
 func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
