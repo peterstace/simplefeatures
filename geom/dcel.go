@@ -25,10 +25,6 @@ type faceRecord struct {
 	extracted bool
 }
 
-func (f *faceRecord) less(o *faceRecord) bool {
-	return f.cycle.less(o.cycle)
-}
-
 type halfEdgeRecord struct {
 	origin     *vertexRecord
 	twin       *halfEdgeRecord
@@ -39,15 +35,6 @@ type halfEdgeRecord struct {
 	edgeInSet [2]bool
 	faceInSet [2]bool
 	extracted bool
-}
-
-func (e *halfEdgeRecord) less(o *halfEdgeRecord) bool {
-	seqI := e.seq
-	seqJ := o.seq
-	if seqI.GetXY(0) != seqJ.GetXY(0) {
-		return seqI.GetXY(0).Less(seqJ.GetXY(0))
-	}
-	return seqI.GetXY(1).Less(seqJ.GetXY(1))
 }
 
 // secondXY gives the second (1-indexed) XY in the edge. This is either the
@@ -72,10 +59,6 @@ type vertexRecord struct {
 	inSet     [2]bool
 	locations [2]location
 	extracted bool
-}
-
-func (v *vertexRecord) less(o *vertexRecord) bool {
-	return v.coords.Less(o.coords)
 }
 
 func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
