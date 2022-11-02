@@ -22,7 +22,7 @@ type faceRecord struct {
 	cycle *halfEdgeRecord
 
 	inSet     [2]bool
-	extracted bool
+	extracted bool // TODO: keep state in func
 }
 
 type halfEdgeRecord struct {
@@ -32,9 +32,9 @@ type halfEdgeRecord struct {
 	next, prev *halfEdgeRecord
 	seq        Sequence
 
-	edgeInSet [2]bool
-	faceInSet [2]bool
-	extracted bool
+	srcEdge   [2]bool
+	srcFace   [2]bool
+	extracted bool // TODO: keep state in func
 }
 
 // secondXY gives the second (1-indexed) XY in the edge. This is either the
@@ -56,9 +56,9 @@ type vertexRecord struct {
 	coords    XY
 	incidents []*halfEdgeRecord
 
-	inSet     [2]bool
+	src       [2]bool
 	locations [2]location
-	extracted bool
+	extracted bool // TODO: keep state in func
 }
 
 func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
@@ -126,13 +126,13 @@ func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand opera
 			forEachNonInteractingSegment(ring, interactions, func(segment Sequence) {
 				e := d.addOrGetEdge(segment)
 
-				e.start.inSet[operand] = true
-				e.end.inSet[operand] = true
+				e.start.src[operand] = true
+				e.end.src[operand] = true
 				// TODO: set vert locations
 
-				e.fwd.edgeInSet[operand] = true
-				e.rev.edgeInSet[operand] = true
-				e.fwd.faceInSet[operand] = true
+				e.fwd.srcEdge[operand] = true
+				e.rev.srcEdge[operand] = true
+				e.fwd.srcFace[operand] = true
 			})
 		}
 
@@ -210,11 +210,11 @@ func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operan
 		seq := ls.Coordinates()
 		forEachNonInteractingSegment(seq, interactions, func(segment Sequence) {
 			edge := d.addOrGetEdge(segment)
-			edge.start.inSet[operand] = true
-			edge.end.inSet[operand] = true
+			edge.start.src[operand] = true
+			edge.end.src[operand] = true
 			// TODO: set vert locations
-			edge.fwd.edgeInSet[operand] = true
-			edge.rev.edgeInSet[operand] = true
+			edge.fwd.srcEdge[operand] = true
+			edge.rev.srcEdge[operand] = true
 		})
 	}
 
@@ -329,12 +329,12 @@ func (d *doublyConnectedEdgeList) addMultiPoint(mp MultiPoint, operand operand) 
 			record = &vertexRecord{
 				coords:    xy,
 				incidents: nil,
-				inSet:     [2]bool{},     // set below
+				src:       [2]bool{},     // set below
 				locations: [2]location{}, // set below
 			}
 			d.vertices[xy] = record
 		}
-		record.inSet[operand] = true
+		record.src[operand] = true
 		record.locations[operand].interior = true
 	}
 }

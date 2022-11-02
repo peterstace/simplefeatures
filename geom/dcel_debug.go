@@ -89,8 +89,8 @@ func (n *namedDCEL) edgeRepr(e *halfEdgeRecord) string {
 		return "nil"
 	}
 	return fmt.Sprintf(
-		"origin:%s twin:%s incident:%s next:%s prev:%s edgeInSet:%s faceInSet:%s xys:%v",
-		n.vertexNames[e.origin], n.edgeNames[e.twin], n.faceNames[e.incident], n.edgeNames[e.next], n.edgeNames[e.prev], bstoa(e.edgeInSet), bstoa(e.faceInSet), e.xys())
+		"origin:%s twin:%s incident:%s next:%s prev:%s srcEdge:%s srcFace:%s xys:%v",
+		n.vertexNames[e.origin], n.edgeNames[e.twin], n.faceNames[e.incident], n.edgeNames[e.next], n.edgeNames[e.prev], bstoa(e.srcEdge), bstoa(e.srcFace), e.xys())
 }
 
 func (n *namedDCEL) vertexRepr(v *vertexRecord) string {
@@ -102,8 +102,8 @@ func (n *namedDCEL) vertexRepr(v *vertexRecord) string {
 		incidents = append(incidents, n.edgeNames[inc])
 	}
 	return fmt.Sprintf(
-		"inSet:%s coords:%v incidents:%v",
-		bstoa(v.inSet), v.coords, incidents,
+		"src:%s coords:%v incidents:%v",
+		bstoa(v.src), v.coords, incidents,
 	)
 }
 

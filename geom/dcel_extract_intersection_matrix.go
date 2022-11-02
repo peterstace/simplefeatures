@@ -31,7 +31,7 @@ func (f *faceRecord) location(operand operand) imLocation {
 func (e *halfEdgeRecord) location(operand operand) imLocation {
 	//assertPresence(e.edgeLabels)
 
-	if !e.edgeInSet[operand] {
+	if !e.srcEdge[operand] {
 		return imExterior
 	}
 

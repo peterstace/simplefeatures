@@ -200,7 +200,7 @@ func (d *doublyConnectedEdgeList) extractLineStrings(include func([2]bool) bool)
 
 func shouldExtractLine(e *halfEdgeRecord, include func([2]bool) bool) bool {
 	return !e.extracted &&
-		include(e.edgeInSet) &&
+		include(e.srcEdge) &&
 		!include(e.incident.inSet) &&
 		!include(e.twin.incident.inSet)
 }
@@ -211,7 +211,7 @@ func shouldExtractLine(e *halfEdgeRecord, include func([2]bool) bool) bool {
 func (d *doublyConnectedEdgeList) extractPoints(include func([2]bool) bool) ([]Point, error) {
 	var pts []Point
 	for _, vert := range d.vertices {
-		if include(vert.inSet) && !vert.extracted {
+		if include(vert.src) && !vert.extracted {
 			vert.extracted = true
 			pt, err := vert.coords.AsPoint()
 			if err != nil {

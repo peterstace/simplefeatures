@@ -6,8 +6,6 @@ import (
 )
 
 func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
-	//b = Point{}.AsGeometry()
-
 	var points []XY
 	points = appendComponentPoints(points, a)
 	points = appendComponentPoints(points, b)
@@ -143,10 +141,10 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 		}
 		d.faces = append(d.faces, f)
 		forEachEdge(cycle, func(e *halfEdgeRecord) {
-			if e.faceInSet[0] {
+			if e.srcFace[0] {
 				f.inSet[0] = true
 			}
-			if e.faceInSet[1] {
+			if e.srcFace[1] {
 				f.inSet[1] = true
 			}
 			e.incident = f
