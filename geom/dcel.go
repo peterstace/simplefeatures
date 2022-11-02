@@ -34,6 +34,7 @@ type halfEdgeRecord struct {
 
 	srcEdge   [2]bool
 	srcFace   [2]bool
+	inSet     [2]bool
 	extracted bool // TODO: keep state in func
 }
 
@@ -57,6 +58,7 @@ type vertexRecord struct {
 	incidents []*halfEdgeRecord
 
 	src       [2]bool
+	inSet     [2]bool
 	locations [2]location
 	extracted bool // TODO: keep state in func
 }

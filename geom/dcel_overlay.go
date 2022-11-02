@@ -25,7 +25,7 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 
 	dcel.fixVertices()
 	dcel.reAssignFaces()
-	//dcel.fixLabels()
+	dcel.populateInSetLabels()
 
 	newNamedDCEL(dcel).show()
 
@@ -37,7 +37,7 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 //	d.overlayEdges(other)
 //	d.fixVertices()
 //	d.reAssignFaces()
-//	d.fixLabels()
+//	d.populateInSetLabels()
 //}
 //
 //func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
@@ -230,24 +230,18 @@ func completeLabels(recipient, donor [2]label) [2]label {
 	return recipient
 }
 
-// // fixLabels updates edge and vertex labels after performing an overlay.
-// func (d *doublyConnectedEdgeList) fixLabels() {
-// 	for _, e := range d.halfEdges {
-// 		// Copy labels from incident faces into edge since the edge represents
-// 		// the (closed) border of the face.
-// 		mergeLabels(&e.edgeLabels, e.incident.labels)
-// 		mergeLabels(&e.edgeLabels, e.twin.incident.labels)
-//
-// 		// If we haven't seen an edge label yet for one of the two input
-// 		// geometries, we can assume that we'll never see it. So we mark off
-// 		// that side as having the bit populated.
-// 		e.edgeLabels[0].populated = true
-// 		e.edgeLabels[1].populated = true
-//
-// 		// Copy edge labels onto the labels of adjacent vertices. This is
-// 		// because the vertices represent the endpoints of the edges, and
-// 		// should have at least those bits set.
-// 		mergeLabels(&e.origin.labels, e.edgeLabels)
-// 		mergeLabels(&e.origin.labels, e.prev.edgeLabels)
-// 	}
-// }
+// populateInSetLabels populates the inSet labels for edges and vertices.
+func (d *doublyConnectedEdgeList) populateInSetLabels() {
+	for _, e := range d.halfEdges {
+		// Copy labels from incident faces into edge since the edge represents
+		// the (closed) border of the face.
+		e.inSet[0] = e.srcEdge[0] || e.incident.inSet[0] || e.twin.incident.inSet[0]
+		e.inSet[1] = e.srcEdge[1] || e.incident.inSet[1] || e.twin.incident.inSet[1]
+
+		// Copy edge labels onto the labels of adjacent vertices. This is
+		// because the vertices represent the endpoints of the edges, and
+		// should have at least those bits set.
+		e.origin.inSet[0] = e.origin.src[0] || e.srcEdge[0] || e.prev.srcEdge[0]
+		e.origin.inSet[1] = e.origin.src[1] || e.srcEdge[1] || e.prev.srcEdge[1]
+	}
+}
