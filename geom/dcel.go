@@ -117,7 +117,6 @@ func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand opera
 	for polyIdx := 0; polyIdx < mp.NumPolygons(); polyIdx++ {
 		poly := mp.PolygonN(polyIdx)
 
-		// Extract rings.
 		rings := make([]Sequence, 1+poly.NumInteriorRings())
 		rings[0] = poly.ExteriorRing().Coordinates()
 		for i := 0; i < poly.NumInteriorRings(); i++ {
@@ -127,11 +126,9 @@ func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand opera
 		for _, ring := range rings {
 			forEachNonInteractingSegment(ring, interactions, func(segment Sequence) {
 				e := d.addOrGetEdge(segment)
-
 				e.start.src[operand] = true
 				e.end.src[operand] = true
-				// TODO: set vert locations
-
+				e.start.locations[operand].boundary = true
 				e.fwd.srcEdge[operand] = true
 				e.rev.srcEdge[operand] = true
 				e.fwd.srcFace[operand] = true

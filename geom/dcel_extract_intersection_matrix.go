@@ -29,21 +29,18 @@ func (f *faceRecord) location(operand operand) imLocation {
 }
 
 func (e *halfEdgeRecord) location(operand operand) imLocation {
-	//assertPresence(e.edgeLabels)
-
-	if !e.srcEdge[operand] {
-		return imExterior
-	}
-
-	//assertPresence(e.incident.labels)
-	//assertPresence(e.twin.incident.labels)
-
 	face1Present := e.incident.inSet[operand]
 	face2Present := e.twin.incident.inSet[operand]
+	if face1Present && face2Present {
+		return imInterior
+	}
 	if face1Present != face2Present {
 		return imBoundary
 	}
-	return imInterior
+	if e.inSet[operand] {
+		return imInterior
+	}
+	return imExterior
 }
 
 func (v *vertexRecord) location(operand operand) imLocation {

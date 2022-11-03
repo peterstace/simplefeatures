@@ -103,8 +103,8 @@ func (n *namedDCEL) vertexRepr(v *vertexRecord) string {
 		incidents = append(incidents, n.edgeNames[inc])
 	}
 	return fmt.Sprintf(
-		"src:%s inSet:%s coords:%v incidents:%v",
-		bstoa(v.src), bstoa(v.inSet), v.coords, incidents,
+		"src:%s inSet:%s loc:%s coords:%v incidents:%v",
+		bstoa(v.src), bstoa(v.inSet), lstoa(v.locations), v.coords, incidents,
 	)
 }
 
@@ -117,6 +117,25 @@ func btoa(b bool) string {
 
 func bstoa(b [2]bool) string {
 	return btoa(b[0]) + btoa(b[1])
+}
+
+func ltoa(loc location) string {
+	var s string
+	if loc.boundary {
+		s += "B"
+	} else {
+		s += "_"
+	}
+	if loc.interior {
+		s += "I"
+	} else {
+		s += "_"
+	}
+	return s
+}
+
+func lstoa(locs [2]location) string {
+	return ltoa(locs[0]) + ltoa(locs[1])
 }
 
 func ptoa(ptr interface{}) string {
