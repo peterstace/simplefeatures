@@ -241,7 +241,7 @@ func (d *doublyConnectedEdgeList) populateInSetLabels() {
 		// Copy edge labels onto the labels of adjacent vertices. This is
 		// because the vertices represent the endpoints of the edges, and
 		// should have at least those bits set.
-		e.origin.inSet[0] = e.origin.src[0] || e.srcEdge[0] || e.prev.srcEdge[0]
-		e.origin.inSet[1] = e.origin.src[1] || e.srcEdge[1] || e.prev.srcEdge[1]
+		e.origin.inSet[0] = e.origin.src[0] || e.inSet[0] || e.prev.inSet[0]
+		e.origin.inSet[1] = e.origin.src[1] || e.inSet[1] || e.prev.inSet[1]
 	}
 }
