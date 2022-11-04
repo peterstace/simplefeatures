@@ -58,13 +58,13 @@ func sortAndUniquifyXYs(xys []XY) []XY {
 	return xys[:n]
 }
 
-func reverseXYs(fwd []XY) []XY {
-	rev := make([]XY, len(fwd))
-	for i := range rev {
-		rev[i] = fwd[len(fwd)-1-i]
-	}
-	return rev
-}
+//func reverseXYs(fwd []XY) []XY {
+//	rev := make([]XY, len(fwd))
+//	for i := range rev {
+//		rev[i] = fwd[len(fwd)-1-i]
+//	}
+//	return rev
+//}
 
 func reverseSequence(seq Sequence) Sequence {
 	n := seq.Length()

@@ -218,17 +218,17 @@ func adjacentFaces(f *faceRecord) []*faceRecord {
 	return adjacent
 }
 
-// completeLabels copies any missing portion (part A or part B) of the label
-// from donor to recipient, and then returns recipient.
-func completeLabels(recipient, donor [2]label) [2]label {
-	for i := 0; i < 2; i++ {
-		if !recipient[i].populated && donor[i].populated {
-			recipient[i].populated = true
-			recipient[i].inSet = donor[i].inSet
-		}
-	}
-	return recipient
-}
+// // completeLabels copies any missing portion (part A or part B) of the label
+// // from donor to recipient, and then returns recipient.
+// func completeLabels(recipient, donor [2]label) [2]label {
+// 	for i := 0; i < 2; i++ {
+// 		if !recipient[i].populated && donor[i].populated {
+// 			recipient[i].populated = true
+// 			recipient[i].inSet = donor[i].inSet
+// 		}
+// 	}
+// 	return recipient
+// }
 
 // populateInSetLabels populates the inSet labels for edges and vertices.
 func (d *doublyConnectedEdgeList) populateInSetLabels() {
