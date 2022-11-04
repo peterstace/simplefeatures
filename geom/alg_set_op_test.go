@@ -76,28 +76,28 @@ func TestBinaryOp(t *testing.T) {
 			symDiff: "MULTIPOLYGON(((0 0,2 0,2 1,1 1,1 2,0 2,0 0)),((2 1,3 1,3 3,1 3,1 2,2 2,2 1)))",
 			relate:  "212101212",
 		},
-		//{
-		//	/*
-		//	               +-----+
-		//	               |     |
-		//	               |     |
-		//	               +-----+
-		//
-		//
-		//	   +-----+
-		//	   |     |
-		//	   |     |
-		//	   +-----+
-		//	*/
-		//	input1:  "POLYGON((0 0,1 0,1 1,0 1,0 0))",
-		//	input2:  "POLYGON((2 2,3 2,3 3,2 3,2 2))",
-		//	union:   "MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)),((2 2,3 2,3 3,2 3,2 2)))",
-		//	inter:   "GEOMETRYCOLLECTION EMPTY",
-		//	fwdDiff: "POLYGON((0 0,1 0,1 1,0 1,0 0))",
-		//	revDiff: "POLYGON((2 2,3 2,3 3,2 3,2 2))",
-		//	symDiff: "MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)),((2 2,3 2,3 3,2 3,2 2)))",
-		//	relate:  "FF2FF1212",
-		//},
+		{
+			/*
+			               +-----+
+			               |     |
+			               |     |
+			               +-----+
+
+
+			   +-----+
+			   |     |
+			   |     |
+			   +-----+
+			*/
+			input1:  "POLYGON((0 0,1 0,1 1,0 1,0 0))",
+			input2:  "POLYGON((2 2,3 2,3 3,2 3,2 2))",
+			union:   "MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)),((2 2,3 2,3 3,2 3,2 2)))",
+			inter:   "GEOMETRYCOLLECTION EMPTY",
+			fwdDiff: "POLYGON((0 0,1 0,1 1,0 1,0 0))",
+			revDiff: "POLYGON((2 2,3 2,3 3,2 3,2 2))",
+			symDiff: "MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)),((2 2,3 2,3 3,2 3,2 2)))",
+			relate:  "FF2FF1212",
+		},
 		//{
 		//	/*
 		//	   +-----------------+
