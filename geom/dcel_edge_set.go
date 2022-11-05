@@ -18,12 +18,6 @@ func (s edgeSet) addOrGet(segment Sequence) (*halfEdgeRecord, bool) {
 	return e, !ok
 }
 
-//func (s edgeSet) lookupEdge(e *halfEdgeRecord) (*halfEdgeRecord, bool) {
-//	k := s.key(e.seq)
-//	e, ok := s[k]
-//	return e, ok
-//}
-
 func (edgeSet) key(seq Sequence) [2]XY {
 	return [2]XY{seq.GetXY(0), seq.GetXY(1)}
 }

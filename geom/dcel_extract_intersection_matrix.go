@@ -21,7 +21,6 @@ func (d *doublyConnectedEdgeList) extractIntersectionMatrix() matrix {
 }
 
 func (f *faceRecord) location(operand operand) imLocation {
-	//assertPresence(f.labels)
 	if !f.inSet[operand] {
 		return imExterior
 	}

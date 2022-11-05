@@ -168,6 +168,20 @@ func findFacesMakingPolygon(include func([2]bool) bool, start *faceRecord) map[*
 	return expanded
 }
 
+// adjacentFaces finds all of the faces that are adjacent to f.
+func adjacentFaces(f *faceRecord) []*faceRecord {
+	var adjacent []*faceRecord
+	set := make(map[*faceRecord]bool)
+	forEachEdge(f.cycle, func(e *halfEdgeRecord) {
+		adj := e.twin.incident
+		if !set[adj] {
+			set[adj] = true
+			adjacent = append(adjacent, adj)
+		}
+	})
+	return adjacent
+}
+
 // orderCCWRingFirst reorders rings such that if it contains at least one CCW
 // ring, then a CCW ring is the first element.
 func orderCCWRingFirst(rings []LineString) {
