@@ -55,7 +55,7 @@ func (e *halfEdgeRecord) xys() []XY {
 
 type vertexRecord struct {
 	coords    XY
-	incidents []*halfEdgeRecord
+	incidents map[*halfEdgeRecord]struct{}
 
 	src       [2]bool
 	inSet     [2]bool
@@ -327,7 +327,7 @@ func (d *doublyConnectedEdgeList) addMultiPoint(mp MultiPoint, operand operand) 
 		if !ok {
 			record = &vertexRecord{
 				coords:    xy,
-				incidents: nil,
+				incidents: make(map[*halfEdgeRecord]struct{}),
 				src:       [2]bool{},     // set below
 				locations: [2]location{}, // set below
 			}
@@ -448,17 +448,23 @@ func (d *doublyConnectedEdgeList) addOrGetEdge(segment Sequence) edge {
 
 	startV, ok := d.vertices[startXY]
 	if !ok {
-		startV = &vertexRecord{coords: startXY}
+		startV = &vertexRecord{
+			coords:    startXY,
+			incidents: make(map[*halfEdgeRecord]struct{}),
+		}
 		d.vertices[startXY] = startV
 	}
 	endV, ok := d.vertices[endXY]
 	if !ok {
-		endV = &vertexRecord{coords: endXY}
+		endV = &vertexRecord{
+			coords:    endXY,
+			incidents: make(map[*halfEdgeRecord]struct{}),
+		}
 		d.vertices[endXY] = endV
 	}
 
-	startV.incidents = append(startV.incidents, fwd)
-	endV.incidents = append(endV.incidents, rev)
+	startV.incidents[fwd] = struct{}{}
+	endV.incidents[rev] = struct{}{}
 
 	if addedFwd {
 		fwd.origin = startV

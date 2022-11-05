@@ -95,10 +95,14 @@ func (d *doublyConnectedEdgeList) fixVertices() {
 
 func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 	// Sort the edges radially.
-	if len(v.incidents) >= 3 {
-		sort.Slice(v.incidents, func(i, j int) bool {
-			ei := v.incidents[i]
-			ej := v.incidents[j]
+	var incidents []*halfEdgeRecord
+	for e := range v.incidents {
+		incidents = append(incidents, e)
+	}
+	if len(incidents) >= 3 {
+		sort.Slice(incidents, func(i, j int) bool {
+			ei := incidents[i]
+			ej := incidents[j]
 			di := ei.secondXY().Sub(ei.origin.coords)
 			dj := ej.secondXY().Sub(ej.origin.coords)
 			aI := math.Atan2(di.Y, di.X)
@@ -108,9 +112,9 @@ func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 	}
 
 	// Fix pointers.
-	for i := range v.incidents {
-		ei := v.incidents[i]
-		ej := v.incidents[(i+1)%len(v.incidents)]
+	for i := range incidents {
+		ei := incidents[i]
+		ej := incidents[(i+1)%len(v.incidents)]
 		ei.prev = ej.twin
 		ej.twin.next = ei
 	}

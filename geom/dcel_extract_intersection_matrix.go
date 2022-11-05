@@ -57,7 +57,7 @@ func (v *vertexRecord) location(operand operand) imLocation {
 		// Exterior or Interior because if it were Boundary, then we would know
 		// that. We can just use the location of one of the incident edges,
 		// since that would have the same location.
-		for _, e := range v.incidents {
+		for e := range v.incidents {
 			return e.location(operand)
 		}
 		panic("point has no incidents") // Can't happen, due to ghost edges.

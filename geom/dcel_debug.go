@@ -99,9 +99,10 @@ func (n *namedDCEL) vertexRepr(v *vertexRecord) string {
 		return "nil"
 	}
 	var incidents []string
-	for _, inc := range v.incidents {
+	for inc := range v.incidents {
 		incidents = append(incidents, n.edgeNames[inc])
 	}
+	sort.Strings(incidents)
 	return fmt.Sprintf(
 		"src:%s inSet:%s loc:%s coords:%v incidents:%v",
 		bstoa(v.src), bstoa(v.inSet), lstoa(v.locations), v.coords, incidents,
