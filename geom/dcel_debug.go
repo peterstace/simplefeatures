@@ -6,6 +6,10 @@ import (
 	"sort"
 )
 
+func dumpDCEL(d *doublyConnectedEdgeList) {
+	newNamedDCEL(d).show()
+}
+
 type namedDCEL struct {
 	*doublyConnectedEdgeList
 

@@ -27,7 +27,7 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 	dcel.reAssignFaces()
 	dcel.populateInSetLabels()
 
-	//newNamedDCEL(dcel).show()
+	dumpDCEL(dcel)
 
 	return dcel, nil
 }
