@@ -148,951 +148,950 @@ func TestBinaryOp(t *testing.T) {
 			symDiff: "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 2,1 2,1 1,0 1)),((1 1,2 1,2 2,3 2,3 0,1 0,1 1)),((4 0,4 1,5 1,5 0,4 0)))",
 			relate:  "212101212",
 		},
-		//{
-		//	/*
-		//
-		//	   Two interlocking rings:
-		//
-		//	   +-------------------+
-		//	   |                   |
-		//	   |   +-----------+   |
-		//	   |   |           |   |
-		//	   |   |   +-------+---+-------+
-		//	   |   |   |       |   |       |
-		//	   |   |   |   +---+---+---+   |
-		//	   |   |   |   |   |   |   |   |
-		//	   |   +---+---+---+   |   |   |
-		//	   |       |   |       |   |   |
-		//	   +-------+---+-------+   |   |
-		//	           |   |           |   |
-		//	           |   +-----------+   |
-		//	           |                   |
-		//	           +-------------------+
-		//	*/
-		//	input1:  "POLYGON((0 2,5 2,5 7,0 7,0 2),(1 3,4 3,4 6,1 6,1 3))",
-		//	input2:  "POLYGON((2 0,7 0,7 5,2 5,2 0),(3 1,6 1,6 4,3 4,3 1))",
-		//	union:   "POLYGON((2 2,0 2,0 7,5 7,5 5,7 5,7 0,2 0,2 2),(5 4,5 2,3 2,3 1,6 1,6 4,5 4),(1 3,2 3,2 5,4 5,4 6,1 6,1 3),(3 3,4 3,4 4,3 4,3 3))",
-		//	inter:   "MULTIPOLYGON(((3 2,2 2,2 3,3 3,3 2)),((5 5,5 4,4 4,4 5,5 5)))",
-		//	fwdDiff: "MULTIPOLYGON(((2 2,0 2,0 7,5 7,5 5,4 5,4 6,1 6,1 3,2 3,2 2)),((5 4,5 2,3 2,3 3,4 3,4 4,5 4)))",
-		//	revDiff: "MULTIPOLYGON(((5 5,7 5,7 0,2 0,2 2,3 2,3 1,6 1,6 4,5 4,5 5)),((2 3,2 5,4 5,4 4,3 4,3 3,2 3)))",
-		//	symDiff: "MULTIPOLYGON(((5 5,7 5,7 0,2 0,2 2,3 2,3 1,6 1,6 4,5 4,5 5)),((5 5,4 5,4 6,1 6,1 3,2 3,2 2,0 2,0 7,5 7,5 5)),((2 3,2 5,4 5,4 4,3 4,3 3,2 3)),((4 4,5 4,5 2,3 2,3 3,4 3,4 4)))",
-		//	relate:  "212101212",
-		//},
-		//{
-		//	/*
-		//
-		//	      /\      /\
-		//	     /  \    /  \
-		//	    / A  \  / A  \
-		//	   /      \/      \
-		//	   \  /\  /\  /\  /
-		//	    \/AB\/  \/AB\/
-		//	    /\  /\  /\  /\
-		//	   /  \/  \/  \/  \
-		//	   \      /\      /
-		//	    \ B  /  \ B  /
-		//	     \  /    \  /
-		//	      \/      \/
-		//
-		//	*/
-		//	input1:  "MULTIPOLYGON(((0 2,1 1,2 2,1 3,0 2)),((2 2,3 1,4 2,3 3,2 2)))",
-		//	input2:  "MULTIPOLYGON(((0 1,1 2,2 1,1 0,0 1)),((2 1,3 0,4 1,3 2,2 1)))",
-		//	union:   "MULTIPOLYGON(((0.5 1.5,0 2,1 3,2 2,1.5 1.5,2 1,1 0,0 1,0.5 1.5)),((2.5 1.5,2 2,3 3,4 2,3.5 1.5,4 1,3 0,2 1,2.5 1.5)))",
-		//	inter:   "MULTIPOLYGON(((1.5 1.5,1 1,0.5 1.5,1 2,1.5 1.5)),((3.5 1.5,3 1,2.5 1.5,3 2,3.5 1.5)))",
-		//	fwdDiff: "MULTIPOLYGON(((0.5 1.5,0 2,1 3,2 2,1.5 1.5,1 2,0.5 1.5)),((2.5 1.5,2 2,3 3,4 2,3.5 1.5,3 2,2.5 1.5)))",
-		//	revDiff: "MULTIPOLYGON(((1 0,0 1,0.5 1.5,1 1,1.5 1.5,2 1,1 0)),((3.5 1.5,4 1,3 0,2 1,2.5 1.5,3 1,3.5 1.5)))",
-		//	symDiff: "MULTIPOLYGON(((1 0,0 1,0.5 1.5,1 1,1.5 1.5,2 1,1 0)),((1.5 1.5,1 2,0.5 1.5,0 2,1 3,2 2,1.5 1.5)),((3.5 1.5,4 1,3 0,2 1,2.5 1.5,3 1,3.5 1.5)),((3.5 1.5,3 2,2.5 1.5,2 2,3 3,4 2,3.5 1.5)))",
-		//	relate:  "212101212",
-		//},
-		//
-		//{
-		//	/*
-		//	   +-----+-----+
-		//	   | B   | A   |
-		//	   |     |     |
-		//	   +-----+-----+
-		//	   | A   | B   |
-		//	   |     |     |
-		//	   +-----+-----+
-		//	*/
-		//	input1:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))",
-		//	input2:  "MULTIPOLYGON(((0 1,0 2,1 2,1 1,0 1)),((1 0,1 1,2 1,2 0,1 0)))",
-		//	union:   "POLYGON((0 0,0 1,0 2,1 2,2 2,2 1,2 0,1 0,0 0))",
-		//	inter:   "MULTILINESTRING((0 1,1 1),(1 1,1 0),(1 1,1 2),(2 1,1 1))",
-		//	fwdDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))",
-		//	revDiff: "MULTIPOLYGON(((0 1,0 2,1 2,1 1,0 1)),((1 0,1 1,2 1,2 0,1 0)))",
-		//	symDiff: "POLYGON((0 0,0 1,0 2,1 2,2 2,2 1,2 0,1 0,0 0))",
-		//	relate:  "FF2F11212",
-		//},
-		//{
-		//	/*
-		//	   +-----+-----+
-		//	   | A   | B   |
-		//	   |     |     |
-		//	   +-----+-----+
-		//	*/
-		//	input1:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
-		//	input2:  "POLYGON((1 0,1 1,2 1,2 0,1 0))",
-		//	union:   "POLYGON((0 0,0 1,1 1,2 1,2 0,1 0,0 0))",
-		//	inter:   "LINESTRING(1 1,1 0)",
-		//	fwdDiff: "POLYGON((0 0,0 1,1 1,1 0,0 0))",
-		//	revDiff: "POLYGON((1 0,1 1,2 1,2 0,1 0))",
-		//	symDiff: "POLYGON((1 1,2 1,2 0,1 0,0 0,0 1,1 1))",
-		//	relate:  "FF2F11212",
-		//},
-		//{
-		//	/*
-		//	   +-------+
-		//	   | A     |
-		//	   |       +-------+
-		//	   |       | B     |
-		//	   +-------+       |
-		//	           |       |
-		//	           +-------+
-		//	*/
-		//	input1:  "POLYGON((0 0.5,0 1.5,1 1.5,1 0.5,0 0.5))",
-		//	input2:  "POLYGON((1 0,1 1,2 1,2 0,1 0))",
-		//	union:   "POLYGON((0 0.5,0 1.5,1 1.5,1 1,2 1,2 0,1 0,1 0.5,0 0.5))",
-		//	inter:   "LINESTRING(1 1,1 0.5)",
-		//	fwdDiff: "POLYGON((0 0.5,0 1.5,1 1.5,1 1,1 0.5,0 0.5))",
-		//	revDiff: "POLYGON((1 0,1 0.5,1 1,2 1,2 0,1 0))",
-		//	symDiff: "POLYGON((1 0,1 0.5,0 0.5,0 1.5,1 1.5,1 1,2 1,2 0,1 0))",
-		//	relate:  "FF2F11212",
-		//},
-		//{
-		//	/*
-		//	   +-----+
-		//	   | A&B |
-		//	   |     |
-		//	   +-----+
-		//	*/
-		//	input1:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
-		//	input2:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
-		//	union:   "POLYGON((0 0,0 1,1 1,1 0,0 0))",
-		//	inter:   "POLYGON((0 0,0 1,1 1,1 0,0 0))",
-		//	fwdDiff: "GEOMETRYCOLLECTION EMPTY",
-		//	revDiff: "GEOMETRYCOLLECTION EMPTY",
-		//	symDiff: "GEOMETRYCOLLECTION EMPTY",
-		//	relate:  "2FFF1FFF2",
-		//},
-		//{
-		//	/*
-		//	   *-------*
-		//	   |\ A&B /|
-		//	   | \   / |
-		//	   |  \ /  |
-		//	   *   *   *
-		//	   | A | B |
-		//	   |   |   |
-		//	   *---*---*
-		//	*/
-		//	input1:  "POLYGON((0 0,0 2,2 2,1 1,1 0,0 0))",
-		//	input2:  "POLYGON((1 0,1 1,0 2,2 2,2 0,1 0))",
-		//	union:   "POLYGON((0 0,0 2,2 2,2 0,1 0,0 0))",
-		//	inter:   "GEOMETRYCOLLECTION(LINESTRING(1 1,1 0),POLYGON((0 2,2 2,1 1,0 2)))",
-		//	fwdDiff: "POLYGON((0 0,0 2,1 1,1 0,0 0))",
-		//	revDiff: "POLYGON((1 0,1 1,2 2,2 0,1 0))",
-		//	symDiff: "POLYGON((0 2,1 1,2 2,2 0,1 0,0 0,0 2))",
-		//	relate:  "212111212",
-		//},
-		//{
-		//	/*
-		//	   +---+
-		//	   | A |
-		//	   +---+---+
-		//	       | B |
-		//	       +---+
-		//	*/
-		//	input1:  "POLYGON((0 1,1 1,1 2,0 2,0 1))",
-		//	input2:  "POLYGON((1 0,2 0,2 1,1 1,1 0))",
-		//	union:   "MULTIPOLYGON(((1 1,0 1,0 2,1 2,1 1)),((1 1,2 1,2 0,1 0,1 1)))",
-		//	inter:   "POINT(1 1)",
-		//	fwdDiff: "POLYGON((1 1,0 1,0 2,1 2,1 1))",
-		//	revDiff: "POLYGON((1 1,2 1,2 0,1 0,1 1))",
-		//	symDiff: "MULTIPOLYGON(((1 1,2 1,2 0,1 0,1 1)),((1 1,0 1,0 2,1 2,1 1)))",
-		//	relate:  "FF2F01212",
-		//},
-		//{
-		//	/*
-		//	   +-----+-----+
-		//	   |    / \    |
-		//	   |   +-+-+   |
-		//	   | A   |   B |
-		//	   +-----+-----+
-		//	*/
-		//	input1:  "POLYGON((0 0,2 0,2 1,1 1,2 2,0 2,0 0))",
-		//	input2:  "POLYGON((2 0,4 0,4 2,2 2,3 1,2 1,2 0))",
-		//	union:   "POLYGON((2 0,0 0,0 2,2 2,4 2,4 0,2 0),(2 2,1 1,2 1,3 1,2 2))",
-		//	inter:   "GEOMETRYCOLLECTION(POINT(2 2),LINESTRING(2 0,2 1))",
-		//	fwdDiff: "POLYGON((2 0,0 0,0 2,2 2,1 1,2 1,2 0))",
-		//	revDiff: "POLYGON((2 2,4 2,4 0,2 0,2 1,3 1,2 2))",
-		//	symDiff: "POLYGON((2 2,4 2,4 0,2 0,0 0,0 2,2 2),(2 2,1 1,2 1,3 1,2 2))",
-		//	relate:  "FF2F11212",
-		//},
-		//{
-		//	/*
-		//	        +---+
-		//	        | A |
-		//	        +---+---+
-		//	            | B |
-		//	   +---+    +---+
-		//	   |A&B|
-		//	   +---+
-		//	*/
-		//	input1:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((1 2,2 2,2 3,1 3,1 2)))",
-		//	input2:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((2 1,3 1,3 2,2 2,2 1)))",
-		//	union:   "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 2,1 2,1 3,2 3,2 2)),((2 2,3 2,3 1,2 1,2 2)))",
-		//	inter:   "GEOMETRYCOLLECTION(POINT(2 2),POLYGON((0 0,0 1,1 1,1 0,0 0)))",
-		//	fwdDiff: "POLYGON((2 2,1 2,1 3,2 3,2 2))",
-		//	revDiff: "POLYGON((2 2,3 2,3 1,2 1,2 2))",
-		//	symDiff: "MULTIPOLYGON(((2 2,3 2,3 1,2 1,2 2)),((2 2,1 2,1 3,2 3,2 2)))",
-		//	relate:  "2F2F11212",
-		//},
-		//{
-		//	/*
-		//	       +-------+
-		//	       |       |
-		//	   +---+---+   |
-		//	   |   |   |   |
-		//	   |   +---+   |
-		//	   | A |       |
-		//	   |   +---+   |
-		//	   |   |   |   |
-		//	   +---+---+   |
-		//	   |A&B|     B |
-		//	   +---+-------+
-		//	*/
-		//	input1:  "POLYGON((0 0,1 0,1 4,0 4,0 0))",
-		//	input2:  "POLYGON((0 0,3 0,3 5,1 5,1 4,2 4,2 3,1 3,1 2,2 2,2 1,0 1,0 0))",
-		//	union:   "POLYGON((1 0,0 0,0 1,0 4,1 4,1 5,3 5,3 0,1 0),(1 4,1 3,2 3,2 4,1 4),(1 2,1 1,2 1,2 2,1 2))",
-		//	inter:   "GEOMETRYCOLLECTION(POINT(1 4),LINESTRING(1 2,1 3),POLYGON((1 0,0 0,0 1,1 1,1 0)))",
-		//	fwdDiff: "POLYGON((1 2,1 1,0 1,0 4,1 4,1 3,1 2))",
-		//	revDiff: "POLYGON((1 4,1 5,3 5,3 0,1 0,1 1,2 1,2 2,1 2,1 3,2 3,2 4,1 4))",
-		//	symDiff: "POLYGON((1 4,1 5,3 5,3 0,1 0,1 1,0 1,0 4,1 4),(1 1,2 1,2 2,1 2,1 1),(1 4,1 3,2 3,2 4,1 4))",
-		//	relate:  "212111212",
-		//},
-		//{
-		//	/*
-		//	   +-------+-------+
-		//	   | A     |     B |
-		//	   |   +---+---+   |
-		//	   |   |       |   |
-		//	   |   +---+---+   |
-		//	   |       |       |
-		//	   +-------+-------+
-		//	*/
-		//
-		//	input1:  "POLYGON((0 0,2 0,2 1,1 1,1 2,2 2,2 3,0 3,0 0))",
-		//	input2:  "POLYGON((2 0,4 0,4 3,2 3,2 2,3 2,3 1,2 1,2 0))",
-		//	union:   "POLYGON((2 0,0 0,0 3,2 3,4 3,4 0,2 0),(2 2,1 2,1 1,2 1,3 1,3 2,2 2))",
-		//	inter:   "MULTILINESTRING((2 0,2 1),(2 2,2 3))",
-		//	fwdDiff: "POLYGON((2 0,0 0,0 3,2 3,2 2,1 2,1 1,2 1,2 0))",
-		//	revDiff: "POLYGON((2 3,4 3,4 0,2 0,2 1,3 1,3 2,2 2,2 3))",
-		//	symDiff: "POLYGON((2 3,4 3,4 0,2 0,0 0,0 3,2 3),(2 1,3 1,3 2,2 2,1 2,1 1,2 1))",
-		//	relate:  "FF2F11212",
-		//},
-		//{
-		//	/*
-		//	   *-------------+
-		//	   |\`.        B |
-		//	   | \ `.        |
-		//	   |  \  `.      |
-		//	   |   \   `*    |
-		//	   |    *    \   |
-		//	   |     `.   \  |
-		//	   |       `.  \ |
-		//	   | A       `. \|
-		//	   +-----------`-*
-		//	*/
-		//
-		//	input1:  "POLYGON((0 0,3 0,1 1,0 3,0 0))",
-		//	input2:  "POLYGON((3 0,3 3,0 3,2 2,3 0))",
-		//	union:   "MULTIPOLYGON(((3 0,0 0,0 3,1 1,3 0)),((0 3,3 3,3 0,2 2,0 3)))",
-		//	inter:   "MULTIPOINT(0 3,3 0)",
-		//	fwdDiff: "POLYGON((3 0,0 0,0 3,1 1,3 0))",
-		//	revDiff: "POLYGON((0 3,3 3,3 0,2 2,0 3))",
-		//	symDiff: "MULTIPOLYGON(((0 3,3 3,3 0,2 2,0 3)),((3 0,0 0,0 3,1 1,3 0)))",
-		//	relate:  "FF2F01212",
-		//},
-		//{
-		//	/*
-		//	   +
-		//	   |A
-		//	   |   B
-		//	   +----+
-		//	*/
-		//	input1:  "LINESTRING(0 0,0 1)",
-		//	input2:  "LINESTRING(0 0,1 0)",
-		//	union:   "MULTILINESTRING((0 0,0 1),(0 0,1 0))",
-		//	inter:   "POINT(0 0)",
-		//	fwdDiff: "LINESTRING(0 0,0 1)",
-		//	revDiff: "LINESTRING(0 0,1 0)",
-		//	symDiff: "MULTILINESTRING((0 0,1 0),(0 0,0 1))",
-		//	relate:  "FF1F00102",
-		//},
-		//{
-		//	/*
-		//	   +       +
-		//	   |       |
-		//	   A       B
-		//	   |       |
-		//	   +--A&B--+
-		//	*/
-		//	input1:  "LINESTRING(0 1,0 0,1 0)",
-		//	input2:  "LINESTRING(0 0,1 0,1 1)",
-		//	union:   "MULTILINESTRING((0 1,0 0),(0 0,1 0),(1 0,1 1))",
-		//	inter:   "LINESTRING(0 0,1 0)",
-		//	fwdDiff: "LINESTRING(0 1,0 0)",
-		//	revDiff: "LINESTRING(1 0,1 1)",
-		//	symDiff: "MULTILINESTRING((1 0,1 1),(0 1,0 0))",
-		//	relate:  "1010F0102",
-		//},
-		//{
-		//	/*
-		//	   \      /
-		//	    \    /
-		//	     B  A
-		//	      \/
-		//	      /\
-		//	     A  B
-		//	    /    \
-		//	   /      \
-		//	*/
-		//	input1:  "LINESTRING(0 0,1 1)",
-		//	input2:  "LINESTRING(0 1,1 0)",
-		//	union:   "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.5 0.5),(0.5 0.5,1 0))",
-		//	inter:   "POINT(0.5 0.5)",
-		//	fwdDiff: "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))",
-		//	revDiff: "MULTILINESTRING((0 1,0.5 0.5),(0.5 0.5,1 0))",
-		//	symDiff: "MULTILINESTRING((0 1,0.5 0.5),(0.5 0.5,1 0),(0 0,0.5 0.5),(0.5 0.5,1 1))",
-		//	relate:  "0F1FF0102",
-		//},
-		//{
-		//	//    +---A---+
-		//	//    |       |
-		//	//    B       B
-		//	//    |       |
-		//	//    +---A---+
-		//	//
-		//	input1:  "MULTILINESTRING((0 0,1 0),(0 1,1 1))",
-		//	input2:  "MULTILINESTRING((0 0,0 1),(1 0,1 1))",
-		//	union:   "MULTILINESTRING((0 0,1 0),(0 1,1 1),(0 0,0 1),(1 0,1 1))",
-		//	inter:   "MULTIPOINT(0 0,0 1,1 0,1 1)",
-		//	fwdDiff: "MULTILINESTRING((0 0,1 0),(0 1,1 1))",
-		//	revDiff: "MULTILINESTRING((0 0,0 1),(1 0,1 1))",
-		//	symDiff: "MULTILINESTRING((0 0,0 1),(1 0,1 1),(0 0,1 0),(0 1,1 1))",
-		//	relate:  "FF1F0F1F2",
-		//},
-		//{
-		//	/*
-		//	   +--A&B--+---A---+
-		//	   |       |       |
-		//	  A&B      B       A
-		//	   |       |       |
-		//	   +---A---+---A---+
-		//	   |       |
-		//	   B       B
-		//	   |       |
-		//	   +---B---+
-		//	*/
-		//	input1:  "LINESTRING(0 2,2 2,2 1,0 1,0 2)",
-		//	input2:  "LINESTRING(1 2,1 0,0 0,0 2,1 2)",
-		//	union:   "MULTILINESTRING((0 2,1 2),(1 2,2 2,2 1,1 1),(1 1,0 1),(0 1,0 2),(1 2,1 1),(1 1,1 0,0 0,0 1))",
-		//	inter:   "GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(0 2,1 2),LINESTRING(0 1,0 2))",
-		//	fwdDiff: "MULTILINESTRING((1 2,2 2,2 1,1 1),(1 1,0 1))",
-		//	revDiff: "MULTILINESTRING((1 2,1 1),(1 1,1 0,0 0,0 1))",
-		//	symDiff: "MULTILINESTRING((1 2,2 2,2 1,1 1),(1 1,0 1),(1 2,1 1),(1 1,1 0,0 0,0 1))",
-		//	relate:  "1F1FFF1F2",
-		//},
-		//{
-		//	/*
-		//	  +---------+
-		//	   `,     ,` `,
-		//	     `, ,`     `,
-		//	      ,`,       ,`
-		//	    ,`   `,   ,`
-		//	  +`       `+`
-		//
-		//	*/
-		//	input1:  "LINESTRING(0 0,2 2,0 2,2 0)",
-		//	input2:  "LINESTRING(2 0,3 1,2 2)",
-		//	union:   "MULTILINESTRING((0 0,1 1),(1 1,2 2),(2 2,0 2,1 1),(1 1,2 0),(2 0,3 1,2 2))",
-		//	inter:   "MULTIPOINT(2 0,2 2)",
-		//	fwdDiff: "MULTILINESTRING((0 0,1 1),(1 1,2 2),(2 2,0 2,1 1),(1 1,2 0))",
-		//	revDiff: "LINESTRING(2 0,3 1,2 2)",
-		//	symDiff: "MULTILINESTRING((0 0,1 1),(1 1,2 2),(2 2,0 2,1 1),(1 1,2 0),(2 0,3 1,2 2))",
-		//	relate:  "F01F001F2",
-		//},
-		//{
-		//	/*
-		//	       +
-		//	       |
-		//	   +---+---+
-		//	   |   |   |
-		//	   |   +   |
-		//	   |       |
-		//	   +-------+
-		//	*/
-		//	input1:  "POLYGON((0 0,0 2,2 2,2 0,0 0))",
-		//	input2:  "LINESTRING(1 1,1 3)",
-		//	union:   "GEOMETRYCOLLECTION(LINESTRING(1 2,1 3),POLYGON((0 0,0 2,1 2,2 2,2 0,0 0)))",
-		//	inter:   "LINESTRING(1 1,1 2)",
-		//	fwdDiff: "POLYGON((0 0,0 2,1 2,2 2,2 0,0 0))",
-		//	revDiff: "LINESTRING(1 2,1 3)",
-		//	symDiff: "GEOMETRYCOLLECTION(LINESTRING(1 2,1 3),POLYGON((0 0,0 2,1 2,2 2,2 0,0 0)))",
-		//	relate:  "1020F1102",
-		//},
-		//{
-		//	/*
-		//	   +--------+
-		//	   |     ,  |
-		//	   |   ,`   |
-		//	   |  `     |
-		//	   +--------+
-		//	*/
-		//	input1:  "POLYGON((0 0,0 3,3 3,3 0,0 0))",
-		//	input2:  "LINESTRING(1 1,2 2)",
-		//	union:   "POLYGON((0 0,0 3,3 3,3 0,0 0))",
-		//	inter:   "LINESTRING(1 1,2 2)",
-		//	fwdDiff: "POLYGON((0 0,0 3,3 3,3 0,0 0))",
-		//	revDiff: "GEOMETRYCOLLECTION EMPTY",
-		//	symDiff: "POLYGON((0 0,0 3,3 3,3 0,0 0))",
-		//	relate:  "102FF1FF2",
-		//},
-		//{
-		//	/*
-		//	   +---+---+---+
-		//	   |   A   |A&B|
-		//	   +---+---+---+
-		//	   |A&B|   B   |
-		//	   +---+---+---+
-		//	   |   A   |A&B|
-		//	   +---+---+---+
-		//	*/
-		//	input1:  "POLYGON((0 0,3 0,3 1,1 1,1 2,3 2,3 3,0 3,0 0))",
-		//	input2:  "POLYGON((0 1,0 2,2 2,2 3,3 3,3 0,2 0,2 1,0 1))",
-		//	union:   "POLYGON((2 0,0 0,0 1,0 2,0 3,2 3,3 3,3 2,3 1,3 0,2 0))",
-		//	inter:   "GEOMETRYCOLLECTION(LINESTRING(2 1,1 1),LINESTRING(1 2,2 2),POLYGON((3 0,2 0,2 1,3 1,3 0)),POLYGON((1 2,1 1,0 1,0 2,1 2)),POLYGON((3 2,2 2,2 3,3 3,3 2)))",
-		//	fwdDiff: "MULTIPOLYGON(((2 0,0 0,0 1,1 1,2 1,2 0)),((2 2,1 2,0 2,0 3,2 3,2 2)))",
-		//	revDiff: "POLYGON((1 2,2 2,3 2,3 1,2 1,1 1,1 2))",
-		//	symDiff: "POLYGON((1 2,0 2,0 3,2 3,2 2,3 2,3 1,2 1,2 0,0 0,0 1,1 1,1 2))",
-		//	relate:  "212111212",
-		//},
-		//{
-		//	/*
-		//	   +   +   +
-		//	   A  A&B  B
-		//	*/
-		//	input1:  "MULTIPOINT(0 0,1 1)",
-		//	input2:  "MULTIPOINT(1 1,2 2)",
-		//	union:   "MULTIPOINT(0 0,1 1,2 2)",
-		//	inter:   "POINT(1 1)",
-		//	fwdDiff: "POINT(0 0)",
-		//	revDiff: "POINT(2 2)",
-		//	symDiff: "MULTIPOINT(0 0,2 2)",
-		//	relate:  "0F0FFF0F2",
-		//},
-		//{
-		//	/*
-		//	   +-------+
-		//	   |       |
-		//	   |   +   |   +
-		//	   |       |
-		//	   +-------+
-		//	*/
-		//	input1:  "POLYGON((0 0,0 2,2 2,2 0,0 0))",
-		//	input2:  "MULTIPOINT(1 1,3 1)",
-		//	union:   "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 1,2 0,0 0)))",
-		//	inter:   "POINT(1 1)",
-		//	fwdDiff: "POLYGON((0 0,0 2,2 2,2 1,2 0,0 0))",
-		//	revDiff: "POINT(3 1)",
-		//	symDiff: "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 1,2 0,0 0)))",
-		//	relate:  "0F2FF10F2",
-		//},
-		//{
-		//	/*
-		//	   +
-		//	   |\
-		//	   | \
-		//	   |  \
-		//	   |   \
-		//	   |    \
-		//	   O-----+
-		//	*/
-		//	input1:  "POLYGON((0 0,0 1,1 0,0 0))",
-		//	input2:  "POINT(0 0)",
-		//	union:   "POLYGON((0 0,0 1,1 0,0 0))",
-		//	inter:   "POINT(0 0)",
-		//	fwdDiff: "POLYGON((0 0,0 1,1 0,0 0))",
-		//	revDiff: "GEOMETRYCOLLECTION EMPTY",
-		//	symDiff: "POLYGON((0 0,0 1,1 0,0 0))",
-		//	relate:  "FF20F1FF2",
-		//},
-		//{
-		//	/*
-		//	   +
-		//	   |\
-		//	   | \
-		//	   |  O
-		//	   |   \
-		//	   |    \
-		//	   +-----+
-		//	*/
-		//	input1:  "POLYGON((0 0,0 1,1 0,0 0))",
-		//	input2:  "POINT(0.5 0.5)",
-		//	union:   "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
-		//	inter:   "POINT(0.5 0.5)",
-		//	fwdDiff: "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
-		//	revDiff: "GEOMETRYCOLLECTION EMPTY",
-		//	symDiff: "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
-		//	relate:  "FF20F1FF2",
-		//},
-		//{
-		//	/*
-		//	   +-------+
-		//	   |       |
-		//	   |   +   |
-		//	   |       |
-		//	   +-------+
-		//	*/
-		//	input1:  "LINESTRING(0 0,0 1,1 1,1 0,0 0,0 1)", // overlapping line segment
-		//	input2:  "POINT(0.5 0.5)",
-		//	union:   "GEOMETRYCOLLECTION(LINESTRING(0 0,0 1),LINESTRING(0 1,1 1,1 0,0 0),POINT(0.5 0.5))",
-		//	inter:   "GEOMETRYCOLLECTION EMPTY",
-		//	fwdDiff: "MULTILINESTRING((0 0,0 1),(0 1,1 1,1 0,0 0))",
-		//	revDiff: "POINT(0.5 0.5)",
-		//	symDiff: "GEOMETRYCOLLECTION(LINESTRING(0 0,0 1),LINESTRING(0 1,1 1,1 0,0 0),POINT(0.5 0.5))",
-		//	relate:  "FF1FF00F2",
-		//},
-		//{
-		//	/*
-		//	       +
-		//	      /
-		//	     *
-		//	    /
-		//	   +
-		//	*/
-		//	input1:  "LINESTRING(0 0,1 1)",
-		//	input2:  "POINT(0.35355339059327373 0.35355339059327373)",
-		//	union:   "MULTILINESTRING((0 0,0.35355339059327373 0.35355339059327373),(0.35355339059327373 0.35355339059327373,1 1))",
-		//	inter:   "POINT(0.35355339059327373 0.35355339059327373)",
-		//	fwdDiff: "MULTILINESTRING((0 0,0.35355339059327373 0.35355339059327373),(0.35355339059327373 0.35355339059327373,1 1))",
-		//	revDiff: "GEOMETRYCOLLECTION EMPTY",
-		//	symDiff: "MULTILINESTRING((0 0,0.35355339059327373 0.35355339059327373),(0.35355339059327373 0.35355339059327373,1 1))",
-		//	relate:  "0F1FF0FF2",
-		//},
-		//{
-		//	// LineString with a Point in the middle of it.
-		//	input1:  "POINT(5 5)",
-		//	input2:  "LINESTRING(1 2,9 8)",
-		//	union:   "MULTILINESTRING((1 2,5 5),(5 5,9 8))",
-		//	inter:   "POINT(5 5)",
-		//	fwdDiff: "GEOMETRYCOLLECTION EMPTY",
-		//	revDiff: "MULTILINESTRING((1 2,5 5),(5 5,9 8))",
-		//	symDiff: "MULTILINESTRING((1 2,5 5),(5 5,9 8))",
-		//	relate:  "0FFFFF102",
-		//},
-		//{
-		//	/*
-		//	       *
-		//	   +  /
-		//	    \/
-		//	    /\
-		//	   *  *
-		//	*/
-		//
-		//	// Tests a case where intersection between two segments is *not* commutative if done naively.
-		//	input1:  "LINESTRING(0 0,1 2)",
-		//	input2:  "LINESTRING(0 1,1 0)",
-		//	union:   "MULTILINESTRING((0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2),(0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))",
-		//	inter:   "POINT(0.3333333333 0.6666666667)",
-		//	fwdDiff: "MULTILINESTRING((0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2))",
-		//	revDiff: "MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))",
-		//	symDiff: "MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0),(0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2))",
-		//	relate:  "0F1FF0102",
-		//},
-		//{
-		//	// Similar case for when line segment non-commutative operations are
-		//	// done, but this time with a line segment doubling back on itself.
-		//	input1:  "LINESTRING(0 0,1 2,0 0)",
-		//	input2:  "LINESTRING(0 1,1 0)",
-		//	union:   "MULTILINESTRING((0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2),(0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))",
-		//	inter:   "POINT(0.3333333333 0.6666666667)",
-		//	fwdDiff: "MULTILINESTRING((0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2))",
-		//	revDiff: "MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))",
-		//	symDiff: "MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0),(0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2))",
-		//	relate:  "0F1FFF102",
-		//},
-		//
-		//// In the following test cases, lines from the first input intersect
-		//// *almost* exactly with one of the vertices in the second input.
-		//{
-		//	input1:  "LINESTRING(-1 1,1 -1)",
-		//	input2:  "POLYGON((-1 0,-0.070710678118655 0.070710678118655,0 1,-1 0))",
-		//	union:   "GEOMETRYCOLLECTION(LINESTRING(-1 1,-0.5 0.5),LINESTRING(-0.070710678118655 0.070710678118655,1 -1),POLYGON((-1 0,-0.5 0.5,0 1,-0.070710678118655 0.070710678118655,-1 0)))",
-		//	inter:   "LINESTRING(-0.5 0.5,-0.070710678118655 0.070710678118655)",
-		//	fwdDiff: "MULTILINESTRING((-1 1,-0.5 0.5),(-0.070710678118655 0.070710678118655,1 -1))",
-		//	revDiff: "POLYGON((-1 0,-0.5 0.5,0 1,-0.070710678118655 0.070710678118655,-1 0))",
-		//	symDiff: "GEOMETRYCOLLECTION(LINESTRING(-1 1,-0.5 0.5),LINESTRING(-0.070710678118655 0.070710678118655,1 -1),POLYGON((-1 0,-0.5 0.5,0 1,-0.070710678118655 0.070710678118655,-1 0)))",
-		//	relate:  "101FF0212",
-		//},
-		//{
-		//	input1:  "LINESTRING(0 0,1 1)",
-		//	input2:  "LINESTRING(1 0,0.5000000000000001 0.5,0 1)",
-		//	union:   "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(1 0,0.5 0.5),(0.5 0.5,0 1))",
-		//	inter:   "POINT(0.5 0.5)",
-		//	fwdDiff: "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))",
-		//	revDiff: "MULTILINESTRING((1 0,0.5 0.5),(0.5 0.5,0 1))",
-		//	symDiff: "MULTILINESTRING((1 0,0.5 0.5),(0.5 0.5,0 1),(0 0,0.5 0.5),(0.5 0.5,1 1))",
-		//	relate:  "0F1FF0102",
-		//},
-		//{
-		//	/*
-		//	     +               +
-		//	     |\              |\
-		//	     | \             | \
-		//	  +--+--+--+  ->  +--+  +--+
-		//	     |   \           |   \
-		//	     |    \          |    \
-		//	     +-----+         +-----+
-		//	*/
-		//	input1:  "GEOMETRYCOLLECTION(POLYGON((1 0,3 2,1 2,1 0)))",
-		//	input2:  "GEOMETRYCOLLECTION(LINESTRING(0 1,3 1))",
-		//	union:   "GEOMETRYCOLLECTION(POLYGON((1 0,2 1,3 2,1 2,1 1,1 0)),LINESTRING(0 1,1 1),LINESTRING(2 1,3 1))",
-		//	inter:   "LINESTRING(1 1,2 1)",
-		//	fwdDiff: "POLYGON((1 0,2 1,3 2,1 2,1 1,1 0))",
-		//	revDiff: "MULTILINESTRING((0 1,1 1),(2 1,3 1))",
-		//	symDiff: "GEOMETRYCOLLECTION(POLYGON((1 0,2 1,3 2,1 2,1 1,1 0)),LINESTRING(0 1,1 1),LINESTRING(2 1,3 1))",
-		//	relate:  "1F20F1102",
-		//},
-		//{
-		//	/*
-		//	    Reproduces a bug with set ops between self-intersecting GeometryCollections.
-		//	        +  +
-		//	        |\ |
-		//	        | \|
-		//	     +  |  +
-		//	     |\ |  |\
-		//	     | \|  | \
-		//	     |  +  |  \
-		//	     |  |\ |   \
-		//	     |  | \|    \
-		//	  +--+--+--+-----+--+1B
-		//	     |  |  |\     \
-		//	     |  |  | \  2A \
-		//	     |  +--+--+-----+
-		//	     |     |   \
-		//	     | 1A  |    \
-		//	     +-----+-----+
-		//	           |
-		//	           |2B
-		//	           +
-		//	*/
-		//	input1: `GEOMETRYCOLLECTION(
-		//		POLYGON((1 1,5 5,1 5,1 1)),
-		//		LINESTRING(0 3,6 3))`,
-		//	input2: `GEOMETRYCOLLECTION(
-		//		POLYGON((2 0,6 4,2 4,2 0)),
-		//		LINESTRING(3 0,3 6))`,
-		//	union: `GEOMETRYCOLLECTION(
-		//		POLYGON((2 2,2 0,3 1,5 3,6 4,4 4,5 5,3 5,1 5,1 3,1 1,2 2)),
-		//		LINESTRING(0 3,1 3),
-		//		LINESTRING(5 3,6 3),
-		//		LINESTRING(3 0,3 1),
-		//		LINESTRING(3 5,3 6))`,
-		//	inter: `GEOMETRYCOLLECTION(
-		//		POLYGON((2 2,3 3,4 4,3 4,2 4,2 3,2 2)),
-		//		LINESTRING(3 3,5 3),
-		//		LINESTRING(3 4,3 5))`,
-		//	fwdDiff: `GEOMETRYCOLLECTION(
-		//		POLYGON((1 1,2 2,2 3,2 4,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
-		//		LINESTRING(0 3,1 3),
-		//		LINESTRING(5 3,6 3))`,
-		//	revDiff: `GEOMETRYCOLLECTION(
-		//		POLYGON((3 1,5 3,6 4,4 4,3 3,2 2,2 0,3 1)),
-		//		LINESTRING(3 0,3 1),
-		//		LINESTRING(3 5,3 6))`,
-		//	symDiff: `GEOMETRYCOLLECTION(
-		//		POLYGON((1 1,2 2,2 3,2 4,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
-		//		POLYGON((3 1,5 3,6 4,4 4,3 3,2 2,2 0,3 1)),
-		//		LINESTRING(0 3,1 3),
-		//		LINESTRING(5 3,6 3),
-		//		LINESTRING(3 0,3 1),
-		//		LINESTRING(3 5,3 6))`,
-		//	relate: `212101212`,
-		//},
-		//{
-		//	/*
-		//	    Reproduces a bug with set ops between self-intersecting GeometryCollections.
-		//	    Similar to the previous case, but none of the crossing points are coincident.
-		//	        +  +
-		//	        |\ |
-		//	        | \|
-		//	     +  |  +
-		//	     |\ |  |\
-		//	     | \|  | \
-		//	     |  +  |  \
-		//	     |  |\ |   \
-		//	     |  | \|    \
-		//	     |  |  +     \
-		//	     |  |  |\     \
-		//	     |  |  | \     \
-		//	  +--+--+--+--+--+--+--+1B
-		//	     |  |  |   \     \
-		//	     |  |  |    \  2A \
-		//	     |  +--+-----+-----+
-		//	     |     |      \
-		//	     | 1A  |       \
-		//	     +-----+--------+
-		//	           |
-		//	           |2B
-		//	           +
-		//	*/
-		//	input1: `GEOMETRYCOLLECTION(
-		//		POLYGON((1 1,6 6,1 6,1 1)),
-		//		LINESTRING(0 4,7 4))`,
-		//	input2: `GEOMETRYCOLLECTION(
-		//		POLYGON((2 0,7 5,2 5,2 0)),
-		//		LINESTRING(3 0,3 7))`,
-		//	union: `GEOMETRYCOLLECTION(
-		//		POLYGON((2 2,2 0,3 1,6 4,7 5,5 5,6 6,3 6,1 6,1 4,1 1,2 2)),
-		//		LINESTRING(0 4,1 4),
-		//		LINESTRING(6 4,7 4),
-		//		LINESTRING(3 0,3 1),
-		//		LINESTRING(3 6,3 7))`,
-		//	inter: `GEOMETRYCOLLECTION(
-		//		POLYGON((2 2,3 3,4 4,5 5,3 5,2 5,2 4,2 2)),
-		//		LINESTRING(4 4,6 4),
-		//		LINESTRING(3 5,3 6))`,
-		//	fwdDiff: `GEOMETRYCOLLECTION(
-		//		POLYGON((5 5,6 6,3 6,1 6,1 4,1 1,2 2,2 4,2 5,3 5,5 5)),
-		//		LINESTRING(0 4,1 4),
-		//		LINESTRING(6 4,7 4))`,
-		//	revDiff: `GEOMETRYCOLLECTION(
-		//		POLYGON((2 0,3 1,6 4,7 5,5 5,4 4,3 3,2 2,2 0)),
-		//		LINESTRING(3 0,3 1),
-		//		LINESTRING(3 6,3 7))`,
-		//	symDiff: `GEOMETRYCOLLECTION(
-		//		POLYGON((3 6,1 6,1 4,1 1,2 2,2 4,2 5,3 5,5 5,6 6,3 6)),
-		//		POLYGON((3 3,2 2,2 0,3 1,6 4,7 5,5 5,4 4,3 3)),
-		//		LINESTRING(0 4,1 4),
-		//		LINESTRING(6 4,7 4),
-		//		LINESTRING(3 0,3 1),
-		//		LINESTRING(3 6,3 7))`,
-		//	relate: `212101212`,
-		//},
-		//{
-		//	/*
-		//		+-----+--+      +-----+--+
-		//		| 1A  |2 |      |        |
-		//		|  +--+--+      |        +
-		//		|  |  |  |  ->  |        |
-		//		+--+--+  |      +--+     |
-		//		   |  1B |         |     |
-		//		   +--+--+         +--+--+
-		//	*/
-		//	input1:  "GEOMETRYCOLLECTION(POLYGON((0 0,2 0,2 2,0 2,0 0)),POLYGON((1 1,3 1,3 3,1 3,1 1)))",
-		//	input2:  "POLYGON((2 0,3 0,3 1,2 1,2 0))",
-		//	union:   "POLYGON((2 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0,2 0))",
-		//	inter:   "MULTILINESTRING((2 1,3 1),(2 0,2 1))",
-		//	fwdDiff: "POLYGON((1 2,0 2,0 0,2 0,2 1,3 1,3 3,1 3,1 2))",
-		//	revDiff: "POLYGON((2 0,3 0,3 1,2 1,2 0))",
-		//	symDiff: "POLYGON((0 0,2 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0))",
-		//	relate:  "FF2F11212",
-		//},
-		//{
-		//	/*
-		//		      +--------+                  +--------+
-		//		      |        |                  |        |
-		//		      |   1A   |                  |        |
-		//		      |        |                  |        |
-		//		+-----+--+  +--+-----+      +-----+        +-----+
-		//		|     |  |  |  |     |      |                    |
-		//		|     +--+--+--+     |      |        +--+        |
-		//		|  2A    |  |    2B  |  ->  |        |  |        |
-		//		|     +--+--+--+     |      |        +--+        |
-		//		|     |  |  |  |     |      |                    |
-		//		+-----+--+  +--+-----+      +-----+        +-----+
-		//		      |        |                  |        |
-		//		      |   1B   |                  |        |
-		//		      |        |                  |        |
-		//		      +--------+                  +--------+
-		//	*/
-		//	input1: `GEOMETRYCOLLECTION(
-		//		POLYGON((2 0,5 0,5 3,2 3,2 0)),
-		//		POLYGON((2 4,5 4,5 7,2 7,2 4)))`,
-		//	input2: `GEOMETRYCOLLECTION(
-		//		POLYGON((0 2,3 2,3 5,0 5,0 2)),
-		//		POLYGON((4 2,7 2,7 5,4 5,4 2)))`,
-		//	union: `POLYGON(
-		//		(0 2,2 2,2 0,5 0,5 2,7 2,7 5,5 5,5 7,2 7,2 5,0 5,0 2),
-		//		(3 3,3 4,4 4,4 3,3 3))`,
-		//	inter: `MULTIPOLYGON(
-		//		((2 2,3 2,3 3,2 3,2 2)),
-		//		((2 4,3 4,3 5,2 5,2 4)),
-		//		((4 2,5 2,5 3,4 3,4 2)),
-		//		((4 4,5 4,5 5,4 5,4 4)))`,
-		//	fwdDiff: `MULTIPOLYGON(
-		//		((2 0,5 0,5 2,4 2,4 3,3 3,3 2,2 2,2 0)),
-		//		((3 4,4 4,4 5,5 5,5 7,2 7,2 5,3 5,3 4)))`,
-		//	revDiff: `MULTIPOLYGON(
-		//		((0 2,2 2,2 3,3 3,3 4,2 4,2 5,0 5,0 2)),
-		//		((5 2,7 2,7 5,5 5,5 4,4 4,4 3,5 3,5 2)))`,
-		//	symDiff: `MULTIPOLYGON(
-		//		((2 0,5 0,5 2,4 2,4 3,3 3,3 2,2 2,2 0)),
-		//		((2 2,2 3,3 3,3 4,2 4,2 5,0 5,0 2,2 2)),
-		//		((3 4,4 4,4 5,5 5,5 7,2 7,2 5,3 5,3 4)),
-		//		((4 3,5 3,5 2,7 2,7 5,5 5,5 4,4 4,4 3)))`,
-		//	relate: "212101212",
-		//},
-		//
-		//// Empty cases for relate.
-		//{input1: "POINT EMPTY", input2: "POINT(0 0)", relate: "FFFFFF0F2"},
-		//{input1: "POINT EMPTY", input2: "LINESTRING(0 0,1 1)", relate: "FFFFFF102"},
-		//{input1: "POINT EMPTY", input2: "LINESTRING(0 0,0 1,1 0,0 0)", relate: "FFFFFF1F2"},
-		//{input1: "POINT EMPTY", input2: "POLYGON((0 0,0 1,1 0,0 0))", relate: "FFFFFF212"},
-		//
-		//// Bug reproductions:
-		//{
-		//	input1:  "LINESTRING(-1 1,1 -1)",
-		//	input2:  "MULTILINESTRING((1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2))",
-		//	union:   "MULTILINESTRING((-1 1,1 -1),(1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2))",
-		//	inter:   "GEOMETRYCOLLECTION EMPTY",
-		//	fwdDiff: "LINESTRING(-1 1,1 -1)",
-		//	revDiff: "MULTILINESTRING((1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2))",
-		//	symDiff: "MULTILINESTRING((1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2),(-1 1,1 -1))",
-		//	relate:  "FF1FF0102",
-		//},
-		//{
-		//	input1:  "LINESTRING(0 1,1 0)",
-		//	input2:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
-		//	union:   "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
-		//	inter:   "LINESTRING(0 1,1 0)",
-		//	fwdDiff: "GEOMETRYCOLLECTION EMPTY",
-		//	revDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
-		//	symDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
-		//	relate:  "1FFF0F212",
-		//},
-		//{
-		//	input1:  "POLYGON((1 0,0 1,1 1,1 0))",
-		//	input2:  "POLYGON((2 0,2 1,3 1,3 0,2 0))",
-		//	union:   "MULTIPOLYGON(((1 0,0 1,1 1,1 0)),((2 0,2 1,3 1,3 0,2 0)))",
-		//	inter:   "GEOMETRYCOLLECTION EMPTY",
-		//	fwdDiff: "POLYGON((1 0,0 1,1 1,1 0))",
-		//	revDiff: "POLYGON((2 0,2 1,3 1,3 0,2 0))",
-		//	symDiff: "MULTIPOLYGON(((2 0,2 1,3 1,3 0,2 0)),((1 0,0 1,1 1,1 0)))",
-		//	relate:  "FF2FF1212",
-		//},
-		//{
-		//	input1:  "POLYGON((0 0,1 1,1 0,0 0))",
-		//	input2:  "POLYGON((2 2,3 2,3 1,2 1,2 2))",
-		//	union:   "MULTIPOLYGON(((0 0,1 0,1 1,0 0)),((2 1,2 2,3 2,3 1,2 1)))",
-		//	inter:   "GEOMETRYCOLLECTION EMPTY",
-		//	fwdDiff: "POLYGON((0 0,1 1,1 0,0 0))",
-		//	revDiff: "POLYGON((2 1,2 2,3 2,3 1,2 1))",
-		//	symDiff: "MULTIPOLYGON(((2 1,2 2,3 2,3 1,2 1)),((0 0,1 0,1 1,0 0)))",
-		//	relate:  "FF2FF1212",
-		//},
-		//{
-		//	input1:  "LINESTRING(0 1,1 0)",
-		//	input2:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((2 1,2 2,3 2,3 1,2 1)))",
-		//	union:   "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((2 1,2 2,3 2,3 1,2 1)))",
-		//	inter:   "LINESTRING(0 1,1 0)",
-		//	fwdDiff: "GEOMETRYCOLLECTION EMPTY",
-		//	revDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 1,2 2,3 2,3 1,2 1)))",
-		//	symDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 1,2 2,3 2,3 1,2 1)))",
-		//	relate:  "1FFF0F212",
-		//},
-		//{
-		//	input1:  "POINT(5 5)",
-		//	input2:  "LINESTRING(5 3,4 8,1 2,9 8)",
-		//	fwdDiff: "GEOMETRYCOLLECTION EMPTY",
-		//	relate:  "0FFFFF102",
-		//},
-		//{
-		//	input1: "LINESTRING(1 1,2 2,3 3,0 0)",
-		//	input2: "LINESTRING(1 2,2 0)",
-		//	inter:  "POINT(1.3333333333 1.3333333333)",
-		//	relate: "0F1FF0102",
-		//},
-		//{
-		//	input1: "MULTILINESTRING((0 0,1 1),(0 1,1 0))",
-		//	input2: "LINESTRING(0 1,0.3333333333 0.6666666667,1 0)",
-		//	union:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.3333333333 0.6666666667,0.5 0.5),(0.5 0.5,1 0))",
-		//	relate: "1F1F00FF2",
-		//},
-		//{
-		//	input1: "POLYGON((-1 0,0 0,0 1,-1 0))",
-		//	input2: "POLYGON((1 0,-0.9 -0.2,-1 -0.0000000000000032310891488651735,-0.9 0.2,1 0))",
-		//	union:  "POLYGON((-1 0,-0.9 0.2,-0.80952380952381 0.19047619047619,0 1,0 0.105263157894737,1 0,-0.9 -0.2,-1 0))",
-		//	relate: "212101212",
-		//},
-		//{
-		//	input1: "LINESTRING(1 2.1,2.1 1)",
-		//	input2: "POLYGON((0 0,0 10,10 10,10 0,0 0),(1.5 1.5,8.5 1.5,8.5 8.5,1.5 8.5,1.5 1.5))",
-		//	inter:  "MULTILINESTRING((1 2.1,1.5 1.6),(1.6 1.5,2.1 1))",
-		//	relate: "1010FF212",
-		//},
-		//{
-		//	input1: "LINESTRING(1 2,2 3)",
-		//	input2: "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((1 2,2 2,2 3,1 3,1 2)))",
-		//	union:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((1 2,2 2,2 3,1 3,1 2)))",
-		//	relate: "1FFF0F212",
-		//},
-		//{
-		//	input1: "LINESTRING(0 1,0 0,1 0)",
-		//	input2: "POLYGON((0 0,1 0,1 1,0 1,0 0.5,0 0))",
-		//	union:  "POLYGON((0 0,1 0,1 1,0 1,0 0.5,0 0))",
-		//	relate: "F1FF0F212",
-		//},
-		//{
-		//	input1:  "LINESTRING(2 2,3 3,4 4,5 5,0 0)",
-		//	input2:  "LINESTRING(0 0,1 1)",
-		//	fwdDiff: "MULTILINESTRING((2 2,3 3,4 4,5 5),(1 1,2 2))",
-		//	relate:  "101F00FF2",
-		//},
-		//{
-		//	input1:  "LINESTRING(0 0,0 0,0 1,1 0,0 0)",
-		//	input2:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.3333333333 0.6666666667,0.5 0.5),(0.5 0.5,1 0))",
-		//	fwdDiff: "MULTILINESTRING((0 0,0 1),(1 0,0 0))",
-		//	relate:  "101FFF102",
-		//},
-		//{
-		//	input1: "LINESTRING(1 0,0.5000000000000001 0.5,0 1)",
-		//	input2: "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0),(0.5 0.5,1 0.5,1 1.5,0.5 1.5,0.5 0.5)))",
-		//	union:  "POLYGON((0 0,1 0,2 0,2 2,0 2,0 1,0 0),(0.5000000000000001 0.5,1 0.5,1 1.5,0.5 1.5,0.5000000000000001 0.5))",
-		//	relate: "10FF0F212",
-		//},
-		//{
-		//	input1: "LINESTRING(1 1,3 1,1 1,3 1)",
-		//	input2: "POLYGON((0 0,0 2,2 2,2 0,0 0))",
-		//	relate: "1010F0212",
-		//},
-		//{
-		//	input1: "LINESTRING(-1 1,1 -1)",
-		//	input2: "MULTILINESTRING((0 0,0 1),(0 0,1 0))",
-		//	relate: "0F1FF0102",
-		//},
-		//{
-		//	input1: "MULTILINESTRING((2 0,2 1),(2 2,2 3))",
-		//	input2: "POLYGON((0 0,0 10,10 10,10 0,0 0),(1.5 1.5,8.5 1.5,8.5 8.5,1.5 8.5,1.5 1.5))",
-		//	union:  "GEOMETRYCOLLECTION(POLYGON((2 0,10 0,10 10,0 10,0 0,2 0),(1.5 1.5,1.5 8.5,8.5 8.5,8.5 1.5,1.5 1.5)),LINESTRING(2 2,2 3))",
-		//},
-		//{
-		//	input1: "POINT(0 0)",
-		//	input2: "POINT(0 0)",
-		//	relate: "0FFFFFFF2",
-		//},
-		//{
-		//	input1: "GEOMETRYCOLLECTION(POINT(0 0))",
-		//	input2: "GEOMETRYCOLLECTION(LINESTRING(2 0,2 1))",
-		//	union:  "GEOMETRYCOLLECTION(POINT(0 0),LINESTRING(2 0,2 1))",
-		//},
-		//{
-		//	input1: "GEOMETRYCOLLECTION(POLYGON((0 0,1 0,0 1,0 0)),POLYGON((0 0,1 1,0 1,0 0)))",
-		//	input2: "POINT(0 0)",
-		//	union:  "POLYGON((0 0,1 0,0.5 0.5,1 1,0 1,0 0))",
-		//},
+		{
+			/*
+
+			   Two interlocking rings:
+
+			   +-------------------+
+			   |                   |
+			   |   +-----------+   |
+			   |   |           |   |
+			   |   |   +-------+---+-------+
+			   |   |   |       |   |       |
+			   |   |   |   +---+---+---+   |
+			   |   |   |   |   |   |   |   |
+			   |   +---+---+---+   |   |   |
+			   |       |   |       |   |   |
+			   +-------+---+-------+   |   |
+			           |   |           |   |
+			           |   +-----------+   |
+			           |                   |
+			           +-------------------+
+			*/
+			input1:  "POLYGON((0 2,5 2,5 7,0 7,0 2),(1 3,4 3,4 6,1 6,1 3))",
+			input2:  "POLYGON((2 0,7 0,7 5,2 5,2 0),(3 1,6 1,6 4,3 4,3 1))",
+			union:   "POLYGON((2 2,0 2,0 7,5 7,5 5,7 5,7 0,2 0,2 2),(5 4,5 2,3 2,3 1,6 1,6 4,5 4),(1 3,2 3,2 5,4 5,4 6,1 6,1 3),(3 3,4 3,4 4,3 4,3 3))",
+			inter:   "MULTIPOLYGON(((3 2,2 2,2 3,3 3,3 2)),((5 5,5 4,4 4,4 5,5 5)))",
+			fwdDiff: "MULTIPOLYGON(((2 2,0 2,0 7,5 7,5 5,4 5,4 6,1 6,1 3,2 3,2 2)),((5 4,5 2,3 2,3 3,4 3,4 4,5 4)))",
+			revDiff: "MULTIPOLYGON(((5 5,7 5,7 0,2 0,2 2,3 2,3 1,6 1,6 4,5 4,5 5)),((2 3,2 5,4 5,4 4,3 4,3 3,2 3)))",
+			symDiff: "MULTIPOLYGON(((5 5,7 5,7 0,2 0,2 2,3 2,3 1,6 1,6 4,5 4,5 5)),((5 5,4 5,4 6,1 6,1 3,2 3,2 2,0 2,0 7,5 7,5 5)),((2 3,2 5,4 5,4 4,3 4,3 3,2 3)),((4 4,5 4,5 2,3 2,3 3,4 3,4 4)))",
+			relate:  "212101212",
+		},
+		{
+			/*
+
+			      /\      /\
+			     /  \    /  \
+			    / A  \  / A  \
+			   /      \/      \
+			   \  /\  /\  /\  /
+			    \/AB\/  \/AB\/
+			    /\  /\  /\  /\
+			   /  \/  \/  \/  \
+			   \      /\      /
+			    \ B  /  \ B  /
+			     \  /    \  /
+			      \/      \/
+
+			*/
+			input1:  "MULTIPOLYGON(((0 2,1 1,2 2,1 3,0 2)),((2 2,3 1,4 2,3 3,2 2)))",
+			input2:  "MULTIPOLYGON(((0 1,1 2,2 1,1 0,0 1)),((2 1,3 0,4 1,3 2,2 1)))",
+			union:   "MULTIPOLYGON(((0.5 1.5,0 2,1 3,2 2,1.5 1.5,2 1,1 0,0 1,0.5 1.5)),((2.5 1.5,2 2,3 3,4 2,3.5 1.5,4 1,3 0,2 1,2.5 1.5)))",
+			inter:   "MULTIPOLYGON(((1.5 1.5,1 1,0.5 1.5,1 2,1.5 1.5)),((3.5 1.5,3 1,2.5 1.5,3 2,3.5 1.5)))",
+			fwdDiff: "MULTIPOLYGON(((0.5 1.5,0 2,1 3,2 2,1.5 1.5,1 2,0.5 1.5)),((2.5 1.5,2 2,3 3,4 2,3.5 1.5,3 2,2.5 1.5)))",
+			revDiff: "MULTIPOLYGON(((1 0,0 1,0.5 1.5,1 1,1.5 1.5,2 1,1 0)),((3.5 1.5,4 1,3 0,2 1,2.5 1.5,3 1,3.5 1.5)))",
+			symDiff: "MULTIPOLYGON(((1 0,0 1,0.5 1.5,1 1,1.5 1.5,2 1,1 0)),((1.5 1.5,1 2,0.5 1.5,0 2,1 3,2 2,1.5 1.5)),((3.5 1.5,4 1,3 0,2 1,2.5 1.5,3 1,3.5 1.5)),((3.5 1.5,3 2,2.5 1.5,2 2,3 3,4 2,3.5 1.5)))",
+			relate:  "212101212",
+		},
+		{
+			/*
+			   +-----+-----+
+			   | B   | A   |
+			   |     |     |
+			   +-----+-----+
+			   | A   | B   |
+			   |     |     |
+			   +-----+-----+
+			*/
+			input1:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))",
+			input2:  "MULTIPOLYGON(((0 1,0 2,1 2,1 1,0 1)),((1 0,1 1,2 1,2 0,1 0)))",
+			union:   "POLYGON((0 0,0 1,0 2,1 2,2 2,2 1,2 0,1 0,0 0))",
+			inter:   "MULTILINESTRING((0 1,1 1),(1 1,1 0),(1 1,1 2),(2 1,1 1))",
+			fwdDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))",
+			revDiff: "MULTIPOLYGON(((0 1,0 2,1 2,1 1,0 1)),((1 0,1 1,2 1,2 0,1 0)))",
+			symDiff: "POLYGON((0 0,0 1,0 2,1 2,2 2,2 1,2 0,1 0,0 0))",
+			relate:  "FF2F11212",
+		},
+		{
+			/*
+			   +-----+-----+
+			   | A   | B   |
+			   |     |     |
+			   +-----+-----+
+			*/
+			input1:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			input2:  "POLYGON((1 0,1 1,2 1,2 0,1 0))",
+			union:   "POLYGON((0 0,0 1,1 1,2 1,2 0,1 0,0 0))",
+			inter:   "LINESTRING(1 1,1 0)",
+			fwdDiff: "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			revDiff: "POLYGON((1 0,1 1,2 1,2 0,1 0))",
+			symDiff: "POLYGON((1 1,2 1,2 0,1 0,0 0,0 1,1 1))",
+			relate:  "FF2F11212",
+		},
+		{
+			/*
+			   +-------+
+			   | A     |
+			   |       +-------+
+			   |       | B     |
+			   +-------+       |
+			           |       |
+			           +-------+
+			*/
+			input1:  "POLYGON((0 0.5,0 1.5,1 1.5,1 0.5,0 0.5))",
+			input2:  "POLYGON((1 0,1 1,2 1,2 0,1 0))",
+			union:   "POLYGON((0 0.5,0 1.5,1 1.5,1 1,2 1,2 0,1 0,1 0.5,0 0.5))",
+			inter:   "LINESTRING(1 1,1 0.5)",
+			fwdDiff: "POLYGON((0 0.5,0 1.5,1 1.5,1 1,1 0.5,0 0.5))",
+			revDiff: "POLYGON((1 0,1 0.5,1 1,2 1,2 0,1 0))",
+			symDiff: "POLYGON((1 0,1 0.5,0 0.5,0 1.5,1 1.5,1 1,2 1,2 0,1 0))",
+			relate:  "FF2F11212",
+		},
+		{
+			/*
+			   +-----+
+			   | A&B |
+			   |     |
+			   +-----+
+			*/
+			input1:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			input2:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			union:   "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			inter:   "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
+			revDiff: "GEOMETRYCOLLECTION EMPTY",
+			symDiff: "GEOMETRYCOLLECTION EMPTY",
+			relate:  "2FFF1FFF2",
+		},
+		{
+			/*
+			   *-------*
+			   |\ A&B /|
+			   | \   / |
+			   |  \ /  |
+			   *   *   *
+			   | A | B |
+			   |   |   |
+			   *---*---*
+			*/
+			input1:  "POLYGON((0 0,0 2,2 2,1 1,1 0,0 0))",
+			input2:  "POLYGON((1 0,1 1,0 2,2 2,2 0,1 0))",
+			union:   "POLYGON((0 0,0 2,2 2,2 0,1 0,0 0))",
+			inter:   "GEOMETRYCOLLECTION(LINESTRING(1 1,1 0),POLYGON((0 2,2 2,1 1,0 2)))",
+			fwdDiff: "POLYGON((0 0,0 2,1 1,1 0,0 0))",
+			revDiff: "POLYGON((1 0,1 1,2 2,2 0,1 0))",
+			symDiff: "POLYGON((0 2,1 1,2 2,2 0,1 0,0 0,0 2))",
+			relate:  "212111212",
+		},
+		{
+			/*
+			   +---+
+			   | A |
+			   +---+---+
+			       | B |
+			       +---+
+			*/
+			input1:  "POLYGON((0 1,1 1,1 2,0 2,0 1))",
+			input2:  "POLYGON((1 0,2 0,2 1,1 1,1 0))",
+			union:   "MULTIPOLYGON(((1 1,0 1,0 2,1 2,1 1)),((1 1,2 1,2 0,1 0,1 1)))",
+			inter:   "POINT(1 1)",
+			fwdDiff: "POLYGON((1 1,0 1,0 2,1 2,1 1))",
+			revDiff: "POLYGON((1 1,2 1,2 0,1 0,1 1))",
+			symDiff: "MULTIPOLYGON(((1 1,2 1,2 0,1 0,1 1)),((1 1,0 1,0 2,1 2,1 1)))",
+			relate:  "FF2F01212",
+		},
+		{
+			/*
+			   +-----+-----+
+			   |    / \    |
+			   |   +-+-+   |
+			   | A   |   B |
+			   +-----+-----+
+			*/
+			input1:  "POLYGON((0 0,2 0,2 1,1 1,2 2,0 2,0 0))",
+			input2:  "POLYGON((2 0,4 0,4 2,2 2,3 1,2 1,2 0))",
+			union:   "POLYGON((2 0,0 0,0 2,2 2,4 2,4 0,2 0),(2 2,1 1,2 1,3 1,2 2))",
+			inter:   "GEOMETRYCOLLECTION(POINT(2 2),LINESTRING(2 0,2 1))",
+			fwdDiff: "POLYGON((2 0,0 0,0 2,2 2,1 1,2 1,2 0))",
+			revDiff: "POLYGON((2 2,4 2,4 0,2 0,2 1,3 1,2 2))",
+			symDiff: "POLYGON((2 2,4 2,4 0,2 0,0 0,0 2,2 2),(2 2,1 1,2 1,3 1,2 2))",
+			relate:  "FF2F11212",
+		},
+		{
+			/*
+			        +---+
+			        | A |
+			        +---+---+
+			            | B |
+			   +---+    +---+
+			   |A&B|
+			   +---+
+			*/
+			input1:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((1 2,2 2,2 3,1 3,1 2)))",
+			input2:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((2 1,3 1,3 2,2 2,2 1)))",
+			union:   "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 2,1 2,1 3,2 3,2 2)),((2 2,3 2,3 1,2 1,2 2)))",
+			inter:   "GEOMETRYCOLLECTION(POINT(2 2),POLYGON((0 0,0 1,1 1,1 0,0 0)))",
+			fwdDiff: "POLYGON((2 2,1 2,1 3,2 3,2 2))",
+			revDiff: "POLYGON((2 2,3 2,3 1,2 1,2 2))",
+			symDiff: "MULTIPOLYGON(((2 2,3 2,3 1,2 1,2 2)),((2 2,1 2,1 3,2 3,2 2)))",
+			relate:  "2F2F11212",
+		},
+		{
+			/*
+			       +-------+
+			       |       |
+			   +---+---+   |
+			   |   |   |   |
+			   |   +---+   |
+			   | A |       |
+			   |   +---+   |
+			   |   |   |   |
+			   +---+---+   |
+			   |A&B|     B |
+			   +---+-------+
+			*/
+			input1:  "POLYGON((0 0,1 0,1 4,0 4,0 0))",
+			input2:  "POLYGON((0 0,3 0,3 5,1 5,1 4,2 4,2 3,1 3,1 2,2 2,2 1,0 1,0 0))",
+			union:   "POLYGON((1 0,0 0,0 1,0 4,1 4,1 5,3 5,3 0,1 0),(1 4,1 3,2 3,2 4,1 4),(1 2,1 1,2 1,2 2,1 2))",
+			inter:   "GEOMETRYCOLLECTION(POINT(1 4),LINESTRING(1 2,1 3),POLYGON((1 0,0 0,0 1,1 1,1 0)))",
+			fwdDiff: "POLYGON((1 2,1 1,0 1,0 4,1 4,1 3,1 2))",
+			revDiff: "POLYGON((1 4,1 5,3 5,3 0,1 0,1 1,2 1,2 2,1 2,1 3,2 3,2 4,1 4))",
+			symDiff: "POLYGON((1 4,1 5,3 5,3 0,1 0,1 1,0 1,0 4,1 4),(1 1,2 1,2 2,1 2,1 1),(1 4,1 3,2 3,2 4,1 4))",
+			relate:  "212111212",
+		},
+		{
+			/*
+			   +-------+-------+
+			   | A     |     B |
+			   |   +---+---+   |
+			   |   |       |   |
+			   |   +---+---+   |
+			   |       |       |
+			   +-------+-------+
+			*/
+
+			input1:  "POLYGON((0 0,2 0,2 1,1 1,1 2,2 2,2 3,0 3,0 0))",
+			input2:  "POLYGON((2 0,4 0,4 3,2 3,2 2,3 2,3 1,2 1,2 0))",
+			union:   "POLYGON((2 0,0 0,0 3,2 3,4 3,4 0,2 0),(2 2,1 2,1 1,2 1,3 1,3 2,2 2))",
+			inter:   "MULTILINESTRING((2 0,2 1),(2 2,2 3))",
+			fwdDiff: "POLYGON((2 0,0 0,0 3,2 3,2 2,1 2,1 1,2 1,2 0))",
+			revDiff: "POLYGON((2 3,4 3,4 0,2 0,2 1,3 1,3 2,2 2,2 3))",
+			symDiff: "POLYGON((2 3,4 3,4 0,2 0,0 0,0 3,2 3),(2 1,3 1,3 2,2 2,1 2,1 1,2 1))",
+			relate:  "FF2F11212",
+		},
+		{
+			/*
+			   *-------------+
+			   |\`.        B |
+			   | \ `.        |
+			   |  \  `.      |
+			   |   \   `*    |
+			   |    *    \   |
+			   |     `.   \  |
+			   |       `.  \ |
+			   | A       `. \|
+			   +-----------`-*
+			*/
+
+			input1:  "POLYGON((0 0,3 0,1 1,0 3,0 0))",
+			input2:  "POLYGON((3 0,3 3,0 3,2 2,3 0))",
+			union:   "MULTIPOLYGON(((3 0,0 0,0 3,1 1,3 0)),((0 3,3 3,3 0,2 2,0 3)))",
+			inter:   "MULTIPOINT(0 3,3 0)",
+			fwdDiff: "POLYGON((3 0,0 0,0 3,1 1,3 0))",
+			revDiff: "POLYGON((0 3,3 3,3 0,2 2,0 3))",
+			symDiff: "MULTIPOLYGON(((0 3,3 3,3 0,2 2,0 3)),((3 0,0 0,0 3,1 1,3 0)))",
+			relate:  "FF2F01212",
+		},
+		{
+			/*
+			   +
+			   |A
+			   |   B
+			   +----+
+			*/
+			input1:  "LINESTRING(0 0,0 1)",
+			input2:  "LINESTRING(0 0,1 0)",
+			union:   "MULTILINESTRING((0 0,0 1),(0 0,1 0))",
+			inter:   "POINT(0 0)",
+			fwdDiff: "LINESTRING(0 0,0 1)",
+			revDiff: "LINESTRING(0 0,1 0)",
+			symDiff: "MULTILINESTRING((0 0,1 0),(0 0,0 1))",
+			relate:  "FF1F00102",
+		},
+		{
+			/*
+			   +       +
+			   |       |
+			   A       B
+			   |       |
+			   +--A&B--+
+			*/
+			input1:  "LINESTRING(0 1,0 0,1 0)",
+			input2:  "LINESTRING(0 0,1 0,1 1)",
+			union:   "MULTILINESTRING((0 1,0 0),(0 0,1 0),(1 0,1 1))",
+			inter:   "LINESTRING(0 0,1 0)",
+			fwdDiff: "LINESTRING(0 1,0 0)",
+			revDiff: "LINESTRING(1 0,1 1)",
+			symDiff: "MULTILINESTRING((1 0,1 1),(0 1,0 0))",
+			relate:  "1010F0102",
+		},
+		{
+			/*
+			   \      /
+			    \    /
+			     B  A
+			      \/
+			      /\
+			     A  B
+			    /    \
+			   /      \
+			*/
+			input1:  "LINESTRING(0 0,1 1)",
+			input2:  "LINESTRING(0 1,1 0)",
+			union:   "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.5 0.5),(0.5 0.5,1 0))",
+			inter:   "POINT(0.5 0.5)",
+			fwdDiff: "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))",
+			revDiff: "MULTILINESTRING((0 1,0.5 0.5),(0.5 0.5,1 0))",
+			symDiff: "MULTILINESTRING((0 1,0.5 0.5),(0.5 0.5,1 0),(0 0,0.5 0.5),(0.5 0.5,1 1))",
+			relate:  "0F1FF0102",
+		},
+		{
+			//    +---A---+
+			//    |       |
+			//    B       B
+			//    |       |
+			//    +---A---+
+			//
+			input1:  "MULTILINESTRING((0 0,1 0),(0 1,1 1))",
+			input2:  "MULTILINESTRING((0 0,0 1),(1 0,1 1))",
+			union:   "MULTILINESTRING((0 0,1 0),(0 1,1 1),(0 0,0 1),(1 0,1 1))",
+			inter:   "MULTIPOINT(0 0,0 1,1 0,1 1)",
+			fwdDiff: "MULTILINESTRING((0 0,1 0),(0 1,1 1))",
+			revDiff: "MULTILINESTRING((0 0,0 1),(1 0,1 1))",
+			symDiff: "MULTILINESTRING((0 0,0 1),(1 0,1 1),(0 0,1 0),(0 1,1 1))",
+			relate:  "FF1F0F1F2",
+		},
+		{
+			/*
+			   +--A&B--+---A---+
+			   |       |       |
+			  A&B      B       A
+			   |       |       |
+			   +---A---+---A---+
+			   |       |
+			   B       B
+			   |       |
+			   +---B---+
+			*/
+			input1:  "LINESTRING(0 2,2 2,2 1,0 1,0 2)",
+			input2:  "LINESTRING(1 2,1 0,0 0,0 2,1 2)",
+			union:   "MULTILINESTRING((0 2,1 2),(1 2,2 2,2 1,1 1),(1 1,0 1),(0 1,0 2),(1 2,1 1),(1 1,1 0,0 0,0 1))",
+			inter:   "GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(0 2,1 2),LINESTRING(0 1,0 2))",
+			fwdDiff: "MULTILINESTRING((1 2,2 2,2 1,1 1),(1 1,0 1))",
+			revDiff: "MULTILINESTRING((1 2,1 1),(1 1,1 0,0 0,0 1))",
+			symDiff: "MULTILINESTRING((1 2,2 2,2 1,1 1),(1 1,0 1),(1 2,1 1),(1 1,1 0,0 0,0 1))",
+			relate:  "1F1FFF1F2",
+		},
+		{
+			/*
+			  +---------+
+			   `,     ,` `,
+			     `, ,`     `,
+			      ,`,       ,`
+			    ,`   `,   ,`
+			  +`       `+`
+
+			*/
+			input1:  "LINESTRING(0 0,2 2,0 2,2 0)",
+			input2:  "LINESTRING(2 0,3 1,2 2)",
+			union:   "MULTILINESTRING((0 0,1 1),(1 1,2 2),(2 2,0 2,1 1),(1 1,2 0),(2 0,3 1,2 2))",
+			inter:   "MULTIPOINT(2 0,2 2)",
+			fwdDiff: "MULTILINESTRING((0 0,1 1),(1 1,2 2),(2 2,0 2,1 1),(1 1,2 0))",
+			revDiff: "LINESTRING(2 0,3 1,2 2)",
+			symDiff: "MULTILINESTRING((0 0,1 1),(1 1,2 2),(2 2,0 2,1 1),(1 1,2 0),(2 0,3 1,2 2))",
+			relate:  "F01F001F2",
+		},
+		{
+			/*
+			       +
+			       |
+			   +---+---+
+			   |   |   |
+			   |   +   |
+			   |       |
+			   +-------+
+			*/
+			input1:  "POLYGON((0 0,0 2,2 2,2 0,0 0))",
+			input2:  "LINESTRING(1 1,1 3)",
+			union:   "GEOMETRYCOLLECTION(LINESTRING(1 2,1 3),POLYGON((0 0,0 2,1 2,2 2,2 0,0 0)))",
+			inter:   "LINESTRING(1 1,1 2)",
+			fwdDiff: "POLYGON((0 0,0 2,1 2,2 2,2 0,0 0))",
+			revDiff: "LINESTRING(1 2,1 3)",
+			symDiff: "GEOMETRYCOLLECTION(LINESTRING(1 2,1 3),POLYGON((0 0,0 2,1 2,2 2,2 0,0 0)))",
+			relate:  "1020F1102",
+		},
+		{
+			/*
+			   +--------+
+			   |     ,  |
+			   |   ,`   |
+			   |  `     |
+			   +--------+
+			*/
+			input1:  "POLYGON((0 0,0 3,3 3,3 0,0 0))",
+			input2:  "LINESTRING(1 1,2 2)",
+			union:   "POLYGON((0 0,0 3,3 3,3 0,0 0))",
+			inter:   "LINESTRING(1 1,2 2)",
+			fwdDiff: "POLYGON((0 0,0 3,3 3,3 0,0 0))",
+			revDiff: "GEOMETRYCOLLECTION EMPTY",
+			symDiff: "POLYGON((0 0,0 3,3 3,3 0,0 0))",
+			relate:  "102FF1FF2",
+		},
+		{
+			/*
+			   +---+---+---+
+			   |   A   |A&B|
+			   +---+---+---+
+			   |A&B|   B   |
+			   +---+---+---+
+			   |   A   |A&B|
+			   +---+---+---+
+			*/
+			input1:  "POLYGON((0 0,3 0,3 1,1 1,1 2,3 2,3 3,0 3,0 0))",
+			input2:  "POLYGON((0 1,0 2,2 2,2 3,3 3,3 0,2 0,2 1,0 1))",
+			union:   "POLYGON((2 0,0 0,0 1,0 2,0 3,2 3,3 3,3 2,3 1,3 0,2 0))",
+			inter:   "GEOMETRYCOLLECTION(LINESTRING(2 1,1 1),LINESTRING(1 2,2 2),POLYGON((3 0,2 0,2 1,3 1,3 0)),POLYGON((1 2,1 1,0 1,0 2,1 2)),POLYGON((3 2,2 2,2 3,3 3,3 2)))",
+			fwdDiff: "MULTIPOLYGON(((2 0,0 0,0 1,1 1,2 1,2 0)),((2 2,1 2,0 2,0 3,2 3,2 2)))",
+			revDiff: "POLYGON((1 2,2 2,3 2,3 1,2 1,1 1,1 2))",
+			symDiff: "POLYGON((1 2,0 2,0 3,2 3,2 2,3 2,3 1,2 1,2 0,0 0,0 1,1 1,1 2))",
+			relate:  "212111212",
+		},
+		{
+			/*
+			   +   +   +
+			   A  A&B  B
+			*/
+			input1:  "MULTIPOINT(0 0,1 1)",
+			input2:  "MULTIPOINT(1 1,2 2)",
+			union:   "MULTIPOINT(0 0,1 1,2 2)",
+			inter:   "POINT(1 1)",
+			fwdDiff: "POINT(0 0)",
+			revDiff: "POINT(2 2)",
+			symDiff: "MULTIPOINT(0 0,2 2)",
+			relate:  "0F0FFF0F2",
+		},
+		{
+			/*
+			   +-------+
+			   |       |
+			   |   +   |   +
+			   |       |
+			   +-------+
+			*/
+			input1:  "POLYGON((0 0,0 2,2 2,2 0,0 0))",
+			input2:  "MULTIPOINT(1 1,3 1)",
+			union:   "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 1,2 0,0 0)))",
+			inter:   "POINT(1 1)",
+			fwdDiff: "POLYGON((0 0,0 2,2 2,2 1,2 0,0 0))",
+			revDiff: "POINT(3 1)",
+			symDiff: "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 1,2 0,0 0)))",
+			relate:  "0F2FF10F2",
+		},
+		{
+			/*
+			   +
+			   |\
+			   | \
+			   |  \
+			   |   \
+			   |    \
+			   O-----+
+			*/
+			input1:  "POLYGON((0 0,0 1,1 0,0 0))",
+			input2:  "POINT(0 0)",
+			union:   "POLYGON((0 0,0 1,1 0,0 0))",
+			inter:   "POINT(0 0)",
+			fwdDiff: "POLYGON((0 0,0 1,1 0,0 0))",
+			revDiff: "GEOMETRYCOLLECTION EMPTY",
+			symDiff: "POLYGON((0 0,0 1,1 0,0 0))",
+			relate:  "FF20F1FF2",
+		},
+		{
+			/*
+			   +
+			   |\
+			   | \
+			   |  O
+			   |   \
+			   |    \
+			   +-----+
+			*/
+			input1:  "POLYGON((0 0,0 1,1 0,0 0))",
+			input2:  "POINT(0.5 0.5)",
+			union:   "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
+			inter:   "POINT(0.5 0.5)",
+			fwdDiff: "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
+			revDiff: "GEOMETRYCOLLECTION EMPTY",
+			symDiff: "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
+			relate:  "FF20F1FF2",
+		},
+		{
+			/*
+			   +-------+
+			   |       |
+			   |   +   |
+			   |       |
+			   +-------+
+			*/
+			input1:  "LINESTRING(0 0,0 1,1 1,1 0,0 0,0 1)", // overlapping line segment
+			input2:  "POINT(0.5 0.5)",
+			union:   "GEOMETRYCOLLECTION(LINESTRING(0 0,0 1),LINESTRING(0 1,1 1,1 0,0 0),POINT(0.5 0.5))",
+			inter:   "GEOMETRYCOLLECTION EMPTY",
+			fwdDiff: "MULTILINESTRING((0 0,0 1),(0 1,1 1,1 0,0 0))",
+			revDiff: "POINT(0.5 0.5)",
+			symDiff: "GEOMETRYCOLLECTION(LINESTRING(0 0,0 1),LINESTRING(0 1,1 1,1 0,0 0),POINT(0.5 0.5))",
+			relate:  "FF1FF00F2",
+		},
+		{
+			/*
+			       +
+			      /
+			     *
+			    /
+			   +
+			*/
+			input1:  "LINESTRING(0 0,1 1)",
+			input2:  "POINT(0.35355339059327373 0.35355339059327373)",
+			union:   "MULTILINESTRING((0 0,0.35355339059327373 0.35355339059327373),(0.35355339059327373 0.35355339059327373,1 1))",
+			inter:   "POINT(0.35355339059327373 0.35355339059327373)",
+			fwdDiff: "MULTILINESTRING((0 0,0.35355339059327373 0.35355339059327373),(0.35355339059327373 0.35355339059327373,1 1))",
+			revDiff: "GEOMETRYCOLLECTION EMPTY",
+			symDiff: "MULTILINESTRING((0 0,0.35355339059327373 0.35355339059327373),(0.35355339059327373 0.35355339059327373,1 1))",
+			relate:  "0F1FF0FF2",
+		},
+		{
+			// LineString with a Point in the middle of it.
+			input1:  "POINT(5 5)",
+			input2:  "LINESTRING(1 2,9 8)",
+			union:   "MULTILINESTRING((1 2,5 5),(5 5,9 8))",
+			inter:   "POINT(5 5)",
+			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
+			revDiff: "MULTILINESTRING((1 2,5 5),(5 5,9 8))",
+			symDiff: "MULTILINESTRING((1 2,5 5),(5 5,9 8))",
+			relate:  "0FFFFF102",
+		},
+		{
+			/*
+			       *
+			   +  /
+			    \/
+			    /\
+			   *  *
+			*/
+
+			// Tests a case where intersection between two segments is *not* commutative if done naively.
+			input1:  "LINESTRING(0 0,1 2)",
+			input2:  "LINESTRING(0 1,1 0)",
+			union:   "MULTILINESTRING((0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2),(0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))",
+			inter:   "POINT(0.3333333333 0.6666666667)",
+			fwdDiff: "MULTILINESTRING((0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2))",
+			revDiff: "MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))",
+			symDiff: "MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0),(0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2))",
+			relate:  "0F1FF0102",
+		},
+		{
+			// Similar case for when line segment non-commutative operations are
+			// done, but this time with a line segment doubling back on itself.
+			input1:  "LINESTRING(0 0,1 2,0 0)",
+			input2:  "LINESTRING(0 1,1 0)",
+			union:   "MULTILINESTRING((0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2),(0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))",
+			inter:   "POINT(0.3333333333 0.6666666667)",
+			fwdDiff: "MULTILINESTRING((0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2))",
+			revDiff: "MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))",
+			symDiff: "MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0),(0 0,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 2))",
+			relate:  "0F1FFF102",
+		},
+
+		// In the following test cases, lines from the first input intersect
+		// *almost* exactly with one of the vertices in the second input.
+		{
+			input1:  "LINESTRING(-1 1,1 -1)",
+			input2:  "POLYGON((-1 0,-0.070710678118655 0.070710678118655,0 1,-1 0))",
+			union:   "GEOMETRYCOLLECTION(LINESTRING(-1 1,-0.5 0.5),LINESTRING(-0.070710678118655 0.070710678118655,1 -1),POLYGON((-1 0,-0.5 0.5,0 1,-0.070710678118655 0.070710678118655,-1 0)))",
+			inter:   "LINESTRING(-0.5 0.5,-0.070710678118655 0.070710678118655)",
+			fwdDiff: "MULTILINESTRING((-1 1,-0.5 0.5),(-0.070710678118655 0.070710678118655,1 -1))",
+			revDiff: "POLYGON((-1 0,-0.5 0.5,0 1,-0.070710678118655 0.070710678118655,-1 0))",
+			symDiff: "GEOMETRYCOLLECTION(LINESTRING(-1 1,-0.5 0.5),LINESTRING(-0.070710678118655 0.070710678118655,1 -1),POLYGON((-1 0,-0.5 0.5,0 1,-0.070710678118655 0.070710678118655,-1 0)))",
+			relate:  "101FF0212",
+		},
+		{
+			input1:  "LINESTRING(0 0,1 1)",
+			input2:  "LINESTRING(1 0,0.5000000000000001 0.5,0 1)",
+			union:   "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(1 0,0.5 0.5),(0.5 0.5,0 1))",
+			inter:   "POINT(0.5 0.5)",
+			fwdDiff: "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))",
+			revDiff: "MULTILINESTRING((1 0,0.5 0.5),(0.5 0.5,0 1))",
+			symDiff: "MULTILINESTRING((1 0,0.5 0.5),(0.5 0.5,0 1),(0 0,0.5 0.5),(0.5 0.5,1 1))",
+			relate:  "0F1FF0102",
+		},
+		{
+			/*
+			     +               +
+			     |\              |\
+			     | \             | \
+			  +--+--+--+  ->  +--+  +--+
+			     |   \           |   \
+			     |    \          |    \
+			     +-----+         +-----+
+			*/
+			input1:  "GEOMETRYCOLLECTION(POLYGON((1 0,3 2,1 2,1 0)))",
+			input2:  "GEOMETRYCOLLECTION(LINESTRING(0 1,3 1))",
+			union:   "GEOMETRYCOLLECTION(POLYGON((1 0,2 1,3 2,1 2,1 1,1 0)),LINESTRING(0 1,1 1),LINESTRING(2 1,3 1))",
+			inter:   "LINESTRING(1 1,2 1)",
+			fwdDiff: "POLYGON((1 0,2 1,3 2,1 2,1 1,1 0))",
+			revDiff: "MULTILINESTRING((0 1,1 1),(2 1,3 1))",
+			symDiff: "GEOMETRYCOLLECTION(POLYGON((1 0,2 1,3 2,1 2,1 1,1 0)),LINESTRING(0 1,1 1),LINESTRING(2 1,3 1))",
+			relate:  "1F20F1102",
+		},
+		{
+			/*
+			    Reproduces a bug with set ops between self-intersecting GeometryCollections.
+			        +  +
+			        |\ |
+			        | \|
+			     +  |  +
+			     |\ |  |\
+			     | \|  | \
+			     |  +  |  \
+			     |  |\ |   \
+			     |  | \|    \
+			  +--+--+--+-----+--+1B
+			     |  |  |\     \
+			     |  |  | \  2A \
+			     |  +--+--+-----+
+			     |     |   \
+			     | 1A  |    \
+			     +-----+-----+
+			           |
+			           |2B
+			           +
+			*/
+			input1: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,5 5,1 5,1 1)),
+				LINESTRING(0 3,6 3))`,
+			input2: `GEOMETRYCOLLECTION(
+				POLYGON((2 0,6 4,2 4,2 0)),
+				LINESTRING(3 0,3 6))`,
+			union: `GEOMETRYCOLLECTION(
+				POLYGON((2 2,2 0,3 1,5 3,6 4,4 4,5 5,3 5,1 5,1 3,1 1,2 2)),
+				LINESTRING(0 3,1 3),
+				LINESTRING(5 3,6 3),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 5,3 6))`,
+			inter: `GEOMETRYCOLLECTION(
+				POLYGON((2 2,3 3,4 4,3 4,2 4,2 3,2 2)),
+				LINESTRING(3 3,5 3),
+				LINESTRING(3 4,3 5))`,
+			fwdDiff: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,2 2,2 3,2 4,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
+				LINESTRING(0 3,1 3),
+				LINESTRING(5 3,6 3))`,
+			revDiff: `GEOMETRYCOLLECTION(
+				POLYGON((3 1,5 3,6 4,4 4,3 3,2 2,2 0,3 1)),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 5,3 6))`,
+			symDiff: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,2 2,2 3,2 4,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
+				POLYGON((3 1,5 3,6 4,4 4,3 3,2 2,2 0,3 1)),
+				LINESTRING(0 3,1 3),
+				LINESTRING(5 3,6 3),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 5,3 6))`,
+			relate: `212101212`,
+		},
+		{
+			/*
+			    Reproduces a bug with set ops between self-intersecting GeometryCollections.
+			    Similar to the previous case, but none of the crossing points are coincident.
+			        +  +
+			        |\ |
+			        | \|
+			     +  |  +
+			     |\ |  |\
+			     | \|  | \
+			     |  +  |  \
+			     |  |\ |   \
+			     |  | \|    \
+			     |  |  +     \
+			     |  |  |\     \
+			     |  |  | \     \
+			  +--+--+--+--+--+--+--+1B
+			     |  |  |   \     \
+			     |  |  |    \  2A \
+			     |  +--+-----+-----+
+			     |     |      \
+			     | 1A  |       \
+			     +-----+--------+
+			           |
+			           |2B
+			           +
+			*/
+			input1: `GEOMETRYCOLLECTION(
+				POLYGON((1 1,6 6,1 6,1 1)),
+				LINESTRING(0 4,7 4))`,
+			input2: `GEOMETRYCOLLECTION(
+				POLYGON((2 0,7 5,2 5,2 0)),
+				LINESTRING(3 0,3 7))`,
+			union: `GEOMETRYCOLLECTION(
+				POLYGON((2 2,2 0,3 1,6 4,7 5,5 5,6 6,3 6,1 6,1 4,1 1,2 2)),
+				LINESTRING(0 4,1 4),
+				LINESTRING(6 4,7 4),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 6,3 7))`,
+			inter: `GEOMETRYCOLLECTION(
+				POLYGON((2 2,3 3,4 4,5 5,3 5,2 5,2 4,2 2)),
+				LINESTRING(4 4,6 4),
+				LINESTRING(3 5,3 6))`,
+			fwdDiff: `GEOMETRYCOLLECTION(
+				POLYGON((5 5,6 6,3 6,1 6,1 4,1 1,2 2,2 4,2 5,3 5,5 5)),
+				LINESTRING(0 4,1 4),
+				LINESTRING(6 4,7 4))`,
+			revDiff: `GEOMETRYCOLLECTION(
+				POLYGON((2 0,3 1,6 4,7 5,5 5,4 4,3 3,2 2,2 0)),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 6,3 7))`,
+			symDiff: `GEOMETRYCOLLECTION(
+				POLYGON((3 6,1 6,1 4,1 1,2 2,2 4,2 5,3 5,5 5,6 6,3 6)),
+				POLYGON((3 3,2 2,2 0,3 1,6 4,7 5,5 5,4 4,3 3)),
+				LINESTRING(0 4,1 4),
+				LINESTRING(6 4,7 4),
+				LINESTRING(3 0,3 1),
+				LINESTRING(3 6,3 7))`,
+			relate: `212101212`,
+		},
+		{
+			/*
+				+-----+--+      +-----+--+
+				| 1A  |2 |      |        |
+				|  +--+--+      |        +
+				|  |  |  |  ->  |        |
+				+--+--+  |      +--+     |
+				   |  1B |         |     |
+				   +--+--+         +--+--+
+			*/
+			input1:  "GEOMETRYCOLLECTION(POLYGON((0 0,2 0,2 2,0 2,0 0)),POLYGON((1 1,3 1,3 3,1 3,1 1)))",
+			input2:  "POLYGON((2 0,3 0,3 1,2 1,2 0))",
+			union:   "POLYGON((2 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0,2 0))",
+			inter:   "MULTILINESTRING((2 1,3 1),(2 0,2 1))",
+			fwdDiff: "POLYGON((1 2,0 2,0 0,2 0,2 1,3 1,3 3,1 3,1 2))",
+			revDiff: "POLYGON((2 0,3 0,3 1,2 1,2 0))",
+			symDiff: "POLYGON((0 0,2 0,3 0,3 1,3 3,1 3,1 2,0 2,0 0))",
+			relate:  "FF2F11212",
+		},
+		{
+			/*
+				      +--------+                  +--------+
+				      |        |                  |        |
+				      |   1A   |                  |        |
+				      |        |                  |        |
+				+-----+--+  +--+-----+      +-----+        +-----+
+				|     |  |  |  |     |      |                    |
+				|     +--+--+--+     |      |        +--+        |
+				|  2A    |  |    2B  |  ->  |        |  |        |
+				|     +--+--+--+     |      |        +--+        |
+				|     |  |  |  |     |      |                    |
+				+-----+--+  +--+-----+      +-----+        +-----+
+				      |        |                  |        |
+				      |   1B   |                  |        |
+				      |        |                  |        |
+				      +--------+                  +--------+
+			*/
+			input1: `GEOMETRYCOLLECTION(
+				POLYGON((2 0,5 0,5 3,2 3,2 0)),
+				POLYGON((2 4,5 4,5 7,2 7,2 4)))`,
+			input2: `GEOMETRYCOLLECTION(
+				POLYGON((0 2,3 2,3 5,0 5,0 2)),
+				POLYGON((4 2,7 2,7 5,4 5,4 2)))`,
+			union: `POLYGON(
+				(0 2,2 2,2 0,5 0,5 2,7 2,7 5,5 5,5 7,2 7,2 5,0 5,0 2),
+				(3 3,3 4,4 4,4 3,3 3))`,
+			inter: `MULTIPOLYGON(
+				((2 2,3 2,3 3,2 3,2 2)),
+				((2 4,3 4,3 5,2 5,2 4)),
+				((4 2,5 2,5 3,4 3,4 2)),
+				((4 4,5 4,5 5,4 5,4 4)))`,
+			fwdDiff: `MULTIPOLYGON(
+				((2 0,5 0,5 2,4 2,4 3,3 3,3 2,2 2,2 0)),
+				((3 4,4 4,4 5,5 5,5 7,2 7,2 5,3 5,3 4)))`,
+			revDiff: `MULTIPOLYGON(
+				((0 2,2 2,2 3,3 3,3 4,2 4,2 5,0 5,0 2)),
+				((5 2,7 2,7 5,5 5,5 4,4 4,4 3,5 3,5 2)))`,
+			symDiff: `MULTIPOLYGON(
+				((2 0,5 0,5 2,4 2,4 3,3 3,3 2,2 2,2 0)),
+				((2 2,2 3,3 3,3 4,2 4,2 5,0 5,0 2,2 2)),
+				((3 4,4 4,4 5,5 5,5 7,2 7,2 5,3 5,3 4)),
+				((4 3,5 3,5 2,7 2,7 5,5 5,5 4,4 4,4 3)))`,
+			relate: "212101212",
+		},
+
+		// Empty cases for relate.
+		{input1: "POINT EMPTY", input2: "POINT(0 0)", relate: "FFFFFF0F2"},
+		{input1: "POINT EMPTY", input2: "LINESTRING(0 0,1 1)", relate: "FFFFFF102"},
+		{input1: "POINT EMPTY", input2: "LINESTRING(0 0,0 1,1 0,0 0)", relate: "FFFFFF1F2"},
+		{input1: "POINT EMPTY", input2: "POLYGON((0 0,0 1,1 0,0 0))", relate: "FFFFFF212"},
+
+		// Bug reproductions:
+		{
+			input1:  "LINESTRING(-1 1,1 -1)",
+			input2:  "MULTILINESTRING((1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2))",
+			union:   "MULTILINESTRING((-1 1,1 -1),(1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2))",
+			inter:   "GEOMETRYCOLLECTION EMPTY",
+			fwdDiff: "LINESTRING(-1 1,1 -1)",
+			revDiff: "MULTILINESTRING((1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2))",
+			symDiff: "MULTILINESTRING((1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2),(-1 1,1 -1))",
+			relate:  "FF1FF0102",
+		},
+		{
+			input1:  "LINESTRING(0 1,1 0)",
+			input2:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			union:   "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			inter:   "LINESTRING(0 1,1 0)",
+			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
+			revDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			symDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			relate:  "1FFF0F212",
+		},
+		{
+			input1:  "POLYGON((1 0,0 1,1 1,1 0))",
+			input2:  "POLYGON((2 0,2 1,3 1,3 0,2 0))",
+			union:   "MULTIPOLYGON(((1 0,0 1,1 1,1 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			inter:   "GEOMETRYCOLLECTION EMPTY",
+			fwdDiff: "POLYGON((1 0,0 1,1 1,1 0))",
+			revDiff: "POLYGON((2 0,2 1,3 1,3 0,2 0))",
+			symDiff: "MULTIPOLYGON(((2 0,2 1,3 1,3 0,2 0)),((1 0,0 1,1 1,1 0)))",
+			relate:  "FF2FF1212",
+		},
+		{
+			input1:  "POLYGON((0 0,1 1,1 0,0 0))",
+			input2:  "POLYGON((2 2,3 2,3 1,2 1,2 2))",
+			union:   "MULTIPOLYGON(((0 0,1 0,1 1,0 0)),((2 1,2 2,3 2,3 1,2 1)))",
+			inter:   "GEOMETRYCOLLECTION EMPTY",
+			fwdDiff: "POLYGON((0 0,1 1,1 0,0 0))",
+			revDiff: "POLYGON((2 1,2 2,3 2,3 1,2 1))",
+			symDiff: "MULTIPOLYGON(((2 1,2 2,3 2,3 1,2 1)),((0 0,1 0,1 1,0 0)))",
+			relate:  "FF2FF1212",
+		},
+		{
+			input1:  "LINESTRING(0 1,1 0)",
+			input2:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((2 1,2 2,3 2,3 1,2 1)))",
+			union:   "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((2 1,2 2,3 2,3 1,2 1)))",
+			inter:   "LINESTRING(0 1,1 0)",
+			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
+			revDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 1,2 2,3 2,3 1,2 1)))",
+			symDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 1,2 2,3 2,3 1,2 1)))",
+			relate:  "1FFF0F212",
+		},
+		{
+			input1:  "POINT(5 5)",
+			input2:  "LINESTRING(5 3,4 8,1 2,9 8)",
+			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
+			relate:  "0FFFFF102",
+		},
+		{
+			input1: "LINESTRING(1 1,2 2,3 3,0 0)",
+			input2: "LINESTRING(1 2,2 0)",
+			inter:  "POINT(1.3333333333 1.3333333333)",
+			relate: "0F1FF0102",
+		},
+		{
+			input1: "MULTILINESTRING((0 0,1 1),(0 1,1 0))",
+			input2: "LINESTRING(0 1,0.3333333333 0.6666666667,1 0)",
+			union:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.3333333333 0.6666666667,0.5 0.5),(0.5 0.5,1 0))",
+			relate: "1F1F00FF2",
+		},
+		{
+			input1: "POLYGON((-1 0,0 0,0 1,-1 0))",
+			input2: "POLYGON((1 0,-0.9 -0.2,-1 -0.0000000000000032310891488651735,-0.9 0.2,1 0))",
+			union:  "POLYGON((-1 0,-0.9 0.2,-0.80952380952381 0.19047619047619,0 1,0 0.105263157894737,1 0,-0.9 -0.2,-1 0))",
+			relate: "212101212",
+		},
+		{
+			input1: "LINESTRING(1 2.1,2.1 1)",
+			input2: "POLYGON((0 0,0 10,10 10,10 0,0 0),(1.5 1.5,8.5 1.5,8.5 8.5,1.5 8.5,1.5 1.5))",
+			inter:  "MULTILINESTRING((1 2.1,1.5 1.6),(1.6 1.5,2.1 1))",
+			relate: "1010FF212",
+		},
+		{
+			input1: "LINESTRING(1 2,2 3)",
+			input2: "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((1 2,2 2,2 3,1 3,1 2)))",
+			union:  "MULTIPOLYGON(((1 1,1 0,0 0,0 1,1 1)),((1 2,2 2,2 3,1 3,1 2)))",
+			relate: "1FFF0F212",
+		},
+		{
+			input1: "LINESTRING(0 1,0 0,1 0)",
+			input2: "POLYGON((0 0,1 0,1 1,0 1,0 0.5,0 0))",
+			union:  "POLYGON((0 0,1 0,1 1,0 1,0 0.5,0 0))",
+			relate: "F1FF0F212",
+		},
+		{
+			input1:  "LINESTRING(2 2,3 3,4 4,5 5,0 0)",
+			input2:  "LINESTRING(0 0,1 1)",
+			fwdDiff: "MULTILINESTRING((2 2,3 3,4 4,5 5),(1 1,2 2))",
+			relate:  "101F00FF2",
+		},
+		{
+			input1:  "LINESTRING(0 0,0 0,0 1,1 0,0 0)",
+			input2:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.3333333333 0.6666666667,0.5 0.5),(0.5 0.5,1 0))",
+			fwdDiff: "MULTILINESTRING((0 0,0 1),(1 0,0 0))",
+			relate:  "101FFF102",
+		},
+		{
+			input1: "LINESTRING(1 0,0.5000000000000001 0.5,0 1)",
+			input2: "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0),(0.5 0.5,1 0.5,1 1.5,0.5 1.5,0.5 0.5)))",
+			union:  "POLYGON((0 0,1 0,2 0,2 2,0 2,0 1,0 0),(0.5000000000000001 0.5,1 0.5,1 1.5,0.5 1.5,0.5000000000000001 0.5))",
+			relate: "10FF0F212",
+		},
+		{
+			input1: "LINESTRING(1 1,3 1,1 1,3 1)",
+			input2: "POLYGON((0 0,0 2,2 2,2 0,0 0))",
+			relate: "1010F0212",
+		},
+		{
+			input1: "LINESTRING(-1 1,1 -1)",
+			input2: "MULTILINESTRING((0 0,0 1),(0 0,1 0))",
+			relate: "0F1FF0102",
+		},
+		{
+			input1: "MULTILINESTRING((2 0,2 1),(2 2,2 3))",
+			input2: "POLYGON((0 0,0 10,10 10,10 0,0 0),(1.5 1.5,8.5 1.5,8.5 8.5,1.5 8.5,1.5 1.5))",
+			union:  "GEOMETRYCOLLECTION(POLYGON((2 0,10 0,10 10,0 10,0 0,2 0),(1.5 1.5,1.5 8.5,8.5 8.5,8.5 1.5,1.5 1.5)),LINESTRING(2 2,2 3))",
+		},
+		{
+			input1: "POINT(0 0)",
+			input2: "POINT(0 0)",
+			relate: "0FFFFFFF2",
+		},
+		{
+			input1: "GEOMETRYCOLLECTION(POINT(0 0))",
+			input2: "GEOMETRYCOLLECTION(LINESTRING(2 0,2 1))",
+			union:  "GEOMETRYCOLLECTION(POINT(0 0),LINESTRING(2 0,2 1))",
+		},
+		{
+			input1: "GEOMETRYCOLLECTION(POLYGON((0 0,1 0,0 1,0 0)),POLYGON((0 0,1 1,0 1,0 0)))",
+			input2: "POINT(0 0)",
+			union:  "POLYGON((0 0,1 0,0.5 0.5,1 1,0 1,0 0))",
+		},
 		//{
 		//	input1:  "GEOMETRYCOLLECTION(POLYGON((0 0,1 0,1 1,0 0)),POLYGON((0 0,1 1,0 1,0 0)))",
 		//	input2:  "POINT(0 0)",
