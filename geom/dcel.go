@@ -76,19 +76,19 @@ func (d *doublyConnectedEdgeList) addGeometry(g Geometry, operand operand, inter
 	switch g.Type() {
 	case TypePolygon:
 		poly := g.MustAsPolygon()
-		d.addMultiPolygon(poly.AsMultiPolygon(), operand, interactions)
+		d.addPolygon(poly, operand, interactions)
 	case TypeMultiPolygon:
 		mp := g.MustAsMultiPolygon()
 		d.addMultiPolygon(mp, operand, interactions)
 	case TypeLineString:
-		mls := g.MustAsLineString().AsMultiLineString()
-		d.addMultiLineString(mls, operand, interactions)
+		ls := g.MustAsLineString()
+		d.addLineString(ls, operand, interactions)
 	case TypeMultiLineString:
 		mls := g.MustAsMultiLineString()
 		d.addMultiLineString(mls, operand, interactions)
 	case TypePoint:
-		mp := g.MustAsPoint().AsMultiPoint()
-		d.addMultiPoint(mp, operand)
+		pt := g.MustAsPoint()
+		d.addPoint(pt, operand)
 	case TypeMultiPoint:
 		mp := g.MustAsMultiPoint()
 		d.addMultiPoint(mp, operand)
@@ -101,97 +101,99 @@ func (d *doublyConnectedEdgeList) addGeometry(g Geometry, operand operand, inter
 }
 
 func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand operand, interactions map[XY]struct{}) {
-	mp = mp.ForceCCW()
+	for i := 0; i < mp.NumPolygons(); i++ {
+		d.addPolygon(mp.PolygonN(i), operand, interactions)
+	}
+}
 
-	for polyIdx := 0; polyIdx < mp.NumPolygons(); polyIdx++ {
-		poly := mp.PolygonN(polyIdx)
-
-		rings := make([]Sequence, 1+poly.NumInteriorRings())
-		rings[0] = poly.ExteriorRing().Coordinates()
-		for i := 0; i < poly.NumInteriorRings(); i++ {
-			rings[i+1] = poly.InteriorRingN(i).Coordinates()
-		}
-
-		for _, ring := range rings {
-			forEachNonInteractingSegment(ring, interactions, func(segment Sequence, _ int) {
-				e := d.addOrGetEdge(segment)
-				e.start.src[operand] = true
-				e.end.src[operand] = true
-				e.start.locations[operand].boundary = true
-				e.fwd.srcEdge[operand] = true
-				e.rev.srcEdge[operand] = true
-				e.fwd.srcFace[operand] = true
-			})
-		}
+func (d *doublyConnectedEdgeList) addPolygon(poly Polygon, operand operand, interactions map[XY]struct{}) {
+	poly = poly.ForceCCW()
+	for _, ring := range poly.DumpRings() {
+		forEachNonInteractingSegment(ring.Coordinates(), interactions, func(segment Sequence, _ int) {
+			e := d.addOrGetEdge(segment)
+			e.start.src[operand] = true
+			e.end.src[operand] = true
+			e.start.locations[operand].boundary = true
+			e.fwd.srcEdge[operand] = true
+			e.rev.srcEdge[operand] = true
+			e.fwd.srcFace[operand] = true
+		})
 	}
 }
 
 func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operand operand, interactions map[XY]struct{}) {
 	for i := 0; i < mls.NumLineStrings(); i++ {
-		ls := mls.LineStringN(i)
-		seq := ls.Coordinates()
-		forEachNonInteractingSegment(seq, interactions, func(segment Sequence, startIdx int) {
-			edge := d.addOrGetEdge(segment)
-			edge.start.src[operand] = true
-			edge.end.src[operand] = true
-			edge.fwd.srcEdge[operand] = true
-			edge.rev.srcEdge[operand] = true
+		d.addLineString(mls.LineStringN(i), operand, interactions)
+	}
+}
 
-			// TODO: do we need to do this when adding polygons as well?
-			// TODO: is there a better way to model location? Could it just be a tri-value enum?
+func (d *doublyConnectedEdgeList) addLineString(ls LineString, operand operand, interactions map[XY]struct{}) {
+	seq := ls.Coordinates()
+	forEachNonInteractingSegment(seq, interactions, func(segment Sequence, startIdx int) {
+		edge := d.addOrGetEdge(segment)
+		edge.start.src[operand] = true
+		edge.end.src[operand] = true
+		edge.fwd.srcEdge[operand] = true
+		edge.rev.srcEdge[operand] = true
 
-			for _, c := range [2]struct {
-				v          *vertexRecord
-				onBoundary bool
-			}{
-				{edge.start, startIdx == 0 && !ls.IsClosed()},
-				{edge.end, startIdx+segment.Length() == seq.Length() && !ls.IsClosed()},
-			} {
-				if !c.v.locations[operand].boundary && !c.v.locations[operand].interior {
-					if c.onBoundary {
-						c.v.locations[operand].boundary = true
-					} else {
+		// TODO: do we need to do this when adding polygons as well?
+		// TODO: is there a better way to model location? Could it just be a tri-value enum?
+
+		for _, c := range [2]struct {
+			v          *vertexRecord
+			onBoundary bool
+		}{
+			{edge.start, startIdx == 0 && !ls.IsClosed()},
+			{edge.end, startIdx+segment.Length() == seq.Length() && !ls.IsClosed()},
+		} {
+			if !c.v.locations[operand].boundary && !c.v.locations[operand].interior {
+				if c.onBoundary {
+					c.v.locations[operand].boundary = true
+				} else {
+					c.v.locations[operand].interior = true
+				}
+			} else {
+				if c.onBoundary {
+					if c.v.locations[operand].boundary {
+						c.v.locations[operand].boundary = false
 						c.v.locations[operand].interior = true
+					} else {
+						c.v.locations[operand].boundary = true
+						c.v.locations[operand].interior = false
 					}
 				} else {
-					if c.onBoundary {
-						if c.v.locations[operand].boundary {
-							c.v.locations[operand].boundary = false
-							c.v.locations[operand].interior = true
-						} else {
-							c.v.locations[operand].boundary = true
-							c.v.locations[operand].interior = false
-						}
-					} else {
-						c.v.locations[operand].interior = true
-					}
+					c.v.locations[operand].interior = true
 				}
 			}
+		}
 
-		})
-	}
+	})
 }
 
 func (d *doublyConnectedEdgeList) addMultiPoint(mp MultiPoint, operand operand) {
 	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
-		xy, ok := mp.PointN(i).XY()
-		if !ok {
-			continue
-		}
-		record, ok := d.vertices[xy]
-		if !ok {
-			record = &vertexRecord{
-				coords:    xy,
-				incidents: make(map[*halfEdgeRecord]struct{}),
-				src:       [2]bool{},     // set below
-				locations: [2]location{}, // set below
-			}
-			d.vertices[xy] = record
-		}
-		record.src[operand] = true
-		record.locations[operand].interior = true
+		d.addPoint(mp.PointN(i), operand)
 	}
+}
+
+func (d *doublyConnectedEdgeList) addPoint(pt Point, operand operand) {
+	xy, ok := pt.XY()
+	if !ok {
+		return
+	}
+	record, ok := d.vertices[xy]
+	if !ok {
+		record = &vertexRecord{
+			coords:    xy,
+			incidents: make(map[*halfEdgeRecord]struct{}),
+			src:       [2]bool{},     // set below
+			locations: [2]location{}, // set below
+		}
+		d.vertices[xy] = record
+	}
+	record.src[operand] = true
+	record.locations[operand].interior = true
 }
 
 func (d *doublyConnectedEdgeList) addGeometryCollection(gc GeometryCollection, operand operand, interactions map[XY]struct{}) {
