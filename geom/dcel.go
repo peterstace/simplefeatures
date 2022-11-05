@@ -124,7 +124,7 @@ func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand opera
 		}
 
 		for _, ring := range rings {
-			forEachNonInteractingSegment(ring, interactions, func(segment Sequence) {
+			forEachNonInteractingSegment(ring, interactions, func(segment Sequence, _ int) {
 				e := d.addOrGetEdge(segment)
 				e.start.src[operand] = true
 				e.end.src[operand] = true
@@ -207,13 +207,44 @@ func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operan
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		ls := mls.LineStringN(i)
 		seq := ls.Coordinates()
-		forEachNonInteractingSegment(seq, interactions, func(segment Sequence) {
+		forEachNonInteractingSegment(seq, interactions, func(segment Sequence, startIdx int) {
 			edge := d.addOrGetEdge(segment)
 			edge.start.src[operand] = true
 			edge.end.src[operand] = true
-			// TODO: set vert locations
 			edge.fwd.srcEdge[operand] = true
 			edge.rev.srcEdge[operand] = true
+
+			// TODO: do we need to do this when adding polygons as well?
+			// TODO: is there a better way to model location? Could it just be a tri-value enum?
+
+			for _, c := range [2]struct {
+				v          *vertexRecord
+				onBoundary bool
+			}{
+				{edge.start, startIdx == 0 && !ls.IsClosed()},
+				{edge.end, startIdx+segment.Length() == seq.Length() && !ls.IsClosed()},
+			} {
+				if !c.v.locations[operand].boundary && !c.v.locations[operand].interior {
+					if c.onBoundary {
+						c.v.locations[operand].boundary = true
+					} else {
+						c.v.locations[operand].interior = true
+					}
+				} else {
+					if c.onBoundary {
+						if c.v.locations[operand].boundary {
+							c.v.locations[operand].boundary = false
+							c.v.locations[operand].interior = true
+						} else {
+							c.v.locations[operand].boundary = true
+							c.v.locations[operand].interior = false
+						}
+					} else {
+						c.v.locations[operand].interior = true
+					}
+				}
+			}
+
 		})
 	}
 
@@ -348,7 +379,7 @@ func (d *doublyConnectedEdgeList) addGeometryCollection(gc GeometryCollection, o
 func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, interactions map[XY]struct{}) {
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		seq := mls.LineStringN(i).Coordinates()
-		forEachNonInteractingSegment(seq, interactions, func(segment Sequence) {
+		forEachNonInteractingSegment(seq, interactions, func(segment Sequence, _ int) {
 			// No need to update labels/locations, since anything added is a "ghost" point.
 			_ = d.addOrGetEdge(segment)
 		})
@@ -487,7 +518,7 @@ func (d *doublyConnectedEdgeList) addOrGetEdge(segment Sequence) edge {
 	}
 }
 
-func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn func(Sequence)) {
+func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn func(Sequence, int)) {
 	n := seq.Length()
 	i := 0
 	for i < n-1 {
@@ -506,7 +537,7 @@ func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn
 		segment := seq.Slice(start, end+1)
 
 		// Execute the callback with the segment.
-		fn(segment)
+		fn(segment, start)
 
 		// On the next iteration, start the next edge at the end of
 		// this one.
