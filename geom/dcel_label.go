@@ -9,6 +9,11 @@ const (
 	operandB operand = 1
 )
 
+func forEachOperand(fn func(operand)) {
+	fn(operandA)
+	fn(operandB)
+}
+
 //type label struct {
 //	// Set to true once inSet has a valid value.
 //	populated bool

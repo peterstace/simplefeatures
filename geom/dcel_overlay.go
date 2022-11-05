@@ -141,15 +141,38 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 		}
 		d.faces = append(d.faces, f)
 		forEachEdge(cycle, func(e *halfEdgeRecord) {
-			if e.srcFace[0] {
-				f.inSet[0] = true
-			}
-			if e.srcFace[1] {
-				f.inSet[1] = true
-			}
+			forEachOperand(func(operand operand) {
+				if e.srcFace[operand] {
+					f.inSet[operand] = true
+				}
+			})
 			e.incident = f
 		})
 	}
+
+	// Populate inSet for faces that did not have edges from their respective
+	// input geometries.
+	forEachOperand(func(operand operand) {
+		visited := make(map[*faceRecord]bool)
+		var dfs func(*faceRecord)
+		dfs = func(f *faceRecord) {
+			if visited[f] {
+				return
+			}
+			visited[f] = true
+			forEachEdge(f.cycle, func(e *halfEdgeRecord) {
+				if !e.srcFace[operand] {
+					e.twin.incident.inSet[operand] = true
+					dfs(e.twin.incident)
+				}
+			})
+		}
+		for _, f := range d.faces {
+			if f.inSet[operand] {
+				dfs(f)
+			}
+		}
+	})
 
 	// If we couldn't find any cycles, then we wouldn't have constructed any
 	// faces. This happens in the case where there are only point geometries.
@@ -204,7 +227,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 // 	face.labels[1].populated = true
 // }
 
-// adjacentFaces finds all of the faces that adjacent to f.
+// adjacentFaces finds all of the faces that are adjacent to f.
 func adjacentFaces(f *faceRecord) []*faceRecord {
 	var adjacent []*faceRecord
 	set := make(map[*faceRecord]bool)
