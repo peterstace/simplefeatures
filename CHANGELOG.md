@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add benchmarks for WKB parsing.
+
 ## v0.40.0
 
 2022-09-28
