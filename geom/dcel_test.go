@@ -143,7 +143,7 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 				if seq[len(seq)-1] != e.next.origin.coords {
 					continue
 				}
-				if !xysEqual(e.intermediate, seq[1:len(seq)-1]) {
+				if !xysEqual(sequenceToXYs(e.seq), seq) {
 					continue
 				}
 				want = spec.Edges[i]
@@ -181,7 +181,7 @@ func xysEqual(a, b []XY) bool {
 
 func findEdge(t *testing.T, dcel *doublyConnectedEdgeList, first, second XY) *halfEdgeRecord {
 	for _, e := range dcel.halfEdges {
-		if e.origin.coords == first && e.secondXY() == second {
+		if e.seq.GetXY(0) == first && e.seq.GetXY(1) == second {
 			return e
 		}
 	}
@@ -202,8 +202,7 @@ func CheckCycle(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []XY) {
 		if e.origin == nil {
 			t.Errorf("edge origin not set")
 		}
-		got = append(got, e.origin.coords)
-		got = append(got, e.intermediate...)
+		got = append(got, sequenceToXYs(e.seq)[:e.seq.Length()-1]...)
 		e = e.next
 		if e == start {
 			got = append(got, e.origin.coords)
@@ -227,10 +226,7 @@ func CheckCycle(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []XY) {
 			t.Fatal("inf loop")
 		}
 
-		got = append(got, e.next.origin.coords)
-		for j := len(e.intermediate) - 1; j >= 0; j-- {
-			got = append(got, e.intermediate[j])
-		}
+		got = append(got, sequenceToXYs(reverseSequence(e.seq))[:e.seq.Length()-1]...)
 
 		e = e.prev
 		if e == start {

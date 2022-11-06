@@ -24,24 +24,14 @@ func (f *faceRecord) String() string {
 }
 
 type halfEdgeRecord struct {
-	origin       *vertexRecord
-	twin         *halfEdgeRecord
-	incident     *faceRecord // only populated in the overlay
-	next, prev   *halfEdgeRecord
-	intermediate []XY
-	edgeLabels   [2]label
-	faceLabels   [2]label
-	extracted    bool
-}
-
-// secondXY gives the second (1-indexed) XY in the edge. This is either the
-// first intermediate XY, or the origin of the next/twin edge in the case where
-// there are no intermediates.
-func (e *halfEdgeRecord) secondXY() XY {
-	if len(e.intermediate) == 0 {
-		return e.twin.origin.coords
-	}
-	return e.intermediate[0]
+	origin     *vertexRecord
+	twin       *halfEdgeRecord
+	incident   *faceRecord // only populated in the overlay
+	next, prev *halfEdgeRecord
+	seq        Sequence
+	edgeLabels [2]label
+	faceLabels [2]label
+	extracted  bool
 }
 
 // String shows the origin and destination of the edge (for debugging
@@ -50,7 +40,7 @@ func (e *halfEdgeRecord) String() string {
 	if e == nil {
 		return "nil"
 	}
-	return fmt.Sprintf("%v->%v->%v", e.origin.coords, e.intermediate, e.twin.origin.coords)
+	return fmt.Sprintf("%v", sequenceToXYs(e.seq))
 }
 
 type vertexRecord struct {
@@ -143,33 +133,30 @@ func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand opera
 
 		for _, ring := range rings {
 			var newEdges []*halfEdgeRecord
-			forEachNonInteractingSegment(ring, interactions, func(segment []XY) {
-				// Construct the internal points slices.
-				intermediateFwd := segment[1 : len(segment)-1]
-				intermediateRev := reverseXYs(intermediateFwd)
-
+			forEachNonInteractingSegment(ring, interactions, func(segment Sequence) {
 				// Build the edges (fwd and rev).
-				vertA := d.vertices[segment[0]]
-				vertB := d.vertices[segment[len(segment)-1]]
+				reverseSegment := reverseSequence(segment)
+				vertA := d.vertices[segment.GetXY(0)]
+				vertB := d.vertices[reverseSegment.GetXY(0)]
 				internalEdge := &halfEdgeRecord{
-					origin:       vertA,
-					twin:         nil, // populated later
-					incident:     nil, // only populated in the overlay
-					next:         nil, // populated later
-					prev:         nil, // populated later
-					intermediate: intermediateFwd,
-					edgeLabels:   newHalfPopulatedLabels(operand, true),
-					faceLabels:   newHalfPopulatedLabels(operand, true),
+					origin:     vertA,
+					twin:       nil, // populated later
+					incident:   nil, // only populated in the overlay
+					next:       nil, // populated later
+					prev:       nil, // populated later
+					seq:        segment,
+					edgeLabels: newHalfPopulatedLabels(operand, true),
+					faceLabels: newHalfPopulatedLabels(operand, true),
 				}
 				externalEdge := &halfEdgeRecord{
-					origin:       vertB,
-					twin:         internalEdge,
-					incident:     nil, // only populated in the overlay
-					next:         nil, // populated later
-					prev:         nil, // populated later
-					intermediate: intermediateRev,
-					edgeLabels:   newHalfPopulatedLabels(operand, true),
-					faceLabels:   newHalfPopulatedLabels(operand, false),
+					origin:     vertB,
+					twin:       internalEdge,
+					incident:   nil, // only populated in the overlay
+					next:       nil, // populated later
+					prev:       nil, // populated later
+					seq:        reverseSegment,
+					edgeLabels: newHalfPopulatedLabels(operand, true),
+					faceLabels: newHalfPopulatedLabels(operand, false),
 				}
 				internalEdge.twin = externalEdge
 				vertA.incidents = append(vertA.incidents, internalEdge)
@@ -241,41 +228,39 @@ func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operan
 	// Add edges.
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		seq := mls.LineStringN(i).Coordinates()
-		forEachNonInteractingSegment(seq, interactions, func(segment []XY) {
-			startXY := segment[0]
-			endXY := segment[len(segment)-1]
+		forEachNonInteractingSegment(seq, interactions, func(segment Sequence) {
+			reverseSegment := reverseSequence(segment)
+			startXY := segment.GetXY(0)
+			endXY := reverseSegment.GetXY(0)
 
-			intermediateFwd := segment[1 : len(segment)-1]
-			intermediateRev := reverseXYs(intermediateFwd)
-
-			if edges.containsStartIntermediateEnd(startXY, intermediateFwd, endXY) {
+			if edges.containsStartIntermediateEnd(segment) {
 				return
 			}
-			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY)
-			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY)
+			edges.insertStartIntermediateEnd(segment)
+			edges.insertStartIntermediateEnd(reverseSegment)
 
 			vOrigin := d.vertices[startXY]
 			vDestin := d.vertices[endXY]
 
 			fwd := &halfEdgeRecord{
-				origin:       vOrigin,
-				twin:         nil, // set later
-				incident:     nil, // only populated in overlay
-				next:         nil, // set later
-				prev:         nil, // set later
-				intermediate: intermediateFwd,
-				edgeLabels:   newHalfPopulatedLabels(operand, true),
-				faceLabels:   newUnpopulatedLabels(),
+				origin:     vOrigin,
+				twin:       nil, // set later
+				incident:   nil, // only populated in overlay
+				next:       nil, // set later
+				prev:       nil, // set later
+				seq:        segment,
+				edgeLabels: newHalfPopulatedLabels(operand, true),
+				faceLabels: newUnpopulatedLabels(),
 			}
 			rev := &halfEdgeRecord{
-				origin:       vDestin,
-				twin:         fwd,
-				incident:     nil, // only populated in overlay
-				next:         fwd,
-				prev:         fwd,
-				intermediate: intermediateRev,
-				edgeLabels:   newHalfPopulatedLabels(operand, true),
-				faceLabels:   newUnpopulatedLabels(),
+				origin:     vDestin,
+				twin:       fwd,
+				incident:   nil, // only populated in overlay
+				next:       fwd,
+				prev:       fwd,
+				seq:        reverseSegment,
+				edgeLabels: newHalfPopulatedLabels(operand, true),
+				faceLabels: newUnpopulatedLabels(),
 			}
 			fwd.twin = rev
 			fwd.next = rev
@@ -326,11 +311,10 @@ func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, operand operand
 
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		seq := mls.LineStringN(i).Coordinates()
-		forEachNonInteractingSegment(seq, interactions, func(segment []XY) {
-			startXY := segment[0]
-			endXY := segment[len(segment)-1]
-			intermediateFwd := segment[1 : len(segment)-1]
-			intermediateRev := reverseXYs(intermediateFwd)
+		forEachNonInteractingSegment(seq, interactions, func(segment Sequence) {
+			reverseSegment := reverseSequence(segment)
+			startXY := segment.GetXY(0)
+			endXY := reverseSegment.GetXY(0)
 
 			if _, ok := d.vertices[startXY]; !ok {
 				d.vertices[startXY] = &vertexRecord{coords: startXY, incidents: nil, labels: [2]label{}}
@@ -339,41 +323,41 @@ func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, operand operand
 				d.vertices[endXY] = &vertexRecord{coords: endXY, incidents: nil, labels: [2]label{}}
 			}
 
-			if edges.containsStartIntermediateEnd(startXY, intermediateFwd, endXY) {
+			if edges.containsStartIntermediateEnd(segment) {
 				// Already exists, so shouldn't add.
 				return
 			}
-			edges.insertStartIntermediateEnd(startXY, intermediateFwd, endXY)
-			edges.insertStartIntermediateEnd(endXY, intermediateRev, startXY)
+			edges.insertStartIntermediateEnd(segment)
+			edges.insertStartIntermediateEnd(reverseSegment)
 
-			d.addGhostLine(startXY, intermediateFwd, intermediateRev, endXY, operand)
+			d.addGhostLine(segment, reverseSegment, operand)
 		})
 	}
 }
 
-func (d *doublyConnectedEdgeList) addGhostLine(startXY XY, intermediateFwd, intermediateRev []XY, endXY XY, operand operand) {
-	vertA := d.vertices[startXY]
-	vertB := d.vertices[endXY]
+func (d *doublyConnectedEdgeList) addGhostLine(segment, reverseSegment Sequence, operand operand) {
+	vertA := d.vertices[segment.GetXY(0)]
+	vertB := d.vertices[reverseSegment.GetXY(0)]
 
 	e1 := &halfEdgeRecord{
-		origin:       vertA,
-		twin:         nil, // populated later
-		incident:     nil, // only populated in the overlay
-		next:         nil, // popluated later
-		prev:         nil, // populated later
-		intermediate: intermediateFwd,
-		edgeLabels:   newHalfPopulatedLabels(operand, false),
-		faceLabels:   [2]label{},
+		origin:     vertA,
+		twin:       nil, // populated later
+		incident:   nil, // only populated in the overlay
+		next:       nil, // popluated later
+		prev:       nil, // populated later
+		seq:        segment,
+		edgeLabels: newHalfPopulatedLabels(operand, false),
+		faceLabels: [2]label{},
 	}
 	e2 := &halfEdgeRecord{
-		origin:       vertB,
-		twin:         e1,
-		incident:     nil, // only populated in the overlay
-		next:         e1,
-		prev:         e1,
-		intermediate: intermediateRev,
-		edgeLabels:   newHalfPopulatedLabels(operand, false),
-		faceLabels:   [2]label{},
+		origin:     vertB,
+		twin:       e1,
+		incident:   nil, // only populated in the overlay
+		next:       e1,
+		prev:       e1,
+		seq:        reverseSegment,
+		edgeLabels: newHalfPopulatedLabels(operand, false),
+		faceLabels: [2]label{},
 	}
 	e1.twin = e2
 	e1.next = e2
@@ -388,7 +372,7 @@ func (d *doublyConnectedEdgeList) addGhostLine(startXY XY, intermediateFwd, inte
 	d.fixVertex(vertB)
 }
 
-func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn func([]XY)) {
+func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn func(Sequence)) {
 	n := seq.Length()
 	i := 0
 	for i < n-1 {
@@ -403,13 +387,8 @@ func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn
 			}
 		}
 
-		// Construct the segment.
-		segment := make([]XY, end-start+1)
-		for j := range segment {
-			segment[j] = seq.GetXY(start + j)
-		}
-
 		// Execute the callback with the segment.
+		segment := seq.Slice(start, end+1)
 		fn(segment)
 
 		// On the next iteration, start the next edge at the end of

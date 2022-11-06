@@ -58,12 +58,23 @@ func sortAndUniquifyXYs(xys []XY) []XY {
 	return xys[:n]
 }
 
-func reverseXYs(fwd []XY) []XY {
-	rev := make([]XY, len(fwd))
-	for i := range rev {
-		rev[i] = fwd[len(fwd)-1-i]
+func reverseSequence(seq Sequence) Sequence {
+	n := seq.Length()
+	coords := make([]float64, 0, 2*n)
+	for i := n - 1; i >= 0; i-- {
+		xy := seq.GetXY(i)
+		coords = append(coords, xy.X, xy.Y)
 	}
-	return rev
+	return NewSequence(coords, DimXY)
+}
+
+func sequenceToXYs(seq Sequence) []XY {
+	n := seq.Length()
+	xys := make([]XY, seq.Length())
+	for i := 0; i < n; i++ {
+		xys[i] = seq.GetXY(i)
+	}
+	return xys
 }
 
 // fastMin is a faster but not functionally identical version of math.Min.

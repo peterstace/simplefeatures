@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Use `Sequence` instead of `[]XY` for DCEL edges.
+
 ## v0.40.0
 
 2022-09-28
