@@ -92,8 +92,8 @@ func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 		sort.Slice(v.incidents, func(i, j int) bool {
 			ei := v.incidents[i]
 			ej := v.incidents[j]
-			di := ei.secondXY().Sub(ei.origin.coords)
-			dj := ej.secondXY().Sub(ej.origin.coords)
+			di := ei.seq.GetXY(1).Sub(ei.seq.GetXY(0))
+			dj := ej.seq.GetXY(1).Sub(ej.seq.GetXY(0))
 			aI := math.Atan2(di.Y, di.X)
 			aJ := math.Atan2(dj.Y, dj.X)
 			return aI < aJ
