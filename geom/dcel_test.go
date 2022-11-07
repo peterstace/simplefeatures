@@ -15,47 +15,24 @@ type DCELSpec struct {
 	Faces    []FaceSpec
 }
 
-type LabelSpec struct {
-	APopulated bool
-	BPopulated bool
-	AInSet     bool
-	BInSet     bool
-}
-
-type LabelOption func(LabelSpec) LabelSpec
-
-func OperandA(inSet bool) LabelOption {
-	return func(s LabelSpec) LabelSpec {
-		s.APopulated = true
-		s.AInSet = inSet
-		return s
-	}
-}
-
-func OperandB(inSet bool) LabelOption {
-	return func(s LabelSpec) LabelSpec {
-		s.BPopulated = true
-		s.BInSet = inSet
-		return s
-	}
-}
-
 type FaceSpec struct {
 	// Origin and destination of an edge that is incident to the face.
 	First  XY
 	Second XY
 	Cycle  []XY
-	Labels []LabelOption
+	InSet  [2]bool
 }
 
 type EdgeSpec struct {
-	EdgeLabels []LabelOption
-	FaceLabels []LabelOption
-	Sequence   []XY
+	SrcEdge  [2]bool
+	SrcFace  [2]bool
+	InSet    [2]bool
+	Sequence []XY
 }
 
 type VertexSpec struct {
-	Labels   []LabelOption
+	Src      [2]bool
+	InSet    [2]bool
 	Vertices []XY
 }
 
@@ -99,7 +76,14 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 					t.Errorf("no vertex %v", wantXY)
 					continue
 				}
-				CheckLabels(t, vert.labels, want.Labels)
+				if want.Src != vert.src {
+					t.Errorf("%v: src mismatch, want:%v got:%v",
+						wantXY, want.Src, vert.src)
+				}
+				if want.InSet != vert.inSet {
+					t.Errorf("%v: inSet mismatch, want:%v got:%v",
+						wantXY, want.InSet, vert.inSet)
+				}
 				delete(unchecked, vert)
 			}
 		}
@@ -153,8 +137,18 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 				t.Fatalf("could not find edge spec matching edge: %v", e)
 			}
 
-			CheckLabels(t, e.edgeLabels, want.EdgeLabels)
-			CheckLabels(t, e.faceLabels, want.FaceLabels)
+			if want.SrcEdge != e.srcEdge {
+				t.Errorf("%v: srcEdge mismatch, want:%v got:%v",
+					want.Sequence, want.SrcEdge, e.srcEdge)
+			}
+			if want.SrcFace != e.srcFace {
+				t.Errorf("%v: srcFace mismatch, want:%v got:%v",
+					want.Sequence, want.SrcFace, e.srcFace)
+			}
+			if want.InSet != e.inSet {
+				t.Errorf("%v: inSet mismatch, want:%v got:%v",
+					want.Sequence, want.InSet, e.inSet)
+			}
 		}
 	})
 
@@ -162,7 +156,10 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 		t.Run(fmt.Sprintf("face_%d", i), func(t *testing.T) {
 			got := findEdge(t, dcel, want.First, want.Second).incident
 			CheckCycle(t, got, got.cycle, want.Cycle)
-			CheckLabels(t, got.labels, want.Labels)
+			if want.InSet != got.inSet {
+				t.Errorf("%v: inSet mismatch, want:%v got:%v",
+					want.Cycle, want.InSet, got.inSet)
+			}
 		})
 	}
 }
@@ -292,28 +289,6 @@ outer:
 	t.Errorf("XY sequences don't match:\ngot:  %v\nwant: %v", got, want)
 }
 
-func CheckLabels(t *testing.T, got [2]label, wantOpts []LabelOption) {
-	t.Helper()
-
-	var want LabelSpec
-	for _, opt := range wantOpts {
-		want = opt(want)
-	}
-
-	if want.APopulated != got[0].populated {
-		t.Errorf("A populated: want=%v got=%v", want.APopulated, got[0].populated)
-	}
-	if want.BPopulated != got[1].populated {
-		t.Errorf("B populated: want=%v got=%v", want.BPopulated, got[1].populated)
-	}
-	if want.AInSet != got[0].inSet {
-		t.Errorf("A inSet: want=%v got=%v", want.AInSet, got[0].inSet)
-	}
-	if want.BInSet != got[1].inSet {
-		t.Errorf("B inSet: want=%v got=%v", want.BInSet, got[1].inSet)
-	}
-}
-
 func createOverlayFromWKTs(t *testing.T, wktA, wktB string) *doublyConnectedEdgeList {
 	gA, err := UnmarshalWKT(wktA)
 	if err != nil {
@@ -362,19 +337,19 @@ func TestGraphTriangle(t *testing.T) {
 		NumEdges: 2,
 		NumFaces: 0,
 		Vertices: []VertexSpec{{
-			Labels:   []LabelOption{OperandA(true)},
+			Src:      [2]bool{true},
 			Vertices: []XY{v0},
 		}},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v0, v1, v2, v0},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{true},
+				Sequence: []XY{v0, v1, v2, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v0, v2, v1, v0},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				Sequence: []XY{v0, v2, v1, v0},
 			},
 		},
 		Faces: nil,
@@ -425,39 +400,39 @@ func TestGraphWithHoles(t *testing.T) {
 		NumEdges: 6,
 		NumFaces: 0,
 		Vertices: []VertexSpec{{
-			Labels:   []LabelOption{OperandB(true)},
+			Src:      [2]bool{false, true},
 			Vertices: []XY{v0, v4, v8},
 		}},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v0, v1, v2, v3, v0},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				Sequence: []XY{v0, v1, v2, v3, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v0, v3, v2, v1, v0},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				Sequence: []XY{v0, v3, v2, v1, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v4, v5, v6, v7, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				Sequence: []XY{v4, v5, v6, v7, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v4, v7, v6, v5, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				Sequence: []XY{v4, v7, v6, v5, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v8, v9, v10, v11, v8},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				Sequence: []XY{v8, v9, v10, v11, v8},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v8, v11, v10, v9, v8},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				Sequence: []XY{v8, v11, v10, v9, v8},
 			},
 		},
 		Faces: nil,
@@ -495,29 +470,29 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 		NumEdges: 4,
 		NumFaces: 0,
 		Vertices: []VertexSpec{{
-			Labels:   []LabelOption{OperandB(true)},
+			Src:      [2]bool{false, true},
 			Vertices: []XY{v0, v4},
 		}},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v0, v1, v2, v3, v0},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				Sequence: []XY{v0, v1, v2, v3, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v0, v3, v2, v1, v0},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				Sequence: []XY{v0, v3, v2, v1, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v4, v5, v6, v7, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				Sequence: []XY{v4, v5, v6, v7, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v4, v7, v6, v5, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				Sequence: []XY{v4, v7, v6, v5, v4},
 			},
 		},
 		Faces: nil,
@@ -555,29 +530,29 @@ func TestGraphMultiLineString(t *testing.T) {
 		NumEdges: 4,
 		NumFaces: 0,
 		Vertices: []VertexSpec{{
-			Labels:   []LabelOption{OperandA(true)},
+			Src:      [2]bool{true},
 			Vertices: []XY{v0, v2, v3, v5},
 		}},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v0, v1, v2},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				Sequence: []XY{v0, v1, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v2, v1, v0},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				Sequence: []XY{v2, v1, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v3, v4, v5},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				Sequence: []XY{v3, v4, v5},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v5, v4, v3},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				Sequence: []XY{v5, v4, v3},
 			},
 		},
 		Faces: nil,
@@ -611,49 +586,41 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 		NumEdges: 8,
 		NumFaces: 0,
 		Vertices: []VertexSpec{{
-			Labels:   []LabelOption{OperandA(true)},
+			Src:      [2]bool{true},
 			Vertices: []XY{v0, v1, v2, v4},
 		}},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v0, v1},
+				SrcEdge:  [2]bool{true},
+				Sequence: []XY{v0, v1},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v1, v0},
+				SrcEdge:  [2]bool{true},
+				Sequence: []XY{v1, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v1, v2},
+				SrcEdge:  [2]bool{true},
+				Sequence: []XY{v1, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v2, v1},
+				SrcEdge:  [2]bool{true},
+				Sequence: []XY{v2, v1},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v1, v3, v2},
+				SrcEdge:  [2]bool{true},
+				Sequence: []XY{v1, v3, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v2, v3, v1},
+				SrcEdge:  [2]bool{true},
+				Sequence: []XY{v2, v3, v1},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v2, v4},
+				SrcEdge:  [2]bool{true},
+				Sequence: []XY{v2, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v4, v2},
+				SrcEdge:  [2]bool{true},
+				Sequence: []XY{v4, v2},
 			},
 		},
 		Faces: nil,
@@ -686,34 +653,30 @@ func TestGraphGhostDeduplication(t *testing.T) {
 		NumFaces: 0,
 		Vertices: []VertexSpec{
 			{
-				Labels:   []LabelOption{OperandA(true)},
+				Src:      [2]bool{true},
 				Vertices: []XY{v0, v1},
 			},
 			{
-				Labels:   nil,
+				Src:      [2]bool{false},
 				Vertices: []XY{v2},
 			},
 		},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v0, v1},
+				SrcEdge:  [2]bool{true},
+				Sequence: []XY{v0, v1},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: nil,
-				Sequence:   []XY{v1, v0},
+				SrcEdge:  [2]bool{true},
+				Sequence: []XY{v1, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v0, v2},
+				SrcEdge:  [2]bool{false},
+				Sequence: []XY{v0, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v2, v0},
+				SrcEdge:  [2]bool{false},
+				Sequence: []XY{v2, v0},
 			},
 		},
 	})
@@ -757,64 +720,76 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 		NumFaces: 4,
 		Vertices: []VertexSpec{
 			{
-				Labels:   []LabelOption{OperandA(true), OperandB(false)},
+				Src:      [2]bool{true, false},
+				InSet:    [2]bool{true, false},
 				Vertices: []XY{v0, v2},
 			},
 			{
-				Labels:   []LabelOption{OperandA(false), OperandB(true)},
+				Src:      [2]bool{false, true},
+				InSet:    [2]bool{false, true},
 				Vertices: []XY{v4},
 			},
 		},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v0, v1, v2},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v0, v1, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v2, v1, v0},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v2, v1, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v2, v3, v0},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v2, v3, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v0, v3, v2},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v0, v3, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v4, v5, v6, v7, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v4, v5, v6, v7, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v4, v7, v6, v5, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v4, v7, v6, v5, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v0, v2},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v0, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v2, v0},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v2, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v2, v4},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+				Sequence: []XY{v2, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v4, v2},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+				Sequence: []XY{v4, v2},
 			},
 		},
 		Faces: []FaceSpec{
@@ -823,28 +798,28 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 				First:  v2,
 				Second: v1,
 				Cycle:  []XY{v2, v1, v0, v3, v2, v4, v7, v6, v5, v4, v2},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet:  [2]bool{false, false},
 			},
 			{
 				// f1
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v2, v0},
-				Labels: []LabelOption{OperandA(true), OperandB(false)},
+				InSet:  [2]bool{true, false},
 			},
 			{
 				// f2
 				First:  v2,
 				Second: v3,
 				Cycle:  []XY{v2, v3, v0, v2},
-				Labels: []LabelOption{OperandA(true), OperandB(false)},
+				InSet:  [2]bool{true, false},
 			},
 			{
 				// f3
 				First:  v4,
 				Second: v5,
 				Cycle:  []XY{v4, v5, v6, v7, v4},
-				Labels: []LabelOption{OperandA(false), OperandB(true)},
+				InSet:  [2]bool{false, true},
 			},
 		},
 	})
@@ -889,88 +864,105 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 		NumFaces: 5,
 		Vertices: []VertexSpec{
 			{
-				Labels:   []LabelOption{OperandA(true), OperandB(false)},
+				Src:      [2]bool{true, false},
+				InSet:    [2]bool{true, false},
 				Vertices: []XY{v0},
 			},
 			{
-				Labels:   []LabelOption{OperandA(false), OperandB(true)},
+				Src:      [2]bool{false, true},
+				InSet:    [2]bool{false, true},
 				Vertices: []XY{v5},
 			},
 			{
-				Labels:   []LabelOption{OperandA(true), OperandB(true)},
+				Src:      [2]bool{true, true},
+				InSet:    [2]bool{true, true},
 				Vertices: []XY{v2, v4},
 			},
 		},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v4, v0},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v4, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v0, v1, v2},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v0, v1, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v2, v1, v0},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v2, v1, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v0, v4},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v0, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v2, v6, v7, v5},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v2, v6, v7, v5},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v5, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v5, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v4, v5},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v4, v5},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v5, v7, v6, v2},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v5, v7, v6, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v2, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v2, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v4, v2},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v4, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v4, v3, v2},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v4, v3, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v2, v3, v4},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v2, v3, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v5, v0},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+				Sequence: []XY{v5, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v0, v5},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+				Sequence: []XY{v0, v5},
 			},
 		},
 		Faces: []FaceSpec{
@@ -979,35 +971,35 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 				First:  v2,
 				Second: v1,
 				Cycle:  []XY{v2, v1, v0, v5, v7, v6, v2},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet:  [2]bool{false, false},
 			},
 			{
 				// f1
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v2, v4, v0},
-				Labels: []LabelOption{OperandA(true), OperandB(false)},
+				InSet:  [2]bool{true, false},
 			},
 			{
 				// f2
 				First:  v2,
 				Second: v6,
 				Cycle:  []XY{v2, v6, v7, v5, v4, v3, v2},
-				Labels: []LabelOption{OperandA(false), OperandB(true)},
+				InSet:  [2]bool{false, true},
 			},
 			{
 				// f3
 				First:  v4,
 				Second: v2,
 				Cycle:  []XY{v4, v2, v3, v4},
-				Labels: []LabelOption{OperandA(true), OperandB(true)},
+				InSet:  [2]bool{true, true},
 			},
 			{
 				// f4
 				First:  v0,
 				Second: v4,
 				Cycle:  []XY{v0, v4, v5, v0},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet:  [2]bool{false, false},
 			},
 		},
 	})
@@ -1048,44 +1040,52 @@ func TestGraphOverlayInside(t *testing.T) {
 		NumFaces: 3,
 		Vertices: []VertexSpec{
 			{
-				Labels:   []LabelOption{OperandA(true), OperandB(false)},
+				Src:      [2]bool{true, false},
+				InSet:    [2]bool{true, false},
 				Vertices: []XY{v0},
 			},
 			{
-				Labels:   []LabelOption{OperandA(true), OperandB(true)},
+				Src:      [2]bool{false, true},
+				InSet:    [2]bool{true, true},
 				Vertices: []XY{v4},
 			},
 		},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v0, v3, v2, v1, v0},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v0, v3, v2, v1, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v0, v1, v2, v3, v0},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v0, v1, v2, v3, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v4, v7, v6, v5, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v4, v7, v6, v5, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v4, v5, v6, v7, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v4, v5, v6, v7, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v0, v4},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v0, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v4, v0},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v4, v0},
 			},
 		},
 		Faces: []FaceSpec{
@@ -1094,21 +1094,21 @@ func TestGraphOverlayInside(t *testing.T) {
 				First:  v0,
 				Second: v3,
 				Cycle:  []XY{v0, v3, v2, v1, v0},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet:  [2]bool{false, false},
 			},
 			{
 				// f1
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v2, v3, v0, v4, v7, v6, v5, v4, v0},
-				Labels: []LabelOption{OperandA(true), OperandB(false)},
+				InSet:  [2]bool{true, false},
 			},
 			{
 				// f2
 				First:  v4,
 				Second: v5,
 				Cycle:  []XY{v4, v5, v6, v7, v4},
-				Labels: []LabelOption{OperandA(true), OperandB(true)},
+				InSet:  [2]bool{true, true},
 			},
 		},
 	})
@@ -1164,149 +1164,178 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 		NumFaces: 7,
 		Vertices: []VertexSpec{
 			{
-				Labels:   []LabelOption{OperandA(true), OperandB(false)},
+				Src:      [2]bool{true, false},
+				InSet:    [2]bool{true, false},
 				Vertices: []XY{v1, v2, v5},
 			},
 			{
-				Labels:   []LabelOption{OperandA(true), OperandB(true)},
+				Src:      [2]bool{true, true},
+				InSet:    [2]bool{true, true},
 				Vertices: []XY{v17, v18},
 			},
 			{
-				Labels:   []LabelOption{OperandA(false), OperandB(true)},
+				Src:      [2]bool{false, true},
+				InSet:    [2]bool{false, true},
 				Vertices: []XY{v9, v12, v13},
 			},
 		},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v5, v2},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+				Sequence: []XY{v5, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v2, v5},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+				Sequence: []XY{v2, v5},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v12, v13},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+				Sequence: []XY{v12, v13},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v13, v12},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+				Sequence: []XY{v13, v12},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v5, v6, v7, v8, v5},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v5, v6, v7, v8, v5},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v5, v8, v7, v6, v5},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v5, v8, v7, v6, v5},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v13, v14, v15, v16, v13},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v13, v14, v15, v16, v13},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v13, v16, v15, v14, v13},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v13, v16, v15, v14, v13},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v2, v1},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v2, v1},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v1, v17},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v1, v17},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v17, v9},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v17, v9},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v9, v12},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v9, v12},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v17, v1},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v17, v1},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v1, v2},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v1, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v12, v9},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v12, v9},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v9, v17},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v9, v17},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v18, v10, v17},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v18, v10, v17},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v17, v4, v18},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v17, v4, v18},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v17, v10, v18},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v17, v10, v18},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v18, v4, v17},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v18, v4, v17},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v1, v9},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+				Sequence: []XY{v1, v9},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v9, v1},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+				Sequence: []XY{v9, v1},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v18, v3, v2},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v18, v3, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v2, v3, v18},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v2, v3, v18},
 			},
 
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v18, v11, v12},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v18, v11, v12},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v12, v11, v18},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v12, v11, v18},
 			},
 		},
 		Faces: []FaceSpec{
@@ -1319,49 +1348,49 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 					v6, v5, v2, v1, v9, v12,
 					v13, v16, v15, v14, v13, v12,
 				},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet: [2]bool{false, false},
 			},
 			{
 				// f1
 				First:  v5,
 				Second: v6,
 				Cycle:  []XY{v5, v6, v7, v8, v5},
-				Labels: []LabelOption{OperandA(true), OperandB(false)},
+				InSet:  [2]bool{true, false},
 			},
 			{
 				// f2
 				First:  v13,
 				Second: v14,
 				Cycle:  []XY{v13, v14, v15, v16, v13},
-				Labels: []LabelOption{OperandA(false), OperandB(true)},
+				InSet:  [2]bool{false, true},
 			},
 			{
 				// f3
 				First:  v1,
 				Second: v2,
 				Cycle:  []XY{v1, v2, v3, v18, v10, v17, v1},
-				Labels: []LabelOption{OperandA(true), OperandB(false)},
+				InSet:  [2]bool{true, false},
 			},
 			{
 				// f4
 				First:  v17,
 				Second: v4,
 				Cycle:  []XY{v17, v4, v18, v11, v12, v9, v17},
-				Labels: []LabelOption{OperandA(false), OperandB(true)},
+				InSet:  [2]bool{false, true},
 			},
 			{
 				// f5
 				First:  v17,
 				Second: v10,
 				Cycle:  []XY{v17, v10, v18, v4, v17},
-				Labels: []LabelOption{OperandA(true), OperandB(true)},
+				InSet:  [2]bool{true, true},
 			},
 			{
 				// f6
 				First:  v1,
 				Second: v17,
 				Cycle:  []XY{v1, v17, v9, v1},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet:  [2]bool{false, false},
 			},
 		},
 	})
@@ -1394,53 +1423,63 @@ func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
 		Vertices: []VertexSpec{
 			{
 				Vertices: []XY{v0},
-				Labels:   []LabelOption{OperandA(true), OperandB(false)},
+				Src:      [2]bool{true, false},
+				InSet:    [2]bool{true, false},
 			},
 			{
 				Vertices: []XY{v1, v4},
-				Labels:   []LabelOption{OperandA(true), OperandB(true)},
+				Src:      [2]bool{true, true},
+				InSet:    [2]bool{true, true},
 			},
 		},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v1, v0},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v1, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v0, v5, v4},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v0, v5, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v4, v5, v0},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v4, v5, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v0, v1},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v0, v1},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v4, v3, v2, v1},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v4, v3, v2, v1},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v1, v2, v3, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v1, v2, v3, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(true), OperandB(false)},
-				Sequence:   []XY{v1, v4},
+				SrcEdge:  [2]bool{true, true},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v1, v4},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(false), OperandB(true)},
-				Sequence:   []XY{v4, v1},
+				SrcEdge:  [2]bool{true, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v4, v1},
 			},
 		},
 		Faces: []FaceSpec{
@@ -1448,19 +1487,19 @@ func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
 				First:  v1,
 				Second: v0,
 				Cycle:  []XY{v0, v5, v4, v3, v2, v1, v0},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet:  [2]bool{false, false},
 			},
 			{
 				First:  v1,
 				Second: v4,
 				Cycle:  []XY{v1, v4, v5, v0, v1},
-				Labels: []LabelOption{OperandA(true), OperandB(false)},
+				InSet:  [2]bool{true, false},
 			},
 			{
 				First:  v1,
 				Second: v2,
 				Cycle:  []XY{v1, v2, v3, v4, v1},
-				Labels: []LabelOption{OperandA(false), OperandB(true)},
+				InSet:  [2]bool{false, true},
 			},
 		},
 	})
@@ -1498,79 +1537,92 @@ func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
 		Vertices: []VertexSpec{
 			{
 				Vertices: []XY{v0},
-				Labels:   []LabelOption{OperandA(true), OperandB(false)},
+				Src:      [2]bool{true, false},
+				InSet:    [2]bool{true, false},
 			},
 			{
 				Vertices: []XY{v2},
-				Labels:   []LabelOption{OperandA(false), OperandB(true)},
+				Src:      [2]bool{false, true},
+				InSet:    [2]bool{false, true},
 			},
 			{
 				Vertices: []XY{v1, v5},
-				Labels:   []LabelOption{OperandA(true), OperandB(true)},
+				Src:      [2]bool{true, true},
+				InSet:    [2]bool{true, true},
 			},
 		},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v1, v0},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v1, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v0, v7, v6, v5},
-			},
-
-			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v5, v6, v7, v0},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v0, v7, v6, v5},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v0, v1},
-			},
-
-			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v5, v4, v3, v2},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v5, v6, v7, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-				Sequence:   []XY{v2, v1},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v0, v1},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v1, v2},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v5, v4, v3, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-				Sequence:   []XY{v2, v3, v4, v5},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v2, v1},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(true), OperandB(false)},
-				Sequence:   []XY{v1, v5},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v1, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(false), OperandB(true)},
-				Sequence:   []XY{v5, v1},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v2, v3, v4, v5},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v2, v0},
+				SrcEdge:  [2]bool{true, true},
+				SrcFace:  [2]bool{true, false},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v1, v5},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-				Sequence:   []XY{v0, v2},
+				SrcEdge:  [2]bool{true, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v5, v1},
+			},
+			{
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+				Sequence: []XY{v2, v0},
+			},
+			{
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+				Sequence: []XY{v0, v2},
 			},
 		},
 		Faces: []FaceSpec{
@@ -1579,28 +1631,28 @@ func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
 				First:  v0,
 				Second: v7,
 				Cycle:  []XY{v0, v7, v6, v5, v4, v3, v2, v0},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet:  [2]bool{false, false},
 			},
 			{
 				// f1
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v5, v6, v7, v0},
-				Labels: []LabelOption{OperandA(true), OperandB(false)},
+				InSet:  [2]bool{true, false},
 			},
 			{
 				// f2
 				First:  v1,
 				Second: v2,
 				Cycle:  []XY{v1, v2, v3, v4, v5, v1},
-				Labels: []LabelOption{OperandA(false), OperandB(true)},
+				InSet:  [2]bool{false, true},
 			},
 			{
 				// f3
 				First:  v2,
 				Second: v1,
 				Cycle:  []XY{v2, v1, v0, v2},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet:  [2]bool{false, false},
 			},
 		},
 	})
@@ -1630,19 +1682,22 @@ func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
 		NumEdges: 2,
 		NumFaces: 2,
 		Vertices: []VertexSpec{{
-			Labels:   []LabelOption{OperandA(true), OperandB(true)},
+			Src:      [2]bool{true, true},
+			InSet:    [2]bool{true, true},
 			Vertices: []XY{v0},
 		}},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(true), OperandB(true)},
-				Sequence:   []XY{v0, v1, v2, v3, v0},
+				SrcEdge:  [2]bool{true, true},
+				SrcFace:  [2]bool{true, true},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v0, v1, v2, v3, v0},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandA(false), OperandB(false)},
-				Sequence:   []XY{v0, v3, v2, v1, v0},
+				SrcEdge:  [2]bool{true, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, true},
+				Sequence: []XY{v0, v3, v2, v1, v0},
 			},
 		},
 		Faces: []FaceSpec{
@@ -1651,14 +1706,14 @@ func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
 				First:  v0,
 				Second: v3,
 				Cycle:  []XY{v0, v3, v2, v1, v0},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet:  [2]bool{false, false},
 			},
 			{
 				// f1
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v2, v3, v0},
-				Labels: []LabelOption{OperandA(true), OperandB(true)},
+				InSet:  [2]bool{true, true},
 			},
 		},
 	})
@@ -1686,37 +1741,53 @@ func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 		NumEdges: 4,
 		NumFaces: 1,
 		Vertices: []VertexSpec{
-			{Vertices: []XY{v2}, Labels: []LabelOption{OperandA(true), OperandB(false)}},
-			{Vertices: []XY{v0}, Labels: []LabelOption{OperandA(false), OperandB(true)}},
-			{Vertices: []XY{v1}, Labels: []LabelOption{OperandA(true), OperandB(true)}},
+			{
+				Vertices: []XY{v2},
+				Src:      [2]bool{true, false},
+				InSet:    [2]bool{true, false},
+			},
+			{
+				Vertices: []XY{v0},
+				Src:      [2]bool{false, true},
+				InSet:    [2]bool{false, true},
+			},
+			{
+				Vertices: []XY{v1},
+				Src:      [2]bool{true, true},
+				InSet:    [2]bool{true, true},
+			},
 		},
 		Edges: []EdgeSpec{
 			{
-				Sequence:   []XY{v1, v2},
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: nil,
+				Sequence: []XY{v1, v2},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
 			},
 			{
-				Sequence:   []XY{v2, v1},
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: nil,
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
+				Sequence: []XY{v2, v1},
 			},
 			{
-				Sequence:   []XY{v0, v1},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: nil,
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v0, v1},
 			},
 			{
-				Sequence:   []XY{v1, v0},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: nil,
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+				Sequence: []XY{v1, v0},
 			},
 		},
 		Faces: []FaceSpec{{
 			First:  v0,
 			Second: v1,
 			Cycle:  []XY{v0, v1, v2, v1, v0},
-			Labels: []LabelOption{OperandA(false), OperandB(false)},
+			InSet:  [2]bool{false, false},
 		}},
 	})
 }
@@ -1756,97 +1827,114 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 		Vertices: []VertexSpec{
 			{
 				Vertices: []XY{v1, v3},
-				Labels:   []LabelOption{OperandA(true), OperandB(true)},
+				Src:      [2]bool{true, true},
+				InSet:    [2]bool{true, true},
 			},
 			{
 				Vertices: []XY{v0, v4, v8},
-				Labels:   []LabelOption{OperandA(false), OperandB(true)},
+				Src:      [2]bool{false, true},
+				InSet:    [2]bool{false, true},
 			},
 		},
 		Edges: []EdgeSpec{
 			{
-				Sequence:   []XY{v1, v3},
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: nil,
+				Sequence: []XY{v1, v3},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, true},
 			},
 			{
-				Sequence:   []XY{v3, v1},
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: nil,
+				Sequence: []XY{v3, v1},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, true},
 			},
 			{
-				Sequence:   []XY{v0, v1},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
+				Sequence: []XY{v0, v1},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
 			},
 			{
-				Sequence:   []XY{v1, v0},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
+				Sequence: []XY{v1, v0},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
 			},
 			{
-				Sequence:   []XY{v3, v0},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
+				Sequence: []XY{v3, v0},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
 			},
 			{
-				Sequence:   []XY{v0, v3},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
+				Sequence: []XY{v0, v3},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
 			},
 			{
-				Sequence:   []XY{v4, v5, v6, v7, v4},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
+				Sequence: []XY{v4, v5, v6, v7, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
 			},
 			{
-				Sequence:   []XY{v4, v7, v6, v5, v4},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
-			},
-
-			{
-				Sequence:   []XY{v1, v8},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
-			},
-			{
-				Sequence:   []XY{v8, v1},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
+				Sequence: []XY{v4, v7, v6, v5, v4},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
 			},
 
 			{
-				Sequence:   []XY{v4, v8},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
+				Sequence: []XY{v1, v8},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
 			},
 			{
-				Sequence:   []XY{v8, v4},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(false)},
-				FaceLabels: nil,
-			},
-
-			{
-				Sequence:   []XY{v3, v8},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: nil,
-			},
-			{
-				Sequence:   []XY{v8, v3},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: nil,
+				Sequence: []XY{v8, v1},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
 			},
 
 			{
-				Sequence:   []XY{v8, v2, v3},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
+				Sequence: []XY{v4, v8},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
 			},
 			{
-				Sequence:   []XY{v3, v2, v8},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
+				Sequence: []XY{v8, v4},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, false},
+			},
+
+			{
+				Sequence: []XY{v3, v8},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+			},
+			{
+				Sequence: []XY{v8, v3},
+				SrcEdge:  [2]bool{false, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
+			},
+			{
+				Sequence: []XY{v8, v2, v3},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
+			},
+			{
+				Sequence: []XY{v3, v2, v8},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
 			},
 		},
 		Faces: []FaceSpec{
@@ -1855,35 +1943,35 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 				First:  v1,
 				Second: v0,
 				Cycle:  []XY{v1, v0, v3, v2, v8, v4, v7, v6, v5, v4, v8, v1},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet:  [2]bool{false, false},
 			},
 			{
 				// f1
 				First:  v1,
 				Second: v8,
 				Cycle:  []XY{v1, v8, v3, v1},
-				Labels: []LabelOption{OperandA(false), OperandB(true)},
+				InSet:  [2]bool{false, true},
 			},
 			{
 				// f2
 				First:  v8,
 				Second: v2,
 				Cycle:  []XY{v8, v2, v3, v8},
-				Labels: []LabelOption{OperandA(false), OperandB(true)},
+				InSet:  [2]bool{false, true},
 			},
 			{
 				// f3
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v3, v0},
-				Labels: []LabelOption{OperandA(false), OperandB(true)},
+				InSet:  [2]bool{false, true},
 			},
 			{
 				// f4
 				First:  v4,
 				Second: v5,
 				Cycle:  []XY{v4, v5, v6, v7, v4},
-				Labels: []LabelOption{OperandA(false), OperandB(true)},
+				InSet:  [2]bool{false, true},
 			},
 		},
 	})
@@ -1914,33 +2002,39 @@ func TestGraphOverlayReproducePointOnLineStringPrecisionBug(t *testing.T) {
 		Vertices: []VertexSpec{
 			{
 				Vertices: []XY{v0, v2},
-				Labels:   []LabelOption{OperandA(true), OperandB(false)},
+				Src:      [2]bool{true, false},
+				InSet:    [2]bool{true, false},
 			},
 			{
 				Vertices: []XY{v1},
-				Labels:   []LabelOption{OperandA(true), OperandB(true)},
+				Src:      [2]bool{true, true},
+				InSet:    [2]bool{true, true},
 			},
 		},
 		Edges: []EdgeSpec{
 			{
-				Sequence:   []XY{v0, v1},
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: nil,
+				Sequence: []XY{v0, v1},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
 			},
 			{
-				Sequence:   []XY{v1, v2},
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: nil,
+				Sequence: []XY{v1, v2},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
 			},
 			{
-				Sequence:   []XY{v2, v1},
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: nil,
+				Sequence: []XY{v2, v1},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
 			},
 			{
-				Sequence:   []XY{v1, v0},
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(false)},
-				FaceLabels: nil,
+				Sequence: []XY{v1, v0},
+				SrcEdge:  [2]bool{true, false},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, false},
 			},
 		},
 		Faces: []FaceSpec{
@@ -1948,7 +2042,7 @@ func TestGraphOverlayReproducePointOnLineStringPrecisionBug(t *testing.T) {
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v2, v1, v0},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet:  [2]bool{false, false},
 			},
 		},
 	})
@@ -1985,39 +2079,46 @@ func TestGraphOverlayReproduceGhostOnGeometryBug(t *testing.T) {
 		Vertices: []VertexSpec{
 			{
 				Vertices: []XY{v0, v1, v3},
-				Labels:   []LabelOption{OperandA(true), OperandB(true)},
+				Src:      [2]bool{true, true},
+				InSet:    [2]bool{true, true},
 			},
 		},
 		Edges: []EdgeSpec{
 			{
-				Sequence:   []XY{v0, v1},
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
+				Sequence: []XY{v0, v1},
+				SrcEdge:  [2]bool{true, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{true, true},
 			},
 			{
-				Sequence:   []XY{v1, v0},
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
+				Sequence: []XY{v1, v0},
+				SrcEdge:  [2]bool{true, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, true},
 			},
 			{
-				Sequence:   []XY{v1, v2, v3},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
+				Sequence: []XY{v1, v2, v3},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{false, true},
 			},
 			{
-				Sequence:   []XY{v3, v2, v1},
-				EdgeLabels: []LabelOption{OperandA(false), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
+				Sequence: []XY{v3, v2, v1},
+				SrcEdge:  [2]bool{false, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{false, true},
 			},
 			{
-				Sequence:   []XY{v3, v4, v0},
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(true)},
+				Sequence: []XY{v3, v4, v0},
+				SrcEdge:  [2]bool{true, true},
+				SrcFace:  [2]bool{false, true},
+				InSet:    [2]bool{true, true},
 			},
 			{
-				Sequence:   []XY{v0, v4, v3},
-				EdgeLabels: []LabelOption{OperandA(true), OperandB(true)},
-				FaceLabels: []LabelOption{OperandB(false)},
+				Sequence: []XY{v0, v4, v3},
+				SrcEdge:  [2]bool{true, true},
+				SrcFace:  [2]bool{false, false},
+				InSet:    [2]bool{true, true},
 			},
 		},
 		Faces: []FaceSpec{
@@ -2025,13 +2126,13 @@ func TestGraphOverlayReproduceGhostOnGeometryBug(t *testing.T) {
 				First:  v1,
 				Second: v0,
 				Cycle:  []XY{v1, v0, v4, v3, v2, v1},
-				Labels: []LabelOption{OperandA(false), OperandB(false)},
+				InSet:  [2]bool{false, false},
 			},
 			{
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v2, v3, v4, v0},
-				Labels: []LabelOption{OperandA(false), OperandB(true)},
+				InSet:  [2]bool{false, true},
 			},
 		},
 	})
@@ -2048,15 +2149,15 @@ func TestGraphWithEmptyGeometryCollection(t *testing.T) {
 
 func TestGraphWithGeometryCollection(t *testing.T) {
 	gc, err := UnmarshalWKT(`GEOMETRYCOLLECTION(
-		POINT(0 0),
-		LINESTRING(0 1,1 1),
-		POLYGON((2 0,3 0,3 1,2 1,2 0))
-	)`)
+ 		POINT(0 0),
+ 		LINESTRING(0 1,1 1),
+ 		POLYGON((2 0,3 0,3 1,2 1,2 0))
+ 	)`)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
-	dcel.addGeometryCollection(gc.MustAsGeometryCollection(), operandA, findInteractionPoints([]Geometry{gc}))
+	dcel.addGeometry(gc, operandA, findInteractionPoints([]Geometry{gc}))
 
 	/*
 	  v0          v3-----v4
@@ -2078,28 +2179,30 @@ func TestGraphWithGeometryCollection(t *testing.T) {
 		NumEdges: 4,
 		Vertices: []VertexSpec{
 			{
-				Labels:   []LabelOption{OperandA(true)},
+				Src:      [2]bool{true},
 				Vertices: []XY{v0, v1, v2, v3},
 			},
 		},
 		Edges: []EdgeSpec{
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v1, v2},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				Sequence: []XY{v1, v2},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v2, v1},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				Sequence: []XY{v2, v1},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(true)},
-				Sequence:   []XY{v3, v4, v5, v6, v3},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{true},
+				Sequence: []XY{v3, v4, v5, v6, v3},
 			},
 			{
-				EdgeLabels: []LabelOption{OperandA(true)},
-				FaceLabels: []LabelOption{OperandA(false)},
-				Sequence:   []XY{v3, v6, v5, v4, v3},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				Sequence: []XY{v3, v6, v5, v4, v3},
 			},
 		},
 	})
