@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.40.1
+
+2022-11-08
+
+__Special thanks to @missinglink for contributing to this release.__
 
 - Add benchmarks for WKB parsing.
 
