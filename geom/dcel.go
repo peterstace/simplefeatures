@@ -6,8 +6,16 @@ import (
 
 type doublyConnectedEdgeList struct {
 	faces     []*faceRecord // only populated in the overlay
-	halfEdges []*halfEdgeRecord
+	halfEdges map[[2]XY]*halfEdgeRecord
 	vertices  map[XY]*vertexRecord
+}
+
+func newDCEL() *doublyConnectedEdgeList {
+	return &doublyConnectedEdgeList{
+		faces:     nil,
+		halfEdges: make(map[[2]XY]*halfEdgeRecord),
+		vertices:  make(map[XY]*vertexRecord),
+	}
 }
 
 type faceRecord struct {
@@ -18,13 +26,6 @@ type faceRecord struct {
 	inSet [2]bool
 
 	extracted bool
-}
-
-func (f *faceRecord) String() string {
-	if f == nil {
-		return "nil"
-	}
-	return "[" + f.cycle.String() + "]"
 }
 
 type halfEdgeRecord struct {
@@ -49,18 +50,9 @@ type halfEdgeRecord struct {
 	extracted bool
 }
 
-// String shows the origin and destination of the edge (for debugging
-// purposes). We can remove this once DCEL active development is completed.
-func (e *halfEdgeRecord) String() string {
-	if e == nil {
-		return "nil"
-	}
-	return fmt.Sprintf("%v", sequenceToXYs(e.seq))
-}
-
 type vertexRecord struct {
 	coords    XY
-	incidents []*halfEdgeRecord
+	incidents map[*halfEdgeRecord]struct{}
 
 	// src encodes whether on not this vertex explicitly appears in the input
 	// geometries.
@@ -85,32 +77,23 @@ func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
 	}
 }
 
-func newDCELFromGeometry(g Geometry, ghosts MultiLineString, operand operand, interactions map[XY]struct{}) *doublyConnectedEdgeList {
-	dcel := &doublyConnectedEdgeList{
-		vertices: make(map[XY]*vertexRecord),
-	}
-	dcel.addGeometry(g, operand, interactions)
-	dcel.addGhosts(ghosts, operand, interactions)
-	return dcel
-}
-
 func (d *doublyConnectedEdgeList) addGeometry(g Geometry, operand operand, interactions map[XY]struct{}) {
 	switch g.Type() {
 	case TypePolygon:
 		poly := g.MustAsPolygon()
-		d.addMultiPolygon(poly.AsMultiPolygon(), operand, interactions)
+		d.addPolygon(poly, operand, interactions)
 	case TypeMultiPolygon:
 		mp := g.MustAsMultiPolygon()
 		d.addMultiPolygon(mp, operand, interactions)
 	case TypeLineString:
-		mls := g.MustAsLineString().AsMultiLineString()
-		d.addMultiLineString(mls, operand, interactions)
+		ls := g.MustAsLineString()
+		d.addLineString(ls, operand, interactions)
 	case TypeMultiLineString:
 		mls := g.MustAsMultiLineString()
 		d.addMultiLineString(mls, operand, interactions)
 	case TypePoint:
-		mp := g.MustAsPoint().AsMultiPoint()
-		d.addMultiPoint(mp, operand)
+		pt := g.MustAsPoint()
+		d.addPoint(pt, operand)
 	case TypeMultiPoint:
 		mp := g.MustAsMultiPoint()
 		d.addMultiPoint(mp, operand)
@@ -123,195 +106,99 @@ func (d *doublyConnectedEdgeList) addGeometry(g Geometry, operand operand, inter
 }
 
 func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand operand, interactions map[XY]struct{}) {
-	mp = mp.ForceCCW()
+	for i := 0; i < mp.NumPolygons(); i++ {
+		d.addPolygon(mp.PolygonN(i), operand, interactions)
+	}
+}
 
-	for polyIdx := 0; polyIdx < mp.NumPolygons(); polyIdx++ {
-		poly := mp.PolygonN(polyIdx)
-
-		// Extract rings.
-		rings := make([]Sequence, 1+poly.NumInteriorRings())
-		rings[0] = poly.ExteriorRing().Coordinates()
-		for i := 0; i < poly.NumInteriorRings(); i++ {
-			rings[i+1] = poly.InteriorRingN(i).Coordinates()
-		}
-
-		// Populate vertices.
-		for _, ring := range rings {
-			for i := 0; i < ring.Length(); i++ {
-				xy := ring.GetXY(i)
-				if _, ok := interactions[xy]; !ok {
-					continue
-				}
-				if _, ok := d.vertices[xy]; !ok {
-					vr := &vertexRecord{
-						coords:    xy,
-						incidents: nil, // populated later
-						locations: newLocationsOnBoundary(operand),
-					}
-					vr.src[operand] = true
-					d.vertices[xy] = vr
-				}
-			}
-		}
-
-		for _, ring := range rings {
-			var newEdges []*halfEdgeRecord
-			forEachNonInteractingSegment(ring, interactions, func(segment Sequence) {
-				// Build the edges (fwd and rev).
-				reverseSegment := reverseSequence(segment)
-				vertA := d.vertices[segment.GetXY(0)]
-				vertB := d.vertices[reverseSegment.GetXY(0)]
-				internalEdge := &halfEdgeRecord{
-					origin:   vertA,
-					twin:     nil, // populated later
-					incident: nil, // only populated in the overlay
-					next:     nil, // populated later
-					prev:     nil, // populated later
-					seq:      segment,
-				}
-				externalEdge := &halfEdgeRecord{
-					origin:   vertB,
-					twin:     internalEdge,
-					incident: nil, // only populated in the overlay
-					next:     nil, // populated later
-					prev:     nil, // populated later
-					seq:      reverseSegment,
-				}
-				internalEdge.srcEdge[operand] = true
-				internalEdge.srcFace[operand] = true
-				externalEdge.srcEdge[operand] = true
-				internalEdge.twin = externalEdge
-				vertA.incidents = append(vertA.incidents, internalEdge)
-				vertB.incidents = append(vertB.incidents, externalEdge)
-				newEdges = append(newEdges, internalEdge, externalEdge)
-			})
-
-			// Link together next/prev pointers.
-			numEdges := len(newEdges)
-			for i := 0; i < numEdges/2; i++ {
-				newEdges[i*2+0].next = newEdges[(2*i+2)%numEdges]
-				newEdges[i*2+1].next = newEdges[(2*i-1+numEdges)%numEdges]
-				newEdges[i*2+0].prev = newEdges[(2*i-2+numEdges)%numEdges]
-				newEdges[i*2+1].prev = newEdges[(2*i+3)%numEdges]
-			}
-			d.halfEdges = append(d.halfEdges, newEdges...)
-		}
+func (d *doublyConnectedEdgeList) addPolygon(poly Polygon, operand operand, interactions map[XY]struct{}) {
+	poly = poly.ForceCCW()
+	for _, ring := range poly.DumpRings() {
+		forEachNonInteractingSegment(ring.Coordinates(), interactions, func(segment Sequence, _ int) {
+			e := d.addOrGetEdge(segment)
+			e.start.src[operand] = true
+			e.end.src[operand] = true
+			e.start.locations[operand].boundary = true
+			e.fwd.srcEdge[operand] = true
+			e.rev.srcEdge[operand] = true
+			e.fwd.srcFace[operand] = true
+		})
 	}
 }
 
 func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operand operand, interactions map[XY]struct{}) {
-	// Add vertices.
 	for i := 0; i < mls.NumLineStrings(); i++ {
-		ls := mls.LineStringN(i)
-		seq := ls.Coordinates()
-		n := seq.Length()
-		for j := 0; j < n; j++ {
-			xy := seq.GetXY(j)
-			if _, ok := interactions[xy]; !ok {
-				continue
-			}
+		d.addLineString(mls.LineStringN(i), operand, interactions)
+	}
+}
 
-			onBoundary := (j == 0 || j == n-1) && !ls.IsClosed()
-			if v, ok := d.vertices[xy]; !ok {
-				var locs [2]location
-				if onBoundary {
-					locs[operand].boundary = true
+func (d *doublyConnectedEdgeList) addLineString(ls LineString, operand operand, interactions map[XY]struct{}) {
+	seq := ls.Coordinates()
+	forEachNonInteractingSegment(seq, interactions, func(segment Sequence, startIdx int) {
+		edge := d.addOrGetEdge(segment)
+		edge.start.src[operand] = true
+		edge.end.src[operand] = true
+		edge.fwd.srcEdge[operand] = true
+		edge.rev.srcEdge[operand] = true
+
+		// TODO: do we need to do this when adding polygons as well?
+		// TODO: is there a better way to model location? Could it just be a tri-value enum?
+
+		for _, c := range [2]struct {
+			v          *vertexRecord
+			onBoundary bool
+		}{
+			{edge.start, startIdx == 0 && !ls.IsClosed()},
+			{edge.end, startIdx+segment.Length() == seq.Length() && !ls.IsClosed()},
+		} {
+			if !c.v.locations[operand].boundary && !c.v.locations[operand].interior {
+				if c.onBoundary {
+					c.v.locations[operand].boundary = true
 				} else {
-					locs[operand].interior = true
+					c.v.locations[operand].interior = true
 				}
-				vr := &vertexRecord{
-					coords:    xy,
-					locations: locs,
-				}
-				vr.src[operand] = true
-				d.vertices[xy] = vr
 			} else {
-				if onBoundary {
-					if v.locations[operand].boundary {
-						// Handle mod-2 rule (the boundary passes through the point
-						// an even number of times, then it should be treated as an
-						// interior point).
-						v.locations[operand].boundary = false
-						v.locations[operand].interior = true
+				if c.onBoundary {
+					if c.v.locations[operand].boundary {
+						c.v.locations[operand].boundary = false
+						c.v.locations[operand].interior = true
 					} else {
-						v.locations[operand].boundary = true
-						v.locations[operand].interior = false
+						c.v.locations[operand].boundary = true
+						c.v.locations[operand].interior = false
 					}
 				} else {
-					v.locations[operand].interior = true
+					c.v.locations[operand].interior = true
 				}
 			}
 		}
-	}
 
-	edges := make(edgeSet)
-
-	// Add edges.
-	for i := 0; i < mls.NumLineStrings(); i++ {
-		seq := mls.LineStringN(i).Coordinates()
-		forEachNonInteractingSegment(seq, interactions, func(segment Sequence) {
-			reverseSegment := reverseSequence(segment)
-			startXY := segment.GetXY(0)
-			endXY := reverseSegment.GetXY(0)
-
-			if edges.containsStartIntermediateEnd(segment) {
-				return
-			}
-			edges.insertStartIntermediateEnd(segment)
-			edges.insertStartIntermediateEnd(reverseSegment)
-
-			vOrigin := d.vertices[startXY]
-			vDestin := d.vertices[endXY]
-
-			fwd := &halfEdgeRecord{
-				origin:   vOrigin,
-				twin:     nil, // set later
-				incident: nil, // only populated in overlay
-				next:     nil, // set later
-				prev:     nil, // set later
-				seq:      segment,
-			}
-			rev := &halfEdgeRecord{
-				origin:   vDestin,
-				twin:     fwd,
-				incident: nil, // only populated in overlay
-				next:     fwd,
-				prev:     fwd,
-				seq:      reverseSegment,
-			}
-			fwd.srcEdge[operand] = true
-			rev.srcEdge[operand] = true
-			fwd.twin = rev
-			fwd.next = rev
-			fwd.prev = rev
-
-			vOrigin.incidents = append(vOrigin.incidents, fwd)
-			vDestin.incidents = append(vDestin.incidents, rev)
-
-			d.halfEdges = append(d.halfEdges, fwd, rev)
-		})
-	}
+	})
 }
 
 func (d *doublyConnectedEdgeList) addMultiPoint(mp MultiPoint, operand operand) {
 	n := mp.NumPoints()
 	for i := 0; i < n; i++ {
-		xy, ok := mp.PointN(i).XY()
-		if !ok {
-			continue
-		}
-		record, ok := d.vertices[xy]
-		if !ok {
-			record = &vertexRecord{
-				coords:    xy,
-				incidents: nil,
-				locations: [2]location{}, // set below
-			}
-			d.vertices[xy] = record
-		}
-		record.src[operand] = true
-		record.locations[operand].interior = true
+		d.addPoint(mp.PointN(i), operand)
 	}
+}
+
+func (d *doublyConnectedEdgeList) addPoint(pt Point, operand operand) {
+	xy, ok := pt.XY()
+	if !ok {
+		return
+	}
+	record, ok := d.vertices[xy]
+	if !ok {
+		record = &vertexRecord{
+			coords:    xy,
+			incidents: make(map[*halfEdgeRecord]struct{}),
+			src:       [2]bool{},     // set below
+			locations: [2]location{}, // set below
+		}
+		d.vertices[xy] = record
+	}
+	record.src[operand] = true
+	record.locations[operand].interior = true
 }
 
 func (d *doublyConnectedEdgeList) addGeometryCollection(gc GeometryCollection, operand operand, interactions map[XY]struct{}) {
@@ -321,72 +208,92 @@ func (d *doublyConnectedEdgeList) addGeometryCollection(gc GeometryCollection, o
 	}
 }
 
-func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, operand operand, interactions map[XY]struct{}) {
-	edges := make(edgeSet)
-	for _, e := range d.halfEdges {
-		edges.insertEdge(e)
-	}
-
+func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, interactions map[XY]struct{}) {
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		seq := mls.LineStringN(i).Coordinates()
-		forEachNonInteractingSegment(seq, interactions, func(segment Sequence) {
-			reverseSegment := reverseSequence(segment)
-			startXY := segment.GetXY(0)
-			endXY := reverseSegment.GetXY(0)
-
-			if _, ok := d.vertices[startXY]; !ok {
-				d.vertices[startXY] = &vertexRecord{coords: startXY}
-			}
-			if _, ok := d.vertices[endXY]; !ok {
-				d.vertices[endXY] = &vertexRecord{coords: endXY}
-			}
-
-			if edges.containsStartIntermediateEnd(segment) {
-				// Already exists, so shouldn't add.
-				return
-			}
-			edges.insertStartIntermediateEnd(segment)
-			edges.insertStartIntermediateEnd(reverseSegment)
-
-			d.addGhostLine(segment, reverseSegment, operand)
+		forEachNonInteractingSegment(seq, interactions, func(segment Sequence, _ int) {
+			// No need to update labels/locations, since anything added is a "ghost" point.
+			_ = d.addOrGetEdge(segment)
 		})
 	}
 }
 
-func (d *doublyConnectedEdgeList) addGhostLine(segment, reverseSegment Sequence, operand operand) {
-	vertA := d.vertices[segment.GetXY(0)]
-	vertB := d.vertices[reverseSegment.GetXY(0)]
-
-	e1 := &halfEdgeRecord{
-		origin:   vertA,
-		twin:     nil, // populated later
-		incident: nil, // only populated in the overlay
-		next:     nil, // popluated later
-		prev:     nil, // populated later
-		seq:      segment,
-	}
-	e2 := &halfEdgeRecord{
-		origin:   vertB,
-		twin:     e1,
-		incident: nil, // only populated in the overlay
-		next:     e1,
-		prev:     e1,
-		seq:      reverseSegment,
-	}
-	e1.twin = e2
-	e1.next = e2
-	e1.prev = e2
-
-	vertA.incidents = append(vertA.incidents, e1)
-	vertB.incidents = append(vertB.incidents, e2)
-
-	d.halfEdges = append(d.halfEdges, e1, e2)
-
-	d.fixVertex(vertA)
-	d.fixVertex(vertB)
+type edge struct {
+	start, end *vertexRecord
+	fwd, rev   *halfEdgeRecord
 }
 
-func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn func(Sequence)) {
+func (d *doublyConnectedEdgeList) addOrGetEdge(segment Sequence) edge {
+	n := segment.Length()
+	if n < 2 {
+		panic(fmt.Sprintf("segment of length less than 2: %d", n))
+	}
+
+	startXY := segment.GetXY(0)
+	endXY := segment.GetXY(n - 1)
+	reverseSegment := reverseSequence(segment)
+
+	fwd, addedFwd := d.getOrAddHalfEdge(segment)
+	rev, addedRev := d.getOrAddHalfEdge(reverseSegment)
+	if addedFwd != addedRev {
+		panic(fmt.Sprintf("addedFwd != addedRev: %t vs %t", addedFwd, addedRev))
+	}
+
+	startV, ok := d.vertices[startXY]
+	if !ok {
+		startV = &vertexRecord{
+			coords:    startXY,
+			incidents: make(map[*halfEdgeRecord]struct{}),
+		}
+		d.vertices[startXY] = startV
+	}
+	endV, ok := d.vertices[endXY]
+	if !ok {
+		endV = &vertexRecord{
+			coords:    endXY,
+			incidents: make(map[*halfEdgeRecord]struct{}),
+		}
+		d.vertices[endXY] = endV
+	}
+
+	startV.incidents[fwd] = struct{}{}
+	endV.incidents[rev] = struct{}{}
+
+	if addedFwd {
+		fwd.origin = startV
+		rev.origin = endV
+		fwd.twin = rev
+		rev.twin = fwd
+		fwd.next = rev
+		fwd.prev = rev
+		rev.next = fwd
+		rev.prev = fwd
+		fwd.seq = segment
+		rev.seq = reverseSegment
+	}
+
+	return edge{
+		start: startV,
+		end:   endV,
+		fwd:   fwd,
+		rev:   rev,
+	}
+}
+
+func (d *doublyConnectedEdgeList) getOrAddHalfEdge(segment Sequence) (*halfEdgeRecord, bool) {
+	k := [2]XY{
+		segment.GetXY(0),
+		segment.GetXY(1),
+	}
+	e, ok := d.halfEdges[k]
+	if !ok {
+		e = new(halfEdgeRecord)
+		d.halfEdges[k] = e
+	}
+	return e, !ok
+}
+
+func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn func(Sequence, int)) {
 	n := seq.Length()
 	i := 0
 	for i < n-1 {
@@ -403,7 +310,7 @@ func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn
 
 		// Execute the callback with the segment.
 		segment := seq.Slice(start, end+1)
-		fn(segment)
+		fn(segment, start)
 
 		// On the next iteration, start the next edge at the end of
 		// this one.

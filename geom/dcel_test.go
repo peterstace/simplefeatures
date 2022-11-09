@@ -103,13 +103,9 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 					bruteForceEdgeSet[er] = struct{}{}
 				}
 			}
-			incidentsSet := make(map[*halfEdgeRecord]struct{})
-			for _, e := range vr.incidents {
-				incidentsSet[e] = struct{}{}
-			}
-			if !reflect.DeepEqual(bruteForceEdgeSet, incidentsSet) {
+			if !reflect.DeepEqual(bruteForceEdgeSet, vr.incidents) {
 				t.Fatalf("vertex record at %v doesn't have correct incidents: "+
-					"bruteForceEdgeSet=%v incidentsSet=%v", vr.coords, bruteForceEdgeSet, incidentsSet)
+					"bruteForceEdgeSet=%v incidentsSet=%v", vr.coords, bruteForceEdgeSet, vr.incidents)
 			}
 		}
 	})
@@ -310,8 +306,8 @@ func TestGraphTriangle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
-	dcel.addMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandA, findInteractionPoints([]Geometry{poly}))
+	dcel := newDCEL()
+	dcel.addPolygon(poly.MustAsPolygon(), operandA, findInteractionPoints([]Geometry{poly}))
 
 	/*
 
@@ -379,7 +375,7 @@ func TestGraphWithHoles(t *testing.T) {
 
 	*/
 
-	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+	dcel := newDCEL()
 	dcel.addMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandB, findInteractionPoints([]Geometry{poly}))
 
 	v0 := XY{0, 0}
@@ -453,7 +449,7 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 	  v0-----v1   v4-----v5
 	*/
 
-	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+	dcel := newDCEL()
 	dcel.addMultiPolygon(mp.MustAsMultiPolygon(), operandB, findInteractionPoints([]Geometry{mp}))
 
 	v0 := XY{0, 0}
@@ -504,7 +500,8 @@ func TestGraphMultiLineString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromGeometry(mls, MultiLineString{}, operandA, findInteractionPoints([]Geometry{mls}))
+	dcel := newDCEL()
+	dcel.addGeometry(mls, operandA, findInteractionPoints([]Geometry{mls}))
 
 	/*
 	        v2    v3
@@ -564,7 +561,8 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := newDCELFromGeometry(ls, MultiLineString{}, operandA, findInteractionPoints([]Geometry{ls}))
+	dcel := newDCEL()
+	dcel.addGeometry(ls, operandA, findInteractionPoints([]Geometry{ls}))
 
 	/*
 	   v1----v2----v4
@@ -636,12 +634,15 @@ func TestGraphGhostDeduplication(t *testing.T) {
 	// Ghost contains duplicated lines. This could happen in the scenario where
 	// one of the inputs is a multipolygon and the ghost joins the rings, but
 	// then the line joining the two input geometries is the same line segment.
-	ghost, err := UnmarshalWKT("MULTILINESTRING((0 0,0 1,0 0))")
+	ghosts, err := UnmarshalWKT("MULTILINESTRING((0 0,0 1,0 0))")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	dcel := newDCELFromGeometry(ls, ghost.MustAsMultiLineString(), operandA, findInteractionPoints([]Geometry{ls, ghost}))
+	interactions := findInteractionPoints([]Geometry{ls, ghosts})
+	dcel := newDCEL()
+	dcel.addGhosts(ghosts.MustAsMultiLineString(), interactions)
+	dcel.addGeometry(ls, operandA, interactions)
 
 	v0 := XY{0, 0}
 	v1 := XY{1, 0}
@@ -2156,7 +2157,7 @@ func TestGraphWithGeometryCollection(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
+	dcel := newDCEL()
 	dcel.addGeometry(gc, operandA, findInteractionPoints([]Geometry{gc}))
 
 	/*
