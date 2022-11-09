@@ -231,7 +231,7 @@ func (d *doublyConnectedEdgeList) addOrGetEdge(segment Sequence) edge {
 
 	startXY := segment.GetXY(0)
 	endXY := segment.GetXY(n - 1)
-	reverseSegment := reverseSequence(segment)
+	reverseSegment := segment.Reverse()
 
 	fwd, addedFwd := d.getOrAddHalfEdge(segment)
 	rev, addedRev := d.getOrAddHalfEdge(reverseSegment)

@@ -219,7 +219,7 @@ func CheckCycle(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []XY) {
 			t.Fatal("inf loop")
 		}
 
-		got = append(got, sequenceToXYs(reverseSequence(e.seq))[:e.seq.Length()-1]...)
+		got = append(got, sequenceToXYs(e.seq.Reverse())[:e.seq.Length()-1]...)
 
 		e = e.prev
 		if e == start {
