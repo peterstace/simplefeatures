@@ -1,4 +1,3 @@
-//nolint:deadcode,unused
 package geom
 
 import (
@@ -7,12 +6,12 @@ import (
 	"sort"
 )
 
-// dumpDCEL logs out a friendly representation of the DCEL that can be used for
-// debugging.
+//nolint:deadcode,unused
 func dumpDCEL(d *doublyConnectedEdgeList) {
 	newNamedDCEL(d).show()
 }
 
+//nolint:unused
 type namedDCEL struct {
 	*doublyConnectedEdgeList
 
@@ -24,6 +23,7 @@ type namedDCEL struct {
 	edgeList   []*halfEdgeRecord
 }
 
+//nolint:unused
 func newNamedDCEL(d *doublyConnectedEdgeList) *namedDCEL {
 	var vertexList []*vertexRecord
 	for _, v := range d.vertices {
@@ -67,6 +67,7 @@ func newNamedDCEL(d *doublyConnectedEdgeList) *namedDCEL {
 	}
 }
 
+//nolint:unused
 func (n *namedDCEL) show() {
 	log.Printf("vertices: %d", len(n.vertices))
 	for _, v := range n.vertexList {
@@ -84,6 +85,7 @@ func (n *namedDCEL) show() {
 	}
 }
 
+//nolint:unused
 func (n *namedDCEL) faceRepr(f *faceRecord) string {
 	if f == nil {
 		return "nil"
@@ -91,6 +93,7 @@ func (n *namedDCEL) faceRepr(f *faceRecord) string {
 	return fmt.Sprintf("cycle:%s inSet:%s", n.edgeNames[f.cycle], bstoa(f.inSet))
 }
 
+//nolint:unused
 func (n *namedDCEL) edgeRepr(e *halfEdgeRecord) string {
 	if e == nil {
 		return "nil"
@@ -101,6 +104,7 @@ func (n *namedDCEL) edgeRepr(e *halfEdgeRecord) string {
 		n.edgeNames[e.prev], bstoa(e.srcEdge), bstoa(e.srcFace), bstoa(e.inSet), sequenceToXYs(e.seq))
 }
 
+//nolint:unused
 func (n *namedDCEL) vertexRepr(v *vertexRecord) string {
 	if v == nil {
 		return "nil"
@@ -116,6 +120,7 @@ func (n *namedDCEL) vertexRepr(v *vertexRecord) string {
 	)
 }
 
+//nolint:unused
 func btoa(b bool) string {
 	if b {
 		return "1"
@@ -123,10 +128,12 @@ func btoa(b bool) string {
 	return "0"
 }
 
+//nolint:unused
 func bstoa(b [2]bool) string {
 	return btoa(b[0]) + btoa(b[1])
 }
 
+//nolint:unused
 func ltoa(loc location) string {
 	var s string
 	if loc.boundary {
@@ -142,19 +149,24 @@ func ltoa(loc location) string {
 	return s
 }
 
+//nolint:unused
 func lstoa(locs [2]location) string {
 	return ltoa(locs[0]) + ltoa(locs[1])
 }
 
+//nolint:unused
 func ptoa(ptr interface{}) string {
 	return fmt.Sprintf("%p", ptr)
 }
 
+//nolint:unused
 func ptrLess(ptr1, ptr2 interface{}) bool {
 	return ptoa(ptr1) < ptoa(ptr2)
 }
 
 // intLog finds the smallest exponent such that base^exponent >= power.
+//
+//nolint:unused
 func intLog(base, power int) int {
 	exponent := 0
 	product := 1
