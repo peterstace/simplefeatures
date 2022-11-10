@@ -77,6 +77,15 @@ func forEachEdge(start *halfEdgeRecord, fn func(*halfEdgeRecord)) {
 	}
 }
 
+func (d *doublyConnectedEdgeList) addVertices(interactions map[XY]struct{}) {
+	for xy := range interactions {
+		d.vertices[xy] = &vertexRecord{
+			coords:    xy,
+			incidents: make(map[*halfEdgeRecord]struct{}),
+		}
+	}
+}
+
 func (d *doublyConnectedEdgeList) addGeometry(g Geometry, operand operand, interactions map[XY]struct{}) {
 	switch g.Type() {
 	case TypePolygon:
@@ -187,18 +196,9 @@ func (d *doublyConnectedEdgeList) addPoint(pt Point, operand operand) {
 	if !ok {
 		return
 	}
-	record, ok := d.vertices[xy]
-	if !ok {
-		record = &vertexRecord{
-			coords:    xy,
-			incidents: make(map[*halfEdgeRecord]struct{}),
-			src:       [2]bool{},     // set below
-			locations: [2]location{}, // set below
-		}
-		d.vertices[xy] = record
-	}
-	record.src[operand] = true
-	record.locations[operand].interior = true
+	v := d.vertices[xy]
+	v.src[operand] = true
+	v.locations[operand].interior = true
 }
 
 func (d *doublyConnectedEdgeList) addGeometryCollection(gc GeometryCollection, operand operand, interactions map[XY]struct{}) {
@@ -239,22 +239,8 @@ func (d *doublyConnectedEdgeList) addOrGetEdge(segment Sequence) edge {
 		panic(fmt.Sprintf("addedFwd != addedRev: %t vs %t", addedFwd, addedRev))
 	}
 
-	startV, ok := d.vertices[startXY]
-	if !ok {
-		startV = &vertexRecord{
-			coords:    startXY,
-			incidents: make(map[*halfEdgeRecord]struct{}),
-		}
-		d.vertices[startXY] = startV
-	}
-	endV, ok := d.vertices[endXY]
-	if !ok {
-		endV = &vertexRecord{
-			coords:    endXY,
-			incidents: make(map[*halfEdgeRecord]struct{}),
-		}
-		d.vertices[endXY] = endV
-	}
+	startV := d.vertices[startXY]
+	endV := d.vertices[endXY]
 
 	startV.incidents[fwd] = struct{}{}
 	endV.incidents[rev] = struct{}{}

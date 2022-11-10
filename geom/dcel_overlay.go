@@ -19,6 +19,7 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 	interactions := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
 
 	dcel := newDCEL()
+	dcel.addVertices(interactions)
 	dcel.addGhosts(ghosts, interactions)
 	dcel.addGeometry(a, operandA, interactions)
 	dcel.addGeometry(b, operandB, interactions)
