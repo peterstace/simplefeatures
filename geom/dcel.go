@@ -154,7 +154,8 @@ func (d *doublyConnectedEdgeList) addLineString(ls LineString, operand operand, 
 		edge.fwd.srcEdge[operand] = true
 		edge.rev.srcEdge[operand] = true
 
-		// TODO: This modelling of location is complicated. Could it just be a tri-value enum instead?
+		// TODO: This modelling of location is complicated. Could it just be a
+		// tri-value enum instead?
 
 		for _, c := range [2]struct {
 			v          *vertexRecord
@@ -215,7 +216,8 @@ func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, interactions ma
 	for i := 0; i < mls.NumLineStrings(); i++ {
 		seq := mls.LineStringN(i).Coordinates()
 		forEachNonInteractingSegment(seq, interactions, func(segment Sequence, _ int) {
-			// No need to update labels/locations, since anything added is a "ghost" point.
+			// No need to update labels/locations since ghosts since these only
+			// apply to input geometries.
 			_ = d.addOrGetEdge(segment)
 		})
 	}
@@ -227,20 +229,16 @@ type edge struct {
 }
 
 func (d *doublyConnectedEdgeList) addOrGetEdge(segment Sequence) edge {
-	n := segment.Length()
-	if n < 2 {
+	if n := segment.Length(); n < 2 {
 		panic(fmt.Sprintf("segment of length less than 2: %d", n))
 	}
 
-	startXY := segment.GetXY(0)
-	endXY := segment.GetXY(n - 1)
 	reverseSegment := segment.Reverse()
+	startXY := segment.GetXY(0)
+	endXY := reverseSegment.GetXY(0)
 
-	fwd, addedFwd := d.getOrAddHalfEdge(segment)
-	rev, addedRev := d.getOrAddHalfEdge(reverseSegment)
-	if addedFwd != addedRev {
-		panic(fmt.Sprintf("addedFwd != addedRev: %t vs %t", addedFwd, addedRev))
-	}
+	fwd := d.getOrAddHalfEdge(segment)
+	rev := d.getOrAddHalfEdge(reverseSegment)
 
 	startV := d.vertices[startXY]
 	endV := d.vertices[endXY]
@@ -248,18 +246,14 @@ func (d *doublyConnectedEdgeList) addOrGetEdge(segment Sequence) edge {
 	startV.incidents[fwd] = struct{}{}
 	endV.incidents[rev] = struct{}{}
 
-	if addedFwd {
-		fwd.origin = startV
-		rev.origin = endV
-		fwd.twin = rev
-		rev.twin = fwd
-		fwd.next = rev
-		fwd.prev = rev
-		rev.next = fwd
-		rev.prev = fwd
-		fwd.seq = segment
-		rev.seq = reverseSegment
-	}
+	fwd.origin = startV
+	rev.origin = endV
+	fwd.twin = rev
+	rev.twin = fwd
+	fwd.next = rev
+	fwd.prev = rev
+	rev.next = fwd
+	rev.prev = fwd
 
 	return edge{
 		start: startV,
@@ -269,17 +263,17 @@ func (d *doublyConnectedEdgeList) addOrGetEdge(segment Sequence) edge {
 	}
 }
 
-func (d *doublyConnectedEdgeList) getOrAddHalfEdge(segment Sequence) (*halfEdgeRecord, bool) {
+func (d *doublyConnectedEdgeList) getOrAddHalfEdge(segment Sequence) *halfEdgeRecord {
 	k := [2]XY{
 		segment.GetXY(0),
 		segment.GetXY(1),
 	}
 	e, ok := d.halfEdges[k]
 	if !ok {
-		e = new(halfEdgeRecord)
+		e = &halfEdgeRecord{seq: segment}
 		d.halfEdges[k] = e
 	}
-	return e, !ok
+	return e
 }
 
 func forEachNonInteractingSegment(seq Sequence, interactions map[XY]struct{}, fn func(Sequence, int)) {
