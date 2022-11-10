@@ -41,7 +41,7 @@ func (d *doublyConnectedEdgeList) fixVertices() {
 
 func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 	// Sort the edges radially.
-	var incidents []*halfEdgeRecord
+	incidents := make([]*halfEdgeRecord, 0, len(v.incidents))
 	for e := range v.incidents {
 		incidents = append(incidents, e)
 	}
@@ -63,7 +63,7 @@ func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 	// Fix pointers.
 	for i := range incidents {
 		ei := incidents[i]
-		ej := incidents[(i+1)%len(v.incidents)]
+		ej := incidents[(i+1)%len(incidents)]
 		ei.prev = ej.twin
 		ej.twin.next = ei
 	}
