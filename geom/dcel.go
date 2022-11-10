@@ -127,10 +127,14 @@ func (d *doublyConnectedEdgeList) addPolygon(poly Polygon, operand operand, inte
 			e := d.addOrGetEdge(segment)
 			e.start.src[operand] = true
 			e.end.src[operand] = true
-			e.start.locations[operand].boundary = true
 			e.fwd.srcEdge[operand] = true
 			e.rev.srcEdge[operand] = true
 			e.fwd.srcFace[operand] = true
+
+			// TODO: is this treatment of boundary correct? It may not follow
+			// the odd-even rule if the node occurs multiple times due to
+			// geometry collections.
+			e.start.locations[operand].boundary = true
 		})
 	}
 }
@@ -150,8 +154,7 @@ func (d *doublyConnectedEdgeList) addLineString(ls LineString, operand operand, 
 		edge.fwd.srcEdge[operand] = true
 		edge.rev.srcEdge[operand] = true
 
-		// TODO: do we need to do this when adding polygons as well?
-		// TODO: is there a better way to model location? Could it just be a tri-value enum?
+		// TODO: This modelling of location is complicated. Could it just be a tri-value enum instead?
 
 		for _, c := range [2]struct {
 			v          *vertexRecord
