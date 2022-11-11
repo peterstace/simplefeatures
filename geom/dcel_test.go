@@ -297,7 +297,7 @@ outer:
 	t.Errorf("XY sequences don't match:\ngot:  %v\nwant: %v", got, want)
 }
 
-func createOverlayFromWKTs(t *testing.T, wktA, wktB string) *doublyConnectedEdgeList {
+func newDCELFromWKTs(t *testing.T, wktA, wktB string) *doublyConnectedEdgeList {
 	gA, err := UnmarshalWKT(wktA)
 	if err != nil {
 		t.Fatal(err)
@@ -306,19 +306,19 @@ func createOverlayFromWKTs(t *testing.T, wktA, wktB string) *doublyConnectedEdge
 	if err != nil {
 		t.Fatal(err)
 	}
-	overlay, err := createOverlay(gA, gB)
+	dcel, err := newDCELFromGeometries(gA, gB)
 	if err != nil {
 		t.Fatal(err)
 	}
-	return overlay
+	return dcel
 }
 
-func createOverlayFromWKT(t *testing.T, wkt string) *doublyConnectedEdgeList {
-	return createOverlayFromWKTs(t, wkt, "GEOMETRYCOLLECTION EMPTY")
+func newDCELFromWKT(t *testing.T, wkt string) *doublyConnectedEdgeList {
+	return newDCELFromWKTs(t, wkt, "GEOMETRYCOLLECTION EMPTY")
 }
 
-func TestGraphTriangle(t *testing.T) {
-	dcel := createOverlayFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))")
+func TestDCELTriangle(t *testing.T) {
+	dcel := newDCELFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))")
 
 	/*
 
@@ -379,8 +379,8 @@ func TestGraphTriangle(t *testing.T) {
 	})
 }
 
-func TestGraphWithHoles(t *testing.T) {
-	dcel := createOverlayFromWKT(t, "POLYGON((0 0,5 0,5 5,0 5,0 0),(1 1,2 1,2 2,1 2,1 1),(3 3,4 3,4 4,3 4,3 3))")
+func TestDCELWithHoles(t *testing.T) {
+	dcel := newDCELFromWKT(t, "POLYGON((0 0,5 0,5 5,0 5,0 0),(1 1,2 1,2 2,1 2,1 1),(3 3,4 3,4 4,3 4,3 3))")
 
 	/*
 	         f0
@@ -543,8 +543,8 @@ func TestGraphWithHoles(t *testing.T) {
 	})
 }
 
-func TestGraphWithMultiPolygon(t *testing.T) {
-	dcel := createOverlayFromWKT(t, "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))")
+func TestDCELWithMultiPolygon(t *testing.T) {
+	dcel := newDCELFromWKT(t, "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))")
 
 	/*
 	            f0
@@ -645,8 +645,8 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 	})
 }
 
-func TestGraphMultiLineString(t *testing.T) {
-	dcel := createOverlayFromWKT(t, "MULTILINESTRING((1 0,0 1,1 2),(2 0,3 1,2 2))")
+func TestDCELMultiLineString(t *testing.T) {
+	dcel := newDCELFromWKT(t, "MULTILINESTRING((1 0,0 1,1 2),(2 0,3 1,2 2))")
 
 	/*
 	        v2    v3
@@ -725,8 +725,8 @@ func TestGraphMultiLineString(t *testing.T) {
 	})
 }
 
-func TestGraphSelfOverlappingLineString(t *testing.T) {
-	dcel := createOverlayFromWKT(t, "LINESTRING(0 0,0 1,1 1,1 0,0 1,1 1,2 1)")
+func TestDCELSelfOverlappingLineString(t *testing.T) {
+	dcel := newDCELFromWKT(t, "LINESTRING(0 0,0 1,1 1,1 0,0 1,1 1,2 1)")
 
 	/*
 	   v1----v2----v4
@@ -809,8 +809,8 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 	})
 }
 
-func TestGraphOverlayDisjoint(t *testing.T) {
-	overlay := createOverlayFromWKTs(t,
+func TestDCELDisjoint(t *testing.T) {
+	dcel := newDCELFromWKTs(t,
 		"POLYGON((0 0,1 0,1 1,0 1,0 0))",
 		"POLYGON((2 2,2 3,3 3,3 2,2 2))",
 	)
@@ -841,7 +841,7 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 	v6 := XY{3, 3}
 	v7 := XY{2, 3}
 
-	CheckDCEL(t, overlay, DCELSpec{
+	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 3,
 		NumEdges: 10,
 		NumFaces: 4,
@@ -952,8 +952,8 @@ func TestGraphOverlayDisjoint(t *testing.T) {
 	})
 }
 
-func TestGraphOverlayIntersecting(t *testing.T) {
-	overlay := createOverlayFromWKTs(t,
+func TestDCELIntersecting(t *testing.T) {
+	dcel := newDCELFromWKTs(t,
 		"POLYGON((0 0,1 2,2 0,0 0))",
 		"POLYGON((0 1,2 1,1 3,0 1))",
 	)
@@ -985,7 +985,7 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	v6 := XY{2, 1}
 	v7 := XY{1, 3}
 
-	CheckDCEL(t, overlay, DCELSpec{
+	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 4,
 		NumEdges: 14,
 		NumFaces: 5,
@@ -1132,8 +1132,8 @@ func TestGraphOverlayIntersecting(t *testing.T) {
 	})
 }
 
-func TestGraphOverlayInside(t *testing.T) {
-	overlay := createOverlayFromWKTs(t,
+func TestDCELInside(t *testing.T) {
+	dcel := newDCELFromWKTs(t,
 		"POLYGON((0 0,3 0,3 3,0 3,0 0))",
 		"POLYGON((1 1,2 1,2 2,1 2,1 1))",
 	)
@@ -1161,7 +1161,7 @@ func TestGraphOverlayInside(t *testing.T) {
 	v6 := XY{2, 2}
 	v7 := XY{1, 2}
 
-	CheckDCEL(t, overlay, DCELSpec{
+	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 2,
 		NumEdges: 6,
 		NumFaces: 3,
@@ -1241,8 +1241,8 @@ func TestGraphOverlayInside(t *testing.T) {
 	})
 }
 
-func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
-	overlay := createOverlayFromWKTs(t,
+func TestDCELReproduceHorizontalHoleLinkageBug(t *testing.T) {
+	dcel := newDCELFromWKTs(t,
 		"MULTIPOLYGON(((4 0,4 1,5 1,5 0,4 0)),((1 0,1 2,3 2,3 0,1 0)))",
 		"MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 1,0 1)))",
 	)
@@ -1285,7 +1285,7 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 	v17 := XY{1, 1}
 	v18 := XY{2, 2}
 
-	CheckDCEL(t, overlay, DCELSpec{
+	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 8,
 		NumEdges: 26,
 		NumFaces: 7,
@@ -1523,8 +1523,8 @@ func TestGraphOverlayReproduceHorizontalHoleLinkageBug(t *testing.T) {
 	})
 }
 
-func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
-	overlay := createOverlayFromWKTs(t,
+func TestDCELFullyOverlappingEdge(t *testing.T) {
+	dcel := newDCELFromWKTs(t,
 		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
 		"POLYGON((1 0,1 1,2 1,2 0,1 0))",
 	)
@@ -1543,7 +1543,7 @@ func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
 	v4 := XY{1, 1}
 	v5 := XY{0, 1}
 
-	CheckDCEL(t, overlay, DCELSpec{
+	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 3,
 		NumEdges: 8,
 		NumFaces: 3,
@@ -1632,8 +1632,8 @@ func TestGraphOverlayFullyOverlappingEdge(t *testing.T) {
 	})
 }
 
-func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
-	overlay := createOverlayFromWKTs(t,
+func TestDCELPartiallyOverlappingEdge(t *testing.T) {
+	dcel := newDCELFromWKTs(t,
 		"POLYGON((0 1,0 3,2 3,2 1,0 1))",
 		"POLYGON((2 0,2 2,4 2,4 0,2 0))",
 	)
@@ -1657,7 +1657,7 @@ func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
 	v6 := XY{2, 3}
 	v7 := XY{0, 3}
 
-	CheckDCEL(t, overlay, DCELSpec{
+	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 4,
 		NumEdges: 12,
 		NumFaces: 4,
@@ -1785,8 +1785,8 @@ func TestGraphOverlayPartiallyOverlappingEdge(t *testing.T) {
 	})
 }
 
-func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
-	overlay := createOverlayFromWKTs(t,
+func TestDCELFullyOverlappingCycle(t *testing.T) {
+	dcel := newDCELFromWKTs(t,
 		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
 		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
 	)
@@ -1804,7 +1804,7 @@ func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
 	v2 := XY{1, 1}
 	v3 := XY{0, 1}
 
-	CheckDCEL(t, overlay, DCELSpec{
+	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 1,
 		NumEdges: 2,
 		NumFaces: 2,
@@ -1846,8 +1846,8 @@ func TestGraphOverlayFullyOverlappingCycle(t *testing.T) {
 	})
 }
 
-func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
-	overlay := createOverlayFromWKTs(t,
+func TestDCELTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
+	dcel := newDCELFromWKTs(t,
 		"LINESTRING(0 0,1 0)",
 		"LINESTRING(0 0,0 1)",
 	)
@@ -1863,7 +1863,7 @@ func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 	v1 := XY{0, 0}
 	v2 := XY{1, 0}
 
-	CheckDCEL(t, overlay, DCELSpec{
+	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 3,
 		NumEdges: 4,
 		NumFaces: 1,
@@ -1919,8 +1919,8 @@ func TestGraphOverlayTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 	})
 }
 
-func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
-	overlay := createOverlayFromWKTs(t,
+func TestDCELReproduceFaceAllocationBug(t *testing.T) {
+	dcel := newDCELFromWKTs(t,
 		"LINESTRING(0 1,1 0)",
 		"MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
 	)
@@ -1947,7 +1947,7 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 	v7 := XY{2, 1}
 	v8 := XY{1, 0.5}
 
-	CheckDCEL(t, overlay, DCELSpec{
+	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 5,
 		NumEdges: 16,
 		NumFaces: 5,
@@ -2104,8 +2104,8 @@ func TestGraphOverlayReproduceFaceAllocationBug(t *testing.T) {
 	})
 }
 
-func TestGraphOverlayReproducePointOnLineStringPrecisionBug(t *testing.T) {
-	overlay := createOverlayFromWKTs(t,
+func TestDCELReproducePointOnLineStringPrecisionBug(t *testing.T) {
+	dcel := newDCELFromWKTs(t,
 		"LINESTRING(0 0,1 1)",
 		"POINT(0.35355339059327373 0.35355339059327373)",
 	)
@@ -2122,7 +2122,7 @@ func TestGraphOverlayReproducePointOnLineStringPrecisionBug(t *testing.T) {
 	v1 := XY{0.35355339059327373, 0.35355339059327373}
 	v2 := XY{1, 1}
 
-	CheckDCEL(t, overlay, DCELSpec{
+	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 3,
 		NumEdges: 4,
 		NumFaces: 1,
@@ -2175,8 +2175,8 @@ func TestGraphOverlayReproducePointOnLineStringPrecisionBug(t *testing.T) {
 	})
 }
 
-func TestGraphOverlayReproduceGhostOnGeometryBug(t *testing.T) {
-	overlay := createOverlayFromWKTs(t,
+func TestDCELReproduceGhostOnGeometryBug(t *testing.T) {
+	dcel := newDCELFromWKTs(t,
 		"LINESTRING(0 1,0 0,1 0)",
 		"POLYGON((0 0,1 0,1 1,0 1,0 0.5,0 0))",
 	)
@@ -2199,7 +2199,7 @@ func TestGraphOverlayReproduceGhostOnGeometryBug(t *testing.T) {
 	v3 := XY{0, 1}
 	v4 := XY{0, 0.5}
 
-	CheckDCEL(t, overlay, DCELSpec{
+	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 3,
 		NumEdges: 6,
 		NumFaces: 2,
@@ -2265,8 +2265,8 @@ func TestGraphOverlayReproduceGhostOnGeometryBug(t *testing.T) {
 	})
 }
 
-func TestGraphWithEmptyGeometryCollection(t *testing.T) {
-	dcel := createOverlayFromWKT(t, "GEOMETRYCOLLECTION EMPTY")
+func TestDECLWithEmptyGeometryCollection(t *testing.T) {
+	dcel := newDCELFromWKT(t, "GEOMETRYCOLLECTION EMPTY")
 	CheckDCEL(t, dcel, DCELSpec{
 		NumFaces: 1,
 		Faces: []FaceSpec{{
@@ -2276,8 +2276,8 @@ func TestGraphWithEmptyGeometryCollection(t *testing.T) {
 	})
 }
 
-func TestGraphWithGeometryCollection(t *testing.T) {
-	dcel := createOverlayFromWKT(t, `GEOMETRYCOLLECTION(
+func TestDCELWithGeometryCollection(t *testing.T) {
+	dcel := newDCELFromWKT(t, `GEOMETRYCOLLECTION(
  		POINT(0 0),
  		LINESTRING(0 1,1 1),
  		POLYGON((2 0,3 0,3 1,2 1,2 0))

@@ -5,34 +5,6 @@ import (
 	"sort"
 )
 
-func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
-	var points []XY
-	points = appendComponentPoints(points, a)
-	points = appendComponentPoints(points, b)
-	ghosts := spanningTree(points)
-
-	a, b, ghosts, err := reNodeGeometries(a, b, ghosts)
-	if err != nil {
-		return nil, wrap(err, "re-noding")
-	}
-
-	interactions := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
-
-	dcel := newDCEL()
-	dcel.addVertices(interactions)
-	dcel.addGhosts(ghosts, interactions)
-	dcel.addGeometry(a, operandA, interactions)
-	dcel.addGeometry(b, operandB, interactions)
-
-	dcel.fixVertices()
-	dcel.reAssignFaces()
-	dcel.populateInSetLabels()
-
-	//dumpDCEL(dcel)
-
-	return dcel, nil
-}
-
 func (d *doublyConnectedEdgeList) fixVertices() {
 	for _, vert := range d.vertices {
 		d.fixVertex(vert)
@@ -69,9 +41,8 @@ func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 	}
 }
 
-// reAssignFaces clears the DCEL face list and creates new faces based on the
-// half edge loops.
-func (d *doublyConnectedEdgeList) reAssignFaces() {
+// assignFaces populates the face list based on half edge loops.
+func (d *doublyConnectedEdgeList) assignFaces() {
 	// Find all cycles.
 	var cycles []*halfEdgeRecord
 	seen := make(map[*halfEdgeRecord]bool)
@@ -79,7 +50,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 		if seen[e] {
 			continue
 		}
-		forEachEdge(e, func(e *halfEdgeRecord) {
+		forEachEdgeInCycle(e, func(e *halfEdgeRecord) {
 			seen[e] = true
 		})
 		cycles = append(cycles, e)
@@ -92,7 +63,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 			cycle: cycle,
 		}
 		d.faces = append(d.faces, f)
-		forEachEdge(cycle, func(e *halfEdgeRecord) {
+		forEachEdgeInCycle(cycle, func(e *halfEdgeRecord) {
 			forEachOperand(func(operand operand) {
 				if e.srcFace[operand] {
 					f.inSet[operand] = true
@@ -112,7 +83,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 				return
 			}
 			visited[f] = true
-			forEachEdge(f.cycle, func(e *halfEdgeRecord) {
+			forEachEdgeInCycle(f.cycle, func(e *halfEdgeRecord) {
 				if !e.srcFace[operand] {
 					e.twin.incident.inSet[operand] = true
 					dfs(e.twin.incident)
@@ -141,7 +112,7 @@ func (d *doublyConnectedEdgeList) reAssignFaces() {
 func adjacentFaces(f *faceRecord) []*faceRecord {
 	var adjacent []*faceRecord
 	set := make(map[*faceRecord]bool)
-	forEachEdge(f.cycle, func(e *halfEdgeRecord) {
+	forEachEdgeInCycle(f.cycle, func(e *halfEdgeRecord) {
 		adj := e.twin.incident
 		if !set[adj] {
 			set[adj] = true

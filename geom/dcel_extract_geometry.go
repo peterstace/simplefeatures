@@ -69,7 +69,7 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func([2]bool) bool) ([
 		seen := make(map[*halfEdgeRecord]bool)
 		for f := range facesInPoly {
 			f.extracted = true
-			forEachEdge(f.cycle, func(edge *halfEdgeRecord) {
+			forEachEdgeInCycle(f.cycle, func(edge *halfEdgeRecord) {
 
 				// Mark all edges and vertices intersecting with the polygon as
 				// being extracted.  This will prevent them being considered

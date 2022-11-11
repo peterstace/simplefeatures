@@ -6,6 +6,16 @@ import (
 	"github.com/peterstace/simplefeatures/rtree"
 )
 
+// createGhosts creates a MultiLineString that connects all components of the
+// input Geometries.
+func createGhosts(a, b Geometry) MultiLineString {
+	var points []XY
+	points = appendComponentPoints(points, a)
+	points = appendComponentPoints(points, b)
+	ghosts := spanningTree(points)
+	return ghosts
+}
+
 // spanningTree creates a near-minimum spanning tree (using the euclidean
 // distance metric) over the supplied points. The tree will consist of N-1
 // lines, where N is the number of _distinct_ xys supplied.

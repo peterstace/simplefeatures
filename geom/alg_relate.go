@@ -53,7 +53,7 @@ func Relate(a, b Geometry) (string, error) {
 		return im.code(), nil
 	}
 
-	overlay, err := createOverlay(a, b)
+	overlay, err := newDCELFromGeometries(a, b)
 	if err != nil {
 		return "", wrap(err, "internal error creating overlay")
 	}
