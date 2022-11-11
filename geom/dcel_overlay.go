@@ -16,70 +16,21 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 		return nil, wrap(err, "re-noding")
 	}
 
-	interactionPoints := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
+	interactions := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
 
-	dcelA := newDCELFromGeometry(a, ghosts, operandA, interactionPoints)
-	dcelB := newDCELFromGeometry(b, ghosts, operandB, interactionPoints)
+	dcel := newDCEL()
+	dcel.addVertices(interactions)
+	dcel.addGhosts(ghosts, interactions)
+	dcel.addGeometry(a, operandA, interactions)
+	dcel.addGeometry(b, operandB, interactions)
 
-	dcelA.overlay(dcelB)
-	return dcelA, nil
-}
+	dcel.fixVertices()
+	dcel.reAssignFaces()
+	dcel.populateInSetLabels()
 
-func (d *doublyConnectedEdgeList) overlay(other *doublyConnectedEdgeList) {
-	d.overlayVertices(other)
-	d.overlayEdges(other)
-	d.fixVertices()
-	d.reAssignFaces()
-	d.populateInSetLabels()
-}
+	//dumpDCEL(dcel)
 
-func (d *doublyConnectedEdgeList) overlayVertices(other *doublyConnectedEdgeList) {
-	for xy, otherVert := range other.vertices {
-		vert, ok := d.vertices[xy]
-		if ok {
-			mergeBools(&vert.src, otherVert.src)
-			mergeBools(&vert.inSet, otherVert.inSet)
-			mergeLocations(&vert.locations, otherVert.locations)
-		} else {
-			d.vertices[xy] = otherVert
-		}
-	}
-	for _, e := range other.halfEdges {
-		if existing, ok := d.vertices[e.origin.coords]; ok {
-			e.origin = existing
-		} else {
-			d.vertices[e.origin.coords] = e.origin
-		}
-	}
-}
-
-func (d *doublyConnectedEdgeList) overlayEdges(other *doublyConnectedEdgeList) {
-	// Clear incidents lists, since we're going to re-compute them.
-	for _, vert := range d.vertices {
-		vert.incidents = nil
-	}
-	for _, vert := range other.vertices {
-		vert.incidents = nil
-	}
-
-	edges := make(edgeSet)
-	for _, e := range d.halfEdges {
-		edges.insertEdge(e)
-		e.origin.incidents = append(e.origin.incidents, e)
-	}
-
-	for _, e := range other.halfEdges {
-		if existing, ok := edges.lookupEdge(e); ok {
-			mergeBools(&existing.srcEdge, e.srcEdge)
-			mergeBools(&existing.srcFace, e.srcFace)
-			mergeBools(&existing.inSet, e.inSet)
-		} else {
-			edges.insertEdge(e)
-			e.origin = d.vertices[e.origin.coords]
-			e.origin.incidents = append(e.origin.incidents, e)
-			d.halfEdges = append(d.halfEdges, e)
-		}
-	}
+	return dcel, nil
 }
 
 func (d *doublyConnectedEdgeList) fixVertices() {
@@ -90,10 +41,17 @@ func (d *doublyConnectedEdgeList) fixVertices() {
 
 func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 	// Sort the edges radially.
-	if len(v.incidents) >= 3 {
-		sort.Slice(v.incidents, func(i, j int) bool {
-			ei := v.incidents[i]
-			ej := v.incidents[j]
+	incidents := make([]*halfEdgeRecord, 0, len(v.incidents))
+	for e := range v.incidents {
+		incidents = append(incidents, e)
+	}
+	if len(incidents) >= 3 {
+		// TODO: consider using a solution like
+		// https://stackoverflow.com/questions/6989100/sort-points-in-clockwise-order
+		// instead of using trigonometry.
+		sort.Slice(incidents, func(i, j int) bool {
+			ei := incidents[i]
+			ej := incidents[j]
 			di := ei.seq.GetXY(1).Sub(ei.seq.GetXY(0))
 			dj := ej.seq.GetXY(1).Sub(ej.seq.GetXY(0))
 			aI := math.Atan2(di.Y, di.X)
@@ -103,9 +61,9 @@ func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 	}
 
 	// Fix pointers.
-	for i := range v.incidents {
-		ei := v.incidents[i]
-		ej := v.incidents[(i+1)%len(v.incidents)]
+	for i := range incidents {
+		ei := incidents[i]
+		ej := incidents[(i+1)%len(incidents)]
 		ei.prev = ej.twin
 		ej.twin.next = ei
 	}

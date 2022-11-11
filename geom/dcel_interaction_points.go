@@ -17,7 +17,7 @@ func findInteractionPoints(gs []Geometry) map[XY]struct{} {
 	interactions := make(map[XY]struct{}, sizeHint)
 
 	// adjacents tracks the next and previous points relative to a middle point
-	// for linear elements (i.e. the points adjacents to a middle point). It is
+	// for linear elements (i.e. the points adjacent to a middle point). It is
 	// used to differentiate the cases where linear elements overlap (in which
 	// case there ISN'T an interaction point) and cases where they are crossing
 	// over each other (in which case there IS an interaction point).

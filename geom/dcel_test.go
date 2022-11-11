@@ -103,13 +103,9 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 					bruteForceEdgeSet[er] = struct{}{}
 				}
 			}
-			incidentsSet := make(map[*halfEdgeRecord]struct{})
-			for _, e := range vr.incidents {
-				incidentsSet[e] = struct{}{}
-			}
-			if !reflect.DeepEqual(bruteForceEdgeSet, incidentsSet) {
+			if !reflect.DeepEqual(bruteForceEdgeSet, vr.incidents) {
 				t.Fatalf("vertex record at %v doesn't have correct incidents: "+
-					"bruteForceEdgeSet=%v incidentsSet=%v", vr.coords, bruteForceEdgeSet, incidentsSet)
+					"bruteForceEdgeSet=%v incidentsSet=%v", vr.coords, bruteForceEdgeSet, vr.incidents)
 			}
 		}
 	})
@@ -154,7 +150,12 @@ func CheckDCEL(t *testing.T, dcel *doublyConnectedEdgeList, spec DCELSpec) {
 
 	for i, want := range spec.Faces {
 		t.Run(fmt.Sprintf("face_%d", i), func(t *testing.T) {
-			got := findEdge(t, dcel, want.First, want.Second).incident
+			var got *faceRecord
+			if len(spec.Faces) == 1 {
+				got = dcel.faces[0]
+			} else {
+				got = findEdge(t, dcel, want.First, want.Second).incident
+			}
 			CheckCycle(t, got, got.cycle, want.Cycle)
 			if want.InSet != got.inSet {
 				t.Errorf("%v: inSet mismatch, want:%v got:%v",
@@ -187,6 +188,13 @@ func findEdge(t *testing.T, dcel *doublyConnectedEdgeList, first, second XY) *ha
 }
 
 func CheckCycle(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []XY) {
+	if start == nil {
+		if len(want) != 0 {
+			t.Errorf("start is nil but want non-empty cycle: %v", want)
+		}
+		return
+	}
+
 	// Check component matches forward order when following 'next' pointer.
 	e := start
 	var got []XY
@@ -223,7 +231,7 @@ func CheckCycle(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []XY) {
 			t.Fatal("inf loop")
 		}
 
-		got = append(got, sequenceToXYs(reverseSequence(e.seq))[:e.seq.Length()-1]...)
+		got = append(got, sequenceToXYs(e.seq.Reverse())[:e.seq.Length()-1]...)
 
 		e = e.prev
 		if e == start {
@@ -305,13 +313,12 @@ func createOverlayFromWKTs(t *testing.T, wktA, wktB string) *doublyConnectedEdge
 	return overlay
 }
 
+func createOverlayFromWKT(t *testing.T, wkt string) *doublyConnectedEdgeList {
+	return createOverlayFromWKTs(t, wkt, "GEOMETRYCOLLECTION EMPTY")
+}
+
 func TestGraphTriangle(t *testing.T) {
-	poly, err := UnmarshalWKT("POLYGON((0 0,0 1,1 0,0 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
-	dcel.addMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandA, findInteractionPoints([]Geometry{poly}))
+	dcel := createOverlayFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))")
 
 	/*
 
@@ -335,52 +342,63 @@ func TestGraphTriangle(t *testing.T) {
 	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 1,
 		NumEdges: 2,
-		NumFaces: 0,
+		NumFaces: 2,
 		Vertices: []VertexSpec{{
 			Src:      [2]bool{true},
+			InSet:    [2]bool{true},
 			Vertices: []XY{v0},
 		}},
 		Edges: []EdgeSpec{
 			{
 				SrcEdge:  [2]bool{true},
 				SrcFace:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v0, v1, v2, v0},
 			},
 			{
 				SrcEdge:  [2]bool{true},
 				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v0, v2, v1, v0},
 			},
 		},
-		Faces: nil,
+		Faces: []FaceSpec{
+			{
+				First:  v0,
+				Second: v2,
+				Cycle:  []XY{v0, v2, v1, v0},
+				InSet:  [2]bool{false},
+			},
+			{
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v2, v0},
+				InSet:  [2]bool{true},
+			},
+		},
 	})
 }
 
 func TestGraphWithHoles(t *testing.T) {
-	poly, err := UnmarshalWKT("POLYGON((0 0,5 0,5 5,0 5,0 0),(1 1,2 1,2 2,1 2,1 1),(3 3,4 3,4 4,3 4,3 3))")
-	if err != nil {
-		t.Fatal(err)
-	}
+	dcel := createOverlayFromWKT(t, "POLYGON((0 0,5 0,5 5,0 5,0 0),(1 1,2 1,2 2,1 2,1 1),(3 3,4 3,4 4,3 4,3 3))")
 
 	/*
 	         f0
 
 	  v3-------------------v2
-	   |                   |
-	   |          v9---v10 |
-	   |    f1     |f3 |   |
-	   |          v8---v11 |
-	   |                   |
-	   |  v5---v6          |
-	   |   |f2 |           |
-	   |  v4---v7          |
-	   |                   |
+	   |                    |
+	   |           v9---v10 |
+	   |    f1      |f3 |   |
+	   |           v8---v11 |
+	   |          /         |
+	   |  v5----v6          |
+	   |   |  ,` |          |
+	   |   |,`   |          |
+	   |  v4----v7          |
+	   |,`                  |
 	  v0-------------------v1
 
 	*/
-
-	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
-	dcel.addMultiPolygon(poly.MustAsPolygon().AsMultiPolygon(), operandB, findInteractionPoints([]Geometry{poly}))
 
 	v0 := XY{0, 0}
 	v1 := XY{5, 0}
@@ -396,65 +414,145 @@ func TestGraphWithHoles(t *testing.T) {
 	v11 := XY{4, 3}
 
 	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 3,
-		NumEdges: 6,
-		NumFaces: 0,
+		NumVerts: 4,
+		NumEdges: 14,
+		NumFaces: 5,
 		Vertices: []VertexSpec{{
-			Src:      [2]bool{false, true},
-			Vertices: []XY{v0, v4, v8},
+			Src:      [2]bool{true},
+			InSet:    [2]bool{true},
+			Vertices: []XY{v0, v4, v6, v8},
 		}},
 		Edges: []EdgeSpec{
 			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v0, v1, v2, v3, v0},
 			},
 			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v0, v3, v2, v1, v0},
 			},
 			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				Sequence: []XY{v4, v5, v6, v7, v4},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{true},
+				InSet:    [2]bool{true},
+				Sequence: []XY{v4, v5, v6},
 			},
 			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				Sequence: []XY{v4, v7, v6, v5, v4},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
+				Sequence: []XY{v6, v5, v4},
 			},
 			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{true},
+				InSet:    [2]bool{true},
+				Sequence: []XY{v6, v7, v4},
+			},
+			{
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
+				Sequence: []XY{v4, v7, v6},
+			},
+			{
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v8, v9, v10, v11, v8},
 			},
 			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v8, v11, v10, v9, v8},
 			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
+				Sequence: []XY{v6, v8},
+			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
+				Sequence: []XY{v8, v6},
+			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{false},
+				Sequence: []XY{v4, v6},
+			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{false},
+				Sequence: []XY{v6, v4},
+			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
+				Sequence: []XY{v0, v4},
+			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
+				Sequence: []XY{v4, v0},
+			},
 		},
-		Faces: nil,
+		Faces: []FaceSpec{
+			{
+				First:  v0,
+				Second: v3,
+				Cycle:  []XY{v0, v3, v2, v1, v0},
+				InSet:  [2]bool{false},
+			},
+			{
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v2, v3, v0, v4, v5, v6, v8, v9, v10, v11, v8, v6, v7, v4, v0},
+				InSet:  [2]bool{true},
+			},
+			{
+				First:  v4,
+				Second: v7,
+				Cycle:  []XY{v4, v7, v6, v4},
+				InSet:  [2]bool{false},
+			},
+			{
+				First:  v6,
+				Second: v5,
+				Cycle:  []XY{v6, v5, v4, v6},
+				InSet:  [2]bool{false},
+			},
+			{
+				First:  v8,
+				Second: v11,
+				Cycle:  []XY{v8, v11, v10, v9, v8},
+				InSet:  [2]bool{false},
+			},
+		},
 	})
 }
 
 func TestGraphWithMultiPolygon(t *testing.T) {
-	mp, err := UnmarshalWKT("MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))")
-	if err != nil {
-		t.Fatal(err)
-	}
+	dcel := createOverlayFromWKT(t, "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))")
 
 	/*
 	            f0
 	  v3-----v2   v7-----v6
 	   | f1  |     | f2  |
 	   |     |     |     |
-	  v0-----v1   v4-----v5
+	  v0-----v1---v4-----v5
 	*/
-
-	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
-	dcel.addMultiPolygon(mp.MustAsMultiPolygon(), operandB, findInteractionPoints([]Geometry{mp}))
 
 	v0 := XY{0, 0}
 	v1 := XY{1, 0}
@@ -466,45 +564,89 @@ func TestGraphWithMultiPolygon(t *testing.T) {
 	v7 := XY{2, 1}
 
 	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 2,
-		NumEdges: 4,
-		NumFaces: 0,
+		NumVerts: 3,
+		NumEdges: 8,
+		NumFaces: 3,
 		Vertices: []VertexSpec{{
-			Src:      [2]bool{false, true},
-			Vertices: []XY{v0, v4},
+			Src:      [2]bool{true},
+			InSet:    [2]bool{true},
+			Vertices: []XY{v0, v1, v4},
 		}},
 		Edges: []EdgeSpec{
 			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				Sequence: []XY{v0, v1, v2, v3, v0},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{true},
+				InSet:    [2]bool{true},
+				Sequence: []XY{v0, v1},
 			},
 			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				Sequence: []XY{v0, v3, v2, v1, v0},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
+				Sequence: []XY{v1, v0},
 			},
 			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{true},
+				InSet:    [2]bool{true},
+				Sequence: []XY{v1, v2, v3, v0},
+			},
+			{
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
+				Sequence: []XY{v0, v3, v2, v1},
+			},
+			{
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v4, v5, v6, v7, v4},
 			},
 			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
+				SrcEdge:  [2]bool{true},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v4, v7, v6, v5, v4},
 			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{false},
+				Sequence: []XY{v1, v4},
+			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{false},
+				Sequence: []XY{v4, v1},
+			},
 		},
-		Faces: nil,
+		Faces: []FaceSpec{
+			{
+				First:  v1,
+				Second: v4,
+				Cycle:  []XY{v3, v2, v1, v4, v7, v6, v5, v4, v1, v0, v3},
+				InSet:  [2]bool{false},
+			},
+			{
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v2, v3, v0},
+				InSet:  [2]bool{true},
+			},
+			{
+				First:  v4,
+				Second: v5,
+				Cycle:  []XY{v4, v5, v6, v7, v4},
+				InSet:  [2]bool{true},
+			},
+		},
 	})
 }
 
 func TestGraphMultiLineString(t *testing.T) {
-	mls, err := UnmarshalWKT("MULTILINESTRING((1 0,0 1,1 2),(2 0,3 1,2 2))")
-	if err != nil {
-		t.Fatal(err)
-	}
-	dcel := newDCELFromGeometry(mls, MultiLineString{}, operandA, findInteractionPoints([]Geometry{mls}))
+	dcel := createOverlayFromWKT(t, "MULTILINESTRING((1 0,0 1,1 2),(2 0,3 1,2 2))")
 
 	/*
 	        v2    v3
@@ -515,7 +657,7 @@ func TestGraphMultiLineString(t *testing.T) {
 	     \            /
 	      \          /
 	       \        /
-	        v0    v5
+	        v0....v5
 	*/
 
 	v0 := XY{1, 0}
@@ -527,44 +669,64 @@ func TestGraphMultiLineString(t *testing.T) {
 
 	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 4,
-		NumEdges: 4,
-		NumFaces: 0,
+		NumEdges: 6,
+		NumFaces: 1,
 		Vertices: []VertexSpec{{
 			Src:      [2]bool{true},
+			InSet:    [2]bool{true},
 			Vertices: []XY{v0, v2, v3, v5},
 		}},
 		Edges: []EdgeSpec{
 			{
 				SrcEdge:  [2]bool{true},
 				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v0, v1, v2},
 			},
 			{
 				SrcEdge:  [2]bool{true},
 				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v2, v1, v0},
 			},
 			{
 				SrcEdge:  [2]bool{true},
 				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v3, v4, v5},
 			},
 			{
 				SrcEdge:  [2]bool{true},
 				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v5, v4, v3},
 			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{false},
+				Sequence: []XY{v0, v5},
+			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{false},
+				Sequence: []XY{v5, v0},
+			},
 		},
-		Faces: nil,
+		Faces: []FaceSpec{
+			{
+				First:  v5,
+				Second: v4,
+				Cycle:  []XY{v5, v4, v3, v4, v5, v0, v1, v2, v1, v0, v5},
+				InSet:  [2]bool{false},
+			},
+		},
 	})
 }
 
 func TestGraphSelfOverlappingLineString(t *testing.T) {
-	ls, err := UnmarshalWKT("LINESTRING(0 0,0 1,1 1,1 0,0 1,1 1,2 1)")
-	if err != nil {
-		t.Fatal(err)
-	}
-	dcel := newDCELFromGeometry(ls, MultiLineString{}, operandA, findInteractionPoints([]Geometry{ls}))
+	dcel := createOverlayFromWKT(t, "LINESTRING(0 0,0 1,1 1,1 0,0 1,1 1,2 1)")
 
 	/*
 	   v1----v2----v4
@@ -584,99 +746,64 @@ func TestGraphSelfOverlappingLineString(t *testing.T) {
 	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 4,
 		NumEdges: 8,
-		NumFaces: 0,
+		NumFaces: 2,
 		Vertices: []VertexSpec{{
 			Src:      [2]bool{true},
+			InSet:    [2]bool{true},
 			Vertices: []XY{v0, v1, v2, v4},
 		}},
 		Edges: []EdgeSpec{
 			{
 				SrcEdge:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v0, v1},
 			},
 			{
 				SrcEdge:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v1, v0},
 			},
 			{
 				SrcEdge:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v1, v2},
 			},
 			{
 				SrcEdge:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v2, v1},
 			},
 			{
 				SrcEdge:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v1, v3, v2},
 			},
 			{
 				SrcEdge:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v2, v3, v1},
 			},
 			{
 				SrcEdge:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v2, v4},
 			},
 			{
 				SrcEdge:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v4, v2},
 			},
 		},
-		Faces: nil,
-	})
-}
-
-func TestGraphGhostDeduplication(t *testing.T) {
-	ls, err := UnmarshalWKT("LINESTRING(0 0,1 0)")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Ghost contains duplicated lines. This could happen in the scenario where
-	// one of the inputs is a multipolygon and the ghost joins the rings, but
-	// then the line joining the two input geometries is the same line segment.
-	ghost, err := UnmarshalWKT("MULTILINESTRING((0 0,0 1,0 0))")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	dcel := newDCELFromGeometry(ls, ghost.MustAsMultiLineString(), operandA, findInteractionPoints([]Geometry{ls, ghost}))
-
-	v0 := XY{0, 0}
-	v1 := XY{1, 0}
-	v2 := XY{0, 1}
-
-	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 3,
-		NumEdges: 4,
-		NumFaces: 0,
-		Vertices: []VertexSpec{
+		Faces: []FaceSpec{
 			{
-				Src:      [2]bool{true},
-				Vertices: []XY{v0, v1},
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v2, v4, v2, v3, v1, v0},
 			},
 			{
-				Src:      [2]bool{false},
-				Vertices: []XY{v2},
-			},
-		},
-		Edges: []EdgeSpec{
-			{
-				SrcEdge:  [2]bool{true},
-				Sequence: []XY{v0, v1},
-			},
-			{
-				SrcEdge:  [2]bool{true},
-				Sequence: []XY{v1, v0},
-			},
-			{
-				SrcEdge:  [2]bool{false},
-				Sequence: []XY{v0, v2},
-			},
-			{
-				SrcEdge:  [2]bool{false},
-				Sequence: []XY{v2, v0},
+				First:  v1,
+				Second: v3,
+				Cycle:  []XY{v3, v2, v1, v3},
 			},
 		},
 	})
@@ -2139,31 +2266,28 @@ func TestGraphOverlayReproduceGhostOnGeometryBug(t *testing.T) {
 }
 
 func TestGraphWithEmptyGeometryCollection(t *testing.T) {
-	var gc GeometryCollection
-
-	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
-	dcel.addGeometryCollection(gc, operandA, map[XY]struct{}{})
-
-	CheckDCEL(t, dcel, DCELSpec{})
+	dcel := createOverlayFromWKT(t, "GEOMETRYCOLLECTION EMPTY")
+	CheckDCEL(t, dcel, DCELSpec{
+		NumFaces: 1,
+		Faces: []FaceSpec{{
+			Cycle: nil, // No cycle
+			InSet: [2]bool{false},
+		}},
+	})
 }
 
 func TestGraphWithGeometryCollection(t *testing.T) {
-	gc, err := UnmarshalWKT(`GEOMETRYCOLLECTION(
+	dcel := createOverlayFromWKT(t, `GEOMETRYCOLLECTION(
  		POINT(0 0),
  		LINESTRING(0 1,1 1),
  		POLYGON((2 0,3 0,3 1,2 1,2 0))
  	)`)
-	if err != nil {
-		t.Fatal(err)
-	}
-	dcel := &doublyConnectedEdgeList{vertices: make(map[XY]*vertexRecord)}
-	dcel.addGeometry(gc, operandA, findInteractionPoints([]Geometry{gc}))
 
 	/*
-	  v0          v3-----v4
-	               |     |
-	               |     |
-	  v1----v2    v6-----v5
+	  v1---v2   v6----v5
+	  | `-,     |      |
+	  |    `-,  |      |
+	  v0      `-v3----v4
 	*/
 
 	v0 := XY{0, 0}
@@ -2176,10 +2300,12 @@ func TestGraphWithGeometryCollection(t *testing.T) {
 
 	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 4,
-		NumEdges: 4,
+		NumEdges: 8,
+		NumFaces: 2,
 		Vertices: []VertexSpec{
 			{
 				Src:      [2]bool{true},
+				InSet:    [2]bool{true},
 				Vertices: []XY{v0, v1, v2, v3},
 			},
 		},
@@ -2187,22 +2313,64 @@ func TestGraphWithGeometryCollection(t *testing.T) {
 			{
 				SrcEdge:  [2]bool{true},
 				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v1, v2},
 			},
 			{
 				SrcEdge:  [2]bool{true},
 				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v2, v1},
 			},
 			{
 				SrcEdge:  [2]bool{true},
 				SrcFace:  [2]bool{true},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v3, v4, v5, v6, v3},
 			},
 			{
 				SrcEdge:  [2]bool{true},
 				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{true},
 				Sequence: []XY{v3, v6, v5, v4, v3},
+			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{false},
+				Sequence: []XY{v0, v1},
+			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{false},
+				Sequence: []XY{v1, v0},
+			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{false},
+				Sequence: []XY{v1, v3},
+			},
+			{
+				SrcEdge:  [2]bool{false},
+				SrcFace:  [2]bool{false},
+				InSet:    [2]bool{false},
+				Sequence: []XY{v3, v1},
+			},
+		},
+		Faces: []FaceSpec{
+			{
+				First:  v0,
+				Second: v1,
+				Cycle:  []XY{v0, v1, v2, v1, v3, v6, v5, v4, v3, v1, v0},
+				InSet:  [2]bool{false},
+			},
+			{
+				First:  v3,
+				Second: v4,
+				Cycle:  []XY{v3, v4, v5, v6, v3},
+				InSet:  [2]bool{true},
 			},
 		},
 	})
