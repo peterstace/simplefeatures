@@ -952,6 +952,45 @@ func TestBinaryOp(t *testing.T) {
 		{input1: "POINT EMPTY", input2: "LINESTRING(0 0,0 1,1 0,0 0)", relate: "FFFFFF1F2"},
 		{input1: "POINT EMPTY", input2: "POLYGON((0 0,0 1,1 0,0 0))", relate: "FFFFFF212"},
 
+		// Cases involving geometry collections where polygons from one of the
+		// inputs interact with each other.
+		{
+			input1: `GEOMETRYCOLLECTION(
+						POLYGON((0 0,1 0,0 1,0 0)),
+						POLYGON((0 0,1 1,0 1,0 0)))`,
+			input2:  "LINESTRING(0 0,1 1)",
+			union:   "POLYGON((0 0,1 0,0.5 0.5,1 1,0 1,0 0))",
+			inter:   "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))",
+			fwdDiff: "POLYGON((0 0,1 0,0.5 0.5,1 1,0 1,0 0))",
+			revDiff: "GEOMETRYCOLLECTION EMPTY",
+			symDiff: "POLYGON((0 0,1 0,0.5 0.5,1 1,0 1,0 0))",
+			relate:  "1F2101FF2",
+		},
+		{
+			input1: `GEOMETRYCOLLECTION(
+						POLYGON((0 0,1 0,0 1,0 0)),
+						POLYGON((1 1,0 1,1 0,1 1)))`,
+			input2:  "POLYGON((0 0,2 0,2 2,0 2,0 0))",
+			union:   "POLYGON((0 0,1 0,2 0,2 2,0 2,0 1,0 0))",
+			inter:   "POLYGON((0 0,1 0,1 1,0 1,0 0))",
+			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
+			revDiff: "POLYGON((1 0,2 0,2 2,0 2,0 1,1 1,1 0))",
+			symDiff: "POLYGON((1 0,2 0,2 2,0 2,0 1,1 1,1 0))",
+			relate:  "2FF11F212",
+		},
+		{
+			input1: `GEOMETRYCOLLECTION(
+						POLYGON((0 0,2 0,2 1,0 1,0 0)),
+						POLYGON((0 0,1 0,1 2,0 2,0 0)))`,
+			input2:  "POLYGON((1 0,2 1,1 2,0 1,1 0))",
+			union:   "POLYGON((0 0,1 0,2 0,2 1,1 2,0 2,0 1,0 0))",
+			inter:   "POLYGON((1 0,2 1,1 1,1 2,0 1,1 0))",
+			fwdDiff: "MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((1 0,2 0,2 1,1 0)),((0 1,1 2,0 2,0 1)))",
+			revDiff: "POLYGON((1 1,2 1,1 2,1 1))",
+			symDiff: "MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((1 0,2 0,2 1,1 0)),((0 1,1 2,0 2,0 1)),((1 1,2 1,1 2,1 1)))",
+			relate:  "212101212",
+		},
+
 		// Bug reproductions:
 		{
 			input1:  "LINESTRING(-1 1,1 -1)",
