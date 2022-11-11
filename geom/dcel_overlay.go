@@ -28,8 +28,6 @@ func createOverlay(a, b Geometry) (*doublyConnectedEdgeList, error) {
 	dcel.reAssignFaces()
 	dcel.populateInSetLabels()
 
-	//dumpDCEL(dcel)
-
 	return dcel, nil
 }
 
