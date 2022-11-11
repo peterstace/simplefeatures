@@ -59,10 +59,13 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 	return g, wrap(err, "executing symmetric difference")
 }
 
+// UnaryUnion is a single input variant of the Union function, unioning
+// together the components of the input geometry.
 func UnaryUnion(g Geometry) (Geometry, error) {
 	return setOp(g, or, Geometry{})
 }
 
+// UnionMany unions together the input geometries.
 func UnionMany(gs []Geometry) (Geometry, error) {
 	gc := NewGeometryCollection(gs)
 	return UnaryUnion(gc.AsGeometry())
