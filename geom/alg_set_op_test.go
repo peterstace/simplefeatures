@@ -1133,6 +1133,11 @@ func TestBinaryOp(t *testing.T) {
 			input2: "POINT(0 0)",
 			union:  "POLYGON((0 0,1 0,0.5 0.5,1 1,0 1,0 0))",
 		},
+		{
+			input1: "GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)),POLYGON((0 1,1 1,1 0,0 1)))",
+			input2: "POLYGON EMPTY",
+			union:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
@@ -1323,7 +1328,7 @@ func TestBinaryOpOneInputEmpty(t *testing.T) {
 			if opCase.wantEmpty {
 				expectTrue(t, got.IsEmpty())
 			} else {
-				expectGeomEq(t, got, poly)
+				expectGeomEq(t, got, poly, geom.IgnoreOrder)
 			}
 		})
 	}
