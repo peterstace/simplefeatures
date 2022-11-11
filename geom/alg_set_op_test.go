@@ -1343,14 +1343,20 @@ func TestUnionMany(t *testing.T) {
 			inputWKTs: nil,
 			wantWKT:   `GEOMETRYCOLLECTION EMPTY`,
 		},
+		//{
+		//	inputWKTs: []string{"POINT (0 0)"},
+		//	wantWKT:   "POINT (0 0)",
+		//},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var inputs []geom.Geometry
 			for _, wkt := range tc.inputWKTs {
 				inputs = append(inputs, geomFromWKT(t, wkt))
 			}
+			t.Log("inputs", inputs)
 			got, err := geom.UnionMany(inputs)
 			expectNoErr(t, err)
+			t.Log("output", got)
 			expectGeomEqWKT(t, got, tc.wantWKT)
 		})
 	}
