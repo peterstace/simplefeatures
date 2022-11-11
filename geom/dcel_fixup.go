@@ -124,16 +124,21 @@ func adjacentFaces(f *faceRecord) []*faceRecord {
 
 // populateInSetLabels populates the inSet labels for edges and vertices.
 func (d *doublyConnectedEdgeList) populateInSetLabels() {
+	for _, v := range d.vertices {
+		forEachOperand(func(op operand) {
+			v.inSet[op] = v.src[op]
+		})
+	}
 	for _, e := range d.halfEdges {
-		// Copy labels from incident faces into edge since the edge represents
-		// the (closed) border of the face.
-		e.inSet[0] = e.srcEdge[0] || e.incident.inSet[0] || e.twin.incident.inSet[0]
-		e.inSet[1] = e.srcEdge[1] || e.incident.inSet[1] || e.twin.incident.inSet[1]
+		forEachOperand(func(op operand) {
+			// Copy labels from incident faces into edge since the edge
+			// represents the (closed) border of the face.
+			e.inSet[op] = e.srcEdge[op] || e.incident.inSet[op] || e.twin.incident.inSet[op]
 
-		// Copy edge labels onto the labels of adjacent vertices. This is
-		// because the vertices represent the endpoints of the edges, and
-		// should have at least those bits set.
-		e.origin.inSet[0] = e.origin.src[0] || e.inSet[0] || e.prev.inSet[0]
-		e.origin.inSet[1] = e.origin.src[1] || e.inSet[1] || e.prev.inSet[1]
+			// Copy edge labels onto the labels of adjacent vertices. This is
+			// because the vertices represent the endpoints of the edges, and
+			// should have at least those bits set.
+			e.origin.inSet[op] = e.origin.inSet[op] || e.inSet[op] || e.prev.inSet[op]
+		})
 	}
 }

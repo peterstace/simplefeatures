@@ -1121,6 +1121,7 @@ func TestBinaryOp(t *testing.T) {
 			input1: "POINT(0 0)",
 			input2: "POINT(0 0)",
 			relate: "0FFFFFFF2",
+			union:  "POINT(0 0)",
 		},
 		{
 			input1: "GEOMETRYCOLLECTION(POINT(0 0))",
