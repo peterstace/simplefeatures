@@ -1333,3 +1333,25 @@ func TestBinaryOpOneInputEmpty(t *testing.T) {
 		})
 	}
 }
+
+func TestUnionMany(t *testing.T) {
+	for i, tc := range []struct {
+		inputWKTs []string
+		wantWKT   string
+	}{
+		{
+			inputWKTs: nil,
+			wantWKT:   `GEOMETRYCOLLECTION EMPTY`,
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			var inputs []geom.Geometry
+			for _, wkt := range tc.inputWKTs {
+				inputs = append(inputs, geomFromWKT(t, wkt))
+			}
+			got, err := geom.UnionMany(inputs)
+			expectNoErr(t, err)
+			expectGeomEqWKT(t, got, tc.wantWKT)
+		})
+	}
+}
