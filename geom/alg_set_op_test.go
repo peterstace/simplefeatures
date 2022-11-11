@@ -1334,7 +1334,7 @@ func TestBinaryOpOneInputEmpty(t *testing.T) {
 	}
 }
 
-func TestUnionMany(t *testing.T) {
+func TestUnaryUnionAndUnionMany(t *testing.T) {
 	for i, tc := range []struct {
 		inputWKTs []string
 		wantWKT   string
@@ -1343,21 +1343,131 @@ func TestUnionMany(t *testing.T) {
 			inputWKTs: nil,
 			wantWKT:   `GEOMETRYCOLLECTION EMPTY`,
 		},
-		//{
-		//	inputWKTs: []string{"POINT (0 0)"},
-		//	wantWKT:   "POINT (0 0)",
-		//},
+		{
+			inputWKTs: []string{"POINT(1 2)"},
+			wantWKT:   "POINT(1 2)",
+		},
+		{
+			inputWKTs: []string{"MULTIPOINT((1 2),(3 4))"},
+			wantWKT:   "MULTIPOINT((1 2),(3 4))",
+		},
+		{
+			inputWKTs: []string{"LINESTRING(1 2,3 4)"},
+			wantWKT:   "LINESTRING(1 2,3 4)",
+		},
+		{
+			inputWKTs: []string{"MULTILINESTRING((0 1,2 1),(1 0,1 2))"},
+			wantWKT:   "MULTILINESTRING((0 1,1 1),(2 1,1 1),(1 0,1 1),(1 2,1 1))",
+		},
+		{
+			inputWKTs: []string{"POLYGON((0 0,0 1,1 0,0 0))"},
+			wantWKT:   "POLYGON((0 0,0 1,1 0,0 0))",
+		},
+		{
+			inputWKTs: []string{"MULTIPOLYGON(((1 1,1 0,0 1,1 1)),((1 1,2 1,1 2,1 1)))"},
+			wantWKT:   "MULTIPOLYGON(((1 1,1 0,0 1,1 1)),((1 1,2 1,1 2,1 1)))",
+		},
+		{
+			inputWKTs: []string{"GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)))"},
+			wantWKT:   "POLYGON((0 0,0 1,1 0,0 0))",
+		},
+		{
+			inputWKTs: []string{"POINT(2 2)", "POINT(2 2)"},
+			wantWKT:   "POINT(2 2)",
+		},
+		{
+			inputWKTs: []string{"MULTIPOINT(1 2,2 2)", "MULTIPOINT(2 2,1 2)"},
+			wantWKT:   "MULTIPOINT(1 2,2 2)",
+		},
+		{
+			inputWKTs: []string{"LINESTRING(0 0,0 1,1 1)", "LINESTRING(1 1,0 1,0 0)"},
+			wantWKT:   "LINESTRING(0 0,0 1,1 1)",
+		},
+		{
+			inputWKTs: []string{"MULTILINESTRING((0 0,0 1,1 1),(2 2,3 3))", "MULTILINESTRING((1 1,0 1,0 0),(2 2,3 3))"},
+			wantWKT:   "MULTILINESTRING((2 2,3 3),(0 0,0 1,1 1))",
+		},
+		{
+			inputWKTs: []string{"POLYGON((0 0,0 1,1 0,0 0))", "POLYGON((0 0,0 1,1 0,0 0))"},
+			wantWKT:   "POLYGON((0 0,0 1,1 0,0 0))",
+		},
+		{
+			inputWKTs: []string{
+				"MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))",
+				"MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))",
+			},
+			wantWKT: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))",
+		},
+		{
+			inputWKTs: []string{"POINT(1 2)", "POINT(2 3)", "POINT(3 4)"},
+			wantWKT:   "MULTIPOINT(1 2,2 3,3 4)",
+		},
+		{
+			inputWKTs: []string{"MULTIPOINT(1 2,2 3)", "MULTIPOINT(2 3,3 4)", "MULTIPOINT(3 4,4 5)"},
+			wantWKT:   "MULTIPOINT(1 2,2 3,3 4,4 5)",
+		},
+		{
+			inputWKTs: []string{"LINESTRING(0 0,0 1,1 1)", "LINESTRING(0 1,1 1,1 0)", "LINESTRING(2 1,2 2,1 2)"},
+			wantWKT:   "MULTILINESTRING((0 0,0 1),(0 1,1 1),(1 1,1 0),(2 1,2 2,1 2))",
+		},
+		{
+			inputWKTs: []string{"MULTILINESTRING((0 0,0 1,1 1),(0 1,1 1,1 0))", "LINESTRING(2 1,2 2,1 2)"},
+			wantWKT:   "MULTILINESTRING((0 0,0 1),(0 1,1 1),(1 1,1 0),(2 1,2 2,1 2))",
+		},
+		{
+			inputWKTs: []string{
+				"POLYGON((0 0,0 1,1 1,1 0,0 0))",
+				"POLYGON((1 0,1 1,2 1,2 0,1 0))",
+				"POLYGON((1 1,1 2,2 2,2 1,1 1))",
+			},
+			wantWKT: "POLYGON((0 0,1 0,2 0,2 1,2 2,1 2,1 1,0 1,0 0))",
+		},
+		{
+			inputWKTs: []string{
+				"POLYGON((0 0,0 1,2 1,2 0,0 0))",
+				"POLYGON((1 0,1 2,2 2,2 0,1 0))",
+				"POLYGON((1 0,1 1,2 1,2 0,1 0))",
+			},
+			wantWKT: "POLYGON((0 0,1 0,2 0,2 1,2 2,1 2,1 1,0 1,0 0))",
+		},
+		{
+			inputWKTs: []string{
+				"POLYGON((0 2,1 0,2 2,1 1,0 2))",
+				"POLYGON((0 2,1 3,2 2,1 4,0 2))",
+				"POLYGON((0 1.5,2 1.5,2 2.5,0 2.5,0 1.5))",
+			},
+			wantWKT: `POLYGON(
+				(1 0,1.75 1.5,2 1.5,2 2,2 2.5,1.75 2.5,1 4,0.25 2.5,0 2.5,0 2,0 1.5,0.25 1.5,1 0),
+				(0.5 1.5,1.5 1.5,1 1,0.5 1.5),
+				(0.5 2.5,1.5 2.5,1 3,0.5 2.5))`,
+		},
+		{
+			inputWKTs: []string{
+				"MULTIPOLYGON(((1 0,2 0,2 1,1 1,1 0)),((3 0,4 0,4 1,3 1,3 0)))",
+				"MULTIPOLYGON(((3 0,4 0,4 -1,3 -1,3 0)),((4 0,5 0,5 1,4 1,4 0)))",
+				"MULTIPOLYGON(((1 0,1 1,0 1,0 0,1 0)),((5 0,6 0,6 -1,5 -1,5 0)))",
+			},
+			wantWKT: `MULTIPOLYGON(
+				((0 0,1 0,2 0,2 1,1 1,0 1,0 0)),
+				((5 0,6 0,6 -1,5 -1,5 0)),
+				((4 0,5 0,5 1,4 1,3 1,3 0,3 -1,4 -1,4 0)))`,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var inputs []geom.Geometry
 			for _, wkt := range tc.inputWKTs {
 				inputs = append(inputs, geomFromWKT(t, wkt))
 			}
-			t.Log("inputs", inputs)
-			got, err := geom.UnionMany(inputs)
-			expectNoErr(t, err)
-			t.Log("output", got)
-			expectGeomEqWKT(t, got, tc.wantWKT)
+			t.Run("UnionMany", func(t *testing.T) {
+				got, err := geom.UnionMany(inputs)
+				expectNoErr(t, err)
+				expectGeomEqWKT(t, got, tc.wantWKT, geom.IgnoreOrder)
+			})
+			t.Run("UnaryUnion", func(t *testing.T) {
+				got, err := geom.UnaryUnion(geom.NewGeometryCollection(inputs).AsGeometry())
+				expectNoErr(t, err)
+				expectGeomEqWKT(t, got, tc.wantWKT, geom.IgnoreOrder)
+			})
 		})
 	}
 }
