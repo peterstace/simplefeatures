@@ -4,6 +4,10 @@
 
 - Use `Sequence` instead of `[]XY` for DCEL edges.
 
+- Reuse half edge records in DCEL algorithm to better support
+  `GeometryCollection` inputs in `Union`, `Intersection`,
+  `Difference`, `SymmetricDifference`, and `Relate` functions.
+
 ## v0.40.1
 
 2022-11-08

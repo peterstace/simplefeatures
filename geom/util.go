@@ -58,16 +58,6 @@ func sortAndUniquifyXYs(xys []XY) []XY {
 	return xys[:n]
 }
 
-func reverseSequence(seq Sequence) Sequence {
-	n := seq.Length()
-	coords := make([]float64, 0, 2*n)
-	for i := n - 1; i >= 0; i-- {
-		xy := seq.GetXY(i)
-		coords = append(coords, xy.X, xy.Y)
-	}
-	return NewSequence(coords, DimXY)
-}
-
 func sequenceToXYs(seq Sequence) []XY {
 	n := seq.Length()
 	xys := make([]XY, seq.Length())
