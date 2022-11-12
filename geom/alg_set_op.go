@@ -60,7 +60,7 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 }
 
 func setOp(a Geometry, include func([2]bool) bool, b Geometry) (Geometry, error) {
-	overlay, err := createOverlay(a, b)
+	overlay, err := newDCELFromGeometries(a, b)
 	if err != nil {
 		return Geometry{}, wrap(err, "internal error creating overlay")
 	}

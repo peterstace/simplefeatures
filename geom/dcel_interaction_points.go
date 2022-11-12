@@ -5,10 +5,10 @@ package geom
 //
 // Assumptions:
 //
-// 1. Input geometries are correctly noded with respect to each other.
+//  1. Input geometries are correctly noded with respect to each other.
 //
-// 2. Input geometries don't have any repeated coordinates (e.g. in areal rings
-// or linear elements).
+//  2. Input geometries don't have any repeated coordinates (e.g. in areal
+//     rings or linear elements).
 func findInteractionPoints(gs []Geometry) map[XY]struct{} {
 	var sizeHint int
 	for _, g := range gs {
