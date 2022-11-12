@@ -19,8 +19,6 @@ func newDCELFromGeometries(a, b Geometry) (*doublyConnectedEdgeList, error) {
 	dcel.assignFaces()
 	dcel.populateInSetLabels()
 
-	//dumpDCEL(dcel)
-
 	return dcel, nil
 }
 

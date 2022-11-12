@@ -12,16 +12,26 @@ func (d *doublyConnectedEdgeList) fixVertices() {
 }
 
 func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
-	// Sort the edges radially.
+	// Create slice of incident edges so that they can be sorted radially.
 	incidents := make([]*halfEdgeRecord, 0, len(v.incidents))
 	for e := range v.incidents {
 		incidents = append(incidents, e)
 	}
-	if len(incidents) >= 3 {
+
+	// If there are 2 or less edges, then the edges are already trivially
+	// sorted around the vertex with relation to each other.
+	alreadySorted := len(incidents) <= 2
+
+	// Perform the sort.
+	if !alreadySorted {
 		// TODO: consider using a solution like
 		// https://stackoverflow.com/questions/6989100/sort-points-in-clockwise-order
 		// instead of using trigonometry.
 		sort.Slice(incidents, func(i, j int) bool {
+			// Sort edges in ascending order of their angle relative to the
+			// x-axis. This is a stricter sort than necessary but is easy to
+			// implement. We only really care that the edges are sorted
+			// relative to each other (we don't care about the starting point).
 			ei := incidents[i]
 			ej := incidents[j]
 			di := ei.seq.GetXY(1).Sub(ei.seq.GetXY(0))
