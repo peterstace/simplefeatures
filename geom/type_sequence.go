@@ -170,6 +170,22 @@ func (s Sequence) assertNoUnusedCapacity() {
 	}
 }
 
+// less gives a lexicographical ordering between sequences, considering only
+// the XY parts of each coordinate when they have Z or M components.
+func (s Sequence) less(o Sequence) bool {
+	oLen := o.Length()
+	for i := 0; i < s.Length(); i++ {
+		if i >= oLen {
+			return true
+		}
+		sxy, oxy := s.GetXY(i), o.GetXY(i)
+		if sxy != oxy {
+			return sxy.Less(oxy)
+		}
+	}
+	return false
+}
+
 // getLine extracts a 2D line segment from a sequence by joining together
 // adjacent locations in the sequence. It is designed to be called with i equal
 // to each index in the sequence (from 0 to n-1, both inclusive). The flag
