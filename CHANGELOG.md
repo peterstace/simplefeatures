@@ -8,6 +8,13 @@
   `GeometryCollection` inputs in `Union`, `Intersection`,
   `Difference`, `SymmetricDifference`, and `Relate` functions.
 
+- Add `UnaryUnion` and `UnionMany` functions.
+
+- Fix a bug where calling `Union`, `Difference`, or `SymmetricDifference` with
+  an empty geometry and a `GeometryCollection` containing multiple children
+  would return the `GeometryCollection` unaltered (rather than unioning it
+  together).
+
 ## v0.40.1
 
 2022-11-08
