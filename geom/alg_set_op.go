@@ -13,7 +13,7 @@ func Union(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	g, err := setOp(a, b, selectUnion)
+	g, err := setOp(a, or, b)
 	return g, wrap(err, "executing union")
 }
 
@@ -24,7 +24,7 @@ func Intersection(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() || b.IsEmpty() {
 		return Geometry{}, nil
 	}
-	g, err := setOp(a, b, selectIntersection)
+	g, err := setOp(a, and, b)
 	return g, wrap(err, "executing intersection")
 }
 
@@ -38,7 +38,7 @@ func Difference(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	g, err := setOp(a, b, selectDifference)
+	g, err := setOp(a, andNot, b)
 	return g, wrap(err, "executing difference")
 }
 
@@ -55,11 +55,11 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 	if b.IsEmpty() {
 		return a, nil
 	}
-	g, err := setOp(a, b, selectSymmetricDifference)
+	g, err := setOp(a, xor, b)
 	return g, wrap(err, "executing symmetric difference")
 }
 
-func setOp(a, b Geometry, include func([2]label) bool) (Geometry, error) {
+func setOp(a Geometry, include func([2]bool) bool, b Geometry) (Geometry, error) {
 	overlay, err := createOverlay(a, b)
 	if err != nil {
 		return Geometry{}, wrap(err, "internal error creating overlay")
@@ -71,3 +71,8 @@ func setOp(a, b Geometry, include func([2]label) bool) (Geometry, error) {
 	}
 	return g, nil
 }
+
+func or(b [2]bool) bool     { return b[0] || b[1] }
+func and(b [2]bool) bool    { return b[0] && b[1] }
+func xor(b [2]bool) bool    { return b[0] != b[1] }
+func andNot(b [2]bool) bool { return b[0] && !b[1] }

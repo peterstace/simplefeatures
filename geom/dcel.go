@@ -11,8 +11,12 @@ type doublyConnectedEdgeList struct {
 }
 
 type faceRecord struct {
-	cycle     *halfEdgeRecord
-	labels    [2]label
+	cycle *halfEdgeRecord
+
+	// inSet encodes whether this face is part of the input geometry for each
+	// operand.
+	inSet [2]bool
+
 	extracted bool
 }
 
@@ -29,9 +33,20 @@ type halfEdgeRecord struct {
 	incident   *faceRecord // only populated in the overlay
 	next, prev *halfEdgeRecord
 	seq        Sequence
-	edgeLabels [2]label
-	faceLabels [2]label
-	extracted  bool
+
+	// srcEdge encodes whether or not this edge is explicitly appears as part
+	// of the input geometries.
+	srcEdge [2]bool
+
+	// srcFace encodes whether or not this edge explicitly borders onto a face
+	// in the input geometries.
+	srcFace [2]bool
+
+	// inSet encodes whether or not this edge is (explicitly or implicitly)
+	// part of the input geometry for each operand.
+	inSet [2]bool
+
+	extracted bool
 }
 
 // String shows the origin and destination of the edge (for debugging
@@ -46,7 +61,15 @@ func (e *halfEdgeRecord) String() string {
 type vertexRecord struct {
 	coords    XY
 	incidents []*halfEdgeRecord
-	labels    [2]label
+
+	// src encodes whether on not this vertex explicitly appears in the input
+	// geometries.
+	src [2]bool
+
+	// inSet encodes whether or not this vertex is part of each input geometry
+	// (although it might not be explicitly encoded there).
+	inSet [2]bool
+
 	locations [2]location
 	extracted bool
 }
@@ -123,9 +146,9 @@ func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand opera
 					vr := &vertexRecord{
 						coords:    xy,
 						incidents: nil, // populated later
-						labels:    newHalfPopulatedLabels(operand, true),
 						locations: newLocationsOnBoundary(operand),
 					}
+					vr.src[operand] = true
 					d.vertices[xy] = vr
 				}
 			}
@@ -139,25 +162,24 @@ func (d *doublyConnectedEdgeList) addMultiPolygon(mp MultiPolygon, operand opera
 				vertA := d.vertices[segment.GetXY(0)]
 				vertB := d.vertices[reverseSegment.GetXY(0)]
 				internalEdge := &halfEdgeRecord{
-					origin:     vertA,
-					twin:       nil, // populated later
-					incident:   nil, // only populated in the overlay
-					next:       nil, // populated later
-					prev:       nil, // populated later
-					seq:        segment,
-					edgeLabels: newHalfPopulatedLabels(operand, true),
-					faceLabels: newHalfPopulatedLabels(operand, true),
+					origin:   vertA,
+					twin:     nil, // populated later
+					incident: nil, // only populated in the overlay
+					next:     nil, // populated later
+					prev:     nil, // populated later
+					seq:      segment,
 				}
 				externalEdge := &halfEdgeRecord{
-					origin:     vertB,
-					twin:       internalEdge,
-					incident:   nil, // only populated in the overlay
-					next:       nil, // populated later
-					prev:       nil, // populated later
-					seq:        reverseSegment,
-					edgeLabels: newHalfPopulatedLabels(operand, true),
-					faceLabels: newHalfPopulatedLabels(operand, false),
+					origin:   vertB,
+					twin:     internalEdge,
+					incident: nil, // only populated in the overlay
+					next:     nil, // populated later
+					prev:     nil, // populated later
+					seq:      reverseSegment,
 				}
+				internalEdge.srcEdge[operand] = true
+				internalEdge.srcFace[operand] = true
+				externalEdge.srcEdge[operand] = true
 				internalEdge.twin = externalEdge
 				vertA.incidents = append(vertA.incidents, internalEdge)
 				vertB.incidents = append(vertB.incidents, externalEdge)
@@ -197,13 +219,12 @@ func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operan
 				} else {
 					locs[operand].interior = true
 				}
-				d.vertices[xy] = &vertexRecord{
-					xy,
-					nil, // populated later
-					newHalfPopulatedLabels(operand, true),
-					locs,
-					false,
+				vr := &vertexRecord{
+					coords:    xy,
+					locations: locs,
 				}
+				vr.src[operand] = true
+				d.vertices[xy] = vr
 			} else {
 				if onBoundary {
 					if v.locations[operand].boundary {
@@ -243,25 +264,23 @@ func (d *doublyConnectedEdgeList) addMultiLineString(mls MultiLineString, operan
 			vDestin := d.vertices[endXY]
 
 			fwd := &halfEdgeRecord{
-				origin:     vOrigin,
-				twin:       nil, // set later
-				incident:   nil, // only populated in overlay
-				next:       nil, // set later
-				prev:       nil, // set later
-				seq:        segment,
-				edgeLabels: newHalfPopulatedLabels(operand, true),
-				faceLabels: newUnpopulatedLabels(),
+				origin:   vOrigin,
+				twin:     nil, // set later
+				incident: nil, // only populated in overlay
+				next:     nil, // set later
+				prev:     nil, // set later
+				seq:      segment,
 			}
 			rev := &halfEdgeRecord{
-				origin:     vDestin,
-				twin:       fwd,
-				incident:   nil, // only populated in overlay
-				next:       fwd,
-				prev:       fwd,
-				seq:        reverseSegment,
-				edgeLabels: newHalfPopulatedLabels(operand, true),
-				faceLabels: newUnpopulatedLabels(),
+				origin:   vDestin,
+				twin:     fwd,
+				incident: nil, // only populated in overlay
+				next:     fwd,
+				prev:     fwd,
+				seq:      reverseSegment,
 			}
+			fwd.srcEdge[operand] = true
+			rev.srcEdge[operand] = true
 			fwd.twin = rev
 			fwd.next = rev
 			fwd.prev = rev
@@ -286,12 +305,11 @@ func (d *doublyConnectedEdgeList) addMultiPoint(mp MultiPoint, operand operand) 
 			record = &vertexRecord{
 				coords:    xy,
 				incidents: nil,
-				labels:    [2]label{},    // set below
 				locations: [2]location{}, // set below
 			}
 			d.vertices[xy] = record
 		}
-		record.labels[operand] = label{populated: true, inSet: true}
+		record.src[operand] = true
 		record.locations[operand].interior = true
 	}
 }
@@ -317,10 +335,10 @@ func (d *doublyConnectedEdgeList) addGhosts(mls MultiLineString, operand operand
 			endXY := reverseSegment.GetXY(0)
 
 			if _, ok := d.vertices[startXY]; !ok {
-				d.vertices[startXY] = &vertexRecord{coords: startXY, incidents: nil, labels: [2]label{}}
+				d.vertices[startXY] = &vertexRecord{coords: startXY}
 			}
 			if _, ok := d.vertices[endXY]; !ok {
-				d.vertices[endXY] = &vertexRecord{coords: endXY, incidents: nil, labels: [2]label{}}
+				d.vertices[endXY] = &vertexRecord{coords: endXY}
 			}
 
 			if edges.containsStartIntermediateEnd(segment) {
@@ -340,24 +358,20 @@ func (d *doublyConnectedEdgeList) addGhostLine(segment, reverseSegment Sequence,
 	vertB := d.vertices[reverseSegment.GetXY(0)]
 
 	e1 := &halfEdgeRecord{
-		origin:     vertA,
-		twin:       nil, // populated later
-		incident:   nil, // only populated in the overlay
-		next:       nil, // popluated later
-		prev:       nil, // populated later
-		seq:        segment,
-		edgeLabels: newHalfPopulatedLabels(operand, false),
-		faceLabels: [2]label{},
+		origin:   vertA,
+		twin:     nil, // populated later
+		incident: nil, // only populated in the overlay
+		next:     nil, // popluated later
+		prev:     nil, // populated later
+		seq:      segment,
 	}
 	e2 := &halfEdgeRecord{
-		origin:     vertB,
-		twin:       e1,
-		incident:   nil, // only populated in the overlay
-		next:       e1,
-		prev:       e1,
-		seq:        reverseSegment,
-		edgeLabels: newHalfPopulatedLabels(operand, false),
-		faceLabels: [2]label{},
+		origin:   vertB,
+		twin:     e1,
+		incident: nil, // only populated in the overlay
+		next:     e1,
+		prev:     e1,
+		seq:      reverseSegment,
 	}
 	e1.twin = e2
 	e1.next = e2
