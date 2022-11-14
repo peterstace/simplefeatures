@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.41.0
+
+2022-11-15
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - Use `Sequence` instead of `[]XY` for DCEL edges.
 
