@@ -8,10 +8,10 @@ func Union(a, b Geometry) (Geometry, error) {
 		return Geometry{}, nil
 	}
 	if a.IsEmpty() {
-		return b, nil
+		return UnaryUnion(b)
 	}
 	if b.IsEmpty() {
-		return a, nil
+		return UnaryUnion(a)
 	}
 	g, err := setOp(a, or, b)
 	return g, wrap(err, "executing union")
@@ -36,7 +36,7 @@ func Difference(a, b Geometry) (Geometry, error) {
 		return Geometry{}, nil
 	}
 	if b.IsEmpty() {
-		return a, nil
+		return UnaryUnion(a)
 	}
 	g, err := setOp(a, andNot, b)
 	return g, wrap(err, "executing difference")
@@ -50,13 +50,25 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 		return Geometry{}, nil
 	}
 	if a.IsEmpty() {
-		return b, nil
+		return UnaryUnion(b)
 	}
 	if b.IsEmpty() {
-		return a, nil
+		return UnaryUnion(a)
 	}
 	g, err := setOp(a, xor, b)
 	return g, wrap(err, "executing symmetric difference")
+}
+
+// UnaryUnion is a single input variant of the Union function, unioning
+// together the components of the input geometry.
+func UnaryUnion(g Geometry) (Geometry, error) {
+	return setOp(g, or, Geometry{})
+}
+
+// UnionMany unions together the input geometries.
+func UnionMany(gs []Geometry) (Geometry, error) {
+	gc := NewGeometryCollection(gs)
+	return UnaryUnion(gc.AsGeometry())
 }
 
 func setOp(a Geometry, include func([2]bool) bool, b Geometry) (Geometry, error) {
