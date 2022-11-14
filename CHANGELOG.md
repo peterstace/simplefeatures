@@ -15,6 +15,8 @@
   would return the `GeometryCollection` unaltered (rather than unioning it
   together).
 
+- Make DCEL operation output ordering deterministic.
+
 ## v0.40.1
 
 2022-11-08

@@ -1471,3 +1471,24 @@ func TestUnaryUnionAndUnionMany(t *testing.T) {
 		})
 	}
 }
+
+func TestBinaryOpOutputOrdering(t *testing.T) {
+	for i, tc := range []struct {
+		wkt string
+	}{
+		{"MULTIPOINT(1 2,2 3)"},
+		{"MULTILINESTRING((1 2,2 3),(3 4,4 5))"},
+		{"POLYGON((0 0,0 4,4 4,4 0,0 0),(1 1,1 2,2 2,2 1,1 1),(2 2,2 3,3 3,3 2,2 2))"},
+		{"MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))"},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			in := geomFromWKT(t, tc.wkt)
+			got1, err := geom.Union(in, in)
+			expectNoErr(t, err)
+			got2, err := geom.Union(in, in)
+			expectNoErr(t, err)
+			// Ensure ordering is stable over multiple executions:
+			expectGeomEq(t, got1, got2)
+		})
+	}
+}
