@@ -35,7 +35,7 @@ func (n *node) appendChild(box Box, child *node) {
 
 // depth calculates the number of layers of nodes in the subtree rooted at the node.
 func (n *node) depth() int {
-	var d = 1
+	d := 1
 	for !n.isLeaf {
 		d++
 		n = n.entries[0].child

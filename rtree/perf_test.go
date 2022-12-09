@@ -13,7 +13,6 @@ func BenchmarkDelete(b *testing.B) {
 	// limiting the total runtime of the entire benchmark).
 	for pop := 100; pop <= 10000; pop *= 10 {
 		b.Run(fmt.Sprintf("n=%d", pop), func(b *testing.B) {
-
 			var boxes []Box
 			trees := make([]*RTree, b.N)
 			for i := 0; i < b.N; i++ {

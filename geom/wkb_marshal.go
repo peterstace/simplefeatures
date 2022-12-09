@@ -21,7 +21,6 @@ func init() {
 	default:
 		panic(fmt.Sprintf("unexpected buf[0]: %d", buf[0]))
 	}
-
 }
 
 type wkbMarshaler struct {

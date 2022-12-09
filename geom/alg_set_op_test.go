@@ -1294,7 +1294,6 @@ func TestBinaryOpBothInputsEmpty(t *testing.T) {
 					t.Errorf("got=%v but want=FFFFFFFF2", got)
 				}
 			})
-
 		})
 	}
 }

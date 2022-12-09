@@ -1,9 +1,27 @@
 run:
   timeout: 5m
 
+issues:
+  exclude-rules:
+    - path: 'internal'
+      linters:
+        - gosec
+    - path: '(.+)_test\.go'
+      linters:
+        - gosec
+
 linter-settings:
+  depguard:
+    list-type: blacklist
+    include-go-root: true
+    packages:
+      - io/ioutil
+    packages-with-error-message:
+      - io/ioutil: "Use os or io instead of io/ioutil"
+  goimports:
+    local-prefixes: github.com/peterstace/simplefeatures
   gosimple:
-    go: "1.16"
+    go: "1.17"
     checks: ["all"]
 
 linters:
@@ -11,6 +29,12 @@ linters:
   disable:
     - errcheck
   enable:
-    - govet
+    - bidichk
+    - contextcheck
+    - depguard
     - gofmt
+    - gofumpt
     - goimports
+    - gosec
+    - govet
+    - misspell

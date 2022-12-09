@@ -602,7 +602,7 @@ func (p *twkbParser) parsePointCountAndArray() ([]float64, int, error) {
 // Utilise and update the running memory of the previous reference point.
 // The returned array will contain numPoints * the number of dimensions values.
 func (p *twkbParser) parsePointArray(numPoints int) ([]float64, error) {
-	var coords = make([]float64, numPoints*int(p.dimensions))
+	coords := make([]float64, numPoints*int(p.dimensions))
 	c := 0
 	for i := 0; i < numPoints; i++ {
 		for d := 0; d < p.dimensions; d++ {

@@ -199,7 +199,7 @@ func (c GeometryCollection) ConvexHull() Geometry {
 // this geometry as a GeoJSON geometry object.
 func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 	buf := []byte(`{"type":"GeometryCollection","geometries":`)
-	var geoms = c.geoms
+	geoms := c.geoms
 	if geoms == nil {
 		geoms = []Geometry{}
 	}

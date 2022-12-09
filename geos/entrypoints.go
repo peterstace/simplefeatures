@@ -329,7 +329,8 @@ func SymmetricDifference(a, b geom.Geometry, opts ...geom.ConstructorOption) (ge
 func MakeValid(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
 	if C.MAKE_VALID_MISSING != 0 {
 		return geom.Geometry{}, unsupportedGEOSVersionError{
-			C.MAKE_VALID_MIN_VERSION, "MakeValid"}
+			C.MAKE_VALID_MIN_VERSION, "MakeValid",
+		}
 	}
 	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSMakeValid_r(ctx, g)
