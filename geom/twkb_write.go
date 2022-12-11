@@ -15,7 +15,6 @@ import (
 // Options can be supplied to control whether headers can be added, or
 // to control the precision of Z or M coordinates.
 func MarshalTWKB(g Geometry, precXY int, opts ...TWKBWriterOption) ([]byte, error) {
-
 	var s twkbWriterOptionSet
 	s.precZ = precXY // Default if not set by opt.
 	s.precM = precXY // Default if not set by opt.

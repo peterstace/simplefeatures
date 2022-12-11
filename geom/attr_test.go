@@ -353,7 +353,6 @@ func TestCoordinatesSequence(t *testing.T) {
 		expectXYEq(t, seq[1].GetXY(1), XY{2, 7})
 		expectXYEq(t, seq[1].GetXY(2), XY{7, 2})
 		expectXYEq(t, seq[1].GetXY(3), XY{2, 2})
-
 	})
 	t.Run("multipoint", func(t *testing.T) {
 		seq := geomFromWKT(t, "MULTIPOINT(0 1,2 3,EMPTY,4 5)").MustAsMultiPoint().Coordinates()
@@ -624,7 +623,6 @@ func TestSignedArea(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestTransformedArea(t *testing.T) {

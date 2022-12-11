@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: golint.Dockerfile
     working_dir: /go/src/github.com/peterstace/simplefeatures
-    entrypoint: golint -set_exit_status ./geom ./geos
+    entrypoint: golangci-lint run --max-same-issues 100
     volumes:
       - ..:/go/src/github.com/peterstace/simplefeatures
     environment:

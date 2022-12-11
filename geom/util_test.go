@@ -174,6 +174,7 @@ func expectXYEq(t testing.TB, got, want XY) {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
+
 func expectXYWithinTolerance(t testing.TB, got, want XY, tolerance float64) {
 	t.Helper()
 	if delta := math.Abs(got.Sub(want).Length()); delta > tolerance {

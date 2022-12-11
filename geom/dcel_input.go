@@ -109,7 +109,6 @@ func (d *doublyConnectedEdgeList) addLineString(ls LineString, operand operand, 
 				}
 			}
 		}
-
 	})
 }
 

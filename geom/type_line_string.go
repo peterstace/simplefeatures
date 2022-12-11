@@ -50,7 +50,8 @@ func validateLineStringSeq(seq Sequence) error {
 	}
 	if !hasAtLeast2DistinctPointsInSeq(seq) {
 		return validationError{
-			"non-empty linestring contains only one distinct XY value"}
+			"non-empty linestring contains only one distinct XY value",
+		}
 	}
 	if err := seq.validate(); err != nil {
 		return validationError{err.Error()}

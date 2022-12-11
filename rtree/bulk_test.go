@@ -2,10 +2,9 @@ package rtree
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 	"testing"
-
-	"math/rand"
 )
 
 func TestQuickPartition(t *testing.T) {
@@ -46,7 +45,6 @@ func TestQuickPartition(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			for k := range tc {
 				t.Run(fmt.Sprintf("k=%d", k), func(t *testing.T) {
-
 					items := make([]BulkItem, 0, len(tc))
 					for _, num := range tc {
 						f := float64(num)

@@ -19,7 +19,6 @@ func checkWKTParse(t *testing.T, pg PostGIS, candidates []string) {
 	for i, wkt := range candidates {
 		any = true
 		t.Run(fmt.Sprintf("CheckWKTParse_%d", i), func(t *testing.T) {
-
 			// The simple feature library accepts LINEARRING WKTs. However,
 			// postgis doesn't accept them. A workaround for this is to just
 			// substitute LINEARRING for LINESTRING. However, this will give a
@@ -501,7 +500,6 @@ func containsOnlyPolygonsOrMultiPolygons(g geom.Geometry) bool {
 
 func checkForceCoordinatesDimension(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckForceCoordinatesDimension", func(t *testing.T) {
-
 		// In the case where a collection has some elements but they are all
 		// empty, PostGIS is giving back a collection with zero elements rather
 		// than transforming each empty elements' coordinates type. So we skip

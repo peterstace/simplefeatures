@@ -1,2 +1,6 @@
-FROM golang:1.17
-RUN go get -u golang.org/x/lint/golint
+FROM golangci/golangci-lint:v1.50.1
+
+RUN apt-get update \
+  && apt-get install -y -q --no-install-recommends \
+    libgeos-dev \
+  && rm -rf /var/lib/apt/lists/*
