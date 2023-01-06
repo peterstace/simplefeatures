@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Make `IgnoreOrder` a function rather than a global variable to prevent
+  consumers from erroneously altering its behaviour.
+
 ## v0.41.0
 
 2022-11-15

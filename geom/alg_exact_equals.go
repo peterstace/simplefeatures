@@ -44,8 +44,9 @@ func (c exactEqualsComparator) eq(a, b Coordinates) bool {
 	return true
 }
 
-// IgnoreOrder modifies the behaviour of the ExactEquals method by ignoring
-// ordering that doesn't have a material impact on geometries.
+// IgnoreOrder is an ExactEqualsOption that modifies the behaviour of the
+// ExactEquals method by ignoring ordering that doesn't have a material impact
+// on geometries.
 //
 // For Points, there is no ordering, so this option does nothing.
 //
@@ -59,12 +60,10 @@ func (c exactEqualsComparator) eq(a, b Coordinates) bool {
 // For collections (MultiPoint, MultiLineString, MultiPolygon, and
 // GeometryCollection), the ordering of constituent elements in the collection
 // are ignored.
-var IgnoreOrder = ExactEqualsOption(
-	func(c exactEqualsComparator) exactEqualsComparator {
-		c.ignoreOrder = true
-		return c
-	},
-)
+func IgnoreOrder(c exactEqualsComparator) exactEqualsComparator {
+	c.ignoreOrder = true
+	return c
+}
 
 // ExactEquals checks if two geometries are equal from a structural pointwise
 // equality perspective. Geometries that are structurally equal are defined by
