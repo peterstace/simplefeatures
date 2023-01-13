@@ -56,12 +56,15 @@ func ulpSizeForLine(ln line) float64 {
 		ulpSize(ln.b.Y))
 }
 
+type triple [3]XY
+type collinearPoints map[triple]struct{}
+
 // reNodeGeometries returns the input geometries, but with additional
 // intermediate nodes (i.e. control points). The additional nodes are created
 // such that when the two geometries are overlaid the only interactions
 // (including self-interactions) between geometries are at nodes. Nodes that
 // are close to each other are also snapped together.
-func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry, MultiLineString, error) {
+func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry, MultiLineString, collinearPoints, error) {
 	// Calculate the maximum ULP size over all control points in the input
 	// geometries. This size is a good indication of the precision that we
 	// should use when node merging.
@@ -81,52 +84,53 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 	var err error
 	g1, err = g1.TransformXY(nodes.insertOrGet, DisableAllValidations)
 	if err != nil {
-		return Geometry{}, Geometry{}, MultiLineString{}, err
+		return Geometry{}, Geometry{}, MultiLineString{}, nil, err
 	}
 	g2, err = g2.TransformXY(nodes.insertOrGet, DisableAllValidations)
 	if err != nil {
-		return Geometry{}, Geometry{}, MultiLineString{}, err
+		return Geometry{}, Geometry{}, MultiLineString{}, nil, err
 	}
 	mls, err = mls.TransformXY(nodes.insertOrGet, DisableAllValidations)
 	if err != nil {
-		return Geometry{}, Geometry{}, MultiLineString{}, err
+		return Geometry{}, Geometry{}, MultiLineString{}, nil, err
 	}
 
 	// Create additional nodes for crossings.
+	collinear := make(collinearPoints) // TODO: actually use
 	cut := newCutSet(all)
-	g1, err = reNodeGeometry(g1, cut, nodes)
+	g1, err = reNodeGeometry(g1, cut, nodes, collinear)
 	if err != nil {
-		return Geometry{}, Geometry{}, MultiLineString{}, err
+		return Geometry{}, Geometry{}, MultiLineString{}, nil, err
 	}
-	g2, err = reNodeGeometry(g2, cut, nodes)
+	g2, err = reNodeGeometry(g2, cut, nodes, collinear)
 	if err != nil {
-		return Geometry{}, Geometry{}, MultiLineString{}, err
+		return Geometry{}, Geometry{}, MultiLineString{}, nil, err
 	}
-	mls, err = reNodeMultiLineString(mls, cut, nodes)
+	mls, err = reNodeMultiLineString(mls, cut, nodes, collinear)
 	if err != nil {
-		return Geometry{}, Geometry{}, MultiLineString{}, err
+		return Geometry{}, Geometry{}, MultiLineString{}, nil, err
 	}
-	return g1, g2, mls, nil
+	return g1, g2, mls, collinear, nil
 }
 
 // reNodeGeometry re-nodes a single geometry, using a common cut set and node
 // map. The cut set is already noded.
-func reNodeGeometry(g Geometry, cut cutSet, nodes nodeSet) (Geometry, error) {
+func reNodeGeometry(g Geometry, cut cutSet, nodes nodeSet, collinear collinearPoints) (Geometry, error) {
 	switch g.Type() {
 	case TypeGeometryCollection:
-		gc, err := reNodeGeometryCollection(g.MustAsGeometryCollection(), cut, nodes)
+		gc, err := reNodeGeometryCollection(g.MustAsGeometryCollection(), cut, nodes, collinear)
 		return gc.AsGeometry(), err
 	case TypeLineString:
-		ls, err := reNodeLineString(g.MustAsLineString(), cut, nodes)
+		ls, err := reNodeLineString(g.MustAsLineString(), cut, nodes, collinear)
 		return ls.AsGeometry(), err
 	case TypePolygon:
-		poly, err := reNodePolygon(g.MustAsPolygon(), cut, nodes)
+		poly, err := reNodePolygon(g.MustAsPolygon(), cut, nodes, collinear)
 		return poly.AsGeometry(), err
 	case TypeMultiLineString:
-		mls, err := reNodeMultiLineString(g.MustAsMultiLineString(), cut, nodes)
+		mls, err := reNodeMultiLineString(g.MustAsMultiLineString(), cut, nodes, collinear)
 		return mls.AsGeometry(), err
 	case TypeMultiPolygon:
-		mp, err := reNodeMultiPolygonString(g.MustAsMultiPolygon(), cut, nodes)
+		mp, err := reNodeMultiPolygonString(g.MustAsMultiPolygon(), cut, nodes, collinear)
 		return mp.AsGeometry(), err
 	case TypePoint, TypeMultiPoint:
 		return g, nil
@@ -206,7 +210,7 @@ func appendPoints(points []XY, g Geometry) []XY {
 	return points
 }
 
-func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, error) {
+func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet, collinear collinearPoints) (LineString, error) {
 	var newCoords []float64
 	seq := ls.Coordinates()
 	n := seq.Length()
@@ -246,6 +250,20 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 		for _, xy := range xys {
 			newCoords = append(newCoords, xy.X, xy.Y)
 		}
+
+		// Populate collinear points.
+		// TODO: should the reverse order be populated too?
+		switch len(xys) {
+		case 0:
+		case 1:
+			collinear[triple{ln.a, xys[0], ln.b}] = struct{}{}
+		default:
+			collinear[triple{ln.a, xys[0], xys[1]}] = struct{}{}
+			for i := 0; i < len(xys)-2; i++ {
+				collinear[triple{xys[i], xys[i+1], xys[i+2]}] = struct{}{}
+			}
+			collinear[triple{xys[len(xys)-2], xys[len(xys)-1], ln.b}] = struct{}{}
+		}
 	}
 
 	// Copy over final point.
@@ -261,12 +279,12 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 	return newLS, nil
 }
 
-func reNodeMultiLineString(mls MultiLineString, cut cutSet, nodes nodeSet) (MultiLineString, error) {
+func reNodeMultiLineString(mls MultiLineString, cut cutSet, nodes nodeSet, collinear collinearPoints) (MultiLineString, error) {
 	n := mls.NumLineStrings()
 	lss := make([]LineString, n)
 	for i := 0; i < n; i++ {
 		var err error
-		lss[i], err = reNodeLineString(mls.LineStringN(i), cut, nodes)
+		lss[i], err = reNodeLineString(mls.LineStringN(i), cut, nodes, collinear)
 		if err != nil {
 			return MultiLineString{}, err
 		}
@@ -274,8 +292,8 @@ func reNodeMultiLineString(mls MultiLineString, cut cutSet, nodes nodeSet) (Mult
 	return NewMultiLineString(lss, DisableAllValidations), nil
 }
 
-func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) (Polygon, error) {
-	reNodedBoundary, err := reNodeMultiLineString(poly.Boundary(), cut, nodes)
+func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet, collinear collinearPoints) (Polygon, error) {
+	reNodedBoundary, err := reNodeMultiLineString(poly.Boundary(), cut, nodes, collinear)
 	if err != nil {
 		return Polygon{}, err
 	}
@@ -291,12 +309,12 @@ func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) (Polygon, error) {
 	return reNodedPoly, nil
 }
 
-func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet) (MultiPolygon, error) {
+func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet, collinear collinearPoints) (MultiPolygon, error) {
 	n := mp.NumPolygons()
 	polys := make([]Polygon, n)
 	for i := 0; i < n; i++ {
 		var err error
-		polys[i], err = reNodePolygon(mp.PolygonN(i), cut, nodes)
+		polys[i], err = reNodePolygon(mp.PolygonN(i), cut, nodes, collinear)
 		if err != nil {
 			return MultiPolygon{}, err
 		}
@@ -308,12 +326,12 @@ func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet) (Multi
 	return reNodedMP, nil
 }
 
-func reNodeGeometryCollection(gc GeometryCollection, cut cutSet, nodes nodeSet) (GeometryCollection, error) {
+func reNodeGeometryCollection(gc GeometryCollection, cut cutSet, nodes nodeSet, collinear collinearPoints) (GeometryCollection, error) {
 	n := gc.NumGeometries()
 	geoms := make([]Geometry, n)
 	for i := 0; i < n; i++ {
 		var err error
-		geoms[i], err = reNodeGeometry(gc.GeometryN(i), cut, nodes)
+		geoms[i], err = reNodeGeometry(gc.GeometryN(i), cut, nodes, collinear)
 		if err != nil {
 			return GeometryCollection{}, err
 		}

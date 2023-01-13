@@ -991,6 +991,13 @@ func TestBinaryOp(t *testing.T) {
 			relate:  "212101212",
 		},
 
+		// Removal of "cut" point test cases:
+		{
+			input1:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			input2:  "POLYGON((2 1,2 0,3 0,3 1,2 1))",
+			fwdDiff: "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+		},
+
 		// Bug reproductions:
 		{
 			input1:  "LINESTRING(-1 1,1 -1)",

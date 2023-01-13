@@ -64,7 +64,7 @@ func TestReNode(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			gotA, gotB, _, err := reNodeGeometries(inA, inB, MultiLineString{})
+			gotA, gotB, _, _, err := reNodeGeometries(inA, inB, MultiLineString{})
 			if err != nil {
 				t.Fatal(err)
 			}

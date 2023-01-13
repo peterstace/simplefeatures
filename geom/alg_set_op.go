@@ -72,12 +72,12 @@ func UnionMany(gs []Geometry) (Geometry, error) {
 }
 
 func setOp(a Geometry, include func([2]bool) bool, b Geometry) (Geometry, error) {
-	overlay, err := newDCELFromGeometries(a, b)
+	overlay, collinear, err := newDCELFromGeometries(a, b)
 	if err != nil {
 		return Geometry{}, wrap(err, "internal error creating overlay")
 	}
 
-	g, err := overlay.extractGeometry(include)
+	g, err := overlay.extractGeometry(include, collinear)
 	if err != nil {
 		return Geometry{}, wrap(err, "internal error extracting geometry")
 	}

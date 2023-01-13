@@ -6,8 +6,8 @@ import (
 )
 
 // extractGeometry converts the DECL into a Geometry that represents it.
-func (d *doublyConnectedEdgeList) extractGeometry(include func([2]bool) bool) (Geometry, error) {
-	areals, err := d.extractPolygons(include)
+func (d *doublyConnectedEdgeList) extractGeometry(include func([2]bool) bool, collinear collinearPoints) (Geometry, error) {
+	areals, err := d.extractPolygons(include, collinear)
 	if err != nil {
 		return Geometry{}, err
 	}
@@ -55,7 +55,7 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]bool) bool) (G
 	}
 }
 
-func (d *doublyConnectedEdgeList) extractPolygons(include func([2]bool) bool) ([]Polygon, error) {
+func (d *doublyConnectedEdgeList) extractPolygons(include func([2]bool) bool, collinear collinearPoints) ([]Polygon, error) {
 	var polys []Polygon
 	for _, face := range d.faces {
 		// Skip any faces not selected to be include in the output geometry, or
