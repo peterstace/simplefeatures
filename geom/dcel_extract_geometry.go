@@ -89,7 +89,7 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func([2]bool) bool, co
 					seen[edge] = true
 					return
 				}
-				ring := extractPolygonRing(facesInPoly, edge, seen)
+				ring := extractPolygonRing(facesInPoly, edge, seen, collinear)
 				rings = append(rings, ring)
 			})
 		}
@@ -111,7 +111,7 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func([2]bool) bool, co
 	return polys, nil
 }
 
-func extractPolygonRing(faceSet map[*faceRecord]bool, start *halfEdgeRecord, seen map[*halfEdgeRecord]bool) LineString {
+func extractPolygonRing(faceSet map[*faceRecord]bool, start *halfEdgeRecord, seen map[*halfEdgeRecord]bool, collinear collinearPoints) LineString {
 	var seqs []Sequence
 	e := start
 	for {
@@ -136,20 +136,22 @@ func extractPolygonRing(faceSet map[*faceRecord]bool, start *halfEdgeRecord, see
 	// rather than sorted.
 	minI := 0
 	for i := range seqs {
+		// TODO: ensure that any sequences that start with a mid-collinear
+		// point are _NOT_ ordered first.
 		if seqs[i].less(seqs[minI]) {
 			minI = i
 		}
 	}
 	rotateSeqs(seqs, len(seqs)-minI)
 
-	ring, err := NewLineString(buildRingSequence(seqs))
+	ring, err := NewLineString(buildRingSequence(seqs, collinear))
 	if err != nil {
 		panic(fmt.Sprintf("could not create LineString: %v", err))
 	}
 	return ring
 }
 
-func buildRingSequence(seqs []Sequence) Sequence {
+func buildRingSequence(seqs []Sequence, collinear collinearPoints) Sequence {
 	// Calculate desired capacity.
 	var capacity int
 	for _, seq := range seqs {
@@ -160,13 +162,30 @@ func buildRingSequence(seqs []Sequence) Sequence {
 
 	// Build concatenated sequence.
 	coords := make([]float64, 0, capacity)
-	for _, seq := range seqs {
+	seqsN := len(seqs)
+	var skipped int
+	for i, seq := range seqs {
+		prevSeq := seqs[(i-1+seqsN)%seqsN]
+		prevXY := prevSeq.GetXY(prevSeq.Length() - 2)
+		middle := seq.GetXY(0)
+		nextXY := seq.GetXY(1)
+		tripFwd := triple{prevXY, middle, nextXY}
+		tripRev := triple{nextXY, middle, prevXY}
+		// TODO: this is a bit nicer if collinearPoints is a map to bool rather than struct{}
+		_, fwdOK := collinear[tripFwd]
+		_, revOK := collinear[tripRev]
+		if fwdOK || revOK {
+			seq = seq.Slice(1, seq.Length())
+			skipped += 2
+		}
 		coords = seq.appendAllPoints(coords)
 		coords = coords[:len(coords)-2]
 	}
 	coords = append(coords, coords[:2]...)
 	seq := NewSequence(coords, DimXY)
-	seq.assertNoUnusedCapacity()
+	if len(seq.floats) != capacity-skipped {
+		panic("something went wrong with capacity calculation")
+	}
 	return seq
 }
 
