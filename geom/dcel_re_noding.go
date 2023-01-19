@@ -57,7 +57,23 @@ func ulpSizeForLine(ln line) float64 {
 }
 
 type triple [3]XY
+
 type collinearPoints map[triple]struct{}
+
+func (c collinearPoints) add(p0, p1, p2 XY) {
+	if p2.Less(p0) {
+		p0, p2 = p2, p0
+	}
+	c[triple{p0, p1, p2}] = struct{}{}
+}
+
+func (c collinearPoints) has(p0, p1, p2 XY) bool {
+	if p2.Less(p0) {
+		p0, p2 = p2, p0
+	}
+	_, ok := c[triple{p0, p1, p2}]
+	return ok
+}
 
 // reNodeGeometries returns the input geometries, but with additional
 // intermediate nodes (i.e. control points). The additional nodes are created
@@ -96,7 +112,7 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 	}
 
 	// Create additional nodes for crossings.
-	collinear := make(collinearPoints) // TODO: actually use
+	collinear := make(collinearPoints)
 	cut := newCutSet(all)
 	g1, err = reNodeGeometry(g1, cut, nodes, collinear)
 	if err != nil {
@@ -252,17 +268,16 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet, collinear collin
 		}
 
 		// Populate collinear points.
-		// TODO: should the reverse order be populated too?
 		switch len(xys) {
 		case 0:
 		case 1:
-			collinear[triple{ln.a, xys[0], ln.b}] = struct{}{}
+			collinear.add(ln.a, xys[0], ln.b)
 		default:
-			collinear[triple{ln.a, xys[0], xys[1]}] = struct{}{}
+			collinear.add(ln.a, xys[0], xys[1])
 			for i := 0; i < len(xys)-2; i++ {
-				collinear[triple{xys[i], xys[i+1], xys[i+2]}] = struct{}{}
+				collinear.add(xys[i], xys[i+1], xys[i+2])
 			}
-			collinear[triple{xys[len(xys)-2], xys[len(xys)-1], ln.b}] = struct{}{}
+			collinear.add(xys[len(xys)-2], xys[len(xys)-1], ln.b)
 		}
 	}
 

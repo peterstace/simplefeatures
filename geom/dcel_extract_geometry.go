@@ -5,6 +5,13 @@ import (
 	"sort"
 )
 
+// TODO: dcelExtractor type similar to the following?
+type dcelExtractor struct {
+	dcel      *doublyConnectedEdgeList
+	include   func([2]bool) bool
+	collinear colllinearPoints
+}
+
 // extractGeometry converts the DECL into a Geometry that represents it.
 func (d *doublyConnectedEdgeList) extractGeometry(include func([2]bool) bool, collinear collinearPoints) (Geometry, error) {
 	areals, err := d.extractPolygons(include, collinear)
@@ -169,12 +176,7 @@ func buildRingSequence(seqs []Sequence, collinear collinearPoints) Sequence {
 		prevXY := prevSeq.GetXY(prevSeq.Length() - 2)
 		middle := seq.GetXY(0)
 		nextXY := seq.GetXY(1)
-		tripFwd := triple{prevXY, middle, nextXY}
-		tripRev := triple{nextXY, middle, prevXY}
-		// TODO: this is a bit nicer if collinearPoints is a map to bool rather than struct{}
-		_, fwdOK := collinear[tripFwd]
-		_, revOK := collinear[tripRev]
-		if fwdOK || revOK {
+		if collinear.has(prevXY, middle, nextXY) {
 			seq = seq.Slice(1, seq.Length())
 			skipped += 2
 		}
