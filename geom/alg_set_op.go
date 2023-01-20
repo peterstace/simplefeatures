@@ -77,7 +77,11 @@ func setOp(a Geometry, include func([2]bool) bool, b Geometry) (Geometry, error)
 		return Geometry{}, wrap(err, "internal error creating overlay")
 	}
 
-	g, err := overlay.extractGeometry(include, collinear)
+	g, err := (&dcelExtractor{
+		dcel:      overlay,
+		include:   include,
+		collinear: collinear,
+	}).extractGeometry()
 	if err != nil {
 		return Geometry{}, wrap(err, "internal error extracting geometry")
 	}

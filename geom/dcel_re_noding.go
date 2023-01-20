@@ -58,6 +58,10 @@ func ulpSizeForLine(ln line) float64 {
 
 type triple [3]XY
 
+// collinearPoints records triples of collinear points that were detected while
+// a DCEL was being built. The 3 points in the triple are always ordered
+// linearly along the line, with the "lesser" point coming first rather than
+// coming last.
 type collinearPoints map[triple]struct{}
 
 func (c collinearPoints) add(p0, p1, p2 XY) {

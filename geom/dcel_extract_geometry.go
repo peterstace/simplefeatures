@@ -5,24 +5,25 @@ import (
 	"sort"
 )
 
-// TODO: dcelExtractor type similar to the following?
-//type dcelExtractor struct {
-//	dcel      *doublyConnectedEdgeList
-//	include   func([2]bool) bool
-//	collinear collinearPoints
-//}
+// dcelExtractor is a helper type that holds data and has methods needed to
+// extract a geometry from a DCEL.
+type dcelExtractor struct {
+	dcel      *doublyConnectedEdgeList // The DCEL to extract from.
+	include   func([2]bool) bool       // The binary output inclusion criteria.
+	collinear collinearPoints          // Collinear points to omit from the output during extraction.
+}
 
-// extractGeometry converts the DECL into a Geometry that represents it.
-func (d *doublyConnectedEdgeList) extractGeometry(include func([2]bool) bool, collinear collinearPoints) (Geometry, error) {
-	areals, err := d.extractPolygons(include, collinear)
+// extractGeometry converts the DCEL into a Geometry that represents it.
+func (d *dcelExtractor) extractGeometry() (Geometry, error) {
+	areals, err := d.extractPolygons()
 	if err != nil {
 		return Geometry{}, err
 	}
-	linears, err := d.extractLineStrings(include)
+	linears, err := d.extractLineStrings()
 	if err != nil {
 		return Geometry{}, err
 	}
-	points, err := d.extractPoints(include)
+	points, err := d.extractPoints()
 	if err != nil {
 		return Geometry{}, err
 	}
@@ -62,17 +63,17 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]bool) bool, co
 	}
 }
 
-func (d *doublyConnectedEdgeList) extractPolygons(include func([2]bool) bool, collinear collinearPoints) ([]Polygon, error) {
+func (d *dcelExtractor) extractPolygons() ([]Polygon, error) {
 	var polys []Polygon
-	for _, face := range d.faces {
+	for _, face := range d.dcel.faces {
 		// Skip any faces not selected to be include in the output geometry, or
 		// any faces already extracted.
-		if !include(face.inSet) || face.extracted {
+		if !d.include(face.inSet) || face.extracted {
 			continue
 		}
 
 		// Find all faces that make up the polygon.
-		facesInPoly := findFacesMakingPolygon(include, face)
+		facesInPoly := findFacesMakingPolygon(d.include, face)
 
 		// Extract the Polygon boundaries from the edges forming the face cycles.
 		var rings []LineString
@@ -90,13 +91,13 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func([2]bool) bool, co
 				if seen[edge] {
 					return
 				}
-				if include(edge.twin.incident.inSet) {
+				if d.include(edge.twin.incident.inSet) {
 					// Adjacent face is in the polygon, so this edge cannot be part
 					// of the boundary.
 					seen[edge] = true
 					return
 				}
-				ring := extractPolygonRing(facesInPoly, edge, seen, collinear)
+				ring := d.extractPolygonRing(facesInPoly, edge, seen)
 				rings = append(rings, ring)
 			})
 		}
@@ -118,7 +119,7 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func([2]bool) bool, co
 	return polys, nil
 }
 
-func extractPolygonRing(faceSet map[*faceRecord]bool, start *halfEdgeRecord, seen map[*halfEdgeRecord]bool, collinear collinearPoints) LineString {
+func (d *dcelExtractor) extractPolygonRing(faceSet map[*faceRecord]bool, start *halfEdgeRecord, seen map[*halfEdgeRecord]bool) LineString {
 	var seqs []Sequence
 	e := start
 	for {
@@ -151,14 +152,14 @@ func extractPolygonRing(faceSet map[*faceRecord]bool, start *halfEdgeRecord, see
 	}
 	rotateSeqs(seqs, len(seqs)-minI)
 
-	ring, err := NewLineString(buildRingSequence(seqs, collinear))
+	ring, err := NewLineString(d.buildRingSequence(seqs))
 	if err != nil {
 		panic(fmt.Sprintf("could not create LineString: %v", err))
 	}
 	return ring
 }
 
-func buildRingSequence(seqs []Sequence, collinear collinearPoints) Sequence {
+func (d *dcelExtractor) buildRingSequence(seqs []Sequence) Sequence {
 	// Calculate desired capacity.
 	var capacity int
 	for _, seq := range seqs {
@@ -176,7 +177,7 @@ func buildRingSequence(seqs []Sequence, collinear collinearPoints) Sequence {
 		prevXY := prevSeq.GetXY(prevSeq.Length() - 2)
 		middle := seq.GetXY(0)
 		nextXY := seq.GetXY(1)
-		if collinear.has(prevXY, middle, nextXY) {
+		if d.collinear.has(prevXY, middle, nextXY) {
 			seq = seq.Slice(1, seq.Length())
 			skipped += 2
 		}
@@ -265,10 +266,10 @@ func orderPolygonRings(rings []LineString) {
 	})
 }
 
-func (d *doublyConnectedEdgeList) extractLineStrings(include func([2]bool) bool) ([]LineString, error) {
+func (d *dcelExtractor) extractLineStrings() ([]LineString, error) {
 	var lss []LineString
-	for _, e := range d.halfEdges {
-		if shouldExtractLine(e, include) {
+	for _, e := range d.dcel.halfEdges {
+		if shouldExtractLine(e, d.include) {
 			if e.twin.seq.less(e.seq) {
 				e = e.twin // Extract in deterministic order.
 			}
@@ -302,10 +303,10 @@ func shouldExtractLine(e *halfEdgeRecord, include func([2]bool) bool) bool {
 // extractPoints extracts any vertices in the DCEL that should be part of the
 // output geometry, but aren't yet represented as part of any previously
 // extracted geometries.
-func (d *doublyConnectedEdgeList) extractPoints(include func([2]bool) bool) ([]Point, error) {
-	xys := make([]XY, 0, len(d.vertices))
-	for _, vert := range d.vertices {
-		if include(vert.inSet) && !vert.extracted {
+func (d *dcelExtractor) extractPoints() ([]Point, error) {
+	xys := make([]XY, 0, len(d.dcel.vertices))
+	for _, vert := range d.dcel.vertices {
+		if d.include(vert.inSet) && !vert.extracted {
 			vert.extracted = true
 			xys = append(xys, vert.coords)
 		}
