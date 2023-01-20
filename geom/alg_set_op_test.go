@@ -254,8 +254,8 @@ func TestBinaryOp(t *testing.T) {
 			input2:  "POLYGON((1 0,1 1,2 1,2 0,1 0))",
 			union:   "POLYGON((0 0.5,0 1.5,1 1.5,1 1,2 1,2 0,1 0,1 0.5,0 0.5))",
 			inter:   "LINESTRING(1 1,1 0.5)",
-			fwdDiff: "POLYGON((0 0.5,0 1.5,1 1.5,1 1,1 0.5,0 0.5))",
-			revDiff: "POLYGON((1 0,1 0.5,1 1,2 1,2 0,1 0))",
+			fwdDiff: "POLYGON((0 0.5,0 1.5,1 1.5,1 0.5,0 0.5))",
+			revDiff: "POLYGON((1 0,1 1,2 1,2 0,1 0))",
 			symDiff: "POLYGON((1 0,1 0.5,0 0.5,0 1.5,1 1.5,1 1,2 1,2 0,1 0))",
 			relate:  "FF2F11212",
 		},
@@ -364,9 +364,9 @@ func TestBinaryOp(t *testing.T) {
 			*/
 			input1:  "POLYGON((0 0,1 0,1 4,0 4,0 0))",
 			input2:  "POLYGON((0 0,3 0,3 5,1 5,1 4,2 4,2 3,1 3,1 2,2 2,2 1,0 1,0 0))",
-			union:   "POLYGON((1 0,0 0,0 1,0 4,1 4,1 5,3 5,3 0,1 0),(1 4,1 3,2 3,2 4,1 4),(1 2,1 1,2 1,2 2,1 2))",
+			union:   "POLYGON((0 0,0 4,1 4,1 5,3 5,3 0,0 0),(1 4,1 3,2 3,2 4,1 4),(1 2,1 1,2 1,2 2,1 2))",
 			inter:   "GEOMETRYCOLLECTION(POINT(1 4),LINESTRING(1 2,1 3),POLYGON((1 0,0 0,0 1,1 1,1 0)))",
-			fwdDiff: "POLYGON((1 2,1 1,0 1,0 4,1 4,1 3,1 2))",
+			fwdDiff: "POLYGON((1 1,0 1,0 4,1 4,1 1))",
 			revDiff: "POLYGON((1 4,1 5,3 5,3 0,1 0,1 1,2 1,2 2,1 2,1 3,2 3,2 4,1 4))",
 			symDiff: "POLYGON((1 4,1 5,3 5,3 0,1 0,1 1,0 1,0 4,1 4),(1 1,2 1,2 2,1 2,1 1),(1 4,1 3,2 3,2 4,1 4))",
 			relate:  "212111212",
@@ -535,11 +535,11 @@ func TestBinaryOp(t *testing.T) {
 			*/
 			input1:  "POLYGON((0 0,0 2,2 2,2 0,0 0))",
 			input2:  "LINESTRING(1 1,1 3)",
-			union:   "GEOMETRYCOLLECTION(LINESTRING(1 2,1 3),POLYGON((0 0,0 2,1 2,2 2,2 0,0 0)))",
+			union:   "GEOMETRYCOLLECTION(LINESTRING(1 2,1 3),POLYGON((0 0,0 2,2 2,2 0,0 0)))",
 			inter:   "LINESTRING(1 1,1 2)",
-			fwdDiff: "POLYGON((0 0,0 2,1 2,2 2,2 0,0 0))",
+			fwdDiff: "POLYGON((0 0,0 2,2 2,2 0,0 0))",
 			revDiff: "LINESTRING(1 2,1 3)",
-			symDiff: "GEOMETRYCOLLECTION(LINESTRING(1 2,1 3),POLYGON((0 0,0 2,1 2,2 2,2 0,0 0)))",
+			symDiff: "GEOMETRYCOLLECTION(LINESTRING(1 2,1 3),POLYGON((0 0,0 2,2 2,2 0,0 0)))",
 			relate:  "1020F1102",
 		},
 		{
@@ -571,10 +571,10 @@ func TestBinaryOp(t *testing.T) {
 			*/
 			input1:  "POLYGON((0 0,3 0,3 1,1 1,1 2,3 2,3 3,0 3,0 0))",
 			input2:  "POLYGON((0 1,0 2,2 2,2 3,3 3,3 0,2 0,2 1,0 1))",
-			union:   "POLYGON((2 0,0 0,0 1,0 2,0 3,2 3,3 3,3 2,3 1,3 0,2 0))",
+			union:   "POLYGON((0 0,0 3,3 3,3 0,0 0))",
 			inter:   "GEOMETRYCOLLECTION(LINESTRING(2 1,1 1),LINESTRING(1 2,2 2),POLYGON((3 0,2 0,2 1,3 1,3 0)),POLYGON((1 2,1 1,0 1,0 2,1 2)),POLYGON((3 2,2 2,2 3,3 3,3 2)))",
-			fwdDiff: "MULTIPOLYGON(((2 0,0 0,0 1,1 1,2 1,2 0)),((2 2,1 2,0 2,0 3,2 3,2 2)))",
-			revDiff: "POLYGON((1 2,2 2,3 2,3 1,2 1,1 1,1 2))",
+			fwdDiff: "MULTIPOLYGON(((2 0,0 0,0 1,2 1,2 0)),((2 2,0 2,0 3,2 3,2 2)))",
+			revDiff: "POLYGON((1 2,3 2,3 1,1 1,1 2))",
 			symDiff: "POLYGON((1 2,0 2,0 3,2 3,2 2,3 2,3 1,2 1,2 0,0 0,0 1,1 1,1 2))",
 			relate:  "212111212",
 		},
@@ -602,11 +602,11 @@ func TestBinaryOp(t *testing.T) {
 			*/
 			input1:  "POLYGON((0 0,0 2,2 2,2 0,0 0))",
 			input2:  "MULTIPOINT(1 1,3 1)",
-			union:   "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 1,2 0,0 0)))",
+			union:   "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 0,0 0)))",
 			inter:   "POINT(1 1)",
-			fwdDiff: "POLYGON((0 0,0 2,2 2,2 1,2 0,0 0))",
+			fwdDiff: "POLYGON((0 0,0 2,2 2,2 0,0 0))",
 			revDiff: "POINT(3 1)",
-			symDiff: "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 1,2 0,0 0)))",
+			symDiff: "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 0,0 0)))",
 			relate:  "0F2FF10F2",
 		},
 		{
@@ -640,11 +640,11 @@ func TestBinaryOp(t *testing.T) {
 			*/
 			input1:  "POLYGON((0 0,0 1,1 0,0 0))",
 			input2:  "POINT(0.5 0.5)",
-			union:   "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
+			union:   "POLYGON((0 0,0 1,1 0,0 0))",
 			inter:   "POINT(0.5 0.5)",
-			fwdDiff: "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
+			fwdDiff: "POLYGON((0 0,0 1,1 0,0 0))",
 			revDiff: "GEOMETRYCOLLECTION EMPTY",
-			symDiff: "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
+			symDiff: "POLYGON((0 0,0 1,1 0,0 0))",
 			relate:  "FF20F1FF2",
 		},
 		{
@@ -729,11 +729,11 @@ func TestBinaryOp(t *testing.T) {
 		{
 			input1:  "LINESTRING(-1 1,1 -1)",
 			input2:  "POLYGON((-1 0,-0.070710678118655 0.070710678118655,0 1,-1 0))",
-			union:   "GEOMETRYCOLLECTION(LINESTRING(-1 1,-0.5 0.5),LINESTRING(-0.070710678118655 0.070710678118655,1 -1),POLYGON((-1 0,-0.5 0.5,0 1,-0.070710678118655 0.070710678118655,-1 0)))",
+			union:   "GEOMETRYCOLLECTION(LINESTRING(-1 1,-0.5 0.5),LINESTRING(-0.070710678118655 0.070710678118655,1 -1),POLYGON((-1 0,0 1,-0.070710678118655 0.070710678118655,-1 0)))",
 			inter:   "LINESTRING(-0.5 0.5,-0.070710678118655 0.070710678118655)",
 			fwdDiff: "MULTILINESTRING((-1 1,-0.5 0.5),(-0.070710678118655 0.070710678118655,1 -1))",
-			revDiff: "POLYGON((-1 0,-0.5 0.5,0 1,-0.070710678118655 0.070710678118655,-1 0))",
-			symDiff: "GEOMETRYCOLLECTION(LINESTRING(-1 1,-0.5 0.5),LINESTRING(-0.070710678118655 0.070710678118655,1 -1),POLYGON((-1 0,-0.5 0.5,0 1,-0.070710678118655 0.070710678118655,-1 0)))",
+			revDiff: "POLYGON((-1 0,0 1,-0.070710678118655 0.070710678118655,-1 0))",
+			symDiff: "GEOMETRYCOLLECTION(LINESTRING(-1 1,-0.5 0.5),LINESTRING(-0.070710678118655 0.070710678118655,1 -1),POLYGON((-1 0,0 1,-0.070710678118655 0.070710678118655,-1 0)))",
 			relate:  "101FF0212",
 		},
 		{
@@ -758,11 +758,11 @@ func TestBinaryOp(t *testing.T) {
 			*/
 			input1:  "GEOMETRYCOLLECTION(POLYGON((1 0,3 2,1 2,1 0)))",
 			input2:  "GEOMETRYCOLLECTION(LINESTRING(0 1,3 1))",
-			union:   "GEOMETRYCOLLECTION(POLYGON((1 0,2 1,3 2,1 2,1 1,1 0)),LINESTRING(0 1,1 1),LINESTRING(2 1,3 1))",
+			union:   "GEOMETRYCOLLECTION(POLYGON((1 0,3 2,1 2,1 0)),LINESTRING(0 1,1 1),LINESTRING(2 1,3 1))",
 			inter:   "LINESTRING(1 1,2 1)",
-			fwdDiff: "POLYGON((1 0,2 1,3 2,1 2,1 1,1 0))",
+			fwdDiff: "POLYGON((1 0,3 2,1 2,1 0))",
 			revDiff: "MULTILINESTRING((0 1,1 1),(2 1,3 1))",
-			symDiff: "GEOMETRYCOLLECTION(POLYGON((1 0,2 1,3 2,1 2,1 1,1 0)),LINESTRING(0 1,1 1),LINESTRING(2 1,3 1))",
+			symDiff: "GEOMETRYCOLLECTION(POLYGON((1 0,3 2,1 2,1 0)),LINESTRING(0 1,1 1),LINESTRING(2 1,3 1))",
 			relate:  "1F20F1102",
 		},
 		{
@@ -795,26 +795,26 @@ func TestBinaryOp(t *testing.T) {
 				POLYGON((2 0,6 4,2 4,2 0)),
 				LINESTRING(3 0,3 6))`,
 			union: `GEOMETRYCOLLECTION(
-				POLYGON((2 2,2 0,3 1,5 3,6 4,4 4,5 5,3 5,1 5,1 3,1 1,2 2)),
+				POLYGON((2 2,2 0,6 4,4 4,5 5,1 5,1 1,2 2)),
 				LINESTRING(0 3,1 3),
 				LINESTRING(5 3,6 3),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 5,3 6))`,
 			inter: `GEOMETRYCOLLECTION(
-				POLYGON((2 2,3 3,4 4,3 4,2 4,2 3,2 2)),
+				POLYGON((2 2,4 4,2 4,2 2)),
 				LINESTRING(3 3,5 3),
 				LINESTRING(3 4,3 5))`,
 			fwdDiff: `GEOMETRYCOLLECTION(
-				POLYGON((1 1,2 2,2 3,2 4,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
+				POLYGON((1 1,2 2,2 4,4 4,5 5,1 5,1 1)),
 				LINESTRING(0 3,1 3),
 				LINESTRING(5 3,6 3))`,
 			revDiff: `GEOMETRYCOLLECTION(
-				POLYGON((3 1,5 3,6 4,4 4,3 3,2 2,2 0,3 1)),
+				POLYGON((2 0,6 4,4 4,2 2,2 0)),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 5,3 6))`,
 			symDiff: `GEOMETRYCOLLECTION(
-				POLYGON((1 1,2 2,2 3,2 4,3 4,4 4,5 5,3 5,1 5,1 3,1 1)),
-				POLYGON((3 1,5 3,6 4,4 4,3 3,2 2,2 0,3 1)),
+				POLYGON((1 1,2 2,2 4,4 4,5 5,1 5,1 1)),
+				POLYGON((2 0,6 4,4 4,2 2,2 0)),
 				LINESTRING(0 3,1 3),
 				LINESTRING(5 3,6 3),
 				LINESTRING(3 0,3 1),
@@ -855,26 +855,26 @@ func TestBinaryOp(t *testing.T) {
 				POLYGON((2 0,7 5,2 5,2 0)),
 				LINESTRING(3 0,3 7))`,
 			union: `GEOMETRYCOLLECTION(
-				POLYGON((2 2,2 0,3 1,6 4,7 5,5 5,6 6,3 6,1 6,1 4,1 1,2 2)),
+				POLYGON((2 2,2 0,7 5,5 5,6 6,1 6,1 1,2 2)),
 				LINESTRING(0 4,1 4),
 				LINESTRING(6 4,7 4),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 6,3 7))`,
 			inter: `GEOMETRYCOLLECTION(
-				POLYGON((2 2,3 3,4 4,5 5,3 5,2 5,2 4,2 2)),
+				POLYGON((2 2,5 5,2 5,2 2)),
 				LINESTRING(4 4,6 4),
 				LINESTRING(3 5,3 6))`,
 			fwdDiff: `GEOMETRYCOLLECTION(
-				POLYGON((5 5,6 6,3 6,1 6,1 4,1 1,2 2,2 4,2 5,3 5,5 5)),
+				POLYGON((5 5,6 6,1 6,1 1,2 2,2 5,5 5)),
 				LINESTRING(0 4,1 4),
 				LINESTRING(6 4,7 4))`,
 			revDiff: `GEOMETRYCOLLECTION(
-				POLYGON((2 0,3 1,6 4,7 5,5 5,4 4,3 3,2 2,2 0)),
+				POLYGON((2 0,7 5,5 5,2 2,2 0)),
 				LINESTRING(3 0,3 1),
 				LINESTRING(3 6,3 7))`,
 			symDiff: `GEOMETRYCOLLECTION(
-				POLYGON((3 6,1 6,1 4,1 1,2 2,2 4,2 5,3 5,5 5,6 6,3 6)),
-				POLYGON((3 3,2 2,2 0,3 1,6 4,7 5,5 5,4 4,3 3)),
+				POLYGON((1 6,1 1,2 2,2 5,5 5,6 6,1 6)),
+				POLYGON((2 2,2 0,7 5,5 5,2 2)),
 				LINESTRING(0 4,1 4),
 				LINESTRING(6 4,7 4),
 				LINESTRING(3 0,3 1),
@@ -971,7 +971,7 @@ func TestBinaryOp(t *testing.T) {
 						POLYGON((0 0,1 0,0 1,0 0)),
 						POLYGON((1 1,0 1,1 0,1 1)))`,
 			input2:  "POLYGON((0 0,2 0,2 2,0 2,0 0))",
-			union:   "POLYGON((0 0,1 0,2 0,2 2,0 2,0 1,0 0))",
+			union:   "POLYGON((0 0,2 0,2 2,0 2,0 0))",
 			inter:   "POLYGON((0 0,1 0,1 1,0 1,0 0))",
 			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
 			revDiff: "POLYGON((1 0,2 0,2 2,0 2,0 1,1 1,1 0))",
@@ -983,7 +983,7 @@ func TestBinaryOp(t *testing.T) {
 						POLYGON((0 0,2 0,2 1,0 1,0 0)),
 						POLYGON((0 0,1 0,1 2,0 2,0 0)))`,
 			input2:  "POLYGON((1 0,2 1,1 2,0 1,1 0))",
-			union:   "POLYGON((0 0,1 0,2 0,2 1,1 2,0 2,0 1,0 0))",
+			union:   "POLYGON((0 0,2 0,2 1,1 2,0 2,0 0))",
 			inter:   "POLYGON((1 0,2 1,1 1,1 2,0 1,1 0))",
 			fwdDiff: "MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((1 0,2 0,2 1,1 0)),((0 1,1 2,0 2,0 1)))",
 			revDiff: "POLYGON((1 1,2 1,1 2,1 1))",
@@ -1012,11 +1012,11 @@ func TestBinaryOp(t *testing.T) {
 		{
 			input1:  "LINESTRING(0 1,1 0)",
 			input2:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
-			union:   "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			union:   "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
 			inter:   "LINESTRING(0 1,1 0)",
 			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
-			revDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
-			symDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			revDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			symDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
 			relate:  "1FFF0F212",
 		},
 		{
@@ -1106,7 +1106,7 @@ func TestBinaryOp(t *testing.T) {
 		{
 			input1: "LINESTRING(1 0,0.5000000000000001 0.5,0 1)",
 			input2: "MULTIPOLYGON(((0 0,2 0,2 2,0 2,0 0),(0.5 0.5,1 0.5,1 1.5,0.5 1.5,0.5 0.5)))",
-			union:  "POLYGON((0 0,1 0,2 0,2 2,0 2,0 1,0 0),(0.5000000000000001 0.5,1 0.5,1 1.5,0.5 1.5,0.5000000000000001 0.5))",
+			union:  "POLYGON((0 0,2 0,2 2,0 2,0 0),(0.5000000000000001 0.5,1 0.5,1 1.5,0.5 1.5,0.5000000000000001 0.5))",
 			relate: "10FF0F212",
 		},
 		{
@@ -1122,7 +1122,7 @@ func TestBinaryOp(t *testing.T) {
 		{
 			input1: "MULTILINESTRING((2 0,2 1),(2 2,2 3))",
 			input2: "POLYGON((0 0,0 10,10 10,10 0,0 0),(1.5 1.5,8.5 1.5,8.5 8.5,1.5 8.5,1.5 1.5))",
-			union:  "GEOMETRYCOLLECTION(POLYGON((2 0,10 0,10 10,0 10,0 0,2 0),(1.5 1.5,1.5 8.5,8.5 8.5,8.5 1.5,1.5 1.5)),LINESTRING(2 2,2 3))",
+			union:  "GEOMETRYCOLLECTION(POLYGON((0 0,10 0,10 10,0 10,0 0),(1.5 1.5,1.5 8.5,8.5 8.5,8.5 1.5,1.5 1.5)),LINESTRING(2 2,2 3))",
 		},
 		{
 			input1: "POINT(0 0)",
@@ -1434,7 +1434,7 @@ func TestUnaryUnionAndUnionMany(t *testing.T) {
 				"POLYGON((1 0,1 2,2 2,2 0,1 0))",
 				"POLYGON((1 0,1 1,2 1,2 0,1 0))",
 			},
-			wantWKT: "POLYGON((0 0,1 0,2 0,2 1,2 2,1 2,1 1,0 1,0 0))",
+			wantWKT: "POLYGON((0 0,2 0,2 2,1 2,1 1,0 1,0 0))",
 		},
 		{
 			inputWKTs: []string{
@@ -1443,7 +1443,7 @@ func TestUnaryUnionAndUnionMany(t *testing.T) {
 				"POLYGON((0 1.5,2 1.5,2 2.5,0 2.5,0 1.5))",
 			},
 			wantWKT: `POLYGON(
-				(1 0,1.75 1.5,2 1.5,2 2,2 2.5,1.75 2.5,1 4,0.25 2.5,0 2.5,0 2,0 1.5,0.25 1.5,1 0),
+				(1 0,1.75 1.5,2 1.5,2 2.5,1.75 2.5,1 4,0.25 2.5,0 2.5,0 1.5,0.25 1.5,1 0),
 				(0.5 1.5,1.5 1.5,1 1,0.5 1.5),
 				(0.5 2.5,1.5 2.5,1 3,0.5 2.5))`,
 		},
@@ -1461,7 +1461,8 @@ func TestUnaryUnionAndUnionMany(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var inputs []geom.Geometry
-			for _, wkt := range tc.inputWKTs {
+			for i, wkt := range tc.inputWKTs {
+				t.Logf("input %d: %s", i, wkt)
 				inputs = append(inputs, geomFromWKT(t, wkt))
 			}
 			t.Run("UnionMany", func(t *testing.T) {

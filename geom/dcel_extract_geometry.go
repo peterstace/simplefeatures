@@ -6,11 +6,11 @@ import (
 )
 
 // TODO: dcelExtractor type similar to the following?
-type dcelExtractor struct {
-	dcel      *doublyConnectedEdgeList
-	include   func([2]bool) bool
-	collinear colllinearPoints
-}
+//type dcelExtractor struct {
+//	dcel      *doublyConnectedEdgeList
+//	include   func([2]bool) bool
+//	collinear collinearPoints
+//}
 
 // extractGeometry converts the DECL into a Geometry that represents it.
 func (d *doublyConnectedEdgeList) extractGeometry(include func([2]bool) bool, collinear collinearPoints) (Geometry, error) {
