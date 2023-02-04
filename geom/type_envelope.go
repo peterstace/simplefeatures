@@ -295,3 +295,27 @@ func (e Envelope) box() (rtree.Box, bool) {
 		MaxY: e.maxY,
 	}, !e.IsEmpty()
 }
+
+// BoundingDiagonal returns the LineString that goes from the minimum point in
+// the Envelope to the point in the Envelope. If the envelope is degenerate and
+// represents a single point, then a Point is returned instead of a LineString.
+// If the Envelope is empty, then the empty Geometry (representing an empty
+// GeometryCollection) is returned.
+func (e Envelope) BoundingDiagonal() Geometry {
+	if e.IsEmpty() {
+		return Geometry{}
+	}
+	if e.IsPoint() {
+		return e.min().asUncheckedPoint().AsGeometry()
+	}
+
+	// The Envelope has already been validated, so it's safe to skip validation
+	// when constructing the diagonal.
+	coords := []float64{e.minX(), e.minY, e.maxX, e.maxY}
+	seq := NewSequence(coords, DimXY)
+	ls, err := NewLineString(seq, DisableAllValidations)
+	if err != nil {
+		panic("programming error: validations disabled by LineString validation failed")
+	}
+	return ls.AsGeometry()
+}
