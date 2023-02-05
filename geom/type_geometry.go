@@ -56,6 +56,7 @@ func (t GeometryType) String() string {
 
 // Type returns a string representation of the geometry's type.
 func (g Geometry) Type() GeometryType {
+	// TODO: why is this not just `return g.gtype`?
 	switch g.gtype {
 	case TypeGeometryCollection:
 		return g.MustAsGeometryCollection().Type()
@@ -972,5 +973,30 @@ func (g Geometry) Simplify(threshold float64, opts ...ConstructorOption) (Geomet
 		return c.AsGeometry(), err
 	default:
 		panic("unknown type: " + g.Type().String())
+	}
+}
+
+// Normalize returns a canonical form for this Geometry. Vertices, rings, and
+// elements of multi-geometries may be reordered. This can be used for testing
+// if two geometries represent equivalent geometries under ordering
+// differences.
+func (g Geometry) Normalize() Geometry {
+	switch g.Type() {
+	case TypeGeometryCollection:
+		return g.MustAsGeometryCollection().Normalize().AsGeometry()
+	case TypePoint:
+		return g.MustAsPoint().Normalize().AsGeometry()
+	case TypeMultiPoint:
+		return g.MustAsMultiPoint().Normalize().AsGeometry()
+	case TypeLineString:
+		return g.MustAsLineString().Normalize().AsGeometry()
+	case TypeMultiLineString:
+		return g.MustAsMultiLineString().Normalize().AsGeometry()
+	case TypePolygon:
+		return g.MustAsPolygon().Normalize().AsGeometry()
+	case TypeMultiPolygon:
+		return g.MustAsMultiPolygon().Normalize().AsGeometry()
+	default:
+		panic("unknown geometry type: " + g.Type().String())
 	}
 }

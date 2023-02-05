@@ -3,6 +3,7 @@ package geom
 import (
 	"database/sql/driver"
 	"fmt"
+	"sort"
 	"unsafe"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -566,4 +567,20 @@ func (m MultiPolygon) Simplify(threshold float64, opts ...ConstructorOption) (Mu
 	}
 	simpl, err := NewMultiPolygon(polys, opts...)
 	return simpl, wrapSimplified(err)
+}
+
+// Normalize returns the canonical form of this MultiPolygon. Each Polygon is
+// normalized, and the order among constituent Polygons is normalized. This can
+// be used for testing.
+func (m MultiPolygon) Normalize() MultiPolygon {
+	polys := make([]Polygon, len(m.polys))
+	for i, p := range m.polys {
+		polys[i] = p.Normalize()
+	}
+	sort.Slice(polys, func(i, j int) bool {
+		a := polys[i].ExteriorRing().StartPoint()
+		b := polys[j].ExteriorRing().StartPoint()
+		return a.less(b)
+	})
+	return m
 }

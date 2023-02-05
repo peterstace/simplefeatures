@@ -186,6 +186,26 @@ func (s Sequence) less(o Sequence) bool {
 	return false
 }
 
+// rotateLeft returns a copy of the sequence that has each set of coordinate
+// rotated k places to the left, wrapping around the start of the sequence to
+// the end.
+func (s Sequence) rotateLeft(k int) Sequence {
+	if k == 0 {
+		return s // Nothing to do (optimisation).
+	}
+
+	cp := make([]float64, len(s.floats))
+	stride := s.ctype.Dimension()
+	n := s.Length()
+	for dst := 0; dst < n; dst++ {
+		src := (dst + k) % n
+		for i := 0; i < stride; i++ {
+			cp[dst*stride+i] = s.floats[src*stride+i]
+		}
+	}
+	return Sequence{ctype: s.ctype, floats: cp}
+}
+
 // getLine extracts a 2D line segment from a sequence by joining together
 // adjacent locations in the sequence. It is designed to be called with i equal
 // to each index in the sequence (from 0 to n-1, both inclusive). The flag

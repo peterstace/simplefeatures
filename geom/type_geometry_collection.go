@@ -540,3 +540,11 @@ func (c GeometryCollection) Simplify(threshold float64, opts ...ConstructorOptio
 	}
 	return NewGeometryCollection(geoms, opts...), nil
 }
+
+func (c GeometryCollection) Normalize() GeometryCollection {
+	//geoms := make([]Geometry, len(c.geoms))
+	//for i, g := range c.geoms {
+	//	geoms[i] = g.Normalize()
+	//}
+	return c
+}

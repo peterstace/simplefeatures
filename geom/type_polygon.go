@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
+	"sort"
 	"unsafe"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -681,4 +682,56 @@ func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon
 	}
 	simpl, err := NewPolygon(rings, opts...)
 	return simpl, wrapSimplified(err)
+}
+
+// Normalize returns the canonical form of this Polygon. The Polygon is wound
+// in a consistent order, and the starting point of each ring is canonicalized,
+// as is the ordering between any inner rings. This can be used for testing.
+func (p Polygon) Normalize() Polygon {
+	p = p.ForceCCW()
+
+	rings := make([]LineString, len(p.rings))
+	for i, r := range p.rings {
+		rings[i] = normaliseRing(r)
+	}
+
+	if len(rings) > 1 {
+		inner := rings[1:]
+		sort.Slice(inner, func(i, j int) bool {
+			// TODO: should we sort the line strings directly rather than using
+			// their starting point?
+			ptA := inner[i].StartPoint()
+			ptB := inner[j].StartPoint()
+			return ptA.less(ptB)
+		})
+	}
+
+	return Polygon{rings, p.ctype}
+}
+
+func normaliseRing(ring LineString) LineString {
+	minI, ok := argminSequence(ring.Coordinates())
+	if !ok {
+		return ring
+	}
+	rotated := ring.Coordinates().rotateLeft(minI)
+	return LineString{seq: rotated}
+}
+
+// argminSequence finds the index such that seq.GetXY(index) is smallest. If
+// there is a tie, then the lowest index is returned.
+func argminSequence(seq Sequence) (int, bool) {
+	n := seq.Length()
+	if n == 0 {
+		return 0, false
+	}
+	var best int
+	for i := 1; i < n; i++ {
+		xyI := seq.GetXY(i)
+		xyBest := seq.GetXY(best)
+		if xyBest.Less(xyI) {
+			best = i
+		}
+	}
+	return best, true
 }

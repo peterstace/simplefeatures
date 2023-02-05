@@ -3,6 +3,7 @@ package geom
 import (
 	"database/sql/driver"
 	"fmt"
+	"sort"
 	"unsafe"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -501,4 +502,18 @@ func (m MultiLineString) Simplify(threshold float64) MultiLineString {
 		}
 	}
 	return NewMultiLineString(lss)
+}
+
+// Normalize returns the canonical form of this MultiLineString. Each
+// constituent LineString is normalised, as is the ordering among LineStrings.
+// This can be used for testing.
+func (m MultiLineString) Normalize() MultiLineString {
+	cp := make([]LineString, len(m.lines))
+	for i, ls := range m.lines {
+		cp[i] = ls.Normalize()
+	}
+	sort.Slice(cp, func(i, j int) bool {
+		return cp[i].less(cp[j])
+	})
+	return MultiLineString{cp, m.ctype}
 }

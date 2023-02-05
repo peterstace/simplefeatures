@@ -3,6 +3,7 @@ package geom
 import (
 	"database/sql/driver"
 	"fmt"
+	"sort"
 	"unsafe"
 )
 
@@ -327,4 +328,15 @@ func (m MultiPoint) Summary() string {
 // String returns the string representation of the MultiPoint.
 func (m MultiPoint) String() string {
 	return m.Summary()
+}
+
+// Normalize returns the MultiPoint with its constituent points converted to
+// their canonical order. This can be used for testing.
+func (m MultiPoint) Normalize() MultiPoint {
+	cp := make([]Point, len(m.points))
+	copy(cp, m.points)
+	sort.Slice(cp, func(i, j int) bool {
+		return cp[i].less(cp[j])
+	})
+	return MultiPoint{cp, m.ctype}
 }

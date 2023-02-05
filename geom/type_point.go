@@ -286,3 +286,23 @@ func (p Point) Summary() string {
 func (p Point) String() string {
 	return p.Summary()
 }
+
+// Normalize returns this Point unaltered (because there is only one
+// representation of a Point).
+func (p Point) Normalize() Point {
+	return p
+}
+
+// less gives an ordering to Points. Empty Points come first. If both Points
+// are non empty then the XY values are used for comparison.
+func (p Point) less(o Point) bool {
+	xyA, okA := p.XY()
+	xyB, okB := o.XY()
+	if !okB {
+		return false
+	}
+	if !okA {
+		return true
+	}
+	return xyA.Less(xyB)
+}
