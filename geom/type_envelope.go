@@ -296,8 +296,8 @@ func (e Envelope) box() (rtree.Box, bool) {
 	}, !e.IsEmpty()
 }
 
-// BoundingDiagonal returns the LineString that goes from the minimum point in
-// the Envelope to the point in the Envelope. If the envelope is degenerate and
+// BoundingDiagonal returns the LineString that goes from the point returned by
+// Min() to the point returned by Max(). If the envelope is degenerate and
 // represents a single point, then a Point is returned instead of a LineString.
 // If the Envelope is empty, then the empty Geometry (representing an empty
 // GeometryCollection) is returned.
