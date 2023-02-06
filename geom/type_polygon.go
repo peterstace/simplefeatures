@@ -710,12 +710,33 @@ func (p Polygon) Normalize() Polygon {
 }
 
 func normaliseRing(ring LineString) LineString {
-	minI, ok := argminSequence(ring.Coordinates())
+	coords := ring.Coordinates()
+	minI, ok := argminSequence(coords)
 	if !ok {
 		return ring
 	}
-	rotated := ring.Coordinates().rotateLeft(minI)
+	rotated := rotateRingSeqLeft(coords, minI)
 	return LineString{seq: rotated}
+}
+
+func rotateRingSeqLeft(s Sequence, k int) Sequence {
+	if k == 0 {
+		return s // Nothing to do (optimisation).
+	}
+
+	cp := make([]float64, len(s.floats))
+	stride := s.ctype.Dimension()
+	n := s.Length() - 1 // Don't rotate the list point in the ring.
+	for dst := 0; dst < n; dst++ {
+		src := (dst + k) % n
+		for i := 0; i < stride; i++ {
+			cp[dst*stride+i] = s.floats[src*stride+i]
+		}
+	}
+	for i := 0; i < stride; i++ {
+		cp[n+i] = cp[i]
+	}
+	return Sequence{ctype: s.ctype, floats: cp}
 }
 
 // argminSequence finds the index such that seq.GetXY(index) is smallest. If
@@ -729,7 +750,7 @@ func argminSequence(seq Sequence) (int, bool) {
 	for i := 1; i < n; i++ {
 		xyI := seq.GetXY(i)
 		xyBest := seq.GetXY(best)
-		if xyBest.Less(xyI) {
+		if xyI.Less(xyBest) {
 			best = i
 		}
 	}

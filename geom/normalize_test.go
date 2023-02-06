@@ -38,7 +38,10 @@ func TestNormalize(t *testing.T) {
 		{"MULTILINESTRING((5 6,7 8),(1 2,3 4),(1 2,5 6))", "MULTILINESTRING((1 2,3 4),(1 2,5 6),(5 6,7 8))"},
 
 		{"POLYGON EMPTY", "POLYGON EMPTY"},
-		//{"POLYGON((0 0,0 1,1 0,0 0))", "POLYGON((0 0,0 1,1 0,0 0))"},
+
+		// Normalises outer ring orientation:
+		{"POLYGON((0 0,0 1,1 0,0 0))", "POLYGON((0 0,1 0,0 1,0 0))"},
+		{"POLYGON((0 0,1 0,0 1,0 0))", "POLYGON((0 0,1 0,0 1,0 0))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := geomFromWKT(t, tc.inputWKT).Normalize()
