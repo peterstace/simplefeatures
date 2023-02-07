@@ -186,6 +186,24 @@ func (s Sequence) less(o Sequence) bool {
 	return false
 }
 
+// argmin finds the index such that GetXY(index) is smallest. If there is a
+// tie, then the lowest index is returned.
+func (s Sequence) argmin() (int, bool) {
+	n := s.Length()
+	if n == 0 {
+		return 0, false
+	}
+	var best int
+	for i := 1; i < n; i++ {
+		xyI := s.GetXY(i)
+		xyBest := s.GetXY(best)
+		if xyI.Less(xyBest) {
+			best = i
+		}
+	}
+	return best, true
+}
+
 // getLine extracts a 2D line segment from a sequence by joining together
 // adjacent locations in the sequence. It is designed to be called with i equal
 // to each index in the sequence (from 0 to n-1, both inclusive). The flag
