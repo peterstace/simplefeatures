@@ -44,9 +44,9 @@ func TestNormalize(t *testing.T) {
 		{"POLYGON((0 0,1 0,0 1,0 0))", "POLYGON((0 0,1 0,0 1,0 0))"},
 
 		// Normalises ring starting points:
-		//{"POLYGON((0 0,1 0,0 1,0 0))", "POLYGON((0 0,1 0,0 1,0 0))"},
-		//{"POLYGON((1 0,0 1,0 0,1 0))", "POLYGON((0 0,1 0,0 1,0 0))"},
-		//{"POLYGON((0 1,0 0,1 0,0 1))", "POLYGON((0 0,1 0,0 1,0 0))"},
+		{"POLYGON((0 0,1 0,0 1,0 0))", "POLYGON((0 0,1 0,0 1,0 0))"},
+		{"POLYGON((1 0,0 1,0 0,1 0))", "POLYGON((0 0,1 0,0 1,0 0))"},
+		{"POLYGON((0 1,0 0,1 0,0 1))", "POLYGON((0 0,1 0,0 1,0 0))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := geomFromWKT(t, tc.inputWKT).Normalize()

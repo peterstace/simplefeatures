@@ -730,7 +730,7 @@ func rotateRingSeqLeft(s Sequence, k int) Sequence {
 		idx := (i + k) % n
 		floats = s.Get(idx).appendFloat64s(floats)
 	}
-	floats = s.Get(n).appendFloat64s(floats) // Close the ring.
+	floats = s.Get(k).appendFloat64s(floats) // Close the ring.
 
 	rotated := NewSequence(floats, s.ctype)
 	rotated.assertNoUnusedCapacity()
