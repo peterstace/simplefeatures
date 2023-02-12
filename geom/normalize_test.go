@@ -57,6 +57,19 @@ func TestNormalize(t *testing.T) {
 		{"POLYGON((0 0,1 0,0 1,0 0))", "POLYGON((0 0,1 0,0 1,0 0))"},
 		{"POLYGON((1 0,0 1,0 0,1 0))", "POLYGON((0 0,1 0,0 1,0 0))"},
 		{"POLYGON((0 1,0 0,1 0,0 1))", "POLYGON((0 0,1 0,0 1,0 0))"},
+
+		// Ring ordering is by lexicographical order rather than order of just
+		// the first point:
+		{
+			`POLYGON(
+				(0 0,4 0,4 4,0 4,0 0),
+				(1 1,3 1,3 2,1 1),
+				(1 1,1 3,2 3,1 1))`,
+			`POLYGON(
+				(0 0,4 0,4 4,0 4,0 0),
+				(1 1,1 3,2 3,1 1),
+				(1 1,3 2,3 1,1 1))`,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := geomFromWKT(t, tc.inputWKT).Normalize()

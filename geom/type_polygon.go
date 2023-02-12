@@ -698,11 +698,7 @@ func (p Polygon) Normalize() Polygon {
 	if len(rings) > 1 {
 		inner := rings[1:]
 		sort.Slice(inner, func(i, j int) bool {
-			// TODO: should we sort the line strings directly rather than using
-			// their starting point?
-			ptA := inner[i].StartPoint()
-			ptB := inner[j].StartPoint()
-			return ptA.less(ptB)
+			return inner[i].less(inner[j])
 		})
 	}
 
