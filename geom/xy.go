@@ -112,6 +112,22 @@ func (w XY) Less(o XY) bool {
 	return w.Y < o.Y
 }
 
+// cmp gives an ordering on XYs, returning a negative, zero, or positive value
+// indicating the less than, equal, or greater than relationship.
+func (w XY) cmp(o XY) int {
+	if w.X < o.X {
+		return -1
+	} else if w.X > o.X {
+		return +1
+	}
+	if w.Y < o.Y {
+		return -1
+	} else if w.Y > o.Y {
+		return +1
+	}
+	return 0
+}
+
 func (w XY) distanceTo(o XY) float64 {
 	return math.Sqrt(w.distanceSquaredTo(o))
 }

@@ -497,23 +497,23 @@ func (s LineString) InterpolateEvenlySpacedPoints(n int) MultiPoint {
 // may be reversed). This can be used for testing.
 func (s LineString) Normalize() LineString {
 	r := s.Reverse()
-	if s.less(r) {
+	if s.cmp(r) < 0 {
 		return s
 	}
 	return r
 }
 
-// less gives a lexicographic ordering ordering between LineStrings.
-func (s LineString) less(o LineString) bool {
+// cmp gives a lexicographic ordering ordering between LineStrings.
+func (s LineString) cmp(o LineString) int {
 	coordsA := s.Coordinates()
 	coordsB := o.Coordinates()
 	n := min(coordsA.Length(), coordsB.Length())
 	for i := 0; i < n; i++ {
 		xyA := coordsA.GetXY(i)
 		xyB := coordsB.GetXY(i)
-		if xyA != xyB {
-			return xyA.Less(xyB)
+		if c := xyA.cmp(xyB); c != 0 {
+			return c
 		}
 	}
-	return coordsA.Length() < coordsB.Length()
+	return coordsA.Length() - coordsB.Length()
 }

@@ -513,7 +513,7 @@ func (m MultiLineString) Normalize() MultiLineString {
 		cp[i] = ls.Normalize()
 	}
 	sort.Slice(cp, func(i, j int) bool {
-		return cp[i].less(cp[j])
+		return cp[i].cmp(cp[j]) < 0
 	})
 	return MultiLineString{cp, m.ctype}
 }

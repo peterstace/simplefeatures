@@ -578,9 +578,9 @@ func (m MultiPolygon) Normalize() MultiPolygon {
 		polys[i] = p.Normalize()
 	}
 	sort.Slice(polys, func(i, j int) bool {
-		a := polys[i].ExteriorRing().StartPoint()
-		b := polys[j].ExteriorRing().StartPoint()
-		return a.less(b)
+		a := polys[i]
+		b := polys[j]
+		return a.cmp(b) < 0
 	})
 	return m
 }

@@ -70,6 +70,12 @@ func TestNormalize(t *testing.T) {
 				(1 1,1 3,2 3,1 1),
 				(1 1,3 2,3 1,1 1))`,
 		},
+
+		// MultiPolygons have their child Polygons ordered by outer ring.
+		{
+			`MULTIPOLYGON(((0 0,0 1,1 0,0 0)),((1 1,1 2,2 1,1 1)))`,
+			`MULTIPOLYGON(((0 0,0 1,1 0,0 0)),((1 1,1 2,2 1,1 1)))`,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := geomFromWKT(t, tc.inputWKT).Normalize()

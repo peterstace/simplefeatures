@@ -684,6 +684,15 @@ func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon
 	return simpl, wrapSimplified(err)
 }
 
+func (p Polygon) cmp(o Polygon) int {
+	for i := 0; i < max(len(p.rings), len(o.rings)); i++ {
+		if c := p.rings[i].cmp(o.rings[i]); c != 0 {
+			return c
+		}
+	}
+	return len(p.rings) - len(o.rings)
+}
+
 // Normalize returns the canonical form of this Polygon. The Polygon is wound
 // in a consistent order, and the starting point of each ring is canonicalized,
 // as is the ordering between any inner rings. This can be used for testing.
@@ -698,7 +707,7 @@ func (p Polygon) Normalize() Polygon {
 	if len(rings) > 1 {
 		inner := rings[1:]
 		sort.Slice(inner, func(i, j int) bool {
-			return inner[i].less(inner[j])
+			return inner[i].cmp(inner[j]) < 0
 		})
 	}
 
