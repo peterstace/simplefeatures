@@ -69,22 +69,28 @@ func (c Coordinates) asUncheckedPoint() Point {
 	return newUncheckedPoint(c)
 }
 
+// cmp gives a lexicographical ordering to Coordinates. The XY values are
+// compared first, then the Z value, then the M value. An absent Z or M value
+// is ordered before a present Z or M value.
 func (c Coordinates) cmp(o Coordinates) int {
-	if d := c.Type.cmp(o.Type); d != 0 {
-		return d
-	}
 	if d := c.XY.cmp(o.XY); d != 0 {
 		return d
 	}
-	if c.Type.Is3D() {
-		if d := cmpFloat64(c.Z, o.Z); d != 0 {
-			return d
-		}
+	if d := cmpOptionalFloat64(
+		c.Z,
+		o.Z,
+		c.Type.Is3D(),
+		o.Type.Is3D(),
+	); d != 0 {
+		return d
 	}
-	if c.Type.IsMeasured() {
-		if d := cmpFloat64(c.M, o.M); d != 0 {
-			return d
-		}
+	if d := cmpOptionalFloat64(
+		c.M,
+		o.M,
+		c.Type.IsMeasured(),
+		o.Type.IsMeasured(),
+	); d != 0 {
+		return d
 	}
 	return 0
 }

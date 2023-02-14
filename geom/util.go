@@ -85,3 +85,16 @@ func cmpFloat64(a, b float64) int {
 	}
 	return 0
 }
+
+func cmpOptionalFloat64(a, b float64, aPresent, bPresent bool) int {
+	if !aPresent && !bPresent {
+		return 0
+	}
+	if !aPresent {
+		return -1
+	}
+	if !bPresent {
+		return +1
+	}
+	return cmpFloat64(a, b)
+}
