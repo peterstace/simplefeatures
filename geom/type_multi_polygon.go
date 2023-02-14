@@ -584,3 +584,12 @@ func (m MultiPolygon) Normalize() MultiPolygon {
 	})
 	return m
 }
+
+func (m MultiPolygon) cmp(o MultiPolygon) int {
+	for i := 0; i < max(len(m.polys), len(o.polys)); i++ {
+		if d := m.polys[i].cmp(o.polys[i]); d != 0 {
+			return d
+		}
+	}
+	return len(m.polys) - len(o.polys)
+}

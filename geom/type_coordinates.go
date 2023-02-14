@@ -68,3 +68,23 @@ func (c Coordinates) appendFloat64s(dst []float64) []float64 {
 func (c Coordinates) asUncheckedPoint() Point {
 	return newUncheckedPoint(c)
 }
+
+func (c Coordinates) cmp(o Coordinates) int {
+	if d := c.Type.cmp(o.Type); d != 0 {
+		return d
+	}
+	if d := c.XY.cmp(o.XY); d != 0 {
+		return d
+	}
+	if c.Type.Is3D() {
+		if d := cmpFloat64(c.Z, o.Z); d != 0 {
+			return d
+		}
+	}
+	if c.Type.IsMeasured() {
+		if d := cmpFloat64(c.M, o.M); d != 0 {
+			return d
+		}
+	}
+	return 0
+}

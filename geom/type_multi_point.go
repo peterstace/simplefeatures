@@ -336,7 +336,16 @@ func (m MultiPoint) Normalize() MultiPoint {
 	cp := make([]Point, len(m.points))
 	copy(cp, m.points)
 	sort.Slice(cp, func(i, j int) bool {
-		return cp[i].less(cp[j])
+		return cp[i].cmp(cp[j]) < 0
 	})
 	return MultiPoint{cp, m.ctype}
+}
+
+func (m MultiPoint) cmp(o MultiPoint) int {
+	for i := 0; i < max(len(m.points), len(o.points)); i++ {
+		if d := m.points[i].cmp(o.points[i]); d != 0 {
+			return d
+		}
+	}
+	return len(m.points) - len(o.points)
 }

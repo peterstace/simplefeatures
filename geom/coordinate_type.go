@@ -48,3 +48,7 @@ func (t CoordinatesType) Is3D() bool {
 func (t CoordinatesType) IsMeasured() bool {
 	return (t & DimXYM) != 0
 }
+
+func (t CoordinatesType) cmp(o CoordinatesType) int {
+	return int(t) - int(o)
+}

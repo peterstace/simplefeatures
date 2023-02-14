@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"unsafe"
 )
 
@@ -542,9 +543,23 @@ func (c GeometryCollection) Simplify(threshold float64, opts ...ConstructorOptio
 }
 
 func (c GeometryCollection) Normalize() GeometryCollection {
-	//geoms := make([]Geometry, len(c.geoms))
-	//for i, g := range c.geoms {
-	//	geoms[i] = g.Normalize()
-	//}
-	return c
+	geoms := make([]Geometry, len(c.geoms))
+	for i, g := range c.geoms {
+		geoms[i] = g.Normalize()
+	}
+	sort.Slice(geoms, func(i, j int) bool {
+		gI := geoms[i]
+		gJ := geoms[j]
+		return gI.cmp(gJ) < 0
+	})
+	return GeometryCollection{geoms: geoms, ctype: c.ctype}
+}
+
+func (c GeometryCollection) cmp(o GeometryCollection) int {
+	for i := 0; i < max(len(c.geoms), len(o.geoms)); i++ {
+		if d := c.geoms[i].cmp(o.geoms[i]); d != 0 {
+			return d
+		}
+	}
+	return len(c.geoms) - len(o.geoms)
 }

@@ -54,6 +54,31 @@ func (t GeometryType) String() string {
 	}
 }
 
+func (t GeometryType) rank() int {
+	switch t {
+	case TypePoint:
+		return 1
+	case TypeLineString:
+		return 2
+	case TypePolygon:
+		return 3
+	case TypeMultiPoint:
+		return 4
+	case TypeMultiLineString:
+		return 5
+	case TypeMultiPolygon:
+		return 6
+	case TypeGeometryCollection:
+		return 7
+	default:
+		panic(fmt.Sprintf("unknown geometry type: %s", t))
+	}
+}
+
+func (t GeometryType) cmp(o GeometryType) int {
+	return t.rank() - o.rank()
+}
+
 // Type returns a string representation of the geometry's type.
 func (g Geometry) Type() GeometryType {
 	// TODO: why is this not just `return g.gtype`?
@@ -998,5 +1023,43 @@ func (g Geometry) Normalize() Geometry {
 		return g.MustAsMultiPolygon().Normalize().AsGeometry()
 	default:
 		panic("unknown geometry type: " + g.Type().String())
+	}
+}
+
+func (g Geometry) cmp(o Geometry) int {
+	if d := g.Type().cmp(o.Type()); d != 0 {
+		return d
+	}
+	switch g.Type() {
+	case TypeGeometryCollection:
+		g := g.MustAsGeometryCollection()
+		o := o.MustAsGeometryCollection()
+		return g.cmp(o)
+	case TypePoint:
+		g := g.MustAsPoint()
+		o := o.MustAsPoint()
+		return g.cmp(o)
+	case TypeMultiPoint:
+		g := g.MustAsMultiPoint()
+		o := o.MustAsMultiPoint()
+		return g.cmp(o)
+	case TypeLineString:
+		g := g.MustAsLineString()
+		o := o.MustAsLineString()
+		return g.cmp(o)
+	case TypeMultiLineString:
+		g := g.MustAsMultiLineString()
+		o := o.MustAsMultiLineString()
+		return g.cmp(o)
+	case TypePolygon:
+		g := g.MustAsPolygon()
+		o := o.MustAsPolygon()
+		return g.cmp(o)
+	case TypeMultiPolygon:
+		g := g.MustAsMultiPolygon()
+		o := o.MustAsMultiPolygon()
+		return g.cmp(o)
+	default:
+		panic("unknown type: " + g.Type().String())
 	}
 }

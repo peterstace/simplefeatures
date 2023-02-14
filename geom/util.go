@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"fmt"
 	"sort"
 )
 
@@ -17,27 +16,6 @@ func min(a, b int) int {
 		return a
 	}
 	return b
-}
-
-func rank(g Geometry) int {
-	switch g.gtype {
-	case TypePoint:
-		return 1
-	case TypeLineString:
-		return 2
-	case TypePolygon:
-		return 3
-	case TypeMultiPoint:
-		return 4
-	case TypeMultiLineString:
-		return 5
-	case TypeMultiPolygon:
-		return 6
-	case TypeGeometryCollection:
-		return 7
-	default:
-		panic(fmt.Sprintf("unknown geometry tag: %s", g.gtype))
-	}
 }
 
 // sortAndUniquifyXYs sorts the xys, and then makes them unique. The input
@@ -96,4 +74,14 @@ func sortFloat64Pair(a, b float64) (float64, float64) {
 		return b, a
 	}
 	return a, b
+}
+
+func cmpFloat64(a, b float64) int {
+	if a < b {
+		return -1
+	}
+	if a > b {
+		return +1
+	}
+	return 0
 }

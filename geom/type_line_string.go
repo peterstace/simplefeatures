@@ -509,10 +509,10 @@ func (s LineString) cmp(o LineString) int {
 	coordsB := o.Coordinates()
 	n := min(coordsA.Length(), coordsB.Length())
 	for i := 0; i < n; i++ {
-		xyA := coordsA.GetXY(i)
-		xyB := coordsB.GetXY(i)
-		if c := xyA.cmp(xyB); c != 0 {
-			return c
+		cA := coordsA.Get(i)
+		cB := coordsB.Get(i)
+		if d := cA.cmp(cB); d != 0 {
+			return d
 		}
 	}
 	return coordsA.Length() - coordsB.Length()

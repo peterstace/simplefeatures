@@ -10,7 +10,7 @@ import (
 // other, i.e. the point sets that the geometries represent have at least one
 // common point.
 func Intersects(g1, g2 Geometry) bool {
-	if rank(g1) > rank(g2) {
+	if g1.Type().rank() > g2.Type().rank() {
 		g1, g2 = g2, g1
 	}
 

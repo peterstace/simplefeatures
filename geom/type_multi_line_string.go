@@ -517,3 +517,12 @@ func (m MultiLineString) Normalize() MultiLineString {
 	})
 	return MultiLineString{cp, m.ctype}
 }
+
+func (m MultiLineString) cmp(o MultiLineString) int {
+	for i := 0; i < max(len(m.lines), len(o.lines)); i++ {
+		if d := m.lines[i].cmp(o.lines[i]); d != 0 {
+			return d
+		}
+	}
+	return len(m.lines) - len(o.lines)
+}

@@ -293,16 +293,17 @@ func (p Point) Normalize() Point {
 	return p
 }
 
-// less gives an ordering to Points. Empty Points come first. If both Points
-// are non empty then the XY values are used for comparison.
-func (p Point) less(o Point) bool {
-	xyA, okA := p.XY()
-	xyB, okB := o.XY()
-	if !okB {
-		return false
+func (p Point) cmp(o Point) int {
+	cA, okA := p.Coordinates()
+	cB, okB := o.Coordinates()
+	if !okA && !okB {
+		return 0
 	}
 	if !okA {
-		return true
+		return -1
 	}
-	return xyA.Less(xyB)
+	if !okB {
+		return +1
+	}
+	return cA.cmp(cB)
 }
