@@ -54,26 +54,9 @@ func (t GeometryType) String() string {
 	}
 }
 
-// Type returns a string representation of the geometry's type.
+// Type returns the type of the Geometry.
 func (g Geometry) Type() GeometryType {
-	switch g.gtype {
-	case TypeGeometryCollection:
-		return g.MustAsGeometryCollection().Type()
-	case TypePoint:
-		return g.MustAsPoint().Type()
-	case TypeLineString:
-		return g.MustAsLineString().Type()
-	case TypePolygon:
-		return g.MustAsPolygon().Type()
-	case TypeMultiPoint:
-		return g.MustAsMultiPoint().Type()
-	case TypeMultiLineString:
-		return g.MustAsMultiLineString().Type()
-	case TypeMultiPolygon:
-		return g.MustAsMultiPolygon().Type()
-	default:
-		panic("unknown geometry: " + g.gtype.String())
-	}
+	return g.gtype
 }
 
 // IsGeometryCollection return true iff the Geometry is a GeometryCollection geometry.
