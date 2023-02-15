@@ -1,8 +1,11 @@
 package geom_test
 
 import (
+	"math/rand"
 	"strconv"
 	"testing"
+
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestNormalize(t *testing.T) {
@@ -73,8 +76,8 @@ func TestNormalize(t *testing.T) {
 
 		// MultiPolygons have their child Polygons ordered by outer ring.
 		{
-			`MULTIPOLYGON(((0 0,0 1,1 0,0 0)),((1 1,1 2,2 1,1 1)))`,
-			`MULTIPOLYGON(((0 0,0 1,1 0,0 0)),((1 1,1 2,2 1,1 1)))`,
+			`MULTIPOLYGON(((1 1,2 1,1 2,1 1)),((0 0,1 0,0 1,0 0)))`,
+			`MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((1 1,2 1,1 2,1 1)))`,
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -82,4 +85,24 @@ func TestNormalize(t *testing.T) {
 			expectGeomEqWKT(t, got, tc.wantWKT)
 		})
 	}
+}
+
+func TestNormalizeGeometryCollection(t *testing.T) {
+	var geoms []geom.Geometry
+	for _, wkt := range []string{
+		// TODO: add more geometries to this test.
+		"POINT(0 0)",
+	} {
+		geoms = append(geoms, geomFromWKT(t, wkt))
+	}
+	rand.Shuffle(len(geoms), func(i, j int) {
+		geoms[i], geoms[j] = geoms[j], geoms[i]
+	})
+	got := geom.NewGeometryCollection(geoms).Normalize().AsGeometry()
+
+	expectGeomEqWKT(t, got, `
+		GEOMETRYCOLLECTION(
+			POINT(0 0)
+		)`,
+	)
 }

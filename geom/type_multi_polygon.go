@@ -582,7 +582,7 @@ func (m MultiPolygon) Normalize() MultiPolygon {
 		b := polys[j]
 		return a.cmp(b) < 0
 	})
-	return m
+	return MultiPolygon{polys: polys, ctype: m.ctype}
 }
 
 func (m MultiPolygon) cmp(o MultiPolygon) int {
