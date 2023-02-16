@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"math"
 	"sort"
 )
 
@@ -24,9 +23,9 @@ func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 
 	// Perform the sort.
 	if !alreadySorted {
-		// TODO: consider using a solution like
+		// This solution is a reworking of
 		// https://stackoverflow.com/questions/6989100/sort-points-in-clockwise-order
-		// instead of using trigonometry.
+		// to avoid using trigonometry.
 		sort.Slice(incidents, func(i, j int) bool {
 			// Sort edges in ascending order of their angle relative to the
 			// x-axis. This is a stricter sort than necessary but is easy to
@@ -36,9 +35,34 @@ func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 			ej := incidents[j]
 			di := ei.seq.GetXY(1).Sub(ei.seq.GetXY(0))
 			dj := ej.seq.GetXY(1).Sub(ej.seq.GetXY(0))
-			aI := math.Atan2(di.Y, di.X)
-			aJ := math.Atan2(dj.Y, dj.X)
-			return aI < aJ
+
+			if di.X >= 0 && dj.X < 0 {
+				return true
+			}
+			if di.X < 0 && dj.X >= 0 {
+				return false
+			}
+			if di.X == 0 && dj.X == 0 {
+				if di.Y >= 0 || dj.Y >= 0 {
+					return di.Y < dj.Y
+				}
+				return dj.Y < di.Y
+			}
+
+			// compute the cross product of vectors from origin
+			det := di.X*dj.Y - dj.X*di.Y
+			if det < 0 {
+				return false
+			}
+			if det > 0 {
+				return true
+			}
+
+			// points are on the same line from the center
+			// check which point is further from the center
+			d1 := di.X*di.X + di.Y*di.Y
+			d2 := dj.X*dj.X + dj.Y*dj.Y
+			return d1 < d2
 		})
 	}
 
