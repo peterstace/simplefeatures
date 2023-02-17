@@ -3,7 +3,6 @@ package geom
 import (
 	"database/sql/driver"
 	"fmt"
-	"math"
 	"unsafe"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -334,7 +333,7 @@ func (s LineString) Length() float64 {
 		xyA := s.seq.GetXY(i)
 		xyB := s.seq.GetXY(i + 1)
 		delta := xyA.Sub(xyB)
-		sum += math.Sqrt(delta.Dot(delta))
+		sum += delta.Length()
 	}
 	return sum
 }
