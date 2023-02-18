@@ -586,7 +586,7 @@ func (m MultiPolygon) Normalize() MultiPolygon {
 }
 
 func (m MultiPolygon) cmp(o MultiPolygon) int {
-	for i := 0; i < max(len(m.polys), len(o.polys)); i++ {
+	for i := 0; i < min(len(m.polys), len(o.polys)); i++ {
 		if d := m.polys[i].cmp(o.polys[i]); d != 0 {
 			return d
 		}

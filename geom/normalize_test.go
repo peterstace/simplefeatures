@@ -90,8 +90,29 @@ func TestNormalize(t *testing.T) {
 func TestNormalizeGeometryCollection(t *testing.T) {
 	var geoms []geom.Geometry
 	for _, wkt := range []string{
-		// TODO: add more geometries to this test.
+		"POINT EMPTY",
 		"POINT(0 0)",
+		"POINT(1 1)",
+		"POINT(1 2)",
+		"MULTIPOINT EMPTY",
+		"MULTIPOINT((0 0))",
+		"MULTIPOINT(3 4,1 2)",
+		"MULTIPOINT(1 2,3 5)",
+		"LINESTRING EMPTY",
+		"LINESTRING(4 3,1 2)",
+		"LINESTRING(1 2,4 5)",
+		"MULTILINESTRING EMPTY",
+		"MULTILINESTRING((3 4,1 2))",
+		"MULTILINESTRING((5 6,7 8),(1 2,5 6),(1 2,3 4))",
+		"POLYGON EMPTY",
+		"POLYGON((0 0,0 5,5 0,0 0))",
+		"POLYGON((0 0,0 5,5 0,0 0),(1 1,1 2,2 1,1 1))",
+		"MULTIPOLYGON EMPTY",
+		"MULTIPOLYGON(((1 1,2 1,1 2,1 1)))",
+		"MULTIPOLYGON(((1 1,2 1,1 2,1 1)),((0 0,1 0,0 1,0 0)))",
+		"GEOMETRYCOLLECTION EMPTY",
+		"GEOMETRYCOLLECTION(POINT(1 2))",
+		"GEOMETRYCOLLECTION(LINESTRING(0 0,1 1),POINT(1 2))",
 	} {
 		geoms = append(geoms, geomFromWKT(t, wkt))
 	}
@@ -102,7 +123,29 @@ func TestNormalizeGeometryCollection(t *testing.T) {
 
 	expectGeomEqWKT(t, got, `
 		GEOMETRYCOLLECTION(
-			POINT(0 0)
+			POINT EMPTY,
+			POINT(0 0),
+			POINT(1 1),
+			POINT(1 2),
+			LINESTRING EMPTY,
+			LINESTRING(1 2,4 3),
+			LINESTRING(1 2,4 5),
+			POLYGON EMPTY,
+			POLYGON((0 0,5 0,0 5,0 0)),
+			POLYGON((0 0,5 0,0 5,0 0),(1 1,1 2,2 1,1 1)),
+			MULTIPOINT EMPTY,
+			MULTIPOINT((0 0)),
+			MULTIPOINT(1 2,3 4),
+			MULTIPOINT(1 2,3 5),
+			MULTILINESTRING EMPTY,
+			MULTILINESTRING((1 2,3 4)),
+			MULTILINESTRING((1 2,3 4),(1 2,5 6),(5 6,7 8)),
+			MULTIPOLYGON EMPTY,
+			MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((1 1,2 1,1 2,1 1))),
+			MULTIPOLYGON(((1 1,2 1,1 2,1 1))),
+			GEOMETRYCOLLECTION EMPTY,
+			GEOMETRYCOLLECTION(POINT(1 2)),
+			GEOMETRYCOLLECTION(POINT(1 2),LINESTRING(0 0,1 1))
 		)`,
 	)
 }

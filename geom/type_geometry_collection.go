@@ -556,7 +556,7 @@ func (c GeometryCollection) Normalize() GeometryCollection {
 }
 
 func (c GeometryCollection) cmp(o GeometryCollection) int {
-	for i := 0; i < max(len(c.geoms), len(o.geoms)); i++ {
+	for i := 0; i < min(len(c.geoms), len(o.geoms)); i++ {
 		if d := c.geoms[i].cmp(o.geoms[i]); d != 0 {
 			return d
 		}

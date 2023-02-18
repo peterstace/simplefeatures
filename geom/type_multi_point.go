@@ -342,7 +342,7 @@ func (m MultiPoint) Normalize() MultiPoint {
 }
 
 func (m MultiPoint) cmp(o MultiPoint) int {
-	for i := 0; i < max(len(m.points), len(o.points)); i++ {
+	for i := 0; i < min(len(m.points), len(o.points)); i++ {
 		if d := m.points[i].cmp(o.points[i]); d != 0 {
 			return d
 		}

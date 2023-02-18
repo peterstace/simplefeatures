@@ -685,7 +685,7 @@ func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon
 }
 
 func (p Polygon) cmp(o Polygon) int {
-	for i := 0; i < max(len(p.rings), len(o.rings)); i++ {
+	for i := 0; i < min(len(p.rings), len(o.rings)); i++ {
 		if c := p.rings[i].cmp(o.rings[i]); c != 0 {
 			return c
 		}
