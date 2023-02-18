@@ -16,6 +16,7 @@ func TestNormalize(t *testing.T) {
 		{"POINT EMPTY", "POINT EMPTY"},
 		{"POINT(1 2)", "POINT(1 2)"},
 
+		// MultiPoint with only XY.
 		{"MULTIPOINT EMPTY", "MULTIPOINT EMPTY"},
 		{"MULTIPOINT(EMPTY)", "MULTIPOINT(EMPTY)"},
 		{"MULTIPOINT(1 2)", "MULTIPOINT(1 2)"},
@@ -25,6 +26,15 @@ func TestNormalize(t *testing.T) {
 		{"MULTIPOINT(1 1,1 -1)", "MULTIPOINT(1 -1,1 1)"},
 		{"MULTIPOINT(2 1,3 1,1 1)", "MULTIPOINT(1 1,2 1,3 1)"},
 
+		// MultiPoint with 3D and Measure.
+		{"MULTIPOINT Z EMPTY", "MULTIPOINT Z EMPTY"},
+		{"MULTIPOINT M EMPTY", "MULTIPOINT M EMPTY"},
+		{"MULTIPOINT ZM EMPTY", "MULTIPOINT ZM EMPTY"},
+		{"MULTIPOINT Z (0 0 1,0 0 0)", "MULTIPOINT Z (0 0 0,0 0 1)"},
+		{"MULTIPOINT M (0 0 1,0 0 0)", "MULTIPOINT M (0 0 0,0 0 1)"},
+		{"MULTIPOINT ZM (0 0 1 2,0 0 1 1)", "MULTIPOINT ZM (0 0 1 1,0 0 1 2)"},
+
+		// LineString with XY only.
 		{"LINESTRING EMPTY", "LINESTRING EMPTY"},
 		{"LINESTRING(1 2,3 4)", "LINESTRING(1 2,3 4)"},
 		{"LINESTRING(3 4,1 2)", "LINESTRING(1 2,3 4)"},
@@ -32,6 +42,11 @@ func TestNormalize(t *testing.T) {
 		{"LINESTRING(3 4,5 6,0 5,1 2)", "LINESTRING(1 2,0 5,5 6,3 4)"},
 		{"LINESTRING(0 0,0 1,1 0,0 0)", "LINESTRING(0 0,0 1,1 0,0 0)"},
 		{"LINESTRING(0 0,1 0,0 1,0 0)", "LINESTRING(0 0,0 1,1 0,0 0)"},
+
+		// LineString with 3D and Measure.
+		{"LINESTRING Z (0 0 1, 1 1 0, 0 0 0)", "LINESTRING Z (0 0 0, 1 1 0, 0 0 1)"},
+		{"LINESTRING M (0 0 1, 1 1 0, 0 0 0)", "LINESTRING M (0 0 0, 1 1 0, 0 0 1)"},
+		{"LINESTRING ZM (0 0 0 1, 1 1 0 0, 0 0 0 0)", "LINESTRING ZM (0 0 0 0, 1 1 0 0, 0 0 0 1)"},
 
 		{"MULTILINESTRING EMPTY", "MULTILINESTRING EMPTY"},
 		{"MULTILINESTRING((3 4,1 2))", "MULTILINESTRING((1 2,3 4))"},
