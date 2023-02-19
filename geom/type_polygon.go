@@ -715,13 +715,48 @@ func (p Polygon) Normalize() Polygon {
 }
 
 func normaliseRing(ring LineString) LineString {
-	coords := ring.Coordinates()
-	minI, ok := coords.argmin()
+	minI, ok := findRingStart(ring)
 	if !ok {
 		return ring
 	}
+	coords := ring.Coordinates()
 	rotated := rotateRingSeqLeft(coords, minI)
 	return LineString{seq: rotated}
+}
+
+// findRingStart finds the index of the start of the ring in the canonicalized
+// ring representation. The start is the minimum point in the ring. If there
+// are multiple adjacent equal minimum points in the ring, then the first such
+// point is chosen.
+func findRingStart(ring LineString) (int, bool) {
+	s := ring.Coordinates()
+	n := s.Length()
+	if n <= 1 {
+		return 0, false
+	}
+	n-- // It's a ring, so ignore the duplicate last point.
+
+	// Find the minimum point in the ring. If there are
+	// multiple minimum points, we don't care which one we
+	// find.
+	var best int
+	for i := 1; i < n; i++ {
+		xyI := s.Get(i)
+		xyBest := s.Get(best)
+		if xyI.cmp(xyBest) < 0 {
+			best = i
+		}
+	}
+
+	// Search backwards to find the "first" minimum point.
+	for i := 0; i < n; i++ {
+		pred := (best - 1 + n) % n
+		if s.Get(best) != s.Get(pred) {
+			break
+		}
+		best = pred
+	}
+	return best, true
 }
 
 func rotateRingSeqLeft(s Sequence, k int) Sequence {

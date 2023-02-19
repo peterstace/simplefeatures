@@ -89,6 +89,13 @@ func TestNormalize(t *testing.T) {
 				(1 1,3 2,3 1,1 1))`,
 		},
 
+		// When there are multiple points that could equally represent the
+		// start of a ring, the first is chosen.
+		{"POLYGON((0 0,0 0,1 0,0 1,0 0))", "POLYGON((0 0,0 0,1 0,0 1,0 0))"},
+		{"POLYGON((0 1,0 0,0 0,1 0,0 1))", "POLYGON((0 0,0 0,1 0,0 1,0 0))"},
+		{"POLYGON((1 0,0 1,0 0,0 0,1 0))", "POLYGON((0 0,0 0,1 0,0 1,0 0))"},
+		{"POLYGON((0 0,1 0,0 1,0 0,0 0))", "POLYGON((0 0,0 0,1 0,0 1,0 0))"},
+
 		// MultiPolygons have their child Polygons ordered by outer ring.
 		{
 			`MULTIPOLYGON(((1 1,2 1,1 2,1 1)),((0 0,1 0,0 1,0 0)))`,
