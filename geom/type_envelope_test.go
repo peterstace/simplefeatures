@@ -582,3 +582,30 @@ func BenchmarkEnvelopeTransformXY(b *testing.B) {
 		expectNoErr(b, err)
 	}
 }
+
+func TestBoundingDiagonal(t *testing.T) {
+	for i, tc := range []struct {
+		env  []XY
+		want string
+	}{
+		{
+			nil,
+			"GEOMETRYCOLLECTION EMPTY",
+		},
+		{
+			[]XY{{1, 2}},
+			"POINT(1 2)",
+		},
+		{
+			[]XY{{3, 2}, {1, 4}},
+			"LINESTRING(1 2,3 4)",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			env, err := NewEnvelope(tc.env)
+			expectNoErr(t, err)
+			got := env.BoundingDiagonal()
+			expectGeomEqWKT(t, got, tc.want)
+		})
+	}
+}
