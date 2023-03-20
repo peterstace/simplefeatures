@@ -7,6 +7,9 @@
 
 - Add a `BoundingDiagonal` method to the `Envelope` type.
 
+- Orient Polygon and MultiPolygon rings as per RFC7946 when serialising as
+  GeoJSON.
+
 ## v0.41.0
 
 2022-11-15
