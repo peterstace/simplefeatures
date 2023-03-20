@@ -299,6 +299,7 @@ func (p Polygon) ConvexHull() Geometry {
 // MarshalJSON implements the encoding/json.Marshaler interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (p Polygon) MarshalJSON() ([]byte, error) {
+	p = p.ForceCCW()
 	var dst []byte
 	dst = append(dst, `{"type":"Polygon","coordinates":`...)
 	dst = appendGeoJSONSequences(dst, p.Coordinates())
