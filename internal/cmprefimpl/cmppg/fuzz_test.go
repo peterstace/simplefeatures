@@ -23,6 +23,7 @@ func TestFuzz(t *testing.T) {
 
 	checkWKTParse(t, pg, candidates)
 	checkWKBParse(t, pg, candidates)
+	checkGeoJSONParse(t, pg, candidates)
 
 	geoms := convertToGeometries(t, candidates)
 

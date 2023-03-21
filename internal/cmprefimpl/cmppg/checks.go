@@ -94,6 +94,44 @@ func hexStringToBytes(s string) ([]byte, error) {
 	return buf, nil
 }
 
+func checkGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
+	var any bool
+	for i, geojson := range candidates {
+		if geojson == `{"type":"Point","coordinates":[]}` {
+			// From https://tools.ietf.org/html/rfc7946#section-3.1:
+			//
+			// > GeoJSON processors MAY interpret Geometry objects with
+			// > empty "coordinates" arrays as null objects.
+			//
+			// Simplefeatures chooses to accept this as an empty point, but
+			// Postgres rejects it.
+			continue
+		}
+		if geojson == `{"type":"MultiPolygon","coordinates":[[0,0]]}` {
+			// PostGIS erroneously accepts this as a valid geometry, but
+			// simplefeatures correctly rejects it.
+			continue
+		}
+		any = true
+		t.Run(fmt.Sprintf("CheckGeoJSONParse_%d", i), func(t *testing.T) {
+			_, sfErr := geom.UnmarshalGeoJSON([]byte(geojson))
+			isValid, reason := pg.GeoJSONIsValidWithReason(t, geojson)
+			if (sfErr == nil) != isValid {
+				t.Logf("GeoJSON: %v", geojson)
+				t.Logf("SimpleFeatures err: %v", sfErr)
+				t.Logf("PostGIS IsValid: %v", isValid)
+				t.Logf("PostGIS Reason: %v", reason)
+				t.Errorf("mismatch")
+			}
+		})
+	}
+	if !any {
+		// We know there are some some valid geojson strings, so if this happens
+		// then something is wrong with the extraction or conversion logic.
+		t.Errorf("could not extract any geojsons")
+	}
+}
+
 func checkWKB(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckWKB", func(t *testing.T) {
 		if g.IsEmpty() && ((g.IsGeometryCollection() && g.MustAsGeometryCollection().NumGeometries() > 0) ||
