@@ -101,7 +101,7 @@ func (w XY) Length() float64 {
 	return math.Sqrt(w.lengthSq())
 }
 
-// lengthSq treads XY as a vector, and returns its squared length.
+// lengthSq treats XY as a vector, and returns its squared length.
 func (w XY) lengthSq() float64 {
 	return w.Dot(w)
 }
