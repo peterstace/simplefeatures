@@ -29,7 +29,7 @@ func (n *nearestPointAccumulator) consider(candidate Point) {
 	}
 
 	delta := targetXY.Sub(candidateXY)
-	candidateDist := delta.Dot(delta)
+	candidateDist := delta.lengthSq()
 	if n.point.IsEmpty() || candidateDist < n.dist {
 		n.dist = candidateDist
 		n.point = candidate

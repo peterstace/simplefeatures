@@ -98,7 +98,12 @@ func (w XY) Unit() XY {
 
 // Length treats XY as a vector, and returns its length.
 func (w XY) Length() float64 {
-	return math.Sqrt(w.Dot(w))
+	return math.Sqrt(w.lengthSq())
+}
+
+// lengthSq treats XY as a vector, and returns its squared length.
+func (w XY) lengthSq() float64 {
+	return w.Dot(w)
 }
 
 // Less gives an ordering on XYs. If two XYs have different X values, then the
