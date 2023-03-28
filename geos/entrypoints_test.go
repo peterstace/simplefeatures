@@ -732,7 +732,14 @@ func TestBuffer(t *testing.T) {
 			t.Logf("WKT: %v", g.AsText())
 			got, err := Buffer(g, tt.radius, tt.opts...)
 			expectNoErr(t, err)
-			expectGeomEq(t, got, geomFromWKT(t, tt.want), geom.IgnoreOrder)
+			expectGeomEq(t, got, geomFromWKT(t, tt.want),
+				// Different versions of GEOS can output geometry parts in
+				// different orders, but there is no semantic difference.
+				geom.IgnoreOrder,
+				// Account for some slight differences in GEOS behaviour
+				// between `x86_64` and `aarch64`:
+				geom.ToleranceXY(1e-15),
+			)
 		})
 	}
 }
