@@ -19,8 +19,8 @@ func Union(g1, g2 geom.Geometry) (geom.Geometry, error) {
 	g2WKB := g2.AsBinary()
 	var outputBuf, errBuf *C.char
 	C.SF_GEOS_Union(
-		(*C.char)(&g1WKB[0]),
-		(*C.char)(&g2WKB[0]),
+		(*C.uchar)(&g1WKB[0]),
+		(*C.uchar)(&g2WKB[0]),
 		&outputBuf,
 		&errBuf,
 	)
