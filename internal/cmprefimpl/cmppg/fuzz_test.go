@@ -39,6 +39,9 @@ func TestFuzz(t *testing.T) {
 				t.Skip("Causes unmarshalling to fail for derivative geometry")
 			}
 
+			if isMultiPointWithEmptyPoint(g) {
+				t.Skip("PostGIS cannot handle MultiPoints that contain empty Points")
+			}
 			want, err := BatchPostGIS(pg).Unary(g)
 			if err != nil {
 				t.Fatalf("could not get result from postgis: %v", err)
@@ -157,4 +160,17 @@ func convertToGeometries(t *testing.T, candidates []string) []geom.Geometry {
 	}
 
 	return geoms
+}
+
+func isMultiPointWithEmptyPoint(g geom.Geometry) bool {
+	mp, ok := g.AsMultiPoint()
+	if !ok {
+		return false
+	}
+	for i := 0; i < mp.NumPoints(); i++ {
+		if mp.PointN(i).IsEmpty() {
+			return true
+		}
+	}
+	return false
 }
