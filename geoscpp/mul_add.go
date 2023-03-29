@@ -1,7 +1,9 @@
 package geoscpp
 
-// #cgo CFLAGS: -Wall
-// #include "bridge_mul_add.h"
+/*
+#cgo CFLAGS: -Wall
+#include "bridge_mul_add.h"
+*/
 import "C"
 
 // MulAdd computes a*b+c.
