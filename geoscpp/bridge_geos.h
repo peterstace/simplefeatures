@@ -3,7 +3,19 @@
 extern "C" {
 #endif
 
-void SF_GEOS_Union(unsigned char *gi1, unsigned char *gi2, char **gr, char **err);
+#include "stddef.h"
+
+void sf_union(
+	unsigned char *g1b,
+	size_t g1n,
+	unsigned char
+	*g2b, size_t g2n,
+	unsigned char **g3b,
+	size_t *g3n, char **estr
+);
+
+void sf_delete_uchar_buffer(unsigned char*);
+void sf_delete_char_buffer(char*);
 
 #ifdef __cplusplus
 } // extern "C"
