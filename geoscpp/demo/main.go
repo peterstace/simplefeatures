@@ -8,9 +8,6 @@ import (
 )
 
 func main() {
-	fmt.Println(geoscpp.MulAdd(2, 3, 4))       // 10
-	fmt.Println(geoscpp.MulAddSimple(2, 3, 4)) // 10
-
 	u, err := geoscpp.Union(
 		mustWKT("POLYGON((0 0,0 1,1 0,0 0))"),
 		mustWKT("POLYGON((0 1,1 1,1 0,0 1))"),
