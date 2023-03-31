@@ -738,6 +738,13 @@ var skipSymDiff = map[string]bool{
 	"MULTILINESTRING((0 1,0.3333333333 0.6666666667),(0.3333333333 0.6666666667,1 0))":                                               true,
 }
 
+var skipUnion = map[string]bool{
+	// Cause simplefeatures DCEL operations to fail with "no rings" error. See
+	// https://github.com/peterstace/simplefeatures/pull/497 for details.
+	"POLYGON((-83.58253051 32.73168239,-83.59843118 32.74617142,-83.70048117 32.63984372,-83.58253051 32.73168239))": true,
+	"POLYGON((-83.70047745 32.63984661,-83.68891846 32.5989632,-83.58253417 32.73167955,-83.70047745 32.63984661))":  true,
+}
+
 func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	// TODO: simplefeatures doesn't support GeometryCollections yet
 	if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
@@ -754,7 +761,7 @@ func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error
 			"Union",
 			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.Union(g1, g2) },
 			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.union(g1, g2) },
-			nil,
+			skipUnion,
 		},
 		{
 			"Intersection",
