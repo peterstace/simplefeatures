@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	fmt.Printf("%s\n", geoscpp.Version())
 	u, err := geoscpp.Union(
 		mustWKT("POLYGON((0 0,0 1,1 0,0 0))"),
 		mustWKT("POLYGON((0 1,1 1,1 0,0 1))"),

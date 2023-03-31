@@ -5,6 +5,8 @@ extern "C" {
 
 #include "stddef.h"
 
+char* sf_version();
+
 void sf_union(
 	unsigned char *g1b,
 	size_t g1n,

@@ -15,6 +15,12 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
+func Version() string {
+	v := C.sf_version()
+	defer C.sf_delete_char_buffer(v)
+	return C.GoString(v)
+}
+
 func Union(g1, g2 geom.Geometry) (geom.Geometry, error) {
 	g1WKB := g1.AsBinary()
 	g2WKB := g2.AsBinary()

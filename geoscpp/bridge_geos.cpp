@@ -16,6 +16,13 @@ void sf_delete_char_buffer(char *p) {
 	delete p;
 }
 
+char* sf_version() {
+	auto tmp = geos::geom::geosversion();
+	char *buf = new char[tmp.length()+1];
+	std::strcpy(buf, tmp.c_str());
+	return buf;
+}
+
 void sf_union(
 	unsigned char *g1b,
 	size_t g1n,
