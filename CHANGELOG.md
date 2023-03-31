@@ -7,6 +7,9 @@
 
 - Add a `BoundingDiagonal` method to the `Envelope` type.
 
+- Return an error rather than panicking when certain internal assumptions are
+  violated during DCEL extraction.
+
 ## v0.41.0
 
 2022-11-15

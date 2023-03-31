@@ -1491,3 +1491,35 @@ func TestBinaryOpOutputOrdering(t *testing.T) {
 		})
 	}
 }
+
+func TestErrInsteadOfPanic(t *testing.T) {
+	for i, tc := range []struct {
+		input1 string
+		input2 string
+		op     func(_, _ geom.Geometry) (geom.Geometry, error)
+	}{
+		{
+			input1: `POLYGON((
+				-83.58253051 32.73168239,
+				-83.59843118 32.74617142,
+				-83.70048117 32.63984372,
+				-83.58253051 32.73168239
+			))`,
+			input2: `POLYGON((
+				-83.70047745 32.63984661,
+				-83.68891846 32.59896320,
+				-83.58253417 32.73167955,
+				-83.70047745 32.63984661
+			))`,
+			op: geom.Union,
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g1 := geomFromWKT(t, tc.input1)
+			g2 := geomFromWKT(t, tc.input2)
+			_, err := tc.op(g1, g2)
+			expectErr(t, err)
+			t.Log(err)
+		})
+	}
+}
