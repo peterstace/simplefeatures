@@ -2,7 +2,9 @@ package main
 
 import (
 	"database/sql"
+	"math"
 	"strings"
+	"time"
 
 	"github.com/lib/pq"
 	"github.com/peterstace/simplefeatures/geom"
@@ -46,6 +48,28 @@ const (
 
 // Unary runs a batch of unary operations on a geometry.
 func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
+	// Retry several times because requests to PostGIS can intermittently fail.
+	// Requests to PostGIS could fail for many reasons. For example, a previous
+	// test case could cause PostGIS to segfault, causing it to restart (so it
+	// may not yet be ready to accept connections by the time this test
+	// executes).
+	var i int
+	for {
+		u, err := p.tryUnary(g)
+		if err == nil {
+			return u, nil
+		}
+
+		i++
+		if i >= 10 {
+			return UnaryResult{}, err
+		}
+
+		time.Sleep(time.Millisecond * time.Duration(math.Pow(2, float64(i))))
+	}
+}
+
+func (p BatchPostGIS) tryUnary(g geom.Geometry) (UnaryResult, error) {
 	// WKB and WKB forms returned from PostGIS don't _always_ give the same
 	// result (usually differences around empty geometries). In the case of
 	// boundary, convex hull, and reverse, they are different enough that it's

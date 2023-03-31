@@ -1,7 +1,9 @@
 version: "2.1"
 services:
   postgis:
-    image: mdillon/postgis
+    image: ghcr.io/baosystems/postgis:15
+    environment:
+      POSTGRES_PASSWORD: password
     healthcheck:
       test: "pg_isready -U postgres"
       interval: '100ms'
