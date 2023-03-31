@@ -809,11 +809,6 @@ func checkDCELOp(
 		return nil
 	}
 
-	got, err := op(g1, g2)
-	if err != nil {
-		return err
-	}
-
 	// Some geometries give results that are not topologically equivalent to
 	// those from GEOS. These have been checked manually, and decided that the
 	// difference is acceptable (they typically have to do with different
@@ -822,6 +817,11 @@ func checkDCELOp(
 	// doesn't crash or give an error.
 	if skip[g1.AsText()] || skip[g2.AsText()] {
 		return nil
+	}
+
+	got, err := op(g1, g2)
+	if err != nil {
+		return err
 	}
 
 	want, err := refImpl(g1, g2)
