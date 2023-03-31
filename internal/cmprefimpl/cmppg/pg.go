@@ -48,6 +48,11 @@ const (
 
 // Unary runs a batch of unary operations on a geometry.
 func (p BatchPostGIS) Unary(g geom.Geometry) (UnaryResult, error) {
+	// Retry several times because requests to PostGIS can intermittently fail.
+	// Requests to PostGIS could fail for many reasons. For example, a previous
+	// test case could cause PostGIS to segfault, causing it to restart (so it
+	// may not yet be ready to accept connections by the time this test
+	// executes).
 	var i int
 	for {
 		u, err := p.tryUnary(g)
