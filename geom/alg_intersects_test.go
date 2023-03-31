@@ -125,6 +125,7 @@ func TestIntersects(t *testing.T) {
 		{"LINESTRING(0 0,1 0)", "LINESTRING(0 0,1 0)", true},
 		{"LINESTRING(1 1,2 2)", "LINESTRING(0 0,3 3)", true},
 		{"LINESTRING(3 1,2 2)", "LINESTRING(1 3,2 2)", true},
+		{"LINESTRING(-1 1,1 -1)", "LINESTRING(-0.5 0.5,-0.1 0.1)", true},
 
 		// Line/LineString
 		{"LINESTRING(0 0,1 1)", "LINESTRING EMPTY", false},

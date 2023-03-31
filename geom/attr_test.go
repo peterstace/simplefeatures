@@ -183,6 +183,7 @@ func TestIsSimple(t *testing.T) {
 		{"MULTILINESTRING((0 0,1 0),(0 1,1 1))", true},
 		{"MULTILINESTRING((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))", true},
 		{"MULTILINESTRING((1 1,1 0,0 0),(1 1,0 1,0 0))", true},
+		{"MULTILINESTRING((0 0,0.1 0.1),(0.1 0.1,1 1))", true},
 
 		// Cases for behaviour around duplicated lines.
 		{"MULTILINESTRING((1 1,2 2),(1 1,2 2))", false},

@@ -1138,6 +1138,11 @@ func TestBinaryOp(t *testing.T) {
 			input2: "POLYGON EMPTY",
 			union:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
 		},
+		{
+			input1: "LINESTRING(0 0,0 0,0 1,1 0,0 0)",
+			input2: "LINESTRING(0.1 0.1,0.5 0.5)",
+			inter:  "POINT(0.5 0.5)",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
