@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Fix a bug affecting only `aarch64` that caused wrong results to be given for
+  line/line intersections. The bug did **not** effect `x64_64`.
+
+## Unreleased
+
 - Make `IgnoreOrder` a function rather than a global variable to prevent
   consumers from erroneously altering its behaviour.
 

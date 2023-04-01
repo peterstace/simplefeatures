@@ -78,9 +78,9 @@ func (w XY) Scale(s float64) XY {
 // Cross returns the 2D cross product of this and another XY. This is defined
 // as the 'z' coordinate of the regular 3D cross product.
 func (w XY) Cross(o XY) float64 {
-	// Avoid fused multi-add by explicitly converting intermediate products to
-	// float64. This ensures that the cross product is *exactly* zero for all
-	// non linearly independent inputs.
+	// Avoid fused multiply-add by explicitly converting intermediate products
+	// to float64. This ensures that the cross product is *exactly* zero for
+	// all linearly dependent inputs.
 	return float64(w.X*o.Y) - float64(w.Y*o.X)
 }
 
