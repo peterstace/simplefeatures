@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.42.0
+
+2023-04-02
+
+__Special thanks to Lachlan Patrick and Albert Teoh for contributing to this release.__
 
 - Make `IgnoreOrder` a function rather than a global variable to prevent
   consumers from erroneously altering its behaviour.
