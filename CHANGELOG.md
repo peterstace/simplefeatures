@@ -1,15 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Fix a bug affecting only `aarch64` that caused wrong results to be given for
+  line/line intersections. The bug did **not** effect `x64_64`.
+
 ## v0.42.0
 
 2023-04-02
 
 __Special thanks to Lachlan Patrick and Albert Teoh for contributing to this release.__
-
-- Fix a bug affecting only `aarch64` that caused wrong results to be given for
-  line/line intersections. The bug did **not** effect `x64_64`.
-
-## Unreleased
 
 - Make `IgnoreOrder` a function rather than a global variable to prevent
   consumers from erroneously altering its behaviour.
