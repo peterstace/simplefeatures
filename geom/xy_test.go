@@ -66,7 +66,7 @@ func TestXYCross(t *testing.T) {
 		{u: xy(1, 1), v: xy(0, 0), want: 0},
 		{u: xy(0.1, 0.1), v: xy(0, 0), want: 0},
 
-		// Not linearly independent:
+		// Linearly dependent:
 		{u: xy(1, 1), v: xy(2, 2), want: 0},
 		{u: xy(-1, -1), v: xy(2, 2), want: 0},
 
