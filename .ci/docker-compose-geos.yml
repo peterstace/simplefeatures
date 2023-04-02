@@ -1,9 +1,10 @@
 version: "2.1"
 services:
   geostests:
-    build:
-      context: .
-      dockerfile: geos.Dockerfile
+    image: geos-3.11.2-golang-1.19-buster
+    #build:
+    #  context: .
+    #  dockerfile: geos.Dockerfile
     working_dir: /go/src/github.com/peterstace/simplefeatures
     entrypoint: go test -test.count=1 -test.run=. ./geos
     volumes:
