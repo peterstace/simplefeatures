@@ -1138,6 +1138,11 @@ func TestBinaryOp(t *testing.T) {
 			input2: "POLYGON EMPTY",
 			union:  "POLYGON((0 0,0 1,1 1,1 0,0 0))",
 		},
+		{
+			input1: "LINESTRING(0 0,0 0,0 1,1 0,0 0)",
+			input2: "LINESTRING(0.1 0.1,0.5 0.5)",
+			inter:  "POINT(0.5 0.5)",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
@@ -1488,6 +1493,38 @@ func TestBinaryOpOutputOrdering(t *testing.T) {
 			expectNoErr(t, err)
 			// Ensure ordering is stable over multiple executions:
 			expectGeomEq(t, got1, got2)
+		})
+	}
+}
+
+func TestErrInsteadOfPanic(t *testing.T) {
+	for i, tc := range []struct {
+		input1 string
+		input2 string
+		op     func(_, _ geom.Geometry) (geom.Geometry, error)
+	}{
+		{
+			input1: `POLYGON((
+				-83.58253051 32.73168239,
+				-83.59843118 32.74617142,
+				-83.70048117 32.63984372,
+				-83.58253051 32.73168239
+			))`,
+			input2: `POLYGON((
+				-83.70047745 32.63984661,
+				-83.68891846 32.59896320,
+				-83.58253417 32.73167955,
+				-83.70047745 32.63984661
+			))`,
+			op: geom.Union,
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g1 := geomFromWKT(t, tc.input1)
+			g2 := geomFromWKT(t, tc.input2)
+			_, err := tc.op(g1, g2)
+			expectErr(t, err)
+			t.Log(err)
 		})
 	}
 }

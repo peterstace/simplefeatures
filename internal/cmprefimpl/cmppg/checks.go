@@ -104,12 +104,21 @@ func checkGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
 			// > empty "coordinates" arrays as null objects.
 			//
 			// Simplefeatures chooses to accept this as an empty point, but
-			// Postgres rejects it.
+			// PostGIS rejects it.
 			continue
 		}
 		if geojson == `{"type":"MultiPolygon","coordinates":[[0,0]]}` {
 			// PostGIS erroneously accepts this as a valid geometry, but
 			// simplefeatures correctly rejects it.
+			continue
+		}
+		if strings.Contains(geojson, "MultiPoint") && strings.Contains(geojson, "[]") {
+			// From https://www.rfc-editor.org/rfc/rfc7946#section-3.1.1:
+			//
+			// > A position is an array of numbers. There MUST be
+			// > two or more elements.
+			//
+			// PostGIS erroneously accepts MultiPoints with empty positions.
 			continue
 		}
 		any = true
@@ -170,6 +179,13 @@ func checkGeoJSON(t *testing.T, want UnaryResult, g geom.Geometry) {
 			// even valid JSON, let alone valid GeoJSON).
 			return
 		}
+		if isNonZeroCollectionWithOnlyEmptyChildren(g) {
+			// The spec [1] gives some leeway to implementers as to how these
+			// should be marshalled. The behaviour of PostGIS and
+			// simplefeatures differs slightly.
+			// [1]: https://www.rfc-editor.org/rfc/rfc7946
+			return
+		}
 		got, err := g.MarshalJSON()
 		if err != nil {
 			t.Fatalf("could not convert to geojson: %v", err)
@@ -185,6 +201,30 @@ func checkGeoJSON(t *testing.T, want UnaryResult, g geom.Geometry) {
 			t.Error("mismatch")
 		}
 	})
+}
+
+func isNonZeroCollectionWithOnlyEmptyChildren(g geom.Geometry) bool {
+	if !g.IsEmpty() {
+		return false
+	}
+	switch g.Type() {
+	case geom.TypePoint, geom.TypeLineString, geom.TypePolygon:
+		return false
+	case geom.TypeMultiPoint:
+		mp := g.MustAsMultiPoint()
+		return mp.NumPoints() > 0
+	case geom.TypeMultiLineString:
+		mls := g.MustAsMultiLineString()
+		return mls.NumLineStrings() > 0
+	case geom.TypeMultiPolygon:
+		mp := g.MustAsMultiPolygon()
+		return mp.NumPolygons() > 0
+	case geom.TypeGeometryCollection:
+		gc := g.MustAsGeometryCollection()
+		return gc.NumGeometries() > 0
+	default:
+		panic("unhandled")
+	}
 }
 
 func geojsonEqual(gj1, gj2 string) error {

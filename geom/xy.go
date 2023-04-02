@@ -78,7 +78,10 @@ func (w XY) Scale(s float64) XY {
 // Cross returns the 2D cross product of this and another XY. This is defined
 // as the 'z' coordinate of the regular 3D cross product.
 func (w XY) Cross(o XY) float64 {
-	return (w.X * o.Y) - (w.Y * o.X)
+	// Avoid fused multiply-add by explicitly converting intermediate products
+	// to float64. This ensures that the cross product is *exactly* zero for
+	// all linearly dependent inputs.
+	return float64(w.X*o.Y) - float64(w.Y*o.X)
 }
 
 // Midpoint returns the midpoint of this and another XY.
@@ -98,7 +101,12 @@ func (w XY) Unit() XY {
 
 // Length treats XY as a vector, and returns its length.
 func (w XY) Length() float64 {
-	return math.Sqrt(w.Dot(w))
+	return math.Sqrt(w.lengthSq())
+}
+
+// lengthSq treats XY as a vector, and returns its squared length.
+func (w XY) lengthSq() float64 {
+	return w.Dot(w)
 }
 
 // Less gives an ordering on XYs. If two XYs have different X values, then the

@@ -23,46 +23,12 @@ func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 
 	// Perform the sort.
 	if !alreadySorted {
-		// This solution is a reworking of
-		// https://stackoverflow.com/questions/6989100/sort-points-in-clockwise-order
-		// to avoid using trigonometry.
 		sort.Slice(incidents, func(i, j int) bool {
-			// Sort edges in ascending order of their angle relative to the
-			// x-axis. This is a stricter sort than necessary but is easy to
-			// implement. We only really care that the edges are sorted
-			// relative to each other (we don't care about the starting point).
 			ei := incidents[i]
 			ej := incidents[j]
 			di := ei.seq.GetXY(1).Sub(ei.seq.GetXY(0))
 			dj := ej.seq.GetXY(1).Sub(ej.seq.GetXY(0))
-
-			if di.X >= 0 && dj.X < 0 {
-				return true
-			}
-			if di.X < 0 && dj.X >= 0 {
-				return false
-			}
-			if di.X == 0 && dj.X == 0 {
-				if di.Y >= 0 || dj.Y >= 0 {
-					return di.Y < dj.Y
-				}
-				return dj.Y < di.Y
-			}
-
-			// compute the cross product of vectors from origin
-			det := di.X*dj.Y - dj.X*di.Y
-			if det < 0 {
-				return false
-			}
-			if det > 0 {
-				return true
-			}
-
-			// points are on the same line from the center
-			// check which point is further from the center
-			d1 := di.X*di.X + di.Y*di.Y
-			d2 := dj.X*dj.X + dj.Y*dj.Y
-			return d1 < d2
+			return radialLess(di, dj)
 		})
 	}
 
@@ -73,6 +39,38 @@ func (d *doublyConnectedEdgeList) fixVertex(v *vertexRecord) {
 		ei.prev = ej.twin
 		ej.twin.next = ei
 	}
+}
+
+// radialLess provides an ordering for sorting vectors radially around the origin.
+// This solution is a reworking of
+// https://stackoverflow.com/questions/6989100/sort-points-in-clockwise-order
+// to avoid using trigonometry.
+func radialLess(di, dj XY) bool {
+	if di.X >= 0 && dj.X < 0 {
+		return true
+	}
+	if di.X < 0 && dj.X >= 0 {
+		return false
+	}
+	if di.X == 0 && dj.X == 0 {
+		if di.Y >= 0 || dj.Y >= 0 {
+			return di.Y < dj.Y
+		}
+		return dj.Y < di.Y
+	}
+
+	// Due to the previous checks, di and dj must be in different sides (LHS vs
+	// RHS) of the XY plane. Therefore the sign of the cross product can
+	// provide an ordering within each half.
+	if det := di.Cross(dj); det != 0 {
+		return det > 0
+	}
+
+	// Points are on the same line from the center.
+	// Check which point is further from the center.
+	li := di.lengthSq()
+	lj := dj.lengthSq()
+	return li < lj
 }
 
 // assignFaces populates the face list based on half edge loops.

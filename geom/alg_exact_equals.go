@@ -32,7 +32,7 @@ func (c exactEqualsComparator) eq(a, b Coordinates) bool {
 		return false
 	}
 	asb := a.XY.Sub(b.XY)
-	if asb.Dot(asb) > c.toleranceSq {
+	if asb.lengthSq() > c.toleranceSq {
 		return false
 	}
 	if a.Type.Is3D() && a.Z != b.Z {

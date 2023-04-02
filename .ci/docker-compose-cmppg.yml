@@ -1,7 +1,7 @@
 version: "2.1"
 services:
   postgis:
-    image: ghcr.io/baosystems/postgis
+    image: ghcr.io/baosystems/postgis:15
     environment:
       POSTGRES_PASSWORD: password
     healthcheck:

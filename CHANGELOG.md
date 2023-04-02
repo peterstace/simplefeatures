@@ -2,13 +2,25 @@
 
 ## Unreleased
 
+- Fix a bug affecting only `aarch64` that caused wrong results to be given for
+  line/line intersections. The bug did **not** effect `x64_64`.
+
+- Orient Polygon and MultiPolygon rings as per RFC7946 when serialising as
+  GeoJSON.
+
+## v0.42.0
+
+2023-04-02
+
+__Special thanks to Lachlan Patrick and Albert Teoh for contributing to this release.__
+
 - Make `IgnoreOrder` a function rather than a global variable to prevent
   consumers from erroneously altering its behaviour.
 
 - Add a `BoundingDiagonal` method to the `Envelope` type.
 
-- Orient Polygon and MultiPolygon rings as per RFC7946 when serialising as
-  GeoJSON.
+- Return an error rather than panicking when certain internal assumptions are
+  violated during DCEL extraction.
 
 ## v0.41.0
 
