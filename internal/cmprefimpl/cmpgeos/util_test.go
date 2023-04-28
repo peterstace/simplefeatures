@@ -29,7 +29,7 @@ func TestMantissaTerminatesQuickly(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			got := mantissaTerminatesQuickly(pt.AsGeometry())
+			got := terminatesQuickly(pt.AsGeometry())
 			if got != tt.want {
 				t.Errorf("got=%v want=%v", got, tt.want)
 			}

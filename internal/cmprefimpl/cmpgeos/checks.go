@@ -855,7 +855,7 @@ func checkDCELOp(
 		return err
 	}
 
-	if !mantissaTerminatesQuickly(got) || !mantissaTerminatesQuickly(want) {
+	if !terminatesQuickly(got) || !terminatesQuickly(want) {
 		// We're not going to be able to compare got and want because of
 		// numeric precision issues.
 		log.Printf("mantissa doesn't terminate quickly, using area heuristic")
@@ -926,7 +926,7 @@ func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	if !mantissaTerminatesQuickly(g1) || !mantissaTerminatesQuickly(g2) {
+	if !terminatesQuickly(g1) || !terminatesQuickly(g2) {
 		// Numerical precision issues cause a large number of geometries to
 		// differ compared to GEOS. There aren't really any heuristics that we
 		// can fall back to, so we just have to skip these sorts of geometries.
