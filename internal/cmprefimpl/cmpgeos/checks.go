@@ -239,6 +239,12 @@ func checkAsBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
+	// GEOS uses a slightly different NaN representation (both are equally valid).
+	want = bytes.ReplaceAll(want,
+		[]byte{0x00, 0, 0, 0, 0, 0, 0xf8, 0x7f},
+		[]byte{0x01, 0, 0, 0, 0, 0, 0xf8, 0x7f},
+	)
+
 	got := g.AsBinary()
 	if !bytes.Equal(want, got) {
 		log.Printf("want:\n%s", hex.Dump(want))
