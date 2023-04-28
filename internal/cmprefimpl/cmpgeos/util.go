@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"strconv"
+	"math"
 	"strings"
 	"text/scanner"
 
@@ -205,10 +205,14 @@ func isNonEmptyGeometryCollection(g geom.Geometry) bool {
 	return g.IsGeometryCollection() && !g.IsEmpty()
 }
 
-func terminatesQuickly(g geom.Geometry) bool {
+func mantissaTerminatesQuickly(g geom.Geometry) bool {
 	termF := func(f float64) bool {
-		s := strconv.FormatFloat(f, 'f', -1, 64)
-		return len(s) <= 10
+		const (
+			mantissaMask        = ^uint64(0) >> 12
+			allowedMantissaMask = (mantissaMask >> 28) << 28
+		)
+		mant := math.Float64bits(f) & mantissaMask
+		return mant & ^allowedMantissaMask == 0
 	}
 	termXY := func(xy geom.XY) bool {
 		return termF(xy.X) && termF(xy.Y)
@@ -227,12 +231,12 @@ func terminatesQuickly(g geom.Geometry) bool {
 		}
 		return true
 	case geom.TypePolygon:
-		return g.IsEmpty() || terminatesQuickly(g.Boundary())
+		return g.IsEmpty() || mantissaTerminatesQuickly(g.Boundary())
 	case geom.TypeMultiPoint:
 		mp := g.MustAsMultiPoint()
 		for i := 0; i < mp.NumPoints(); i++ {
 			pt := mp.PointN(i)
-			if !terminatesQuickly(pt.AsGeometry()) {
+			if !mantissaTerminatesQuickly(pt.AsGeometry()) {
 				return false
 			}
 		}
@@ -241,18 +245,18 @@ func terminatesQuickly(g geom.Geometry) bool {
 		mls := g.MustAsMultiLineString()
 		for i := 0; i < mls.NumLineStrings(); i++ {
 			ls := mls.LineStringN(i)
-			if !terminatesQuickly(ls.AsGeometry()) {
+			if !mantissaTerminatesQuickly(ls.AsGeometry()) {
 				return false
 			}
 		}
 		return true
 	case geom.TypeMultiPolygon:
-		return g.IsEmpty() || terminatesQuickly(g.Boundary())
+		return g.IsEmpty() || mantissaTerminatesQuickly(g.Boundary())
 	case geom.TypeGeometryCollection:
 		gc := g.MustAsGeometryCollection()
 		for i := 0; i < gc.NumGeometries(); i++ {
 			g := gc.GeometryN(i)
-			if !terminatesQuickly(g) {
+			if !mantissaTerminatesQuickly(g) {
 				return false
 			}
 		}
