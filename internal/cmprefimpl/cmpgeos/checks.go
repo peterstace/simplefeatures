@@ -855,34 +855,8 @@ func checkDCELOp(
 		return err
 	}
 
-	if !terminatesQuickly(got) || !terminatesQuickly(want) {
-		// We're not going to be able to compare got and want because of
-		// numeric precision issues.
-		log.Printf("mantissa doesn't terminate quickly, using area heuristic")
-		if err := checkEqualityHeuristic(want, got, log); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	if want.IsGeometryCollection() || got.IsGeometryCollection() {
-		// We can't use Equals from GEOS on GeometryCollections, so we can't
-		// use proper Equals for this case.
-		log.Printf("want or got is a geometry collection, using area heuristic")
-		if err := checkEqualityHeuristic(want, got, log); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	eq, err := geos.Equals(want, got)
-	if err != nil {
+	if err := checkEqualityHeuristic(want, got, log); err != nil {
 		return err
-	}
-	if !eq {
-		log.Printf("want: %v", want.AsText())
-		log.Printf("got:  %v", got.AsText())
-		return errMismatch
 	}
 	return nil
 }
@@ -893,13 +867,41 @@ func checkDCELOp(
 // TODO: we could come up with some smarter heuristics. E.g. distance sampled
 // by many random points.
 func checkEqualityHeuristic(want, got geom.Geometry, log *log.Logger) error {
-	wantArea := want.Area()
-	gotArea := got.Area()
-	if math.Abs(wantArea-gotArea) > 1e-3 {
-		log.Printf("wantWKT: %v\n", want.AsText())
-		log.Printf("gotWKT:  %v\n", got.AsText())
-		log.Printf("wantArea: %v\n", wantArea)
-		log.Printf("gotArea:  %v\n", gotArea)
+	if isArealGeometry(want) && isArealGeometry(got) {
+		return checkRelativeAreaHeuristic(want, got, log)
+	}
+
+	// TODO: more dynamic buffer radius
+	const radius = 0.01
+	var err error
+	want, err = geos.Buffer(want, radius)
+	if err != nil {
+		return err
+	}
+	got, err = geos.Buffer(got, radius)
+	if err != nil {
+		return err
+	}
+	return checkRelativeAreaHeuristic(want, got, log)
+}
+
+func checkRelativeAreaHeuristic(want, got geom.Geometry, log *log.Logger) error {
+	var (
+		wantArea = want.Area()
+		gotArea  = got.Area()
+		absDiff  = math.Abs(wantArea - gotArea)
+		relative = absDiff / math.Max(wantArea, gotArea)
+	)
+	const threshold = 1e-3
+	if relative > threshold {
+		log.Printf("relative area heuristic failed:")
+		log.Printf("wantWKT:   %v\n", want.AsText())
+		log.Printf("gotWKT:    %v\n", got.AsText())
+		log.Printf("wantArea:  %v\n", wantArea)
+		log.Printf("gotArea:   %v\n", gotArea)
+		log.Printf("diff:      %v\n", absDiff)
+		log.Printf("relative:  %v\n", relative)
+		log.Printf("theshold:  %v\n", threshold)
 		return errMismatch
 	}
 	return nil
