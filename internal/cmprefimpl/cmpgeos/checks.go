@@ -136,12 +136,19 @@ func checkAsText(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
+	// Skip geometries that GEOS is known to produce incorrect WKT for due to numerical rounding issues.
+	if map[string]bool{
+		"POLYGON((0.9292893218813453 1.0707106781186548,1 1.1414213562373097,1.1414213562373097 1,0.07071067811865475 -0.07071067811865475,0 -0.1414213562373095,-0.1414213562373095 -0.000000000000000013877787807814457,0.9292893218813453 1.0707106781186548))": true,
+	}[g.AsText()] {
+		return nil
+	}
+
 	want, err := h.asText(g)
 	if err != nil {
 		return err
 	}
 
-	// Account for easy-to-adjust for acceptable spacing differeneces between
+	// Account for easy-to-adjust for acceptable spacing differences between
 	// libgeos and simplefeatures.
 	want = strings.ReplaceAll(want, " (", "(")
 	want = strings.ReplaceAll(want, ", ", ",")
