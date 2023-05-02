@@ -815,3 +815,41 @@ func TestMakeValid(t *testing.T) {
 		})
 	}
 }
+
+func TestCoverageUnion(t *testing.T) {
+	for i, tc := range []struct {
+		input   string
+		output  string
+		wantErr bool
+	}{
+		{
+			input:  `GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)),POLYGON((1 1,0 1,1 0,1 1)))`,
+			output: `POLYGON((0 0,0 1,1 1,1 0,0 0))`,
+		},
+		{
+			// Input constraint violated: inputs overlap.
+			input:   `GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)),POLYGON((0 0,0 1,1 1,0 0)))`,
+			wantErr: true,
+		},
+		{
+			// Input constraint violated: not noded correctly.
+			input:   `GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)),POLYGON((0 0,2 0,0 -2,0 0)))`,
+			wantErr: true,
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			in := geomFromWKT(t, tc.input)
+			gotGeom, err := CoverageUnion(in)
+			if _, ok := err.(unsupportedGEOSVersionError); ok {
+				t.Skip(err)
+			}
+			if tc.wantErr {
+				expectErr(t, err)
+			} else {
+				expectNoErr(t, err)
+				wantGeom := geomFromWKT(t, tc.output)
+				expectGeomEq(t, gotGeom, wantGeom, geom.IgnoreOrder)
+			}
+		})
+	}
+}

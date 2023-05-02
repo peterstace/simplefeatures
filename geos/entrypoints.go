@@ -15,6 +15,16 @@ package geos
 GEOSGeometry *GEOSMakeValid_r(GEOSContextHandle_t handle, const GEOSGeometry* g) { return NULL; }
 #endif
 
+#define COVERAGE_UNION_MIN_VERSION "3.8.0"
+#define COVERAGE_UNION_MISSING ( \
+	GEOS_VERSION_MAJOR < 3 || \
+	(GEOS_VERSION_MAJOR == 3 && GEOS_VERSION_MINOR < 8) \
+)
+#if COVERAGE_UNION_MISSING
+// This stub implementation always fails:
+GEOSGeometry *GEOSCoverageUnion_r(GEOSContextHandle_t handle, const GEOSGeometry* g) { return NULL; }
+#endif
+
 */
 import "C"
 
@@ -336,4 +346,19 @@ func MakeValid(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, 
 		return C.GEOSMakeValid_r(ctx, g)
 	})
 	return result, wrap(err, "executing GEOSMakeValid_r")
+}
+
+// CoverageUnion unions together polygonal inputs (typically held in a
+// GeometryCollection). The inputs must be correctly noded and not overlap. An
+// error will be returned if those constraints are not met.
+func CoverageUnion(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	if C.COVERAGE_UNION_MISSING != 0 {
+		return geom.Geometry{}, unsupportedGEOSVersionError{
+			C.COVERAGE_UNION_MIN_VERSION, "CoverageUnion",
+		}
+	}
+	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSCoverageUnion_r(ctx, g)
+	})
+	return result, wrap(err, "executing GEOSCoverageUnion_r")
 }
