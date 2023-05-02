@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Updates reference implementation checks to use GEOS 3.11.
+
 - Fix a bug affecting only `aarch64` that caused wrong results to be given for
   line/line intersections. The bug did **not** effect `x64_64`.
 
