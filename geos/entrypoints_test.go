@@ -823,17 +823,34 @@ func TestCoverageUnion(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			input:  `GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)),POLYGON((1 1,0 1,1 0,1 1)))`,
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 0,0 0)),
+				POLYGON((1 1,0 1,1 0,1 1))
+			)`,
 			output: `POLYGON((0 0,0 1,1 1,1 0,0 0))`,
 		},
 		{
 			// Input constraint violated: inputs overlap.
-			input:   `GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)),POLYGON((0 0,0 1,1 1,0 0)))`,
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 0,0 0)),
+				POLYGON((0 0,0 1,1 1,1 0,0 0))
+			)`,
+			wantErr: true,
+		},
+		{
+			// Input constraint violated: inputs overlap and not noded correctly.
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 0,0 0)),
+				POLYGON((0 0,0 1,1 1,0 0))
+			)`,
 			wantErr: true,
 		},
 		{
 			// Input constraint violated: not noded correctly.
-			input:   `GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)),POLYGON((0 0,2 0,0 -2,0 0)))`,
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 1,1 0,0 0)),
+				POLYGON((0 1,2 1,2 2,0 2,0 1))
+			)`,
 			wantErr: true,
 		},
 	} {
