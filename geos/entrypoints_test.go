@@ -853,8 +853,16 @@ func TestCoverageUnion(t *testing.T) {
 			)`,
 			wantErr: true,
 		},
+		{
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 0,0 0)),
+				POLYGON((0 0,2 0,0 -2,0 0))
+			)`,
+			wantErr: true,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			t.Log(tc.input)
 			in := geomFromWKT(t, tc.input)
 			gotGeom, err := CoverageUnion(in)
 			if _, ok := err.(unsupportedGEOSVersionError); ok {
@@ -862,6 +870,7 @@ func TestCoverageUnion(t *testing.T) {
 			}
 			if tc.wantErr {
 				expectErr(t, err)
+				t.Log(err)
 			} else {
 				expectNoErr(t, err)
 				wantGeom := geomFromWKT(t, tc.output)
