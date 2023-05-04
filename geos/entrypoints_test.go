@@ -853,6 +853,11 @@ func TestCoverageUnion(t *testing.T) {
 			)`,
 			wantErr: true,
 		},
+		{
+			// Input constraint violation: not everything is a polygon.
+			input:   `GEOMETRYCOLLECTION(POINT(1 2),POLYGON((0 0,0 1,1 0,0 0)))`,
+			wantErr: true,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in := geomFromWKT(t, tc.input)

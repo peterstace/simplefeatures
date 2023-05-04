@@ -348,9 +348,20 @@ func MakeValid(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, 
 	return result, wrap(err, "executing GEOSMakeValid_r")
 }
 
-// CoverageUnion unions together polygonal inputs (typically held in a
-// GeometryCollection). The inputs must be correctly noded and not overlap. An
-// error will be returned if those constraints are not met.
+// The CoverageUnion function is used to union polygonal inputs that form a
+// coverage, which are typically provided as a GeometryCollection. This method
+// is much faster than other unioning methods, but there are some constraints
+// that must be met by the inputs to form a valid polygonal coverage. These
+// constraints are:
+//
+//  1. all input geometries must be polygonal,
+//  2. the inputs must not overlap, and
+//  3. the input boundaries must be noded in the same way.
+//
+// It should be noted that while CoverageUnion may detect constraint violations
+// and return an error, but this is not guaranteed, and an invalid result may
+// be returned without an error. It is the responsibility of the caller to
+// ensure that the constraints are met before using this function.
 func CoverageUnion(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
 	if C.COVERAGE_UNION_MISSING != 0 {
 		return geom.Geometry{}, unsupportedGEOSVersionError{
