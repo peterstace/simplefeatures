@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.42.1
+
+2023-05-05
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - Updates reference implementation checks to use GEOS 3.11.
 
