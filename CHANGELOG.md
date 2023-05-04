@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.42.1
 
 - Updates reference implementation checks to use GEOS 3.11.
 
