@@ -355,8 +355,8 @@ func MakeValid(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, 
 // constraints are:
 //
 //  1. all input geometries must be polygonal,
-//  2. the inputs must not overlap, and
-//  3. the input boundaries must be noded in the same way.
+//  2. the interiors of the inputs must not intersect, and
+//  3. the common boundaries of adjacent polygons have the same set of vertices in both polygons.
 //
 // It should be noted that while CoverageUnion may detect constraint violations
 // and return an error, but this is not guaranteed, and an invalid result may

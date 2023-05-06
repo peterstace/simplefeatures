@@ -823,11 +823,28 @@ func TestCoverageUnion(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			// Noded correctly (shared edge).
 			input: `GEOMETRYCOLLECTION(
 				POLYGON((0 0,0 1,1 0,0 0)),
 				POLYGON((1 1,0 1,1 0,1 1))
 			)`,
 			output: `POLYGON((0 0,0 1,1 1,1 0,0 0))`,
+		},
+		{
+			// Noded correctly (shared vertex but no shared edge).
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 1,1 0,0 0)),
+				POLYGON((1 1,1 2,2 2,2 1,1 1))
+			)`,
+			output: `MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))`,
+		},
+		{
+			// Noded correctly (completely disjoint).
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 1,1 0,0 0)),
+				POLYGON((2 2,2 3,3 3,3 2,2 2))
+			)`,
+			output: `MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 2,2 3,3 3,3 2,2 2)))`,
 		},
 		{
 			// Input constraint violated: inputs overlap.
