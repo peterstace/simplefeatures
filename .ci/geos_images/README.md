@@ -31,13 +31,29 @@ Login to dockerhub:
 docker login # interactive
 ```
 
-Build and push the images:
+Specify the versions of GEOS and Go to build the images for:
 ```sh
 GEOS_VERSION=3.10.5
+GO_VERSION=1.20.4
+```
+
+Build and push the GEOS images:
+```sh
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
   --file geos.Dockerfile \
   --build-arg GEOS_VERSION=${GEOS_VERSION} \
   --tag peterstace/simplefeatures-ci:geos-${GEOS_VERSION} \
+  --push .
+```
+
+Build and push the Go images:
+```sh
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --file go.Dockerfile \
+  --build-arg GEOS_VERSION=${GEOS_VERSION} \
+  --build-arg GO_VERSION=${GO_VERSION} \
+  --tag peterstace/simplefeatures-ci:geos-${GEOS_VERSION}-go-${GO_VERSION} \
   --push .
 ```
