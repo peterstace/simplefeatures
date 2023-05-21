@@ -337,3 +337,13 @@ func MakeValid(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, 
 	})
 	return result, wrap(err, "executing GEOSMakeValid_r")
 }
+
+// UnaryUnion is a single argument version of Union. It is most useful when
+// supplied with a GeometryCollection, resulting in the union of the
+// GeometryCollection's child geometries.
+func UnaryUnion(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSUnaryUnion_r(ctx, g)
+	})
+	return result, wrap(err, "executing GEOSUnaryUnion_r")
+}

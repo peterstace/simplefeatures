@@ -829,3 +829,21 @@ func TestMakeValid(t *testing.T) {
 		})
 	}
 }
+
+func TestUnaryUnion(t *testing.T) {
+	for i, tt := range []struct {
+		input      string
+		wantOutput string
+	}{
+		{
+			"GEOMETRYCOLLECTION(POLYGON((0 0,0 2,2 2,2 0,0 0)),POLYGON((1 1,1 3,3 3,3 1,1 1)))",
+			"POLYGON((0 0,2 0,2 1,3 1,3 3,1 3,1 2,0 2,0 0))",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got, err := UnaryUnion(geomFromWKT(t, tt.input))
+			expectNoErr(t, err)
+			expectGeomEq(t, got, geomFromWKT(t, tt.wantOutput), geom.IgnoreOrder)
+		})
+	}
+}
