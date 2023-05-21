@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleases
+
+- Adds a wrapper in the `geos` package for the `GEOSUnaryUnion_r` function
+  (exposed as `UnaryUnion`).
+
 ## v0.42.1
 
 2023-05-05
