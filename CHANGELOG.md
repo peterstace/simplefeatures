@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleases
+## Unreleased
 
 - Adds a wrapper in the `geos` package for the `GEOSUnaryUnion_r` function
   (exposed as `UnaryUnion`).
