@@ -829,3 +829,80 @@ func TestMakeValid(t *testing.T) {
 		})
 	}
 }
+
+func TestCoverageUnion(t *testing.T) {
+	for i, tc := range []struct {
+		input   string
+		output  string
+		wantErr bool
+	}{
+		{
+			// Noded correctly (shared edge).
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 0,0 0)),
+				POLYGON((1 1,0 1,1 0,1 1))
+			)`,
+			output: `POLYGON((0 0,0 1,1 1,1 0,0 0))`,
+		},
+		{
+			// Noded correctly (shared vertex but no shared edge).
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 1,1 0,0 0)),
+				POLYGON((1 1,1 2,2 2,2 1,1 1))
+			)`,
+			output: `MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))`,
+		},
+		{
+			// Noded correctly (completely disjoint).
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 1,1 0,0 0)),
+				POLYGON((2 2,2 3,3 3,3 2,2 2))
+			)`,
+			output: `MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 2,2 3,3 3,3 2,2 2)))`,
+		},
+		{
+			// Input constraint violated: inputs overlap.
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 0,0 0)),
+				POLYGON((0 0,0 1,1 1,1 0,0 0))
+			)`,
+			wantErr: true,
+		},
+		{
+			// Input constraint violated: inputs overlap and not noded correctly.
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 0,0 0)),
+				POLYGON((0 0,0 1,1 1,0 0))
+			)`,
+			wantErr: true,
+		},
+		{
+			// Input constraint violated: not noded correctly.
+			input: `GEOMETRYCOLLECTION(
+				POLYGON((0 0,0 1,1 1,1 0,0 0)),
+				POLYGON((0 1,2 1,2 2,0 2,0 1))
+			)`,
+			wantErr: true,
+		},
+		{
+			// Input constraint violation: not everything is a polygon.
+			input:   `GEOMETRYCOLLECTION(POINT(1 2),POLYGON((0 0,0 1,1 0,0 0)))`,
+			wantErr: true,
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			in := geomFromWKT(t, tc.input)
+			gotGeom, err := CoverageUnion(in)
+			if _, ok := err.(unsupportedGEOSVersionError); ok {
+				t.Skip(err)
+			}
+			if tc.wantErr {
+				expectErr(t, err)
+			} else {
+				expectNoErr(t, err)
+				wantGeom := geomFromWKT(t, tc.output)
+				expectGeomEq(t, gotGeom, wantGeom, geom.IgnoreOrder)
+			}
+		})
+	}
+}
