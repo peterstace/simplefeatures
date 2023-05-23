@@ -23,6 +23,7 @@ int32_t *offset_pointer(int32_t *indices, size_t offset) {
 }
 */
 import "C"
+
 import (
 	"fmt"
 	"unsafe"
