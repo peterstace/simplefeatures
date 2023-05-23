@@ -1,12 +1,8 @@
 version: "2.1"
 services:
   geostests:
-    build:
-      context: .
-      dockerfile: geos.Dockerfile
-    working_dir: /go/src/github.com/peterstace/simplefeatures
+    image: peterstace/simplefeatures-ci:geos-${GEOS_VERSION}-go-1.20.4
+    working_dir: /mnt/sf
     entrypoint: go test -test.count=1 -test.run=. ./geos
     volumes:
-      - ..:/go/src/github.com/peterstace/simplefeatures
-    environment:
-      - GO111MODULE=on
+      - ..:/mnt/sf
