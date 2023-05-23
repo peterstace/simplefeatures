@@ -15,6 +15,16 @@ package geos
 GEOSGeometry *GEOSMakeValid_r(GEOSContextHandle_t handle, const GEOSGeometry* g) { return NULL; }
 #endif
 
+#define COVERAGE_UNION_MIN_VERSION "3.8.0"
+#define COVERAGE_UNION_MISSING ( \
+	GEOS_VERSION_MAJOR < 3 || \
+	(GEOS_VERSION_MAJOR == 3 && GEOS_VERSION_MINOR < 8) \
+)
+#if COVERAGE_UNION_MISSING
+// This stub implementation always fails:
+GEOSGeometry *GEOSCoverageUnion_r(GEOSContextHandle_t handle, const GEOSGeometry* g) { return NULL; }
+#endif
+
 */
 import "C"
 
@@ -336,6 +346,32 @@ func MakeValid(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, 
 		return C.GEOSMakeValid_r(ctx, g)
 	})
 	return result, wrap(err, "executing GEOSMakeValid_r")
+}
+
+// The CoverageUnion function is used to union polygonal inputs that form a
+// coverage, which are typically provided as a GeometryCollection. This method
+// is much faster than other unioning methods, but there are some constraints
+// that must be met by the inputs to form a valid polygonal coverage. These
+// constraints are:
+//
+//  1. all input geometries must be polygonal,
+//  2. the interiors of the inputs must not intersect, and
+//  3. the common boundaries of adjacent polygons have the same set of vertices in both polygons.
+//
+// It should be noted that while CoverageUnion may detect constraint violations
+// and return an error, but this is not guaranteed, and an invalid result may
+// be returned without an error. It is the responsibility of the caller to
+// ensure that the constraints are met before using this function.
+func CoverageUnion(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+	if C.COVERAGE_UNION_MISSING != 0 {
+		return geom.Geometry{}, unsupportedGEOSVersionError{
+			C.COVERAGE_UNION_MIN_VERSION, "CoverageUnion",
+		}
+	}
+	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSCoverageUnion_r(ctx, g)
+	})
+	return result, wrap(err, "executing GEOSCoverageUnion_r")
 }
 
 // UnaryUnion is a single argument version of Union. It is most useful when
