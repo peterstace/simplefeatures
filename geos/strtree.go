@@ -67,7 +67,7 @@ func NewSTRTree(nodeCapacity int, entries []STRTreeEntry) (*STRTree, error) {
 
 	tree.tree = C.GEOSSTRtree_create_r(h.context, C.size_t(nodeCapacity))
 	if tree.tree == nil {
-		return nil, wrap(err, "executing GEOSSTRtree_create_r")
+		return nil, wrap(h.err(), "executing GEOSSTRtree_create_r")
 	}
 
 	tree.indices = C.allocate_indices(C.size_t(nodeCapacity))
