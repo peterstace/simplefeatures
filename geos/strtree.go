@@ -7,25 +7,13 @@ package geos
 #include "stdint.h"
 #include "stdlib.h"
 
-int32_t *allocate_indices(size_t n) {
-	int32_t *ind = malloc(4 * n);
-	if (ind == NULL) {
-		return NULL;
-	}
-	for (int i = 0; i < n; i++) {
-		ind[i] = i;
-	}
-	return ind;
-}
-
-int32_t *offset_pointer(int32_t *indices, size_t offset) {
-	return &indices[offset];
-}
+extern void queryCallback(void *item, void *userdata);
 */
 import "C"
 
 import (
 	"fmt"
+	"runtime/cgo"
 	"unsafe"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -35,7 +23,7 @@ type STRTree struct {
 	h       *handle
 	tree    *C.GEOSSTRtree
 	geoms   []*C.GEOSGeometry
-	indices *C.int32_t
+	entries []STRTreeEntry
 	closed  bool
 }
 
@@ -51,9 +39,11 @@ func NewSTRTree(nodeCapacity int, entries []STRTreeEntry) (*STRTree, error) {
 	}
 
 	tree := &STRTree{
-		h:     h,
-		tree:  nil, // Populated below.
-		geoms: nil, // Populated below.
+		h:       h,
+		tree:    nil, // Populated below.
+		geoms:   nil, // Populated below.
+		entries: entries,
+		closed:  false,
 	}
 
 	// The upper limit is artificial, but it's a good idea to constrain it to
@@ -70,11 +60,6 @@ func NewSTRTree(nodeCapacity int, entries []STRTreeEntry) (*STRTree, error) {
 		return nil, wrap(h.err(), "executing GEOSSTRtree_create_r")
 	}
 
-	tree.indices = C.allocate_indices(C.size_t(nodeCapacity))
-	if tree.indices == nil {
-		tree.Close()
-		return nil, fmt.Errorf("allocating memory for indices")
-	}
 	for i, e := range entries {
 		gh, err := h.createGeometryHandle(e.BBox.BoundingDiagonal())
 		if err != nil {
@@ -82,8 +67,8 @@ func NewSTRTree(nodeCapacity int, entries []STRTreeEntry) (*STRTree, error) {
 			return nil, wrap(err, "creating entry bbox")
 		}
 		tree.geoms = append(tree.geoms, gh)
-		userData := C.offset_pointer(tree.indices, C.size_t(i))
-		C.GEOSSTRtree_insert_r(tree.h.context, tree.tree, gh, unsafe.Pointer(userData))
+		userData := unsafe.Pointer(uintptr(i))
+		C.GEOSSTRtree_insert_r(tree.h.context, tree.tree, gh, userData)
 	}
 
 	return tree, nil
@@ -99,13 +84,41 @@ func (t *STRTree) Close() error {
 	}
 	t.geoms = nil
 
-	if t.indices != nil {
-		C.free(unsafe.Pointer(t.indices))
-	}
 	if t.tree != nil {
 		C.GEOSSTRtree_destroy_r(t.h.context, t.tree)
 	}
 	t.h.release()
 	t.closed = true
 	return nil
+}
+
+func (t *STRTree) Iterate(callback func(STRTreeEntry)) {
+	if t.closed {
+		panic("STRTree is closed")
+	}
+
+	userData := cgo.NewHandle(callbackUserData{
+		entries:  t.entries,
+		callback: callback,
+	})
+	defer userData.Delete()
+
+	C.GEOSSTRtree_iterate_r(
+		t.h.context,
+		t.tree,
+		(C.GEOSQueryCallback)(C.queryCallback),
+		unsafe.Pointer(userData),
+	)
+}
+
+type callbackUserData struct {
+	entries  []STRTreeEntry
+	callback func(STRTreeEntry)
+}
+
+//export queryCallback
+func queryCallback(item, userData unsafe.Pointer) {
+	itemIdx := int(uintptr(item))
+	ud := (cgo.Handle(userData).Value()).(callbackUserData)
+	ud.callback(ud.entries[itemIdx])
 }
