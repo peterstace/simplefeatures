@@ -40,8 +40,8 @@ func TestSTRTreeNodeCapacityValidation(t *testing.T) {
 func randomEnv(t *testing.T) geom.Envelope {
 	t.Helper()
 	bbox, err := geom.NewEnvelope([]geom.XY{
-		geom.XY{X: randomFloat2DP(), Y: randomFloat2DP()},
-		geom.XY{X: randomFloat2DP(), Y: randomFloat2DP()},
+		{X: randomFloat2DP(), Y: randomFloat2DP()},
+		{X: randomFloat2DP(), Y: randomFloat2DP()},
 	})
 	expectNoErr(t, err)
 	return bbox
