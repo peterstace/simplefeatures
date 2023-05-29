@@ -6,6 +6,7 @@ package geos
 #include "geos_c.h"
 #include "stdint.h"
 #include "stdlib.h"
+#include "string.h"
 
 extern void queryCallback(void *item, void *userdata);
 */
@@ -23,13 +24,14 @@ type STRTree struct {
 	h       *handle
 	tree    *C.GEOSSTRtree
 	geoms   []*C.GEOSGeometry
+	indices *C.char
 	entries []STRTreeEntry
 	closed  bool
 }
 
 type STRTreeEntry struct {
 	BBox geom.Envelope
-	Item interface{} // TODO: Use generics here?
+	Item interface{}
 }
 
 func NewSTRTree(nodeCapacity int, entries []STRTreeEntry) (*STRTree, error) {
@@ -42,6 +44,7 @@ func NewSTRTree(nodeCapacity int, entries []STRTreeEntry) (*STRTree, error) {
 		h:       h,
 		tree:    nil, // Populated below.
 		geoms:   nil, // Populated below.
+		indices: nil, // Populated below.
 		entries: entries,
 		closed:  false,
 	}
@@ -57,8 +60,12 @@ func NewSTRTree(nodeCapacity int, entries []STRTreeEntry) (*STRTree, error) {
 
 	tree.tree = C.GEOSSTRtree_create_r(h.context, C.size_t(nodeCapacity))
 	if tree.tree == nil {
+		tree.Close()
 		return nil, wrap(h.err(), "executing GEOSSTRtree_create_r")
 	}
+
+	tree.indices = (*C.char)(C.malloc(C.sizeof_char * C.size_t(len(entries))))
+	C.memset(unsafe.Pointer(tree.indices), 0, C.sizeof_char*C.size_t(len(entries)))
 
 	for i, e := range entries {
 		gh, err := h.createGeometryHandle(e.BBox.BoundingDiagonal())
@@ -67,7 +74,7 @@ func NewSTRTree(nodeCapacity int, entries []STRTreeEntry) (*STRTree, error) {
 			return nil, wrap(err, "creating entry bbox")
 		}
 		tree.geoms = append(tree.geoms, gh)
-		userData := unsafe.Pointer(uintptr(i))
+		userData := unsafe.Pointer(uintptr(unsafe.Pointer(tree.indices)) + C.sizeof_char*uintptr(i))
 		C.GEOSSTRtree_insert_r(tree.h.context, tree.tree, gh, userData)
 	}
 
@@ -79,15 +86,18 @@ func (t *STRTree) Close() error {
 		return fmt.Errorf("already closed")
 	}
 
+	if t.tree != nil {
+		C.GEOSSTRtree_destroy_r(t.h.context, t.tree)
+	}
+	if t.indices != nil {
+		C.free(unsafe.Pointer(t.indices))
+	}
 	for _, gh := range t.geoms {
 		C.GEOSGeom_destroy(gh)
 	}
 	t.geoms = nil
-
-	if t.tree != nil {
-		C.GEOSSTRtree_destroy_r(t.h.context, t.tree)
-	}
 	t.h.release()
+
 	t.closed = true
 	return nil
 }
@@ -98,6 +108,7 @@ func (t *STRTree) Iterate(callback func(STRTreeEntry)) {
 	}
 
 	userData := cgo.NewHandle(callbackUserData{
+		indices:  t.indices,
 		entries:  t.entries,
 		callback: callback,
 	})
@@ -112,13 +123,14 @@ func (t *STRTree) Iterate(callback func(STRTreeEntry)) {
 }
 
 type callbackUserData struct {
+	indices  *C.char
 	entries  []STRTreeEntry
 	callback func(STRTreeEntry)
 }
 
 //export queryCallback
 func queryCallback(item, userData unsafe.Pointer) {
-	itemIdx := int(uintptr(item))
 	ud := (cgo.Handle(userData).Value()).(callbackUserData)
-	ud.callback(ud.entries[itemIdx])
+	itemOffset := uintptr(item) - uintptr(unsafe.Pointer(ud.indices))
+	ud.callback(ud.entries[itemOffset])
 }
