@@ -25,16 +25,10 @@ type STRTree struct {
 	tree    *C.GEOSSTRtree
 	geoms   []*C.GEOSGeometry
 	indices *C.char
-	entries []STRTreeEntry
 	closed  bool
 }
 
-type STRTreeEntry struct {
-	BBox geom.Envelope
-	Item interface{}
-}
-
-func NewSTRTree(nodeCapacity int, entries []STRTreeEntry) (*STRTree, error) {
+func NewSTRTree(nodeCapacity int, boxes []geom.Envelope) (*STRTree, error) {
 	h, err := newHandle()
 	if err != nil {
 		return nil, err
@@ -45,7 +39,6 @@ func NewSTRTree(nodeCapacity int, entries []STRTreeEntry) (*STRTree, error) {
 		tree:    nil, // Populated below.
 		geoms:   nil, // Populated below.
 		indices: nil, // Populated below.
-		entries: entries,
 		closed:  false,
 	}
 
@@ -64,23 +57,25 @@ func NewSTRTree(nodeCapacity int, entries []STRTreeEntry) (*STRTree, error) {
 		return nil, wrap(h.err(), "executing GEOSSTRtree_create_r")
 	}
 
-	tree.indices = (*C.char)(C.malloc(C.sizeof_char * C.size_t(len(entries))))
-	C.memset(unsafe.Pointer(tree.indices), 0, C.sizeof_char*C.size_t(len(entries)))
+	tree.indices = (*C.char)(C.malloc(C.sizeof_char * C.size_t(len(boxes))))
+	C.memset(unsafe.Pointer(tree.indices), 0, C.sizeof_char*C.size_t(len(boxes)))
 
-	for i, e := range entries {
-		gh, err := h.createGeometryHandle(e.BBox.BoundingDiagonal())
+	for i, b := range boxes {
+		// TODO: what if the envelope is empty?
+		gh, err := h.createGeometryHandle(b.BoundingDiagonal())
 		if err != nil {
 			tree.Close()
 			return nil, wrap(err, "creating entry bbox")
 		}
-		tree.geoms = append(tree.geoms, gh)
 		userData := unsafe.Pointer(uintptr(unsafe.Pointer(tree.indices)) + C.sizeof_char*uintptr(i))
 		C.GEOSSTRtree_insert_r(tree.h.context, tree.tree, gh, userData)
+		tree.geoms = append(tree.geoms, gh) // TODO: only need to keep geoms if >= 3.9.0
 	}
 
 	return tree, nil
 }
 
+// TODO: add tests to ensure no memory leaks
 func (t *STRTree) Close() error {
 	if t.closed {
 		return fmt.Errorf("already closed")
@@ -102,14 +97,13 @@ func (t *STRTree) Close() error {
 	return nil
 }
 
-func (t *STRTree) Iterate(callback func(STRTreeEntry)) {
+func (t *STRTree) Iterate(callback func(ridx int)) {
 	if t.closed {
 		panic("STRTree is closed")
 	}
 
 	userData := cgo.NewHandle(callbackUserData{
 		indices:  t.indices,
-		entries:  t.entries,
 		callback: callback,
 	})
 	defer userData.Delete()
@@ -124,13 +118,12 @@ func (t *STRTree) Iterate(callback func(STRTreeEntry)) {
 
 type callbackUserData struct {
 	indices  *C.char
-	entries  []STRTreeEntry
-	callback func(STRTreeEntry)
+	callback func(int)
 }
 
 //export queryCallback
 func queryCallback(item, userData unsafe.Pointer) {
 	ud := (cgo.Handle(userData).Value()).(callbackUserData)
-	itemOffset := uintptr(item) - uintptr(unsafe.Pointer(ud.indices))
-	ud.callback(ud.entries[itemOffset])
+	ridx := uintptr(item) - uintptr(unsafe.Pointer(ud.indices))
+	ud.callback(int(ridx))
 }

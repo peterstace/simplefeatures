@@ -1,7 +1,6 @@
 package geos_test
 
 import (
-	"reflect"
 	"testing"
 )
 
@@ -19,9 +18,9 @@ func expectErr(t testing.TB, err error) {
 	}
 }
 
-func expectDeepEq(t testing.TB, want, got interface{}) {
+func expectIntEq(t testing.TB, want, got int) {
 	t.Helper()
-	if !reflect.DeepEqual(want, got) {
+	if want != got {
 		t.Logf("want: %v", want)
 		t.Logf("got:  %v", got)
 		t.Fatal("expected equal")
