@@ -6,9 +6,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: CI
-      run: |
-        "$GITHUB_WORKSPACE/.ci/run_ci.sh"
+    - name: lint
+      run: make lint
+    - name: unit
+      run: make unit
+    - name: geos
+      run: make geos
+    - name: pgscan
+      run: make pgscan
+    - name: cmppg
+      run: make cmppg
+    - name: cmpgeos
+      run: make cmpgeos
     - name: Convert coverage to lcov
       uses: jandelgado/gcov2lcov-action@v1.0.2
       with:
