@@ -27,27 +27,6 @@ type entry struct {
 	recordID int
 }
 
-func (n *node) appendRecord(box Box, recordID int) {
-	n.entries[n.numEntries] = entry{box: box, recordID: recordID}
-	n.numEntries++
-}
-
-func (n *node) appendChild(box Box, child *node) {
-	n.entries[n.numEntries] = entry{box: box, child: child}
-	n.numEntries++
-	child.parent = n
-}
-
-// depth calculates the number of layers of nodes in the subtree rooted at the node.
-func (n *node) depth() int {
-	d := 1
-	for !n.isLeaf {
-		d++
-		n = n.entries[0].child
-	}
-	return d
-}
-
 // RTree is an in-memory R-Tree data structure. It holds record ID and bounding
 // box pairs (the actual records aren't stored in the tree; the user is
 // responsible for storing their own records). Its zero value is an empty
