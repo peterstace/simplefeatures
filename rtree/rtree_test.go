@@ -158,9 +158,6 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 				if e.recordID != 0 {
 					t.Fatal("non-leaf has recordID")
 				}
-				if e.child.parent != current {
-					t.Fatalf("node %p has wrong parent", e.child)
-				}
 				box := e.child.entries[0].box
 				for j := 1; j < e.child.numEntries; j++ {
 					box = combine(box, e.child.entries[j].box)
@@ -183,9 +180,6 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 	}
 	if rt.root != nil {
 		check(rt.root, 0)
-		if rt.root.parent != nil {
-			t.Fatalf("root parent should be nil, but is %p", rt.root.parent)
-		}
 	}
 
 	if len(unfound) != 0 {

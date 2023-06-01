@@ -74,12 +74,10 @@ func bulkInsert(items []BulkItem, levels int) *node {
 func bulkNode(levels int, parts ...[]BulkItem) *node {
 	root := &node{
 		numEntries: len(parts),
-		parent:     nil,
 		isLeaf:     false,
 	}
 	for i, part := range parts {
 		child := bulkInsert(part, levels-1)
-		child.parent = root
 		root.entries[i].child = child
 		root.entries[i].box = calculateBound(child)
 	}

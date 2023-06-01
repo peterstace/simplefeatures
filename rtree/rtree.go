@@ -14,7 +14,6 @@ const (
 type node struct {
 	entries    [1 + maxChildren]entry
 	numEntries int
-	parent     *node
 	isLeaf     bool
 }
 
