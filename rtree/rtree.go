@@ -12,7 +12,7 @@ const (
 // node is a node in an R-Tree. nodes can either be leaf nodes holding entries
 // for terminal items, or intermediate nodes holding entries for more nodes.
 type node struct {
-	entries    [1 + maxChildren]entry
+	entries    [maxChildren]entry
 	numEntries int
 	isLeaf     bool
 }
