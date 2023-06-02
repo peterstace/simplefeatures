@@ -5,6 +5,8 @@
 - Adds a wrapper in the `geos` package for the `GEOSUnaryUnion_r` function
   (exposed as `UnaryUnion`).
 
+- Replaces CI scripts with a Makefile.
+
 ## v0.42.1
 
 2023-05-05
