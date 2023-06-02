@@ -5,6 +5,12 @@
 - Adds a wrapper in the `geos` package for the `GEOSUnaryUnion_r` function
   (exposed as `UnaryUnion`).
 
+- **Breaking change**: Removes the `Insert` and `Delete` methods from the
+  `RTree` type in the `rtree` package. Users relying on the `Insert` and
+  `Delete` methods are advised to restructure their programs not to rely on
+  them, or use alternative r-tree implementations, such as the
+  `github.com/tidwall/rtree` package.
+
 ## v0.42.1
 
 2023-05-05
