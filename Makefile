@@ -26,9 +26,9 @@ cmpgeos:
 	task=cmpgeos; $(DC_RUN)
 
 DC_GEOS_RUN = \
-	env GEOS_VERSION=$${version} \
+	env GEOS_VERSION=$$version \
 	docker-compose \
-	--project-name sf-geos-$${version//./-} \
+	--project-name sf-geos-$$(echo $$version | sed 's/\./-/g') \
 	--file ./.ci/docker-compose-geos.yml \
 	up \
 	--abort-on-container-exit
