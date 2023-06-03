@@ -1,5 +1,5 @@
 DC_RUN = \
-	docker-compose \
+	docker compose \
 	--project-name $${task} \
 	--file .ci/docker-compose-$${task}.yml \
 	up \
@@ -27,7 +27,7 @@ cmpgeos:
 
 DC_GEOS_RUN = \
 	env GEOS_VERSION=$$version \
-	docker-compose \
+	docker compose \
 	--project-name sf-geos-$$(echo $$version | sed 's/\./-/g') \
 	--file .ci/docker-compose-geos.yml \
 	up \
