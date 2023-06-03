@@ -1,7 +1,7 @@
 DC_RUN = \
 	docker compose \
-	--project-name $${task} \
-	--file .ci/docker-compose-$${task}.yml \
+	--project-name $$task \
+	--file .ci/docker-compose-$$task.yml \
 	up \
 	--abort-on-container-exit
 
