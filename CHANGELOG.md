@@ -1,9 +1,16 @@
 # Changelog
 
-## Unreleased
+## v0.43.0
 
-- Adds a wrapper in the `geos` package for the `GEOSUnaryUnion_r` function
-  (exposed as `UnaryUnion`).
+2023-06-05
+
+__Special thanks to Albert Teoh for contributing to this release.__
+
+- Adds wrappers in the `geos` package for the `GEOSUnaryUnion_r` and
+  `GEOSCoverageUnion_r` functions (exposed as `UnaryUnion` and
+  `CoverageUnion`).
+
+- Runs CI against all non-EOL versions of GEOS (3.7 through to 3.11).
 
 - Replaces CI scripts with a Makefile.
 
