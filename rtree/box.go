@@ -24,16 +24,6 @@ func combine(box1, box2 Box) Box {
 	}
 }
 
-// enlargement returns how much additional area the existing Box would have to
-// enlarge by to accommodate the additional Box.
-func enlargement(existing, additional Box) float64 {
-	return area(combine(existing, additional)) - area(existing)
-}
-
-func area(box Box) float64 {
-	return (box.MaxX - box.MinX) * (box.MaxY - box.MinY)
-}
-
 func overlap(box1, box2 Box) bool {
 	return true &&
 		(box1.MinX <= box2.MaxX) && (box1.MaxX >= box2.MinX) &&

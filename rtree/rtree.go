@@ -4,12 +4,16 @@ import (
 	"errors"
 )
 
+const (
+	minChildren = 2
+	maxChildren = 4
+)
+
 // node is a node in an R-Tree. nodes can either be leaf nodes holding entries
 // for terminal items, or intermediate nodes holding entries for more nodes.
 type node struct {
-	entries    [1 + maxChildren]entry
+	entries    [maxChildren]entry
 	numEntries int
-	parent     *node
 	isLeaf     bool
 }
 
@@ -20,27 +24,6 @@ type entry struct {
 	// For leaf nodes, recordID is populated. For non-leaf nodes, child is populated.
 	child    *node
 	recordID int
-}
-
-func (n *node) appendRecord(box Box, recordID int) {
-	n.entries[n.numEntries] = entry{box: box, recordID: recordID}
-	n.numEntries++
-}
-
-func (n *node) appendChild(box Box, child *node) {
-	n.entries[n.numEntries] = entry{box: box, child: child}
-	n.numEntries++
-	child.parent = n
-}
-
-// depth calculates the number of layers of nodes in the subtree rooted at the node.
-func (n *node) depth() int {
-	d := 1
-	for !n.isLeaf {
-		d++
-		n = n.entries[0].child
-	}
-	return d
 }
 
 // RTree is an in-memory R-Tree data structure. It holds record ID and bounding

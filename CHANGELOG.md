@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **Breaking change**: Removes the `Insert` and `Delete` methods from the
+  `RTree` type in the `rtree` package. Users relying on the `Insert` and
+  `Delete` methods are advised to restructure their programs not to rely on
+  them, or use alternative r-tree implementations, such as the
+  `github.com/tidwall/rtree` package.
+
 ## v0.43.0
 
 2023-06-05

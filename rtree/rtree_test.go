@@ -53,39 +53,6 @@ func TestRandom(t *testing.T) {
 			checkInvariants(t, rt, boxes)
 			checkSearch(t, rt, boxes, rnd)
 		})
-		name := fmt.Sprintf("insert_%d", population)
-		t.Run(name, func(t *testing.T) {
-			rnd := rand.New(rand.NewSource(0))
-			boxes := make([]Box, population)
-			for i := range boxes {
-				boxes[i] = randomBox(rnd, 0.9, 0.1)
-			}
-
-			rt := new(RTree)
-			for i, box := range boxes {
-				rt.Insert(box, i)
-				checkInvariants(t, rt, boxes[:i+1])
-			}
-
-			checkSearch(t, rt, boxes, rnd)
-		})
-	}
-}
-
-func TestDelete(t *testing.T) {
-	for _, population := range testPopulations(66, 1000, 1.5) {
-		t.Run(fmt.Sprintf("pop=%d", population), func(t *testing.T) {
-			rnd := rand.New(rand.NewSource(0))
-			rt, boxes := testBulkLoad(rnd, population, 0.9, 0.1)
-			checkInvariants(t, rt, boxes)
-
-			for i := len(boxes) - 1; i >= 0; i-- {
-				t.Logf("deleting recordID %d", i)
-				rt.Delete(boxes[i], i)
-				checkInvariants(t, rt, boxes[:i])
-				checkSearch(t, rt, boxes[:i], rnd)
-			}
-		})
 	}
 }
 
@@ -191,9 +158,6 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 				if e.recordID != 0 {
 					t.Fatal("non-leaf has recordID")
 				}
-				if e.child.parent != current {
-					t.Fatalf("node %p has wrong parent", e.child)
-				}
 				box := e.child.entries[0].box
 				for j := 1; j < e.child.numEntries; j++ {
 					box = combine(box, e.child.entries[j].box)
@@ -216,9 +180,6 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 	}
 	if rt.root != nil {
 		check(rt.root, 0)
-		if rt.root.parent != nil {
-			t.Fatalf("root parent should be nil, but is %p", rt.root.parent)
-		}
 	}
 
 	if len(unfound) != 0 {
