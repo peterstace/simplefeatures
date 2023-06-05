@@ -2,14 +2,25 @@
 
 ## Unreleased
 
-- Adds a wrapper in the `geos` package for the `GEOSUnaryUnion_r` function
-  (exposed as `UnaryUnion`).
-
 - **Breaking change**: Removes the `Insert` and `Delete` methods from the
   `RTree` type in the `rtree` package. Users relying on the `Insert` and
   `Delete` methods are advised to restructure their programs not to rely on
   them, or use alternative r-tree implementations, such as the
   `github.com/tidwall/rtree` package.
+
+## v0.43.0
+
+2023-06-05
+
+__Special thanks to Albert Teoh for contributing to this release.__
+
+- Adds wrappers in the `geos` package for the `GEOSUnaryUnion_r` and
+  `GEOSCoverageUnion_r` functions (exposed as `UnaryUnion` and
+  `CoverageUnion`).
+
+- Runs CI against all non-EOL versions of GEOS (3.7 through to 3.11).
+
+- Replaces CI scripts with a Makefile.
 
 ## v0.42.1
 
