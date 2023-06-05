@@ -16,11 +16,11 @@ func (t *RTree) Nearest(box Box) (recordID int, found bool) {
 }
 
 // PrioritySearch iterates over the records in the RTree in priority order of
-// distance from the input box (shortest distanace first using the Euclidean
+// distance from the input box (shortest distance first using the Euclidean
 // metric).  The callback is called for every element iterated over. If an
 // error is returned from the callback, then iteration stops immediately. Any
 // error returned from the callback is returned by PrioritySearch, except for
-// the case where the special Stop sentinal error is returned (in which case
+// the case where the special Stop sentinel error is returned (in which case
 // nil will be returned from PrioritySearch).
 func (t *RTree) PrioritySearch(box Box, callback func(recordID int) error) error {
 	if t.root == nil {
@@ -61,9 +61,9 @@ func (q *entriesQueue) Len() int {
 }
 
 func (q *entriesQueue) Less(i int, j int) bool {
-	e1 := q.entries[i]
-	e2 := q.entries[j]
-	return squaredEuclideanDistance(e1.box, q.origin) < squaredEuclideanDistance(e2.box, q.origin)
+	d1 := squaredEuclideanDistance(q.entries[i].box, q.origin)
+	d2 := squaredEuclideanDistance(q.entries[j].box, q.origin)
+	return d1 < d2
 }
 
 func (q *entriesQueue) Swap(i int, j int) {
