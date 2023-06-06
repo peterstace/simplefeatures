@@ -8,6 +8,8 @@
   them, or use alternative r-tree implementations, such as the
   `github.com/tidwall/rtree` package.
 
+- Performs a minor non-user-facing cleanup in the `rtree` package.
+
 ## v0.43.0
 
 2023-06-05

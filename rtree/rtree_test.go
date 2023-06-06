@@ -174,7 +174,8 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 				t.Fatal("entry past numEntries is not the zero value")
 			}
 		}
-		if current.numEntries > maxChildren || (current != rt.root && current.numEntries < minChildren) {
+		if current.numEntries > maxChildren ||
+			(current != rt.root && current.numEntries < minChildren) {
 			t.Fatalf("%p: unexpected number of entries", current)
 		}
 	}
