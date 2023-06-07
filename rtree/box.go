@@ -6,7 +6,8 @@ type Box struct {
 }
 
 // calculateBound calculates the smallest bounding box that fits a node.
-func calculateBound(n *node) Box {
+func (t *RTree) calculateBound(nodeIdx int) Box {
+	n := t.nodes[nodeIdx]
 	box := n.entries[0].box
 	for i := 1; i < n.numEntries; i++ {
 		box = combine(box, n.entries[i].box)

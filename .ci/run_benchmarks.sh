@@ -50,4 +50,4 @@ cat "$new"
 echo
 echo "COMPARISON"
 
-benchstat "$old" "$new"
+benchstat "$old" "$new" | tee benchstat_output_$(date +%s).txt

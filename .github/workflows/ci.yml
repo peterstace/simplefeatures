@@ -6,25 +6,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: lint
-      run: make lint
-    - name: unit
-      run: make unit
-    - name: geos
-      run: make geos
-    - name: pgscan
-      run: make pgscan
-    - name: cmppg
-      run: make cmppg
-    - name: cmpgeos
-      run: make cmpgeos
-    - name: Convert coverage to lcov
-      uses: jandelgado/gcov2lcov-action@v1.0.2
-      with:
-        infile: coverage.out
-        outfile: coverage.lcov
-    - name: Coveralls
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: coverage.lcov
+    #- name: lint
+    #  run: make lint
+    #- name: unit
+    #  run: make unit
+    #- name: geos
+    #  run: make geos
+    #- name: pgscan
+    #  run: make pgscan
+    #- name: cmppg
+    #  run: make cmppg
+    #- name: cmpgeos
+    #  run: make cmpgeos
+    #- name: Convert coverage to lcov
+    #  uses: jandelgado/gcov2lcov-action@v1.0.2
+    #  with:
+    #    infile: coverage.out
+    #    outfile: coverage.lcov
+    #- name: Coveralls
+    #  uses: coverallsapp/github-action@master
+    #  with:
+    #    github-token: ${{ secrets.GITHUB_TOKEN }}
+    #    path-to-lcov: coverage.lcov

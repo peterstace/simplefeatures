@@ -2,6 +2,8 @@ package rtree
 
 import (
 	"errors"
+	"fmt"
+	"unsafe"
 )
 
 const (
@@ -12,18 +14,25 @@ const (
 // node is a node in an R-Tree. nodes can either be leaf nodes holding entries
 // for terminal items, or intermediate nodes holding entries for more nodes.
 type node struct {
-	entries    [maxChildren]entry
+	entries [maxChildren]entry
+
+	// TODO: could save some memory here by using uint8 and bool.
 	numEntries int
 	isLeaf     bool
+}
+
+func init() {
+	// 208 to start with
+	fmt.Println("DEBUG rtree/rtree.go:23 unsafe.Sizeof(node{})", unsafe.Sizeof(node{})) // XXX
 }
 
 // entry is an entry under a node, leading either to terminal items, or more nodes.
 type entry struct {
 	box Box
 
-	// For leaf nodes, recordID is populated. For non-leaf nodes, child is populated.
-	child    *node
-	recordID int
+	// For leaf nodes, data is the user's recordID. For non-leaf nodes, data is
+	// an index to a child node.
+	data int
 }
 
 // RTree is an in-memory R-Tree data structure. It holds record ID and bounding
@@ -31,7 +40,10 @@ type entry struct {
 // responsible for storing their own records). Its zero value is an empty
 // R-Tree.
 type RTree struct {
-	root  *node
+	// TODO: the root node will be the last node in the slice. Could things be
+	// restructured to make it the first node in the slice instead? That feels
+	// a little bit more sane.
+	nodes []node
 	count int
 }
 
@@ -46,40 +58,46 @@ var Stop = errors.New("stop")
 // except for the case where the special Stop sentinal error is returned (in
 // which case nil will be returned from RangeSearch).
 func (t *RTree) RangeSearch(box Box, callback func(recordID int) error) error {
-	if t.root == nil {
+	if len(t.nodes) == 0 {
 		return nil
 	}
-	var recurse func(*node) error
-	recurse = func(n *node) error {
+	var recurse func(int) error
+	recurse = func(nodeIdx int) error {
+		n := t.nodes[nodeIdx]
 		for i := 0; i < n.numEntries; i++ {
 			entry := n.entries[i]
 			if !overlap(entry.box, box) {
 				continue
 			}
 			if n.isLeaf {
-				if err := callback(entry.recordID); err == Stop {
+				if err := callback(entry.data); err == Stop {
 					return nil
 				} else if err != nil {
 					return err
 				}
 			} else {
-				if err := recurse(entry.child); err != nil {
+				if err := recurse(entry.data); err != nil {
 					return err
 				}
 			}
 		}
 		return nil
 	}
-	return recurse(t.root)
+	rootIdx := len(t.nodes) - 1
+	return recurse(rootIdx)
 }
 
 // Extent gives the Box that most closely bounds the RTree. If the RTree is
 // empty, then false is returned.
 func (t *RTree) Extent() (Box, bool) {
-	if t.root == nil || t.root.numEntries == 0 {
+	if len(t.nodes) == 0 {
 		return Box{}, false
 	}
-	return calculateBound(t.root), true
+	rootIdx := len(t.nodes) - 1
+	if t.nodes[rootIdx].numEntries == 0 {
+		return Box{}, false
+	}
+	return t.calculateBound(rootIdx), true
 }
 
 // Count gives the number of entries in the RTree.

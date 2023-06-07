@@ -13,11 +13,13 @@ func BulkLoad(items []BulkItem) *RTree {
 	if len(items) == 0 {
 		return &RTree{}
 	}
-	root := bulkInsert(items)
-	return &RTree{root, len(items)}
+	// TODO: could we allocate the nodes slice all at once?
+	t := &RTree{nil, len(items)}
+	t.bulkInsert(items)
+	return t
 }
 
-func bulkInsert(items []BulkItem) *node {
+func (t *RTree) bulkInsert(items []BulkItem) int {
 	if len(items) == 0 {
 		panic("should not have recursed into bulkInsert without any items")
 	}
@@ -27,21 +29,22 @@ func bulkInsert(items []BulkItem) *node {
 
 	// 4 or fewer items can fit into a single node.
 	if len(items) <= 4 {
-		n := &node{isLeaf: true, numEntries: len(items)}
+		n := node{isLeaf: true, numEntries: len(items)}
 		for i, item := range items {
 			n.entries[i] = entry{
-				box:      item.Box,
-				recordID: item.RecordID,
+				box:  item.Box,
+				data: item.RecordID,
 			}
 		}
-		return n
+		t.nodes = append(t.nodes, n)
+		return len(t.nodes) - 1
 	}
 
 	// 5 to 8 items are put into 3 nodes (one intermediate
 	// node and two child nodes).
 	if len(items) <= 8 {
 		firstHalf, secondHalf := splitBulkItems2Ways(items)
-		return bulkNode(firstHalf, secondHalf)
+		return t.bulkNode(firstHalf, secondHalf)
 	}
 
 	// 9 or more items are split into 4 groups, completely filling the
@@ -49,20 +52,21 @@ func bulkInsert(items []BulkItem) *node {
 	firstHalf, secondHalf := splitBulkItems2Ways(items)
 	firstQuarter, secondQuarter := splitBulkItems2Ways(firstHalf)
 	thirdQuarter, fourthQuarter := splitBulkItems2Ways(secondHalf)
-	return bulkNode(firstQuarter, secondQuarter, thirdQuarter, fourthQuarter)
+	return t.bulkNode(firstQuarter, secondQuarter, thirdQuarter, fourthQuarter)
 }
 
-func bulkNode(parts ...[]BulkItem) *node {
-	root := &node{
+func (t *RTree) bulkNode(parts ...[]BulkItem) int {
+	n := node{
 		numEntries: len(parts),
 		isLeaf:     false,
 	}
 	for i, part := range parts {
-		child := bulkInsert(part)
-		root.entries[i].child = child
-		root.entries[i].box = calculateBound(child)
+		child := t.bulkInsert(part)
+		n.entries[i].data = child
+		n.entries[i].box = t.calculateBound(child)
 	}
-	return root
+	t.nodes = append(t.nodes, n)
+	return len(t.nodes) - 1
 }
 
 func splitBulkItems2Ways(items []BulkItem) ([]BulkItem, []BulkItem) {
