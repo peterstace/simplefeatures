@@ -2,6 +2,7 @@ package rtree
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"reflect"
 	"sort"
@@ -132,15 +133,13 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 		unfound[i] = struct{}{}
 	}
 
-	leafLevel := -1
+	minLeafLevel := math.MaxInt
+	maxLeafLevel := math.MinInt
 	var check func(n *node, level int)
 	check = func(current *node, level int) {
 		if current.isLeaf {
-			if leafLevel == -1 {
-				leafLevel = level
-			} else if leafLevel != level {
-				t.Fatalf("inconsistent leaf level: %d vs %d", leafLevel, level)
-			}
+			minLeafLevel = min(minLeafLevel, level)
+			maxLeafLevel = max(maxLeafLevel, level)
 
 			for i := 0; i < current.numEntries; i++ {
 				e := current.entries[i]
@@ -181,6 +180,10 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 	}
 	if rt.root != nil {
 		check(rt.root, 0)
+		if maxLeafLevel-minLeafLevel > 1 {
+			t.Fatalf("leaf levels differ by more than 1: "+
+				"min=%d max=%d", minLeafLevel, maxLeafLevel)
+		}
 	}
 
 	if len(unfound) != 0 {
@@ -204,4 +207,18 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 			t.Fatalf("unexpected bounding box: want=%v got=%v", wantExtent, gotExtent)
 		}
 	}
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

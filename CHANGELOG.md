@@ -10,6 +10,8 @@
 
 - Performs a minor non-user-facing cleanup in the `rtree` package.
 
+- R-tree improvements that reduce the amount of memory they use.
+
 ## v0.43.0
 
 2023-06-05
