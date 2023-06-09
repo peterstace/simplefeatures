@@ -29,15 +29,15 @@ func (t *RTree) bulkInsert(items []BulkItem) int {
 
 	// 4 or fewer items can fit into a single node.
 	if len(items) <= 4 {
-		n := node{isLeaf: true, numEntries: len(items)}
+		t.nodes = append(t.nodes, node{isLeaf: true, numEntries: len(items)})
+		idx := len(t.nodes) - 1
 		for i, item := range items {
-			n.entries[i] = entry{
+			t.nodes[idx].entries[i] = entry{
 				box:  item.Box,
 				data: item.RecordID,
 			}
 		}
-		t.nodes = append(t.nodes, n)
-		return len(t.nodes) - 1
+		return idx
 	}
 
 	// 5 to 8 items are put into 3 nodes (one intermediate
@@ -56,17 +56,19 @@ func (t *RTree) bulkInsert(items []BulkItem) int {
 }
 
 func (t *RTree) bulkNode(parts ...[]BulkItem) int {
-	n := node{
+	t.nodes = append(t.nodes, node{
 		numEntries: len(parts),
 		isLeaf:     false,
-	}
+	})
+	idx := len(t.nodes) - 1
 	for i, part := range parts {
 		child := t.bulkInsert(part)
-		n.entries[i].data = child
-		n.entries[i].box = t.calculateBound(child)
+		t.nodes[idx].entries[i] = entry{
+			box:  t.calculateBound(child),
+			data: child,
+		}
 	}
-	t.nodes = append(t.nodes, n)
-	return len(t.nodes) - 1
+	return idx
 }
 
 func splitBulkItems2Ways(items []BulkItem) ([]BulkItem, []BulkItem) {

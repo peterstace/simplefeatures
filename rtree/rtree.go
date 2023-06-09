@@ -47,7 +47,7 @@ type RTree struct {
 	count int
 }
 
-// Stop is a special sentinal error that can be used to stop a search operation
+// Stop is a special sentinel error that can be used to stop a search operation
 // without any error.
 var Stop = errors.New("stop")
 
@@ -83,8 +83,7 @@ func (t *RTree) RangeSearch(box Box, callback func(recordID int) error) error {
 		}
 		return nil
 	}
-	rootIdx := len(t.nodes) - 1
-	return recurse(rootIdx)
+	return recurse(0)
 }
 
 // Extent gives the Box that most closely bounds the RTree. If the RTree is
@@ -93,11 +92,10 @@ func (t *RTree) Extent() (Box, bool) {
 	if len(t.nodes) == 0 {
 		return Box{}, false
 	}
-	rootIdx := len(t.nodes) - 1
-	if t.nodes[rootIdx].numEntries == 0 {
+	if t.nodes[0].numEntries == 0 {
 		return Box{}, false
 	}
-	return t.calculateBound(rootIdx), true
+	return t.calculateBound(0), true
 }
 
 // Count gives the number of entries in the RTree.
