@@ -139,7 +139,7 @@ func checksum(n *node) uint64 {
 	var entries []string
 	for i := 0; i < n.numEntries; i++ {
 		var entry string
-		if n.isLeaf {
+		if n.entries[i].child == nil {
 			entry = strconv.Itoa(n.entries[i].recordID)
 		} else {
 			entry = strconv.FormatUint(checksum(n.entries[i].child), 10)

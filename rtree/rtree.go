@@ -14,7 +14,6 @@ const (
 type node struct {
 	entries    [maxChildren]entry
 	numEntries int
-	isLeaf     bool
 }
 
 // entry is an entry under a node, leading either to terminal items, or more nodes.
@@ -35,7 +34,7 @@ type RTree struct {
 	count int
 }
 
-// Stop is a special sentinal error that can be used to stop a search operation
+// Stop is a special sentinel error that can be used to stop a search operation
 // without any error.
 var Stop = errors.New("stop")
 
@@ -43,7 +42,7 @@ var Stop = errors.New("stop")
 // bounding box. The callback is called with the record ID for each found item.
 // If an error is returned from the callback then the search is terminated
 // early.  Any error returned from the callback is returned by RangeSearch,
-// except for the case where the special Stop sentinal error is returned (in
+// except for the case where the special Stop sentinel error is returned (in
 // which case nil will be returned from RangeSearch).
 func (t *RTree) RangeSearch(box Box, callback func(recordID int) error) error {
 	if t.root == nil {
@@ -56,7 +55,7 @@ func (t *RTree) RangeSearch(box Box, callback func(recordID int) error) error {
 			if !overlap(entry.box, box) {
 				continue
 			}
-			if n.isLeaf {
+			if entry.child == nil {
 				if err := callback(entry.recordID); err == Stop {
 					return nil
 				} else if err != nil {
