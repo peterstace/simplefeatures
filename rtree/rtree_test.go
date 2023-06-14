@@ -139,9 +139,6 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 			if e.child == nil {
 				minLeafLevel = min(minLeafLevel, level)
 				maxLeafLevel = max(maxLeafLevel, level)
-				if e.child != nil {
-					t.Fatalf("leaf node has child (entry %d)", i)
-				}
 				if _, ok := unfound[e.recordID]; !ok {
 					t.Fatal("record ID found in tree but wasn't in unfound map")
 				}
@@ -162,12 +159,12 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 		}
 		for i := current.numEntries; i < len(current.entries); i++ {
 			e := current.entries[i]
-			if e.box != (Box{}) || e.child != nil || e.recordID != 0 {
+			if e != (entry{}) {
 				t.Fatal("entry past numEntries is not the zero value")
 			}
 		}
-		if current.numEntries > maxChildren ||
-			(current != rt.root && current.numEntries < minChildren) {
+		if current.numEntries > maxEntries ||
+			(current != rt.root && current.numEntries < minEntries) {
 			t.Fatalf("%p: unexpected number of entries", current)
 		}
 	}

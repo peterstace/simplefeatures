@@ -5,22 +5,23 @@ import (
 )
 
 const (
-	minChildren = 2
-	maxChildren = 4
+	minEntries = 2
+	maxEntries = 4
 )
 
-// node is a node in an R-Tree. nodes can either be leaf nodes holding entries
-// for terminal items, or intermediate nodes holding entries for more nodes.
+// node is a node in an R-Tree, holding user record IDs and/or links to deeper
+// nodes in the tree.
 type node struct {
-	entries    [maxChildren]entry
+	entries    [maxEntries]entry
 	numEntries int
 }
 
-// entry is an entry under a node, leading either to terminal items, or more nodes.
+// entry is an entry contained inside a node. An entry can either hold a user
+// record ID, or point to a deeper node in the tree (but not both). Because 0
+// is a valid record ID, the child pointer should be used to distinguish
+// between the two types of entries.
 type entry struct {
-	box Box
-
-	// For leaf nodes, recordID is populated. For non-leaf nodes, child is populated.
+	box      Box
 	child    *node
 	recordID int
 }
