@@ -27,7 +27,7 @@ func bulkInsert(items []BulkItem) *node {
 
 	// 4 or fewer items can fit into a single node.
 	if len(items) <= 4 {
-		n := &node{isLeaf: true, numEntries: len(items)}
+		n := &node{numEntries: len(items)}
 		for i, item := range items {
 			n.entries[i] = entry{
 				box:      item.Box,
@@ -53,10 +53,7 @@ func bulkInsert(items []BulkItem) *node {
 }
 
 func bulkNode(parts ...[]BulkItem) *node {
-	root := &node{
-		numEntries: len(parts),
-		isLeaf:     false,
-	}
+	root := &node{numEntries: len(parts)}
 	for i, part := range parts {
 		child := bulkInsert(part)
 		root.entries[i].child = child

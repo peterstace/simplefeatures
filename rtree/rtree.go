@@ -5,23 +5,23 @@ import (
 )
 
 const (
-	minChildren = 2
-	maxChildren = 4
+	minEntries = 2
+	maxEntries = 4
 )
 
-// node is a node in an R-Tree. nodes can either be leaf nodes holding entries
-// for terminal items, or intermediate nodes holding entries for more nodes.
+// node is a node in an R-Tree, holding user record IDs and/or links to deeper
+// nodes in the tree.
 type node struct {
-	entries    [maxChildren]entry
+	entries    [maxEntries]entry
 	numEntries int
-	isLeaf     bool
 }
 
-// entry is an entry under a node, leading either to terminal items, or more nodes.
+// entry is an entry contained inside a node. An entry can either hold a user
+// record ID, or point to a deeper node in the tree (but not both). Because 0
+// is a valid record ID, the child pointer should be used to distinguish
+// between the two types of entries.
 type entry struct {
-	box Box
-
-	// For leaf nodes, recordID is populated. For non-leaf nodes, child is populated.
+	box      Box
 	child    *node
 	recordID int
 }
@@ -35,7 +35,7 @@ type RTree struct {
 	count int
 }
 
-// Stop is a special sentinal error that can be used to stop a search operation
+// Stop is a special sentinel error that can be used to stop a search operation
 // without any error.
 var Stop = errors.New("stop")
 
@@ -43,7 +43,7 @@ var Stop = errors.New("stop")
 // bounding box. The callback is called with the record ID for each found item.
 // If an error is returned from the callback then the search is terminated
 // early.  Any error returned from the callback is returned by RangeSearch,
-// except for the case where the special Stop sentinal error is returned (in
+// except for the case where the special Stop sentinel error is returned (in
 // which case nil will be returned from RangeSearch).
 func (t *RTree) RangeSearch(box Box, callback func(recordID int) error) error {
 	if t.root == nil {
@@ -56,7 +56,7 @@ func (t *RTree) RangeSearch(box Box, callback func(recordID int) error) error {
 			if !overlap(entry.box, box) {
 				continue
 			}
-			if n.isLeaf {
+			if entry.child == nil {
 				if err := callback(entry.recordID); err == Stop {
 					return nil
 				} else if err != nil {

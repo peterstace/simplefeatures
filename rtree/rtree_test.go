@@ -101,16 +101,13 @@ func randomBox(rnd *rand.Rand, maxStart, maxWidth float64) Box {
 func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 	var recurse func(*node, string)
 	recurse = func(current *node, indent string) {
-		t.Logf("%sNode addr=%p leaf=%t numEntries=%d", indent, current, current.isLeaf, current.numEntries)
+		t.Logf("%sNode addr=%p numEntries=%d", indent, current, current.numEntries)
 		indent += "\t"
-		if current.isLeaf {
-			for i := 0; i < current.numEntries; i++ {
-				e := current.entries[i]
+		for i := 0; i < current.numEntries; i++ {
+			e := current.entries[i]
+			if e.child == nil {
 				t.Logf("%sEntry[%d] recordID=%d box=%v", indent, i, e.recordID, e.box)
-			}
-		} else {
-			for i := 0; i < current.numEntries; i++ {
-				e := &current.entries[i]
+			} else {
 				t.Logf("%sEntry[%d] box=%v", indent, i, e.box)
 				recurse(e.child, indent+"\t")
 			}
@@ -137,23 +134,16 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 	maxLeafLevel := math.MinInt
 	var check func(n *node, level int)
 	check = func(current *node, level int) {
-		if current.isLeaf {
-			minLeafLevel = min(minLeafLevel, level)
-			maxLeafLevel = max(maxLeafLevel, level)
-
-			for i := 0; i < current.numEntries; i++ {
-				e := current.entries[i]
-				if e.child != nil {
-					t.Fatalf("leaf node has child (entry %d)", i)
-				}
+		for i := 0; i < current.numEntries; i++ {
+			e := current.entries[i]
+			if e.child == nil {
+				minLeafLevel = min(minLeafLevel, level)
+				maxLeafLevel = max(maxLeafLevel, level)
 				if _, ok := unfound[e.recordID]; !ok {
 					t.Fatal("record ID found in tree but wasn't in unfound map")
 				}
 				delete(unfound, e.recordID)
-			}
-		} else {
-			for i := 0; i < current.numEntries; i++ {
-				e := &current.entries[i]
+			} else {
 				if e.recordID != 0 {
 					t.Fatal("non-leaf has recordID")
 				}
@@ -169,12 +159,12 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 		}
 		for i := current.numEntries; i < len(current.entries); i++ {
 			e := current.entries[i]
-			if e.box != (Box{}) || e.child != nil || e.recordID != 0 {
+			if e != (entry{}) {
 				t.Fatal("entry past numEntries is not the zero value")
 			}
 		}
-		if current.numEntries > maxChildren ||
-			(current != rt.root && current.numEntries < minChildren) {
+		if current.numEntries > maxEntries ||
+			(current != rt.root && current.numEntries < minEntries) {
 			t.Fatalf("%p: unexpected number of entries", current)
 		}
 	}
