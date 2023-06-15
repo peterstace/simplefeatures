@@ -12,6 +12,8 @@
 
 - R-tree improvements that reduce the amount of memory they use.
 
+- Adds a `String() string` method to the `geom.Envelope` type.
+
 ## v0.43.0
 
 2023-06-05
