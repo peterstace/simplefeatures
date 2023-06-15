@@ -12,6 +12,9 @@
 
 - R-tree improvements that reduce the amount of memory they use.
 
+- Exposes a `Box() rtree.Box` method on the `geom.Envelope` type, that converts
+  the envelope to an `rtree.Box`.
+
 ## v0.43.0
 
 2023-06-05
