@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	. "github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/rtree"
 )
 
 func onePtEnv(x, y float64) Envelope {
@@ -608,4 +609,16 @@ func TestBoundingDiagonal(t *testing.T) {
 			expectGeomEqWKT(t, got, tc.want)
 		})
 	}
+}
+
+func TestEnvelopeEmptyAsBox(t *testing.T) {
+	_, ok := Envelope{}.AsBox()
+	expectFalse(t, ok)
+}
+
+func TestEnvelopeNonEmptyAsBox(t *testing.T) {
+	got, ok := twoPtEnv(1, 2, 3, 4).AsBox()
+	expectTrue(t, ok)
+	want := rtree.Box{MinX: 1, MinY: 2, MaxX: 3, MaxY: 4}
+	expectTrue(t, got == want)
 }

@@ -65,7 +65,7 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 	boxes := make([]rtree.Box, len(polys))
 	items := make([]rtree.BulkItem, 0, len(polys))
 	for i, p := range polys {
-		if box, ok := p.Envelope().Box(); ok {
+		if box, ok := p.Envelope().AsBox(); ok {
 			boxes[i] = box
 			item := rtree.BulkItem{Box: boxes[i], RecordID: i}
 			items = append(items, item)

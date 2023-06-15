@@ -80,7 +80,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	boxes := make([]rtree.Box, len(rings))
 	items := make([]rtree.BulkItem, len(rings))
 	for i, r := range rings {
-		box, ok := r.Envelope().Box()
+		box, ok := r.Envelope().AsBox()
 		if !ok {
 			// Cannot occur, because we have already checked to ensure rings
 			// are closed. Closed rings by definition are non-empty.
