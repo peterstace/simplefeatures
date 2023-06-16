@@ -615,8 +615,8 @@ func TestEnvelopeString(t *testing.T) {
 		env  Envelope
 		want string
 	}{
-		{Envelope{}, "ENV EMPTY"},
-		{twoPtEnv(1.5, 2.5, 3.5, 4.5), "ENV(1.5 2.5,3.5 4.5)"},
+		{Envelope{}, "ENVELOPE EMPTY"},
+		{twoPtEnv(1.5, 2.5, 3.5, 4.5), "ENVELOPE(1.5 2.5,3.5 4.5)"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := fmt.Sprintf("%v", tc.env)

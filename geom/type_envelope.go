@@ -326,7 +326,7 @@ func (e Envelope) BoundingDiagonal() Geometry {
 // pseudo-WKT style.
 func (e Envelope) String() string {
 	var sb strings.Builder
-	sb.WriteString("ENV")
+	sb.WriteString("ENVELOPE")
 	if e.IsEmpty() {
 		sb.WriteString(" EMPTY")
 		return sb.String()
