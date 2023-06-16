@@ -3,6 +3,8 @@ package geom
 import (
 	"fmt"
 	"math"
+	"strconv"
+	"strings"
 
 	"github.com/peterstace/simplefeatures/rtree"
 )
@@ -318,4 +320,25 @@ func (e Envelope) BoundingDiagonal() Geometry {
 		panic("programming error: validations disabled by LineString validation failed")
 	}
 	return ls.AsGeometry()
+}
+
+// String implements the fmt.Stringer interface by printing the envelope in a
+// pseudo-WKT style.
+func (e Envelope) String() string {
+	var sb strings.Builder
+	sb.WriteString("ENVELOPE")
+	if e.IsEmpty() {
+		sb.WriteString(" EMPTY")
+		return sb.String()
+	}
+	sb.WriteRune('(')
+	add := func(f float64, r rune) {
+		sb.WriteString(strconv.FormatFloat(f, 'f', -1, 64))
+		sb.WriteRune(r)
+	}
+	add(e.minX(), ' ')
+	add(e.minY, ',')
+	add(e.maxX, ' ')
+	add(e.maxY, ')')
+	return sb.String()
 }
