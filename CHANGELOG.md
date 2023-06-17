@@ -15,6 +15,9 @@
 - Exposes an `AsBox() rtree.Box` method on the `geom.Envelope` type, that
   converts the envelope to an `rtree.Box`.
 
+- Adds a `String() string` method to the `geom.Envelope` type.
+
+
 ## v0.43.0
 
 2023-06-05

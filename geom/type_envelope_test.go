@@ -622,3 +622,19 @@ func TestEnvelopeNonEmptyAsBox(t *testing.T) {
 	want := rtree.Box{MinX: 1, MinY: 2, MaxX: 3, MaxY: 4}
 	expectTrue(t, got == want)
 }
+
+func TestEnvelopeString(t *testing.T) {
+	for i, tc := range []struct {
+		env  Envelope
+		want string
+	}{
+		{Envelope{}, "ENVELOPE EMPTY"},
+		{twoPtEnv(1.5, 2.5, 3.5, 4.5), "ENVELOPE(1.5 2.5,3.5 4.5)"},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := fmt.Sprintf("%v", tc.env)
+			t.Log(got)
+			expectTrue(t, got == tc.want)
+		})
+	}
+}
