@@ -289,7 +289,8 @@ func (e Envelope) TransformXY(fn func(XY) XY) (Envelope, error) {
 	return NewEnvelope([]XY{fn(min), fn(max)})
 }
 
-func (e Envelope) box() (rtree.Box, bool) {
+// AsBox converts this Envelope to an rtree.Box.
+func (e Envelope) AsBox() (rtree.Box, bool) {
 	return rtree.Box{
 		MinX: e.minX(),
 		MinY: e.minY,
