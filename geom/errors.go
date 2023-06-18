@@ -23,6 +23,7 @@ func wrapSimplified(err error) error {
 
 // validationError is an error used to indicate that a geometry could not be
 // created because it didn't pass all validation checks.
+// TODO: remove me
 type validationError struct {
 	// reason should begin with the name of the invalid geometry being created,
 	// and describe the invalid state (as opposed to describing the validation
@@ -76,4 +77,28 @@ func wrapWithGeoJSONSyntaxError(err error) error {
 		return nil
 	}
 	return geojsonSyntaxError{err.Error()}
+}
+
+type ruleViolation string
+
+const (
+	ruleInf ruleViolation = "Inf not allowed"
+	ruleNaN ruleViolation = "NaN not allowed"
+)
+
+func (v ruleViolation) errAt(location XY) error {
+	return validationError2{
+		ruleViolation: v,
+		location:      location,
+	}
+}
+
+// TODO: rename to validationError once the old validationError is removed.
+type validationError2 struct {
+	ruleViolation ruleViolation
+	location      XY
+}
+
+func (e validationError2) Error() string {
+	return fmt.Sprintf("%s (at %v)", e.ruleViolation, e.location)
 }
