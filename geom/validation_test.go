@@ -52,30 +52,6 @@ func TestDisableAllPointValidations(t *testing.T) {
 	expectNoErr(t, err)
 }
 
-func TestOmitInvalidPoint(t *testing.T) {
-	t.Run("DimXY", func(t *testing.T) {
-		c := xy(2, math.NaN())
-
-		_, err := NewPoint(c)
-		expectErr(t, err)
-
-		pt, err := NewPoint(c, OmitInvalid)
-		expectNoErr(t, err)
-		expectTrue(t, pt.IsEmpty())
-	})
-	t.Run("DimXYZ", func(t *testing.T) {
-		c := Coordinates{Type: DimXYZ, XY: XY{2, math.NaN()}}
-
-		_, err := NewPoint(c)
-		expectErr(t, err)
-
-		pt, err := NewPoint(c, OmitInvalid)
-		expectNoErr(t, err)
-		expectTrue(t, pt.IsEmpty())
-		expectCoordinatesTypeEq(t, pt.CoordinatesType(), DimXYZ)
-	})
-}
-
 func TestLineStringValidationInvalidFromRawCoords(t *testing.T) {
 	nan := math.NaN()
 	inf := math.Inf(+1)
@@ -97,9 +73,6 @@ func TestLineStringValidationInvalidFromRawCoords(t *testing.T) {
 			expectErr(t, err)
 			_, err = NewLineString(seq, DisableAllValidations)
 			expectNoErr(t, err)
-			ls, err := NewLineString(seq, OmitInvalid)
-			expectNoErr(t, err)
-			expectTrue(t, ls.IsEmpty())
 		})
 	}
 }

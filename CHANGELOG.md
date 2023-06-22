@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Breaking change**: Removes the `OmitInvalid` constructor option. Users of
+  `OmitInvalid` should manage this behaviour manually.
+
+## Unreleased
+
 - **Breaking change**: Removes the `Insert` and `Delete` methods from the
   `RTree` type in the `rtree` package. Users relying on the `Insert` and
   `Delete` methods are advised to restructure their programs not to rely on
