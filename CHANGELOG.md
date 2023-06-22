@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **Breaking change**: Removes the `OmitInvalid` constructor option. Users of
+  `OmitInvalid` should manage this behaviour manually.
+
 ## v0.44.0
 
 2023-06-23

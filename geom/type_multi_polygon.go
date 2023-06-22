@@ -45,9 +45,6 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 
 	ctorOpts := newOptionSet(opts)
 	if err := validateMultiPolygon(polys, ctorOpts); err != nil {
-		if ctorOpts.omitInvalid {
-			return MultiPolygon{}, nil
-		}
 		return MultiPolygon{}, err
 	}
 	return MultiPolygon{polys, ctype}, nil

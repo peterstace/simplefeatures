@@ -26,21 +26,10 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 	if ctorOpts.skipValidations {
 		return LineString{seq}, nil
 	}
-	if ctorOpts.omitInvalid {
-		return newLineStringWithOmitInvalid(seq), nil
-	}
-
 	if err := validateLineStringSeq(seq); err != nil {
 		return LineString{}, err
 	}
 	return LineString{seq}, nil
-}
-
-func newLineStringWithOmitInvalid(seq Sequence) LineString {
-	if err := validateLineStringSeq(seq); err != nil {
-		return LineString{}.ForceCoordinatesType(seq.CoordinatesType())
-	}
-	return LineString{seq}
 }
 
 func validateLineStringSeq(seq Sequence) error {
@@ -440,7 +429,11 @@ func (s LineString) Simplify(threshold float64) LineString {
 	seq := s.Coordinates()
 	floats := ramerDouglasPeucker(nil, seq, threshold)
 	seq = NewSequence(floats, seq.CoordinatesType())
-	return newLineStringWithOmitInvalid(seq)
+	ls, err := NewLineString(seq)
+	if err != nil {
+		return LineString{}.ForceCoordinatesType(s.CoordinatesType())
+	}
+	return ls
 }
 
 // InterpolatePoint returns a Point interpolated along the LineString at the
