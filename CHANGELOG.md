@@ -5,7 +5,11 @@
 - **Breaking change**: Removes the `OmitInvalid` constructor option. Users of
   `OmitInvalid` should manage this behaviour manually.
 
-## Unreleased
+## v0.44.0
+
+2023-06-23
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - **Breaking change**: Removes the `Insert` and `Delete` methods from the
   `RTree` type in the `rtree` package. Users relying on the `Insert` and
@@ -15,13 +19,13 @@
 
 - Performs a minor non-user-facing cleanup in the `rtree` package.
 
-- R-tree improvements that reduce the amount of memory they use.
+- R-tree performance improvements that moderately reduce the amount of memory
+  and slightly reduce the amount of CPU that they use.
 
 - Exposes an `AsBox() rtree.Box` method on the `geom.Envelope` type, that
   converts the envelope to an `rtree.Box`.
 
 - Adds a `String() string` method to the `geom.Envelope` type.
-
 
 ## v0.43.0
 
