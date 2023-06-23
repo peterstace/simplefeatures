@@ -90,6 +90,7 @@ const (
 	defyRingSimple         ruleViolation = "polygon ring not simple"
 	defyRingNotNested      ruleViolation = "polygon has nested rings"
 	defyInteriorInExterior ruleViolation = "polygon interior ring outside of exterior ring"
+	defyInteriorConnected  ruleViolation = "polygon has disconnected interior"
 )
 
 func (v ruleViolation) errAt(location XY) error {

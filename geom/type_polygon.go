@@ -165,8 +165,7 @@ func (p Polygon) Validate() error {
 	// intersection. The interior of the polygon is connected iff the graph
 	// does not contain a cycle.
 	if graph.hasCycle() {
-		// TODO other error
-		return validationError{"polygon has disconnected interior"}
+		return defyInteriorConnected.err()
 	}
 	return nil
 }
