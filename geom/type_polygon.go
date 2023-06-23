@@ -74,7 +74,7 @@ func (p Polygon) Validate() error {
 	}
 
 	for _, r := range p.rings {
-		if !r.IsEmpty() {
+		if r.IsEmpty() {
 			return defyRingNotEmpty.err()
 		}
 		if !r.IsClosed() {
