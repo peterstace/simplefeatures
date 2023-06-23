@@ -82,8 +82,9 @@ func wrapWithGeoJSONSyntaxError(err error) error {
 type ruleViolation string
 
 const (
-	ruleInf ruleViolation = "Inf not allowed"
-	ruleNaN ruleViolation = "NaN not allowed"
+	ruleInf              ruleViolation = "Inf not allowed"
+	ruleNaN              ruleViolation = "NaN not allowed"
+	ruleAtLeastTwoPoints ruleViolation = "non-empty LineString contains only one distinct XY value"
 )
 
 func (v ruleViolation) errAt(location XY) error {

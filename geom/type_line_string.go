@@ -22,27 +22,29 @@ type LineString struct {
 // sequence must contain exactly 0 points, or at least 2 points with distinct
 // XY values (otherwise an error is returned).
 func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) {
-	ctorOpts := newOptionSet(opts)
-	if ctorOpts.skipValidations {
-		return LineString{seq}, nil
+	ls := LineString{seq}
+	co := newOptionSet(opts)
+	if co.skipValidations {
+		return ls, nil
 	}
-	if err := validateLineStringSeq(seq); err != nil {
+	if err := ls.Validate(); err != nil {
 		return LineString{}, err
 	}
-	return LineString{seq}, nil
+	return ls, nil
 }
 
-func validateLineStringSeq(seq Sequence) error {
-	if seq.Length() == 0 {
+// Validate checks if the LineString is valid. For it to be valid, its
+// coordinates must not be NaN or positive or negative Inf, and there must be
+// at least two distinct points.
+func (s LineString) Validate() error {
+	if s.seq.Length() == 0 {
 		return nil
 	}
-	if !hasAtLeast2DistinctPointsInSeq(seq) {
-		return validationError{
-			"non-empty linestring contains only one distinct XY value",
-		}
-	}
-	if err := seq.validate(); err != nil {
+	if err := s.seq.validate(); err != nil {
 		return validationError{err.Error()}
+	}
+	if !hasAtLeast2DistinctPointsInSeq(s.seq) {
+		return ruleAtLeastTwoPoints.errAt(s.seq.GetXY(0))
 	}
 	return nil
 }
