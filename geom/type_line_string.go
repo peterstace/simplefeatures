@@ -44,7 +44,7 @@ func (s LineString) Validate() error {
 		return validationError{err.Error()}
 	}
 	if !hasAtLeast2DistinctPointsInSeq(s.seq) {
-		return ruleAtLeastTwoPoints.errAt(s.seq.GetXY(0))
+		return defyAtLeastTwoPoints.errAt(s.seq.GetXY(0))
 	}
 	return nil
 }

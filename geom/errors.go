@@ -82,24 +82,38 @@ func wrapWithGeoJSONSyntaxError(err error) error {
 type ruleViolation string
 
 const (
-	ruleInf              ruleViolation = "Inf not allowed"
-	ruleNaN              ruleViolation = "NaN not allowed"
-	ruleAtLeastTwoPoints ruleViolation = "non-empty LineString contains only one distinct XY value"
+	defyNoInf              ruleViolation = "Inf not allowed"
+	defyNoNaN              ruleViolation = "NaN not allowed"
+	defyAtLeastTwoPoints   ruleViolation = "non-empty LineString contains only one distinct XY value"
+	defyRingNotEmpty       ruleViolation = "polygon ring empty"
+	defyRingClosed         ruleViolation = "polygon ring not closed"
+	defyRingSimple         ruleViolation = "polygon ring not simple"
+	defyRingNotNested      ruleViolation = "polygon has nested rings"
+	defyInteriorInExterior ruleViolation = "polygon interior ring outside of exterior ring"
 )
 
 func (v ruleViolation) errAt(location XY) error {
 	return validationError2{
 		ruleViolation: v,
+		hasLocation:   true,
 		location:      location,
 	}
+}
+
+func (v ruleViolation) err() error {
+	return validationError2{ruleViolation: v}
 }
 
 // TODO: rename to validationError once the old validationError is removed.
 type validationError2 struct {
 	ruleViolation ruleViolation
+	hasLocation   bool
 	location      XY
 }
 
 func (e validationError2) Error() string {
-	return fmt.Sprintf("%s (at %v)", e.ruleViolation, e.location)
+	if e.hasLocation {
+		return fmt.Sprintf("%s (at or near %v)", e.ruleViolation, e.location)
+	}
+	return string(e.ruleViolation)
 }

@@ -34,49 +34,66 @@ type Polygon struct {
 // is the empty Polygon. The coordinate type of the polygon is the lowest
 // common coordinate type of its rings.
 func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
-	if len(rings) == 0 {
-		return Polygon{}, nil
-	}
-
-	ctype := DimXYZM
-	for _, r := range rings {
-		ctype &= r.CoordinatesType()
+	ctype := DimXY
+	if len(rings) > 0 {
+		ctype = DimXYZM
+		for _, r := range rings {
+			ctype &= r.CoordinatesType()
+		}
 	}
 	rings = append([]LineString(nil), rings...)
 	for i := range rings {
 		rings[i] = rings[i].ForceCoordinatesType(ctype)
 	}
+	poly := Polygon{rings, ctype}
 
-	ctorOpts := newOptionSet(opts)
-	if err := validatePolygon(rings, ctorOpts); err != nil {
+	os := newOptionSet(opts)
+	if os.skipValidations {
+		return poly, nil
+	}
+	if err := poly.Validate(); err != nil {
 		return Polygon{}, err
 	}
-	return Polygon{rings, ctype}, nil
+	return poly, nil
 }
 
-func validatePolygon(rings []LineString, opts ctorOptionSet) error {
-	if len(rings) == 0 || opts.skipValidations {
+// Validate checks if the Polygon is valid. For it to be valid, the following
+// assertions must hold:
+//
+// 1. The rings (outer and inner) must be valid linear rings. This means that
+// they must be non-empty, simple, and closed.
+//
+// 2. Each pair of rings must only intersect at a single point.
+//
+// 3. The interior of the polygon must be connected.
+//
+// 4. The holes must be fully inside the outer ring.
+func (p Polygon) Validate() error {
+	if len(p.rings) == 0 {
 		return nil
 	}
 
-	for _, r := range rings {
+	for _, r := range p.rings {
+		if !r.IsEmpty() {
+			return defyRingNotEmpty.err()
+		}
 		if !r.IsClosed() {
-			return validationError{"polygon ring not closed"}
+			return defyRingClosed.errAt(r.Coordinates().GetXY(0))
 		}
 		if !r.IsSimple() {
-			return validationError{"polygon ring not simple"}
+			return defyRingSimple.errAt(r.Coordinates().GetXY(0))
 		}
 	}
 
 	// Data structures used to track connectedness.
-	nextInterVert := len(rings)
+	nextInterVert := len(p.rings)
 	interVerts := make(map[XY]int)
 	graph := newGraph()
 
 	// Construct RTree of rings.
-	boxes := make([]rtree.Box, len(rings))
-	items := make([]rtree.BulkItem, len(rings))
-	for i, r := range rings {
+	boxes := make([]rtree.Box, len(p.rings))
+	items := make([]rtree.BulkItem, len(p.rings))
+	for i, r := range p.rings {
 		box, ok := r.Envelope().AsBox()
 		if !ok {
 			// Cannot occur, because we have already checked to ensure rings
@@ -89,7 +106,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	tree := rtree.BulkLoad(items)
 
 	// Check each pair of rings (skipping any pairs that could not possibly intersect).
-	for i := range rings {
+	for i := range p.rings {
 		if err := tree.RangeSearch(boxes[i], func(j int) error {
 			// Only compare each pair once.
 			if i <= j {
@@ -98,16 +115,16 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 			if i > 0 && j > 0 { // Check is skipped if the outer ring is involved.
 				// It's ok to access the first coord (index 0), since we've
 				// already checked to ensure that no ring is empty.
-				iStart := rings[i].Coordinates().GetXY(0)
-				jStart := rings[j].Coordinates().GetXY(0)
-				nestedFwd := relatePointToRing(iStart, rings[j]) == interior
-				nestedRev := relatePointToRing(jStart, rings[i]) == interior
+				iStart := p.rings[i].Coordinates().GetXY(0)
+				jStart := p.rings[j].Coordinates().GetXY(0)
+				nestedFwd := relatePointToRing(iStart, p.rings[j]) == interior
+				nestedRev := relatePointToRing(jStart, p.rings[i]) == interior
 				if nestedFwd || nestedRev {
-					return validationError{"polygon has nested rings"}
+					return defyRingNotNested.errAt(iStart)
 				}
 			}
 
-			intersects, ext := hasIntersectionLineStringWithLineString(rings[i], rings[j], true)
+			intersects, ext := hasIntersectionLineStringWithLineString(p.rings[i], p.rings[j], true)
 			if !intersects {
 				return nil
 			}
@@ -132,13 +149,13 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	// All inner rings must be inside the outer ring. We can just check an
 	// arbitrary point in each inner ring because we have already made sure
 	// that the rings don't intersect at multiple points.
-	for _, hole := range rings[1:] {
+	for _, hole := range p.rings[1:] {
 		xy, ok := hole.StartPoint().XY()
 		if !ok {
 			continue
 		}
-		if relatePointToRing(xy, rings[0]) == exterior {
-			return validationError{"polygon interior ring outside of exterior ring"}
+		if relatePointToRing(xy, p.rings[0]) == exterior {
+			return defyInteriorInExterior.errAt(xy)
 		}
 	}
 
@@ -148,6 +165,7 @@ func validatePolygon(rings []LineString, opts ctorOptionSet) error {
 	// intersection. The interior of the polygon is connected iff the graph
 	// does not contain a cycle.
 	if graph.hasCycle() {
+		// TODO other error
 		return validationError{"polygon has disconnected interior"}
 	}
 	return nil

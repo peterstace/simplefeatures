@@ -15,10 +15,10 @@ type XY struct {
 // validate checks if the XY value contains NaN, -inf, or +inf.
 func (w XY) validate() error {
 	if math.IsNaN(w.X) || math.IsNaN(w.Y) {
-		return ruleNaN.errAt(w)
+		return defyNoNaN.errAt(w)
 	}
 	if math.IsInf(w.X, 0) || math.IsInf(w.Y, 0) {
-		return ruleInf.errAt(w)
+		return defyNoInf.errAt(w)
 	}
 	return nil
 }
