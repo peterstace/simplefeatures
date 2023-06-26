@@ -31,6 +31,11 @@ func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 	return MultiPoint{forced, ctype}
 }
 
+// Validate checks if the MultiPoint is valid.
+func (m MultiPoint) Validate() error {
+	return nil
+}
+
 // Type returns the GeometryType for a MultiPoint
 func (m MultiPoint) Type() GeometryType {
 	return TypeMultiPoint

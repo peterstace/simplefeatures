@@ -50,6 +50,11 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 	return MultiPolygon{polys, ctype}, nil
 }
 
+// Validate checks if the MultiPolygon is valid.
+func (m MultiPolygon) Validate() error {
+	return nil // TODO
+}
+
 func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 	if opts.skipValidations {
 		return nil

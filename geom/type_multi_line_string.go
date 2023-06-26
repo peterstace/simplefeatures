@@ -39,6 +39,11 @@ func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLine
 	return MultiLineString{lines, ctype}
 }
 
+// Validate checks if the MultiLineString is valid.
+func (m MultiLineString) Validate() error {
+	return nil
+}
+
 // Type returns the GeometryType for a MultiLineString
 func (m MultiLineString) Type() GeometryType {
 	return TypeMultiLineString
