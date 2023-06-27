@@ -35,6 +35,11 @@ func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) Geometry
 	return GeometryCollection{geoms, ctype}
 }
 
+// Validate checks if the GeometryCollection is valid.
+func (c GeometryCollection) Validate() error {
+	return nil // TODO
+}
+
 // Type returns the GeometryType for a GeometryCollection
 func (c GeometryCollection) Type() GeometryType {
 	return TypeGeometryCollection

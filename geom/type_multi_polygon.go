@@ -30,43 +30,38 @@ type MultiPolygon struct {
 // coordinates type of the MultiPolygon is the lowest common coordinates type
 // its Polygons.
 func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
-	if len(polys) == 0 {
-		return MultiPolygon{}, nil
-	}
-
-	ctype := DimXYZM
-	for _, p := range polys {
-		ctype &= p.CoordinatesType()
+	ctype := DimXY
+	if len(polys) > 0 {
+		ctype = DimXYZM
+		for _, p := range polys {
+			ctype &= p.CoordinatesType()
+		}
 	}
 	polys = append([]Polygon(nil), polys...)
 	for i := range polys {
 		polys[i] = polys[i].ForceCoordinatesType(ctype)
 	}
+	mp := MultiPolygon{polys, ctype}
 
-	ctorOpts := newOptionSet(opts)
-	if err := validateMultiPolygon(polys, ctorOpts); err != nil {
+	os := newOptionSet(opts)
+	if os.skipValidations {
+		return mp, nil
+	}
+	if err := mp.Validate(); err != nil {
 		return MultiPolygon{}, err
 	}
-	return MultiPolygon{polys, ctype}, nil
+	return mp, nil
 }
 
 // Validate checks if the MultiPolygon is valid.
 func (m MultiPolygon) Validate() error {
-	return nil // TODO
-}
-
-func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
-	if opts.skipValidations {
-		return nil
-	}
-
-	polyBoundaries := make([]indexedLines, len(polys))
-	polyBoundaryPopulated := make([]bool, len(polys))
+	polyBoundaries := make([]indexedLines, len(m.polys))
+	polyBoundaryPopulated := make([]bool, len(m.polys))
 
 	// Construct RTree of Polygons.
-	boxes := make([]rtree.Box, len(polys))
-	items := make([]rtree.BulkItem, 0, len(polys))
-	for i, p := range polys {
+	boxes := make([]rtree.Box, len(m.polys))
+	items := make([]rtree.BulkItem, 0, len(m.polys))
+	for i, p := range m.polys {
 		if box, ok := p.Envelope().AsBox(); ok {
 			boxes[i] = box
 			item := rtree.BulkItem{Box: boxes[i], RecordID: i}
@@ -75,8 +70,8 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 	}
 	tree := rtree.BulkLoad(items)
 
-	for i := range polys {
-		if polys[i].IsEmpty() {
+	for i := range m.polys {
+		if m.polys[i].IsEmpty() {
 			continue
 		}
 		if err := tree.RangeSearch(boxes[i], func(j int) error {
@@ -87,7 +82,7 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 
 			for _, k := range [...]int{i, j} {
 				if !polyBoundaryPopulated[k] {
-					polyBoundaries[k] = newIndexedLines(polys[k].Boundary().asLines())
+					polyBoundaries[k] = newIndexedLines(m.polys[k].Boundary().asLines())
 					polyBoundaryPopulated[k] = true
 				}
 			}
@@ -108,8 +103,8 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 			if interMP.IsEmpty() {
 				// We already know the polygons are NOT empty, so it's safe to
 				// directly access index 0.
-				ptI := polys[i].ExteriorRing().Coordinates().GetXY(0)
-				ptJ := polys[j].ExteriorRing().Coordinates().GetXY(0)
+				ptI := m.polys[i].ExteriorRing().Coordinates().GetXY(0)
+				ptJ := m.polys[j].ExteriorRing().Coordinates().GetXY(0)
 				if relatePointToPolygon(ptI, polyBoundaries[j]) != exterior ||
 					relatePointToPolygon(ptJ, polyBoundaries[i]) != exterior {
 					return validationError{"multipolygon has nested child polygons"}
