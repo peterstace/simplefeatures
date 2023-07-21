@@ -13,17 +13,6 @@ import (
 // It is immutable after creation. When not empty, it is defined by one outer
 // ring and zero or more interior rings. The outer ring defines the exterior
 // boundary of the Polygon, and each inner ring defines a hole in the polygon.
-//
-// For a Polygon to be valid, the following assertions must hold:
-//
-// 1. The rings (outer and inner) must be valid linear rings. This means that
-// they must be non-empty, simple, and closed.
-//
-// 2. Each pair of rings must only intersect at a single point.
-//
-// 3. The interior of the polygon must be connected.
-//
-// 4. The holes must be fully inside the outer ring.
 type Polygon struct {
 	rings []LineString
 	ctype CoordinatesType
@@ -33,6 +22,10 @@ type Polygon struct {
 // any inner rings follow. If no rings are provided, then the returned Polygon
 // is the empty Polygon. The coordinate type of the polygon is the lowest
 // common coordinate type of its rings.
+//
+// An error is returned if any of the Polygon constraints are not met (see the
+// Validate method for details). Note that the validity of each input
+// LineString is not verified.
 func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
 	ctype := DimXY
 	if len(rings) > 0 {
@@ -68,6 +61,10 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 // 3. The interior of the polygon must be connected.
 //
 // 4. The holes must be fully inside the outer ring.
+//
+// In addition to these constraints, this method also verifiers that the rings
+// are valid LineStrings (i.e. have at least 2 distinct XY values, and don't
+// contain NaN or Infinite values).
 func (p Polygon) Validate() error {
 	for i, r := range p.rings {
 		if err := r.Validate(); err != nil {

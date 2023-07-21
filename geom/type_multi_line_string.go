@@ -20,7 +20,8 @@ type MultiLineString struct {
 
 // NewMultiLineString creates a MultiLineString from its constituent
 // LineStrings. The coordinates type of the MultiLineString is the lowest
-// common coordinates type of its LineStrings.
+// common coordinates type of its LineStrings. The validity of the input
+// LineStrings is not verified.
 func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLineString {
 	if len(lines) == 0 {
 		return MultiLineString{}
@@ -39,7 +40,8 @@ func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLine
 	return MultiLineString{lines, ctype}
 }
 
-// Validate checks if the MultiLineString is valid.
+// Validate checks if the MultiLineString is valid. The only validation rule is
+// that each child LineString must be valid.
 func (m MultiLineString) Validate() error {
 	for i, ls := range m.lines {
 		if err := ls.Validate(); err != nil {

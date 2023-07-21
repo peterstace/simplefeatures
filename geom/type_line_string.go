@@ -11,16 +11,13 @@ import (
 // LineString is a linear geometry defined by linear interpolation between a
 // finite set of points. Its zero value is the empty line string. It is
 // immutable after creation.
-//
-// A LineString must consist of either zero points (i.e. it is the empty line
-// string), or it must have at least 2 points with distinct XY values.
 type LineString struct {
 	seq Sequence
 }
 
-// NewLineString creates a new LineString from a Sequence of points. The
-// sequence must contain exactly 0 points, or at least 2 points with distinct
-// XY values (otherwise an error is returned).
+// NewLineString creates a new LineString from a Sequence of points. An error
+// is returned if the LineString would be invalid (see the Validate method for
+// details).
 func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) {
 	ls := LineString{seq}
 	co := newOptionSet(opts)

@@ -9,26 +9,19 @@ import (
 )
 
 // MultiPolygon is a planar surface geometry that consists of a collection of
-// Polygons. The zero value is the empty MultiPolygon (i.e. the collection of
-// zero Polygons). It is immutable after creation.
-//
-// For a MultiPolygon to be valid, the following assertions must hold:
-//
-// 1. It must be made up of zero or more valid Polygons (any of which may be empty).
-//
-// 2. The interiors of any two polygons must not intersect.
-//
-// 3. The boundaries of any two polygons may touch only at a finite number of points.
+// (possibly empty) Polygons. The zero value is the empty MultiPolygon (i.e.
+// the collection of zero Polygons). It is immutable after creation.
 type MultiPolygon struct {
 	// Invariant: ctype matches the coordinates type of each polygon.
 	polys []Polygon
 	ctype CoordinatesType
 }
 
-// NewMultiPolygon creates a MultiPolygon from its constituent Polygons. It
-// gives an error if any of the MultiPolygon assertions are not maintained. The
+// NewMultiPolygon creates a MultiPolygon from its constituent Polygons. The
 // coordinates type of the MultiPolygon is the lowest common coordinates type
-// its Polygons.
+// its Polygons. An error is returned if any of the MultiPolygon constraints
+// aren't met (see the Validate method for details). Note that the validity of
+// each input Polygon is not verified.
 func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
 	ctype := DimXY
 	if len(polys) > 0 {
@@ -53,7 +46,16 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 	return mp, nil
 }
 
-// Validate checks if the MultiPolygon is valid.
+// Validate checks if the MultiPolygon is valid. MultiPolygons have the
+// following constraints:
+//
+// 1. The interiors of any two child polygons must not intersect.
+//
+// 2. The boundaries of any two child polygons may touch only at a finite
+// number of points.
+//
+// In addition to these constraints, this method also checks if each child
+// Polygon is valid.
 func (m MultiPolygon) Validate() error {
 	for i, poly := range m.polys {
 		if err := poly.Validate(); err != nil {

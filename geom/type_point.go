@@ -18,7 +18,8 @@ type Point struct {
 	full   bool
 }
 
-// NewPoint creates a new point given its Coordinates.
+// NewPoint creates a new point given its Coordinates. An error is returned for
+// invalid points (see the Validate method for details).
 func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
 	pt := newUncheckedPoint(c)
 	os := newOptionSet(opts)
@@ -31,8 +32,8 @@ func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
 	return pt, nil
 }
 
-// Validate checks if the Point is valid. For it to be valid, its coordinates
-// must not be NaN or positive or negative Inf.
+// Validate checks if the Point is valid. For it to be valid, it must be empty
+// or have non-NaN and non-infinite coordinates.
 func (p Point) Validate() error {
 	if !p.full {
 		return nil
