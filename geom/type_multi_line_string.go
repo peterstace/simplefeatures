@@ -41,6 +41,11 @@ func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLine
 
 // Validate checks if the MultiLineString is valid.
 func (m MultiLineString) Validate() error {
+	for i, ls := range m.lines {
+		if err := ls.Validate(); err != nil {
+			return wrap(err, "validating linestring at index %d", i)
+		}
+	}
 	return nil
 }
 

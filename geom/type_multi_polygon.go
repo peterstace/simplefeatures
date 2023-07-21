@@ -47,7 +47,7 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 	if os.skipValidations {
 		return mp, nil
 	}
-	if err := mp.Validate(); err != nil {
+	if err := mp.checkMultiPolygonConstraints(); err != nil {
 		return MultiPolygon{}, err
 	}
 	return mp, nil
@@ -55,6 +55,16 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 
 // Validate checks if the MultiPolygon is valid.
 func (m MultiPolygon) Validate() error {
+	for i, poly := range m.polys {
+		if err := poly.Validate(); err != nil {
+			return wrap(err, "validating polygon at index %d", i)
+		}
+	}
+	err := m.checkMultiPolygonConstraints()
+	return wrap(err, "validating multipolygon constraints")
+}
+
+func (m MultiPolygon) checkMultiPolygonConstraints() error {
 	polyBoundaries := make([]indexedLines, len(m.polys))
 	polyBoundaryPopulated := make([]bool, len(m.polys))
 

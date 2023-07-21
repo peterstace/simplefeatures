@@ -37,7 +37,12 @@ func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) Geometry
 
 // Validate checks if the GeometryCollection is valid.
 func (c GeometryCollection) Validate() error {
-	return nil // TODO
+	for i, g := range c.geoms {
+		if err := g.Validate(); err != nil {
+			return wrap(err, "validating geometry at index %d", i)
+		}
+	}
+	return nil
 }
 
 // Type returns the GeometryType for a GeometryCollection

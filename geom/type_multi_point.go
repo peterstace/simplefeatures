@@ -33,6 +33,11 @@ func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 
 // Validate checks if the MultiPoint is valid.
 func (m MultiPoint) Validate() error {
+	for i, pt := range m.points {
+		if err := pt.Validate(); err != nil {
+			return wrap(err, "validating point at index %d", i)
+		}
+	}
 	return nil
 }
 

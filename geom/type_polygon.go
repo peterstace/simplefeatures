@@ -51,7 +51,7 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 	if os.skipValidations {
 		return poly, nil
 	}
-	if err := poly.Validate(); err != nil {
+	if err := poly.checkPolygonConstraints(); err != nil {
 		return Polygon{}, err
 	}
 	return poly, nil
@@ -69,6 +69,16 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 //
 // 4. The holes must be fully inside the outer ring.
 func (p Polygon) Validate() error {
+	for i, r := range p.rings {
+		if err := r.Validate(); err != nil {
+			return wrap(err, "validating ring at index %d", i)
+		}
+	}
+	err := p.checkPolygonConstraints()
+	return wrap(err, "validating polygon constraints")
+}
+
+func (p Polygon) checkPolygonConstraints() error {
 	if len(p.rings) == 0 {
 		return nil
 	}
