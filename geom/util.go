@@ -90,3 +90,46 @@ func sortFloat64Pair(a, b float64) (float64, float64) {
 	}
 	return a, b
 }
+
+func arbitraryControlPoint(g Geometry) Point {
+	switch typ := g.Type(); typ {
+	case TypeGeometryCollection:
+		gc := g.MustAsGeometryCollection()
+		for i := 0; i < gc.NumGeometries(); i++ {
+			if pt := arbitraryControlPoint(gc.GeometryN(i)); !pt.IsEmpty() {
+				return pt
+			}
+		}
+		return Point{}
+	case TypePoint:
+		return g.MustAsPoint()
+	case TypeLineString:
+		return g.MustAsLineString().StartPoint()
+	case TypePolygon:
+		return g.MustAsPolygon().ExteriorRing().StartPoint()
+	case TypeMultiPoint:
+		for _, pt := range g.MustAsMultiPoint().Dump() {
+			if !pt.IsEmpty() {
+				return pt
+			}
+		}
+		return Point{}
+	case TypeMultiLineString:
+		for _, ls := range g.MustAsMultiLineString().Dump() {
+			if pt := ls.StartPoint(); !pt.IsEmpty() {
+				return pt
+			}
+		}
+		return Point{}
+	case TypeMultiPolygon:
+		for _, p := range g.MustAsMultiPolygon().Dump() {
+			pt := p.ExteriorRing().StartPoint()
+			if !pt.IsEmpty() {
+				return pt
+			}
+		}
+		return Point{}
+	default:
+		panic(fmt.Sprintf("invalid geometry type: %d", int(typ)))
+	}
+}

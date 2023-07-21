@@ -78,10 +78,10 @@ func (p Polygon) Validate() error {
 			return defyRingNotEmpty.err()
 		}
 		if !r.IsClosed() {
-			return defyRingClosed.errAt(r.Coordinates().GetXY(0))
+			return defyRingClosed.errAtXY(r.Coordinates().GetXY(0))
 		}
 		if !r.IsSimple() {
-			return defyRingSimple.errAt(r.Coordinates().GetXY(0))
+			return defyRingSimple.errAtXY(r.Coordinates().GetXY(0))
 		}
 	}
 
@@ -120,7 +120,7 @@ func (p Polygon) Validate() error {
 				nestedFwd := relatePointToRing(iStart, p.rings[j]) == interior
 				nestedRev := relatePointToRing(jStart, p.rings[i]) == interior
 				if nestedFwd || nestedRev {
-					return defyRingNotNested.errAt(iStart)
+					return defyRingNotNested.errAtXY(iStart)
 				}
 			}
 
@@ -129,7 +129,7 @@ func (p Polygon) Validate() error {
 				return nil
 			}
 			if ext.multiplePoints {
-				return validationError{"polygon rings intersect at multiple points"}
+				return defyRingsMultiTouch.errAtXY(ext.singlePoint)
 			}
 
 			interVert, ok := interVerts[ext.singlePoint]
@@ -155,7 +155,7 @@ func (p Polygon) Validate() error {
 			continue
 		}
 		if relatePointToRing(xy, p.rings[0]) == exterior {
-			return defyInteriorInExterior.errAt(xy)
+			return defyInteriorInExterior.errAtXY(xy)
 		}
 	}
 

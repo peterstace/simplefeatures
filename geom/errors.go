@@ -21,21 +21,6 @@ func wrapSimplified(err error) error {
 	return wrap(err, "simplified geometry")
 }
 
-// validationError is an error used to indicate that a geometry could not be
-// created because it didn't pass all validation checks.
-// TODO: remove me
-type validationError struct {
-	// reason should begin with the name of the invalid geometry being created,
-	// and describe the invalid state (as opposed to describing the validation
-	// rule). E.g. "polygon has non-closed ring" rather than "polygon rings
-	// must be closed".
-	reason string
-}
-
-func (e validationError) Error() string {
-	return fmt.Sprintf("failed geometry constraint: %s", e.reason)
-}
-
 // wkbSyntaxError is an error used to indicate that a serialised WKB geometry
 // cannot be unmarshalled because some aspect of it's syntax is invalid.
 type wkbSyntaxError struct {
@@ -82,37 +67,47 @@ func wrapWithGeoJSONSyntaxError(err error) error {
 type ruleViolation string
 
 const (
-	defyNoInf              ruleViolation = "Inf not allowed"
-	defyNoNaN              ruleViolation = "NaN not allowed"
-	defyAtLeastTwoPoints   ruleViolation = "non-empty LineString contains only one distinct XY value"
-	defyRingNotEmpty       ruleViolation = "polygon ring empty"
-	defyRingClosed         ruleViolation = "polygon ring not closed"
-	defyRingSimple         ruleViolation = "polygon ring not simple"
-	defyRingNotNested      ruleViolation = "polygon has nested rings"
-	defyInteriorInExterior ruleViolation = "polygon interior ring outside of exterior ring"
-	defyInteriorConnected  ruleViolation = "polygon has disconnected interior"
+	defyNoInf                ruleViolation = "Inf not allowed"
+	defyNoNaN                ruleViolation = "NaN not allowed"
+	defyAtLeastTwoPoints     ruleViolation = "non-empty LineString contains only one distinct XY value"
+	defyRingNotEmpty         ruleViolation = "polygon ring empty"
+	defyRingClosed           ruleViolation = "polygon ring not closed"
+	defyRingSimple           ruleViolation = "polygon ring not simple"
+	defyRingNotNested        ruleViolation = "polygon has nested rings"
+	defyInteriorInExterior   ruleViolation = "polygon interior ring outside of exterior ring"
+	defyInteriorConnected    ruleViolation = "polygon has disconnected interior"
+	defyRingsMultiTouch      ruleViolation = "polygon rings intersect at multiple points"
+	defyChildPolysMultiTouch ruleViolation = "multipolygon child polygons touch at multiple points"
 )
 
-func (v ruleViolation) errAt(location XY) error {
-	return validationError2{
+func (v ruleViolation) errAtXY(location XY) error {
+	return validationError{
 		ruleViolation: v,
 		hasLocation:   true,
 		location:      location,
 	}
 }
 
-func (v ruleViolation) err() error {
-	return validationError2{ruleViolation: v}
+func (v ruleViolation) errAtPt(location Point) error {
+	xy, ok := location.XY()
+	return validationError{
+		ruleViolation: v,
+		hasLocation:   ok,
+		location:      xy,
+	}
 }
 
-// TODO: rename to validationError once the old validationError is removed.
-type validationError2 struct {
+func (v ruleViolation) err() error {
+	return validationError{ruleViolation: v}
+}
+
+type validationError struct {
 	ruleViolation ruleViolation
 	hasLocation   bool
 	location      XY
 }
 
-func (e validationError2) Error() string {
+func (e validationError) Error() string {
 	if e.hasLocation {
 		return fmt.Sprintf("%s (at or near %v)", e.ruleViolation, e.location)
 	}
