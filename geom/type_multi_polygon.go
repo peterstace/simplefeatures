@@ -19,7 +19,7 @@ type MultiPolygon struct {
 
 // NewMultiPolygon creates a MultiPolygon from its constituent Polygons. The
 // coordinates type of the MultiPolygon is the lowest common coordinates type
-// its Polygons. An error is returned if any of the MultiPolygon constraints
+// of its Polygons. An error is returned if any of the MultiPolygon constraints
 // aren't met (see the Validate method for details). Note that the validity of
 // each input Polygon is not verified.
 func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
