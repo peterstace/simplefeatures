@@ -67,17 +67,17 @@ func wrapWithGeoJSONSyntaxError(err error) error {
 type ruleViolation string
 
 const (
-	defyNoInf                ruleViolation = "Inf not allowed"
-	defyNoNaN                ruleViolation = "NaN not allowed"
-	defyAtLeastTwoPoints     ruleViolation = "non-empty LineString contains only one distinct XY value"
-	defyRingNotEmpty         ruleViolation = "polygon ring empty"
-	defyRingClosed           ruleViolation = "polygon ring not closed"
-	defyRingSimple           ruleViolation = "polygon ring not simple"
-	defyRingNotNested        ruleViolation = "polygon has nested rings"
-	defyInteriorInExterior   ruleViolation = "polygon interior ring outside of exterior ring"
-	defyInteriorConnected    ruleViolation = "polygon has disconnected interior"
-	defyRingsMultiTouch      ruleViolation = "polygon rings intersect at multiple points"
-	defyChildPolysMultiTouch ruleViolation = "multipolygon child polygons touch at multiple points"
+	violateInf                ruleViolation = "Inf not allowed"
+	violateNaN                ruleViolation = "NaN not allowed"
+	violateTwoPoints          ruleViolation = "non-empty LineString contains only one distinct XY value"
+	violateRingEmpty          ruleViolation = "polygon ring empty"
+	violateRingClosed         ruleViolation = "polygon ring not closed"
+	violateRingSimple         ruleViolation = "polygon ring not simple"
+	defyRingNested            ruleViolation = "polygon has nested rings"
+	violateInteriorInExterior ruleViolation = "polygon interior ring outside of exterior ring"
+	violateInteriorConnected  ruleViolation = "polygon has disconnected interior"
+	violateRingsMultiTouch    ruleViolation = "polygon rings intersect at multiple points"
+	violatePolysMultiTouch    ruleViolation = "multipolygon child polygons touch at multiple points"
 )
 
 func (v ruleViolation) errAtXY(location XY) error {

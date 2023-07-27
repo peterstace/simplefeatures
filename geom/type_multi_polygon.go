@@ -103,7 +103,7 @@ func (m MultiPolygon) checkMultiPolygonConstraints() error {
 				polyBoundaries[j],
 			)
 			if !interMLS.IsEmpty() {
-				return defyChildPolysMultiTouch.errAtPt(
+				return violatePolysMultiTouch.errAtPt(
 					arbitraryControlPoint(interMLS.AsGeometry()))
 			}
 
@@ -119,7 +119,7 @@ func (m MultiPolygon) checkMultiPolygonConstraints() error {
 					in := m.polys[dir.inIdx].ExteriorRing().Coordinates().GetXY(0)
 					out := polyBoundaries[dir.outIdx]
 					if relatePointToPolygon(in, out) != exterior {
-						return defyChildPolysMultiTouch.errAtXY(in)
+						return violatePolysMultiTouch.errAtXY(in)
 					}
 				}
 				return nil
@@ -176,7 +176,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 		for k := 0; k+1 < len(pts); k++ {
 			midpoint := pts[k].Add(pts[k+1]).Scale(0.5)
 			if relatePointToPolygon(midpoint, p1) == interior {
-				return defyChildPolysMultiTouch.errAtXY(midpoint)
+				return violatePolysMultiTouch.errAtXY(midpoint)
 			}
 		}
 	}

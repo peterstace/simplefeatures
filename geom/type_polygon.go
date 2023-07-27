@@ -82,13 +82,13 @@ func (p Polygon) checkPolygonConstraints() error {
 
 	for _, r := range p.rings {
 		if r.IsEmpty() {
-			return defyRingNotEmpty.err()
+			return violateRingEmpty.err()
 		}
 		if !r.IsClosed() {
-			return defyRingClosed.errAtXY(r.Coordinates().GetXY(0))
+			return violateRingClosed.errAtXY(r.Coordinates().GetXY(0))
 		}
 		if !r.IsSimple() {
-			return defyRingSimple.errAtXY(r.Coordinates().GetXY(0))
+			return violateRingSimple.errAtXY(r.Coordinates().GetXY(0))
 		}
 	}
 
@@ -127,7 +127,7 @@ func (p Polygon) checkPolygonConstraints() error {
 				nestedFwd := relatePointToRing(iStart, p.rings[j]) == interior
 				nestedRev := relatePointToRing(jStart, p.rings[i]) == interior
 				if nestedFwd || nestedRev {
-					return defyRingNotNested.errAtXY(iStart)
+					return defyRingNested.errAtXY(iStart)
 				}
 			}
 
@@ -136,7 +136,7 @@ func (p Polygon) checkPolygonConstraints() error {
 				return nil
 			}
 			if ext.multiplePoints {
-				return defyRingsMultiTouch.errAtXY(ext.singlePoint)
+				return violateRingsMultiTouch.errAtXY(ext.singlePoint)
 			}
 
 			interVert, ok := interVerts[ext.singlePoint]
@@ -162,7 +162,7 @@ func (p Polygon) checkPolygonConstraints() error {
 			continue
 		}
 		if relatePointToRing(xy, p.rings[0]) == exterior {
-			return defyInteriorInExterior.errAtXY(xy)
+			return violateInteriorInExterior.errAtXY(xy)
 		}
 	}
 
@@ -172,7 +172,7 @@ func (p Polygon) checkPolygonConstraints() error {
 	// intersection. The interior of the polygon is connected iff the graph
 	// does not contain a cycle.
 	if graph.hasCycle() {
-		return defyInteriorConnected.err()
+		return violateInteriorConnected.err()
 	}
 	return nil
 }
