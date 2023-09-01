@@ -17,8 +17,12 @@ type MultiPoint struct {
 
 // NewMultiPoint creates a MultiPoint from a list of Points. The coordinate
 // type of the MultiPoint is the lowest common coordinates type of its Points.
+//
 // Because MultiPoints are unconstrained collections, this constructor function
 // doesn't return an error.
+//
+// Note that this constructor doesn't check the validity of its Point
+// arguments.
 func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 	if len(pts) == 0 {
 		return MultiPoint{}

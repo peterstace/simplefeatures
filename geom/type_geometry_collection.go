@@ -18,8 +18,13 @@ type GeometryCollection struct {
 
 // NewGeometryCollection creates a collection of geometries. The coordinates
 // type of the GeometryCollection is the lowest common coordinates type of its
-// child geometries. Because GeometryCollections are unconstrained collections,
-// this construction function doesn't return an error.
+// child geometries.
+//
+// Because GeometryCollections are unconstrained collections, this construction
+// function doesn't return an error.
+//
+// Note that this constructor doesn't check the validity of its Polygon
+// arguments.
 func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) GeometryCollection {
 	if len(geoms) == 0 {
 		return GeometryCollection{}

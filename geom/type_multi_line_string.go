@@ -20,9 +20,13 @@ type MultiLineString struct {
 
 // NewMultiLineString creates a MultiLineString from its constituent
 // LineStrings. The coordinates type of the MultiLineString is the lowest
-// common coordinates type of its LineStrings. Because MultiLineStrings are
-// unconstrained collections, this constructor function doesn't return an
-// error.
+// common coordinates type of its LineStrings.
+//
+// Because MultiLineStrings are unconstrained collections, this constructor
+// function doesn't return an error.
+//
+// Note that this constructor doesn't check the validity of its LineString
+// arguments.
 func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLineString {
 	if len(lines) == 0 {
 		return MultiLineString{}

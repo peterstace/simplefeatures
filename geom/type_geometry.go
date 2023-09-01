@@ -959,7 +959,7 @@ func (g Geometry) Simplify(threshold float64, opts ...ConstructorOption) (Geomet
 }
 
 // Validate checks if the Geometry is valid. See the documentation for each
-// concrete geometry type for details about the validation rules.
+// concrete geometry's Validate method for details about the validation rules.
 func (g Geometry) Validate() error {
 	switch g.gtype {
 	case TypeGeometryCollection:
