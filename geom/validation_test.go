@@ -170,19 +170,6 @@ func TestPolygonValidation(t *testing.T) {
 	}
 }
 
-func TestPolygonConstraintValidation(t *testing.T) {
-	ls, err := UnmarshalWKT("LINESTRING(0 0)", DisableAllValidations)
-	expectNoErr(t, err)
-	expectErr(t, ls.Validate())
-
-	// The validity of the LineString is not checked by the constructor and
-	// will only be caught by checking the validity of each input, or calling
-	// the Validate method.
-	poly, err := NewPolygon([]LineString{ls.MustAsLineString()})
-	expectNoErr(t, err)
-	expectErr(t, poly.Validate())
-}
-
 func TestMultiPointValidation(t *testing.T) {
 	nan := math.NaN()
 	for i, tc := range []struct {

@@ -33,7 +33,7 @@ func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
 }
 
 // Validate checks if the Point is valid. For it to be valid, it must be empty
-// or have non-NaN and non-infinite coordinates.
+// or not have NaN or Inf XY values.
 func (p Point) Validate() error {
 	if !p.full {
 		return nil

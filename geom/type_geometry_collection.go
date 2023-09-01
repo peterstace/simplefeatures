@@ -18,7 +18,8 @@ type GeometryCollection struct {
 
 // NewGeometryCollection creates a collection of geometries. The coordinates
 // type of the GeometryCollection is the lowest common coordinates type of its
-// child geometries.
+// child geometries. Because GeometryCollections are unconstrained collections,
+// this construction function doesn't return an error.
 func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) GeometryCollection {
 	if len(geoms) == 0 {
 		return GeometryCollection{}
@@ -35,8 +36,9 @@ func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) Geometry
 	return GeometryCollection{geoms, ctype}
 }
 
-// Validate checks if the GeometryCollection is valid, by checking that all
-// child geometries are valid.
+// Validate checks if the GeometryCollection is valid. GeometryCollections are
+// unconstrained collections, however this method additionally checks that each
+// child Geometry is valid.
 func (c GeometryCollection) Validate() error {
 	for i, g := range c.geoms {
 		if err := g.Validate(); err != nil {

@@ -30,9 +30,12 @@ func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) 
 	return ls, nil
 }
 
-// Validate checks if the LineString is valid. For it to be valid, its
-// coordinates must not be NaN or positive or negative Inf, and there must be
-// at least two distinct points.
+// Validate checks if the LineString is valid. For it to be valid, the
+// following rules must hold.
+//
+//  1. The XY values must not be NaN or Inf.
+//  2. For non-empty LineStrings, there must be at least two distinct XY
+//     values.
 func (s LineString) Validate() error {
 	if s.seq.Length() == 0 {
 		return nil

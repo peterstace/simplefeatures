@@ -24,8 +24,7 @@ type Polygon struct {
 // common coordinate type of its rings.
 //
 // An error is returned if any of the Polygon constraints are not met (see the
-// Validate method for details). Note that the validity of each input
-// LineString is not verified.
+// Validate method for details).
 func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
 	ctype := DimXY
 	if len(rings) > 0 {
@@ -44,40 +43,29 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 	if os.skipValidations {
 		return poly, nil
 	}
-	if err := poly.checkPolygonConstraints(); err != nil {
+	if err := poly.Validate(); err != nil {
 		return Polygon{}, err
 	}
 	return poly, nil
 }
 
-// Validate checks if the Polygon is valid. For it to be valid, the following
-// assertions must hold:
+// Validate checks if the Polygon is valid. For non-empty Polygons to be valid,
+// the following validation rules must hold:
 //
-// 1. The rings (outer and inner) must be valid linear rings. This means that
-// they must be non-empty, simple, and closed.
-//
-// 2. Each pair of rings must only intersect at a single point.
-//
-// 3. The interior of the polygon must be connected.
-//
-// 4. The holes must be fully inside the outer ring.
-//
-// In addition to these constraints, this method also verifiers that the rings
-// are valid LineStrings (i.e. have at least 2 distinct XY values, and don't
-// contain NaN or Infinite values).
+//  1. The rings (outer and inner) must be valid linear rings. This means that
+//     they must be valid LineStrings that are non-empty, simple, and closed.
+//  2. Each pair of rings must at most intersect at a single point.
+//  3. The interior of the polygon must be connected.
+//  4. Any interior rings must be fully inside the exterior ring.
 func (p Polygon) Validate() error {
+	if len(p.rings) == 0 {
+		return nil
+	}
+
 	for i, r := range p.rings {
 		if err := r.Validate(); err != nil {
 			return wrap(err, "validating ring at index %d", i)
 		}
-	}
-	err := p.checkPolygonConstraints()
-	return wrap(err, "validating polygon constraints")
-}
-
-func (p Polygon) checkPolygonConstraints() error {
-	if len(p.rings) == 0 {
-		return nil
 	}
 
 	for _, r := range p.rings {
@@ -127,7 +115,7 @@ func (p Polygon) checkPolygonConstraints() error {
 				nestedFwd := relatePointToRing(iStart, p.rings[j]) == interior
 				nestedRev := relatePointToRing(jStart, p.rings[i]) == interior
 				if nestedFwd || nestedRev {
-					return defyRingNested.errAtXY(iStart)
+					return violateRingNested.errAtXY(iStart)
 				}
 			}
 

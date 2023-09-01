@@ -73,7 +73,7 @@ const (
 	violateRingEmpty          ruleViolation = "polygon ring empty"
 	violateRingClosed         ruleViolation = "polygon ring not closed"
 	violateRingSimple         ruleViolation = "polygon ring not simple"
-	defyRingNested            ruleViolation = "polygon has nested rings"
+	violateRingNested         ruleViolation = "polygon has nested rings"
 	violateInteriorInExterior ruleViolation = "polygon interior ring outside of exterior ring"
 	violateInteriorConnected  ruleViolation = "polygon has disconnected interior"
 	violateRingsMultiTouch    ruleViolation = "polygon rings intersect at multiple points"

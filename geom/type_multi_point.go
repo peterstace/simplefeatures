@@ -17,7 +17,8 @@ type MultiPoint struct {
 
 // NewMultiPoint creates a MultiPoint from a list of Points. The coordinate
 // type of the MultiPoint is the lowest common coordinates type of its Points.
-// The validity of the input Points is not verified.
+// Because MultiPoints are unconstrained collections, this constructor function
+// doesn't return an error.
 func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 	if len(pts) == 0 {
 		return MultiPoint{}
@@ -32,8 +33,9 @@ func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
 	return MultiPoint{forced, ctype}
 }
 
-// Validate checks if the MultiPoint is valid. The only validation rule is that
-// each child Point is valid.
+// Validate checks if the MultiPoint is valid. MultiPoints are unconstrained
+// collections, however this method additionally checks that each child Point
+// is valid.
 func (m MultiPoint) Validate() error {
 	for i, pt := range m.points {
 		if err := pt.Validate(); err != nil {

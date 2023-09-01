@@ -19,9 +19,14 @@ type MultiPolygon struct {
 
 // NewMultiPolygon creates a MultiPolygon from its constituent Polygons. The
 // coordinates type of the MultiPolygon is the lowest common coordinates type
-// of its Polygons. An error is returned if any of the MultiPolygon constraints
-// aren't met (see the Validate method for details). Note that the validity of
-// each input Polygon is not verified.
+// of its Polygons.
+//
+// The Polygons that make up a MultiPolygon are constrained by a set of
+// validation rules. If these are violated, then an error is returned (see the
+// Validate method for details).
+//
+// Note that this constructor doesn't check the validity of its Polygon
+// arguments.
 func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
 	ctype := DimXY
 	if len(polys) > 0 {
@@ -46,13 +51,14 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 	return mp, nil
 }
 
-// Validate checks if the MultiPolygon is valid. MultiPolygons have the
-// following constraints:
+// Validate checks if the MultiPolygon is valid.
 //
-// 1. The interiors of any two child polygons must not intersect.
+// The Polygons that make up a MultiPolygon are constrained by the following
+// rules:
 //
-// 2. The boundaries of any two child polygons may touch only at a finite
-// number of points.
+//  1. The interiors of any two child polygons must not intersect.
+//  2. The boundaries of any two child polygons may touch only at a finite
+//     number of points.
 //
 // In addition to these constraints, this method also checks if each child
 // Polygon is valid.
