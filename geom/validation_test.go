@@ -32,47 +32,53 @@ func TestPointValidation(t *testing.T) {
 		{false, xy(-inf, -inf)},
 	} {
 		t.Run(fmt.Sprintf("point_%d", i), func(t *testing.T) {
-			_, err := NewPoint(tc.input)
-			if tc.wantValid {
+			t.Run("Constructor", func(t *testing.T) {
+				_, err := NewPoint(tc.input)
+				if tc.wantValid {
+					expectNoErr(t, err)
+				} else {
+					expectErr(t, err)
+				}
+			})
+			t.Run("Validate", func(t *testing.T) {
+				pt, err := NewPoint(tc.input, DisableAllValidations)
 				expectNoErr(t, err)
-			} else {
-				expectErr(t, err)
-			}
+				expectBoolEq(t, tc.wantValid, pt.Validate() == nil)
+			})
 		})
 	}
 }
 
-func TestDisableAllPointValidations(t *testing.T) {
-	c := xy(2, math.NaN())
-
-	_, err := NewPoint(c)
-	expectErr(t, err)
-
-	_, err = NewPoint(c, DisableAllValidations)
-	expectNoErr(t, err)
-}
-
-func TestLineStringValidationInvalidFromRawCoords(t *testing.T) {
+func TestLineStringValidation(t *testing.T) {
 	nan := math.NaN()
 	inf := math.Inf(+1)
-	for i, pts := range [][]float64{
-		{0, 0},
-		{1, 1},
-		{0, 0, 0, 0},
-		{1, 1, 1, 1},
-		{0, 0, 1, 1, 2, nan},
-		{0, 0, 1, 1, nan, 2},
-		{0, 0, 1, 1, 2, inf},
-		{0, 0, 1, 1, inf, 2},
-		{0, 0, 1, 1, 2, -inf},
-		{0, 0, 1, 1, -inf, 2},
+	for i, tc := range []struct {
+		wantValid bool
+		inputs    []float64
+	}{
+		{true, []float64{0, 0, 1, 1}},
+		{false, []float64{0, 0}},
+		{false, []float64{1, 1}},
+		{false, []float64{0, 0, 0, 0}},
+		{false, []float64{1, 1, 1, 1}},
+		{false, []float64{0, 0, 1, 1, 2, nan}},
+		{false, []float64{0, 0, 1, 1, nan, 2}},
+		{false, []float64{0, 0, 1, 1, 2, inf}},
+		{false, []float64{0, 0, 1, 1, inf, 2}},
+		{false, []float64{0, 0, 1, 1, 2, -inf}},
+		{false, []float64{0, 0, 1, 1, -inf, 2}},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			seq := NewSequence(pts, DimXY)
-			_, err := NewLineString(seq)
-			expectErr(t, err)
-			_, err = NewLineString(seq, DisableAllValidations)
-			expectNoErr(t, err)
+			seq := NewSequence(tc.inputs, DimXY)
+			t.Run("Constructor", func(t *testing.T) {
+				_, err := NewLineString(seq)
+				expectBoolEq(t, tc.wantValid, err == nil)
+			})
+			t.Run("Validate", func(t *testing.T) {
+				ls, err := NewLineString(seq, DisableAllValidations)
+				expectNoErr(t, err)
+				expectBoolEq(t, tc.wantValid, ls.Validate() == nil)
+			})
 		})
 	}
 }
@@ -97,10 +103,11 @@ func TestPolygonValidation(t *testing.T) {
 		)`,
 	} {
 		t.Run("valid_"+strconv.Itoa(i), func(t *testing.T) {
-			_, err := UnmarshalWKT(wkt)
+			poly, err := UnmarshalWKT(wkt)
 			if err != nil {
 				t.Error(err)
 			}
+			expectNoErr(t, poly.Validate())
 		})
 	}
 	for i, wkt := range []string{
@@ -150,11 +157,63 @@ func TestPolygonValidation(t *testing.T) {
 		`POLYGON((0 0,0 1,1 0,0 0),EMPTY)`,
 	} {
 		t.Run("invalid_"+strconv.Itoa(i), func(t *testing.T) {
-			_, err := UnmarshalWKT(wkt)
-			if err == nil {
-				t.Log("WKT", wkt)
-				t.Error("expected error")
+			t.Run("Constructor", func(t *testing.T) {
+				_, err := UnmarshalWKT(wkt)
+				expectErr(t, err)
+			})
+			t.Run("Validate", func(t *testing.T) {
+				poly, err := UnmarshalWKT(wkt, DisableAllValidations)
+				expectNoErr(t, err)
+				expectErr(t, poly.Validate())
+			})
+		})
+	}
+}
+
+func TestMultiPointValidation(t *testing.T) {
+	nan := math.NaN()
+	for i, tc := range []struct {
+		wantValid bool
+		coords    []Coordinates
+	}{
+		{true, []Coordinates{xy(0, 1), xy(2, 3)}},
+		{false, []Coordinates{xy(0, 1), xy(2, nan)}},
+		{false, []Coordinates{xy(nan, 1), xy(2, 3)}},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			var pts []Point
+			for _, c := range tc.coords {
+				pt, err := NewPoint(c, DisableAllValidations)
+				expectNoErr(t, err)
+				pts = append(pts, pt)
 			}
+			mp := NewMultiPoint(pts)
+			expectBoolEq(t, tc.wantValid, mp.Validate() == nil)
+		})
+	}
+}
+
+func TestMultiLineStringValidation(t *testing.T) {
+	nan := math.NaN()
+	for i, tc := range []struct {
+		wantValid bool
+		coords    [][]float64
+	}{
+		{true, [][]float64{}},
+		{false, [][]float64{{0, 1}}},
+		{true, [][]float64{{0, 1, 2, 3}}},
+		{false, [][]float64{{0, 1, 2, nan}}},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			var lss []LineString
+			for _, coords := range tc.coords {
+				seq := NewSequence(coords, DimXY)
+				ls, err := NewLineString(seq, DisableAllValidations)
+				expectNoErr(t, err)
+				lss = append(lss, ls)
+			}
+			mls := NewMultiLineString(lss)
+			expectBoolEq(t, tc.wantValid, mls.Validate() == nil)
 		})
 	}
 }
@@ -244,6 +303,35 @@ func TestMultiPolygonValidation(t *testing.T) {
 				t.Log(wkt)
 				t.Error("expected error")
 			}
+		})
+	}
+}
+
+func TestMultiPolygonConstraintValidation(t *testing.T) {
+	poly, err := UnmarshalWKT("POLYGON((0 0,1 1,0 1,1 0,0 0))", DisableAllValidations)
+	expectNoErr(t, err)
+	expectErr(t, poly.Validate())
+
+	// The validity of the Polygon is not checked by the constructor and
+	// will only be caught by checking the validity of each input, or calling
+	// the Validate method.
+	mp, err := NewMultiPolygon([]Polygon{poly.MustAsPolygon()})
+	expectNoErr(t, err)
+	expectErr(t, mp.Validate())
+}
+
+func TestGeometryCollectionValidation(t *testing.T) {
+	for i, tc := range []struct {
+		wantValid bool
+		wkt       string
+	}{
+		{true, "GEOMETRYCOLLECTION(LINESTRING(0 1,2 3))"},
+		{false, "GEOMETRYCOLLECTION(LINESTRING(0 1))"},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			gc, err := UnmarshalWKT(tc.wkt, DisableAllValidations)
+			expectNoErr(t, err)
+			expectBoolEq(t, gc.Validate() == nil, tc.wantValid)
 		})
 	}
 }

@@ -957,3 +957,26 @@ func (g Geometry) Simplify(threshold float64, opts ...ConstructorOption) (Geomet
 		panic("unknown type: " + g.Type().String())
 	}
 }
+
+// Validate checks if the Geometry is valid. See the documentation for each
+// concrete geometry's Validate method for details about the validation rules.
+func (g Geometry) Validate() error {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		return g.MustAsGeometryCollection().Validate()
+	case TypePoint:
+		return g.MustAsPoint().Validate()
+	case TypeLineString:
+		return g.MustAsLineString().Validate()
+	case TypePolygon:
+		return g.MustAsPolygon().Validate()
+	case TypeMultiPoint:
+		return g.MustAsMultiPoint().Validate()
+	case TypeMultiLineString:
+		return g.MustAsMultiLineString().Validate()
+	case TypeMultiPolygon:
+		return g.MustAsMultiPolygon().Validate()
+	default:
+		panic("unknown type: " + g.Type().String())
+	}
+}

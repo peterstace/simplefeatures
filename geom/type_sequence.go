@@ -16,7 +16,7 @@ type Sequence struct {
 // The slice will be retained by the constructed Sequence and must NOT be
 // modified by the caller after the function returns.
 //
-// The CoordiantesType indicates what type of coordinates the Sequence will
+// The CoordinatesType indicates what type of coordinates the Sequence will
 // store (i.e. just XY, XYZ, XYM, or XYZM).
 //
 // The coordinates in the passed slice should be interleaved. That is, all of

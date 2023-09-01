@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -15,11 +14,11 @@ type XY struct {
 
 // validate checks if the XY value contains NaN, -inf, or +inf.
 func (w XY) validate() error {
-	if math.IsNaN(w.X) || math.IsInf(w.X, 0) {
-		return fmt.Errorf("invalid X value: %v", w.X)
+	if math.IsNaN(w.X) || math.IsNaN(w.Y) {
+		return violateNaN.errAtXY(w)
 	}
-	if math.IsNaN(w.Y) || math.IsInf(w.Y, 0) {
-		return fmt.Errorf("invalid Y value: %v", w.Y)
+	if math.IsInf(w.X, 0) || math.IsInf(w.Y, 0) {
+		return violateInf.errAtXY(w)
 	}
 	return nil
 }

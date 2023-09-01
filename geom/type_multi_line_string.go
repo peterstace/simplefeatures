@@ -21,6 +21,12 @@ type MultiLineString struct {
 // NewMultiLineString creates a MultiLineString from its constituent
 // LineStrings. The coordinates type of the MultiLineString is the lowest
 // common coordinates type of its LineStrings.
+//
+// Because MultiLineStrings are unconstrained collections, this constructor
+// function doesn't return an error.
+//
+// Note that this constructor doesn't check the validity of its LineString
+// arguments.
 func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLineString {
 	if len(lines) == 0 {
 		return MultiLineString{}
@@ -37,6 +43,18 @@ func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLine
 	}
 
 	return MultiLineString{lines, ctype}
+}
+
+// Validate checks if the MultiLineString is valid. MultiLineStrings are
+// unconstrained collections, however this method additionally checks that each
+// child LineString is valid.
+func (m MultiLineString) Validate() error {
+	for i, ls := range m.lines {
+		if err := ls.Validate(); err != nil {
+			return wrap(err, "validating linestring at index %d", i)
+		}
+	}
+	return nil
 }
 
 // Type returns the GeometryType for a MultiLineString

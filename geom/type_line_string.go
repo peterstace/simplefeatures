@@ -11,38 +11,40 @@ import (
 // LineString is a linear geometry defined by linear interpolation between a
 // finite set of points. Its zero value is the empty line string. It is
 // immutable after creation.
-//
-// A LineString must consist of either zero points (i.e. it is the empty line
-// string), or it must have at least 2 points with distinct XY values.
 type LineString struct {
 	seq Sequence
 }
 
-// NewLineString creates a new LineString from a Sequence of points. The
-// sequence must contain exactly 0 points, or at least 2 points with distinct
-// XY values (otherwise an error is returned).
+// NewLineString creates a new LineString from a Sequence of points. An error
+// is returned if the LineString would be invalid (see the Validate method for
+// details).
 func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) {
-	ctorOpts := newOptionSet(opts)
-	if ctorOpts.skipValidations {
-		return LineString{seq}, nil
+	ls := LineString{seq}
+	co := newOptionSet(opts)
+	if co.skipValidations {
+		return ls, nil
 	}
-	if err := validateLineStringSeq(seq); err != nil {
+	if err := ls.Validate(); err != nil {
 		return LineString{}, err
 	}
-	return LineString{seq}, nil
+	return ls, nil
 }
 
-func validateLineStringSeq(seq Sequence) error {
-	if seq.Length() == 0 {
+// Validate checks if the LineString is valid. For it to be valid, the
+// following rules must hold.
+//
+//  1. The XY values must not be NaN or Inf.
+//  2. For non-empty LineStrings, there must be at least two distinct XY
+//     values.
+func (s LineString) Validate() error {
+	if s.seq.Length() == 0 {
 		return nil
 	}
-	if !hasAtLeast2DistinctPointsInSeq(seq) {
-		return validationError{
-			"non-empty linestring contains only one distinct XY value",
-		}
+	if err := s.seq.validate(); err != nil {
+		return err
 	}
-	if err := seq.validate(); err != nil {
-		return validationError{err.Error()}
+	if !hasAtLeast2DistinctPointsInSeq(s.seq) {
+		return violateTwoPoints.errAtXY(s.seq.GetXY(0))
 	}
 	return nil
 }

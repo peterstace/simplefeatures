@@ -9,59 +9,77 @@ import (
 )
 
 // MultiPolygon is a planar surface geometry that consists of a collection of
-// Polygons. The zero value is the empty MultiPolygon (i.e. the collection of
-// zero Polygons). It is immutable after creation.
-//
-// For a MultiPolygon to be valid, the following assertions must hold:
-//
-// 1. It must be made up of zero or more valid Polygons (any of which may be empty).
-//
-// 2. The interiors of any two polygons must not intersect.
-//
-// 3. The boundaries of any two polygons may touch only at a finite number of points.
+// (possibly empty) Polygons. The zero value is the empty MultiPolygon (i.e.
+// the collection of zero Polygons). It is immutable after creation.
 type MultiPolygon struct {
 	// Invariant: ctype matches the coordinates type of each polygon.
 	polys []Polygon
 	ctype CoordinatesType
 }
 
-// NewMultiPolygon creates a MultiPolygon from its constituent Polygons. It
-// gives an error if any of the MultiPolygon assertions are not maintained. The
+// NewMultiPolygon creates a MultiPolygon from its constituent Polygons. The
 // coordinates type of the MultiPolygon is the lowest common coordinates type
-// its Polygons.
+// of its Polygons.
+//
+// The Polygons that make up a MultiPolygon are constrained by a set of
+// validation rules. If these are violated, then an error is returned (see the
+// Validate method for details).
+//
+// Note that this constructor doesn't check the validity of its Polygon
+// arguments.
 func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
-	if len(polys) == 0 {
-		return MultiPolygon{}, nil
-	}
-
-	ctype := DimXYZM
-	for _, p := range polys {
-		ctype &= p.CoordinatesType()
+	ctype := DimXY
+	if len(polys) > 0 {
+		ctype = DimXYZM
+		for _, p := range polys {
+			ctype &= p.CoordinatesType()
+		}
 	}
 	polys = append([]Polygon(nil), polys...)
 	for i := range polys {
 		polys[i] = polys[i].ForceCoordinatesType(ctype)
 	}
+	mp := MultiPolygon{polys, ctype}
 
-	ctorOpts := newOptionSet(opts)
-	if err := validateMultiPolygon(polys, ctorOpts); err != nil {
+	os := newOptionSet(opts)
+	if os.skipValidations {
+		return mp, nil
+	}
+	if err := mp.checkMultiPolygonConstraints(); err != nil {
 		return MultiPolygon{}, err
 	}
-	return MultiPolygon{polys, ctype}, nil
+	return mp, nil
 }
 
-func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
-	if opts.skipValidations {
-		return nil
+// Validate checks if the MultiPolygon is valid.
+//
+// The Polygons that make up a MultiPolygon are constrained by the following
+// rules:
+//
+//  1. The interiors of any two child polygons must not intersect.
+//  2. The boundaries of any two child polygons may touch only at a finite
+//     number of points.
+//
+// In addition to these constraints, this method also checks if each child
+// Polygon is valid.
+func (m MultiPolygon) Validate() error {
+	for i, poly := range m.polys {
+		if err := poly.Validate(); err != nil {
+			return wrap(err, "validating polygon at index %d", i)
+		}
 	}
+	err := m.checkMultiPolygonConstraints()
+	return wrap(err, "validating multipolygon constraints")
+}
 
-	polyBoundaries := make([]indexedLines, len(polys))
-	polyBoundaryPopulated := make([]bool, len(polys))
+func (m MultiPolygon) checkMultiPolygonConstraints() error {
+	polyBoundaries := make([]indexedLines, len(m.polys))
+	polyBoundaryPopulated := make([]bool, len(m.polys))
 
 	// Construct RTree of Polygons.
-	boxes := make([]rtree.Box, len(polys))
-	items := make([]rtree.BulkItem, 0, len(polys))
-	for i, p := range polys {
+	boxes := make([]rtree.Box, len(m.polys))
+	items := make([]rtree.BulkItem, 0, len(m.polys))
+	for i, p := range m.polys {
 		if box, ok := p.Envelope().AsBox(); ok {
 			boxes[i] = box
 			item := rtree.BulkItem{Box: boxes[i], RecordID: i}
@@ -70,8 +88,8 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 	}
 	tree := rtree.BulkLoad(items)
 
-	for i := range polys {
-		if polys[i].IsEmpty() {
+	for i := range m.polys {
+		if m.polys[i].IsEmpty() {
 			continue
 		}
 		if err := tree.RangeSearch(boxes[i], func(j int) error {
@@ -82,7 +100,7 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 
 			for _, k := range [...]int{i, j} {
 				if !polyBoundaryPopulated[k] {
-					polyBoundaries[k] = newIndexedLines(polys[k].Boundary().asLines())
+					polyBoundaries[k] = newIndexedLines(m.polys[k].Boundary().asLines())
 					polyBoundaryPopulated[k] = true
 				}
 			}
@@ -91,8 +109,8 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 				polyBoundaries[j],
 			)
 			if !interMLS.IsEmpty() {
-				return validationError{"multipolygon child polygon " +
-					"boundaries intersect at multiple points"}
+				return violatePolysMultiTouch.errAtPt(
+					arbitraryControlPoint(interMLS.AsGeometry()))
 			}
 
 			// Fast case: If both the point and line parts of the intersection
@@ -103,11 +121,12 @@ func validateMultiPolygon(polys []Polygon, opts ctorOptionSet) error {
 			if interMP.IsEmpty() {
 				// We already know the polygons are NOT empty, so it's safe to
 				// directly access index 0.
-				ptI := polys[i].ExteriorRing().Coordinates().GetXY(0)
-				ptJ := polys[j].ExteriorRing().Coordinates().GetXY(0)
-				if relatePointToPolygon(ptI, polyBoundaries[j]) != exterior ||
-					relatePointToPolygon(ptJ, polyBoundaries[i]) != exterior {
-					return validationError{"multipolygon has nested child polygons"}
+				for _, dir := range []struct{ inIdx, outIdx int }{{i, j}, {j, i}} {
+					in := m.polys[dir.inIdx].ExteriorRing().Coordinates().GetXY(0)
+					out := polyBoundaries[dir.outIdx]
+					if relatePointToPolygon(in, out) != exterior {
+						return violatePolysMultiTouch.errAtXY(in)
+					}
 				}
 				return nil
 			}
@@ -163,8 +182,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 		for k := 0; k+1 < len(pts); k++ {
 			midpoint := pts[k].Add(pts[k+1]).Scale(0.5)
 			if relatePointToPolygon(midpoint, p1) == interior {
-				return validationError{fmt.Sprintf("multipolygon child polygon "+
-					"interiors intersect at %v", midpoint)}
+				return violatePolysMultiTouch.errAtXY(midpoint)
 			}
 		}
 	}
