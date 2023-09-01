@@ -353,11 +353,8 @@ func (m MultiPolygon) Coordinates() [][]Sequence {
 
 // TransformXY transforms this MultiPolygon into another MultiPolygon according
 // to fn. It returns an error if the resultant MultiPolygon is invalid.
-func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPolygon, error) {
+func (m MultiPolygon) TransformXY(fn func(XY) XY) (MultiPolygon, error) {
 	tx := m.TransformXYWithoutValidation(fn)
-	if newOptionSet(opts).skipValidations {
-		return tx, nil
-	}
 	if err := tx.Validate(); err != nil {
 		return MultiPolygon{}, wrapTransformed(err)
 	}

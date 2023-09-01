@@ -310,11 +310,8 @@ func (s LineString) Coordinates() Sequence {
 }
 
 // TransformXY transforms this LineString into another LineString according to fn. It returns an error if the resultant LineString is invalid.
-func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (LineString, error) {
+func (s LineString) TransformXY(fn func(XY) XY) (LineString, error) {
 	tx := s.TransformXYWithoutValidation(fn)
-	if newOptionSet(opts).skipValidations {
-		return tx, nil
-	}
 	if err := tx.Validate(); err != nil {
 		return LineString{}, wrapTransformed(err)
 	}

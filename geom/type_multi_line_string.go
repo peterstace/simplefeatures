@@ -331,12 +331,11 @@ func (m MultiLineString) Coordinates() []Sequence {
 	return seqs
 }
 
-// TransformXY transforms this MultiLineString into another MultiLineString according to fn. It returns an error if the resultant MultiLineString is invalid.
-func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiLineString, error) {
+// TransformXY transforms this MultiLineString into another MultiLineString
+// according to fn. It returns an error if the resultant MultiLineString is
+// invalid.
+func (m MultiLineString) TransformXY(fn func(XY) XY) (MultiLineString, error) {
 	tx := m.TransformXYWithoutValidation(fn)
-	if newOptionSet(opts).skipValidations {
-		return tx, nil
-	}
 	if err := tx.Validate(); err != nil {
 		return MultiLineString{}, wrapTransformed(err)
 	}

@@ -239,11 +239,8 @@ func (c *GeometryCollection) UnmarshalJSON(buf []byte) error {
 // TransformXY transforms this GeometryCollection into another
 // GeometryCollection according to fn. It returns an error if the resultant
 // Point is invalid.
-func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryCollection, error) {
+func (c GeometryCollection) TransformXY(fn func(XY) XY) (GeometryCollection, error) {
 	tx := c.TransformXYWithoutValidation(fn)
-	if newOptionSet(opts).skipValidations {
-		return tx, nil
-	}
 	if err := tx.Validate(); err != nil {
 		return GeometryCollection{}, wrapTransformed(err)
 	}

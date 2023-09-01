@@ -78,21 +78,12 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 
 	// Snap vertices together if they are very close.
 	nodes := newNodeSet(maxULPSize, xyCount)
-	var err error
-	g1, err = g1.TransformXY(nodes.insertOrGet, DisableAllValidations)
-	if err != nil {
-		return Geometry{}, Geometry{}, MultiLineString{}, err
-	}
-	g2, err = g2.TransformXY(nodes.insertOrGet, DisableAllValidations)
-	if err != nil {
-		return Geometry{}, Geometry{}, MultiLineString{}, err
-	}
-	mls, err = mls.TransformXY(nodes.insertOrGet, DisableAllValidations)
-	if err != nil {
-		return Geometry{}, Geometry{}, MultiLineString{}, err
-	}
+	g1 = g1.TransformXYWithoutValidation(nodes.insertOrGet)
+	g2 = g2.TransformXYWithoutValidation(nodes.insertOrGet)
+	mls = mls.TransformXYWithoutValidation(nodes.insertOrGet)
 
 	// Create additional nodes for crossings.
+	var err error
 	cut := newCutSet(all)
 	g1, err = reNodeGeometry(g1, cut, nodes)
 	if err != nil {

@@ -521,28 +521,28 @@ func (g Geometry) ConvexHull() Geometry {
 // transformed Geometry, in which case no error will be returned. Other
 // types of transformations may result in a validation error if their
 // mapping results in an invalid Geometry.
-func (g Geometry) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geometry, error) {
+func (g Geometry) TransformXY(fn func(XY) XY) (Geometry, error) {
 	switch g.gtype {
 	case TypeGeometryCollection:
-		gt, err := g.MustAsGeometryCollection().TransformXY(fn, opts...)
+		gt, err := g.MustAsGeometryCollection().TransformXY(fn)
 		return gt.AsGeometry(), err
 	case TypePoint:
-		gt, err := g.MustAsPoint().TransformXY(fn, opts...)
+		gt, err := g.MustAsPoint().TransformXY(fn)
 		return gt.AsGeometry(), err
 	case TypeLineString:
-		gt, err := g.MustAsLineString().TransformXY(fn, opts...)
+		gt, err := g.MustAsLineString().TransformXY(fn)
 		return gt.AsGeometry(), err
 	case TypePolygon:
-		gt, err := g.MustAsPolygon().TransformXY(fn, opts...)
+		gt, err := g.MustAsPolygon().TransformXY(fn)
 		return gt.AsGeometry(), err
 	case TypeMultiPoint:
-		gt, err := g.MustAsMultiPoint().TransformXY(fn, opts...)
+		gt, err := g.MustAsMultiPoint().TransformXY(fn)
 		return gt.AsGeometry(), err
 	case TypeMultiLineString:
-		gt, err := g.MustAsMultiLineString().TransformXY(fn, opts...)
+		gt, err := g.MustAsMultiLineString().TransformXY(fn)
 		return gt.AsGeometry(), err
 	case TypeMultiPolygon:
-		gt, err := g.MustAsMultiPolygon().TransformXY(fn, opts...)
+		gt, err := g.MustAsMultiPolygon().TransformXY(fn)
 		return gt.AsGeometry(), err
 	default:
 		panic("unknown geometry: " + g.gtype.String())

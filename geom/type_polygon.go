@@ -340,11 +340,8 @@ func (p Polygon) Coordinates() []Sequence {
 }
 
 // TransformXY transforms this Polygon into another Polygon according to fn. It returns an error if the resultant Polygon is invalid.
-func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon, error) {
+func (p Polygon) TransformXY(fn func(XY) XY) (Polygon, error) {
 	tx := p.TransformXYWithoutValidation(fn)
-	if newOptionSet(opts).skipValidations {
-		return tx, nil
-	}
 	if err := tx.Validate(); err != nil {
 		return Polygon{}, wrapTransformed(err)
 	}

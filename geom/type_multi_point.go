@@ -220,11 +220,8 @@ func (m MultiPoint) Coordinates() Sequence {
 }
 
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn. It returns an error if the resultant MultiPoint is invalid.
-func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPoint, error) {
+func (m MultiPoint) TransformXY(fn func(XY) XY) (MultiPoint, error) {
 	tx := m.TransformXYWithoutValidation(fn)
-	if newOptionSet(opts).skipValidations {
-		return tx, nil
-	}
 	if err := tx.Validate(); err != nil {
 		return MultiPoint{}, wrapTransformed(err)
 	}

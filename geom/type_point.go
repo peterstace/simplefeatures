@@ -188,11 +188,8 @@ func (p *Point) UnmarshalJSON(buf []byte) error {
 
 // TransformXY transforms this Point into another Point according to fn. It
 // returns an error if the resultant Point is invalid.
-func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, error) {
+func (p Point) TransformXY(fn func(XY) XY) (Point, error) {
 	tx := p.TransformXYWithoutValidation(fn)
-	if newOptionSet(opts).skipValidations {
-		return tx, nil
-	}
 	if err := tx.Validate(); err != nil {
 		return Point{}, wrapTransformed(err)
 	}
