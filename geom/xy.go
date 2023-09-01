@@ -36,7 +36,7 @@ func (w XY) AsPoint(opts ...ConstructorOption) (Point, error) {
 // directly from outside of the library without first being validated.
 func (w XY) asUncheckedPoint() Point {
 	coords := Coordinates{XY: w, Type: DimXY}
-	return newUncheckedPoint(coords)
+	return NewPointWithoutValidation(coords)
 }
 
 // uncheckedEnvelope is a convenience function to convert this XY value into

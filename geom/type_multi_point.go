@@ -219,25 +219,35 @@ func (m MultiPoint) Coordinates() Sequence {
 	return NewSequence(coords, ctype)
 }
 
-// TransformXY transforms this MultiPoint into another MultiPoint according to fn.
+// TransformXY transforms this MultiPoint into another MultiPoint according to fn. It returns an error if the resultant MultiPoint is invalid.
 func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPoint, error) {
+	tx := m.TransformXYWithoutValidation(fn)
+	if newOptionSet(opts).skipValidations {
+		return tx, nil
+	}
+	if err := tx.Validate(); err != nil {
+		return MultiPoint{}, err
+	}
+	return tx, nil
+}
+
+// TransformXYWithoutValidation transforms this MultiPoint into another
+// MultiPoint according to fn. It doesn't verify that the resultant MultiPoint
+// is valid.
+func (m MultiPoint) TransformXYWithoutValidation(fn func(XY) XY) MultiPoint {
 	if len(m.points) == 0 {
-		return MultiPoint{}.ForceCoordinatesType(m.CoordinatesType()), nil
+		return MultiPoint{}.ForceCoordinatesType(m.CoordinatesType())
 	}
 	txPoints := make([]Point, len(m.points))
 	for i, pt := range m.points {
 		if c, ok := pt.Coordinates(); ok {
 			c.XY = fn(c.XY)
-			var err error
-			txPoints[i], err = NewPoint(c, opts...)
-			if err != nil {
-				return MultiPoint{}, err
-			}
+			txPoints[i] = NewPointWithoutValidation(c)
 		} else {
-			txPoints[i] = pt
+			txPoints[i] = Point{}.ForceCoordinatesType(m.CoordinatesType())
 		}
 	}
-	return NewMultiPoint(txPoints), nil
+	return NewMultiPoint(txPoints)
 }
 
 // Centroid gives the centroid of the coordinates of the MultiPoint.

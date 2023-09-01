@@ -21,7 +21,7 @@ type Point struct {
 // NewPoint creates a new point given its Coordinates. An error is returned for
 // invalid points (see the Validate method for details).
 func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
-	pt := newUncheckedPoint(c)
+	pt := NewPointWithoutValidation(c)
 	os := newOptionSet(opts)
 	if os.skipValidations {
 		return pt, nil
@@ -32,6 +32,13 @@ func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
 	return pt, nil
 }
 
+// NewPointWithoutValidation creates a new point given its Coordinates. It
+// doesn't perform any validation on the Coordinates, and can potentially
+// create an invalid Point.
+func NewPointWithoutValidation(c Coordinates) Point {
+	return Point{c, true}
+}
+
 // Validate checks if the Point is valid. For it to be valid, it must be empty
 // or not have NaN or Inf XY values.
 func (p Point) Validate() error {
@@ -39,26 +46,6 @@ func (p Point) Validate() error {
 		return nil
 	}
 	return p.coords.XY.validate()
-}
-
-// newUncheckedPoint constructs a point without checking any validations. It
-// may be used internally when the caller is sure that the coordinates don't
-// come directly from outside the library, or have already otherwise been
-// validated.
-//
-// An examples of valid use:
-//
-// - The coordinates have just been validated.
-//
-// - The coordinates are taken directly from the control points of a geometry
-// that has been validated.
-//
-// - The coordinates are derived from calculations based on control points of a
-// geometry that has been validated. Technically, these calculations could
-// overflow to +/- inf. However if control points are originally close to
-// infinity, many of the algorithms will be already broken in many other ways.
-func newUncheckedPoint(c Coordinates) Point {
-	return Point{c, true}
 }
 
 // NewEmptyPoint creates a Point that is empty.
@@ -199,14 +186,28 @@ func (p *Point) UnmarshalJSON(buf []byte) error {
 	return unmarshalGeoJSONAsType(buf, p)
 }
 
-// TransformXY transforms this Point into another Point according to fn.
+// TransformXY transforms this Point into another Point according to fn. It
+// returns an error if the resultant Point is invalid.
 func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, error) {
+	tx := p.TransformXYWithoutValidation(fn)
+	if newOptionSet(opts).skipValidations {
+		return tx, nil
+	}
+	if err := tx.Validate(); err != nil {
+		return Point{}, err
+	}
+	return tx, nil
+}
+
+// TransformXYWithoutValidation transforms this Point into another Point
+// according to fn. It doesn't verify that the resultant Point is valid.
+func (p Point) TransformXYWithoutValidation(fn func(XY) XY) Point {
 	if !p.full {
-		return p, nil
+		return p
 	}
 	newC := p.coords
 	newC.XY = fn(newC.XY)
-	return NewPoint(newC, opts...)
+	return NewPointWithoutValidation(newC)
 }
 
 // Centroid of a point is that point.

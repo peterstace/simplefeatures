@@ -549,6 +549,32 @@ func (g Geometry) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Geomet
 	}
 }
 
+// TransformXYWithoutValidation transforms this Geometry into another geometry
+// according the mapping provided by the XY function. Some classes of mappings
+// (such as affine transformations) will preserve the validity this Geometry in
+// the transformed Geometry, whereas other types of transformations may result
+// in invalid geometry. The validity of the result is not checked.
+func (g Geometry) TransformXYWithoutValidation(fn func(XY) XY) Geometry {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		return g.MustAsGeometryCollection().TransformXYWithoutValidation(fn).AsGeometry()
+	case TypePoint:
+		return g.MustAsPoint().TransformXYWithoutValidation(fn).AsGeometry()
+	case TypeLineString:
+		return g.MustAsLineString().TransformXYWithoutValidation(fn).AsGeometry()
+	case TypePolygon:
+		return g.MustAsPolygon().TransformXYWithoutValidation(fn).AsGeometry()
+	case TypeMultiPoint:
+		return g.MustAsMultiPoint().TransformXYWithoutValidation(fn).AsGeometry()
+	case TypeMultiLineString:
+		return g.MustAsMultiLineString().TransformXYWithoutValidation(fn).AsGeometry()
+	case TypeMultiPolygon:
+		return g.MustAsMultiPolygon().TransformXYWithoutValidation(fn).AsGeometry()
+	default:
+		panic("unknown geometry: " + g.gtype.String())
+	}
+}
+
 // Length gives the length of a Line, LineString, or MultiLineString
 // or the sum of the lengths of the components of a GeometryCollection.
 // Other Geometries are defined to return a length of zero.

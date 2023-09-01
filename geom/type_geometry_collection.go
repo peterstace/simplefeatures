@@ -236,17 +236,29 @@ func (c *GeometryCollection) UnmarshalJSON(buf []byte) error {
 	return unmarshalGeoJSONAsType(buf, c)
 }
 
-// TransformXY transforms this GeometryCollection into another GeometryCollection according to fn.
+// TransformXY transforms this GeometryCollection into another
+// GeometryCollection according to fn. It returns an error if the resultant
+// Point is invalid.
 func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryCollection, error) {
+	tx := c.TransformXYWithoutValidation(fn)
+	if newOptionSet(opts).skipValidations {
+		return tx, nil
+	}
+	if err := tx.Validate(); err != nil {
+		return GeometryCollection{}, err
+	}
+	return tx, nil
+}
+
+// TransformXYWithoutValidation transforms this GeometryCollection into another
+// GeometryCollection according to fn. It doesn't verify that the resultant
+// GeometryCollection is valid.
+func (c GeometryCollection) TransformXYWithoutValidation(fn func(XY) XY) GeometryCollection {
 	transformed := make([]Geometry, len(c.geoms))
 	for i := range c.geoms {
-		var err error
-		transformed[i], err = c.geoms[i].TransformXY(fn, opts...)
-		if err != nil {
-			return GeometryCollection{}, wrapTransformed(err)
-		}
+		transformed[i] = c.geoms[i].TransformXYWithoutValidation(fn)
 	}
-	return GeometryCollection{transformed, c.ctype}, nil
+	return GeometryCollection{transformed, c.ctype}
 }
 
 // Reverse in the case of GeometryCollection reverses each component and also

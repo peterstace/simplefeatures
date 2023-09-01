@@ -336,8 +336,8 @@ func (p *twkbParser) parseBBoxHeader(twkb []byte) (bbox []Point, err error) {
 		maxZ := p.scalings[2] * float64(p.bbox[4]+p.bbox[5])
 		maxM := p.scalings[3] * float64(p.bbox[6]+p.bbox[7])
 
-		minPt := newUncheckedPoint(Coordinates{XY: XY{minX, minY}, Z: minZ, M: minM, Type: p.ctype})
-		maxPt := newUncheckedPoint(Coordinates{XY: XY{maxX, maxY}, Z: maxZ, M: maxM, Type: p.ctype})
+		minPt := NewPointWithoutValidation(Coordinates{XY: XY{minX, minY}, Z: minZ, M: minM, Type: p.ctype})
+		maxPt := NewPointWithoutValidation(Coordinates{XY: XY{maxX, maxY}, Z: maxZ, M: maxM, Type: p.ctype})
 		bbox = []Point{minPt, maxPt}
 
 	} else if p.hasZ {
@@ -349,8 +349,8 @@ func (p *twkbParser) parseBBoxHeader(twkb []byte) (bbox []Point, err error) {
 		maxY := p.scalings[1] * float64(p.bbox[2]+p.bbox[3])
 		maxZ := p.scalings[2] * float64(p.bbox[4]+p.bbox[5])
 
-		minPt := newUncheckedPoint(Coordinates{XY: XY{minX, minY}, Z: minZ, Type: p.ctype})
-		maxPt := newUncheckedPoint(Coordinates{XY: XY{maxX, maxY}, Z: maxZ, Type: p.ctype})
+		minPt := NewPointWithoutValidation(Coordinates{XY: XY{minX, minY}, Z: minZ, Type: p.ctype})
+		maxPt := NewPointWithoutValidation(Coordinates{XY: XY{maxX, maxY}, Z: maxZ, Type: p.ctype})
 		bbox = []Point{minPt, maxPt}
 
 	} else if p.hasM {
@@ -362,8 +362,8 @@ func (p *twkbParser) parseBBoxHeader(twkb []byte) (bbox []Point, err error) {
 		maxY := p.scalings[1] * float64(p.bbox[2]+p.bbox[3])
 		maxM := p.scalings[2] * float64(p.bbox[4]+p.bbox[5])
 
-		minPt := newUncheckedPoint(Coordinates{XY: XY{minX, minY}, M: minM, Type: p.ctype})
-		maxPt := newUncheckedPoint(Coordinates{XY: XY{maxX, maxY}, M: maxM, Type: p.ctype})
+		minPt := NewPointWithoutValidation(Coordinates{XY: XY{minX, minY}, M: minM, Type: p.ctype})
+		maxPt := NewPointWithoutValidation(Coordinates{XY: XY{maxX, maxY}, M: maxM, Type: p.ctype})
 		bbox = []Point{minPt, maxPt}
 
 	} else {
@@ -373,8 +373,8 @@ func (p *twkbParser) parseBBoxHeader(twkb []byte) (bbox []Point, err error) {
 		maxX := p.scalings[0] * float64(p.bbox[0]+p.bbox[1])
 		maxY := p.scalings[1] * float64(p.bbox[2]+p.bbox[3])
 
-		minPt := newUncheckedPoint(Coordinates{XY: XY{minX, minY}, Type: p.ctype})
-		maxPt := newUncheckedPoint(Coordinates{XY: XY{maxX, maxY}, Type: p.ctype})
+		minPt := NewPointWithoutValidation(Coordinates{XY: XY{minX, minY}, Type: p.ctype})
+		maxPt := NewPointWithoutValidation(Coordinates{XY: XY{maxX, maxY}, Type: p.ctype})
 		bbox = []Point{minPt, maxPt}
 	}
 	return bbox, nil

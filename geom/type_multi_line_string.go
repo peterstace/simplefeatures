@@ -331,24 +331,31 @@ func (m MultiLineString) Coordinates() []Sequence {
 	return seqs
 }
 
-// TransformXY transforms this MultiLineString into another MultiLineString according to fn.
+// TransformXY transforms this MultiLineString into another MultiLineString according to fn. It returns an error if the resultant MultiLineString is invalid.
 func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiLineString, error) {
+	tx := m.TransformXYWithoutValidation(fn)
+	if newOptionSet(opts).skipValidations {
+		return tx, nil
+	}
+	if err := tx.Validate(); err != nil {
+		return MultiLineString{}, err
+	}
+	return tx, nil
+}
+
+// TransformXYWithoutValidation transforms this MultiLineString into another
+// MultiLineString according to fn. It doesn't verify that the resultant
+// MultiLineString is valid.
+func (m MultiLineString) TransformXYWithoutValidation(fn func(XY) XY) MultiLineString {
 	n := m.NumLineStrings()
 	if n == 0 {
-		return MultiLineString{}.ForceCoordinatesType(m.CoordinatesType()), nil
+		return MultiLineString{}.ForceCoordinatesType(m.CoordinatesType())
 	}
 	transformed := make([]LineString, n)
 	for i := 0; i < n; i++ {
-		var err error
-		transformed[i], err = NewLineString(
-			transformSequence(m.LineStringN(i).Coordinates(), fn),
-			opts...,
-		)
-		if err != nil {
-			return MultiLineString{}, wrapTransformed(err)
-		}
+		transformed[i] = m.LineStringN(i).TransformXYWithoutValidation(fn)
 	}
-	return NewMultiLineString(transformed, opts...), nil
+	return NewMultiLineString(transformed)
 }
 
 // Length gives the sum of the lengths of the constituent members of the multi

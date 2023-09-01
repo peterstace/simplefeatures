@@ -28,6 +28,20 @@ type MultiPolygon struct {
 // Note that this constructor doesn't check the validity of its Polygon
 // arguments.
 func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
+	mp := NewMultiPolygonWithoutValidation(polys)
+	if newOptionSet(opts).skipValidations {
+		return mp, nil
+	}
+	if err := mp.checkMultiPolygonConstraints(); err != nil {
+		return MultiPolygon{}, err
+	}
+	return mp, nil
+}
+
+// NewMultiPolygonWithoutValidation creates a MultiPolygon from its constituent
+// Polygons. It doesn't perform any validation, and potentially creates an
+// invalid MultiPolygon.
+func NewMultiPolygonWithoutValidation(polys []Polygon) MultiPolygon {
 	ctype := DimXY
 	if len(polys) > 0 {
 		ctype = DimXYZM
@@ -39,16 +53,7 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 	for i := range polys {
 		polys[i] = polys[i].ForceCoordinatesType(ctype)
 	}
-	mp := MultiPolygon{polys, ctype}
-
-	os := newOptionSet(opts)
-	if os.skipValidations {
-		return mp, nil
-	}
-	if err := mp.checkMultiPolygonConstraints(); err != nil {
-		return MultiPolygon{}, err
-	}
-	return mp, nil
+	return MultiPolygon{polys, ctype}
 }
 
 // Validate checks if the MultiPolygon is valid.
@@ -346,18 +351,28 @@ func (m MultiPolygon) Coordinates() [][]Sequence {
 	return coords
 }
 
-// TransformXY transforms this MultiPolygon into another MultiPolygon according to fn.
+// TransformXY transforms this MultiPolygon into another MultiPolygon according
+// to fn. It returns an error if the resultant MultiPolygon is invalid.
 func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPolygon, error) {
+	tx := m.TransformXYWithoutValidation(fn)
+	if newOptionSet(opts).skipValidations {
+		return tx, nil
+	}
+	if err := tx.Validate(); err != nil {
+		return MultiPolygon{}, err
+	}
+	return tx, nil
+}
+
+// TransformXYWithoutValidation transforms this MultiPolygon into another
+// MultiPolygon according to fn. It doesn't verify that the resultant
+// MultiPolygon is valid.
+func (m MultiPolygon) TransformXYWithoutValidation(fn func(XY) XY) MultiPolygon {
 	polys := make([]Polygon, m.NumPolygons())
 	for i := range polys {
-		transformed, err := m.PolygonN(i).TransformXY(fn, opts...)
-		if err != nil {
-			return MultiPolygon{}, wrapTransformed(err)
-		}
-		polys[i] = transformed
+		polys[i] = m.PolygonN(i).TransformXYWithoutValidation(fn)
 	}
-	mp, err := NewMultiPolygon(polys, opts...)
-	return mp.ForceCoordinatesType(m.ctype), wrapTransformed(err)
+	return MultiPolygon{polys, m.ctype}
 }
 
 // Area in the case of a MultiPolygon is the sum of the areas of its polygons.

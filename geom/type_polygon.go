@@ -26,6 +26,19 @@ type Polygon struct {
 // An error is returned if any of the Polygon constraints are not met (see the
 // Validate method for details).
 func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
+	poly := NewPolygonWithoutValidation(rings)
+	if newOptionSet(opts).skipValidations {
+		return poly, nil
+	}
+	if err := poly.Validate(); err != nil {
+		return Polygon{}, err
+	}
+	return poly, nil
+}
+
+// NewPolygonWithoutValidation creates a polygon given its rings. It doesn't
+// perform any validation, and potentially creates an invalid Polygon.
+func NewPolygonWithoutValidation(rings []LineString) Polygon {
 	ctype := DimXY
 	if len(rings) > 0 {
 		ctype = DimXYZM
@@ -37,16 +50,7 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 	for i := range rings {
 		rings[i] = rings[i].ForceCoordinatesType(ctype)
 	}
-	poly := Polygon{rings, ctype}
-
-	os := newOptionSet(opts)
-	if os.skipValidations {
-		return poly, nil
-	}
-	if err := poly.Validate(); err != nil {
-		return Polygon{}, err
-	}
-	return poly, nil
+	return Polygon{rings, ctype}
 }
 
 // Validate checks if the Polygon is valid. For non-empty Polygons to be valid,
@@ -335,22 +339,32 @@ func (p Polygon) Coordinates() []Sequence {
 	return coords
 }
 
-// TransformXY transforms this Polygon into another Polygon according to fn.
+// TransformXY transforms this Polygon into another Polygon according to fn. It returns an error if the resultant Polygon is invalid.
 func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon, error) {
+	tx := p.TransformXYWithoutValidation(fn)
+	if newOptionSet(opts).skipValidations {
+		return tx, nil
+	}
+	if err := tx.Validate(); err != nil {
+		return Polygon{}, err
+	}
+	return tx, nil
+}
+
+// TransformXYWithoutValidation transforms this Polygon into another Polygon
+// according to fn. It doesn't verify that the resultant Polygon is valid.
+func (p Polygon) TransformXYWithoutValidation(fn func(XY) XY) Polygon {
+	if p.IsEmpty() {
+		return p
+	}
 	n := len(p.rings)
 	transformed := make([]LineString, n)
 	for i, r := range p.rings {
-		var err error
-		transformed[i], err = NewLineString(
+		transformed[i] = NewLineStringWithoutValidation(
 			transformSequence(r.Coordinates(), fn),
-			opts...,
 		)
-		if err != nil {
-			return Polygon{}, wrapTransformed(err)
-		}
 	}
-	poly, err := NewPolygon(transformed, opts...)
-	return poly.ForceCoordinatesType(p.ctype), wrapTransformed(err)
+	return NewPolygonWithoutValidation(transformed)
 }
 
 // AreaOption allows the behaviour of area calculations to be modified.

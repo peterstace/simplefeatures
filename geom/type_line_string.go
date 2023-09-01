@@ -19,15 +19,21 @@ type LineString struct {
 // is returned if the LineString would be invalid (see the Validate method for
 // details).
 func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) {
-	ls := LineString{seq}
-	co := newOptionSet(opts)
-	if co.skipValidations {
+	ls := NewLineStringWithoutValidation(seq)
+	if newOptionSet(opts).skipValidations {
 		return ls, nil
 	}
 	if err := ls.Validate(); err != nil {
 		return LineString{}, err
 	}
 	return ls, nil
+}
+
+// NewLineStringWithoutValidation creates a new LineString from a Sequence of
+// Coordinates. It doesn't perform any validation, and potentially creates an
+// invalid LineString.
+func NewLineStringWithoutValidation(seq Sequence) LineString {
+	return LineString{seq}
 }
 
 // Validate checks if the LineString is valid. For it to be valid, the
@@ -80,7 +86,7 @@ func (s LineString) StartPoint() Point {
 		return NewEmptyPoint(s.CoordinatesType())
 	}
 	c := s.seq.Get(0)
-	return newUncheckedPoint(c)
+	return NewPointWithoutValidation(c)
 }
 
 // EndPoint gives the last point of the LineString. If the LineString is empty
@@ -91,7 +97,7 @@ func (s LineString) EndPoint() Point {
 	}
 	end := s.seq.Length() - 1
 	c := s.seq.Get(end)
-	return newUncheckedPoint(c)
+	return NewPointWithoutValidation(c)
 }
 
 // AsText returns the WKT (Well Known Text) representation of this geometry.
@@ -303,11 +309,24 @@ func (s LineString) Coordinates() Sequence {
 	return s.seq
 }
 
-// TransformXY transforms this LineString into another LineString according to fn.
+// TransformXY transforms this LineString into another LineString according to fn. It returns an error if the resultant LineString is invalid.
 func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (LineString, error) {
+	tx := s.TransformXYWithoutValidation(fn)
+	if newOptionSet(opts).skipValidations {
+		return tx, nil
+	}
+	if err := tx.Validate(); err != nil {
+		return LineString{}, err
+	}
+	return tx, nil
+}
+
+// TransformXYWithoutValidation transforms this LineString into another
+// LineString according to fn. It doesn't verify that the resultant LineString
+// is valid.
+func (s LineString) TransformXYWithoutValidation(fn func(XY) XY) LineString {
 	transformed := transformSequence(s.seq, fn)
-	ls, err := NewLineString(transformed, opts...)
-	return ls, wrapTransformed(err)
+	return NewLineStringWithoutValidation(transformed)
 }
 
 // IsRing returns true iff this LineString is both simple and closed (i.e. is a

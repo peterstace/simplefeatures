@@ -66,5 +66,5 @@ func (c Coordinates) appendFloat64s(dst []float64) []float64 {
 // asUncheckedPoint shadows the asUncheckedPoint method on XY so that it's not
 // accidentally called.
 func (c Coordinates) asUncheckedPoint() Point {
-	return newUncheckedPoint(c)
+	return NewPointWithoutValidation(c)
 }
