@@ -63,20 +63,8 @@ func (p Polygon) Validate() error {
 	}
 
 	for i, r := range p.rings {
-		if err := r.Validate(); err != nil {
+		if err := validateRing(r); err != nil {
 			return wrap(err, "validating ring at index %d", i)
-		}
-	}
-
-	for _, r := range p.rings {
-		if r.IsEmpty() {
-			return violateRingEmpty.err()
-		}
-		if !r.IsClosed() {
-			return violateRingClosed.errAtXY(r.Coordinates().GetXY(0))
-		}
-		if !r.IsSimple() {
-			return violateRingSimple.errAtXY(r.Coordinates().GetXY(0))
 		}
 	}
 
@@ -161,6 +149,22 @@ func (p Polygon) Validate() error {
 	// does not contain a cycle.
 	if graph.hasCycle() {
 		return violateInteriorConnected.err()
+	}
+	return nil
+}
+
+func validateRing(r LineString) error {
+	if err := r.Validate(); err != nil {
+		return err
+	}
+	if r.IsEmpty() {
+		return violateRingEmpty.err()
+	}
+	if !r.IsClosed() {
+		return violateRingClosed.errAtXY(r.Coordinates().GetXY(0))
+	}
+	if !r.IsSimple() {
+		return violateRingSimple.errAtXY(r.Coordinates().GetXY(0))
 	}
 	return nil
 }
