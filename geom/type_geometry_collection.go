@@ -245,7 +245,7 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOptio
 		return tx, nil
 	}
 	if err := tx.Validate(); err != nil {
-		return GeometryCollection{}, err
+		return GeometryCollection{}, wrapTransformed(err)
 	}
 	return tx, nil
 }

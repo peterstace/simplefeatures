@@ -338,7 +338,7 @@ func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) 
 		return tx, nil
 	}
 	if err := tx.Validate(); err != nil {
-		return MultiLineString{}, err
+		return MultiLineString{}, wrapTransformed(err)
 	}
 	return tx, nil
 }

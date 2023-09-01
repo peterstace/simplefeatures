@@ -359,7 +359,7 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mu
 		return tx, nil
 	}
 	if err := tx.Validate(); err != nil {
-		return MultiPolygon{}, err
+		return MultiPolygon{}, wrapTransformed(err)
 	}
 	return tx, nil
 }

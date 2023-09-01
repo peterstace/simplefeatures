@@ -346,7 +346,7 @@ func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon
 		return tx, nil
 	}
 	if err := tx.Validate(); err != nil {
-		return Polygon{}, err
+		return Polygon{}, wrapTransformed(err)
 	}
 	return tx, nil
 }

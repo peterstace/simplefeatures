@@ -226,7 +226,7 @@ func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Mult
 		return tx, nil
 	}
 	if err := tx.Validate(); err != nil {
-		return MultiPoint{}, err
+		return MultiPoint{}, wrapTransformed(err)
 	}
 	return tx, nil
 }

@@ -316,7 +316,7 @@ func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Line
 		return tx, nil
 	}
 	if err := tx.Validate(); err != nil {
-		return LineString{}, err
+		return LineString{}, wrapTransformed(err)
 	}
 	return tx, nil
 }

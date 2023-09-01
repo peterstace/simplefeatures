@@ -194,7 +194,7 @@ func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, er
 		return tx, nil
 	}
 	if err := tx.Validate(); err != nil {
-		return Point{}, err
+		return Point{}, wrapTransformed(err)
 	}
 	return tx, nil
 }
