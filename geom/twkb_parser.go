@@ -11,11 +11,29 @@ import (
 // See spec https://github.com/TWKB/Specification/blob/master/twkb.md
 
 // UnmarshalTWKB parses a Tiny Well Known Binary (TWKB), returning the
-// corresponding Geometry.
-func UnmarshalTWKB(twkb []byte, opts ...ConstructorOption) (Geometry, error) {
-	p := newtwkbParser(twkb, opts...)
+// corresponding Geometry. The geometry constraints of the result are
+// validated.
+func UnmarshalTWKB(twkb []byte) (Geometry, error) {
+	g, err := UnmarshalTWKBWithoutValidation(twkb)
+	if err != nil {
+		return Geometry{}, err
+	}
+	if err := g.Validate(); err != nil {
+		return Geometry{}, err
+	}
+	return g, nil
+}
+
+// UnmarshalTWKB parses a Tiny Well Known Binary (TWKB), returning the
+// corresponding Geometry. The geometry constraints of the result are not
+// validated.
+func UnmarshalTWKBWithoutValidation(twkb []byte) (Geometry, error) {
+	p := newtwkbParser(twkb)
 	g, err := p.nextGeometry()
-	return g, p.annotateError(err)
+	if err != nil {
+		return Geometry{}, p.annotateError(err)
+	}
+	return g, nil
 }
 
 // UnmarshalTWKBWithHeaders parses a Tiny Well Known Binary (TWKB),
@@ -27,8 +45,32 @@ func UnmarshalTWKB(twkb []byte, opts ...ConstructorOption) (Geometry, error) {
 //
 // If there is an ID list header, the ids slice will be populated with the
 // IDs from that header. Otherwise, the slice is empty.
-func UnmarshalTWKBWithHeaders(twkb []byte, opts ...ConstructorOption) (g Geometry, bbox []Point, ids []int64, err error) {
-	p := newtwkbParser(twkb, opts...)
+//
+// The geometry constraints of the result are validated.
+func UnmarshalTWKBWithHeaders(twkb []byte) (g Geometry, bbox []Point, ids []int64, err error) {
+	g, bbox, ids, err = UnmarshalTWKBWithHeadersWithoutValidation(twkb)
+	if err != nil {
+		return Geometry{}, nil, nil, err
+	}
+	if err := g.Validate(); err != nil {
+		return Geometry{}, nil, nil, err
+	}
+	return g, bbox, ids, err
+}
+
+// UnmarshalTWKBWithHeaders parses a Tiny Well Known Binary (TWKB),
+// returning the corresponding Geometry, and any bounding box and any IDs
+// listed in its header information.
+//
+// If there is a bounding box header, the bbox slice will be populated with
+// two points, a minimum then a maximum. Otherwise, the slice is empty.
+//
+// If there is an ID list header, the ids slice will be populated with the
+// IDs from that header. Otherwise, the slice is empty.
+//
+// The geometry constraints of the result are not validated.
+func UnmarshalTWKBWithHeadersWithoutValidation(twkb []byte) (g Geometry, bbox []Point, ids []int64, err error) {
+	p := newtwkbParser(twkb)
 	g, err = p.nextGeometry()
 	if err != nil {
 		return Geometry{}, nil, nil, p.annotateError(err)
@@ -95,7 +137,6 @@ func UnmarshalTWKBEnvelope(twkb []byte) (Envelope, error) {
 type twkbParser struct {
 	twkb []byte
 	pos  int
-	opts []ConstructorOption
 
 	kind  twkbGeometryType
 	ctype CoordinatesType
@@ -120,10 +161,9 @@ type twkbParser struct {
 	refpoint [twkbMaxDimensions]int64
 }
 
-func newtwkbParser(twkb []byte, opts ...ConstructorOption) twkbParser {
+func newtwkbParser(twkb []byte) twkbParser {
 	return twkbParser{
 		twkb:       twkb,
-		opts:       opts,
 		ctype:      DimXY,
 		dimensions: 2,
 	}
@@ -407,12 +447,12 @@ func (p *twkbParser) nextPoint() (Point, error) {
 		c.M = coords[2]
 	}
 
-	return NewPoint(c, p.opts...)
+	return NewPointWithoutValidation(c), nil
 }
 
 func (p *twkbParser) parseLineString() (LineString, error) {
 	if p.isEmpty {
-		return NewLineString(NewSequence(nil, p.ctype), p.opts...)
+		return NewLineStringWithoutValidation(NewSequence(nil, p.ctype)), nil
 	}
 	return p.nextLineString()
 }
@@ -422,12 +462,12 @@ func (p *twkbParser) nextLineString() (LineString, error) {
 	if err != nil {
 		return LineString{}, err
 	}
-	return NewLineString(NewSequence(coords, p.ctype), p.opts...)
+	return NewLineStringWithoutValidation(NewSequence(coords, p.ctype)), nil
 }
 
 func (p *twkbParser) parsePolygon() (Polygon, error) {
 	if p.isEmpty {
-		return NewPolygon(nil, p.opts...)
+		return NewPolygonWithoutValidation(nil), nil
 	}
 	return p.nextPolygon()
 }
@@ -469,18 +509,15 @@ func (p *twkbParser) nextPolygon() (Polygon, error) {
 				}
 			}
 		}
-		ls, err := NewLineString(NewSequence(coords, p.ctype), p.opts...)
-		if err != nil {
-			return Polygon{}, err
-		}
+		ls := NewLineStringWithoutValidation(NewSequence(coords, p.ctype))
 		rings = append(rings, ls)
 	}
-	return NewPolygon(rings, p.opts...)
+	return NewPolygonWithoutValidation(rings), nil
 }
 
 func (p *twkbParser) parseMultiPoint() (MultiPoint, error) {
 	if p.isEmpty {
-		return NewMultiPoint(nil, p.opts...), nil
+		return NewMultiPoint(nil), nil
 	}
 	return p.nextMultiPoint()
 }
@@ -501,12 +538,12 @@ func (p *twkbParser) nextMultiPoint() (MultiPoint, error) {
 		}
 		pts = append(pts, pt)
 	}
-	return NewMultiPoint(pts, p.opts...), nil
+	return NewMultiPoint(pts), nil
 }
 
 func (p *twkbParser) parseMultiLineString() (MultiLineString, error) {
 	if p.isEmpty {
-		return NewMultiLineString(nil, p.opts...), nil
+		return NewMultiLineString(nil), nil
 	}
 	return p.nextMultiLineString()
 }
@@ -527,12 +564,12 @@ func (p *twkbParser) nextMultiLineString() (MultiLineString, error) {
 		}
 		lines = append(lines, ls)
 	}
-	return NewMultiLineString(lines, p.opts...), nil
+	return NewMultiLineString(lines), nil
 }
 
 func (p *twkbParser) parseMultiPolygon() (MultiPolygon, error) {
 	if p.isEmpty {
-		return NewMultiPolygon(nil, p.opts...)
+		return NewMultiPolygonWithoutValidation(nil), nil
 	}
 	return p.nextMultiPolygon()
 }
@@ -553,12 +590,12 @@ func (p *twkbParser) nextMultiPolygon() (MultiPolygon, error) {
 		}
 		polys = append(polys, poly)
 	}
-	return NewMultiPolygon(polys, p.opts...)
+	return NewMultiPolygonWithoutValidation(polys), nil
 }
 
 func (p *twkbParser) parseGeometryCollection() (GeometryCollection, error) {
 	if p.isEmpty {
-		return NewGeometryCollection(nil, p.opts...), nil
+		return NewGeometryCollection(nil), nil
 	}
 	return p.nextGeometryCollection()
 }
@@ -573,7 +610,7 @@ func (p *twkbParser) nextGeometryCollection() (GeometryCollection, error) {
 	}
 	var geoms []Geometry
 	for i := 0; i < int(numGeoms); i++ {
-		subParser := newtwkbParser(p.twkb[p.pos:], p.opts...)
+		subParser := newtwkbParser(p.twkb[p.pos:])
 		g, nbytes, err := subParser.parseGeometry()
 		if err != nil {
 			p.pos += nbytes // Add sub-parser's last known position, for error reporting.
@@ -582,7 +619,7 @@ func (p *twkbParser) nextGeometryCollection() (GeometryCollection, error) {
 		p.pos += nbytes // Sub-parser's geometry has been read, so ensure it is skipped.
 		geoms = append(geoms, g)
 	}
-	return NewGeometryCollection(geoms, p.opts...), nil
+	return NewGeometryCollection(geoms), nil
 }
 
 // Read a number of points then convert that many points from int to float coords.
