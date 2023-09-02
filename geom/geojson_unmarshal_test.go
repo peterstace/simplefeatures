@@ -371,7 +371,7 @@ func TestGeoJSONUnmarshalDisableAllValidations(t *testing.T) {
 			if _, err := UnmarshalGeoJSON([]byte(geojson)); err == nil {
 				t.Fatal("invalid test case -- geometry should be invalid")
 			}
-			if _, err := UnmarshalGeoJSON([]byte(geojson), DisableAllValidations); err != nil {
+			if _, err := UnmarshalGeoJSONWithoutValidation([]byte(geojson)); err != nil {
 				t.Errorf("got error but didn't expect one because validations are disabled")
 			}
 		})

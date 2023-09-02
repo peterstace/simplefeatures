@@ -6,7 +6,19 @@ import (
 )
 
 // UnmarshalGeoJSON unmarshals a geometry that is encoded as a GeoJSON Geometry Object.
-func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error) {
+func UnmarshalGeoJSON(input []byte) (Geometry, error) {
+	g, err := UnmarshalGeoJSONWithoutValidation(input)
+	if err != nil {
+		return Geometry{}, err
+	}
+	if err := g.Validate(); err != nil {
+		return Geometry{}, err
+	}
+	return g, nil
+}
+
+// UnmarshalGeoJSON unmarshals a geometry that is encoded as a GeoJSON Geometry Object.
+func UnmarshalGeoJSONWithoutValidation(input []byte) (Geometry, error) {
 	var root geojsonNode
 	if err := json.Unmarshal(input, &root); err != nil {
 		return Geometry{}, wrapWithGeoJSONSyntaxError(err)
@@ -57,7 +69,7 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 		ctype = DimXYZ
 	}
 
-	return geojsonNodeToGeometry(rootObj, ctype, opts)
+	return geojsonNodeToGeometry(rootObj, ctype), nil
 }
 
 type geojsonNode struct {
@@ -234,104 +246,76 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 	}
 }
 
-func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []ConstructorOption) (Geometry, error) {
+func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) Geometry {
 	switch node := node.(type) {
 	case geojsonPoint:
 		coords, ok := oneDimFloat64sToCoordinates(node.coords, ctype)
 		if ok {
-			pt, err := NewPoint(coords, opts...)
-			return pt.AsGeometry(), err
+			return NewPointWithoutValidation(coords).AsGeometry()
 		}
-		return NewEmptyPoint(ctype).AsGeometry(), nil
+		return NewEmptyPoint(ctype).AsGeometry()
 	case geojsonLineString:
 		seq := twoDimFloat64sToSequence(node.coords, ctype)
-		ls, err := NewLineString(seq, opts...)
-		return ls.AsGeometry(), err
+		return NewLineStringWithoutValidation(seq).AsGeometry()
 	case geojsonPolygon:
 		if len(node.coords) == 0 {
-			return Polygon{}.ForceCoordinatesType(ctype).AsGeometry(), nil
+			return Polygon{}.ForceCoordinatesType(ctype).AsGeometry()
 		}
 		rings := make([]LineString, len(node.coords))
 		for i, coords := range node.coords {
 			seq := twoDimFloat64sToSequence(coords, ctype)
-			var err error
-			rings[i], err = NewLineString(seq, opts...)
-			if err != nil {
-				return Geometry{}, err
-			}
+			rings[i] = NewLineStringWithoutValidation(seq)
 		}
-		poly, err := NewPolygon(rings, opts...)
-		return poly.AsGeometry(), err
+		return NewPolygonWithoutValidation(rings).AsGeometry()
 	case geojsonMultiPoint:
 		// GeoJSON MultiPoints cannot contain empty Points.
 		if len(node.coords) == 0 {
-			return MultiPoint{}.ForceCoordinatesType(ctype).AsGeometry(), nil
+			return MultiPoint{}.ForceCoordinatesType(ctype).AsGeometry()
 		}
 		points := make([]Point, len(node.coords))
 		for i, coords := range node.coords {
 			coords, ok := oneDimFloat64sToCoordinates(coords, ctype)
 			if ok {
-				var err error
-				points[i], err = NewPoint(coords, opts...)
-				if err != nil {
-					return Geometry{}, err
-				}
+				points[i] = NewPointWithoutValidation(coords)
 			} else {
 				points[i] = NewEmptyPoint(ctype)
 			}
 		}
-		return NewMultiPoint(points).AsGeometry(), nil
+		return NewMultiPoint(points).AsGeometry()
 	case geojsonMultiLineString:
 		if len(node.coords) == 0 {
-			return MultiLineString{}.ForceCoordinatesType(ctype).AsGeometry(), nil
+			return MultiLineString{}.ForceCoordinatesType(ctype).AsGeometry()
 		}
 		lss := make([]LineString, len(node.coords))
 		for i, coords := range node.coords {
 			seq := twoDimFloat64sToSequence(coords, ctype)
-			var err error
-			lss[i], err = NewLineString(seq, opts...)
-			if err != nil {
-				return Geometry{}, err
-			}
+			lss[i] = NewLineStringWithoutValidation(seq)
 		}
-		return NewMultiLineString(lss, opts...).AsGeometry(), nil
+		return NewMultiLineString(lss).AsGeometry()
 	case geojsonMultiPolygon:
 		if len(node.coords) == 0 {
-			return MultiPolygon{}.ForceCoordinatesType(ctype).AsGeometry(), nil
+			return MultiPolygon{}.ForceCoordinatesType(ctype).AsGeometry()
 		}
 		polys := make([]Polygon, len(node.coords))
 		for i, coords := range node.coords {
 			rings := make([]LineString, len(coords))
 			for j, coords := range coords {
 				seq := twoDimFloat64sToSequence(coords, ctype)
-				var err error
-				rings[j], err = NewLineString(seq, opts...)
-				if err != nil {
-					return Geometry{}, err
-				}
+				rings[j] = NewLineStringWithoutValidation(seq)
 			}
-			var err error
-			polys[i], err = NewPolygon(rings, opts...)
-			if err != nil {
-				return Geometry{}, err
-			}
+			polys[i] = NewPolygonWithoutValidation(rings)
 			polys[i] = polys[i].ForceCoordinatesType(ctype)
 		}
-		mp, err := NewMultiPolygon(polys, opts...)
-		return mp.AsGeometry(), err
+		return NewMultiPolygonWithoutValidation(polys).AsGeometry()
 	case geojsonGeometryCollection:
 		if len(node.geoms) == 0 {
-			return GeometryCollection{}.ForceCoordinatesType(ctype).AsGeometry(), nil
+			return GeometryCollection{}.ForceCoordinatesType(ctype).AsGeometry()
 		}
 		children := make([]Geometry, len(node.geoms))
 		for i, child := range node.geoms {
-			var err error
-			children[i], err = geojsonNodeToGeometry(child, ctype, opts)
-			if err != nil {
-				return Geometry{}, err
-			}
+			children[i] = geojsonNodeToGeometry(child, ctype)
 		}
-		return NewGeometryCollection(children, opts...).AsGeometry(), nil
+		return NewGeometryCollection(children).AsGeometry()
 	default:
 		panic(fmt.Sprintf("unexpected node: %#v", node))
 	}

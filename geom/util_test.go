@@ -30,9 +30,9 @@ func geomsFromWKTs(t testing.TB, wkts []string, opts ...ConstructorOption) []Geo
 	return gs
 }
 
-func geomFromGeoJSON(t testing.TB, geojson string, opts ...ConstructorOption) Geometry {
+func geomFromGeoJSON(t testing.TB, geojson string) Geometry {
 	t.Helper()
-	g, err := UnmarshalGeoJSON([]byte(geojson), opts...)
+	g, err := UnmarshalGeoJSON([]byte(geojson))
 	if err != nil {
 		t.Fatalf("could not unmarshal GeoJSON:\n geojson: %s\n     err: %v", geojson, err)
 	}
