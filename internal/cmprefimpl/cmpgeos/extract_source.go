@@ -89,7 +89,7 @@ func convertToGeometries(candidates []string) ([]geom.Geometry, error) {
 
 	oldCount = len(geoms)
 	for _, c := range candidates {
-		g, err := geom.UnmarshalGeoJSON([]byte(c), geom.DisableAllValidations)
+		g, err := geom.UnmarshalGeoJSONWithoutValidation([]byte(c))
 		if err == nil {
 			geoms = append(geoms, g)
 		}

@@ -5,7 +5,8 @@ import (
 	"fmt"
 )
 
-// UnmarshalGeoJSON unmarshals a geometry that is encoded as a GeoJSON Geometry Object.
+// UnmarshalGeoJSON unmarshals a geometry that is encoded as a GeoJSON Geometry
+// Object. The geometry constraints of the result are validated.
 func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 	g, err := UnmarshalGeoJSONWithoutValidation(input)
 	if err != nil {
@@ -17,7 +18,8 @@ func UnmarshalGeoJSON(input []byte) (Geometry, error) {
 	return g, nil
 }
 
-// UnmarshalGeoJSON unmarshals a geometry that is encoded as a GeoJSON Geometry Object.
+// UnmarshalGeoJSON unmarshals a geometry that is encoded as a GeoJSON Geometry
+// Object. The geometry constraints of the result are not validated.
 func UnmarshalGeoJSONWithoutValidation(input []byte) (Geometry, error) {
 	var root geojsonNode
 	if err := json.Unmarshal(input, &root); err != nil {
