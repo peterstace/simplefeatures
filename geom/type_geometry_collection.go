@@ -553,17 +553,24 @@ func (c GeometryCollection) String() string {
 }
 
 // Simplify returns a simplified version of the GeometryCollection by applying
-// Simplify to each child geometry. Any supplied ConstructorOptions will be
-// used when simplifying each child geometry.
-func (c GeometryCollection) Simplify(threshold float64, opts ...ConstructorOption) (GeometryCollection, error) {
+// Simplify to each child geometry. If the resultant Geometry were to be
+// invalid, an error is returned.
+func (c GeometryCollection) Simplify(threshold float64) (GeometryCollection, error) {
+	gc := c.SimplifyWithoutValidation(threshold)
+	if err := gc.Validate(); err != nil {
+		return GeometryCollection{}, wrapSimplified(err)
+	}
+	return gc, nil
+}
+
+// Simplify returns a simplified version of the GeometryCollection by applying
+// Simplify to each child geometry. The validity of the resultant geometry is
+// not checked.
+func (c GeometryCollection) SimplifyWithoutValidation(threshold float64) GeometryCollection {
 	n := c.NumGeometries()
 	geoms := make([]Geometry, n)
 	for i := 0; i < n; i++ {
-		var err error
-		geoms[i], err = c.GeometryN(i).Simplify(threshold, opts...)
-		if err != nil {
-			return GeometryCollection{}, wrapSimplified(err)
-		}
+		geoms[i] = c.GeometryN(i).SimplifyWithoutValidation(threshold)
 	}
-	return NewGeometryCollection(geoms, opts...), nil
+	return NewGeometryCollection(geoms)
 }

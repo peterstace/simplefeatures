@@ -674,14 +674,32 @@ func (p Polygon) String() string {
 // Ramer-Douglas-Peucker algorithm to each constituent ring. If the exterior
 // ring collapses to a point or single linear element, the empty Polygon is
 // returned. If any interior ring collapses to a point or a single linear
-// element, then it is omitted from the final output. The output Polygon will
-// be invalid if any rings in the input become non-rings (e.g. via self
-// intersection) in the output, or if any two rings were to interact in ways
-// prohibited by Polygon validation rules (such as intersecting at more than
-// one point). In these cases, an error is returned. Construction behaviour of
-// the output (which includes omitting errors) may be controlled via
-// ConstructorOptions.
-func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon, error) {
+// element, then it is omitted from the final output.
+//
+// The output Polygon will be invalid if any rings in the input become
+// non-rings (e.g. via self intersection) in the output, or if any two rings
+// were to interact in ways prohibited by Polygon validation rules (such as
+// intersecting at more than one point). In these cases, an error is returned.
+func (p Polygon) Simplify(threshold float64) (Polygon, error) {
+	simpl := p.SimplifyWithoutValidation(threshold)
+	if err := simpl.Validate(); err != nil {
+		return Polygon{}, wrapSimplified(err)
+	}
+	return simpl, nil
+}
+
+// Simplify returns a simplified version of the Polygon by applying the
+// Ramer-Douglas-Peucker algorithm to each constituent ring. If the exterior
+// ring collapses to a point or single linear element, the empty Polygon is
+// returned. If any interior ring collapses to a point or a single linear
+// element, then it is omitted from the final output.
+//
+// The output Polygon will be invalid if any rings in the input become
+// non-rings (e.g. via self intersection) in the output, or if any two rings
+// were to interact in ways prohibited by Polygon validation rules (such as
+// intersecting at more than one point). In these cases, the returned Polygon
+// will be invalid.
+func (p Polygon) SimplifyWithoutValidation(threshold float64) Polygon {
 	exterior := p.ExteriorRing().Simplify(threshold)
 
 	// If we don't have at least 4 coordinates, then we can't form a ring, and
@@ -691,7 +709,7 @@ func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon
 		return ring.Coordinates().Length() < 4
 	}
 	if hasCollapsed(exterior) {
-		return Polygon{}, nil
+		return Polygon{}
 	}
 
 	n := p.NumInteriorRings()
@@ -703,6 +721,5 @@ func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon
 			rings = append(rings, interior)
 		}
 	}
-	simpl, err := NewPolygon(rings, opts...)
-	return simpl, wrapSimplified(err)
+	return NewPolygonWithoutValidation(rings)
 }

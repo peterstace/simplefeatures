@@ -577,20 +577,27 @@ func (m MultiPolygon) String() string {
 
 // Simplify returns a simplified version of the MultiPolygon by applying
 // Simplify to each child Polygon and constructing a new MultiPolygon from the
-// result. Any supplied ConstructorOptions will be used when simplifying each
-// child Polygon, or constructing the final MultiPolygon output.
-func (m MultiPolygon) Simplify(threshold float64, opts ...ConstructorOption) (MultiPolygon, error) {
+// result. An error is returned if the resultant MultiPolygon would not be
+// valid.
+func (m MultiPolygon) Simplify(threshold float64) (MultiPolygon, error) {
+	simpl := m.SimplifyWithoutValidation(threshold)
+	if err := simpl.Validate(); err != nil {
+		return MultiPolygon{}, wrapTransformed(err)
+	}
+	return simpl, nil
+}
+
+// Simplify returns a simplified version of the MultiPolygon by applying
+// Simplify to each child Polygon and constructing a new MultiPolygon from the
+// result. The validity of the result is not checked.
+func (m MultiPolygon) SimplifyWithoutValidation(threshold float64) MultiPolygon {
 	n := m.NumPolygons()
 	polys := make([]Polygon, 0, n)
 	for i := 0; i < n; i++ {
-		poly, err := m.PolygonN(i).Simplify(threshold, opts...)
-		if err != nil {
-			return MultiPolygon{}, err
-		}
+		poly := m.PolygonN(i).SimplifyWithoutValidation(threshold)
 		if !poly.IsEmpty() {
 			polys = append(polys, poly)
 		}
 	}
-	simpl, err := NewMultiPolygon(polys, opts...)
-	return simpl, wrapSimplified(err)
+	return NewMultiPolygonWithoutValidation(polys)
 }

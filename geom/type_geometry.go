@@ -957,12 +957,11 @@ func (g Geometry) String() string {
 // Simplify returns a simplified version of the geometry using the
 // Ramer-Douglas-Peucker algorithm. Sometimes a simplified geometry can become
 // invalid, in which case an error is returned rather than attempting to fix
-// the geometry. Validation of the result can be skipped by making use of the
-// geometry constructor options.
-func (g Geometry) Simplify(threshold float64, opts ...ConstructorOption) (Geometry, error) {
+// the geometry.
+func (g Geometry) Simplify(threshold float64) (Geometry, error) {
 	switch g.gtype {
 	case TypeGeometryCollection:
-		c, err := g.MustAsGeometryCollection().Simplify(threshold, opts...)
+		c, err := g.MustAsGeometryCollection().Simplify(threshold)
 		return c.AsGeometry(), err
 	case TypePoint:
 		return g, nil
@@ -970,15 +969,39 @@ func (g Geometry) Simplify(threshold float64, opts ...ConstructorOption) (Geomet
 		c := g.MustAsLineString().Simplify(threshold)
 		return c.AsGeometry(), nil
 	case TypePolygon:
-		c, err := g.MustAsPolygon().Simplify(threshold, opts...)
+		c, err := g.MustAsPolygon().Simplify(threshold)
 		return c.AsGeometry(), err
 	case TypeMultiPoint:
 		return g, nil
 	case TypeMultiLineString:
 		return g.MustAsMultiLineString().Simplify(threshold).AsGeometry(), nil
 	case TypeMultiPolygon:
-		c, err := g.MustAsMultiPolygon().Simplify(threshold, opts...)
+		c, err := g.MustAsMultiPolygon().Simplify(threshold)
 		return c.AsGeometry(), err
+	default:
+		panic("unknown type: " + g.Type().String())
+	}
+}
+
+// Simplify returns a simplified version of the geometry using the
+// Ramer-Douglas-Peucker algorithm. Sometimes a simplified geometry can become
+// invalid, however this is not checked.
+func (g Geometry) SimplifyWithoutValidation(threshold float64) Geometry {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		return g.MustAsGeometryCollection().SimplifyWithoutValidation(threshold).AsGeometry()
+	case TypePoint:
+		return g
+	case TypeLineString:
+		return g.MustAsLineString().Simplify(threshold).AsGeometry()
+	case TypePolygon:
+		return g.MustAsPolygon().SimplifyWithoutValidation(threshold).AsGeometry()
+	case TypeMultiPoint:
+		return g
+	case TypeMultiLineString:
+		return g.MustAsMultiLineString().Simplify(threshold).AsGeometry()
+	case TypeMultiPolygon:
+		return g.MustAsMultiPolygon().SimplifyWithoutValidation(threshold).AsGeometry()
 	default:
 		panic("unknown type: " + g.Type().String())
 	}
