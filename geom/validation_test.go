@@ -162,7 +162,7 @@ func TestPolygonValidation(t *testing.T) {
 				expectErr(t, err)
 			})
 			t.Run("Validate", func(t *testing.T) {
-				poly, err := UnmarshalWKT(wkt, DisableAllValidations)
+				poly, err := UnmarshalWKTWithoutValidation(wkt)
 				expectNoErr(t, err)
 				expectErr(t, poly.Validate())
 			})
@@ -308,7 +308,7 @@ func TestMultiPolygonValidation(t *testing.T) {
 }
 
 func TestMultiPolygonConstraintValidation(t *testing.T) {
-	poly, err := UnmarshalWKT("POLYGON((0 0,1 1,0 1,1 0,0 0))", DisableAllValidations)
+	poly, err := UnmarshalWKTWithoutValidation("POLYGON((0 0,1 1,0 1,1 0,0 0))")
 	expectNoErr(t, err)
 	expectErr(t, poly.Validate())
 
@@ -329,7 +329,7 @@ func TestGeometryCollectionValidation(t *testing.T) {
 		{false, "GEOMETRYCOLLECTION(LINESTRING(0 1))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			gc, err := UnmarshalWKT(tc.wkt, DisableAllValidations)
+			gc, err := UnmarshalWKTWithoutValidation(tc.wkt)
 			expectNoErr(t, err)
 			expectBoolEq(t, gc.Validate() == nil, tc.wantValid)
 		})

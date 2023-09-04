@@ -14,9 +14,23 @@ import (
 // next production in the grammar.
 
 // UnmarshalWKT parses a Well Known Text (WKT), and returns the corresponding
-// Geometry.
-func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
-	p := newParser(wkt, opts)
+// Geometry. The result has its geometry constraints validated.
+func UnmarshalWKT(wkt string) (Geometry, error) {
+	g, err := UnmarshalWKTWithoutValidation(wkt)
+	if err != nil {
+		return Geometry{}, err
+	}
+	if err := g.Validate(); err != nil {
+		return Geometry{}, err
+	}
+	return g, nil
+}
+
+// UnmarshalWKTWithoutValidation parses a Well Known Text (WKT), and returns
+// the corresponding Geometry. The result does not have its geometry
+// constraints validated.
+func UnmarshalWKTWithoutValidation(wkt string) (Geometry, error) {
+	p := newParser(wkt)
 	geom, err := p.nextGeometryTaggedText()
 	if err != nil {
 		return Geometry{}, err
@@ -37,13 +51,12 @@ func wantButGot(wantTok, gotTok string) error {
 	)}
 }
 
-func newParser(wkt string, opts []ConstructorOption) *parser {
-	return &parser{lexer: newWKTLexer(wkt), opts: opts}
+func newParser(wkt string) *parser {
+	return &parser{newWKTLexer(wkt)}
 }
 
 type parser struct {
 	lexer wktLexer
-	opts  []ConstructorOption
 }
 
 func (p *parser) nextGeometryTaggedText() (Geometry, error) {
@@ -60,8 +73,7 @@ func (p *parser) nextGeometryTaggedText() (Geometry, error) {
 		if !ok {
 			return NewEmptyPoint(ctype).AsGeometry(), nil
 		}
-		pt, err := NewPoint(c, p.opts...)
-		return pt.AsGeometry(), err
+		return NewPointWithoutValidation(c).AsGeometry(), nil
 	case "LINESTRING":
 		ls, err := p.nextLineStringText(ctype)
 		return ls.AsGeometry(), err
@@ -257,7 +269,7 @@ func (p *parser) nextLineStringText(ctype CoordinatesType) (LineString, error) {
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	return NewLineString(seq, p.opts...)
+	return NewLineStringWithoutValidation(seq), nil
 }
 
 func (p *parser) nextPolygonText(ctype CoordinatesType) (Polygon, error) {
@@ -268,7 +280,7 @@ func (p *parser) nextPolygonText(ctype CoordinatesType) (Polygon, error) {
 	if len(rings) == 0 {
 		return Polygon{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewPolygon(rings, p.opts...)
+	return NewPolygonWithoutValidation(rings), nil
 }
 
 func (p *parser) nextMultiLineString(ctype CoordinatesType) (MultiLineString, error) {
@@ -279,7 +291,7 @@ func (p *parser) nextMultiLineString(ctype CoordinatesType) (MultiLineString, er
 	if len(lss) == 0 {
 		return MultiLineString{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewMultiLineString(lss, p.opts...), nil
+	return NewMultiLineString(lss), nil
 }
 
 func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType) ([]LineString, error) {
@@ -326,10 +338,7 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) (MultiPoint, error) {
 				return MultiPoint{}, err
 			}
 			if ok {
-				pt, err := NewPoint(coords, p.opts...)
-				if err != nil {
-					return MultiPoint{}, err
-				}
+				pt := NewPointWithoutValidation(coords)
 				points = append(points, pt)
 			} else {
 				points = append(points, NewEmptyPoint(ctype))
@@ -346,7 +355,7 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) (MultiPoint, error) {
 	if len(points) == 0 {
 		return MultiPoint{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewMultiPoint(points, p.opts...), nil
+	return NewMultiPoint(points), nil
 }
 
 func (p *parser) nextMultiPointStylePoint(ctype CoordinatesType) (Coordinates, bool, error) {
@@ -408,7 +417,7 @@ func (p *parser) nextMultiPolygonText(ctype CoordinatesType) (MultiPolygon, erro
 	if len(polys) == 0 {
 		return MultiPolygon{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewMultiPolygon(polys, p.opts...)
+	return NewMultiPolygonWithoutValidation(polys), nil
 }
 
 func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryCollection, error) {
@@ -436,5 +445,5 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryColl
 	if len(geoms) == 0 {
 		return GeometryCollection{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewGeometryCollection(geoms, p.opts...), nil
+	return NewGeometryCollection(geoms), nil
 }

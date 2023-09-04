@@ -35,7 +35,7 @@ func TestDisableValidation(t *testing.T) {
 				t.Logf("wkt: %v", wkt)
 				t.Fatal("expected validation error unmarshalling wkt")
 			}
-			_, err = geom.UnmarshalWKT(wkt, geom.DisableAllValidations)
+			_, err = geom.UnmarshalWKTWithoutValidation(wkt)
 			if err != nil {
 				t.Logf("wkt: %v", wkt)
 				t.Errorf("disabling validations still gave an error: %v", err)

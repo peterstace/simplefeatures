@@ -8,20 +8,20 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-func geomFromWKT(t testing.TB, wkt string, opts ...ConstructorOption) Geometry {
+func geomFromWKT(t testing.TB, wkt string) Geometry {
 	t.Helper()
-	geom, err := UnmarshalWKT(wkt, opts...)
+	geom, err := UnmarshalWKT(wkt)
 	if err != nil {
 		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 	}
 	return geom
 }
 
-func geomsFromWKTs(t testing.TB, wkts []string, opts ...ConstructorOption) []Geometry {
+func geomsFromWKTs(t testing.TB, wkts []string) []Geometry {
 	t.Helper()
 	var gs []Geometry
 	for _, wkt := range wkts {
-		g, err := UnmarshalWKT(wkt, opts...)
+		g, err := UnmarshalWKT(wkt)
 		if err != nil {
 			t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 		}

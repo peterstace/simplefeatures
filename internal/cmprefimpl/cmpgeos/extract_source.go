@@ -63,7 +63,7 @@ func extractStringsFromSource(dir string) ([]string, error) {
 func convertToGeometries(candidates []string) ([]geom.Geometry, error) {
 	var geoms []geom.Geometry
 	for _, c := range candidates {
-		g, err := geom.UnmarshalWKT(c, geom.DisableAllValidations)
+		g, err := geom.UnmarshalWKTWithoutValidation(c)
 		if err == nil {
 			geoms = append(geoms, g)
 		}

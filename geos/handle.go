@@ -171,7 +171,7 @@ func (h *handle) decode(gh *C.GEOSGeometry, opts []geom.ConstructorOption) (geom
 
 	if isWKT != 0 {
 		wkt := C.GoStringN(serialised, C.int(size))
-		g, err := geom.UnmarshalWKT(wkt, opts...)
+		g, err := geom.UnmarshalWKTWithoutValidation(wkt)
 		return g, wrap(err, "failed to unmarshal GEOS WKT result")
 	}
 	wkb := C.GoBytes(unsafe.Pointer(serialised), C.int(size))
