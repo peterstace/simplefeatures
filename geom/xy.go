@@ -24,10 +24,17 @@ func (w XY) validate() error {
 }
 
 // AsPoint is a convenience function to convert this XY value into a Point
-// geometry.
-func (w XY) AsPoint(opts ...ConstructorOption) (Point, error) {
+// geometry. If an invalid Point would be created, then an error is returned.
+func (w XY) AsPoint() (Point, error) {
 	coords := Coordinates{XY: w, Type: DimXY}
-	return NewPoint(coords, opts...)
+	return NewPoint(coords)
+}
+
+// AsPointWithoutValidation is a convenience function to convert this XY value into a Point
+// geometry. The validity of the Point result is not validated.
+func (w XY) AsPointWithoutValidation() Point {
+	coords := Coordinates{XY: w, Type: DimXY}
+	return NewPointWithoutValidation(coords)
 }
 
 // asUncheckedPoint is a convenience function to convert this XY value into a
