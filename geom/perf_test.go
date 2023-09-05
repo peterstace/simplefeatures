@@ -57,7 +57,7 @@ func BenchmarkUnmarshalWKB(b *testing.B) {
 				wkb := regularPolygon(XY{}, 1.0, sz).AsBinary()
 				b.ResetTimer()
 				for i := 0; i < b.N; i++ {
-					_, err := UnmarshalWKB(wkb, DisableAllValidations)
+					_, err := UnmarshalWKBWithoutValidation(wkb)
 					if err != nil {
 						b.Fatal(err)
 					}

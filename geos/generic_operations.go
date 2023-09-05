@@ -43,7 +43,6 @@ func binaryOpE(
 
 func binaryOpG(
 	g1, g2 geom.Geometry,
-	opts []geom.ConstructorOption,
 	op func(C.GEOSContextHandle_t, *C.GEOSGeometry, *C.GEOSGeometry) *C.GEOSGeometry,
 ) (geom.Geometry, error) {
 	var result geom.Geometry
@@ -54,7 +53,7 @@ func binaryOpG(
 		}
 		defer C.GEOSGeom_destroy(resultGH)
 		var err error
-		result, err = h.decode(resultGH, opts)
+		result, err = h.decode(resultGH)
 		return wrap(err, "decoding result")
 	})
 	return result, err
@@ -95,7 +94,6 @@ func unaryOpE(g geom.Geometry, op func(*handle, *C.GEOSGeometry) error) error {
 
 func unaryOpG(
 	g geom.Geometry,
-	opts []geom.ConstructorOption,
 	op func(C.GEOSContextHandle_t, *C.GEOSGeometry) *C.GEOSGeometry,
 ) (geom.Geometry, error) {
 	var result geom.Geometry
@@ -111,7 +109,7 @@ func unaryOpG(
 			defer C.GEOSGeom_destroy(resultGH)
 		}
 		var err error
-		result, err = h.decode(resultGH, opts)
+		result, err = h.decode(resultGH)
 		return wrap(err, "decoding result")
 	})
 	return result, err

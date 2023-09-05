@@ -78,7 +78,7 @@ func convertToGeometries(candidates []string) ([]geom.Geometry, error) {
 		if err != nil {
 			continue
 		}
-		g, err := geom.UnmarshalWKB(buf, geom.DisableAllValidations)
+		g, err := geom.UnmarshalWKBWithoutValidation(buf)
 		if err == nil {
 			geoms = append(geoms, g)
 		}
