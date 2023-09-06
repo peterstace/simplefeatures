@@ -25,7 +25,7 @@ type GeometryCollection struct {
 //
 // Note that this constructor doesn't check the validity of its Polygon
 // arguments.
-func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) GeometryCollection {
+func NewGeometryCollection(geoms []Geometry) GeometryCollection {
 	if len(geoms) == 0 {
 		return GeometryCollection{}
 	}

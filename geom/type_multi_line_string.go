@@ -27,7 +27,7 @@ type MultiLineString struct {
 //
 // Note that this constructor doesn't check the validity of its LineString
 // arguments.
-func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLineString {
+func NewMultiLineString(lines []LineString) MultiLineString {
 	if len(lines) == 0 {
 		return MultiLineString{}
 	}

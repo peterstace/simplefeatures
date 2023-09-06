@@ -23,7 +23,7 @@ type MultiPoint struct {
 //
 // Note that this constructor doesn't check the validity of its Point
 // arguments.
-func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
+func NewMultiPoint(pts []Point) MultiPoint {
 	if len(pts) == 0 {
 		return MultiPoint{}
 	}

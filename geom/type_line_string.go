@@ -18,11 +18,8 @@ type LineString struct {
 // NewLineString creates a new LineString from a Sequence of points. An error
 // is returned if the LineString would be invalid (see the Validate method for
 // details).
-func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) {
+func NewLineString(seq Sequence) (LineString, error) {
 	ls := NewLineStringWithoutValidation(seq)
-	if newOptionSet(opts).skipValidations {
-		return ls, nil
-	}
 	if err := ls.Validate(); err != nil {
 		return LineString{}, err
 	}

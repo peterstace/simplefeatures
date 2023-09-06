@@ -25,11 +25,11 @@ func regularPolygon(center XY, radius float64, sides int) Polygon {
 	}
 	coords[2*sides+0] = coords[0]
 	coords[2*sides+1] = coords[1]
-	ring, err := NewLineString(NewSequence(coords, DimXY), geom.DisableAllValidations)
+	ring, err := NewLineString(NewSequence(coords, DimXY))
 	if err != nil {
 		panic(err)
 	}
-	poly, err := NewPolygon([]LineString{ring}, geom.DisableAllValidations)
+	poly, err := NewPolygon([]LineString{ring})
 	if err != nil {
 		panic(err)
 	}

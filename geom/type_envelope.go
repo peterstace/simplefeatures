@@ -316,11 +316,7 @@ func (e Envelope) BoundingDiagonal() Geometry {
 	// when constructing the diagonal.
 	coords := []float64{e.minX(), e.minY, e.maxX, e.maxY}
 	seq := NewSequence(coords, DimXY)
-	ls, err := NewLineString(seq, DisableAllValidations)
-	if err != nil {
-		panic("programming error: validations disabled by LineString validation failed")
-	}
-	return ls.AsGeometry()
+	return NewLineStringWithoutValidation(seq).AsGeometry()
 }
 
 // String implements the fmt.Stringer interface by printing the envelope in a

@@ -27,11 +27,8 @@ type MultiPolygon struct {
 //
 // Note that this constructor doesn't check the validity of its Polygon
 // arguments.
-func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
+func NewMultiPolygon(polys []Polygon) (MultiPolygon, error) {
 	mp := NewMultiPolygonWithoutValidation(polys)
-	if newOptionSet(opts).skipValidations {
-		return mp, nil
-	}
 	if err := mp.checkMultiPolygonConstraints(); err != nil {
 		return MultiPolygon{}, err
 	}

@@ -20,12 +20,8 @@ type Point struct {
 
 // NewPoint creates a new point given its Coordinates. An error is returned for
 // invalid points (see the Validate method for details).
-func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
+func NewPoint(c Coordinates) (Point, error) {
 	pt := NewPointWithoutValidation(c)
-	os := newOptionSet(opts)
-	if os.skipValidations {
-		return pt, nil
-	}
 	if err := pt.Validate(); err != nil {
 		return Point{}, err
 	}

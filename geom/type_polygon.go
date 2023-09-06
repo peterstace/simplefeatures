@@ -25,11 +25,8 @@ type Polygon struct {
 //
 // An error is returned if any of the Polygon constraints are not met (see the
 // Validate method for details).
-func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
+func NewPolygon(rings []LineString) (Polygon, error) {
 	poly := NewPolygonWithoutValidation(rings)
-	if newOptionSet(opts).skipValidations {
-		return poly, nil
-	}
 	if err := poly.Validate(); err != nil {
 		return Polygon{}, err
 	}

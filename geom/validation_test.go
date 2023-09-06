@@ -41,8 +41,7 @@ func TestPointValidation(t *testing.T) {
 				}
 			})
 			t.Run("Validate", func(t *testing.T) {
-				pt, err := NewPoint(tc.input, DisableAllValidations)
-				expectNoErr(t, err)
+				pt := NewPointWithoutValidation(tc.input)
 				expectBoolEq(t, tc.wantValid, pt.Validate() == nil)
 			})
 		})
@@ -75,8 +74,7 @@ func TestLineStringValidation(t *testing.T) {
 				expectBoolEq(t, tc.wantValid, err == nil)
 			})
 			t.Run("Validate", func(t *testing.T) {
-				ls, err := NewLineString(seq, DisableAllValidations)
-				expectNoErr(t, err)
+				ls := NewLineStringWithoutValidation(seq)
 				expectBoolEq(t, tc.wantValid, ls.Validate() == nil)
 			})
 		})
@@ -183,8 +181,7 @@ func TestMultiPointValidation(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var pts []Point
 			for _, c := range tc.coords {
-				pt, err := NewPoint(c, DisableAllValidations)
-				expectNoErr(t, err)
+				pt := NewPointWithoutValidation(c)
 				pts = append(pts, pt)
 			}
 			mp := NewMultiPoint(pts)
@@ -208,8 +205,7 @@ func TestMultiLineStringValidation(t *testing.T) {
 			var lss []LineString
 			for _, coords := range tc.coords {
 				seq := NewSequence(coords, DimXY)
-				ls, err := NewLineString(seq, DisableAllValidations)
-				expectNoErr(t, err)
+				ls := NewLineStringWithoutValidation(seq)
 				lss = append(lss, ls)
 			}
 			mls := NewMultiLineString(lss)
