@@ -579,7 +579,7 @@ type BinaryOperationTestCase struct {
 	Out      string
 }
 
-func RunBinaryOperationTest(t *testing.T, fn func(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error), cases []BinaryOperationTestCase) {
+func RunBinaryOperationTest(t *testing.T, fn func(a, b geom.Geometry) (geom.Geometry, error), cases []BinaryOperationTestCase) {
 	for i, c := range cases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			run := func(rev bool) func(t *testing.T) {

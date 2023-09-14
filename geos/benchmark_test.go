@@ -33,23 +33,6 @@ func regularPolygon(center geom.XY, radius float64, sides int) geom.Polygon {
 	return poly
 }
 
-func BenchmarkIntersectionWithoutValidation(b *testing.B) {
-	for _, sz := range []int{10, 100, 1000, 10000} {
-		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
-			inputA := regularPolygon(geom.XY{X: 0, Y: 0}, 1.0, sz).AsGeometry()
-			inputB := regularPolygon(geom.XY{X: 1, Y: 0}, 1.0, sz).AsGeometry()
-			b.ResetTimer()
-
-			for i := 0; i < b.N; i++ {
-				_, err := Intersection(inputA, inputB, geom.DisableAllValidations)
-				if err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-	}
-}
-
 func BenchmarkNoOp(b *testing.B) {
 	for _, sz := range []int{10, 100, 1000, 10000} {
 		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
@@ -57,7 +40,7 @@ func BenchmarkNoOp(b *testing.B) {
 			b.ResetTimer()
 
 			for i := 0; i < b.N; i++ {
-				_, err := noop(input, geom.DisableAllValidations)
+				_, err := noop(input)
 				if err != nil {
 					b.Fatal(err)
 				}

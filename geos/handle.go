@@ -37,8 +37,8 @@ import (
 // noop returns the geometry unaltered, via conversion to and from GEOS. This
 // function is only for benchmarking purposes, hence it is not exported or used
 // outside of benchmark tests.
-func noop(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+func noop(g geom.Geometry) (geom.Geometry, error) {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.noop(ctx, g)
 	})
 	return result, wrap(err, "executing noop")
@@ -158,7 +158,7 @@ func (h *handle) boolErr(c C.char) (bool, error) {
 	}
 }
 
-func (h *handle) decode(gh *C.GEOSGeometry, opts []geom.ConstructorOption) (geom.Geometry, error) {
+func (h *handle) decode(gh *C.GEOSGeometry) (geom.Geometry, error) {
 	var (
 		isWKT C.char
 		size  C.size_t
@@ -171,10 +171,10 @@ func (h *handle) decode(gh *C.GEOSGeometry, opts []geom.ConstructorOption) (geom
 
 	if isWKT != 0 {
 		wkt := C.GoStringN(serialised, C.int(size))
-		g, err := geom.UnmarshalWKT(wkt, opts...)
+		g, err := geom.UnmarshalWKT(wkt, geom.DisableAllValidations)
 		return g, wrap(err, "failed to unmarshal GEOS WKT result")
 	}
 	wkb := C.GoBytes(unsafe.Pointer(serialised), C.int(size))
-	g, err := geom.UnmarshalWKB(wkb, opts...)
+	g, err := geom.UnmarshalWKB(wkb, geom.DisableAllValidations)
 	return g, wrap(err, "failed to unmarshal GEOS WKB result")
 }
