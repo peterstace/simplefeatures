@@ -281,13 +281,12 @@ func (e Envelope) Distance(o Envelope) (float64, bool) {
 }
 
 // TransformXY transforms this Envelope into another Envelope according to fn.
-// TODO: remove the error here as well.
-func (e Envelope) TransformXY(fn func(XY) XY) (Envelope, error) {
+func (e Envelope) TransformXY(fn func(XY) XY) Envelope {
 	min, max, ok := e.MinMaxXYs()
 	if !ok {
-		return Envelope{}, nil
+		return Envelope{}
 	}
-	return NewEnvelope([]XY{fn(min), fn(max)})
+	return newUncheckedEnvelope(fn(min), fn(max))
 }
 
 // AsBox converts this Envelope to an rtree.Box.
