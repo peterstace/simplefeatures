@@ -200,13 +200,13 @@ func (p *Point) UnmarshalJSON(buf []byte) error {
 }
 
 // TransformXY transforms this Point into another Point according to fn.
-func (p Point) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Point, error) {
+func (p Point) TransformXY(fn func(XY) XY) Point {
 	if !p.full {
-		return p, nil
+		return p
 	}
 	newC := p.coords
 	newC.XY = fn(newC.XY)
-	return NewPoint(newC, opts...)
+	return newUncheckedPoint(newC)
 }
 
 // Centroid of a point is that point.

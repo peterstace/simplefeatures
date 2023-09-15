@@ -237,16 +237,12 @@ func (c *GeometryCollection) UnmarshalJSON(buf []byte) error {
 }
 
 // TransformXY transforms this GeometryCollection into another GeometryCollection according to fn.
-func (c GeometryCollection) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (GeometryCollection, error) {
+func (c GeometryCollection) TransformXY(fn func(XY) XY) GeometryCollection {
 	transformed := make([]Geometry, len(c.geoms))
 	for i := range c.geoms {
-		var err error
-		transformed[i], err = c.geoms[i].TransformXY(fn, opts...)
-		if err != nil {
-			return GeometryCollection{}, wrapTransformed(err)
-		}
+		transformed[i] = c.geoms[i].TransformXY(fn)
 	}
-	return GeometryCollection{transformed, c.ctype}, nil
+	return GeometryCollection{transformed, c.ctype}
 }
 
 // Reverse in the case of GeometryCollection reverses each component and also

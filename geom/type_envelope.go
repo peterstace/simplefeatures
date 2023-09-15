@@ -281,6 +281,7 @@ func (e Envelope) Distance(o Envelope) (float64, bool) {
 }
 
 // TransformXY transforms this Envelope into another Envelope according to fn.
+// TODO: remove the error here as well.
 func (e Envelope) TransformXY(fn func(XY) XY) (Envelope, error) {
 	min, max, ok := e.MinMaxXYs()
 	if !ok {
@@ -318,7 +319,7 @@ func (e Envelope) BoundingDiagonal() Geometry {
 	seq := NewSequence(coords, DimXY)
 	ls, err := NewLineString(seq, DisableAllValidations)
 	if err != nil {
-		panic("programming error: validations disabled by LineString validation failed")
+		panic("non-validating ctor failed: " + err.Error())
 	}
 	return ls.AsGeometry()
 }

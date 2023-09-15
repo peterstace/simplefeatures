@@ -454,8 +454,7 @@ func TestTransformXY(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g := geomFromWKT(t, tt.wktIn)
-			got, err := g.TransformXY(transform)
-			expectNoErr(t, err)
+			got := g.TransformXY(transform)
 			want := geomFromWKT(t, tt.wktOut)
 			expectGeomEq(t, got, want)
 		})

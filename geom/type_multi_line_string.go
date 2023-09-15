@@ -332,23 +332,23 @@ func (m MultiLineString) Coordinates() []Sequence {
 }
 
 // TransformXY transforms this MultiLineString into another MultiLineString according to fn.
-func (m MultiLineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiLineString, error) {
+func (m MultiLineString) TransformXY(fn func(XY) XY) MultiLineString {
 	n := m.NumLineStrings()
 	if n == 0 {
-		return MultiLineString{}.ForceCoordinatesType(m.CoordinatesType()), nil
+		return MultiLineString{}.ForceCoordinatesType(m.CoordinatesType())
 	}
 	transformed := make([]LineString, n)
 	for i := 0; i < n; i++ {
 		var err error
 		transformed[i], err = NewLineString(
 			transformSequence(m.LineStringN(i).Coordinates(), fn),
-			opts...,
+			DisableAllValidations,
 		)
 		if err != nil {
-			return MultiLineString{}, wrapTransformed(err)
+			panic("non-validating ctor failed: " + err.Error())
 		}
 	}
-	return NewMultiLineString(transformed, opts...), nil
+	return NewMultiLineString(transformed)
 }
 
 // Length gives the sum of the lengths of the constituent members of the multi
