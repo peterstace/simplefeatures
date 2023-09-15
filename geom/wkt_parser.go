@@ -17,7 +17,7 @@ import (
 // Geometry.
 func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 	p := newParser(wkt, opts)
-	geom, err := p.nextGeometryTaggedText()
+	g, err := p.nextGeometryTaggedText()
 	if err != nil {
 		return Geometry{}, err
 	}
@@ -27,7 +27,13 @@ func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 	} else if err != wktUnexpectedEOF {
 		return Geometry{}, err
 	}
-	return geom, nil
+
+	if !newOptionSet(opts).skipValidations {
+		if err := g.Validate(); err != nil {
+			return Geometry{}, err
+		}
+	}
+	return g, nil
 }
 
 func wantButGot(wantTok, gotTok string) error {
@@ -60,8 +66,7 @@ func (p *parser) nextGeometryTaggedText() (Geometry, error) {
 		if !ok {
 			return NewEmptyPoint(ctype).AsGeometry(), nil
 		}
-		pt, err := NewPoint(c, p.opts...)
-		return pt.AsGeometry(), err
+		return NewPoint(c).AsGeometry(), nil
 	case "LINESTRING":
 		ls, err := p.nextLineStringText(ctype)
 		return ls.AsGeometry(), err
@@ -257,7 +262,7 @@ func (p *parser) nextLineStringText(ctype CoordinatesType) (LineString, error) {
 		}
 	}
 	seq := NewSequence(floats, ctype)
-	return NewLineString(seq, p.opts...)
+	return NewLineString(seq), nil
 }
 
 func (p *parser) nextPolygonText(ctype CoordinatesType) (Polygon, error) {
@@ -268,7 +273,7 @@ func (p *parser) nextPolygonText(ctype CoordinatesType) (Polygon, error) {
 	if len(rings) == 0 {
 		return Polygon{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewPolygon(rings, p.opts...)
+	return NewPolygon(rings), nil
 }
 
 func (p *parser) nextMultiLineString(ctype CoordinatesType) (MultiLineString, error) {
@@ -279,7 +284,7 @@ func (p *parser) nextMultiLineString(ctype CoordinatesType) (MultiLineString, er
 	if len(lss) == 0 {
 		return MultiLineString{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewMultiLineString(lss, p.opts...), nil
+	return NewMultiLineString(lss), nil
 }
 
 func (p *parser) nextPolygonOrMultiLineStringText(ctype CoordinatesType) ([]LineString, error) {
@@ -326,11 +331,7 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) (MultiPoint, error) {
 				return MultiPoint{}, err
 			}
 			if ok {
-				pt, err := NewPoint(coords, p.opts...)
-				if err != nil {
-					return MultiPoint{}, err
-				}
-				points = append(points, pt)
+				points = append(points, NewPoint(coords))
 			} else {
 				points = append(points, NewEmptyPoint(ctype))
 			}
@@ -346,7 +347,7 @@ func (p *parser) nextMultiPointText(ctype CoordinatesType) (MultiPoint, error) {
 	if len(points) == 0 {
 		return MultiPoint{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewMultiPoint(points, p.opts...), nil
+	return NewMultiPoint(points), nil
 }
 
 func (p *parser) nextMultiPointStylePoint(ctype CoordinatesType) (Coordinates, bool, error) {
@@ -408,7 +409,7 @@ func (p *parser) nextMultiPolygonText(ctype CoordinatesType) (MultiPolygon, erro
 	if len(polys) == 0 {
 		return MultiPolygon{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewMultiPolygon(polys, p.opts...)
+	return NewMultiPolygon(polys), nil
 }
 
 func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryCollection, error) {
@@ -436,5 +437,5 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryColl
 	if len(geoms) == 0 {
 		return GeometryCollection{}.ForceCoordinatesType(ctype), nil
 	}
-	return NewGeometryCollection(geoms, p.opts...), nil
+	return NewGeometryCollection(geoms), nil
 }

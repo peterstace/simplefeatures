@@ -20,13 +20,6 @@ func regularPolygon(center geom.XY, radius float64, sides int) geom.Polygon {
 	}
 	coords[2*sides+0] = coords[0]
 	coords[2*sides+1] = coords[1]
-	ring, err := geom.NewLineString(geom.NewSequence(coords, geom.DimXY), geom.DisableAllValidations)
-	if err != nil {
-		panic(err)
-	}
-	poly, err := geom.NewPolygon([]geom.LineString{ring}, geom.DisableAllValidations)
-	if err != nil {
-		panic(err)
-	}
-	return poly
+	ring := geom.NewLineString(geom.NewSequence(coords, geom.DimXY))
+	return geom.NewPolygon([]geom.LineString{ring})
 }

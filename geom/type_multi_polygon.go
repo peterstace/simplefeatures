@@ -21,13 +21,9 @@ type MultiPolygon struct {
 // coordinates type of the MultiPolygon is the lowest common coordinates type
 // of its Polygons.
 //
-// The Polygons that make up a MultiPolygon are constrained by a set of
-// validation rules. If these are violated, then an error is returned (see the
-// Validate method for details).
-//
-// Note that this constructor doesn't check the validity of its Polygon
-// arguments.
-func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, error) {
+// It doesn't perform any validation on the result. The Validate method can be
+// used to check the validity of the result if needed.
+func NewMultiPolygon(polys []Polygon) MultiPolygon {
 	ctype := DimXY
 	if len(polys) > 0 {
 		ctype = DimXYZM
@@ -39,16 +35,7 @@ func NewMultiPolygon(polys []Polygon, opts ...ConstructorOption) (MultiPolygon, 
 	for i := range polys {
 		polys[i] = polys[i].ForceCoordinatesType(ctype)
 	}
-	mp := MultiPolygon{polys, ctype}
-
-	os := newOptionSet(opts)
-	if os.skipValidations {
-		return mp, nil
-	}
-	if err := mp.checkMultiPolygonConstraints(); err != nil {
-		return MultiPolygon{}, err
-	}
-	return mp, nil
+	return MultiPolygon{polys, ctype}
 }
 
 // Validate checks if the MultiPolygon is valid.
@@ -352,10 +339,7 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY) MultiPolygon {
 	for i := range polys {
 		polys[i] = m.PolygonN(i).TransformXY(fn)
 	}
-	mp, err := NewMultiPolygon(polys, DisableAllValidations)
-	if err != nil {
-		panic("non-validating ctor failed: " + err.Error())
-	}
+	mp := NewMultiPolygon(polys)
 	return mp.ForceCoordinatesType(m.ctype)
 }
 
@@ -578,6 +562,11 @@ func (m MultiPolygon) Simplify(threshold float64, opts ...ConstructorOption) (Mu
 			polys = append(polys, poly)
 		}
 	}
-	simpl, err := NewMultiPolygon(polys, opts...)
-	return simpl, wrapSimplified(err)
+	simpl := NewMultiPolygon(polys)
+	if !newOptionSet(opts).skipValidations {
+		if err := simpl.Validate(); err != nil {
+			return simpl, wrapSimplified(err)
+		}
+	}
+	return simpl, nil
 }

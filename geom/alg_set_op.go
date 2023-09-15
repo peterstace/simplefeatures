@@ -81,6 +81,9 @@ func setOp(a Geometry, include func([2]bool) bool, b Geometry) (Geometry, error)
 	if err != nil {
 		return Geometry{}, wrap(err, "internal error extracting geometry")
 	}
+	if err := g.Validate(); err != nil {
+		return Geometry{}, wrap(err, "invalid geometry produced by overlay")
+	}
 	return g, nil
 }
 

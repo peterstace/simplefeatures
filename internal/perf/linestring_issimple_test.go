@@ -32,10 +32,7 @@ func BenchmarkLineStringIsSimpleZigZag(b *testing.B) {
 				floats[2*i+1] = float64(i) * 0.01
 			}
 			seq := geom.NewSequence(floats, geom.DimXY)
-			ls, err := geom.NewLineString(seq)
-			if err != nil {
-				b.Fatal(err)
-			}
+			ls := geom.NewLineString(seq)
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {

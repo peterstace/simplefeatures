@@ -46,8 +46,7 @@ func TestZeroValueGeometries(t *testing.T) {
 
 func TestEmptySliceConstructors(t *testing.T) {
 	t.Run("Polygon", func(t *testing.T) {
-		p, err := NewPolygon(nil)
-		expectNoErr(t, err)
+		p := NewPolygon(nil)
 		expectBoolEq(t, p.IsEmpty(), true)
 		expectCoordinatesTypeEq(t, p.CoordinatesType(), DimXY)
 	})
@@ -62,8 +61,7 @@ func TestEmptySliceConstructors(t *testing.T) {
 		expectCoordinatesTypeEq(t, mls.CoordinatesType(), DimXY)
 	})
 	t.Run("MultiPolygon", func(t *testing.T) {
-		mp, err := NewMultiPolygon(nil)
-		expectNoErr(t, err)
+		mp := NewMultiPolygon(nil)
 		expectIntEq(t, mp.NumPolygons(), 0)
 		expectCoordinatesTypeEq(t, mp.CoordinatesType(), DimXY)
 	})

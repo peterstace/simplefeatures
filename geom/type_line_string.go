@@ -15,19 +15,12 @@ type LineString struct {
 	seq Sequence
 }
 
-// NewLineString creates a new LineString from a Sequence of points. An error
-// is returned if the LineString would be invalid (see the Validate method for
-// details).
-func NewLineString(seq Sequence, opts ...ConstructorOption) (LineString, error) {
-	ls := LineString{seq}
-	co := newOptionSet(opts)
-	if co.skipValidations {
-		return ls, nil
-	}
-	if err := ls.Validate(); err != nil {
-		return LineString{}, err
-	}
-	return ls, nil
+// NewLineString creates a new LineString from a Sequence of points.
+//
+// It doesn't perform any validation on the result. The Validate method can be
+// used to check the validity of the result if needed.
+func NewLineString(seq Sequence) LineString {
+	return LineString{seq}
 }
 
 // Validate checks if the LineString is valid. For it to be valid, the
@@ -306,11 +299,7 @@ func (s LineString) Coordinates() Sequence {
 // TransformXY transforms this LineString into another LineString according to fn.
 func (s LineString) TransformXY(fn func(XY) XY) LineString {
 	transformed := transformSequence(s.seq, fn)
-	ls, err := NewLineString(transformed, DisableAllValidations)
-	if err != nil {
-		panic("non-validating ctor failed: " + err.Error())
-	}
-	return ls
+	return NewLineString(transformed)
 }
 
 // IsRing returns true iff this LineString is both simple and closed (i.e. is a
@@ -434,8 +423,8 @@ func (s LineString) Simplify(threshold float64) LineString {
 	seq := s.Coordinates()
 	floats := ramerDouglasPeucker(nil, seq, threshold)
 	seq = NewSequence(floats, seq.CoordinatesType())
-	ls, err := NewLineString(seq)
-	if err != nil {
+	ls := NewLineString(seq)
+	if err := ls.Validate(); err != nil {
 		return LineString{}.ForceCoordinatesType(s.CoordinatesType())
 	}
 	return ls

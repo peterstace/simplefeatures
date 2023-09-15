@@ -197,6 +197,7 @@ func appendPoints(points []XY, g Geometry) []XY {
 	return points
 }
 
+// TODO: remove error?
 func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, error) {
 	var newCoords []float64
 	seq := ls.Coordinates()
@@ -245,11 +246,7 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 		newCoords = append(newCoords, last.X, last.Y)
 	}
 
-	newLS, err := NewLineString(NewSequence(newCoords, DimXY), DisableAllValidations)
-	if err != nil {
-		return LineString{}, err
-	}
-	return newLS, nil
+	return NewLineString(NewSequence(newCoords, DimXY)), nil
 }
 
 func reNodeMultiLineString(mls MultiLineString, cut cutSet, nodes nodeSet) (MultiLineString, error) {
@@ -262,9 +259,10 @@ func reNodeMultiLineString(mls MultiLineString, cut cutSet, nodes nodeSet) (Mult
 			return MultiLineString{}, err
 		}
 	}
-	return NewMultiLineString(lss, DisableAllValidations), nil
+	return NewMultiLineString(lss), nil
 }
 
+// TODO: remove error handling?
 func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) (Polygon, error) {
 	reNodedBoundary, err := reNodeMultiLineString(poly.Boundary(), cut, nodes)
 	if err != nil {
@@ -275,13 +273,10 @@ func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) (Polygon, error) {
 	for i := 0; i < n; i++ {
 		rings[i] = reNodedBoundary.LineStringN(i)
 	}
-	reNodedPoly, err := NewPolygon(rings, DisableAllValidations)
-	if err != nil {
-		return Polygon{}, err
-	}
-	return reNodedPoly, nil
+	return NewPolygon(rings), nil
 }
 
+// TODO: no error handling
 func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet) (MultiPolygon, error) {
 	n := mp.NumPolygons()
 	polys := make([]Polygon, n)
@@ -292,13 +287,10 @@ func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet) (Multi
 			return MultiPolygon{}, err
 		}
 	}
-	reNodedMP, err := NewMultiPolygon(polys, DisableAllValidations)
-	if err != nil {
-		return MultiPolygon{}, err
-	}
-	return reNodedMP, nil
+	return NewMultiPolygon(polys), nil
 }
 
+// TODO: no error handling
 func reNodeGeometryCollection(gc GeometryCollection, cut cutSet, nodes nodeSet) (GeometryCollection, error) {
 	n := gc.NumGeometries()
 	geoms := make([]Geometry, n)
@@ -309,5 +301,5 @@ func reNodeGeometryCollection(gc GeometryCollection, cut cutSet, nodes nodeSet) 
 			return GeometryCollection{}, err
 		}
 	}
-	return NewGeometryCollection(geoms, DisableAllValidations), nil
+	return NewGeometryCollection(geoms), nil
 }

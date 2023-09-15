@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"fmt"
 	"sort"
 )
 
@@ -36,13 +35,13 @@ func convexHull(g Geometry) Geometry {
 		floats[2*i+1] = hull[i].Y
 	}
 	seq := NewSequence(floats, DimXY)
-	ring, err := NewLineString(seq)
-	if err != nil {
-		panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid ring: %w", err))
+	ring := NewLineString(seq)
+	if err := ring.Validate(); err != nil {
+		panic("bug in monotoneChain routine - didn't produce a valid ring: " + err.Error())
 	}
-	poly, err := NewPolygon([]LineString{ring})
-	if err != nil {
-		panic(fmt.Errorf("bug in monotoneChain routine - didn't produce a valid polygon: %w", err))
+	poly := NewPolygon([]LineString{ring})
+	if err := poly.Validate(); err != nil {
+		panic("bug in monotoneChain routine - didn't produce a valid polygon: " + err.Error())
 	}
 	return poly.AsGeometry()
 }

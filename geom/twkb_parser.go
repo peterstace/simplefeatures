@@ -15,7 +15,15 @@ import (
 func UnmarshalTWKB(twkb []byte, opts ...ConstructorOption) (Geometry, error) {
 	p := newtwkbParser(twkb, opts...)
 	g, err := p.nextGeometry()
-	return g, p.annotateError(err)
+	if err != nil {
+		return Geometry{}, p.annotateError(err)
+	}
+	if !newOptionSet(opts).skipValidations {
+		if err := g.Validate(); err != nil {
+			return Geometry{}, err
+		}
+	}
+	return g, nil
 }
 
 // UnmarshalTWKBWithHeaders parses a Tiny Well Known Binary (TWKB),
@@ -32,6 +40,11 @@ func UnmarshalTWKBWithHeaders(twkb []byte, opts ...ConstructorOption) (g Geometr
 	g, err = p.nextGeometry()
 	if err != nil {
 		return Geometry{}, nil, nil, p.annotateError(err)
+	}
+	if !newOptionSet(opts).skipValidations {
+		if err := g.Validate(); err != nil {
+			return Geometry{}, nil, nil, err
+		}
 	}
 	if p.hasBBox {
 		bbox, err = UnmarshalTWKBBoundingBoxHeader(twkb)
@@ -95,7 +108,7 @@ func UnmarshalTWKBEnvelope(twkb []byte) (Envelope, error) {
 type twkbParser struct {
 	twkb []byte
 	pos  int
-	opts []ConstructorOption
+	opts []ConstructorOption // TODO: remove me
 
 	kind  twkbGeometryType
 	ctype CoordinatesType
@@ -407,12 +420,12 @@ func (p *twkbParser) nextPoint() (Point, error) {
 		c.M = coords[2]
 	}
 
-	return NewPoint(c, p.opts...)
+	return NewPoint(c), nil
 }
 
 func (p *twkbParser) parseLineString() (LineString, error) {
 	if p.isEmpty {
-		return NewLineString(NewSequence(nil, p.ctype), p.opts...)
+		return NewLineString(NewSequence(nil, p.ctype)), nil
 	}
 	return p.nextLineString()
 }
@@ -422,12 +435,12 @@ func (p *twkbParser) nextLineString() (LineString, error) {
 	if err != nil {
 		return LineString{}, err
 	}
-	return NewLineString(NewSequence(coords, p.ctype), p.opts...)
+	return NewLineString(NewSequence(coords, p.ctype)), nil
 }
 
 func (p *twkbParser) parsePolygon() (Polygon, error) {
 	if p.isEmpty {
-		return NewPolygon(nil, p.opts...)
+		return NewPolygon(nil), nil
 	}
 	return p.nextPolygon()
 }
@@ -469,18 +482,15 @@ func (p *twkbParser) nextPolygon() (Polygon, error) {
 				}
 			}
 		}
-		ls, err := NewLineString(NewSequence(coords, p.ctype), p.opts...)
-		if err != nil {
-			return Polygon{}, err
-		}
+		ls := NewLineString(NewSequence(coords, p.ctype))
 		rings = append(rings, ls)
 	}
-	return NewPolygon(rings, p.opts...)
+	return NewPolygon(rings), nil
 }
 
 func (p *twkbParser) parseMultiPoint() (MultiPoint, error) {
 	if p.isEmpty {
-		return NewMultiPoint(nil, p.opts...), nil
+		return NewMultiPoint(nil), nil
 	}
 	return p.nextMultiPoint()
 }
@@ -501,12 +511,12 @@ func (p *twkbParser) nextMultiPoint() (MultiPoint, error) {
 		}
 		pts = append(pts, pt)
 	}
-	return NewMultiPoint(pts, p.opts...), nil
+	return NewMultiPoint(pts), nil
 }
 
 func (p *twkbParser) parseMultiLineString() (MultiLineString, error) {
 	if p.isEmpty {
-		return NewMultiLineString(nil, p.opts...), nil
+		return NewMultiLineString(nil), nil
 	}
 	return p.nextMultiLineString()
 }
@@ -527,12 +537,12 @@ func (p *twkbParser) nextMultiLineString() (MultiLineString, error) {
 		}
 		lines = append(lines, ls)
 	}
-	return NewMultiLineString(lines, p.opts...), nil
+	return NewMultiLineString(lines), nil
 }
 
 func (p *twkbParser) parseMultiPolygon() (MultiPolygon, error) {
 	if p.isEmpty {
-		return NewMultiPolygon(nil, p.opts...)
+		return NewMultiPolygon(nil), nil
 	}
 	return p.nextMultiPolygon()
 }
@@ -553,12 +563,12 @@ func (p *twkbParser) nextMultiPolygon() (MultiPolygon, error) {
 		}
 		polys = append(polys, poly)
 	}
-	return NewMultiPolygon(polys, p.opts...)
+	return NewMultiPolygon(polys), nil
 }
 
 func (p *twkbParser) parseGeometryCollection() (GeometryCollection, error) {
 	if p.isEmpty {
-		return NewGeometryCollection(nil, p.opts...), nil
+		return NewGeometryCollection(nil), nil
 	}
 	return p.nextGeometryCollection()
 }
@@ -582,7 +592,7 @@ func (p *twkbParser) nextGeometryCollection() (GeometryCollection, error) {
 		p.pos += nbytes // Sub-parser's geometry has been read, so ensure it is skipped.
 		geoms = append(geoms, g)
 	}
-	return NewGeometryCollection(geoms, p.opts...), nil
+	return NewGeometryCollection(geoms), nil
 }
 
 // Read a number of points then convert that many points from int to float coords.

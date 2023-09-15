@@ -57,7 +57,16 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 		ctype = DimXYZ
 	}
 
-	return geojsonNodeToGeometry(rootObj, ctype, opts)
+	g, err := geojsonNodeToGeometry(rootObj, ctype, opts)
+	if err != nil {
+		return Geometry{}, err
+	}
+	if !newOptionSet(opts).skipValidations {
+		if err := g.Validate(); err != nil {
+			return Geometry{}, err
+		}
+	}
+	return g, nil
 }
 
 type geojsonNode struct {
@@ -234,19 +243,18 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 	}
 }
 
+// TODO: remove opts argument
 func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []ConstructorOption) (Geometry, error) {
 	switch node := node.(type) {
 	case geojsonPoint:
 		coords, ok := oneDimFloat64sToCoordinates(node.coords, ctype)
 		if ok {
-			pt, err := NewPoint(coords, opts...)
-			return pt.AsGeometry(), err
+			return NewPoint(coords).AsGeometry(), nil
 		}
 		return NewEmptyPoint(ctype).AsGeometry(), nil
 	case geojsonLineString:
 		seq := twoDimFloat64sToSequence(node.coords, ctype)
-		ls, err := NewLineString(seq, opts...)
-		return ls.AsGeometry(), err
+		return NewLineString(seq).AsGeometry(), nil
 	case geojsonPolygon:
 		if len(node.coords) == 0 {
 			return Polygon{}.ForceCoordinatesType(ctype).AsGeometry(), nil
@@ -254,14 +262,9 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 		rings := make([]LineString, len(node.coords))
 		for i, coords := range node.coords {
 			seq := twoDimFloat64sToSequence(coords, ctype)
-			var err error
-			rings[i], err = NewLineString(seq, opts...)
-			if err != nil {
-				return Geometry{}, err
-			}
+			rings[i] = NewLineString(seq)
 		}
-		poly, err := NewPolygon(rings, opts...)
-		return poly.AsGeometry(), err
+		return NewPolygon(rings).AsGeometry(), nil
 	case geojsonMultiPoint:
 		// GeoJSON MultiPoints cannot contain empty Points.
 		if len(node.coords) == 0 {
@@ -271,11 +274,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 		for i, coords := range node.coords {
 			coords, ok := oneDimFloat64sToCoordinates(coords, ctype)
 			if ok {
-				var err error
-				points[i], err = NewPoint(coords, opts...)
-				if err != nil {
-					return Geometry{}, err
-				}
+				points[i] = NewPoint(coords)
 			} else {
 				points[i] = NewEmptyPoint(ctype)
 			}
@@ -288,13 +287,9 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 		lss := make([]LineString, len(node.coords))
 		for i, coords := range node.coords {
 			seq := twoDimFloat64sToSequence(coords, ctype)
-			var err error
-			lss[i], err = NewLineString(seq, opts...)
-			if err != nil {
-				return Geometry{}, err
-			}
+			lss[i] = NewLineString(seq)
 		}
-		return NewMultiLineString(lss, opts...).AsGeometry(), nil
+		return NewMultiLineString(lss).AsGeometry(), nil
 	case geojsonMultiPolygon:
 		if len(node.coords) == 0 {
 			return MultiPolygon{}.ForceCoordinatesType(ctype).AsGeometry(), nil
@@ -304,21 +299,11 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 			rings := make([]LineString, len(coords))
 			for j, coords := range coords {
 				seq := twoDimFloat64sToSequence(coords, ctype)
-				var err error
-				rings[j], err = NewLineString(seq, opts...)
-				if err != nil {
-					return Geometry{}, err
-				}
+				rings[j] = NewLineString(seq)
 			}
-			var err error
-			polys[i], err = NewPolygon(rings, opts...)
-			if err != nil {
-				return Geometry{}, err
-			}
-			polys[i] = polys[i].ForceCoordinatesType(ctype)
+			polys[i] = NewPolygon(rings).ForceCoordinatesType(ctype)
 		}
-		mp, err := NewMultiPolygon(polys, opts...)
-		return mp.AsGeometry(), err
+		return NewMultiPolygon(polys).AsGeometry(), nil
 	case geojsonGeometryCollection:
 		if len(node.geoms) == 0 {
 			return GeometryCollection{}.ForceCoordinatesType(ctype).AsGeometry(), nil
@@ -331,7 +316,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 				return Geometry{}, err
 			}
 		}
-		return NewGeometryCollection(children, opts...).AsGeometry(), nil
+		return NewGeometryCollection(children).AsGeometry(), nil
 	default:
 		panic(fmt.Sprintf("unexpected node: %#v", node))
 	}

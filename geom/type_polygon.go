@@ -23,9 +23,9 @@ type Polygon struct {
 // is the empty Polygon. The coordinate type of the polygon is the lowest
 // common coordinate type of its rings.
 //
-// An error is returned if any of the Polygon constraints are not met (see the
-// Validate method for details).
-func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) {
+// It doesn't perform any validation on the result. The Validate method can be
+// used to check the validity of the result if needed.
+func NewPolygon(rings []LineString) Polygon {
 	ctype := DimXY
 	if len(rings) > 0 {
 		ctype = DimXYZM
@@ -37,16 +37,7 @@ func NewPolygon(rings []LineString, opts ...ConstructorOption) (Polygon, error) 
 	for i := range rings {
 		rings[i] = rings[i].ForceCoordinatesType(ctype)
 	}
-	poly := Polygon{rings, ctype}
-
-	os := newOptionSet(opts)
-	if os.skipValidations {
-		return poly, nil
-	}
-	if err := poly.Validate(); err != nil {
-		return Polygon{}, err
-	}
-	return poly, nil
+	return Polygon{rings, ctype}
 }
 
 // Validate checks if the Polygon is valid. For non-empty Polygons to be valid,
@@ -340,19 +331,10 @@ func (p Polygon) TransformXY(fn func(XY) XY) Polygon {
 	n := len(p.rings)
 	transformed := make([]LineString, n)
 	for i, r := range p.rings {
-		var err error
-		transformed[i], err = NewLineString(
-			transformSequence(r.Coordinates(), fn),
-			DisableAllValidations,
-		)
-		if err != nil {
-			panic("non-validating ctor failed: " + err.Error())
-		}
+		seq := transformSequence(r.Coordinates(), fn)
+		transformed[i] = NewLineString(seq)
 	}
-	poly, err := NewPolygon(transformed)
-	if err != nil {
-		panic("non-validating ctor failed: " + err.Error())
-	}
+	poly := NewPolygon(transformed)
 	return poly.ForceCoordinatesType(p.ctype)
 }
 
@@ -501,12 +483,7 @@ func (p Polygon) AsMultiPolygon() MultiPolygon {
 	if !p.IsEmpty() {
 		polys = []Polygon{p}
 	}
-	mp, err := NewMultiPolygon(polys)
-	if err != nil {
-		// Cannot occur due to construction. A valid polygon will always be a
-		// valid multipolygon.
-		panic(err)
-	}
+	mp := NewMultiPolygon(polys)
 	return mp.ForceCoordinatesType(p.ctype)
 }
 
@@ -695,6 +672,9 @@ func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon
 			rings = append(rings, interior)
 		}
 	}
-	simpl, err := NewPolygon(rings, opts...)
-	return simpl, wrapSimplified(err)
+	simpl := NewPolygon(rings)
+	if err := simpl.Validate(); err != nil {
+		return simpl, wrapSimplified(err)
+	}
+	return simpl, nil
 }

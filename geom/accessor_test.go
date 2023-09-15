@@ -25,13 +25,11 @@ func TestLineStringAccessor(t *testing.T) {
 	pt56 := xyCoords(5, 6)
 
 	t.Run("start", func(t *testing.T) {
-		want, err := NewPoint(pt12)
-		expectNoErr(t, err)
+		want := NewPoint(pt12)
 		expectGeomEq(t, ls.StartPoint().AsGeometry(), want.AsGeometry())
 	})
 	t.Run("end", func(t *testing.T) {
-		want, err := NewPoint(pt56)
-		expectNoErr(t, err)
+		want := NewPoint(pt56)
 		expectGeomEq(t, ls.EndPoint().AsGeometry(), want.AsGeometry())
 	})
 	t.Run("num points", func(t *testing.T) {
