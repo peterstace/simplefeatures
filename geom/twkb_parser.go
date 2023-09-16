@@ -13,7 +13,7 @@ import (
 // UnmarshalTWKB parses a Tiny Well Known Binary (TWKB), returning the
 // corresponding Geometry.
 func UnmarshalTWKB(twkb []byte, opts ...ConstructorOption) (Geometry, error) {
-	p := newtwkbParser(twkb, opts...)
+	p := newtwkbParser(twkb)
 	g, err := p.nextGeometry()
 	if err != nil {
 		return Geometry{}, p.annotateError(err)
@@ -36,7 +36,7 @@ func UnmarshalTWKB(twkb []byte, opts ...ConstructorOption) (Geometry, error) {
 // If there is an ID list header, the ids slice will be populated with the
 // IDs from that header. Otherwise, the slice is empty.
 func UnmarshalTWKBWithHeaders(twkb []byte, opts ...ConstructorOption) (g Geometry, bbox []Point, ids []int64, err error) {
-	p := newtwkbParser(twkb, opts...)
+	p := newtwkbParser(twkb)
 	g, err = p.nextGeometry()
 	if err != nil {
 		return Geometry{}, nil, nil, p.annotateError(err)
@@ -108,7 +108,6 @@ func UnmarshalTWKBEnvelope(twkb []byte) (Envelope, error) {
 type twkbParser struct {
 	twkb []byte
 	pos  int
-	opts []ConstructorOption // TODO: remove me
 
 	kind  twkbGeometryType
 	ctype CoordinatesType
@@ -133,10 +132,9 @@ type twkbParser struct {
 	refpoint [twkbMaxDimensions]int64
 }
 
-func newtwkbParser(twkb []byte, opts ...ConstructorOption) twkbParser {
+func newtwkbParser(twkb []byte) twkbParser {
 	return twkbParser{
 		twkb:       twkb,
-		opts:       opts,
 		ctype:      DimXY,
 		dimensions: 2,
 	}
@@ -583,7 +581,7 @@ func (p *twkbParser) nextGeometryCollection() (GeometryCollection, error) {
 	}
 	var geoms []Geometry
 	for i := 0; i < int(numGeoms); i++ {
-		subParser := newtwkbParser(p.twkb[p.pos:], p.opts...)
+		subParser := newtwkbParser(p.twkb[p.pos:])
 		g, nbytes, err := subParser.parseGeometry()
 		if err != nil {
 			p.pos += nbytes // Add sub-parser's last known position, for error reporting.

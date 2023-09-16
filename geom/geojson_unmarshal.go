@@ -57,7 +57,7 @@ func UnmarshalGeoJSON(input []byte, opts ...ConstructorOption) (Geometry, error)
 		ctype = DimXYZ
 	}
 
-	g, err := geojsonNodeToGeometry(rootObj, ctype, opts)
+	g, err := geojsonNodeToGeometry(rootObj, ctype)
 	if err != nil {
 		return Geometry{}, err
 	}
@@ -243,8 +243,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 	}
 }
 
-// TODO: remove opts argument
-func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []ConstructorOption) (Geometry, error) {
+func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType) (Geometry, error) {
 	switch node := node.(type) {
 	case geojsonPoint:
 		coords, ok := oneDimFloat64sToCoordinates(node.coords, ctype)
@@ -311,7 +310,7 @@ func geojsonNodeToGeometry(node interface{}, ctype CoordinatesType, opts []Const
 		children := make([]Geometry, len(node.geoms))
 		for i, child := range node.geoms {
 			var err error
-			children[i], err = geojsonNodeToGeometry(child, ctype, opts)
+			children[i], err = geojsonNodeToGeometry(child, ctype)
 			if err != nil {
 				return Geometry{}, err
 			}
