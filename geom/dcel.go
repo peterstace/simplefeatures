@@ -1,11 +1,8 @@
 package geom
 
-func newDCELFromGeometries(a, b Geometry) (*doublyConnectedEdgeList, error) {
+func newDCELFromGeometries(a, b Geometry) *doublyConnectedEdgeList {
 	ghosts := createGhosts(a, b)
-	a, b, ghosts, err := reNodeGeometries(a, b, ghosts)
-	if err != nil {
-		return nil, wrap(err, "re-noding")
-	}
+	a, b, ghosts = reNodeGeometries(a, b, ghosts)
 
 	interactions := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
 
@@ -19,7 +16,7 @@ func newDCELFromGeometries(a, b Geometry) (*doublyConnectedEdgeList, error) {
 	dcel.assignFaces()
 	dcel.populateInSetLabels()
 
-	return dcel, nil
+	return dcel
 }
 
 func newDCEL() *doublyConnectedEdgeList {

@@ -1184,17 +1184,11 @@ func TestBinaryOp(t *testing.T) {
 					{"rev", true},
 				} {
 					t.Run(swap.description, func(t *testing.T) {
-						var (
-							got string
-							err error
-						)
+						var got string
 						if swap.reverse {
-							got, err = geom.Relate(g2, g1)
+							got = geom.Relate(g2, g1)
 						} else {
-							got, err = geom.Relate(g1, g2)
-						}
-						if err != nil {
-							t.Fatal("could not perform relate op")
+							got = geom.Relate(g1, g2)
 						}
 
 						want := geomCase.relate
@@ -1291,10 +1285,7 @@ func TestBinaryOpBothInputsEmpty(t *testing.T) {
 				})
 			}
 			t.Run("relate", func(t *testing.T) {
-				got, err := geom.Relate(g, g)
-				if err != nil {
-					t.Fatal("could not perform relate op")
-				}
+				got := geom.Relate(g, g)
 				if got != "FFFFFFFF2" {
 					t.Errorf("got=%v but want=FFFFFFFF2", got)
 				}

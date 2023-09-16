@@ -927,10 +927,7 @@ func checkEqualityHeuristic(want, got geom.Geometry, log *log.Logger) error {
 }
 
 func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
-	got, err := geom.Relate(g1, g2)
-	if err != nil {
-		return err
-	}
+	got := geom.Relate(g1, g2)
 	want, err := h.relate(g1, g2)
 	if err != nil {
 		if err == errLibgeosCrash {

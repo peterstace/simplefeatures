@@ -306,11 +306,7 @@ func newDCELFromWKTs(t *testing.T, wktA, wktB string) *doublyConnectedEdgeList {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dcel, err := newDCELFromGeometries(gA, gB)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return dcel
+	return newDCELFromGeometries(gA, gB)
 }
 
 func newDCELFromWKT(t *testing.T, wkt string) *doublyConnectedEdgeList {

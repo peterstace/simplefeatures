@@ -20,12 +20,12 @@ package geom
 //
 // The matrix is represented by a 9 character string, with entries in row-major
 // order (i.e. entries are ordered II, IB, IE, BI, BB, BE, EI, EB, EE).
-func Relate(a, b Geometry) (string, error) {
+func Relate(a, b Geometry) string {
 	if a.IsEmpty() || b.IsEmpty() {
 		im := newMatrix()
 		im.set(imExterior, imExterior, '2')
 		if a.IsEmpty() && b.IsEmpty() {
-			return im.code(), nil
+			return im.code()
 		}
 
 		var flip bool
@@ -50,22 +50,20 @@ func Relate(a, b Geometry) (string, error) {
 		if flip {
 			im.transpose()
 		}
-		return im.code(), nil
+		return im.code()
 	}
 
-	overlay, err := newDCELFromGeometries(a, b)
-	if err != nil {
-		return "", wrap(err, "internal error creating overlay")
-	}
+	overlay := newDCELFromGeometries(a, b)
 	im := overlay.extractIntersectionMatrix()
-	return im.code(), nil
+	return im.code()
 }
 
+// TODO: this only returns an error when the patterns are invalid. However, the
+// patterns are hardcoded within simplefeatures and always valid. The error
+// should be removed (and the error removal bubbled up to other functions, such
+// as Equals).
 func relateMatchesAnyPattern(a, b Geometry, patterns ...string) (bool, error) {
-	mat, err := Relate(a, b)
-	if err != nil {
-		return false, err
-	}
+	mat := Relate(a, b)
 	for _, pat := range patterns {
 		match, err := RelateMatches(mat, pat)
 		if err != nil {
