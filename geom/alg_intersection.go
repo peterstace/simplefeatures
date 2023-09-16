@@ -17,8 +17,7 @@ func intersectionOfIndexedLines(
 			}
 			if inter.ptA == inter.ptB {
 				if xy := inter.ptA; !seen[xy] {
-					pt := xy.asUncheckedPoint()
-					pts = append(pts, pt)
+					pts = append(pts, xy.AsPoint())
 					seen[xy] = true
 				}
 			} else {

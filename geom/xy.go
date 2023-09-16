@@ -26,25 +26,10 @@ func (w XY) validate() error {
 // AsPoint is a convenience function to convert this XY value into a Point
 // geometry.
 //
-// TODO: remove the error from the return
-func (w XY) AsPoint(opts ...ConstructorOption) (Point, error) {
+// It doesn't check the validity of the resulting Point.
+func (w XY) AsPoint() Point {
 	coords := Coordinates{XY: w, Type: DimXY}
-	pt := NewPoint(coords)
-	if !newOptionSet(opts).skipValidations {
-		if err := pt.Validate(); err != nil {
-			return Point{}, err
-		}
-	}
-	return pt, nil
-}
-
-// asUncheckedPoint is a convenience function to convert this XY value into a
-// Point. The Point is constructed without checking any validations. It may be
-// used internally when the caller is sure that the XY value doesn't come
-// directly from outside of the library without first being validated.
-func (w XY) asUncheckedPoint() Point {
-	coords := Coordinates{XY: w, Type: DimXY}
-	return newUncheckedPoint(coords)
+	return NewPoint(coords)
 }
 
 // uncheckedEnvelope is a convenience function to convert this XY value into

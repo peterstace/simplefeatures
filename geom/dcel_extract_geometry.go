@@ -270,6 +270,8 @@ func shouldExtractLine(e *halfEdgeRecord, include func([2]bool) bool) bool {
 // extractPoints extracts any vertices in the DCEL that should be part of the
 // output geometry, but aren't yet represented as part of any previously
 // extracted geometries.
+//
+// TODO: remove error from signature
 func (d *doublyConnectedEdgeList) extractPoints(include func([2]bool) bool) ([]Point, error) {
 	xys := make([]XY, 0, len(d.vertices))
 	for _, vert := range d.vertices {
@@ -285,11 +287,7 @@ func (d *doublyConnectedEdgeList) extractPoints(include func([2]bool) bool) ([]P
 
 	pts := make([]Point, 0, len(xys))
 	for _, xy := range xys {
-		pt, err := xy.AsPoint()
-		if err != nil {
-			return nil, err
-		}
-		pts = append(pts, pt)
+		pts = append(pts, xy.AsPoint())
 	}
 	return pts, nil
 }
