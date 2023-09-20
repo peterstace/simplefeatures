@@ -34,9 +34,8 @@ func NewMultiPoint(pts []Point) MultiPoint {
 	return MultiPoint{forced, ctype}
 }
 
-// Validate checks if the MultiPoint is valid. MultiPoints are unconstrained
-// collections, however this method additionally checks that each child Point
-// is valid.
+// Validate checks if the MultiPoint is valid. The only validation rule is that
+// each point in the collection must be valid.
 func (m MultiPoint) Validate() error {
 	for i, pt := range m.points {
 		if err := pt.Validate(); err != nil {

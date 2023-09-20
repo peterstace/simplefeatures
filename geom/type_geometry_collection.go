@@ -38,9 +38,8 @@ func NewGeometryCollection(geoms []Geometry) GeometryCollection {
 	return GeometryCollection{geoms, ctype}
 }
 
-// Validate checks if the GeometryCollection is valid. GeometryCollections are
-// unconstrained collections, however this method additionally checks that each
-// child Geometry is valid.
+// Validate checks if the GeometryCollection is valid. The only validation rule
+// is that each geometry in the collection must be valid.
 func (c GeometryCollection) Validate() error {
 	for i, g := range c.geoms {
 		if err := g.Validate(); err != nil {

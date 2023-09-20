@@ -43,12 +43,10 @@ func NewMultiPolygon(polys []Polygon) MultiPolygon {
 // The Polygons that make up a MultiPolygon are constrained by the following
 // rules:
 //
-//  1. The interiors of any two child polygons must not intersect.
-//  2. The boundaries of any two child polygons may touch only at a finite
+//  1. Each child polygon must be valid.
+//  2. The interiors of any two child polygons must not intersect.
+//  3. The boundaries of any two child polygons may touch only at a finite
 //     number of points.
-//
-// In addition to these constraints, this method also checks if each child
-// Polygon is valid.
 func (m MultiPolygon) Validate() error {
 	for i, poly := range m.polys {
 		if err := poly.Validate(); err != nil {
