@@ -20,12 +20,9 @@ type GeometryCollection struct {
 // type of the GeometryCollection is the lowest common coordinates type of its
 // child geometries.
 //
-// Because GeometryCollections are unconstrained collections, this construction
-// function doesn't return an error.
-//
-// Note that this constructor doesn't check the validity of its Polygon
-// arguments.
-func NewGeometryCollection(geoms []Geometry, opts ...ConstructorOption) GeometryCollection {
+// It doesn't perform any validation on the result. The Validate method can be
+// used to check the validity of the result if needed.
+func NewGeometryCollection(geoms []Geometry) GeometryCollection {
 	if len(geoms) == 0 {
 		return GeometryCollection{}
 	}
@@ -552,5 +549,5 @@ func (c GeometryCollection) Simplify(threshold float64, opts ...ConstructorOptio
 			return GeometryCollection{}, wrapSimplified(err)
 		}
 	}
-	return NewGeometryCollection(geoms, opts...), nil
+	return NewGeometryCollection(geoms), nil
 }

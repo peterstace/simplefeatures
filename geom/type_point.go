@@ -18,18 +18,12 @@ type Point struct {
 	full   bool
 }
 
-// NewPoint creates a new point given its Coordinates. An error is returned for
-// invalid points (see the Validate method for details).
-func NewPoint(c Coordinates, opts ...ConstructorOption) (Point, error) {
-	pt := newUncheckedPoint(c)
-	os := newOptionSet(opts)
-	if os.skipValidations {
-		return pt, nil
-	}
-	if err := pt.Validate(); err != nil {
-		return Point{}, err
-	}
-	return pt, nil
+// NewPoint creates a new point given its Coordinates.
+//
+// It doesn't perform any validation on the result. The Validate method can be
+// used to check the validity of the result if needed.
+func NewPoint(c Coordinates) Point {
+	return Point{c, true}
 }
 
 // Validate checks if the Point is valid. For it to be valid, it must be empty
@@ -57,6 +51,8 @@ func (p Point) Validate() error {
 // geometry that has been validated. Technically, these calculations could
 // overflow to +/- inf. However if control points are originally close to
 // infinity, many of the algorithms will be already broken in many other ways.
+//
+// TODO: this is the same as NewPoint, so it should be removed.
 func newUncheckedPoint(c Coordinates) Point {
 	return Point{c, true}
 }

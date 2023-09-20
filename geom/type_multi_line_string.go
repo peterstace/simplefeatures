@@ -22,12 +22,9 @@ type MultiLineString struct {
 // LineStrings. The coordinates type of the MultiLineString is the lowest
 // common coordinates type of its LineStrings.
 //
-// Because MultiLineStrings are unconstrained collections, this constructor
-// function doesn't return an error.
-//
-// Note that this constructor doesn't check the validity of its LineString
-// arguments.
-func NewMultiLineString(lines []LineString, opts ...ConstructorOption) MultiLineString {
+// It doesn't perform any validation on the result. The Validate method can be
+// used to check the validity of the result if needed.
+func NewMultiLineString(lines []LineString) MultiLineString {
 	if len(lines) == 0 {
 		return MultiLineString{}
 	}
@@ -339,14 +336,8 @@ func (m MultiLineString) TransformXY(fn func(XY) XY) MultiLineString {
 	}
 	transformed := make([]LineString, n)
 	for i := 0; i < n; i++ {
-		var err error
-		transformed[i], err = NewLineString(
-			transformSequence(m.LineStringN(i).Coordinates(), fn),
-			DisableAllValidations,
-		)
-		if err != nil {
-			panic("non-validating ctor failed: " + err.Error())
-		}
+		seq := transformSequence(m.LineStringN(i).Coordinates(), fn)
+		transformed[i] = NewLineString(seq)
 	}
 	return NewMultiLineString(transformed)
 }

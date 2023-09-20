@@ -18,12 +18,9 @@ type MultiPoint struct {
 // NewMultiPoint creates a MultiPoint from a list of Points. The coordinate
 // type of the MultiPoint is the lowest common coordinates type of its Points.
 //
-// Because MultiPoints are unconstrained collections, this constructor function
-// doesn't return an error.
-//
-// Note that this constructor doesn't check the validity of its Point
-// arguments.
-func NewMultiPoint(pts []Point, opts ...ConstructorOption) MultiPoint {
+// It doesn't perform any validation on the result. The Validate method can be
+// used to check the validity of the result if needed.
+func NewMultiPoint(pts []Point) MultiPoint {
 	if len(pts) == 0 {
 		return MultiPoint{}
 	}
@@ -228,11 +225,7 @@ func (m MultiPoint) TransformXY(fn func(XY) XY) MultiPoint {
 	for i, pt := range m.points {
 		if c, ok := pt.Coordinates(); ok {
 			c.XY = fn(c.XY)
-			var err error
-			txPoints[i], err = NewPoint(c, DisableAllValidations)
-			if err != nil {
-				panic("non-validating ctor failed: " + err.Error())
-			}
+			txPoints[i] = NewPoint(c)
 		} else {
 			txPoints[i] = pt
 		}

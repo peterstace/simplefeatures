@@ -32,19 +32,8 @@ func TestPointValidation(t *testing.T) {
 		{false, xy(-inf, -inf)},
 	} {
 		t.Run(fmt.Sprintf("point_%d", i), func(t *testing.T) {
-			t.Run("Constructor", func(t *testing.T) {
-				_, err := NewPoint(tc.input)
-				if tc.wantValid {
-					expectNoErr(t, err)
-				} else {
-					expectErr(t, err)
-				}
-			})
-			t.Run("Validate", func(t *testing.T) {
-				pt, err := NewPoint(tc.input, DisableAllValidations)
-				expectNoErr(t, err)
-				expectBoolEq(t, tc.wantValid, pt.Validate() == nil)
-			})
+			pt := NewPoint(tc.input)
+			expectBoolEq(t, tc.wantValid, pt.Validate() == nil)
 		})
 	}
 }
@@ -70,15 +59,8 @@ func TestLineStringValidation(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			seq := NewSequence(tc.inputs, DimXY)
-			t.Run("Constructor", func(t *testing.T) {
-				_, err := NewLineString(seq)
-				expectBoolEq(t, tc.wantValid, err == nil)
-			})
-			t.Run("Validate", func(t *testing.T) {
-				ls, err := NewLineString(seq, DisableAllValidations)
-				expectNoErr(t, err)
-				expectBoolEq(t, tc.wantValid, ls.Validate() == nil)
-			})
+			ls := NewLineString(seq)
+			expectBoolEq(t, tc.wantValid, ls.Validate() == nil)
 		})
 	}
 }
@@ -183,8 +165,7 @@ func TestMultiPointValidation(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var pts []Point
 			for _, c := range tc.coords {
-				pt, err := NewPoint(c, DisableAllValidations)
-				expectNoErr(t, err)
+				pt := NewPoint(c)
 				pts = append(pts, pt)
 			}
 			mp := NewMultiPoint(pts)
@@ -208,8 +189,7 @@ func TestMultiLineStringValidation(t *testing.T) {
 			var lss []LineString
 			for _, coords := range tc.coords {
 				seq := NewSequence(coords, DimXY)
-				ls, err := NewLineString(seq, DisableAllValidations)
-				expectNoErr(t, err)
+				ls := NewLineString(seq)
 				lss = append(lss, ls)
 			}
 			mls := NewMultiLineString(lss)
@@ -312,11 +292,7 @@ func TestMultiPolygonConstraintValidation(t *testing.T) {
 	expectNoErr(t, err)
 	expectErr(t, poly.Validate())
 
-	// The validity of the Polygon is not checked by the constructor and
-	// will only be caught by checking the validity of each input, or calling
-	// the Validate method.
-	mp, err := NewMultiPolygon([]Polygon{poly.MustAsPolygon()})
-	expectNoErr(t, err)
+	mp := NewMultiPolygon([]Polygon{poly.MustAsPolygon()})
 	expectErr(t, mp.Validate())
 }
 
