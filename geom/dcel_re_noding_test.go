@@ -64,10 +64,7 @@ func TestReNode(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			gotA, gotB, _, err := reNodeGeometries(inA, inB, MultiLineString{})
-			if err != nil {
-				t.Fatal(err)
-			}
+			gotA, gotB, _ := reNodeGeometries(inA, inB, MultiLineString{})
 			if !ExactEquals(gotA, wantA) || !ExactEquals(gotB, wantB) {
 				t.Logf("INPUT A: %v\n", inA.AsText())
 				t.Logf("INPUT B: %v\n", inB.AsText())
