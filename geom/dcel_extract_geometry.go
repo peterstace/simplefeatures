@@ -284,11 +284,7 @@ func (d *doublyConnectedEdgeList) extractPoints(include func([2]bool) bool) ([]P
 
 	pts := make([]Point, 0, len(xys))
 	for _, xy := range xys {
-		pt, err := xy.AsPoint()
-		if err != nil {
-			return nil, err
-		}
-		pts = append(pts, pt)
+		pts = append(pts, xy.AsPoint())
 	}
 	return pts, nil
 }

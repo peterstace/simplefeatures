@@ -25,19 +25,7 @@ func (w XY) validate() error {
 
 // AsPoint is a convenience function to convert this XY value into a Point
 // geometry.
-//
-// TODO: This method shouldn't return an error or accept ConstructorOptions.
-func (w XY) AsPoint(opts ...ConstructorOption) (Point, error) {
-	coords := Coordinates{XY: w, Type: DimXY}
-	pt := NewPoint(coords)
-	if err := validate(opts, pt); err != nil {
-		return Point{}, err
-	}
-	return pt, nil
-}
-
-// asPoint is a convenience function to convert this XY value into a Point.
-func (w XY) asPoint() Point {
+func (w XY) AsPoint() Point {
 	coords := Coordinates{XY: w, Type: DimXY}
 	return NewPoint(coords)
 }

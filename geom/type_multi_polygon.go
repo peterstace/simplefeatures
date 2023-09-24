@@ -373,7 +373,7 @@ func (m MultiPolygon) Centroid() Point {
 			weightedCentroid = weightedCentroid.Add(centroid.Scale(areas[i] / totalArea))
 		}
 	}
-	return weightedCentroid.asPoint()
+	return weightedCentroid.AsPoint()
 }
 
 // Reverse in the case of MultiPolygon outputs the component polygons in their original order,

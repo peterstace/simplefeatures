@@ -232,8 +232,8 @@ func checkAsBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
 	if err == nil {
 		wantDefined = true
 	}
-	hasPointEmpty := hasEmptyPoint(g)
-	if !wantDefined && !hasPointEmpty {
+	hAsPointEmpty := hasEmptyPoint(g)
+	if !wantDefined && !hAsPointEmpty {
 		return errors.New("AsBinary wasn't defined by libgeos and the test is " +
 			"NOT for a geometry containing a POINT EMPTY, which is unexpected",
 		)
