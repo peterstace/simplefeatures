@@ -181,7 +181,7 @@ func (m MultiLineString) IsSimple() bool {
 					return rtree.Stop
 				}
 				boundary := intersectionOfMultiPointAndMultiPoint(ls.Boundary(), otherLS.Boundary())
-				if !hasIntersectionPointWithMultiPoint(inter.ptA.asUncheckedPoint(), boundary) {
+				if !hasIntersectionPointWithMultiPoint(inter.ptA.asPoint(), boundary) {
 					isSimple = false
 					return rtree.Stop
 				}
@@ -364,7 +364,7 @@ func (m MultiLineString) Centroid() Point {
 	if sumLength == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return sumXY.Scale(1.0 / sumLength).asUncheckedPoint()
+	return sumXY.Scale(1.0 / sumLength).asPoint()
 }
 
 // Reverse in the case of MultiLineString outputs each component line string in their
@@ -428,7 +428,7 @@ func (m MultiLineString) PointOnSurface() Point {
 		seq := m.LineStringN(i).Coordinates()
 		n := seq.Length()
 		for j := 1; j < n-1; j++ {
-			candidate := seq.GetXY(j).asUncheckedPoint()
+			candidate := seq.GetXY(j).asPoint()
 			nearest.consider(candidate)
 		}
 	}

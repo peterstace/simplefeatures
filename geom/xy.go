@@ -36,16 +36,10 @@ func (w XY) AsPoint(opts ...ConstructorOption) (Point, error) {
 	return pt, nil
 }
 
-// asUncheckedPoint is a convenience function to convert this XY value into a
-// Point. The Point is constructed without checking any validations. It may be
-// used internally when the caller is sure that the XY value doesn't come
-// directly from outside of the library without first being validated.
-//
-// TODO: This method should be removed (caller can use AsPoint instead once its
-// ConstructorOptions and error are removed).
-func (w XY) asUncheckedPoint() Point {
+// asPoint is a convenience function to convert this XY value into a Point.
+func (w XY) asPoint() Point {
 	coords := Coordinates{XY: w, Type: DimXY}
-	return newUncheckedPoint(coords)
+	return NewPoint(coords)
 }
 
 // uncheckedEnvelope is a convenience function to convert this XY value into
