@@ -650,7 +650,7 @@ func (p Polygon) String() string {
 // one point). In these cases, an error is returned. Construction behaviour of
 // the output (which includes omitting errors) may be controlled via
 // ConstructorOptions.
-func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon, error) {
+func (p Polygon) Simplify(threshold float64, noValidate ...NoValidate) (Polygon, error) {
 	exterior := p.ExteriorRing().Simplify(threshold)
 
 	// If we don't have at least 4 coordinates, then we can't form a ring, and
@@ -673,8 +673,10 @@ func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon
 		}
 	}
 	simpl := NewPolygon(rings)
-	if err := validate(opts, simpl); err != nil {
-		return Polygon{}, wrapSimplified(err)
+	if len(noValidate) == 0 {
+		if err := simpl.Validate(); err != nil {
+			return Polygon{}, wrapSimplified(err)
+		}
 	}
 	return simpl, nil
 }

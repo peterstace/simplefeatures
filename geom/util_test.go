@@ -8,20 +8,20 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-func geomFromWKT(t testing.TB, wkt string, opts ...ConstructorOption) Geometry {
+func geomFromWKT(t testing.TB, wkt string, noValidate ...NoValidate) Geometry {
 	t.Helper()
-	geom, err := UnmarshalWKT(wkt, opts...)
+	geom, err := UnmarshalWKT(wkt, noValidate...)
 	if err != nil {
 		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 	}
 	return geom
 }
 
-func geomsFromWKTs(t testing.TB, wkts []string, opts ...ConstructorOption) []Geometry {
+func geomsFromWKTs(t testing.TB, wkts []string, noValidate ...NoValidate) []Geometry {
 	t.Helper()
 	var gs []Geometry
 	for _, wkt := range wkts {
-		g, err := UnmarshalWKT(wkt, opts...)
+		g, err := UnmarshalWKT(wkt, noValidate...)
 		if err != nil {
 			t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 		}
@@ -30,9 +30,9 @@ func geomsFromWKTs(t testing.TB, wkts []string, opts ...ConstructorOption) []Geo
 	return gs
 }
 
-func geomFromGeoJSON(t testing.TB, geojson string, opts ...ConstructorOption) Geometry {
+func geomFromGeoJSON(t testing.TB, geojson string, noValidate ...NoValidate) Geometry {
 	t.Helper()
-	g, err := UnmarshalGeoJSON([]byte(geojson), opts...)
+	g, err := UnmarshalGeoJSON([]byte(geojson), noValidate...)
 	if err != nil {
 		t.Fatalf("could not unmarshal GeoJSON:\n geojson: %s\n     err: %v", geojson, err)
 	}

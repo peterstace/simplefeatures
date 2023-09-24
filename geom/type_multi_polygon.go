@@ -548,11 +548,11 @@ func (m MultiPolygon) String() string {
 // Simplify to each child Polygon and constructing a new MultiPolygon from the
 // result. Any supplied ConstructorOptions will be used when simplifying each
 // child Polygon, or constructing the final MultiPolygon output.
-func (m MultiPolygon) Simplify(threshold float64, opts ...ConstructorOption) (MultiPolygon, error) {
+func (m MultiPolygon) Simplify(threshold float64, noValidate ...NoValidate) (MultiPolygon, error) {
 	n := m.NumPolygons()
 	polys := make([]Polygon, 0, n)
 	for i := 0; i < n; i++ {
-		poly, err := m.PolygonN(i).Simplify(threshold, opts...)
+		poly, err := m.PolygonN(i).Simplify(threshold, noValidate...)
 		if err != nil {
 			return MultiPolygon{}, err
 		}
@@ -561,8 +561,10 @@ func (m MultiPolygon) Simplify(threshold float64, opts ...ConstructorOption) (Mu
 		}
 	}
 	simpl := NewMultiPolygon(polys)
-	if err := validate(opts, simpl); err != nil {
-		return MultiPolygon{}, wrapSimplified(err)
+	if len(noValidate) == 0 {
+		if err := simpl.Validate(); err != nil {
+			return MultiPolygon{}, wrapSimplified(err)
+		}
 	}
 	return simpl, nil
 }

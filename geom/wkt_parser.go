@@ -15,7 +15,7 @@ import (
 
 // UnmarshalWKT parses a Well Known Text (WKT), and returns the corresponding
 // Geometry.
-func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
+func UnmarshalWKT(wkt string, noValidate ...NoValidate) (Geometry, error) {
 	p := newParser(wkt)
 	g, err := p.nextGeometryTaggedText()
 	if err != nil {
@@ -28,8 +28,10 @@ func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 		return Geometry{}, err
 	}
 
-	if err := validate(opts, g); err != nil {
-		return Geometry{}, err
+	if len(noValidate) == 0 {
+		if err := g.Validate(); err != nil {
+			return Geometry{}, err
+		}
 	}
 	return g, nil
 }

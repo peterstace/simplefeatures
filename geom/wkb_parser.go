@@ -9,7 +9,7 @@ import (
 
 // UnmarshalWKB reads the Well Known Binary (WKB), and returns the
 // corresponding Geometry.
-func UnmarshalWKB(wkb []byte, opts ...ConstructorOption) (Geometry, error) {
+func UnmarshalWKB(wkb []byte, noValidate ...NoValidate) (Geometry, error) {
 	// Note that we purposefully DON'T check for the presence of trailing
 	// bytes. There is nothing in the OGC spec indicating that trailing bytes
 	// are illegal. Some Esri software will add (useless) trailing bytes to
@@ -19,8 +19,10 @@ func UnmarshalWKB(wkb []byte, opts ...ConstructorOption) (Geometry, error) {
 	if err != nil {
 		return Geometry{}, err
 	}
-	if err := validate(opts, g); err != nil {
-		return Geometry{}, err
+	if len(noValidate) == 0 {
+		if err := g.Validate(); err != nil {
+			return Geometry{}, err
+		}
 	}
 	return g, nil
 }
