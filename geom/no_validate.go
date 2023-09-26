@@ -1,8 +1,13 @@
 package geom
 
-// NoValidate instructs geometry constructors to skip geometry constraint
-// validations. This allows simplefeatures to work with geometries that are
-// invalid.
+// NoValidate causes functions to skip geometry constraint validation.
+// Functions where validation can be skipped accepted as a variadic list of
+// NoValidate values. If at least one NoValidate value is passed in, then the
+// function will skip validation, otherwise it will perform validation as its
+// default behaviour.
+//
+// NoValidate is just an empty struct type, so can be passed in as
+// NoValidate{}.
 //
 // Some algorithms implemented in simplefeatures rely on valid geometries to
 // operate correctly. If invalid geometries are supplied, then the results may

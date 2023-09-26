@@ -8,9 +8,9 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-func geomFromWKT(t *testing.T, wkt string, noValidate ...geom.NoValidate) geom.Geometry {
+func geomFromWKT(t *testing.T, wkt string, nv ...geom.NoValidate) geom.Geometry {
 	t.Helper()
-	geom, err := geom.UnmarshalWKT(wkt, noValidate...)
+	geom, err := geom.UnmarshalWKT(wkt, nv...)
 	if err != nil {
 		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 	}

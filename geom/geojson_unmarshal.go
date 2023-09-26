@@ -6,7 +6,9 @@ import (
 )
 
 // UnmarshalGeoJSON unmarshals a geometry that is encoded as a GeoJSON Geometry Object.
-func UnmarshalGeoJSON(input []byte, noValidate ...NoValidate) (Geometry, error) {
+//
+// NoValidate{} can be passed in to disable geometry constraint validation.
+func UnmarshalGeoJSON(input []byte, nv ...NoValidate) (Geometry, error) {
 	var root geojsonNode
 	if err := json.Unmarshal(input, &root); err != nil {
 		return Geometry{}, wrapWithGeoJSONSyntaxError(err)
@@ -58,7 +60,7 @@ func UnmarshalGeoJSON(input []byte, noValidate ...NoValidate) (Geometry, error) 
 	}
 
 	g := geojsonNodeToGeometry(rootObj, ctype)
-	if len(noValidate) == 0 {
+	if len(nv) == 0 {
 		if err := g.Validate(); err != nil {
 			return Geometry{}, err
 		}
