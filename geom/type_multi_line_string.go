@@ -42,9 +42,8 @@ func NewMultiLineString(lines []LineString) MultiLineString {
 	return MultiLineString{lines, ctype}
 }
 
-// Validate checks if the MultiLineString is valid. MultiLineStrings are
-// unconstrained collections, however this method additionally checks that each
-// child LineString is valid.
+// Validate checks if the MultiLineString is valid. The only validation rule is
+// that each LineString in the collection must be valid.
 func (m MultiLineString) Validate() error {
 	for i, ls := range m.lines {
 		if err := ls.Validate(); err != nil {
