@@ -37,3 +37,11 @@ func newOptionSet(opts []ConstructorOption) ctorOptionSet {
 	}
 	return cos
 }
+
+func validate(opts []ConstructorOption, g interface{ Validate() error }) error {
+	os := newOptionSet(opts)
+	if os.skipValidations {
+		return nil
+	}
+	return g.Validate()
+}

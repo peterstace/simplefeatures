@@ -46,29 +46,32 @@ func TestZeroValueGeometries(t *testing.T) {
 
 func TestEmptySliceConstructors(t *testing.T) {
 	t.Run("Polygon", func(t *testing.T) {
-		p, err := NewPolygon(nil)
-		expectNoErr(t, err)
+		p := NewPolygon(nil)
+		expectNoErr(t, p.Validate())
 		expectBoolEq(t, p.IsEmpty(), true)
 		expectCoordinatesTypeEq(t, p.CoordinatesType(), DimXY)
 	})
 	t.Run("MultiPoint", func(t *testing.T) {
 		mp := NewMultiPoint(nil)
+		expectNoErr(t, mp.Validate())
 		expectIntEq(t, mp.NumPoints(), 0)
 		expectCoordinatesTypeEq(t, mp.CoordinatesType(), DimXY)
 	})
 	t.Run("MultiLineString", func(t *testing.T) {
 		mls := NewMultiLineString(nil)
+		expectNoErr(t, mls.Validate())
 		expectIntEq(t, mls.NumLineStrings(), 0)
 		expectCoordinatesTypeEq(t, mls.CoordinatesType(), DimXY)
 	})
 	t.Run("MultiPolygon", func(t *testing.T) {
-		mp, err := NewMultiPolygon(nil)
-		expectNoErr(t, err)
+		mp := NewMultiPolygon(nil)
+		expectNoErr(t, mp.Validate())
 		expectIntEq(t, mp.NumPolygons(), 0)
 		expectCoordinatesTypeEq(t, mp.CoordinatesType(), DimXY)
 	})
 	t.Run("GeometryCollection", func(t *testing.T) {
 		gc := NewGeometryCollection(nil)
+		expectNoErr(t, gc.Validate())
 		expectIntEq(t, gc.NumGeometries(), 0)
 		expectCoordinatesTypeEq(t, gc.CoordinatesType(), DimXY)
 	})

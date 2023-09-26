@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -49,15 +48,10 @@ func (ln line) centroid() XY {
 }
 
 func (ln line) asLineString() LineString {
-	ls, err := NewLineString(NewSequence([]float64{
+	return NewLineString(NewSequence([]float64{
 		ln.a.X, ln.a.Y,
 		ln.b.X, ln.b.Y,
 	}, DimXY))
-	if err != nil {
-		// Should not occur, because we know that a and b are distinct.
-		panic(fmt.Sprintf("could not create line string: %v", err))
-	}
-	return ls
 }
 
 func (ln line) intersectsXY(xy XY) bool {

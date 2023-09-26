@@ -61,6 +61,9 @@ func ulpSizeForLine(ln line) float64 {
 // such that when the two geometries are overlaid the only interactions
 // (including self-interactions) between geometries are at nodes. Nodes that
 // are close to each other are also snapped together.
+//
+// TODO: should be able to remove the error returns from this function and its
+// descendants.
 func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry, MultiLineString, error) {
 	// Calculate the maximum ULP size over all control points in the input
 	// geometries. This size is a good indication of the precision that we
@@ -245,11 +248,7 @@ func reNodeLineString(ls LineString, cut cutSet, nodes nodeSet) (LineString, err
 		newCoords = append(newCoords, last.X, last.Y)
 	}
 
-	newLS, err := NewLineString(NewSequence(newCoords, DimXY), DisableAllValidations)
-	if err != nil {
-		return LineString{}, err
-	}
-	return newLS, nil
+	return NewLineString(NewSequence(newCoords, DimXY)), nil
 }
 
 func reNodeMultiLineString(mls MultiLineString, cut cutSet, nodes nodeSet) (MultiLineString, error) {
@@ -262,7 +261,7 @@ func reNodeMultiLineString(mls MultiLineString, cut cutSet, nodes nodeSet) (Mult
 			return MultiLineString{}, err
 		}
 	}
-	return NewMultiLineString(lss, DisableAllValidations), nil
+	return NewMultiLineString(lss), nil
 }
 
 func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) (Polygon, error) {
@@ -275,11 +274,7 @@ func reNodePolygon(poly Polygon, cut cutSet, nodes nodeSet) (Polygon, error) {
 	for i := 0; i < n; i++ {
 		rings[i] = reNodedBoundary.LineStringN(i)
 	}
-	reNodedPoly, err := NewPolygon(rings, DisableAllValidations)
-	if err != nil {
-		return Polygon{}, err
-	}
-	return reNodedPoly, nil
+	return NewPolygon(rings), nil
 }
 
 func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet) (MultiPolygon, error) {
@@ -292,11 +287,7 @@ func reNodeMultiPolygonString(mp MultiPolygon, cut cutSet, nodes nodeSet) (Multi
 			return MultiPolygon{}, err
 		}
 	}
-	reNodedMP, err := NewMultiPolygon(polys, DisableAllValidations)
-	if err != nil {
-		return MultiPolygon{}, err
-	}
-	return reNodedMP, nil
+	return NewMultiPolygon(polys), nil
 }
 
 func reNodeGeometryCollection(gc GeometryCollection, cut cutSet, nodes nodeSet) (GeometryCollection, error) {
@@ -309,5 +300,5 @@ func reNodeGeometryCollection(gc GeometryCollection, cut cutSet, nodes nodeSet) 
 			return GeometryCollection{}, err
 		}
 	}
-	return NewGeometryCollection(geoms, DisableAllValidations), nil
+	return NewGeometryCollection(geoms), nil
 }

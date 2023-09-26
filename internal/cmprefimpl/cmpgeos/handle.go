@@ -315,8 +315,11 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 			}
 			subPolys[i] = subPolyAsGeom.MustAsPolygon()
 		}
-		mp, err := geom.NewMultiPolygon(subPolys)
-		return mp.AsGeometry(), err
+		mp := geom.NewMultiPolygon(subPolys)
+		if err := mp.Validate(); err != nil {
+			return geom.Geometry{}, err
+		}
+		return mp.AsGeometry(), nil
 	case "GeometryCollection":
 		n := C.GEOSGetNumGeometries_r(h.context, gh)
 		if n == -1 {

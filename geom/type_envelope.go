@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -125,14 +124,8 @@ func (e Envelope) AsGeometry() Geometry {
 		minX, e.minY,
 	}
 	seq := NewSequence(floats[:], DimXY)
-	ls, err := NewLineString(seq)
-	if err != nil {
-		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
-	}
-	poly, err := NewPolygon([]LineString{ls})
-	if err != nil {
-		panic(fmt.Sprintf("constructing geometry from envelope: %v", err))
-	}
+	ring := NewLineString(seq)
+	poly := NewPolygon([]LineString{ring})
 	return poly.AsGeometry()
 }
 
@@ -312,15 +305,9 @@ func (e Envelope) BoundingDiagonal() Geometry {
 		return e.min().asUncheckedPoint().AsGeometry()
 	}
 
-	// The Envelope has already been validated, so it's safe to skip validation
-	// when constructing the diagonal.
 	coords := []float64{e.minX(), e.minY, e.maxX, e.maxY}
 	seq := NewSequence(coords, DimXY)
-	ls, err := NewLineString(seq, DisableAllValidations)
-	if err != nil {
-		panic("non-validating ctor failed: " + err.Error())
-	}
-	return ls.AsGeometry()
+	return NewLineString(seq).AsGeometry()
 }
 
 // String implements the fmt.Stringer interface by printing the envelope in a

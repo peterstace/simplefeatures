@@ -25,11 +25,7 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]bool) bool) (G
 		if len(areals) == 1 {
 			return areals[0].AsGeometry(), nil
 		}
-		mp, err := NewMultiPolygon(areals)
-		if err != nil {
-			return Geometry{}, wrap(err, "could not extract areal geometry from DCEL")
-		}
-		return mp.AsGeometry(), nil
+		return NewMultiPolygon(areals).AsGeometry(), nil
 	case len(areals) == 0 && len(linears) > 0 && len(points) == 0:
 		if len(linears) == 1 {
 			return linears[0].AsGeometry(), nil
@@ -100,11 +96,7 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func([2]bool) bool) ([
 
 		// Construct the polygon.
 		orderPolygonRings(rings)
-		poly, err := NewPolygon(rings)
-		if err != nil {
-			return nil, err
-		}
-		polys = append(polys, poly)
+		polys = append(polys, NewPolygon(rings))
 	}
 
 	sort.Slice(polys, func(i, j int) bool {
@@ -146,11 +138,7 @@ func extractPolygonRing(faceSet map[*faceRecord]bool, start *halfEdgeRecord, see
 	}
 	rotateSeqs(seqs, len(seqs)-minI)
 
-	ring, err := NewLineString(buildRingSequence(seqs))
-	if err != nil {
-		panic(fmt.Sprintf("could not create LineString: %v", err))
-	}
-	return ring
+	return NewLineString(buildRingSequence(seqs))
 }
 
 func buildRingSequence(seqs []Sequence) Sequence {
@@ -260,11 +248,7 @@ func (d *doublyConnectedEdgeList) extractLineStrings(include func([2]bool) bool)
 			e.origin.extracted = true
 			e.twin.origin.extracted = true
 
-			ls, err := NewLineString(e.seq)
-			if err != nil {
-				return nil, err
-			}
-			lss = append(lss, ls)
+			lss = append(lss, NewLineString(e.seq))
 		}
 	}
 	sort.Slice(lss, func(i, j int) bool {
