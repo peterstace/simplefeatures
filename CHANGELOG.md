@@ -2,8 +2,46 @@
 
 ## Unreleased
 
-- **Breaking change**: Removes the `OmitInvalid` constructor option. Users of
-  `OmitInvalid` should manage this behaviour manually.
+2023-09-27
+
+__Special thanks to Albert Teoh for contributing to this release.__
+
+This release contains a large number of breaking changes, primarily surrounding
+geometry validation. See
+https://github.com/peterstace/simplefeatures/discussions/525 for background and
+an overview of the changes.
+
+- **Breaking change**: The `geom.ConstructorOption` type has been removed.
+  Previous uses of `geom.DisableAllValidations` can be replaced with
+  `geom.NoValidate`. Previous uses of `OmitInvalid` should be managed manually
+  (no replacement for this functionality is provided).
+
+- A `Validate() error` method is added to `Geometry` and each concrete geometry
+  type. This allows geometry constraints to be checked after geometry
+  construction.
+
+- **Breaking change**: Geometry results from GEOS (wrapped by the
+  `github.com/peterstace/simplefeatures/geos` package) are no longer validated.
+  The variadic constructor options in function signatures have been removed.
+  If users wish to validate these results, then `Validate()` can be called
+  manually.
+
+- **Breaking change**: The `TransformXY` methods no longer validate geometry
+  constraints of the result. The variadic constructor options have been removed
+  as method parameters, as have the error returns. If users wish to validate
+  these results, then `Validate()` can be called manually.
+
+- **Breaking change**: The direct geometry constructors (`NewPoint`,
+  `NewLineString`, `NewPolygon`, `NewMultiPoint`, `NewMultiLineString`,
+  `NewPolygon`, and `NewGeometryCollectiion`) no longer perform any geometry
+  validation. They no longer accept constructor options or return an error,
+  resulting in a function signature change. If users wish to validate the
+  results, then `Validate()` can be called manually.
+
+- **Breaking change**: `XY`'s `AsPoint` method no longer checks the validity of
+  the result and no longer returns an error. An `AsPoint` method is added to
+  the `Coordinates` type to shadow `XY`'s `AsPoint` method (since `XY` is
+  embedded in `Coordinates`).
 
 ## v0.44.0
 
