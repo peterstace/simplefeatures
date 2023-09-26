@@ -643,14 +643,15 @@ func (p Polygon) String() string {
 // Ramer-Douglas-Peucker algorithm to each constituent ring. If the exterior
 // ring collapses to a point or single linear element, the empty Polygon is
 // returned. If any interior ring collapses to a point or a single linear
-// element, then it is omitted from the final output. The output Polygon will
-// be invalid if any rings in the input become non-rings (e.g. via self
-// intersection) in the output, or if any two rings were to interact in ways
-// prohibited by Polygon validation rules (such as intersecting at more than
-// one point). In these cases, an error is returned. Construction behaviour of
-// the output (which includes omitting errors) may be controlled via
-// ConstructorOptions.
-func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon, error) {
+// element, then it is omitted from the final output.
+//
+// The output Polygon will be invalid if any rings in the input become
+// non-rings (e.g. via self intersection) in the output, or if any two rings
+// were to interact in ways prohibited by Polygon validation rules (such as
+// intersecting at more than one point). In these cases, an error is returned.
+// These validations can be skipped by passing in NoValidate{}, potentially
+// resulting in a non-valid Polygon being returned.
+func (p Polygon) Simplify(threshold float64, nv ...NoValidate) (Polygon, error) {
 	exterior := p.ExteriorRing().Simplify(threshold)
 
 	// If we don't have at least 4 coordinates, then we can't form a ring, and
@@ -673,8 +674,10 @@ func (p Polygon) Simplify(threshold float64, opts ...ConstructorOption) (Polygon
 		}
 	}
 	simpl := NewPolygon(rings)
-	if err := validate(opts, simpl); err != nil {
-		return Polygon{}, wrapSimplified(err)
+	if len(nv) == 0 {
+		if err := simpl.Validate(); err != nil {
+			return Polygon{}, wrapSimplified(err)
+		}
 	}
 	return simpl, nil
 }

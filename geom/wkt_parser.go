@@ -15,7 +15,9 @@ import (
 
 // UnmarshalWKT parses a Well Known Text (WKT), and returns the corresponding
 // Geometry.
-func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
+//
+// NoValidate{} can be passed in to disable geometry constraint validation.
+func UnmarshalWKT(wkt string, nv ...NoValidate) (Geometry, error) {
 	p := newParser(wkt)
 	g, err := p.nextGeometryTaggedText()
 	if err != nil {
@@ -28,8 +30,10 @@ func UnmarshalWKT(wkt string, opts ...ConstructorOption) (Geometry, error) {
 		return Geometry{}, err
 	}
 
-	if err := validate(opts, g); err != nil {
-		return Geometry{}, err
+	if len(nv) == 0 {
+		if err := g.Validate(); err != nil {
+			return Geometry{}, err
+		}
 	}
 	return g, nil
 }

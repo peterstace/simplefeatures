@@ -12,14 +12,18 @@ import (
 
 // UnmarshalTWKB parses a Tiny Well Known Binary (TWKB), returning the
 // corresponding Geometry.
-func UnmarshalTWKB(twkb []byte, opts ...ConstructorOption) (Geometry, error) {
+//
+// NoValidate{} can be passed in to disable geometry constraint validation.
+func UnmarshalTWKB(twkb []byte, nv ...NoValidate) (Geometry, error) {
 	p := newTWKBParser(twkb)
 	g, err := p.nextGeometry()
 	if err != nil {
 		return Geometry{}, p.annotateError(err)
 	}
-	if err := validate(opts, g); err != nil {
-		return Geometry{}, p.annotateError(err)
+	if len(nv) == 0 {
+		if err := g.Validate(); err != nil {
+			return Geometry{}, err
+		}
 	}
 	return g, nil
 }
@@ -33,14 +37,18 @@ func UnmarshalTWKB(twkb []byte, opts ...ConstructorOption) (Geometry, error) {
 //
 // If there is an ID list header, the ids slice will be populated with the
 // IDs from that header. Otherwise, the slice is empty.
-func UnmarshalTWKBWithHeaders(twkb []byte, opts ...ConstructorOption) (g Geometry, bbox []Point, ids []int64, err error) {
+//
+// NoValidate{} can be passed in to disable geometry constraint validation.
+func UnmarshalTWKBWithHeaders(twkb []byte, nv ...NoValidate) (g Geometry, bbox []Point, ids []int64, err error) {
 	p := newTWKBParser(twkb)
 	g, err = p.nextGeometry()
 	if err != nil {
 		return Geometry{}, nil, nil, p.annotateError(err)
 	}
-	if err := validate(opts, g); err != nil {
-		return Geometry{}, nil, nil, p.annotateError(err)
+	if len(nv) == 0 {
+		if err := g.Validate(); err != nil {
+			return Geometry{}, nil, nil, err
+		}
 	}
 	if p.hasBBox {
 		bbox, err = UnmarshalTWKBBoundingBoxHeader(twkb)

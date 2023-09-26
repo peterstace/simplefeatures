@@ -536,14 +536,16 @@ func (c GeometryCollection) String() string {
 }
 
 // Simplify returns a simplified version of the GeometryCollection by applying
-// Simplify to each child geometry. Any supplied ConstructorOptions will be
-// used when simplifying each child geometry.
-func (c GeometryCollection) Simplify(threshold float64, opts ...ConstructorOption) (GeometryCollection, error) {
+// Simplify to each child geometry. If simplification causes a child geometry
+// to become invalid, then an error is returned. NoValidate{} can be passed in
+// to disable geometry constraint validation, potentially resulting in an
+// invalid geometry being returned.
+func (c GeometryCollection) Simplify(threshold float64, nv ...NoValidate) (GeometryCollection, error) {
 	n := c.NumGeometries()
 	geoms := make([]Geometry, n)
 	for i := 0; i < n; i++ {
 		var err error
-		geoms[i], err = c.GeometryN(i).Simplify(threshold, opts...)
+		geoms[i], err = c.GeometryN(i).Simplify(threshold, nv...)
 		if err != nil {
 			return GeometryCollection{}, wrapSimplified(err)
 		}

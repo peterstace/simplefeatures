@@ -8,9 +8,9 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-func geomFromWKT(t *testing.T, wkt string, opts ...geom.ConstructorOption) geom.Geometry {
+func geomFromWKT(t *testing.T, wkt string, nv ...geom.NoValidate) geom.Geometry {
 	t.Helper()
-	geom, err := geom.UnmarshalWKT(wkt, opts...)
+	geom, err := geom.UnmarshalWKT(wkt, nv...)
 	if err != nil {
 		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 	}
@@ -818,7 +818,7 @@ func TestMakeValid(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			_, err := geom.UnmarshalWKT(tt.input)
 			expectErr(t, err)
-			in := geomFromWKT(t, tt.input, geom.DisableAllValidations)
+			in := geomFromWKT(t, tt.input, geom.NoValidate{})
 			gotGeom, err := MakeValid(in)
 			if _, ok := err.(unsupportedGEOSVersionError); ok {
 				t.Skip(err)
