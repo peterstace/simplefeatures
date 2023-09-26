@@ -921,10 +921,11 @@ func (g Geometry) String() string {
 }
 
 // Simplify returns a simplified version of the geometry using the
-// Ramer-Douglas-Peucker algorithm. Sometimes a simplified geometry can become
-// invalid, in which case an error is returned rather than attempting to fix
-// the geometry. NoValidate{} can be passed in, causing this validation to be
-// skipped (potentially resulting in an invalid geometry being returned).
+// Ramer-Douglas-Peucker algorithm. Simplification can cause Polygons and
+// MultiPolygons to become invalid, in which case an error is returned rather
+// than attempting to fix them them. NoValidate{} can be passed in, causing
+// this validation to be skipped (potentially resulting in invalid geometries
+// being returned).
 func (g Geometry) Simplify(threshold float64, nv ...NoValidate) (Geometry, error) {
 	switch g.gtype {
 	case TypeGeometryCollection:
