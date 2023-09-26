@@ -109,7 +109,7 @@ func (e Envelope) AsGeometry() Geometry {
 	case e.IsEmpty():
 		return Geometry{}
 	case e.IsPoint():
-		return e.min().asUncheckedPoint().AsGeometry()
+		return e.min().AsPoint().AsGeometry()
 	case e.IsLine():
 		ln := line{e.min(), e.max()}
 		return ln.asLineString().AsGeometry()
@@ -134,7 +134,7 @@ func (e Envelope) Min() Point {
 	if e.IsEmpty() {
 		return Point{}
 	}
-	return e.min().asUncheckedPoint()
+	return e.min().AsPoint()
 }
 
 // Max returns the point in the envelope with the maximum X and Y values.
@@ -142,7 +142,7 @@ func (e Envelope) Max() Point {
 	if e.IsEmpty() {
 		return Point{}
 	}
-	return e.max().asUncheckedPoint()
+	return e.max().AsPoint()
 }
 
 // MinMaxXYs returns the two XY values in the envelope that contain the minimum
@@ -220,7 +220,7 @@ func (e Envelope) Center() Point {
 	return e.min().
 		Add(e.max()).
 		Scale(0.5).
-		asUncheckedPoint()
+		AsPoint()
 }
 
 // Covers returns true if and only if this envelope entirely covers another
@@ -302,7 +302,7 @@ func (e Envelope) BoundingDiagonal() Geometry {
 		return Geometry{}
 	}
 	if e.IsPoint() {
-		return e.min().asUncheckedPoint().AsGeometry()
+		return e.min().AsPoint().AsGeometry()
 	}
 
 	coords := []float64{e.minX(), e.minY, e.maxX, e.maxY}

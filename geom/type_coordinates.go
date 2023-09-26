@@ -63,8 +63,11 @@ func (c Coordinates) appendFloat64s(dst []float64) []float64 {
 	}
 }
 
-// asUncheckedPoint shadows the asUncheckedPoint method on XY so that it's not
-// accidentally called.
-func (c Coordinates) asUncheckedPoint() Point {
-	return newUncheckedPoint(c)
+// AsPoint is a convenience function to convert this Coordinates value into a Point geometry.
+func (c Coordinates) AsPoint() Point {
+	// NOTE: this function is not very useful on its own. Its main purpose is
+	// to shadow the AsPoint method on XY. If it were not shadowed, a user
+	// could accidentally call AsPoint on a coordinates value (since XY is
+	// field embedded), which would result in a Point with just XY populated.
+	return NewPoint(c)
 }

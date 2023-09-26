@@ -73,7 +73,7 @@ func (s LineString) StartPoint() Point {
 		return NewEmptyPoint(s.CoordinatesType())
 	}
 	c := s.seq.Get(0)
-	return newUncheckedPoint(c)
+	return NewPoint(c)
 }
 
 // EndPoint gives the last point of the LineString. If the LineString is empty
@@ -84,7 +84,7 @@ func (s LineString) EndPoint() Point {
 	}
 	end := s.seq.Length() - 1
 	c := s.seq.Get(end)
-	return newUncheckedPoint(c)
+	return NewPoint(c)
 }
 
 // AsText returns the WKT (Well Known Text) representation of this geometry.
@@ -327,7 +327,7 @@ func (s LineString) Centroid() Point {
 	if sumLength == 0 {
 		return NewEmptyPoint(DimXY)
 	}
-	return sumXY.Scale(1.0 / sumLength).asUncheckedPoint()
+	return sumXY.Scale(1.0 / sumLength).AsPoint()
 }
 
 func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64) {
@@ -392,7 +392,7 @@ func (s LineString) PointOnSurface() Point {
 	n := s.seq.Length()
 	nearest := newNearestPointAccumulator(s.Centroid())
 	for i := 1; i < n-1; i++ {
-		candidate := s.seq.GetXY(i).asUncheckedPoint()
+		candidate := s.seq.GetXY(i).AsPoint()
 		nearest.consider(candidate)
 	}
 	if !nearest.point.IsEmpty() {

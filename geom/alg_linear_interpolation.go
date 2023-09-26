@@ -29,7 +29,7 @@ func (l linearInterpolator) interpolate(frac float64) Point {
 	frac = math.Max(0, math.Min(1, frac))
 	idx := sort.SearchFloat64s(l.cumulative, frac*l.total)
 	if idx == l.seq.Length() {
-		return l.seq.Get(idx - 1).asUncheckedPoint()
+		return l.seq.Get(idx - 1).AsPoint()
 	}
 
 	p0 := l.seq.Get(idx)
@@ -49,7 +49,7 @@ func (l linearInterpolator) interpolate(frac float64) Point {
 		Z:    lerp(p0.Z, p1.Z, partial),
 		M:    lerp(p0.M, p1.M, partial),
 		Type: l.seq.CoordinatesType(),
-	}.asUncheckedPoint()
+	}.AsPoint()
 }
 
 func lerp(a, b, ratio float64) float64 {
