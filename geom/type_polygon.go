@@ -336,21 +336,24 @@ func (p Polygon) Coordinates() []Sequence {
 }
 
 // TransformXY transforms this Polygon into another Polygon according to fn.
-func (p Polygon) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (Polygon, error) {
+func (p Polygon) TransformXY(fn func(XY) XY) Polygon {
 	n := len(p.rings)
 	transformed := make([]LineString, n)
 	for i, r := range p.rings {
 		var err error
 		transformed[i], err = NewLineString(
 			transformSequence(r.Coordinates(), fn),
-			opts...,
+			DisableAllValidations,
 		)
 		if err != nil {
-			return Polygon{}, wrapTransformed(err)
+			panic("non-validating ctor failed: " + err.Error())
 		}
 	}
-	poly, err := NewPolygon(transformed, opts...)
-	return poly.ForceCoordinatesType(p.ctype), wrapTransformed(err)
+	poly, err := NewPolygon(transformed)
+	if err != nil {
+		panic("non-validating ctor failed: " + err.Error())
+	}
+	return poly.ForceCoordinatesType(p.ctype)
 }
 
 // AreaOption allows the behaviour of area calculations to be modified.

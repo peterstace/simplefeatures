@@ -566,8 +566,7 @@ func TestEnvelopeTransformXY(t *testing.T) {
 		{twoPtEnv(1, 2, 3, 4), twoPtEnv(1.5, 5, 4.5, 10)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, err := tc.input.TransformXY(transform)
-			expectNoErr(t, err)
+			got := tc.input.TransformXY(transform)
 			expectEnvEq(t, got, tc.want)
 		})
 	}
@@ -577,10 +576,9 @@ func BenchmarkEnvelopeTransformXY(b *testing.B) {
 	input := twoPtEnv(1, 2, 3, 4)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := input.TransformXY(func(in XY) XY {
+		input.TransformXY(func(in XY) XY {
 			return XY{in.X * 1.5, in.Y * 2.5}
 		})
-		expectNoErr(b, err)
 	}
 }
 

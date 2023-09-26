@@ -220,24 +220,24 @@ func (m MultiPoint) Coordinates() Sequence {
 }
 
 // TransformXY transforms this MultiPoint into another MultiPoint according to fn.
-func (m MultiPoint) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (MultiPoint, error) {
+func (m MultiPoint) TransformXY(fn func(XY) XY) MultiPoint {
 	if len(m.points) == 0 {
-		return MultiPoint{}.ForceCoordinatesType(m.CoordinatesType()), nil
+		return MultiPoint{}.ForceCoordinatesType(m.CoordinatesType())
 	}
 	txPoints := make([]Point, len(m.points))
 	for i, pt := range m.points {
 		if c, ok := pt.Coordinates(); ok {
 			c.XY = fn(c.XY)
 			var err error
-			txPoints[i], err = NewPoint(c, opts...)
+			txPoints[i], err = NewPoint(c, DisableAllValidations)
 			if err != nil {
-				return MultiPoint{}, err
+				panic("non-validating ctor failed: " + err.Error())
 			}
 		} else {
 			txPoints[i] = pt
 		}
 	}
-	return NewMultiPoint(txPoints), nil
+	return NewMultiPoint(txPoints)
 }
 
 // Centroid gives the centroid of the coordinates of the MultiPoint.

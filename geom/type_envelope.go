@@ -281,12 +281,12 @@ func (e Envelope) Distance(o Envelope) (float64, bool) {
 }
 
 // TransformXY transforms this Envelope into another Envelope according to fn.
-func (e Envelope) TransformXY(fn func(XY) XY) (Envelope, error) {
+func (e Envelope) TransformXY(fn func(XY) XY) Envelope {
 	min, max, ok := e.MinMaxXYs()
 	if !ok {
-		return Envelope{}, nil
+		return Envelope{}
 	}
-	return NewEnvelope([]XY{fn(min), fn(max)})
+	return newUncheckedEnvelope(fn(min), fn(max))
 }
 
 // AsBox converts this Envelope to an rtree.Box.
@@ -318,7 +318,7 @@ func (e Envelope) BoundingDiagonal() Geometry {
 	seq := NewSequence(coords, DimXY)
 	ls, err := NewLineString(seq, DisableAllValidations)
 	if err != nil {
-		panic("programming error: validations disabled by LineString validation failed")
+		panic("non-validating ctor failed: " + err.Error())
 	}
 	return ls.AsGeometry()
 }

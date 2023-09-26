@@ -304,10 +304,13 @@ func (s LineString) Coordinates() Sequence {
 }
 
 // TransformXY transforms this LineString into another LineString according to fn.
-func (s LineString) TransformXY(fn func(XY) XY, opts ...ConstructorOption) (LineString, error) {
+func (s LineString) TransformXY(fn func(XY) XY) LineString {
 	transformed := transformSequence(s.seq, fn)
-	ls, err := NewLineString(transformed, opts...)
-	return ls, wrapTransformed(err)
+	ls, err := NewLineString(transformed, DisableAllValidations)
+	if err != nil {
+		panic("non-validating ctor failed: " + err.Error())
+	}
+	return ls
 }
 
 // IsRing returns true iff this LineString is both simple and closed (i.e. is a
