@@ -43,7 +43,7 @@ func NewMultiLineString(lines []LineString) MultiLineString {
 }
 
 // Validate checks if the MultiLineString is valid. The only validation rule is
-// that each LineStrings in the collection must be valid.
+// that each LineString in the collection must be valid.
 func (m MultiLineString) Validate() error {
 	for i, ls := range m.lines {
 		if err := ls.Validate(); err != nil {
