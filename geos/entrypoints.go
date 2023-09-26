@@ -179,8 +179,10 @@ func Overlaps(a, b geom.Geometry) (bool, error) {
 // Union returns a geometry that is the union of the input geometries.
 // Formally, the returned geometry will contain a particular point X if and
 // only if X is present in either geometry (or both).
-func Union(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	g, err := binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+//
+// The validity of the result is not checked.
+func Union(a, b geom.Geometry) (geom.Geometry, error) {
+	g, err := binaryOpG(a, b, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSUnion_r(ctx, a, b)
 	})
 	return g, wrap(err, "executing GEOSUnion_r")
@@ -189,8 +191,10 @@ func Union(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, e
 // Intersection returns a geometry that is the intersection of the input
 // geometries. Formally, the returned geometry will contain a particular point
 // X if and only if X is present in both geometries.
-func Intersection(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	g, err := binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+//
+// The validity of the result is not checked.
+func Intersection(a, b geom.Geometry) (geom.Geometry, error) {
+	g, err := binaryOpG(a, b, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSIntersection_r(ctx, a, b)
 	})
 	return g, wrap(err, "executing GEOSIntersection_r")
@@ -204,7 +208,6 @@ type bufferOptionSet struct {
 	endCapStyle  int
 	joinStyle    int
 	mitreLimit   float64
-	ctorOpts     []geom.ConstructorOption
 }
 
 func newBufferOptionSet(opts []BufferOption) bufferOptionSet {
@@ -278,19 +281,13 @@ func BufferJoinStyleBevel() BufferOption {
 	}
 }
 
-// BufferConstructorOption sets constructor option that are used when
-// reconstructing the buffered geometry that is returned from the GEOS lib.
-func BufferConstructorOption(opts ...geom.ConstructorOption) BufferOption {
-	return func(bos *bufferOptionSet) {
-		bos.ctorOpts = append(bos.ctorOpts, opts...)
-	}
-}
-
 // Buffer returns a geometry that contains all points within the given radius
 // of the input geometry.
+//
+// The validity of the result is not checked.
 func Buffer(g geom.Geometry, radius float64, opts ...BufferOption) (geom.Geometry, error) {
 	optSet := newBufferOptionSet(opts)
-	result, err := unaryOpG(g, optSet.ctorOpts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSBufferWithStyle_r(
 			ctx, gh, C.double(radius),
 			C.int(optSet.quadSegments),
@@ -306,8 +303,10 @@ func Buffer(g geom.Geometry, radius float64, opts ...BufferOption) (geom.Geometr
 // Douglas-Peucker algorithm. Topological invariants may not be maintained,
 // e.g. polygons can collapse into linestrings, and holes in polygons may be
 // lost.
-func Simplify(g geom.Geometry, tolerance float64, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
+//
+// The validity of the result is not checked.
+func Simplify(g geom.Geometry, tolerance float64) (geom.Geometry, error) {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSSimplify_r(ctx, gh, C.double(tolerance))
 	})
 	return result, wrap(err, "executing GEOSSimplify_r")
@@ -315,8 +314,10 @@ func Simplify(g geom.Geometry, tolerance float64, opts ...geom.ConstructorOption
 
 // Difference returns the geometry that represents the parts of input geometry
 // A that are not part of input geometry B.
-func Difference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	result, err := binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+//
+// The validity of the result is not checked.
+func Difference(a, b geom.Geometry) (geom.Geometry, error) {
+	result, err := binaryOpG(a, b, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSDifference_r(ctx, a, b)
 	})
 	return result, wrap(err, "executing GEOSDifference_r")
@@ -324,8 +325,10 @@ func Difference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geomet
 
 // SymmetricDifference returns the geometry that represents the parts of the
 // input geometries that are not part of the other input geometry.
-func SymmetricDifference(a, b geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	result, err := binaryOpG(a, b, opts, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
+//
+// The validity of the result is not checked.
+func SymmetricDifference(a, b geom.Geometry) (geom.Geometry, error) {
+	result, err := binaryOpG(a, b, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSSymDifference_r(ctx, a, b)
 	})
 	return result, wrap(err, "executing GEOSSymDifference_r")
@@ -336,13 +339,15 @@ func SymmetricDifference(a, b geom.Geometry, opts ...geom.ConstructorOption) (ge
 // geometry that is valid and similar (but not the same as) the original
 // invalid geometry. If the input geometry is valid, then it is returned
 // unaltered.
-func MakeValid(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+//
+// The validity of the result is not checked.
+func MakeValid(g geom.Geometry) (geom.Geometry, error) {
 	if C.MAKE_VALID_MISSING != 0 {
 		return geom.Geometry{}, unsupportedGEOSVersionError{
 			C.MAKE_VALID_MIN_VERSION, "MakeValid",
 		}
 	}
-	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSMakeValid_r(ctx, g)
 	})
 	return result, wrap(err, "executing GEOSMakeValid_r")
@@ -362,13 +367,15 @@ func MakeValid(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, 
 // and return an error, but this is not guaranteed, and an invalid result may
 // be returned without an error. It is the responsibility of the caller to
 // ensure that the constraints are met before using this function.
-func CoverageUnion(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
+//
+// The validity of the result is not checked.
+func CoverageUnion(g geom.Geometry) (geom.Geometry, error) {
 	if C.COVERAGE_UNION_MISSING != 0 {
 		return geom.Geometry{}, unsupportedGEOSVersionError{
 			C.COVERAGE_UNION_MIN_VERSION, "CoverageUnion",
 		}
 	}
-	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSCoverageUnion_r(ctx, g)
 	})
 	return result, wrap(err, "executing GEOSCoverageUnion_r")
@@ -377,8 +384,10 @@ func CoverageUnion(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geomet
 // UnaryUnion is a single argument version of Union. It is most useful when
 // supplied with a GeometryCollection, resulting in the union of the
 // GeometryCollection's child geometries.
-func UnaryUnion(g geom.Geometry, opts ...geom.ConstructorOption) (geom.Geometry, error) {
-	result, err := unaryOpG(g, opts, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+//
+// The validity of the result is not checked.
+func UnaryUnion(g geom.Geometry) (geom.Geometry, error) {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSUnaryUnion_r(ctx, g)
 	})
 	return result, wrap(err, "executing GEOSUnaryUnion_r")
