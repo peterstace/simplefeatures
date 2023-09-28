@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.45.0
 
-2023-09-27
+2023-09-29
 
 __Special thanks to Albert Teoh for contributing to this release.__
 
