@@ -6,6 +6,8 @@ YYYY-MM-DD
 
 - Adds an method with signature `Envelope() Envelope` to type `Sequence`.
 
+- Simplifies the internal representation of the `Envelope` type.
+
 ## v0.45.1
 
 2023-09-29
