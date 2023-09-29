@@ -10,11 +10,6 @@ jobs:
       run: make lint
     - name: unit
       run: make unit
-    - name: Convert coverage to lcov
-      uses: jandelgado/gcov2lcov-action@v1.0.9
-      with:
-        infile: coverage.out
-        outfile: coverage.lcov
     - name: geos
       run: make geos
     - name: pgscan
@@ -23,6 +18,11 @@ jobs:
       run: make cmppg
     - name: cmpgeos
       run: make cmpgeos
+    - name: Convert coverage to lcov
+      uses: jandelgado/gcov2lcov-action@v1.0.9
+      with:
+        infile: coverage.out
+        outfile: coverage.lcov
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
