@@ -19,7 +19,7 @@ jobs:
     - name: cmpgeos
       run: make cmpgeos
     - name: Convert coverage to lcov
-      uses: jandelgado/gcov2lcov-action@v1.0.6
+      uses: jandelgado/gcov2lcov-action@v1.0.9
       with:
         infile: coverage.out
         outfile: coverage.lcov
