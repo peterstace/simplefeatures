@@ -279,7 +279,12 @@ func (e Envelope) TransformXY(fn func(XY) XY) Envelope {
 	if !ok {
 		return Envelope{}
 	}
-	return newUncheckedEnvelope(fn(min), fn(max))
+	u := fn(min)
+	v := fn(max)
+	return newUncheckedEnvelope(
+		XY{fastMin(u.X, v.X), fastMin(u.Y, v.Y)},
+		XY{fastMax(u.X, v.X), fastMax(u.Y, v.Y)},
+	)
 }
 
 // AsBox converts this Envelope to an rtree.Box.

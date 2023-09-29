@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.45.1
+
+2023-09-29
+
+- Fixes a bug in `Envelope`'s `TransformXY` method, where (depending on the
+  transform) invariants in the newly created `Envelope` value would be
+  violated.
+
 ## v0.45.0
 
 2023-09-29

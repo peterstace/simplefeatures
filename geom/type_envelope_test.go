@@ -572,6 +572,16 @@ func TestEnvelopeTransformXY(t *testing.T) {
 	}
 }
 
+func TestEnvelopeTransformBugFix(t *testing.T) {
+	// Reproduces a bug where a transform that alters which coordinates are min
+	// and max causes a malformed envelope.
+	env := twoPtEnv(1, 2, 3, 4)
+	got := env.TransformXY(func(in XY) XY {
+		return XY{-in.X, -in.Y}
+	})
+	expectEnvEq(t, got, twoPtEnv(-3, -4, -1, -2))
+}
+
 func BenchmarkEnvelopeTransformXY(b *testing.B) {
 	input := twoPtEnv(1, 2, 3, 4)
 	b.ResetTimer()

@@ -209,11 +209,7 @@ func expectEnvEq(t testing.TB, got, want Envelope) {
 		ExactEquals(got.Max().AsGeometry(), want.Max().AsGeometry()) {
 		return
 	}
-	t.Errorf(
-		"\ngot:  %v\nwant: %v\n",
-		got.AsGeometry().AsText(),
-		want.AsGeometry().AsText(),
-	)
+	t.Errorf("\ngot:  %v\nwant: %v", got, want)
 }
 
 func expectSequenceEq(t testing.TB, got, want Sequence) {
