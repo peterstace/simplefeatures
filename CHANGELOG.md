@@ -4,7 +4,7 @@
 
 YYYY-MM-DD
 
-- Adds an method with signature `Envelope() Envelope` to type `Sequence`.
+- Adds a method with signature `Envelope() Envelope` to type `Sequence`.
 
 ## v0.45.1
 
