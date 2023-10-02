@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+YYYY-MM-DD
+
+- Adds a method with signature `Envelope() Envelope` to type `Sequence`.
+
 ## v0.45.1
 
 2023-09-29

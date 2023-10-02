@@ -186,6 +186,29 @@ func (s Sequence) less(o Sequence) bool {
 	return false
 }
 
+// Envelope returns the axis aligned bounding box that most tightly surrounds
+// the XY values in the sequence.
+func (s Sequence) Envelope() Envelope {
+	n := s.Length()
+	if n == 0 {
+		return Envelope{}
+	}
+
+	xy0 := s.GetXY(0)
+	min, max := xy0, xy0
+
+	stride := s.ctype.Dimension()
+	for i := stride; i < len(s.floats); i += stride {
+		x := s.floats[i]
+		y := s.floats[i+1]
+		min.X = fastMin(min.X, x)
+		min.Y = fastMin(min.Y, y)
+		max.X = fastMax(max.X, x)
+		max.Y = fastMax(max.Y, y)
+	}
+	return newUncheckedEnvelope(min, max)
+}
+
 // getLine extracts a 2D line segment from a sequence by joining together
 // adjacent locations in the sequence. It is designed to be called with i equal
 // to each index in the sequence (from 0 to n-1, both inclusive). The flag

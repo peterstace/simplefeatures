@@ -1,6 +1,7 @@
 package geom_test
 
 import (
+	"math/rand"
 	"strconv"
 	"testing"
 
@@ -176,6 +177,45 @@ func TestSequenceLengthAndGet(t *testing.T) {
 					checkSequence(t, forced, wantCoords)
 					expectCoordinatesTypeEq(t, forced.CoordinatesType(), ct)
 				})
+			}
+		})
+	}
+}
+
+func TestSequencEnvelope(t *testing.T) {
+	for i, tc := range []struct {
+		floats []float64
+		ct     geom.CoordinatesType
+		want   geom.Envelope
+	}{
+		{nil, geom.DimXY, geom.Envelope{}},
+		{[]float64{1, 2}, geom.DimXY, onePtEnv(1, 2)},
+		{[]float64{3, 2, 1, 4}, geom.DimXY, twoPtEnv(1, 2, 3, 4)},
+		{[]float64{3, 6, 1, 4, 5, 2}, geom.DimXY, twoPtEnv(1, 2, 5, 6)},
+		{nil, geom.DimXYZ, geom.Envelope{}},
+		{[]float64{1, 2, 3}, geom.DimXYZ, onePtEnv(1, 2)},
+		{[]float64{3, 2, 0, 1, 4, 0}, geom.DimXYZ, twoPtEnv(1, 2, 3, 4)},
+		{[]float64{3, 6, -1, 1, 4, -1, 5, 2, -1}, geom.DimXYZ, twoPtEnv(1, 2, 5, 6)},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			seq := geom.NewSequence(tc.floats, tc.ct)
+			expectEnvEq(t, seq.Envelope(), tc.want)
+		})
+	}
+}
+
+func BenchmarkSequenceEnvelope(b *testing.B) {
+	for _, sz := range []int{10, 100, 1000, 10_000} {
+		b.Run(strconv.Itoa(sz), func(b *testing.B) {
+			rnd := rand.New(rand.NewSource(1))
+			flts := make([]float64, sz*2)
+			for i := range flts {
+				flts[i] = rnd.Float64()
+			}
+			seq := geom.NewSequence(flts, geom.DimXY)
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				seq.Envelope()
 			}
 		})
 	}
