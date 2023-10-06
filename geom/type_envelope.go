@@ -28,20 +28,32 @@ type Envelope struct {
 // NewEnvelope returns the smallest envelope that contains all provided XYs.
 // It returns an error if any of the XYs contain NaN or +/- Infinity
 // coordinates.
-func NewEnvelope(xys []XY) (Envelope, error) {
+func NewEnvelope(xys ...XY) Envelope {
 	var env Envelope
 	for _, xy := range xys {
-		var err error
-		env, err = env.ExtendToIncludeXY(xy)
-		if err != nil {
-			return Envelope{}, err
-		}
+		env = env.ExpandToIncludeXY(xy)
 	}
-	return env, nil
+	return env
 }
 
 func newUncheckedEnvelope(min, max XY) Envelope {
 	return Envelope{min, max, true}
+}
+
+// Validate checks if the Envelope is valid. The only validation rule is that
+// the coordinates the Envelope was constructed from must not be NaN or +/-
+// infinity. An empty Envelope is always valid.
+func (e Envelope) Validate() error {
+	if e.IsEmpty() {
+		return nil
+	}
+	if err := e.min.validate(); err != nil {
+		return wrap(err, "min coords invalid")
+	}
+	if err := e.max.validate(); err != nil {
+		return wrap(err, "max coords invalid")
+	}
+	return nil
 }
 
 // IsEmpty returns true if and only if this envelope is empty.
@@ -123,20 +135,11 @@ func (e Envelope) MinMaxXYs() (XY, XY, bool) {
 	return e.min, e.max, true
 }
 
-// ExtendToIncludeXY returns the smallest envelope that contains all of the
-// points in this envelope along with the provided point. It gives an error if
-// the XY contains NaN or +/- Infinite coordinates.
-func (e Envelope) ExtendToIncludeXY(xy XY) (Envelope, error) {
-	if err := xy.validate(); err != nil {
-		return Envelope{}, err
-	}
-	return e.uncheckedExtend(xy), nil
-}
-
-// uncheckedExtend extends the envelope in the same manner as
-// ExtendToIncludeXY but doesn't validate the XY. It should only be used
-// when the XY doesn't come directly from user input.
-func (e Envelope) uncheckedExtend(xy XY) Envelope {
+// ExpandToIncludeXY returns the smallest envelope that contains all of the
+// points in this envelope along with the provided point. If will produce an
+// invalid envelope if any of the coordinates in the existing envelope or new
+// XY contain NaN or +/- infinity.
+func (e Envelope) ExpandToIncludeXY(xy XY) Envelope {
 	if e.IsEmpty() {
 		return newUncheckedEnvelope(xy, xy)
 	}
@@ -147,7 +150,9 @@ func (e Envelope) uncheckedExtend(xy XY) Envelope {
 }
 
 // ExpandToIncludeEnvelope returns the smallest envelope that contains all of
-// the points in this envelope and another envelope.
+// the points in this envelope and another envelope. It will produce an invalid
+// envelope if min or max coordinates of either envelope contain NaN or +/-
+// infinity.
 func (e Envelope) ExpandToIncludeEnvelope(o Envelope) Envelope {
 	if e.IsEmpty() {
 		return o

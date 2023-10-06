@@ -97,7 +97,7 @@ func (p Point) IsSimple() bool {
 // envelope, or an envelope covering a single point).
 func (p Point) Envelope() Envelope {
 	if xy, ok := p.XY(); ok {
-		return Envelope{}.uncheckedExtend(xy)
+		return Envelope{}.ExpandToIncludeXY(xy)
 	}
 	return Envelope{}
 }

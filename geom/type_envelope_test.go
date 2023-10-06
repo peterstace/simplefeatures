@@ -11,11 +11,7 @@ import (
 )
 
 func onePtEnv(x, y float64) Envelope {
-	env, err := Envelope{}.ExtendToIncludeXY(XY{X: x, Y: y})
-	if err != nil {
-		panic("could not construct env")
-	}
-	return env
+	return Envelope{}.ExpandToIncludeXY(XY{X: x, Y: y})
 }
 
 func twoPtEnv(minX, minY, maxX, maxY float64) Envelope {
@@ -25,11 +21,7 @@ func twoPtEnv(minX, minY, maxX, maxY float64) Envelope {
 	if minY > maxY {
 		panic(fmt.Sprintf("Y values out of order: %v %v", minY, maxY))
 	}
-	env, err := onePtEnv(minX, minY).ExtendToIncludeXY(XY{X: maxX, Y: maxY})
-	if err != nil {
-		panic("could not construct env")
-	}
-	return env
+	return onePtEnv(minX, minY).ExpandToIncludeXY(XY{X: maxX, Y: maxY})
 }
 
 func TestEnvelopeNew(t *testing.T) {
@@ -65,8 +57,7 @@ func TestEnvelopeNew(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			got, err := NewEnvelope(tc.xys)
-			expectNoErr(t, err)
+			got := NewEnvelope(tc.xys...)
 			expectEnvEq(t, got, tc.want)
 		})
 	}
@@ -207,34 +198,29 @@ func TestEnvelopeAttributes(t *testing.T) {
 	}
 }
 
-func TestEnvelopeExtendToIncludeXY(t *testing.T) {
+func TestEnvelopeExpandToIncludeXY(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
-		env, err := Envelope{}.ExtendToIncludeXY(XY{1, 2})
-		expectNoErr(t, err)
+		env := Envelope{}.ExpandToIncludeXY(XY{1, 2})
 		expectGeomEqWKT(t, env.Min().AsGeometry(), "POINT(1 2)")
 		expectGeomEqWKT(t, env.Max().AsGeometry(), "POINT(1 2)")
 	})
 	t.Run("single point extend to same", func(t *testing.T) {
-		env, err := onePtEnv(1, 2).ExtendToIncludeXY(XY{1, 2})
-		expectNoErr(t, err)
+		env := onePtEnv(1, 2).ExpandToIncludeXY(XY{1, 2})
 		expectGeomEqWKT(t, env.Min().AsGeometry(), "POINT(1 2)")
 		expectGeomEqWKT(t, env.Max().AsGeometry(), "POINT(1 2)")
 	})
 	t.Run("single point extend to different", func(t *testing.T) {
-		env, err := onePtEnv(1, 2).ExtendToIncludeXY(XY{-1, 3})
-		expectNoErr(t, err)
+		env := onePtEnv(1, 2).ExpandToIncludeXY(XY{-1, 3})
 		expectGeomEqWKT(t, env.Min().AsGeometry(), "POINT(-1 2)")
 		expectGeomEqWKT(t, env.Max().AsGeometry(), "POINT(1 3)")
 	})
 	t.Run("area extend within", func(t *testing.T) {
-		env, err := twoPtEnv(1, 2, 3, 4).ExtendToIncludeXY(XY{2, 3})
-		expectNoErr(t, err)
+		env := twoPtEnv(1, 2, 3, 4).ExpandToIncludeXY(XY{2, 3})
 		expectGeomEqWKT(t, env.Min().AsGeometry(), "POINT(1 2)")
 		expectGeomEqWKT(t, env.Max().AsGeometry(), "POINT(3 4)")
 	})
 	t.Run("area extend outside", func(t *testing.T) {
-		env, err := twoPtEnv(1, 2, 3, 4).ExtendToIncludeXY(XY{100, 200})
-		expectNoErr(t, err)
+		env := twoPtEnv(1, 2, 3, 4).ExpandToIncludeXY(XY{100, 200})
 		expectGeomEqWKT(t, env.Min().AsGeometry(), "POINT(1 2)")
 		expectGeomEqWKT(t, env.Max().AsGeometry(), "POINT(100 200)")
 	})
@@ -371,22 +357,37 @@ func TestEnvelopeInvalidXYInteractions(t *testing.T) {
 		{-inf, -inf},
 	} {
 		t.Run(fmt.Sprintf("new_envelope_with_first_arg_invalid_%d", i), func(t *testing.T) {
-			_, err := NewEnvelope([]XY{tc})
-			expectErr(t, err)
+			env := NewEnvelope(tc)
+			expectErr(t, env.Validate())
 		})
 		t.Run(fmt.Sprintf("new_envelope_with_second_arg_invalid_%d", i), func(t *testing.T) {
-			_, err := NewEnvelope([]XY{{}, tc})
-			expectErr(t, err)
+			env := NewEnvelope(XY{}, tc)
+			expectErr(t, env.Validate())
 		})
-		t.Run(fmt.Sprintf("extend_to_include_invalid_xy_%d", i), func(t *testing.T) {
-			env, err := NewEnvelope([]XY{{-1, -1}, {1, 1}})
-			expectNoErr(t, err)
-			_, err = env.ExtendToIncludeXY(tc)
-			expectErr(t, err)
+		t.Run(fmt.Sprintf("expand_to_include_invalid_xy_%d", i), func(t *testing.T) {
+			env := NewEnvelope(XY{-1, -1}, XY{1, 1})
+			env = env.ExpandToIncludeXY(tc)
+			expectErr(t, env.Validate())
+		})
+		t.Run(fmt.Sprintf("expand_from_invalid_to_include_env_%d", i), func(t *testing.T) {
+			env := NewEnvelope(tc)
+			env = env.ExpandToIncludeXY(XY{1, 1})
+			expectErr(t, env.Validate())
+		})
+		t.Run(fmt.Sprintf("expand_to_include_invalid_env_%d", i), func(t *testing.T) {
+			base := NewEnvelope(XY{-1, -1}, XY{1, 1})
+			other := NewEnvelope(tc)
+			env := base.ExpandToIncludeEnvelope(other)
+			expectErr(t, env.Validate())
+		})
+		t.Run(fmt.Sprintf("expand_from_invalid_to_include_env_%d", i), func(t *testing.T) {
+			base := NewEnvelope(tc)
+			other := NewEnvelope(XY{-1, -1}, XY{1, 1})
+			env := base.ExpandToIncludeEnvelope(other)
+			expectErr(t, env.Validate())
 		})
 		t.Run(fmt.Sprintf("contains_invalid_xy_%d", i), func(t *testing.T) {
-			env, err := NewEnvelope([]XY{{-1, -1}, {1, 1}})
-			expectNoErr(t, err)
+			env := NewEnvelope(XY{-1, -1}, XY{1, 1})
 			expectFalse(t, env.Contains(tc))
 		})
 	}
@@ -611,8 +612,7 @@ func TestBoundingDiagonal(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			env, err := NewEnvelope(tc.env)
-			expectNoErr(t, err)
+			env := NewEnvelope(tc.env...)
 			got := env.BoundingDiagonal()
 			expectGeomEqWKT(t, got, tc.want)
 		})
