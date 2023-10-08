@@ -32,6 +32,7 @@ import (
 	"unsafe"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/wrapgeos"
 )
 
 // Equals returns true if and only if the input geometries are spatially equal,
@@ -182,10 +183,7 @@ func Overlaps(a, b geom.Geometry) (bool, error) {
 //
 // The validity of the result is not checked.
 func Union(a, b geom.Geometry) (geom.Geometry, error) {
-	g, err := binaryOpG(a, b, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
-		return C.GEOSUnion_r(ctx, a, b)
-	})
-	return g, wrap(err, "executing GEOSUnion_r")
+	return wrapgeos.Union(a, b)
 }
 
 // Intersection returns a geometry that is the intersection of the input

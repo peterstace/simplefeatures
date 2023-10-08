@@ -1,6 +1,6 @@
 module github.com/peterstace/simplefeatures
 
-go 1.17
+go 1.18
 
 retract v0.45.0 // Due to bug: https://github.com/peterstace/simplefeatures/pull/554
 

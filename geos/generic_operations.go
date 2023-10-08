@@ -103,7 +103,7 @@ func unaryOpG(
 			return h.err()
 		}
 		if gh != resultGH {
-			// gh and resultGH will be the same if op is the noop function that
+			// gh and resultGH will be the same if op is the geos_pkg_noop function that
 			// just returns its input. We need to avoid destroying resultGH in
 			// that case otherwise we will do a double-free.
 			defer C.GEOSGeom_destroy(resultGH)

@@ -33,7 +33,7 @@ func BenchmarkNoOp(b *testing.B) {
 			b.ResetTimer()
 
 			for i := 0; i < b.N; i++ {
-				_, err := noop(input)
+				_, err := geos_pkg_noop(input)
 				if err != nil {
 					b.Fatal(err)
 				}

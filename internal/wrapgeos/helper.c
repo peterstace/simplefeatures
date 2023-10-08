@@ -1,12 +1,12 @@
 #include <string.h>
 #include "geos_c.h"
 
-// geos_pkg_marshal converts the supplied geometry to either WKB (prefered) or WKT
+// marshal converts the supplied geometry to either WKB (prefered) or WKT
 // (fallback). The result is either a WKB or a WKT (or NULL, indicating that
 // something went wrong). The size param is set to the number of bytes in the
 // returned WKB or WKT. The isWKT param is either set to 0 (WKB) or 1 (WKT),
-// indicating the type of geos_pkg_marshalling used.
-char *geos_pkg_marshal(
+// indicating the type of marshalling used.
+char *marshal(
 	GEOSContextHandle_t handle,
 	const GEOSGeometry *g,
 	size_t *size,

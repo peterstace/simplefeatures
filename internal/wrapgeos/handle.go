@@ -1,4 +1,4 @@
-package geos
+package wrapgeos
 
 /*
 #cgo LDFLAGS: -lgeos_c
@@ -7,19 +7,19 @@ package geos
 #include <stdlib.h>
 #include <string.h>
 
-void geos_pkg_sf_error_handler(const char *message, void *userdata) {
+void sf_error_handler(const char *message, void *userdata) {
 	strncpy(userdata, message, 1024);
 }
 
-GEOSContextHandle_t geos_pkg_sf_init(void *userdata) {
+GEOSContextHandle_t sf_init(void *userdata) {
 	GEOSContextHandle_t ctx = GEOS_init_r();
-	GEOSContext_setErrorMessageHandler_r(ctx, geos_pkg_sf_error_handler, userdata);
+	GEOSContext_setErrorMessageHandler_r(ctx, sf_error_handler, userdata);
 	return ctx;
 }
 
-char *geos_pkg_marshal(GEOSContextHandle_t handle, const GEOSGeometry *g, size_t *size, char *isWKT);
+char *marshal(GEOSContextHandle_t handle, const GEOSGeometry *g, size_t *size, char *isWKT);
 
-GEOSGeometry const *geos_pkg_noop(GEOSContextHandle_t handle, const GEOSGeometry *g) {
+GEOSGeometry const *noop(GEOSContextHandle_t handle, const GEOSGeometry *g) {
 	return g;
 }
 */
@@ -33,16 +33,6 @@ import (
 
 	"github.com/peterstace/simplefeatures/geom"
 )
-
-// geos_pkg_noop returns the geometry unaltered, via conversion to and from GEOS. This
-// function is only for benchmarking purposes, hence it is not exported or used
-// outside of benchmark tests.
-func geos_pkg_noop(g geom.Geometry) (geom.Geometry, error) {
-	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
-		return C.geos_pkg_noop(ctx, g)
-	})
-	return result, wrap(err, "executing geos_pkg_noop")
-}
 
 // handle is an opaque handle that can be used to invoke GEOS operations.
 // Instances are not threadsafe and thus should only be used serially (e.g.
@@ -63,7 +53,7 @@ func newHandle() (*handle, error) {
 	}
 	C.memset((unsafe.Pointer)(h.errBuf), 0, 1024)
 
-	h.context = C.geos_pkg_sf_init(unsafe.Pointer(h.errBuf))
+	h.context = C.sf_init(unsafe.Pointer(h.errBuf))
 	if h.context == nil {
 		h.release()
 		return nil, errors.New("could not create GEOS context")
@@ -163,18 +153,18 @@ func (h *handle) decode(gh *C.GEOSGeometry) (geom.Geometry, error) {
 		isWKT C.char
 		size  C.size_t
 	)
-	serialised := C.geos_pkg_marshal(h.context, gh, &size, &isWKT)
+	serialised := C.marshal(h.context, gh, &size, &isWKT)
 	if serialised == nil {
-		return geom.Geometry{}, wrap(h.err(), "geos_pkg_marshalling result")
+		return geom.Geometry{}, wrap(h.err(), "marshalling result")
 	}
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(serialised))
 
 	if isWKT != 0 {
 		wkt := C.GoStringN(serialised, C.int(size))
 		g, err := geom.UnmarshalWKT(wkt, geom.NoValidate{})
-		return g, wrap(err, "failed to ungeos_pkg_marshal GEOS WKT result")
+		return g, wrap(err, "failed to unmarshal GEOS WKT result")
 	}
 	wkb := C.GoBytes(unsafe.Pointer(serialised), C.int(size))
 	g, err := geom.UnmarshalWKB(wkb, geom.NoValidate{})
-	return g, wrap(err, "failed to ungeos_pkg_marshal GEOS WKB result")
+	return g, wrap(err, "failed to unmarshal GEOS WKB result")
 }
