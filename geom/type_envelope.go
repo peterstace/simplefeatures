@@ -14,7 +14,7 @@ import (
 // cases where the width or height (or both) are zero, or the envelope is
 // empty. Its bounds are validated so as to not be NaN or +/- Infinity.
 //
-// An envelope can be thought of as as being similar to a regular geometry, but
+// An envelope can be thought of as being similar to a regular geometry, but
 // can only represent an empty geometry, a single point, a horizontal or
 // vertical line, or an axis aligned rectangle with some area.
 //

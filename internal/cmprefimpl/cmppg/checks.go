@@ -15,9 +15,9 @@ import (
 )
 
 func checkWKTParse(t *testing.T, pg PostGIS, candidates []string) {
-	var any bool
+	var found bool
 	for i, wkt := range candidates {
-		any = true
+		found = true
 		t.Run(fmt.Sprintf("CheckWKTParse_%d", i), func(t *testing.T) {
 			// The simple feature library accepts LINEARRING WKTs. However,
 			// postgis doesn't accept them. A workaround for this is to just
@@ -36,21 +36,21 @@ func checkWKTParse(t *testing.T, pg PostGIS, candidates []string) {
 			}
 		})
 	}
-	if !any {
-		// We know there are some some valid WKT strings, so if this happens
-		// then something is wrong with the extraction or conversion logic.
+	if !found {
+		// We know there are some valid WKT strings, so if this happens then
+		// something is wrong with the extraction or conversion logic.
 		t.Errorf("could not extract any WKTs")
 	}
 }
 
 func checkWKBParse(t *testing.T, pg PostGIS, candidates []string) {
-	var any bool
+	var found bool
 	for i, wkb := range candidates {
 		buf, err := hexStringToBytes(wkb)
 		if err != nil {
 			continue
 		}
-		any = true
+		found = true
 		t.Run(fmt.Sprintf("CheckWKBParse_%d", i), func(t *testing.T) {
 			if len(wkb) >= 10 {
 				if strings.HasPrefix(wkb, "0108000000") {
@@ -72,9 +72,9 @@ func checkWKBParse(t *testing.T, pg PostGIS, candidates []string) {
 			}
 		})
 	}
-	if !any {
-		// We know there are some some valid hex strings, so if this happens
-		// then something is wrong with the extraction or conversion logic.
+	if !found {
+		// We know there are some valid hex strings, so if this happens then
+		// something is wrong with the extraction or conversion logic.
 		t.Errorf("could not extract any WKBs")
 	}
 }
@@ -95,7 +95,7 @@ func hexStringToBytes(s string) ([]byte, error) {
 }
 
 func checkGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
-	var any bool
+	var found bool
 	for i, geojson := range candidates {
 		if geojson == `{"type":"Point","coordinates":[]}` {
 			// From https://tools.ietf.org/html/rfc7946#section-3.1:
@@ -121,7 +121,7 @@ func checkGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
 			// PostGIS erroneously accepts MultiPoints with empty positions.
 			continue
 		}
-		any = true
+		found = true
 		t.Run(fmt.Sprintf("CheckGeoJSONParse_%d", i), func(t *testing.T) {
 			_, sfErr := geom.UnmarshalGeoJSON([]byte(geojson))
 			isValid, reason := pg.GeoJSONIsValidWithReason(t, geojson)
@@ -134,8 +134,8 @@ func checkGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
 			}
 		})
 	}
-	if !any {
-		// We know there are some some valid geojson strings, so if this happens
+	if !found {
+		// We know there are some valid geojson strings, so if this happens
 		// then something is wrong with the extraction or conversion logic.
 		t.Errorf("could not extract any geojsons")
 	}

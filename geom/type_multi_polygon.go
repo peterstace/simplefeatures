@@ -174,7 +174,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 	return nil
 }
 
-// Type returns the GeometryType for a MultiPolygon
+// Type returns the GeometryType for a MultiPolygon.
 func (m MultiPolygon) Type() GeometryType {
 	return TypeMultiPolygon
 }

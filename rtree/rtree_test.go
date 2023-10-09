@@ -58,6 +58,7 @@ func TestRandom(t *testing.T) {
 }
 
 func checkSearch(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
+	t.Helper()
 	for i := 0; i < 10; i++ {
 		searchBB := randomBox(rnd, 0.5, 0.5)
 		var got []int
@@ -99,6 +100,7 @@ func randomBox(rnd *rand.Rand, maxStart, maxWidth float64) Box {
 }
 
 func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
+	t.Helper()
 	var recurse func(*node, string)
 	recurse = func(current *node, indent string) {
 		t.Logf("%sNode addr=%p numEntries=%d", indent, current, current.numEntries)

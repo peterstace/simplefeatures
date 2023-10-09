@@ -284,16 +284,17 @@ func (p *twkbParser) parseExtendedPrecision() error {
 		p.hasM = true
 		p.precM = int(extprec >> 5 & 0x07)
 	}
-	if p.hasZ && p.hasM {
+	switch {
+	case p.hasZ && p.hasM:
 		p.ctype = DimXYZM
 		p.dimensions = 4
 		p.scalings[2] = math.Pow10(-p.precZ)
 		p.scalings[3] = math.Pow10(-p.precM)
-	} else if p.hasZ {
+	case p.hasZ:
 		p.ctype = DimXYZ
 		p.dimensions = 3
 		p.scalings[2] = math.Pow10(-p.precZ)
-	} else if p.hasM {
+	case p.hasM:
 		p.ctype = DimXYM
 		p.dimensions = 3
 		p.scalings[2] = math.Pow10(-p.precM)
@@ -340,7 +341,8 @@ func (p *twkbParser) parseBBoxHeader(twkb []byte) (bbox []Point, err error) {
 	if !p.hasBBox {
 		return nil, nil
 	}
-	if p.hasZ && p.hasM {
+	switch {
+	case p.hasZ && p.hasM:
 		minX := p.scalings[0] * float64(p.bbox[0])
 		minY := p.scalings[1] * float64(p.bbox[2])
 		minZ := p.scalings[2] * float64(p.bbox[4])
@@ -354,8 +356,7 @@ func (p *twkbParser) parseBBoxHeader(twkb []byte) (bbox []Point, err error) {
 		minPt := NewPoint(Coordinates{XY: XY{minX, minY}, Z: minZ, M: minM, Type: p.ctype})
 		maxPt := NewPoint(Coordinates{XY: XY{maxX, maxY}, Z: maxZ, M: maxM, Type: p.ctype})
 		bbox = []Point{minPt, maxPt}
-
-	} else if p.hasZ {
+	case p.hasZ:
 		minX := p.scalings[0] * float64(p.bbox[0])
 		minY := p.scalings[1] * float64(p.bbox[2])
 		minZ := p.scalings[2] * float64(p.bbox[4])
@@ -367,8 +368,7 @@ func (p *twkbParser) parseBBoxHeader(twkb []byte) (bbox []Point, err error) {
 		minPt := NewPoint(Coordinates{XY: XY{minX, minY}, Z: minZ, Type: p.ctype})
 		maxPt := NewPoint(Coordinates{XY: XY{maxX, maxY}, Z: maxZ, Type: p.ctype})
 		bbox = []Point{minPt, maxPt}
-
-	} else if p.hasM {
+	case p.hasM:
 		minX := p.scalings[0] * float64(p.bbox[0])
 		minY := p.scalings[1] * float64(p.bbox[2])
 		minM := p.scalings[2] * float64(p.bbox[4])
@@ -380,8 +380,7 @@ func (p *twkbParser) parseBBoxHeader(twkb []byte) (bbox []Point, err error) {
 		minPt := NewPoint(Coordinates{XY: XY{minX, minY}, M: minM, Type: p.ctype})
 		maxPt := NewPoint(Coordinates{XY: XY{maxX, maxY}, M: maxM, Type: p.ctype})
 		bbox = []Point{minPt, maxPt}
-
-	} else {
+	default:
 		minX := p.scalings[0] * float64(p.bbox[0])
 		minY := p.scalings[1] * float64(p.bbox[2])
 
@@ -413,12 +412,13 @@ func (p *twkbParser) nextPoint() (Point, error) {
 
 	c.XY.X = coords[0]
 	c.XY.Y = coords[1]
-	if p.hasZ && p.hasM {
+	switch {
+	case p.hasZ && p.hasM:
 		c.Z = coords[2]
 		c.M = coords[3]
-	} else if p.hasZ {
+	case p.hasZ:
 		c.Z = coords[2]
-	} else if p.hasM {
+	case p.hasM:
 		c.M = coords[2]
 	}
 
@@ -614,7 +614,7 @@ func (p *twkbParser) parsePointCountAndArray() ([]float64, int, error) {
 // Utilise and update the running memory of the previous reference point.
 // The returned array will contain numPoints * the number of dimensions values.
 func (p *twkbParser) parsePointArray(numPoints int) ([]float64, error) {
-	coords := make([]float64, numPoints*int(p.dimensions))
+	coords := make([]float64, numPoints*p.dimensions)
 	c := 0
 	for i := 0; i < numPoints; i++ {
 		for d := 0; d < p.dimensions; d++ {

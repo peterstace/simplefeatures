@@ -8,33 +8,33 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-func geomFromWKT(t testing.TB, wkt string, nv ...NoValidate) Geometry {
-	t.Helper()
+func geomFromWKT(tb testing.TB, wkt string, nv ...NoValidate) Geometry {
+	tb.Helper()
 	geom, err := UnmarshalWKT(wkt, nv...)
 	if err != nil {
-		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
+		tb.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 	}
 	return geom
 }
 
-func geomsFromWKTs(t testing.TB, wkts []string, nv ...NoValidate) []Geometry {
-	t.Helper()
+func geomsFromWKTs(tb testing.TB, wkts []string, nv ...NoValidate) []Geometry {
+	tb.Helper()
 	var gs []Geometry
 	for _, wkt := range wkts {
 		g, err := UnmarshalWKT(wkt, nv...)
 		if err != nil {
-			t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
+			tb.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 		}
 		gs = append(gs, g)
 	}
 	return gs
 }
 
-func geomFromGeoJSON(t testing.TB, geojson string, nv ...NoValidate) Geometry {
-	t.Helper()
+func geomFromGeoJSON(tb testing.TB, geojson string, nv ...NoValidate) Geometry {
+	tb.Helper()
 	g, err := UnmarshalGeoJSON([]byte(geojson), nv...)
 	if err != nil {
-		t.Fatalf("could not unmarshal GeoJSON:\n geojson: %s\n     err: %v", geojson, err)
+		tb.Fatalf("could not unmarshal GeoJSON:\n geojson: %s\n     err: %v", geojson, err)
 	}
 	return g
 }
@@ -67,170 +67,169 @@ func upcastPolygons(ps []Polygon) []Geometry {
 	return gs
 }
 
-func expectPanics(t testing.TB, fn func()) {
-	t.Helper()
+func expectPanics(tb testing.TB, fn func()) {
+	tb.Helper()
 	defer func() {
 		if r := recover(); r != nil {
 			return
 		}
-		t.Errorf("didn't panic")
+		tb.Errorf("didn't panic")
 	}()
 	fn()
 }
 
-func expectNoErr(t testing.TB, err error) {
-	t.Helper()
+func expectNoErr(tb testing.TB, err error) {
+	tb.Helper()
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		tb.Fatalf("unexpected error: %v", err)
 	}
 }
 
-func expectErr(t testing.TB, err error) {
-	t.Helper()
+func expectErr(tb testing.TB, err error) {
+	tb.Helper()
 	if err == nil {
-		t.Fatal("expected error but got nil")
+		tb.Fatal("expected error but got nil")
 	}
 }
 
-func expectGeomEq(t testing.TB, got, want Geometry, opts ...ExactEqualsOption) {
-	t.Helper()
+func expectGeomEq(tb testing.TB, got, want Geometry, opts ...ExactEqualsOption) {
+	tb.Helper()
 	if !ExactEquals(got, want, opts...) {
-		t.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
+		tb.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
 	}
 }
 
 //nolint:deadcode,unused
-func expectGeomApproxEq(t testing.TB, got, want Geometry) {
-	t.Helper()
+func expectGeomApproxEq(tb testing.TB, got, want Geometry) {
+	tb.Helper()
 	eq, err := Equals(got, want)
 	if err != nil {
-		t.Errorf("\ngot:  %v\nwant: %v\nerr: %v\n", got.AsText(), want.AsText(), err)
+		tb.Errorf("\ngot:  %v\nwant: %v\nerr: %v\n", got.AsText(), want.AsText(), err)
 	}
 	if !eq {
-		t.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
+		tb.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
 	}
 }
 
-func expectGeomEqWKT(t testing.TB, got Geometry, wantWKT string, opts ...ExactEqualsOption) {
-	t.Helper()
-	want := geomFromWKT(t, wantWKT)
-	expectGeomEq(t, got, want, opts...)
+func expectGeomEqWKT(tb testing.TB, got Geometry, wantWKT string, opts ...ExactEqualsOption) {
+	tb.Helper()
+	want := geomFromWKT(tb, wantWKT)
+	expectGeomEq(tb, got, want, opts...)
 }
 
-func expectGeomsEq(t testing.TB, got, want []Geometry, opts ...ExactEqualsOption) {
-	t.Helper()
+func expectGeomsEq(tb testing.TB, got, want []Geometry, opts ...ExactEqualsOption) {
+	tb.Helper()
 	if len(got) != len(want) {
-		t.Errorf("\ngot:  len %d\nwant: len %d\n", len(got), len(want))
+		tb.Errorf("\ngot:  len %d\nwant: len %d\n", len(got), len(want))
 	}
 	for i := range got {
 		if !ExactEquals(got[i], want[i], opts...) {
-			t.Errorf("\ngot:  %v\nwant: %v\n", got[i].AsText(), want[i].AsText())
+			tb.Errorf("\ngot:  %v\nwant: %v\n", got[i].AsText(), want[i].AsText())
 		}
 	}
 }
 
-func expectCoordsEq(t testing.TB, got, want Coordinates) {
-	t.Helper()
+func expectCoordsEq(tb testing.TB, got, want Coordinates) {
+	tb.Helper()
 	if got != want {
-		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
 
-func expectStringEq(t testing.TB, got, want string) {
-	t.Helper()
+func expectStringEq(tb testing.TB, got, want string) {
+	tb.Helper()
 	if got != want {
-		t.Errorf("\ngot:  %q\nwant: %q\n", got, want)
+		tb.Errorf("\ngot:  %q\nwant: %q\n", got, want)
 	}
 }
 
-func expectIntEq(t testing.TB, got, want int) {
-	t.Helper()
+func expectIntEq(tb testing.TB, got, want int) {
+	tb.Helper()
 	if got != want {
-		t.Errorf("\ngot:  %d\nwant: %d\n", got, want)
+		tb.Errorf("\ngot:  %d\nwant: %d\n", got, want)
 	}
 }
 
-func expectBoolEq(t testing.TB, got, want bool) {
-	t.Helper()
+func expectBoolEq(tb testing.TB, got, want bool) {
+	tb.Helper()
 	if got != want {
-		t.Errorf("\ngot:  %t\nwant: %t\n", got, want)
+		tb.Errorf("\ngot:  %t\nwant: %t\n", got, want)
 	}
 }
 
-func expectTrue(t testing.TB, got bool) {
-	t.Helper()
-	expectBoolEq(t, got, true)
+func expectTrue(tb testing.TB, got bool) {
+	tb.Helper()
+	expectBoolEq(tb, got, true)
 }
 
-//nolint:deadcode,unused
-func expectFalse(t testing.TB, got bool) {
-	t.Helper()
-	expectBoolEq(t, got, false)
+func expectFalse(tb testing.TB, got bool) {
+	tb.Helper()
+	expectBoolEq(tb, got, false)
 }
 
-func expectXYEq(t testing.TB, got, want XY) {
-	t.Helper()
+func expectXYEq(tb testing.TB, got, want XY) {
+	tb.Helper()
 	if got != want {
-		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
 
-func expectXYWithinTolerance(t testing.TB, got, want XY, tolerance float64) {
-	t.Helper()
+func expectXYWithinTolerance(tb testing.TB, got, want XY, tolerance float64) {
+	tb.Helper()
 	if delta := math.Abs(got.Sub(want).Length()); delta > tolerance {
-		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
 
-func expectCoordinatesTypeEq(t testing.TB, got, want CoordinatesType) {
-	t.Helper()
+func expectCoordinatesTypeEq(tb testing.TB, got, want CoordinatesType) {
+	tb.Helper()
 	if got != want {
-		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
 
-func expectBytesEq(t testing.TB, got, want []byte) {
-	t.Helper()
+func expectBytesEq(tb testing.TB, got, want []byte) {
+	tb.Helper()
 	if !bytes.Equal(got, want) {
-		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
 
-func expectFloat64Eq(t testing.TB, got, want float64) {
-	t.Helper()
+func expectFloat64Eq(tb testing.TB, got, want float64) {
+	tb.Helper()
 	if got != want {
-		t.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
 
-func expectEnvEq(t testing.TB, got, want Envelope) {
-	t.Helper()
+func expectEnvEq(tb testing.TB, got, want Envelope) {
+	tb.Helper()
 	if ExactEquals(got.Min().AsGeometry(), want.Min().AsGeometry()) &&
 		ExactEquals(got.Max().AsGeometry(), want.Max().AsGeometry()) {
 		return
 	}
-	t.Errorf("\ngot:  %v\nwant: %v", got, want)
+	tb.Errorf("\ngot:  %v\nwant: %v", got, want)
 }
 
-func expectSequenceEq(t testing.TB, got, want Sequence) {
-	t.Helper()
+func expectSequenceEq(tb testing.TB, got, want Sequence) {
+	tb.Helper()
 	show := func() {
-		t.Logf("len(got): %d, ct(got): %s", got.Length(), got.CoordinatesType())
+		tb.Logf("len(got): %d, ct(got): %s", got.Length(), got.CoordinatesType())
 		for i := 0; i < got.Length(); i++ {
-			t.Logf("got[%d]: %v", i, got.Get(i))
+			tb.Logf("got[%d]: %v", i, got.Get(i))
 		}
-		t.Logf("len(want): %d, ct(want): %s", want.Length(), want.CoordinatesType())
+		tb.Logf("len(want): %d, ct(want): %s", want.Length(), want.CoordinatesType())
 		for i := 0; i < want.Length(); i++ {
-			t.Logf("want[%d]: %v", i, want.Get(i))
+			tb.Logf("want[%d]: %v", i, want.Get(i))
 		}
 	}
 	if got.CoordinatesType() != want.CoordinatesType() {
-		t.Errorf("mismatched coordinate type")
+		tb.Errorf("mismatched coordinate type")
 		show()
 		return
 	}
 	if got.Length() != want.Length() {
-		t.Errorf("length mismatch")
+		tb.Errorf("length mismatch")
 		show()
 		return
 	}
@@ -238,7 +237,7 @@ func expectSequenceEq(t testing.TB, got, want Sequence) {
 		w := want.Get(i)
 		g := got.Get(i)
 		if g != w {
-			t.Errorf("mismatch at %d: got:%v want:%v", i, g, w)
+			tb.Errorf("mismatch at %d: got:%v want:%v", i, g, w)
 		}
 	}
 }

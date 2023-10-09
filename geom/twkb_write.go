@@ -169,13 +169,14 @@ func newtwkbWriter(
 		w.dimensions++
 	}
 
-	if hasZ && hasM {
+	switch {
+	case hasZ && hasM:
 		w.ctype = DimXYZM
-	} else if hasZ {
+	case hasZ:
 		w.ctype = DimXYZ
-	} else if hasM {
+	case hasM:
 		w.ctype = DimXYM
-	} else {
+	default:
 		w.ctype = DimXY
 	}
 
@@ -521,12 +522,13 @@ func (w *twkbWriter) writePointArray(numPoints int, coords []float64) {
 			fval := coords[c]
 			ival := int64(fval * w.scalings[d])
 			// Compute bounding box.
-			if !w.bboxValid {
+			switch {
+			case !w.bboxValid:
 				w.bboxMin[d] = ival
 				w.bboxMax[d] = ival
-			} else if ival < w.bboxMin[d] {
+			case ival < w.bboxMin[d]:
 				w.bboxMin[d] = ival
-			} else if ival > w.bboxMax[d] {
+			case ival > w.bboxMax[d]:
 				w.bboxMax[d] = ival
 			}
 			// Perform coord differencing to find the int value.

@@ -41,7 +41,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer h.Close()
 
 	{
 		var buf bytes.Buffer
@@ -139,8 +138,8 @@ func deduplicateGeometries(geoms []geom.Geometry) []geom.Geometry {
 }
 
 // forceTo2D converts all geometries to 2D geometries, dropping any Z and M
-// values. This is done because because the C bindings for libgeos don't fully
-// support Z and M value.
+// values. This is done because the C bindings for libgeos don't fully support
+// Z and M value.
 func forceTo2D(geoms []geom.Geometry) {
 	for i := range geoms {
 		geoms[i] = geoms[i].Force2D()

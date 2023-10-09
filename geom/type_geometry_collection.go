@@ -49,7 +49,7 @@ func (c GeometryCollection) Validate() error {
 	return nil
 }
 
-// Type returns the GeometryType for a GeometryCollection
+// Type returns the GeometryType for a GeometryCollection.
 func (c GeometryCollection) Type() GeometryType {
 	return TypeGeometryCollection
 }

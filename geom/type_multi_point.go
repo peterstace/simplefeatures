@@ -45,7 +45,7 @@ func (m MultiPoint) Validate() error {
 	return nil
 }
 
-// Type returns the GeometryType for a MultiPoint
+// Type returns the GeometryType for a MultiPoint.
 func (m MultiPoint) Type() GeometryType {
 	return TypeMultiPoint
 }

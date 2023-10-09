@@ -22,6 +22,7 @@ func TestNearest(t *testing.T) {
 }
 
 func checkNearest(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
+	t.Helper()
 	for i := 0; i < 10; i++ {
 		originBB := randomBox(rnd, 0.9, 0.1)
 		got, ok := rt.Nearest(originBB)
@@ -47,6 +48,7 @@ func checkNearest(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
 }
 
 func checkPrioritySearch(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
+	t.Helper()
 	for i := 0; i < 10; i++ {
 		var got []int
 		originBB := randomBox(rnd, 0.9, 0.1)

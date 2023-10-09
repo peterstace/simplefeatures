@@ -422,6 +422,7 @@ func TestCrosses(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			run := func(rev bool) func(*testing.T) {
 				return func(t *testing.T) {
+					t.Helper()
 					g1 := geomFromWKT(t, tt.wkt1)
 					g2 := geomFromWKT(t, tt.wkt2)
 					if rev {
@@ -478,6 +479,7 @@ func TestOverlaps(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			run := func(rev bool) func(t *testing.T) {
 				return func(t *testing.T) {
+					t.Helper()
 					g1 := geomFromWKT(t, tt.wkt1)
 					g2 := geomFromWKT(t, tt.wkt2)
 					if rev {
