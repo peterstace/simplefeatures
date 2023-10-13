@@ -24,12 +24,18 @@ linters-settings:
   gosec:
     excludes:
       - G404 # Insecure random number source (rand)
+  errcheck:
+    exclude-functions:
+      - io.Copy(os.Stdout)
+      - (*github.com/peterstace/simplefeatures/rtree.RTree).RangeSearch
+      - (*github.com/peterstace/simplefeatures/rtree.RTree).PrioritySearch
 
 # NOTE: every linter supported by golangci-lint is either explicitly included
 # or excluded.
 linters:
 
   enable:
+
     - asasalint
     - asciicheck
     - bidichk
@@ -41,6 +47,7 @@ linters:
     - dogsled
     - dupword
     - durationcheck
+    - errcheck
     - errchkjson
     - execinquery
     - exportloopref
@@ -140,7 +147,6 @@ linters:
 
     # These are a good idea to enable, but would involve noisey changes.
     # They will be enabled later.
-    - errcheck
     - errorlint
     - revive
     - stylecheck

@@ -254,10 +254,11 @@ func (w *twkbWriter) writePoint(pt Point) error {
 	}
 	w.writeInitialHeaders()
 
-	return w.writePointCoords(pt)
+	w.writePointCoords(pt)
+	return nil
 }
 
-func (w *twkbWriter) writePointCoords(pt Point) error {
+func (w *twkbWriter) writePointCoords(pt Point) {
 	switch pt.CoordinatesType() {
 	case DimXY:
 		w.writePoints(1, pt.coords.XY.X, pt.coords.XY.Y)
@@ -268,9 +269,8 @@ func (w *twkbWriter) writePointCoords(pt Point) error {
 	case DimXYZM:
 		w.writePoints(1, pt.coords.XY.X, pt.coords.XY.Y, pt.coords.Z, pt.coords.M)
 	default:
-		return fmt.Errorf("point has unsupported type %s", pt.CoordinatesType())
+		panic(fmt.Errorf("point has unknown type %s", pt.CoordinatesType()))
 	}
-	return nil
 }
 
 func (w *twkbWriter) writeLineString(ls LineString) error {
@@ -286,18 +286,18 @@ func (w *twkbWriter) writeLineString(ls LineString) error {
 	}
 	w.writeInitialHeaders()
 
-	return w.writeLineStringCoords(ls)
+	w.writeLineStringCoords(ls)
+	return nil
 }
 
-func (w *twkbWriter) writeLineStringCoords(ls LineString) error {
+func (w *twkbWriter) writeLineStringCoords(ls LineString) {
 	coords := ls.Coordinates()
 	numPoints := coords.Length()
 	w.writeUnsignedVarint(uint64(numPoints))
 	w.writePointArray(numPoints, coords.floats)
-	return nil
 }
 
-func (w *twkbWriter) writeRing(ls LineString) error {
+func (w *twkbWriter) writeRing(ls LineString) {
 	coords := ls.Coordinates()
 	numPoints := coords.Length()
 	if !w.closeRings && numPoints >= 2 {
@@ -305,7 +305,6 @@ func (w *twkbWriter) writeRing(ls LineString) error {
 	}
 	w.writeUnsignedVarint(uint64(numPoints))
 	w.writePointArray(numPoints, coords.floats)
-	return nil
 }
 
 func (w *twkbWriter) writePolygon(poly Polygon) error {
@@ -321,14 +320,15 @@ func (w *twkbWriter) writePolygon(poly Polygon) error {
 	}
 	w.writeInitialHeaders()
 
-	return w.writePolygonRings(poly)
+	w.writePolygonRings(poly)
+	return nil
 }
 
-func (w *twkbWriter) writePolygonRings(poly Polygon) error {
+func (w *twkbWriter) writePolygonRings(poly Polygon) {
 	w.writeUnsignedVarint(uint64(poly.NumRings()))
 
 	if poly.NumRings() == 0 {
-		return nil
+		return
 	}
 
 	ls := poly.ExteriorRing()
@@ -339,7 +339,6 @@ func (w *twkbWriter) writePolygonRings(poly Polygon) error {
 		ls = poly.InteriorRingN(i)
 		w.writeRing(ls)
 	}
-	return nil
 }
 
 func (w *twkbWriter) writeMultiPoint(mp MultiPoint) error {
@@ -446,7 +445,9 @@ func (w *twkbWriter) writeGeometryCollection(gc GeometryCollection) error {
 	for i := 0; i < numGeometries; i++ {
 		subWriter := copytwkbWriter(w)
 		g := gc.GeometryN(i)
-		subWriter.writeGeometry(g)
+		if err := subWriter.writeGeometry(g); err != nil {
+			return err
+		}
 		subTWKB := subWriter.formTWKB()
 		w.twkbContents = append(w.twkbContents, subTWKB...)
 	}
