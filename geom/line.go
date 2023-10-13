@@ -134,8 +134,8 @@ func (ln line) intersectLine(other line) lineWithLineIntersection {
 	return lineWithLineIntersection{empty: true}
 }
 
-// onSegement checks if point r is on the segment formed by p and q (which
-// should all be collinear).
+// onSegement checks if point r is on the segment formed by p and q (all 3
+// points should be collinear).
 func onSegment(p XY, q XY, r XY) bool {
 	return r.X <= fastMax(p.X, q.X) &&
 		r.X >= fastMin(p.X, q.X) &&
