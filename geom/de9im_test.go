@@ -1,8 +1,10 @@
-package geom
+package geom_test
 
 import (
 	"strconv"
 	"testing"
+
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestRelateMatch(t *testing.T) {
@@ -44,7 +46,7 @@ func TestRelateMatch(t *testing.T) {
 		{"F012F012F", "F*11*T*2*", false},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, err := RelateMatches(tc.mat, tc.pat)
+			got, err := geom.RelateMatches(tc.mat, tc.pat)
 			if err != nil {
 				t.Error(err)
 			}
@@ -68,7 +70,7 @@ func TestRelateMatchError(t *testing.T) {
 		{"FFFFFFFFF", "FFFFXFFFF"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := RelateMatches(tc.mat, tc.pat)
+			_, err := geom.RelateMatches(tc.mat, tc.pat)
 			t.Log(err)
 			if err == nil {
 				t.Error("expected error but got nil")

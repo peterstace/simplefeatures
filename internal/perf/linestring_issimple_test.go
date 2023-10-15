@@ -1,4 +1,4 @@
-package perf
+package perf_test
 
 import (
 	"fmt"

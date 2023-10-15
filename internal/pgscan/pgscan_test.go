@@ -1,4 +1,4 @@
-package pgscan
+package pgscan_test
 
 import (
 	"database/sql"
