@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"math"
 	"sort"
 )
 
@@ -69,7 +70,7 @@ func sequenceToXYs(seq Sequence) []XY {
 
 // fastMin is a faster but not functionally identical version of math.Min.
 func fastMin(a, b float64) float64 {
-	if a < b {
+	if math.IsNaN(a) || a < b {
 		return a
 	}
 	return b
@@ -77,7 +78,7 @@ func fastMin(a, b float64) float64 {
 
 // fastMax is a faster but not functionally identical version of math.Max.
 func fastMax(a, b float64) float64 {
-	if a > b {
+	if math.IsNaN(a) || a > b {
 		return a
 	}
 	return b
