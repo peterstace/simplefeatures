@@ -167,8 +167,7 @@ func BenchmarkPolygonMultipleRingsValidation(b *testing.B) {
 func BenchmarkPolygonZigZagRingsValidation(b *testing.B) {
 	for _, sz := range []int{10, 100, 1000, 10000} {
 		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
-			outerRingEnv, err := NewEnvelope([]XY{{}, {7, float64(sz + 1)}})
-			expectNoErr(b, err)
+			outerRingEnv := NewEnvelope(XY{}, XY{7, float64(sz + 1)})
 			outerRing := outerRingEnv.AsGeometry().MustAsPolygon().ExteriorRing()
 			var leftFloats, rightFloats []float64
 			for i := 0; i < sz; i++ {

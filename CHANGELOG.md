@@ -8,6 +8,17 @@ YYYY-MM-DD
 
 - Simplifies the internal representation of the `Envelope` type.
 
+- **Breaking change**: Renames `Envelope`'s `ExtendToIncludeXY` method to
+  `ExpandToIncludeXY`. This makes the names of the `ExpandToIncludeXY` and
+  `ExpandToIncludeEnvelope` methods have consistent naming.
+
+- **Breaking change**: Alters the signature (and behaviour) of the
+  `NewEnvelope` function. It previously returned an `Envelope` and an `error`,
+  and new just returns an `Envelope`. It no longer validates that its inputs
+  don't contain NaN or +/- infinity (this can be checked via the `Validate`
+  method if desired). It also now accepts a variadic list of `XY` values,
+  rather than a slice of `XY` values.
+
 ## v0.45.1
 
 2023-09-29
