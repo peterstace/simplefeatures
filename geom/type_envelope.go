@@ -136,7 +136,7 @@ func (e Envelope) MinMaxXYs() (XY, XY, bool) {
 }
 
 // ExpandToIncludeXY returns the smallest envelope that contains all of the
-// points in this envelope along with the provided point. If will produce an
+// points in this envelope along with the provided point. It will produce an
 // invalid envelope if any of the coordinates in the existing envelope or new
 // XY contain NaN or +/- infinity.
 func (e Envelope) ExpandToIncludeXY(xy XY) Envelope {
