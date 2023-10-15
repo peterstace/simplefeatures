@@ -7,9 +7,9 @@ import (
 
 func convexHull(g Geometry) Geometry {
 	if g.IsEmpty() {
-		// Any empty geometry could be returned here to to give correct
-		// behaviour. However, to replicate PostGIS behaviour, we always return
-		// the original geometry.
+		// Any empty geometry could be returned here to give correct behaviour.
+		// However, to replicate PostGIS behaviour, we always return the
+		// original geometry.
 		return g.Force2D()
 	}
 

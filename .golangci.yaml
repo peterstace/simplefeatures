@@ -3,38 +3,146 @@ run:
 
 issues:
   exclude-rules:
-    - path: 'internal'
-      linters:
-        - gosec
-    - path: '(.+)_test\.go'
-      linters:
-        - gosec
 
-linter-settings:
+    # The tests in cmprefimpl have pass *testing.T values deeply through
+    # functions where using t.Helper() doesn't make sense.
+    - path: internal/cmprefimpl
+      linters:
+        - thelper
+
+linters-settings:
   depguard:
-    list-type: blacklist
-    include-go-root: true
-    packages:
-      - io/ioutil
-    packages-with-error-message:
-      - io/ioutil: "Use os or io instead of io/ioutil"
-  goimports:
-    local-prefixes: github.com/peterstace/simplefeatures
-  gosimple:
-    go: "1.17"
-    checks: ["all"]
+    rules:
+      main:
+        allow:
+          - $gostd
+          - github.com/peterstace/simplefeatures
+          - github.com/lib/pq
+        deny:
+          - pkg: io/ioutil
+            desc: Use os or io instead of io/ioutil
+  gosec:
+    excludes:
+      - G404 # Insecure random number source (rand)
 
+# NOTE: every linter supported by golangci-lint is either explicitly included
+# or excluded.
 linters:
-  fast: false
-  disable:
-    - errcheck
+
   enable:
+    - asasalint
+    - asciicheck
     - bidichk
+    - bodyclose
+    - containedctx
     - contextcheck
+    - decorder
     - depguard
+    - dogsled
+    - dupword
+    - durationcheck
+    - errchkjson
+    - execinquery
+    - exportloopref
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gocritic
+    - godot
     - gofmt
     - gofumpt
+    - goheader
     - goimports
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
     - gosec
+    - gosimple
+    - gosmopolitan
     - govet
+    - grouper
+    - importas
+    - ineffassign
+    - interfacebloat
+    - ireturn
+    - loggercheck
+    - makezero
+    - mirror
     - misspell
+    - musttag
+    - nakedret
+    - nilerr
+    - nilnil
+    - noctx
+    - nolintlint
+    - nosprintfhostport
+    - predeclared
+    - promlinter
+    - reassign
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - tagalign
+    - tagliatelle
+    - tenv
+    - testableexamples
+    - thelper
+    - tparallel
+    - unconvert
+    - unused
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+    - zerologlint
+
+  disable:
+
+    # Deprecated by golangci-lint:
+    - deadcode
+    - exhaustivestruct
+    - golint
+    - ifshort
+    - interfacer
+    - maligned
+    - nosnakecase
+    - scopelint
+    - structcheck
+    - varcheck
+
+    # The following are disabled because they're not a good match for
+    # simplefeatures.
+    - cyclop
+    - dupl
+    - errname
+    - exhaustive
+    - exhaustruct
+    - forbidigo
+    - forcetypeassert
+    - funlen
+    - gci
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocyclo
+    - godox
+    - goerr113
+    - gomnd
+    - lll
+    - maintidx
+    - nestif
+    - nlreturn
+    - nonamedreturns
+    - paralleltest
+    - prealloc
+    - varnamelen
+    - wrapcheck
+    - wsl
+
+    # These are a good idea to enable, but would involve noisey changes.
+    # They will be enabled later.
+    - errcheck
+    - errorlint
+    - revive
+    - stylecheck
+    - testpackage
+    - unparam

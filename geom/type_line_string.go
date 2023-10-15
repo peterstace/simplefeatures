@@ -56,7 +56,7 @@ func hasAtLeast2DistinctPointsInSeq(seq Sequence) bool {
 	return false
 }
 
-// Type returns the GeometryType for a LineString
+// Type returns the GeometryType for a LineString.
 func (s LineString) Type() GeometryType {
 	return TypeLineString
 }

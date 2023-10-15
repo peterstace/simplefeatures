@@ -484,6 +484,7 @@ func TestBinaryOp(t *testing.T) {
 			relate:  "FF1F0F1F2",
 		},
 		{
+			//nolint:dupword
 			/*
 			   +--A&B--+---A---+
 			   |       |       |

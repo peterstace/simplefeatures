@@ -10,22 +10,22 @@ const (
 	// rightTurn indicates that the last point is to the right of the line
 	// formed by traversing from the first point to the second point.
 	//
-	// A---B
-	//      \
-	//       C
+	//   A---B
+	//        \
+	//         C
 	rightTurn threePointOrientation = iota + 1
 
 	// collinear indicates that the three points are on the same line.
 	//
-	// A---B---C
+	//   A---B---C
 	collinear
 
 	// rightTurn indicates that the last point is to the left of the line
 	// formed by traversing from the first point to the second point.
 	//
-	//       C
-	//      /
-	// A---B
+	//         C
+	//        /
+	//   A---B
 	leftTurn
 )
 

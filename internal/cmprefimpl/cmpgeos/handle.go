@@ -50,6 +50,7 @@ type Handle struct {
 // NewHandle creates a new handle.
 func NewHandle() (*Handle, error) {
 	h := &Handle{}
+	//nolint:gocritic
 	h.context = C.sf_geos_init(unsafe.Pointer(&h.errBuf))
 	if h.context == nil {
 		return nil, errors.New("could not create libgeos context")
@@ -284,7 +285,7 @@ func (h *Handle) decodeGeomHandle(gh *C.GEOSGeometry) (geom.Geometry, error) {
 			} else {
 				subPointAsGeom, err := h.decodeGeomHandleUsingWKB(sub)
 				if err != nil {
-					return geom.Geometry{}, nil
+					return geom.Geometry{}, err
 				}
 				if !subPointAsGeom.IsPoint() {
 					return geom.Geometry{}, errors.New(

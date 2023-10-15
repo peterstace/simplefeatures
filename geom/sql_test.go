@@ -26,6 +26,7 @@ func TestSQLScanGeometry(t *testing.T) {
 	wkb := geomFromWKT(t, wkt).AsBinary()
 	var g Geometry
 	check := func(t *testing.T, err error) {
+		t.Helper()
 		if err != nil {
 			t.Fatal(err)
 		}

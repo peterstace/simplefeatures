@@ -178,6 +178,7 @@ func xysEqual(a, b []XY) bool {
 }
 
 func findEdge(t *testing.T, dcel *doublyConnectedEdgeList, first, second XY) *halfEdgeRecord {
+	t.Helper()
 	for _, e := range dcel.halfEdges {
 		if e.seq.GetXY(0) == first && e.seq.GetXY(1) == second {
 			return e
@@ -188,6 +189,7 @@ func findEdge(t *testing.T, dcel *doublyConnectedEdgeList, first, second XY) *ha
 }
 
 func CheckCycle(t *testing.T, f *faceRecord, start *halfEdgeRecord, want []XY) {
+	t.Helper()
 	if start == nil {
 		if len(want) != 0 {
 			t.Errorf("start is nil but want non-empty cycle: %v", want)
@@ -298,6 +300,7 @@ outer:
 }
 
 func newDCELFromWKTs(t *testing.T, wktA, wktB string) *doublyConnectedEdgeList {
+	t.Helper()
 	gA, err := UnmarshalWKT(wktA)
 	if err != nil {
 		t.Fatal(err)
@@ -314,6 +317,7 @@ func newDCELFromWKTs(t *testing.T, wktA, wktB string) *doublyConnectedEdgeList {
 }
 
 func newDCELFromWKT(t *testing.T, wkt string) *doublyConnectedEdgeList {
+	t.Helper()
 	return newDCELFromWKTs(t, wkt, "GEOMETRYCOLLECTION EMPTY")
 }
 

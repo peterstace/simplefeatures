@@ -40,7 +40,7 @@ func NewEmptyPoint(ctype CoordinatesType) Point {
 	return Point{Coordinates{Type: ctype}, false}
 }
 
-// Type returns the GeometryType for a Point
+// Type returns the GeometryType for a Point.
 func (p Point) Type() GeometryType {
 	return TypePoint
 }

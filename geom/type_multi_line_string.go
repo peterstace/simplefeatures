@@ -53,7 +53,7 @@ func (m MultiLineString) Validate() error {
 	return nil
 }
 
-// Type returns the GeometryType for a MultiLineString
+// Type returns the GeometryType for a MultiLineString.
 func (m MultiLineString) Type() GeometryType {
 	return TypeMultiLineString
 }

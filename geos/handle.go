@@ -102,7 +102,7 @@ func (h *handle) errMsg() string {
 			return string(buf[:i])
 		}
 	}
-	return string(buf[:])
+	return string(buf)
 }
 
 // release releases any resources held by the handle. The handle should not be

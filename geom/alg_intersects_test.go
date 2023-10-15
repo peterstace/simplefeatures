@@ -374,6 +374,7 @@ func TestIntersects(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			runTest := func(g1, g2 geom.Geometry) func(t *testing.T) {
 				return func(t *testing.T) {
+					t.Helper()
 					got := geom.Intersects(g1, g2)
 					if got != tt.want {
 						t.Errorf(

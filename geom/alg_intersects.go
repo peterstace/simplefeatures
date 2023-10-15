@@ -131,8 +131,7 @@ func Intersects(g1, g2 Geometry) bool {
 			)
 		}
 	case g1.IsMultiPolygon():
-		switch {
-		case g2.IsMultiPolygon():
+		if g2.IsMultiPolygon() {
 			return hasIntersectionMultiPolygonWithMultiPolygon(
 				g1.MustAsMultiPolygon(),
 				g2.MustAsMultiPolygon(),

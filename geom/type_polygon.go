@@ -160,7 +160,7 @@ func validateRing(r LineString) error {
 	return nil
 }
 
-// Type returns the GeometryType for a Polygon
+// Type returns the GeometryType for a Polygon.
 func (p Polygon) Type() GeometryType {
 	return TypePolygon
 }
@@ -467,7 +467,7 @@ func centroidOfRing(ring LineString) XY {
 	return cent6.Scale(1.0 / 3.0 / areaSum2)
 }
 
-// centroid3 returns triple the centroid of 3 points
+// centroid3 returns triple the centroid of 3 points.
 func centroid3(pt1, pt2, pt3 XY) XY {
 	return pt1.Add(pt2).Add(pt3)
 }

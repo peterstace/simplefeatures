@@ -464,15 +464,15 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 	}
 }
 
-// XTestWriteTWKBSQLFile exists to allow testing of TWKB test cases
+// TestWriteTWKBSQLFile exists to allow testing of TWKB test cases
 // against a PostGIS-enabled database.
-// Remove the leading X to run as a test.
 //
 // Note: some PostGIS implementations do not support all features,
 // in particular some will always close polygon rings by duplicating
 // the first point as the final point. So some test cases listed
 // in this file may not agree with all PostGIS implementations.
-func XTestWriteTWKBSQLFile(t *testing.T) {
+func TestWriteTWKBSQLFile(t *testing.T) {
+	t.Skip("this test was only used during initial development")
 	sql := ""
 	for _, tc := range TWKBTestCases {
 		sql += "/* " + tc.description + " */\n"
@@ -482,7 +482,8 @@ func XTestWriteTWKBSQLFile(t *testing.T) {
 		}
 
 		if !tc.skipEncode {
-			if tc.hasIDList {
+			switch {
+			case tc.hasIDList:
 				ids := "ARRAY ["
 				for _, id := range tc.listedIDs {
 					ids += fmt.Sprintf("%d, ", id)
@@ -491,17 +492,17 @@ func XTestWriteTWKBSQLFile(t *testing.T) {
 
 				sql += fmt.Sprintf("select ST_AsTWKB(%s, %s, %d, %d, %d, %v, %v);\n",
 					tc.postGIS, ids, tc.precXY, tc.precZ, tc.precM, tc.hasSize, tc.hasBBox)
-			} else if tc.precXY != 0 || tc.precZ != 0 || tc.precM != 0 || tc.hasSize || tc.hasBBox {
+			case tc.precXY != 0 || tc.precZ != 0 || tc.precM != 0 || tc.hasSize || tc.hasBBox:
 				sql += fmt.Sprintf("select ST_AsTWKB('%s'::geometry, %d, %d, %d, %v, %v);\n",
 					tc.wkt, tc.precXY, tc.precZ, tc.precM, tc.hasSize, tc.hasBBox)
-			} else {
+			default:
 				sql += fmt.Sprintf("select ST_AsTWKB('%s'::geometry);\n", tc.wkt)
 			}
 		}
 		sql += "\n\n"
 	}
 
-	err := os.WriteFile("../twkb_sql.txt", []byte(sql), 0o644)
+	err := os.WriteFile("../twkb_sql.txt", []byte(sql), 0o600)
 	expectNoErr(t, err)
 }
 

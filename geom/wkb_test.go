@@ -10,17 +10,17 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-func hexStringToBytes(t testing.TB, s string) []byte {
-	t.Helper()
+func hexStringToBytes(tb testing.TB, s string) []byte {
+	tb.Helper()
 	s = strings.ReplaceAll(s, " ", "")
 	if len(s)%2 != 0 {
-		t.Fatal("hex string must have even length")
+		tb.Fatal("hex string must have even length")
 	}
 	var buf []byte
 	for i := 0; i < len(s); i += 2 {
 		x, err := strconv.ParseUint(s[i:i+2], 16, 8)
 		if err != nil {
-			t.Fatal(err)
+			tb.Fatal(err)
 		}
 		buf = append(buf, byte(x))
 	}

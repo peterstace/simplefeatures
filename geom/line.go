@@ -134,8 +134,8 @@ func (ln line) intersectLine(other line) lineWithLineIntersection {
 	return lineWithLineIntersection{empty: true}
 }
 
-// onSegement checks if point r on the segment formed by p and q.
-// p, q and r should be collinear
+// onSegement checks if point r is on the segment formed by p and q (all 3
+// points should be collinear).
 func onSegment(p XY, q XY, r XY) bool {
 	return r.X <= fastMax(p.X, q.X) &&
 		r.X >= fastMin(p.X, q.X) &&
@@ -143,7 +143,7 @@ func onSegment(p XY, q XY, r XY) bool {
 		r.Y >= fastMin(p.Y, q.Y)
 }
 
-// rightmostThenHighestIndex finds the rightmost-then-highest point
+// rightmostThenHighestIndex finds the rightmost-then-highest point.
 func rightmostThenHighestIndex(ps []XY) int {
 	rpi := 0
 	for i := 1; i < len(ps); i++ {

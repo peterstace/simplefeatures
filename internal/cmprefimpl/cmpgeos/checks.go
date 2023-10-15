@@ -800,25 +800,25 @@ func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error
 	}{
 		{
 			"Union",
-			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.Union(g1, g2) },
+			geom.Union,
 			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.union(g1, g2) },
 			skipUnion,
 		},
 		{
 			"Intersection",
-			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.Intersection(g1, g2) },
+			geom.Intersection,
 			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.intersection(g1, g2) },
 			skipIntersection,
 		},
 		{
 			"Difference",
-			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.Difference(g1, g2) },
+			geom.Difference,
 			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.difference(g1, g2) },
 			skipDifference,
 		},
 		{
 			"SymmetricDifference",
-			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return geom.SymmetricDifference(g1, g2) },
+			geom.SymmetricDifference,
 			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.symmetricDifference(g1, g2) },
 			skipSymDiff,
 		},
