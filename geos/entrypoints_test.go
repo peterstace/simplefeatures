@@ -3,6 +3,7 @@ package geos_test
 import (
 	"math"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -825,6 +826,9 @@ func TestMakeValid(t *testing.T) {
 			expectErr(t, err)
 			in := geomFromWKT(t, tt.input, geom.NoValidate{})
 			gotGeom, err := geos.MakeValid(in)
+			if err != nil && strings.Contains(err.Error(), "unsupported") {
+				t.Skip(err)
+			}
 			expectNoErr(t, err)
 			wantGeom := geomFromWKT(t, tt.wantOutput)
 			expectGeomEq(t, gotGeom, wantGeom, geom.IgnoreOrder)
@@ -913,6 +917,9 @@ func TestCoverageUnion(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in := geomFromWKT(t, tc.input)
 			gotGeom, err := geos.CoverageUnion(in)
+			if err != nil && strings.Contains(err.Error(), "unsupported") {
+				t.Skip(err)
+			}
 			if tc.wantErr {
 				expectErr(t, err)
 			} else {
