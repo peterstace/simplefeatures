@@ -213,12 +213,7 @@ func (s LineString) IsEmpty() bool {
 
 // Envelope returns the Envelope that most tightly surrounds the geometry.
 func (s LineString) Envelope() Envelope {
-	var env Envelope
-	n := s.seq.Length()
-	for i := 0; i < n; i++ {
-		env = env.uncheckedExtend(s.seq.GetXY(i))
-	}
-	return env
+	return s.seq.Envelope()
 }
 
 // Boundary returns the spatial boundary of this LineString. For closed

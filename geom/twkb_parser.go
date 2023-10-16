@@ -95,16 +95,16 @@ func UnmarshalTWKBEnvelope(twkb []byte) (Envelope, error) {
 	if !p.hasBBox {
 		return Envelope{}, nil
 	}
-	return NewEnvelope([]XY{
-		{
+	return NewEnvelope(
+		XY{
 			p.scalings[0] * float64(p.bbox[0]),
 			p.scalings[1] * float64(p.bbox[2]),
 		},
-		{
+		XY{
 			p.scalings[0] * float64(p.bbox[0]+p.bbox[1]),
 			p.scalings[1] * float64(p.bbox[2]+p.bbox[3]),
 		},
-	})
+	), nil
 }
 
 // twkbParser holds all state information for interpreting TWKB buffers

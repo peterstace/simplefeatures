@@ -225,19 +225,19 @@ func hasIntersectionBetweenLines(
 
 			if !populateExtension {
 				env = inter.ptA.uncheckedEnvelope()
-				env = env.uncheckedExtend(inter.ptB)
+				env = env.ExpandToIncludeXY(inter.ptB)
 				return rtree.Stop
 			}
 
 			if inter.ptA != inter.ptB {
 				env = inter.ptA.uncheckedEnvelope()
-				env = env.uncheckedExtend(inter.ptB)
+				env = env.ExpandToIncludeXY(inter.ptB)
 				return rtree.Stop
 			}
 
 			// Single point intersection case from here onwards:
 
-			env = env.uncheckedExtend(inter.ptA)
+			env = env.ExpandToIncludeXY(inter.ptA)
 			if !env.IsPoint() {
 				return rtree.Stop
 			}

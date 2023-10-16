@@ -510,7 +510,11 @@ func (h *Handle) envelope(g geom.Geometry) (geom.Envelope, error) {
 		if C.GEOSGeomGetY_r(h.context, env, &y) == 0 {
 			return geom.Envelope{}, h.err()
 		}
-		return geom.NewEnvelope([]geom.XY{{X: float64(x), Y: float64(y)}})
+		env := geom.NewEnvelope(geom.XY{X: float64(x), Y: float64(y)})
+		if err := env.Validate(); err != nil {
+			return geom.Envelope{}, err
+		}
+		return env, nil
 	case "Polygon":
 		// Continues below
 	default:
@@ -550,12 +554,12 @@ func (h *Handle) envelope(g geom.Geometry) (geom.Envelope, error) {
 			return geom.Envelope{}, h.err()
 		}
 		xy := geom.XY{X: float64(x), Y: float64(y)}
-		sfEnv, err = sfEnv.ExtendToIncludeXY(xy)
-		if err != nil {
-			return geom.Envelope{}, err
-		}
+		sfEnv = sfEnv.ExpandToIncludeXY(xy)
 	}
 
+	if err := sfEnv.Validate(); err != nil {
+		return geom.Envelope{}, err
+	}
 	return sfEnv, nil
 }
 
