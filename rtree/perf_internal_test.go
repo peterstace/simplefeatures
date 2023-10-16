@@ -30,7 +30,7 @@ func BenchmarkRangeSearch(b *testing.B) {
 	for _, pop := range [...]int{10, 100, 1000, 10_000, 100_000} {
 		b.Run(fmt.Sprintf("n=%d", pop), func(b *testing.B) {
 			rnd := rand.New(rand.NewSource(0))
-			tree, _ := testBulkLoad(rnd, pop, 0.9, 0.1)
+			tree, _ := testBulkLoad(rnd, pop)
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				tree.RangeSearch(Box{0.5, 0.5, 0.5, 0.5}, func(int) error { return nil })

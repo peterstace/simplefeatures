@@ -96,6 +96,7 @@ linters:
     - thelper
     - tparallel
     - unconvert
+    - unparam
     - unused
     - usestdlibvars
     - wastedassign
@@ -151,4 +152,3 @@ linters:
     - errorlint
     - revive
     - stylecheck
-    - unparam

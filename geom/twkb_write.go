@@ -261,13 +261,13 @@ func (w *twkbWriter) writePoint(pt Point) error {
 func (w *twkbWriter) writePointCoords(pt Point) {
 	switch pt.CoordinatesType() {
 	case DimXY:
-		w.writePoints(1, pt.coords.XY.X, pt.coords.XY.Y)
+		w.writeSinglePointArray(pt.coords.XY.X, pt.coords.XY.Y)
 	case DimXYZ:
-		w.writePoints(1, pt.coords.XY.X, pt.coords.XY.Y, pt.coords.Z)
+		w.writeSinglePointArray(pt.coords.XY.X, pt.coords.XY.Y, pt.coords.Z)
 	case DimXYM:
-		w.writePoints(1, pt.coords.XY.X, pt.coords.XY.Y, pt.coords.M)
+		w.writeSinglePointArray(pt.coords.XY.X, pt.coords.XY.Y, pt.coords.M)
 	case DimXYZM:
-		w.writePoints(1, pt.coords.XY.X, pt.coords.XY.Y, pt.coords.Z, pt.coords.M)
+		w.writeSinglePointArray(pt.coords.XY.X, pt.coords.XY.Y, pt.coords.Z, pt.coords.M)
 	default:
 		panic(fmt.Errorf("point has unknown type %s", pt.CoordinatesType()))
 	}
@@ -508,8 +508,8 @@ func (w *twkbWriter) writeExtendedPrecision() {
 	w.writeHeaderByte(ext)
 }
 
-func (w *twkbWriter) writePoints(numPoints int, coords ...float64) {
-	w.writePointArray(numPoints, coords)
+func (w *twkbWriter) writeSinglePointArray(coords ...float64) {
+	w.writePointArray(1, coords)
 }
 
 // Convert a given number of points from floating point to integer coordinates.
@@ -592,18 +592,16 @@ func (w *twkbWriter) writeIDList(num int) error {
 	return nil
 }
 
-func (w *twkbWriter) writeSignedVarint(val int64) int {
+func (w *twkbWriter) writeSignedVarint(val int64) {
 	var buf [binary.MaxVarintLen64]byte
 	n := binary.PutVarint(buf[:], val)
 	w.twkbContents = append(w.twkbContents, buf[:n]...)
-	return n
 }
 
-func (w *twkbWriter) writeUnsignedVarint(val uint64) int {
+func (w *twkbWriter) writeUnsignedVarint(val uint64) {
 	var buf [binary.MaxVarintLen64]byte
 	n := binary.PutUvarint(buf[:], val)
 	w.twkbContents = append(w.twkbContents, buf[:n]...)
-	return n
 }
 
 func (w *twkbWriter) writeHeaderByte(b byte) {

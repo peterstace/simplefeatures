@@ -65,7 +65,6 @@ func Intersects(g1, g2 Geometry) bool {
 			has, _ := hasIntersectionMultiLineStringWithMultiLineString(
 				g1.MustAsLineString().AsMultiLineString(),
 				g2.MustAsMultiLineString(),
-				false,
 			)
 			return has
 		case g2.IsMultiPolygon():
@@ -121,7 +120,6 @@ func Intersects(g1, g2 Geometry) bool {
 			has, _ := hasIntersectionMultiLineStringWithMultiLineString(
 				g1.MustAsMultiLineString(),
 				g2.MustAsMultiLineString(),
-				false,
 			)
 			return has
 		case g2.IsMultiPolygon():
@@ -183,13 +181,13 @@ func hasIntersectionLineStringWithLineString(
 }
 
 func hasIntersectionMultiLineStringWithMultiLineString(
-	mls1, mls2 MultiLineString, populateExtension bool,
+	mls1, mls2 MultiLineString,
 ) (
 	bool, mlsWithMLSIntersectsExtension,
 ) {
 	lines1 := mls1.asLines()
 	lines2 := mls2.asLines()
-	return hasIntersectionBetweenLines(lines1, lines2, populateExtension)
+	return hasIntersectionBetweenLines(lines1, lines2, true)
 }
 
 func hasIntersectionBetweenLines(
@@ -260,7 +258,7 @@ func hasIntersectionBetweenLines(
 }
 
 func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp MultiPolygon) bool {
-	if has, _ := hasIntersectionMultiLineStringWithMultiLineString(mls, mp.Boundary(), false); has {
+	if has, _ := hasIntersectionMultiLineStringWithMultiLineString(mls, mp.Boundary()); has {
 		return true
 	}
 
@@ -391,7 +389,7 @@ func hasIntersectionPolygonWithPolygon(p1, p2 Polygon) bool {
 	// intersect.
 	b1 := p1.Boundary()
 	b2 := p2.Boundary()
-	if has, _ := hasIntersectionMultiLineStringWithMultiLineString(b1, b2, false); has {
+	if has, _ := hasIntersectionMultiLineStringWithMultiLineString(b1, b2); has {
 		return true
 	}
 

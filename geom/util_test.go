@@ -8,6 +8,7 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
+//nolint:unparam
 func geomFromWKT(tb testing.TB, wkt string, nv ...NoValidate) Geometry {
 	tb.Helper()
 	geom, err := UnmarshalWKT(wkt, nv...)
@@ -17,6 +18,7 @@ func geomFromWKT(tb testing.TB, wkt string, nv ...NoValidate) Geometry {
 	return geom
 }
 
+//nolint:unparam
 func geomsFromWKTs(tb testing.TB, wkts []string, nv ...NoValidate) []Geometry {
 	tb.Helper()
 	var gs []Geometry
@@ -117,6 +119,7 @@ func expectGeomEqWKT(tb testing.TB, got Geometry, wantWKT string, opts ...ExactE
 	expectGeomEq(tb, got, want, opts...)
 }
 
+//nolint:unparam
 func expectGeomsEq(tb testing.TB, got, want []Geometry, opts ...ExactEqualsOption) {
 	tb.Helper()
 	if len(got) != len(want) {

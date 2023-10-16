@@ -11,14 +11,8 @@ func (d *doublyConnectedEdgeList) extractGeometry(include func([2]bool) bool) (G
 	if err != nil {
 		return Geometry{}, err
 	}
-	linears, err := d.extractLineStrings(include)
-	if err != nil {
-		return Geometry{}, err
-	}
-	points, err := d.extractPoints(include)
-	if err != nil {
-		return Geometry{}, err
-	}
+	linears := d.extractLineStrings(include)
+	points := d.extractPoints(include)
 
 	switch {
 	case len(areals) > 0 && len(linears) == 0 && len(points) == 0:
@@ -236,7 +230,7 @@ func orderPolygonRings(rings []LineString) {
 	})
 }
 
-func (d *doublyConnectedEdgeList) extractLineStrings(include func([2]bool) bool) ([]LineString, error) {
+func (d *doublyConnectedEdgeList) extractLineStrings(include func([2]bool) bool) []LineString {
 	var lss []LineString
 	for _, e := range d.halfEdges {
 		if shouldExtractLine(e, include) {
@@ -256,7 +250,7 @@ func (d *doublyConnectedEdgeList) extractLineStrings(include func([2]bool) bool)
 		seqJ := lss[j].Coordinates()
 		return seqI.less(seqJ)
 	})
-	return lss, nil
+	return lss
 }
 
 func shouldExtractLine(e *halfEdgeRecord, include func([2]bool) bool) bool {
@@ -269,7 +263,7 @@ func shouldExtractLine(e *halfEdgeRecord, include func([2]bool) bool) bool {
 // extractPoints extracts any vertices in the DCEL that should be part of the
 // output geometry, but aren't yet represented as part of any previously
 // extracted geometries.
-func (d *doublyConnectedEdgeList) extractPoints(include func([2]bool) bool) ([]Point, error) {
+func (d *doublyConnectedEdgeList) extractPoints(include func([2]bool) bool) []Point {
 	xys := make([]XY, 0, len(d.vertices))
 	for _, vert := range d.vertices {
 		if include(vert.inSet) && !vert.extracted {
@@ -286,5 +280,5 @@ func (d *doublyConnectedEdgeList) extractPoints(include func([2]bool) bool) ([]P
 	for _, xy := range xys {
 		pts = append(pts, xy.AsPoint())
 	}
-	return pts, nil
+	return pts
 }

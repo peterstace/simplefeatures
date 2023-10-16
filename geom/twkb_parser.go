@@ -72,7 +72,7 @@ func UnmarshalTWKBWithHeaders(twkb []byte, nv ...NoValidate) (g Geometry, bbox [
 // Any remaining geometry is not parsed by this function.
 func UnmarshalTWKBBoundingBoxHeader(twkb []byte) (bbox []Point, err error) {
 	p := newTWKBParser(twkb)
-	bbox, err = p.parseBBoxHeader(twkb)
+	bbox, err = p.parseBBoxHeader()
 	return bbox, p.annotateError(err)
 }
 
@@ -334,7 +334,7 @@ func (p *twkbParser) parseBBox() error {
 	return nil
 }
 
-func (p *twkbParser) parseBBoxHeader(twkb []byte) (bbox []Point, err error) {
+func (p *twkbParser) parseBBoxHeader() (bbox []Point, err error) {
 	if err = p.parseHeaders(); err != nil {
 		return nil, err
 	}
