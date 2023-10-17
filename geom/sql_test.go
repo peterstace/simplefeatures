@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
-	. "github.com/peterstace/simplefeatures/geom"
 )
 
 func TestSQLValueGeometry(t *testing.T) {
@@ -14,7 +13,7 @@ func TestSQLValueGeometry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	geom, err := UnmarshalWKB(val.([]byte))
+	geom, err := geom.UnmarshalWKB(val.([]byte))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +23,7 @@ func TestSQLValueGeometry(t *testing.T) {
 func TestSQLScanGeometry(t *testing.T) {
 	const wkt = "POINT(2 3)"
 	wkb := geomFromWKT(t, wkt).AsBinary()
-	var g Geometry
+	var g geom.Geometry
 	check := func(t *testing.T, err error) {
 		t.Helper()
 		if err != nil {
@@ -33,11 +32,11 @@ func TestSQLScanGeometry(t *testing.T) {
 		expectGeomEq(t, g, geomFromWKT(t, wkt))
 	}
 	t.Run("string", func(t *testing.T) {
-		g = Geometry{}
+		g = geom.Geometry{}
 		check(t, g.Scan(string(wkb)))
 	})
 	t.Run("byte", func(t *testing.T) {
-		g = Geometry{}
+		g = geom.Geometry{}
 		check(t, g.Scan(wkb))
 	})
 }
@@ -57,12 +56,12 @@ func TestSQLValueConcrete(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log(wkt)
-			geom := geomFromWKT(t, wkt)
-			val, err := geom.Value()
+			in := geomFromWKT(t, wkt)
+			val, err := in.Value()
 			expectNoErr(t, err)
-			g, err := UnmarshalWKB(val.([]byte))
+			out, err := geom.UnmarshalWKB(val.([]byte))
 			expectNoErr(t, err)
-			expectGeomEq(t, g, geom)
+			expectGeomEq(t, out, in)
 		})
 	}
 }

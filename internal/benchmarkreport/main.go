@@ -117,7 +117,7 @@ func showTable(benches map[benchmark]time.Duration) {
 }
 
 func roundDuration(d time.Duration) time.Duration {
-	var round time.Duration = time.Nanosecond
+	round := time.Nanosecond
 	for round < d {
 		round *= 10
 	}
