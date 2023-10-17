@@ -548,35 +548,29 @@ func checkSimplify(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func binaryChecks(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+func binaryChecks(h *Handle, g1, g2 geom.Geometry, lg *log.Logger) error {
 	for _, g := range []geom.Geometry{g1, g2} {
-		if valid, err := checkIsValid(h, g, log); err != nil {
+		if valid, err := checkIsValid(h, g, lg); err != nil {
 			return err
 		} else if !valid {
 			return nil
 		}
 	}
 
-	log.Println("checking Intersects")
-	if err := checkIntersects(h, g1, g2, log); err != nil {
-		return err
+	for _, check := range []struct {
+		name string
+		fn   func(*Handle, geom.Geometry, geom.Geometry, *log.Logger) error
+	}{
+		{"Intersects", checkIntersects},
+		{"ExactEquals", checkExactEquals},
+		{"Distance", checkDistance},
+		{"DCELOperations", checkDCELOperations},
+	} {
+		lg.Printf("checking %s", check.name)
+		if err := check.fn(h, g1, g2, lg); err != nil {
+			return err
+		}
 	}
-
-	log.Println("checking ExactEquals")
-	if err := checkExactEquals(h, g1, g2, log); err != nil {
-		return err
-	}
-
-	log.Println("checking Distance")
-	if err := checkDistance(h, g1, g2, log); err != nil {
-		return err
-	}
-
-	log.Println("checking DCEL operations")
-	if err := checkDCELOperations(h, g1, g2, log); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -796,11 +790,7 @@ func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error
 	}
 
 	log.Println("checking Relate")
-	if err := checkRelate(h, g1, g2, log); err != nil {
-		return err
-	}
-
-	return nil
+	return checkRelate(h, g1, g2, log)
 }
 
 func checkDCELOp(
@@ -845,20 +835,14 @@ func checkDCELOp(
 		// We're not going to be able to compare got and want because of
 		// numeric precision issues.
 		log.Printf("mantissa doesn't terminate quickly, using area heuristic")
-		if err := checkEqualityHeuristic(want, got, log); err != nil {
-			return err
-		}
-		return nil
+		return checkEqualityHeuristic(want, got, log)
 	}
 
 	if want.IsGeometryCollection() || got.IsGeometryCollection() {
 		// We can't use Equals from GEOS on GeometryCollections, so we can't
 		// use proper Equals for this case.
 		log.Printf("want or got is a geometry collection, using area heuristic")
-		if err := checkEqualityHeuristic(want, got, log); err != nil {
-			return err
-		}
-		return nil
+		return checkEqualityHeuristic(want, got, log)
 	}
 
 	eq, err := geos.Equals(want, got)

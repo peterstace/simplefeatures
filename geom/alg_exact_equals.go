@@ -60,7 +60,7 @@ func (c exactEqualsComparator) eq(a, b Coordinates) bool {
 // For collections (MultiPoint, MultiLineString, MultiPolygon, and
 // GeometryCollection), the ordering of constituent elements in the collection
 // are ignored.
-func IgnoreOrder(c exactEqualsComparator) exactEqualsComparator {
+func IgnoreOrder(c exactEqualsComparator) exactEqualsComparator { //nolint:revive
 	c.ignoreOrder = true
 	return c
 }

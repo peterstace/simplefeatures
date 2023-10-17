@@ -37,7 +37,7 @@ type RTree struct {
 
 // Stop is a special sentinel error that can be used to stop a search operation
 // without any error.
-var Stop = errors.New("stop") //nolint:stylecheck // ST1012
+var Stop = errors.New("stop") //nolint:stylecheck,revive
 
 // RangeSearch looks for any items in the tree that overlap with the given
 // bounding box. The callback is called with the record ID for each found item.
