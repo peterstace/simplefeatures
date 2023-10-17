@@ -114,7 +114,7 @@ func TestPrioritySearchEarlyStop(t *testing.T) {
 			}
 			return nil
 		})
-		if err != userErr {
+		if !errors.Is(err, userErr) {
 			t.Fatalf("expected to get userErr but got: %v", userErr)
 		}
 		if count != 3 {
