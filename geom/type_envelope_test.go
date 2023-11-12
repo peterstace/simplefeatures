@@ -6,58 +6,58 @@ import (
 	"strconv"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/geom"
 	"github.com/peterstace/simplefeatures/rtree"
 )
 
-func onePtEnv(x, y float64) Envelope {
-	return Envelope{}.ExpandToIncludeXY(XY{X: x, Y: y})
+func onePtEnv(x, y float64) geom.Envelope {
+	return geom.Envelope{}.ExpandToIncludeXY(geom.XY{X: x, Y: y})
 }
 
-func twoPtEnv(minX, minY, maxX, maxY float64) Envelope {
+func twoPtEnv(minX, minY, maxX, maxY float64) geom.Envelope {
 	if minX > maxX {
 		panic(fmt.Sprintf("X values out of order: %v %v", minX, maxX))
 	}
 	if minY > maxY {
 		panic(fmt.Sprintf("Y values out of order: %v %v", minY, maxY))
 	}
-	return onePtEnv(minX, minY).ExpandToIncludeXY(XY{X: maxX, Y: maxY})
+	return onePtEnv(minX, minY).ExpandToIncludeXY(geom.XY{X: maxX, Y: maxY})
 }
 
 func TestEnvelopeNew(t *testing.T) {
 	for _, tc := range []struct {
 		desc string
-		xys  []XY
-		want Envelope
+		xys  []geom.XY
+		want geom.Envelope
 	}{
 		{
 			desc: "nil slice",
 			xys:  nil,
-			want: Envelope{},
+			want: geom.Envelope{},
 		},
 		{
 			desc: "empty slice",
-			xys:  []XY{},
-			want: Envelope{},
+			xys:  []geom.XY{},
+			want: geom.Envelope{},
 		},
 		{
 			desc: "single element",
-			xys:  []XY{{1, 2}},
+			xys:  []geom.XY{{1, 2}},
 			want: onePtEnv(1, 2),
 		},
 		{
 			desc: "two same elements",
-			xys:  []XY{{1, 2}, {1, 2}},
+			xys:  []geom.XY{{1, 2}, {1, 2}},
 			want: onePtEnv(1, 2),
 		},
 		{
 			desc: "two different elements",
-			xys:  []XY{{1, 2}, {-1, 3}},
+			xys:  []geom.XY{{1, 2}, {-1, 3}},
 			want: twoPtEnv(-1, 2, 1, 3),
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			got := NewEnvelope(tc.xys...)
+			got := geom.NewEnvelope(tc.xys...)
 			expectEnvEq(t, got, tc.want)
 		})
 	}
@@ -66,14 +66,14 @@ func TestEnvelopeNew(t *testing.T) {
 func TestEnvelopeAttributes(t *testing.T) {
 	for _, tc := range []struct {
 		description                      string
-		env                              Envelope
+		env                              geom.Envelope
 		isEmpty, isPoint, isLine, isRect bool
 		area, width, height              float64
 		center, min, max, geom           string
 	}{
 		{
 			description: "empty",
-			env:         Envelope{},
+			env:         geom.Envelope{},
 			isEmpty:     true,
 			isPoint:     false,
 			isLine:      false,
@@ -192,7 +192,7 @@ func TestEnvelopeAttributes(t *testing.T) {
 				}
 			})
 			t.Run("AsGeometry", func(t *testing.T) {
-				expectGeomEqWKT(t, tc.env.AsGeometry(), tc.geom, IgnoreOrder)
+				expectGeomEqWKT(t, tc.env.AsGeometry(), tc.geom, geom.IgnoreOrder)
 			})
 		})
 	}
@@ -200,27 +200,27 @@ func TestEnvelopeAttributes(t *testing.T) {
 
 func TestEnvelopeExpandToIncludeXY(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
-		env := Envelope{}.ExpandToIncludeXY(XY{1, 2})
+		env := geom.Envelope{}.ExpandToIncludeXY(geom.XY{1, 2})
 		expectGeomEqWKT(t, env.Min().AsGeometry(), "POINT(1 2)")
 		expectGeomEqWKT(t, env.Max().AsGeometry(), "POINT(1 2)")
 	})
 	t.Run("single point extend to same", func(t *testing.T) {
-		env := onePtEnv(1, 2).ExpandToIncludeXY(XY{1, 2})
+		env := onePtEnv(1, 2).ExpandToIncludeXY(geom.XY{1, 2})
 		expectGeomEqWKT(t, env.Min().AsGeometry(), "POINT(1 2)")
 		expectGeomEqWKT(t, env.Max().AsGeometry(), "POINT(1 2)")
 	})
 	t.Run("single point extend to different", func(t *testing.T) {
-		env := onePtEnv(1, 2).ExpandToIncludeXY(XY{-1, 3})
+		env := onePtEnv(1, 2).ExpandToIncludeXY(geom.XY{-1, 3})
 		expectGeomEqWKT(t, env.Min().AsGeometry(), "POINT(-1 2)")
 		expectGeomEqWKT(t, env.Max().AsGeometry(), "POINT(1 3)")
 	})
 	t.Run("area extend within", func(t *testing.T) {
-		env := twoPtEnv(1, 2, 3, 4).ExpandToIncludeXY(XY{2, 3})
+		env := twoPtEnv(1, 2, 3, 4).ExpandToIncludeXY(geom.XY{2, 3})
 		expectGeomEqWKT(t, env.Min().AsGeometry(), "POINT(1 2)")
 		expectGeomEqWKT(t, env.Max().AsGeometry(), "POINT(3 4)")
 	})
 	t.Run("area extend outside", func(t *testing.T) {
-		env := twoPtEnv(1, 2, 3, 4).ExpandToIncludeXY(XY{100, 200})
+		env := twoPtEnv(1, 2, 3, 4).ExpandToIncludeXY(geom.XY{100, 200})
 		expectGeomEqWKT(t, env.Min().AsGeometry(), "POINT(1 2)")
 		expectGeomEqWKT(t, env.Max().AsGeometry(), "POINT(100 200)")
 	})
@@ -228,19 +228,19 @@ func TestEnvelopeExpandToIncludeXY(t *testing.T) {
 
 func TestEnvelopeContains(t *testing.T) {
 	for _, tc := range []struct {
-		env      Envelope
-		subtests map[XY]bool
+		env      geom.Envelope
+		subtests map[geom.XY]bool
 	}{
 		{
-			env: Envelope{},
-			subtests: map[XY]bool{
+			env: geom.Envelope{},
+			subtests: map[geom.XY]bool{
 				{}:     false,
 				{1, 2}: false,
 			},
 		},
 		{
 			env: onePtEnv(1, 2),
-			subtests: map[XY]bool{
+			subtests: map[geom.XY]bool{
 				{}:     false,
 				{1, 2}: true,
 				{3, 1}: false,
@@ -248,11 +248,11 @@ func TestEnvelopeContains(t *testing.T) {
 		},
 		{
 			env: twoPtEnv(1, 2, 4, 5),
-			subtests: func() map[XY]bool {
-				m := map[XY]bool{}
+			subtests: func() map[geom.XY]bool {
+				m := map[geom.XY]bool{}
 				for x := 0; x <= 5; x++ {
 					for y := 1; y <= 6; y++ {
-						m[XY{float64(x), float64(y)}] = x >= 1 && x <= 4 && y >= 2 && y <= 5
+						m[geom.XY{float64(x), float64(y)}] = x >= 1 && x <= 4 && y >= 2 && y <= 5
 					}
 				}
 				return m
@@ -273,25 +273,25 @@ func TestEnvelopeContains(t *testing.T) {
 func TestEnvelopeExpandToIncludeEnvelope(t *testing.T) {
 	for _, tc := range []struct {
 		desc   string
-		e1, e2 Envelope
-		want   Envelope
+		e1, e2 geom.Envelope
+		want   geom.Envelope
 	}{
 		{
 			desc: "empty and empty",
-			e1:   Envelope{},
-			e2:   Envelope{},
-			want: Envelope{},
+			e1:   geom.Envelope{},
+			e2:   geom.Envelope{},
+			want: geom.Envelope{},
 		},
 		{
 			desc: "point and empty",
 			e1:   onePtEnv(1, 2),
-			e2:   Envelope{},
+			e2:   geom.Envelope{},
 			want: onePtEnv(1, 2),
 		},
 		{
 			desc: "rect and empty",
 			e1:   twoPtEnv(1, 1, 2, 2),
-			e2:   Envelope{},
+			e2:   geom.Envelope{},
 			want: twoPtEnv(1, 1, 2, 2),
 		},
 		{
@@ -345,7 +345,7 @@ func TestEnvelopeExpandToIncludeEnvelope(t *testing.T) {
 func TestEnvelopeInvalidXYInteractions(t *testing.T) {
 	nan := math.NaN()
 	inf := math.Inf(+1)
-	for i, tc := range []XY{
+	for i, tc := range []geom.XY{
 		{0, nan},
 		{nan, 0},
 		{nan, nan},
@@ -357,37 +357,37 @@ func TestEnvelopeInvalidXYInteractions(t *testing.T) {
 		{-inf, -inf},
 	} {
 		t.Run(fmt.Sprintf("new_envelope_with_first_arg_invalid_%d", i), func(t *testing.T) {
-			env := NewEnvelope(tc)
+			env := geom.NewEnvelope(tc)
 			expectErr(t, env.Validate())
 		})
 		t.Run(fmt.Sprintf("new_envelope_with_second_arg_invalid_%d", i), func(t *testing.T) {
-			env := NewEnvelope(XY{}, tc)
+			env := geom.NewEnvelope(geom.XY{}, tc)
 			expectErr(t, env.Validate())
 		})
 		t.Run(fmt.Sprintf("expand_to_include_invalid_xy_%d", i), func(t *testing.T) {
-			env := NewEnvelope(XY{-1, -1}, XY{1, 1})
+			env := geom.NewEnvelope(geom.XY{-1, -1}, geom.XY{1, 1})
 			env = env.ExpandToIncludeXY(tc)
 			expectErr(t, env.Validate())
 		})
 		t.Run(fmt.Sprintf("expand_from_invalid_to_include_env_%d", i), func(t *testing.T) {
-			env := NewEnvelope(tc)
-			env = env.ExpandToIncludeXY(XY{1, 1})
+			env := geom.NewEnvelope(tc)
+			env = env.ExpandToIncludeXY(geom.XY{1, 1})
 			expectErr(t, env.Validate())
 		})
 		t.Run(fmt.Sprintf("expand_to_include_invalid_env_%d", i), func(t *testing.T) {
-			base := NewEnvelope(XY{-1, -1}, XY{1, 1})
-			other := NewEnvelope(tc)
+			base := geom.NewEnvelope(geom.XY{-1, -1}, geom.XY{1, 1})
+			other := geom.NewEnvelope(tc)
 			env := base.ExpandToIncludeEnvelope(other)
 			expectErr(t, env.Validate())
 		})
 		t.Run(fmt.Sprintf("expand_from_invalid_to_include_env_%d", i), func(t *testing.T) {
-			base := NewEnvelope(tc)
-			other := NewEnvelope(XY{-1, -1}, XY{1, 1})
+			base := geom.NewEnvelope(tc)
+			other := geom.NewEnvelope(geom.XY{-1, -1}, geom.XY{1, 1})
 			env := base.ExpandToIncludeEnvelope(other)
 			expectErr(t, env.Validate())
 		})
 		t.Run(fmt.Sprintf("contains_invalid_xy_%d", i), func(t *testing.T) {
-			env := NewEnvelope(XY{-1, -1}, XY{1, 1})
+			env := geom.NewEnvelope(geom.XY{-1, -1}, geom.XY{1, 1})
 			expectFalse(t, env.Contains(tc))
 		})
 	}
@@ -395,15 +395,15 @@ func TestEnvelopeInvalidXYInteractions(t *testing.T) {
 
 func TestEnvelopeIntersects(t *testing.T) {
 	for i, tt := range []struct {
-		e1, e2 Envelope
+		e1, e2 geom.Envelope
 		want   bool
 	}{
 		// Empty vs empty.
-		{Envelope{}, Envelope{}, false},
+		{geom.Envelope{}, geom.Envelope{}, false},
 
 		// Empty vs non-empty.
-		{Envelope{}, onePtEnv(0, 0), false},
-		{Envelope{}, twoPtEnv(0, 0, 1, 1), false},
+		{geom.Envelope{}, onePtEnv(0, 0), false},
+		{geom.Envelope{}, twoPtEnv(0, 0, 1, 1), false},
 
 		// Single pt vs single pt.
 		{onePtEnv(0, 0), onePtEnv(0, 0), true},
@@ -454,21 +454,21 @@ func TestEnvelopeIntersects(t *testing.T) {
 
 func TestEnvelopeCovers(t *testing.T) {
 	for i, tt := range []struct {
-		env1, env2 Envelope
+		env1, env2 geom.Envelope
 		want       bool
 	}{
 		// Empty vs empty.
-		{Envelope{}, Envelope{}, false},
+		{geom.Envelope{}, geom.Envelope{}, false},
 
 		// Empty vs single pt.
-		{Envelope{}, onePtEnv(1, 2), false},
-		{onePtEnv(1, 2), Envelope{}, false},
-		{Envelope{}, onePtEnv(0, 0), false},
-		{onePtEnv(0, 0), Envelope{}, false},
+		{geom.Envelope{}, onePtEnv(1, 2), false},
+		{onePtEnv(1, 2), geom.Envelope{}, false},
+		{geom.Envelope{}, onePtEnv(0, 0), false},
+		{onePtEnv(0, 0), geom.Envelope{}, false},
 
 		// Empty vs rect.
-		{Envelope{}, twoPtEnv(1, 2, 3, 4), false},
-		{twoPtEnv(1, 2, 3, 4), Envelope{}, false},
+		{geom.Envelope{}, twoPtEnv(1, 2, 3, 4), false},
+		{twoPtEnv(1, 2, 3, 4), geom.Envelope{}, false},
 
 		// Single pt vs single pt.
 		{onePtEnv(1, 2), onePtEnv(1, 2), true},
@@ -506,19 +506,19 @@ func TestEnvelopeCovers(t *testing.T) {
 func TestEnvelopeDistance(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
 		t.Run("both", func(t *testing.T) {
-			_, ok := Envelope{}.Distance(Envelope{})
+			_, ok := geom.Envelope{}.Distance(geom.Envelope{})
 			expectFalse(t, ok)
 		})
 		t.Run("only one", func(t *testing.T) {
-			_, ok := Envelope{}.Distance(onePtEnv(1, 2))
+			_, ok := geom.Envelope{}.Distance(onePtEnv(1, 2))
 			expectFalse(t, ok)
-			_, ok = onePtEnv(1, 2).Distance(Envelope{})
+			_, ok = onePtEnv(1, 2).Distance(geom.Envelope{})
 			expectFalse(t, ok)
 		})
 	})
 	t.Run("non-empty", func(t *testing.T) {
 		for i, tt := range []struct {
-			env1, env2 Envelope
+			env1, env2 geom.Envelope
 			want       float64
 		}{
 			// Pt vs pt.
@@ -555,14 +555,14 @@ func TestEnvelopeDistance(t *testing.T) {
 }
 
 func TestEnvelopeTransformXY(t *testing.T) {
-	transform := func(in XY) XY {
-		return XY{in.X * 1.5, in.Y * 2.5}
+	transform := func(in geom.XY) geom.XY {
+		return geom.XY{in.X * 1.5, in.Y * 2.5}
 	}
 	for i, tc := range []struct {
-		input Envelope
-		want  Envelope
+		input geom.Envelope
+		want  geom.Envelope
 	}{
-		{Envelope{}, Envelope{}},
+		{geom.Envelope{}, geom.Envelope{}},
 		{onePtEnv(1, 2), onePtEnv(1.5, 5)},
 		{twoPtEnv(1, 2, 3, 4), twoPtEnv(1.5, 5, 4.5, 10)},
 	} {
@@ -577,8 +577,8 @@ func TestEnvelopeTransformBugFix(t *testing.T) {
 	// Reproduces a bug where a transform that alters which coordinates are min
 	// and max causes a malformed envelope.
 	env := twoPtEnv(1, 2, 3, 4)
-	got := env.TransformXY(func(in XY) XY {
-		return XY{-in.X, -in.Y}
+	got := env.TransformXY(func(in geom.XY) geom.XY {
+		return geom.XY{-in.X, -in.Y}
 	})
 	expectEnvEq(t, got, twoPtEnv(-3, -4, -1, -2))
 }
@@ -587,15 +587,15 @@ func BenchmarkEnvelopeTransformXY(b *testing.B) {
 	input := twoPtEnv(1, 2, 3, 4)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		input.TransformXY(func(in XY) XY {
-			return XY{in.X * 1.5, in.Y * 2.5}
+		input.TransformXY(func(in geom.XY) geom.XY {
+			return geom.XY{in.X * 1.5, in.Y * 2.5}
 		})
 	}
 }
 
 func TestBoundingDiagonal(t *testing.T) {
 	for i, tc := range []struct {
-		env  []XY
+		env  []geom.XY
 		want string
 	}{
 		{
@@ -603,16 +603,16 @@ func TestBoundingDiagonal(t *testing.T) {
 			"GEOMETRYCOLLECTION EMPTY",
 		},
 		{
-			[]XY{{1, 2}},
+			[]geom.XY{{1, 2}},
 			"POINT(1 2)",
 		},
 		{
-			[]XY{{3, 2}, {1, 4}},
+			[]geom.XY{{3, 2}, {1, 4}},
 			"LINESTRING(1 2,3 4)",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			env := NewEnvelope(tc.env...)
+			env := geom.NewEnvelope(tc.env...)
 			got := env.BoundingDiagonal()
 			expectGeomEqWKT(t, got, tc.want)
 		})
@@ -620,7 +620,7 @@ func TestBoundingDiagonal(t *testing.T) {
 }
 
 func TestEnvelopeEmptyAsBox(t *testing.T) {
-	_, ok := Envelope{}.AsBox()
+	_, ok := geom.Envelope{}.AsBox()
 	expectFalse(t, ok)
 }
 
@@ -633,10 +633,10 @@ func TestEnvelopeNonEmptyAsBox(t *testing.T) {
 
 func TestEnvelopeString(t *testing.T) {
 	for i, tc := range []struct {
-		env  Envelope
+		env  geom.Envelope
 		want string
 	}{
-		{Envelope{}, "ENVELOPE EMPTY"},
+		{geom.Envelope{}, "ENVELOPE EMPTY"},
 		{twoPtEnv(1.5, 2.5, 3.5, 4.5), "ENVELOPE(1.5 2.5,3.5 4.5)"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {

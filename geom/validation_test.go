@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/geom"
 )
 
-func xy(x, y float64) Coordinates {
-	return Coordinates{Type: DimXY, XY: XY{x, y}}
+func xy(x, y float64) geom.Coordinates {
+	return geom.Coordinates{Type: geom.DimXY, XY: geom.XY{x, y}}
 }
 
 func TestPointValidation(t *testing.T) {
@@ -18,7 +18,7 @@ func TestPointValidation(t *testing.T) {
 	inf := math.Inf(+1)
 	for i, tc := range []struct {
 		wantValid bool
-		input     Coordinates
+		input     geom.Coordinates
 	}{
 		{true, xy(0, 0)},
 		{false, xy(nan, 0)},
@@ -32,7 +32,7 @@ func TestPointValidation(t *testing.T) {
 		{false, xy(-inf, -inf)},
 	} {
 		t.Run(fmt.Sprintf("point_%d", i), func(t *testing.T) {
-			pt := NewPoint(tc.input)
+			pt := geom.NewPoint(tc.input)
 			expectBoolEq(t, tc.wantValid, pt.Validate() == nil)
 		})
 	}
@@ -58,8 +58,8 @@ func TestLineStringValidation(t *testing.T) {
 		{false, []float64{0, 0, 1, 1, -inf, 2}},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			seq := NewSequence(tc.inputs, DimXY)
-			ls := NewLineString(seq)
+			seq := geom.NewSequence(tc.inputs, geom.DimXY)
+			ls := geom.NewLineString(seq)
 			expectBoolEq(t, tc.wantValid, ls.Validate() == nil)
 		})
 	}
@@ -85,7 +85,7 @@ func TestPolygonValidation(t *testing.T) {
 		)`,
 	} {
 		t.Run("valid_"+strconv.Itoa(i), func(t *testing.T) {
-			poly, err := UnmarshalWKT(wkt)
+			poly, err := geom.UnmarshalWKT(wkt)
 			if err != nil {
 				t.Error(err)
 			}
@@ -140,11 +140,11 @@ func TestPolygonValidation(t *testing.T) {
 	} {
 		t.Run("invalid_"+strconv.Itoa(i), func(t *testing.T) {
 			t.Run("Constructor", func(t *testing.T) {
-				_, err := UnmarshalWKT(wkt)
+				_, err := geom.UnmarshalWKT(wkt)
 				expectErr(t, err)
 			})
 			t.Run("Validate", func(t *testing.T) {
-				poly, err := UnmarshalWKT(wkt, NoValidate{})
+				poly, err := geom.UnmarshalWKT(wkt, geom.NoValidate{})
 				expectNoErr(t, err)
 				expectErr(t, poly.Validate())
 			})
@@ -156,19 +156,19 @@ func TestMultiPointValidation(t *testing.T) {
 	nan := math.NaN()
 	for i, tc := range []struct {
 		wantValid bool
-		coords    []Coordinates
+		coords    []geom.Coordinates
 	}{
-		{true, []Coordinates{xy(0, 1), xy(2, 3)}},
-		{false, []Coordinates{xy(0, 1), xy(2, nan)}},
-		{false, []Coordinates{xy(nan, 1), xy(2, 3)}},
+		{true, []geom.Coordinates{xy(0, 1), xy(2, 3)}},
+		{false, []geom.Coordinates{xy(0, 1), xy(2, nan)}},
+		{false, []geom.Coordinates{xy(nan, 1), xy(2, 3)}},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			var pts []Point
+			var pts []geom.Point
 			for _, c := range tc.coords {
-				pt := NewPoint(c)
+				pt := geom.NewPoint(c)
 				pts = append(pts, pt)
 			}
-			mp := NewMultiPoint(pts)
+			mp := geom.NewMultiPoint(pts)
 			expectBoolEq(t, tc.wantValid, mp.Validate() == nil)
 		})
 	}
@@ -186,13 +186,13 @@ func TestMultiLineStringValidation(t *testing.T) {
 		{false, [][]float64{{0, 1, 2, nan}}},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			var lss []LineString
+			var lss []geom.LineString
 			for _, coords := range tc.coords {
-				seq := NewSequence(coords, DimXY)
-				ls := NewLineString(seq)
+				seq := geom.NewSequence(coords, geom.DimXY)
+				ls := geom.NewLineString(seq)
 				lss = append(lss, ls)
 			}
-			mls := NewMultiLineString(lss)
+			mls := geom.NewMultiLineString(lss)
 			expectBoolEq(t, tc.wantValid, mls.Validate() == nil)
 		})
 	}
@@ -278,7 +278,7 @@ func TestMultiPolygonValidation(t *testing.T) {
 		)`,
 	} {
 		t.Run(fmt.Sprintf("invalid_%d", i), func(t *testing.T) {
-			_, err := UnmarshalWKT(wkt)
+			_, err := geom.UnmarshalWKT(wkt)
 			if err == nil {
 				t.Log(wkt)
 				t.Error("expected error")
@@ -288,11 +288,11 @@ func TestMultiPolygonValidation(t *testing.T) {
 }
 
 func TestMultiPolygonConstraintValidation(t *testing.T) {
-	poly, err := UnmarshalWKT("POLYGON((0 0,1 1,0 1,1 0,0 0))", NoValidate{})
+	poly, err := geom.UnmarshalWKT("POLYGON((0 0,1 1,0 1,1 0,0 0))", geom.NoValidate{})
 	expectNoErr(t, err)
 	expectErr(t, poly.Validate())
 
-	mp := NewMultiPolygon([]Polygon{poly.MustAsPolygon()})
+	mp := geom.NewMultiPolygon([]geom.Polygon{poly.MustAsPolygon()})
 	expectErr(t, mp.Validate())
 }
 
@@ -305,7 +305,7 @@ func TestGeometryCollectionValidation(t *testing.T) {
 		{false, "GEOMETRYCOLLECTION(LINESTRING(0 1))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			gc, err := UnmarshalWKT(tc.wkt, NoValidate{})
+			gc, err := geom.UnmarshalWKT(tc.wkt, geom.NoValidate{})
 			expectNoErr(t, err)
 			expectBoolEq(t, gc.Validate() == nil, tc.wantValid)
 		})

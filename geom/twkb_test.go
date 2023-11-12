@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -525,7 +526,7 @@ func TestZigZagInt(t *testing.T) {
 		{-32768, 65535},
 		{32768, 65536},
 	} {
-		t.Run(fmt.Sprintf("%v", tc.n), func(t *testing.T) {
+		t.Run(strconv.Itoa(int(tc.n)), func(t *testing.T) {
 			t.Logf("ZigZag encode int64: %v", tc.n)
 			z := geom.EncodeZigZagInt64(tc.n)
 			if tc.z != z {

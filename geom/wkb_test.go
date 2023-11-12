@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 func hexStringToBytes(tb testing.TB, s string) []byte {
@@ -390,7 +390,7 @@ var validWKBCases = []struct {
 func TestWKBParseValid(t *testing.T) {
 	for i, tt := range validWKBCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			geom, err := UnmarshalWKB(hexStringToBytes(t, tt.wkb))
+			geom, err := geom.UnmarshalWKB(hexStringToBytes(t, tt.wkb))
 			expectNoErr(t, err)
 			expectGeomEq(t, geom, geomFromWKT(t, tt.wkt))
 		})
@@ -496,7 +496,7 @@ func TestWKBParserSyntaxError(t *testing.T) {
 	} {
 		t.Run(tc.description, func(t *testing.T) {
 			wkb := hexStringToBytes(t, tc.wkbHex)
-			_, err := UnmarshalWKB(wkb)
+			_, err := geom.UnmarshalWKB(wkb)
 			if err == nil {
 				t.Fatal("expected an error but got nil")
 			}
@@ -535,11 +535,11 @@ func TestWKBMarshalValid(t *testing.T) {
 		"GEOMETRYCOLLECTION(POINT(1 2),LINESTRING(1 2,3 4))",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			geom := geomFromWKT(t, wkt)
-			buf := geom.AsBinary()
-			readBackGeom, err := UnmarshalWKB(buf)
+			g := geomFromWKT(t, wkt)
+			buf := g.AsBinary()
+			readBackGeom, err := geom.UnmarshalWKB(buf)
 			expectNoErr(t, err)
-			expectGeomEq(t, readBackGeom, geom)
+			expectGeomEq(t, readBackGeom, g)
 		})
 	}
 }
@@ -673,7 +673,7 @@ func TestWKBUnmarshalEndianess(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			want := geomFromWKT(t, tt.wkt)
 			wkb := hexStringToBytes(t, tt.hex)
-			got, err := UnmarshalWKB(wkb)
+			got, err := geom.UnmarshalWKB(wkb)
 			expectNoErr(t, err)
 			expectGeomEq(t, got, want)
 		})

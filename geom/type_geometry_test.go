@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestZeroGeometry(t *testing.T) {
-	var z Geometry
+	var z geom.Geometry
 	expectBoolEq(t, z.IsGeometryCollection(), true)
 	z.MustAsGeometryCollection() // Doesn't crash.
 	expectStringEq(t, z.AsText(), "GEOMETRYCOLLECTION EMPTY")
@@ -24,7 +24,7 @@ func TestZeroGeometry(t *testing.T) {
 	expectNoErr(t, err)
 	expectStringEq(t, strings.TrimSpace(buf.String()), `{"type":"GeometryCollection","geometries":[]}`)
 
-	pt := XY{1, 2}.AsPoint()
+	pt := geom.XY{1, 2}.AsPoint()
 	z = pt.AsGeometry() // Set away from zero value
 	expectBoolEq(t, z.IsPoint(), true)
 	err = json.NewDecoder(&buf).Decode(&z)
@@ -32,7 +32,7 @@ func TestZeroGeometry(t *testing.T) {
 	expectBoolEq(t, z.IsPoint(), false)
 	expectBoolEq(t, z.IsGeometryCollection(), true)
 	expectBoolEq(t, z.IsEmpty(), true)
-	z = Geometry{}
+	z = geom.Geometry{}
 
 	_ = z.AsBinary() // Doesn't crash
 
@@ -45,24 +45,24 @@ func TestZeroGeometry(t *testing.T) {
 func TestGeometryType(t *testing.T) {
 	for i, tt := range []struct {
 		wkt     string
-		geoType GeometryType
+		geoType geom.GeometryType
 	}{
-		{"POINT(1 1)", TypePoint},
-		{"POINT EMPTY", TypePoint},
-		{"MULTIPOINT EMPTY", TypeMultiPoint},
-		{"MULTIPOINT ((10 40), (40 30), (20 20), (30 10))", TypeMultiPoint},
-		{"LINESTRING(1 2,3 4)", TypeLineString},
-		{"LINESTRING(1 2,3 4,5 6)", TypeLineString},
-		{"LINESTRING EMPTY", TypeLineString},
-		{"MULTILINESTRING ((10 10, 20 20, 10 40),(40 40, 30 30, 40 20, 30 10))", TypeMultiLineString},
-		{"MULTILINESTRING EMPTY", TypeMultiLineString},
-		{"MULTILINESTRING(EMPTY)", TypeMultiLineString},
-		{"POLYGON((1 1,3 1,2 2,2 4,1 1))", TypePolygon},
-		{"POLYGON EMPTY", TypePolygon},
-		{"MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20)))", TypeMultiPolygon},
-		{"MULTIPOLYGON EMPTY", TypeMultiPolygon},
-		{"MULTIPOLYGON(EMPTY)", TypeMultiPolygon},
-		{"GEOMETRYCOLLECTION EMPTY", TypeGeometryCollection},
+		{"POINT(1 1)", geom.TypePoint},
+		{"POINT EMPTY", geom.TypePoint},
+		{"MULTIPOINT EMPTY", geom.TypeMultiPoint},
+		{"MULTIPOINT ((10 40), (40 30), (20 20), (30 10))", geom.TypeMultiPoint},
+		{"LINESTRING(1 2,3 4)", geom.TypeLineString},
+		{"LINESTRING(1 2,3 4,5 6)", geom.TypeLineString},
+		{"LINESTRING EMPTY", geom.TypeLineString},
+		{"MULTILINESTRING ((10 10, 20 20, 10 40),(40 40, 30 30, 40 20, 30 10))", geom.TypeMultiLineString},
+		{"MULTILINESTRING EMPTY", geom.TypeMultiLineString},
+		{"MULTILINESTRING(EMPTY)", geom.TypeMultiLineString},
+		{"POLYGON((1 1,3 1,2 2,2 4,1 1))", geom.TypePolygon},
+		{"POLYGON EMPTY", geom.TypePolygon},
+		{"MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20)))", geom.TypeMultiPolygon},
+		{"MULTIPOLYGON EMPTY", geom.TypeMultiPolygon},
+		{"MULTIPOLYGON(EMPTY)", geom.TypeMultiPolygon},
+		{"GEOMETRYCOLLECTION EMPTY", geom.TypeGeometryCollection},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("wkt:", tt.wkt)
@@ -76,16 +76,16 @@ func TestGeometryType(t *testing.T) {
 
 func TestGeometryTypeString(t *testing.T) {
 	for _, tc := range []struct {
-		typ  GeometryType
+		typ  geom.GeometryType
 		want string
 	}{
-		{TypeGeometryCollection, "GeometryCollection"},
-		{TypePoint, "Point"},
-		{TypeMultiPoint, "MultiPoint"},
-		{TypeLineString, "LineString"},
-		{TypeMultiLineString, "MultiLineString"},
-		{TypePolygon, "Polygon"},
-		{TypeMultiPolygon, "MultiPolygon"},
+		{geom.TypeGeometryCollection, "GeometryCollection"},
+		{geom.TypePoint, "Point"},
+		{geom.TypeMultiPoint, "MultiPoint"},
+		{geom.TypeLineString, "LineString"},
+		{geom.TypeMultiLineString, "MultiLineString"},
+		{geom.TypePolygon, "Polygon"},
+		{geom.TypeMultiPolygon, "MultiPolygon"},
 		{99, "invalid"},
 	} {
 		t.Run(tc.want, func(t *testing.T) {
@@ -177,37 +177,37 @@ func TestAsConcreteType(t *testing.T) {
 func TestGeometryIsCWandIsCCW(t *testing.T) {
 	for i, tt := range []struct {
 		wkt     string
-		geoType GeometryType
+		geoType geom.GeometryType
 		isCW    bool
 		isCCW   bool
 		note    string
 	}{
-		{"POINT(1 1)", TypePoint, true, true, "undefined"},
-		{"POINT EMPTY", TypePoint, true, true, "undefined"},
-		{"MULTIPOINT EMPTY", TypeMultiPoint, true, true, "undefined"},
-		{"MULTIPOINT ((10 40), (40 30), (20 20), (30 10))", TypeMultiPoint, true, true, "undefined"},
-		{"LINESTRING(1 2,3 4)", TypeLineString, true, true, "undefined"},
-		{"LINESTRING(1 2,3 4,5 6)", TypeLineString, true, true, "undefined"},
-		{"LINESTRING EMPTY", TypeLineString, true, true, "undefined"},
-		{"MULTILINESTRING ((10 10, 20 20, 10 40),(40 40, 30 30, 40 20, 30 10))", TypeMultiLineString, true, true, "undefined"},
-		{"MULTILINESTRING EMPTY", TypeMultiLineString, true, true, "undefined"},
-		{"MULTILINESTRING(EMPTY)", TypeMultiLineString, true, true, "undefined"},
-		{"POLYGON((0 0,0 5,5 5,5 0,0 0))", TypePolygon, true, false, "CW"},
-		{"POLYGON((1 1,3 1,2 2,2 4,1 1))", TypePolygon, false, true, "CCW"},
-		{"POLYGON((0 0,0 5,5 5,5 0,0 0), (1 1,3 1,2 2,2 4,1 1))", TypePolygon, true, false, "outer CW inner CCW"},
-		{"POLYGON((0 0,5 0,5 5,0 5,0 0), (1 1,1 2,2 2,2 1,1 1))", TypePolygon, false, true, "outer CCW inner CW"},
-		{"POLYGON((0 0,5 0,5 5,0 5,0 0), (1 1,2 1,2 2,1 2,1 1))", TypePolygon, false, false, "outer CCW, inner CCW, inconsistent"},
-		{"POLYGON EMPTY", TypePolygon, true, true, "empty"},
-		{"MULTIPOLYGON(((40 40, 45 30, 20 45, 40 40)),((20 35, 45 20, 30 5, 10 10, 10 30, 20 35),(30 20, 20 25, 20 15, 30 20)))", TypeMultiPolygon, true, false, "all CW"},
-		{"MULTIPOLYGON(((40 40, 20 45, 45 30, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20)))", TypeMultiPolygon, false, true, "all CCW"},
-		{"MULTIPOLYGON(((40 40, 45 30, 20 45, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20)))", TypeMultiPolygon, false, false, "first CW, next CCW, inconsistent"},
-		{"MULTIPOLYGON EMPTY", TypeMultiPolygon, true, true, "empty"},
-		{"MULTIPOLYGON(EMPTY)", TypeMultiPolygon, true, true, "empty"},
-		{"GEOMETRYCOLLECTION(POLYGON((0 0,0 5,5 5,5 0,0 0)), MULTIPOLYGON(((40 40, 45 30, 20 45, 40 40)),((20 35, 45 20, 30 5, 10 10, 10 30, 20 35),(30 20, 20 25, 20 15, 30 20))))", TypeGeometryCollection, true, false, "all CW"},
-		{"GEOMETRYCOLLECTION(POLYGON((0 0,0 5,5 5,5 0,0 0)), MULTIPOLYGON(((40 40, 20 45, 45 30, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))))", TypeGeometryCollection, false, false, "first CW, next CCW, inconsistent"},
-		{"GEOMETRYCOLLECTION EMPTY", TypeGeometryCollection, true, true, "empty"},
-		{"GEOMETRYCOLLECTION(POINT(1 1))", TypeGeometryCollection, true, true, "first undefined"},
-		{"GEOMETRYCOLLECTION(POLYGON((0 0,0 5,5 5,5 0,0 0)), POINT(1 1))", TypeGeometryCollection, true, false, "first CW, second undefined"},
+		{"POINT(1 1)", geom.TypePoint, true, true, "undefined"},
+		{"POINT EMPTY", geom.TypePoint, true, true, "undefined"},
+		{"MULTIPOINT EMPTY", geom.TypeMultiPoint, true, true, "undefined"},
+		{"MULTIPOINT ((10 40), (40 30), (20 20), (30 10))", geom.TypeMultiPoint, true, true, "undefined"},
+		{"LINESTRING(1 2,3 4)", geom.TypeLineString, true, true, "undefined"},
+		{"LINESTRING(1 2,3 4,5 6)", geom.TypeLineString, true, true, "undefined"},
+		{"LINESTRING EMPTY", geom.TypeLineString, true, true, "undefined"},
+		{"MULTILINESTRING ((10 10, 20 20, 10 40),(40 40, 30 30, 40 20, 30 10))", geom.TypeMultiLineString, true, true, "undefined"},
+		{"MULTILINESTRING EMPTY", geom.TypeMultiLineString, true, true, "undefined"},
+		{"MULTILINESTRING(EMPTY)", geom.TypeMultiLineString, true, true, "undefined"},
+		{"POLYGON((0 0,0 5,5 5,5 0,0 0))", geom.TypePolygon, true, false, "CW"},
+		{"POLYGON((1 1,3 1,2 2,2 4,1 1))", geom.TypePolygon, false, true, "CCW"},
+		{"POLYGON((0 0,0 5,5 5,5 0,0 0), (1 1,3 1,2 2,2 4,1 1))", geom.TypePolygon, true, false, "outer CW inner CCW"},
+		{"POLYGON((0 0,5 0,5 5,0 5,0 0), (1 1,1 2,2 2,2 1,1 1))", geom.TypePolygon, false, true, "outer CCW inner CW"},
+		{"POLYGON((0 0,5 0,5 5,0 5,0 0), (1 1,2 1,2 2,1 2,1 1))", geom.TypePolygon, false, false, "outer CCW, inner CCW, inconsistent"},
+		{"POLYGON EMPTY", geom.TypePolygon, true, true, "empty"},
+		{"MULTIPOLYGON(((40 40, 45 30, 20 45, 40 40)),((20 35, 45 20, 30 5, 10 10, 10 30, 20 35),(30 20, 20 25, 20 15, 30 20)))", geom.TypeMultiPolygon, true, false, "all CW"},
+		{"MULTIPOLYGON(((40 40, 20 45, 45 30, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20)))", geom.TypeMultiPolygon, false, true, "all CCW"},
+		{"MULTIPOLYGON(((40 40, 45 30, 20 45, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20)))", geom.TypeMultiPolygon, false, false, "first CW, next CCW, inconsistent"},
+		{"MULTIPOLYGON EMPTY", geom.TypeMultiPolygon, true, true, "empty"},
+		{"MULTIPOLYGON(EMPTY)", geom.TypeMultiPolygon, true, true, "empty"},
+		{"GEOMETRYCOLLECTION(POLYGON((0 0,0 5,5 5,5 0,0 0)), MULTIPOLYGON(((40 40, 45 30, 20 45, 40 40)),((20 35, 45 20, 30 5, 10 10, 10 30, 20 35),(30 20, 20 25, 20 15, 30 20))))", geom.TypeGeometryCollection, true, false, "all CW"},
+		{"GEOMETRYCOLLECTION(POLYGON((0 0,0 5,5 5,5 0,0 0)), MULTIPOLYGON(((40 40, 20 45, 45 30, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))))", geom.TypeGeometryCollection, false, false, "first CW, next CCW, inconsistent"},
+		{"GEOMETRYCOLLECTION EMPTY", geom.TypeGeometryCollection, true, true, "empty"},
+		{"GEOMETRYCOLLECTION(POINT(1 1))", geom.TypeGeometryCollection, true, true, "first undefined"},
+		{"GEOMETRYCOLLECTION(POLYGON((0 0,0 5,5 5,5 0,0 0)), POINT(1 1))", geom.TypeGeometryCollection, true, false, "first CW, second undefined"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("wkt:", tt.wkt)
