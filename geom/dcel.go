@@ -1,6 +1,6 @@
 package geom
 
-func newDCELFromGeometries(a, b Geometry) (*doublyConnectedEdgeList, error) {
+func newDCELFromGeometries(a, b Geometry) *doublyConnectedEdgeList {
 	ghosts := createGhosts(a, b)
 	a, b, ghosts = reNodeGeometries(a, b, ghosts)
 
@@ -16,7 +16,7 @@ func newDCELFromGeometries(a, b Geometry) (*doublyConnectedEdgeList, error) {
 	dcel.assignFaces()
 	dcel.populateInSetLabels()
 
-	return dcel, nil
+	return dcel
 }
 
 func newDCEL() *doublyConnectedEdgeList {

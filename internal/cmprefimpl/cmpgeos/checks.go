@@ -15,76 +15,38 @@ import (
 	"github.com/peterstace/simplefeatures/geos"
 )
 
-func unaryChecks(h *Handle, g geom.Geometry, log *log.Logger) error {
-	if valid, err := checkIsValid(h, g, log); err != nil {
+func unaryChecks(h *Handle, g geom.Geometry, lg *log.Logger) error {
+	if valid, err := checkIsValid(h, g, lg); err != nil {
 		return err
 	} else if !valid {
 		return nil
 	}
 
-	log.Println("checking AsBinary")
-	if err := checkAsBinary(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking FromBinary")
-	if err := checkFromBinary(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking AsText")
-	if err := checkAsText(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking FromText")
-	if err := checkFromText(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking IsEmpty")
-	if err := checkIsEmpty(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking Dimension")
-	if err := checkDimension(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking Envelope")
-	if err := checkEnvelope(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking IsSimple")
-	if err := checkIsSimple(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking Boundary")
-	if err := checkBoundary(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking ConvexHull")
-	if err := checkConvexHull(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking IsRing")
-	if err := checkIsRing(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking Length")
-	if err := checkLength(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking Area")
-	if err := checkArea(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking Centroid")
-	if err := checkCentroid(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking PointOnSurface")
-	if err := checkPointOnSurface(h, g, log); err != nil {
-		return err
-	}
-	log.Println("checking Simplify")
-	if err := checkSimplify(h, g, log); err != nil {
-		return err
+	for _, check := range []struct {
+		name string
+		fn   func(*Handle, geom.Geometry, *log.Logger) error
+	}{
+		{"AsBinary", checkAsBinary},
+		{"FromBinary", checkFromBinary},
+		{"AsText", checkAsText},
+		{"FromText", checkFromText},
+		{"IsEmpty", checkIsEmpty},
+		{"Dimension", checkDimension},
+		{"Envelope", checkEnvelope},
+		{"IsSimple", checkIsSimple},
+		{"Boundary", checkBoundary},
+		{"ConvexHull", checkConvexHull},
+		{"IsRing", checkIsRing},
+		{"Length", checkLength},
+		{"Area", checkArea},
+		{"Centroid", checkCentroid},
+		{"PointOnSurface", checkPointOnSurface},
+		{"Simplify", checkSimplify},
+	} {
+		lg.Printf("checking %s", check.name)
+		if err := check.fn(h, g, lg); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -292,6 +254,9 @@ func checkFromBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
 	}
 
 	if !geom.ExactEquals(want, got) {
+		log.Printf("wkb:\n%s", hex.Dump(wkb))
+		log.Printf("want:\n%s", want.AsText())
+		log.Printf("got:\n%s", got.AsText())
 		return errMismatch
 	}
 	return nil
@@ -513,7 +478,7 @@ func checkCentroid(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkPointOnSurface(h *Handle, g geom.Geometry, log *log.Logger) error {
+func checkPointOnSurface(_ *Handle, g geom.Geometry, log *log.Logger) error {
 	// It's too difficult to perform a direct comparison against GEOS's
 	// PointOnSurface, due to numeric stability related issue. This is because
 	// there are floating point comparisons to find the "best" point. However,

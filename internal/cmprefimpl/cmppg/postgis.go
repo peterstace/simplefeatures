@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"testing"
 )
 
 // PostGIS is a DB access type allowing non-batch based interactions
@@ -31,8 +30,10 @@ func (p PostGIS) WKTIsValidWithReason(wkt string) (bool, string) {
 	return isValid, reason
 }
 
-// WKBIsValidWithReason checks if a WKB is valid, and if not gives the reason.
-func (p PostGIS) WKBIsValidWithReason(t *testing.T, wkb string) (bool, string) {
+// WKBIsValidWithReason checks if a WKB is valid and, if not, gives the reason.
+// It's unable to differentiate between errors due to problems with the WKB and
+// general problems with the database.
+func (p PostGIS) WKBIsValidWithReason(wkb string) (bool, string) {
 	var isValid bool
 	err := p.db.QueryRow(`SELECT ST_IsValid(ST_GeomFromWKB(decode($1, 'hex')))`, wkb).Scan(&isValid)
 	if err != nil {
@@ -46,15 +47,15 @@ func (p PostGIS) WKBIsValidWithReason(t *testing.T, wkb string) (bool, string) {
 	return isValid, reason
 }
 
-// GeoJSONIsValidWithReason checks if a GeoJSON object is valid, and if not
-// gives the reason.
-func (p PostGIS) GeoJSONIsValidWithReason(t *testing.T, geojson string) (bool, string) {
+// WKBIsValidWithReason checks if a GeoJSON value is valid and, if not, gives
+// the reason.  It's unable to differentiate between errors due to problems
+// with the GeoJSON value and general problems with the database.
+func (p PostGIS) GeoJSONIsValidWithReason(geojson string) (bool, string) {
 	var isValid bool
 	err := p.db.QueryRow(`SELECT ST_IsValid(ST_GeomFromGeoJSON($1))`, geojson).Scan(&isValid)
 	if err != nil {
 		return false, err.Error()
 	}
-
 	var reason string
 	err = p.db.QueryRow(`SELECT ST_IsValidReason(ST_GeomFromGeoJSON($1))`, geojson).Scan(&reason)
 	if err != nil {

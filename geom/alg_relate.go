@@ -21,6 +21,7 @@ package geom
 // The matrix is represented by a 9 character string, with entries in row-major
 // order (i.e. entries are ordered II, IB, IE, BI, BB, BE, EI, EB, EE).
 func Relate(a, b Geometry) (string, error) {
+	// TODO: don't need to return an error from this function
 	if a.IsEmpty() || b.IsEmpty() {
 		im := newMatrix()
 		im.set(imExterior, imExterior, '2')
@@ -53,10 +54,7 @@ func Relate(a, b Geometry) (string, error) {
 		return im.code(), nil
 	}
 
-	overlay, err := newDCELFromGeometries(a, b)
-	if err != nil {
-		return "", wrap(err, "internal error creating overlay")
-	}
+	overlay := newDCELFromGeometries(a, b)
 	im := overlay.extractIntersectionMatrix()
 	return im.code(), nil
 }

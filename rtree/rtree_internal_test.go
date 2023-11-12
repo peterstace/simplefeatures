@@ -9,14 +9,14 @@ import (
 	"testing"
 )
 
-func testBulkLoad(rnd *rand.Rand, pop int, maxStart, maxWidth float64) (*RTree, []Box) {
+func testBulkLoad(rnd *rand.Rand, pop int) (*RTree, []Box) {
 	boxes := make([]Box, pop)
 	seenX := make(map[float64]bool)
 	seenY := make(map[float64]bool)
 	for i := range boxes {
 		var box Box
 		for {
-			box = randomBox(rnd, maxStart, maxWidth)
+			box = randomBox(rnd, 0.9, 0.1)
 			x := box.MinX + box.MaxX
 			y := box.MinY + box.MaxY
 			if !seenX[x] && !seenY[y] {
@@ -50,7 +50,7 @@ func TestRandom(t *testing.T) {
 	for _, population := range testPopulations(66, 1000, 1.2) {
 		t.Run(fmt.Sprintf("bulk_%d", population), func(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
-			rt, boxes := testBulkLoad(rnd, population, 0.9, 0.1)
+			rt, boxes := testBulkLoad(rnd, population)
 			checkInvariants(t, rt, boxes)
 			checkSearch(t, rt, boxes, rnd)
 		})

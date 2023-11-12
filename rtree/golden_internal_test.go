@@ -126,7 +126,7 @@ func TestBulkLoadGolden(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("n=%d", tt.pop), func(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
-			rt, _ := testBulkLoad(rnd, tt.pop, 0.9, 0.1)
+			rt, _ := testBulkLoad(rnd, tt.pop)
 			got := checksum(rt.root)
 			if got != tt.want {
 				t.Errorf("got=%d want=%d", got, tt.want)

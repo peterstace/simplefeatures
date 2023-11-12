@@ -62,12 +62,10 @@ func Intersects(g1, g2 Geometry) bool {
 				g1.MustAsLineString().AsMultiLineString(),
 			)
 		case g2.IsMultiLineString():
-			has, _ := hasIntersectionMultiLineStringWithMultiLineString(
+			return hasIntersectionMultiLineStringWithMultiLineString(
 				g1.MustAsLineString().AsMultiLineString(),
 				g2.MustAsMultiLineString(),
-				false,
 			)
-			return has
 		case g2.IsMultiPolygon():
 			return hasIntersectionMultiLineStringWithMultiPolygon(
 				g1.MustAsLineString().AsMultiLineString(),
@@ -118,12 +116,10 @@ func Intersects(g1, g2 Geometry) bool {
 	case g1.IsMultiLineString():
 		switch {
 		case g2.IsMultiLineString():
-			has, _ := hasIntersectionMultiLineStringWithMultiLineString(
+			return hasIntersectionMultiLineStringWithMultiLineString(
 				g1.MustAsMultiLineString(),
 				g2.MustAsMultiLineString(),
-				false,
 			)
-			return has
 		case g2.IsMultiPolygon():
 			return hasIntersectionMultiLineStringWithMultiPolygon(
 				g1.MustAsMultiLineString(),
@@ -182,14 +178,11 @@ func hasIntersectionLineStringWithLineString(
 	return hasIntersectionBetweenLines(lines1, lines2, populateExtension)
 }
 
-func hasIntersectionMultiLineStringWithMultiLineString(
-	mls1, mls2 MultiLineString, populateExtension bool,
-) (
-	bool, mlsWithMLSIntersectsExtension,
-) {
+func hasIntersectionMultiLineStringWithMultiLineString(mls1, mls2 MultiLineString) bool {
 	lines1 := mls1.asLines()
 	lines2 := mls2.asLines()
-	return hasIntersectionBetweenLines(lines1, lines2, populateExtension)
+	has, _ := hasIntersectionBetweenLines(lines1, lines2, false)
+	return has
 }
 
 func hasIntersectionBetweenLines(
@@ -260,7 +253,7 @@ func hasIntersectionBetweenLines(
 }
 
 func hasIntersectionMultiLineStringWithMultiPolygon(mls MultiLineString, mp MultiPolygon) bool {
-	if has, _ := hasIntersectionMultiLineStringWithMultiLineString(mls, mp.Boundary(), false); has {
+	if hasIntersectionMultiLineStringWithMultiLineString(mls, mp.Boundary()) {
 		return true
 	}
 
@@ -391,7 +384,7 @@ func hasIntersectionPolygonWithPolygon(p1, p2 Polygon) bool {
 	// intersect.
 	b1 := p1.Boundary()
 	b2 := p2.Boundary()
-	if has, _ := hasIntersectionMultiLineStringWithMultiLineString(b1, b2, false); has {
+	if hasIntersectionMultiLineStringWithMultiLineString(b1, b2) {
 		return true
 	}
 

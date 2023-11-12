@@ -13,7 +13,7 @@ func TestNearest(t *testing.T) {
 	for _, population := range testPopulations(66, 1000, 1.1) {
 		t.Run(fmt.Sprintf("n=%d", population), func(t *testing.T) {
 			rnd := rand.New(rand.NewSource(0))
-			rt, boxes := testBulkLoad(rnd, population, 0.9, 0.1)
+			rt, boxes := testBulkLoad(rnd, population)
 			checkInvariants(t, rt, boxes)
 			checkPrioritySearch(t, rt, boxes, rnd)
 			checkNearest(t, rt, boxes, rnd)

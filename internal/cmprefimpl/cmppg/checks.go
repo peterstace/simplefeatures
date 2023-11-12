@@ -62,7 +62,7 @@ func checkWKBParse(t *testing.T, pg PostGIS, candidates []string) {
 			}
 
 			_, sfErr := geom.UnmarshalWKB(buf)
-			isValid, reason := pg.WKBIsValidWithReason(t, wkb)
+			isValid, reason := pg.WKBIsValidWithReason(wkb)
 			if (sfErr == nil) != isValid {
 				t.Logf("WKB: %v", wkb)
 				t.Logf("SimpleFeatures err: %v", sfErr)
@@ -124,7 +124,7 @@ func checkGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
 		found = true
 		t.Run(fmt.Sprintf("CheckGeoJSONParse_%d", i), func(t *testing.T) {
 			_, sfErr := geom.UnmarshalGeoJSON([]byte(geojson))
-			isValid, reason := pg.GeoJSONIsValidWithReason(t, geojson)
+			isValid, reason := pg.GeoJSONIsValidWithReason(geojson)
 			if (sfErr == nil) != isValid {
 				t.Logf("GeoJSON: %v", geojson)
 				t.Logf("SimpleFeatures err: %v", sfErr)
