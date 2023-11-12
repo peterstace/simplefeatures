@@ -86,6 +86,7 @@ linters:
     - predeclared
     - promlinter
     - reassign
+    - revive
     - rowserrcheck
     - sqlclosecheck
     - staticcheck
@@ -148,7 +149,3 @@ linters:
     - varnamelen
     - wrapcheck
     - wsl
-
-    # These are a good idea to enable, but would involve noisey changes.
-    # They will be enabled later.
-    - revive
