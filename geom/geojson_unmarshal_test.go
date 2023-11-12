@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
-	. "github.com/peterstace/simplefeatures/geom"
 )
 
 func TestGeoJSONUnmarshalValid(t *testing.T) {
@@ -172,7 +171,7 @@ func TestGeoJSONUnmarshalValid(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, err := UnmarshalGeoJSON([]byte(tt.geojson))
+			got, err := geom.UnmarshalGeoJSON([]byte(tt.geojson))
 			expectNoErr(t, err)
 			want := geomFromWKT(t, tt.wkt)
 			expectGeomEq(t, got, want)
@@ -219,7 +218,7 @@ func TestGeoJSONUnmarshalValidAllowAdditionalCoordDimensions(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, err := UnmarshalGeoJSON([]byte(tt.geojson))
+			got, err := geom.UnmarshalGeoJSON([]byte(tt.geojson))
 			expectNoErr(t, err)
 			want := geomFromWKT(t, tt.wkt)
 			expectGeomEq(t, got, want)
@@ -322,7 +321,7 @@ func TestGeoJSONSyntaxError(t *testing.T) {
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
-			_, err := UnmarshalGeoJSON([]byte(tc.geojson))
+			_, err := geom.UnmarshalGeoJSON([]byte(tc.geojson))
 			if err == nil {
 				t.Fatal("expected an error but got nil")
 			}
@@ -368,10 +367,10 @@ func TestGeoJSONUnmarshalNoValidate(t *testing.T) {
 		`{"type":"MultiPolygon","coordinates":[[[[0,0],[0,0]]]]}`,
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			if _, err := UnmarshalGeoJSON([]byte(geojson)); err == nil {
+			if _, err := geom.UnmarshalGeoJSON([]byte(geojson)); err == nil {
 				t.Fatal("invalid test case -- geometry should be invalid")
 			}
-			if _, err := UnmarshalGeoJSON([]byte(geojson), NoValidate{}); err != nil {
+			if _, err := geom.UnmarshalGeoJSON([]byte(geojson), geom.NoValidate{}); err != nil {
 				t.Errorf("got error but didn't expect one because validations are disabled")
 			}
 		})
@@ -383,43 +382,43 @@ func TestGeoJSONUnmarshalIntoConcreteGeometryValid(t *testing.T) {
 		target interface {
 			json.Unmarshaler
 			AsGeometry() geom.Geometry
-			Type() GeometryType
+			Type() geom.GeometryType
 		}
 		geojson string
 		wantWKT string
 	}{
 		{
-			target:  new(GeometryCollection),
+			target:  new(geom.GeometryCollection),
 			geojson: `{"type":"GeometryCollection","geometries":[{"type":"Point","coordinates":[1,2]}]}`,
 			wantWKT: "GEOMETRYCOLLECTION(POINT(1 2))",
 		},
 		{
-			target:  new(Point),
+			target:  new(geom.Point),
 			geojson: `{"type":"Point","coordinates":[1,2]}`,
 			wantWKT: "POINT(1 2)",
 		},
 		{
-			target:  new(LineString),
+			target:  new(geom.LineString),
 			geojson: `{"type":"LineString","coordinates":[[1,2],[3,4]]}`,
 			wantWKT: "LINESTRING(1 2,3 4)",
 		},
 		{
-			target:  new(Polygon),
+			target:  new(geom.Polygon),
 			geojson: `{"type":"Polygon","coordinates":[[[0,0],[0,1],[1,0],[0,0]]]}`,
 			wantWKT: "POLYGON((0 0,0 1,1 0,0 0))",
 		},
 		{
-			target:  new(MultiPoint),
+			target:  new(geom.MultiPoint),
 			geojson: `{"type":"MultiPoint","coordinates":[[1,2]]}`,
 			wantWKT: "MULTIPOINT((1 2))",
 		},
 		{
-			target:  new(MultiLineString),
+			target:  new(geom.MultiLineString),
 			geojson: `{"type":"MultiLineString","coordinates":[[[1,2],[3,4]]]}`,
 			wantWKT: "MULTILINESTRING((1 2,3 4))",
 		},
 		{
-			target:  new(MultiPolygon),
+			target:  new(geom.MultiPolygon),
 			geojson: `{"type":"MultiPolygon","coordinates":[[[[0,0],[0,1],[1,0],[0,0]]]]}`,
 			wantWKT: "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))",
 		},
@@ -436,16 +435,16 @@ func TestGeoJSONUnmarshalIntoConcreteGeometryWrongType(t *testing.T) {
 	for _, tc := range []struct {
 		dest interface {
 			json.Unmarshaler
-			Type() GeometryType
+			Type() geom.GeometryType
 		}
 	}{
-		{new(GeometryCollection)},
-		{new(Point)},
-		{new(LineString)},
-		{new(Polygon)},
-		{new(MultiPoint)},
-		{new(MultiLineString)},
-		{new(MultiPolygon)},
+		{new(geom.GeometryCollection)},
+		{new(geom.Point)},
+		{new(geom.LineString)},
+		{new(geom.Polygon)},
+		{new(geom.MultiPoint)},
+		{new(geom.MultiLineString)},
+		{new(geom.MultiPolygon)},
 	} {
 		t.Run("dest_"+tc.dest.Type().String(), func(t *testing.T) {
 			for _, geojson := range []string{
