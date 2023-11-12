@@ -8,6 +8,8 @@ YYYY-MM-DD
 
 - Simplifies the internal representation of the `Envelope` type.
 
+- Upgrades `golangci-lint` to `v1.55.2`.
+
 - **Breaking change**: Renames `Envelope`'s `ExtendToIncludeXY` method to
   `ExpandToIncludeXY`. This makes the names of the `ExpandToIncludeXY` and
   `ExpandToIncludeEnvelope` methods have consistent naming.
