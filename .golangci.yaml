@@ -92,6 +92,7 @@ linters:
     - tagliatelle
     - tenv
     - testableexamples
+    - testpackage
     - thelper
     - tparallel
     - unconvert
@@ -150,5 +151,4 @@ linters:
     - errorlint
     - revive
     - stylecheck
-    - testpackage
     - unparam

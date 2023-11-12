@@ -1,7 +1,7 @@
-// Package perf contains performance benchmarks that don't make sense to
+// Package perf_test contains performance benchmarks that don't make sense to
 // include in any particular package (they may test code from multiple
 // packages).
-package perf
+package perf_test
 
 import (
 	"fmt"
