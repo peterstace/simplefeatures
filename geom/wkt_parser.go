@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -26,7 +27,7 @@ func UnmarshalWKT(wkt string, nv ...NoValidate) (Geometry, error) {
 
 	if tok, err := p.lexer.next(); err == nil {
 		return Geometry{}, wantButGot("EOF", tok)
-	} else if err != wktUnexpectedEOF {
+	} else if !errors.Is(err, wktUnexpectedEOF) {
 		return Geometry{}, err
 	}
 

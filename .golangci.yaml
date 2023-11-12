@@ -49,6 +49,7 @@ linters:
     - durationcheck
     - errcheck
     - errchkjson
+    - errorlint
     - execinquery
     - exportloopref
     - ginkgolinter
@@ -150,5 +151,4 @@ linters:
 
     # These are a good idea to enable, but would involve noisey changes.
     # They will be enabled later.
-    - errorlint
     - revive

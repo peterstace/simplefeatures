@@ -1,6 +1,9 @@
 package rtree
 
-import "container/heap"
+import (
+	"container/heap"
+	"errors"
+)
 
 // Nearest finds the record in the RTree that is the closest to the input box
 // as measured by the Euclidean metric. Note that there may be multiple records
@@ -21,7 +24,7 @@ func (t *RTree) Nearest(box Box) (recordID int, found bool) {
 // error is returned from the callback, then iteration stops immediately. Any
 // error returned from the callback is returned by PrioritySearch, except for
 // the case where the special Stop sentinel error is returned (in which case
-// nil will be returned from PrioritySearch).
+// nil will be returned from PrioritySearch). Stop may be wrapped.
 func (t *RTree) PrioritySearch(box Box, callback func(recordID int) error) error {
 	if t.root == nil {
 		return nil
@@ -39,7 +42,7 @@ func (t *RTree) PrioritySearch(box Box, callback func(recordID int) error) error
 		nearest := heap.Pop(&queue).(*entry)
 		if nearest.child == nil {
 			if err := callback(nearest.recordID); err != nil {
-				if err == Stop {
+				if errors.Is(err, Stop) {
 					return nil
 				}
 				return err

@@ -366,7 +366,7 @@ func (h *Handle) decodeGeomHandleUsingWKB(gh *C.GEOSGeometry) (geom.Geometry, er
 	var size C.size_t
 	wkb := C.GEOSWKBWriter_write_r(h.context, h.wkbWriter, gh, &size)
 	if wkb == nil {
-		return geom.Geometry{}, fmt.Errorf("writing wkb: %v", h.err())
+		return geom.Geometry{}, fmt.Errorf("writing wkb: %w", h.err())
 	}
 	defer C.GEOSFree_r(h.context, unsafe.Pointer(wkb))
 	byts := C.GoBytes(unsafe.Pointer(wkb), C.int(size))
@@ -399,7 +399,7 @@ func (h *Handle) asText(g geom.Geometry) (string, error) {
 func (h *Handle) fromText(wkt string) (geom.Geometry, error) {
 	reader := C.GEOSWKTReader_create_r(h.context)
 	if reader == nil {
-		return geom.Geometry{}, fmt.Errorf("creating wkt reader: %v", h.err())
+		return geom.Geometry{}, fmt.Errorf("creating wkt reader: %w", h.err())
 	}
 	defer C.GEOSWKTReader_destroy_r(h.context, reader)
 

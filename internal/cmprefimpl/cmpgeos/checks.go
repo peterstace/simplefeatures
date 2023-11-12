@@ -319,7 +319,7 @@ func checkEnvelope(h *Handle, g geom.Geometry, log *log.Logger) error {
 func checkIsSimple(h *Handle, g geom.Geometry, log *log.Logger) error {
 	want, wantDefined, err := h.isSimple(g)
 	if err != nil {
-		if err == errLibgeosCrash {
+		if errors.Is(err, errLibgeosCrash) {
 			// Skip any tests that would cause libgeos to crash.
 			return nil
 		}
@@ -606,7 +606,7 @@ func checkIntersects(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 
 	want, err := h.intersects(g1, g2)
 	if err != nil {
-		if err == errLibgeosCrash {
+		if errors.Is(err, errLibgeosCrash) {
 			return nil
 		}
 		return err
@@ -639,7 +639,7 @@ func checkExactEquals(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 func checkDistance(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	want, err := h.distance(g1, g2)
 	if err != nil {
-		if err == errLibgeosCrash {
+		if errors.Is(err, errLibgeosCrash) {
 			// Skip any tests that would cause libgeos to crash.
 			return nil
 		}
@@ -832,7 +832,7 @@ func checkDCELOp(
 
 	want, err := refImpl(g1, g2)
 	if err != nil {
-		if err == errInvalidAccordingToGEOS {
+		if errors.Is(err, errInvalidAccordingToGEOS) {
 			// Because GEOS has given us back an invalid geometry (even according
 			// to its own validation routines) we can't trust it for this test
 			// case.
@@ -898,7 +898,7 @@ func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	}
 	want, err := h.relate(g1, g2)
 	if err != nil {
-		if err == errLibgeosCrash {
+		if errors.Is(err, errLibgeosCrash) {
 			// Skip any tests that would cause libgeos to crash.
 			return nil
 		}
