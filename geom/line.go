@@ -13,6 +13,14 @@ type line struct {
 	a, b XY
 }
 
+// less orders provides an ordering on lines.
+func (ln line) less(ot line) bool {
+	if ln.a != ot.a {
+		return ln.a.Less(ot.a)
+	}
+	return ln.b.Less(ot.b)
+}
+
 // uncheckedEnvelope directly constructs an Envelope that bounds the line. It
 // skips envelope validation because line coordinates never come directly from
 // users. Instead, line coordinates come directly from pre-validated
@@ -67,6 +75,15 @@ func (ln line) intersectsXY(xy XY) bool {
 
 func (ln line) hasEndpoint(xy XY) bool {
 	return ln.a == xy || ln.b == xy
+}
+
+// canonicalise swaps the endpoints of the line to be in a canonical form. Two
+// lines with reversed endpoint order will have the same canonical form.
+func (ln line) canonicalise() line {
+	if ln.b.Less(ln.a) {
+		ln.a, ln.b = ln.b, ln.a
+	}
+	return ln
 }
 
 // lineWithLineIntersection represents the result of intersecting two line
@@ -132,6 +149,26 @@ func (ln line) intersectLine(other line) lineWithLineIntersection {
 	}
 
 	return lineWithLineIntersection{empty: true}
+}
+
+// canonicaliseLinePair canonicalises two lines with respect to both the
+// endpoint order in each line, and the ordering between the two lines
+// themselves.
+func canonicaliseLinePair(lnA, lnB line) (line, line) {
+	lnA = lnA.canonicalise()
+	lnB = lnB.canonicalise()
+	if !lnA.less(lnB) {
+		return lnB, lnA
+	}
+	return lnA, lnB
+}
+
+// symmetricLineIntersection is a symmetric version of line.intersectLine. The
+// result will be the same, no matter the order of the input arguments (either
+// the order of the endpoints, or the order of the two lines).
+func symmetricLineIntersection(lnA, lnB line) lineWithLineIntersection {
+	lnA, lnB = canonicaliseLinePair(lnA, lnB)
+	return lnA.intersectLine(lnB)
 }
 
 // onSegement checks if point r is on the segment formed by p and q (all 3
