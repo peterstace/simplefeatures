@@ -4,32 +4,32 @@ import (
 	"strconv"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestCoordinatesString(t *testing.T) {
 	for i, tc := range []struct {
-		coords Coordinates
+		coords geom.Coordinates
 		want   string
 	}{
 		{
-			Coordinates{},
+			geom.Coordinates{},
 			"Coordinates[XY] 0 0",
 		},
 		{
-			Coordinates{XY: XY{X: 1, Y: 2}},
+			geom.Coordinates{XY: geom.XY{X: 1, Y: 2}},
 			"Coordinates[XY] 1 2",
 		},
 		{
-			Coordinates{XY: XY{X: 1, Y: 2}, Z: 3, Type: DimXYZ},
+			geom.Coordinates{XY: geom.XY{X: 1, Y: 2}, Z: 3, Type: geom.DimXYZ},
 			"Coordinates[XYZ] 1 2 3",
 		},
 		{
-			Coordinates{XY: XY{X: 1, Y: 2}, M: 3, Type: DimXYM},
+			geom.Coordinates{XY: geom.XY{X: 1, Y: 2}, M: 3, Type: geom.DimXYM},
 			"Coordinates[XYM] 1 2 3",
 		},
 		{
-			Coordinates{XY: XY{X: 1, Y: 2}, Z: 3, M: 4, Type: DimXYZM},
+			geom.Coordinates{XY: geom.XY{X: 1, Y: 2}, Z: 3, M: 4, Type: geom.DimXYZM},
 			"Coordinates[XYZM] 1 2 3 4",
 		},
 	} {

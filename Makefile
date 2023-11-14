@@ -3,7 +3,8 @@ DC_RUN = \
 	--project-name sf-$$task \
 	--file .ci/docker-compose-$$task.yml \
 	up \
-	--abort-on-container-exit
+	--abort-on-container-exit \
+	--build
 
 .PHONY: lint
 lint:

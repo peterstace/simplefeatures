@@ -83,6 +83,7 @@ linters:
     - noctx
     - nolintlint
     - nosprintfhostport
+    - perfsprint
     - predeclared
     - promlinter
     - reassign
@@ -133,12 +134,14 @@ linters:
     - gci
     - gochecknoglobals
     - gochecknoinits
+    - gochecksumtype
     - gocognit
     - goconst
     - gocyclo
     - godox
     - goerr113
     - gomnd
+    - inamedparam
     - lll
     - maintidx
     - nestif
@@ -146,6 +149,9 @@ linters:
     - nonamedreturns
     - paralleltest
     - prealloc
+    - protogetter
+    - sloglint
+    - testifylint
     - varnamelen
     - wrapcheck
     - wsl

@@ -3,13 +3,13 @@ package geom_test
 import (
 	"testing"
 
-	. "github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestPointAccessorNonEmpty(t *testing.T) {
 	xy, ok := geomFromWKT(t, "POINT(1 2)").MustAsPoint().XY()
 	expectBoolEq(t, ok, true)
-	expectXYEq(t, xy, XY{1, 2})
+	expectXYEq(t, xy, geom.XY{1, 2})
 }
 
 func TestPointAccessorEmpty(t *testing.T) {
@@ -25,11 +25,11 @@ func TestLineStringAccessor(t *testing.T) {
 	pt56 := xyCoords(5, 6)
 
 	t.Run("start", func(t *testing.T) {
-		want := NewPoint(pt12)
+		want := geom.NewPoint(pt12)
 		expectGeomEq(t, ls.StartPoint().AsGeometry(), want.AsGeometry())
 	})
 	t.Run("end", func(t *testing.T) {
-		want := NewPoint(pt56)
+		want := geom.NewPoint(pt56)
 		expectGeomEq(t, ls.EndPoint().AsGeometry(), want.AsGeometry())
 	})
 	t.Run("num points", func(t *testing.T) {

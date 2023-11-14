@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestIsEmptyDimension(t *testing.T) {
@@ -46,7 +46,7 @@ func TestIsEmptyDimension(t *testing.T) {
 		{"GEOMETRYCOLLECTION(POLYGON((0 0,1 1,1 0,0 0)),POINT(1 1),LINESTRING(0 0,1 1))", false, 2},
 	} {
 		t.Run(tt.wkt, func(t *testing.T) {
-			geom, err := UnmarshalWKT(tt.wkt)
+			geom, err := geom.UnmarshalWKT(tt.wkt)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -67,13 +67,13 @@ func TestIsEmptyDimension(t *testing.T) {
 }
 
 func TestEnvelope(t *testing.T) {
-	xy := func(x, y float64) XY {
-		return XY{x, y}
+	xy := func(x, y float64) geom.XY {
+		return geom.XY{x, y}
 	}
 	for i, tt := range []struct {
 		wkt string
-		min XY
-		max XY
+		min geom.XY
+		max geom.XY
 	}{
 		{"POINT(1 1)", xy(1, 1), xy(1, 1)},
 		{"LINESTRING(1 2,3 4)", xy(1, 2), xy(3, 4)},
@@ -319,7 +319,7 @@ func TestCoordinatesSequence(t *testing.T) {
 		t.Run("populated", func(t *testing.T) {
 			c, ok := geomFromWKT(t, "POINT(1 2)").MustAsPoint().Coordinates()
 			expectBoolEq(t, ok, true)
-			expectXYEq(t, c.XY, XY{1, 2})
+			expectXYEq(t, c.XY, geom.XY{1, 2})
 		})
 		t.Run("empty", func(t *testing.T) {
 			_, ok := geomFromWKT(t, "POINT EMPTY").MustAsPoint().Coordinates()
@@ -329,52 +329,52 @@ func TestCoordinatesSequence(t *testing.T) {
 	t.Run("linestring", func(t *testing.T) {
 		seq := geomFromWKT(t, "LINESTRING(0 1,2 3,4 5)").MustAsLineString().Coordinates()
 		expectIntEq(t, seq.Length(), 3)
-		expectXYEq(t, seq.GetXY(0), XY{0, 1})
-		expectXYEq(t, seq.GetXY(1), XY{2, 3})
-		expectXYEq(t, seq.GetXY(2), XY{4, 5})
+		expectXYEq(t, seq.GetXY(0), geom.XY{0, 1})
+		expectXYEq(t, seq.GetXY(1), geom.XY{2, 3})
+		expectXYEq(t, seq.GetXY(2), geom.XY{4, 5})
 	})
 	t.Run("linestring with dupe", func(t *testing.T) {
 		seq := geomFromWKT(t, "LINESTRING(1 5,5 2,5 2,4 9)").MustAsLineString().Coordinates()
 		expectIntEq(t, seq.Length(), 4)
-		expectXYEq(t, seq.GetXY(0), XY{1, 5})
-		expectXYEq(t, seq.GetXY(1), XY{5, 2})
-		expectXYEq(t, seq.GetXY(2), XY{5, 2})
-		expectXYEq(t, seq.GetXY(3), XY{4, 9})
+		expectXYEq(t, seq.GetXY(0), geom.XY{1, 5})
+		expectXYEq(t, seq.GetXY(1), geom.XY{5, 2})
+		expectXYEq(t, seq.GetXY(2), geom.XY{5, 2})
+		expectXYEq(t, seq.GetXY(3), geom.XY{4, 9})
 	})
 	t.Run("polygon", func(t *testing.T) {
 		seq := geomFromWKT(t, "POLYGON((0 0,0 10,10 0,0 0),(2 2,2 7,7 2,2 2))").MustAsPolygon().Coordinates()
 		expectIntEq(t, len(seq), 2)
 		expectIntEq(t, seq[0].Length(), 4)
-		expectXYEq(t, seq[0].GetXY(0), XY{0, 0})
-		expectXYEq(t, seq[0].GetXY(1), XY{0, 10})
-		expectXYEq(t, seq[0].GetXY(2), XY{10, 0})
-		expectXYEq(t, seq[0].GetXY(3), XY{0, 0})
+		expectXYEq(t, seq[0].GetXY(0), geom.XY{0, 0})
+		expectXYEq(t, seq[0].GetXY(1), geom.XY{0, 10})
+		expectXYEq(t, seq[0].GetXY(2), geom.XY{10, 0})
+		expectXYEq(t, seq[0].GetXY(3), geom.XY{0, 0})
 		expectIntEq(t, seq[1].Length(), 4)
-		expectXYEq(t, seq[1].GetXY(0), XY{2, 2})
-		expectXYEq(t, seq[1].GetXY(1), XY{2, 7})
-		expectXYEq(t, seq[1].GetXY(2), XY{7, 2})
-		expectXYEq(t, seq[1].GetXY(3), XY{2, 2})
+		expectXYEq(t, seq[1].GetXY(0), geom.XY{2, 2})
+		expectXYEq(t, seq[1].GetXY(1), geom.XY{2, 7})
+		expectXYEq(t, seq[1].GetXY(2), geom.XY{7, 2})
+		expectXYEq(t, seq[1].GetXY(3), geom.XY{2, 2})
 	})
 	t.Run("multipoint", func(t *testing.T) {
 		seq := geomFromWKT(t, "MULTIPOINT(0 1,2 3,EMPTY,4 5)").MustAsMultiPoint().Coordinates()
 		expectIntEq(t, seq.Length(), 3)
-		expectXYEq(t, seq.GetXY(0), XY{0, 1})
-		expectXYEq(t, seq.GetXY(1), XY{2, 3})
-		expectXYEq(t, seq.GetXY(2), XY{4, 5})
+		expectXYEq(t, seq.GetXY(0), geom.XY{0, 1})
+		expectXYEq(t, seq.GetXY(1), geom.XY{2, 3})
+		expectXYEq(t, seq.GetXY(2), geom.XY{4, 5})
 	})
 	t.Run("multilinestring", func(t *testing.T) {
 		seq := geomFromWKT(t, "MULTILINESTRING((0 0,0 10,10 0,0 0),(2 2,2 8,8 2,2 2))").MustAsMultiLineString().Coordinates()
 		expectIntEq(t, len(seq), 2)
 		expectIntEq(t, seq[0].Length(), 4)
-		expectXYEq(t, seq[0].GetXY(0), XY{0, 0})
-		expectXYEq(t, seq[0].GetXY(1), XY{0, 10})
-		expectXYEq(t, seq[0].GetXY(2), XY{10, 0})
-		expectXYEq(t, seq[0].GetXY(3), XY{0, 0})
+		expectXYEq(t, seq[0].GetXY(0), geom.XY{0, 0})
+		expectXYEq(t, seq[0].GetXY(1), geom.XY{0, 10})
+		expectXYEq(t, seq[0].GetXY(2), geom.XY{10, 0})
+		expectXYEq(t, seq[0].GetXY(3), geom.XY{0, 0})
 		expectIntEq(t, seq[1].Length(), 4)
-		expectXYEq(t, seq[1].GetXY(0), XY{2, 2})
-		expectXYEq(t, seq[1].GetXY(1), XY{2, 8})
-		expectXYEq(t, seq[1].GetXY(2), XY{8, 2})
-		expectXYEq(t, seq[1].GetXY(3), XY{2, 2})
+		expectXYEq(t, seq[1].GetXY(0), geom.XY{2, 2})
+		expectXYEq(t, seq[1].GetXY(1), geom.XY{2, 8})
+		expectXYEq(t, seq[1].GetXY(2), geom.XY{8, 2})
+		expectXYEq(t, seq[1].GetXY(3), geom.XY{2, 2})
 	})
 	t.Run("multipolygon", func(t *testing.T) {
 		seq := geomFromWKT(t, `
@@ -393,33 +393,33 @@ func TestCoordinatesSequence(t *testing.T) {
 
 		expectIntEq(t, len(seq[0]), 2)
 		expectIntEq(t, seq[0][0].Length(), 4)
-		expectXYEq(t, seq[0][0].GetXY(0), XY{0, 0})
-		expectXYEq(t, seq[0][0].GetXY(1), XY{0, 10})
-		expectXYEq(t, seq[0][0].GetXY(2), XY{10, 0})
-		expectXYEq(t, seq[0][0].GetXY(3), XY{0, 0})
+		expectXYEq(t, seq[0][0].GetXY(0), geom.XY{0, 0})
+		expectXYEq(t, seq[0][0].GetXY(1), geom.XY{0, 10})
+		expectXYEq(t, seq[0][0].GetXY(2), geom.XY{10, 0})
+		expectXYEq(t, seq[0][0].GetXY(3), geom.XY{0, 0})
 		expectIntEq(t, seq[0][1].Length(), 4)
-		expectXYEq(t, seq[0][1].GetXY(0), XY{2, 2})
-		expectXYEq(t, seq[0][1].GetXY(1), XY{2, 7})
-		expectXYEq(t, seq[0][1].GetXY(2), XY{7, 2})
-		expectXYEq(t, seq[0][1].GetXY(3), XY{2, 2})
+		expectXYEq(t, seq[0][1].GetXY(0), geom.XY{2, 2})
+		expectXYEq(t, seq[0][1].GetXY(1), geom.XY{2, 7})
+		expectXYEq(t, seq[0][1].GetXY(2), geom.XY{7, 2})
+		expectXYEq(t, seq[0][1].GetXY(3), geom.XY{2, 2})
 
 		expectIntEq(t, len(seq[1]), 2)
 		expectIntEq(t, seq[1][0].Length(), 4)
-		expectXYEq(t, seq[1][0].GetXY(0), XY{100, 100})
-		expectXYEq(t, seq[1][0].GetXY(1), XY{100, 110})
-		expectXYEq(t, seq[1][0].GetXY(2), XY{110, 100})
-		expectXYEq(t, seq[1][0].GetXY(3), XY{100, 100})
+		expectXYEq(t, seq[1][0].GetXY(0), geom.XY{100, 100})
+		expectXYEq(t, seq[1][0].GetXY(1), geom.XY{100, 110})
+		expectXYEq(t, seq[1][0].GetXY(2), geom.XY{110, 100})
+		expectXYEq(t, seq[1][0].GetXY(3), geom.XY{100, 100})
 		expectIntEq(t, seq[1][1].Length(), 4)
-		expectXYEq(t, seq[1][1].GetXY(0), XY{102, 102})
-		expectXYEq(t, seq[1][1].GetXY(1), XY{102, 107})
-		expectXYEq(t, seq[1][1].GetXY(2), XY{107, 102})
-		expectXYEq(t, seq[1][1].GetXY(3), XY{102, 102})
+		expectXYEq(t, seq[1][1].GetXY(0), geom.XY{102, 102})
+		expectXYEq(t, seq[1][1].GetXY(1), geom.XY{102, 107})
+		expectXYEq(t, seq[1][1].GetXY(2), geom.XY{107, 102})
+		expectXYEq(t, seq[1][1].GetXY(3), geom.XY{102, 102})
 	})
 }
 
 func TestTransformXY(t *testing.T) {
-	transform := func(in XY) XY {
-		return XY{in.X * 1.5, in.Y}
+	transform := func(in geom.XY) geom.XY {
+		return geom.XY{in.X * 1.5, in.Y}
 	}
 	for i, tt := range []struct {
 		wktIn, wktOut string
@@ -616,8 +616,8 @@ func TestSignedArea(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Logf("input: %s", tc.input)
-			geom := geomFromWKT(t, tc.input)
-			got := geom.Area(SignedArea)
+			g := geomFromWKT(t, tc.input)
+			got := g.Area(geom.SignedArea)
 			if got != tc.expected {
 				t.Errorf("expected: %f, got: %f", tc.expected, got)
 			}
@@ -636,7 +636,7 @@ func TestTransformedArea(t *testing.T) {
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((2 2,3 2,2 3,2 2)))", 0.125},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := geomFromWKT(t, tt.wkt).Area(WithTransform(func(xy XY) XY {
+			got := geomFromWKT(t, tt.wkt).Area(geom.WithTransform(func(xy geom.XY) geom.XY {
 				xy.X *= 0.5
 				xy.Y *= 0.25
 				return xy
@@ -651,7 +651,7 @@ func TestTransformedArea(t *testing.T) {
 func TestTransformedAreaInvocationCount(t *testing.T) {
 	g := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))")
 	var count int
-	g.Area(WithTransform(func(xy XY) XY {
+	g.Area(geom.WithTransform(func(xy geom.XY) geom.XY {
 		count++
 		return xy
 	}))
@@ -719,7 +719,7 @@ func TestCentroid(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := geomFromWKT(t, tt.input).Centroid()
 			want := geomFromWKT(t, tt.output)
-			if !ExactEquals(want, got.AsGeometry(), ToleranceXY(0.00000001)) {
+			if !geom.ExactEquals(want, got.AsGeometry(), geom.ToleranceXY(0.00000001)) {
 				t.Log(tt.input)
 				t.Errorf("got=%v want=%v", got.AsText(), tt.output)
 			}
@@ -731,7 +731,7 @@ func TestLineStringToMultiLineString(t *testing.T) {
 	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").MustAsLineString()
 	got := ls.AsMultiLineString()
 	want := geomFromWKT(t, "MULTILINESTRING((1 2,3 4,5 6))")
-	if !ExactEquals(got.AsGeometry(), want) {
+	if !geom.ExactEquals(got.AsGeometry(), want) {
 		t.Errorf("want=%v got=%v", want, got)
 	}
 }
@@ -885,161 +885,161 @@ func TestReverse(t *testing.T) {
 func TestForceCoordinatesType(t *testing.T) {
 	for i, tt := range []struct {
 		input  string
-		ct     CoordinatesType
+		ct     geom.CoordinatesType
 		output string
 	}{
-		{"POINT EMPTY", DimXY, "POINT EMPTY"},
-		{"POINT EMPTY", DimXYZ, "POINT Z EMPTY"},
-		{"POINT EMPTY", DimXYM, "POINT M EMPTY"},
-		{"POINT EMPTY", DimXYZM, "POINT ZM EMPTY"},
-		{"POINT Z EMPTY", DimXY, "POINT EMPTY"},
-		{"POINT Z EMPTY", DimXYZ, "POINT Z EMPTY"},
-		{"POINT Z EMPTY", DimXYM, "POINT M EMPTY"},
-		{"POINT Z EMPTY", DimXYZM, "POINT ZM EMPTY"},
-		{"POINT M EMPTY", DimXY, "POINT EMPTY"},
-		{"POINT M EMPTY", DimXYZ, "POINT Z EMPTY"},
-		{"POINT M EMPTY", DimXYM, "POINT M EMPTY"},
-		{"POINT M EMPTY", DimXYZM, "POINT ZM EMPTY"},
-		{"POINT ZM EMPTY", DimXY, "POINT EMPTY"},
-		{"POINT ZM EMPTY", DimXYZ, "POINT Z EMPTY"},
-		{"POINT ZM EMPTY", DimXYM, "POINT M EMPTY"},
-		{"POINT ZM EMPTY", DimXYZM, "POINT ZM EMPTY"},
+		{"POINT EMPTY", geom.DimXY, "POINT EMPTY"},
+		{"POINT EMPTY", geom.DimXYZ, "POINT Z EMPTY"},
+		{"POINT EMPTY", geom.DimXYM, "POINT M EMPTY"},
+		{"POINT EMPTY", geom.DimXYZM, "POINT ZM EMPTY"},
+		{"POINT Z EMPTY", geom.DimXY, "POINT EMPTY"},
+		{"POINT Z EMPTY", geom.DimXYZ, "POINT Z EMPTY"},
+		{"POINT Z EMPTY", geom.DimXYM, "POINT M EMPTY"},
+		{"POINT Z EMPTY", geom.DimXYZM, "POINT ZM EMPTY"},
+		{"POINT M EMPTY", geom.DimXY, "POINT EMPTY"},
+		{"POINT M EMPTY", geom.DimXYZ, "POINT Z EMPTY"},
+		{"POINT M EMPTY", geom.DimXYM, "POINT M EMPTY"},
+		{"POINT M EMPTY", geom.DimXYZM, "POINT ZM EMPTY"},
+		{"POINT ZM EMPTY", geom.DimXY, "POINT EMPTY"},
+		{"POINT ZM EMPTY", geom.DimXYZ, "POINT Z EMPTY"},
+		{"POINT ZM EMPTY", geom.DimXYM, "POINT M EMPTY"},
+		{"POINT ZM EMPTY", geom.DimXYZM, "POINT ZM EMPTY"},
 
-		{"POINT(1 2)", DimXY, "POINT(1 2)"},
-		{"POINT(1 2)", DimXYZ, "POINT Z (1 2 0)"},
-		{"POINT(1 2)", DimXYM, "POINT M (1 2 0)"},
-		{"POINT(1 2)", DimXYZM, "POINT ZM (1 2 0 0)"},
-		{"POINT Z (1 2 3)", DimXY, "POINT(1 2)"},
-		{"POINT Z (1 2 3)", DimXYZ, "POINT Z (1 2 3)"},
-		{"POINT Z (1 2 3)", DimXYM, "POINT M (1 2 0)"},
-		{"POINT Z (1 2 3)", DimXYZM, "POINT ZM (1 2 3 0)"},
-		{"POINT M (1 2 4)", DimXY, "POINT(1 2)"},
-		{"POINT M (1 2 4)", DimXYZ, "POINT Z (1 2 0)"},
-		{"POINT M (1 2 4)", DimXYM, "POINT M (1 2 4)"},
-		{"POINT M (1 2 4)", DimXYZM, "POINT ZM (1 2 0 4)"},
-		{"POINT ZM (1 2 3 4)", DimXY, "POINT(1 2)"},
-		{"POINT ZM (1 2 3 4)", DimXYZ, "POINT Z (1 2 3)"},
-		{"POINT ZM (1 2 3 4)", DimXYM, "POINT M (1 2 4)"},
-		{"POINT ZM (1 2 3 4)", DimXYZM, "POINT ZM (1 2 3 4)"},
+		{"POINT(1 2)", geom.DimXY, "POINT(1 2)"},
+		{"POINT(1 2)", geom.DimXYZ, "POINT Z (1 2 0)"},
+		{"POINT(1 2)", geom.DimXYM, "POINT M (1 2 0)"},
+		{"POINT(1 2)", geom.DimXYZM, "POINT ZM (1 2 0 0)"},
+		{"POINT Z (1 2 3)", geom.DimXY, "POINT(1 2)"},
+		{"POINT Z (1 2 3)", geom.DimXYZ, "POINT Z (1 2 3)"},
+		{"POINT Z (1 2 3)", geom.DimXYM, "POINT M (1 2 0)"},
+		{"POINT Z (1 2 3)", geom.DimXYZM, "POINT ZM (1 2 3 0)"},
+		{"POINT M (1 2 4)", geom.DimXY, "POINT(1 2)"},
+		{"POINT M (1 2 4)", geom.DimXYZ, "POINT Z (1 2 0)"},
+		{"POINT M (1 2 4)", geom.DimXYM, "POINT M (1 2 4)"},
+		{"POINT M (1 2 4)", geom.DimXYZM, "POINT ZM (1 2 0 4)"},
+		{"POINT ZM (1 2 3 4)", geom.DimXY, "POINT(1 2)"},
+		{"POINT ZM (1 2 3 4)", geom.DimXYZ, "POINT Z (1 2 3)"},
+		{"POINT ZM (1 2 3 4)", geom.DimXYM, "POINT M (1 2 4)"},
+		{"POINT ZM (1 2 3 4)", geom.DimXYZM, "POINT ZM (1 2 3 4)"},
 
-		{"LINESTRING(1 2,3 4)", DimXY, "LINESTRING(1 2,3 4)"},
-		{"LINESTRING(1 2,3 4)", DimXYZ, "LINESTRING Z (1 2 0,3 4 0)"},
-		{"LINESTRING(1 2,3 4)", DimXYM, "LINESTRING M (1 2 0,3 4 0)"},
-		{"LINESTRING(1 2,3 4)", DimXYZM, "LINESTRING ZM (1 2 0 0,3 4 0 0)"},
-		{"LINESTRING Z (1 2 3,4 5 6)", DimXY, "LINESTRING(1 2,4 5)"},
-		{"LINESTRING Z (1 2 3,4 5 6)", DimXYZ, "LINESTRING Z (1 2 3,4 5 6)"},
-		{"LINESTRING Z (1 2 3,4 5 6)", DimXYM, "LINESTRING M (1 2 0,4 5 0)"},
-		{"LINESTRING Z (1 2 3,4 5 6)", DimXYZM, "LINESTRING ZM (1 2 3 0,4 5 6 0)"},
-		{"LINESTRING M (1 2 3,4 5 6)", DimXY, "LINESTRING(1 2,4 5)"},
-		{"LINESTRING M (1 2 3,4 5 6)", DimXYZ, "LINESTRING Z (1 2 0,4 5 0)"},
-		{"LINESTRING M (1 2 3,4 5 6)", DimXYM, "LINESTRING M (1 2 3,4 5 6)"},
-		{"LINESTRING M (1 2 3,4 5 6)", DimXYZM, "LINESTRING ZM (1 2 0 3,4 5 0 6)"},
-		{"LINESTRING ZM (1 2 3 4,5 6 7 8)", DimXY, "LINESTRING(1 2,5 6)"},
-		{"LINESTRING ZM (1 2 3 4,5 6 7 8)", DimXYZ, "LINESTRING Z (1 2 3,5 6 7)"},
-		{"LINESTRING ZM (1 2 3 4,5 6 7 8)", DimXYM, "LINESTRING M (1 2 4,5 6 8)"},
-		{"LINESTRING ZM (1 2 3 4,5 6 7 8)", DimXYZM, "LINESTRING ZM (1 2 3 4,5 6 7 8)"},
+		{"LINESTRING(1 2,3 4)", geom.DimXY, "LINESTRING(1 2,3 4)"},
+		{"LINESTRING(1 2,3 4)", geom.DimXYZ, "LINESTRING Z (1 2 0,3 4 0)"},
+		{"LINESTRING(1 2,3 4)", geom.DimXYM, "LINESTRING M (1 2 0,3 4 0)"},
+		{"LINESTRING(1 2,3 4)", geom.DimXYZM, "LINESTRING ZM (1 2 0 0,3 4 0 0)"},
+		{"LINESTRING Z (1 2 3,4 5 6)", geom.DimXY, "LINESTRING(1 2,4 5)"},
+		{"LINESTRING Z (1 2 3,4 5 6)", geom.DimXYZ, "LINESTRING Z (1 2 3,4 5 6)"},
+		{"LINESTRING Z (1 2 3,4 5 6)", geom.DimXYM, "LINESTRING M (1 2 0,4 5 0)"},
+		{"LINESTRING Z (1 2 3,4 5 6)", geom.DimXYZM, "LINESTRING ZM (1 2 3 0,4 5 6 0)"},
+		{"LINESTRING M (1 2 3,4 5 6)", geom.DimXY, "LINESTRING(1 2,4 5)"},
+		{"LINESTRING M (1 2 3,4 5 6)", geom.DimXYZ, "LINESTRING Z (1 2 0,4 5 0)"},
+		{"LINESTRING M (1 2 3,4 5 6)", geom.DimXYM, "LINESTRING M (1 2 3,4 5 6)"},
+		{"LINESTRING M (1 2 3,4 5 6)", geom.DimXYZM, "LINESTRING ZM (1 2 0 3,4 5 0 6)"},
+		{"LINESTRING ZM (1 2 3 4,5 6 7 8)", geom.DimXY, "LINESTRING(1 2,5 6)"},
+		{"LINESTRING ZM (1 2 3 4,5 6 7 8)", geom.DimXYZ, "LINESTRING Z (1 2 3,5 6 7)"},
+		{"LINESTRING ZM (1 2 3 4,5 6 7 8)", geom.DimXYM, "LINESTRING M (1 2 4,5 6 8)"},
+		{"LINESTRING ZM (1 2 3 4,5 6 7 8)", geom.DimXYZM, "LINESTRING ZM (1 2 3 4,5 6 7 8)"},
 
-		{"LINESTRING(1 2,3 4,5 6)", DimXY, "LINESTRING(1 2,3 4,5 6)"},
-		{"LINESTRING(1 2,3 4,5 6)", DimXYZ, "LINESTRING Z (1 2 0,3 4 0,5 6 0)"},
-		{"LINESTRING(1 2,3 4,5 6)", DimXYM, "LINESTRING M (1 2 0,3 4 0,5 6 0)"},
-		{"LINESTRING(1 2,3 4,5 6)", DimXYZM, "LINESTRING ZM (1 2 0 0,3 4 0 0,5 6 0 0)"},
-		{"LINESTRING Z (1 2 3,4 5 6,7 8 9)", DimXY, "LINESTRING(1 2,4 5,7 8)"},
-		{"LINESTRING Z (1 2 3,4 5 6,7 8 9)", DimXYZ, "LINESTRING Z (1 2 3,4 5 6,7 8 9)"},
-		{"LINESTRING Z (1 2 3,4 5 6,7 8 9)", DimXYM, "LINESTRING M (1 2 0,4 5 0,7 8 0)"},
-		{"LINESTRING Z (1 2 3,4 5 6,7 8 9)", DimXYZM, "LINESTRING ZM (1 2 3 0,4 5 6 0,7 8 9 0)"},
-		{"LINESTRING M (1 2 3,4 5 6,7 8 9)", DimXY, "LINESTRING(1 2,4 5,7 8)"},
-		{"LINESTRING M (1 2 3,4 5 6,7 8 9)", DimXYZ, "LINESTRING Z (1 2 0,4 5 0,7 8 0)"},
-		{"LINESTRING M (1 2 3,4 5 6,7 8 9)", DimXYM, "LINESTRING M (1 2 3,4 5 6,7 8 9)"},
-		{"LINESTRING M (1 2 3,4 5 6,7 8 9)", DimXYZM, "LINESTRING ZM (1 2 0 3,4 5 0 6,7 8 0 9)"},
-		{"LINESTRING ZM (1 2 3 4,5 6 7 8,9 10 11 12)", DimXY, "LINESTRING(1 2,5 6,9 10)"},
-		{"LINESTRING ZM (1 2 3 4,5 6 7 8,9 10 11 12)", DimXYZ, "LINESTRING Z (1 2 3,5 6 7,9 10 11)"},
-		{"LINESTRING ZM (1 2 3 4,5 6 7 8,9 10 11 12)", DimXYM, "LINESTRING M (1 2 4,5 6 8,9 10 12)"},
-		{"LINESTRING ZM (1 2 3 4,5 6 7 8,9 10 11 12)", DimXYZM, "LINESTRING ZM (1 2 3 4,5 6 7 8,9 10 11 12)"},
+		{"LINESTRING(1 2,3 4,5 6)", geom.DimXY, "LINESTRING(1 2,3 4,5 6)"},
+		{"LINESTRING(1 2,3 4,5 6)", geom.DimXYZ, "LINESTRING Z (1 2 0,3 4 0,5 6 0)"},
+		{"LINESTRING(1 2,3 4,5 6)", geom.DimXYM, "LINESTRING M (1 2 0,3 4 0,5 6 0)"},
+		{"LINESTRING(1 2,3 4,5 6)", geom.DimXYZM, "LINESTRING ZM (1 2 0 0,3 4 0 0,5 6 0 0)"},
+		{"LINESTRING Z (1 2 3,4 5 6,7 8 9)", geom.DimXY, "LINESTRING(1 2,4 5,7 8)"},
+		{"LINESTRING Z (1 2 3,4 5 6,7 8 9)", geom.DimXYZ, "LINESTRING Z (1 2 3,4 5 6,7 8 9)"},
+		{"LINESTRING Z (1 2 3,4 5 6,7 8 9)", geom.DimXYM, "LINESTRING M (1 2 0,4 5 0,7 8 0)"},
+		{"LINESTRING Z (1 2 3,4 5 6,7 8 9)", geom.DimXYZM, "LINESTRING ZM (1 2 3 0,4 5 6 0,7 8 9 0)"},
+		{"LINESTRING M (1 2 3,4 5 6,7 8 9)", geom.DimXY, "LINESTRING(1 2,4 5,7 8)"},
+		{"LINESTRING M (1 2 3,4 5 6,7 8 9)", geom.DimXYZ, "LINESTRING Z (1 2 0,4 5 0,7 8 0)"},
+		{"LINESTRING M (1 2 3,4 5 6,7 8 9)", geom.DimXYM, "LINESTRING M (1 2 3,4 5 6,7 8 9)"},
+		{"LINESTRING M (1 2 3,4 5 6,7 8 9)", geom.DimXYZM, "LINESTRING ZM (1 2 0 3,4 5 0 6,7 8 0 9)"},
+		{"LINESTRING ZM (1 2 3 4,5 6 7 8,9 10 11 12)", geom.DimXY, "LINESTRING(1 2,5 6,9 10)"},
+		{"LINESTRING ZM (1 2 3 4,5 6 7 8,9 10 11 12)", geom.DimXYZ, "LINESTRING Z (1 2 3,5 6 7,9 10 11)"},
+		{"LINESTRING ZM (1 2 3 4,5 6 7 8,9 10 11 12)", geom.DimXYM, "LINESTRING M (1 2 4,5 6 8,9 10 12)"},
+		{"LINESTRING ZM (1 2 3 4,5 6 7 8,9 10 11 12)", geom.DimXYZM, "LINESTRING ZM (1 2 3 4,5 6 7 8,9 10 11 12)"},
 
-		{"POLYGON((0 0,0 1,1 0,0 0))", DimXY, "POLYGON((0 0,0 1,1 0,0 0))"},
-		{"POLYGON((0 0,0 1,1 0,0 0))", DimXYZ, "POLYGON Z ((0 0 0,0 1 0,1 0 0,0 0 0))"},
-		{"POLYGON((0 0,0 1,1 0,0 0))", DimXYM, "POLYGON M ((0 0 0,0 1 0,1 0 0,0 0 0))"},
-		{"POLYGON((0 0,0 1,1 0,0 0))", DimXYZM, "POLYGON ZM ((0 0 0 0,0 1 0 0,1 0 0 0,0 0 0 0))"},
-		{"POLYGON Z ((0 0 3,1 0 6,0 1 9,0 0 3))", DimXY, "POLYGON((0 0,1 0,0 1,0 0))"},
-		{"POLYGON Z ((0 0 3,1 0 6,0 1 9,0 0 3))", DimXYZ, "POLYGON Z ((0 0 3,1 0 6,0 1 9,0 0 3))"},
-		{"POLYGON Z ((0 0 3,1 0 6,0 1 9,0 0 3))", DimXYM, "POLYGON M ((0 0 0,1 0 0,0 1 0,0 0 0))"},
-		{"POLYGON Z ((0 0 3,1 0 6,0 1 9,0 0 3))", DimXYZM, "POLYGON ZM ((0 0 3 0,1 0 6 0,0 1 9 0,0 0 3 0))"},
-		{"POLYGON M ((0 0 3,1 0 6,0 1 9,0 0 3))", DimXY, "POLYGON((0 0,1 0,0 1,0 0))"},
-		{"POLYGON M ((0 0 3,1 0 6,0 1 9,0 0 3))", DimXYZ, "POLYGON Z ((0 0 0,1 0 0,0 1 0,0 0 0))"},
-		{"POLYGON M ((0 0 3,1 0 6,0 1 9,0 0 3))", DimXYM, "POLYGON M ((0 0 3,1 0 6,0 1 9,0 0 3))"},
-		{"POLYGON M ((0 0 3,1 0 6,0 1 9,0 0 3))", DimXYZM, "POLYGON ZM ((0 0 0 3,1 0 0 6,0 1 0 9,0 0 0 3))"},
-		{"POLYGON ZM ((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4))", DimXY, "POLYGON((0 0,1 0,0 1,0 0))"},
-		{"POLYGON ZM ((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4))", DimXYZ, "POLYGON Z ((0 0 3,1 0 7,0 1 11,0 0 3))"},
-		{"POLYGON ZM ((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4))", DimXYM, "POLYGON M ((0 0 4,1 0 8,0 1 12,0 0 4))"},
-		{"POLYGON ZM ((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4))", DimXYZM, "POLYGON ZM ((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4))"},
+		{"POLYGON((0 0,0 1,1 0,0 0))", geom.DimXY, "POLYGON((0 0,0 1,1 0,0 0))"},
+		{"POLYGON((0 0,0 1,1 0,0 0))", geom.DimXYZ, "POLYGON Z ((0 0 0,0 1 0,1 0 0,0 0 0))"},
+		{"POLYGON((0 0,0 1,1 0,0 0))", geom.DimXYM, "POLYGON M ((0 0 0,0 1 0,1 0 0,0 0 0))"},
+		{"POLYGON((0 0,0 1,1 0,0 0))", geom.DimXYZM, "POLYGON ZM ((0 0 0 0,0 1 0 0,1 0 0 0,0 0 0 0))"},
+		{"POLYGON Z ((0 0 3,1 0 6,0 1 9,0 0 3))", geom.DimXY, "POLYGON((0 0,1 0,0 1,0 0))"},
+		{"POLYGON Z ((0 0 3,1 0 6,0 1 9,0 0 3))", geom.DimXYZ, "POLYGON Z ((0 0 3,1 0 6,0 1 9,0 0 3))"},
+		{"POLYGON Z ((0 0 3,1 0 6,0 1 9,0 0 3))", geom.DimXYM, "POLYGON M ((0 0 0,1 0 0,0 1 0,0 0 0))"},
+		{"POLYGON Z ((0 0 3,1 0 6,0 1 9,0 0 3))", geom.DimXYZM, "POLYGON ZM ((0 0 3 0,1 0 6 0,0 1 9 0,0 0 3 0))"},
+		{"POLYGON M ((0 0 3,1 0 6,0 1 9,0 0 3))", geom.DimXY, "POLYGON((0 0,1 0,0 1,0 0))"},
+		{"POLYGON M ((0 0 3,1 0 6,0 1 9,0 0 3))", geom.DimXYZ, "POLYGON Z ((0 0 0,1 0 0,0 1 0,0 0 0))"},
+		{"POLYGON M ((0 0 3,1 0 6,0 1 9,0 0 3))", geom.DimXYM, "POLYGON M ((0 0 3,1 0 6,0 1 9,0 0 3))"},
+		{"POLYGON M ((0 0 3,1 0 6,0 1 9,0 0 3))", geom.DimXYZM, "POLYGON ZM ((0 0 0 3,1 0 0 6,0 1 0 9,0 0 0 3))"},
+		{"POLYGON ZM ((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4))", geom.DimXY, "POLYGON((0 0,1 0,0 1,0 0))"},
+		{"POLYGON ZM ((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4))", geom.DimXYZ, "POLYGON Z ((0 0 3,1 0 7,0 1 11,0 0 3))"},
+		{"POLYGON ZM ((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4))", geom.DimXYM, "POLYGON M ((0 0 4,1 0 8,0 1 12,0 0 4))"},
+		{"POLYGON ZM ((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4))", geom.DimXYZM, "POLYGON ZM ((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4))"},
 
-		{"MULTIPOINT(1 2,3 4,5 6)", DimXY, "MULTIPOINT(1 2,3 4,5 6)"},
-		{"MULTIPOINT(1 2,3 4,5 6)", DimXYZ, "MULTIPOINT Z (1 2 0,3 4 0,5 6 0)"},
-		{"MULTIPOINT(1 2,3 4,5 6)", DimXYM, "MULTIPOINT M (1 2 0,3 4 0,5 6 0)"},
-		{"MULTIPOINT(1 2,3 4,5 6)", DimXYZM, "MULTIPOINT ZM (1 2 0 0,3 4 0 0,5 6 0 0)"},
-		{"MULTIPOINT Z (1 2 3,4 5 6,7 8 9)", DimXY, "MULTIPOINT(1 2,4 5,7 8)"},
-		{"MULTIPOINT Z (1 2 3,4 5 6,7 8 9)", DimXYZ, "MULTIPOINT Z (1 2 3,4 5 6,7 8 9)"},
-		{"MULTIPOINT Z (1 2 3,4 5 6,7 8 9)", DimXYM, "MULTIPOINT M (1 2 0,4 5 0,7 8 0)"},
-		{"MULTIPOINT Z (1 2 3,4 5 6,7 8 9)", DimXYZM, "MULTIPOINT ZM (1 2 3 0,4 5 6 0,7 8 9 0)"},
-		{"MULTIPOINT M (1 2 3,4 5 6,7 8 9)", DimXY, "MULTIPOINT(1 2,4 5,7 8)"},
-		{"MULTIPOINT M (1 2 3,4 5 6,7 8 9)", DimXYZ, "MULTIPOINT Z (1 2 0,4 5 0,7 8 0)"},
-		{"MULTIPOINT M (1 2 3,4 5 6,7 8 9)", DimXYM, "MULTIPOINT M (1 2 3,4 5 6,7 8 9)"},
-		{"MULTIPOINT M (1 2 3,4 5 6,7 8 9)", DimXYZM, "MULTIPOINT ZM (1 2 0 3,4 5 0 6,7 8 0 9)"},
-		{"MULTIPOINT ZM (1 2 3 4,5 6 7 8,9 10 11 12)", DimXY, "MULTIPOINT(1 2,5 6,9 10)"},
-		{"MULTIPOINT ZM (1 2 3 4,5 6 7 8,9 10 11 12)", DimXYZ, "MULTIPOINT Z (1 2 3,5 6 7,9 10 11)"},
-		{"MULTIPOINT ZM (1 2 3 4,5 6 7 8,9 10 11 12)", DimXYM, "MULTIPOINT M (1 2 4,5 6 8,9 10 12)"},
-		{"MULTIPOINT ZM (1 2 3 4,5 6 7 8,9 10 11 12)", DimXYZM, "MULTIPOINT ZM (1 2 3 4,5 6 7 8,9 10 11 12)"},
+		{"MULTIPOINT(1 2,3 4,5 6)", geom.DimXY, "MULTIPOINT(1 2,3 4,5 6)"},
+		{"MULTIPOINT(1 2,3 4,5 6)", geom.DimXYZ, "MULTIPOINT Z (1 2 0,3 4 0,5 6 0)"},
+		{"MULTIPOINT(1 2,3 4,5 6)", geom.DimXYM, "MULTIPOINT M (1 2 0,3 4 0,5 6 0)"},
+		{"MULTIPOINT(1 2,3 4,5 6)", geom.DimXYZM, "MULTIPOINT ZM (1 2 0 0,3 4 0 0,5 6 0 0)"},
+		{"MULTIPOINT Z (1 2 3,4 5 6,7 8 9)", geom.DimXY, "MULTIPOINT(1 2,4 5,7 8)"},
+		{"MULTIPOINT Z (1 2 3,4 5 6,7 8 9)", geom.DimXYZ, "MULTIPOINT Z (1 2 3,4 5 6,7 8 9)"},
+		{"MULTIPOINT Z (1 2 3,4 5 6,7 8 9)", geom.DimXYM, "MULTIPOINT M (1 2 0,4 5 0,7 8 0)"},
+		{"MULTIPOINT Z (1 2 3,4 5 6,7 8 9)", geom.DimXYZM, "MULTIPOINT ZM (1 2 3 0,4 5 6 0,7 8 9 0)"},
+		{"MULTIPOINT M (1 2 3,4 5 6,7 8 9)", geom.DimXY, "MULTIPOINT(1 2,4 5,7 8)"},
+		{"MULTIPOINT M (1 2 3,4 5 6,7 8 9)", geom.DimXYZ, "MULTIPOINT Z (1 2 0,4 5 0,7 8 0)"},
+		{"MULTIPOINT M (1 2 3,4 5 6,7 8 9)", geom.DimXYM, "MULTIPOINT M (1 2 3,4 5 6,7 8 9)"},
+		{"MULTIPOINT M (1 2 3,4 5 6,7 8 9)", geom.DimXYZM, "MULTIPOINT ZM (1 2 0 3,4 5 0 6,7 8 0 9)"},
+		{"MULTIPOINT ZM (1 2 3 4,5 6 7 8,9 10 11 12)", geom.DimXY, "MULTIPOINT(1 2,5 6,9 10)"},
+		{"MULTIPOINT ZM (1 2 3 4,5 6 7 8,9 10 11 12)", geom.DimXYZ, "MULTIPOINT Z (1 2 3,5 6 7,9 10 11)"},
+		{"MULTIPOINT ZM (1 2 3 4,5 6 7 8,9 10 11 12)", geom.DimXYM, "MULTIPOINT M (1 2 4,5 6 8,9 10 12)"},
+		{"MULTIPOINT ZM (1 2 3 4,5 6 7 8,9 10 11 12)", geom.DimXYZM, "MULTIPOINT ZM (1 2 3 4,5 6 7 8,9 10 11 12)"},
 
-		{"MULTILINESTRING((1 2,3 4,5 6))", DimXY, "MULTILINESTRING((1 2,3 4,5 6))"},
-		{"MULTILINESTRING((1 2,3 4,5 6))", DimXYZ, "MULTILINESTRING Z ((1 2 0,3 4 0,5 6 0))"},
-		{"MULTILINESTRING((1 2,3 4,5 6))", DimXYM, "MULTILINESTRING M ((1 2 0,3 4 0,5 6 0))"},
-		{"MULTILINESTRING((1 2,3 4,5 6))", DimXYZM, "MULTILINESTRING ZM ((1 2 0 0,3 4 0 0,5 6 0 0))"},
-		{"MULTILINESTRING Z ((1 2 3,4 5 6,7 8 9))", DimXY, "MULTILINESTRING((1 2,4 5,7 8))"},
-		{"MULTILINESTRING Z ((1 2 3,4 5 6,7 8 9))", DimXYZ, "MULTILINESTRING Z ((1 2 3,4 5 6,7 8 9))"},
-		{"MULTILINESTRING Z ((1 2 3,4 5 6,7 8 9))", DimXYM, "MULTILINESTRING M ((1 2 0,4 5 0,7 8 0))"},
-		{"MULTILINESTRING Z ((1 2 3,4 5 6,7 8 9))", DimXYZM, "MULTILINESTRING ZM ((1 2 3 0,4 5 6 0,7 8 9 0))"},
-		{"MULTILINESTRING M ((1 2 3,4 5 6,7 8 9))", DimXY, "MULTILINESTRING((1 2,4 5,7 8))"},
-		{"MULTILINESTRING M ((1 2 3,4 5 6,7 8 9))", DimXYZ, "MULTILINESTRING Z ((1 2 0,4 5 0,7 8 0))"},
-		{"MULTILINESTRING M ((1 2 3,4 5 6,7 8 9))", DimXYM, "MULTILINESTRING M ((1 2 3,4 5 6,7 8 9))"},
-		{"MULTILINESTRING M ((1 2 3,4 5 6,7 8 9))", DimXYZM, "MULTILINESTRING ZM ((1 2 0 3,4 5 0 6,7 8 0 9))"},
-		{"MULTILINESTRING ZM ((1 2 3 4,5 6 7 8,9 10 11 12))", DimXY, "MULTILINESTRING((1 2,5 6,9 10))"},
-		{"MULTILINESTRING ZM ((1 2 3 4,5 6 7 8,9 10 11 12))", DimXYZ, "MULTILINESTRING Z ((1 2 3,5 6 7,9 10 11))"},
-		{"MULTILINESTRING ZM ((1 2 3 4,5 6 7 8,9 10 11 12))", DimXYM, "MULTILINESTRING M ((1 2 4,5 6 8,9 10 12))"},
-		{"MULTILINESTRING ZM ((1 2 3 4,5 6 7 8,9 10 11 12))", DimXYZM, "MULTILINESTRING ZM ((1 2 3 4,5 6 7 8,9 10 11 12))"},
+		{"MULTILINESTRING((1 2,3 4,5 6))", geom.DimXY, "MULTILINESTRING((1 2,3 4,5 6))"},
+		{"MULTILINESTRING((1 2,3 4,5 6))", geom.DimXYZ, "MULTILINESTRING Z ((1 2 0,3 4 0,5 6 0))"},
+		{"MULTILINESTRING((1 2,3 4,5 6))", geom.DimXYM, "MULTILINESTRING M ((1 2 0,3 4 0,5 6 0))"},
+		{"MULTILINESTRING((1 2,3 4,5 6))", geom.DimXYZM, "MULTILINESTRING ZM ((1 2 0 0,3 4 0 0,5 6 0 0))"},
+		{"MULTILINESTRING Z ((1 2 3,4 5 6,7 8 9))", geom.DimXY, "MULTILINESTRING((1 2,4 5,7 8))"},
+		{"MULTILINESTRING Z ((1 2 3,4 5 6,7 8 9))", geom.DimXYZ, "MULTILINESTRING Z ((1 2 3,4 5 6,7 8 9))"},
+		{"MULTILINESTRING Z ((1 2 3,4 5 6,7 8 9))", geom.DimXYM, "MULTILINESTRING M ((1 2 0,4 5 0,7 8 0))"},
+		{"MULTILINESTRING Z ((1 2 3,4 5 6,7 8 9))", geom.DimXYZM, "MULTILINESTRING ZM ((1 2 3 0,4 5 6 0,7 8 9 0))"},
+		{"MULTILINESTRING M ((1 2 3,4 5 6,7 8 9))", geom.DimXY, "MULTILINESTRING((1 2,4 5,7 8))"},
+		{"MULTILINESTRING M ((1 2 3,4 5 6,7 8 9))", geom.DimXYZ, "MULTILINESTRING Z ((1 2 0,4 5 0,7 8 0))"},
+		{"MULTILINESTRING M ((1 2 3,4 5 6,7 8 9))", geom.DimXYM, "MULTILINESTRING M ((1 2 3,4 5 6,7 8 9))"},
+		{"MULTILINESTRING M ((1 2 3,4 5 6,7 8 9))", geom.DimXYZM, "MULTILINESTRING ZM ((1 2 0 3,4 5 0 6,7 8 0 9))"},
+		{"MULTILINESTRING ZM ((1 2 3 4,5 6 7 8,9 10 11 12))", geom.DimXY, "MULTILINESTRING((1 2,5 6,9 10))"},
+		{"MULTILINESTRING ZM ((1 2 3 4,5 6 7 8,9 10 11 12))", geom.DimXYZ, "MULTILINESTRING Z ((1 2 3,5 6 7,9 10 11))"},
+		{"MULTILINESTRING ZM ((1 2 3 4,5 6 7 8,9 10 11 12))", geom.DimXYM, "MULTILINESTRING M ((1 2 4,5 6 8,9 10 12))"},
+		{"MULTILINESTRING ZM ((1 2 3 4,5 6 7 8,9 10 11 12))", geom.DimXYZM, "MULTILINESTRING ZM ((1 2 3 4,5 6 7 8,9 10 11 12))"},
 
-		{"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", DimXY, "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))"},
-		{"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", DimXYZ, "MULTIPOLYGON Z (((0 0 0,0 1 0,1 0 0,0 0 0)))"},
-		{"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", DimXYM, "MULTIPOLYGON M (((0 0 0,0 1 0,1 0 0,0 0 0)))"},
-		{"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", DimXYZM, "MULTIPOLYGON ZM (((0 0 0 0,0 1 0 0,1 0 0 0,0 0 0 0)))"},
-		{"MULTIPOLYGON Z (((0 0 3,1 0 6,0 1 9,0 0 3)))", DimXY, "MULTIPOLYGON(((0 0,1 0,0 1,0 0)))"},
-		{"MULTIPOLYGON Z (((0 0 3,1 0 6,0 1 9,0 0 3)))", DimXYZ, "MULTIPOLYGON Z (((0 0 3,1 0 6,0 1 9,0 0 3)))"},
-		{"MULTIPOLYGON Z (((0 0 3,1 0 6,0 1 9,0 0 3)))", DimXYM, "MULTIPOLYGON M (((0 0 0,1 0 0,0 1 0,0 0 0)))"},
-		{"MULTIPOLYGON Z (((0 0 3,1 0 6,0 1 9,0 0 3)))", DimXYZM, "MULTIPOLYGON ZM (((0 0 3 0,1 0 6 0,0 1 9 0,0 0 3 0)))"},
-		{"MULTIPOLYGON M (((0 0 3,1 0 6,0 1 9,0 0 3)))", DimXY, "MULTIPOLYGON(((0 0,1 0,0 1,0 0)))"},
-		{"MULTIPOLYGON M (((0 0 3,1 0 6,0 1 9,0 0 3)))", DimXYZ, "MULTIPOLYGON Z (((0 0 0,1 0 0,0 1 0,0 0 0)))"},
-		{"MULTIPOLYGON M (((0 0 3,1 0 6,0 1 9,0 0 3)))", DimXYM, "MULTIPOLYGON M (((0 0 3,1 0 6,0 1 9,0 0 3)))"},
-		{"MULTIPOLYGON M (((0 0 3,1 0 6,0 1 9,0 0 3)))", DimXYZM, "MULTIPOLYGON ZM (((0 0 0 3,1 0 0 6,0 1 0 9,0 0 0 3)))"},
-		{"MULTIPOLYGON ZM (((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4)))", DimXY, "MULTIPOLYGON(((0 0,1 0,0 1,0 0)))"},
-		{"MULTIPOLYGON ZM (((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4)))", DimXYZ, "MULTIPOLYGON Z (((0 0 3,1 0 7,0 1 11,0 0 3)))"},
-		{"MULTIPOLYGON ZM (((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4)))", DimXYM, "MULTIPOLYGON M (((0 0 4,1 0 8,0 1 12,0 0 4)))"},
-		{"MULTIPOLYGON ZM (((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4)))", DimXYZM, "MULTIPOLYGON ZM (((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4)))"},
+		{"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", geom.DimXY, "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))"},
+		{"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", geom.DimXYZ, "MULTIPOLYGON Z (((0 0 0,0 1 0,1 0 0,0 0 0)))"},
+		{"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", geom.DimXYM, "MULTIPOLYGON M (((0 0 0,0 1 0,1 0 0,0 0 0)))"},
+		{"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))", geom.DimXYZM, "MULTIPOLYGON ZM (((0 0 0 0,0 1 0 0,1 0 0 0,0 0 0 0)))"},
+		{"MULTIPOLYGON Z (((0 0 3,1 0 6,0 1 9,0 0 3)))", geom.DimXY, "MULTIPOLYGON(((0 0,1 0,0 1,0 0)))"},
+		{"MULTIPOLYGON Z (((0 0 3,1 0 6,0 1 9,0 0 3)))", geom.DimXYZ, "MULTIPOLYGON Z (((0 0 3,1 0 6,0 1 9,0 0 3)))"},
+		{"MULTIPOLYGON Z (((0 0 3,1 0 6,0 1 9,0 0 3)))", geom.DimXYM, "MULTIPOLYGON M (((0 0 0,1 0 0,0 1 0,0 0 0)))"},
+		{"MULTIPOLYGON Z (((0 0 3,1 0 6,0 1 9,0 0 3)))", geom.DimXYZM, "MULTIPOLYGON ZM (((0 0 3 0,1 0 6 0,0 1 9 0,0 0 3 0)))"},
+		{"MULTIPOLYGON M (((0 0 3,1 0 6,0 1 9,0 0 3)))", geom.DimXY, "MULTIPOLYGON(((0 0,1 0,0 1,0 0)))"},
+		{"MULTIPOLYGON M (((0 0 3,1 0 6,0 1 9,0 0 3)))", geom.DimXYZ, "MULTIPOLYGON Z (((0 0 0,1 0 0,0 1 0,0 0 0)))"},
+		{"MULTIPOLYGON M (((0 0 3,1 0 6,0 1 9,0 0 3)))", geom.DimXYM, "MULTIPOLYGON M (((0 0 3,1 0 6,0 1 9,0 0 3)))"},
+		{"MULTIPOLYGON M (((0 0 3,1 0 6,0 1 9,0 0 3)))", geom.DimXYZM, "MULTIPOLYGON ZM (((0 0 0 3,1 0 0 6,0 1 0 9,0 0 0 3)))"},
+		{"MULTIPOLYGON ZM (((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4)))", geom.DimXY, "MULTIPOLYGON(((0 0,1 0,0 1,0 0)))"},
+		{"MULTIPOLYGON ZM (((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4)))", geom.DimXYZ, "MULTIPOLYGON Z (((0 0 3,1 0 7,0 1 11,0 0 3)))"},
+		{"MULTIPOLYGON ZM (((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4)))", geom.DimXYM, "MULTIPOLYGON M (((0 0 4,1 0 8,0 1 12,0 0 4)))"},
+		{"MULTIPOLYGON ZM (((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4)))", geom.DimXYZM, "MULTIPOLYGON ZM (((0 0 3 4,1 0 7 8,0 1 11 12,0 0 3 4)))"},
 
-		{"GEOMETRYCOLLECTION(POINT(1 2))", DimXY, "GEOMETRYCOLLECTION(POINT(1 2))"},
-		{"GEOMETRYCOLLECTION(POINT(1 2))", DimXYZ, "GEOMETRYCOLLECTION Z (POINT Z (1 2 0))"},
-		{"GEOMETRYCOLLECTION(POINT(1 2))", DimXYM, "GEOMETRYCOLLECTION M (POINT M (1 2 0))"},
-		{"GEOMETRYCOLLECTION(POINT(1 2))", DimXYZM, "GEOMETRYCOLLECTION ZM (POINT ZM (1 2 0 0))"},
-		{"GEOMETRYCOLLECTION Z (POINT Z (1 2 3))", DimXY, "GEOMETRYCOLLECTION(POINT(1 2))"},
-		{"GEOMETRYCOLLECTION Z (POINT Z (1 2 3))", DimXYZ, "GEOMETRYCOLLECTION Z (POINT Z (1 2 3))"},
-		{"GEOMETRYCOLLECTION Z (POINT Z (1 2 3))", DimXYM, "GEOMETRYCOLLECTION M (POINT M (1 2 0))"},
-		{"GEOMETRYCOLLECTION Z (POINT Z (1 2 3))", DimXYZM, "GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 0))"},
-		{"GEOMETRYCOLLECTION M (POINT M (1 2 4))", DimXY, "GEOMETRYCOLLECTION(POINT(1 2))"},
-		{"GEOMETRYCOLLECTION M (POINT M (1 2 4))", DimXYZ, "GEOMETRYCOLLECTION Z (POINT Z (1 2 0))"},
-		{"GEOMETRYCOLLECTION M (POINT M (1 2 4))", DimXYM, "GEOMETRYCOLLECTION M (POINT M (1 2 4))"},
-		{"GEOMETRYCOLLECTION M (POINT M (1 2 4))", DimXYZM, "GEOMETRYCOLLECTION ZM (POINT ZM (1 2 0 4))"},
-		{"GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4))", DimXY, "GEOMETRYCOLLECTION(POINT(1 2))"},
-		{"GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4))", DimXYZ, "GEOMETRYCOLLECTION Z (POINT Z (1 2 3))"},
-		{"GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4))", DimXYM, "GEOMETRYCOLLECTION M (POINT M (1 2 4))"},
-		{"GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4))", DimXYZM, "GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4))"},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", geom.DimXY, "GEOMETRYCOLLECTION(POINT(1 2))"},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", geom.DimXYZ, "GEOMETRYCOLLECTION Z (POINT Z (1 2 0))"},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", geom.DimXYM, "GEOMETRYCOLLECTION M (POINT M (1 2 0))"},
+		{"GEOMETRYCOLLECTION(POINT(1 2))", geom.DimXYZM, "GEOMETRYCOLLECTION ZM (POINT ZM (1 2 0 0))"},
+		{"GEOMETRYCOLLECTION Z (POINT Z (1 2 3))", geom.DimXY, "GEOMETRYCOLLECTION(POINT(1 2))"},
+		{"GEOMETRYCOLLECTION Z (POINT Z (1 2 3))", geom.DimXYZ, "GEOMETRYCOLLECTION Z (POINT Z (1 2 3))"},
+		{"GEOMETRYCOLLECTION Z (POINT Z (1 2 3))", geom.DimXYM, "GEOMETRYCOLLECTION M (POINT M (1 2 0))"},
+		{"GEOMETRYCOLLECTION Z (POINT Z (1 2 3))", geom.DimXYZM, "GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 0))"},
+		{"GEOMETRYCOLLECTION M (POINT M (1 2 4))", geom.DimXY, "GEOMETRYCOLLECTION(POINT(1 2))"},
+		{"GEOMETRYCOLLECTION M (POINT M (1 2 4))", geom.DimXYZ, "GEOMETRYCOLLECTION Z (POINT Z (1 2 0))"},
+		{"GEOMETRYCOLLECTION M (POINT M (1 2 4))", geom.DimXYM, "GEOMETRYCOLLECTION M (POINT M (1 2 4))"},
+		{"GEOMETRYCOLLECTION M (POINT M (1 2 4))", geom.DimXYZM, "GEOMETRYCOLLECTION ZM (POINT ZM (1 2 0 4))"},
+		{"GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4))", geom.DimXY, "GEOMETRYCOLLECTION(POINT(1 2))"},
+		{"GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4))", geom.DimXYZ, "GEOMETRYCOLLECTION Z (POINT Z (1 2 3))"},
+		{"GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4))", geom.DimXYM, "GEOMETRYCOLLECTION M (POINT M (1 2 4))"},
+		{"GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4))", geom.DimXYZM, "GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("input", tt.input)
@@ -1616,7 +1616,7 @@ func TestPolygonDumpRings(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			input := geomFromWKT(t, tc.inputWKT).MustAsPolygon()
-			wantRings := make([]LineString, len(tc.wantRingWKTs))
+			wantRings := make([]geom.LineString, len(tc.wantRingWKTs))
 			for j, wantRingWKT := range tc.wantRingWKTs {
 				wantRings[j] = geomFromWKT(t, wantRingWKT).MustAsLineString()
 			}

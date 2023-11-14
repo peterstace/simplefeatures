@@ -5,13 +5,13 @@ import (
 	"math"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 //nolint:unparam
-func geomFromWKT(tb testing.TB, wkt string, nv ...NoValidate) Geometry {
+func geomFromWKT(tb testing.TB, wkt string, nv ...geom.NoValidate) geom.Geometry {
 	tb.Helper()
-	geom, err := UnmarshalWKT(wkt, nv...)
+	geom, err := geom.UnmarshalWKT(wkt, nv...)
 	if err != nil {
 		tb.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 	}
@@ -19,11 +19,11 @@ func geomFromWKT(tb testing.TB, wkt string, nv ...NoValidate) Geometry {
 }
 
 //nolint:unparam
-func geomsFromWKTs(tb testing.TB, wkts []string, nv ...NoValidate) []Geometry {
+func geomsFromWKTs(tb testing.TB, wkts []string, nv ...geom.NoValidate) []geom.Geometry {
 	tb.Helper()
-	var gs []Geometry
+	var gs []geom.Geometry
 	for _, wkt := range wkts {
-		g, err := UnmarshalWKT(wkt, nv...)
+		g, err := geom.UnmarshalWKT(wkt, nv...)
 		if err != nil {
 			tb.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 		}
@@ -32,37 +32,37 @@ func geomsFromWKTs(tb testing.TB, wkts []string, nv ...NoValidate) []Geometry {
 	return gs
 }
 
-func geomFromGeoJSON(tb testing.TB, geojson string, nv ...NoValidate) Geometry {
+func geomFromGeoJSON(tb testing.TB, geojson string, nv ...geom.NoValidate) geom.Geometry {
 	tb.Helper()
-	g, err := UnmarshalGeoJSON([]byte(geojson), nv...)
+	g, err := geom.UnmarshalGeoJSON([]byte(geojson), nv...)
 	if err != nil {
 		tb.Fatalf("could not unmarshal GeoJSON:\n geojson: %s\n     err: %v", geojson, err)
 	}
 	return g
 }
 
-func xyCoords(x, y float64) Coordinates {
-	return Coordinates{XY: XY{x, y}, Type: DimXY}
+func xyCoords(x, y float64) geom.Coordinates {
+	return geom.Coordinates{XY: geom.XY{x, y}, Type: geom.DimXY}
 }
 
-func upcastPoints(ps []Point) []Geometry {
-	gs := make([]Geometry, len(ps))
+func upcastPoints(ps []geom.Point) []geom.Geometry {
+	gs := make([]geom.Geometry, len(ps))
 	for i, p := range ps {
 		gs[i] = p.AsGeometry()
 	}
 	return gs
 }
 
-func upcastLineStrings(lss []LineString) []Geometry {
-	gs := make([]Geometry, len(lss))
+func upcastLineStrings(lss []geom.LineString) []geom.Geometry {
+	gs := make([]geom.Geometry, len(lss))
 	for i, ls := range lss {
 		gs[i] = ls.AsGeometry()
 	}
 	return gs
 }
 
-func upcastPolygons(ps []Polygon) []Geometry {
-	gs := make([]Geometry, len(ps))
+func upcastPolygons(ps []geom.Polygon) []geom.Geometry {
+	gs := make([]geom.Geometry, len(ps))
 	for i, p := range ps {
 		gs[i] = p.AsGeometry()
 	}
@@ -94,17 +94,17 @@ func expectErr(tb testing.TB, err error) {
 	}
 }
 
-func expectGeomEq(tb testing.TB, got, want Geometry, opts ...ExactEqualsOption) {
+func expectGeomEq(tb testing.TB, got, want geom.Geometry, opts ...geom.ExactEqualsOption) {
 	tb.Helper()
-	if !ExactEquals(got, want, opts...) {
+	if !geom.ExactEquals(got, want, opts...) {
 		tb.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
 	}
 }
 
 //nolint:deadcode,unused
-func expectGeomApproxEq(tb testing.TB, got, want Geometry) {
+func expectGeomApproxEq(tb testing.TB, got, want geom.Geometry) {
 	tb.Helper()
-	eq, err := Equals(got, want)
+	eq, err := geom.Equals(got, want)
 	if err != nil {
 		tb.Errorf("\ngot:  %v\nwant: %v\nerr: %v\n", got.AsText(), want.AsText(), err)
 	}
@@ -113,26 +113,26 @@ func expectGeomApproxEq(tb testing.TB, got, want Geometry) {
 	}
 }
 
-func expectGeomEqWKT(tb testing.TB, got Geometry, wantWKT string, opts ...ExactEqualsOption) {
+func expectGeomEqWKT(tb testing.TB, got geom.Geometry, wantWKT string, opts ...geom.ExactEqualsOption) {
 	tb.Helper()
 	want := geomFromWKT(tb, wantWKT)
 	expectGeomEq(tb, got, want, opts...)
 }
 
 //nolint:unparam
-func expectGeomsEq(tb testing.TB, got, want []Geometry, opts ...ExactEqualsOption) {
+func expectGeomsEq(tb testing.TB, got, want []geom.Geometry, opts ...geom.ExactEqualsOption) {
 	tb.Helper()
 	if len(got) != len(want) {
 		tb.Errorf("\ngot:  len %d\nwant: len %d\n", len(got), len(want))
 	}
 	for i := range got {
-		if !ExactEquals(got[i], want[i], opts...) {
+		if !geom.ExactEquals(got[i], want[i], opts...) {
 			tb.Errorf("\ngot:  %v\nwant: %v\n", got[i].AsText(), want[i].AsText())
 		}
 	}
 }
 
-func expectCoordsEq(tb testing.TB, got, want Coordinates) {
+func expectCoordsEq(tb testing.TB, got, want geom.Coordinates) {
 	tb.Helper()
 	if got != want {
 		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
@@ -170,21 +170,21 @@ func expectFalse(tb testing.TB, got bool) {
 	expectBoolEq(tb, got, false)
 }
 
-func expectXYEq(tb testing.TB, got, want XY) {
+func expectXYEq(tb testing.TB, got, want geom.XY) {
 	tb.Helper()
 	if got != want {
 		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
 
-func expectXYWithinTolerance(tb testing.TB, got, want XY, tolerance float64) {
+func expectXYWithinTolerance(tb testing.TB, got, want geom.XY, tolerance float64) {
 	tb.Helper()
 	if delta := math.Abs(got.Sub(want).Length()); delta > tolerance {
 		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
 
-func expectCoordinatesTypeEq(tb testing.TB, got, want CoordinatesType) {
+func expectCoordinatesTypeEq(tb testing.TB, got, want geom.CoordinatesType) {
 	tb.Helper()
 	if got != want {
 		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
@@ -205,16 +205,16 @@ func expectFloat64Eq(tb testing.TB, got, want float64) {
 	}
 }
 
-func expectEnvEq(tb testing.TB, got, want Envelope) {
+func expectEnvEq(tb testing.TB, got, want geom.Envelope) {
 	tb.Helper()
-	if ExactEquals(got.Min().AsGeometry(), want.Min().AsGeometry()) &&
-		ExactEquals(got.Max().AsGeometry(), want.Max().AsGeometry()) {
+	if geom.ExactEquals(got.Min().AsGeometry(), want.Min().AsGeometry()) &&
+		geom.ExactEquals(got.Max().AsGeometry(), want.Max().AsGeometry()) {
 		return
 	}
 	tb.Errorf("\ngot:  %v\nwant: %v", got, want)
 }
 
-func expectSequenceEq(tb testing.TB, got, want Sequence) {
+func expectSequenceEq(tb testing.TB, got, want geom.Sequence) {
 	tb.Helper()
 	show := func() {
 		tb.Logf("len(got): %d, ct(got): %s", got.Length(), got.CoordinatesType())

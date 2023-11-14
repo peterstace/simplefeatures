@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"testing"
 
-	. "github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/geom"
 )
 
 func TestUnmarshalWKTValidGrammar(t *testing.T) {
@@ -40,7 +40,7 @@ func TestUnmarshalWKTValidGrammar(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Logf("WKT: %v", tt.wkt)
-			_, err := UnmarshalWKT(tt.wkt)
+			_, err := geom.UnmarshalWKT(tt.wkt)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -157,7 +157,7 @@ func TestUnmarshalWKTSyntaxErrors(t *testing.T) {
 		},
 	} {
 		t.Run(tt.description, func(t *testing.T) {
-			_, err := UnmarshalWKT(tt.wkt)
+			_, err := geom.UnmarshalWKT(tt.wkt)
 			if err == nil {
 				t.Fatalf("expected error but got nil")
 			}
@@ -199,15 +199,15 @@ func TestUnmarshalWKT(t *testing.T) {
 func TestAsTextEmpty(t *testing.T) {
 	for i, tt := range []struct {
 		want string
-		g    Geometry
+		g    geom.Geometry
 	}{
-		{"POINT EMPTY", Point{}.AsGeometry()},
-		{"LINESTRING EMPTY", LineString{}.AsGeometry()},
-		{"POLYGON EMPTY", Polygon{}.AsGeometry()},
-		{"MULTIPOINT EMPTY", MultiPoint{}.AsGeometry()},
-		{"MULTILINESTRING EMPTY", MultiLineString{}.AsGeometry()},
-		{"MULTIPOLYGON EMPTY", MultiPolygon{}.AsGeometry()},
-		{"GEOMETRYCOLLECTION EMPTY", GeometryCollection{}.AsGeometry()},
+		{"POINT EMPTY", geom.Point{}.AsGeometry()},
+		{"LINESTRING EMPTY", geom.LineString{}.AsGeometry()},
+		{"POLYGON EMPTY", geom.Polygon{}.AsGeometry()},
+		{"MULTIPOINT EMPTY", geom.MultiPoint{}.AsGeometry()},
+		{"MULTILINESTRING EMPTY", geom.MultiLineString{}.AsGeometry()},
+		{"MULTIPOLYGON EMPTY", geom.MultiPolygon{}.AsGeometry()},
+		{"GEOMETRYCOLLECTION EMPTY", geom.GeometryCollection{}.AsGeometry()},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := tt.g.AsText()
