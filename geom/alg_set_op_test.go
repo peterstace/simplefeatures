@@ -1144,6 +1144,11 @@ func TestBinaryOp(t *testing.T) {
 			input2: "LINESTRING(0.1 0.1,0.5 0.5)",
 			inter:  "POINT(0.5 0.5)",
 		},
+		{
+			input1:  "POLYGON((2 0,0 0,0 3,2 3,4 3,4 0,2 0),(2 2,1 2,1 1,2 1,3 1,3 2,2 2))",
+			input2:  "POINT(-1 2)",
+			fwdDiff: "POLYGON((2 0,0 0,0 3,2 3,4 3,4 0,2 0),(2 2,1 2,1 1,2 1,3 1,3 2,2 2))",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
@@ -1498,7 +1503,7 @@ func TestBinaryOpOutputOrdering(t *testing.T) {
 	}
 }
 
-func TestErrInsteadOfPanic(t *testing.T) {
+func TestNoPanic(t *testing.T) {
 	for i, tc := range []struct {
 		input1 string
 		input2 string
@@ -1523,9 +1528,33 @@ func TestErrInsteadOfPanic(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, tc.input1)
 			g2 := geomFromWKT(t, tc.input2)
-			_, err := tc.op(g1, g2)
-			expectErr(t, err)
-			t.Log(err)
+			_, err := tc.op(g1, g2) // Caused panic before bugfix.
+			expectNoErr(t, err)
+		})
+	}
+}
+
+func TestReproduceNoRingsError(t *testing.T) {
+	// The following tests failed with "no rings to extract" error before a bugfix.
+	for i, tc := range []struct {
+		inputA, inputB, want string
+	}{
+		{
+			// failing case with no rings to extract (should not fail).
+			"POLYGON ((-57.84764391579377 -14.00436771429812, -57.98105430423379 -13.978568346975345, -57.97219 -13.895754, -57.815573 -13.870471, -57.78975494169227 -13.97408746357712, -57.79567678742665 -14.003207561112367, -57.84764391579377 -14.00436771429812))",
+			"POLYGON ((-57.97219 -13.895754, -57.815573 -13.870471, -57.782572 -14.002915, -57.984142 -14.007415, -57.97219 -13.895754))",
+			"POLYGON((-57.97219 -13.895754,-57.98105430423379 -13.978568346975345,-57.84764391579377 -14.00436771429812,-57.827863875752776 -14.00392612983523,-57.79567678742665 -14.003207561112367,-57.78975494169227 -13.97408746357712,-57.815573 -13.870471,-57.97219 -13.895754))",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			aoi, err := geom.UnmarshalWKT(tc.inputA)
+			expectNoErr(t, err)
+			mask, err := geom.UnmarshalWKT(tc.inputB)
+			expectNoErr(t, err)
+
+			got, err := geom.Intersection(aoi, mask)
+			expectNoErr(t, err)
+			expectGeomEqWKT(t, got, tc.want, geom.ToleranceXY(1e-4))
 		})
 	}
 }

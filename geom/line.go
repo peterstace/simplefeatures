@@ -69,6 +69,15 @@ func (ln line) hasEndpoint(xy XY) bool {
 	return ln.a == xy || ln.b == xy
 }
 
+// canonicalise swaps the endpoints of the line to be in a canonical form. Two
+// lines with reversed endpoint order will have the same canonical form.
+func (ln line) canonicalise() line {
+	if ln.b.Less(ln.a) {
+		ln.a, ln.b = ln.b, ln.a
+	}
+	return ln
+}
+
 // lineWithLineIntersection represents the result of intersecting two line
 // segments together. It can either be empty (flag set), a single point (both
 // points set the same), or a line segment (defined by the two points).
@@ -132,6 +141,35 @@ func (ln line) intersectLine(other line) lineWithLineIntersection {
 	}
 
 	return lineWithLineIntersection{empty: true}
+}
+
+// canonicaliseLinePair canonicalises a pair of lines by potentially swapping
+// the order between the two lines and the points making up each line.
+func canonicaliseLinePair(lnA, lnB line) (line, line) {
+	lnA = lnA.canonicalise()
+	lnB = lnB.canonicalise()
+
+	if lnA.a != lnB.a {
+		if lnB.a.Less(lnA.a) {
+			lnA, lnB = lnB, lnA
+		}
+		return lnA, lnB
+	}
+
+	if lnB.b.Less(lnA.b) {
+		lnA, lnB = lnB, lnA
+	}
+	return lnA, lnB
+}
+
+// symmetricLineIntersection is a version of lineIntersection that is *exactly*
+// symmetric with regards to the ordering of its inputs (both the order of the
+// lines, and the points within the lines themselves). The regular
+// lineIntersection result may subtly change depending on ordering due to
+// floating point operation sequencing differences.
+func symmetricLineIntersection(lnA, lnB line) lineWithLineIntersection {
+	lnA, lnB = canonicaliseLinePair(lnA, lnB)
+	return lnA.intersectLine(lnB)
 }
 
 // onSegement checks if point r is on the segment formed by p and q (all 3

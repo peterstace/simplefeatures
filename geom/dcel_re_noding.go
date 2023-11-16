@@ -15,7 +15,23 @@ func appendNewNodesFromLineLineIntersection(dst []XY, ln, other line, eps float6
 	if !ln.hasEndpoint(other.b) && distBetweenXYAndLine(other.b, ln) < eps {
 		dst = appendNewNode(dst, nodes, ln, other.b)
 	}
-	inter := ln.intersectLine(other)
+
+	// A "symmetric" version of line-line intersection is used here. This is to
+	// prevent multiple nodes being created in close proximity to each other.
+	// This would happen in some cases when the same line segments are
+	// intersected multiple times, but with the arguments in different orders.
+	//
+	// Making the operation symmetric eliminates this problem, but is a hacky
+	// way to do it. A better approach would be to restructure the re-noding
+	// process into 3 steps:
+	//
+	// 1. Snap all vertices.
+	// 2. Renode line segments based on vertices of the other geometry.
+	// 3. Renode line segments based on crossings.
+	//
+	// TODO(PS): attempt this restructure later.
+	inter := symmetricLineIntersection(ln, other)
+
 	if !inter.empty {
 		if !ln.hasEndpoint(inter.ptA) {
 			dst = appendNewNode(dst, nodes, ln, inter.ptA)
