@@ -830,49 +830,47 @@ func checkDCELOp(
 		}
 		return err
 	}
+	return checkEqualityHeuristic(want, got, log)
+}
 
-	if !mantissaTerminatesQuickly(got) || !mantissaTerminatesQuickly(want) {
-		// We're not going to be able to compare got and want because of
-		// numeric precision issues.
-		log.Printf("mantissa doesn't terminate quickly, using area heuristic")
-		return checkEqualityHeuristic(want, got, log)
-	}
-
-	if want.IsGeometryCollection() || got.IsGeometryCollection() {
-		// We can't use Equals from GEOS on GeometryCollections, so we can't
-		// use proper Equals for this case.
-		log.Printf("want or got is a geometry collection, using area heuristic")
-		return checkEqualityHeuristic(want, got, log)
-	}
-
-	eq, err := geos.Equals(want, got)
+// checkEqualityHeuristic checks some necessary but not sufficient properties
+// of two geometries if they are to be equal.
+func checkEqualityHeuristic(want, got geom.Geometry, log *log.Logger) error {
+	symDiff, err := geos.SymmetricDifference(want, got)
 	if err != nil {
 		return err
 	}
-	if !eq {
-		log.Printf("want: %v", want.AsText())
-		log.Printf("got:  %v", got.AsText())
+	symDiffArea := symDiff.Area()
+
+	floatEq := float64EqualityChecker{
+		absoluteThreshold: 1e-3,
+		relativeThreshold: 1e-3,
+	}.eq
+
+	wantArea := want.Area()
+	gotArea := got.Area()
+
+	if !floatEq(symDiffArea, 0) {
+		log.Printf("wantWKT: %v\n", want.AsText())
+		log.Printf("gotWKT:  %v\n", got.AsText())
+		log.Printf("wantArea: %v\n", wantArea)
+		log.Printf("gotArea:  %v\n", gotArea)
+		log.Printf("wantSymDiffArea: %v\n", 0)
+		log.Printf("gotSymDiffArea:  %v\n", symDiffArea)
 		return errMismatch
 	}
 	return nil
 }
 
-// checkEqualityHeuristic checks some necessary but not sufficient properties
-// of two geometries if they are to be equal.
-//
-// TODO: we could come up with some smarter heuristics. E.g. distance sampled
-// by many random points.
-func checkEqualityHeuristic(want, got geom.Geometry, log *log.Logger) error {
-	wantArea := want.Area()
-	gotArea := got.Area()
-	if math.Abs(wantArea-gotArea) > 1e-3 {
-		log.Printf("wantWKT: %v\n", want.AsText())
-		log.Printf("gotWKT:  %v\n", got.AsText())
-		log.Printf("wantArea: %v\n", wantArea)
-		log.Printf("gotArea:  %v\n", gotArea)
-		return errMismatch
-	}
-	return nil
+type float64EqualityChecker struct {
+	absoluteThreshold float64
+	relativeThreshold float64
+}
+
+func (c float64EqualityChecker) eq(a, b float64) bool {
+	absDiff := math.Abs(a - b)
+	magnitude := math.Max(math.Abs(a), math.Abs(b))
+	return absDiff < c.absoluteThreshold || absDiff < magnitude*c.relativeThreshold
 }
 
 func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {

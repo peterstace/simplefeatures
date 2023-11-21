@@ -49,3 +49,11 @@ func (s nodeSet) insertOrGet(xy XY) XY {
 	s.nodes[b] = xy
 	return xy
 }
+
+func (s nodeSet) list() []XY {
+	xys := make([]XY, 0, len(s.nodes))
+	for _, xy := range s.nodes {
+		xys = append(xys, xy)
+	}
+	return xys
+}
