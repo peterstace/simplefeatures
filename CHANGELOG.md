@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.46.0
 
-YYYY-MM-DD
+2023-11-24
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - Fixes two DCEL renoding bugs. The first affected some inputs that had
   overlapping line segments. The second affected some inputs that caused the
