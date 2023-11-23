@@ -4,8 +4,10 @@
 
 YYYY-MM-DD
 
-- Fixes a DCEL renoding bug affecting some inputs that have overlapping line
-  segments.
+- Fixes two DCEL renoding bugs. The first affected some inputs that had
+  overlapping line segments. The second affected some inputs that caused the
+  location of line vs. line intersections to differ on which input was being
+  renoded.
 
 - Adds a method with signature `Envelope() Envelope` to type `Sequence`.
 

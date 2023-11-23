@@ -66,7 +66,13 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 	appendCutsLineXLine := func(ln line, cuts []XY) []XY {
 		lnIndex.tree.RangeSearch(ln.box(), func(i int) error {
 			other := lnIndex.lines[i]
-			inter := ln.intersectLine(other)
+
+			// TODO: This is a hacky approach (re-orders inputs, rather than
+			// making the operation truly symmetric). Instead, it would be
+			// better to use "solution 2" described in
+			// https://github.com/peterstace/simplefeatures/issues/574.
+			inter := symmetricLineIntersection(ln, other)
+
 			if !inter.empty {
 				if !ln.hasEndpoint(inter.ptA) {
 					cuts = appendNewNode(cuts, nodes, ln, inter.ptA)
