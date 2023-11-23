@@ -42,13 +42,19 @@ func sortAndUniquifyXYs(xys []XY) []XY {
 		return xys
 	}
 	sort.Slice(xys, func(i, j int) bool {
-		ptI := xys[i]
-		ptJ := xys[j]
-		if ptI.X != ptJ.X {
-			return ptI.X < ptJ.X
-		}
-		return ptI.Y < ptJ.Y
+		return xys[i].Less(xys[j])
 	})
+	return uniquifyGroupedXYs(xys)
+}
+
+// uniquifyGroupedXYs uniquifies the xys, assuming that equal values are always
+// grouped adjacent to each other. The input slice is modified, however the
+// result is in the returned slice since it may have its size changed due to
+// uniquification.
+func uniquifyGroupedXYs(xys []XY) []XY {
+	if len(xys) == 0 {
+		return xys
+	}
 	n := 1
 	for i := 1; i < len(xys); i++ {
 		if xys[i] != xys[i-1] {
