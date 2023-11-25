@@ -23,6 +23,8 @@ func appendNewNode(dst []XY, nodes nodeSet, ln line, xy XY) []XY {
 // (including self-interactions) between geometries are at nodes. Nodes that
 // are close to each other are also snapped together.
 func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry, MultiLineString) {
+	mls = MultiLineString{}
+
 	// Calculate the maximum ULP size over all control points in the input
 	// geometries. This size is a good indication of the precision that we
 	// should use when node merging.
@@ -57,38 +59,48 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 		})
 		return cuts
 	}
+	//fmt.Println("DEBUG geom/dcel_re_noding.go:61 MIDNODED") // XXX
 	g1 = reNodeGeometry(g1, appendCutsForPointXLine)
+	//fmt.Println("DEBUG geom/dcel_re_noding.go:62 g1.AsText()", g1.AsText()) // XXX
 	g2 = reNodeGeometry(g2, appendCutsForPointXLine)
+	//fmt.Println("DEBUG geom/dcel_re_noding.go:65 g2.AsText()", g2.AsText()) // XXX
 	mls = reNodeMultiLineString(mls, appendCutsForPointXLine)
+	//fmt.Println("DEBUG geom/dcel_re_noding.go:68 mls.AsText()", mls.AsText()) // XXX
 
 	// Create new nodes for line/line intersections.
 	lnIndex := newIndexedLines(appendLines(nil, all()))
 	appendCutsLineXLine := func(ln line, cuts []XY) []XY {
 		lnIndex.tree.RangeSearch(ln.box(), func(i int) error {
 			other := lnIndex.lines[i]
-
-			// TODO: This is a hacky approach (re-orders inputs, rather than
-			// making the operation truly symmetric). Instead, it would be
-			// better to use "solution 2" described in
-			// https://github.com/peterstace/simplefeatures/issues/574.
-			inter := symmetricLineIntersection(ln, other)
-
-			if !inter.empty {
-				if !ln.hasEndpoint(inter.ptA) {
-					cuts = appendNewNode(cuts, nodes, ln, inter.ptA)
-				}
-				if inter.ptA != inter.ptB && !ln.hasEndpoint(inter.ptB) {
-					cuts = appendNewNode(cuts, nodes, ln, inter.ptB)
+			//fmt.Println("DEBUG geom/dcel_re_noding.go:69 +++")                                                       // XXX
+			//fmt.Println("DEBUG geom/dcel_re_noding.go:69 ln.asLineString().AsText()", ln.asLineString().AsText())    // XXX
+			//fmt.Println("DEBUG geom/dcel_re_noding.go:72 ot.asLineString().AsText()", other.asLineString().AsText()) // XXX
+			if !ln.sharesEndpointWith(other) {
+				//fmt.Println("DEBUG geom/dcel_re_noding.go:74 inside") // XXX
+				inter, ok := lineLineIntersection(ln, other)
+				//fmt.Println("DEBUG geom/dcel_re_noding.go:75 ok", ok)       // XXX
+				//fmt.Println("DEBUG geom/dcel_re_noding.go:75 inter", inter) // XXX
+				if ok {
+					//fmt.Println("DEBUG geom/dcel_re_noding.go:76 inside2") // XXX
+					cuts = appendNewNode(cuts, nodes, ln, inter)
 				}
 			}
+			//fmt.Println("DEBUG geom/dcel_re_noding.go:80 ---") // XXX
 			return nil
 		})
 		return cuts
 	}
 
+	fmt.Println("DEBUG geom/dcel_re_noding.go:82 RENODED") // XXX
 	g1 = reNodeGeometry(g1, appendCutsLineXLine)
+	g1.AsText()
+	fmt.Println("DEBUG geom/dcel_re_noding.go:81 g1.AsText()", g1.AsText()) // XXX
 	g2 = reNodeGeometry(g2, appendCutsLineXLine)
+	g2.AsText()
+	fmt.Println("DEBUG geom/dcel_re_noding.go:84 g2.AsText()", g2.AsText()) // XXX
 	mls = reNodeMultiLineString(mls, appendCutsLineXLine)
+	mls.AsText()
+	fmt.Println("DEBUG geom/dcel_re_noding.go:87 mls.AsText()", mls.AsText()) // XXX
 
 	return g1, g2, mls
 }

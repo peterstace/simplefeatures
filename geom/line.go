@@ -77,6 +77,11 @@ func (ln line) hasEndpoint(xy XY) bool {
 	return ln.a == xy || ln.b == xy
 }
 
+// TODO: rename?
+func (ln line) sharesEndpointWith(other line) bool {
+	return ln.hasEndpoint(other.a) || ln.hasEndpoint(other.b)
+}
+
 // canonicalise swaps the endpoints of the line to be in a canonical form. Two
 // lines with reversed endpoint order will have the same canonical form.
 func (ln line) canonicalise() line {
