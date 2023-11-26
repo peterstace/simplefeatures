@@ -12,8 +12,7 @@ import (
 )
 
 func BenchmarkSetOperation(b *testing.B) {
-	for i := 2; i <= 14; i++ {
-		sz := 1 << i
+	for sz := range []int{10, 100, 1000} {
 		p1 := regularPolygon(geom.XY{X: 0, Y: 0}, 1.0, sz).AsGeometry()
 		p2 := regularPolygon(geom.XY{X: 1, Y: 0}, 1.0, sz).AsGeometry()
 		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
@@ -25,10 +24,10 @@ func BenchmarkSetOperation(b *testing.B) {
 				{"Go_Difference", geom.Difference},
 				{"Go_SymmetricDifference", geom.SymmetricDifference},
 				{"Go_Union", geom.Union},
-				{"GEOS_Intersection", adaptGEOSSetOp(geos.Intersection)},
-				{"GEOS_Difference", adaptGEOSSetOp(geos.Difference)},
-				{"GEOS_SymmetricDifference", adaptGEOSSetOp(geos.SymmetricDifference)},
-				{"GEOS_Union", adaptGEOSSetOp(geos.Union)},
+				{"GEOS_Intersection", geos.Intersection},
+				{"GEOS_Difference", geos.Difference},
+				{"GEOS_SymmetricDifference", geos.SymmetricDifference},
+				{"GEOS_Union", geos.Union},
 			} {
 				b.Run(op.name, func(b *testing.B) {
 					for i := 0; i < b.N; i++ {
@@ -39,13 +38,5 @@ func BenchmarkSetOperation(b *testing.B) {
 				})
 			}
 		})
-	}
-}
-
-func adaptGEOSSetOp(
-	setOp func(_, _ geom.Geometry) (geom.Geometry, error),
-) func(_, _ geom.Geometry) (geom.Geometry, error) {
-	return func(g1, g2 geom.Geometry) (geom.Geometry, error) {
-		return setOp(g1, g2)
 	}
 }

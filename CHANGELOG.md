@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+YYYY-MM-DD
+
+- Eliminates some redundant benchmarks, improving the execution speed of the
+  benchmark suite.
+
 ## v0.46.0
 
 2023-11-24
