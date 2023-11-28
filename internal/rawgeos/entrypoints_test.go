@@ -1,4 +1,4 @@
-package geos_test
+package rawgeos_test
 
 import (
 	"math"

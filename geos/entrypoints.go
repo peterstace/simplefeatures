@@ -1,64 +1,26 @@
 package geos
 
-/*
-#cgo LDFLAGS: -lgeos_c
-#cgo CFLAGS: -Wall
-#include "geos_c.h"
-
-#define MAKE_VALID_MIN_VERSION "3.8.0"
-#define MAKE_VALID_MISSING ( \
-	GEOS_VERSION_MAJOR < 3 || \
-	(GEOS_VERSION_MAJOR == 3 && GEOS_VERSION_MINOR < 8) \
-)
-#if MAKE_VALID_MISSING
-// This stub implementation always fails:
-GEOSGeometry *GEOSMakeValid_r(GEOSContextHandle_t handle, const GEOSGeometry* g) { return NULL; }
-#endif
-
-#define COVERAGE_UNION_MIN_VERSION "3.8.0"
-#define COVERAGE_UNION_MISSING ( \
-	GEOS_VERSION_MAJOR < 3 || \
-	(GEOS_VERSION_MAJOR == 3 && GEOS_VERSION_MINOR < 8) \
-)
-#if COVERAGE_UNION_MISSING
-// This stub implementation always fails:
-GEOSGeometry *GEOSCoverageUnion_r(GEOSContextHandle_t handle, const GEOSGeometry* g) { return NULL; }
-#endif
-
-*/
-import "C"
-
 import (
-	"unsafe"
-
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/rawgeos"
 )
 
 // Equals returns true if and only if the input geometries are spatially equal,
 // i.e. they represent exactly the same set of points.
 func Equals(a, b geom.Geometry) (bool, error) {
-	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
-		return C.GEOSEquals_r(h, a, b)
-	})
-	return result, wrap(err, "executing GEOSEquals_r")
+	return rawgeos.Equals(a, b)
 }
 
 // Disjoint returns true if and only if the input geometries have no points in
 // common.
 func Disjoint(a, b geom.Geometry) (bool, error) {
-	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
-		return C.GEOSDisjoint_r(h, a, b)
-	})
-	return result, wrap(err, "executing GEOSDisjoint_r")
+	return rawgeos.Disjoint(a, b)
 }
 
 // Touches returns true if and only if the geometries have at least 1 point in
 // common, but their interiors don't intersect.
 func Touches(a, b geom.Geometry) (bool, error) {
-	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
-		return C.GEOSTouches_r(h, a, b)
-	})
-	return result, wrap(err, "executing GEOSTouches_r")
+	return rawgeos.Touches(a, b)
 }
 
 // Contains returns true if and only if geometry A contains geometry B.
@@ -70,10 +32,7 @@ func Touches(a, b geom.Geometry) (bool, error) {
 // 2 .At least one point of the interior of B lies on the interior of A. That
 // is, they can't *only* intersect at their boundaries.
 func Contains(a, b geom.Geometry) (bool, error) {
-	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
-		return C.GEOSContains_r(h, a, b)
-	})
-	return result, wrap(err, "executing GEOSContains_r")
+	return rawgeos.Contains(a, b)
 }
 
 // Covers returns true if and only if geometry A covers geometry B. Formally,
@@ -84,19 +43,13 @@ func Contains(a, b geom.Geometry) (bool, error) {
 //
 // 2. At least one point of B lies on A (either its interior or boundary).
 func Covers(a, b geom.Geometry) (bool, error) {
-	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
-		return C.GEOSCovers_r(h, a, b)
-	})
-	return result, wrap(err, "executing GEOSCovers_r")
+	return rawgeos.Covers(a, b)
 }
 
 // Intersects returns true if and only if the geometries share at least one
 // point in common.
 func Intersects(a, b geom.Geometry) (bool, error) {
-	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
-		return C.GEOSIntersects_r(h, a, b)
-	})
-	return result, wrap(err, "executing GEOSIntersects_r")
+	return rawgeos.Intersects(a, b)
 }
 
 // Within returns true if and only if geometry A is completely within geometry
@@ -108,10 +61,7 @@ func Intersects(a, b geom.Geometry) (bool, error) {
 // 2.At least one point of the interior of A lies on the interior of B. That
 // is, they can't *only* intersect at their boundaries.
 func Within(a, b geom.Geometry) (bool, error) {
-	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
-		return C.GEOSWithin_r(h, a, b)
-	})
-	return result, wrap(err, "executing GEOSWithin_r")
+	return rawgeos.Within(a, b)
 }
 
 // CoveredBy returns true if and only if geometry A is covered by geometry B.
@@ -122,10 +72,7 @@ func Within(a, b geom.Geometry) (bool, error) {
 //
 // 2. At least one point of A lies on B (either its interior or boundary).
 func CoveredBy(a, b geom.Geometry) (bool, error) {
-	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
-		return C.GEOSCoveredBy_r(h, a, b)
-	})
-	return result, wrap(err, "executing GEOSCoveredBy_r")
+	return rawgeos.CoveredBy(a, b)
 }
 
 // Crosses returns true if and only if geometry A and B cross each other.
@@ -138,26 +85,13 @@ func CoveredBy(a, b geom.Geometry) (bool, error) {
 //
 // 3. The intersection must not equal either of the input geometries.
 func Crosses(a, b geom.Geometry) (bool, error) {
-	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
-		return C.GEOSCrosses_r(h, a, b)
-	})
-	return result, wrap(err, "executing GEOSCrosses_r")
+	return rawgeos.Crosses(a, b)
 }
 
 // Relate returns a 9-character DE9-IM string that describes the relationship
 // between two geometries.
 func Relate(g1, g2 geom.Geometry) (string, error) {
-	var result string
-	err := binaryOpE(g1, g2, func(h *handle, gh1, gh2 *C.GEOSGeometry) error {
-		cstr := C.GEOSRelate_r(h.context, gh1, gh2)
-		if cstr == nil {
-			return wrap(h.err(), "executing GEOSRelate_r")
-		}
-		defer C.GEOSFree_r(h.context, unsafe.Pointer(cstr))
-		result = C.GoString(cstr)
-		return nil
-	})
-	return result, err
+	return rawgeos.Relate(g1, g2)
 }
 
 // Overlaps returns true if and only if geometry A and B overlap with each
@@ -170,10 +104,7 @@ func Relate(g1, g2 geom.Geometry) (string, error) {
 // 3. The intersection of the geometries must have the same dimension as the
 // geometries themselves.
 func Overlaps(a, b geom.Geometry) (bool, error) {
-	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
-		return C.GEOSOverlaps_r(h, a, b)
-	})
-	return result, wrap(err, "executing GEOSOverlaps_r")
+	return rawgeos.Overlaps(a, b)
 }
 
 // Union returns a geometry that is the union of the input geometries.
@@ -182,10 +113,7 @@ func Overlaps(a, b geom.Geometry) (bool, error) {
 //
 // The validity of the result is not checked.
 func Union(a, b geom.Geometry) (geom.Geometry, error) {
-	g, err := binaryOpG(a, b, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
-		return C.GEOSUnion_r(ctx, a, b)
-	})
-	return g, wrap(err, "executing GEOSUnion_r")
+	return rawgeos.Union(a, b)
 }
 
 // Intersection returns a geometry that is the intersection of the input
@@ -194,10 +122,7 @@ func Union(a, b geom.Geometry) (geom.Geometry, error) {
 //
 // The validity of the result is not checked.
 func Intersection(a, b geom.Geometry) (geom.Geometry, error) {
-	g, err := binaryOpG(a, b, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
-		return C.GEOSIntersection_r(ctx, a, b)
-	})
-	return g, wrap(err, "executing GEOSIntersection_r")
+	return rawgeos.Intersection(a, b)
 }
 
 // BufferOption allows the behaviour of the Buffer operation to be modified.
@@ -205,16 +130,16 @@ type BufferOption func(*bufferOptionSet)
 
 type bufferOptionSet struct {
 	quadSegments int
-	endCapStyle  int
-	joinStyle    int
+	endCapStyle  rawgeos.BufferEndCapStyle
+	joinStyle    rawgeos.BufferJoinStyle
 	mitreLimit   float64
 }
 
 func newBufferOptionSet(opts []BufferOption) bufferOptionSet {
 	bos := bufferOptionSet{
 		quadSegments: 8,
-		endCapStyle:  int(C.GEOSBUF_CAP_ROUND),
-		joinStyle:    int(C.GEOSBUF_JOIN_ROUND),
+		endCapStyle:  rawgeos.BufferEndCapStyleRound,
+		joinStyle:    rawgeos.BufferJoinStyleRound,
 		mitreLimit:   0.0,
 	}
 	for _, opt := range opts {
@@ -235,14 +160,14 @@ func BufferQuadSegments(quadSegments int) BufferOption {
 // default.
 func BufferEndCapRound() BufferOption {
 	return func(bos *bufferOptionSet) {
-		bos.endCapStyle = int(C.GEOSBUF_CAP_ROUND)
+		bos.endCapStyle = rawgeos.BufferEndCapStyleRound
 	}
 }
 
 // BufferEndCapFlat sets the end cap style to 'flat'. It is 'round' by default.
 func BufferEndCapFlat() BufferOption {
 	return func(bos *bufferOptionSet) {
-		bos.endCapStyle = int(C.GEOSBUF_CAP_FLAT)
+		bos.endCapStyle = rawgeos.BufferEndCapStyleFlat
 	}
 }
 
@@ -250,7 +175,7 @@ func BufferEndCapFlat() BufferOption {
 // default.
 func BufferEndCapSquare() BufferOption {
 	return func(bos *bufferOptionSet) {
-		bos.endCapStyle = int(C.GEOSBUF_CAP_SQUARE)
+		bos.endCapStyle = rawgeos.BufferEndCapStyleSquare
 	}
 }
 
@@ -258,7 +183,7 @@ func BufferEndCapSquare() BufferOption {
 // default.
 func BufferJoinStyleRound() BufferOption {
 	return func(bos *bufferOptionSet) {
-		bos.joinStyle = int(C.GEOSBUF_JOIN_ROUND)
+		bos.joinStyle = rawgeos.BufferJoinStyleRound
 		bos.mitreLimit = 0.0
 	}
 }
@@ -267,7 +192,7 @@ func BufferJoinStyleRound() BufferOption {
 // default.
 func BufferJoinStyleMitre(mitreLimit float64) BufferOption {
 	return func(bos *bufferOptionSet) {
-		bos.joinStyle = int(C.GEOSBUF_JOIN_MITRE)
+		bos.joinStyle = rawgeos.BufferJoinStyleMitre
 		bos.mitreLimit = mitreLimit
 	}
 }
@@ -276,7 +201,7 @@ func BufferJoinStyleMitre(mitreLimit float64) BufferOption {
 // default.
 func BufferJoinStyleBevel() BufferOption {
 	return func(bos *bufferOptionSet) {
-		bos.joinStyle = int(C.GEOSBUF_JOIN_BEVEL)
+		bos.joinStyle = rawgeos.BufferJoinStyleBevel
 		bos.mitreLimit = 0.0
 	}
 }
@@ -287,16 +212,13 @@ func BufferJoinStyleBevel() BufferOption {
 // The validity of the result is not checked.
 func Buffer(g geom.Geometry, radius float64, opts ...BufferOption) (geom.Geometry, error) {
 	optSet := newBufferOptionSet(opts)
-	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
-		return C.GEOSBufferWithStyle_r(
-			ctx, gh, C.double(radius),
-			C.int(optSet.quadSegments),
-			C.int(optSet.endCapStyle),
-			C.int(optSet.joinStyle),
-			C.double(optSet.mitreLimit),
-		)
+	return rawgeos.Buffer(g, rawgeos.BufferOptions{
+		Radius:       radius,
+		QuadSegments: optSet.quadSegments,
+		EndCapStyle:  optSet.endCapStyle,
+		JoinStyle:    optSet.joinStyle,
+		MitreLimit:   optSet.mitreLimit,
 	})
-	return result, wrap(err, "executing GEOSBufferWithStyle_r")
 }
 
 // Simplify creates a simplified version of a geometry using the
@@ -306,10 +228,7 @@ func Buffer(g geom.Geometry, radius float64, opts ...BufferOption) (geom.Geometr
 //
 // The validity of the result is not checked.
 func Simplify(g geom.Geometry, tolerance float64) (geom.Geometry, error) {
-	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
-		return C.GEOSSimplify_r(ctx, gh, C.double(tolerance))
-	})
-	return result, wrap(err, "executing GEOSSimplify_r")
+	return rawgeos.Simplify(g, tolerance)
 }
 
 // Difference returns the geometry that represents the parts of input geometry
@@ -317,10 +236,7 @@ func Simplify(g geom.Geometry, tolerance float64) (geom.Geometry, error) {
 //
 // The validity of the result is not checked.
 func Difference(a, b geom.Geometry) (geom.Geometry, error) {
-	result, err := binaryOpG(a, b, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
-		return C.GEOSDifference_r(ctx, a, b)
-	})
-	return result, wrap(err, "executing GEOSDifference_r")
+	return rawgeos.Difference(a, b)
 }
 
 // SymmetricDifference returns the geometry that represents the parts of the
@@ -328,10 +244,7 @@ func Difference(a, b geom.Geometry) (geom.Geometry, error) {
 //
 // The validity of the result is not checked.
 func SymmetricDifference(a, b geom.Geometry) (geom.Geometry, error) {
-	result, err := binaryOpG(a, b, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
-		return C.GEOSSymDifference_r(ctx, a, b)
-	})
-	return result, wrap(err, "executing GEOSSymDifference_r")
+	return rawgeos.SymmetricDifference(a, b)
 }
 
 // MakeValid can be used to convert an invalid geometry into a valid geometry.
@@ -342,15 +255,7 @@ func SymmetricDifference(a, b geom.Geometry) (geom.Geometry, error) {
 //
 // The validity of the result is not checked.
 func MakeValid(g geom.Geometry) (geom.Geometry, error) {
-	if C.MAKE_VALID_MISSING != 0 {
-		return geom.Geometry{}, unsupportedGEOSVersionError{
-			C.MAKE_VALID_MIN_VERSION, "MakeValid",
-		}
-	}
-	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
-		return C.GEOSMakeValid_r(ctx, g)
-	})
-	return result, wrap(err, "executing GEOSMakeValid_r")
+	return rawgeos.MakeValid(g)
 }
 
 // The CoverageUnion function is used to union polygonal inputs that form a
@@ -370,15 +275,7 @@ func MakeValid(g geom.Geometry) (geom.Geometry, error) {
 //
 // The validity of the result is not checked.
 func CoverageUnion(g geom.Geometry) (geom.Geometry, error) {
-	if C.COVERAGE_UNION_MISSING != 0 {
-		return geom.Geometry{}, unsupportedGEOSVersionError{
-			C.COVERAGE_UNION_MIN_VERSION, "CoverageUnion",
-		}
-	}
-	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
-		return C.GEOSCoverageUnion_r(ctx, g)
-	})
-	return result, wrap(err, "executing GEOSCoverageUnion_r")
+	return rawgeos.CoverageUnion(g)
 }
 
 // UnaryUnion is a single argument version of Union. It is most useful when
@@ -387,8 +284,5 @@ func CoverageUnion(g geom.Geometry) (geom.Geometry, error) {
 //
 // The validity of the result is not checked.
 func UnaryUnion(g geom.Geometry) (geom.Geometry, error) {
-	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
-		return C.GEOSUnaryUnion_r(ctx, g)
-	})
-	return result, wrap(err, "executing GEOSUnaryUnion_r")
+	return rawgeos.UnaryUnion(g)
 }
