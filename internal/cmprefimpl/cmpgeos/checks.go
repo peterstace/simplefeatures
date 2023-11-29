@@ -521,11 +521,11 @@ func checkPointOnSurface(_ *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkSimplify(h *Handle, g geom.Geometry, log *log.Logger) error {
+func checkSimplify(_ *Handle, g geom.Geometry, log *log.Logger) error {
 	for _, threshold := range []float64{0.125, 0.25, 0.5, 1, 2, 4, 8, 16} {
 		// If we get an error from GEOS, then we may or may not get an error from
 		// simplefeatures.
-		want, err := h.simplify(g, threshold)
+		want, err := rawgeos.Simplify(g, threshold)
 		wantIsValid := err == nil
 
 		// Even if GEOS couldn't simplify, we still want to attempt to simplify
@@ -574,7 +574,7 @@ func binaryChecks(h *Handle, g1, g2 geom.Geometry, lg *log.Logger) error {
 	return nil
 }
 
-func checkIntersects(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+func checkIntersects(_ *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	skipList := map[string]bool{
 		// postgres=# SELECT ST_Intersects(
 		//   ST_GeomFromText('LINESTRING(1 0,0.5000000000000001 0.5,0 1)'),
@@ -743,7 +743,7 @@ var skipUnion = map[string]bool{
 	"POLYGON((-83.70047745 32.63984661,-83.68891846 32.5989632,-83.58253417 32.73167955,-83.70047745 32.63984661))":  true,
 }
 
-func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+func checkDCELOperations(_ *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	// TODO: simplefeatures doesn't support GeometryCollections yet
 	if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
 		return nil
@@ -788,7 +788,7 @@ func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error
 	}
 
 	log.Println("checking Relate")
-	return checkRelate(h, g1, g2, log)
+	return checkRelate(g1, g2, log)
 }
 
 func checkDCELOp(
@@ -871,7 +871,7 @@ func (c float64EqualityChecker) eq(a, b float64) bool {
 	return absDiff < c.absoluteThreshold || absDiff < magnitude*c.relativeThreshold
 }
 
-func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+func checkRelate(g1, g2 geom.Geometry, log *log.Logger) error {
 	got, err := geom.Relate(g1, g2)
 	if err != nil {
 		return err
