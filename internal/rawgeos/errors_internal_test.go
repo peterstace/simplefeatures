@@ -1,4 +1,4 @@
-package geos
+package rawgeos
 
 import (
 	"errors"
