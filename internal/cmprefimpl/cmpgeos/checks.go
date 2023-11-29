@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/peterstace/simplefeatures/geom"
-	"github.com/peterstace/simplefeatures/geos"
+	"github.com/peterstace/simplefeatures/internal/rawgeos"
 )
 
 func unaryChecks(h *Handle, g geom.Geometry, lg *log.Logger) error {
@@ -497,7 +497,7 @@ func checkPointOnSurface(_ *Handle, g geom.Geometry, log *log.Logger) error {
 	}
 
 	if !g.IsEmpty() && !g.IsGeometryCollection() {
-		intersects, err := geos.Intersects(pt, g)
+		intersects, err := rawgeos.Intersects(pt, g)
 		if err != nil {
 			return err
 		}
@@ -508,7 +508,7 @@ func checkPointOnSurface(_ *Handle, g geom.Geometry, log *log.Logger) error {
 	}
 
 	if g.Dimension() == 2 && !g.IsEmpty() && !g.IsGeometryCollection() {
-		contains, err := geos.Contains(g, pt)
+		contains, err := rawgeos.Contains(g, pt)
 		if err != nil {
 			return err
 		}
@@ -521,17 +521,17 @@ func checkPointOnSurface(_ *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkSimplify(h *Handle, g geom.Geometry, log *log.Logger) error {
+func checkSimplify(_ *Handle, g geom.Geometry, log *log.Logger) error {
 	for _, threshold := range []float64{0.125, 0.25, 0.5, 1, 2, 4, 8, 16} {
 		// If we get an error from GEOS, then we may or may not get an error from
 		// simplefeatures.
-		want, err := h.simplify(g, threshold)
+		want, err := rawgeos.Simplify(g, threshold)
 		wantIsValid := err == nil
 
 		// Even if GEOS couldn't simplify, we still want to attempt to simplify
 		// with simplefeatures to ensure it doesn't crash (even if it may give an
 		// error).
-		got, err := geos.Simplify(g, threshold)
+		got, err := rawgeos.Simplify(g, threshold)
 		gotIsValid := err == nil
 
 		if wantIsValid && !gotIsValid {
@@ -574,7 +574,7 @@ func binaryChecks(h *Handle, g1, g2 geom.Geometry, lg *log.Logger) error {
 	return nil
 }
 
-func checkIntersects(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+func checkIntersects(_ *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	skipList := map[string]bool{
 		// postgres=# SELECT ST_Intersects(
 		//   ST_GeomFromText('LINESTRING(1 0,0.5000000000000001 0.5,0 1)'),
@@ -598,11 +598,8 @@ func checkIntersects(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	want, err := h.intersects(g1, g2)
+	want, err := rawgeos.Intersects(g1, g2)
 	if err != nil {
-		if errors.Is(err, errLibgeosCrash) {
-			return nil
-		}
 		return err
 	}
 	got := geom.Intersects(g1, g2)
@@ -746,7 +743,7 @@ var skipUnion = map[string]bool{
 	"POLYGON((-83.70047745 32.63984661,-83.68891846 32.5989632,-83.58253417 32.73167955,-83.70047745 32.63984661))":  true,
 }
 
-func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+func checkDCELOperations(_ *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	// TODO: simplefeatures doesn't support GeometryCollections yet
 	if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
 		return nil
@@ -761,25 +758,25 @@ func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error
 		{
 			"Union",
 			geom.Union,
-			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.union(g1, g2) },
+			rawgeos.Union,
 			skipUnion,
 		},
 		{
 			"Intersection",
 			geom.Intersection,
-			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.intersection(g1, g2) },
+			rawgeos.Intersection,
 			skipIntersection,
 		},
 		{
 			"Difference",
 			geom.Difference,
-			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.difference(g1, g2) },
+			rawgeos.Difference,
 			skipDifference,
 		},
 		{
 			"SymmetricDifference",
 			geom.SymmetricDifference,
-			func(g1, g2 geom.Geometry) (geom.Geometry, error) { return h.symmetricDifference(g1, g2) },
+			rawgeos.SymmetricDifference,
 			skipSymDiff,
 		},
 	} {
@@ -791,7 +788,7 @@ func checkDCELOperations(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error
 	}
 
 	log.Println("checking Relate")
-	return checkRelate(h, g1, g2, log)
+	return checkRelate(g1, g2, log)
 }
 
 func checkDCELOp(
@@ -837,7 +834,7 @@ func checkDCELOp(
 // checkEqualityHeuristic checks some necessary but not sufficient properties
 // of two geometries if they are to be equal.
 func checkEqualityHeuristic(want, got geom.Geometry, log *log.Logger) error {
-	symDiff, err := geos.SymmetricDifference(want, got)
+	symDiff, err := rawgeos.SymmetricDifference(want, got)
 	if err != nil {
 		return err
 	}
@@ -874,17 +871,13 @@ func (c float64EqualityChecker) eq(a, b float64) bool {
 	return absDiff < c.absoluteThreshold || absDiff < magnitude*c.relativeThreshold
 }
 
-func checkRelate(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+func checkRelate(g1, g2 geom.Geometry, log *log.Logger) error {
 	got, err := geom.Relate(g1, g2)
 	if err != nil {
 		return err
 	}
-	want, err := h.relate(g1, g2)
+	want, err := rawgeos.Relate(g1, g2)
 	if err != nil {
-		if errors.Is(err, errLibgeosCrash) {
-			// Skip any tests that would cause libgeos to crash.
-			return nil
-		}
 		return err
 	}
 
