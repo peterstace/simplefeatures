@@ -15,8 +15,8 @@ import (
 	"github.com/peterstace/simplefeatures/internal/rawgeos"
 )
 
-func unaryChecks(h *Handle, g geom.Geometry, lg *log.Logger) error {
-	if valid, err := checkIsValid(h, g, lg); err != nil {
+func unaryChecks(g geom.Geometry, lg *log.Logger) error {
+	if valid, err := checkIsValid(g, lg); err != nil {
 		return err
 	} else if !valid {
 		return nil
@@ -24,7 +24,7 @@ func unaryChecks(h *Handle, g geom.Geometry, lg *log.Logger) error {
 
 	for _, check := range []struct {
 		name string
-		fn   func(*Handle, geom.Geometry, *log.Logger) error
+		fn   func(geom.Geometry, *log.Logger) error
 	}{
 		{"AsBinary", checkAsBinary},
 		{"FromBinary", checkFromBinary},
@@ -44,7 +44,7 @@ func unaryChecks(h *Handle, g geom.Geometry, lg *log.Logger) error {
 		{"Simplify", checkSimplify},
 	} {
 		lg.Printf("checking %s", check.name)
-		if err := check.fn(h, g, lg); err != nil {
+		if err := check.fn(g, lg); err != nil {
 			return err
 		}
 	}
@@ -57,7 +57,7 @@ func unaryChecks(h *Handle, g geom.Geometry, lg *log.Logger) error {
 
 var errMismatch = errors.New("mismatch")
 
-func checkIsValid(h *Handle, g geom.Geometry, log *log.Logger) (bool, error) {
+func checkIsValid(g geom.Geometry, log *log.Logger) (bool, error) {
 	wkb := g.AsBinary()
 	var validAsPerSimpleFeatures bool
 	if _, err := geom.UnmarshalWKB(wkb); err == nil {
@@ -65,7 +65,7 @@ func checkIsValid(h *Handle, g geom.Geometry, log *log.Logger) (bool, error) {
 	}
 	log.Printf("Valid as per simplefeatures: %v", validAsPerSimpleFeatures)
 
-	validAsPerLibgeos, err := h.isValid(g)
+	validAsPerLibgeos, err := rawgeos.IsValid(g)
 	if err != nil {
 		// The geometry is _so_ invalid that libgeos can't even tell if it's
 		// invalid or not.
@@ -83,7 +83,7 @@ func checkIsValid(h *Handle, g geom.Geometry, log *log.Logger) (bool, error) {
 	return validAsPerSimpleFeatures, nil
 }
 
-func checkAsText(h *Handle, g geom.Geometry, log *log.Logger) error {
+func checkAsText(g geom.Geometry, log *log.Logger) error {
 	// Skip any geometries that have a non-empty Point within a MultiPoint.
 	// Libgeos erroneously produces WKT with missing parenthesis around each
 	// non-empty point.
@@ -105,7 +105,7 @@ func checkAsText(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	want, err := h.asText(g)
+	want, err := rawgeos.AsText(g)
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,7 @@ func wktsEqual(wktA, wktB string) error {
 	return nil
 }
 
-func checkFromText(h *Handle, g geom.Geometry, log *log.Logger) error {
+func checkFromText(g geom.Geometry, log *log.Logger) error {
 	// libgeos is unable to parse MultiPoints if the *first* Point is empty. It
 	// gives the following error: ParseException: Unexpected token: WORD EMPTY.
 	// Skip the check in that case.
@@ -170,7 +170,7 @@ func checkFromText(h *Handle, g geom.Geometry, log *log.Logger) error {
 	}
 
 	wkt := g.AsText()
-	want, err := h.fromText(wkt)
+	want, err := rawgeos.FromText(wkt)
 	if err != nil {
 		return err
 	}
@@ -188,9 +188,9 @@ func checkFromText(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkAsBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
+func checkAsBinary(g geom.Geometry, log *log.Logger) error {
 	var wantDefined bool
-	want, err := h.asBinary(g)
+	want, err := rawgeos.AsBinary(g)
 	if err == nil {
 		wantDefined = true
 	}
@@ -223,7 +223,7 @@ func checkAsBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkFromBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
+func checkFromBinary(g geom.Geometry, log *log.Logger) error {
 	if containsMultiPolygonWithEmptyPolygon(g) {
 		// libgeos omits the empty Polygon, but simplefeatures doesn't.
 		return nil
@@ -243,7 +243,7 @@ func checkFromBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
 		}
 	}
 
-	want, err := h.fromBinary(wkb)
+	want, err := rawgeos.FromBinary(wkb)
 	if err != nil {
 		return err
 	}
@@ -262,8 +262,8 @@ func checkFromBinary(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkIsEmpty(h *Handle, g geom.Geometry, log *log.Logger) error {
-	want, err := h.isEmpty(g)
+func checkIsEmpty(g geom.Geometry, log *log.Logger) error {
+	want, err := rawgeos.IsEmpty(g)
 	if err != nil {
 		return err
 	}
@@ -277,7 +277,7 @@ func checkIsEmpty(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkDimension(h *Handle, g geom.Geometry, log *log.Logger) error {
+func checkDimension(g geom.Geometry, log *log.Logger) error {
 	var want int
 	if !containsOnlyGeometryCollections(g) {
 		// Libgeos gives -1 dimension for GeometryCollection trees that only
@@ -286,7 +286,7 @@ func checkDimension(h *Handle, g geom.Geometry, log *log.Logger) error {
 		// So we don't get 'want' from libgeos in that case (and allow want to
 		// default to 0).
 		var err error
-		want, err = h.dimension(g)
+		want, err = rawgeos.Dimension(g)
 		if err != nil {
 			return err
 		}
@@ -301,31 +301,62 @@ func checkDimension(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkEnvelope(h *Handle, g geom.Geometry, log *log.Logger) error {
-	want, err := h.envelope(g)
+func checkEnvelope(g geom.Geometry, log *log.Logger) error {
+	want, err := rawgeos.Envelope(g)
 	if err != nil {
 		return err
 	}
 	got := g.Envelope()
+	gotMin, gotMax, gotNonEmpty := got.MinMaxXYs()
 
-	if want.Min() != got.Min() || want.Max() != got.Max() {
-		log.Printf("want: %v", want.AsGeometry().AsText())
-		log.Printf("got:  %v", got.AsGeometry().AsText())
+	wantCoords := want.DumpCoordinates()
+	if wantCoords.Length() == 0 {
+		if gotNonEmpty {
+			log.Printf("want: %v", want.AsText())
+			log.Printf("got: %v", got.AsGeometry().AsText())
+			return errMismatch
+		}
+		return nil
+	}
+
+	minx := wantCoords.GetXY(0).X
+	miny := wantCoords.GetXY(0).Y
+	maxx := minx
+	maxy := miny
+	for i := 1; i < wantCoords.Length(); i++ {
+		xy := wantCoords.GetXY(i)
+		minx = math.Min(minx, xy.X)
+		miny = math.Min(miny, xy.Y)
+		maxx = math.Max(maxx, xy.X)
+		maxy = math.Max(maxy, xy.Y)
+	}
+
+	if gotMin != (geom.XY{X: minx, Y: miny}) || gotMax != (geom.XY{X: maxx, Y: maxy}) {
+		log.Printf("want: %v", want.AsText())
+		log.Printf("got: %v", got.AsGeometry().AsText())
 		return errMismatch
 	}
 	return nil
 }
 
-func checkIsSimple(h *Handle, g geom.Geometry, log *log.Logger) error {
-	want, wantDefined, err := h.isSimple(g)
-	if err != nil {
-		if errors.Is(err, errLibgeosCrash) {
-			// Skip any tests that would cause libgeos to crash.
-			return nil
-		}
-		return err
+func checkIsSimple(g geom.Geometry, log *log.Logger) error {
+	if containsMultiPointWithEmptyPoint(g) {
+		// libgeos crashes when GEOSisSimple_r is called with MultiPoints
+		// containing empty Points.
+		return nil
 	}
-	got, gotDefined := g.IsSimple()
+
+	var wantDefined, wantSimple bool
+	if !g.IsGeometryCollection() {
+		wantDefined = true
+		var err error
+		wantSimple, err = rawgeos.IsSimple(g)
+		if err != nil {
+			return err
+		}
+	}
+
+	gotSimple, gotDefined := g.IsSimple()
 
 	if wantDefined != gotDefined {
 		log.Printf("want defined: %v", wantDefined)
@@ -336,26 +367,24 @@ func checkIsSimple(h *Handle, g geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	if want != got {
-		log.Printf("want: %v", want)
-		log.Printf("got:  %v", got)
+	if wantSimple != gotSimple {
+		log.Printf("want: %v", wantSimple)
+		log.Printf("got:  %v", gotSimple)
 		return errMismatch
 	}
 	return nil
 }
 
-func checkBoundary(h *Handle, g geom.Geometry, log *log.Logger) error {
-	want, wantDefined, err := h.boundary(g)
-	if err != nil {
-		return err
+func checkBoundary(g geom.Geometry, log *log.Logger) error {
+	if g.Type() == geom.TypeGeometryCollection {
+		// libgeos doesn't define the boundary of GeometryCollections, but
+		// simplefeatures does. So we skip the test in this case.
+		return nil
 	}
 
-	if !wantDefined && !g.IsGeometryCollection() {
-		return errors.New("boundary not defined by libgeos, but " +
-			"input is not a geometry collection (this is unexpected)")
-	}
-	if !wantDefined {
-		return nil
+	want, err := rawgeos.Boundary(g)
+	if err != nil {
+		return err
 	}
 
 	got := g.Boundary()
@@ -374,8 +403,8 @@ func checkBoundary(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkConvexHull(h *Handle, g geom.Geometry, log *log.Logger) error {
-	want, err := h.convexHull(g)
+func checkConvexHull(g geom.Geometry, log *log.Logger) error {
+	want, err := rawgeos.ConvexHull(g)
 	if err != nil {
 		return err
 	}
@@ -396,8 +425,8 @@ func checkConvexHull(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkIsRing(h *Handle, g geom.Geometry, log *log.Logger) error {
-	want, err := h.isRing(g)
+func checkIsRing(g geom.Geometry, log *log.Logger) error {
+	want, err := rawgeos.IsRing(g)
 	if err != nil {
 		return err
 	}
@@ -411,8 +440,8 @@ func checkIsRing(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkLength(h *Handle, g geom.Geometry, log *log.Logger) error {
-	want, err := h.length(g)
+func checkLength(g geom.Geometry, log *log.Logger) error {
+	want, err := rawgeos.Length(g)
 	if err != nil {
 		return err
 	}
@@ -448,8 +477,8 @@ func isArealGeometry(g geom.Geometry) bool {
 	return false
 }
 
-func checkArea(h *Handle, g geom.Geometry, log *log.Logger) error {
-	want, err := h.area(g)
+func checkArea(g geom.Geometry, log *log.Logger) error {
+	want, err := rawgeos.Area(g)
 	if err != nil {
 		return err
 	}
@@ -463,8 +492,8 @@ func checkArea(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkCentroid(h *Handle, g geom.Geometry, log *log.Logger) error {
-	want, err := h.centroid(g)
+func checkCentroid(g geom.Geometry, log *log.Logger) error {
+	want, err := rawgeos.Centroid(g)
 	if err != nil {
 		return err
 	}
@@ -478,7 +507,7 @@ func checkCentroid(h *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkPointOnSurface(_ *Handle, g geom.Geometry, log *log.Logger) error {
+func checkPointOnSurface(g geom.Geometry, log *log.Logger) error {
 	// It's too difficult to perform a direct comparison against GEOS's
 	// PointOnSurface, due to numeric stability related issue. This is because
 	// there are floating point comparisons to find the "best" point. However,
@@ -521,7 +550,7 @@ func checkPointOnSurface(_ *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkSimplify(_ *Handle, g geom.Geometry, log *log.Logger) error {
+func checkSimplify(g geom.Geometry, log *log.Logger) error {
 	for _, threshold := range []float64{0.125, 0.25, 0.5, 1, 2, 4, 8, 16} {
 		// If we get an error from GEOS, then we may or may not get an error from
 		// simplefeatures.
@@ -548,9 +577,9 @@ func checkSimplify(_ *Handle, g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func binaryChecks(h *Handle, g1, g2 geom.Geometry, lg *log.Logger) error {
+func binaryChecks(g1, g2 geom.Geometry, lg *log.Logger) error {
 	for _, g := range []geom.Geometry{g1, g2} {
-		if valid, err := checkIsValid(h, g, lg); err != nil {
+		if valid, err := checkIsValid(g, lg); err != nil {
 			return err
 		} else if !valid {
 			return nil
@@ -559,7 +588,7 @@ func binaryChecks(h *Handle, g1, g2 geom.Geometry, lg *log.Logger) error {
 
 	for _, check := range []struct {
 		name string
-		fn   func(*Handle, geom.Geometry, geom.Geometry, *log.Logger) error
+		fn   func(geom.Geometry, geom.Geometry, *log.Logger) error
 	}{
 		{"Intersects", checkIntersects},
 		{"ExactEquals", checkExactEquals},
@@ -567,14 +596,14 @@ func binaryChecks(h *Handle, g1, g2 geom.Geometry, lg *log.Logger) error {
 		{"DCELOperations", checkDCELOperations},
 	} {
 		lg.Printf("checking %s", check.name)
-		if err := check.fn(h, g1, g2, lg); err != nil {
+		if err := check.fn(g1, g2, lg); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func checkIntersects(_ *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+func checkIntersects(g1, g2 geom.Geometry, log *log.Logger) error {
 	skipList := map[string]bool{
 		// postgres=# SELECT ST_Intersects(
 		//   ST_GeomFromText('LINESTRING(1 0,0.5000000000000001 0.5,0 1)'),
@@ -612,8 +641,8 @@ func checkIntersects(_ *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkExactEquals(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
-	want, err := h.exactEquals(g1, g2)
+func checkExactEquals(g1, g2 geom.Geometry, log *log.Logger) error {
+	want, err := rawgeos.EqualsExact(g1, g2)
 	if err != nil {
 		return err
 	}
@@ -627,13 +656,21 @@ func checkExactEquals(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkDistance(h *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
-	want, err := h.distance(g1, g2)
+func checkDistance(g1, g2 geom.Geometry, log *log.Logger) error {
+	willCauseGEOSCrash := false ||
+		containsMultiLineStringWithEmptyLineString(g1) ||
+		containsMultiLineStringWithEmptyLineString(g2) ||
+		containsMultiPointWithEmptyPoint(g1) ||
+		containsMultiPointWithEmptyPoint(g2) ||
+		containsMultiPolygonWithEmptyPolygon(g1) ||
+		containsMultiPolygonWithEmptyPolygon(g2)
+	if willCauseGEOSCrash {
+		// Skip test since attempting to calculate distance will cause a GEOS crash.
+		return nil
+	}
+
+	want, err := rawgeos.Distance(g1, g2)
 	if err != nil {
-		if errors.Is(err, errLibgeosCrash) {
-			// Skip any tests that would cause libgeos to crash.
-			return nil
-		}
 		return err
 	}
 	got, ok := geom.Distance(g1, g2)
@@ -743,7 +780,7 @@ var skipUnion = map[string]bool{
 	"POLYGON((-83.70047745 32.63984661,-83.68891846 32.5989632,-83.58253417 32.73167955,-83.70047745 32.63984661))":  true,
 }
 
-func checkDCELOperations(_ *Handle, g1, g2 geom.Geometry, log *log.Logger) error {
+func checkDCELOperations(g1, g2 geom.Geometry, log *log.Logger) error {
 	// TODO: simplefeatures doesn't support GeometryCollections yet
 	if g1.IsGeometryCollection() || g2.IsGeometryCollection() {
 		return nil
@@ -820,12 +857,6 @@ func checkDCELOp(
 
 	want, err := refImpl(g1, g2)
 	if err != nil {
-		if errors.Is(err, errInvalidAccordingToGEOS) {
-			// Because GEOS has given us back an invalid geometry (even according
-			// to its own validation routines) we can't trust it for this test
-			// case.
-			return nil
-		}
 		return err
 	}
 	return checkEqualityHeuristic(want, got, log)
@@ -911,11 +942,11 @@ func checkRelate(g1, g2 geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
-func checkRelateMatch(h *Handle, log *log.Logger) error {
+func checkRelateMatch(log *log.Logger) error {
 	for i := 0; i < 1_000_000; i++ {
 		mat := rand9("F012")
 		pat := rand9("F012T*")
-		want, err := h.relateMatch(mat, pat)
+		want, err := rawgeos.RelatePatternMatch(mat, pat)
 		if err != nil {
 			log.Printf("could not calculate want: %v", err)
 			return err

@@ -72,6 +72,20 @@ func binaryOpB(
 	return result, err
 }
 
+func binaryOpF(
+	g1, g2 geom.Geometry,
+	op func(C.GEOSContextHandle_t, *C.GEOSGeometry, *C.GEOSGeometry, *C.double) C.int,
+) (float64, error) {
+	var result C.double
+	err := binaryOpE(g1, g2, func(h *handle, gh1, gh2 *C.GEOSGeometry) error {
+		if err := h.intErr(op(h.context, gh1, gh2, &result)); err != nil {
+			return err
+		}
+		return nil
+	})
+	return float64(result), err
+}
+
 func unaryOpE(g geom.Geometry, op func(*handle, *C.GEOSGeometry) error) error {
 	// Not all versions of libgeos can handle Z and M geometries correctly. For
 	// unary operations, we only need 2D geometries anyway.
@@ -113,4 +127,43 @@ func unaryOpG(
 		return wrap(err, "decoding result")
 	})
 	return result, err
+}
+
+func unaryOpB(
+	g geom.Geometry,
+	op func(C.GEOSContextHandle_t, *C.GEOSGeometry) C.char,
+) (bool, error) {
+	var result bool
+	err := unaryOpE(g, func(h *handle, gh *C.GEOSGeometry) error {
+		var err error
+		result, err = h.boolErr(op(h.context, gh))
+		return err
+	})
+	return result, err
+}
+
+func unaryOpF(
+	g geom.Geometry,
+	op func(C.GEOSContextHandle_t, *C.GEOSGeometry, *C.double) C.int,
+) (float64, error) {
+	var result C.double
+	err := unaryOpE(g, func(h *handle, gh *C.GEOSGeometry) error {
+		if err := h.intErr(op(h.context, gh, &result)); err != nil {
+			return err
+		}
+		return nil
+	})
+	return float64(result), err
+}
+
+func unaryOpI(
+	g geom.Geometry,
+	op func(C.GEOSContextHandle_t, *C.GEOSGeometry) C.int,
+) (int, error) {
+	var result C.int
+	err := unaryOpE(g, func(h *handle, gh *C.GEOSGeometry) error {
+		result = op(h.context, gh)
+		return nil
+	})
+	return int(result), err
 }
