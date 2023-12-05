@@ -37,15 +37,10 @@ func main() {
 	forceTo2D(geoms)
 	geoms = deduplicateGeometries(geoms)
 
-	h, err := NewHandle()
-	if err != nil {
-		panic(err)
-	}
-
 	{
 		var buf bytes.Buffer
 		lg := log.New(&buf, "", log.Lshortfile)
-		if err := checkRelateMatch(h, lg); err != nil {
+		if err := checkRelateMatch(lg); err != nil {
 			fmt.Printf("Check failed: %v\n", err)
 			io.Copy(os.Stdout, &buf)
 			fmt.Println()
@@ -59,7 +54,7 @@ func main() {
 		lg := log.New(&buf, "", log.Lshortfile)
 		lg.Printf("========================== START ===========================")
 		lg.Printf("WKT: %v", g.AsText())
-		err := unaryChecks(h, g, lg)
+		err := unaryChecks(g, lg)
 		lg.Printf("=========================== END ============================")
 		if err != nil {
 			fmt.Printf("Check failed: %v\n", err)
@@ -98,7 +93,7 @@ func main() {
 			lg.Printf("========================== START ===========================")
 			lg.Printf("WKT1: %v", g1.AsText())
 			lg.Printf("WKT2: %v", g2.AsText())
-			err := binaryChecks(h, g1, g2, lg)
+			err := binaryChecks(g1, g2, lg)
 			lg.Printf("=========================== END ============================")
 			if err != nil {
 				if strings.HasPrefix(err.Error(), "TopologyException") {

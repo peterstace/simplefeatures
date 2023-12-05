@@ -4,6 +4,7 @@ package rawgeos
 #cgo LDFLAGS: -lgeos_c
 #cgo CFLAGS: -Wall
 #include "geos_c.h"
+#include <stdlib.h>
 
 #define MAKE_VALID_MIN_VERSION "3.8.0"
 #define MAKE_VALID_MISSING ( \
@@ -117,6 +118,13 @@ func Overlaps(a, b geom.Geometry) (bool, error) {
 		return C.GEOSOverlaps_r(h, a, b)
 	})
 	return result, wrap(err, "executing GEOSOverlaps_r")
+}
+
+func EqualsExact(a, b geom.Geometry) (bool, error) {
+	result, err := binaryOpB(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry) C.char {
+		return C.GEOSEqualsExact_r(h, a, b, C.double(0.0))
+	})
+	return result, wrap(err, "executing GEOSEqualsExact_r")
 }
 
 func Union(a, b geom.Geometry) (geom.Geometry, error) {
@@ -249,4 +257,190 @@ func UnaryUnion(g geom.Geometry) (geom.Geometry, error) {
 		return C.GEOSUnaryUnion_r(ctx, g)
 	})
 	return result, wrap(err, "executing GEOSUnaryUnion_r")
+}
+
+func Reverse(g geom.Geometry) (geom.Geometry, error) {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSReverse_r(ctx, g)
+	})
+	return result, wrap(err, "executing GEOSReverse_r")
+}
+
+func Boundary(g geom.Geometry) (geom.Geometry, error) {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSBoundary_r(ctx, g)
+	})
+	return result, wrap(err, "executing GEOSBoundary_r")
+}
+
+func AsText(g geom.Geometry) (string, error) {
+	var result string
+	if err := unaryOpE(g, func(h *handle, gh *C.GEOSGeometry) error {
+		writer := C.GEOSWKTWriter_create_r(h.context)
+		if writer == nil {
+			return wrap(h.err(), "executing GEOSWKTWriter_create_r")
+		}
+		defer C.GEOSWKTWriter_destroy_r(h.context, writer)
+		C.GEOSWKTWriter_setTrim_r(h.context, writer, 1)
+
+		cstr := C.GEOSWKTWriter_write_r(h.context, writer, gh)
+		if cstr == nil {
+			return wrap(h.err(), "executing GEOSWKTWriter_write_r")
+		}
+		defer C.GEOSFree_r(h.context, unsafe.Pointer(cstr))
+		result = C.GoString(cstr)
+
+		return nil
+	}); err != nil {
+		return "", err
+	}
+	return result, nil
+}
+
+func AsBinary(g geom.Geometry) ([]byte, error) {
+	var result []byte
+	if err := unaryOpE(g, func(h *handle, gh *C.GEOSGeometry) error {
+		var size C.size_t
+		cptr := C.GEOSGeomToWKB_buf_r(h.context, gh, &size)
+		if cptr == nil {
+			return wrap(h.err(), "executing GEOSGeomToWKB_buf_r")
+		}
+		defer C.GEOSFree_r(h.context, unsafe.Pointer(cptr))
+		result = C.GoBytes(unsafe.Pointer(cptr), C.int(size))
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func IsValid(g geom.Geometry) (bool, error) {
+	result, err := unaryOpB(g, func(h C.GEOSContextHandle_t, g *C.GEOSGeometry) C.char {
+		return C.GEOSisValid_r(h, g)
+	})
+	return result, wrap(err, "executing GEOSisValid_r")
+}
+
+func IsEmpty(g geom.Geometry) (bool, error) {
+	result, err := unaryOpB(g, func(h C.GEOSContextHandle_t, g *C.GEOSGeometry) C.char {
+		return C.GEOSisEmpty_r(h, g)
+	})
+	return result, wrap(err, "executing GEOSisEmpty_r")
+}
+
+func IsRing(g geom.Geometry) (bool, error) {
+	result, err := unaryOpB(g, func(h C.GEOSContextHandle_t, g *C.GEOSGeometry) C.char {
+		return C.GEOSisRing_r(h, g)
+	})
+	return result, wrap(err, "executing GEOSisRing_r")
+}
+
+func IsSimple(g geom.Geometry) (bool, error) {
+	result, err := unaryOpB(g, func(h C.GEOSContextHandle_t, g *C.GEOSGeometry) C.char {
+		return C.GEOSisSimple_r(h, g)
+	})
+	return result, wrap(err, "executing GEOSisSimple_r")
+}
+
+func ConvexHull(g geom.Geometry) (geom.Geometry, error) {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSConvexHull_r(ctx, g)
+	})
+	return result, wrap(err, "executing GEOSConvexHull_r")
+}
+
+func Centroid(g geom.Geometry) (geom.Geometry, error) {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSGetCentroid_r(ctx, g)
+	})
+	return result, wrap(err, "executing GEOSGetCentroid_r")
+}
+
+func Envelope(g geom.Geometry) (geom.Geometry, error) {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSEnvelope_r(ctx, g)
+	})
+	return result, wrap(err, "executing GEOSEnvelope_r")
+}
+
+func Area(g geom.Geometry) (float64, error) {
+	result, err := unaryOpF(g, func(h C.GEOSContextHandle_t, g *C.GEOSGeometry, d *C.double) C.int {
+		return C.GEOSArea_r(h, g, d)
+	})
+	return result, wrap(err, "executing GEOSArea_r")
+}
+
+func Length(g geom.Geometry) (float64, error) {
+	result, err := unaryOpF(g, func(h C.GEOSContextHandle_t, g *C.GEOSGeometry, d *C.double) C.int {
+		return C.GEOSLength_r(h, g, d)
+	})
+	return result, wrap(err, "executing GEOSLength_r")
+}
+
+func Dimension(g geom.Geometry) (int, error) {
+	result, err := unaryOpI(g, func(h C.GEOSContextHandle_t, g *C.GEOSGeometry) C.int {
+		return C.GEOSGeom_getDimensions_r(h, g)
+	})
+	return result, wrap(err, "executing GEOSGeom_getDimensions_r")
+}
+
+func Distance(a, b geom.Geometry) (float64, error) {
+	result, err := binaryOpF(a, b, func(h C.GEOSContextHandle_t, a, b *C.GEOSGeometry, d *C.double) C.int {
+		return C.GEOSDistance_r(h, a, b, d)
+	})
+	return result, wrap(err, "executing GEOSDistance_r")
+}
+
+func RelatePatternMatch(mat, pat string) (bool, error) {
+	h, err := newHandle()
+	if err != nil {
+		return false, err
+	}
+	defer h.release()
+
+	cMat := C.CString(mat)
+	cPat := C.CString(pat)
+	defer C.free(unsafe.Pointer(cMat))
+	defer C.free(unsafe.Pointer(cPat))
+
+	return h.boolErr(C.GEOSRelatePatternMatch_r(h.context, cMat, cPat))
+}
+
+func FromText(wkt string) (geom.Geometry, error) {
+	h, err := newHandle()
+	if err != nil {
+		return geom.Geometry{}, err
+	}
+	defer h.release()
+
+	cwkt := C.CString(wkt)
+	defer C.free(unsafe.Pointer(cwkt))
+
+	reader := C.GEOSWKTReader_create_r(h.context)
+	if reader == nil {
+		return geom.Geometry{}, fmt.Errorf("creating wkt reader: %w", h.err())
+	}
+	defer C.GEOSWKTReader_destroy_r(h.context, reader)
+
+	gh := C.GEOSWKTReader_read_r(h.context, reader, cwkt)
+	if gh == nil {
+		return geom.Geometry{}, h.err()
+	}
+	return h.decode(gh)
+}
+
+func FromBinary(wkb []byte) (geom.Geometry, error) {
+	h, err := newHandle()
+	if err != nil {
+		return geom.Geometry{}, err
+	}
+	defer h.release()
+
+	gh, err := h.createGeometryHandleFromWKB(wkb)
+	if err != nil {
+		return geom.Geometry{}, err
+	}
+	defer C.GEOSGeom_destroy_r(h.context, gh)
+
+	return h.decode(gh)
 }

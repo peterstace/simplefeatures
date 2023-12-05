@@ -7,6 +7,10 @@ YYYY-MM-DD
 - Eliminates some redundant benchmarks, improving the execution speed of the
   benchmark suite.
 
+- Unify the GEOS wrappers used for the
+  `github.com/peterstace/simplefeatures/geos` package and the package used for
+  reference implementation tests.
+
 ## v0.46.0
 
 2023-11-24

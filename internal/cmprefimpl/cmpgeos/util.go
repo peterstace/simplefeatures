@@ -201,10 +201,6 @@ func tokenizeWKT(wkt string) []string {
 	return tokens
 }
 
-func isNonEmptyGeometryCollection(g geom.Geometry) bool {
-	return g.IsGeometryCollection() && !g.IsEmpty()
-}
-
 func mantissaTerminatesQuickly(g geom.Geometry) bool {
 	termF := func(f float64) bool {
 		const (

@@ -125,6 +125,10 @@ func (h *handle) release() {
 // createGeometryHandle converts a Geometry object into a GEOS geometry handle.
 func (h *handle) createGeometryHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
 	wkb := g.AsBinary()
+	return h.createGeometryHandleFromWKB(wkb)
+}
+
+func (h *handle) createGeometryHandleFromWKB(wkb []byte) (*C.GEOSGeometry, error) {
 	gh := C.GEOSWKBReader_read_r(
 		h.context,
 		h.reader,
@@ -156,6 +160,15 @@ func (h *handle) boolErr(c C.char) (bool, error) {
 	default:
 		return false, wrap(h.err(), "illegal result %v from GEOS", c)
 	}
+}
+
+// intErr converts an int result encoding an error status to a Go error.
+func (h *handle) intErr(i C.int) error {
+	// From geos_c.h: return 1 on success, 0 on exception.
+	if i == 1 {
+		return nil
+	}
+	return h.err()
 }
 
 func (h *handle) decode(gh *C.GEOSGeometry) (geom.Geometry, error) {
