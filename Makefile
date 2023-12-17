@@ -27,36 +27,36 @@ cmpgeos:
 	task=cmpgeos; $(DC_RUN)
 
 DC_GEOS_RUN = \
-	env GEOS_VERSION=$$version \
 	docker compose \
-	--project-name sf-geos-$$(echo $$version | sed 's/\./-/g') \
+	--project-name sf-geos-$$(echo $$geos_version | sed 's/\./-/g') \
 	--file .ci/docker-compose-geos.yml \
 	up \
+	--build \
 	--abort-on-container-exit
+
+.PHONY: geos-3.12
+geos-3.12:
+	export alpine_version=3.19 geos_version=3.12.1-r0; $(DC_GEOS_RUN)
 
 .PHONY: geos-3.11
 geos-3.11:
-	version=3.11.2; $(DC_GEOS_RUN)
+	export alpine_version=3.18 geos_version=3.11.2-r0; $(DC_GEOS_RUN)
 
 .PHONY: geos-3.10
 geos-3.10:
-	version=3.10.5; $(DC_GEOS_RUN)
+	export alpine_version=3.16 geos_version=3.10.3-r0; $(DC_GEOS_RUN)
 
 .PHONY: geos-3.9
 geos-3.9:
-	version=3.9.4; $(DC_GEOS_RUN)
+	export alpine_version=3.14 geos_version=3.9.1-r0; $(DC_GEOS_RUN)
 
 .PHONY: geos-3.8
 geos-3.8:
-	version=3.8.3; $(DC_GEOS_RUN)
-
-.PHONY: geos-3.7
-geos-3.7:
-	version=3.7.5; $(DC_GEOS_RUN)
+	export alpine_version=3.13 geos_version=3.8.1-r2; $(DC_GEOS_RUN)
 
 .PHONY: geos
+geos: geos-3.12
 geos: geos-3.11
 geos: geos-3.10
 geos: geos-3.9
 geos: geos-3.8
-geos: geos-3.7
