@@ -1,8 +1,12 @@
 version: "2.1"
 services:
   geostests:
-    image: peterstace/simplefeatures-ci:geos-${GEOS_VERSION}-go-1.20.4
+    build:
+      dockerfile: geos.Dockerfile
+      args:
+        ALPINE_VERSION: $alpine_version
+        GEOS_VERSION: $geos_version
     working_dir: /mnt/sf
-    entrypoint: go test -test.count=1 -test.run=. ./geos
+    entrypoint: go test -test.count=1 -test.run=. ./geos ./internal/rawgeos
     volumes:
       - ..:/mnt/sf

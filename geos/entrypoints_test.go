@@ -1,4 +1,4 @@
-package rawgeos_test
+package geos_test
 
 import (
 	"math"
@@ -29,7 +29,7 @@ func expectNoErr(t *testing.T, err error) {
 func expectErr(t *testing.T, err error) {
 	t.Helper()
 	if err == nil {
-		t.Fatal("unexpected error but got nil")
+		t.Fatal("expected error but got nil")
 	}
 }
 
@@ -625,11 +625,6 @@ func TestUnion(t *testing.T) {
 		},
 		{
 			"POINT EMPTY",
-			"POINT(3 4)",
-			"POINT(3 4)",
-		},
-		{
-			"POINT EMPTY",
 			"POINT EMPTY",
 			"GEOMETRYCOLLECTION EMPTY",
 		},
@@ -897,14 +892,6 @@ func TestCoverageUnion(t *testing.T) {
 			input: `GEOMETRYCOLLECTION(
 				POLYGON((0 0,0 1,1 0,0 0)),
 				POLYGON((0 0,0 1,1 1,0 0))
-			)`,
-			wantErr: true,
-		},
-		{
-			// Input constraint violated: not noded correctly.
-			input: `GEOMETRYCOLLECTION(
-				POLYGON((0 0,0 1,1 1,1 0,0 0)),
-				POLYGON((0 1,2 1,2 2,0 2,0 1))
 			)`,
 			wantErr: true,
 		},
