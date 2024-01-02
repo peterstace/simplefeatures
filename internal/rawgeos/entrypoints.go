@@ -273,6 +273,13 @@ func Boundary(g geom.Geometry) (geom.Geometry, error) {
 	return result, wrap(err, "executing GEOSBoundary_r")
 }
 
+func MinimumRotatedRectangle(g geom.Geometry) (geom.Geometry, error) {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSMinimumRotatedRectangle_r(ctx, g)
+	})
+	return result, wrap(err, "executing GEOSMinimumRotatedRectangle_r")
+}
+
 func AsText(g geom.Geometry) (string, error) {
 	var result string
 	if err := unaryOpE(g, func(h *handle, gh *C.GEOSGeometry) error {

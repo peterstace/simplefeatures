@@ -42,6 +42,7 @@ func unaryChecks(g geom.Geometry, lg *log.Logger) error {
 		{"Centroid", checkCentroid},
 		{"PointOnSurface", checkPointOnSurface},
 		{"Simplify", checkSimplify},
+		{"RotatedMinimumAreaBoundingRectangle", checkRotatedMinimumAreaBoundingRectangle},
 	} {
 		lg.Printf("checking %s", check.name)
 		if err := check.fn(g, lg); err != nil {
@@ -577,6 +578,59 @@ func checkSimplify(g geom.Geometry, log *log.Logger) error {
 	return nil
 }
 
+func checkRotatedMinimumAreaBoundingRectangle(g geom.Geometry, log *log.Logger) error {
+	want, err := rawgeos.MinimumRotatedRectangle(g)
+	if err != nil {
+		return err
+	}
+	wantArea := want.Area()
+
+	got := geom.RotatedMinimumAreaBoundingRectangle(g)
+	gotArea := got.Area()
+
+	// The rotated bounding rectangle with minimum area is ambiguous is not
+	// always unique, and simplefeatures and GEOS (both correctly) choose
+	// different ones. To account for this, the comparison between the GEOS
+	// result and the simplefeatures result is broken into two parts...
+
+	// ...First, the areas are compared.
+	const areaDiffThreshold = 1e-10
+	if math.Abs(wantArea-gotArea) > areaDiffThreshold {
+		log.Printf("areas differ by more than %v", areaDiffThreshold)
+		log.Printf("want: (area %v) %v", wantArea, want.AsText())
+		log.Printf("got:  (area %v) %v", gotArea, got.AsText())
+		return errMismatch
+	}
+
+	// ...Second, we check if any of the input geometry is outside of the
+	// minimum bounding rectangle. Since GEOS cannot compute the difference of
+	// two geometries if one of them is a GeometryCollection, we break into
+	// parts and check the difference of each part individually.
+	var parts []geom.Geometry
+	if gc, ok := g.AsGeometryCollection(); ok {
+		parts = gc.Dump()
+	} else {
+		parts = []geom.Geometry{g}
+	}
+	for i, part := range parts {
+		overhang, err := rawgeos.Difference(part, got)
+		if err != nil {
+			return err
+		}
+		overhangArea := overhang.Area()
+		const overhangAreaThreshold = 1e-14
+		if overhangArea > overhangAreaThreshold {
+			log.Printf("part WKT (%d of %d): %v", i+1, len(parts), part.AsText())
+			log.Printf("part area overhangs MBR by %v (threshold %v)", overhangArea, overhangAreaThreshold)
+			log.Printf("overhang: (area %v) %v", overhangArea, overhang.AsText())
+			log.Printf("want: (area %v) %v", wantArea, want.AsText())
+			log.Printf("got:  (area %v) %v", gotArea, got.AsText())
+			return errMismatch
+		}
+	}
+	return nil
+}
+
 func binaryChecks(g1, g2 geom.Geometry, lg *log.Logger) error {
 	for _, g := range []geom.Geometry{g1, g2} {
 		if valid, err := checkIsValid(g, lg); err != nil {
@@ -620,6 +674,10 @@ func checkIntersects(g1, g2 geom.Geometry, log *log.Logger) error {
 		// https://github.com/peterstace/simplefeatures/issues/274
 		"LINESTRING(0.5 0,0.5000000000000001 0.5)":                              true,
 		"MULTILINESTRING((0 0,2 2.000000000000001),(1 0,-1 2.000000000000001))": true,
+
+		// GEOS gives the wrong result for the intersection of these two inputs:
+		"POLYGON((4.4 8.2,2.8 7.4,5.4 2.2,7 3,4.4 8.2))": true,
+		"POLYGON((1 4,3 4,3 7,1 7,1 4))":                 true,
 	}
 	if skipList[g1.AsText()] || skipList[g2.AsText()] {
 		// Skipping test because GEOS gives the incorrect result for *some*
