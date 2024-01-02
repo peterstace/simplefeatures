@@ -588,10 +588,11 @@ func checkRotatedMinimumAreaBoundingRectangle(g geom.Geometry, log *log.Logger) 
 	got := geom.RotatedMinimumAreaBoundingRectangle(g)
 	gotArea := got.Area()
 
-	// The rotated bounding rectangle with minimum area is ambiguous is not
-	// always unique, and simplefeatures and GEOS (both correctly) choose
-	// different ones. To account for this, the comparison between the GEOS
-	// result and the simplefeatures result is broken into two parts...
+	// The rotated bounding rectangle with minimum area is not always unique
+	// (multiple could exist with the same minimum area). Simplefeatures and
+	// GEOS (both correctly) choose different ones in some cases. To account
+	// for this, the comparison between the GEOS result and the simplefeatures
+	// result is broken into two parts...
 
 	// ...First, the areas are compared.
 	const areaDiffThreshold = 1e-10
