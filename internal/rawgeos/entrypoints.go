@@ -370,6 +370,13 @@ func Envelope(g geom.Geometry) (geom.Geometry, error) {
 	return result, wrap(err, "executing GEOSEnvelope_r")
 }
 
+func MinimumDiameter(g geom.Geometry) (geom.Geometry, error) {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSMinimumWidth_r(ctx, g)
+	})
+	return result, wrap(err, "executing GEOSMinimumWidth_r")
+}
+
 func Area(g geom.Geometry) (float64, error) {
 	result, err := unaryOpF(g, func(h C.GEOSContextHandle_t, g *C.GEOSGeometry, d *C.double) C.int {
 		return C.GEOSArea_r(h, g, d)
