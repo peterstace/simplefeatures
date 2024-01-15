@@ -7,7 +7,7 @@ import (
 
 // RotatedMinimumAreaBoundingRectangle finds a rectangle with minimum area that
 // fully encloses the geometry. If the geometry is empty, the empty geometry of
-// the same type is returned. If the bounding rectangle would be degenerate
+// the same type is returned. If the bounding rectangle is degenerate
 // (zero area), then a point or line string (with a single line segment) will
 // be returned.
 func RotatedMinimumAreaBoundingRectangle(g Geometry) Geometry {
@@ -16,7 +16,7 @@ func RotatedMinimumAreaBoundingRectangle(g Geometry) Geometry {
 
 // RotatedMinimumWidthBoundingRectangle finds a rectangle with minimum width
 // that fully encloses the geometry. If the geometry is empty, the empty
-// geometry of the same type is returned. If the bounding rectangle would be
+// geometry of the same type is returned. If the bounding rectangle is
 // degenerate (zero area), then a point or line string (with a single line
 // segment) will be returned.
 func RotatedMinimumWidthBoundingRectangle(g Geometry) Geometry {
@@ -33,7 +33,7 @@ func rotatedMinimumBoundingRectangle(g Geometry, metric func(rotatedRectangle) f
 		return hull
 	case TypePolygon:
 		seq := hull.MustAsPolygon().ExteriorRing().Coordinates()
-		rect := findBestMBR(seq, metric)
+		rect := findMBR(seq, metric)
 		return rect.asPoly().AsGeometry()
 	default:
 		panic(fmt.Sprintf("unexpected convex hull geometry type: %s", hull.Type()))
@@ -74,17 +74,17 @@ func (r rotatedRectangle) widthSq() float64 {
 	return math.Min(r.span1.lengthSq(), r.span2.lengthSq())
 }
 
-// findBestMBR finds a bounding rectangle for a convex ring that minimises some
-// metric. It does this by enumerating each candidate rotated bounding
+// findMBR finds a "minimum bounding rectangle" for a convex ring (minimising
+// some metric). It does this by enumerating each candidate rotated bounding
 // rectangle, and finding the one with the minimum metric value. There is a
 // candidate rectangle corresponding to each edge in the convex ring.
-func findBestMBR(seq Sequence, metric func(rotatedRectangle) float64) rotatedRectangle {
+func findMBR(seq Sequence, metric func(rotatedRectangle) float64) rotatedRectangle {
 	rhs := caliper{orient: XY.identity}
 	far := caliper{orient: XY.rotateCCW90}
 	lhs := caliper{orient: XY.rotate180}
 
-	var bestRect rotatedRectangle
-	var bestMetric float64
+	var minRect rotatedRectangle
+	var minMetric float64
 
 	for i := 0; i+1 < seq.Length(); i++ {
 		rhs.update(seq, i)
@@ -97,18 +97,18 @@ func findBestMBR(seq Sequence, metric func(rotatedRectangle) float64) rotatedRec
 		}
 		lhs.update(seq, i)
 
-		canadidateRect := rotatedRectangle{
+		candidateRect := rotatedRectangle{
 			origin: seq.GetXY(i).Add(lhs.proj),
 			span1:  rhs.proj.Sub(lhs.proj),
 			span2:  far.proj,
 		}
-		candidateMetric := metric(canadidateRect)
-		if i == 0 || candidateMetric < bestMetric {
-			bestMetric = candidateMetric
-			bestRect = canadidateRect
+		candidateMetric := metric(candidateRect)
+		if i == 0 || candidateMetric < minMetric {
+			minMetric = candidateMetric
+			minRect = candidateRect
 		}
 	}
-	return bestRect
+	return minRect
 }
 
 // caliper is a helper struct for finding the maximum perpendicular distance
