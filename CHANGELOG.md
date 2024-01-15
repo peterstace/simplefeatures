@@ -11,8 +11,10 @@ YYYY-MM-DD
   `github.com/peterstace/simplefeatures/geos` package and the package used for
   reference implementation tests.
 
-- Adds a new function `RotatedMinimumAreaBoundingRectangle` that calculates the
-  minimum-area non-axis-aligned bounding rectangle for a geometry.
+- Adds new functions `RotatedMinimumAreaBoundingRectangle` and
+  `RotatedMinimumWidthBoundingRectangle`. These functions calculate the
+  non-axis-aligned (rotated) bounding rectangles for geometries, minimising
+  either the area or width.
 
 ## v0.46.0
 

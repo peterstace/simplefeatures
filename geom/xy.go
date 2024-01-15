@@ -145,6 +145,11 @@ func (w XY) rotate180() XY {
 	}
 }
 
+// identity returns the XY unchanged.
+func (w XY) identity() XY {
+	return w
+}
+
 // proj returns the projection of w onto o.
 func (w XY) proj(o XY) XY {
 	return o.Scale(w.Dot(o) / o.Dot(o))

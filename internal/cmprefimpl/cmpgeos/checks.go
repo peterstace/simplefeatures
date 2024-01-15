@@ -679,6 +679,8 @@ func checkIntersects(g1, g2 geom.Geometry, log *log.Logger) error {
 		// GEOS gives the wrong result for the intersection of these two inputs:
 		"POLYGON((4.4 8.2,2.8 7.4,5.4 2.2,7 3,4.4 8.2))": true,
 		"POLYGON((1 4,3 4,3 7,1 7,1 4))":                 true,
+		"POLYGON((1.5827586206896551 -0.49310344827586206,7.575862068965518 6.589655172413793,5.424137931034483 8.410344827586208,-0.5689655172413792 1.3275862068965518,1.5827586206896551 -0.49310344827586206))": true,
+		"POLYGON((-0.057692307692307696 -0.038461538461538464,3 1.9999999999999998,2.230769230769231 3.1538461538461537,-0.826923076923077 1.1153846153846154,-0.057692307692307696 -0.038461538461538464))":        true,
 	}
 	if skipList[g1.AsText()] || skipList[g2.AsText()] {
 		// Skipping test because GEOS gives the incorrect result for *some*
