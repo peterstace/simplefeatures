@@ -127,3 +127,25 @@ func (w XY) box() rtree.Box {
 		MaxY: w.Y,
 	}
 }
+
+// rotateCCW90 treats the XY as a vector, rotating it 90 degrees in a counter
+// clockwise direction (assuming a right handed/positive orientation).
+func (w XY) rotateCCW90() XY {
+	return XY{
+		X: -w.Y,
+		Y: w.X,
+	}
+}
+
+// rotate180 treats the XY as a vector, rotating it 180 degrees.
+func (w XY) rotate180() XY {
+	return XY{
+		X: -w.X,
+		Y: -w.Y,
+	}
+}
+
+// proj returns the projection of w onto o.
+func (w XY) proj(o XY) XY {
+	return o.Scale(w.Dot(o) / o.Dot(o))
+}
