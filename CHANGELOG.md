@@ -1,8 +1,15 @@
 # Changelog
 
-## Unreleased
+## v0.47.0
 
-YYYY-MM-DD
+2024-01-19
+
+__Special thanks to Albert Teoh for contributing to this release.__
+
+- Adds new functions `RotatedMinimumAreaBoundingRectangle` and
+  `RotatedMinimumWidthBoundingRectangle`. These functions calculate the
+  non-axis-aligned (rotated) bounding rectangles for geometries, minimising
+  either the area or width.
 
 - Eliminates some redundant benchmarks, improving the execution speed of the
   benchmark suite.
@@ -10,11 +17,6 @@ YYYY-MM-DD
 - Unify the GEOS wrappers used for the
   `github.com/peterstace/simplefeatures/geos` package and the package used for
   reference implementation tests.
-
-- Adds new functions `RotatedMinimumAreaBoundingRectangle` and
-  `RotatedMinimumWidthBoundingRectangle`. These functions calculate the
-  non-axis-aligned (rotated) bounding rectangles for geometries, minimising
-  either the area or width.
 
 ## v0.46.0
 
