@@ -145,10 +145,7 @@ func convexHullPointSet(g Geometry) []XY {
 
 func monotoneChain(pts []XY) []XY {
 	sort.Slice(pts, func(i, j int) bool {
-		if pts[i].X != pts[j].X {
-			return pts[i].X < pts[j].X
-		}
-		return pts[i].Y < pts[j].Y
+		return pts[i].Less(pts[j])
 	})
 
 	// Calculate lower hull.
