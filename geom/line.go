@@ -197,9 +197,7 @@ func rightmostThenHighestIndex(ps []XY) int {
 func leftmostThenLowestIndex(ps []XY) int {
 	rpi := 0
 	for i := 1; i < len(ps); i++ {
-		if ps[i].X < ps[rpi].X ||
-			(ps[i].X == ps[rpi].X &&
-				ps[i].Y < ps[rpi].Y) {
+		if ps[i].Less(ps[rpi]) {
 			rpi = i
 		}
 	}
