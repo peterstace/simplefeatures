@@ -473,3 +473,18 @@ func (s LineString) InterpolateEvenlySpacedPoints(n int) MultiPoint {
 	}
 	return NewMultiPoint(pts)
 }
+
+// SnapToGrid returns a copy of the LineString with all coordinates snapped to
+// a base 10 grid.
+//
+// The grid spacing is specified by the number of decimal places to round to
+// (with negative decimal places being allowed). E.g., a decimalPlaces value of
+// 2 would cause all coordinates to be rounded to the nearest 0.01, and a
+// decimalPlaces of -1 would cause all coordinates to be rounded to the nearest
+// 10.
+//
+// Returned LineStrings may be invalid due to snapping, even if the input
+// geometry was valid.
+func (s LineString) SnapToGrid(decimalPlaces int) LineString {
+	return s.TransformXY(snapToGridXY(decimalPlaces))
+}

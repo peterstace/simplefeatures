@@ -338,3 +338,15 @@ func (m MultiPoint) Summary() string {
 func (m MultiPoint) String() string {
 	return m.Summary()
 }
+
+// SnapToGrid returns a copy of the MultiPoint with all coordinates snapped to
+// a base 10 grid.
+//
+// The grid spacing is specified by the number of decimal places to round to
+// (with negative decimal places being allowed). E.g., a decimalPlaces value of
+// 2 would cause all coordinates to be rounded to the nearest 0.01, and a
+// decimalPlaces of -1 would cause all coordinates to be rounded to the nearest
+// 10.
+func (m MultiPoint) SnapToGrid(decimalPlaces int) MultiPoint {
+	return m.TransformXY(snapToGridXY(decimalPlaces))
+}
