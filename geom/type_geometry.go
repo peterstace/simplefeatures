@@ -973,3 +973,25 @@ func (g Geometry) Validate() error {
 		panic("unknown type: " + g.Type().String())
 	}
 }
+
+// Densify returns a new Geometry with additional linearly interpolated control
+// points such that the distance between any two consecutive control points is
+// at most the given maxDistance.
+func (g Geometry) Densify(maxDistance float64) Geometry {
+	switch g.gtype {
+	case TypePoint, TypeMultiPoint:
+		return g
+	case TypeLineString:
+		return g.MustAsLineString().Densify(maxDistance).AsGeometry()
+	case TypeMultiLineString:
+		return g.MustAsMultiLineString().Densify(maxDistance).AsGeometry()
+	case TypePolygon:
+		return g.MustAsPolygon().Densify(maxDistance).AsGeometry()
+	case TypeMultiPolygon:
+		return g.MustAsMultiPolygon().Densify(maxDistance).AsGeometry()
+	case TypeGeometryCollection:
+		return g.MustAsGeometryCollection().Densify(maxDistance).AsGeometry()
+	default:
+		panic("unknown type: " + g.Type().String())
+	}
+}

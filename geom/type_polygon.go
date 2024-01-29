@@ -681,3 +681,14 @@ func (p Polygon) Simplify(threshold float64, nv ...NoValidate) (Polygon, error) 
 	}
 	return simpl, nil
 }
+
+// Densify returns a new Polygon with additional linearly interpolated control
+// points such that the distance between any two consecutive control points is
+// at most the given maxDistance.
+func (p Polygon) Densify(maxDistance float64) Polygon {
+	rings := make([]LineString, len(p.rings))
+	for i, r := range p.rings {
+		rings[i] = r.Densify(maxDistance)
+	}
+	return Polygon{rings, p.ctype}
+}

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+YYYY-MM-DD
+
+- Adds new `Densify` methods on each concrete geometry types that add
+  additional linearly interpolated control points such that the distance
+  between any two consecutive control points is at most a fixed distance. This
+  can be useful when transforming geometries from one projection to another.
+
 ## v0.47.0
 
 2024-01-19
