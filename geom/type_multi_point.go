@@ -142,10 +142,10 @@ func (m MultiPoint) Value() (driver.Value, error) {
 //
 // If the WKB doesn't represent a MultiPoint geometry, then an error is returned.
 //
-// It constructs the resultant geometry with no ConstructionOptions. If
-// ConstructionOptions are needed, then the value should be scanned into a byte
-// slice and then UnmarshalWKB called manually (passing in the
-// ConstructionOptions as desired).
+// Geometry constraint validation is performed on the resultant geometry (an
+// error will be returned if the geometry is invalid). If this validation isn't
+// needed or is undesirable, then the WKB should be scanned into a byte slice
+// and then UnmarshalWKB called manually (passing in NoValidate{}).
 func (m *MultiPoint) Scan(src interface{}) error {
 	return scanAsType(src, m)
 }
@@ -337,4 +337,16 @@ func (m MultiPoint) Summary() string {
 // String returns the string representation of the MultiPoint.
 func (m MultiPoint) String() string {
 	return m.Summary()
+}
+
+// SnapToGrid returns a copy of the MultiPoint with all coordinates snapped to
+// a base 10 grid.
+//
+// The grid spacing is specified by the number of decimal places to round to
+// (with negative decimal places being allowed). E.g., a decimalPlaces value of
+// 2 would cause all coordinates to be rounded to the nearest 0.01, and a
+// decimalPlaces of -1 would cause all coordinates to be rounded to the nearest
+// 10.
+func (m MultiPoint) SnapToGrid(decimalPlaces int) MultiPoint {
+	return m.TransformXY(snapToGridXY(decimalPlaces))
 }
