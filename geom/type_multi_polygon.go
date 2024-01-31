@@ -573,6 +573,8 @@ func (m MultiPolygon) Simplify(threshold float64, nv ...NoValidate) (MultiPolygo
 // Densify returns a new MultiPolygon with additional linearly interpolated
 // control points such that the distance between any two consecutive control
 // points is at most the given maxDistance.
+//
+// Panics if maxDistance is zero or negative.
 func (m MultiPolygon) Densify(maxDistance float64) MultiPolygon {
 	ps := make([]Polygon, len(m.polys))
 	for i, p := range m.polys {

@@ -556,6 +556,8 @@ func (c GeometryCollection) Simplify(threshold float64, nv ...NoValidate) (Geome
 // Densify returns a new GeometryCollection with additional linearly
 // interpolated control points such that the distance between any two
 // consecutive control points is at most the given maxDistance.
+//
+// Panics if maxDistance is zero or negative.
 func (c GeometryCollection) Densify(maxDistance float64) GeometryCollection {
 	gs := make([]Geometry, len(c.geoms))
 	for i, g := range c.geoms {

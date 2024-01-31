@@ -477,6 +477,8 @@ func (s LineString) InterpolateEvenlySpacedPoints(n int) MultiPoint {
 // Densify returns a new LineString with additional linearly interpolated
 // control points such that the distance between any two consecutive control
 // points is at most the given maxDistance.
+//
+// Panics if maxDistance is zero or negative.
 func (s LineString) Densify(minDistance float64) LineString {
 	return NewLineString(densify(s.seq, minDistance))
 }

@@ -978,9 +978,16 @@ func (g Geometry) Validate() error {
 // Densify returns a new Geometry with additional linearly interpolated control
 // points such that the distance between any two consecutive control points is
 // at most the given maxDistance.
+//
+// Panics if maxDistance is zero or negative.
 func (g Geometry) Densify(maxDistance float64) Geometry {
 	switch g.gtype {
 	case TypePoint, TypeMultiPoint:
+		// Points cannot be densified, but still check that the max distance is
+		// valid for consistency between types.
+		if maxDistance <= 0 {
+			panic("maxDistance must be positive")
+		}
 		return g
 	case TypeLineString:
 		return g.MustAsLineString().Densify(maxDistance).AsGeometry()

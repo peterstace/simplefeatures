@@ -73,3 +73,22 @@ func TestDensify(t *testing.T) {
 		})
 	}
 }
+
+func TestDensifyInvalidMaxDist(t *testing.T) {
+	for i, tc := range []struct {
+		input   string
+		maxDist float64
+	}{
+		{"LINESTRING(0 0,1 0)", -1},
+		{"LINESTRING(0 0,1 0)", 0},
+		{"POINT(0 0)", -1},
+		{"POINT(0 0)", 0},
+		{"MULTIPOINT((0 0))", -1},
+		{"MULTIPOINT((0 0))", 0},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			input := geomFromWKT(t, tc.input)
+			expectPanics(t, func() { input.Densify(tc.maxDist) })
+		})
+	}
+}

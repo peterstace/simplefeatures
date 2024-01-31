@@ -514,6 +514,8 @@ func (m MultiLineString) Simplify(threshold float64) MultiLineString {
 // Densify returns a new MultiLineString with additional linearly interpolated
 // control points such that the distance between any two consecutive control
 // points is at most the given maxDistance.
+//
+// Panics if maxDistance is zero or negative.
 func (m MultiLineString) Densify(maxDistance float64) MultiLineString {
 	lss := make([]LineString, len(m.lines))
 	for i := range m.lines {

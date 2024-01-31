@@ -6,6 +6,10 @@ import "math"
 // inserted such that the distance between adjacent sets of coordinates is at
 // most maxDist.
 func densify(seq Sequence, maxDist float64) Sequence {
+	if maxDist <= 0 {
+		panic("maxDist must be positive")
+	}
+
 	if seq.Length() == 0 {
 		return seq
 	}
