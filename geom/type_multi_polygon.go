@@ -569,3 +569,18 @@ func (m MultiPolygon) Simplify(threshold float64, nv ...NoValidate) (MultiPolygo
 	}
 	return simpl, nil
 }
+
+// SnapToGrid returns a MultiPolygon of the geometry with all coordinates
+// snapped to a base 10 grid.
+//
+// The grid spacing is specified by the number of decimal places to round to
+// (with negative decimal places being allowed). E.g., a decimalPlaces value of
+// 2 would cause all coordinates to be rounded to the nearest 0.01, and a
+// decimalPlaces of -1 would cause all coordinates to be rounded to the nearest
+// 10.
+//
+// Returned MultiPolygons may be invalid due to snapping, even if the input
+// geometry was valid.
+func (m MultiPolygon) SnapToGrid(decimalPlaces int) MultiPolygon {
+	return m.TransformXY(snapToGridXY(decimalPlaces))
+}

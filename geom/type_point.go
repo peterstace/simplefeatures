@@ -268,3 +268,15 @@ func (p Point) Summary() string {
 func (p Point) String() string {
 	return p.Summary()
 }
+
+// SnapToGrid returns a copy of the Point with all coordinates snapped to a
+// base 10 grid.
+//
+// The grid spacing is specified by the number of decimal places to round to
+// (with negative decimal places being allowed). E.g., a decimalPlaces value of
+// 2 would cause all coordinates to be rounded to the nearest 0.01, and a
+// decimalPlaces of -1 would cause all coordinates to be rounded to the nearest
+// 10.
+func (p Point) SnapToGrid(decimalPlaces int) Point {
+	return p.TransformXY(snapToGridXY(decimalPlaces))
+}

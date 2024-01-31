@@ -973,3 +973,35 @@ func (g Geometry) Validate() error {
 		panic("unknown type: " + g.Type().String())
 	}
 }
+
+// SnapToGrid returns a copy of the geometry with all coordinates snapped to a
+// base 10 grid.
+//
+// The grid spacing is specified by the number of decimal places to round to
+// (with negative decimal places being allowed). E.g., a decimalPlaces value of
+// 2 would cause all coordinates to be rounded to the nearest 0.01, and a
+// decimalPlaces of -1 would cause all coordinates to be rounded to the nearest
+// 10.
+//
+// Returned geometries may be invalid due to snapping, even if the input
+// geometry was valid.
+func (g Geometry) SnapToGrid(decimalPlaces int) Geometry {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		return g.MustAsGeometryCollection().SnapToGrid(decimalPlaces).AsGeometry()
+	case TypePoint:
+		return g.MustAsPoint().SnapToGrid(decimalPlaces).AsGeometry()
+	case TypeLineString:
+		return g.MustAsLineString().SnapToGrid(decimalPlaces).AsGeometry()
+	case TypePolygon:
+		return g.MustAsPolygon().SnapToGrid(decimalPlaces).AsGeometry()
+	case TypeMultiPoint:
+		return g.MustAsMultiPoint().SnapToGrid(decimalPlaces).AsGeometry()
+	case TypeMultiLineString:
+		return g.MustAsMultiLineString().SnapToGrid(decimalPlaces).AsGeometry()
+	case TypeMultiPolygon:
+		return g.MustAsMultiPolygon().SnapToGrid(decimalPlaces).AsGeometry()
+	default:
+		panic("unknown type: " + g.Type().String())
+	}
+}

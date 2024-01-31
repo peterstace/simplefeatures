@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+YYYY-MM-DD
+
+- Adds a new method `SnapToGrid` to each concrete geometry type. The method
+  returns a copy of the geometry with its control points snapped to a base 10
+  grid.
+
 ## v0.47.0
 
 2024-01-19
