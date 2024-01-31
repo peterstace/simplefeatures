@@ -270,10 +270,10 @@ func (m MultiPolygon) Value() (driver.Value, error) {
 //
 // If the WKB doesn't represent a MultiPolygon geometry, then an error is returned.
 //
-// It constructs the resultant geometry with no ConstructionOptions. If
-// ConstructionOptions are needed, then the value should be scanned into a byte
-// slice and then UnmarshalWKB called manually (passing in the
-// ConstructionOptions as desired).
+// Geometry constraint validation is performed on the resultant geometry (an
+// error will be returned if the geometry is invalid). If this validation isn't
+// needed or is undesirable, then the WKB should be scanned into a byte slice
+// and then UnmarshalWKB called manually (passing in NoValidate{}).
 func (m *MultiPolygon) Scan(src interface{}) error {
 	return scanAsType(src, m)
 }
