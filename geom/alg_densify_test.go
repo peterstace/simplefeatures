@@ -37,7 +37,7 @@ func TestDensifyEmpty(t *testing.T) {
 func TestDensify(t *testing.T) {
 	for i, tc := range []struct {
 		input   string
-		minDist float64
+		maxDist float64
 		want    string
 	}{
 		// LineString with a single segment (tests threshold logic):
@@ -68,7 +68,7 @@ func TestDensify(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			input := geomFromWKT(t, tc.input)
-			got := input.Densify(tc.minDist)
+			got := input.Densify(tc.maxDist)
 			expectGeomEqWKT(t, got, tc.want)
 		})
 	}
