@@ -32,7 +32,7 @@ func (l linearInterpolator) interpolate(frac float64) Point {
 		return l.seq.Get(idx - 1).AsPoint()
 	}
 
-	p0 := l.seq.Get(idx)
+	p0 := l.seq.Get(idx + 0)
 	p1 := l.seq.Get(idx + 1)
 
 	partial := frac * l.total
@@ -41,17 +41,21 @@ func (l linearInterpolator) interpolate(frac float64) Point {
 	}
 	partial /= p0.XY.distanceTo(p1.XY)
 
-	return Coordinates{
-		XY: XY{
-			X: lerp(p0.X, p1.X, partial),
-			Y: lerp(p0.Y, p1.Y, partial),
-		},
-		Z:    lerp(p0.Z, p1.Z, partial),
-		M:    lerp(p0.M, p1.M, partial),
-		Type: l.seq.CoordinatesType(),
-	}.AsPoint()
+	return interpolateCoords(p0, p1, partial).AsPoint()
 }
 
 func lerp(a, b, ratio float64) float64 {
 	return a + ratio*(b-a)
+}
+
+func interpolateCoords(c0, c1 Coordinates, frac float64) Coordinates {
+	return Coordinates{
+		XY: XY{
+			X: lerp(c0.X, c1.X, frac),
+			Y: lerp(c0.Y, c1.Y, frac),
+		},
+		Z:    lerp(c0.Z, c1.Z, frac),
+		M:    lerp(c0.M, c1.M, frac),
+		Type: c0.Type & c1.Type,
+	}
 }

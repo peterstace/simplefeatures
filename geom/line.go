@@ -1,8 +1,6 @@
 package geom
 
 import (
-	"math"
-
 	"github.com/peterstace/simplefeatures/rtree"
 )
 
@@ -43,9 +41,7 @@ func (ln line) box() rtree.Box {
 }
 
 func (ln line) length() float64 {
-	dx := ln.b.X - ln.a.X
-	dy := ln.b.Y - ln.a.Y
-	return math.Sqrt(dx*dx + dy*dy)
+	return ln.a.distanceTo(ln.b)
 }
 
 func (ln line) centroid() XY {
