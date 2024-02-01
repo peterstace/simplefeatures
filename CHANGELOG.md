@@ -13,6 +13,8 @@ YYYY-MM-DD
   returns a copy of the geometry with its control points snapped to a base 10
   grid.
 
+- Make LERP operations robust in all edge cases.
+
 ## v0.47.0
 
 2024-01-19
