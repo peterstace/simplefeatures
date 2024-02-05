@@ -44,8 +44,34 @@ func (l linearInterpolator) interpolate(frac float64) Point {
 	return interpolateCoords(p0, p1, partial).AsPoint()
 }
 
-func lerp(a, b, ratio float64) float64 {
-	return a + ratio*(b-a)
+// lerp calculates the linear interpolation (or extrapolation) between a and b
+// at t. Mathematically, the result is:
+//
+//	a + t×(b-a)
+//
+// or equivalently:
+//
+//	(1-t)×a + t×b
+//
+// In IEEE floating point math, the implementation can't be that simple due to
+// rounding and over/underflow of intermediate results. Instead, we used the
+// hybrid approach described by Davis Herring in [1]. It's is much more complex
+// than the naive approach, but fixes a lot of edge cases that would otherwise
+// occur.
+//
+// [1]: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0811r2.html
+func lerp(a, b, t float64) float64 {
+	if a <= 0 && b >= 0 || a >= 0 && b <= 0 {
+		return t*b + (1-t)*a
+	}
+	if t == 1 {
+		return b
+	}
+	x := a + t*(b-a)
+	if (t > 1) == (b > a) {
+		return math.Max(b, x)
+	}
+	return math.Min(b, x)
 }
 
 func interpolateCoords(c0, c1 Coordinates, frac float64) Coordinates {
