@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -68,10 +69,10 @@ func RelateMatches(intersectionMatrix, intersectionMatrixPattern string) (bool, 
 	mat := intersectionMatrix
 	pat := intersectionMatrixPattern
 	if len(mat) != 9 {
-		return false, fmt.Errorf("invalid matrix: length is not 9")
+		return false, errors.New("invalid matrix: length is not 9")
 	}
 	if len(pat) != 9 {
-		return false, fmt.Errorf("invalid matrix pattern: length is not 9")
+		return false, errors.New("invalid matrix pattern: length is not 9")
 	}
 
 	for i, m := range mat {

@@ -24,7 +24,7 @@ type wkbSyntaxError struct {
 }
 
 func (e wkbSyntaxError) Error() string {
-	return fmt.Sprintf("invalid WKB syntax: %s", e.reason)
+	return "invalid WKB syntax: " + e.reason
 }
 
 // wktSyntaxError is an error used to indicate that a serialised WKT geometry
@@ -36,7 +36,7 @@ type wktSyntaxError struct {
 }
 
 func (e wktSyntaxError) Error() string {
-	return fmt.Sprintf("invalid WKT syntax: %s", e.reason)
+	return "invalid WKT syntax: " + e.reason
 }
 
 // geojsonSyntaxError is an error used to indicate that a serialised GeoJSON geometry
@@ -48,7 +48,7 @@ type geojsonSyntaxError struct {
 }
 
 func (e geojsonSyntaxError) Error() string {
-	return fmt.Sprintf("invalid GeoJSON syntax: %s", e.reason)
+	return "invalid GeoJSON syntax: " + e.reason
 }
 
 func wrapWithGeoJSONSyntaxError(err error) error {

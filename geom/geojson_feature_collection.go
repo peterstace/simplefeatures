@@ -47,7 +47,7 @@ func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 	f.Properties = topLevel.Properties
 
 	if topLevel.Geometry == nil {
-		return fmt.Errorf("geometry field missing or empty")
+		return errors.New("geometry field missing or empty")
 	}
 	f.Geometry = *topLevel.Geometry
 
