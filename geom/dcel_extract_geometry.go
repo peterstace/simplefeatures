@@ -1,7 +1,7 @@
 package geom
 
 import (
-	"fmt"
+	"errors"
 	"sort"
 )
 
@@ -85,7 +85,7 @@ func (d *doublyConnectedEdgeList) extractPolygons(include func([2]bool) bool) ([
 		}
 
 		if len(rings) == 0 {
-			return nil, fmt.Errorf("no rings to extract")
+			return nil, errors.New("no rings to extract")
 		}
 
 		// Construct the polygon.

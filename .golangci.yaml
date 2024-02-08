@@ -89,6 +89,7 @@ linters:
     - reassign
     - revive
     - rowserrcheck
+    - spancheck
     - sqlclosecheck
     - staticcheck
     - stylecheck
