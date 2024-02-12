@@ -20,7 +20,7 @@ func TestNodeSetNoCrash(t *testing.T) {
 			},
 		},
 	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
+		t.Run(strconv.Itoa(i), func(*testing.T) {
 			ns := newNodeSet(tc.maxULP, len(tc.pts))
 			for _, pt := range tc.pts {
 				ns.insertOrGet(pt)
