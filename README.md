@@ -72,7 +72,7 @@ control points.</td>
 <tr>
 <td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#MultiPolygon">MultiPolygon</a></td>
 <td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiPolygon.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/3/3b/SFA_MultiPolygon_with_hole.svg"></a></td>
-<td>Polygon is collection of Polygons (with some constraints on how the Polygons interact with each other).</td>
+<td>MultiPolygon is collection of Polygons (with some constraints on how the Polygons interact with each other).</td>
 </tr>
 
 <tr>
