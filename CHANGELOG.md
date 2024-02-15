@@ -15,7 +15,7 @@ YYYY-MM-DD
 
 - Make LERP operations robust in all edge cases.
 
-- Upgrades `golangci-lint` to `v1.56.1`.
+- Upgrades `golangci-lint` to `v1.56.2`.
 
 ## v0.47.0
 
