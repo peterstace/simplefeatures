@@ -1,0 +1,10 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: GEOS
+Description: Geometry Engine - Open Source
+Version: <version>
+Libs: -L${libdir} -lgeos_c
+Cflags: -I${includedir}

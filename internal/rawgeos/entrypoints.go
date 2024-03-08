@@ -1,7 +1,7 @@
 package rawgeos
 
 /*
-#cgo LDFLAGS: -lgeos_c
+#cgo pkg-config: geos
 #cgo CFLAGS: -Wall
 #include "geos_c.h"
 #include <stdlib.h>
