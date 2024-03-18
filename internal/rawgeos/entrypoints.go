@@ -356,6 +356,17 @@ func ConvexHull(g geom.Geometry) (geom.Geometry, error) {
 	return result, wrap(err, "executing GEOSConvexHull_r")
 }
 
+func ConcaveHull(g geom.Geometry, pctconvex float64, allowHoles bool) (geom.Geometry, error) {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		allow_holes := C.uint(0)
+		if allowHoles {
+			allow_holes = 1
+		}
+		return C.GEOSConcaveHull_r(ctx, g, C.double(pctconvex), allow_holes)
+	})
+	return result, wrap(err, "executing GEOSConcaveHull_r")
+}
+
 func Centroid(g geom.Geometry) (geom.Geometry, error) {
 	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSGetCentroid_r(ctx, g)
