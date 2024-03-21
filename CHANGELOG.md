@@ -17,6 +17,16 @@ YYYY-MM-DD
 
 - Upgrades `golangci-lint` to `v1.56.2`.
 
+## v0.47.1
+
+2024-03-08
+
+__Special thanks to Val Gridnev and Albert Teoh for contributing to this release.__
+
+- Uses `#cgo pkg-config` directives in the `github.com/peterstace/geos`
+  library, rather than manipulating `LDFLAGS` directly. This fixes an issue
+  where the library could not be built on some Mac environments.
+
 ## v0.47.0
 
 2024-01-19
