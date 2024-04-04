@@ -288,13 +288,8 @@ func UnaryUnion(g geom.Geometry) (geom.Geometry, error) {
 }
 
 // ConcaveHull returns concave hull of input geometry.
-// pctconvex - ratio 0 to 1 (0 - max concaveness, 1 - convex hull)
+// concavenessRatio - ratio 0 to 1 (0 - max concaveness, 1 - convex hull)
 // allowHoles - true to allow holes inside of polygons.
-func ConcaveHull(g geom.Geometry, pctconvex float64, allowHoles bool) (geom.Geometry, error) {
-	return rawgeos.ConcaveHull(g, pctconvex, allowHoles)
-}
-
-// ConvexHull returns convex hull of input geometry.
-func ConvexHull(g geom.Geometry) (geom.Geometry, error) {
-	return rawgeos.ConvexHull(g)
+func ConcaveHull(g geom.Geometry, concavenessRatio float64, allowHoles bool) (geom.Geometry, error) {
+	return rawgeos.ConcaveHull(g, concavenessRatio, allowHoles)
 }
