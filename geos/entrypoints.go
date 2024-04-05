@@ -286,3 +286,10 @@ func CoverageUnion(g geom.Geometry) (geom.Geometry, error) {
 func UnaryUnion(g geom.Geometry) (geom.Geometry, error) {
 	return rawgeos.UnaryUnion(g)
 }
+
+// ConcaveHull returns concave hull of input geometry.
+// concavenessRatio - ratio 0 to 1 (0 - max concaveness, 1 - convex hull)
+// allowHoles - true to allow holes inside of polygons.
+func ConcaveHull(g geom.Geometry, concavenessRatio float64, allowHoles bool) (geom.Geometry, error) {
+	return rawgeos.ConcaveHull(g, concavenessRatio, allowHoles)
+}

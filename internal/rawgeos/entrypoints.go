@@ -26,6 +26,16 @@ GEOSGeometry *GEOSMakeValid_r(GEOSContextHandle_t handle, const GEOSGeometry* g)
 GEOSGeometry *GEOSCoverageUnion_r(GEOSContextHandle_t handle, const GEOSGeometry* g) { return NULL; }
 #endif
 
+#define CONCAVE_HULL_MIN_VERSION "3.11.0"
+#define CONCAVE_HULL_MISSING ( \
+	GEOS_VERSION_MAJOR < 3 || \
+	(GEOS_VERSION_MAJOR == 3 && GEOS_VERSION_MINOR < 11) \
+)
+#if CONCAVE_HULL_MISSING
+// This stub implementation always fails:
+GEOSGeometry* GEOSConcaveHull_r(GEOSContextHandle_t handle, const GEOSGeometry *g, double ratio, unsigned int allowHoles) { return NULL; }
+#endif
+
 */
 import "C"
 
@@ -354,6 +364,22 @@ func ConvexHull(g geom.Geometry) (geom.Geometry, error) {
 		return C.GEOSConvexHull_r(ctx, g)
 	})
 	return result, wrap(err, "executing GEOSConvexHull_r")
+}
+
+func ConcaveHull(g geom.Geometry, pctconvex float64, allowHoles bool) (geom.Geometry, error) {
+	if C.CONCAVE_HULL_MISSING != 0 {
+		return geom.Geometry{}, unsupportedGEOSVersionError{
+			C.CONCAVE_HULL_MIN_VERSION, "ConcaveHull",
+		}
+	}
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		ah := C.uint(0)
+		if allowHoles {
+			ah = 1
+		}
+		return C.GEOSConcaveHull_r(ctx, g, C.double(pctconvex), ah)
+	})
+	return result, wrap(err, "executing GEOSConcaveHull_r")
 }
 
 func Centroid(g geom.Geometry) (geom.Geometry, error) {
