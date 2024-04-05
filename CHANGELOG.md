@@ -17,6 +17,9 @@ YYYY-MM-DD
 
 - Upgrades `golangci-lint` to `v1.56.2`.
 
+- Adds wrappers in the `geos` package for the `GEOSConcaveHull_r` function
+  (exposed as `ConcaveHull`).
+
 ## v0.47.1
 
 2024-03-08
