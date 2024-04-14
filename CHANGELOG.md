@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.48.0
 
-YYYY-MM-DD
+2024-04-15
+
+__Special thanks to Val Gridnev and Albert Teoh for contributing to this release.__
 
 - Adds new `Densify` methods on each concrete geometry types that add
   additional linearly interpolated control points such that the distance
