@@ -52,7 +52,11 @@ geos-3.9:
 
 .PHONY: geos-3.8
 geos-3.8:
-	export alpine_version=3.13 geos_version=3.8.1-r2; $(DC_GEOS_RUN)
+	# Alpine 3.13 doesn't include a geos.pc file (needed by pkg-config). So
+	# the sfnopkgconfig tag is used, disabling the use of pkg-config.
+	# LDFLAGS are used to configure GEOS directly.
+	export tags='-tags sfnopkgconfig' \
+	       alpine_version=3.13 geos_version=3.8.1-r2; $(DC_GEOS_RUN)
 
 .PHONY: geos
 geos: geos-3.12
