@@ -20,6 +20,18 @@ YYYY-MM-DD
 - Adds wrappers in the `geos` package for the `GEOSConcaveHull_r` function
   (exposed as `ConcaveHull`).
 
+## v0.47.2
+
+2024-04-15
+
+- Adds support for the `sfnopkgconfig` build tag, which has an effect on the
+  build process of the `github.com/peterstace/geos` package. It causes the
+  `#cgo pkg-config` directive to be replaced with the `#cgo LDFLAGS: -lgeos_c`
+  directive (which was the previous behaviour, before v0.47.1).  This is useful
+  in environments where `pkg-config` is not available or the `geos.pc` file is
+  not installed. The majority of systems won't need to use the `sfnopkgconfig`
+  build tag.
+
 ## v0.47.1
 
 2024-03-08

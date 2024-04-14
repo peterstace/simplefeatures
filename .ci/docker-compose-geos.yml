@@ -7,6 +7,6 @@ services:
         ALPINE_VERSION: $alpine_version
         GEOS_VERSION: $geos_version
     working_dir: /mnt/sf
-    entrypoint: go test -test.count=1 -test.run=. ./geos ./internal/rawgeos
+    entrypoint: go test $tags -test.count=1 -test.run=. ./geos ./internal/rawgeos
     volumes:
       - ..:/mnt/sf
