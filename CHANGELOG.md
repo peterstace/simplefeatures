@@ -2,7 +2,7 @@
 
 ## v0.47.2
 
-2024-04-12
+2024-04-15
 
 - Adds support for the `sfnopkgconfig` build tag, which has an effect on the
   build process of the `github.com/peterstace/geos` package. It causes the
