@@ -521,7 +521,7 @@ func (w *twkbWriter) writePointArray(numPoints int, coords []float64) {
 	for i := 0; i < numPoints; i++ {
 		for d := 0; d < w.dimensions; d++ {
 			fval := coords[c]
-			ival := int64(fval * w.scalings[d])
+			ival := int64(math.Round(fval * w.scalings[d]))
 			// Compute bounding box.
 			switch {
 			case !w.bboxValid:
