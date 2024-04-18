@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.49.0
+
+2024-04-19
+
+__Special thanks to Daniel Cohen for contributing to this release.__
+
+- Fixes two bugs in TWKB marshalling and unmarshalling. The first bugfix
+  correctly rounds coordinates (rather than truncating them) and the second
+  bugfix fixes a numerical stability issue when calculating the scale factor.
+
 ## v0.48.0
 
 2024-04-15
