@@ -97,12 +97,12 @@ func UnmarshalTWKBEnvelope(twkb []byte) (Envelope, error) {
 	}
 	return NewEnvelope(
 		XY{
-			p.scalings[0] * float64(p.bbox[0]),
-			p.scalings[1] * float64(p.bbox[2]),
+			float64(p.bbox[0]) / p.scalings[0],
+			float64(p.bbox[2]) / p.scalings[1],
 		},
 		XY{
-			p.scalings[0] * float64(p.bbox[0]+p.bbox[1]),
-			p.scalings[1] * float64(p.bbox[2]+p.bbox[3]),
+			float64(p.bbox[0]+p.bbox[1]) / p.scalings[0],
+			float64(p.bbox[2]+p.bbox[3]) / p.scalings[1],
 		},
 	), nil
 }
@@ -248,8 +248,8 @@ func (p *twkbParser) parseTypeAndPrecision() error {
 	p.kind = twkbGeometryType(typeprec & 0x0f)
 	p.precXY = int(decodeZigZagInt64(uint64(typeprec) >> 4))
 
-	p.scalings[0] = math.Pow10(-p.precXY) // X
-	p.scalings[1] = math.Pow10(-p.precXY) // Y
+	p.scalings[0] = math.Pow10(p.precXY) // X
+	p.scalings[1] = math.Pow10(p.precXY) // Y
 	return nil
 }
 
@@ -288,16 +288,16 @@ func (p *twkbParser) parseExtendedPrecision() error {
 	case p.hasZ && p.hasM:
 		p.ctype = DimXYZM
 		p.dimensions = 4
-		p.scalings[2] = math.Pow10(-p.precZ)
-		p.scalings[3] = math.Pow10(-p.precM)
+		p.scalings[2] = math.Pow10(p.precZ)
+		p.scalings[3] = math.Pow10(p.precM)
 	case p.hasZ:
 		p.ctype = DimXYZ
 		p.dimensions = 3
-		p.scalings[2] = math.Pow10(-p.precZ)
+		p.scalings[2] = math.Pow10(p.precZ)
 	case p.hasM:
 		p.ctype = DimXYM
 		p.dimensions = 3
-		p.scalings[2] = math.Pow10(-p.precM)
+		p.scalings[2] = math.Pow10(p.precM)
 	}
 	return nil
 }
@@ -343,49 +343,49 @@ func (p *twkbParser) parseBBoxHeader() (bbox []Point, err error) {
 	}
 	switch {
 	case p.hasZ && p.hasM:
-		minX := p.scalings[0] * float64(p.bbox[0])
-		minY := p.scalings[1] * float64(p.bbox[2])
-		minZ := p.scalings[2] * float64(p.bbox[4])
-		minM := p.scalings[3] * float64(p.bbox[6])
+		minX := float64(p.bbox[0]) / p.scalings[0]
+		minY := float64(p.bbox[2]) / p.scalings[1]
+		minZ := float64(p.bbox[4]) / p.scalings[2]
+		minM := float64(p.bbox[6]) / p.scalings[3]
 
-		maxX := p.scalings[0] * float64(p.bbox[0]+p.bbox[1])
-		maxY := p.scalings[1] * float64(p.bbox[2]+p.bbox[3])
-		maxZ := p.scalings[2] * float64(p.bbox[4]+p.bbox[5])
-		maxM := p.scalings[3] * float64(p.bbox[6]+p.bbox[7])
+		maxX := float64(p.bbox[0]+p.bbox[1]) / p.scalings[0]
+		maxY := float64(p.bbox[2]+p.bbox[3]) / p.scalings[1]
+		maxZ := float64(p.bbox[4]+p.bbox[5]) / p.scalings[2]
+		maxM := float64(p.bbox[6]+p.bbox[7]) / p.scalings[3]
 
 		minPt := NewPoint(Coordinates{XY: XY{minX, minY}, Z: minZ, M: minM, Type: p.ctype})
 		maxPt := NewPoint(Coordinates{XY: XY{maxX, maxY}, Z: maxZ, M: maxM, Type: p.ctype})
 		bbox = []Point{minPt, maxPt}
 	case p.hasZ:
-		minX := p.scalings[0] * float64(p.bbox[0])
-		minY := p.scalings[1] * float64(p.bbox[2])
-		minZ := p.scalings[2] * float64(p.bbox[4])
+		minX := float64(p.bbox[0]) / p.scalings[0]
+		minY := float64(p.bbox[2]) / p.scalings[1]
+		minZ := float64(p.bbox[4]) / p.scalings[2]
 
-		maxX := p.scalings[0] * float64(p.bbox[0]+p.bbox[1])
-		maxY := p.scalings[1] * float64(p.bbox[2]+p.bbox[3])
-		maxZ := p.scalings[2] * float64(p.bbox[4]+p.bbox[5])
+		maxX := float64(p.bbox[0]+p.bbox[1]) / p.scalings[0]
+		maxY := float64(p.bbox[2]+p.bbox[3]) / p.scalings[1]
+		maxZ := float64(p.bbox[4]+p.bbox[5]) / p.scalings[2]
 
 		minPt := NewPoint(Coordinates{XY: XY{minX, minY}, Z: minZ, Type: p.ctype})
 		maxPt := NewPoint(Coordinates{XY: XY{maxX, maxY}, Z: maxZ, Type: p.ctype})
 		bbox = []Point{minPt, maxPt}
 	case p.hasM:
-		minX := p.scalings[0] * float64(p.bbox[0])
-		minY := p.scalings[1] * float64(p.bbox[2])
-		minM := p.scalings[2] * float64(p.bbox[4])
+		minX := float64(p.bbox[0]) / p.scalings[0]
+		minY := float64(p.bbox[2]) / p.scalings[1]
+		minM := float64(p.bbox[4]) / p.scalings[2]
 
-		maxX := p.scalings[0] * float64(p.bbox[0]+p.bbox[1])
-		maxY := p.scalings[1] * float64(p.bbox[2]+p.bbox[3])
-		maxM := p.scalings[2] * float64(p.bbox[4]+p.bbox[5])
+		maxX := float64(p.bbox[0]+p.bbox[1]) / p.scalings[0]
+		maxY := float64(p.bbox[2]+p.bbox[3]) / p.scalings[1]
+		maxM := float64(p.bbox[4]+p.bbox[5]) / p.scalings[2]
 
 		minPt := NewPoint(Coordinates{XY: XY{minX, minY}, M: minM, Type: p.ctype})
 		maxPt := NewPoint(Coordinates{XY: XY{maxX, maxY}, M: maxM, Type: p.ctype})
 		bbox = []Point{minPt, maxPt}
 	default:
-		minX := p.scalings[0] * float64(p.bbox[0])
-		minY := p.scalings[1] * float64(p.bbox[2])
+		minX := float64(p.bbox[0]) / p.scalings[0]
+		minY := float64(p.bbox[2]) / p.scalings[1]
 
-		maxX := p.scalings[0] * float64(p.bbox[0]+p.bbox[1])
-		maxY := p.scalings[1] * float64(p.bbox[2]+p.bbox[3])
+		maxX := float64(p.bbox[0]+p.bbox[1]) / p.scalings[0]
+		maxY := float64(p.bbox[2]+p.bbox[3]) / p.scalings[1]
 
 		minPt := NewPoint(Coordinates{XY: XY{minX, minY}, Type: p.ctype})
 		maxPt := NewPoint(Coordinates{XY: XY{maxX, maxY}, Type: p.ctype})
@@ -624,7 +624,7 @@ func (p *twkbParser) parsePointArray(numPoints int) ([]float64, error) {
 			}
 
 			p.refpoint[d] += val // Reverse coord differencing to find the true value.
-			coords[c] = float64(p.refpoint[d]) * p.scalings[d]
+			coords[c] = float64(p.refpoint[d]) / p.scalings[d]
 			c++
 		}
 	}

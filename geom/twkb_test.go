@@ -81,6 +81,19 @@ var TWKBTestCases = []struct {
 		precXY:      0,
 	},
 	{
+		description: "point with prec 7",
+		twkbHex:     "e100cfddf89107b0a5e9d702",
+		wkt:         "POINT (-95.8338920 36.0524120)",
+		precXY:      7,
+	},
+	{
+		description: "point with prec 7 requiring encoding (requires rounding)",
+		twkbHex:     "e100cfddf89107b0a5e9d702",
+		wkt:         "POINT (-95.83389199999999 36.052412)",
+		precXY:      7,
+		skipDecode:  true,
+	},
+	{
 		description: "point with prec xy 2",
 		twkbHex:     "41000204",
 		wkt:         "POINT(0.01 0.02)",
