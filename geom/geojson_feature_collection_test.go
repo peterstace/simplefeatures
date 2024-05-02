@@ -91,7 +91,7 @@ func TestGeoJSONFeatureCollectionInvalidUnmarshal(t *testing.T) {
 		},
 		{
 			input:       `{"type":"FeatureCollection","features":[{"geometry":{"type":"Point","coordinates":[1,2]}}]}`,
-			errFragment: "feature type field missing or empty",
+			errFragment: "feature type field missing",
 		},
 		{
 			input:       `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"ZORT","coordinates":[1,2]}}]}`,
@@ -99,7 +99,7 @@ func TestGeoJSONFeatureCollectionInvalidUnmarshal(t *testing.T) {
 		},
 		{
 			input:       `{"type":"FeatureCollection","features":[{"type":"Feature"}]}`,
-			errFragment: "geometry field missing or empty",
+			errFragment: "geometry field missing",
 		},
 		{
 			input: `{"type":"FeatureCollection","features":[{"type":"Feature","properties":"zoortle","geometry":{"type":"Point","coordinates":[1,2]}}]}`,
@@ -159,4 +159,53 @@ func TestGeoJSONFeatureCollectionAndPropertiesSet(t *testing.T) {
 	}})
 	expectNoErr(t, err)
 	expectStringEq(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"id":"myid","properties":{"foo":"bar"}}]}`)
+}
+
+func TestGeoJSONForeignMembers(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		members map[string]interface{}
+		json    string
+	}{
+		{
+			name:    "nil foreign members",
+			members: nil,
+			json:    `{"type":"Feature","geometry":{"type":"Point","coordinates":[0,0]},"properties":{}}`,
+		},
+		{
+			name:    "empty foreign members",
+			members: map[string]interface{}{},
+			json:    `{"type":"Feature","geometry":{"type":"Point","coordinates":[0,0]},"properties":{}}`,
+		},
+		{
+			name:    "one foreign member",
+			members: map[string]interface{}{"foo": "bar"},
+			json:    `{"type":"Feature","geometry":{"type":"Point","coordinates":[0,0]},"properties":{},"foo":"bar"}`,
+		},
+		{
+			name:    "two foreign members",
+			members: map[string]interface{}{"foo": "bar", "baz": 42.0},
+			json:    `{"type":"Feature","geometry":{"type":"Point","coordinates":[0,0]},"properties":{},"baz":42,"foo":"bar"}`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Run("marshal", func(t *testing.T) {
+				feat := geom.GeoJSONFeature{
+					Geometry:       geom.XY{}.AsPoint().AsGeometry(),
+					ForeignMembers: tc.members,
+				}
+				got, err := json.Marshal(feat)
+				expectNoErr(t, err)
+				expectStringEq(t, string(got), tc.json)
+			})
+			t.Run("unmarshal", func(t *testing.T) {
+				var feat geom.GeoJSONFeature
+				err := json.Unmarshal([]byte(tc.json), &feat)
+				expectNoErr(t, err)
+				if len(feat.ForeignMembers) != 0 || len(tc.members) != 0 {
+					expectDeepEq(t, feat.ForeignMembers, tc.members)
+				}
+			})
+		})
+	}
 }

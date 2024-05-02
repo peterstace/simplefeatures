@@ -3,6 +3,8 @@ package geom_test
 import (
 	"bytes"
 	"math"
+	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -94,6 +96,13 @@ func expectErr(tb testing.TB, err error) {
 	}
 }
 
+func expectDeepEq(tb testing.TB, got, want interface{}) {
+	tb.Helper()
+	if !reflect.DeepEqual(got, want) {
+		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+	}
+}
+
 func expectGeomEq(tb testing.TB, got, want geom.Geometry, opts ...geom.ExactEqualsOption) {
 	tb.Helper()
 	if !geom.ExactEquals(got, want, opts...) {
@@ -142,8 +151,15 @@ func expectCoordsEq(tb testing.TB, got, want geom.Coordinates) {
 func expectStringEq(tb testing.TB, got, want string) {
 	tb.Helper()
 	if got != want {
-		tb.Errorf("\ngot:  %q\nwant: %q\n", got, want)
+		tb.Errorf("\ngot:  %s\nwant: %s\n", quotedString(got), quotedString(want))
 	}
+}
+
+func quotedString(s string) string {
+	if strconv.CanBackquote(s) {
+		return "`" + s + "`"
+	}
+	return strconv.Quote(s)
 }
 
 func expectIntEq(tb testing.TB, got, want int) {
