@@ -187,6 +187,11 @@ func TestGeoJSONForeignMembers(t *testing.T) {
 			members: map[string]interface{}{"foo": "bar", "baz": 42.0},
 			json:    `{"type":"Feature","geometry":{"type":"Point","coordinates":[0,0]},"properties":{},"baz":42,"foo":"bar"}`,
 		},
+		{
+			name:    "nested",
+			members: map[string]interface{}{"metadata": map[string]interface{}{"foo": "bar", "baz": 42.0}},
+			json:    `{"type":"Feature","geometry":{"type":"Point","coordinates":[0,0]},"properties":{},"metadata":{"baz":42,"foo":"bar"}}`,
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Run("marshal", func(t *testing.T) {
