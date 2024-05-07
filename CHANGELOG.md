@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.50.0
+
+2024-05-07
+
+__Special thanks to Val Gridnev for contributing to this release.__
 
 - Adds "foreign member" support for GeoJSON features. This allows for
   additional properties to be included in GeoJSON features that are not part of
