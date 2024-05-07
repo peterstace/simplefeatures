@@ -42,6 +42,7 @@ linters:
     - bodyclose
     - containedctx
     - contextcheck
+    - copyloopvar
     - decorder
     - depguard
     - dogsled
@@ -50,7 +51,6 @@ linters:
     - errcheck
     - errchkjson
     - errorlint
-    - execinquery
     - exportloopref
     - ginkgolinter
     - gocheckcompilerdirectives
@@ -71,6 +71,7 @@ linters:
     - importas
     - ineffassign
     - interfacebloat
+    - intrange
     - ireturn
     - loggercheck
     - makezero
@@ -112,6 +113,7 @@ linters:
 
     # Deprecated by golangci-lint:
     - deadcode
+    - execinquery
     - exhaustivestruct
     - golint
     - ifshort
@@ -140,7 +142,7 @@ linters:
     - goconst
     - gocyclo
     - godox
-    - goerr113
+    - err113
     - gomnd
     - inamedparam
     - lll
