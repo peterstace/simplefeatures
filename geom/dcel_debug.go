@@ -6,7 +6,7 @@ import (
 	"sort"
 )
 
-//nolint:deadcode,unused
+//nolint:unused
 func dumpDCEL(d *doublyConnectedEdgeList) {
 	newNamedDCEL(d).show()
 }
