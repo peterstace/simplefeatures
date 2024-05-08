@@ -426,6 +426,9 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryColl
 			if err != nil {
 				return GeometryCollection{}, err
 			}
+			//if g.CoordinatesType() != ctype {
+			//	return GeometryCollection{}, mismatchedGeometryCollectionDims{}
+			//}
 			geoms = append(geoms, g)
 			tok, err := p.nextCommaOrRightParen()
 			if err != nil {
@@ -436,8 +439,23 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryColl
 			}
 		}
 	}
+	if err := checkGeomCollectionCoordTypeConsistency(ctype, geoms); err != nil {
+		return GeometryCollection{}, err
+	}
 	if len(geoms) == 0 {
 		return GeometryCollection{}.ForceCoordinatesType(ctype), nil
 	}
 	return NewGeometryCollection(geoms), nil
+}
+
+func checkGeomCollectionCoordTypeConsistency(ct CoordinatesType, gs []Geometry) error {
+	if len(gs) == 0 {
+		return nil
+	}
+	for _, g := range gs {
+		if g.CoordinatesType() != ct {
+			return mismatchedGeometryCollectionDimsError{}
+		}
+	}
+	return nil
 }

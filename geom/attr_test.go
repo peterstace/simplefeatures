@@ -1553,17 +1553,17 @@ func TestSummary(t *testing.T) {
 		},
 		{
 			name:        "XYZ single point",
-			wkt:         "GEOMETRYCOLLECTION (POINT Z(0 0 0.5))",
+			wkt:         "GEOMETRYCOLLECTION Z (POINT Z(0 0 0.5))",
 			wantSummary: "GeometryCollection[XYZ] with 1 child geometry consisting of 1 total point",
 		},
 		{
 			name:        "XYM single point",
-			wkt:         "GEOMETRYCOLLECTION (POINT M(0 0 0.8))",
+			wkt:         "GEOMETRYCOLLECTION M (POINT M(0 0 0.8))",
 			wantSummary: "GeometryCollection[XYM] with 1 child geometry consisting of 1 total point",
 		},
 		{
 			name:        "XYZM single point",
-			wkt:         "GEOMETRYCOLLECTION (POINT ZM(0 0 0.5 0.8))",
+			wkt:         "GEOMETRYCOLLECTION ZM (POINT ZM(0 0 0.5 0.8))",
 			wantSummary: "GeometryCollection[XYZM] with 1 child geometry consisting of 1 total point",
 		},
 		{

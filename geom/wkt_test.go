@@ -215,3 +215,47 @@ func TestAsTextEmpty(t *testing.T) {
 		})
 	}
 }
+
+func TestInconsistentDimensionTypeInWKT(t *testing.T) {
+	for _, tc := range []struct {
+		allow bool
+		wkt   string
+	}{
+		{true, "GEOMETRYCOLLECTION (POINT (1 2))"},
+		{true, "GEOMETRYCOLLECTION (POINT (1 2), POINT(2 3))"},
+
+		{true, "GEOMETRYCOLLECTION M(POINT M(1 2 0))"},
+		{true, "GEOMETRYCOLLECTION Z(POINT Z(1 2 0))"},
+		{true, "GEOMETRYCOLLECTION ZM(POINT ZM(1 2 0 0))"},
+
+		{false, "GEOMETRYCOLLECTION M(POINT (1 2))"},
+		{false, "GEOMETRYCOLLECTION M(POINT Z(1 2 0))"},
+		{false, "GEOMETRYCOLLECTION M(POINT ZM(1 2 0 0))"},
+
+		{false, "GEOMETRYCOLLECTION Z(POINT (1 2))"},
+		{false, "GEOMETRYCOLLECTION Z(POINT M(1 2 0))"},
+		{false, "GEOMETRYCOLLECTION Z(POINT ZM(1 2 0 0))"},
+
+		{false, "GEOMETRYCOLLECTION ZM(POINT (1 2))"},
+		{false, "GEOMETRYCOLLECTION ZM(POINT M(1 2 0))"},
+		{false, "GEOMETRYCOLLECTION ZM(POINT Z(1 2 0))"},
+
+		// NOTE: these forms are accepted by PostGIS, but banned by the OGC spec.
+		{false, "GEOMETRYCOLLECTION (POINT Z(1 2 0))"},
+		{false, "GEOMETRYCOLLECTION (POINT M(1 2 0))"},
+		{false, "GEOMETRYCOLLECTION (POINT ZM(1 2 0 0))"},
+		{false, "GEOMETRYCOLLECTION (POINT (1 2), POINT Z(2 3 0))"},
+		{false, "GEOMETRYCOLLECTION (POINT (1 2), POINT M(2 3 0))"},
+		{false, "GEOMETRYCOLLECTION (POINT (1 2), POINT ZM(2 3 0 0))"},
+	} {
+		t.Run(tc.wkt, func(t *testing.T) {
+			_, err := geom.UnmarshalWKT(tc.wkt)
+			if tc.allow {
+				expectNoErr(t, err)
+				return
+			}
+			expectErr(t, err)
+			expectStringEq(t, err.Error(), "mixed dimensions in geometry collection")
+		})
+	}
+}
