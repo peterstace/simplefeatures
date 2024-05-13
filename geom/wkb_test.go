@@ -3,6 +3,7 @@ package geom_test
 import (
 	"bytes"
 	"encoding/hex"
+	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -676,5 +677,48 @@ func TestWKBUnmarshalEndianess(t *testing.T) {
 			expectNoErr(t, err)
 			expectGeomEq(t, got, want)
 		})
+	}
+}
+
+func TestWKBGeometryCollectionMixedCoordinateTypes(t *testing.T) {
+	const (
+		bigEndian = "00"
+		f64Zero   = "0000000000000000"
+		u32One    = "00000001"
+	)
+
+	for _, gc := range []struct {
+		hex string
+		ct  geom.CoordinatesType
+	}{
+		{"00000007", geom.DimXY},
+		{"000003ef", geom.DimXYZ},
+		{"000007d7", geom.DimXYM},
+		{"00000bbf", geom.DimXYZM},
+	} {
+		for _, point := range []struct {
+			hex string
+			ct  geom.CoordinatesType
+		}{
+			{"00000001", geom.DimXY},
+			{"000003e9", geom.DimXYZ},
+			{"000007d1", geom.DimXYM},
+			{"00000bb9", geom.DimXYZM},
+		} {
+			t.Run(fmt.Sprintf("gc_%v_point_%v", gc.ct, point.ct), func(t *testing.T) {
+				hex := bigEndian +
+					gc.hex +
+					u32One +
+					bigEndian +
+					point.hex +
+					strings.Repeat(f64Zero, point.ct.Dimension())
+				_, err := geom.UnmarshalWKB(hexStringToBytes(t, hex))
+				if gc.ct == point.ct {
+					expectNoErr(t, err)
+				} else {
+					expectErr(t, err)
+				}
+			})
+		}
 	}
 }
