@@ -4,6 +4,9 @@
 
 - Upgrades `golangci-lint` to `v1.58.0`.
 
+- Fixes a bug where geometry collections with mixed coordinate types were
+  erroneously allowed during WKT parsing.
+
 ## v0.50.0
 
 2024-05-07
