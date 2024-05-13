@@ -5,6 +5,7 @@ import (
 	"math"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -152,6 +153,13 @@ func expectStringEq(tb testing.TB, got, want string) {
 	tb.Helper()
 	if got != want {
 		tb.Errorf("\ngot:  %s\nwant: %s\n", quotedString(got), quotedString(want))
+	}
+}
+
+func expectSubstring(tb testing.TB, got, wantSubstring string) {
+	tb.Helper()
+	if !strings.Contains(got, wantSubstring) {
+		tb.Errorf("\ngot:            %s\nwant substring: %s\n", quotedString(got), quotedString(wantSubstring))
 	}
 }
 

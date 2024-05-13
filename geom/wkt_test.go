@@ -240,13 +240,16 @@ func TestInconsistentDimensionTypeInWKT(t *testing.T) {
 		{false, "GEOMETRYCOLLECTION ZM(POINT M(1 2 0))"},
 		{false, "GEOMETRYCOLLECTION ZM(POINT Z(1 2 0))"},
 
-		// NOTE: these forms are accepted by PostGIS, but banned by the OGC spec.
-		{false, "GEOMETRYCOLLECTION (POINT Z(1 2 0))"},
-		{false, "GEOMETRYCOLLECTION (POINT M(1 2 0))"},
-		{false, "GEOMETRYCOLLECTION (POINT ZM(1 2 0 0))"},
 		{false, "GEOMETRYCOLLECTION (POINT (1 2), POINT Z(2 3 0))"},
 		{false, "GEOMETRYCOLLECTION (POINT (1 2), POINT M(2 3 0))"},
 		{false, "GEOMETRYCOLLECTION (POINT (1 2), POINT ZM(2 3 0 0))"},
+
+		// These forms are accepted by PostGIS, but banned by the OGC spec.
+		// Simplefeatures follows the PostGIS behaviour (since it's a
+		// reasonable extension).
+		{true, "GEOMETRYCOLLECTION (POINT Z(1 2 0))"},
+		{true, "GEOMETRYCOLLECTION (POINT M(1 2 0))"},
+		{true, "GEOMETRYCOLLECTION (POINT ZM(1 2 0 0))"},
 	} {
 		t.Run(tc.wkt, func(t *testing.T) {
 			_, err := geom.UnmarshalWKT(tc.wkt)
@@ -255,7 +258,7 @@ func TestInconsistentDimensionTypeInWKT(t *testing.T) {
 				return
 			}
 			expectErr(t, err)
-			expectStringEq(t, err.Error(), "mixed dimensions in geometry collection")
+			expectSubstring(t, err.Error(), "mixed dimensions in geometry collection")
 		})
 	}
 }

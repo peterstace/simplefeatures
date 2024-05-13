@@ -426,9 +426,6 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryColl
 			if err != nil {
 				return GeometryCollection{}, err
 			}
-			//if g.CoordinatesType() != ctype {
-			//	return GeometryCollection{}, mismatchedGeometryCollectionDims{}
-			//}
 			geoms = append(geoms, g)
 			tok, err := p.nextCommaOrRightParen()
 			if err != nil {
@@ -439,7 +436,7 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryColl
 			}
 		}
 	}
-	if err := checkGeomCollectionCoordTypeConsistency(ctype, geoms); err != nil {
+	if err := checkCoordinateTypesInGeometryCollection(ctype, geoms); err != nil {
 		return GeometryCollection{}, err
 	}
 	if len(geoms) == 0 {
@@ -448,13 +445,28 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryColl
 	return NewGeometryCollection(geoms), nil
 }
 
-func checkGeomCollectionCoordTypeConsistency(ct CoordinatesType, gs []Geometry) error {
+func checkCoordinateTypesInGeometryCollection(ctype CoordinatesType, gs []Geometry) error {
+	// If the collection has an explicitly tagged coordinates type, then all
+	// elements in the collection must match that type.
+	if ctype != DimXY {
+		for _, g := range gs {
+			if ct := g.CoordinatesType(); ct != ctype {
+				return mismatchedGeometryCollectionDimsError{ctype, ct}
+			}
+		}
+	}
+
+	// If the collection has no explicitly tagged coordinates type, then all
+	// elements in the collection must merely match each other. This is
+	// strictly an extension of the OGC spec, but is quite reasonable and
+	// matches other implementations such as PostGIS.
 	if len(gs) == 0 {
 		return nil
 	}
-	for _, g := range gs {
-		if g.CoordinatesType() != ct {
-			return mismatchedGeometryCollectionDimsError{}
+	first := gs[0].CoordinatesType()
+	for _, g := range gs[1:] {
+		if g.CoordinatesType() != first {
+			return mismatchedGeometryCollectionDimsError{first, g.CoordinatesType()}
 		}
 	}
 	return nil

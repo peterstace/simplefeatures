@@ -58,10 +58,12 @@ func wrapWithGeoJSONSyntaxError(err error) error {
 	return geojsonSyntaxError{err.Error()}
 }
 
-type mismatchedGeometryCollectionDimsError struct{}
+type mismatchedGeometryCollectionDimsError struct {
+	ct1, ct2 CoordinatesType
+}
 
 func (e mismatchedGeometryCollectionDimsError) Error() string {
-	return "mixed dimensions in geometry collection"
+	return fmt.Sprintf("mixed dimensions in geometry collection: %s and %s", e.ct1, e.ct2)
 }
 
 type ruleViolation string
