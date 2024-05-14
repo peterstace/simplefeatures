@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Upgrades `golangci-lint` to `v1.58.0`.
+- Upgrades `golangci-lint` to `v1.58.1`.
 
 ## v0.50.0
 
