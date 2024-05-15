@@ -436,8 +436,38 @@ func (p *parser) nextGeometryCollectionText(ctype CoordinatesType) (GeometryColl
 			}
 		}
 	}
+	if err := checkCoordinateTypesInGeometryCollection(ctype, geoms); err != nil {
+		return GeometryCollection{}, err
+	}
 	if len(geoms) == 0 {
 		return GeometryCollection{}.ForceCoordinatesType(ctype), nil
 	}
 	return NewGeometryCollection(geoms), nil
+}
+
+func checkCoordinateTypesInGeometryCollection(ctype CoordinatesType, gs []Geometry) error {
+	// If the collection has an explicitly tagged coordinates type, then all
+	// elements in the collection must match that type.
+	if ctype != DimXY {
+		for _, g := range gs {
+			if ct := g.CoordinatesType(); ct != ctype {
+				return mismatchedGeometryCollectionDimsError{ctype, ct}
+			}
+		}
+	}
+
+	// If the collection has no explicitly tagged coordinates type, then all
+	// elements in the collection must merely match each other. This is
+	// strictly an extension of the OGC spec, but is quite reasonable and
+	// matches other implementations such as PostGIS.
+	if len(gs) == 0 {
+		return nil
+	}
+	first := gs[0].CoordinatesType()
+	for _, g := range gs[1:] {
+		if g.CoordinatesType() != first {
+			return mismatchedGeometryCollectionDimsError{first, g.CoordinatesType()}
+		}
+	}
+	return nil
 }
