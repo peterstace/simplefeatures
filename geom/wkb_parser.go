@@ -364,6 +364,13 @@ func (p *wkbParser) parseGeometryCollection(ctype CoordinatesType) (GeometryColl
 		if err != nil {
 			return GeometryCollection{}, err
 		}
+		if geoms[i].CoordinatesType() != ctype {
+			err := mismatchedGeometryCollectionDimsError{
+				ctype,
+				geoms[i].CoordinatesType(),
+			}
+			return GeometryCollection{}, err
+		}
 	}
 	return NewGeometryCollection(geoms), nil
 }
