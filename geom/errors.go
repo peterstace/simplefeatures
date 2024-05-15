@@ -59,11 +59,11 @@ func wrapWithGeoJSONSyntaxError(err error) error {
 }
 
 type mismatchedGeometryCollectionDimsError struct {
-	ct1, ct2 CoordinatesType
+	CT1, CT2 CoordinatesType
 }
 
 func (e mismatchedGeometryCollectionDimsError) Error() string {
-	return fmt.Sprintf("mixed dimensions in geometry collection: %s and %s", e.ct1, e.ct2)
+	return fmt.Sprintf("mixed dimensions in geometry collection: %s and %s", e.CT1, e.CT2)
 }
 
 type ruleViolation string
