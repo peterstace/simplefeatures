@@ -257,8 +257,8 @@ func TestInconsistentDimensionTypeInWKT(t *testing.T) {
 				expectNoErr(t, err)
 				return
 			}
-			expectErr(t, err)
-			expectSubstring(t, err.Error(), "mixed dimensions in geometry collection")
+			want := geom.MismatchedGeometryCollectionDimsError{}
+			expectErrAs(t, err, &want)
 		})
 	}
 }

@@ -716,7 +716,8 @@ func TestWKBGeometryCollectionMixedCoordinateTypes(t *testing.T) {
 				if gc.ct == point.ct {
 					expectNoErr(t, err)
 				} else {
-					expectErr(t, err)
+					wantErr := geom.MismatchedGeometryCollectionDimsError{gc.ct, point.ct}
+					expectErrIs(t, err, wantErr)
 				}
 			})
 		}

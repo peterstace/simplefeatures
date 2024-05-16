@@ -2,6 +2,7 @@ package geom_test
 
 import (
 	"bytes"
+	"errors"
 	"math"
 	"reflect"
 	"strconv"
@@ -97,6 +98,21 @@ func expectErr(tb testing.TB, err error) {
 	}
 }
 
+func expectErrIs(tb testing.TB, err, want error) {
+	tb.Helper()
+	if !errors.Is(err, want) {
+		tb.Errorf("\ngot:  %v\nwant: %v\n", err, want)
+	}
+}
+
+func expectErrAs(tb testing.TB, err error, target interface{}) {
+	tb.Helper()
+	if !errors.As(err, target) {
+		targetType := reflect.ValueOf(target).Elem().Interface()
+		tb.Errorf("%#v not assignable after unwrapping to %T", err, targetType)
+	}
+}
+
 func expectDeepEq(tb testing.TB, got, want interface{}) {
 	tb.Helper()
 	if !reflect.DeepEqual(got, want) {
@@ -156,6 +172,7 @@ func expectStringEq(tb testing.TB, got, want string) {
 	}
 }
 
+//nolint:unused
 func expectSubstring(tb testing.TB, got, wantSubstring string) {
 	tb.Helper()
 	if !strings.Contains(got, wantSubstring) {
