@@ -142,7 +142,8 @@ func TestSimplifyErrorCases(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in := geomFromWKT(t, tc.wkt)
 			_, err := in.Simplify(tc.threshold)
-			expectErr(t, err)
+			var want geom.ValidationError
+			expectErrAs(t, err, &want)
 		})
 	}
 }

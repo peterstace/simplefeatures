@@ -12,7 +12,6 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-//nolint:unparam
 func geomFromWKT(tb testing.TB, wkt string, nv ...geom.NoValidate) geom.Geometry {
 	tb.Helper()
 	geom, err := geom.UnmarshalWKT(wkt, nv...)
@@ -91,6 +90,7 @@ func expectNoErr(tb testing.TB, err error) {
 	}
 }
 
+//nolint:unused
 func expectErr(tb testing.TB, err error) {
 	tb.Helper()
 	if err == nil {
@@ -111,6 +111,25 @@ func expectErrAs(tb testing.TB, err error, target interface{}) {
 		targetType := reflect.ValueOf(target).Elem().Interface()
 		tb.Errorf("%#v not assignable after unwrapping to %T", err, targetType)
 	}
+}
+
+func expectValidationErrWithReason(tb testing.TB, err error, reason geom.RuleViolation) {
+	tb.Helper()
+	var ve geom.ValidationError
+	expectErrAs(tb, err, &ve)
+	expectStringEq(tb, string(ve.RuleViolation), string(reason))
+}
+
+// expectValidity either expects the geometry/envelope to be valid (when rv is
+// ""), or the geometry to be invalid with the given rule violation.
+func expectValidity(tb testing.TB, g interface{ Validate() error }, rv geom.RuleViolation) {
+	tb.Helper()
+	err := g.Validate()
+	if rv == "" {
+		expectNoErr(tb, err)
+		return
+	}
+	expectValidationErrWithReason(tb, err, rv)
 }
 
 func expectDeepEq(tb testing.TB, got, want interface{}) {

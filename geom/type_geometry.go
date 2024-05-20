@@ -280,7 +280,10 @@ func unmarshalGeoJSONAsType(p []byte, dst interface{}) error {
 	}
 	dstType := dst.(interface{ Type() GeometryType }).Type()
 	if g.Type() != dstType {
-		return fmt.Errorf("cannot unmarshal GeoJSON of type %s into %s", g.Type(), dstType)
+		return unmarshalGeoJSONSourceDestinationMismatchError{
+			SourceType:      g.Type(),
+			DestinationType: dstType,
+		}
 	}
 	assignToConcrete(dst, g)
 	return nil

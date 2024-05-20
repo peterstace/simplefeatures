@@ -343,52 +343,57 @@ func TestEnvelopeExpandToIncludeEnvelope(t *testing.T) {
 }
 
 func TestEnvelopeInvalidXYInteractions(t *testing.T) {
-	nan := math.NaN()
-	inf := math.Inf(+1)
-	for i, tc := range []geom.XY{
-		{0, nan},
-		{nan, 0},
-		{nan, nan},
-		{0, inf},
-		{inf, 0},
-		{inf, inf},
-		{0, -inf},
-		{-inf, 0},
-		{-inf, -inf},
+	var (
+		nan = math.NaN()
+		inf = math.Inf(+1)
+	)
+	for i, tc := range []struct {
+		violation geom.RuleViolation
+		xy        geom.XY
+	}{
+		{geom.ViolateNaN, geom.XY{0, nan}},
+		{geom.ViolateNaN, geom.XY{nan, 0}},
+		{geom.ViolateNaN, geom.XY{nan, nan}},
+		{geom.ViolateInf, geom.XY{0, inf}},
+		{geom.ViolateInf, geom.XY{inf, 0}},
+		{geom.ViolateInf, geom.XY{inf, inf}},
+		{geom.ViolateInf, geom.XY{0, -inf}},
+		{geom.ViolateInf, geom.XY{-inf, 0}},
+		{geom.ViolateInf, geom.XY{-inf, -inf}},
 	} {
 		t.Run(fmt.Sprintf("new_envelope_with_first_arg_invalid_%d", i), func(t *testing.T) {
-			env := geom.NewEnvelope(tc)
-			expectErr(t, env.Validate())
+			env := geom.NewEnvelope(tc.xy)
+			expectValidity(t, env, tc.violation)
 		})
 		t.Run(fmt.Sprintf("new_envelope_with_second_arg_invalid_%d", i), func(t *testing.T) {
-			env := geom.NewEnvelope(geom.XY{}, tc)
-			expectErr(t, env.Validate())
+			env := geom.NewEnvelope(geom.XY{}, tc.xy)
+			expectValidity(t, env, tc.violation)
 		})
 		t.Run(fmt.Sprintf("expand_to_include_invalid_xy_%d", i), func(t *testing.T) {
 			env := geom.NewEnvelope(geom.XY{-1, -1}, geom.XY{1, 1})
-			env = env.ExpandToIncludeXY(tc)
-			expectErr(t, env.Validate())
+			env = env.ExpandToIncludeXY(tc.xy)
+			expectValidity(t, env, tc.violation)
 		})
 		t.Run(fmt.Sprintf("expand_from_invalid_to_include_env_%d", i), func(t *testing.T) {
-			env := geom.NewEnvelope(tc)
+			env := geom.NewEnvelope(tc.xy)
 			env = env.ExpandToIncludeXY(geom.XY{1, 1})
-			expectErr(t, env.Validate())
+			expectValidity(t, env, tc.violation)
 		})
 		t.Run(fmt.Sprintf("expand_to_include_invalid_env_%d", i), func(t *testing.T) {
 			base := geom.NewEnvelope(geom.XY{-1, -1}, geom.XY{1, 1})
-			other := geom.NewEnvelope(tc)
+			other := geom.NewEnvelope(tc.xy)
 			env := base.ExpandToIncludeEnvelope(other)
-			expectErr(t, env.Validate())
+			expectValidity(t, env, tc.violation)
 		})
 		t.Run(fmt.Sprintf("expand_from_invalid_to_include_env_%d", i), func(t *testing.T) {
-			base := geom.NewEnvelope(tc)
+			base := geom.NewEnvelope(tc.xy)
 			other := geom.NewEnvelope(geom.XY{-1, -1}, geom.XY{1, 1})
 			env := base.ExpandToIncludeEnvelope(other)
-			expectErr(t, env.Validate())
+			expectValidity(t, env, tc.violation)
 		})
 		t.Run(fmt.Sprintf("contains_invalid_xy_%d", i), func(t *testing.T) {
 			env := geom.NewEnvelope(geom.XY{-1, -1}, geom.XY{1, 1})
-			expectFalse(t, env.Contains(tc))
+			expectFalse(t, env.Contains(tc.xy))
 		})
 	}
 }
