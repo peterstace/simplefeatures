@@ -17,23 +17,23 @@ func TestPointValidation(t *testing.T) {
 	nan := math.NaN()
 	inf := math.Inf(+1)
 	for i, tc := range []struct {
-		wantValid bool
-		input     geom.Coordinates
+		reason geom.RuleViolation
+		input  geom.Coordinates
 	}{
-		{true, xy(0, 0)},
-		{false, xy(nan, 0)},
-		{false, xy(0, nan)},
-		{false, xy(nan, nan)},
-		{false, xy(inf, 0)},
-		{false, xy(0, inf)},
-		{false, xy(inf, inf)},
-		{false, xy(-inf, 0)},
-		{false, xy(0, -inf)},
-		{false, xy(-inf, -inf)},
+		{"", xy(0, 0)},
+		{geom.ViolateNaN, xy(nan, 0)},
+		{geom.ViolateNaN, xy(0, nan)},
+		{geom.ViolateNaN, xy(nan, nan)},
+		{geom.ViolateInf, xy(inf, 0)},
+		{geom.ViolateInf, xy(0, inf)},
+		{geom.ViolateInf, xy(inf, inf)},
+		{geom.ViolateInf, xy(-inf, 0)},
+		{geom.ViolateInf, xy(0, -inf)},
+		{geom.ViolateInf, xy(-inf, -inf)},
 	} {
 		t.Run(fmt.Sprintf("point_%d", i), func(t *testing.T) {
 			pt := geom.NewPoint(tc.input)
-			expectBoolEq(t, tc.wantValid, pt.Validate() == nil)
+			expectValidity(t, pt, tc.reason)
 		})
 	}
 }
@@ -42,25 +42,25 @@ func TestLineStringValidation(t *testing.T) {
 	nan := math.NaN()
 	inf := math.Inf(+1)
 	for i, tc := range []struct {
-		wantValid bool
-		inputs    []float64
+		reason geom.RuleViolation
+		inputs []float64
 	}{
-		{true, []float64{0, 0, 1, 1}},
-		{false, []float64{0, 0}},
-		{false, []float64{1, 1}},
-		{false, []float64{0, 0, 0, 0}},
-		{false, []float64{1, 1, 1, 1}},
-		{false, []float64{0, 0, 1, 1, 2, nan}},
-		{false, []float64{0, 0, 1, 1, nan, 2}},
-		{false, []float64{0, 0, 1, 1, 2, inf}},
-		{false, []float64{0, 0, 1, 1, inf, 2}},
-		{false, []float64{0, 0, 1, 1, 2, -inf}},
-		{false, []float64{0, 0, 1, 1, -inf, 2}},
+		{"", []float64{0, 0, 1, 1}},
+		{geom.ViolateTwoPoints, []float64{0, 0}},
+		{geom.ViolateTwoPoints, []float64{1, 1}},
+		{geom.ViolateTwoPoints, []float64{0, 0, 0, 0}},
+		{geom.ViolateTwoPoints, []float64{1, 1, 1, 1}},
+		{geom.ViolateNaN, []float64{0, 0, 1, 1, 2, nan}},
+		{geom.ViolateNaN, []float64{0, 0, 1, 1, nan, 2}},
+		{geom.ViolateInf, []float64{0, 0, 1, 1, 2, inf}},
+		{geom.ViolateInf, []float64{0, 0, 1, 1, inf, 2}},
+		{geom.ViolateInf, []float64{0, 0, 1, 1, 2, -inf}},
+		{geom.ViolateInf, []float64{0, 0, 1, 1, -inf, 2}},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			seq := geom.NewSequence(tc.inputs, geom.DimXY)
 			ls := geom.NewLineString(seq)
-			expectBoolEq(t, tc.wantValid, ls.Validate() == nil)
+			expectValidity(t, ls, tc.reason)
 		})
 	}
 }
@@ -92,61 +92,86 @@ func TestPolygonValidation(t *testing.T) {
 			expectNoErr(t, poly.Validate())
 		})
 	}
-	for i, wkt := range []string{
-		// not closed
-		"POLYGON((0 0,1 1,0 1))",
 
-		// not simple
-		"POLYGON((0 0,1 1,0 1,1 0,0 0))",
-
-		// intersect at a line
-		"POLYGON((0 0,3 0,3 3,0 3,0 0),(0 1,1 1,1 2,0 2,0 1))",
-
-		// intersect at two points
-		"POLYGON((0 0,3 0,3 3,0 3,0 0),(1 0,3 1,2 2,1 0))",
-
-		// inner ring is outside of the outer ring
-		"POLYGON((0 0,3 0,3 3,0 3,0 0),(4 0,7 0,7 3,4 3,4 0))",
-
-		// polygons aren't connected
-		`POLYGON(
-			(0 0, 4 0, 4 4, 0 4, 0 0),
-			(2 0, 3 1, 2 2, 1 1, 2 0),
-			(2 2, 3 3, 2 4, 1 3, 2 2)
-		)`,
-		`POLYGON(
-			(0 0, 6 0, 6 5, 0 5, 0 0),
-			(2 1, 4 1, 4 2, 2 2, 2 1),
-			(2 2, 3 3, 2 4, 1 3, 2 2),
-			(4 2, 5 3, 4 4, 3 3, 4 2)
-		)`,
-
-		// Nested rings
-		`POLYGON(
-			(0 0,5 0,5 5,0 5,0 0),
-			(1 1,4 1,4 4,1 4,1 1),
-			(2 2,3 2,3 3,2 3,2 2)
-		)`,
-		`POLYGON(
-			(0 0,5 0,5 5,0 5,0 0),
-			(2 2,3 2,3 3,2 3,2 2),
-			(1 1,4 1,4 4,1 4,1 1)
-		)`,
-
-		// Contains empty rings.
-		`POLYGON(EMPTY)`,
-		`POLYGON(EMPTY,(0 0,0 1,1 0,0 0))`,
-		`POLYGON((0 0,0 1,1 0,0 0),EMPTY)`,
+	for i, tc := range []struct {
+		reason geom.RuleViolation
+		wkt    string
+	}{
+		{
+			geom.ViolateRingClosed,
+			"POLYGON((0 0,1 1,0 1))",
+		},
+		{
+			geom.ViolateRingSimple,
+			"POLYGON((0 0,1 1,0 1,1 0,0 0))",
+		},
+		{
+			geom.ViolateRingsMultiTouch,
+			"POLYGON((0 0,3 0,3 3,0 3,0 0),(0 1,1 1,1 2,0 2,0 1))",
+		},
+		{
+			geom.ViolateRingsMultiTouch,
+			"POLYGON((0 0,3 0,3 3,0 3,0 0),(1 0,3 1,2 2,1 0))",
+		},
+		{
+			geom.ViolateInteriorInExterior,
+			"POLYGON((0 0,3 0,3 3,0 3,0 0),(4 0,7 0,7 3,4 3,4 0))",
+		},
+		{
+			geom.ViolateInteriorConnected,
+			`POLYGON(
+				(0 0, 4 0, 4 4, 0 4, 0 0),
+				(2 0, 3 1, 2 2, 1 1, 2 0),
+				(2 2, 3 3, 2 4, 1 3, 2 2)
+			)`,
+		},
+		{
+			geom.ViolateInteriorConnected,
+			`POLYGON(
+				(0 0, 6 0, 6 5, 0 5, 0 0),
+				(2 1, 4 1, 4 2, 2 2, 2 1),
+				(2 2, 3 3, 2 4, 1 3, 2 2),
+				(4 2, 5 3, 4 4, 3 3, 4 2)
+			)`,
+		},
+		{
+			geom.ViolateRingNested,
+			`POLYGON(
+				(0 0,5 0,5 5,0 5,0 0),
+				(1 1,4 1,4 4,1 4,1 1),
+				(2 2,3 2,3 3,2 3,2 2)
+			)`,
+		},
+		{
+			geom.ViolateRingNested,
+			`POLYGON(
+				(0 0,5 0,5 5,0 5,0 0),
+				(2 2,3 2,3 3,2 3,2 2),
+				(1 1,4 1,4 4,1 4,1 1)
+			)`,
+		},
+		{
+			geom.ViolateRingEmpty,
+			`POLYGON(EMPTY)`,
+		},
+		{
+			geom.ViolateRingEmpty,
+			`POLYGON(EMPTY,(0 0,0 1,1 0,0 0))`,
+		},
+		{
+			geom.ViolateRingEmpty,
+			`POLYGON((0 0,0 1,1 0,0 0),EMPTY)`,
+		},
 	} {
 		t.Run("invalid_"+strconv.Itoa(i), func(t *testing.T) {
 			t.Run("Constructor", func(t *testing.T) {
-				_, err := geom.UnmarshalWKT(wkt)
-				expectErr(t, err)
+				_, err := geom.UnmarshalWKT(tc.wkt)
+				expectValidationErrWithReason(t, err, tc.reason)
 			})
 			t.Run("Validate", func(t *testing.T) {
-				poly, err := geom.UnmarshalWKT(wkt, geom.NoValidate{})
+				poly, err := geom.UnmarshalWKT(tc.wkt, geom.NoValidate{})
 				expectNoErr(t, err)
-				expectErr(t, poly.Validate())
+				expectValidity(t, poly, tc.reason)
 			})
 		})
 	}
@@ -155,12 +180,12 @@ func TestPolygonValidation(t *testing.T) {
 func TestMultiPointValidation(t *testing.T) {
 	nan := math.NaN()
 	for i, tc := range []struct {
-		wantValid bool
-		coords    []geom.Coordinates
+		reason geom.RuleViolation
+		coords []geom.Coordinates
 	}{
-		{true, []geom.Coordinates{xy(0, 1), xy(2, 3)}},
-		{false, []geom.Coordinates{xy(0, 1), xy(2, nan)}},
-		{false, []geom.Coordinates{xy(nan, 1), xy(2, 3)}},
+		{"", []geom.Coordinates{xy(0, 1), xy(2, 3)}},
+		{geom.ViolateNaN, []geom.Coordinates{xy(0, 1), xy(2, nan)}},
+		{geom.ViolateNaN, []geom.Coordinates{xy(nan, 1), xy(2, 3)}},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var pts []geom.Point
@@ -169,7 +194,7 @@ func TestMultiPointValidation(t *testing.T) {
 				pts = append(pts, pt)
 			}
 			mp := geom.NewMultiPoint(pts)
-			expectBoolEq(t, tc.wantValid, mp.Validate() == nil)
+			expectValidity(t, mp, tc.reason)
 		})
 	}
 }
@@ -177,13 +202,13 @@ func TestMultiPointValidation(t *testing.T) {
 func TestMultiLineStringValidation(t *testing.T) {
 	nan := math.NaN()
 	for i, tc := range []struct {
-		wantValid bool
-		coords    [][]float64
+		reason geom.RuleViolation
+		coords [][]float64
 	}{
-		{true, [][]float64{}},
-		{false, [][]float64{{0, 1}}},
-		{true, [][]float64{{0, 1, 2, 3}}},
-		{false, [][]float64{{0, 1, 2, nan}}},
+		{"", [][]float64{}},
+		{geom.ViolateTwoPoints, [][]float64{{0, 1}}},
+		{"", [][]float64{{0, 1, 2, 3}}},
+		{geom.ViolateNaN, [][]float64{{0, 1, 2, nan}}},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var lss []geom.LineString
@@ -193,7 +218,7 @@ func TestMultiLineStringValidation(t *testing.T) {
 				lss = append(lss, ls)
 			}
 			mls := geom.NewMultiLineString(lss)
-			expectBoolEq(t, tc.wantValid, mls.Validate() == nil)
+			expectValidity(t, mls, tc.reason)
 		})
 	}
 }
@@ -231,6 +256,7 @@ func TestMultiPolygonValidation(t *testing.T) {
 			geomFromWKT(t, wkt)
 		})
 	}
+
 	for i, wkt := range []string{
 		`MULTIPOLYGON(
 			((-6 -3,8 4,7 6,-7 -1,-6 -3)),
@@ -278,11 +304,8 @@ func TestMultiPolygonValidation(t *testing.T) {
 		)`,
 	} {
 		t.Run(fmt.Sprintf("invalid_%d", i), func(t *testing.T) {
-			_, err := geom.UnmarshalWKT(wkt)
-			if err == nil {
-				t.Log(wkt)
-				t.Error("expected error")
-			}
+			g := geomFromWKT(t, wkt, geom.NoValidate{})
+			expectValidity(t, g, geom.ViolatePolysMultiTouch)
 		})
 	}
 }
@@ -290,24 +313,23 @@ func TestMultiPolygonValidation(t *testing.T) {
 func TestMultiPolygonConstraintValidation(t *testing.T) {
 	poly, err := geom.UnmarshalWKT("POLYGON((0 0,1 1,0 1,1 0,0 0))", geom.NoValidate{})
 	expectNoErr(t, err)
-	expectErr(t, poly.Validate())
+	expectValidity(t, poly, geom.ViolateRingSimple)
 
 	mp := geom.NewMultiPolygon([]geom.Polygon{poly.MustAsPolygon()})
-	expectErr(t, mp.Validate())
+	expectValidity(t, mp, geom.ViolateRingSimple)
 }
 
 func TestGeometryCollectionValidation(t *testing.T) {
 	for i, tc := range []struct {
-		wantValid bool
-		wkt       string
+		reason geom.RuleViolation
+		wkt    string
 	}{
-		{true, "GEOMETRYCOLLECTION(LINESTRING(0 1,2 3))"},
-		{false, "GEOMETRYCOLLECTION(LINESTRING(0 1))"},
+		{"", "GEOMETRYCOLLECTION(LINESTRING(0 1,2 3))"},
+		{geom.ViolateTwoPoints, "GEOMETRYCOLLECTION(LINESTRING(0 1))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			gc, err := geom.UnmarshalWKT(tc.wkt, geom.NoValidate{})
-			expectNoErr(t, err)
-			expectBoolEq(t, gc.Validate() == nil, tc.wantValid)
+			gc := geomFromWKT(t, tc.wkt, geom.NoValidate{})
+			expectValidity(t, gc, tc.reason)
 		})
 	}
 }

@@ -458,13 +458,18 @@ func TestGeoJSONUnmarshalIntoConcreteGeometryWrongType(t *testing.T) {
 			} {
 				srcTyp := geomFromGeoJSON(t, geojson).Type()
 				t.Run("source_"+srcTyp.String(), func(t *testing.T) {
-					if srcTyp == tc.dest.Type() {
+					destType := tc.dest.Type()
+					if srcTyp == destType {
 						// This test suite is for negative test cases, however
 						// this test case would always succeed.
 						return
 					}
 					err := json.Unmarshal([]byte(geojson), tc.dest)
-					expectErr(t, err)
+					want := geom.UnmarshalGeoJSONSourceDestinationMismatchError{
+						SourceType:      srcTyp,
+						DestinationType: destType,
+					}
+					expectErrIs(t, err, want)
 				})
 			}
 		})

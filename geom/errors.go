@@ -58,6 +58,18 @@ func wrapWithGeoJSONSyntaxError(err error) error {
 	return geojsonSyntaxError{err.Error()}
 }
 
+type unmarshalGeoJSONSourceDestinationMismatchError struct {
+	SourceType      GeometryType
+	DestinationType GeometryType
+}
+
+func (e unmarshalGeoJSONSourceDestinationMismatchError) Error() string {
+	return fmt.Sprintf(
+		"cannot unmarshal GeoJSON of type %s into %s",
+		e.SourceType, e.DestinationType,
+	)
+}
+
 type mismatchedGeometryCollectionDimsError struct {
 	CT1, CT2 CoordinatesType
 }
@@ -84,34 +96,34 @@ const (
 
 func (v ruleViolation) errAtXY(location XY) error {
 	return validationError{
-		ruleViolation: v,
-		hasLocation:   true,
-		location:      location,
+		RuleViolation: v,
+		HasLocation:   true,
+		Location:      location,
 	}
 }
 
 func (v ruleViolation) errAtPt(location Point) error {
 	xy, ok := location.XY()
 	return validationError{
-		ruleViolation: v,
-		hasLocation:   ok,
-		location:      xy,
+		RuleViolation: v,
+		HasLocation:   ok,
+		Location:      xy,
 	}
 }
 
 func (v ruleViolation) err() error {
-	return validationError{ruleViolation: v}
+	return validationError{RuleViolation: v}
 }
 
 type validationError struct {
-	ruleViolation ruleViolation
-	hasLocation   bool
-	location      XY
+	RuleViolation ruleViolation
+	HasLocation   bool
+	Location      XY
 }
 
 func (e validationError) Error() string {
-	if e.hasLocation {
-		return fmt.Sprintf("%s (at or near %v)", e.ruleViolation, e.location)
+	if e.HasLocation {
+		return fmt.Sprintf("%s (at or near %v)", e.RuleViolation, e.Location)
 	}
-	return string(e.ruleViolation)
+	return string(e.RuleViolation)
 }
