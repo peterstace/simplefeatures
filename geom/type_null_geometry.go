@@ -24,7 +24,7 @@ func (ng *NullGeometry) Scan(value interface{}) error {
 // Value implements the database/sql/driver.Valuer interface.
 func (ng NullGeometry) Value() (driver.Value, error) {
 	if !ng.Valid {
-		return nil, nil
+		return nil, nil //nolint:nilnil
 	}
 	return ng.Geometry.Value()
 }

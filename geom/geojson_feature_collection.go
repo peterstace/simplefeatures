@@ -153,7 +153,7 @@ func (c *GeoJSONFeatureCollection) UnmarshalJSON(p []byte) error {
 		Type     string           `json:"type"`
 		Features []GeoJSONFeature `json:"features"`
 	}
-	if err := json.Unmarshal(p, &topLevel); err != nil { //nolint:musttag
+	if err := json.Unmarshal(p, &topLevel); err != nil {
 		return err
 	}
 	if topLevel.Type == "" {
