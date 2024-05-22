@@ -364,7 +364,7 @@ func ConvexHull(g geom.Geometry) (geom.Geometry, error) {
 	return result, wrap(err, "executing GEOSConvexHull_r")
 }
 
-func ConcaveHull(g geom.Geometry, pctconvex float64, allowHoles bool) (geom.Geometry, error) {
+func ConcaveHull(g geom.Geometry, ratio float64, allowHoles bool) (geom.Geometry, error) {
 	if C.CONCAVE_HULL_MISSING != 0 {
 		return geom.Geometry{}, unsupportedGEOSVersionError{
 			C.CONCAVE_HULL_MIN_VERSION, "ConcaveHull",
@@ -375,7 +375,7 @@ func ConcaveHull(g geom.Geometry, pctconvex float64, allowHoles bool) (geom.Geom
 		if allowHoles {
 			ah = 1
 		}
-		return C.GEOSConcaveHull_r(ctx, g, C.double(pctconvex), ah)
+		return C.GEOSConcaveHull_r(ctx, g, C.double(ratio), ah)
 	})
 	return result, wrap(err, "executing GEOSConcaveHull_r")
 }
