@@ -7,6 +7,9 @@
 - Fixes a bug where geometry collections with mixed coordinate types were
   erroneously allowed during WKT and WKB parsing.
 
+- Fixes a bug where the `Simplify` method would drop coordinate type to XY in
+  some scenarios where the result is an empty geometry.
+
 ## v0.50.0
 
 2024-05-07

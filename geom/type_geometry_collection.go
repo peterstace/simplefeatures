@@ -550,7 +550,7 @@ func (c GeometryCollection) Simplify(threshold float64, nv ...NoValidate) (Geome
 			return GeometryCollection{}, wrapSimplified(err)
 		}
 	}
-	return NewGeometryCollection(geoms), nil
+	return NewGeometryCollection(geoms).ForceCoordinatesType(c.CoordinatesType()), nil
 }
 
 // Densify returns a new GeometryCollection with additional linearly
