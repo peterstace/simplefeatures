@@ -222,6 +222,13 @@ func Simplify(g geom.Geometry, tolerance float64) (geom.Geometry, error) {
 	return result, wrap(err, "executing GEOSSimplify_r")
 }
 
+func TopologyPreserveSimplify(g geom.Geometry, tolerance float64) (geom.Geometry, error) {
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, gh *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSTopologyPreserveSimplify_r(ctx, gh, C.double(tolerance))
+	})
+	return result, wrap(err, "executing GEOSSimplifyPreserveTopology_r")
+}
+
 func Difference(a, b geom.Geometry) (geom.Geometry, error) {
 	result, err := binaryOpG(a, b, func(ctx C.GEOSContextHandle_t, a, b *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSDifference_r(ctx, a, b)
