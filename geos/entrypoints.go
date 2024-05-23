@@ -287,9 +287,13 @@ func UnaryUnion(g geom.Geometry) (geom.Geometry, error) {
 	return rawgeos.UnaryUnion(g)
 }
 
-// ConcaveHull returns concave hull of input geometry.
-// concavenessRatio - ratio 0 to 1 (0 - max concaveness, 1 - convex hull)
-// allowHoles - true to allow holes inside of polygons.
+// ConcaveHull returns a concave hull of the input. A concave hull is generally
+// a Polygon, but could also be a 2-point LineString or a Point in degenerate
+// cases. It will be made of vertices that are a subset of the input vertices.
+// The concavenessRatio parameter controls the concaveness of the hull (a value
+// of 1 will produce convex hulls, and a value of 0 will produce maximally
+// concave hulls). The allowHoles parameter controls whether holes are allowed
+// in the hull.
 func ConcaveHull(g geom.Geometry, concavenessRatio float64, allowHoles bool) (geom.Geometry, error) {
 	return rawgeos.ConcaveHull(g, concavenessRatio, allowHoles)
 }
