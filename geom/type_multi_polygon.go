@@ -567,7 +567,7 @@ func (m MultiPolygon) Simplify(threshold float64, nv ...NoValidate) (MultiPolygo
 			return MultiPolygon{}, wrapSimplified(err)
 		}
 	}
-	return simpl, nil
+	return simpl.ForceCoordinatesType(m.CoordinatesType()), nil
 }
 
 // Densify returns a new MultiPolygon with additional linearly interpolated

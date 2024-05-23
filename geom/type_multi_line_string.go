@@ -508,7 +508,7 @@ func (m MultiLineString) Simplify(threshold float64) MultiLineString {
 			lss = append(lss, ls)
 		}
 	}
-	return NewMultiLineString(lss)
+	return NewMultiLineString(lss).ForceCoordinatesType(m.CoordinatesType())
 }
 
 // Densify returns a new MultiLineString with additional linearly interpolated

@@ -661,7 +661,7 @@ func (p Polygon) Simplify(threshold float64, nv ...NoValidate) (Polygon, error) 
 		return ring.Coordinates().Length() < 4
 	}
 	if hasCollapsed(exterior) {
-		return Polygon{}, nil
+		return Polygon{}.ForceCoordinatesType(p.CoordinatesType()), nil
 	}
 
 	n := p.NumInteriorRings()
