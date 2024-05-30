@@ -1,3 +1,6 @@
+.PHONY: all
+all: unit lint pgscan cmppg cmpgeos
+
 DC_RUN = \
 	docker compose \
 	--project-name sf-$$task \
@@ -59,8 +62,4 @@ geos-3.8:
 	       alpine_version=3.13 geos_version=3.8.1-r2; $(DC_GEOS_RUN)
 
 .PHONY: geos
-geos: geos-3.12
-geos: geos-3.11
-geos: geos-3.10
-geos: geos-3.9
-geos: geos-3.8
+geos: geos-3.12 geos-3.11 geos-3.10 geos-3.9 geos-3.8
