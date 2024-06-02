@@ -231,12 +231,12 @@ func Simplify(g geom.Geometry, tolerance float64) (geom.Geometry, error) {
 	return rawgeos.Simplify(g, tolerance)
 }
 
-// TopologyPresereSimplify creates a simplified version of a geometry using
+// TopologyPreserveSimplify creates a simplified version of a geometry using
 // the Douglas-Peucker algorithm. An attempt is made to preserve topological
 // invariants, e.g.  ring collapse and intersection.
 //
 // The validity of the result is not checked.
-func TopologyPresereSimplify(g geom.Geometry, tolerance float64) (geom.Geometry, error) {
+func TopologyPreserveSimplify(g geom.Geometry, tolerance float64) (geom.Geometry, error) {
 	return rawgeos.TopologyPreserveSimplify(g, tolerance)
 }
 

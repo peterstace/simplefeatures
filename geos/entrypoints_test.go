@@ -789,7 +789,7 @@ func TestTopologyPreserveSimplify(t *testing.T) {
 		input  = `POLYGON((0 0,0 1,-0.5 1.5,0 2,0 3,3 3,3 0,0 0),(-0.1 1.5,2 2,2 1,-0.1 1.5))`
 		output = `POLYGON((0 0,-0.5 1.5,0 3,3 3,3 0,0 0),(-0.1 1.5,2 2,2 1,-0.1 1.5))`
 	)
-	got, err := geos.TopologyPresereSimplify(geomFromWKT(t, input), 0.5)
+	got, err := geos.TopologyPreserveSimplify(geomFromWKT(t, input), 0.5)
 	expectNoErr(t, err)
 	expectGeomEq(t, got, geomFromWKT(t, output), geom.IgnoreOrder)
 }
