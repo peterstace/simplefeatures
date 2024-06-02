@@ -10,6 +10,9 @@
 - Fixes a bug where the `Simplify` method would drop coordinate type to XY in
   some scenarios where the result is an empty geometry.
 
+- Adds a wrapper to the `geos` package for the `GEOSTopologyPreserveSimplify_r`
+  function (exposed as `TopologyPreserveSimplify`).
+
 ## v0.50.0
 
 2024-05-07
