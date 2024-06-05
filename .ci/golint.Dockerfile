@@ -1,4 +1,4 @@
-FROM golangci/golangci-lint:v1.58.2
+FROM golangci/golangci-lint:v1.59.0
 
 RUN apt-get update \
   && apt-get install -y -q --no-install-recommends \
