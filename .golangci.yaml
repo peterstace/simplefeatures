@@ -112,17 +112,7 @@ linters:
   disable:
 
     # Deprecated by golangci-lint:
-    - deadcode
     - execinquery
-    - exhaustivestruct
-    - golint
-    - ifshort
-    - interfacer
-    - maligned
-    - nosnakecase
-    - scopelint
-    - structcheck
-    - varcheck
 
     # The following are disabled because they're not a good match for
     # simplefeatures.
