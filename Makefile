@@ -1,5 +1,5 @@
 .PHONY: all
-all: unit lint pgscan cmppg cmpgeos
+all: unit lint geos pgscan cmppg cmpgeos
 
 DC_RUN = \
 	docker compose \

@@ -2,6 +2,7 @@ package geos_test
 
 import (
 	"math"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -17,6 +18,13 @@ func geomFromWKT(t *testing.T, wkt string, nv ...geom.NoValidate) geom.Geometry 
 		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
 	}
 	return geom
+}
+
+func geomFromWKTFile(t *testing.T, path string, nv ...geom.NoValidate) geom.Geometry {
+	t.Helper()
+	wkt, err := os.ReadFile(path)
+	expectNoErr(t, err)
+	return geomFromWKT(t, string(wkt), nv...)
 }
 
 func expectNoErr(t *testing.T, err error) {
@@ -926,4 +934,20 @@ func TestCoverageUnion(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCoverageSimplifyVW(t *testing.T) {
+	input := geom.NewGeometryCollection(
+		[]geom.Geometry{
+			geomFromWKTFile(t, "testdata/coverage_simplify_input_birchgrove.wkt"),
+			geomFromWKTFile(t, "testdata/coverage_simplify_input_balmain.wkt"),
+		},
+	)
+	got, err := geos.CoverageSimplifyVW(input.AsGeometry(), 0.001, false)
+	if err != nil && strings.Contains(err.Error(), "unsupported") {
+		t.Skip(err)
+	}
+	expectNoErr(t, err)
+	want := geomFromWKTFile(t, "testdata/coverage_simplify_output.wkt")
+	expectGeomEq(t, got, want)
 }

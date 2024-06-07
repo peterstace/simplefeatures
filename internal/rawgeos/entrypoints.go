@@ -24,6 +24,16 @@ GEOSGeometry *GEOSMakeValid_r(GEOSContextHandle_t handle, const GEOSGeometry* g)
 GEOSGeometry *GEOSCoverageUnion_r(GEOSContextHandle_t handle, const GEOSGeometry* g) { return NULL; }
 #endif
 
+#define COVERAGE_SIMPLIFY_VW_MIN_VERSION "3.12.0"
+#define COVERAGE_SIMPLIFY_VW_MISSING ( \
+	GEOS_VERSION_MAJOR < 3 || \
+	(GEOS_VERSION_MAJOR == 3 && GEOS_VERSION_MINOR < 12) \
+)
+#if COVERAGE_SIMPLIFY_VW_MISSING
+// This stub implementation always fails:
+GEOSGeometry *GEOSCoverageSimplifyVW_r(GEOSContextHandle_t handle, const GEOSGeometry* g, double tolerance, int preserveTopology) { return NULL; }
+#endif
+
 #define CONCAVE_HULL_MIN_VERSION "3.11.0"
 #define CONCAVE_HULL_MISSING ( \
 	GEOS_VERSION_MAJOR < 3 || \
@@ -267,6 +277,18 @@ func CoverageUnion(g geom.Geometry) (geom.Geometry, error) {
 	return result, wrap(err, "executing GEOSCoverageUnion_r")
 }
 
+func CoverageSimplifyVW(g geom.Geometry, tolerance float64, preserveBoundary bool) (geom.Geometry, error) {
+	if C.COVERAGE_SIMPLIFY_VW_MISSING != 0 {
+		return geom.Geometry{}, unsupportedGEOSVersionError{
+			C.COVERAGE_SIMPLIFY_VW_MIN_VERSION, "CoverageSimplifyVW",
+		}
+	}
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSCoverageSimplifyVW_r(ctx, g, C.double(tolerance), goBoolToCInt(preserveBoundary))
+	})
+	return result, wrap(err, "executing GEOSCoverageSimplifyVW_r")
+}
+
 func UnaryUnion(g geom.Geometry) (geom.Geometry, error) {
 	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
 		return C.GEOSUnaryUnion_r(ctx, g)
@@ -378,11 +400,7 @@ func ConcaveHull(g geom.Geometry, ratio float64, allowHoles bool) (geom.Geometry
 		}
 	}
 	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
-		ah := C.uint(0)
-		if allowHoles {
-			ah = 1
-		}
-		return C.GEOSConcaveHull_r(ctx, g, C.double(ratio), ah)
+		return C.GEOSConcaveHull_r(ctx, g, C.double(ratio), goBoolToCUint(allowHoles))
 	})
 	return result, wrap(err, "executing GEOSConcaveHull_r")
 }
