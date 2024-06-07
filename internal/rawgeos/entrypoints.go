@@ -255,7 +255,7 @@ func SymmetricDifference(a, b geom.Geometry) (geom.Geometry, error) {
 
 func MakeValid(g geom.Geometry) (geom.Geometry, error) {
 	if C.MAKE_VALID_MISSING != 0 {
-		return geom.Geometry{}, unsupportedGEOSVersionError{
+		return geom.Geometry{}, UnsupportedGEOSVersionError{
 			C.MAKE_VALID_MIN_VERSION, "MakeValid",
 		}
 	}
@@ -267,7 +267,7 @@ func MakeValid(g geom.Geometry) (geom.Geometry, error) {
 
 func CoverageUnion(g geom.Geometry) (geom.Geometry, error) {
 	if C.COVERAGE_UNION_MISSING != 0 {
-		return geom.Geometry{}, unsupportedGEOSVersionError{
+		return geom.Geometry{}, UnsupportedGEOSVersionError{
 			C.COVERAGE_UNION_MIN_VERSION, "CoverageUnion",
 		}
 	}
@@ -279,7 +279,7 @@ func CoverageUnion(g geom.Geometry) (geom.Geometry, error) {
 
 func CoverageSimplifyVW(g geom.Geometry, tolerance float64, preserveBoundary bool) (geom.Geometry, error) {
 	if C.COVERAGE_SIMPLIFY_VW_MISSING != 0 {
-		return geom.Geometry{}, unsupportedGEOSVersionError{
+		return geom.Geometry{}, UnsupportedGEOSVersionError{
 			C.COVERAGE_SIMPLIFY_VW_MIN_VERSION, "CoverageSimplifyVW",
 		}
 	}
@@ -395,7 +395,7 @@ func ConvexHull(g geom.Geometry) (geom.Geometry, error) {
 
 func ConcaveHull(g geom.Geometry, ratio float64, allowHoles bool) (geom.Geometry, error) {
 	if C.CONCAVE_HULL_MISSING != 0 {
-		return geom.Geometry{}, unsupportedGEOSVersionError{
+		return geom.Geometry{}, UnsupportedGEOSVersionError{
 			C.CONCAVE_HULL_MIN_VERSION, "ConcaveHull",
 		}
 	}
