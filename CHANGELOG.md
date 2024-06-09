@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Upgrades `golangci-lint` to `v1.59.0`.
+- Upgrades `golangci-lint` to `v1.59.1`.
 
 - Fixes a bug where geometry collections with mixed coordinate types were
   erroneously allowed during WKT and WKB parsing.
