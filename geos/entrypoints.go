@@ -287,6 +287,23 @@ func CoverageUnion(g geom.Geometry) (geom.Geometry, error) {
 	return rawgeos.CoverageUnion(g)
 }
 
+// CoverageSimplifyVW simplifies inputs that form a polygon coverage, provided
+// as a GeometryCollection of Polygons and/or MultiPolygons. It uses the
+// Visvalingam–Whyatt algorithm and relies on the fact that the input is a
+// valid polygon coverage, i.e.:
+//
+//  1. all input geometries must be polygonal,
+//  2. the interiors of the inputs must not intersect, and
+//  3. the common boundaries of adjacent polygons have the same set of vertices in both polygons.
+//
+// It may not check that these constraints are met, so it's possible that an
+// incorrect result is returned without an error if they are not.
+//
+// The validity of the result is not checked.
+func CoverageSimplifyVW(g geom.Geometry, tolerance float64, preserveBoundary bool) (geom.Geometry, error) {
+	return rawgeos.CoverageSimplifyVW(g, tolerance, preserveBoundary)
+}
+
 // UnaryUnion is a single argument version of Union. It is most useful when
 // supplied with a GeometryCollection, resulting in the union of the
 // GeometryCollection's child geometries.

@@ -13,6 +13,9 @@
 - Adds a wrapper to the `geos` package for the `GEOSTopologyPreserveSimplify_r`
   function (exposed as `TopologyPreserveSimplify`).
 
+- Adds a wrapper to the `geos` package for the `GEOSCoverageSimplifyVW_r`
+  function (exposed as `CoverageSimplifyVW`).
+
 ## v0.50.0
 
 2024-05-07

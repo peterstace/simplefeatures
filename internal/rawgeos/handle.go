@@ -189,3 +189,17 @@ func (h *handle) decode(gh *C.GEOSGeometry) (geom.Geometry, error) {
 	g, err := geom.UnmarshalWKB(wkb, geom.NoValidate{})
 	return g, wrap(err, "failed to unmarshal GEOS WKB result")
 }
+
+func goBoolToCInt(b bool) C.int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func goBoolToCUint(b bool) C.uint {
+	if b {
+		return 1
+	}
+	return 0
+}
