@@ -19,12 +19,12 @@ var currentGEOSVersion = fmt.Sprintf(
 	C.GEOS_VERSION_PATCH,
 )
 
-type unsupportedGEOSVersionError struct {
+type UnsupportedGEOSVersionError struct {
 	requiredGEOSVersion string
 	operation           string
 }
 
-func (e unsupportedGEOSVersionError) Error() string {
+func (e UnsupportedGEOSVersionError) Error() string {
 	return fmt.Sprintf("%s is unsupported in GEOS %s, requires at least GEOS %s",
 		e.operation, currentGEOSVersion, e.requiredGEOSVersion)
 }

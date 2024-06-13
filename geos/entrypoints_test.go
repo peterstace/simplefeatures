@@ -1,14 +1,15 @@
 package geos_test
 
 import (
+	"errors"
 	"math"
 	"os"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
 	"github.com/peterstace/simplefeatures/geos"
+	"github.com/peterstace/simplefeatures/internal/rawgeos"
 )
 
 func geomFromWKT(t *testing.T, wkt string, nv ...geom.NoValidate) geom.Geometry {
@@ -45,6 +46,14 @@ func expectGeomEq(t *testing.T, got, want geom.Geometry, opts ...geom.ExactEqual
 	t.Helper()
 	if !geom.ExactEquals(got, want, opts...) {
 		t.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
+	}
+}
+
+func skipIfUnsupported(tb testing.TB, err error) {
+	tb.Helper()
+	var verErr rawgeos.UnsupportedGEOSVersionError
+	if errors.As(err, &verErr) {
+		tb.Skipf(verErr.Error())
 	}
 }
 
@@ -839,9 +848,7 @@ func TestMakeValid(t *testing.T) {
 			expectErr(t, err)
 			in := geomFromWKT(t, tt.input, geom.NoValidate{})
 			gotGeom, err := geos.MakeValid(in)
-			if err != nil && strings.Contains(err.Error(), "unsupported") {
-				t.Skip(err)
-			}
+			skipIfUnsupported(t, err)
 			expectNoErr(t, err)
 			wantGeom := geomFromWKT(t, tt.wantOutput)
 			expectGeomEq(t, gotGeom, wantGeom, geom.IgnoreOrder)
@@ -922,9 +929,7 @@ func TestCoverageUnion(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			in := geomFromWKT(t, tc.input)
 			gotGeom, err := geos.CoverageUnion(in)
-			if err != nil && strings.Contains(err.Error(), "unsupported") {
-				t.Skip(err)
-			}
+			skipIfUnsupported(t, err)
 			if tc.wantErr {
 				expectErr(t, err)
 			} else {
@@ -944,9 +949,7 @@ func TestCoverageSimplifyVW(t *testing.T) {
 		},
 	)
 	got, err := geos.CoverageSimplifyVW(input.AsGeometry(), 0.001, false)
-	if err != nil && strings.Contains(err.Error(), "unsupported") {
-		t.Skip(err)
-	}
+	skipIfUnsupported(t, err)
 	expectNoErr(t, err)
 	want := geomFromWKTFile(t, "testdata/coverage_simplify_output.wkt")
 	expectGeomEq(t, got, want)
