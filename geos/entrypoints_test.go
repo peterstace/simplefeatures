@@ -57,6 +57,13 @@ func skipIfUnsupported(tb testing.TB, err error) {
 	}
 }
 
+func expectBoolEq(t *testing.T, got, want bool) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got:  %v want: %v", got, want)
+	}
+}
+
 // These tests aren't exhaustive, because we are leveraging GEOS.  The
 // testing is just enough to make use confident that we're invoking GEOS
 // correctly.
@@ -953,4 +960,59 @@ func TestCoverageSimplifyVW(t *testing.T) {
 	expectNoErr(t, err)
 	want := geomFromWKTFile(t, "testdata/coverage_simplify_output.wkt")
 	expectGeomEq(t, got, want)
+}
+
+func TestCoverageIsValid(t *testing.T) {
+	for _, tc := range []struct {
+		name         string
+		input        string
+		wantValid    bool
+		wantBadEdges string
+	}{
+		{
+			name:         "adjoining trianges",
+			input:        "GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)),POLYGON((1 0,1 1,0 1,1 0)))",
+			wantValid:    true,
+			wantBadEdges: "GEOMETRYCOLLECTION(LINESTRING EMPTY, LINESTRING EMPTY)",
+		},
+		{
+			name:         "adjoining trianges with matching center point",
+			input:        "GEOMETRYCOLLECTION(POLYGON((0 0,0 1,0.5 0.5,1 0,0 0)),POLYGON((1 0,1 1,0 1,0.5 0.5,1 0)))",
+			wantValid:    true,
+			wantBadEdges: "GEOMETRYCOLLECTION(LINESTRING EMPTY, LINESTRING EMPTY)",
+		},
+		{
+			name:         "adjoining trianges with mismatching center point in first geometry",
+			input:        "GEOMETRYCOLLECTION(POLYGON((0 0,0 1,0.5 0.5,1 0,0 0)),POLYGON((1 0,1 1,0 1,1 0)))",
+			wantValid:    false,
+			wantBadEdges: "GEOMETRYCOLLECTION(LINESTRING(0 1,0.5 0.5,1 0), LINESTRING(0 1,1 0))",
+		},
+		{
+			name:         "adjoining trianges with mismatching center point in second geometry",
+			input:        "GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)),POLYGON((1 0,1 1,0 1,0.5 0.5,1 0)))",
+			wantValid:    false,
+			wantBadEdges: "GEOMETRYCOLLECTION(LINESTRING(0 1,1 0), LINESTRING(0 1,0.5 0.5,1 0))",
+		},
+		{
+			name:         "overlapping trianges with non-common crossing points",
+			input:        "GEOMETRYCOLLECTION(POLYGON((0 0,0 1,1 0,0 0)),POLYGON((0 0,1 0,1 1,0 0)))",
+			wantValid:    false,
+			wantBadEdges: "GEOMETRYCOLLECTION(LINESTRING(0 1,1 0,0 0),LINESTRING(1 1,0 0,1 0))",
+		},
+		{
+			name:         "overlapping trianges with common crossing points",
+			input:        "GEOMETRYCOLLECTION(POLYGON((0 0,0 1,0.5 0.5,1 0,0 0)),POLYGON((0 0,1 0,1 1,0.5 0.5,0 0)))",
+			wantValid:    false,
+			wantBadEdges: "GEOMETRYCOLLECTION(LINESTRING(0.5 0.5,1 0,0 0),LINESTRING(0.5 0.5,0 0,1 0))",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			inputG := geomFromWKT(t, tc.input)
+			valid, badEdges, err := geos.CoverageIsValid(inputG, 0)
+			skipIfUnsupported(t, err)
+			expectNoErr(t, err)
+			expectBoolEq(t, valid, tc.wantValid)
+			expectGeomEq(t, badEdges, geomFromWKT(t, tc.wantBadEdges))
+		})
+	}
 }

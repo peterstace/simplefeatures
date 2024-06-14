@@ -268,40 +268,48 @@ func MakeValid(g geom.Geometry) (geom.Geometry, error) {
 }
 
 // The CoverageUnion function is used to union polygonal inputs that form a
-// coverage, which are typically provided as a GeometryCollection. This method
-// is much faster than other unioning methods, but there are some constraints
-// that must be met by the inputs to form a valid polygonal coverage. These
-// constraints are:
+// coverage, provided as a GeometryCollection of Polygons and/or MultiPolygons.
+// This method is much faster than other unioning methods, but it relies on the
+// input being a valid coverage (see the CoverageIsValid function for details).
 //
-//  1. all input geometries must be polygonal,
-//  2. the interiors of the inputs must not intersect, and
-//  3. the common boundaries of adjacent polygons have the same set of vertices in both polygons.
-//
-// It should be noted that while CoverageUnion may detect constraint violations
-// and return an error, but this is not guaranteed, and an invalid result may
-// be returned without an error. It is the responsibility of the caller to
-// ensure that the constraints are met before using this function.
+// CoverageUnion may detect that the input is not a coverage and return an
+// error, but this is not guaranteed (causing an invalid result to be returned
+// without an error). It is the responsibility of the caller to ensure that the
+// is valid before using this function.
 //
 // The validity of the result is not checked.
 func CoverageUnion(g geom.Geometry) (geom.Geometry, error) {
 	return rawgeos.CoverageUnion(g)
 }
 
-// CoverageSimplifyVW simplifies inputs that form a polygon coverage, provided
-// as a GeometryCollection of Polygons and/or MultiPolygons. It uses the
-// Visvalingam–Whyatt algorithm and relies on the fact that the input is a
-// valid polygon coverage, i.e.:
+// CoverageSimplifyVW simplifies a polygon coverage, provided as a
+// GeometryCollection of Polygons and/or MultiPolygons. It uses the
+// Visvalingam–Whyatt algorithm and relies on the coverage being valid (see the
+// CoverageIsValid function for details).
 //
-//  1. all input geometries must be polygonal,
-//  2. the interiors of the inputs must not intersect, and
-//  3. the common boundaries of adjacent polygons have the same set of vertices in both polygons.
-//
-// It may not check that these constraints are met, so it's possible that an
-// incorrect result is returned without an error if they are not.
+// It may not check that the input forms a valid coverage, so it's possible
+// that an incorrect result is returned without an error.
 //
 // The validity of the result is not checked.
 func CoverageSimplifyVW(g geom.Geometry, tolerance float64, preserveBoundary bool) (geom.Geometry, error) {
 	return rawgeos.CoverageSimplifyVW(g, tolerance, preserveBoundary)
+}
+
+// CoverageIsValid checks if a coverage (provided as a GeometryCollection) is
+// valid. Coverage validity is indicated by the boolean return value. A valid
+// coverage must have the following properties:
+//
+//  1. all input geometries are of type Polygon or MultiPolygon,
+//
+//  2. the interiors of the inputs do not intersect, and
+//
+//  3. the common boundaries of adjacent Polygons or MultiPolygons have the
+//     same set of vertices.
+//
+// If the coverage is not valid, then the returned geometry shows the invalid
+// edges.
+func CoverageIsValid(g geom.Geometry, gapWidth float64) (bool, geom.Geometry, error) {
+	return rawgeos.CoverageIsValid(g, gapWidth)
 }
 
 // UnaryUnion is a single argument version of Union. It is most useful when
