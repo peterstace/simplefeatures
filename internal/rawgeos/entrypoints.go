@@ -31,7 +31,17 @@ GEOSGeometry *GEOSCoverageUnion_r(GEOSContextHandle_t handle, const GEOSGeometry
 )
 #if COVERAGE_SIMPLIFY_VW_MISSING
 // This stub implementation always fails:
-GEOSGeometry *GEOSCoverageSimplifyVW_r(GEOSContextHandle_t handle, const GEOSGeometry* g, double tolerance, int preserveTopology) { return NULL; }
+GEOSGeometry *GEOSCoverageSimplifyVW_r(GEOSContextHandle_t handle, const GEOSGeometry* g, double tolerance, int preserveBoundary) { return NULL; }
+#endif
+
+#define COVERAGE_IS_VALID_MIN_VERSION "3.12.0"
+#define COVERAGE_IS_VALID_MISSING ( \
+	GEOS_VERSION_MAJOR < 3 || \
+	(GEOS_VERSION_MAJOR == 3 && GEOS_VERSION_MINOR < 12) \
+)
+#if COVERAGE_IS_VALID_MISSING
+// This stub implementation always fails:
+int GEOSCoverageIsValid_r(GEOSContextHandle_t handle, const GEOSGeometry* g, double gapWidth, GEOSGeometry** invalidEdges) { return 2; }
 #endif
 
 #define CONCAVE_HULL_MIN_VERSION "3.11.0"
@@ -287,6 +297,18 @@ func CoverageSimplifyVW(g geom.Geometry, tolerance float64, preserveBoundary boo
 		return C.GEOSCoverageSimplifyVW_r(ctx, g, C.double(tolerance), goBoolToCInt(preserveBoundary))
 	})
 	return result, wrap(err, "executing GEOSCoverageSimplifyVW_r")
+}
+
+func CoverageIsValid(g geom.Geometry, gapWidth float64) (bool, geom.Geometry, error) {
+	if C.COVERAGE_IS_VALID_MISSING != 0 {
+		return false, geom.Geometry{}, UnsupportedGEOSVersionError{
+			C.COVERAGE_IS_VALID_MIN_VERSION, "CoverageIsValid",
+		}
+	}
+	ok, edges, err := unaryOpBG(g, func(h C.GEOSContextHandle_t, gh *C.GEOSGeometry, invalidEdges **C.GEOSGeometry) C.int {
+		return C.GEOSCoverageIsValid_r(h, gh, C.double(gapWidth), invalidEdges)
+	})
+	return ok, edges, wrap(err, "executing GEOSCoverageIsValid_r")
 }
 
 func UnaryUnion(g geom.Geometry) (geom.Geometry, error) {

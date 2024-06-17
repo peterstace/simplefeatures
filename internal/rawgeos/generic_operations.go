@@ -165,3 +165,26 @@ func unaryOpI(
 	})
 	return int(result), err
 }
+
+func unaryOpBG(
+	g geom.Geometry,
+	op func(C.GEOSContextHandle_t, *C.GEOSGeometry, **C.GEOSGeometry) C.int,
+) (bool, geom.Geometry, error) {
+	var resultB bool
+	var resultG geom.Geometry
+	err := unaryOpE(g, func(h *handle, gh *C.GEOSGeometry) error {
+		var resultGH *C.GEOSGeometry
+		var err error
+		resultB, err = h.boolErr(C.char(op(h.context, gh, &resultGH)))
+		if err != nil {
+			return err
+		}
+		if resultGH == nil {
+			return nil
+		}
+		defer C.GEOSGeom_destroy(resultGH)
+		resultG, err = h.decode(resultGH)
+		return wrap(err, "decoding result")
+	})
+	return resultB, resultG, err
+}
