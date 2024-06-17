@@ -28,83 +28,66 @@ func UnmarshalTWKB(twkb []byte, nv ...NoValidate) (Geometry, error) {
 	return g, nil
 }
 
-// UnmarshalTWKBWithHeaders parses a Tiny Well Known Binary (TWKB),
-// returning the corresponding Geometry, and any bounding box and any IDs
-// listed in its header information.
-//
-// If there is a bounding box header, the bbox slice will be populated with
-// two points, a minimum then a maximum. Otherwise, the slice is empty.
-//
-// If there is an ID list header, the ids slice will be populated with the
-// IDs from that header. Otherwise, the slice is empty.
-//
-// NoValidate{} can be passed in to disable geometry constraint validation.
-func UnmarshalTWKBWithHeaders(twkb []byte, nv ...NoValidate) (g Geometry, bbox []Point, ids []int64, err error) {
-	p := newTWKBParser(twkb)
-	g, err = p.nextGeometry()
-	if err != nil {
-		return Geometry{}, nil, nil, p.annotateError(err)
-	}
-	if len(nv) == 0 {
-		if err := g.Validate(); err != nil {
-			return Geometry{}, nil, nil, err
-		}
-	}
-	if p.hasBBox {
-		bbox, err = UnmarshalTWKBBoundingBoxHeader(twkb)
-		if err != nil {
-			return Geometry{}, nil, nil, p.annotateError(err)
-		}
-	}
-	return g, bbox, p.idList, p.annotateError(err)
-}
-
-// UnmarshalTWKBBoundingBoxHeader checks if the bounding box header
-// exists in the Tiny Well Known Binary (TWKB) and if it exists
-// returns its minimum and maximum points in the bbox slice
-// (otherwise the slice is empty).
-//
-// Because the results are returned as Points, the X, Y, Z, and M values
-// can all be returned. Check the point type to see if the Z and M values
-// are valid.
-//
-// The function returns immediately after parsing the headers.
-// Any remaining geometry is not parsed by this function.
-func UnmarshalTWKBBoundingBoxHeader(twkb []byte) (bbox []Point, err error) {
-	p := newTWKBParser(twkb)
-	bbox, err = p.parseBBoxHeader()
-	return bbox, p.annotateError(err)
-}
-
-// UnmarshalTWKBEnvelope checks if the bounding box header exists
-// in the Tiny Well Known Binary (TWKB) and returns an Envelope
-// that is non-empty iff the header exists (thus the envelope
-// will not be computed from the data, only from a header).
-//
-// Note that due to the definition of Envelope, only the X and Y
-// coordinates will be returned this way, whereas any Z and M
-// coordinates will be silently ignored by this function.
-//
-// The function returns immediately after parsing the headers.
-// Any remaining geometry is not parsed by this function.
-func UnmarshalTWKBEnvelope(twkb []byte) (Envelope, error) {
+// UnmarshalTWKBIDList parses just the ID list of a Tiny Well Known Binary
+// (TWKB). The bool return flag indicates if the list is present or not (ID
+// lists are not mandatory in TWKBs).
+func UnmarshalTWKBIDList(twkb []byte) ([]int64, bool, error) {
 	p := newTWKBParser(twkb)
 	if err := p.parseHeaders(); err != nil {
-		return Envelope{}, p.annotateError(err)
+		return nil, false, p.annotateError(err)
 	}
-	if !p.hasBBox {
-		return Envelope{}, nil
+	if !p.hasIDs {
+		return nil, false, nil
 	}
-	return NewEnvelope(
-		XY{
-			float64(p.bbox[0]) / p.scalings[0],
-			float64(p.bbox[2]) / p.scalings[1],
-		},
-		XY{
-			float64(p.bbox[0]+p.bbox[1]) / p.scalings[0],
-			float64(p.bbox[2]+p.bbox[3]) / p.scalings[1],
-		},
-	), nil
+
+	// When parsing the header, we already validated that if the ID list flag
+	// is set then we have a collection type. Each collection types starts with
+	// a uvarint indicating the number of elements, followed by the ID list.
+	numItems, err := p.parseUnsignedVarint()
+	if err != nil {
+		return nil, false, p.annotateError(fmt.Errorf("ID list size uvarint malformed: %w", err))
+	}
+
+	if err := p.parseIDList(int(numItems)); err != nil {
+		return nil, false, p.annotateError(err)
+	}
+	return p.idList, true, nil
+}
+
+// ExtendedEnvelope is an Envelope that may also contain Z and M ranges.
+type ExtendedEnvelope struct {
+	XYEnvelope Envelope
+	ZRange     Interval
+	MRange     Interval
+}
+
+// UnmarshalTWKBEnvelope parses just the envelope from the header of a Tiny
+// Well Known Binary (TWKB). The bool return flag indicates if the envelope is
+// present or not (envelopes are not mandatory in TWKBs). The envelope may
+// contain Z and M values if they are present in the TWKB.
+func UnmarshalTWKBEnvelope(twkb []byte) (ExtendedEnvelope, bool, error) {
+	p := newTWKBParser(twkb)
+	extEnv, err := p.parseBBoxHeader()
+	if err != nil {
+		return ExtendedEnvelope{}, false, p.annotateError(err)
+	}
+	return extEnv, p.hasBBox, nil
+}
+
+// UnmarshalTWKBSize parses the size (in bytes) of the Tiny Well Known Binary
+// (TWKB) from its header. This can be used for a quickly scanning through a
+// sequence of concatenated TWKBs, for reading just bounding boxes, or to
+// distribute full parsing to different goroutines. The size is the total size
+// of the TWKB (from its start).
+func UnmarshalTWKBSize(twkb []byte) (int, bool, error) {
+	p := newTWKBParser(twkb)
+	if err := p.parseHeaders(); err != nil {
+		return 0, false, p.annotateError(err)
+	}
+	if !p.hasSize {
+		return 0, false, nil
+	}
+	return p.size, p.hasSize, nil
 }
 
 // twkbParser holds all state information for interpreting TWKB buffers
@@ -132,6 +115,7 @@ type twkbParser struct {
 
 	bbox   []int64
 	idList []int64
+	size   int
 
 	refpoint [twkbMaxDimensions]int64
 }
@@ -265,6 +249,13 @@ func (p *twkbParser) parseMetadataHeader() error {
 	p.hasIDs = (metaheader & twkbHasIDs) != 0
 	p.hasExt = (metaheader & twkbHasExtPrec) != 0
 	p.isEmpty = (metaheader & twkbIsEmpty) != 0
+
+	switch p.kind {
+	case twkbTypePoint, twkbTypeLineString, twkbTypePolygon:
+		if p.hasIDs {
+			return errors.New("ID list is not allowed for Point, LineString, or Polygon")
+		}
+	}
 	return nil
 }
 
@@ -310,7 +301,8 @@ func (p *twkbParser) parseSize() error {
 	if err != nil {
 		return fmt.Errorf("size varint malformed: %w", err)
 	}
-	if uint64(p.pos)+bytesRemaining > uint64(len(p.twkb)) {
+	p.size = p.pos + int(bytesRemaining)
+	if p.size > len(p.twkb) {
 		return fmt.Errorf("remaining input (%d bytes) smaller than size varint indicates (%d bytes)", len(p.twkb)-p.pos, bytesRemaining)
 	}
 	return nil
@@ -334,12 +326,12 @@ func (p *twkbParser) parseBBox() error {
 	return nil
 }
 
-func (p *twkbParser) parseBBoxHeader() (bbox []Point, err error) {
-	if err = p.parseHeaders(); err != nil {
-		return nil, err
+func (p *twkbParser) parseBBoxHeader() (ExtendedEnvelope, error) {
+	if err := p.parseHeaders(); err != nil {
+		return ExtendedEnvelope{}, err
 	}
 	if !p.hasBBox {
-		return nil, nil
+		return ExtendedEnvelope{}, nil
 	}
 	switch {
 	case p.hasZ && p.hasM:
@@ -353,9 +345,11 @@ func (p *twkbParser) parseBBoxHeader() (bbox []Point, err error) {
 		maxZ := float64(p.bbox[4]+p.bbox[5]) / p.scalings[2]
 		maxM := float64(p.bbox[6]+p.bbox[7]) / p.scalings[3]
 
-		minPt := NewPoint(Coordinates{XY: XY{minX, minY}, Z: minZ, M: minM, Type: p.ctype})
-		maxPt := NewPoint(Coordinates{XY: XY{maxX, maxY}, Z: maxZ, M: maxM, Type: p.ctype})
-		bbox = []Point{minPt, maxPt}
+		return ExtendedEnvelope{
+			XYEnvelope: NewEnvelope(XY{minX, minY}, XY{maxX, maxY}),
+			ZRange:     NewInterval(minZ, maxZ),
+			MRange:     NewInterval(minM, maxM),
+		}, nil
 	case p.hasZ:
 		minX := float64(p.bbox[0]) / p.scalings[0]
 		minY := float64(p.bbox[2]) / p.scalings[1]
@@ -365,9 +359,10 @@ func (p *twkbParser) parseBBoxHeader() (bbox []Point, err error) {
 		maxY := float64(p.bbox[2]+p.bbox[3]) / p.scalings[1]
 		maxZ := float64(p.bbox[4]+p.bbox[5]) / p.scalings[2]
 
-		minPt := NewPoint(Coordinates{XY: XY{minX, minY}, Z: minZ, Type: p.ctype})
-		maxPt := NewPoint(Coordinates{XY: XY{maxX, maxY}, Z: maxZ, Type: p.ctype})
-		bbox = []Point{minPt, maxPt}
+		return ExtendedEnvelope{
+			XYEnvelope: NewEnvelope(XY{minX, minY}, XY{maxX, maxY}),
+			ZRange:     NewInterval(minZ, maxZ),
+		}, nil
 	case p.hasM:
 		minX := float64(p.bbox[0]) / p.scalings[0]
 		minY := float64(p.bbox[2]) / p.scalings[1]
@@ -377,9 +372,10 @@ func (p *twkbParser) parseBBoxHeader() (bbox []Point, err error) {
 		maxY := float64(p.bbox[2]+p.bbox[3]) / p.scalings[1]
 		maxM := float64(p.bbox[4]+p.bbox[5]) / p.scalings[2]
 
-		minPt := NewPoint(Coordinates{XY: XY{minX, minY}, M: minM, Type: p.ctype})
-		maxPt := NewPoint(Coordinates{XY: XY{maxX, maxY}, M: maxM, Type: p.ctype})
-		bbox = []Point{minPt, maxPt}
+		return ExtendedEnvelope{
+			XYEnvelope: NewEnvelope(XY{minX, minY}, XY{maxX, maxY}),
+			MRange:     NewInterval(minM, maxM),
+		}, nil
 	default:
 		minX := float64(p.bbox[0]) / p.scalings[0]
 		minY := float64(p.bbox[2]) / p.scalings[1]
@@ -387,11 +383,10 @@ func (p *twkbParser) parseBBoxHeader() (bbox []Point, err error) {
 		maxX := float64(p.bbox[0]+p.bbox[1]) / p.scalings[0]
 		maxY := float64(p.bbox[2]+p.bbox[3]) / p.scalings[1]
 
-		minPt := NewPoint(Coordinates{XY: XY{minX, minY}, Type: p.ctype})
-		maxPt := NewPoint(Coordinates{XY: XY{maxX, maxY}, Type: p.ctype})
-		bbox = []Point{minPt, maxPt}
+		return ExtendedEnvelope{
+			XYEnvelope: NewEnvelope(XY{minX, minY}, XY{maxX, maxY}),
+		}, nil
 	}
-	return bbox, nil
 }
 
 func (p *twkbParser) parsePoint() (Point, error) {
@@ -502,8 +497,10 @@ func (p *twkbParser) nextMultiPoint() (MultiPoint, error) {
 	if err != nil {
 		return MultiPoint{}, fmt.Errorf("num points varint malformed: %w", err)
 	}
-	if err := p.parseIDList(int(numPoints)); err != nil {
-		return MultiPoint{}, err
+	if p.hasIDs {
+		if err := p.parseIDList(int(numPoints)); err != nil {
+			return MultiPoint{}, err
+		}
 	}
 	var pts []Point
 	for i := 0; i < int(numPoints); i++ {
@@ -528,8 +525,10 @@ func (p *twkbParser) nextMultiLineString() (MultiLineString, error) {
 	if err != nil {
 		return MultiLineString{}, fmt.Errorf("num linestrings varint malformed: %w", err)
 	}
-	if err := p.parseIDList(int(numLineStrings)); err != nil {
-		return MultiLineString{}, err
+	if p.hasIDs {
+		if err := p.parseIDList(int(numLineStrings)); err != nil {
+			return MultiLineString{}, err
+		}
 	}
 	var lines []LineString
 	for i := 0; i < int(numLineStrings); i++ {
@@ -554,8 +553,10 @@ func (p *twkbParser) nextMultiPolygon() (MultiPolygon, error) {
 	if err != nil {
 		return MultiPolygon{}, fmt.Errorf("num polygons varint malformed: %w", err)
 	}
-	if err := p.parseIDList(int(numPolygons)); err != nil {
-		return MultiPolygon{}, err
+	if p.hasIDs {
+		if err := p.parseIDList(int(numPolygons)); err != nil {
+			return MultiPolygon{}, err
+		}
 	}
 	var polys []Polygon
 	for i := 0; i < int(numPolygons); i++ {
@@ -580,8 +581,10 @@ func (p *twkbParser) nextGeometryCollection() (GeometryCollection, error) {
 	if err != nil {
 		return GeometryCollection{}, fmt.Errorf("num polygons varint malformed: %w", err)
 	}
-	if err := p.parseIDList(int(numGeoms)); err != nil {
-		return GeometryCollection{}, err
+	if p.hasIDs {
+		if err := p.parseIDList(int(numGeoms)); err != nil {
+			return GeometryCollection{}, err
+		}
 	}
 	var geoms []Geometry
 	for i := 0; i < int(numGeoms); i++ {
@@ -632,9 +635,6 @@ func (p *twkbParser) parsePointArray(numPoints int) ([]float64, error) {
 }
 
 func (p *twkbParser) parseIDList(numIDs int) error {
-	if !p.hasIDs {
-		return nil
-	}
 	p.idList = make([]int64, numIDs)
 	for i := 0; i < numIDs; i++ {
 		id, err := p.parseSignedVarint()
