@@ -4,7 +4,7 @@ all: unit lint geos pgscan cmppg cmpgeos
 DC_RUN = \
 	docker compose \
 	--project-name sf-$$task \
-	--file .ci/docker-compose-$$task.yml \
+	--file .ci/compose-$$task.yaml \
 	up \
 	--abort-on-container-exit \
 	--build
@@ -32,26 +32,26 @@ cmpgeos:
 DC_GEOS_RUN = \
 	docker compose \
 	--project-name sf-geos-$$(echo $$geos_version | sed 's/\./-/g') \
-	--file .ci/docker-compose-geos.yml \
+	--file .ci/compose-geos.yaml \
 	up \
 	--build \
 	--abort-on-container-exit
 
 .PHONY: geos-3.12
 geos-3.12:
-	export alpine_version=3.19 geos_version=3.12.1-r0; $(DC_GEOS_RUN)
+	export tags='' alpine_version=3.19 geos_version=3.12.1-r0; $(DC_GEOS_RUN)
 
 .PHONY: geos-3.11
 geos-3.11:
-	export alpine_version=3.18 geos_version=3.11.2-r0; $(DC_GEOS_RUN)
+	export tags='' alpine_version=3.18 geos_version=3.11.2-r0; $(DC_GEOS_RUN)
 
 .PHONY: geos-3.10
 geos-3.10:
-	export alpine_version=3.16 geos_version=3.10.3-r0; $(DC_GEOS_RUN)
+	export tags='' alpine_version=3.16 geos_version=3.10.3-r0; $(DC_GEOS_RUN)
 
 .PHONY: geos-3.9
 geos-3.9:
-	export alpine_version=3.14 geos_version=3.9.1-r0; $(DC_GEOS_RUN)
+	export tags='' alpine_version=3.14 geos_version=3.9.1-r0; $(DC_GEOS_RUN)
 
 .PHONY: geos-3.8
 geos-3.8:

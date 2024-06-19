@@ -1,4 +1,3 @@
-version: "2.1"
 services:
   postgis:
     image: ghcr.io/baosystems/postgis:15
