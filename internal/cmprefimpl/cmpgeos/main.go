@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/extract"
 )
 
 // TODO: These are additional geometries. Needs something a bit more robust...
@@ -24,7 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not get working dir: %v", err)
 	}
-	candidates, err := extractStringsFromSource(dir)
+	candidates, err := extract.StringsFromSource(dir)
 	if err != nil {
 		log.Fatalf("could not extract strings from src: %v", err)
 	}
