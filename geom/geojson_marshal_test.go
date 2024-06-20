@@ -1,7 +1,9 @@
 package geom_test
 
 import (
+	"encoding/hex"
 	"encoding/json"
+	"strings"
 	"testing"
 )
 
@@ -181,13 +183,15 @@ func TestGeoJSONMarshal(t *testing.T) {
 			wkt:  `LINESTRING ZM (1 2 3 4,3 4 5 6,5 6 7 8)`,
 			want: `{"type":"LineString","coordinates":[[1,2,3],[3,4,5],[5,6,7]]}`,
 		},
+
+		// NOTE: Polygons oriented CCW in the output.
 		{
 			wkt:  `POLYGON EMPTY`,
 			want: `{"type":"Polygon","coordinates":[]}`,
 		},
 		{
 			wkt:  `POLYGON((0 0,4 0,0 4,0 0),(1 1,2 1,1 2,1 1))`,
-			want: `{"type":"Polygon","coordinates":[[[0,0],[4,0],[0,4],[0,0]],[[1,1],[2,1],[1,2],[1,1]]]}`,
+			want: `{"type":"Polygon","coordinates":[[[0,0],[4,0],[0,4],[0,0]],[[1,1],[1,2],[2,1],[1,1]]]}`,
 		},
 		{
 			wkt:  `POLYGON Z EMPTY`,
@@ -195,7 +199,7 @@ func TestGeoJSONMarshal(t *testing.T) {
 		},
 		{
 			wkt:  `POLYGON Z ((0 0 0,4 0 1,0 4 1,0 0 1),(1 1 2,2 1 3,1 2 4,1 1 5))`,
-			want: `{"type":"Polygon","coordinates":[[[0,0,0],[4,0,1],[0,4,1],[0,0,1]],[[1,1,2],[2,1,3],[1,2,4],[1,1,5]]]}`,
+			want: `{"type":"Polygon","coordinates":[[[0,0,0],[4,0,1],[0,4,1],[0,0,1]],[[1,1,5],[1,2,4],[2,1,3],[1,1,2]]]}`,
 		},
 		{
 			wkt:  `POLYGON M EMPTY`,
@@ -203,7 +207,7 @@ func TestGeoJSONMarshal(t *testing.T) {
 		},
 		{
 			wkt:  `POLYGON M ((0 0 0,4 0 1,0 4 1,0 0 1),(1 1 2,2 1 3,1 2 4,1 1 5))`,
-			want: `{"type":"Polygon","coordinates":[[[0,0],[4,0],[0,4],[0,0]],[[1,1],[2,1],[1,2],[1,1]]]}`,
+			want: `{"type":"Polygon","coordinates":[[[0,0],[4,0],[0,4],[0,0]],[[1,1],[1,2],[2,1],[1,1]]]}`,
 		},
 		{
 			wkt:  `POLYGON ZM EMPTY`,
@@ -211,7 +215,7 @@ func TestGeoJSONMarshal(t *testing.T) {
 		},
 		{
 			wkt:  `POLYGON ZM ((0 0 0 8,4 0 1 3,0 4 1 7,0 0 1 9),(1 1 2 3,2 1 3 7,1 2 4 8,1 1 5 4))`,
-			want: `{"type":"Polygon","coordinates":[[[0,0,0],[4,0,1],[0,4,1],[0,0,1]],[[1,1,2],[2,1,3],[1,2,4],[1,1,5]]]}`,
+			want: `{"type":"Polygon","coordinates":[[[0,0,0],[4,0,1],[0,4,1],[0,0,1]],[[1,1,5],[1,2,4],[2,1,3],[1,1,2]]]}`,
 		},
 		{
 			wkt:  `MULTIPOINT EMPTY`,
@@ -357,6 +361,8 @@ func TestGeoJSONMarshal(t *testing.T) {
 			wkt:  `MULTILINESTRING ZM ((0 1 1 2,2 3 4 8),EMPTY)`,
 			want: `{"type":"MultiLineString","coordinates":[[[0,1,1],[2,3,4]],[]]}`,
 		},
+
+		// NOTE: MultiPolygons oriented CCW in the output.
 		{
 			wkt:  `MULTIPOLYGON EMPTY`,
 			want: `{"type":"MultiPolygon","coordinates":[]}`,
@@ -438,14 +444,16 @@ func TestGeoJSONMarshal(t *testing.T) {
 			want: `{"type":"GeometryCollection","geometries":[{"type":"Point","coordinates":[1,2,3]},{"type":"Point","coordinates":[3,4,5]}]}`,
 		},
 	} {
-		t.Run(tt.wkt, func(t *testing.T) {
+		desc := strings.ReplaceAll(tt.wkt, "(", "_")
+		desc = strings.ReplaceAll(desc, ")", "_")
+		t.Run(desc, func(t *testing.T) {
 			geom := geomFromWKT(t, tt.wkt)
 			gotJSON, err := json.Marshal(geom)
 			expectNoErr(t, err)
 			if string(gotJSON) != tt.want {
 				t.Error("json doesn't match")
-				t.Logf("got:  %v", string(gotJSON))
-				t.Logf("want: %v", tt.want)
+				t.Logf("got:\n%v", hex.Dump(gotJSON))
+				t.Logf("want:\n%v", hex.Dump([]byte(tt.want)))
 			}
 		})
 	}
