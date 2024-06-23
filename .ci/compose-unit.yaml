@@ -1,4 +1,3 @@
-version: "2.1"
 services:
   tests:
     image: golang:1.17
