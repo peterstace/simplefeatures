@@ -75,7 +75,7 @@ func UnmarshalTWKBEnvelope(twkb []byte) (ExtendedEnvelope, bool, error) {
 }
 
 // UnmarshalTWKBSize parses the size (in bytes) of the Tiny Well Known Binary
-// (TWKB) from its header. This can be used for a quickly scanning through a
+// (TWKB) from its header. This can be used for quickly scanning through a
 // sequence of concatenated TWKBs, for reading just bounding boxes, or to
 // distribute full parsing to different goroutines. The size is the total size
 // of the TWKB (from its start).
