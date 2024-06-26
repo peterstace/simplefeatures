@@ -3,6 +3,7 @@ package geom_test
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"testing"
@@ -347,104 +348,84 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 			twkb := hexStringToBytes(t, tc.twkbHex)
 			t.Logf("TWKB (hex): %v", tc.twkbHex)
 
-			if !tc.skipDecode {
-				// Decode the TWKB and check its geometry matches the WKT's geometry.
-				g, err := geom.UnmarshalTWKB(twkb)
-				if err != nil {
-					t.Fatalf("unexpected error: %v", err)
-				}
-				expectGeomEqWKT(t, g, tc.wkt)
-
-				// Verify UnmarshalTWKBBoundingBoxHeader returns the complete bounding box,
-				// if it exists.
-				bbox, err := geom.UnmarshalTWKBBoundingBoxHeader(twkb)
-				if err != nil {
-					t.Fatalf("unexpected error: %v", err)
+			t.Run("decode", func(t *testing.T) {
+				if tc.skipDecode {
+					t.SkipNow()
 				}
 
-				hasBBox := (len(bbox) == 2)
-				if hasBBox != tc.hasBBox {
-					t.Errorf("\ngot:  hasBBox = %v\nwant: %v\n", hasBBox, tc.hasBBox)
-				}
-				var minPt, maxPt geom.Point
-				if hasBBox {
-					// Check the bounding box matches.
-					minPt, maxPt = bbox[0], bbox[1]
-					if minPt.AsText() != tc.listedBBox[0] {
-						t.Errorf("\ngot:  bbox min = %q\nwant: %q\n", minPt.AsText(), tc.listedBBox[0])
-					}
-					if maxPt.AsText() != tc.listedBBox[1] {
-						t.Errorf("\ngot:  bbox max = %q\nwant: %q\n", maxPt.AsText(), tc.listedBBox[1])
-					}
-				}
+				t.Run("geometry", func(t *testing.T) {
+					g, err := geom.UnmarshalTWKB(twkb)
+					expectNoErr(t, err)
+					expectGeomEqWKT(t, g, tc.wkt)
+				})
 
-				// Verify UnmarshalTWKBEnvelope returns only the min and max X and Y coordinates
-				// of the bounding box, if it exists.
-				envelope, err := geom.UnmarshalTWKBEnvelope(twkb)
-				if err != nil {
-					t.Fatalf("unexpected error: %v", err)
-				}
-				hasEnvelope := !envelope.IsEmpty()
-				if hasEnvelope != tc.hasBBox {
-					t.Errorf("\ngot:  hasEnv = %v\nwant: %v\n", hasEnvelope, tc.hasBBox)
-				}
-				if hasEnvelope {
-					minXY, exists := minPt.XY()
-					if !exists {
-						t.Errorf("\nproblem unpacking bounding box min point\n")
-					}
-					envXY, exists := envelope.Min().XY()
-					if !exists {
-						t.Errorf("\nproblem unpacking envelope min point\n")
-					}
-					if envXY.X != minXY.X || envXY.Y != minXY.Y {
-						t.Errorf("\ngot:  env min = {%f,%f}\nwant: {%f,%f}\n", envXY.X, envXY.Y, minXY.X, minXY.Y)
-					}
-					maxXY, exists := maxPt.XY()
-					if !exists {
-						t.Errorf("\nproblem unpacking bounding box max point\n")
-					}
-					envXY, exists = envelope.Max().XY()
-					if !exists {
-						t.Errorf("\nproblem unpacking envelope max point\n")
-					}
-					if envXY.X != maxXY.X || envXY.Y != maxXY.Y {
-						t.Errorf("\ngot:  env max = {%f,%f}\nwant: {%f,%f}\n", envXY.X, envXY.Y, maxXY.X, maxXY.Y)
-					}
-				}
+				t.Run("envelope", func(t *testing.T) {
+					gotExtEnv, ok, err := geom.UnmarshalTWKBEnvelope(twkb)
+					expectNoErr(t, err)
+					expectBoolEq(t, ok, tc.hasBBox)
+					if ok {
+						wantC1, ok := geomFromWKT(t, tc.listedBBox[0]).MustAsPoint().Coordinates()
+						expectTrue(t, ok)
+						wantC2, ok := geomFromWKT(t, tc.listedBBox[1]).MustAsPoint().Coordinates()
+						expectTrue(t, ok)
 
-				// Verify UnmarshalTWKBWithHeaders returns the ID list correctly.
-				g2, bbox2, ids, err := geom.UnmarshalTWKBWithHeaders(twkb)
-				if err != nil {
-					t.Fatalf("unexpected error: %v", err)
-				}
-				// Double-check the geometry from UnmarshalTWKBWithHeaders is correct.
-				expectGeomEqWKT(t, g2, tc.wkt)
+						wantC1.X, wantC2.X = minMax(wantC1.X, wantC2.X)
+						wantC1.Y, wantC2.Y = minMax(wantC1.Y, wantC2.Y)
+						wantC1.Z, wantC2.Z = minMax(wantC1.Z, wantC2.Z)
+						wantC1.M, wantC2.M = minMax(wantC1.M, wantC2.M)
 
-				if tc.hasBBox {
-					// Check the bounding box matches.
-					minPt, maxPt = bbox2[0], bbox2[1]
-					if minPt.AsText() != tc.listedBBox[0] {
-						t.Errorf("\ngot:  bbox min = %q\nwant: %q\n", minPt.AsText(), tc.listedBBox[0])
-					}
-					if maxPt.AsText() != tc.listedBBox[1] {
-						t.Errorf("\ngot:  bbox max = %q\nwant: %q\n", maxPt.AsText(), tc.listedBBox[1])
-					}
-				}
-				if tc.hasIDList {
-					// Check the ID list.
-					if len(ids) != len(tc.listedIDs) {
-						t.Errorf("\ngot:  len(ids) = %d\nwant: len(ids) = %d\n", len(ids), len(tc.listedIDs))
-					}
-					for i := 0; i < len(tc.listedIDs); i++ {
-						if ids[i] != tc.listedIDs[i] {
-							t.Errorf("\ngot:  ids[%d] = %d\nwant: ids[%d] = %d\n", i, ids[i], i, tc.listedIDs[i])
+						gotXY1, gotXY2, ok := gotExtEnv.XYEnvelope.MinMaxXYs()
+						expectTrue(t, ok)
+
+						ct := wantC1.Type
+						expectCoordinatesTypeEq(t, ct, wantC2.Type)
+						minZ, maxZ, hasZ := gotExtEnv.ZRange.MinMax()
+						minM, maxM, hasM := gotExtEnv.MRange.MinMax()
+						expectBoolEq(t, hasZ, ct.Is3D())
+						expectBoolEq(t, hasM, ct.IsMeasured())
+
+						expectXYEq(t, gotXY1, wantC1.XY)
+						expectXYEq(t, gotXY2, wantC2.XY)
+
+						if ct.Is3D() {
+							expectFloat64Eq(t, minZ, wantC1.Z)
+							expectFloat64Eq(t, maxZ, wantC2.Z)
+						}
+						if ct.IsMeasured() {
+							expectFloat64Eq(t, minM, wantC1.M)
+							expectFloat64Eq(t, maxM, wantC2.M)
 						}
 					}
-				}
-			}
+				})
 
-			if !tc.skipEncode {
+				t.Run("id list", func(t *testing.T) {
+					got, has, err := geom.UnmarshalTWKBIDList(twkb)
+					expectNoErr(t, err)
+					expectBoolEq(t, has, tc.hasIDList)
+					expectInt64SliceEq(t, got, tc.listedIDs)
+				})
+
+				t.Run("size", func(t *testing.T) {
+					for _, extra := range []int{0, 13} {
+						t.Run(fmt.Sprintf("append_%d", extra), func(t *testing.T) {
+							buf := make([]byte, len(twkb)+extra)
+							copy(buf, twkb)
+							got, ok, err := geom.UnmarshalTWKBSize(buf)
+							expectNoErr(t, err)
+							expectBoolEq(t, ok, tc.hasSize)
+							if tc.hasSize {
+								expectIntEq(t, got, len(twkb))
+							}
+						})
+					}
+				})
+			})
+
+			t.Run("encode", func(t *testing.T) {
+				if tc.skipEncode {
+					t.SkipNow()
+				}
+
 				// Encode the WKT's geometry as TWKB and check its bytes match the expected TWKB bytes.
 				g := geomFromWKT(t, tc.wkt)
 				opts := []geom.TWKBWriterOption{}
@@ -473,7 +454,7 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 				if !bytes.Equal(twkb, marshaled) {
 					t.Errorf("MarshalTWKB %x result differs from expected TWKB %x", marshaled, twkb)
 				}
-			}
+			})
 		})
 	}
 }
@@ -552,4 +533,8 @@ func TestZigZagInt(t *testing.T) {
 			}
 		})
 	}
+}
+
+func minMax(a, b float64) (float64, float64) {
+	return math.Min(a, b), math.Max(a, b)
 }

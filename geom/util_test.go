@@ -304,3 +304,21 @@ func expectSequenceEq(tb testing.TB, got, want geom.Sequence) {
 		}
 	}
 }
+
+func expectInt64SliceEq(tb testing.TB, got, want []int64) {
+	tb.Helper()
+	mismatch := false
+	if len(got) != len(want) {
+		mismatch = true
+	} else {
+		for i := range got {
+			if got[i] != want[i] {
+				mismatch = true
+				break
+			}
+		}
+	}
+	if mismatch {
+		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
+	}
+}

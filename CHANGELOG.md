@@ -17,6 +17,20 @@
   `GEOSCoverageSimplifyVW_r` functions (exposed as `CoverageIsValid` and
   `CoverageSimplifyVW`).
 
+- **Breaking change:** Overhauls the TWKB unmarshalling related functions in a
+  breaking way:
+
+    - Removes the `UnmarshalTWKBWithHeaders` and
+      `UnmarshalTWKBBoundingBoxHeader` functions.
+
+    - Modifies the `UnmarshalTWKBEnvelope` function to return an
+      `ExtendedEnvelope` (which is a regular XY `Envelope` with the addition of
+      Z and M ranges).
+
+    - Adds `UnmarshalTWKBList` and `UnmarshalTWKBSize` functions, which return
+      the (optional) ID list and (optional) sizes of TWKBs without fully
+      unmarshalling them.
+
 ## v0.50.0
 
 2024-05-07
