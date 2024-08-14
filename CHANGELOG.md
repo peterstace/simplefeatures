@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Fixes a Polygon validation bug that falsely identified an invalid ring as
+  being valid. The bug occurred in the rare edge case where an inner ring is
+  outside the outer ring and the first control point of the inner ring touches
+  the outer ring.
+
 - Upgrades `golangci-lint` to `v1.59.1`.
 
 - Fixes a bug where geometry collections with mixed coordinate types were

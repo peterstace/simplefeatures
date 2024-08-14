@@ -162,6 +162,14 @@ func TestPolygonValidation(t *testing.T) {
 			geom.ViolateRingEmpty,
 			`POLYGON((0 0,0 1,1 0,0 0),EMPTY)`,
 		},
+		{
+			// https://github.com/peterstace/simplefeatures/issues/631
+			geom.ViolateInteriorInExterior,
+			`POLYGON(
+				(1 1,5 1,5 5,1 5,1 1),
+				(3 1,6 0,6 6,0 6,0 0,3 1)
+			)`,
+		},
 	} {
 		t.Run("invalid_"+strconv.Itoa(i), func(t *testing.T) {
 			t.Run("Constructor", func(t *testing.T) {
