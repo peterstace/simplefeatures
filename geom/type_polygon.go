@@ -120,16 +120,22 @@ func (p Polygon) Validate() error {
 		}
 	}
 
-	// All inner rings must be inside the outer ring. We can just check an
-	// arbitrary point in each inner ring because we have already made sure
-	// that the rings don't intersect at multiple points.
+	// All inner rings must be inside the outer ring. Because we have already
+	// made sure that the rings don't intersect at multiple points, we can
+	// check arbitrary points in the inner rings until we find one that's
+	// unambiguously inside or outside the outer ring.
 	for _, hole := range p.rings[1:] {
-		xy, ok := hole.StartPoint().XY()
-		if !ok {
-			continue
-		}
-		if relatePointToRing(xy, p.rings[0]) == exterior {
-			return violateInteriorInExterior.errAtXY(xy)
+		holeSeq := hole.Coordinates()
+		for i := 0; i < holeSeq.Length(); i++ {
+			xy := holeSeq.GetXY(i)
+			relate := relatePointToRing(xy, p.rings[0])
+			if relate == exterior {
+				return violateInteriorInExterior.errAtXY(xy)
+			}
+			if relate == interior {
+				break
+			}
+			// Continue to next iteration if relate == boundary.
 		}
 	}
 
