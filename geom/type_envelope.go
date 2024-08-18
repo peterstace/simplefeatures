@@ -36,8 +36,8 @@ func NewEnvelope(xys ...XY) Envelope {
 	return env
 }
 
-func newUncheckedEnvelope(min, max XY) Envelope {
-	return Envelope{min, max, true}
+func newUncheckedEnvelope(minXY, maxXY XY) Envelope {
+	return Envelope{minXY, maxXY, true}
 }
 
 // Validate checks if the Envelope is valid. The only validation rule is that
@@ -247,12 +247,12 @@ func (e Envelope) Distance(o Envelope) (float64, bool) {
 
 // TransformXY transforms this Envelope into another Envelope according to fn.
 func (e Envelope) TransformXY(fn func(XY) XY) Envelope {
-	min, max, ok := e.MinMaxXYs()
+	u, v, ok := e.MinMaxXYs()
 	if !ok {
 		return Envelope{}
 	}
-	u := fn(min)
-	v := fn(max)
+	u = fn(u)
+	v = fn(v)
 	return newUncheckedEnvelope(
 		XY{fastMin(u.X, v.X), fastMin(u.Y, v.Y)},
 		XY{fastMax(u.X, v.X), fastMax(u.Y, v.Y)},

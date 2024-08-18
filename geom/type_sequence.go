@@ -195,18 +195,18 @@ func (s Sequence) Envelope() Envelope {
 	}
 
 	xy0 := s.GetXY(0)
-	min, max := xy0, xy0
+	lower, upper := xy0, xy0
 
 	stride := s.ctype.Dimension()
 	for i := stride; i < len(s.floats); i += stride {
 		x := s.floats[i]
 		y := s.floats[i+1]
-		min.X = fastMin(min.X, x)
-		min.Y = fastMin(min.Y, y)
-		max.X = fastMax(max.X, x)
-		max.Y = fastMax(max.Y, y)
+		lower.X = fastMin(lower.X, x)
+		lower.Y = fastMin(lower.Y, y)
+		upper.X = fastMax(upper.X, x)
+		upper.Y = fastMax(upper.Y, y)
 	}
-	return newUncheckedEnvelope(min, max)
+	return newUncheckedEnvelope(lower, upper)
 }
 
 // getLine extracts a 2D line segment from a sequence by joining together

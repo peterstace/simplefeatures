@@ -6,7 +6,8 @@ import (
 	"sort"
 )
 
-func max(a, b int) int {
+// TODO: Remove this when we require Go 1.21 (the max builtin can be used instead).
+func maxInt(a, b int) int {
 	if a > b {
 		return a
 	}
