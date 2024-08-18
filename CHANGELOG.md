@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.51.0
+
+2024-08-19
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - Fixes a Polygon validation bug that falsely identified an invalid ring as
   being valid. The bug occurred in the rare edge case where an inner ring is
