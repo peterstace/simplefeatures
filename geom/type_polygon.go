@@ -187,7 +187,7 @@ func (p Polygon) ExteriorRing() LineString {
 
 // NumInteriorRings gives the number of interior rings in the polygon boundary.
 func (p Polygon) NumInteriorRings() int {
-	return max(0, len(p.rings)-1)
+	return maxInt(0, len(p.rings)-1)
 }
 
 // NumRings gives the total number of rings: ExternalRing + NumInteriorRings().

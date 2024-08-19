@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Upgrades `golangci-lint` to `v1.60.1`.
+
 ## v0.51.0
 
 2024-08-19

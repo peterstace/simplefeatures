@@ -370,7 +370,7 @@ func (s LineString) Force2D() LineString {
 
 func (s LineString) asLines() []line {
 	n := s.seq.Length()
-	lines := make([]line, 0, max(0, n-1))
+	lines := make([]line, 0, maxInt(0, n-1))
 	for i := 0; i < n; i++ {
 		ln, ok := getLine(s.seq, i)
 		if ok {

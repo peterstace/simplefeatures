@@ -35,12 +35,12 @@ func testBulkLoad(rnd *rand.Rand, pop int) (*RTree, []Box) {
 	return BulkLoad(inserts), boxes
 }
 
-func testPopulations(manditory, max int, mult float64) []int {
+func testPopulations(manditory, upper int, mult float64) []int {
 	var pops []int
 	for i := 0; i < manditory; i++ {
 		pops = append(pops, i)
 	}
-	for pop := float64(manditory); pop < float64(max); pop *= mult {
+	for pop := float64(manditory); pop < float64(upper); pop *= mult {
 		pops = append(pops, int(pop))
 	}
 	return pops
@@ -139,8 +139,8 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 		for i := 0; i < current.numEntries; i++ {
 			e := current.entries[i]
 			if e.child == nil {
-				minLeafLevel = min(minLeafLevel, level)
-				maxLeafLevel = max(maxLeafLevel, level)
+				minLeafLevel = minInt(minLeafLevel, level)
+				maxLeafLevel = maxInt(maxLeafLevel, level)
 				if _, ok := unfound[e.recordID]; !ok {
 					t.Fatal("record ID found in tree but wasn't in unfound map")
 				}
@@ -201,14 +201,16 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 	}
 }
 
-func min(a, b int) int {
+// TODO: Remove this when we require Go 1.21 (the min builtin can be used instead).
+func minInt(a, b int) int {
 	if a < b {
 		return a
 	}
 	return b
 }
 
-func max(a, b int) int {
+// TODO: Remove this when we require Go 1.21 (the max builtin can be used instead).
+func maxInt(a, b int) int {
 	if a > b {
 		return a
 	}

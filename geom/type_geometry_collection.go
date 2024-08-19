@@ -121,7 +121,7 @@ func (c GeometryCollection) IsEmpty() bool {
 func (c GeometryCollection) Dimension() int {
 	dim := 0
 	for _, g := range c.geoms {
-		dim = max(dim, g.Dimension())
+		dim = maxInt(dim, g.Dimension())
 	}
 	return dim
 }
@@ -290,7 +290,7 @@ func highestDimensionIgnoreEmpties(g Geometry) int {
 	c := g.MustAsGeometryCollection()
 	highestDim := 0
 	for _, g2 := range c.geoms {
-		highestDim = max(highestDim, highestDimensionIgnoreEmpties(g2))
+		highestDim = maxInt(highestDim, highestDimensionIgnoreEmpties(g2))
 	}
 	return highestDim
 }
@@ -422,7 +422,7 @@ func (c GeometryCollection) PointOnSurface() Point {
 	var maxDim int
 	c.walk(func(g Geometry) {
 		if !g.IsEmpty() {
-			maxDim = max(maxDim, g.Dimension())
+			maxDim = maxInt(maxDim, g.Dimension())
 		}
 	})
 

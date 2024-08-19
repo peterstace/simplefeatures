@@ -53,7 +53,7 @@ func skipIfUnsupported(tb testing.TB, err error) {
 	tb.Helper()
 	var verErr rawgeos.UnsupportedGEOSVersionError
 	if errors.As(err, &verErr) {
-		tb.Skipf(verErr.Error())
+		tb.Skip(verErr.Error())
 	}
 }
 
