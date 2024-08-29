@@ -10,6 +10,10 @@ issues:
       linters:
         - thelper
 
+    - text: "G115.*"
+      linters:
+        - gosec
+
 linters-settings:
   depguard:
     rules:
