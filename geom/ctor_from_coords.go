@@ -309,30 +309,31 @@ func multiPointFromCoords(coords []float64, ct CoordinatesType) MultiPoint {
 		return MultiPoint{}.ForceCoordinatesType(ct)
 	}
 
-	if len(coords)%ct.Dimension() != 0 {
+	dim := ct.Dimension()
+	if len(coords)%dim != 0 {
 		msg := fmt.Sprintf(
 			"geom: coordinate arguments to %s constructor "+
 				"must have a length that is a multiple of %d",
-			ct.String(), ct.Dimension(),
+			ct.String(), dim,
 		)
 		panic(msg)
 	}
 
-	n := len(coords) / ct.Dimension()
+	n := len(coords) / dim
 	pts := make([]Point, n)
 	for i := 0; i < n; i++ {
 		c := Coordinates{
 			XY: XY{
-				coords[i*ct.Dimension()+0],
-				coords[i*ct.Dimension()+1],
+				coords[i*dim+0],
+				coords[i*dim+1],
 			},
 			Type: ct,
 		}
 		if ct.Is3D() {
-			c.Z = coords[i*ct.Dimension()+2]
+			c.Z = coords[i*dim+2]
 		}
 		if ct.IsMeasured() {
-			c.M = coords[i*ct.Dimension()+ct.Dimension()-1]
+			c.M = coords[i*dim+dim-1]
 		}
 		pts[i] = NewPoint(c)
 	}
