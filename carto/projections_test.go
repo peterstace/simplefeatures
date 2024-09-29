@@ -1,9 +1,10 @@
-package geom_test
+package carto_test
 
 import (
 	"strconv"
 	"testing"
 
+	"github.com/peterstace/simplefeatures/carto"
 	"github.com/peterstace/simplefeatures/geom"
 )
 
@@ -26,7 +27,7 @@ func TestProjections(t *testing.T) {
 	}{
 		{
 			name:      "WebMercator0",
-			proj:      geom.NewWebMercator(0),
+			proj:      carto.NewWebMercator(0),
 			threshold: 1.0 / (1 << 16), // 1/65536th of a tile.
 			subtests: []projectionSubTest{
 				{
@@ -41,7 +42,7 @@ func TestProjections(t *testing.T) {
 		},
 		{
 			name:      "WebMercator21",
-			proj:      geom.NewWebMercator(21),
+			proj:      carto.NewWebMercator(21),
 			threshold: 1.0 / (1 << 16), // 1/65536th of a tile.
 			subtests: []projectionSubTest{
 				{
@@ -52,8 +53,8 @@ func TestProjections(t *testing.T) {
 		},
 		{
 			name: "OrthographicAtSydney",
-			proj: geom.NewOrthographic(
-				geom.WGS84EllipsoidMeanRadiusM,
+			proj: carto.NewOrthographic(
+				carto.WGS84EllipsoidMeanRadiusM,
 				geom.XY{151, -34},
 			),
 			threshold: 1e-3, // 1mm
