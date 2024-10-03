@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"image"
+	"image/color"
 	"image/png"
 	"io"
 	"os"
@@ -36,8 +37,11 @@ func TestImage(t *testing.T) {
 		t.Fatalf("expected MultiLineString, got %v", landBoundary.Type())
 	}
 
+	rast := rasterize.NewRasterizer(pxWide, pxHigh)
+	rast.MultiLineString(mls)
+
 	img := image.NewRGBA(image.Rect(0, 0, pxWide, pxHigh))
-	rasterize.MultiLineString(img, mls)
+	rast.Draw(img, img.Bounds(), image.NewUniform(color.Black), image.Point{})
 
 	err := os.WriteFile("testdata/land.png", imageToPNG(t, img), 0644)
 	expectNoErr(t, err)
@@ -50,6 +54,10 @@ func imageToPNG(t *testing.T, img image.Image) []byte {
 	return buf.Bytes()
 }
 
+// TODO: Load the "lakes" geometry as well, and subtract it from the "land"
+// geometry.
+//
+// TODO: Get the geometries at a higher level of detail.
 func loadLandGeom(t *testing.T) geom.Geometry {
 	zippedBuf, err := os.ReadFile("testdata/ne_110m_land.geojson.gz")
 	expectNoErr(t, err)
