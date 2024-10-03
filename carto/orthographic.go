@@ -34,7 +34,7 @@ func (m *Orthographic) To(lonLat XY) XY {
 	// Directly from https://en.wikipedia.org/wiki/Orthographic_map_projection.
 	x := R * cos(φr) * sin(λr-λ0r)
 	y := R * (cos(φ0r)*sin(φr) - sin(φ0r)*cos(φr)*cos(λr-λ0r))
-	return XY{x, y}
+	return XY{X: x, Y: y}
 }
 
 // From converts an orthographically projected (x, y) pair to a (longitude,
@@ -53,5 +53,5 @@ func (m *Orthographic) From(xy XY) XY {
 	c := asin(ρ / R)
 	φr := asin(cos(c)*sin(φ0r) + y*sin(c)*cos(φ0r)/ρ)
 	λr := λ0r + atan(x*sin(c)/(ρ*cos(c)*cos(φ0r)-y*sin(c)*sin(φ0r)))
-	return XY{rtod(λr), rtod(φr)}
+	return XY{X: rtod(λr), Y: rtod(φr)}
 }

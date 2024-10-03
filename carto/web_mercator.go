@@ -30,7 +30,7 @@ func (m *WebMercator) To(lonlat XY) XY {
 	// Directly from https://en.wikipedia.org/wiki/Web_Mercator_projection.
 	x := (λd + 180) / 360 * P
 	y := (π - ln(tan(π/4+φr/2))) * P / (2 * π)
-	return XY{x, y}
+	return XY{X: x, Y: y}
 }
 
 // From converts a Web Mercator (x, y) pair to a (longitude, latitude) pair.
@@ -43,5 +43,5 @@ func (m *WebMercator) From(xy XY) XY {
 	// inverting the equations.
 	λd := x/P*360 - 180
 	φr := 2 * (atan(exp(π-2*π*y/P)) - π/4)
-	return XY{λd, rtod(φr)}
+	return XY{X: λd, Y: rtod(φr)}
 }
