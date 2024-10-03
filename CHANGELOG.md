@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Upgrades `golangci-lint` to `v1.60.3`.
+- Upgrades `golangci-lint` to `v1.61.0`.
 
 - Adds a new group of functions to the `geom` package that construct
   geometries. These functions have names in the form `New{Type}{Dimension}`,
