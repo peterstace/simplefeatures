@@ -227,6 +227,53 @@ func NewPolygonXYZM(xyzms ...[]float64) Polygon {
 	return polygonFromCoords(xyzms, DimXYZM)
 }
 
+// NewSingleRingPolygonXY builds a new XY Polygon from the x and y coordinates
+// of its exterior ring, in the form x1, y1, x2, y2, ..., xn, yn, x1, y1 (the
+// first and last coordinates of the ring should be the same). If the number of
+// coordinates is not a multiple of 2 the function will panic.
+//
+// It doesn't perform any validation on the result. The Validate method can be
+// used to check the validity of the result if needed.
+func NewSingleRingPolygonXY(xys ...float64) Polygon {
+	return NewPolygonXY(xys)
+}
+
+// NewSingleRingPolygonXYZ builds a new XYZ Polygon from the x, y and z
+// coordinates of its exterior ring, in the form x1, y1, z1, x2, y2, z2, ...,
+// xn, yn, zn, x1, y1, z1 (the first and last coordinates of the ring should be
+// the same). If the number of coordinates is not a multiple of 3 the function
+// will panic.
+//
+// It doesn't perform any validation on the result. The Validate method can be
+// used to check the validity of the result if needed.
+func NewSingleRingPolygonXYZ(xyzs ...float64) Polygon {
+	return NewPolygonXYZ(xyzs)
+}
+
+// NewSingleRingPolygonXYM builds a new XYM Polygon from the x, y and m
+// coordinates of its exterior ring, in the form x1, y1, m1, x2, y2, m2, ...,
+// xn, yn, mn, x1, y1, m1 (the first and last coordinates of the ring should be
+// the same). If the number of coordinates is not a multiple of 3 the function
+// will panic.
+//
+// It doesn't perform any validation on the result. The Validate method can be
+// used to check the validity of the result if needed.
+func NewSingleRingPolygonXYM(xyms ...float64) Polygon {
+	return NewPolygonXYM(xyms)
+}
+
+// NewSingleRingPolygonXYZM builds a new XYZM Polygon from the x, y, z and m
+// coordinates of its exterior ring, in the form x1, y1, z1, m1, x2, y2, z2,
+// m2, ..., xn, yn, zn, mn, x1, y1, z1, m1 (the first and last coordinates of
+// the ring should be the same). If the number of coordinates is not a multiple
+// of 4 the function will panic.
+//
+// It doesn't perform any validation on the result. The Validate method can be
+// used to check the validity of the result if needed.
+func NewSingleRingPolygonXYZM(xyzms ...float64) Polygon {
+	return NewPolygonXYZM(xyzms)
+}
+
 // NewMultiPolygonXY builds a new XY MultiPolygon from the x and y coordinates
 // of its Polygons, each in its own slice of rings. Ring coordinates are in the
 // form x1, y1, x2, y2, ..., xn, yn, x1, y1 (the first and last coordinates of

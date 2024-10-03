@@ -75,6 +75,15 @@ func TestCoordinateConstructors(t *testing.T) {
 		{geom.NewPolygonXYZM([]float64{0, 0, 10, 100, 0, 4, 11, 101, 4, 4, 12, 102, 4, 0, 13, 103, 0, 0, 14, 104}), "POLYGON ZM((0 0 10 100,0 4 11 101,4 4 12 102,4 0 13 103,0 0 14 104))"},
 		{geom.NewPolygonXYZM([]float64{0, 0, 10, 100, 0, 4, 11, 101, 4, 4, 12, 102, 4, 0, 13, 103, 0, 0, 14, 104}, []float64{1, 1, 20, 200, 1, 2, 21, 201, 2, 2, 22, 202, 2, 1, 23, 203, 1, 1, 24, 204}), "POLYGON ZM((0 0 10 100,0 4 11 101,4 4 12 102,4 0 13 103,0 0 14 104),(1 1 20 200,1 2 21 201,2 2 22 202,2 1 23 203,1 1 24 204))"},
 
+		{geom.NewSingleRingPolygonXY(), "POLYGON EMPTY"},
+		{geom.NewSingleRingPolygonXY(0, 0, 0, 4, 4, 4, 4, 0, 0, 0), "POLYGON((0 0,0 4,4 4,4 0,0 0))"},
+		{geom.NewSingleRingPolygonXYZ(), "POLYGON Z EMPTY"},
+		{geom.NewSingleRingPolygonXYZ(0, 0, 10, 0, 4, 11, 4, 4, 12, 4, 0, 13, 0, 0, 14), "POLYGON Z((0 0 10,0 4 11,4 4 12,4 0 13,0 0 14))"},
+		{geom.NewSingleRingPolygonXYM(), "POLYGON M EMPTY"},
+		{geom.NewSingleRingPolygonXYM(0, 0, 10, 0, 4, 11, 4, 4, 12, 4, 0, 13, 0, 0, 14), "POLYGON M((0 0 10,0 4 11,4 4 12,4 0 13,0 0 14))"},
+		{geom.NewSingleRingPolygonXYZM(), "POLYGON ZM EMPTY"},
+		{geom.NewSingleRingPolygonXYZM(0, 0, 10, 100, 0, 4, 11, 101, 4, 4, 12, 102, 4, 0, 13, 103, 0, 0, 14, 104), "POLYGON ZM((0 0 10 100,0 4 11 101,4 4 12 102,4 0 13 103,0 0 14 104))"},
+
 		{geom.NewMultiPolygonXY(), "MULTIPOLYGON EMPTY"},
 		{geom.NewMultiPolygonXY(nil), "MULTIPOLYGON(EMPTY)"},
 		{geom.NewMultiPolygonXY([][]float64{{0, 0, 0, 1, 1, 1, 1, 0, 0, 0}}, [][]float64{{2, 2, 2, 1, 1, 2, 2, 2}}), "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 2,2 1,1 2,2 2)))"},
