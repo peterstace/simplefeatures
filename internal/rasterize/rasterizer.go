@@ -60,6 +60,35 @@ func (r *Rasterizer) MultiLineString(mls geom.MultiLineString) {
 	}
 }
 
+func (r *Rasterizer) Polygon(p geom.Polygon) {
+	// TODO: Support holes.
+	ext := p.ExteriorRing()
+	seq := ext.Coordinates()
+	n := seq.Length()
+	if n == 0 {
+		return
+	}
+	r.moveTo(seq.GetXY(0))
+	for i := 1; i < n; i++ {
+		r.lineTo(seq.GetXY(i))
+	}
+	r.rast.ClosePath() // Usually not necessary, but just in case.
+}
+
+func (r *Rasterizer) MultiPolygon(mp geom.MultiPolygon) {
+	for _, p := range mp.Dump() {
+		r.Polygon(p)
+	}
+}
+
+func (r *Rasterizer) moveTo(pt geom.XY) {
+	r.rast.MoveTo(float32(pt.X), float32(pt.Y))
+}
+
+func (r *Rasterizer) lineTo(pt geom.XY) {
+	r.rast.LineTo(float32(pt.X), float32(pt.Y))
+}
+
 // TODO: This is duplicated from geom/xy.go. Could be a better solution?
 func rotateCCW90(v geom.XY) geom.XY {
 	return geom.XY{-v.Y, v.X}

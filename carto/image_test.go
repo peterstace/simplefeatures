@@ -4,46 +4,196 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
 	"image/png"
 	"io"
+	"math"
 	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/peterstace/simplefeatures/carto"
 	"github.com/peterstace/simplefeatures/geom"
 	"github.com/peterstace/simplefeatures/internal/rasterize"
 )
 
-func TestImage(t *testing.T) {
+func TestWorldProjections(t *testing.T) {
 	const (
-		pxWide = 360 * 2
-		pxHigh = 180 * 2
+		earthRadius = 6371000
+		earthCircum = 2 * math.Pi * earthRadius
 	)
-	land := loadLandGeom(t)
-	land = land.TransformXY(func(in geom.XY) geom.XY {
-		// TODO: Consider adding a "Linear" transformation to do this.
-		in.X += 180                   // -180..180 -> 0..360
-		in.X *= float64(pxWide) / 360 // 0..360 -> 0..pxWide
-		in.Y = 90 - in.Y              // 90..-90 -> 0..180
-		in.Y *= float64(pxHigh) / 180 // 0..180 -> 0..pxHigh
-		return in
-	})
-	t.Log(land.Envelope())
+	for i, tc := range []struct {
+		name     string
+		proj     func(geom.XY) geom.XY
+		pxWide   int
+		pxHigh   int
+		tlXY     geom.XY
+		brXY     geom.XY
+		mask     geom.Polygon
+		filename string
+	}{
+		{
+			name:     "plate carree",
+			proj:     func(pt geom.XY) geom.XY { return pt },
+			pxWide:   720,
+			pxHigh:   360,
+			tlXY:     geom.XY{X: -180, Y: +90},
+			brXY:     geom.XY{X: +180, Y: -90},
+			filename: "plate_carree.png",
+		},
+		{
+			name:     "web mercator",
+			proj:     carto.NewWebMercator(0).To,
+			pxWide:   512,
+			pxHigh:   512,
+			tlXY:     geom.XY{},
+			brXY:     geom.XY{X: 1, Y: 1},
+			filename: "web_mercator.png",
+		},
+		{
+			name:     "lambert cylindrical equal area",
+			proj:     carto.NewLambertCylindricalEqualArea(1, 0).To,
+			pxWide:   902, // h*pi
+			pxHigh:   287, // h
+			tlXY:     geom.XY{X: -math.Pi, Y: +1.0},
+			brXY:     geom.XY{X: +math.Pi, Y: -1.0},
+			filename: "lambert_cylindrical_equal_area.png",
+		},
+		{
+			name:     "sinusoidal",
+			proj:     carto.NewSinusoidal(earthRadius, 0).To,
+			pxWide:   720,
+			pxHigh:   360,
+			tlXY:     geom.XY{X: -0.5 * earthCircum, Y: +0.25 * earthCircum},
+			brXY:     geom.XY{X: +0.5 * earthCircum, Y: -0.25 * earthCircum},
+			filename: "sinusoidal.png",
+			mask: func() geom.Polygon {
+				// TODO: Consider a programmatic "mask" image instead.
+				var lhs, rhs []float64
+				for i := 0; i <= 360; i++ {
+					lhs = append(lhs, 360+math.Sin(float64(i)*math.Pi/360)*360, float64(i))
+					rhs = append(rhs, 360-math.Sin(float64(i)*math.Pi/360)*360, 360-float64(i))
+				}
+				all := append(lhs, rhs...)
+				seq := geom.NewSequence(all, geom.DimXY)
+				ring := geom.NewLineString(seq)
+				poly := geom.NewPolygon([]geom.LineString{ring})
+				poly.AsText()
+				fmt.Println("DEBUG carto/image_test.go:84 poly.AsText()", poly.AsText()) // XXX
+				return poly
+			}(),
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			path := filepath.Join("./testdata", fmt.Sprintf("%d_%s", i, tc.filename))
+			writeProjectedWorld(t, path, tc.proj, tc.pxWide, tc.pxHigh, tc.tlXY, tc.brXY, tc.mask)
+		})
+	}
+}
 
-	landBoundary := land.Boundary()
-	mls, ok := landBoundary.AsMultiLineString()
-	if !ok {
-		t.Fatalf("expected MultiLineString, got %v", landBoundary.Type())
+func writeProjectedWorld(
+	t *testing.T,
+	outputFilename string,
+	projection func(geom.XY) geom.XY,
+	pxWide int,
+	pxHigh int,
+	tlXY geom.XY,
+	brXY geom.XY,
+	maskPoly geom.Polygon,
+) {
+	var (
+		waterColor = color.RGBA{R: 144, G: 218, B: 238, A: 255}
+		landColor  = color.RGBA{R: 188, G: 236, B: 216, A: 255}
+		iceColor   = color.RGBA{R: 252, G: 251, B: 250, A: 255}
+	)
+
+	land := loadGeom(t, "testdata/ne_50m_land.geojson.gz")
+	lakes := loadGeom(t, "testdata/ne_50m_lakes.geojson.gz")
+	glaciers := loadGeom(t, "testdata/ne_50m_glaciated_areas.geojson.gz")
+	iceshelves := loadGeom(t, "testdata/ne_50m_antarctic_ice_shelves_polys.geojson.gz")
+
+	var lines []geom.LineString
+	for lon := -180; lon <= 180; lon += 30 {
+		line := geom.NewLineString(geom.NewSequence([]float64{float64(lon), -90, float64(lon), +90}, geom.DimXY))
+		line = line.Densify(1)
+		lines = append(lines, line)
+	}
+	for lat := -90; lat <= 90; lat += 30 {
+		line := geom.NewLineString(geom.NewSequence([]float64{-180, float64(lat), +180, float64(lat)}, geom.DimXY))
+		line = line.Densify(1)
+		lines = append(lines, line)
+	}
+
+	for _, g := range []*geom.Geometry{&land, &lakes, &glaciers, &iceshelves} {
+		*g = g.TransformXY(func(latlon geom.XY) geom.XY {
+			// Project from lat/lon to map coordinates:
+			xy := projection(latlon)
+
+			// Project from map coordinates to image coordinates:
+			return geom.XY{
+				X: linearRemap(tlXY.X, 0, brXY.X, float64(pxWide))(xy.X),
+				Y: linearRemap(tlXY.Y, 0, brXY.Y, float64(pxHigh))(xy.Y),
+			}
+		})
+	}
+
+	// TODO: Remove duplication.
+	for i := range lines {
+		lines[i] = lines[i].TransformXY(func(latlon geom.XY) geom.XY {
+			// Project from lat/lon to map coordinates:
+			xy := projection(latlon)
+
+			// Project from map coordinates to image coordinates:
+			return geom.XY{
+				X: linearRemap(tlXY.X, 0, brXY.X, float64(pxWide))(xy.X),
+				Y: linearRemap(tlXY.Y, 0, brXY.Y, float64(pxHigh))(xy.Y),
+			}
+		})
+
 	}
 
 	rast := rasterize.NewRasterizer(pxWide, pxHigh)
-	rast.MultiLineString(mls)
+
+	// TODO: Programmatic mask instead of geometry based mask.
+	mask := image.NewAlpha(image.Rect(0, 0, pxWide, pxHigh))
+	if maskPoly.IsEmpty() {
+		draw.Draw(mask, mask.Bounds(), image.NewUniform(color.Opaque), image.Point{}, draw.Src)
+	} else {
+		mask = image.NewAlpha(image.Rect(0, 0, pxWide, pxHigh))
+		rast.Reset()
+		rast.Polygon(maskPoly)
+		rast.Draw(mask, mask.Bounds(), image.NewUniform(color.Opaque), image.Point{})
+	}
+
+	fmt.Println("DEBUG carto/image_test.go:130 mask.At(0, 0)", mask.At(0, 0))         // XXX
+	fmt.Println("DEBUG carto/image_test.go:132 mask.At(360, 180)", mask.At(360, 180)) // XXX
 
 	img := image.NewRGBA(image.Rect(0, 0, pxWide, pxHigh))
-	rast.Draw(img, img.Bounds(), image.NewUniform(color.Black), image.Point{})
+	draw.DrawMask(img, img.Bounds(), image.NewUniform(waterColor), image.Point{}, mask, image.Point{}, draw.Src)
 
-	err := os.WriteFile("testdata/land.png", imageToPNG(t, img), 0644)
+	rast.Reset()
+	rast.MultiPolygon(land.MustAsMultiPolygon())
+	rast.Draw(img, img.Bounds(), image.NewUniform(landColor), image.Point{})
+
+	rast.Reset()
+	rast.MultiPolygon(lakes.MustAsMultiPolygon())
+	rast.Draw(img, img.Bounds(), image.NewUniform(waterColor), image.Point{})
+
+	rast.Reset()
+	rast.MultiPolygon(glaciers.MustAsMultiPolygon())
+	rast.MultiPolygon(iceshelves.MustAsMultiPolygon())
+	rast.Draw(img, img.Bounds(), image.NewUniform(iceColor), image.Point{})
+
+	rast.Reset()
+	for _, line := range lines {
+		rast.LineString(line)
+	}
+	rast.Draw(img, img.Bounds(), image.NewUniform(color.Gray{Y: 0x80}), image.Point{})
+
+	err := os.WriteFile(outputFilename, imageToPNG(t, img), 0644)
 	expectNoErr(t, err)
 }
 
@@ -54,12 +204,8 @@ func imageToPNG(t *testing.T, img image.Image) []byte {
 	return buf.Bytes()
 }
 
-// TODO: Load the "lakes" geometry as well, and subtract it from the "land"
-// geometry.
-//
-// TODO: Get the geometries at a higher level of detail.
-func loadLandGeom(t *testing.T) geom.Geometry {
-	zippedBuf, err := os.ReadFile("testdata/ne_110m_land.geojson.gz")
+func loadGeom(t *testing.T, filename string) geom.Geometry {
+	zippedBuf, err := os.ReadFile(filename)
 	expectNoErr(t, err)
 
 	gzipReader, err := gzip.NewReader(bytes.NewReader(zippedBuf))
@@ -93,4 +239,13 @@ func loadLandGeom(t *testing.T) geom.Geometry {
 	expectNoErr(t, err)
 
 	return all
+}
+
+func linearRemap(fromA, toA, fromB, toB float64) func(float64) float64 {
+	fromDelta := fromB - fromA
+	toDelta := toB - toA
+	return func(f float64) float64 {
+		t := (f - fromA) / fromDelta
+		return toA + t*toDelta
+	}
 }

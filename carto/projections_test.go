@@ -75,6 +75,44 @@ func TestProjections(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "LambertCylindricalEqual",
+			proj: carto.NewLambertCylindricalEqualArea(
+				carto.WGS84EllipsoidMeanRadiusM, 0,
+			),
+			threshold: 1e-3, // 1mm
+			subtests: []projectionSubTest{{
+				geom.XY{151, -34},
+				geom.XY{1.679045703992921e7, -3.5626228929251498e6},
+			}},
+		},
+		{
+			name:      "LambertCylindricalEqualAtSydney",
+			proj:      carto.NewLambertCylindricalEqualArea(carto.WGS84EllipsoidMeanRadiusM, 151),
+			threshold: 1e-3, // 1mm
+			subtests: []projectionSubTest{{
+				geom.XY{151, -34},
+				geom.XY{0, -3.5626228929251498e6},
+			}},
+		},
+		{
+			name:      "Sinusoidal",
+			proj:      carto.NewSinusoidal(carto.WGS84EllipsoidMeanRadiusM, 0),
+			threshold: 1e-3, // 1mm
+			subtests: []projectionSubTest{{
+				geom.XY{151, -34},
+				geom.XY{1.3919919746472625e+07, -3.780632710977439e+06},
+			}},
+		},
+		{
+			name:      "SinusoidalAtSydney",
+			proj:      carto.NewSinusoidal(carto.WGS84EllipsoidMeanRadiusM, 151),
+			threshold: 1e-3, // 1mm
+			subtests: []projectionSubTest{{
+				geom.XY{151, -34},
+				geom.XY{0, -3.780632710977439e+06},
+			}},
+		},
 	} {
 		t.Run(pc.name, func(t *testing.T) {
 			for i, st := range pc.subtests {
