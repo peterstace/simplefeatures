@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.52.0
+
+2024-10-08
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - Upgrades `golangci-lint` to `v1.61.0`.
 
