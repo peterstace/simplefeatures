@@ -1,8 +1,21 @@
 # Changelog
 
-## Unreleased
+## v0.52.0
+
+2024-10-08
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - Upgrades `golangci-lint` to `v1.61.0`.
+
+- Adds a new group of functions to the `geom` package that construct
+  geometries. These functions have names in the form `New{Type}{Dimension}`,
+  where `Type` is one of {`Point`, `LineString`, `Polygon`, `MultiPoint`,
+  `MultiLineString`, `MultiPolygon`}, and `Dimension` is one of {`XY`, `XYZ`,
+  `XYM`, `XYZM`}. They accept coordinates at the appropriate level of nesting
+  that corresponds to the geometry type. These functions panic if the number of
+  coordinates provided is not consistent with the dimension (this behaviour is
+  consistent with the behaviour of the `NewSequence` function).
 
 ## v0.51.0
 
