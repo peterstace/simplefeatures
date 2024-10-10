@@ -113,6 +113,7 @@ func TestProjections(t *testing.T) {
 				geom.XY{0, -3.780632710977439e+06},
 			}},
 		},
+		// TODO: Test Equirectangular.
 	} {
 		t.Run(pc.name, func(t *testing.T) {
 			for i, st := range pc.subtests {

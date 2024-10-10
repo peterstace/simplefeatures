@@ -86,6 +86,24 @@ func TestWorldProjections(t *testing.T) {
 				return poly
 			}(),
 		},
+		{
+			name:     "equirectangular",
+			proj:     (&carto.Equirectangular{Radius: earthRadius}).To,
+			pxWide:   720,
+			pxHigh:   360,
+			tlXY:     geom.XY{X: -0.5 * earthCircum, Y: +0.25 * earthCircum},
+			brXY:     geom.XY{X: +0.5 * earthCircum, Y: -0.25 * earthCircum},
+			filename: "equirectangular.png",
+		},
+		{
+			name:     "marinus",
+			proj:     (&carto.Equirectangular{Radius: earthRadius, StandardParallels: 36}).To,
+			pxWide:   int(math.Round(720 * math.Cos(36*math.Pi/180))),
+			pxHigh:   360,
+			tlXY:     geom.XY{X: -0.5 * earthCircum * math.Cos(36*math.Pi/180), Y: +0.25 * earthCircum},
+			brXY:     geom.XY{X: +0.5 * earthCircum * math.Cos(36*math.Pi/180), Y: -0.25 * earthCircum},
+			filename: "marinus.png",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			path := filepath.Join("./testdata", fmt.Sprintf("%d_%s", i, tc.filename))
