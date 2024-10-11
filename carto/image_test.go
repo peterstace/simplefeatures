@@ -20,10 +20,142 @@ import (
 	"github.com/peterstace/simplefeatures/internal/rasterize"
 )
 
+func TestDrawMapPlateCaree(t *testing.T) {
+	const (
+		earthRadius = 6371000
+		earthCircum = 2 * pi * earthRadius
+	)
+	f := &worldProjectionFixture{
+		proj:   (&carto.Equirectangular{Radius: earthRadius}).To,
+		pxWide: 720,
+		pxHigh: 360,
+		worldMask: rectangle(
+			geom.XY{X: -180, Y: +90},
+			geom.XY{X: +180, Y: -90},
+		),
+		mapMask: rectangle(
+			geom.XY{X: -0.5 * earthCircum, Y: +0.25 * earthCircum},
+			geom.XY{X: +0.5 * earthCircum, Y: -0.25 * earthCircum},
+		),
+	}
+	f.build(t, "testdata/plate_carree.png")
+}
+
+type worldProjectionFixture struct {
+	proj      func(geom.XY) geom.XY // Convert lon/lat to projected coordinates.
+	pxWide    int
+	pxHigh    int
+	worldMask geom.Polygon // Parts of the world (in lon/lat) to include.
+	mapMask   geom.Polygon // Parts of the map (in projected coordinates) to include.
+}
+
+func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
+	var (
+		waterColor = color.RGBA{R: 144, G: 218, B: 238, A: 255}
+		landColor  = color.RGBA{R: 188, G: 236, B: 216, A: 255}
+		iceColor   = color.RGBA{R: 252, G: 251, B: 250, A: 255}
+	)
+
+	land := loadGeom(t, "testdata/ne_50m_land.geojson.gz")
+	lakes := loadGeom(t, "testdata/ne_50m_lakes.geojson.gz")
+	glaciers := loadGeom(t, "testdata/ne_50m_glaciated_areas.geojson.gz")
+	iceshelves := loadGeom(t, "testdata/ne_50m_antarctic_ice_shelves_polys.geojson.gz")
+
+	f.worldMask = f.worldMask.Densify(1)
+	for _, g := range []*geom.Geometry{&land, &lakes, &glaciers, &iceshelves} {
+		clipped, err := geom.Intersection(*g, f.worldMask.AsGeometry())
+		*g = clipped
+		expectNoErr(t, err)
+	}
+
+	var lines []geom.LineString
+	for lon := -180; lon <= 180; lon += 30 {
+		line := geom.NewLineString(geom.NewSequence([]float64{float64(lon), -90, float64(lon), +90}, geom.DimXY))
+		line = line.Densify(1)
+		lines = append(lines, line)
+	}
+	for lat := -90; lat <= 90; lat += 30 {
+		line := geom.NewLineString(geom.NewSequence([]float64{-180, float64(lat), +180, float64(lat)}, geom.DimXY))
+		line = line.Densify(1)
+		lines = append(lines, line)
+	}
+
+	var clippedLines []geom.LineString
+	for i := range lines {
+		clipped, err := geom.Intersection(lines[i].AsGeometry(), f.worldMask.AsGeometry())
+		clippedLines = append(clippedLines, extractLinearParts(clipped)...)
+		expectNoErr(t, err)
+	}
+	lines = clippedLines
+
+	mapUnitsPerPixel := f.mapMask.Envelope().Width() / float64(f.pxWide)
+
+	imgDims := geom.XY{X: float64(f.pxWide), Y: float64(f.pxHigh)}
+	lonLatToImg := func(lonLat geom.XY) geom.XY {
+		// Project from lon/lat to map coordinates:
+		xy := f.proj(lonLat)
+
+		// Transform from map coordinates to image coordinates:
+		imgCoords := xy.Scale(1 / mapUnitsPerPixel).Add(imgDims.Scale(0.5))
+		imgCoords.Y = imgDims.Y - imgCoords.Y
+		return imgCoords
+	}
+
+	for _, g := range []*geom.Geometry{&land, &lakes, &glaciers, &iceshelves} {
+		*g = g.TransformXY(lonLatToImg)
+	}
+	for i := range lines {
+		lines[i] = lines[i].TransformXY(lonLatToImg)
+	}
+
+	rast := rasterize.NewRasterizer(f.pxWide, f.pxHigh)
+
+	mapMaskImage := image.NewAlpha(image.Rect(0, 0, f.pxWide, f.pxHigh))
+	rast.Reset()
+	rast.Polygon(f.mapMask)
+	rast.Draw(mapMaskImage, mapMaskImage.Bounds(), image.NewUniform(color.Opaque), image.Point{})
+
+	img := image.NewRGBA(image.Rect(0, 0, f.pxWide, f.pxHigh))
+	draw.DrawMask(img, img.Bounds(), image.NewUniform(waterColor), image.Point{}, mapMaskImage, image.Point{}, draw.Src)
+
+	rast.Reset()
+	mapOutline := f.mapMask.Boundary()
+	rast.MultiLineString(mapOutline)
+	rast.Draw(img, img.Bounds(), image.NewUniform(color.Black), image.Point{})
+
+	rasterisePolygons := func(g geom.Geometry) {
+		for _, p := range extractPolygonalParts(g) {
+			rast.Polygon(p)
+		}
+	}
+
+	rast.Reset()
+	rasterisePolygons(land)
+	rast.Draw(img, img.Bounds(), image.NewUniform(landColor), image.Point{})
+
+	rast.Reset()
+	rasterisePolygons(lakes)
+	rast.Draw(img, img.Bounds(), image.NewUniform(waterColor), image.Point{})
+
+	rast.Reset()
+	rasterisePolygons(glaciers)
+	rasterisePolygons(iceshelves)
+	rast.Draw(img, img.Bounds(), image.NewUniform(iceColor), image.Point{})
+
+	rast.Reset()
+	for _, line := range lines {
+		rast.LineString(line)
+	}
+	rast.Draw(img, img.Bounds(), image.NewUniform(color.Gray{Y: 0x80}), image.Point{})
+
+	err := os.WriteFile(outputPath, imageToPNG(t, img), 0644)
+	expectNoErr(t, err)
+}
+
 func TestWorldProjections(t *testing.T) {
 	const (
 		earthRadius = 6371000
-		earthCircum = 2 * math.Pi * earthRadius
+		earthCircum = 2 * pi * earthRadius
 	)
 	for i, tc := range []struct {
 		name     string
@@ -58,8 +190,8 @@ func TestWorldProjections(t *testing.T) {
 			proj:     carto.NewLambertCylindricalEqualArea(1, 0).To,
 			pxWide:   902, // h*pi
 			pxHigh:   287, // h
-			tlXY:     geom.XY{X: -math.Pi, Y: +1.0},
-			brXY:     geom.XY{X: +math.Pi, Y: -1.0},
+			tlXY:     geom.XY{X: -pi, Y: +1.0},
+			brXY:     geom.XY{X: +pi, Y: -1.0},
 			filename: "lambert_cylindrical_equal_area.png",
 		},
 		{
@@ -74,8 +206,8 @@ func TestWorldProjections(t *testing.T) {
 				// TODO: Consider a programmatic "mask" image instead.
 				var lhs, rhs []float64
 				for i := 0; i <= 360; i++ {
-					lhs = append(lhs, 360+math.Sin(float64(i)*math.Pi/360)*360, float64(i))
-					rhs = append(rhs, 360-math.Sin(float64(i)*math.Pi/360)*360, 360-float64(i))
+					lhs = append(lhs, 360+math.Sin(float64(i)*pi/360)*360, float64(i))
+					rhs = append(rhs, 360-math.Sin(float64(i)*pi/360)*360, 360-float64(i))
 				}
 				all := append(lhs, rhs...)
 				seq := geom.NewSequence(all, geom.DimXY)
@@ -96,10 +228,10 @@ func TestWorldProjections(t *testing.T) {
 		{
 			name:     "marinus",
 			proj:     (&carto.Equirectangular{Radius: earthRadius, StandardParallels: 36}).To,
-			pxWide:   int(math.Round(720 * math.Cos(36*math.Pi/180))),
+			pxWide:   int(math.Round(720 * math.Cos(36*pi/180))),
 			pxHigh:   360,
-			tlXY:     geom.XY{X: -0.5 * earthCircum * math.Cos(36*math.Pi/180), Y: +0.25 * earthCircum},
-			brXY:     geom.XY{X: +0.5 * earthCircum * math.Cos(36*math.Pi/180), Y: -0.25 * earthCircum},
+			tlXY:     geom.XY{X: -0.5 * earthCircum * math.Cos(36*pi/180), Y: +0.25 * earthCircum},
+			brXY:     geom.XY{X: +0.5 * earthCircum * math.Cos(36*pi/180), Y: -0.25 * earthCircum},
 			filename: "marinus.png",
 		},
 	} {
@@ -144,7 +276,7 @@ func TestWorldProjections(t *testing.T) {
 		const centralMeridian = -105
 		var worldMaskCoords []float64
 		latAtLon := func(lon float64) float64 {
-			return 45 * math.Cos((285+lon)*math.Pi/180)
+			return 45 * math.Cos((285+lon)*pi/180)
 		}
 		for lon := -180.0; lon <= 180.0; lon++ {
 			lat := latAtLon(lon)
@@ -343,6 +475,7 @@ func loadGeom(t *testing.T, filename string) geom.Geometry {
 	return all
 }
 
+// TODO: Remove me?
 func linearRemap(fromA, toA, fromB, toB float64) func(float64) float64 {
 	fromDelta := fromB - fromA
 	toDelta := toB - toA
@@ -386,13 +519,19 @@ func extractLinearParts(g geom.Geometry) []geom.LineString {
 	}
 }
 
-func circle(center geom.XY, radius float64) geom.Polygon {
+func circle(c geom.XY, r float64) geom.Polygon {
 	var coords []float64
 	for i := 0.0; i <= 360; i++ {
 		coords = append(coords,
-			center.X+radius*math.Cos(i*math.Pi/180),
-			center.Y+radius*math.Sin(i*math.Pi/180),
+			c.X+r*math.Cos(i*pi/180),
+			c.Y+r*math.Sin(i*pi/180),
 		)
 	}
 	return geom.NewPolygonXY(coords)
 }
+
+func rectangle(tl, br geom.XY) geom.Polygon {
+	return geom.NewEnvelope(tl, br).AsGeometry().MustAsPolygon()
+}
+
+const pi = math.Pi
