@@ -113,7 +113,25 @@ func TestProjections(t *testing.T) {
 				geom.XY{0, -3.780632710977439e+06},
 			}},
 		},
-		// TODO: Test Equirectangular.
+		{
+			name:      "Equirectangular - Plate Carree",
+			proj:      &carto.Equirectangular{Radius: carto.WGS84EllipsoidMeanRadiusM},
+			threshold: 1e-3, // 1mm
+			subtests: []projectionSubTest{{
+				geom.XY{151, -34},
+				geom.XY{1.679045703992921e+07, -3.780632710977439e+06},
+			}},
+		},
+		{
+			name:      "Equirectangular - Marinus of Tyre",
+			proj:      &carto.Equirectangular{Radius: carto.WGS84EllipsoidMeanRadiusM, StandardParallels: 36},
+			threshold: 1e-3, // 1mm
+			subtests: []projectionSubTest{{
+				// Gibraltar, ~480km west of 0 degrees and at ~36 degrees latitude.
+				geom.XY{-5.34660683624621225, 36.1335656729737309},
+				geom.XY{-480973.8495682527, 4.0178747161028227e+06},
+			}},
+		},
 	} {
 		t.Run(pc.name, func(t *testing.T) {
 			for i, st := range pc.subtests {

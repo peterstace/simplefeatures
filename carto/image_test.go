@@ -81,8 +81,6 @@ func TestWorldProjections(t *testing.T) {
 				seq := geom.NewSequence(all, geom.DimXY)
 				ring := geom.NewLineString(seq)
 				poly := geom.NewPolygon([]geom.LineString{ring})
-				poly.AsText()
-				fmt.Println("DEBUG carto/image_test.go:84 poly.AsText()", poly.AsText()) // XXX
 				return poly
 			}(),
 		},
@@ -185,9 +183,6 @@ func writeProjectedWorld(
 		rast.Polygon(maskPoly)
 		rast.Draw(mask, mask.Bounds(), image.NewUniform(color.Opaque), image.Point{})
 	}
-
-	fmt.Println("DEBUG carto/image_test.go:130 mask.At(0, 0)", mask.At(0, 0))         // XXX
-	fmt.Println("DEBUG carto/image_test.go:132 mask.At(360, 180)", mask.At(360, 180)) // XXX
 
 	img := image.NewRGBA(image.Rect(0, 0, pxWide, pxHigh))
 	draw.DrawMask(img, img.Bounds(), image.NewUniform(waterColor), image.Point{}, mask, image.Point{}, draw.Src)
