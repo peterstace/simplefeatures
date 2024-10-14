@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -20,25 +19,97 @@ import (
 	"github.com/peterstace/simplefeatures/internal/rasterize"
 )
 
-func TestDrawMapPlateCaree(t *testing.T) {
-	const (
-		earthRadius = 6371000
-		earthCircum = 2 * pi * earthRadius
+const (
+	earthRadius = 6371000
+	earthCircum = 2 * pi * earthRadius
+)
+
+var (
+	fullWorldMask = rectangle(
+		xy(-180, +90),
+		xy(+180, -90),
 	)
+)
+
+func TestDrawMapEquirectangularPlateCaree(t *testing.T) {
 	f := &worldProjectionFixture{
-		proj:   (&carto.Equirectangular{Radius: earthRadius}).To,
-		pxWide: 720,
-		pxHigh: 360,
-		worldMask: rectangle(
-			geom.XY{X: -180, Y: +90},
-			geom.XY{X: +180, Y: -90},
-		),
+		proj:      (&carto.Equirectangular{Radius: earthRadius}).To,
+		pxWide:    720,
+		pxHigh:    360,
+		worldMask: fullWorldMask,
 		mapMask: rectangle(
-			geom.XY{X: -0.5 * earthCircum, Y: +0.25 * earthCircum},
-			geom.XY{X: +0.5 * earthCircum, Y: -0.25 * earthCircum},
+			xy(-0.5*earthCircum, +0.25*earthCircum),
+			xy(+0.5*earthCircum, -0.25*earthCircum),
 		),
 	}
 	f.build(t, "testdata/plate_carree.png")
+}
+
+func TestDrawMapEquirectangularMarinus(t *testing.T) {
+	cos36 := math.Cos(36 * pi / 180)
+	f := &worldProjectionFixture{
+		proj:      (&carto.Equirectangular{Radius: earthRadius, StandardParallels: 36}).To,
+		pxWide:    int(math.Round(720 * cos36)),
+		pxHigh:    360, // TODO: Resize to match pixel budget.
+		worldMask: fullWorldMask,
+		mapMask: rectangle(
+			xy(-0.5*earthCircum*cos36, +0.25*earthCircum),
+			xy(+0.5*earthCircum*cos36, -0.25*earthCircum),
+		),
+	}
+	f.build(t, "testdata/marinus.png")
+}
+
+func TestDrawMapWebMercator(t *testing.T) {
+	f := &worldProjectionFixture{
+		proj:      carto.NewWebMercator(0).To,
+		pxWide:    512,
+		pxHigh:    512,
+		worldMask: fullWorldMask,
+		mapMask:   rectangle(xy(0, 0), xy(1, 1)),
+		mapCenter: xy(0.5, 0.5),
+		mapFlipY:  true,
+	}
+	f.build(t, "testdata/web_mercator.png")
+}
+
+func TestDrawMapLambertCylindricalEqualArea(t *testing.T) {
+	f := &worldProjectionFixture{
+		proj:      carto.NewLambertCylindricalEqualArea(earthRadius, 0).To,
+		pxWide:    902, // h*pi
+		pxHigh:    287, // h
+		worldMask: fullWorldMask,
+		mapMask: rectangle(
+			xy(-0.5*earthCircum, +0.25*earthCircum),
+			xy(+0.5*earthCircum, -0.25*earthCircum),
+		),
+	}
+	f.build(t, "testdata/lambert_cylindrical_equal_area.png")
+}
+
+func TestDrawMapSinusoidal(t *testing.T) {
+	var lhs, rhs []float64
+	for lat := -90.0; lat <= 90; lat++ {
+		lhs = append(lhs,
+			-0.5*earthCircum*math.Cos(lat*pi/180),
+			lat/90*0.25*earthCircum,
+		)
+		rhs = append(rhs,
+			+0.5*earthCircum*math.Cos(lat*pi/180),
+			-lat/90*0.25*earthCircum,
+		)
+	}
+	all := append(lhs, rhs...)
+	mapMask := geom.NewPolygonXY(all)
+
+	f := &worldProjectionFixture{
+		proj:      carto.NewSinusoidal(earthRadius, 0).To,
+		pxWide:    720, // TODO: Adjust to account for missing area.
+		pxHigh:    360,
+		worldMask: fullWorldMask,
+		mapMask:   mapMask,
+	}
+	f.build(t, "testdata/sinusoidal.png")
 }
 
 type worldProjectionFixture struct {
@@ -47,6 +118,8 @@ type worldProjectionFixture struct {
 	pxHigh    int
 	worldMask geom.Polygon // Parts of the world (in lon/lat) to include.
 	mapMask   geom.Polygon // Parts of the map (in projected coordinates) to include.
+	mapCenter geom.XY      // The point of the map (in projected coordinates) to display in the center of the image.
+	mapFlipY  bool         // True iff the map coordinates increase from top to bottom.
 }
 
 func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
@@ -91,35 +164,41 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 	mapUnitsPerPixel := f.mapMask.Envelope().Width() / float64(f.pxWide)
 
 	imgDims := geom.XY{X: float64(f.pxWide), Y: float64(f.pxHigh)}
-	lonLatToImg := func(lonLat geom.XY) geom.XY {
-		// Project from lon/lat to map coordinates:
-		xy := f.proj(lonLat)
-
-		// Transform from map coordinates to image coordinates:
-		imgCoords := xy.Scale(1 / mapUnitsPerPixel).Add(imgDims.Scale(0.5))
-		imgCoords.Y = imgDims.Y - imgCoords.Y
+	mapCoordsToImgCoords := func(mapCoords geom.XY) geom.XY {
+		imgCoords := mapCoords.
+			Sub(f.mapCenter).
+			Scale(1 / mapUnitsPerPixel).
+			Add(imgDims.Scale(0.5))
+		if !f.mapFlipY {
+			imgCoords.Y = imgDims.Y - imgCoords.Y
+		}
 		return imgCoords
+	}
+	lonLatToImgCoords := func(lonLat geom.XY) geom.XY {
+		mapCoords := f.proj(lonLat)
+		return mapCoordsToImgCoords(mapCoords)
 	}
 
 	for _, g := range []*geom.Geometry{&land, &lakes, &glaciers, &iceshelves} {
-		*g = g.TransformXY(lonLatToImg)
+		*g = g.TransformXY(lonLatToImgCoords)
 	}
 	for i := range lines {
-		lines[i] = lines[i].TransformXY(lonLatToImg)
+		lines[i] = lines[i].TransformXY(lonLatToImgCoords)
 	}
 
 	rast := rasterize.NewRasterizer(f.pxWide, f.pxHigh)
 
 	mapMaskImage := image.NewAlpha(image.Rect(0, 0, f.pxWide, f.pxHigh))
 	rast.Reset()
-	rast.Polygon(f.mapMask)
+	mapMaskInImgCoords := f.mapMask.TransformXY(mapCoordsToImgCoords)
+	rast.Polygon(mapMaskInImgCoords)
 	rast.Draw(mapMaskImage, mapMaskImage.Bounds(), image.NewUniform(color.Opaque), image.Point{})
 
 	img := image.NewRGBA(image.Rect(0, 0, f.pxWide, f.pxHigh))
 	draw.DrawMask(img, img.Bounds(), image.NewUniform(waterColor), image.Point{}, mapMaskImage, image.Point{}, draw.Src)
 
 	rast.Reset()
-	mapOutline := f.mapMask.Boundary()
+	mapOutline := mapMaskInImgCoords.Boundary()
 	rast.MultiLineString(mapOutline)
 	rast.Draw(img, img.Bounds(), image.NewUniform(color.Black), image.Point{})
 
@@ -157,90 +236,6 @@ func TestWorldProjections(t *testing.T) {
 		earthRadius = 6371000
 		earthCircum = 2 * pi * earthRadius
 	)
-	for i, tc := range []struct {
-		name     string
-		proj     func(geom.XY) geom.XY
-		pxWide   int
-		pxHigh   int
-		tlXY     geom.XY
-		brXY     geom.XY
-		mask     geom.Polygon
-		filename string
-	}{
-		{
-			name:     "plate carree",
-			proj:     func(pt geom.XY) geom.XY { return pt },
-			pxWide:   720,
-			pxHigh:   360,
-			tlXY:     geom.XY{X: -180, Y: +90},
-			brXY:     geom.XY{X: +180, Y: -90},
-			filename: "plate_carree.png",
-		},
-		{
-			name:     "web mercator",
-			proj:     carto.NewWebMercator(0).To,
-			pxWide:   512,
-			pxHigh:   512,
-			tlXY:     geom.XY{},
-			brXY:     geom.XY{X: 1, Y: 1},
-			filename: "web_mercator.png",
-		},
-		{
-			name:     "lambert cylindrical equal area",
-			proj:     carto.NewLambertCylindricalEqualArea(1, 0).To,
-			pxWide:   902, // h*pi
-			pxHigh:   287, // h
-			tlXY:     geom.XY{X: -pi, Y: +1.0},
-			brXY:     geom.XY{X: +pi, Y: -1.0},
-			filename: "lambert_cylindrical_equal_area.png",
-		},
-		{
-			name:     "sinusoidal",
-			proj:     carto.NewSinusoidal(earthRadius, 0).To,
-			pxWide:   720,
-			pxHigh:   360,
-			tlXY:     geom.XY{X: -0.5 * earthCircum, Y: +0.25 * earthCircum},
-			brXY:     geom.XY{X: +0.5 * earthCircum, Y: -0.25 * earthCircum},
-			filename: "sinusoidal.png",
-			mask: func() geom.Polygon {
-				// TODO: Consider a programmatic "mask" image instead.
-				var lhs, rhs []float64
-				for i := 0; i <= 360; i++ {
-					lhs = append(lhs, 360+math.Sin(float64(i)*pi/360)*360, float64(i))
-					rhs = append(rhs, 360-math.Sin(float64(i)*pi/360)*360, 360-float64(i))
-				}
-				all := append(lhs, rhs...)
-				seq := geom.NewSequence(all, geom.DimXY)
-				ring := geom.NewLineString(seq)
-				poly := geom.NewPolygon([]geom.LineString{ring})
-				return poly
-			}(),
-		},
-		{
-			name:     "equirectangular",
-			proj:     (&carto.Equirectangular{Radius: earthRadius}).To,
-			pxWide:   720,
-			pxHigh:   360,
-			tlXY:     geom.XY{X: -0.5 * earthCircum, Y: +0.25 * earthCircum},
-			brXY:     geom.XY{X: +0.5 * earthCircum, Y: -0.25 * earthCircum},
-			filename: "equirectangular.png",
-		},
-		{
-			name:     "marinus",
-			proj:     (&carto.Equirectangular{Radius: earthRadius, StandardParallels: 36}).To,
-			pxWide:   int(math.Round(720 * math.Cos(36*pi/180))),
-			pxHigh:   360,
-			tlXY:     geom.XY{X: -0.5 * earthCircum * math.Cos(36*pi/180), Y: +0.25 * earthCircum},
-			brXY:     geom.XY{X: +0.5 * earthCircum * math.Cos(36*pi/180), Y: -0.25 * earthCircum},
-			filename: "marinus.png",
-		},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			path := filepath.Join("./testdata", fmt.Sprintf("%d_%s", i, tc.filename))
-			worldMask := geom.NewSingleRingPolygonXY(-180, 90, 180, 90, 180, -90, -180, -90, -180, 90)
-			writeProjectedWorld(t, path, tc.proj, tc.pxWide, tc.pxHigh, tc.tlXY, tc.brXY, tc.mask, worldMask)
-		})
-	}
 
 	t.Run("orthographic from south pole", func(t *testing.T) {
 		worldMask := geom.NewSingleRingPolygonXY(-180, 0, 180, 0, 180, -90, -180, -90, -180, 0)
@@ -535,3 +530,7 @@ func rectangle(tl, br geom.XY) geom.Polygon {
 }
 
 const pi = math.Pi
+
+func xy(x, y float64) geom.XY {
+	return geom.XY{X: x, Y: y}
+}
