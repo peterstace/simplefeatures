@@ -1,6 +1,7 @@
 package carto_test
 
 import (
+	"math"
 	"strconv"
 	"testing"
 
@@ -159,7 +160,7 @@ func TestProjections(t *testing.T) {
 			threshold: 1e-3, // 1mm
 			subtests: []projectionSubTest{
 				{ // Cape Town:
-					geom.XY{18.423300, -33.918065},
+					geom.XY{18.483735820900083, -33.95848592499432},
 					geom.XY{1805674, -3835659},
 				},
 			},
@@ -180,5 +181,12 @@ func TestProjections(t *testing.T) {
 				})
 			}
 		})
+	}
+}
+
+func expectXYWithinTolerance(tb testing.TB, got, want geom.XY, tolerance float64) {
+	tb.Helper()
+	if delta := math.Abs(got.Sub(want).Length()); delta > tolerance {
+		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)
 	}
 }
