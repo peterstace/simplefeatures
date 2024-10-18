@@ -132,6 +132,38 @@ func TestProjections(t *testing.T) {
 				geom.XY{-480973.8495682527, 4.0178747161028227e+06},
 			}},
 		},
+		{
+			name: "Azimuthal Equidistant - North Pole",
+			proj: &carto.AzimuthalEquidistant{
+				Radius:       carto.WGS84EllipsoidMeanRadiusM,
+				OriginLonLat: geom.XY{0, 90},
+			},
+			threshold: 1e-3, // 1mm
+			subtests: []projectionSubTest{
+				{ // Hamburg:
+					geom.XY{9.988519873740467, 53.434757149649016},
+					geom.XY{705229.5, -4004246.7},
+				},
+				{ // Port Moresby:
+					geom.XY{147.1827863021232, -9.36844599194037},
+					geom.XY{5988277, 9285859},
+				},
+			},
+		},
+		{
+			name: "Azimuthal Equidistant - Africa",
+			proj: &carto.AzimuthalEquidistant{
+				Radius:       carto.WGS84EllipsoidMeanRadiusM,
+				OriginLonLat: geom.XY{0, 0},
+			},
+			threshold: 1e-3, // 1mm
+			subtests: []projectionSubTest{
+				{ // Cape Town:
+					geom.XY{18.423300, -33.918065},
+					geom.XY{1805674, -3835659},
+				},
+			},
+		},
 	} {
 		t.Run(pc.name, func(t *testing.T) {
 			for i, st := range pc.subtests {

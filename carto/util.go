@@ -1,6 +1,10 @@
 package carto
 
-import "math"
+import (
+	"math"
+
+	"github.com/peterstace/simplefeatures/geom"
+)
 
 func dtor(d float64) float64 {
 	return d * π / 180
@@ -16,11 +20,18 @@ const (
 
 // TODO: Make these funcs rather than vars.
 var (
-	tan  = math.Tan
-	ln   = math.Log
-	sin  = math.Sin
-	cos  = math.Cos
-	atan = math.Atan
-	asin = math.Asin
-	exp  = math.Exp
+	sqrt  = math.Sqrt
+	tan   = math.Tan
+	ln    = math.Log
+	sin   = math.Sin
+	cos   = math.Cos
+	atan  = math.Atan
+	atan2 = math.Atan2
+	asin  = math.Asin
+	acos  = math.Acos
+	exp   = math.Exp
 )
+
+func xy(x, y float64) geom.XY {
+	return geom.XY{X: x, Y: y}
+}

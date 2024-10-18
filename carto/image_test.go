@@ -174,6 +174,31 @@ func TestDrawMapOrthographicNorthAmerica(t *testing.T) {
 	f.build(t, "testdata/orthographic_north_america.png")
 }
 
+func TestDrawMapAzimuthalEquidistant(t *testing.T) {
+	f := &worldProjectionFixture{
+		proj:   (&carto.AzimuthalEquidistant{earthRadius, geom.XY{0, 90}}).To,
+		pxWide: 512,
+		pxHigh: 512,
+		worldMask: geom.NewSingleRingPolygonXY(
+			// Don't include the south pole, since it's a line in the projection.
+			-180, 90, +180, 90, +180, -89.99, -180, -89.99, -180, 90,
+		),
+		mapMask: circle(xy(0, 0), earthCircum/2),
+	}
+	f.build(t, "testdata/azimuthal_equidistant.png")
+}
+
+func TestDrawMapAzimuthalEquidistantSydney(t *testing.T) {
+	f := &worldProjectionFixture{
+		proj:      (&carto.AzimuthalEquidistant{earthRadius, geom.XY{151, -34}}).To,
+		pxWide:    512,
+		pxHigh:    512,
+		worldMask: fullWorldMask,
+		mapMask:   circle(xy(0, 0), earthCircum/2),
+	}
+	f.build(t, "testdata/azimuthal_equidistant_sydney.png")
+}
+
 type worldProjectionFixture struct {
 	proj      func(geom.XY) geom.XY // Convert lon/lat to projected coordinates.
 	pxWide    int
@@ -204,14 +229,14 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 	}
 
 	var lines []geom.LineString
-	for lon := -180; lon <= 180; lon += 30 {
-		line := geom.NewLineString(geom.NewSequence([]float64{float64(lon), -90, float64(lon), +90}, geom.DimXY))
-		line = line.Densify(1)
+	for lon := -180.0; lon < 180; lon += 30 {
+		line := geom.NewLineStringXY(lon, -90, lon, +90)
+		line = line.Densify(0.1)
 		lines = append(lines, line)
 	}
-	for lat := -90; lat <= 90; lat += 30 {
-		line := geom.NewLineString(geom.NewSequence([]float64{-180, float64(lat), +180, float64(lat)}, geom.DimXY))
-		line = line.Densify(1)
+	for lat := -60.0; lat <= 60; lat += 30 {
+		line := geom.NewLineStringXY(-180, lat, +180, lat)
+		line = line.Densify(0.1)
 		lines = append(lines, line)
 	}
 
@@ -259,11 +284,6 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 	img := image.NewRGBA(image.Rect(0, 0, f.pxWide, f.pxHigh))
 	draw.DrawMask(img, img.Bounds(), image.NewUniform(waterColor), image.Point{}, mapMaskImage, image.Point{}, draw.Src)
 
-	rast.Reset()
-	mapOutline := mapMaskInImgCoords.Boundary()
-	rast.MultiLineString(mapOutline)
-	rast.Draw(img, img.Bounds(), image.NewUniform(color.Black), image.Point{})
-
 	rasterisePolygons := func(g geom.Geometry) {
 		for _, p := range extractPolygonalParts(g) {
 			rast.Polygon(p)
@@ -283,11 +303,16 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 	rasterisePolygons(iceshelves)
 	rast.Draw(img, img.Bounds(), image.NewUniform(iceColor), image.Point{})
 
-	rast.Reset()
 	for _, line := range lines {
+		rast.Reset()
 		rast.LineString(line)
+		rast.Draw(img, img.Bounds(), image.NewUniform(color.Gray{Y: 0xb0}), image.Point{})
 	}
-	rast.Draw(img, img.Bounds(), image.NewUniform(color.Gray{Y: 0x80}), image.Point{})
+
+	rast.Reset()
+	mapOutline := mapMaskInImgCoords.Boundary()
+	rast.MultiLineString(mapOutline)
+	rast.Draw(img, img.Bounds(), image.NewUniform(color.Black), image.Point{})
 
 	err := os.WriteFile(outputPath, imageToPNG(t, img), 0644)
 	expectNoErr(t, err)
