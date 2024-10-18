@@ -18,13 +18,8 @@ import (
 	"github.com/peterstace/simplefeatures/internal/rasterize"
 )
 
-// TODO: Use a pixel budget of 720*360 for each map (as a global constant). We
-// don't need to specify the dimensions of each map in pixels, since we can
-// calculate that from the budget and the aspect ratio of the map mask.  Should
-// take the area of the map mask into account, since for non-rectangular maps
-// we want them to be bigger.
-
 const (
+	budget      = 720 * 360
 	earthRadius = 6371000
 	earthCircum = 2 * pi * earthRadius
 	pi          = math.Pi
@@ -45,8 +40,6 @@ func xy(x, y float64) geom.XY {
 func TestDrawMapEquirectangularPlateCaree(t *testing.T) {
 	f := &worldProjectionFixture{
 		proj:      (&carto.Equirectangular{Radius: earthRadius}).To,
-		pxWide:    720,
-		pxHigh:    360,
 		worldMask: fullWorldMask,
 		mapMask: rectangle(
 			xy(-0.5*earthCircum, +0.25*earthCircum),
@@ -60,8 +53,6 @@ func TestDrawMapEquirectangularMarinus(t *testing.T) {
 	cos36 := math.Cos(36 * pi / 180)
 	f := &worldProjectionFixture{
 		proj:      (&carto.Equirectangular{Radius: earthRadius, StandardParallels: 36}).To,
-		pxWide:    int(math.Sqrt(720*360/2/cos36) * 2 * cos36),
-		pxHigh:    int(math.Sqrt(720 * 360 / 2 / cos36)),
 		worldMask: fullWorldMask,
 		mapMask: rectangle(
 			xy(-0.5*earthCircum*cos36, +0.25*earthCircum),
@@ -74,8 +65,6 @@ func TestDrawMapEquirectangularMarinus(t *testing.T) {
 func TestDrawMapWebMercator(t *testing.T) {
 	f := &worldProjectionFixture{
 		proj:      carto.NewWebMercator(0).To,
-		pxWide:    512,
-		pxHigh:    512,
 		worldMask: fullWorldMask,
 		mapMask:   rectangle(xy(0, 0), xy(1, 1)),
 		mapCenter: xy(0.5, 0.5),
@@ -87,12 +76,10 @@ func TestDrawMapWebMercator(t *testing.T) {
 func TestDrawMapLambertCylindricalEqualArea(t *testing.T) {
 	f := &worldProjectionFixture{
 		proj:      carto.NewLambertCylindricalEqualArea(earthRadius, 0).To,
-		pxWide:    902, // h*pi
-		pxHigh:    287, // h
 		worldMask: fullWorldMask,
 		mapMask: rectangle(
-			xy(-0.5*earthCircum, +0.25*earthCircum),
-			xy(+0.5*earthCircum, -0.25*earthCircum),
+			xy(-0.5*earthCircum, +0.25*earthCircum*2/pi),
+			xy(+0.5*earthCircum, -0.25*earthCircum*2/pi),
 		),
 	}
 	f.build(t, "testdata/lambert_cylindrical_equal_area.png")
@@ -115,8 +102,6 @@ func TestDrawMapSinusoidal(t *testing.T) {
 
 	f := &worldProjectionFixture{
 		proj:      carto.NewSinusoidal(earthRadius, 0).To,
-		pxWide:    int(720 / sqrt2 * pi / 2),
-		pxHigh:    int(360 / sqrt2 * pi / 2),
 		worldMask: fullWorldMask,
 		mapMask:   mapMask,
 	}
@@ -126,8 +111,6 @@ func TestDrawMapSinusoidal(t *testing.T) {
 func TestDrawMapOrthographicSouthPole(t *testing.T) {
 	f := &worldProjectionFixture{
 		proj:      carto.NewOrthographic(earthRadius, geom.XY{X: 135, Y: -90}).To,
-		pxWide:    512,
-		pxHigh:    512,
 		worldMask: geom.NewSingleRingPolygonXY(-180, 0, 180, 0, 180, -90, -180, -90, -180, 0),
 		mapMask:   circle(xy(0, 0), earthRadius),
 	}
@@ -137,8 +120,6 @@ func TestDrawMapOrthographicSouthPole(t *testing.T) {
 func TestDrawMapOrthographicNorthPole(t *testing.T) {
 	f := &worldProjectionFixture{
 		proj:      carto.NewOrthographic(earthRadius, geom.XY{X: 15, Y: 90}).To,
-		pxWide:    512,
-		pxHigh:    512,
 		worldMask: geom.NewSingleRingPolygonXY(-180, 0, 180, 0, 180, 90, -180, 90, -180, 0),
 		mapMask:   circle(xy(0, 0), earthRadius),
 	}
@@ -166,8 +147,6 @@ func TestDrawMapOrthographicNorthAmerica(t *testing.T) {
 
 	f := &worldProjectionFixture{
 		proj:      carto.NewOrthographic(earthRadius, geom.XY{X: centralMeridian, Y: 45}).To,
-		pxWide:    512,
-		pxHigh:    512,
 		worldMask: worldMask,
 		mapMask:   circle(xy(0, 0), earthRadius),
 	}
@@ -176,9 +155,7 @@ func TestDrawMapOrthographicNorthAmerica(t *testing.T) {
 
 func TestDrawMapAzimuthalEquidistant(t *testing.T) {
 	f := &worldProjectionFixture{
-		proj:   (&carto.AzimuthalEquidistant{earthRadius, geom.XY{0, 90}}).To,
-		pxWide: 512,
-		pxHigh: 512,
+		proj: (&carto.AzimuthalEquidistant{Radius: earthRadius, OriginLonLat: geom.XY{X: 0, Y: 90}}).To,
 		worldMask: geom.NewSingleRingPolygonXY(
 			// Don't include the south pole, since it's a line in the projection.
 			-180, 90, +180, 90, +180, -89.99, -180, -89.99, -180, 90,
@@ -190,9 +167,7 @@ func TestDrawMapAzimuthalEquidistant(t *testing.T) {
 
 func TestDrawMapAzimuthalEquidistantSydney(t *testing.T) {
 	f := &worldProjectionFixture{
-		proj:      (&carto.AzimuthalEquidistant{earthRadius, geom.XY{151, -34}}).To,
-		pxWide:    512,
-		pxHigh:    512,
+		proj:      (&carto.AzimuthalEquidistant{Radius: earthRadius, OriginLonLat: geom.XY{X: 151, Y: -34}}).To,
 		worldMask: fullWorldMask,
 		mapMask:   circle(xy(0, 0), earthCircum/2),
 	}
@@ -201,12 +176,10 @@ func TestDrawMapAzimuthalEquidistantSydney(t *testing.T) {
 
 type worldProjectionFixture struct {
 	proj      func(geom.XY) geom.XY // Convert lon/lat to projected coordinates.
-	pxWide    int
-	pxHigh    int
-	worldMask geom.Polygon // Parts of the world (in lon/lat) to include.
-	mapMask   geom.Polygon // Parts of the map (in projected coordinates) to include.
-	mapCenter geom.XY      // The point of the map (in projected coordinates) to display in the center of the image.
-	mapFlipY  bool         // True iff the map coordinates increase from top to bottom.
+	worldMask geom.Polygon          // Parts of the world (in lon/lat) to include.
+	mapMask   geom.Polygon          // Parts of the map (in projected coordinates) to include.
+	mapCenter geom.XY               // The point of the map (in projected coordinates) to display in the center of the image.
+	mapFlipY  bool                  // True iff the map coordinates increase from top to bottom.
 }
 
 func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
@@ -248,9 +221,15 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 	}
 	lines = clippedLines
 
-	mapUnitsPerPixel := f.mapMask.Envelope().Width() / float64(f.pxWide)
+	mapMaskEnv := f.mapMask.Envelope()
+	mapMaskRatio := mapMaskEnv.Width() / mapMaskEnv.Height()
+	fullnessFactor := f.mapMask.Area() / mapMaskEnv.Area()
+	pxHigh := int(math.Round(math.Sqrt(budget / mapMaskRatio / fullnessFactor)))
+	pxWide := int(math.Round(float64(pxHigh) * mapMaskRatio))
 
-	imgDims := geom.XY{X: float64(f.pxWide), Y: float64(f.pxHigh)}
+	mapUnitsPerPixel := f.mapMask.Envelope().Width() / float64(pxWide)
+
+	imgDims := geom.XY{X: float64(pxWide), Y: float64(pxHigh)}
 	mapCoordsToImgCoords := func(mapCoords geom.XY) geom.XY {
 		imgCoords := mapCoords.
 			Sub(f.mapCenter).
@@ -273,15 +252,15 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 		lines[i] = lines[i].TransformXY(lonLatToImgCoords)
 	}
 
-	rast := rasterize.NewRasterizer(f.pxWide, f.pxHigh)
+	rast := rasterize.NewRasterizer(pxWide, pxHigh)
 
-	mapMaskImage := image.NewAlpha(image.Rect(0, 0, f.pxWide, f.pxHigh))
+	mapMaskImage := image.NewAlpha(image.Rect(0, 0, pxWide, pxHigh))
 	rast.Reset()
 	mapMaskInImgCoords := f.mapMask.TransformXY(mapCoordsToImgCoords)
 	rast.Polygon(mapMaskInImgCoords)
 	rast.Draw(mapMaskImage, mapMaskImage.Bounds(), image.NewUniform(color.Opaque), image.Point{})
 
-	img := image.NewRGBA(image.Rect(0, 0, f.pxWide, f.pxHigh))
+	img := image.NewRGBA(image.Rect(0, 0, pxWide, pxHigh))
 	draw.DrawMask(img, img.Bounds(), image.NewUniform(waterColor), image.Point{}, mapMaskImage, image.Point{}, draw.Src)
 
 	rasterisePolygons := func(g geom.Geometry) {
