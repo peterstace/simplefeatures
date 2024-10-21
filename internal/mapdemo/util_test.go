@@ -10,3 +10,10 @@ func expectNoErr(tb testing.TB, err error) {
 		tb.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func expectTrue(tb testing.TB, b bool) {
+	tb.Helper()
+	if !b {
+		tb.Fatalf("expected true, got false")
+	}
+}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -67,7 +68,6 @@ func TestDrawMapWebMercator(t *testing.T) {
 		proj:      carto.NewWebMercator(0).To,
 		worldMask: fullWorldMask,
 		mapMask:   rectangle(xy(0, 0), xy(1, 1)),
-		mapCenter: xy(0.5, 0.5),
 		mapFlipY:  true,
 	}
 	f.build(t, "testdata/web_mercator.png")
@@ -175,26 +175,60 @@ func TestDrawMapAzimuthalEquidistantSydney(t *testing.T) {
 }
 
 func TestDrawEquidistantConic(t *testing.T) {
-	p := carto.NewEquidistantConic(earthRadius)
-	p.SetStandardParallels(15, 45)
-	p.SetOrigin(geom.XY{0, 0})
-	const scale = 0.605 // TODO: what is this number really?
-	f := &worldProjectionFixture{
-		proj:      p.To,
-		worldMask: fullWorldMask,
-		mapMask: rectangle( // TODO: work out the real mask
-			xy(-scale*earthCircum, +scale*earthCircum),
-			xy(+scale*earthCircum, -scale*earthCircum),
-		),
+	for _, tc := range []struct {
+		name                       string
+		stdParallel1, stdParallel2 float64
+		originLonLat               geom.XY
+	}{
+		{
+			name:         "europe",
+			stdParallel1: 37,
+			stdParallel2: 57,
+			originLonLat: geom.XY{X: 13, Y: 47},
+		},
+		{
+			name:         "australia",
+			stdParallel1: -15,
+			stdParallel2: -35,
+			originLonLat: geom.XY{X: 132, Y: 25},
+		},
+		{
+			name:         "usa",
+			stdParallel1: 29,
+			stdParallel2: 46,
+			originLonLat: geom.XY{X: -97, Y: 37.5},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p := carto.NewEquidistantConic(earthRadius)
+			p.SetStandardParallels(tc.stdParallel1, tc.stdParallel2)
+			p.SetOrigin(tc.originLonLat)
+
+			const eps = 0.1
+			mapMask := geom.NewSingleRingPolygonXY(
+				-180+eps, -90+eps,
+				-180+eps, +90-eps,
+				+180-eps, +90-eps,
+				+180-eps, -90+eps,
+				-180+eps, -90+eps,
+			)
+			mapMask = mapMask.Densify(0.1)
+			mapMask = mapMask.TransformXY(p.To)
+
+			f := &worldProjectionFixture{
+				proj:      p.To,
+				worldMask: fullWorldMask,
+				mapMask:   mapMask,
+			}
+			f.build(t, fmt.Sprintf("testdata/equidistant_conic_%s.png", tc.name))
+		})
 	}
-	f.build(t, "testdata/equidistant_conic.png")
 }
 
 type worldProjectionFixture struct {
 	proj      func(geom.XY) geom.XY // Convert lon/lat to projected coordinates.
 	worldMask geom.Polygon          // Parts of the world (in lon/lat) to include.
 	mapMask   geom.Polygon          // Parts of the map (in projected coordinates) to include.
-	mapCenter geom.XY               // The point of the map (in projected coordinates) to display in the center of the image.
 	mapFlipY  bool                  // True iff the map coordinates increase from top to bottom.
 }
 
@@ -242,13 +276,15 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 	fullnessFactor := f.mapMask.Area() / mapMaskEnv.Area()
 	pxHigh := int(math.Round(math.Sqrt(budget / mapMaskRatio / fullnessFactor)))
 	pxWide := int(math.Round(float64(pxHigh) * mapMaskRatio))
+	mapMaskCenter, ok := mapMaskEnv.Center().XY()
+	expectTrue(t, ok)
 
 	mapUnitsPerPixel := f.mapMask.Envelope().Width() / float64(pxWide)
 
 	imgDims := geom.XY{X: float64(pxWide), Y: float64(pxHigh)}
 	mapCoordsToImgCoords := func(mapCoords geom.XY) geom.XY {
 		imgCoords := mapCoords.
-			Sub(f.mapCenter).
+			Sub(mapMaskCenter).
 			Scale(1 / mapUnitsPerPixel).
 			Add(imgDims.Scale(0.5))
 		if !f.mapFlipY {
