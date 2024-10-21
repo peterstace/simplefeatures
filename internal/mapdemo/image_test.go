@@ -174,6 +174,22 @@ func TestDrawMapAzimuthalEquidistantSydney(t *testing.T) {
 	f.build(t, "testdata/azimuthal_equidistant_sydney.png")
 }
 
+func TestDrawEquidistantConic(t *testing.T) {
+	p := carto.NewEquidistantConic(earthRadius)
+	p.SetStandardParallels(15, 45)
+	p.SetOrigin(geom.XY{0, 0})
+	const scale = 0.605 // TODO: what is this number really?
+	f := &worldProjectionFixture{
+		proj:      p.To,
+		worldMask: fullWorldMask,
+		mapMask: rectangle( // TODO: work out the real mask
+			xy(-scale*earthCircum, +scale*earthCircum),
+			xy(+scale*earthCircum, -scale*earthCircum),
+		),
+	}
+	f.build(t, "testdata/equidistant_conic.png")
+}
+
 type worldProjectionFixture struct {
 	proj      func(geom.XY) geom.XY // Convert lon/lat to projected coordinates.
 	worldMask geom.Polygon          // Parts of the world (in lon/lat) to include.
