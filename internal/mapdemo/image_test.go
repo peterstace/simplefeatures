@@ -231,6 +231,63 @@ func TestDrawEquidistantConic(t *testing.T) {
 	}
 }
 
+func TestDrawLambertConformalConfig(t *testing.T) {
+	for _, tc := range []struct {
+		name                       string
+		stdParallel1, stdParallel2 float64
+		originLonLat               geom.XY
+	}{
+		{
+			name:         "europe",
+			stdParallel1: 37,
+			stdParallel2: 57,
+			originLonLat: geom.XY{X: 15, Y: 47},
+		},
+		//{
+		//	name:         "australia",
+		//	stdParallel1: -15,
+		//	stdParallel2: -35,
+		//	originLonLat: geom.XY{X: 135, Y: 25},
+		//},
+		//{
+		//	name:         "usa",
+		//	stdParallel1: 29,
+		//	stdParallel2: 46,
+		//	originLonLat: geom.XY{X: -105, Y: 37.5},
+		//},
+		//{
+		//	name:         "south_america",
+		//	stdParallel1: -42,
+		//	stdParallel2: -5,
+		//	originLonLat: geom.XY{X: -60, Y: 32},
+		//},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p := carto.NewLambertConformalConic(earthRadius)
+			p.SetOrigin(tc.originLonLat)
+			p.SetStandardParallels(tc.stdParallel1, tc.stdParallel2)
+
+			const eps = 0.1
+			mapMask := geom.NewSingleRingPolygonXY(
+				-180+eps, 0,
+				-180+eps, +90-eps,
+				+180-eps, +90-eps,
+				+180-eps, 0,
+				-180+eps, 0,
+			)
+			mapMask = mapMask.Densify(0.1)
+			mapMask = mapMask.TransformXY(p.To)
+
+			f := &worldProjectionFixture{
+				proj:      p.To,
+				worldMask: fullWorldMask,
+				mapMask:   mapMask,
+			}
+			f.build(t, fmt.Sprintf("testdata/lambert_conformal_conic_%s.png", tc.name))
+		})
+	}
+}
+
 type worldProjectionFixture struct {
 	proj      func(geom.XY) geom.XY // Convert lon/lat to projected coordinates.
 	worldMask geom.Polygon          // Parts of the world (in lon/lat) to include.

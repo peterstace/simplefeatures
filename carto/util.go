@@ -30,6 +30,7 @@ var (
 	asin  = math.Asin
 	acos  = math.Acos
 	exp   = math.Exp
+	pow   = math.Pow
 )
 
 func xy(x, y float64) geom.XY {
@@ -38,4 +39,12 @@ func xy(x, y float64) geom.XY {
 
 func sign(x float64) float64 {
 	return math.Copysign(1, x)
+}
+
+func sec(x float64) float64 {
+	return 1 / cos(x)
+}
+
+func cot(x float64) float64 {
+	return 1 / tan(x)
 }
