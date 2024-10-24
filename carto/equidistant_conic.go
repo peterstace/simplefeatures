@@ -55,9 +55,43 @@ func (c *EquidistantConic) To(lonlat geom.XY) geom.XY {
 		n  = (cos(φ1r) - cos(φ2r)) / (φ2r - φ1r)
 		G  = cos(φ1r)/n + φ1r
 		ρ0 = G - φ0r
-		ρ  = G - φr
-		x  = ρ * sin(n*(λr-λ0r))
-		y  = ρ0 - ρ*cos(n*(λr-λ0r))
+
+		ρ = G - φr
+		x = ρ * sin(n*(λr-λ0r))
+		y = ρ0 - ρ*cos(n*(λr-λ0r))
 	)
 	return geom.XY{X: R * x, Y: R * y}
+}
+
+func (c *EquidistantConic) From(xy geom.XY) geom.XY {
+	var (
+		R = c.earthRadius
+
+		x = xy.X / R
+		y = xy.Y / R
+
+		φ0d = c.origin.Y
+		φ1d = c.stdParallels[0]
+		φ2d = c.stdParallels[1]
+
+		λ0d = c.origin.X
+		λ0r = dtor(λ0d)
+
+		φ0r = dtor(φ0d)
+		φ1r = dtor(φ1d)
+		φ2r = dtor(φ2d)
+	)
+	var (
+		n  = (cos(φ1r) - cos(φ2r)) / (φ2r - φ1r)
+		G  = cos(φ1r)/n + φ1r
+		ρ0 = G - φ0r
+
+		ρ = sign(n) * sqrt(x*x+(ρ0-y)*(ρ0-y))
+
+		θ = atan(x / (ρ0 - y))
+
+		φr = G - ρ
+		λr = λ0r + θ/n
+	)
+	return geom.XY{X: rtod(λr), Y: rtod(φr)}
 }

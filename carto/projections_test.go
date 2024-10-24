@@ -165,6 +165,46 @@ func TestProjections(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Equidistant Conic - South America",
+			proj: func() projection {
+				p := carto.NewEquidistantConic(
+					carto.WGS84EllipsoidMeanRadiusM,
+				)
+				p.SetOrigin(geom.XY{X: -60, Y: -32})
+				p.SetStandardParallels(-5, -42)
+				return p
+			}(),
+			threshold: 1e-3, // 1mm
+			subtests: []projectionSubTest{
+				{ // Rio de Janeiro:
+					geom.XY{X: -43.2, Y: -22.8},
+					geom.XY{1629961.7759447654, 929251.645477184},
+				},
+				{ // Baltimore:
+					geom.XY{X: -76.6, Y: 39.3},
+					geom.XY{X: -2392910.752006106, Y: 7792228.9404544085},
+				},
+			},
+		},
+		{
+			name: "Equidistant Conic - North Asia",
+			proj: func() projection {
+				p := carto.NewEquidistantConic(
+					carto.WGS84EllipsoidMeanRadiusM,
+				)
+				p.SetOrigin(geom.XY{X: 95, Y: 30})
+				p.SetStandardParallels(15, 65)
+				return p
+			}(),
+			threshold: 1e-3, // 1mm
+			subtests: []projectionSubTest{
+				{ // Beijing:
+					geom.XY{X: 116.44497408510593, Y: 39.890737551498475},
+					geom.XY{X: 1643407.6, Y: 1292149.5},
+				},
+			},
+		},
 	} {
 		t.Run(pc.name, func(t *testing.T) {
 			for i, st := range pc.subtests {

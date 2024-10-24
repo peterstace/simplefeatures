@@ -35,3 +35,7 @@ var (
 func xy(x, y float64) geom.XY {
 	return geom.XY{X: x, Y: y}
 }
+
+func sign(x float64) float64 {
+	return math.Copysign(1, x)
+}

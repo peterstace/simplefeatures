@@ -184,19 +184,25 @@ func TestDrawEquidistantConic(t *testing.T) {
 			name:         "europe",
 			stdParallel1: 37,
 			stdParallel2: 57,
-			originLonLat: geom.XY{X: 13, Y: 47},
+			originLonLat: geom.XY{X: 15, Y: 47},
 		},
 		{
 			name:         "australia",
 			stdParallel1: -15,
 			stdParallel2: -35,
-			originLonLat: geom.XY{X: 132, Y: 25},
+			originLonLat: geom.XY{X: 135, Y: 25},
 		},
 		{
 			name:         "usa",
 			stdParallel1: 29,
 			stdParallel2: 46,
-			originLonLat: geom.XY{X: -97, Y: 37.5},
+			originLonLat: geom.XY{X: -105, Y: 37.5},
+		},
+		{
+			name:         "south_america",
+			stdParallel1: -42,
+			stdParallel2: -5,
+			originLonLat: geom.XY{X: -60, Y: 32},
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
