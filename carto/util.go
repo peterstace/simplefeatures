@@ -48,3 +48,7 @@ func sec(x float64) float64 {
 func cot(x float64) float64 {
 	return 1 / tan(x)
 }
+
+func sq(x float64) float64 {
+	return x * x
+}

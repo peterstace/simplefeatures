@@ -47,3 +47,29 @@ func (c *LambertConformalConic) To(lonlat geom.XY) geom.XY {
 	)
 	return xy(x, y)
 }
+
+func (c *LambertConformalConic) From(xy geom.XY) geom.XY {
+	var (
+		R  = c.radius
+		x  = xy.X
+		y  = xy.Y
+		φ0 = dtor(c.origin.Y)
+		λ0 = dtor(c.origin.X)
+		φ1 = dtor(c.stdParallels[0])
+		φ2 = dtor(c.stdParallels[1])
+	)
+	var (
+		n  = ln(cos(φ1)*sec(φ2)) / ln(tan(π/4+φ2/2)*cot(π/4+φ1/2))
+		F  = cos(φ1) * pow(tan(π/4+φ1/2), n) / n
+		ρ0 = R * F * pow(cot(π/4+φ0/2), n)
+	)
+	var (
+		ρ = sign(n) * sqrt(sq(x)+sq(ρ0-y))
+		θ = atan(x / (ρ0 - y))
+	)
+	var (
+		φ = 2*atan(pow(R*F/ρ, 1/n)) - π/2
+		λ = λ0 + θ/n
+	)
+	return geom.XY{X: rtod(λ), Y: rtod(φ)}
+}

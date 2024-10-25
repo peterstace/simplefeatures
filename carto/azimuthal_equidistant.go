@@ -47,5 +47,5 @@ func (a *AzimuthalEquidistant) From(xy geom.XY) geom.XY {
 	)
 	λd := rtod(λr)
 	φd := rtod(φr)
-	return geom.XY{λd, φd}
+	return geom.XY{X: λd, Y: φd}
 }

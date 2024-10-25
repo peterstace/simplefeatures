@@ -205,6 +205,28 @@ func TestProjections(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Lambert Conformal Conic - Canada",
+			proj: func() projection {
+				p := carto.NewLambertConformalConic(
+					carto.WGS84EllipsoidMeanRadiusM,
+				)
+				p.SetOrigin(geom.XY{X: -96, Y: 40})
+				p.SetStandardParallels(50, 70)
+				return p
+			}(),
+			threshold: 1e-3, // 1mm
+			subtests: []projectionSubTest{
+				{ // Toronto:
+					geom.XY{X: -79.3832, Y: 43.6532},
+					geom.XY{X: 1353292.7229285287, Y: 590902.0666354574},
+				},
+				{ // Vancouver:
+					geom.XY{X: -123.1216, Y: 49.2827},
+					geom.XY{X: -1916086.3118012992, Y: 1453088.303860319},
+				},
+			},
+		},
 	} {
 		t.Run(pc.name, func(t *testing.T) {
 			for i, st := range pc.subtests {
