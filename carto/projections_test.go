@@ -227,6 +227,28 @@ func TestProjections(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Albers Equal Area Conic - Australia",
+			proj: func() projection {
+				p := carto.NewAlbersEqualAreaConic(
+					carto.WGS84EllipsoidMeanRadiusM,
+				)
+				p.SetOrigin(geom.XY{X: 132, Y: 0})
+				p.SetStandardParallels(-18, -36)
+				return p
+			}(),
+			threshold: 1e-3, // 1mm
+			subtests: []projectionSubTest{
+				{ // Sydney:
+					geom.XY{151.2146821, -33.8574973},
+					geom.XY{1757815.279206157, -3843578.921069043},
+				},
+				{ // Perth:
+					geom.XY{115.5397172, -31.9949202},
+					geom.XY{-1534150.6162269458, -3601473.816874394},
+				},
+			},
+		},
 	} {
 		t.Run(pc.name, func(t *testing.T) {
 			for i, st := range pc.subtests {

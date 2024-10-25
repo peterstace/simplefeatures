@@ -289,6 +289,52 @@ func TestDrawLambertConformalConfig(t *testing.T) {
 	}
 }
 
+func TestDrawAlbersEqualAreaConic(t *testing.T) {
+	for _, tc := range []struct {
+		name         string
+		origin       geom.XY
+		stdParallels [2]float64
+	}{
+		{
+			name:         "20N50N",
+			origin:       geom.XY{X: 0, Y: 0},
+			stdParallels: [2]float64{20, 50},
+		},
+		{
+			name:         "Alaska",
+			origin:       geom.XY{X: -154, Y: 50},
+			stdParallels: [2]float64{65, 55},
+		},
+		{
+			name:         "Australia",
+			origin:       geom.XY{X: 132, Y: 0},
+			stdParallels: [2]float64{-18, -36},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p := carto.NewAlbersEqualAreaConic(earthRadius)
+			p.SetOrigin(tc.origin)
+			p.SetStandardParallels(tc.stdParallels[0], tc.stdParallels[1])
+
+			worldMask := geom.NewSingleRingPolygonXY(
+				-180, -90,
+				-180, +90,
+				+180, +90,
+				+180, -90,
+				-180, -90,
+			)
+			mapMask := worldMask.Densify(0.1).TransformXY(p.To)
+
+			f := &worldProjectionFixture{
+				proj:      p.To,
+				worldMask: worldMask,
+				mapMask:   mapMask,
+			}
+			f.build(t, fmt.Sprintf("testdata/albers_equal_area_conic_%s.png", tc.name))
+		})
+	}
+}
+
 type worldProjectionFixture struct {
 	proj      func(geom.XY) geom.XY // Convert lon/lat to projected coordinates.
 	worldMask geom.Polygon          // Parts of the world (in lon/lat) to include.
