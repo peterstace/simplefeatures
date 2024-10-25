@@ -104,6 +104,7 @@ func TestDrawMapSinusoidal(t *testing.T) {
 		proj:      carto.NewSinusoidal(earthRadius, 0).To,
 		worldMask: fullWorldMask,
 		mapMask:   mapMask,
+		paddingPx: 2,
 	}
 	f.build(t, "testdata/sinusoidal.png")
 }
@@ -113,6 +114,7 @@ func TestDrawMapOrthographicSouthPole(t *testing.T) {
 		proj:      carto.NewOrthographic(earthRadius, geom.XY{X: 135, Y: -90}).To,
 		worldMask: geom.NewSingleRingPolygonXY(-180, 0, 180, 0, 180, -90, -180, -90, -180, 0),
 		mapMask:   circle(xy(0, 0), earthRadius),
+		paddingPx: 2,
 	}
 	f.build(t, "testdata/orthographic_south_pole.png")
 }
@@ -122,6 +124,7 @@ func TestDrawMapOrthographicNorthPole(t *testing.T) {
 		proj:      carto.NewOrthographic(earthRadius, geom.XY{X: 15, Y: 90}).To,
 		worldMask: geom.NewSingleRingPolygonXY(-180, 0, 180, 0, 180, 90, -180, 90, -180, 0),
 		mapMask:   circle(xy(0, 0), earthRadius),
+		paddingPx: 2,
 	}
 	f.build(t, "testdata/orthographic_north_pole.png")
 }
@@ -149,6 +152,7 @@ func TestDrawMapOrthographicNorthAmerica(t *testing.T) {
 		proj:      carto.NewOrthographic(earthRadius, geom.XY{X: centralMeridian, Y: 45}).To,
 		worldMask: worldMask,
 		mapMask:   circle(xy(0, 0), earthRadius),
+		paddingPx: 2,
 	}
 	f.build(t, "testdata/orthographic_north_america.png")
 }
@@ -160,7 +164,8 @@ func TestDrawMapAzimuthalEquidistant(t *testing.T) {
 			// Don't include the south pole, since it's a line in the projection.
 			-180, 90, +180, 90, +180, -89.99, -180, -89.99, -180, 90,
 		),
-		mapMask: circle(xy(0, 0), earthCircum/2),
+		mapMask:   circle(xy(0, 0), earthCircum/2),
+		paddingPx: 2,
 	}
 	f.build(t, "testdata/azimuthal_equidistant.png")
 }
@@ -170,6 +175,7 @@ func TestDrawMapAzimuthalEquidistantSydney(t *testing.T) {
 		proj:      (&carto.AzimuthalEquidistant{Radius: earthRadius, OriginLonLat: geom.XY{X: 151, Y: -34}}).To,
 		worldMask: fullWorldMask,
 		mapMask:   circle(xy(0, 0), earthCircum/2),
+		paddingPx: 2,
 	}
 	f.build(t, "testdata/azimuthal_equidistant_sydney.png")
 }
@@ -180,6 +186,12 @@ func TestDrawEquidistantConic(t *testing.T) {
 		stdParallel1, stdParallel2 float64
 		originLonLat               geom.XY
 	}{
+		{
+			name:         "blog",
+			stdParallel1: 30,
+			stdParallel2: 60,
+			originLonLat: geom.XY{X: 0, Y: 0},
+		},
 		{
 			name:         "europe",
 			stdParallel1: 37,
@@ -222,16 +234,18 @@ func TestDrawEquidistantConic(t *testing.T) {
 			mapMask = mapMask.TransformXY(p.To)
 
 			f := &worldProjectionFixture{
-				proj:      p.To,
-				worldMask: fullWorldMask,
-				mapMask:   mapMask,
+				proj:         p.To,
+				worldMask:    fullWorldMask,
+				mapMask:      mapMask,
+				stdParallels: [2]float64{tc.stdParallel1, tc.stdParallel2},
+				paddingPx:    2,
 			}
 			f.build(t, fmt.Sprintf("testdata/equidistant_conic_%s.png", tc.name))
 		})
 	}
 }
 
-func TestDrawLambertConformalConfig(t *testing.T) {
+func TestDrawLambertConformalConic(t *testing.T) {
 	for _, tc := range []struct {
 		name                       string
 		stdParallel1, stdParallel2 float64
@@ -239,6 +253,14 @@ func TestDrawLambertConformalConfig(t *testing.T) {
 		minLat                     float64
 		maxLat                     float64
 	}{
+		{
+			name:         "blog",
+			stdParallel1: 30,
+			stdParallel2: 60,
+			originLonLat: geom.XY{X: 0, Y: 0},
+			minLat:       -45,
+			maxLat:       90,
+		},
 		{
 			name:         "wikipedia",
 			stdParallel1: 20,
@@ -280,9 +302,11 @@ func TestDrawLambertConformalConfig(t *testing.T) {
 			mapMask := worldMask.Densify(0.1).TransformXY(p.To)
 
 			f := &worldProjectionFixture{
-				proj:      p.To,
-				worldMask: worldMask,
-				mapMask:   mapMask,
+				proj:         p.To,
+				worldMask:    worldMask,
+				mapMask:      mapMask,
+				stdParallels: [2]float64{tc.stdParallel1, tc.stdParallel2},
+				paddingPx:    2,
 			}
 			f.build(t, fmt.Sprintf("testdata/lambert_conformal_conic_%s.png", tc.name))
 		})
@@ -295,6 +319,11 @@ func TestDrawAlbersEqualAreaConic(t *testing.T) {
 		origin       geom.XY
 		stdParallels [2]float64
 	}{
+		{
+			name:         "blog",
+			origin:       geom.XY{X: 0, Y: 0},
+			stdParallels: [2]float64{30, 60},
+		},
 		{
 			name:         "20N50N",
 			origin:       geom.XY{X: 0, Y: 0},
@@ -326,9 +355,11 @@ func TestDrawAlbersEqualAreaConic(t *testing.T) {
 			mapMask := worldMask.Densify(0.1).TransformXY(p.To)
 
 			f := &worldProjectionFixture{
-				proj:      p.To,
-				worldMask: worldMask,
-				mapMask:   mapMask,
+				proj:         p.To,
+				worldMask:    worldMask,
+				mapMask:      mapMask,
+				stdParallels: tc.stdParallels,
+				paddingPx:    2,
 			}
 			f.build(t, fmt.Sprintf("testdata/albers_equal_area_conic_%s.png", tc.name))
 		})
@@ -336,10 +367,12 @@ func TestDrawAlbersEqualAreaConic(t *testing.T) {
 }
 
 type worldProjectionFixture struct {
-	proj      func(geom.XY) geom.XY // Convert lon/lat to projected coordinates.
-	worldMask geom.Polygon          // Parts of the world (in lon/lat) to include.
-	mapMask   geom.Polygon          // Parts of the map (in projected coordinates) to include.
-	mapFlipY  bool                  // True iff the map coordinates increase from top to bottom.
+	proj         func(geom.XY) geom.XY // Convert lon/lat to projected coordinates.
+	worldMask    geom.Polygon          // Parts of the world (in lon/lat) to include.
+	mapMask      geom.Polygon          // Parts of the map (in projected coordinates) to include.
+	mapFlipY     bool                  // True iff the map coordinates increase from top to bottom.
+	stdParallels [2]float64
+	paddingPx    int
 }
 
 func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
@@ -381,6 +414,18 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 	}
 	lines = clippedLines
 
+	var redLines []geom.LineString
+	for i := range f.stdParallels {
+		if f.stdParallels[i] == 0 {
+			continue
+		}
+		line := geom.NewLineStringXY(-180, f.stdParallels[i], +180, f.stdParallels[i])
+		line = line.Densify(0.1)
+		clipped, err := geom.Intersection(line.AsGeometry(), f.worldMask.AsGeometry())
+		expectNoErr(t, err)
+		redLines = append(redLines, extractLinearParts(clipped)...)
+	}
+
 	mapMaskEnv := f.mapMask.Envelope()
 	mapMaskRatio := mapMaskEnv.Width() / mapMaskEnv.Height()
 	fullnessFactor := f.mapMask.Area() / mapMaskEnv.Area()
@@ -400,6 +445,10 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 		if !f.mapFlipY {
 			imgCoords.Y = imgDims.Y - imgCoords.Y
 		}
+		imgCoords = imgCoords.Add(geom.XY{
+			X: float64(f.paddingPx),
+			Y: float64(f.paddingPx),
+		})
 		return imgCoords
 	}
 	lonLatToImgCoords := func(lonLat geom.XY) geom.XY {
@@ -413,16 +462,20 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 	for i := range lines {
 		lines[i] = lines[i].TransformXY(lonLatToImgCoords)
 	}
+	for i := range redLines {
+		redLines[i] = redLines[i].TransformXY(lonLatToImgCoords)
+	}
 
-	rast := rasterize.NewRasterizer(pxWide, pxHigh)
+	imgRect := image.Rect(0, 0, pxWide+2*f.paddingPx, pxHigh+2*f.paddingPx)
+	rast := rasterize.NewRasterizer(imgRect.Dx(), imgRect.Dy())
 
-	mapMaskImage := image.NewAlpha(image.Rect(0, 0, pxWide, pxHigh))
+	mapMaskImage := image.NewAlpha(imgRect)
 	rast.Reset()
 	mapMaskInImgCoords := f.mapMask.TransformXY(mapCoordsToImgCoords)
 	rast.Polygon(mapMaskInImgCoords)
 	rast.Draw(mapMaskImage, mapMaskImage.Bounds(), image.NewUniform(color.Opaque), image.Point{})
 
-	img := image.NewRGBA(image.Rect(0, 0, pxWide, pxHigh))
+	img := image.NewRGBA(imgRect)
 	draw.DrawMask(img, img.Bounds(), image.NewUniform(waterColor), image.Point{}, mapMaskImage, image.Point{}, draw.Src)
 
 	rasterisePolygons := func(g geom.Geometry) {
@@ -448,6 +501,12 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 		rast.Reset()
 		rast.LineString(line)
 		rast.Draw(img, img.Bounds(), image.NewUniform(color.Gray{Y: 0xb0}), image.Point{})
+	}
+
+	for _, line := range redLines {
+		rast.Reset()
+		rast.LineString(line)
+		rast.Draw(img, img.Bounds(), image.NewUniform(color.RGBA{R: 0xff, G: 0, B: 0, A: 0xff}), image.Point{})
 	}
 
 	rast.Reset()
