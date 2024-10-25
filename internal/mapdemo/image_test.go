@@ -236,51 +236,52 @@ func TestDrawLambertConformalConfig(t *testing.T) {
 		name                       string
 		stdParallel1, stdParallel2 float64
 		originLonLat               geom.XY
+		minLat                     float64
+		maxLat                     float64
 	}{
 		{
-			name:         "europe",
-			stdParallel1: 37,
-			stdParallel2: 57,
-			originLonLat: geom.XY{X: 15, Y: 47},
+			name:         "wikipedia",
+			stdParallel1: 20,
+			stdParallel2: 50,
+			originLonLat: geom.XY{},
+			minLat:       -30,
+			maxLat:       90,
 		},
-		//{
-		//	name:         "australia",
-		//	stdParallel1: -15,
-		//	stdParallel2: -35,
-		//	originLonLat: geom.XY{X: 135, Y: 25},
-		//},
-		//{
-		//	name:         "usa",
-		//	stdParallel1: 29,
-		//	stdParallel2: 46,
-		//	originLonLat: geom.XY{X: -105, Y: 37.5},
-		//},
-		//{
-		//	name:         "south_america",
-		//	stdParallel1: -42,
-		//	stdParallel2: -5,
-		//	originLonLat: geom.XY{X: -60, Y: 32},
-		//},
+		{
+			name:         "europe",
+			stdParallel1: 43,
+			stdParallel2: 63,
+			originLonLat: geom.XY{X: 30, Y: 30},
+			minLat:       34,
+			maxLat:       90,
+		},
+		{
+			name:         "south_america",
+			stdParallel1: -42,
+			stdParallel2: -5,
+			originLonLat: geom.XY{X: -60, Y: 32},
+			minLat:       -90,
+			maxLat:       15,
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			p := carto.NewLambertConformalConic(earthRadius)
 			p.SetOrigin(tc.originLonLat)
 			p.SetStandardParallels(tc.stdParallel1, tc.stdParallel2)
 
-			const eps = 0.1
-			mapMask := geom.NewSingleRingPolygonXY(
-				-180+eps, 0,
-				-180+eps, +90-eps,
-				+180-eps, +90-eps,
-				+180-eps, 0,
-				-180+eps, 0,
+			worldMask := geom.NewSingleRingPolygonXY(
+				-180, tc.minLat,
+				-180, tc.maxLat,
+				+180, tc.maxLat,
+				+180, tc.minLat,
+				-180, tc.minLat,
 			)
-			mapMask = mapMask.Densify(0.1)
-			mapMask = mapMask.TransformXY(p.To)
+
+			mapMask := worldMask.Densify(0.1).TransformXY(p.To)
 
 			f := &worldProjectionFixture{
 				proj:      p.To,
-				worldMask: fullWorldMask,
+				worldMask: worldMask,
 				mapMask:   mapMask,
 			}
 			f.build(t, fmt.Sprintf("testdata/lambert_conformal_conic_%s.png", tc.name))

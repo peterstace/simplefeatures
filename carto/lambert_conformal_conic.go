@@ -38,8 +38,8 @@ func (c *LambertConformalConic) To(lonlat geom.XY) geom.XY {
 	var (
 		n  = ln(cos(φ1)*sec(φ2)) / ln(tan(π/4+φ2/2)*cot(π/4+φ1/2))
 		F  = cos(φ1) * pow(tan(π/4+φ1/2), n) / n
-		ρ  = R * F / pow(cot(π/4+φ/2), n)
-		ρ0 = R * F / pow(cot(π/4+φ0/2), n)
+		ρ  = R * F * pow(cot(π/4+φ/2), n)
+		ρ0 = R * F * pow(cot(π/4+φ0/2), n)
 	)
 	var (
 		x = ρ * sin(n*(λ-λ0))
