@@ -79,7 +79,7 @@ func TestProjections(t *testing.T) {
 		{
 			name: "LambertCylindricalEqual",
 			proj: carto.NewLambertCylindricalEqualArea(
-				carto.WGS84EllipsoidMeanRadiusM, 0,
+				carto.WGS84EllipsoidMeanRadiusM,
 			),
 			threshold: 1e-3, // 1mm
 			subtests: []projectionSubTest{{
@@ -88,8 +88,12 @@ func TestProjections(t *testing.T) {
 			}},
 		},
 		{
-			name:      "LambertCylindricalEqualAtSydney",
-			proj:      carto.NewLambertCylindricalEqualArea(carto.WGS84EllipsoidMeanRadiusM, 151),
+			name: "LambertCylindricalEqualAtSydney",
+			proj: func() projection {
+				p := carto.NewLambertCylindricalEqualArea(carto.WGS84EllipsoidMeanRadiusM)
+				p.SetCentralMeridian(151)
+				return p
+			}(),
 			threshold: 1e-3, // 1mm
 			subtests: []projectionSubTest{{
 				geom.XY{151, -34},
@@ -115,8 +119,10 @@ func TestProjections(t *testing.T) {
 			}},
 		},
 		{
-			name:      "Equirectangular - Plate Carree",
-			proj:      &carto.Equirectangular{Radius: carto.WGS84EllipsoidMeanRadiusM},
+			name: "Equirectangular - Plate Carree",
+			proj: func() projection {
+				return carto.NewEquirectangular(carto.WGS84EllipsoidMeanRadiusM)
+			}(),
 			threshold: 1e-3, // 1mm
 			subtests: []projectionSubTest{{
 				geom.XY{151, -34},
@@ -124,8 +130,12 @@ func TestProjections(t *testing.T) {
 			}},
 		},
 		{
-			name:      "Equirectangular - Marinus of Tyre",
-			proj:      &carto.Equirectangular{Radius: carto.WGS84EllipsoidMeanRadiusM, StandardParallels: 36},
+			name: "Equirectangular - Marinus of Tyre",
+			proj: func() projection {
+				p := carto.NewEquirectangular(carto.WGS84EllipsoidMeanRadiusM)
+				p.SetStandardParallels(36)
+				return p
+			}(),
 			threshold: 1e-3, // 1mm
 			subtests: []projectionSubTest{{
 				// Gibraltar, ~480km west of 0 degrees and at ~36 degrees latitude.

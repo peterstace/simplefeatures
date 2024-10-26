@@ -3,44 +3,44 @@ package carto
 import "github.com/peterstace/simplefeatures/geom"
 
 type LambertCylindricalEqualArea struct {
-	radius     float64
-	centralLon float64
+	radius float64
+	λ0     float64
 }
 
-func NewLambertCylindricalEqualArea(radius, centralLon float64) *LambertCylindricalEqualArea {
-	return &LambertCylindricalEqualArea{radius, centralLon}
+func NewLambertCylindricalEqualArea(radius float64) *LambertCylindricalEqualArea {
+	return &LambertCylindricalEqualArea{
+		radius: radius,
+		λ0:     0,
+	}
+}
+
+func (c *LambertCylindricalEqualArea) SetCentralMeridian(lon float64) {
+	c.λ0 = dtor(lon)
 }
 
 func (c *LambertCylindricalEqualArea) To(lonLat geom.XY) geom.XY {
 	var (
-		R   = c.radius
-		λd  = lonLat.X
-		λ0d = c.centralLon
-		φd  = lonLat.Y
-		λr  = dtor(λd)
-		λ0r = dtor(λ0d)
-		φr  = dtor(φd)
+		R  = c.radius
+		λ  = dtor(lonLat.X)
+		λ0 = c.λ0
+		φ  = dtor(lonLat.Y)
 	)
-	var (
-		x = R * (λr - λ0r)
-		y = R * sin(φr)
-	)
-	return geom.XY{X: x, Y: y}
+	return geom.XY{
+		X: R * (λ - λ0),
+		Y: R * sin(φ),
+	}
 }
 
 func (c *LambertCylindricalEqualArea) From(xy geom.XY) geom.XY {
 	var (
-		R   = c.radius
-		λ0d = c.centralLon
-		λ0r = dtor(λ0d)
-		x   = xy.X
-		y   = xy.Y
+		R  = c.radius
+		x  = xy.X
+		y  = xy.Y
+		λ0 = c.λ0
 	)
 	var (
-		λr = x/R + λ0r
-		φr = asin(y / R)
-		λd = rtod(λr)
-		φd = rtod(φr)
+		λ = x/R + λ0
+		φ = asin(y / R)
 	)
-	return geom.XY{X: λd, Y: φd}
+	return rtodxy(λ, φ)
 }

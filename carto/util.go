@@ -14,6 +14,10 @@ func rtod(r float64) float64 {
 	return r * 180 / π
 }
 
+func rtodxy(λ, φ float64) geom.XY {
+	return geom.XY{X: rtod(λ), Y: rtod(φ)}
+}
+
 const (
 	π = math.Pi
 )

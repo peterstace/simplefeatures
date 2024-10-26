@@ -3,45 +3,53 @@ package carto
 import "github.com/peterstace/simplefeatures/geom"
 
 type Equirectangular struct {
-	CentralMeridian   float64
-	StandardParallels float64
-	Radius            float64
+	λ0     float64
+	cosφ1  float64
+	radius float64
+}
+
+func NewEquirectangular(earthRadius float64) *Equirectangular {
+	return &Equirectangular{
+		λ0:     0,
+		cosφ1:  1, // φ1 = 0 (equator)
+		radius: earthRadius,
+	}
+}
+
+func (e *Equirectangular) SetCentralMeridian(lon float64) {
+	e.λ0 = dtor(lon)
+}
+
+func (e *Equirectangular) SetStandardParallels(lat float64) {
+	φ1 := dtor(lat)
+	e.cosφ1 = cos(φ1)
 }
 
 func (e *Equirectangular) To(lonLat geom.XY) geom.XY {
 	var (
-		λd  = lonLat.X
-		φd  = lonLat.Y
-		λ0d = e.CentralMeridian
-		φ1d = e.StandardParallels
-		R   = e.Radius
-		λr  = dtor(λd)
-		φr  = dtor(φd)
-		λ0r = dtor(λ0d)
-		φ1r = dtor(φ1d)
+		R     = e.radius
+		λ     = dtor(lonLat.X)
+		φ     = dtor(lonLat.Y)
+		λ0    = e.λ0
+		cosφ1 = e.cosφ1
 	)
-	var (
-		x = R * (λr - λ0r) * cos(φ1r)
-		y = R * φr
-	)
-	return geom.XY{X: x, Y: y}
+	return geom.XY{
+		X: R * (λ - λ0) * cosφ1,
+		Y: R * φ,
+	}
 }
 
 func (e *Equirectangular) From(xy geom.XY) geom.XY {
 	var (
-		x   = xy.X
-		y   = xy.Y
-		λ0d = e.CentralMeridian
-		φ1d = e.StandardParallels
-		R   = e.Radius
-		λ0r = dtor(λ0d)
-		φ1r = dtor(φ1d)
+		R     = e.radius
+		x     = xy.X
+		y     = xy.Y
+		λ0    = e.λ0
+		cosφ1 = e.cosφ1
 	)
 	var (
-		λr = x/(R*cos(φ1r)) + λ0r
-		φr = y / R
-		λd = rtod(λr)
-		φd = rtod(φr)
+		λ = x/(R*cosφ1) + λ0
+		φ = y / R
 	)
-	return geom.XY{X: λd, Y: φd}
+	return rtodxy(λ, φ)
 }

@@ -40,7 +40,7 @@ func xy(x, y float64) geom.XY {
 
 func TestDrawMapEquirectangularPlateCaree(t *testing.T) {
 	f := &worldProjectionFixture{
-		proj:      (&carto.Equirectangular{Radius: earthRadius}).To,
+		proj:      carto.NewEquirectangular(earthRadius).To,
 		worldMask: fullWorldMask,
 		mapMask: rectangle(
 			xy(-0.5*earthCircum, +0.25*earthCircum),
@@ -51,9 +51,11 @@ func TestDrawMapEquirectangularPlateCaree(t *testing.T) {
 }
 
 func TestDrawMapEquirectangularMarinus(t *testing.T) {
+	p := carto.NewEquirectangular(earthRadius)
+	p.SetStandardParallels(36)
 	cos36 := math.Cos(36 * pi / 180)
 	f := &worldProjectionFixture{
-		proj:      (&carto.Equirectangular{Radius: earthRadius, StandardParallels: 36}).To,
+		proj:      p.To,
 		worldMask: fullWorldMask,
 		mapMask: rectangle(
 			xy(-0.5*earthCircum*cos36, +0.25*earthCircum),
@@ -75,7 +77,7 @@ func TestDrawMapWebMercator(t *testing.T) {
 
 func TestDrawMapLambertCylindricalEqualArea(t *testing.T) {
 	f := &worldProjectionFixture{
-		proj:      carto.NewLambertCylindricalEqualArea(earthRadius, 0).To,
+		proj:      carto.NewLambertCylindricalEqualArea(earthRadius).To,
 		worldMask: fullWorldMask,
 		mapMask: rectangle(
 			xy(-0.5*earthCircum, +0.25*earthCircum*2/pi),
