@@ -54,10 +54,13 @@ func TestProjections(t *testing.T) {
 		},
 		{
 			name: "OrthographicAtSydney",
-			proj: carto.NewOrthographic(
-				carto.WGS84EllipsoidMeanRadiusM,
-				geom.XY{151, -34},
-			),
+			proj: func() projection {
+				p := carto.NewOrthographic(
+					carto.WGS84EllipsoidMeanRadiusM,
+				)
+				p.SetOrigin(geom.XY{151, -34})
+				return p
+			}(),
 			threshold: 1e-3, // 1mm
 			subtests: []projectionSubTest{
 				{
@@ -102,7 +105,7 @@ func TestProjections(t *testing.T) {
 		},
 		{
 			name:      "Sinusoidal",
-			proj:      carto.NewSinusoidal(carto.WGS84EllipsoidMeanRadiusM, 0),
+			proj:      carto.NewSinusoidal(carto.WGS84EllipsoidMeanRadiusM),
 			threshold: 1e-3, // 1mm
 			subtests: []projectionSubTest{{
 				geom.XY{151, -34},
@@ -110,8 +113,12 @@ func TestProjections(t *testing.T) {
 			}},
 		},
 		{
-			name:      "SinusoidalAtSydney",
-			proj:      carto.NewSinusoidal(carto.WGS84EllipsoidMeanRadiusM, 151),
+			name: "SinusoidalAtSydney",
+			proj: func() projection {
+				p := carto.NewSinusoidal(carto.WGS84EllipsoidMeanRadiusM)
+				p.SetCentralMeridian(151)
+				return p
+			}(),
 			threshold: 1e-3, // 1mm
 			subtests: []projectionSubTest{{
 				geom.XY{151, -34},

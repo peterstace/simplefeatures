@@ -3,44 +3,44 @@ package carto
 import "github.com/peterstace/simplefeatures/geom"
 
 type Sinusoidal struct {
-	radius          float64
-	centralMeridian float64
+	radius float64
+	λ0     float64
 }
 
-func NewSinusoidal(radius, centralMeridian float64) *Sinusoidal {
-	return &Sinusoidal{radius, centralMeridian}
+func NewSinusoidal(radius float64) *Sinusoidal {
+	return &Sinusoidal{
+		radius: radius,
+		λ0:     0,
+	}
+}
+
+func (c *Sinusoidal) SetCentralMeridian(lon float64) {
+	c.λ0 = dtor(lon)
 }
 
 func (c *Sinusoidal) To(lonLat geom.XY) geom.XY {
 	var (
-		R   = c.radius
-		λd  = lonLat.X
-		λ0d = c.centralMeridian
-		φd  = lonLat.Y
-		λr  = dtor(λd)
-		λ0r = dtor(λ0d)
-		φr  = dtor(φd)
+		R  = c.radius
+		λ0 = c.λ0
+		λ  = dtor(lonLat.X)
+		φ  = dtor(lonLat.Y)
 	)
-	var (
-		x = R * cos(φr) * (λr - λ0r)
-		y = R * φr
-	)
-	return geom.XY{X: x, Y: y}
+	return geom.XY{
+		X: R * cos(φ) * (λ - λ0),
+		Y: R * φ,
+	}
 }
 
 func (c *Sinusoidal) From(xy geom.XY) geom.XY {
 	var (
-		R   = c.radius
-		λ0d = c.centralMeridian
-		λ0r = dtor(λ0d)
-		x   = xy.X
-		y   = xy.Y
+		R  = c.radius
+		λ0 = c.λ0
+		x  = xy.X
+		y  = xy.Y
 	)
 	var (
-		λr = x/(R*cos(y/R)) + λ0r
-		φr = y / R
-		λd = rtod(λr)
-		φd = rtod(φr)
+		λ = x/(R*cos(y/R)) + λ0
+		φ = y / R
 	)
-	return geom.XY{X: λd, Y: φd}
+	return rtodxy(λ, φ)
 }

@@ -103,7 +103,7 @@ func TestDrawMapSinusoidal(t *testing.T) {
 	mapMask := geom.NewPolygonXY(all)
 
 	f := &worldProjectionFixture{
-		proj:      carto.NewSinusoidal(earthRadius, 0).To,
+		proj:      carto.NewSinusoidal(earthRadius).To,
 		worldMask: fullWorldMask,
 		mapMask:   mapMask,
 		paddingPx: 2,
@@ -112,8 +112,10 @@ func TestDrawMapSinusoidal(t *testing.T) {
 }
 
 func TestDrawMapOrthographicSouthPole(t *testing.T) {
+	proj := carto.NewOrthographic(earthRadius)
+	proj.SetOrigin(geom.XY{X: 135, Y: -90})
 	f := &worldProjectionFixture{
-		proj:      carto.NewOrthographic(earthRadius, geom.XY{X: 135, Y: -90}).To,
+		proj:      proj.To,
 		worldMask: geom.NewSingleRingPolygonXY(-180, 0, 180, 0, 180, -90, -180, -90, -180, 0),
 		mapMask:   circle(xy(0, 0), earthRadius),
 		paddingPx: 2,
@@ -122,8 +124,10 @@ func TestDrawMapOrthographicSouthPole(t *testing.T) {
 }
 
 func TestDrawMapOrthographicNorthPole(t *testing.T) {
+	proj := carto.NewOrthographic(earthRadius)
+	proj.SetOrigin(geom.XY{X: 15, Y: 90})
 	f := &worldProjectionFixture{
-		proj:      carto.NewOrthographic(earthRadius, geom.XY{X: 15, Y: 90}).To,
+		proj:      proj.To,
 		worldMask: geom.NewSingleRingPolygonXY(-180, 0, 180, 0, 180, 90, -180, 90, -180, 0),
 		mapMask:   circle(xy(0, 0), earthRadius),
 		paddingPx: 2,
@@ -150,8 +154,11 @@ func TestDrawMapOrthographicNorthAmerica(t *testing.T) {
 	)
 	worldMask := geom.NewPolygonXY(worldMaskCoords)
 
+	proj := carto.NewOrthographic(earthRadius)
+	proj.SetOrigin(geom.XY{X: centralMeridian, Y: 45})
+
 	f := &worldProjectionFixture{
-		proj:      carto.NewOrthographic(earthRadius, geom.XY{X: centralMeridian, Y: 45}).To,
+		proj:      proj.To,
 		worldMask: worldMask,
 		mapMask:   circle(xy(0, 0), earthRadius),
 		paddingPx: 2,
