@@ -5,18 +5,29 @@ import (
 )
 
 type AzimuthalEquidistant struct {
-	Radius       float64
-	OriginLonLat geom.XY
+	radius       float64
+	originLonLat geom.XY
+}
+
+func NewAzimuthalEquidistant(earthRadius float64) *AzimuthalEquidistant {
+	return &AzimuthalEquidistant{
+		radius:       earthRadius,
+		originLonLat: geom.XY{},
+	}
+}
+
+func (a *AzimuthalEquidistant) SetOrigin(origin geom.XY) {
+	a.originLonLat = origin
 }
 
 func (a *AzimuthalEquidistant) To(lonLat geom.XY) geom.XY {
-	R := a.Radius
+	R := a.radius
 	λd := lonLat.X
 	φd := lonLat.Y
 	λr := dtor(λd)
 	φr := dtor(φd)
-	λ0r := dtor(a.OriginLonLat.X)
-	φ0r := dtor(a.OriginLonLat.Y)
+	λ0r := dtor(a.originLonLat.X)
+	φ0r := dtor(a.originLonLat.Y)
 
 	// From https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection,
 	// with some slight algebraic rearrangement.
@@ -31,11 +42,11 @@ func (a *AzimuthalEquidistant) To(lonLat geom.XY) geom.XY {
 }
 
 func (a *AzimuthalEquidistant) From(xy geom.XY) geom.XY {
-	R := a.Radius
+	R := a.radius
 	x := xy.X
 	y := xy.Y
-	λ0r := dtor(a.OriginLonLat.X)
-	φ0r := dtor(a.OriginLonLat.Y)
+	λ0r := dtor(a.originLonLat.X)
+	φ0r := dtor(a.originLonLat.Y)
 
 	// From https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection,
 	// with some slight algebraic rearrangement.

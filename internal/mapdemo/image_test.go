@@ -167,8 +167,10 @@ func TestDrawMapOrthographicNorthAmerica(t *testing.T) {
 }
 
 func TestDrawMapAzimuthalEquidistant(t *testing.T) {
+	p := carto.NewAzimuthalEquidistant(earthRadius)
+	p.SetOrigin(geom.XY{X: 0, Y: 90})
 	f := &worldProjectionFixture{
-		proj: (&carto.AzimuthalEquidistant{Radius: earthRadius, OriginLonLat: geom.XY{X: 0, Y: 90}}).To,
+		proj: p.To,
 		worldMask: geom.NewSingleRingPolygonXY(
 			// Don't include the south pole, since it's a line in the projection.
 			-180, 90, +180, 90, +180, -89.99, -180, -89.99, -180, 90,
@@ -180,8 +182,10 @@ func TestDrawMapAzimuthalEquidistant(t *testing.T) {
 }
 
 func TestDrawMapAzimuthalEquidistantSydney(t *testing.T) {
+	p := carto.NewAzimuthalEquidistant(earthRadius)
+	p.SetOrigin(geom.XY{X: 151, Y: -34})
 	f := &worldProjectionFixture{
-		proj:      (&carto.AzimuthalEquidistant{Radius: earthRadius, OriginLonLat: geom.XY{X: 151, Y: -34}}).To,
+		proj:      p.To,
 		worldMask: fullWorldMask,
 		mapMask:   circle(xy(0, 0), earthCircum/2),
 		paddingPx: 2,

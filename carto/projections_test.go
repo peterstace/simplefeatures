@@ -152,10 +152,13 @@ func TestProjections(t *testing.T) {
 		},
 		{
 			name: "Azimuthal Equidistant - North Pole",
-			proj: &carto.AzimuthalEquidistant{
-				Radius:       carto.WGS84EllipsoidMeanRadiusM,
-				OriginLonLat: geom.XY{0, 90},
-			},
+			proj: func() projection {
+				p := carto.NewAzimuthalEquidistant(
+					carto.WGS84EllipsoidMeanRadiusM,
+				)
+				p.SetOrigin(geom.XY{0, 90})
+				return p
+			}(),
 			threshold: 1e-3, // 1mm
 			subtests: []projectionSubTest{
 				{ // Hamburg:
@@ -170,10 +173,13 @@ func TestProjections(t *testing.T) {
 		},
 		{
 			name: "Azimuthal Equidistant - Africa",
-			proj: &carto.AzimuthalEquidistant{
-				Radius:       carto.WGS84EllipsoidMeanRadiusM,
-				OriginLonLat: geom.XY{0, 0},
-			},
+			proj: func() projection {
+				p := carto.NewAzimuthalEquidistant(
+					carto.WGS84EllipsoidMeanRadiusM,
+				)
+				p.SetOrigin(geom.XY{0, 0})
+				return p
+			}(),
 			threshold: 1e-3, // 1mm
 			subtests: []projectionSubTest{
 				{ // Cape Town:
