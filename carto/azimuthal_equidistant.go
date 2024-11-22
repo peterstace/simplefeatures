@@ -8,7 +8,7 @@ import (
 // (x, y) pairs via the azimuthal equidistant projection.
 type AzimuthalEquidistant struct {
 	radius       float64
-	originLonLat geom.XY
+	centerLonLat geom.XY
 }
 
 // NewAzimuthalEquidistant returns a new AzimuthalEquidistant projection with
@@ -16,14 +16,15 @@ type AzimuthalEquidistant struct {
 func NewAzimuthalEquidistant(earthRadius float64) *AzimuthalEquidistant {
 	return &AzimuthalEquidistant{
 		radius:       earthRadius,
-		originLonLat: geom.XY{},
+		centerLonLat: geom.XY{},
 	}
 }
 
-// SetOrigin sets the origin of the projection to the given (longitude,
-// latitude) pair. The origin have projected coordinates (0, 0).
-func (a *AzimuthalEquidistant) SetOrigin(origin geom.XY) {
-	a.originLonLat = origin
+// SetCenterLonLat sets the center of the projection to the given (longitude,
+// latitude) pair. The center have projected coordinates (0, 0) and be the
+// center of the circular map.
+func (a *AzimuthalEquidistant) SetCenter(origin geom.XY) {
+	a.centerLonLat = origin
 }
 
 // Forward converts a (longitude, latitude) pair expressed in degrees to a
@@ -34,8 +35,8 @@ func (a *AzimuthalEquidistant) Forward(lonLat geom.XY) geom.XY {
 	φd := lonLat.Y
 	λr := dtor(λd)
 	φr := dtor(φd)
-	λ0r := dtor(a.originLonLat.X)
-	φ0r := dtor(a.originLonLat.Y)
+	λ0r := dtor(a.centerLonLat.X)
+	φ0r := dtor(a.centerLonLat.Y)
 
 	ρ := R * acos(sin(φ0r)*sin(φr)+cos(φ0r)*cos(φr)*cos(λr-λ0r))
 	θ := atan2(
@@ -54,8 +55,8 @@ func (a *AzimuthalEquidistant) Reverse(xy geom.XY) geom.XY {
 	R := a.radius
 	x := xy.X
 	y := xy.Y
-	λ0r := dtor(a.originLonLat.X)
-	φ0r := dtor(a.originLonLat.Y)
+	λ0r := dtor(a.centerLonLat.X)
+	φ0r := dtor(a.centerLonLat.Y)
 
 	ρ := sqrt(x*x + y*y)
 	φr := asin(cos(ρ/R)*sin(φ0r) + (y*sin(ρ/R)*cos(φ0r))/ρ)

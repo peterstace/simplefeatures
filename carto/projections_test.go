@@ -156,7 +156,7 @@ func TestProjections(t *testing.T) {
 				p := carto.NewAzimuthalEquidistant(
 					carto.WGS84EllipsoidMeanRadiusM,
 				)
-				p.SetOrigin(geom.XY{0, 90})
+				p.SetCenter(geom.XY{0, 90})
 				return p
 			}(),
 			threshold: 1e-3, // 1mm
@@ -177,7 +177,7 @@ func TestProjections(t *testing.T) {
 				p := carto.NewAzimuthalEquidistant(
 					carto.WGS84EllipsoidMeanRadiusM,
 				)
-				p.SetOrigin(geom.XY{0, 0})
+				p.SetCenter(geom.XY{0, 0})
 				return p
 			}(),
 			threshold: 1e-3, // 1mm
