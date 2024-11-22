@@ -29,16 +29,15 @@ func (a *AzimuthalEquidistant) To(lonLat geom.XY) geom.XY {
 	λ0r := dtor(a.originLonLat.X)
 	φ0r := dtor(a.originLonLat.Y)
 
-	// From https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection,
-	// with some slight algebraic rearrangement.
 	ρ := R * acos(sin(φ0r)*sin(φr)+cos(φ0r)*cos(φr)*cos(λr-λ0r))
 	θ := atan2(
 		cos(φr)*sin(λr-λ0r),
 		cos(φ0r)*sin(φr)-sin(φ0r)*cos(φr)*cos(λr-λ0r),
 	)
-	x := ρ * sin(θ)
-	y := ρ * cos(θ)
-	return xy(x, y)
+	return geom.XY{
+		X: ρ * sin(θ),
+		Y: ρ * cos(θ),
+	}
 }
 
 func (a *AzimuthalEquidistant) From(xy geom.XY) geom.XY {
@@ -48,8 +47,6 @@ func (a *AzimuthalEquidistant) From(xy geom.XY) geom.XY {
 	λ0r := dtor(a.originLonLat.X)
 	φ0r := dtor(a.originLonLat.Y)
 
-	// From https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection,
-	// with some slight algebraic rearrangement.
 	ρ := sqrt(x*x + y*y)
 	φr := asin(cos(ρ/R)*sin(φ0r) + (y*sin(ρ/R)*cos(φ0r))/ρ)
 	λr := λ0r + atan2(

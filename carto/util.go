@@ -6,6 +6,10 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
+// This file contains utility functions that make projection formulas terser.
+// While terse code is usually _harder_ to read, the opposite is true for
+// mathematical formulas.
+
 func dtor(d float64) float64 {
 	return d * π / 180
 }
@@ -22,23 +26,48 @@ const (
 	π = math.Pi
 )
 
-// TODO: Make these funcs rather than vars.
-var (
-	sqrt  = math.Sqrt
-	tan   = math.Tan
-	ln    = math.Log
-	sin   = math.Sin
-	cos   = math.Cos
-	atan  = math.Atan
-	atan2 = math.Atan2
-	asin  = math.Asin
-	acos  = math.Acos
-	exp   = math.Exp
-	pow   = math.Pow
-)
+func sqrt(x float64) float64 {
+	return math.Sqrt(x)
+}
 
-func xy(x, y float64) geom.XY {
-	return geom.XY{X: x, Y: y}
+func tan(x float64) float64 {
+	return math.Tan(x)
+}
+
+func ln(x float64) float64 {
+	return math.Log(x)
+}
+
+func sin(x float64) float64 {
+	return math.Sin(x)
+}
+
+func cos(x float64) float64 {
+	return math.Cos(x)
+}
+
+func atan(x float64) float64 {
+	return math.Atan(x)
+}
+
+func atan2(y, x float64) float64 {
+	return math.Atan2(y, x)
+}
+
+func asin(x float64) float64 {
+	return math.Asin(x)
+}
+
+func acos(x float64) float64 {
+	return math.Acos(x)
+}
+
+func exp(x float64) float64 {
+	return math.Exp(x)
+}
+
+func pow(x, y float64) float64 {
+	return math.Pow(x, y)
 }
 
 func sign(x float64) float64 {

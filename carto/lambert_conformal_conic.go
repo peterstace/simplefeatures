@@ -41,11 +41,10 @@ func (c *LambertConformalConic) To(lonlat geom.XY) geom.XY {
 		ρ  = R * F * pow(cot(π/4+φ/2), n)
 		ρ0 = R * F * pow(cot(π/4+φ0/2), n)
 	)
-	var (
-		x = ρ * sin(n*(λ-λ0))
-		y = ρ0 - ρ*cos(n*(λ-λ0))
-	)
-	return xy(x, y)
+	return geom.XY{
+		X: ρ * sin(n*(λ-λ0)),
+		Y: ρ0 - ρ*cos(n*(λ-λ0)),
+	}
 }
 
 func (c *LambertConformalConic) From(xy geom.XY) geom.XY {
