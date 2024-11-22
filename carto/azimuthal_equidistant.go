@@ -23,8 +23,8 @@ func NewAzimuthalEquidistant(earthRadius float64) *AzimuthalEquidistant {
 // SetCenterLonLat sets the center of the projection to the given (longitude,
 // latitude) pair. The center have projected coordinates (0, 0) and be the
 // center of the circular map.
-func (a *AzimuthalEquidistant) SetCenter(origin geom.XY) {
-	a.centerLonLat = origin
+func (a *AzimuthalEquidistant) SetCenter(centerLonLat geom.XY) {
+	a.centerLonLat = centerLonLat
 }
 
 // Forward converts a (longitude, latitude) pair expressed in degrees to a

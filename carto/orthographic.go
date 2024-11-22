@@ -28,11 +28,12 @@ func NewOrthographic(radius float64) *Orthographic {
 	}
 }
 
-// SetOrigin sets the origin of the projection to the given (longitude,
-// latitude) pair. The origin have projected coordinates (0, 0).
-func (m *Orthographic) SetOrigin(originLonLat XY) {
-	m.λ0 = dtor(originLonLat.X)
-	φ0 := dtor(originLonLat.Y)
+// SetCenterLonLat sets the center of the projection to the given (longitude,
+// latitude) pair. The center have projected coordinates (0, 0) and be the
+// center of the circular map.
+func (m *Orthographic) SetCenter(centerLonLat XY) {
+	m.λ0 = dtor(centerLonLat.X)
+	φ0 := dtor(centerLonLat.Y)
 	m.sinφ0 = sin(φ0)
 	m.cosφ0 = cos(φ0)
 }

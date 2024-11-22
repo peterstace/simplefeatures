@@ -27,7 +27,8 @@ func (e *Equirectangular) SetCentralMeridian(lon float64) {
 }
 
 // SetStandardParallels sets the standard parallels of the projection to the
-// given latitudes expressed in degrees.
+// given latitude and its negative, expressed in degrees. E.g. providing 35
+// will set the standard parallels to 35 and -35.
 func (e *Equirectangular) SetStandardParallels(lat float64) {
 	φ1 := dtor(lat)
 	e.cosφ1 = cos(φ1)

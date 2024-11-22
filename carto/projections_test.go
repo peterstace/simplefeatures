@@ -58,7 +58,7 @@ func TestProjections(t *testing.T) {
 				p := carto.NewOrthographic(
 					carto.WGS84EllipsoidMeanRadiusM,
 				)
-				p.SetOrigin(geom.XY{151, -34})
+				p.SetCenter(geom.XY{151, -34})
 				return p
 			}(),
 			threshold: 1e-3, // 1mm
