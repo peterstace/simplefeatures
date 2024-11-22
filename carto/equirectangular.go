@@ -4,6 +4,13 @@ import "github.com/peterstace/simplefeatures/geom"
 
 // Equirectangular allows projecting (longitude, latitude) coordinates to (x, y)
 // pairs via the equirectangular projection.
+//
+// The equirectangular projection is a cylindrical projection that is:
+//   - Configured by setting the central meridian and two symmetric standard
+//     parallels.
+//   - Not equal area, but preserves area locally at the standard parallels.
+//   - Not conformal, but preserves shape locally at the standard parallels.
+//   - Not equidistant, but preserves distance locally at the standard parallels.
 type Equirectangular struct {
 	λ0     float64
 	cosφ1  float64

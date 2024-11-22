@@ -4,6 +4,14 @@ import "github.com/peterstace/simplefeatures/geom"
 
 // Sinusoidal allows projecting (longitude, latitude) coordinates to (x, y)
 // pairs via the sinusoidal projection.
+//
+// The sinusoidal projection is a pseudocylindrical projection that is:
+//   - Configured by setting the central meridian.
+//   - Globally equal area.
+//   - Not conformal, but preserves shape locally along the central meridian
+//     and equator.
+//   - Not equidistant, but preserves distance locally along all parallels and
+//     the central meridian.
 type Sinusoidal struct {
 	radius float64
 	λ0     float64

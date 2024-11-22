@@ -6,6 +6,15 @@ import (
 
 // AzimuthalEquidistant allows projecting (longitude, latitude) coordinates to
 // (x, y) pairs via the azimuthal equidistant projection.
+//
+// The azimuthal equidistant projection is a projection that is:
+//   - Configured by setting a center point.
+//   - Equidistant. Distances from the center point are correctly scaled.
+//   - Azimuthal. Directions from the center point are correctly preserved.
+//   - Not (globally) conformal, but preserves shape locally at the center
+//     point.
+//   - Not (globally) equal area, but preserves area locally at the center
+//     point.
 type AzimuthalEquidistant struct {
 	radius       float64
 	centerLonLat geom.XY

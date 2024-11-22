@@ -6,6 +6,12 @@ import (
 
 // EquidistantConic allows projecting (longitude, latitude) coordinates to
 // (x, y) pairs via the equidistant conic projection.
+//
+// The equidistant conic projection is a conic projection that is:
+//   - Configured by setting two standard parallels.
+//   - Equidistant along all meridians and the two standard parallels.
+//   - Not (globally) conformal, but preserves shape locally at the standard parallels.
+//   - Not (globally) equal area, but preserves area locally at the standard parallels.
 type EquidistantConic struct {
 	earthRadius  float64
 	stdParallels [2]float64

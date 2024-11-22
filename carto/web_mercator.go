@@ -11,6 +11,11 @@ import (
 //
 // The x coordinate increases from left to right, and the y coordinate
 // increases from top to bottom.
+//
+// It is:
+//   - Conformal (shape is preserved locally at all points).
+//   - Not equal area.
+//   - Not equidistant.
 type WebMercator struct {
 	zoom int
 }

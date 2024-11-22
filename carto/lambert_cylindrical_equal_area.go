@@ -5,6 +5,14 @@ import "github.com/peterstace/simplefeatures/geom"
 // LambertCylindricalEqualArea allows projecting (longitude, latitude)
 // coordinates to (x, y) pairs via the Lambert cylindrical equal area
 // projection.
+//
+// The Lambert cylindrical equal area projection is a cylindrical projection
+// that is:
+//   - Configured by setting the central meridian.
+//   - (Globally) equal area.
+//   - Not (globally) conformal, but preserves shape locally along the
+//     equator.
+//   - Not equidistant, but preserves distance along the equator.
 type LambertCylindricalEqualArea struct {
 	radius float64
 	λ0     float64

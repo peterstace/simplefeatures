@@ -10,6 +10,11 @@ import (
 // The orthographic is a projection where the sphere is projected onto a
 // tangent plane, with a point of perspective that is infinitely far away. It
 // gives a view of the sphere as seen from outer space.
+//
+// It is:
+//   - Configured by setting the center of the projection.
+//   - Not (globally) conformal, equal area or equidistant, but preserves
+//     shape, area, and distance locally at the center of the projection.
 type Orthographic struct {
 	radius float64
 	λ0     float64

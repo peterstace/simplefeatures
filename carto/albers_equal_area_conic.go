@@ -4,6 +4,12 @@ import "github.com/peterstace/simplefeatures/geom"
 
 // AlbersEqualAreaConic allows projecting (longitude, latitude) coordinates to
 // (x, y) pairs via the Albers equal area conic projection.
+//
+// The Albers equal area conic projection is a conic projection that is:
+//   - Configured by setting two standard parallels.
+//   - (Globally) equal area.
+//   - Not (globally) conformal, but preserves shape locally at the standard
+//     parallels.
 type AlbersEqualAreaConic struct {
 	radius       float64
 	origin       geom.XY
