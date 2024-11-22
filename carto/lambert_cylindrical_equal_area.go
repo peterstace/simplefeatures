@@ -2,11 +2,16 @@ package carto
 
 import "github.com/peterstace/simplefeatures/geom"
 
+// LambertCylindricalEqualArea allows projecting (longitude, latitude)
+// coordinates to (x, y) pairs via the Lambert cylindrical equal area
+// projection.
 type LambertCylindricalEqualArea struct {
 	radius float64
 	λ0     float64
 }
 
+// NewLambertCylindricalEqualArea returns a new LambertCylindricalEqualArea
+// projection with the given earth radius.
 func NewLambertCylindricalEqualArea(radius float64) *LambertCylindricalEqualArea {
 	return &LambertCylindricalEqualArea{
 		radius: radius,
@@ -14,10 +19,14 @@ func NewLambertCylindricalEqualArea(radius float64) *LambertCylindricalEqualArea
 	}
 }
 
+// SetCentralMeridian sets the central meridian of the projection to the given
+// longitude expressed in degrees.
 func (c *LambertCylindricalEqualArea) SetCentralMeridian(lon float64) {
 	c.λ0 = dtor(lon)
 }
 
+// Forward converts a (longitude, latitude) pair expressed in degrees to a
+// projected (x, y) pair.
 func (c *LambertCylindricalEqualArea) Forward(lonLat geom.XY) geom.XY {
 	var (
 		R  = c.radius
@@ -31,6 +40,8 @@ func (c *LambertCylindricalEqualArea) Forward(lonLat geom.XY) geom.XY {
 	}
 }
 
+// Reverse converts a projected (x, y) pair to a (longitude, latitude) pair
+// expressed in degrees.
 func (c *LambertCylindricalEqualArea) Reverse(xy geom.XY) geom.XY {
 	var (
 		R  = c.radius

@@ -2,12 +2,16 @@ package carto
 
 import "github.com/peterstace/simplefeatures/geom"
 
+// LambertConformalConic allows projecting (longitude, latitude) coordinates to
+// (x, y) pairs via the Lambert conformal conic projection.
 type LambertConformalConic struct {
 	radius       float64
 	origin       geom.XY
 	stdParallels [2]float64
 }
 
+// NewLambertConformalConic returns a new LambertConformalConic projection with
+// the given earth radius.
 func NewLambertConformalConic(earthRadius float64) *LambertConformalConic {
 	return &LambertConformalConic{
 		radius:       earthRadius,
@@ -16,15 +20,22 @@ func NewLambertConformalConic(earthRadius float64) *LambertConformalConic {
 	}
 }
 
+// SetOrigin sets the origin of the projection to the given (longitude,
+// latitude) pair. The origin will be at the center of the map and have
+// projected coordinates (0, 0).
 func (c *LambertConformalConic) SetOrigin(origin geom.XY) {
 	c.origin = origin
 }
 
+// SetStandardParallels sets the standard parallels of the projection to the
+// given latitudes expressed in degrees.
 func (c *LambertConformalConic) SetStandardParallels(lat1, lat2 float64) {
 	c.stdParallels[0] = lat1
 	c.stdParallels[1] = lat2
 }
 
+// Forward converts a (longitude, latitude) pair expressed in degrees to a
+// projected (x, y) pair.
 func (c *LambertConformalConic) Forward(lonlat geom.XY) geom.XY {
 	var (
 		R  = c.radius
@@ -47,6 +58,8 @@ func (c *LambertConformalConic) Forward(lonlat geom.XY) geom.XY {
 	}
 }
 
+// Reverse converts a projected (x, y) pair to a (longitude, latitude) pair
+// expressed in degrees.
 func (c *LambertConformalConic) Reverse(xy geom.XY) geom.XY {
 	var (
 		R  = c.radius

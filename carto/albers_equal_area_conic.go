@@ -2,12 +2,16 @@ package carto
 
 import "github.com/peterstace/simplefeatures/geom"
 
+// AlbersEqualAreaConic allows projecting (longitude, latitude) coordinates to
+// (x, y) pairs via the Albers equal area conic projection.
 type AlbersEqualAreaConic struct {
 	radius       float64
 	origin       geom.XY
 	stdParallels [2]float64
 }
 
+// NewAlbersEqualAreaConic returns a new AlbersEqualAreaConic projection with
+// the given earth radius.
 func NewAlbersEqualAreaConic(earthRadius float64) *AlbersEqualAreaConic {
 	return &AlbersEqualAreaConic{
 		radius:       earthRadius,
@@ -15,15 +19,22 @@ func NewAlbersEqualAreaConic(earthRadius float64) *AlbersEqualAreaConic {
 	}
 }
 
+// SetStandardParallels sets the standard parallels of the projection to the
+// given latitudes expressed in degrees.
 func (c *AlbersEqualAreaConic) SetStandardParallels(lat1, lat2 float64) {
 	c.stdParallels[0] = lat1
 	c.stdParallels[1] = lat2
 }
 
+// SetOrigin sets the origin of the projection to the given (longitude,
+// latitude) pair. The origin will be at the center of the map and have
+// projected coordinates (0, 0).
 func (c *AlbersEqualAreaConic) SetOrigin(origin geom.XY) {
 	c.origin = origin
 }
 
+// Forward converts a (longitude, latitude) pair expressed in degrees to a
+// projected (x, y) pair.
 func (c *AlbersEqualAreaConic) Forward(lonlat geom.XY) geom.XY {
 	var (
 		R  = c.radius
@@ -48,6 +59,8 @@ func (c *AlbersEqualAreaConic) Forward(lonlat geom.XY) geom.XY {
 	return geom.XY{X: x, Y: y}
 }
 
+// Reverse converts a projected (x, y) pair to a (longitude, latitude) pair
+// expressed in degrees.
 func (c *AlbersEqualAreaConic) Reverse(xy geom.XY) geom.XY {
 	var (
 		R  = c.radius

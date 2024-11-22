@@ -2,22 +2,30 @@ package carto
 
 import "github.com/peterstace/simplefeatures/geom"
 
+// Sinusoidal allows projecting (longitude, latitude) coordinates to (x, y)
+// pairs via the sinusoidal projection.
 type Sinusoidal struct {
 	radius float64
 	λ0     float64
 }
 
-func NewSinusoidal(radius float64) *Sinusoidal {
+// NewSinusoidal returns a new Sinusoidal projection with the given earth
+// radius.
+func NewSinusoidal(earthRadius float64) *Sinusoidal {
 	return &Sinusoidal{
-		radius: radius,
+		radius: earthRadius,
 		λ0:     0,
 	}
 }
 
+// SetCentralMeridian sets the central meridian of the projection to the given
+// longitude expressed in degrees.
 func (c *Sinusoidal) SetCentralMeridian(lon float64) {
 	c.λ0 = dtor(lon)
 }
 
+// Forward converts a (longitude, latitude) pair expressed in degrees to a
+// projected (x, y) pair.
 func (c *Sinusoidal) Forward(lonLat geom.XY) geom.XY {
 	var (
 		R  = c.radius
@@ -31,6 +39,8 @@ func (c *Sinusoidal) Forward(lonLat geom.XY) geom.XY {
 	}
 }
 
+// Reverse converts a projected (x, y) pair to a (longitude, latitude) pair
+// expressed in degrees.
 func (c *Sinusoidal) Reverse(xy geom.XY) geom.XY {
 	var (
 		R  = c.radius

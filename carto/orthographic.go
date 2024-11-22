@@ -4,9 +4,12 @@ import (
 	. "github.com/peterstace/simplefeatures/geom"
 )
 
-// Orthographic is is a projection where the sphere is projected onto a tangent
-// plane, with a point of perspective that is infinitely far away. It gives a
-// view of the sphere as seen from outer space.
+// Orthographic allows projecting (longitude, latitude) coordinates to (x, y)
+// pairs via the orthographic projection.
+//
+// The orthographic is a projection where the sphere is projected onto a
+// tangent plane, with a point of perspective that is infinitely far away. It
+// gives a view of the sphere as seen from outer space.
 type Orthographic struct {
 	radius float64
 	λ0     float64
@@ -15,8 +18,7 @@ type Orthographic struct {
 }
 
 // NewOrthographic returns a new Orthographic projection with the given earth
-// radius and projection origin. The projection has the least distortion near
-// the origin.
+// radius.
 func NewOrthographic(radius float64) *Orthographic {
 	return &Orthographic{
 		radius: radius,
@@ -26,6 +28,9 @@ func NewOrthographic(radius float64) *Orthographic {
 	}
 }
 
+// SetOrigin sets the origin of the projection to the given (longitude,
+// latitude) pair. The origin will be at the center of the map and have
+// projected coordinates (0, 0).
 func (m *Orthographic) SetOrigin(originLonLat XY) {
 	m.λ0 = dtor(originLonLat.X)
 	φ0 := dtor(originLonLat.Y)
@@ -33,10 +38,8 @@ func (m *Orthographic) SetOrigin(originLonLat XY) {
 	m.cosφ0 = cos(φ0)
 }
 
-// Forward converts a (longitude, latitude) pair to an orthographically project
-// (x, y) pair. The units of the longitude and latitude are in degrees. The
-// units of the x and y coordinates are the same as that used to specify the
-// radius.
+// Forward converts a (longitude, latitude) pair expressed in degrees to a
+// projected (x, y) pair.
 func (m *Orthographic) Forward(lonLat XY) XY {
 	var (
 		R     = m.radius
@@ -52,10 +55,8 @@ func (m *Orthographic) Forward(lonLat XY) XY {
 	}
 }
 
-// Reverse converts an orthographically projected (x, y) pair to a (longitude,
-// latitude) pair. The units of the longitude and latitude are in degrees.  The
-// units of the x and y coordinates are the same as that used to specify the
-// radius.
+// Reverse converts a projected (x, y) pair to a (longitude, latitude) pair
+// expressed in degrees.
 func (m *Orthographic) Reverse(xy XY) XY {
 	var (
 		R     = m.radius

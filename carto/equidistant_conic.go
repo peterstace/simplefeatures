@@ -4,12 +4,16 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
+// EquidistantConic allows projecting (longitude, latitude) coordinates to
+// (x, y) pairs via the equidistant conic projection.
 type EquidistantConic struct {
 	earthRadius  float64
 	stdParallels [2]float64
 	origin       geom.XY
 }
 
+// NewEquidistantConic returns a new EquidistantConic projection with the given
+// earth radius.
 func NewEquidistantConic(earthRadius float64) *EquidistantConic {
 	return &EquidistantConic{
 		earthRadius:  earthRadius,
@@ -17,20 +21,24 @@ func NewEquidistantConic(earthRadius float64) *EquidistantConic {
 	}
 }
 
+// SetStandardParallels sets the standard parallels of the projection to the
+// given latitudes expressed in degrees.
 func (c *EquidistantConic) SetStandardParallels(lat1, lat2 float64) *EquidistantConic {
-	// TODO: check that lat1 and lat2 are not equal.
-	// TODO: check that lat1 and lat2 are in a reasonable range.
-	// TODO: swap lat1 and lat2 if lat1 > lat2 (?).
 	c.stdParallels[0] = lat1
 	c.stdParallels[1] = lat2
 	return c
 }
 
+// SetOrigin sets the origin of the projection to the given (longitude,
+// latitude) pair. The origin will be at the center of the map and have
+// projected coordinates (0, 0).
 func (c *EquidistantConic) SetOrigin(lonLat geom.XY) *EquidistantConic {
 	c.origin = lonLat
 	return c
 }
 
+// Forward converts a (longitude, latitude) pair expressed in degrees to a
+// projected (x, y) pair.
 func (c *EquidistantConic) Forward(lonlat geom.XY) geom.XY {
 	var (
 		R = c.earthRadius
@@ -63,6 +71,8 @@ func (c *EquidistantConic) Forward(lonlat geom.XY) geom.XY {
 	return geom.XY{X: R * x, Y: R * y}
 }
 
+// Reverse converts a projected (x, y) pair to a (longitude, latitude) pair
+// expressed in degrees.
 func (c *EquidistantConic) Reverse(xy geom.XY) geom.XY {
 	var (
 		R = c.earthRadius
