@@ -21,8 +21,7 @@ func NewAzimuthalEquidistant(earthRadius float64) *AzimuthalEquidistant {
 }
 
 // SetOrigin sets the origin of the projection to the given (longitude,
-// latitude) pair. The origin will be at the center of the map and have
-// projected coordinates (0, 0).
+// latitude) pair. The origin have projected coordinates (0, 0).
 func (a *AzimuthalEquidistant) SetOrigin(origin geom.XY) {
 	a.originLonLat = origin
 }

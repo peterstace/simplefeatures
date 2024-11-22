@@ -30,8 +30,7 @@ func (c *EquidistantConic) SetStandardParallels(lat1, lat2 float64) *Equidistant
 }
 
 // SetOrigin sets the origin of the projection to the given (longitude,
-// latitude) pair. The origin will be at the center of the map and have
-// projected coordinates (0, 0).
+// latitude) pair. The origin have projected coordinates (0, 0).
 func (c *EquidistantConic) SetOrigin(lonLat geom.XY) *EquidistantConic {
 	c.origin = lonLat
 	return c

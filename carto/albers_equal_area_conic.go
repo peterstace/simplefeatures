@@ -27,8 +27,7 @@ func (c *AlbersEqualAreaConic) SetStandardParallels(lat1, lat2 float64) {
 }
 
 // SetOrigin sets the origin of the projection to the given (longitude,
-// latitude) pair. The origin will be at the center of the map and have
-// projected coordinates (0, 0).
+// latitude) pair. The origin have projected coordinates (0, 0).
 func (c *AlbersEqualAreaConic) SetOrigin(origin geom.XY) {
 	c.origin = origin
 }

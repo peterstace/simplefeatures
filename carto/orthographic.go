@@ -29,8 +29,7 @@ func NewOrthographic(radius float64) *Orthographic {
 }
 
 // SetOrigin sets the origin of the projection to the given (longitude,
-// latitude) pair. The origin will be at the center of the map and have
-// projected coordinates (0, 0).
+// latitude) pair. The origin have projected coordinates (0, 0).
 func (m *Orthographic) SetOrigin(originLonLat XY) {
 	m.λ0 = dtor(originLonLat.X)
 	φ0 := dtor(originLonLat.Y)
