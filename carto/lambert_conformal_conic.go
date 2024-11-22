@@ -25,7 +25,7 @@ func (c *LambertConformalConic) SetStandardParallels(lat1, lat2 float64) {
 	c.stdParallels[1] = lat2
 }
 
-func (c *LambertConformalConic) To(lonlat geom.XY) geom.XY {
+func (c *LambertConformalConic) Forward(lonlat geom.XY) geom.XY {
 	var (
 		R  = c.radius
 		φ  = dtor(lonlat.Y)
@@ -47,7 +47,7 @@ func (c *LambertConformalConic) To(lonlat geom.XY) geom.XY {
 	}
 }
 
-func (c *LambertConformalConic) From(xy geom.XY) geom.XY {
+func (c *LambertConformalConic) Reverse(xy geom.XY) geom.XY {
 	var (
 		R  = c.radius
 		x  = xy.X

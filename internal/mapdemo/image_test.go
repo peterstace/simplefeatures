@@ -40,7 +40,7 @@ func xy(x, y float64) geom.XY {
 
 func TestDrawMapEquirectangularPlateCaree(t *testing.T) {
 	f := &worldProjectionFixture{
-		proj:      carto.NewEquirectangular(earthRadius).To,
+		proj:      carto.NewEquirectangular(earthRadius).Forward,
 		worldMask: fullWorldMask,
 		mapMask: rectangle(
 			xy(-0.5*earthCircum, +0.25*earthCircum),
@@ -55,7 +55,7 @@ func TestDrawMapEquirectangularMarinus(t *testing.T) {
 	p.SetStandardParallels(36)
 	cos36 := math.Cos(36 * pi / 180)
 	f := &worldProjectionFixture{
-		proj:      p.To,
+		proj:      p.Forward,
 		worldMask: fullWorldMask,
 		mapMask: rectangle(
 			xy(-0.5*earthCircum*cos36, +0.25*earthCircum),
@@ -67,7 +67,7 @@ func TestDrawMapEquirectangularMarinus(t *testing.T) {
 
 func TestDrawMapWebMercator(t *testing.T) {
 	f := &worldProjectionFixture{
-		proj:      carto.NewWebMercator(0).To,
+		proj:      carto.NewWebMercator(0).Forward,
 		worldMask: fullWorldMask,
 		mapMask:   rectangle(xy(0, 0), xy(1, 1)),
 		mapFlipY:  true,
@@ -77,7 +77,7 @@ func TestDrawMapWebMercator(t *testing.T) {
 
 func TestDrawMapLambertCylindricalEqualArea(t *testing.T) {
 	f := &worldProjectionFixture{
-		proj:      carto.NewLambertCylindricalEqualArea(earthRadius).To,
+		proj:      carto.NewLambertCylindricalEqualArea(earthRadius).Forward,
 		worldMask: fullWorldMask,
 		mapMask: rectangle(
 			xy(-0.5*earthCircum, +0.25*earthCircum*2/pi),
@@ -103,7 +103,7 @@ func TestDrawMapSinusoidal(t *testing.T) {
 	mapMask := geom.NewPolygonXY(all)
 
 	f := &worldProjectionFixture{
-		proj:      carto.NewSinusoidal(earthRadius).To,
+		proj:      carto.NewSinusoidal(earthRadius).Forward,
 		worldMask: fullWorldMask,
 		mapMask:   mapMask,
 		paddingPx: 2,
@@ -115,7 +115,7 @@ func TestDrawMapOrthographicSouthPole(t *testing.T) {
 	proj := carto.NewOrthographic(earthRadius)
 	proj.SetOrigin(geom.XY{X: 135, Y: -90})
 	f := &worldProjectionFixture{
-		proj:      proj.To,
+		proj:      proj.Forward,
 		worldMask: geom.NewSingleRingPolygonXY(-180, 0, 180, 0, 180, -90, -180, -90, -180, 0),
 		mapMask:   circle(xy(0, 0), earthRadius),
 		paddingPx: 2,
@@ -127,7 +127,7 @@ func TestDrawMapOrthographicNorthPole(t *testing.T) {
 	proj := carto.NewOrthographic(earthRadius)
 	proj.SetOrigin(geom.XY{X: 15, Y: 90})
 	f := &worldProjectionFixture{
-		proj:      proj.To,
+		proj:      proj.Forward,
 		worldMask: geom.NewSingleRingPolygonXY(-180, 0, 180, 0, 180, 90, -180, 90, -180, 0),
 		mapMask:   circle(xy(0, 0), earthRadius),
 		paddingPx: 2,
@@ -158,7 +158,7 @@ func TestDrawMapOrthographicNorthAmerica(t *testing.T) {
 	proj.SetOrigin(geom.XY{X: centralMeridian, Y: 45})
 
 	f := &worldProjectionFixture{
-		proj:      proj.To,
+		proj:      proj.Forward,
 		worldMask: worldMask,
 		mapMask:   circle(xy(0, 0), earthRadius),
 		paddingPx: 2,
@@ -170,7 +170,7 @@ func TestDrawMapAzimuthalEquidistant(t *testing.T) {
 	p := carto.NewAzimuthalEquidistant(earthRadius)
 	p.SetOrigin(geom.XY{X: 0, Y: 90})
 	f := &worldProjectionFixture{
-		proj: p.To,
+		proj: p.Forward,
 		worldMask: geom.NewSingleRingPolygonXY(
 			// Don't include the south pole, since it's a line in the projection.
 			-180, 90, +180, 90, +180, -89.99, -180, -89.99, -180, 90,
@@ -185,7 +185,7 @@ func TestDrawMapAzimuthalEquidistantSydney(t *testing.T) {
 	p := carto.NewAzimuthalEquidistant(earthRadius)
 	p.SetOrigin(geom.XY{X: 151, Y: -34})
 	f := &worldProjectionFixture{
-		proj:      p.To,
+		proj:      p.Forward,
 		worldMask: fullWorldMask,
 		mapMask:   circle(xy(0, 0), earthCircum/2),
 		paddingPx: 2,
@@ -244,10 +244,10 @@ func TestDrawEquidistantConic(t *testing.T) {
 				-180+eps, -90+eps,
 			)
 			mapMask = mapMask.Densify(0.1)
-			mapMask = mapMask.TransformXY(p.To)
+			mapMask = mapMask.TransformXY(p.Forward)
 
 			f := &worldProjectionFixture{
-				proj:         p.To,
+				proj:         p.Forward,
 				worldMask:    fullWorldMask,
 				mapMask:      mapMask,
 				stdParallels: [2]float64{tc.stdParallel1, tc.stdParallel2},
@@ -312,10 +312,10 @@ func TestDrawLambertConformalConic(t *testing.T) {
 				-180, tc.minLat,
 			)
 
-			mapMask := worldMask.Densify(0.1).TransformXY(p.To)
+			mapMask := worldMask.Densify(0.1).TransformXY(p.Forward)
 
 			f := &worldProjectionFixture{
-				proj:         p.To,
+				proj:         p.Forward,
 				worldMask:    worldMask,
 				mapMask:      mapMask,
 				stdParallels: [2]float64{tc.stdParallel1, tc.stdParallel2},
@@ -365,10 +365,10 @@ func TestDrawAlbersEqualAreaConic(t *testing.T) {
 				+180, -90,
 				-180, -90,
 			)
-			mapMask := worldMask.Densify(0.1).TransformXY(p.To)
+			mapMask := worldMask.Densify(0.1).TransformXY(p.Forward)
 
 			f := &worldProjectionFixture{
-				proj:         p.To,
+				proj:         p.Forward,
 				worldMask:    worldMask,
 				mapMask:      mapMask,
 				stdParallels: tc.stdParallels,

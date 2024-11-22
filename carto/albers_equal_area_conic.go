@@ -24,7 +24,7 @@ func (c *AlbersEqualAreaConic) SetOrigin(origin geom.XY) {
 	c.origin = origin
 }
 
-func (c *AlbersEqualAreaConic) To(lonlat geom.XY) geom.XY {
+func (c *AlbersEqualAreaConic) Forward(lonlat geom.XY) geom.XY {
 	var (
 		R  = c.radius
 		φ  = dtor(lonlat.Y)
@@ -48,7 +48,7 @@ func (c *AlbersEqualAreaConic) To(lonlat geom.XY) geom.XY {
 	return geom.XY{X: x, Y: y}
 }
 
-func (c *AlbersEqualAreaConic) From(xy geom.XY) geom.XY {
+func (c *AlbersEqualAreaConic) Reverse(xy geom.XY) geom.XY {
 	var (
 		R  = c.radius
 		x  = xy.X

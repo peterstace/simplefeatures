@@ -25,7 +25,7 @@ func (e *Equirectangular) SetStandardParallels(lat float64) {
 	e.cosφ1 = cos(φ1)
 }
 
-func (e *Equirectangular) To(lonLat geom.XY) geom.XY {
+func (e *Equirectangular) Forward(lonLat geom.XY) geom.XY {
 	var (
 		R     = e.radius
 		λ     = dtor(lonLat.X)
@@ -39,7 +39,7 @@ func (e *Equirectangular) To(lonLat geom.XY) geom.XY {
 	}
 }
 
-func (e *Equirectangular) From(xy geom.XY) geom.XY {
+func (e *Equirectangular) Reverse(xy geom.XY) geom.XY {
 	var (
 		R     = e.radius
 		x     = xy.X

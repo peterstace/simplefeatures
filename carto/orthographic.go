@@ -33,10 +33,11 @@ func (m *Orthographic) SetOrigin(originLonLat XY) {
 	m.cosφ0 = cos(φ0)
 }
 
-// To converts a (longitude, latitude) pair to an orthographically project (x,
-// y) pair. The units of the longitude and latitude are in degrees. The units
-// of the x and y coordinates are the same as that used to specify the radius.
-func (m *Orthographic) To(lonLat XY) XY {
+// Forward converts a (longitude, latitude) pair to an orthographically project
+// (x, y) pair. The units of the longitude and latitude are in degrees. The
+// units of the x and y coordinates are the same as that used to specify the
+// radius.
+func (m *Orthographic) Forward(lonLat XY) XY {
 	var (
 		R     = m.radius
 		λ     = dtor(lonLat.X)
@@ -51,11 +52,11 @@ func (m *Orthographic) To(lonLat XY) XY {
 	}
 }
 
-// From converts an orthographically projected (x, y) pair to a (longitude,
+// Reverse converts an orthographically projected (x, y) pair to a (longitude,
 // latitude) pair. The units of the longitude and latitude are in degrees.  The
 // units of the x and y coordinates are the same as that used to specify the
 // radius.
-func (m *Orthographic) From(xy XY) XY {
+func (m *Orthographic) Reverse(xy XY) XY {
 	var (
 		R     = m.radius
 		x     = xy.X

@@ -10,8 +10,8 @@ import (
 )
 
 type projection interface {
-	To(lonlat geom.XY) geom.XY
-	From(xy geom.XY) geom.XY
+	Forward(lonlat geom.XY) geom.XY
+	Reverse(xy geom.XY) geom.XY
 }
 
 type projectionSubTest struct {
@@ -276,12 +276,12 @@ func TestProjections(t *testing.T) {
 		t.Run(pc.name, func(t *testing.T) {
 			for i, st := range pc.subtests {
 				t.Run(strconv.Itoa(i), func(t *testing.T) {
-					t.Run("To", func(t *testing.T) {
-						got := pc.proj.To(st.lotLat)
+					t.Run("Forward", func(t *testing.T) {
+						got := pc.proj.Forward(st.lotLat)
 						expectXYWithinTolerance(t, got, st.projected, pc.threshold)
 					})
-					t.Run("From", func(t *testing.T) {
-						got := pc.proj.From(st.projected)
+					t.Run("Reverse", func(t *testing.T) {
+						got := pc.proj.Reverse(st.projected)
 						const threshold = 1e-8 // 1e-8 degrees is about 1mm.
 						expectXYWithinTolerance(t, got, st.lotLat, threshold)
 					})

@@ -18,7 +18,7 @@ func (c *Sinusoidal) SetCentralMeridian(lon float64) {
 	c.λ0 = dtor(lon)
 }
 
-func (c *Sinusoidal) To(lonLat geom.XY) geom.XY {
+func (c *Sinusoidal) Forward(lonLat geom.XY) geom.XY {
 	var (
 		R  = c.radius
 		λ0 = c.λ0
@@ -31,7 +31,7 @@ func (c *Sinusoidal) To(lonLat geom.XY) geom.XY {
 	}
 }
 
-func (c *Sinusoidal) From(xy geom.XY) geom.XY {
+func (c *Sinusoidal) Reverse(xy geom.XY) geom.XY {
 	var (
 		R  = c.radius
 		λ0 = c.λ0

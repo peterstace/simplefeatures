@@ -20,8 +20,8 @@ func NewWebMercator(zoom int) *WebMercator {
 	return &WebMercator{zoom}
 }
 
-// To converts a (longitude, latitude) pair to a Web Mercator (x, y) pair.
-func (m *WebMercator) To(lonlat geom.XY) geom.XY {
+// Forward converts a (longitude, latitude) pair to a Web Mercator (x, y) pair.
+func (m *WebMercator) Forward(lonlat geom.XY) geom.XY {
 	λd := lonlat.X
 	φd := lonlat.Y
 	φr := dtor(φd)
@@ -32,8 +32,8 @@ func (m *WebMercator) To(lonlat geom.XY) geom.XY {
 	return geom.XY{X: x, Y: y}
 }
 
-// From converts a Web Mercator (x, y) pair to a (longitude, latitude) pair.
-func (m *WebMercator) From(xy geom.XY) geom.XY {
+// Reverse converts a Web Mercator (x, y) pair to a (longitude, latitude) pair.
+func (m *WebMercator) Reverse(xy geom.XY) geom.XY {
 	x := xy.X
 	y := xy.Y
 	P := float64(int(1) << m.zoom)

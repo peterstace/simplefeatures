@@ -31,7 +31,7 @@ func (c *EquidistantConic) SetOrigin(lonLat geom.XY) *EquidistantConic {
 	return c
 }
 
-func (c *EquidistantConic) To(lonlat geom.XY) geom.XY {
+func (c *EquidistantConic) Forward(lonlat geom.XY) geom.XY {
 	var (
 		R = c.earthRadius
 
@@ -63,7 +63,7 @@ func (c *EquidistantConic) To(lonlat geom.XY) geom.XY {
 	return geom.XY{X: R * x, Y: R * y}
 }
 
-func (c *EquidistantConic) From(xy geom.XY) geom.XY {
+func (c *EquidistantConic) Reverse(xy geom.XY) geom.XY {
 	var (
 		R = c.earthRadius
 

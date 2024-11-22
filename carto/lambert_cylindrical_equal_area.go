@@ -18,7 +18,7 @@ func (c *LambertCylindricalEqualArea) SetCentralMeridian(lon float64) {
 	c.λ0 = dtor(lon)
 }
 
-func (c *LambertCylindricalEqualArea) To(lonLat geom.XY) geom.XY {
+func (c *LambertCylindricalEqualArea) Forward(lonLat geom.XY) geom.XY {
 	var (
 		R  = c.radius
 		λ  = dtor(lonLat.X)
@@ -31,7 +31,7 @@ func (c *LambertCylindricalEqualArea) To(lonLat geom.XY) geom.XY {
 	}
 }
 
-func (c *LambertCylindricalEqualArea) From(xy geom.XY) geom.XY {
+func (c *LambertCylindricalEqualArea) Reverse(xy geom.XY) geom.XY {
 	var (
 		R  = c.radius
 		x  = xy.X

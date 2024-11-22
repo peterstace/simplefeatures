@@ -20,7 +20,7 @@ func (a *AzimuthalEquidistant) SetOrigin(origin geom.XY) {
 	a.originLonLat = origin
 }
 
-func (a *AzimuthalEquidistant) To(lonLat geom.XY) geom.XY {
+func (a *AzimuthalEquidistant) Forward(lonLat geom.XY) geom.XY {
 	R := a.radius
 	λd := lonLat.X
 	φd := lonLat.Y
@@ -40,7 +40,7 @@ func (a *AzimuthalEquidistant) To(lonLat geom.XY) geom.XY {
 	}
 }
 
-func (a *AzimuthalEquidistant) From(xy geom.XY) geom.XY {
+func (a *AzimuthalEquidistant) Reverse(xy geom.XY) geom.XY {
 	R := a.radius
 	x := xy.X
 	y := xy.Y
