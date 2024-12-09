@@ -7,7 +7,7 @@ import "github.com/peterstace/simplefeatures/geom"
 //
 // The sinusoidal projection is a pseudocylindrical projection that is:
 //   - Configured by setting the central meridian.
-//   - Globally equal area.
+//   - Equal area.
 //   - Not conformal, but preserves shape locally along the central meridian
 //     and equator.
 //   - Not equidistant, but preserves distance locally along all parallels and

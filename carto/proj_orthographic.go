@@ -13,8 +13,8 @@ import (
 //
 // It is:
 //   - Configured by setting the center of the projection.
-//   - Not (globally) conformal, equal area or equidistant, but preserves
-//     shape, area, and distance locally at the center of the projection.
+//   - Not conformal, equal area or equidistant, but preserves shape, area, and
+//     distance locally at the center of the projection.
 type Orthographic struct {
 	radius float64
 	λ0     float64

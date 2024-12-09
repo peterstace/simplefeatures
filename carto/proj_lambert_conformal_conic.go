@@ -7,11 +7,10 @@ import "github.com/peterstace/simplefeatures/geom"
 //
 // The Lambert conformal conic projection is a conic projection that is:
 //   - Configured by setting two standard parallels.
-//   - (Globally) conformal. Shape is preserved locally at all points.
-//   - Not (globally) equal area, but preserves area locally at the standard
+//   - Conformal. Shape is preserved locally at all points.
+//   - Not equal area, but preserves area locally at the standard parallels.
+//   - Not equidistant, but preserves distance locally along the standard
 //     parallels.
-//   - Not (globally) equidistant, but preserves distance locally along the
-//     standard parallels.
 type LambertConformalConic struct {
 	radius       float64
 	origin       geom.XY
