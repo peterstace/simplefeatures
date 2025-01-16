@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Adds a new package `github.com/nearmap/simplefeatures/carto` package that
+  provides cartography functionality for working with and making maps.
+  Initially this includes transformations between angular (lon/lat) and planar
+  (x/y) coordinates for various simple projections.
+
 ## v0.52.0
 
 2024-10-08
