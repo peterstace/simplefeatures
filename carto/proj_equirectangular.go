@@ -6,8 +6,8 @@ import "github.com/peterstace/simplefeatures/geom"
 // pairs via the equirectangular projection.
 //
 // The equirectangular projection is a cylindrical projection that is:
-//   - Configured by setting the central meridian and two symmetric standard
-//     parallels.
+//   - Configured by setting the central meridian and two standard parallels
+//     that are symmetric about the equator.
 //   - Not equal area, but preserves area locally at the standard parallels.
 //   - Not conformal, but preserves shape locally at the standard parallels.
 //   - Not equidistant, but preserves distance locally at the standard parallels.

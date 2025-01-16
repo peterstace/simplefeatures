@@ -16,7 +16,8 @@ type AlbersEqualAreaConic struct {
 }
 
 // NewAlbersEqualAreaConic returns a new AlbersEqualAreaConic projection with
-// the given earth radius.
+// the given earth radius. The standard parallels are set to 30 and 60 degrees
+// north.
 func NewAlbersEqualAreaConic(earthRadius float64) *AlbersEqualAreaConic {
 	return &AlbersEqualAreaConic{
 		radius:       earthRadius,
@@ -32,7 +33,7 @@ func (c *AlbersEqualAreaConic) SetStandardParallels(lat1, lat2 float64) {
 }
 
 // SetOrigin sets the origin of the projection to the given (longitude,
-// latitude) pair. The origin have projected coordinates (0, 0).
+// latitude) pair. The origin has projected coordinates (0, 0).
 func (c *AlbersEqualAreaConic) SetOrigin(origin geom.XY) {
 	c.origin = origin
 }

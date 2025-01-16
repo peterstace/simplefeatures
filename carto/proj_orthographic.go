@@ -5,9 +5,9 @@ import "github.com/peterstace/simplefeatures/geom"
 // Orthographic allows projecting (longitude, latitude) coordinates to (x, y)
 // pairs via the orthographic projection.
 //
-// The orthographic is a projection where the sphere is projected onto a
-// tangent plane, with a point of perspective that is infinitely far away. It
-// gives a view of the sphere as seen from outer space.
+// The orthographic projection projects the sphere onto a tangent plane with a
+// point of perspective that is infinitely far away. It gives a view of the
+// earth as seen from outer space.
 //
 // It is:
 //   - Configured by setting the center of the projection.
@@ -31,7 +31,7 @@ func NewOrthographic(radius float64) *Orthographic {
 	}
 }
 
-// SetCenterLonLat sets the center of the projection to the given (longitude,
+// SetCenter sets the center of the projection to the given (longitude,
 // latitude) pair. The center have projected coordinates (0, 0) and be the
 // center of the circular map.
 func (m *Orthographic) SetCenter(centerLonLat geom.XY) {
