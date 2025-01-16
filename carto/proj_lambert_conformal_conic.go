@@ -22,7 +22,7 @@ type LambertConformalConic struct {
 func NewLambertConformalConic(earthRadius float64) *LambertConformalConic {
 	return &LambertConformalConic{
 		radius:       earthRadius,
-		origin:       geom.XY{0, 0},
+		origin:       geom.XY{X: 0, Y: 0},
 		stdParallels: [2]float64{0, 0},
 	}
 }

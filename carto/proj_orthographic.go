@@ -1,8 +1,6 @@
 package carto
 
-import (
-	. "github.com/peterstace/simplefeatures/geom"
-)
+import "github.com/peterstace/simplefeatures/geom"
 
 // Orthographic allows projecting (longitude, latitude) coordinates to (x, y)
 // pairs via the orthographic projection.
@@ -36,7 +34,7 @@ func NewOrthographic(radius float64) *Orthographic {
 // SetCenterLonLat sets the center of the projection to the given (longitude,
 // latitude) pair. The center have projected coordinates (0, 0) and be the
 // center of the circular map.
-func (m *Orthographic) SetCenter(centerLonLat XY) {
+func (m *Orthographic) SetCenter(centerLonLat geom.XY) {
 	m.λ0 = dtor(centerLonLat.X)
 	φ0 := dtor(centerLonLat.Y)
 	m.sinφ0 = sin(φ0)
@@ -45,7 +43,7 @@ func (m *Orthographic) SetCenter(centerLonLat XY) {
 
 // Forward converts a (longitude, latitude) pair expressed in degrees to a
 // projected (x, y) pair.
-func (m *Orthographic) Forward(lonLat XY) XY {
+func (m *Orthographic) Forward(lonLat geom.XY) geom.XY {
 	var (
 		R     = m.radius
 		λ     = dtor(lonLat.X)
@@ -54,7 +52,7 @@ func (m *Orthographic) Forward(lonLat XY) XY {
 		cosφ0 = m.cosφ0
 		sinφ0 = m.sinφ0
 	)
-	return XY{
+	return geom.XY{
 		X: R * cos(φ) * sin(λ-λ0),
 		Y: R * (cosφ0*sin(φ) - sinφ0*cos(φ)*cos(λ-λ0)),
 	}
@@ -62,7 +60,7 @@ func (m *Orthographic) Forward(lonLat XY) XY {
 
 // Reverse converts a projected (x, y) pair to a (longitude, latitude) pair
 // expressed in degrees.
-func (m *Orthographic) Reverse(xy XY) XY {
+func (m *Orthographic) Reverse(xy geom.XY) geom.XY {
 	var (
 		R     = m.radius
 		x     = xy.X

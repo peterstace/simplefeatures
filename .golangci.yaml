@@ -14,6 +14,10 @@ issues:
       linters:
         - gosec
 
+    - path: "carto/*"
+      linters:
+        - asciicheck
+
 linters-settings:
   depguard:
     rules:
