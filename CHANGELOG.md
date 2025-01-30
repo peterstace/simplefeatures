@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.53.0
+
+2025-01-31
 
 - Adds a new package `github.com/nearmap/simplefeatures/carto` package that
   provides cartography functionality for working with and making maps.
