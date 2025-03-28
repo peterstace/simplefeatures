@@ -335,10 +335,25 @@ func (m MultiLineString) TransformXY(fn func(XY) XY) MultiLineString {
 	}
 	transformed := make([]LineString, n)
 	for i := 0; i < n; i++ {
-		seq := transformSequence(m.LineStringN(i).Coordinates(), fn)
-		transformed[i] = NewLineString(seq)
+		transformed[i] = m.LineStringN(i).TransformXY(fn)
 	}
 	return NewMultiLineString(transformed)
+}
+
+func (m MultiLineString) Transform(fn func(CoordinatesType, []float64) error) (MultiLineString, error) {
+	n := m.NumLineStrings()
+	if n == 0 {
+		return MultiLineString{}.ForceCoordinatesType(m.CoordinatesType()), nil
+	}
+	transformed := make([]LineString, n)
+	for i := 0; i < n; i++ {
+		tls, err := m.LineStringN(i).Transform(fn)
+		if err != nil {
+			return MultiLineString{}, err
+		}
+		transformed[i] = tls
+	}
+	return NewMultiLineString(transformed), nil
 }
 
 // Length gives the sum of the lengths of the constituent members of the multi

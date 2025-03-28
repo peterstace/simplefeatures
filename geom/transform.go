@@ -22,3 +22,13 @@ func transformSequence(seq Sequence, fn func(XY) XY) Sequence {
 	}
 	return NewSequence(floats, ctype)
 }
+
+func transformSequenceAllAtOnce(seq Sequence, fn func(CoordinatesType, []float64) error) (Sequence, error) {
+	clone := clone1DFloat64s(seq.floats)
+	ct := seq.CoordinatesType()
+	err := fn(ct, clone)
+	if err != nil {
+		return Sequence{}, err
+	}
+	return NewSequence(clone, ct), nil
+}

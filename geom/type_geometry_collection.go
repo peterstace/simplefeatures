@@ -241,6 +241,18 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY) GeometryCollection {
 	return GeometryCollection{transformed, c.ctype}
 }
 
+func (c GeometryCollection) Transform(fn func(CoordinatesType, []float64) error) (GeometryCollection, error) {
+	transformed := make([]Geometry, len(c.geoms))
+	for i := range c.geoms {
+		var err error
+		transformed[i], err = c.geoms[i].Transform(fn)
+		if err != nil {
+			return GeometryCollection{}, err
+		}
+	}
+	return GeometryCollection{transformed, c.ctype}, nil
+}
+
 // Reverse in the case of GeometryCollection reverses each component and also
 // returns them in the original order.
 func (c GeometryCollection) Reverse() GeometryCollection {

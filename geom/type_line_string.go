@@ -297,6 +297,11 @@ func (s LineString) TransformXY(fn func(XY) XY) LineString {
 	return NewLineString(transformed)
 }
 
+func (s LineString) Transform(fn func(CoordinatesType, []float64) error) (LineString, error) {
+	transformed, err := transformSequenceAllAtOnce(s.seq, fn)
+	return NewLineString(transformed), err
+}
+
 // IsRing returns true iff this LineString is both simple and closed (i.e. is a
 // linear ring).
 func (s LineString) IsRing() bool {

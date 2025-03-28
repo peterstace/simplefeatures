@@ -341,6 +341,19 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY) MultiPolygon {
 	return mp.ForceCoordinatesType(m.ctype)
 }
 
+func (m MultiPolygon) Transform(fn func(CoordinatesType, []float64) error) (MultiPolygon, error) {
+	polys := make([]Polygon, m.NumPolygons())
+	for i := range polys {
+		var err error
+		polys[i], err = m.PolygonN(i).Transform(fn)
+		if err != nil {
+			return MultiPolygon{}, err
+		}
+	}
+	mp := NewMultiPolygon(polys)
+	return mp.ForceCoordinatesType(m.ctype), nil
+}
+
 // Area in the case of a MultiPolygon is the sum of the areas of its polygons.
 func (m MultiPolygon) Area(opts ...AreaOption) float64 {
 	var area float64
