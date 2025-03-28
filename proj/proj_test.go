@@ -8,7 +8,7 @@ import (
 )
 
 func TestBasic(t *testing.T) {
-	pj, err := proj.NewPJ("EPSG:4326", "+proj=utm +zone=32 +datum=WGS84")
+	pj, err := proj.NewTransformation("EPSG:4326", "+proj=utm +zone=32 +datum=WGS84")
 	if err != nil {
 		t.Fatal(err)
 	}

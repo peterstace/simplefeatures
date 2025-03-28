@@ -11,12 +11,12 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-type PJ struct {
+type Transformation struct {
 	ctx *C.PJ_CONTEXT
 	pj  *C.PJ
 }
 
-func NewPJ(sourceCRS, targetCRS string) (*PJ, error) {
+func NewTransformation(sourceCRS, targetCRS string) (*Transformation, error) {
 	c := C.proj_context_create()
 
 	p := C.proj_create_crs_to_crs(c, C.CString(sourceCRS), C.CString(targetCRS), nil)
@@ -33,18 +33,29 @@ func NewPJ(sourceCRS, targetCRS string) (*PJ, error) {
 		errstr := C.GoString(C.proj_context_errno_string(c, errno))
 		return nil, fmt.Errorf("proj_normalize_for_visualization failed: %s", errstr)
 	}
-	return &PJ{c, n}, nil
+	return &Transformation{c, n}, nil
 }
 
-func (p *PJ) Forward(ct geom.CoordinatesType, coords []float64) error {
+func (p *Transformation) Release() {
+	if p.pj != nil {
+		C.proj_destroy(p.pj)
+		p.pj = nil
+	}
+	if p.ctx != nil {
+		C.proj_context_destroy(p.ctx)
+		p.ctx = nil
+	}
+}
+
+func (p *Transformation) Forward(ct geom.CoordinatesType, coords []float64) error {
 	return p.transform(C.PJ_FWD, ct, coords)
 }
 
-func (p *PJ) Inverse(ct geom.CoordinatesType, coords []float64) error {
+func (p *Transformation) Inverse(ct geom.CoordinatesType, coords []float64) error {
 	return p.transform(C.PJ_INV, ct, coords)
 }
 
-func (p *PJ) transform(dir C.PJ_DIRECTION, ct geom.CoordinatesType, coords []float64) error {
+func (p *Transformation) transform(dir C.PJ_DIRECTION, ct geom.CoordinatesType, coords []float64) error {
 	if len(coords)%int(ct.Dimension()) != 0 {
 		return fmt.Errorf("len(coords) must be a multiple of ct.Dimension()")
 	}
@@ -81,13 +92,4 @@ func (p *PJ) transform(dir C.PJ_DIRECTION, ct geom.CoordinatesType, coords []flo
 		return fmt.Errorf("proj_trans_generic failed: %s", errstr)
 	}
 	return nil
-}
-
-func (p *PJ) Release() {
-	if p.pj != nil {
-		C.proj_destroy(p.pj)
-	}
-	if p.ctx != nil {
-		C.proj_context_destroy(p.ctx)
-	}
 }
