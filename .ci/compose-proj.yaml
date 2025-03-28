@@ -1,0 +1,11 @@
+services:
+  projtests:
+    build:
+      dockerfile: proj.Dockerfile
+      args:
+        ALPINE_VERSION: $alpine_version
+        PROJ_VERSION: $proj_version
+    working_dir: /mnt/sf
+    entrypoint: go test $tags -test.count=1 -test.run=. ./proj
+    volumes:
+      - ..:/mnt/sf
