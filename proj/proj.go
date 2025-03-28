@@ -61,7 +61,7 @@ func (p *Transformation) transform(dir C.PJ_DIRECTION, ct geom.CoordinatesType, 
 	}
 
 	var (
-		stride = C.size_t(ct.Dimension())
+		stride = C.size_t(ct.Dimension()) * C.sizeof_double
 		count  = C.size_t(len(coords) / int(ct.Dimension()))
 	)
 
