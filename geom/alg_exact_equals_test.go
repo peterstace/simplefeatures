@@ -1,10 +1,41 @@
 package geom_test
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
 )
+
+func TestExactEqualsZTolerance(t *testing.T) {
+	for _, zmc := range []struct {
+		zOrM string
+		opt  geom.ExactEqualsOption
+	}{
+		{"Z", geom.ToleranceZ(0.1)},
+		{"M", geom.ToleranceM(0.1)},
+	} {
+		t.Run(zmc.zOrM, func(t *testing.T) {
+			for i, tc := range []struct {
+				body1, body2 string
+				wantEq       bool
+			}{
+				{"(1 2 5)", "(1 2 5.5)", false},
+				{"(1 2 5)", "(1 2 5.05)", true},
+				{"(1 2 5)", "(1 3 5.05)", false},
+			} {
+				t.Run(strconv.Itoa(i), func(t *testing.T) {
+					g1 := geomFromWKT(t, "POINT "+zmc.zOrM+tc.body1)
+					g2 := geomFromWKT(t, "POINT "+zmc.zOrM+tc.body2)
+					gotEq := geom.ExactEquals(g1, g2, zmc.opt)
+					if gotEq != tc.wantEq {
+						t.Errorf("got=%v want=%v", gotEq, tc.wantEq)
+					}
+				})
+			}
+		})
+	}
+}
 
 func TestExactEquals(t *testing.T) {
 	wkts := map[string]string{
