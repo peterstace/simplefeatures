@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Adds new `ToleranceZ` and `ToleranceM` options for use with the `ExactEquals`
+  function. These options allow geometries to compare as equal, even when their
+  Z and M values differ slightly.
+
 ## v0.53.0
 
 2025-01-31
