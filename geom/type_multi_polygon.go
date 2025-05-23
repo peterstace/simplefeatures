@@ -331,7 +331,8 @@ func (m MultiPolygon) Coordinates() [][]Sequence {
 	return coords
 }
 
-// TransformXY transforms this MultiPolygon into another MultiPolygon according to fn.
+// TransformXY transforms this MultiPolygon into another MultiPolygon according
+// to fn. See [Geometry.TransformXY] for more details.
 func (m MultiPolygon) TransformXY(fn func(XY) XY) MultiPolygon {
 	polys := make([]Polygon, m.NumPolygons())
 	for i := range polys {
@@ -339,6 +340,21 @@ func (m MultiPolygon) TransformXY(fn func(XY) XY) MultiPolygon {
 	}
 	mp := NewMultiPolygon(polys)
 	return mp.ForceCoordinatesType(m.ctype)
+}
+
+// Transform transforms this MultiPolygon into another MultiPolygon according
+// to fn. See [Geometry.Transform] for more details.
+func (m MultiPolygon) Transform(fn func(CoordinatesType, []float64) error) (MultiPolygon, error) {
+	polys := make([]Polygon, m.NumPolygons())
+	for i := range polys {
+		var err error
+		polys[i], err = m.PolygonN(i).Transform(fn)
+		if err != nil {
+			return MultiPolygon{}, err
+		}
+	}
+	mp := NewMultiPolygon(polys)
+	return mp.ForceCoordinatesType(m.ctype), nil
 }
 
 // Area in the case of a MultiPolygon is the sum of the areas of its polygons.

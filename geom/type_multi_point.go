@@ -215,7 +215,8 @@ func (m MultiPoint) Coordinates() Sequence {
 	return NewSequence(coords, ctype)
 }
 
-// TransformXY transforms this MultiPoint into another MultiPoint according to fn.
+// TransformXY transforms this MultiPoint into another MultiPoint according to
+// fn. See [Geometry.TransformXY] for more details.
 func (m MultiPoint) TransformXY(fn func(XY) XY) MultiPoint {
 	if len(m.points) == 0 {
 		return MultiPoint{}.ForceCoordinatesType(m.CoordinatesType())
@@ -230,6 +231,52 @@ func (m MultiPoint) TransformXY(fn func(XY) XY) MultiPoint {
 		}
 	}
 	return NewMultiPoint(txPoints)
+}
+
+// Transform transforms this MultiPoint into another MultiPoint according to
+// fn. See [Geometry.Transform] for more details.
+func (m MultiPoint) Transform(fn func(CoordinatesType, []float64) error) (MultiPoint, error) {
+	if len(m.points) == 0 {
+		return MultiPoint{}.ForceCoordinatesType(m.CoordinatesType()), nil
+	}
+
+	ct := m.ctype
+	var clone []float64
+	for _, pt := range m.points {
+		if c, ok := pt.Coordinates(); ok {
+			clone = c.appendFloat64s(clone)
+		}
+	}
+	if err := fn(ct, clone); err != nil {
+		return MultiPoint{}, err
+	}
+
+	txPoints := make([]Point, len(m.points))
+	var j int
+	for i, pt := range m.points {
+		if !pt.full {
+			txPoints[i] = pt // Copy original point to preserve coordinates type.
+			continue
+		}
+
+		var z, m float64
+		if ct.Is3D() {
+			z = clone[j+2]
+		}
+		if ct.IsMeasured() {
+			m = clone[j+ct.Dimension()-1]
+		}
+
+		c := Coordinates{
+			XY:   XY{clone[j], clone[j+1]},
+			Z:    z,
+			M:    m,
+			Type: ct,
+		}
+		txPoints[i] = NewPoint(c)
+		j += ct.Dimension()
+	}
+	return NewMultiPoint(txPoints), nil
 }
 
 // Centroid gives the centroid of the coordinates of the MultiPoint.

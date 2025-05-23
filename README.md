@@ -24,6 +24,7 @@ used those libraries before.
 - [Marshalling and Unmarshalling](#marshalling-and-unmarshalling)
 - [Geometry Algorithms](#geometry-algorithms)
 - [GEOS Wrapper](#geos-wrapper)
+- [PROJ Wrapper](#proj-wrapper)
 - [Examples](#examples)
 
 ### Geometry Types
@@ -150,6 +151,15 @@ A [GEOS](https://www.osgeo.org/projects/geos/) CGO wrapper is also provided,
 giving access to functionality not yet implemented natively in Go. The [wrapper
 is implemented in a separate
 package](https://pkg.go.dev/github.com/peterstace/simplefeatures/geos?tab=doc),
+meaning that library users who don't need this additional functionality don't
+need to expose themselves to CGO.
+
+### PROJ Wrapper
+
+A [PROJ](https://proj.org/) CGO wrapper is also provided, giving access to a
+vast array of transformations between various coordinate reference systems.
+The [wrapper is implemented in a separate
+package](https://pkg.go.dev/github.com/peterstace/simplefeatures/proj?tab=doc),
 meaning that library users who don't need this additional functionality don't
 need to expose themselves to CGO.
 

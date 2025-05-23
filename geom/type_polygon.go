@@ -333,15 +333,31 @@ func (p Polygon) Coordinates() []Sequence {
 }
 
 // TransformXY transforms this Polygon into another Polygon according to fn.
+// See [Geometry.TransformXY] for more details.
 func (p Polygon) TransformXY(fn func(XY) XY) Polygon {
 	n := len(p.rings)
 	transformed := make([]LineString, n)
 	for i, r := range p.rings {
-		seq := transformSequence(r.Coordinates(), fn)
-		transformed[i] = NewLineString(seq)
+		transformed[i] = r.TransformXY(fn)
 	}
 	poly := NewPolygon(transformed)
 	return poly.ForceCoordinatesType(p.ctype)
+}
+
+// Transform transforms this Polygon into another Polygon according to fn. See
+// [Geometry.Transform] for more details.
+func (p Polygon) Transform(fn func(CoordinatesType, []float64) error) (Polygon, error) {
+	n := len(p.rings)
+	transformed := make([]LineString, n)
+	for i, r := range p.rings {
+		var err error
+		transformed[i], err = r.Transform(fn)
+		if err != nil {
+			return Polygon{}, err
+		}
+	}
+	poly := NewPolygon(transformed)
+	return poly.ForceCoordinatesType(p.ctype), nil
 }
 
 // AreaOption allows the behaviour of area calculations to be modified.

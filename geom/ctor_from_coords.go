@@ -330,6 +330,7 @@ func NewMultiPolygonXYZM(xyzms ...[][]float64) MultiPolygon {
 }
 
 func clone1DFloat64s(src []float64) []float64 {
+	// TODO: Use slices.Clone once on Go 1.21.
 	dst := make([]float64, len(src))
 	copy(dst, src)
 	return dst

@@ -173,7 +173,8 @@ func (p *Point) UnmarshalJSON(buf []byte) error {
 	return unmarshalGeoJSONAsType(buf, p)
 }
 
-// TransformXY transforms this Point into another Point according to fn.
+// TransformXY transforms this Point into another Point according to fn. See
+// [Geometry.TransformXY] for more details.
 func (p Point) TransformXY(fn func(XY) XY) Point {
 	if !p.full {
 		return p
@@ -181,6 +182,32 @@ func (p Point) TransformXY(fn func(XY) XY) Point {
 	newC := p.coords
 	newC.XY = fn(newC.XY)
 	return NewPoint(newC)
+}
+
+// Transform transforms this Point into another Point according to fn. See
+// [Geometry.Transform] for more details.
+func (p Point) Transform(fn func(CoordinatesType, []float64) error) (Point, error) {
+	if !p.full {
+		return p, nil
+	}
+
+	ct := p.coords.Type
+	clone := p.coords.appendFloat64s(nil)
+	if err := fn(ct, clone); err != nil {
+		return Point{}, err
+	}
+
+	coords := Coordinates{
+		Type: ct,
+		XY:   XY{clone[0], clone[1]},
+	}
+	if ct.Is3D() {
+		coords.Z = clone[2]
+	}
+	if ct.IsMeasured() {
+		coords.M = clone[len(clone)-1]
+	}
+	return NewPoint(coords), nil
 }
 
 // Centroid of a point is that point.
