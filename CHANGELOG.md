@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Adds a new package `github.com/peterstace/simplefeatures/proj` that wrappers
+- Adds a new package `github.com/peterstace/simplefeatures/proj` that wraps
   the [PROJ](https://proj.org/) library. This package provides functionality
   for transforming geometries between a vast array of different coordinate
   reference systems.
