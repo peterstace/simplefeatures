@@ -1,12 +1,16 @@
 package geom
 
+import "math"
+
 // ExactEqualsOption allows the behaviour of the ExactEquals method in the
 // Geometry interface to be modified.
 type ExactEqualsOption func(exactEqualsComparator) exactEqualsComparator
 
 type exactEqualsComparator struct {
-	toleranceSq float64
-	ignoreOrder bool
+	toleranceXYSq float64
+	toleranceZ    float64
+	toleranceM    float64
+	ignoreOrder   bool
 }
 
 func newExactEqualsComparator(opts []ExactEqualsOption) exactEqualsComparator {
@@ -18,11 +22,31 @@ func newExactEqualsComparator(opts []ExactEqualsOption) exactEqualsComparator {
 }
 
 // ToleranceXY modifies the behaviour of the ExactEquals method by allowing two
-// geometry control points be considered equal if their XY coordinates are
+// geometry control points be considered equal when their XY coordinates are
 // within the given euclidean distance of each other.
 func ToleranceXY(within float64) ExactEqualsOption {
 	return func(c exactEqualsComparator) exactEqualsComparator {
-		c.toleranceSq = within * within
+		c.toleranceXYSq = within * within
+		return c
+	}
+}
+
+// ToleranceZ modifies the behaviour of the ExactEquals method by allowing two
+// geometry control points be considered equal when their Z coordinates are
+// within the given euclidean distance of each other.
+func ToleranceZ(within float64) ExactEqualsOption {
+	return func(c exactEqualsComparator) exactEqualsComparator {
+		c.toleranceZ = within
+		return c
+	}
+}
+
+// ToleranceM modifies the behaviour of the ExactEquals method by allowing two
+// geometry control points be considered equal when their M coordinates are
+// within the given euclidean distance of each other.
+func ToleranceM(within float64) ExactEqualsOption {
+	return func(c exactEqualsComparator) exactEqualsComparator {
+		c.toleranceM = within
 		return c
 	}
 }
@@ -32,13 +56,13 @@ func (c exactEqualsComparator) eq(a, b Coordinates) bool {
 		return false
 	}
 	asb := a.XY.Sub(b.XY)
-	if asb.lengthSq() > c.toleranceSq {
+	if asb.lengthSq() > c.toleranceXYSq {
 		return false
 	}
-	if a.Type.Is3D() && a.Z != b.Z {
+	if a.Type.Is3D() && math.Abs(a.Z-b.Z) > c.toleranceZ {
 		return false
 	}
-	if a.Type.IsMeasured() && a.M != b.M {
+	if a.Type.IsMeasured() && math.Abs(a.M-b.M) > c.toleranceM {
 		return false
 	}
 	return true
