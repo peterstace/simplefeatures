@@ -280,3 +280,10 @@ func (p Point) String() string {
 func (p Point) SnapToGrid(decimalPlaces int) Point {
 	return p.TransformXY(snapToGridXY(decimalPlaces))
 }
+
+// FlipCoordinates returns a new Point with X and Y swapped.
+func (p Point) FlipCoordinates() Point {
+	return p.TransformXY(func(xy XY) XY {
+		return XY{xy.Y, xy.X}
+	})
+}

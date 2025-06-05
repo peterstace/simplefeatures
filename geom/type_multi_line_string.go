@@ -538,3 +538,10 @@ func (m MultiLineString) Densify(maxDistance float64) MultiLineString {
 func (m MultiLineString) SnapToGrid(decimalPlaces int) MultiLineString {
 	return m.TransformXY(snapToGridXY(decimalPlaces))
 }
+
+// FlipCoordinates returns a new MultiLineString with X and Y swapped for each point.
+func (mls MultiLineString) FlipCoordinates() MultiLineString {
+	return mls.TransformXY(func(xy XY) XY {
+		return XY{xy.Y, xy.X}
+	})
+}
