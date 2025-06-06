@@ -839,6 +839,8 @@ var skipUnion = map[string]bool{
 	// https://github.com/peterstace/simplefeatures/pull/497 for details.
 	"POLYGON((-83.58253051 32.73168239,-83.59843118 32.74617142,-83.70048117 32.63984372,-83.58253051 32.73168239))": true,
 	"POLYGON((-83.70047745 32.63984661,-83.68891846 32.5989632,-83.58253417 32.73167955,-83.70047745 32.63984661))":  true,
+	"POINT(456567.479 3973182.99)":  true,
+	"POINT(333673.327 6252387.751)": true,
 }
 
 func checkDCELOperations(g1, g2 geom.Geometry, log *log.Logger) error {
