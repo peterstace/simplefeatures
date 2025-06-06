@@ -6,6 +6,9 @@
   function. These options allow geometries to compare as equal, even when their
   Z and M values differ slightly.
 
+- Adds UTM projection support to the `carto` package. This allows projecting
+  geometries between angular (lon/lat) coordinates and UTM (x/y) coordinates.
+
 ## v0.53.0
 
 2025-01-31
