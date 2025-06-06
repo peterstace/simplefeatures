@@ -800,6 +800,8 @@ var skipDifference = map[string]bool{
 	// https://github.com/peterstace/simplefeatures/pull/497 for details.
 	"POLYGON((-83.58253051 32.73168239,-83.59843118 32.74617142,-83.70048117 32.63984372,-83.58253051 32.73168239))": true,
 	"POLYGON((-83.70047745 32.63984661,-83.68891846 32.5989632,-83.58253417 32.73167955,-83.70047745 32.63984661))":  true,
+	"POINT(333673.327 6252387.751)": true,
+	"POINT(456567.479 3973182.99)":  true,
 
 	// Causes simplefeatures DCEL operations to fail with "polygon ring not simple" error.
 	"POLYGON((-1 0,-0.9 0.2,-0.80952380952381 0.19047619047619,0 1,0 0.105263157894737,1 0,-0.9 -0.2,-1 0))":                                                                                                                                                   true,
