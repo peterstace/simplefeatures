@@ -42,16 +42,8 @@ func sin(x float64) float64 {
 	return math.Sin(x)
 }
 
-func sinh(x float64) float64 {
-	return math.Sinh(x)
-}
-
 func cos(x float64) float64 {
 	return math.Cos(x)
-}
-
-func cosh(x float64) float64 {
-	return math.Cosh(x)
 }
 
 func atan(x float64) float64 {
@@ -60,10 +52,6 @@ func atan(x float64) float64 {
 
 func atan2(y, x float64) float64 {
 	return math.Atan2(y, x)
-}
-
-func atanh(x float64) float64 {
-	return math.Atanh(x)
 }
 
 func asin(x float64) float64 {
@@ -96,8 +84,4 @@ func cot(x float64) float64 {
 
 func sq(x float64) float64 {
 	return x * x
-}
-
-func abs(x float64) float64 {
-	return math.Abs(x)
 }

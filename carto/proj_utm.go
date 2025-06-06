@@ -131,6 +131,7 @@ func (u *UTM) falseNorthing() float64 {
 	return 10e6
 }
 
+//nolint:revive,stylecheck // Underscores used to retain as close as possible Snyder's notation.
 const (
 	utm_a            = 6378137
 	utm_k0           = 0.9996
