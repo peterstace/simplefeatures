@@ -350,3 +350,10 @@ func (m MultiPoint) String() string {
 func (m MultiPoint) SnapToGrid(decimalPlaces int) MultiPoint {
 	return m.TransformXY(snapToGridXY(decimalPlaces))
 }
+
+// FlipCoordinates returns a new MultiPoint with X and Y swapped for each point.
+func (mp MultiPoint) FlipCoordinates() MultiPoint {
+	return mp.TransformXY(func(xy XY) XY {
+		return XY{xy.Y, xy.X}
+	})
+}
