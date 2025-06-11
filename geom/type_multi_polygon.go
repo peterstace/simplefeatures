@@ -599,8 +599,8 @@ func (m MultiPolygon) SnapToGrid(decimalPlaces int) MultiPolygon {
 }
 
 // FlipCoordinates returns a new MultiPolygon with X and Y swapped for each point.
-func (mp MultiPolygon) FlipCoordinates() MultiPolygon {
-	return mp.TransformXY(func(xy XY) XY {
+func (m MultiPolygon) FlipCoordinates() MultiPolygon {
+	return m.TransformXY(func(xy XY) XY {
 		return XY{xy.Y, xy.X}
 	})
 }

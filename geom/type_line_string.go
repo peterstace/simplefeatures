@@ -499,8 +499,8 @@ func (s LineString) SnapToGrid(decimalPlaces int) LineString {
 }
 
 // FlipCoordinates returns a new LineString with X and Y swapped for each point.
-func (ls LineString) FlipCoordinates() LineString {
-	return ls.TransformXY(func(xy XY) XY {
+func (s LineString) FlipCoordinates() LineString {
+	return s.TransformXY(func(xy XY) XY {
 		return XY{xy.Y, xy.X}
 	})
 }

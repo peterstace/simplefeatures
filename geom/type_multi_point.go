@@ -352,8 +352,8 @@ func (m MultiPoint) SnapToGrid(decimalPlaces int) MultiPoint {
 }
 
 // FlipCoordinates returns a new MultiPoint with X and Y swapped for each point.
-func (mp MultiPoint) FlipCoordinates() MultiPoint {
-	return mp.TransformXY(func(xy XY) XY {
+func (m MultiPoint) FlipCoordinates() MultiPoint {
+	return m.TransformXY(func(xy XY) XY {
 		return XY{xy.Y, xy.X}
 	})
 }

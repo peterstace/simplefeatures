@@ -2,9 +2,14 @@
 
 ## Unreleased
 
+__Special thanks to @gamzeozgul for contributing to this release.__
+
 - Adds new `ToleranceZ` and `ToleranceM` options for use with the `ExactEquals`
   function. These options allow geometries to compare as equal, even when their
   Z and M values differ slightly.
+
+- Adds new `FlipCoordinates` methods to each geometry type. This method creates
+  a new geometry with the X and Y coordinates interchanged.
 
 ## v0.53.0
 

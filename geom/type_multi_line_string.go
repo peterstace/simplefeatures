@@ -540,8 +540,8 @@ func (m MultiLineString) SnapToGrid(decimalPlaces int) MultiLineString {
 }
 
 // FlipCoordinates returns a new MultiLineString with X and Y swapped for each point.
-func (mls MultiLineString) FlipCoordinates() MultiLineString {
-	return mls.TransformXY(func(xy XY) XY {
+func (m MultiLineString) FlipCoordinates() MultiLineString {
+	return m.TransformXY(func(xy XY) XY {
 		return XY{xy.Y, xy.X}
 	})
 }

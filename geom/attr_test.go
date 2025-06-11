@@ -821,8 +821,9 @@ func TestReverse(t *testing.T) {
 				POLYGON((0 0,1 0,0 1,0 0))
 			)`,
 			`GEOMETRYCOLLECTION(
-				MULTIPOINT(1 0,5 2),
-				LINESTRING(0 0,1 0,0 1,0 0)
+				LINESTRING(5 2,0 5,1 0),
+				POINT(2 3),
+				POLYGON((0 0,0 1,1 0,0 0))
 			)`,
 		},
 		{
