@@ -1640,3 +1640,24 @@ func TestPolygonDumpRings(t *testing.T) {
 		})
 	}
 }
+
+func TestFlipCoordinates(t *testing.T) {
+	for i, tt := range []struct {
+		wktIn, wktOut string
+	}{
+		{"POINT(1 2)", "POINT(2 1)"},
+		{"LINESTRING(1 2,3 4)", "LINESTRING(2 1,4 3)"},
+		{"POLYGON((0 1,1 2,2 1,0 1))", "POLYGON((1 0,2 1,1 2,1 0))"},
+		{"MULTIPOINT(1 2,3 4)", "MULTIPOINT(2 1,4 3)"},
+		{"MULTILINESTRING((1 2,3 4),(5 6,7 8))", "MULTILINESTRING((2 1,4 3),(6 5,8 7))"},
+		{"MULTIPOLYGON(((0 1,1 2,2 1,0 1)))", "MULTIPOLYGON(((1 0,2 1,1 2,1 0)))"},
+		{"GEOMETRYCOLLECTION(POINT(1 2),LINESTRING(3 4,5 6))", "GEOMETRYCOLLECTION(POINT(2 1),LINESTRING(4 3,6 5))"},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			g := geomFromWKT(t, tt.wktIn)
+			got := g.FlipCoordinates()
+			want := geomFromWKT(t, tt.wktOut)
+			expectGeomEq(t, got, want)
+		})
+	}
+}

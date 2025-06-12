@@ -597,3 +597,10 @@ func (m MultiPolygon) Densify(maxDistance float64) MultiPolygon {
 func (m MultiPolygon) SnapToGrid(decimalPlaces int) MultiPolygon {
 	return m.TransformXY(snapToGridXY(decimalPlaces))
 }
+
+// FlipCoordinates returns a new MultiPolygon with X and Y swapped for each point.
+func (m MultiPolygon) FlipCoordinates() MultiPolygon {
+	return m.TransformXY(func(xy XY) XY {
+		return XY{xy.Y, xy.X}
+	})
+}
