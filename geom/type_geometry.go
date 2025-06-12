@@ -545,6 +545,41 @@ func (g Geometry) TransformXY(fn func(XY) XY) Geometry {
 	}
 }
 
+// Transform transforms this Geometry into another Geometry according to the
+// provided function, which should transform coordinates in place in the
+// float64 slice argument. Coordinates are laid out in order X1, Y1, X2, Y2...
+// (for XY geometries), X1, Y1, Z1, X2, Y2, Z2... (for XYZ geometries), X1, Y1,
+// M1, X2, Y2, M2... (for XYM geometries), or X1, Y1, Z1, M1, X2, Y2, Z2, M2...
+// (for XYZM geometries). The function should return an error if the
+// transformation fails.
+func (g Geometry) Transform(fn func(CoordinatesType, []float64) error) (Geometry, error) {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		tf, err := g.MustAsGeometryCollection().Transform(fn)
+		return tf.AsGeometry(), err
+	case TypePoint:
+		tf, err := g.MustAsPoint().Transform(fn)
+		return tf.AsGeometry(), err
+	case TypeLineString:
+		tf, err := g.MustAsLineString().Transform(fn)
+		return tf.AsGeometry(), err
+	case TypePolygon:
+		tf, err := g.MustAsPolygon().Transform(fn)
+		return tf.AsGeometry(), err
+	case TypeMultiPoint:
+		tf, err := g.MustAsMultiPoint().Transform(fn)
+		return tf.AsGeometry(), err
+	case TypeMultiLineString:
+		tf, err := g.MustAsMultiLineString().Transform(fn)
+		return tf.AsGeometry(), err
+	case TypeMultiPolygon:
+		tf, err := g.MustAsMultiPolygon().Transform(fn)
+		return tf.AsGeometry(), err
+	default:
+		panic("unknown geometry: " + g.gtype.String())
+	}
+}
+
 // Length gives the length of a Line, LineString, or MultiLineString
 // or the sum of the lengths of the components of a GeometryCollection.
 // Other Geometries are defined to return a length of zero.
