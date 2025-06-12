@@ -4,6 +4,11 @@
 
 __Special thanks to @gamzeozgul for contributing to this release.__
 
+- Adds a new package `github.com/peterstace/simplefeatures/proj` that wraps
+  the [PROJ](https://proj.org/) library. This package provides functionality
+  for transforming geometries between a vast array of different coordinate
+  reference systems.
+
 - Adds new `ToleranceZ` and `ToleranceM` options for use with the `ExactEquals`
   function. These options allow geometries to compare as equal, even when their
   Z and M values differ slightly.
