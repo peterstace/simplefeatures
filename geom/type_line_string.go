@@ -505,3 +505,10 @@ func (s LineString) Densify(minDistance float64) LineString {
 func (s LineString) SnapToGrid(decimalPlaces int) LineString {
 	return s.TransformXY(snapToGridXY(decimalPlaces))
 }
+
+// FlipCoordinates returns a new LineString with X and Y swapped for each point.
+func (s LineString) FlipCoordinates() LineString {
+	return s.TransformXY(func(xy XY) XY {
+		return XY{xy.Y, xy.X}
+	})
+}

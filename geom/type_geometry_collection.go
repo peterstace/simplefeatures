@@ -596,3 +596,10 @@ func (c GeometryCollection) Densify(maxDistance float64) GeometryCollection {
 func (c GeometryCollection) SnapToGrid(decimalPlaces int) GeometryCollection {
 	return c.TransformXY(snapToGridXY(decimalPlaces))
 }
+
+// FlipCoordinates returns a new GeometryCollection with X and Y swapped for each point in all geometries.
+func (c GeometryCollection) FlipCoordinates() GeometryCollection {
+	return c.TransformXY(func(xy XY) XY {
+		return XY{xy.Y, xy.X}
+	})
+}

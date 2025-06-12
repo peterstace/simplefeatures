@@ -1073,3 +1073,25 @@ func (g Geometry) SnapToGrid(decimalPlaces int) Geometry {
 		panic("unknown type: " + g.Type().String())
 	}
 }
+
+// FlipCoordinates returns a new geometry with X and Y coordinates swapped.
+func (g Geometry) FlipCoordinates() Geometry {
+	switch g.gtype {
+	case TypeGeometryCollection:
+		return g.MustAsGeometryCollection().FlipCoordinates().AsGeometry()
+	case TypePoint:
+		return g.MustAsPoint().FlipCoordinates().AsGeometry()
+	case TypeLineString:
+		return g.MustAsLineString().FlipCoordinates().AsGeometry()
+	case TypePolygon:
+		return g.MustAsPolygon().FlipCoordinates().AsGeometry()
+	case TypeMultiPoint:
+		return g.MustAsMultiPoint().FlipCoordinates().AsGeometry()
+	case TypeMultiLineString:
+		return g.MustAsMultiLineString().FlipCoordinates().AsGeometry()
+	case TypeMultiPolygon:
+		return g.MustAsMultiPolygon().FlipCoordinates().AsGeometry()
+	default:
+		panic("unknown geometry: " + g.gtype.String())
+	}
+}

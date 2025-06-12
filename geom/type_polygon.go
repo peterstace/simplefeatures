@@ -731,3 +731,10 @@ func (p Polygon) Densify(maxDistance float64) Polygon {
 func (p Polygon) SnapToGrid(decimalPlaces int) Polygon {
 	return p.TransformXY(snapToGridXY(decimalPlaces))
 }
+
+// FlipCoordinates returns a new Polygon with X and Y swapped for each point.
+func (p Polygon) FlipCoordinates() Polygon {
+	return p.TransformXY(func(xy XY) XY {
+		return XY{xy.Y, xy.X}
+	})
+}
