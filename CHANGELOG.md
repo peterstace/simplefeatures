@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.54.0
+
+2025-06-16
 
 __Special thanks to @gamzeozgul for contributing to this release.__
 
