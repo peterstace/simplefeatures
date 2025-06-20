@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Simplifies some internals for GeoJSON marshalling. This change is not
+  detectable externally.
+
 ## v0.54.0
 
 2025-06-16
