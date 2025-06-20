@@ -179,42 +179,94 @@ func TestGeoJSONUnmarshalValid(t *testing.T) {
 	}
 }
 
-func TestGeoJSONUnmarshalValidAllowAdditionalCoordDimensions(t *testing.T) {
+func TestGeoJSONUnmarshalValidXYZM(t *testing.T) {
+	// The GeoJSON spec states:
+	//
+	// > The interpretation and meaning of additional elements is beyond the
+	// > scope of this specification, and additional elements MAY be ignored by
+	// > parsers.
+	//
+	// However, some users find that being able to unmarshal XYZM coordinates
+	// is useful, and isn't strictly prohibited by the spec.
+
 	for i, tt := range []struct {
 		geojson string
 		wkt     string
 	}{
 		{
 			geojson: `{"type":"Point","coordinates":[1,2,3,4]}`,
-			wkt:     "POINT Z (1 2 3)",
+			wkt:     "POINT ZM (1 2 3 4)",
 		},
 		{
-			geojson: `{"type":"LineString","coordinates":[[1,2,3,4],[2,3,4,5]]}`,
-			wkt:     "LINESTRING Z (1 2 3,2 3 4)",
+			geojson: `{"type":"LineString","coordinates":[[1,2,3,1],[3,4,5,2],[5,6,7,3]]}`,
+			wkt:     "LINESTRING ZM (1 2 3 1,3 4 5 2,5 6 7 3)",
 		},
 		{
-			geojson: `{"type":"LineString","coordinates":[[1,2,3,4],[2,3,4,5],[3,4,5,6,7]]}`,
-			wkt:     "LINESTRING Z (1 2 3,2 3 4,3 4 5)",
+			geojson: `{"type":"Polygon","coordinates":[[[0,0,9,1],[4,0,9,2],[0,4,9,3],[0,0,9,4]],[[1,1,9,5],[2,1,9,6],[1,2,9,7],[1,1,9,8]]]}`,
+			wkt:     "POLYGON ZM ((0 0 9 1,4 0 9 2,0 4 9 3,0 0 9 4),(1 1 9 5,2 1 9 6,1 2 9 7,1 1 9 8))",
 		},
 		{
-			geojson: `{"type":"Polygon","coordinates":[[[0,0,0,0],[0,1,0,0],[1,0,0,0],[0,0,0,0]]]}`,
-			wkt:     "POLYGON Z ((0 0 0,0 1 0,1 0 0,0 0 0))",
+			geojson: `{"type":"MultiPoint","coordinates":[[1,2,3,1],[3,4,5,2]]}`,
+			wkt:     "MULTIPOINT ZM (1 2 3 1,3 4 5 2)",
 		},
 		{
-			geojson: `{"type":"MultiPoint","coordinates":[[1,2,3,4]]}`,
-			wkt:     "MULTIPOINT Z (1 2 3)",
+			geojson: `{"type":"MultiLineString","coordinates":[[[0,1,9,1],[2,3,9,2]],[[4,5,9,3],[6,7,9,4],[8,9,9,5]]]}`,
+			wkt:     "MULTILINESTRING ZM ((0 1 9 1,2 3 9 2),(4 5 9 3,6 7 9 4,8 9 9 5))",
 		},
 		{
-			geojson: `{"type":"MultiLineString","coordinates":[[[1,2,3,4],[2,3,4,5]]]}`,
-			wkt:     "MULTILINESTRING Z ((1 2 3,2 3 4))",
+			geojson: `{"type":"MultiPolygon","coordinates":[[[[0,0,9,1],[1,0,9,2],[0,1,9,3],[0,0,9,4]]],[[[1,0,9,5],[2,0,9,6],[1,1,9,7],[1,0,9,8]]]]}`,
+			wkt:     "MULTIPOLYGON ZM (((0 0 9 1,1 0 9 2,0 1 9 3,0 0 9 4)),((1 0 9 5,2 0 9 6,1 1 9 7,1 0 9 8)))",
 		},
 		{
-			geojson: `{"type":"MultiLineString","coordinates":[[[1,2,3,4],[2,3,4,5],[3,4,5,6,7]]]}`,
-			wkt:     "MULTILINESTRING Z ((1 2 3,2 3 4,3 4 5))",
+			geojson: `{"type":"GeometryCollection","geometries":[{"type":"Point","coordinates":[1,2,3,1]},{"type":"Point","coordinates":[3,4,5,2]}]}`,
+			wkt:     "GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 1),POINT ZM (3 4 5 2))",
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got, err := geom.UnmarshalGeoJSON([]byte(tt.geojson))
+			expectNoErr(t, err)
+			want := geomFromWKT(t, tt.wkt)
+			expectGeomEq(t, got, want)
+		})
+	}
+}
+
+func TestGeoJSONUnmarshalValidAllowAdditionalCoordDimensions(t *testing.T) {
+	for i, tt := range []struct {
+		geojson string
+		wkt     string
+	}{
+		{
+			geojson: `{"type":"Point","coordinates":[1,2,3,4,5]}`,
+			wkt:     "POINT ZM (1 2 3 4)",
 		},
 		{
-			geojson: `{"type":"MultiPolygon","coordinates":[[[[0,0,0,0],[0,1,0,0],[1,0,0,0],[0,0,0,0]]]]}`,
-			wkt:     "MULTIPOLYGON Z (((0 0 0,0 1 0,1 0 0,0 0 0)))",
+			geojson: `{"type":"LineString","coordinates":[[1,2,3,4,5],[2,3,4,5,6]]}`,
+			wkt:     "LINESTRING ZM (1 2 3 4,2 3 4 5)",
+		},
+		{
+			geojson: `{"type":"LineString","coordinates":[[1,2,3,4,5],[2,3,4,5,6],[3,4,5,6,7,8]]}`,
+			wkt:     "LINESTRING ZM (1 2 3 4,2 3 4 5,3 4 5 6)",
+		},
+		{
+			geojson: `{"type":"Polygon","coordinates":[[[0,0,0,0,6],[0,1,0,0,7],[1,0,0,0,8],[0,0,0,0,9]]]}`,
+			wkt:     "POLYGON ZM ((0 0 0 0,0 1 0 0,1 0 0 0,0 0 0 0))",
+		},
+		{
+			geojson: `{"type":"MultiPoint","coordinates":[[1,2,3,4,5]]}`,
+			wkt:     "MULTIPOINT ZM (1 2 3 4)",
+		},
+		{
+			geojson: `{"type":"MultiLineString","coordinates":[[[1,2,3,4,5],[2,3,4,5,6]]]}`,
+			wkt:     "MULTILINESTRING ZM ((1 2 3 4,2 3 4 5))",
+		},
+		{
+			geojson: `{"type":"MultiLineString","coordinates":[[[1,2,3,4,5],[2,3,4,5,6],[3,4,5,6,7,8]]]}`,
+			wkt:     "MULTILINESTRING ZM ((1 2 3 4,2 3 4 5,3 4 5 6))",
+		},
+		{
+			geojson: `{"type":"MultiPolygon","coordinates":[[[[0,0,0,0,1],[0,1,0,0,2],[1,0,0,0,3],[0,0,0,0,4]]]]}`,
+			wkt:     "MULTIPOLYGON ZM (((0 0 0 0,0 1 0 0,1 0 0 0,0 0 0 0)))",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
