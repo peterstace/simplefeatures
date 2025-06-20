@@ -1,7 +1,6 @@
 package geom
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -128,16 +127,9 @@ func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(fms) == 0 || fms[0] != '{' {
-		return nil, errors.New("ForeignMembers must marshal to a JSON object")
-	}
-	if bytes.Equal(fms, []byte("{}")) {
-		// {} is a special case due to the ',' that would be added below.
-		return buf, nil
-	}
 	buf = buf[:len(buf)-1] // remove trailing '}'
 	buf = append(buf, ',')
-	buf = append(buf, fms[1:]...) // skip leading '{'
+	buf = append(buf, fms[1:]...) // skip leading '{' (must be a JSON object due to construction)
 	return buf, nil
 }
 
