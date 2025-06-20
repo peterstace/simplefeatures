@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Breaking change:** Adds support for foreign members in GeoJSON Feature
+  Collections. This necessitates a breaking change to the
+  `geom.GeoJSONFeatureCollection` type. It was previously defined as
+  `[]geom.GeoJSONFeature`, but is now defined as a struct with a `Features
+  []geom.GeoJSONFeature` field and a `ForeignMembers
+  map[string]json.RawMessage` field.
+
 - Simplifies some internals for GeoJSON marshalling. This change is not
   detectable externally.
 
