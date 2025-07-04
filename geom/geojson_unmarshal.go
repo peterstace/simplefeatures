@@ -333,14 +333,17 @@ func oneDimFloat64sToCoordinates(fs []float64, ctype CoordinatesType) (Coordinat
 	}
 
 	switch ctype {
+	case DimXY:
+		// Do nothing, already set XY.
 	case DimXYZ:
 		coords.Z = fs[2]
 	case DimXYZM:
 		coords.Z = fs[2]
 		coords.M = fs[3]
 	case DimXYM:
-		// This should not happen because DimXYM is never be chosen as the ctype.
-		panic("unexpected DimXYM ctype in oneDimFloat64sToCoordinates")
+		fallthrough // Cannot happen because DimXYM is never chosen as the ctype.
+	default:
+		panic(fmt.Sprintf("unexpected ctype %v in oneDimFloat64sToCoordinates", ctype))
 	}
 
 	return coords, true
