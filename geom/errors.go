@@ -133,5 +133,5 @@ type forbiddenForeignMemberError struct {
 }
 
 func (e forbiddenForeignMemberError) Error() string {
-	return fmt.Sprintf("disallowed foreign member: %s", e.memberName)
+	return "disallowed foreign member: " + e.memberName
 }
