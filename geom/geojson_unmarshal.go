@@ -19,7 +19,7 @@ func UnmarshalGeoJSON(input []byte, nv ...NoValidate) (Geometry, error) {
 		return Geometry{}, err
 	}
 
-	hasLength := make(map[int]bool)
+	hasLength := make(map[int]struct{})
 	if err := detectCoordinatesLengths(rootObj, hasLength); err != nil {
 		return Geometry{}, err
 	}
@@ -34,7 +34,7 @@ func UnmarshalGeoJSON(input []byte, nv ...NoValidate) (Geometry, error) {
 	return g, nil
 }
 
-func chooseGeoJSONCoordinatesType(hasLength map[int]bool) CoordinatesType {
+func chooseGeoJSONCoordinatesType(hasLength map[int]struct{}) CoordinatesType {
 	// The GeoJSON spec allows (but doesn't require) parsers to ignore any
 	// "extra" coordinate values in addition to the normal 3 coordinate values
 	// used to specify a 3D position. We choose to interpret a 4th dimension as
@@ -169,11 +169,11 @@ func geojsonInvalidCoordinatesLengthError(n int) error {
 	return geojsonSyntaxError{fmt.Sprintf("invalid geojson coordinate length: %d", n)}
 }
 
-func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
+func detectCoordinatesLengths(node interface{}, hasLength map[int]struct{}) error {
 	switch node := node.(type) {
 	case geojsonPoint:
 		n := len(node.coords)
-		hasLength[n] = true
+		hasLength[n] = struct{}{}
 		if n == 1 {
 			return geojsonInvalidCoordinatesLengthError(n)
 		}
@@ -181,7 +181,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 	case geojsonLineString:
 		for _, c := range node.coords {
 			n := len(c)
-			hasLength[n] = true
+			hasLength[n] = struct{}{}
 			if n < 2 {
 				return geojsonInvalidCoordinatesLengthError(n)
 			}
@@ -191,7 +191,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 		for _, outer := range node.coords {
 			for _, inner := range outer {
 				n := len(inner)
-				hasLength[n] = true
+				hasLength[n] = struct{}{}
 				if n < 2 {
 					return geojsonInvalidCoordinatesLengthError(n)
 				}
@@ -202,7 +202,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 		for _, c := range node.coords {
 			// GeoJSON MultiPoints do not allow empty Points inside them.
 			n := len(c)
-			hasLength[n] = true
+			hasLength[n] = struct{}{}
 			if n < 2 {
 				return geojsonInvalidCoordinatesLengthError(n)
 			}
@@ -212,7 +212,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 		for _, outer := range node.coords {
 			for _, inner := range outer {
 				n := len(inner)
-				hasLength[n] = true
+				hasLength[n] = struct{}{}
 				if n < 2 {
 					return geojsonInvalidCoordinatesLengthError(n)
 				}
@@ -224,7 +224,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 			for _, middle := range outer {
 				for _, inner := range middle {
 					n := len(inner)
-					hasLength[n] = true
+					hasLength[n] = struct{}{}
 					if n < 2 {
 						return geojsonInvalidCoordinatesLengthError(n)
 					}
