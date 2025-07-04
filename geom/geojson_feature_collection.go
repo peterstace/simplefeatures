@@ -123,6 +123,11 @@ func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
 	if len(f.ForeignMembers) == 0 {
 		return buf, nil
 	}
+	for _, forbidden := range []string{"type", "geometry", "id", "properties"} {
+		if _, ok := f.ForeignMembers[forbidden]; ok {
+			return nil, forbiddenForeignMemberError{forbidden}
+		}
+	}
 	fms, err := json.Marshal(f.ForeignMembers)
 	if err != nil {
 		return nil, err
@@ -208,6 +213,11 @@ func (c GeoJSONFeatureCollection) MarshalJSON() ([]byte, error) {
 
 	if len(c.ForeignMembers) == 0 {
 		return buf, nil
+	}
+	for _, forbidden := range []string{"type", "features"} {
+		if _, ok := c.ForeignMembers[forbidden]; ok {
+			return nil, forbiddenForeignMemberError{forbidden}
+		}
 	}
 	fms, err := json.Marshal(c.ForeignMembers)
 	if err != nil {

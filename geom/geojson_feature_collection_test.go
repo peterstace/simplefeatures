@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestGeoJSONFeatureCollectionValidUnmarshal(t *testing.T) {
@@ -220,6 +221,38 @@ func TestGeoJSONFeatureForeignMembers(t *testing.T) {
 	}
 }
 
+func TestGeoJSONFeatureForeignMembersForbidden(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		members map[string]interface{}
+	}{
+		{
+			name:    "has type foreign member",
+			members: map[string]interface{}{"type": "dummy"},
+		},
+		{
+			name:    "has geometry foreign member",
+			members: map[string]interface{}{"geometry": "dummy"},
+		},
+		{
+			name:    "has properties foreign member",
+			members: map[string]interface{}{"properties": "dummy"},
+		},
+		{
+			name:    "has id foreign member",
+			members: map[string]interface{}{"id": "dummy"},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			feat := geom.GeoJSONFeature{
+				ForeignMembers: tc.members,
+			}
+			_, err := json.Marshal(feat)
+			test.ErrAs(t, err, &geom.DisallowedForeignMemberError{})
+		})
+	}
+}
+
 func TestGeoJSONFeatureCollectionForeignMembers(t *testing.T) {
 	for _, tc := range []struct {
 		name    string
@@ -269,6 +302,30 @@ func TestGeoJSONFeatureCollectionForeignMembers(t *testing.T) {
 					expectDeepEq(t, fc.ForeignMembers, tc.members)
 				}
 			})
+		})
+	}
+}
+
+func TestGeoJSONFeatureCollectionForeignMembersForbidden(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		members map[string]interface{}
+	}{
+		{
+			name:    "has type foreign member",
+			members: map[string]interface{}{"type": "dummy"},
+		},
+		{
+			name:    "has features foreign member",
+			members: map[string]interface{}{"features": "dummy"},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			fc := geom.GeoJSONFeatureCollection{
+				ForeignMembers: tc.members,
+			}
+			_, err := json.Marshal(fc)
+			test.ErrAs(t, err, &geom.DisallowedForeignMemberError{})
 		})
 	}
 }

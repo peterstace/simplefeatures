@@ -10,6 +10,8 @@ type MismatchedGeometryCollectionDimsError = mismatchedGeometryCollectionDimsErr
 
 type UnmarshalGeoJSONSourceDestinationMismatchError = unmarshalGeoJSONSourceDestinationMismatchError
 
+type DisallowedForeignMemberError = forbiddenForeignMemberError
+
 type (
 	ValidationError = validationError
 	RuleViolation   = ruleViolation
