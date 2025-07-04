@@ -5,6 +5,8 @@
 - Simplifies some internals for GeoJSON marshalling. This change is not
   detectable externally.
 
+- Adds support for XYZM coordinate types when unmarshalling GeoJSON.
+
 ## v0.54.0
 
 2025-06-16

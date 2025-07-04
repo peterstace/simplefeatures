@@ -19,45 +19,11 @@ func UnmarshalGeoJSON(input []byte, nv ...NoValidate) (Geometry, error) {
 		return Geometry{}, err
 	}
 
-	hasLength := make(map[int]bool)
+	hasLength := make(map[int]struct{})
 	if err := detectCoordinatesLengths(rootObj, hasLength); err != nil {
 		return Geometry{}, err
 	}
-
-	// We want to parse the geojson as a 3D geometry in the case where there is
-	// at least 1 non-empty geometry, and there are no 2D coordinates (since
-	// otherwise we would not be able to provide the height for the 2D
-	// coordinates). In all other cases, we can only sensibly interpret the
-	// geojson as being 2D.
-	//
-	// | hasEmpty | has2D | has3D | result |
-	// | ---      | ---   | ---   | ---    |
-	// | false    | false | false | DimXY  |
-	// | false    | false | true  | XYZ    |
-	// | false    | true  | false | DimXY  |
-	// | false    | true  | true  | DimXY  |
-	// | true     | false | false | DimXY  |
-	// | true     | false | true  | XYZ    |
-	// | true     | true  | false | DimXY  |
-	// | true     | true  | true  | DimXY  |
-	var has2D, has3D bool
-	for length := range hasLength {
-		if length == 2 {
-			has2D = true
-		}
-
-		// The GeoJSON spec allows parsers to ignore any "extra" coordinate
-		// values in addition to the normal 3 coordinate values used to specify
-		// a 3D position. So having a length strictly greater than 3 is not an
-		// error.
-		if length >= 3 {
-			has3D = true
-		}
-	}
-	ctype := DimXY
-	if !has2D && has3D {
-		ctype = DimXYZ
-	}
+	ctype := chooseGeoJSONCoordinatesType(hasLength)
 
 	g := geojsonNodeToGeometry(rootObj, ctype)
 	if len(nv) == 0 {
@@ -66,6 +32,42 @@ func UnmarshalGeoJSON(input []byte, nv ...NoValidate) (Geometry, error) {
 		}
 	}
 	return g, nil
+}
+
+func chooseGeoJSONCoordinatesType(hasLength map[int]struct{}) CoordinatesType {
+	// The GeoJSON spec allows (but doesn't require) parsers to ignore any
+	// "extra" coordinate values in addition to the normal 3 coordinate values
+	// used to specify a 3D position. We choose to interpret a 4th dimension as
+	// M values, and ignore any further (5th and above) dimensions without
+	// error.
+	//
+	// We choose the highest ctype such that we can unambiguously parse any of
+	// the points in the geometry (i.e. we don't have to make up a Z or M
+	// value).
+	//
+	// | has2  | has3  | has4OrMore | ctype   |
+	// | ---   | ---   | ---        | ---     |
+	// | false | false | false      | DimXY   |
+	// | false | false | true       | DimXYZM |
+	// | false | true  | false      | DimXYZ  |
+	// | false | true  | true       | DimXYZ  |
+	// | true  | false | false      | DimXY   |
+	// | true  | false | true       | DimXY   |
+	// | true  | true  | false      | DimXY   |
+	// | true  | true  | true       | DimXY   |
+	var has2, has3, has4OrMore bool
+	for length := range hasLength {
+		has2 = has2 || length == 2
+		has3 = has3 || length == 3
+		has4OrMore = has4OrMore || length >= 4
+	}
+	if !has2 && has3 {
+		return DimXYZ
+	}
+	if !has2 && !has3 && has4OrMore {
+		return DimXYZM
+	}
+	return DimXY
 }
 
 type geojsonNode struct {
@@ -167,11 +169,11 @@ func geojsonInvalidCoordinatesLengthError(n int) error {
 	return geojsonSyntaxError{fmt.Sprintf("invalid geojson coordinate length: %d", n)}
 }
 
-func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
+func detectCoordinatesLengths(node interface{}, hasLength map[int]struct{}) error {
 	switch node := node.(type) {
 	case geojsonPoint:
 		n := len(node.coords)
-		hasLength[n] = true
+		hasLength[n] = struct{}{}
 		if n == 1 {
 			return geojsonInvalidCoordinatesLengthError(n)
 		}
@@ -179,7 +181,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 	case geojsonLineString:
 		for _, c := range node.coords {
 			n := len(c)
-			hasLength[n] = true
+			hasLength[n] = struct{}{}
 			if n < 2 {
 				return geojsonInvalidCoordinatesLengthError(n)
 			}
@@ -189,7 +191,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 		for _, outer := range node.coords {
 			for _, inner := range outer {
 				n := len(inner)
-				hasLength[n] = true
+				hasLength[n] = struct{}{}
 				if n < 2 {
 					return geojsonInvalidCoordinatesLengthError(n)
 				}
@@ -200,7 +202,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 		for _, c := range node.coords {
 			// GeoJSON MultiPoints do not allow empty Points inside them.
 			n := len(c)
-			hasLength[n] = true
+			hasLength[n] = struct{}{}
 			if n < 2 {
 				return geojsonInvalidCoordinatesLengthError(n)
 			}
@@ -210,7 +212,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 		for _, outer := range node.coords {
 			for _, inner := range outer {
 				n := len(inner)
-				hasLength[n] = true
+				hasLength[n] = struct{}{}
 				if n < 2 {
 					return geojsonInvalidCoordinatesLengthError(n)
 				}
@@ -222,7 +224,7 @@ func detectCoordinatesLengths(node interface{}, hasLength map[int]bool) error {
 			for _, middle := range outer {
 				for _, inner := range middle {
 					n := len(inner)
-					hasLength[n] = true
+					hasLength[n] = struct{}{}
 					if n < 2 {
 						return geojsonInvalidCoordinatesLengthError(n)
 					}
@@ -324,9 +326,26 @@ func oneDimFloat64sToCoordinates(fs []float64, ctype CoordinatesType) (Coordinat
 		XY:   XY{fs[0], fs[1]},
 		Type: ctype,
 	}
-	if ctype.Is3D() {
-		coords.Z = fs[2]
+
+	if len(fs) < ctype.Dimension() {
+		// This should not happen because we used the lengths to choose the ctype.
+		panic(fmt.Sprintf("unexpected length %d for ctype %s", len(fs), ctype))
 	}
+
+	switch ctype {
+	case DimXY:
+		// Do nothing, already set XY.
+	case DimXYZ:
+		coords.Z = fs[2]
+	case DimXYZM:
+		coords.Z = fs[2]
+		coords.M = fs[3]
+	case DimXYM:
+		fallthrough // Cannot happen because DimXYM is never chosen as the ctype.
+	default:
+		panic(fmt.Sprintf("unexpected ctype %v in oneDimFloat64sToCoordinates", ctype))
+	}
+
 	return coords, true
 }
 
