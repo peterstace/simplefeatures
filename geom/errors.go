@@ -127,3 +127,11 @@ func (e validationError) Error() string {
 	}
 	return string(e.RuleViolation)
 }
+
+type forbiddenForeignMemberError struct {
+	memberName string
+}
+
+func (e forbiddenForeignMemberError) Error() string {
+	return "disallowed foreign member: " + e.memberName
+}

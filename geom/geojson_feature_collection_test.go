@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestGeoJSONFeatureCollectionValidUnmarshal(t *testing.T) {
@@ -59,9 +60,9 @@ func TestGeoJSONFeatureCollectionValidUnmarshal(t *testing.T) {
 	err := json.NewDecoder(strings.NewReader(input)).Decode(&fc)
 	expectNoErr(t, err)
 
-	expectIntEq(t, len(fc), 2)
-	f0 := fc[0]
-	f1 := fc[1]
+	expectIntEq(t, len(fc.Features), 2)
+	f0 := fc.Features[0]
+	f1 := fc.Features[1]
 
 	expectStringEq(t, f0.ID.(string), "id0")
 	expectBoolEq(t, reflect.DeepEqual(f0.Properties, map[string]interface{}{"prop0": "value0", "prop1": "value1"}), true)
@@ -138,30 +139,35 @@ func TestGeoJSONFeatureCollectionEmpty(t *testing.T) {
 }
 
 func TestGeoJSONFeatureCollectionNil(t *testing.T) {
-	out, err := json.Marshal(geom.GeoJSONFeatureCollection(nil))
+	out, err := json.Marshal(geom.GeoJSONFeatureCollection{
+		Features:       nil,
+		ForeignMembers: nil,
+	})
 	expectNoErr(t, err)
 	expectStringEq(t, string(out), `{"type":"FeatureCollection","features":[]}`)
 }
 
 func TestGeoJSONFeatureCollectionAndPropertiesNil(t *testing.T) {
-	out, err := json.Marshal(geom.GeoJSONFeatureCollection{{Geometry: geomFromWKT(t, "POINT(1 2)")}})
+	out, err := json.Marshal(geom.GeoJSONFeatureCollection{Features: []geom.GeoJSONFeature{{Geometry: geomFromWKT(t, "POINT(1 2)")}}})
 	expectNoErr(t, err)
 	expectStringEq(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"properties":{}}]}`)
 }
 
 func TestGeoJSONFeatureCollectionAndPropertiesSet(t *testing.T) {
-	out, err := json.Marshal(geom.GeoJSONFeatureCollection{{
-		Geometry: geomFromWKT(t, "POINT(1 2)"),
-		ID:       "myid",
-		Properties: map[string]interface{}{
-			"foo": "bar",
-		},
-	}})
+	out, err := json.Marshal(geom.GeoJSONFeatureCollection{
+		Features: []geom.GeoJSONFeature{{
+			Geometry: geomFromWKT(t, "POINT(1 2)"),
+			ID:       "myid",
+			Properties: map[string]interface{}{
+				"foo": "bar",
+			},
+		}},
+	})
 	expectNoErr(t, err)
 	expectStringEq(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"id":"myid","properties":{"foo":"bar"}}]}`)
 }
 
-func TestGeoJSONForeignMembers(t *testing.T) {
+func TestGeoJSONFeatureForeignMembers(t *testing.T) {
 	for _, tc := range []struct {
 		name    string
 		members map[string]interface{}
@@ -211,6 +217,115 @@ func TestGeoJSONForeignMembers(t *testing.T) {
 					expectDeepEq(t, feat.ForeignMembers, tc.members)
 				}
 			})
+		})
+	}
+}
+
+func TestGeoJSONFeatureForeignMembersForbidden(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		members map[string]interface{}
+	}{
+		{
+			name:    "has type foreign member",
+			members: map[string]interface{}{"type": "dummy"},
+		},
+		{
+			name:    "has geometry foreign member",
+			members: map[string]interface{}{"geometry": "dummy"},
+		},
+		{
+			name:    "has properties foreign member",
+			members: map[string]interface{}{"properties": "dummy"},
+		},
+		{
+			name:    "has id foreign member",
+			members: map[string]interface{}{"id": "dummy"},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			feat := geom.GeoJSONFeature{
+				ForeignMembers: tc.members,
+			}
+			_, err := json.Marshal(feat)
+			test.ErrAs(t, err, &geom.DisallowedForeignMemberError{})
+		})
+	}
+}
+
+func TestGeoJSONFeatureCollectionForeignMembers(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		members map[string]interface{}
+		json    string
+	}{
+		{
+			name:    "nil foreign members",
+			members: nil,
+			json:    `{"type":"FeatureCollection","features":[]}`,
+		},
+		{
+			name:    "empty foreign members",
+			members: map[string]interface{}{},
+			json:    `{"type":"FeatureCollection","features":[]}`,
+		},
+		{
+			name:    "one foreign member",
+			members: map[string]interface{}{"foo": "bar"},
+			json:    `{"type":"FeatureCollection","features":[],"foo":"bar"}`,
+		},
+		{
+			name:    "two foreign members",
+			members: map[string]interface{}{"foo": "bar", "baz": 42.0},
+			json:    `{"type":"FeatureCollection","features":[],"baz":42,"foo":"bar"}`,
+		},
+		{
+			name:    "nested",
+			members: map[string]interface{}{"metadata": map[string]interface{}{"foo": "bar", "baz": 42.0}},
+			json:    `{"type":"FeatureCollection","features":[],"metadata":{"baz":42,"foo":"bar"}}`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Run("marshal", func(t *testing.T) {
+				fc := geom.GeoJSONFeatureCollection{
+					ForeignMembers: tc.members,
+				}
+				got, err := json.Marshal(fc)
+				expectNoErr(t, err)
+				expectStringEq(t, string(got), tc.json)
+			})
+			t.Run("unmarshal", func(t *testing.T) {
+				var fc geom.GeoJSONFeatureCollection
+				err := json.Unmarshal([]byte(tc.json), &fc)
+				expectNoErr(t, err)
+				if len(fc.ForeignMembers) != 0 || len(tc.members) != 0 {
+					expectDeepEq(t, fc.ForeignMembers, tc.members)
+				}
+			})
+		})
+	}
+}
+
+func TestGeoJSONFeatureCollectionForeignMembersForbidden(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		members map[string]interface{}
+	}{
+		{
+			name:    "has type foreign member",
+			members: map[string]interface{}{"type": "dummy"},
+		},
+		{
+			name:    "has features foreign member",
+			members: map[string]interface{}{"features": "dummy"},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			fc := geom.GeoJSONFeatureCollection{
+				ForeignMembers: tc.members,
+			}
+			_, err := json.Marshal(fc)
+			test.ErrAs(t, err, &geom.DisallowedForeignMemberError{})
 		})
 	}
 }
