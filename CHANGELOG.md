@@ -14,6 +14,13 @@
 
 - Adds support for XYZM coordinate types when unmarshalling GeoJSON.
 
+- Refactors the internal representation of the `geom.Geometry` type to use
+  `interface{}` instead of `unsafe.Pointer`. This makes geometries compatible
+  with `reflect.DeepEqual`, which now produces the same result as `ExactEquals`
+  when called with no options. This change is not detectable externally except
+  that `reflect.DeepEqual` now works correctly for exactly comparing
+  geometries.
+
 ## v0.54.0
 
 2025-06-16
@@ -777,7 +784,7 @@ __Special thanks to Albert Teoh for contributing to this release.__
   scenarios involving almost collinear points.
 
 - Add GEOS Buffer option wrappers. The following options are now wrapped:
-  
+
     - The number of line segments used to represent curved parts of buffered
       geometries.
 
