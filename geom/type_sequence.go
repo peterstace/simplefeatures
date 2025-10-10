@@ -31,6 +31,12 @@ func NewSequence(coordinates []float64, ctype CoordinatesType) Sequence {
 	if len(coordinates)%ctype.Dimension() != 0 {
 		panic("invalid coordinates length: inconsistent with CoordinatesType")
 	}
+	if len(coordinates) == 0 {
+		// Canonicalize empty slice to nil so that reflect.DeepEqual works
+		// correctly. This ensures Sequence{ctype, nil} and Sequence{ctype,
+		// []float64{}} are equal, matching the zero value representation.
+		coordinates = nil
+	}
 	return Sequence{ctype, coordinates}
 }
 

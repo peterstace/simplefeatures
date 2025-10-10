@@ -7,11 +7,9 @@ import (
 	"github.com/peterstace/simplefeatures/internal/test"
 )
 
-// TestReflectDeepEqualFails proves that reflect.DeepEqual doesn't work for
-// comparing geom.Geometry values because it compares the unsafe.Pointer field
-// by address rather than dereferencing it to compare the underlying geometry
-// data. This test covers both non-empty and empty geometries.
-func TestReflectDeepEqualFails(t *testing.T) {
+// TestReflectDeepEqualWorks proves that reflect.DeepEqual works for comparing
+// geom.Geometry values.
+func TestReflectDeepEqualWorks(t *testing.T) {
 	tests := []struct {
 		name string
 		wkt  string
@@ -36,25 +34,21 @@ func TestReflectDeepEqualFails(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g1 := geomFromWKT(t, tt.wkt)
 			g2 := geomFromWKT(t, tt.wkt)
-
-			// The geometries are semantically equal.
-			test.ExactEquals(t, g1, g2)
-
-			// But reflect.DeepEqual fails because it compares unsafe.Pointer addresses.
-			test.NotDeepEqual(t, g1, g2)
+			test.ExactEquals(t, g1, g2) // The geometries are semantically equal.
+			test.DeepEqual(t, g1, g2)   // And reflect.DeepEqual works as expected.
 		})
 	}
 }
 
-// TestReflectDeepEqualFailsForZeroValue proves that reflect.DeepEqual doesn't
-// handle the special zero value semantics of geom.Geometry. The zero value of
-// Geometry is an empty GeometryCollection with a nil pointer, but this should
-// be semantically equal to manually constructed empty GeometryCollections.
-func TestReflectDeepEqualFailsForZeroValue(t *testing.T) {
-	// Zero value has ptr == nil.
+// TestReflectDeepEqualWorksForZeroValue proves that reflect.DeepEqual handles
+// the special zero value semantics of geom.Geometry. The zero value of
+// Geometry is an empty GeometryCollection with a nil impl, and this is
+// semantically equal to manually constructed empty GeometryCollections.
+func TestReflectDeepEqualWorksForZeroValue(t *testing.T) {
+	// Zero value has impl == nil.
 	var g1 geom.Geometry
 
-	// Constructed from WKT has ptr != nil.
+	// Constructed from WKT.
 	g2 := geomFromWKT(t, "GEOMETRYCOLLECTION EMPTY")
 
 	// Manually constructed with nil slice.
@@ -71,11 +65,11 @@ func TestReflectDeepEqualFailsForZeroValue(t *testing.T) {
 	test.ExactEquals(t, g2, g4)
 	test.ExactEquals(t, g3, g4)
 
-	// But reflect.DeepEqual fails for all pairs due to different pointers or nil vs empty slices.
-	test.NotDeepEqual(t, g1, g2)
-	test.NotDeepEqual(t, g1, g3)
-	test.NotDeepEqual(t, g1, g4)
-	test.NotDeepEqual(t, g2, g3)
-	test.NotDeepEqual(t, g2, g4)
-	test.NotDeepEqual(t, g3, g4)
+	// And reflect.DeepEqual works for all pairs.
+	test.DeepEqual(t, g1, g2)
+	test.DeepEqual(t, g1, g3)
+	test.DeepEqual(t, g1, g4)
+	test.DeepEqual(t, g2, g3)
+	test.DeepEqual(t, g2, g4)
+	test.DeepEqual(t, g3, g4)
 }

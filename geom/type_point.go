@@ -4,7 +4,6 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
-	"unsafe"
 )
 
 // Point is a zero dimensional geometry that represents a single location in a
@@ -47,7 +46,7 @@ func (p Point) Type() GeometryType {
 
 // AsGeometry converts this Point into a Geometry.
 func (p Point) AsGeometry() Geometry {
-	return Geometry{TypePoint, unsafe.Pointer(&p)}
+	return Geometry{impl: p}
 }
 
 // XY gives the XY location of the point. The returned flag is set to true if

@@ -4,7 +4,6 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
-	"unsafe"
 
 	"github.com/peterstace/simplefeatures/rtree"
 )
@@ -173,7 +172,7 @@ func (p Polygon) Type() GeometryType {
 
 // AsGeometry converts this Polygon into a Geometry.
 func (p Polygon) AsGeometry() Geometry {
-	return Geometry{TypePolygon, unsafe.Pointer(&p)}
+	return Geometry{impl: p}
 }
 
 // ExteriorRing gives the exterior ring of the polygon boundary. If the polygon
@@ -528,6 +527,10 @@ func (p Polygon) CoordinatesType() CoordinatesType {
 // ForceCoordinatesType returns a new Polygon with a different CoordinatesType. If a dimension
 // is added, then new values are populated with 0.
 func (p Polygon) ForceCoordinatesType(newCType CoordinatesType) Polygon {
+	if len(p.rings) == 0 {
+		// Canonicalize empty slice to nil so that reflect.DeepEqual works correctly.
+		return Polygon{nil, newCType}
+	}
 	flatRings := make([]LineString, len(p.rings))
 	for i := range p.rings {
 		flatRings[i] = p.rings[i].ForceCoordinatesType(newCType)

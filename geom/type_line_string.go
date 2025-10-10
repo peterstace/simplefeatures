@@ -3,7 +3,6 @@ package geom
 import (
 	"database/sql/driver"
 	"fmt"
-	"unsafe"
 
 	"github.com/peterstace/simplefeatures/rtree"
 )
@@ -63,7 +62,7 @@ func (s LineString) Type() GeometryType {
 
 // AsGeometry converts this LineString into a Geometry.
 func (s LineString) AsGeometry() Geometry {
-	return Geometry{TypeLineString, unsafe.Pointer(&s)}
+	return Geometry{impl: s}
 }
 
 // StartPoint gives the first point of the LineString. If the LineString is

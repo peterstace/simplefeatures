@@ -3,7 +3,6 @@ package geom
 import (
 	"database/sql/driver"
 	"fmt"
-	"unsafe"
 )
 
 // MultiPoint is a 0-dimensional geometry that is a collection of points. Its
@@ -52,7 +51,7 @@ func (m MultiPoint) Type() GeometryType {
 
 // AsGeometry converts this MultiPoint into a Geometry.
 func (m MultiPoint) AsGeometry() Geometry {
-	return Geometry{TypeMultiPoint, unsafe.Pointer(&m)}
+	return Geometry{impl: m}
 }
 
 // NumPoints gives the number of element points making up the MultiPoint.
@@ -318,6 +317,10 @@ func (m MultiPoint) ForceCoordinatesType(newCType CoordinatesType) MultiPoint {
 // forceCoordinatesTypeOfPointSlice creates a new slice of Points, each forced
 // to a new coordinates type.
 func forceCoordinatesTypeOfPointSlice(pts []Point, ctype CoordinatesType) []Point {
+	if len(pts) == 0 {
+		// Canonicalize empty slice to nil so that reflect.DeepEqual works correctly.
+		return nil
+	}
 	cp := make([]Point, len(pts))
 	for i, pt := range pts {
 		cp[i] = pt.ForceCoordinatesType(ctype)

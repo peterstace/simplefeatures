@@ -4,7 +4,6 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
-	"unsafe"
 )
 
 // GeometryCollection is a non-homogeneous collection of geometries. Its zero
@@ -56,7 +55,12 @@ func (c GeometryCollection) Type() GeometryType {
 
 // AsGeometry converts this GeometryCollection into a Geometry.
 func (c GeometryCollection) AsGeometry() Geometry {
-	return Geometry{TypeGeometryCollection, unsafe.Pointer(&c)}
+	// Ensure consistent representation of empty GeometryCollection with DimXY
+	// to match the Geometry zero value.
+	if len(c.geoms) == 0 && c.ctype == DimXY {
+		return Geometry{}
+	}
+	return Geometry{impl: c}
 }
 
 // NumGeometries gives the number of Geometry elements in the GeometryCollection.

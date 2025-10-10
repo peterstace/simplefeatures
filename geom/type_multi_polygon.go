@@ -3,7 +3,6 @@ package geom
 import (
 	"database/sql/driver"
 	"fmt"
-	"unsafe"
 
 	"github.com/peterstace/simplefeatures/rtree"
 )
@@ -181,7 +180,7 @@ func (m MultiPolygon) Type() GeometryType {
 
 // AsGeometry converts this MultiPolygon into a Geometry.
 func (m MultiPolygon) AsGeometry() Geometry {
-	return Geometry{TypeMultiPolygon, unsafe.Pointer(&m)}
+	return Geometry{impl: m}
 }
 
 // NumPolygons gives the number of Polygon elements in the MultiPolygon.
@@ -412,6 +411,10 @@ func (m MultiPolygon) CoordinatesType() CoordinatesType {
 // ForceCoordinatesType returns a new MultiPolygon with a different CoordinatesType. If a
 // dimension is added, then new values are populated with 0.
 func (m MultiPolygon) ForceCoordinatesType(newCType CoordinatesType) MultiPolygon {
+	if len(m.polys) == 0 {
+		// Canonicalize empty slice to nil so that reflect.DeepEqual works correctly.
+		return MultiPolygon{nil, newCType}
+	}
 	flat := make([]Polygon, len(m.polys))
 	for i := range m.polys {
 		flat[i] = m.polys[i].ForceCoordinatesType(newCType)

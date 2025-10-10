@@ -221,7 +221,7 @@ func (w *twkbWriter) writeGeometry(g Geometry) error {
 }
 
 func (w *twkbWriter) writeGeometryByType(g Geometry) error {
-	switch g.gtype {
+	switch g.Type() {
 	case TypePoint:
 		return w.writePoint(g.MustAsPoint())
 	case TypeLineString:
@@ -237,7 +237,7 @@ func (w *twkbWriter) writeGeometryByType(g Geometry) error {
 	case TypeGeometryCollection:
 		return w.writeGeometryCollection(g.MustAsGeometryCollection())
 	default:
-		return fmt.Errorf("geometry has unsupported type: %q", g.gtype)
+		return fmt.Errorf("geometry has unsupported type: %q", g.Type())
 	}
 }
 

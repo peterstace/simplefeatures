@@ -3,7 +3,6 @@ package geom
 import (
 	"database/sql/driver"
 	"fmt"
-	"unsafe"
 
 	"github.com/peterstace/simplefeatures/rtree"
 )
@@ -60,7 +59,7 @@ func (m MultiLineString) Type() GeometryType {
 
 // AsGeometry converts this MultiLineString into a Geometry.
 func (m MultiLineString) AsGeometry() Geometry {
-	return Geometry{TypeMultiLineString, unsafe.Pointer(&m)}
+	return Geometry{impl: m}
 }
 
 // NumLineStrings gives the number of LineString elements in the
@@ -405,6 +404,10 @@ func (m MultiLineString) CoordinatesType() CoordinatesType {
 // ForceCoordinatesType returns a new MultiLineString with a different CoordinatesType. If a
 // dimension is added, then new values are populated with 0.
 func (m MultiLineString) ForceCoordinatesType(newCType CoordinatesType) MultiLineString {
+	if len(m.lines) == 0 {
+		// Canonicalize empty slice to nil so that reflect.DeepEqual works correctly.
+		return MultiLineString{nil, newCType}
+	}
 	flat := make([]LineString, len(m.lines))
 	for i := range m.lines {
 		flat[i] = m.lines[i].ForceCoordinatesType(newCType)

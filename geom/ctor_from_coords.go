@@ -331,12 +331,20 @@ func NewMultiPolygonXYZM(xyzms ...[][]float64) MultiPolygon {
 
 func clone1DFloat64s(src []float64) []float64 {
 	// TODO: Use slices.Clone once on Go 1.21.
+	if len(src) == 0 {
+		// Canonicalize empty slice to nil so that zero values and non-zero empty slices compare deeply equal.
+		return nil
+	}
 	dst := make([]float64, len(src))
 	copy(dst, src)
 	return dst
 }
 
 func clone2DFloat64s(src [][]float64) [][]float64 {
+	if len(src) == 0 {
+		// Canonicalize empty slice to nil so that zero values and non-zero empty slices compare deeply equal.
+		return nil
+	}
 	dst := make([][]float64, len(src))
 	for i := range src {
 		dst[i] = clone1DFloat64s(src[i])
@@ -345,6 +353,10 @@ func clone2DFloat64s(src [][]float64) [][]float64 {
 }
 
 func clone3DFloat64s(src [][][]float64) [][][]float64 {
+	if len(src) == 0 {
+		// Canonicalize empty slice to nil so that zero values and non-zero empty slices compare deeply equal.
+		return nil
+	}
 	dst := make([][][]float64, len(src))
 	for i := range src {
 		dst[i] = clone2DFloat64s(src[i])
