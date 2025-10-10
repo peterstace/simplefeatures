@@ -78,7 +78,6 @@ linters:
     - grouper
     - importas
     - ineffassign
-    - interfacebloat
     - intrange
     - ireturn
     - loggercheck
@@ -143,6 +142,7 @@ linters:
     - err113
     - gomnd
     - inamedparam
+    - interfacebloat
     - lll
     - maintidx
     - nestif
