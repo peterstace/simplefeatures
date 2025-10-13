@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.55.0
+
+2025-10-10
 
 - **Breaking change:** Adds support for foreign members in GeoJSON Feature
   Collections. This necessitates a breaking change to the
