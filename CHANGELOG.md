@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Refactors the internal representation of the `geom.Geometry` type to use
+  `interface{}` instead of `unsafe.Pointer`. This makes geometries compatible
+  with `reflect.DeepEqual`, which now produces the same result as `ExactEquals`
+  when called with no options. This change is not detectable externally except
+  that `reflect.DeepEqual` now works correctly for exactly comparing
+  geometries.
+
 ## v0.55.0
 
 2025-10-10
@@ -15,13 +24,6 @@
   detectable externally.
 
 - Adds support for XYZM coordinate types when unmarshalling GeoJSON.
-
-- Refactors the internal representation of the `geom.Geometry` type to use
-  `interface{}` instead of `unsafe.Pointer`. This makes geometries compatible
-  with `reflect.DeepEqual`, which now produces the same result as `ExactEquals`
-  when called with no options. This change is not detectable externally except
-  that `reflect.DeepEqual` now works correctly for exactly comparing
-  geometries.
 
 ## v0.54.0
 
