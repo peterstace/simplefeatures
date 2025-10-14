@@ -1,9 +1,31 @@
 package geom
 
 func newDCELFromGeometries(a, b Geometry) *doublyConnectedEdgeList {
-	ghosts := createGhosts(a, b)
-	a, b, ghosts = reNodeGeometries(a, b, ghosts)
+	a, b, ghosts := prepareGeometriesForDCEL(a, b)
+	return newDCELFromRenodedGeometries(a, b, ghosts)
+}
 
+// prepareGeometriesForDCEL pre-processes the input geometries (A and B) such
+// that they can be used to create a DCEL. An additional "ghost"
+// MultiLineString is also returned, which provides the appropriate connections
+// such that A and B (when combined together) are fully connected.
+func prepareGeometriesForDCEL(a, b Geometry) (Geometry, Geometry, MultiLineString) {
+	// Renode just A and B. Them being noded correctly is a pre-requisite for
+	// creating the ghosts.
+	a, b, _ = reNodeGeometries(a, b, MultiLineString{})
+
+	ghosts := createGhosts(a, b)
+
+	if ghosts.IsEmpty() {
+		return a, b, ghosts
+	}
+
+	// Renode again, since, the ghosts may have introduced new intersections
+	// with A and/or B.
+	return reNodeGeometries(a, b, ghosts)
+}
+
+func newDCELFromRenodedGeometries(a, b Geometry, ghosts MultiLineString) *doublyConnectedEdgeList {
 	interactions := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})
 
 	dcel := newDCEL()
