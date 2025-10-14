@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Refactors the internal representation of the `geom.Geometry` type to use
+  `interface{}` instead of `unsafe.Pointer`. This makes geometries compatible
+  with `reflect.DeepEqual`, which now produces the same result as `ExactEquals`
+  when called with no options. This change is not detectable externally except
+  that `reflect.DeepEqual` now works correctly for exactly comparing
+  geometries.
+
 ## v0.55.0
 
 2025-10-10
@@ -779,7 +788,7 @@ __Special thanks to Albert Teoh for contributing to this release.__
   scenarios involving almost collinear points.
 
 - Add GEOS Buffer option wrappers. The following options are now wrapped:
-  
+
     - The number of line segments used to represent curved parts of buffered
       geometries.
 
