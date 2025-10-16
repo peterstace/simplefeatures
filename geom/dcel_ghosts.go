@@ -213,43 +213,42 @@ func findClosestRayIntersection(
 	return result
 }
 
-// castRayAndCreateGhost casts a horizontal ray from the origin point and
-// creates a ghost edge based on the intersection found.
-func castRayAndCreateGhost(
+// createGhostFromHit creates a ghost edge from origin to the intersection
+// found by ray casting. Handles both vertex hits and edge hits.
+func createGhostFromHit(
 	origin XY,
-	pointIndex indexedPoints,
-	lineIndex indexedLines,
+	hitResult rayHitResult,
 	allPoints []XY,
 	allLines []line,
-	maxX float64,
 ) LineString {
-	hitResult := findClosestRayIntersection(
-		origin, pointIndex, lineIndex, allPoints, allLines,
-	)
-
 	if hitResult.hitType == hitVertex {
 		// Case A: Ray hits a vertex directly.
 		return line{origin, hitResult.hitPoint}.asLineString()
 	}
 
-	if hitResult.hitType == hitEdge {
-		// Case B: Ray hits an edge - check endpoints for obstructions.
-		edge := hitResult.hitEdge
+	// Case B: Ray hits an edge - check endpoints for obstructions.
+	edge := hitResult.hitEdge
 
-		if !isObstructed(origin, edge.a, allPoints, allLines) {
+	aObstructed := isObstructed(origin, edge.a, allPoints, allLines)
+	bObstructed := isObstructed(origin, edge.b, allPoints, allLines)
+
+	if !aObstructed && !bObstructed {
+		// Both endpoints unobstructed - choose the closer one.
+		if origin.distanceSquaredTo(edge.a) <= origin.distanceSquaredTo(edge.b) {
 			return line{origin, edge.a}.asLineString()
 		}
-		if !isObstructed(origin, edge.b, allPoints, allLines) {
-			return line{origin, edge.b}.asLineString()
-		}
-
-		// Both endpoints obstructed - connect to intersection point.
-		return line{origin, hitResult.hitPoint}.asLineString()
+		return line{origin, edge.b}.asLineString()
 	}
 
-	// Case C: No intersection - connect to vertical line beyond all geometry.
-	verticalLineX := maxX + 2
-	return line{origin, XY{verticalLineX, origin.Y}}.asLineString()
+	if !aObstructed {
+		return line{origin, edge.a}.asLineString()
+	}
+	if !bObstructed {
+		return line{origin, edge.b}.asLineString()
+	}
+
+	// Both endpoints obstructed - connect to intersection point.
+	return line{origin, hitResult.hitPoint}.asLineString()
 }
 
 // createGhosts creates a MultiLineString that connects all components of the
@@ -277,12 +276,34 @@ func createGhosts(a, b Geometry) MultiLineString {
 	maxX := findMaxX(allPoints)
 
 	// Process each representative, casting rays rightward.
-	ghostEdges := make([]LineString, 0, len(representatives))
+	var ghostEdges []LineString
+	var verticalLineOrigins []XY
+
 	for _, origin := range representatives {
-		ghostEdge := castRayAndCreateGhost(
-			origin, pointIndex, lineIndex, allPoints, allLines, maxX,
+		hitResult := findClosestRayIntersection(
+			origin, pointIndex, lineIndex, allPoints, allLines,
+		)
+
+		if hitResult.hitType == hitNone {
+			// No intersection - would need vertical line connection.
+			verticalLineOrigins = append(verticalLineOrigins, origin)
+			continue
+		}
+
+		// Can create a ghost edge to an actual component.
+		ghostEdge := createGhostFromHit(
+			origin, hitResult, allPoints, allLines,
 		)
 		ghostEdges = append(ghostEdges, ghostEdge)
+	}
+
+	// Only create vertical line connections if at least 2 components need it.
+	if len(verticalLineOrigins) >= 2 {
+		verticalLineX := maxX + 2
+		for _, origin := range verticalLineOrigins {
+			ghostEdge := line{origin, XY{verticalLineX, origin.Y}}.asLineString()
+			ghostEdges = append(ghostEdges, ghostEdge)
+		}
 	}
 
 	return NewMultiLineString(ghostEdges)
