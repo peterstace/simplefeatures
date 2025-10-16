@@ -1,7 +1,16 @@
 package geom
 
 func newDCELFromGeometries(a, b Geometry) *doublyConnectedEdgeList {
+	// Phase 1: Initial renoding (without ghosts). This ensures that the two
+	// input geometries only interact at control points before ghost edge
+	// construction.
+	a, b, _ = reNodeGeometries(a, b, MultiLineString{})
+
+	// Phase 2: Create ghost edges to connect disjoint components.
 	ghosts := createGhosts(a, b)
+
+	// Phase 3: Final renoding (with ghosts). This handles the case where ghost
+	// edges had to split input geometry edges.
 	a, b, ghosts = reNodeGeometries(a, b, ghosts)
 
 	interactions := findInteractionPoints([]Geometry{a, b, ghosts.AsGeometry()})

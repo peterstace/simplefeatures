@@ -5,6 +5,92 @@ import (
 	"testing"
 )
 
+func TestFindComponentRepresentatives(t *testing.T) {
+	for i, tc := range []struct {
+		aWKT string
+		bWKT string
+		want []XY
+	}{
+		{
+			aWKT: "POLYGON((0 0,1 0,1 1,0 1,0 0))",
+			bWKT: "POLYGON((1 0,2 0,2 1,1 1,1 0))",
+			want: []XY{{2, 1}},
+		},
+		{
+			aWKT: "POLYGON((0 0,1 0,1 1,0 1,0 0))",
+			bWKT: "POLYGON((2 0,3 0,3 1,2 1,2 0))",
+			want: []XY{{1, 1}, {3, 1}},
+		},
+		{
+			aWKT: "LINESTRING(0 0,1 0,2 0)",
+			bWKT: "LINESTRING(3 0,4 0)",
+			want: []XY{{2, 0}, {4, 0}},
+		},
+		{
+			aWKT: "LINESTRING(0 0,0 1,0 2)",
+			bWKT: "LINESTRING(1 0,1 1,1 2)",
+			want: []XY{{0, 2}, {1, 2}},
+		},
+		{
+			aWKT: "LINESTRING(5 5,5 3,5 1)",
+			bWKT: "POINT EMPTY",
+			want: []XY{{5, 5}},
+		},
+		{
+			aWKT: "POINT EMPTY",
+			bWKT: "POINT EMPTY",
+			want: nil,
+		},
+		{
+			aWKT: "GEOMETRYCOLLECTION(POLYGON((0 0,1 0,1 1,0 1,0 0)),POLYGON((1 0,2 0,2 1,1 1,1 0)))",
+			bWKT: "POINT EMPTY",
+			want: []XY{{2, 1}},
+		},
+		{
+			aWKT: "MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)),((3 0,4 0,4 1,3 1,3 0)))",
+			bWKT: "POINT EMPTY",
+			want: []XY{{1, 1}, {4, 1}},
+		},
+	} {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			a, err := UnmarshalWKT(tc.aWKT)
+			if err != nil {
+				t.Fatal(err)
+			}
+			b, err := UnmarshalWKT(tc.bWKT)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			got := findComponentRepresentatives(a, b)
+
+			if len(got) != len(tc.want) {
+				t.Fatalf("length mismatch: got %d, want %d", len(got), len(tc.want))
+			}
+
+			gotSet := make(map[XY]bool)
+			for _, xy := range got {
+				gotSet[xy] = true
+			}
+			wantSet := make(map[XY]bool)
+			for _, xy := range tc.want {
+				wantSet[xy] = true
+			}
+
+			for xy := range wantSet {
+				if !gotSet[xy] {
+					t.Errorf("missing expected point: %v", xy)
+				}
+			}
+			for xy := range gotSet {
+				if !wantSet[xy] {
+					t.Errorf("unexpected point: %v", xy)
+				}
+			}
+		})
+	}
+}
+
 func TestSpanningTree(t *testing.T) {
 	for i, tc := range []struct {
 		xys     []XY

@@ -2,18 +2,290 @@ package geom
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/peterstace/simplefeatures/rtree"
 )
 
-// createGhosts creates a MultiLineString that connects all components of the
-// input Geometries.
-func createGhosts(a, b Geometry) MultiLineString {
+// findComponentRepresentatives identifies connected components in the input
+// geometries and returns the rightmost point from each component. These
+// representative points will be used for ghost edge construction.
+func findComponentRepresentatives(a, b Geometry) []XY {
+	// Collect all control points from both geometries.
 	var points []XY
-	points = appendComponentPoints(points, a)
-	points = appendComponentPoints(points, b)
-	ghosts := spanningTree(points)
-	return ghosts
+	walk(a, func(xy XY) { points = append(points, xy) })
+	walk(b, func(xy XY) { points = append(points, xy) })
+
+	if len(points) == 0 {
+		return nil
+	}
+
+	// Deduplicate points and create point-to-index mapping.
+	points = sortAndUniquifyXYs(points)
+	pointToIdx := make(map[XY]int, len(points))
+	for i, pt := range points {
+		pointToIdx[pt] = i
+	}
+
+	// Initialize union-find with all points as separate components.
+	dset := newDisjointSet(len(points))
+
+	// Union endpoints of all edges to build connected components.
+	all := NewGeometryCollection([]Geometry{a, b}).AsGeometry()
+	lines := appendLines(nil, all)
+	for _, ln := range lines {
+		idxA, okA := pointToIdx[ln.a]
+		idxB, okB := pointToIdx[ln.b]
+		if okA && okB {
+			dset.union(idxA, idxB)
+		}
+	}
+
+	// Find the rightmost point for each component.
+	rightmost := make(map[int]XY)
+	for _, pt := range points {
+		root := dset.find(pointToIdx[pt])
+		current, exists := rightmost[root]
+		if !exists || isMoreRightmost(pt, current) {
+			rightmost[root] = pt
+		}
+	}
+
+	// Collect representative points.
+	representatives := make([]XY, 0, len(rightmost))
+	for _, pt := range rightmost {
+		representatives = append(representatives, pt)
+	}
+
+	return representatives
+}
+
+// isMoreRightmost returns true if p1 is more rightmost than p2.
+// A point is more rightmost if it has a larger X coordinate, or the same X
+// coordinate with a larger Y coordinate.
+func isMoreRightmost(p1, p2 XY) bool {
+	if p1.X > p2.X {
+		return true
+	}
+	if p1.X == p2.X && p1.Y > p2.Y {
+		return true
+	}
+	return false
+}
+
+// sortRightmostFirst sorts points right-to-left (descending X, then
+// descending Y). This order is used for processing components during ghost
+// edge construction.
+func sortRightmostFirst(points []XY) {
+	sort.Slice(points, func(i, j int) bool {
+		if points[i].X != points[j].X {
+			return points[i].X > points[j].X
+		}
+		return points[i].Y > points[j].Y
+	})
+}
+
+// collectAllPoints collects all control points from both geometries and
+// returns them deduplicated.
+func collectAllPoints(a, b Geometry) []XY {
+	var points []XY
+	walk(a, func(xy XY) { points = append(points, xy) })
+	walk(b, func(xy XY) { points = append(points, xy) })
+	return sortAndUniquifyXYs(points)
+}
+
+// findMaxX returns the maximum X coordinate among all points.
+func findMaxX(points []XY) float64 {
+	if len(points) == 0 {
+		return 0
+	}
+	maxX := points[0].X
+	for i := range points {
+		if points[i].X > maxX {
+			maxX = points[i].X
+		}
+	}
+	return maxX
+}
+
+// isObstructed checks if there is any control point or edge between origin and
+// target. Returns true if the path from origin to target is obstructed.
+func isObstructed(origin, target XY, allPoints []XY, allLines []line) bool {
+	segment := line{origin, target}
+
+	// Check if any point lies on the segment (excluding endpoints).
+	for _, pt := range allPoints {
+		if pt == origin || pt == target {
+			continue
+		}
+		if segment.intersectsXY(pt) {
+			return true
+		}
+	}
+
+	// Check if any edge intersects the segment.
+	for _, edge := range allLines {
+		inter := segment.intersectLine(edge)
+		if inter.empty {
+			continue
+		}
+
+		// Check if intersection is not just at the origin or target endpoints.
+		if inter.ptA != origin && inter.ptA != target {
+			return true
+		}
+		if inter.ptA != inter.ptB && inter.ptB != origin && inter.ptB != target {
+			return true
+		}
+	}
+
+	return false
+}
+
+// rayHitType represents the type of intersection found by ray casting.
+type rayHitType int
+
+const (
+	hitNone rayHitType = iota
+	hitVertex
+	hitEdge
+)
+
+// rayHitResult contains information about a ray intersection.
+type rayHitResult struct {
+	hitType  rayHitType
+	hitPoint XY
+	hitEdge  line
+}
+
+// findClosestRayIntersection casts a horizontal ray from origin in the +X
+// direction and finds the closest intersection with any vertex or edge.
+func findClosestRayIntersection(
+	origin XY,
+	pointIndex indexedPoints,
+	lineIndex indexedLines,
+	allPoints []XY,
+	allLines []line,
+) rayHitResult {
+	closestDist := float64(1<<63 - 1) // Max float64 approximation.
+	result := rayHitResult{hitType: hitNone}
+
+	// Check for vertex intersections.
+	for _, pt := range allPoints {
+		if pt.X <= origin.X || pt.Y != origin.Y {
+			continue
+		}
+		dist := pt.X - origin.X
+		if dist < closestDist {
+			closestDist = dist
+			result = rayHitResult{
+				hitType:  hitVertex,
+				hitPoint: pt,
+			}
+		}
+	}
+
+	// Check for edge intersections.
+	for _, edge := range allLines {
+		// Create a ray as a very long horizontal line segment.
+		ray := line{origin, XY{origin.X + 1e10, origin.Y}}
+		inter := ray.intersectLine(edge)
+		if inter.empty {
+			continue
+		}
+
+		// Only consider intersections to the right of origin.
+		if inter.ptA.X <= origin.X {
+			continue
+		}
+
+		dist := inter.ptA.X - origin.X
+		if dist < closestDist {
+			closestDist = dist
+			result = rayHitResult{
+				hitType:  hitEdge,
+				hitPoint: inter.ptA,
+				hitEdge:  edge,
+			}
+		}
+	}
+
+	return result
+}
+
+// castRayAndCreateGhost casts a horizontal ray from the origin point and
+// creates a ghost edge based on the intersection found.
+func castRayAndCreateGhost(
+	origin XY,
+	pointIndex indexedPoints,
+	lineIndex indexedLines,
+	allPoints []XY,
+	allLines []line,
+	maxX float64,
+) LineString {
+	hitResult := findClosestRayIntersection(
+		origin, pointIndex, lineIndex, allPoints, allLines,
+	)
+
+	if hitResult.hitType == hitVertex {
+		// Case A: Ray hits a vertex directly.
+		return line{origin, hitResult.hitPoint}.asLineString()
+	}
+
+	if hitResult.hitType == hitEdge {
+		// Case B: Ray hits an edge - check endpoints for obstructions.
+		edge := hitResult.hitEdge
+
+		if !isObstructed(origin, edge.a, allPoints, allLines) {
+			return line{origin, edge.a}.asLineString()
+		}
+		if !isObstructed(origin, edge.b, allPoints, allLines) {
+			return line{origin, edge.b}.asLineString()
+		}
+
+		// Both endpoints obstructed - connect to intersection point.
+		return line{origin, hitResult.hitPoint}.asLineString()
+	}
+
+	// Case C: No intersection - connect to vertical line beyond all geometry.
+	verticalLineX := maxX + 2
+	return line{origin, XY{verticalLineX, origin.Y}}.asLineString()
+}
+
+// createGhosts creates a MultiLineString that connects all components of the
+// input Geometries using a ray-casting algorithm that minimizes crossings with
+// input geometry.
+func createGhosts(a, b Geometry) MultiLineString {
+	// Get representative points for each component.
+	representatives := findComponentRepresentatives(a, b)
+
+	if len(representatives) <= 1 {
+		return MultiLineString{}
+	}
+
+	// Sort right-to-left for processing.
+	sortRightmostFirst(representatives)
+
+	// Build spatial indexes and collect geometry data.
+	allPoints := collectAllPoints(a, b)
+	all := NewGeometryCollection([]Geometry{a, b}).AsGeometry()
+	allLines := appendLines(nil, all)
+	pointIndex := newIndexedPoints(allPoints)
+	lineIndex := newIndexedLines(allLines)
+
+	// Calculate max X for vertical line fallback.
+	maxX := findMaxX(allPoints)
+
+	// Process each representative, casting rays rightward.
+	ghostEdges := make([]LineString, 0, len(representatives))
+	for _, origin := range representatives {
+		ghostEdge := castRayAndCreateGhost(
+			origin, pointIndex, lineIndex, allPoints, allLines, maxX,
+		)
+		ghostEdges = append(ghostEdges, ghostEdge)
+	}
+
+	return NewMultiLineString(ghostEdges)
 }
 
 // spanningTree creates a near-minimum spanning tree (using the euclidean
