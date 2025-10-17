@@ -2,6 +2,7 @@ package geom
 
 import (
 	"fmt"
+	"math"
 	"sort"
 
 	"github.com/peterstace/simplefeatures/rtree"
@@ -299,10 +300,25 @@ func createGhosts(a, b Geometry) MultiLineString {
 
 	// Only create vertical line connections if at least 2 components need it.
 	if len(verticalLineOrigins) >= 2 {
-		verticalLineX := maxX + 2
+		verticalLineX := math.Ceil(maxX) + 1
+
+		// Create horizontal connections to the vertical line.
 		for _, origin := range verticalLineOrigins {
 			ghostEdge := line{origin, XY{verticalLineX, origin.Y}}.asLineString()
 			ghostEdges = append(ghostEdges, ghostEdge)
+		}
+
+		// Sort vertical line origins by Y coordinate to create vertical segments.
+		sort.Slice(verticalLineOrigins, func(i, j int) bool {
+			return verticalLineOrigins[i].Y < verticalLineOrigins[j].Y
+		})
+
+		// Create vertical line segments connecting consecutive horizontal endpoints.
+		for i := 0; i < len(verticalLineOrigins)-1; i++ {
+			from := XY{verticalLineX, verticalLineOrigins[i].Y}
+			to := XY{verticalLineX, verticalLineOrigins[i+1].Y}
+			verticalSegment := line{from, to}.asLineString()
+			ghostEdges = append(ghostEdges, verticalSegment)
 		}
 	}
 

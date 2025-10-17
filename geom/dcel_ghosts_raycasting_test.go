@@ -33,8 +33,8 @@ func TestCreateGhostsRayCasting(t *testing.T) {
 			description: "three components stacked vertically",
 			aWKT:        "POINT(0 0)",
 			bWKT:        "GEOMETRYCOLLECTION(POINT(0 1),POINT(0 2))",
-			minGhosts:   2,
-			maxGhosts:   3,
+			minGhosts:   5,
+			maxGhosts:   5,
 		},
 		{
 			description: "empty geometries",
