@@ -774,27 +774,30 @@ func TestDCELDisjoint(t *testing.T) {
 }
 
 func TestDCELIntersecting(t *testing.T) {
-	t.Skip("Test expects specific DCEL structure from old spanning tree ghost algorithm. New ray-casting algorithm creates different (but valid) ghost edges to minimize crossings with input geometry.")
 	dcel := newDCELFromWKTs(t,
 		"POLYGON((0 0,1 2,2 0,0 0))",
 		"POLYGON((0 1,2 1,1 3,0 1))",
 	)
 
 	/*
-	           v7
-	          /  \
-	         /    \
-	        /  f2  \
-	       /        \
-	      /    v3    \
-	     /    /  \    \
-	    /    / f3 \    \
-	   v5--v4------v2--v6
-	   |   /        \
-	   |f4/    f1    \    f0
-	   | /            \
-	   |/              \
-	   v0--------------v1
+	             v7
+	            /  \
+	           /    \
+	          /      \
+	         /        \
+	        /    f2    \
+	       /            \
+	      /      v3      \
+	     /      /  \      \
+	    /      / f3 \      \
+	  [v5]--[v4]----[v2]---v6
+	         /        \
+	        /          \
+	       /            \
+	      /      f1      \    f0
+	     /                \
+	    /                  \
+	  [v0]-----------------v1
 
 	*/
 
@@ -809,169 +812,79 @@ func TestDCELIntersecting(t *testing.T) {
 
 	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 4,
-		NumEdges: 14,
-		NumFaces: 5,
+		NumEdges: 12,
+		NumFaces: 4,
 		Vertices: []VertexSpec{
-			{
-				Src:      [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Vertices: []XY{v0},
-			},
-			{
-				Src:      [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-				Vertices: []XY{v5},
-			},
-			{
-				Src:      [2]bool{true, true},
-				InSet:    [2]bool{true, true},
-				Vertices: []XY{v2, v4},
-			},
+			{Src: b10, InSet: b10, Vertices: []XY{v0}},
+			{Src: b01, InSet: b01, Vertices: []XY{v5}},
+			{Src: b11, InSet: b11, Vertices: []XY{v2, v4}},
 		},
 		Edges: []EdgeSpec{
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v4, v0},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v0, v1, v2},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v2, v1, v0},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v0, v4},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v2, v6, v7, v5},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v5, v4},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v4, v5},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v5, v7, v6, v2},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v2, v4},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v4, v2},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v4, v3, v2},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v2, v3, v4},
-			},
-			{
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, false},
-				Sequence: []XY{v5, v0},
-			},
-			{
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, false},
-				Sequence: []XY{v0, v5},
-			},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v0, v1, v2}},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v4, v0}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v2, v1, v0}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v0, v4}},
+
+			{SrcEdge: b01, SrcFace: b01, InSet: b01, Sequence: []XY{v2, v6, v7, v5}},
+			{SrcEdge: b01, SrcFace: b01, InSet: b01, Sequence: []XY{v5, v4}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b01, Sequence: []XY{v5, v7, v6, v2}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b01, Sequence: []XY{v4, v5}},
+
+			{SrcEdge: b01, SrcFace: b01, InSet: b11, Sequence: []XY{v4, v2}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b11, Sequence: []XY{v2, v4}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b11, Sequence: []XY{v4, v3, v2}},
+			{SrcEdge: b10, SrcFace: b10, InSet: b11, Sequence: []XY{v2, v3, v4}},
 		},
 		Faces: []FaceSpec{
 			{
 				// f0
 				First:  v2,
 				Second: v1,
-				Cycle:  []XY{v2, v1, v0, v5, v7, v6, v2},
-				InSet:  [2]bool{false, false},
+				Cycle:  []XY{v2, v1, v0, v4, v5, v7, v6, v2},
+				InSet:  b00,
 			},
 			{
 				// f1
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v2, v4, v0},
-				InSet:  [2]bool{true, false},
+				InSet:  b10,
 			},
 			{
 				// f2
 				First:  v2,
 				Second: v6,
 				Cycle:  []XY{v2, v6, v7, v5, v4, v3, v2},
-				InSet:  [2]bool{false, true},
+				InSet:  b01,
 			},
 			{
 				// f3
 				First:  v4,
 				Second: v2,
 				Cycle:  []XY{v4, v2, v3, v4},
-				InSet:  [2]bool{true, true},
-			},
-			{
-				// f4
-				First:  v0,
-				Second: v4,
-				Cycle:  []XY{v0, v4, v5, v0},
-				InSet:  [2]bool{false, false},
+				InSet:  b11,
 			},
 		},
 	})
 }
 
 func TestDCELInside(t *testing.T) {
-	t.Skip("Test expects specific DCEL structure from old spanning tree ghost algorithm. New ray-casting algorithm creates different (but valid) ghost edges to minimize crossings with input geometry.")
 	dcel := newDCELFromWKTs(t,
 		"POLYGON((0 0,3 0,3 3,0 3,0 0))",
 		"POLYGON((1 1,2 1,2 2,1 2,1 1))",
 	)
 
 	/*
-	  v3-----------------v2
-	   |                 |
-	   |                 |
-	   |    v7-----v6    |
+	  v3----------------[v2]
+	   |               / |
+	   |              /  |
+	   |    v7----[v6]   |
 	   |     | f2  |     |
 	   |     |     |     |
-	   |    v4-----v5    |  f0
-	   |  ,`             |
-	   |,`     f1        |
-	  v0-----------------v1
+	   |   [v4]--- v5    |  f0
+	   |                 |
+	   |       f1        |
+	 [v0]----------------v1
 
 	*/
 
@@ -985,58 +898,26 @@ func TestDCELInside(t *testing.T) {
 	v7 := XY{1, 2}
 
 	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 2,
-		NumEdges: 6,
+		NumVerts: 4,
+		NumEdges: 10,
 		NumFaces: 3,
 		Vertices: []VertexSpec{
-			{
-				Src:      [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Vertices: []XY{v0},
-			},
-			{
-				Src:      [2]bool{false, true},
-				InSet:    [2]bool{true, true},
-				Vertices: []XY{v4},
-			},
+			{Src: b10, InSet: b10, Vertices: []XY{v0, v2}},
+			{Src: b01, InSet: b11, Vertices: []XY{v4, v6}},
 		},
 		Edges: []EdgeSpec{
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v0, v3, v2, v1, v0},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v0, v1, v2, v3, v0},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v4, v7, v6, v5, v4},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v4, v5, v6, v7, v4},
-			},
-			{
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v0, v4},
-			},
-			{
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v4, v0},
-			},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v0, v1, v2}},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v2, v3, v0}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v2, v1, v0}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v0, v3, v2}},
+
+			{SrcEdge: b01, SrcFace: b01, InSet: b11, Sequence: []XY{v4, v5, v6}},
+			{SrcEdge: b01, SrcFace: b01, InSet: b11, Sequence: []XY{v6, v7, v4}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b11, Sequence: []XY{v6, v5, v4}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b11, Sequence: []XY{v4, v7, v6}},
+
+			{SrcEdge: b00, SrcFace: b00, InSet: b10, Sequence: []XY{v2, v6}},
+			{SrcEdge: b00, SrcFace: b00, InSet: b10, Sequence: []XY{v6, v2}},
 		},
 		Faces: []FaceSpec{
 			{
@@ -1044,50 +925,49 @@ func TestDCELInside(t *testing.T) {
 				First:  v0,
 				Second: v3,
 				Cycle:  []XY{v0, v3, v2, v1, v0},
-				InSet:  [2]bool{false, false},
+				InSet:  b00,
 			},
 			{
 				// f1
 				First:  v0,
 				Second: v1,
-				Cycle:  []XY{v0, v1, v2, v3, v0, v4, v7, v6, v5, v4, v0},
-				InSet:  [2]bool{true, false},
+				Cycle:  []XY{v0, v1, v2, v6, v5, v4, v7, v6, v2, v3, v0},
+				InSet:  b10,
 			},
 			{
 				// f2
 				First:  v4,
 				Second: v5,
 				Cycle:  []XY{v4, v5, v6, v7, v4},
-				InSet:  [2]bool{true, true},
+				InSet:  b11,
 			},
 		},
 	})
 }
 
 func TestDCELReproduceHorizontalHoleLinkageBug(t *testing.T) {
-	t.Skip("Test expects specific DCEL structure from old spanning tree ghost algorithm. New ray-casting algorithm creates different (but valid) ghost edges to minimize crossings with input geometry.")
 	dcel := newDCELFromWKTs(t,
 		"MULTIPOLYGON(((4 0,4 1,5 1,5 0,4 0)),((1 0,1 2,3 2,3 0,1 0)))",
 		"MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 1,0 1)))",
 	)
 
 	/*
-	  v16---v15
-	   | f2  |
-	   |     |
-	  v13---v14
-	   |
-	   |
-	  v12---------v11    f0
-	   |  f4       |
-	   |           |
-	   |    v4----v18----v3
-	   |     | f5  |     |
-	   |     |     |     |
-	  v9----v17---v10    |    v8-----v7
-	   `, f6 |           |     | f1  |
-	     `,  |  f3       |     |     |
-	   o   `v1-----------v2---v5-----v6
+	  v16--[v15]---------------------------[v21]
+	   | f2  |                               |
+	   |     |                               |
+	 [v13]--v14                              |
+	                                         |
+	                                         |
+	  v12---------v11    f0                  |
+	   |  f4       |                         |
+	   |           |                         |
+	   |    v4---[v18]--[v3]---------------[v20]
+	   |     | f5  |     |                   |
+	   |     |     |     |                   |
+	 [v9]--[v17]--v10    |    v8----[v7]---[v19]
+	         |           |     | f1  |
+	         |  f3       |     |     |
+	   o   [v1]----------v2  [v5]----v6
 	*/
 
 	v1 := XY{1, 0}
@@ -1108,247 +988,109 @@ func TestDCELReproduceHorizontalHoleLinkageBug(t *testing.T) {
 	v16 := XY{0, 5}
 	v17 := XY{1, 1}
 	v18 := XY{2, 2}
+	v19 := XY{6, 1}
+	v20 := XY{6, 2}
+	v21 := XY{6, 5}
 
 	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 8,
-		NumEdges: 26,
-		NumFaces: 7,
+		NumVerts: 12,
+		NumEdges: 32,
+		NumFaces: 6,
 		Vertices: []VertexSpec{
-			{
-				Src:      [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Vertices: []XY{v1, v2, v5},
-			},
-			{
-				Src:      [2]bool{true, true},
-				InSet:    [2]bool{true, true},
-				Vertices: []XY{v17, v18},
-			},
-			{
-				Src:      [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-				Vertices: []XY{v9, v12, v13},
-			},
+			{Src: b10, InSet: b10, Vertices: []XY{v1, v3, v5, v7}},
+			{Src: b11, InSet: b11, Vertices: []XY{v17, v18}},
+			{Src: b01, InSet: b01, Vertices: []XY{v9, v13, v15}},
+			{Src: b00, InSet: b00, Vertices: []XY{v19, v20, v21}},
 		},
 		Edges: []EdgeSpec{
-			{
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, false},
-				Sequence: []XY{v5, v2},
-			},
-			{
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, false},
-				Sequence: []XY{v2, v5},
-			},
-			{
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, false},
-				Sequence: []XY{v12, v13},
-			},
-			{
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, false},
-				Sequence: []XY{v13, v12},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v5, v6, v7, v8, v5},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v5, v8, v7, v6, v5},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v13, v14, v15, v16, v13},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v13, v16, v15, v14, v13},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v2, v1},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v1, v17},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v17, v9},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v9, v12},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v17, v1},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v1, v2},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v12, v9},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v9, v17},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v18, v10, v17},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v17, v4, v18},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v17, v10, v18},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v18, v4, v17},
-			},
-			{
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, false},
-				Sequence: []XY{v1, v9},
-			},
-			{
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, false},
-				Sequence: []XY{v9, v1},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v18, v3, v2},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v2, v3, v18},
-			},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v1, v2, v3}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v3, v2, v1}},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v3, v18}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v18, v3}},
+			{SrcEdge: b10, SrcFace: b10, InSet: b11, Sequence: []XY{v18, v4, v17}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b11, Sequence: []XY{v17, v4, v18}},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v17, v1}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v1, v17}},
 
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v18, v11, v12},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v12, v11, v18},
-			},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v5, v6, v7}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v7, v6, v5}},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v7, v8, v5}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v5, v8, v7}},
+
+			{SrcEdge: b01, SrcFace: b01, InSet: b01, Sequence: []XY{v9, v17}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b01, Sequence: []XY{v17, v9}},
+			{SrcEdge: b01, SrcFace: b01, InSet: b11, Sequence: []XY{v17, v10, v18}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b11, Sequence: []XY{v18, v10, v17}},
+			{SrcEdge: b01, SrcFace: b01, InSet: b01, Sequence: []XY{v18, v11, v12, v9}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b01, Sequence: []XY{v9, v12, v11, v18}},
+
+			{SrcEdge: b01, SrcFace: b01, InSet: b01, Sequence: []XY{v13, v14, v15}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b01, Sequence: []XY{v15, v14, v13}},
+			{SrcEdge: b01, SrcFace: b01, InSet: b01, Sequence: []XY{v15, v16, v13}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b01, Sequence: []XY{v13, v16, v15}},
+
+			{SrcEdge: b00, SrcFace: b00, InSet: b00, Sequence: []XY{v19, v20}},
+			{SrcEdge: b00, SrcFace: b00, InSet: b00, Sequence: []XY{v20, v19}},
+			{SrcEdge: b00, SrcFace: b00, InSet: b00, Sequence: []XY{v20, v21}},
+			{SrcEdge: b00, SrcFace: b00, InSet: b00, Sequence: []XY{v21, v20}},
+			{SrcEdge: b00, SrcFace: b00, InSet: b00, Sequence: []XY{v21, v15}},
+			{SrcEdge: b00, SrcFace: b00, InSet: b00, Sequence: []XY{v15, v21}},
+			{SrcEdge: b00, SrcFace: b00, InSet: b00, Sequence: []XY{v7, v19}},
+			{SrcEdge: b00, SrcFace: b00, InSet: b00, Sequence: []XY{v19, v7}},
+			{SrcEdge: b00, SrcFace: b00, InSet: b00, Sequence: []XY{v3, v20}},
+			{SrcEdge: b00, SrcFace: b00, InSet: b00, Sequence: []XY{v20, v3}},
 		},
 		Faces: []FaceSpec{
 			{
 				// f0
-				First:  v12,
-				Second: v11,
+				First:  v18,
+				Second: v3,
 				Cycle: []XY{
-					v12, v11, v18, v3, v2, v5, v8, v7,
-					v6, v5, v2, v1, v9, v12,
-					v13, v16, v15, v14, v13, v12,
+					v18, v3, v20, v21, v15, v14, v13, v16, v15, v21, v20, v19, v7,
+					v6, v5, v8, v7, v19, v20, v3, v2, v1, v17, v9, v12, v11, v18,
 				},
-				InSet: [2]bool{false, false},
+				InSet: b00,
 			},
 			{
 				// f1
 				First:  v5,
 				Second: v6,
 				Cycle:  []XY{v5, v6, v7, v8, v5},
-				InSet:  [2]bool{true, false},
+				InSet:  b10,
 			},
 			{
 				// f2
 				First:  v13,
 				Second: v14,
 				Cycle:  []XY{v13, v14, v15, v16, v13},
-				InSet:  [2]bool{false, true},
+				InSet:  b01,
 			},
 			{
 				// f3
 				First:  v1,
 				Second: v2,
 				Cycle:  []XY{v1, v2, v3, v18, v10, v17, v1},
-				InSet:  [2]bool{true, false},
+				InSet:  b10,
 			},
 			{
 				// f4
 				First:  v17,
 				Second: v4,
 				Cycle:  []XY{v17, v4, v18, v11, v12, v9, v17},
-				InSet:  [2]bool{false, true},
+				InSet:  b01,
 			},
 			{
 				// f5
 				First:  v17,
 				Second: v10,
 				Cycle:  []XY{v17, v10, v18, v4, v17},
-				InSet:  [2]bool{true, true},
-			},
-			{
-				// f6
-				First:  v1,
-				Second: v17,
-				Cycle:  []XY{v1, v17, v9, v1},
-				InSet:  [2]bool{false, false},
+				InSet:  b11,
 			},
 		},
 	})
 }
 
 func TestDCELFullyOverlappingEdge(t *testing.T) {
-	t.Skip("Test expects specific DCEL structure from old spanning tree ghost algorithm. New ray-casting algorithm creates different (but valid) ghost edges to minimize crossings with input geometry.")
 	dcel := newDCELFromWKTs(t,
 		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
 		"POLYGON((1 0,1 1,2 1,2 0,1 0))",
@@ -1373,92 +1115,43 @@ func TestDCELFullyOverlappingEdge(t *testing.T) {
 		NumEdges: 8,
 		NumFaces: 3,
 		Vertices: []VertexSpec{
-			{
-				Vertices: []XY{v0},
-				Src:      [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-			},
-			{
-				Vertices: []XY{v1, v4},
-				Src:      [2]bool{true, true},
-				InSet:    [2]bool{true, true},
-			},
+			{Vertices: []XY{v0}, Src: b10, InSet: b10},
+			{Vertices: []XY{v1, v4}, Src: b11, InSet: b11},
 		},
 		Edges: []EdgeSpec{
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v1, v0},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v0, v5, v4},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v4, v5, v0},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v0, v1},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v4, v3, v2, v1},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v1, v2, v3, v4},
-			},
-			{
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v1, v4},
-			},
-			{
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v4, v1},
-			},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v1, v0}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v0, v5, v4}},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v4, v5, v0}},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v0, v1}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b01, Sequence: []XY{v4, v3, v2, v1}},
+			{SrcEdge: b01, SrcFace: b01, InSet: b01, Sequence: []XY{v1, v2, v3, v4}},
+			{SrcEdge: b11, SrcFace: b10, InSet: b11, Sequence: []XY{v1, v4}},
+			{SrcEdge: b11, SrcFace: b01, InSet: b11, Sequence: []XY{v4, v1}},
 		},
 		Faces: []FaceSpec{
 			{
 				First:  v1,
 				Second: v0,
 				Cycle:  []XY{v0, v5, v4, v3, v2, v1, v0},
-				InSet:  [2]bool{false, false},
+				InSet:  b00,
 			},
 			{
 				First:  v1,
 				Second: v4,
 				Cycle:  []XY{v1, v4, v5, v0, v1},
-				InSet:  [2]bool{true, false},
+				InSet:  b10,
 			},
 			{
 				First:  v1,
 				Second: v2,
 				Cycle:  []XY{v1, v2, v3, v4, v1},
-				InSet:  [2]bool{false, true},
+				InSet:  b01,
 			},
 		},
 	})
 }
 
 func TestDCELPartiallyOverlappingEdge(t *testing.T) {
-	t.Skip("Test expects specific DCEL structure from old spanning tree ghost algorithm. New ray-casting algorithm creates different (but valid) ghost edges to minimize crossings with input geometry.")
 	dcel := newDCELFromWKTs(t,
 		"POLYGON((0 1,0 3,2 3,2 1,0 1))",
 		"POLYGON((2 0,2 2,4 2,4 0,2 0))",
@@ -1467,11 +1160,11 @@ func TestDCELPartiallyOverlappingEdge(t *testing.T) {
 	/*
 	  v7-------v6    f0
 	   |       |
-	   | f1   v5-------v4
+	   | f1  [v5]------v4
 	   |       |       |
-	  v0------v1   f2  |
-	    `-, f3 |       |
-	       `-,v2-------v3
+	 [v0]----[v1]  f2  |
+	           |       |
+	         [v2]------v3
 	*/
 
 	v0 := XY{0, 1}
@@ -1485,134 +1178,52 @@ func TestDCELPartiallyOverlappingEdge(t *testing.T) {
 
 	CheckDCEL(t, dcel, DCELSpec{
 		NumVerts: 4,
-		NumEdges: 12,
-		NumFaces: 4,
+		NumEdges: 10,
+		NumFaces: 3,
 		Vertices: []VertexSpec{
-			{
-				Vertices: []XY{v0},
-				Src:      [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-			},
-			{
-				Vertices: []XY{v2},
-				Src:      [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-			},
-			{
-				Vertices: []XY{v1, v5},
-				Src:      [2]bool{true, true},
-				InSet:    [2]bool{true, true},
-			},
+			{Src: b10, InSet: b10, Vertices: []XY{v0}},
+			{Src: b01, InSet: b01, Vertices: []XY{v2}},
+			{Src: b11, InSet: b11, Vertices: []XY{v1, v5}},
 		},
 		Edges: []EdgeSpec{
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v1, v0},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v0, v7, v6, v5},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v5, v6, v7, v0},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v0, v1},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v5, v4, v3, v2},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v2, v1},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v1, v2},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v2, v3, v4, v5},
-			},
-			{
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{true, false},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v1, v5},
-			},
-			{
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v5, v1},
-			},
-			{
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, false},
-				Sequence: []XY{v2, v0},
-			},
-			{
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, false},
-				Sequence: []XY{v0, v2},
-			},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v0, v1}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v1, v0}},
+			{SrcEdge: b11, SrcFace: b10, InSet: b11, Sequence: []XY{v1, v5}},
+			{SrcEdge: b11, SrcFace: b01, InSet: b11, Sequence: []XY{v5, v1}},
+			{SrcEdge: b10, SrcFace: b10, InSet: b10, Sequence: []XY{v5, v6, v7, v0}},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v0, v7, v6, v5}},
+			{SrcEdge: b01, SrcFace: b01, InSet: b01, Sequence: []XY{v1, v2}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b01, Sequence: []XY{v2, v1}},
+			{SrcEdge: b01, SrcFace: b01, InSet: b01, Sequence: []XY{v2, v3, v4, v5}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b01, Sequence: []XY{v5, v4, v3, v2}},
 		},
 		Faces: []FaceSpec{
 			{
 				// f0
 				First:  v0,
 				Second: v7,
-				Cycle:  []XY{v0, v7, v6, v5, v4, v3, v2, v0},
-				InSet:  [2]bool{false, false},
+				Cycle:  []XY{v0, v7, v6, v5, v4, v3, v2, v1, v0},
+				InSet:  b00,
 			},
 			{
 				// f1
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v5, v6, v7, v0},
-				InSet:  [2]bool{true, false},
+				InSet:  b10,
 			},
 			{
 				// f2
 				First:  v1,
 				Second: v2,
 				Cycle:  []XY{v1, v2, v3, v4, v5, v1},
-				InSet:  [2]bool{false, true},
-			},
-			{
-				// f3
-				First:  v2,
-				Second: v1,
-				Cycle:  []XY{v2, v1, v0, v2},
-				InSet:  [2]bool{false, false},
+				InSet:  b01,
 			},
 		},
 	})
 }
 
 func TestDCELFullyOverlappingCycle(t *testing.T) {
-	t.Skip("Test expects specific DCEL structure from old spanning tree ghost algorithm. New ray-casting algorithm creates different (but valid) ghost edges to minimize crossings with input geometry.")
 	dcel := newDCELFromWKTs(t,
 		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
 		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
@@ -1635,24 +1246,12 @@ func TestDCELFullyOverlappingCycle(t *testing.T) {
 		NumVerts: 1,
 		NumEdges: 2,
 		NumFaces: 2,
-		Vertices: []VertexSpec{{
-			Src:      [2]bool{true, true},
-			InSet:    [2]bool{true, true},
-			Vertices: []XY{v0},
-		}},
+		Vertices: []VertexSpec{
+			{Src: b11, InSet: b11, Vertices: []XY{v0}},
+		},
 		Edges: []EdgeSpec{
-			{
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{true, true},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v0, v1, v2, v3, v0},
-			},
-			{
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, true},
-				Sequence: []XY{v0, v3, v2, v1, v0},
-			},
+			{SrcEdge: b11, SrcFace: b11, InSet: b11, Sequence: []XY{v0, v1, v2, v3, v0}},
+			{SrcEdge: b11, SrcFace: b00, InSet: b11, Sequence: []XY{v0, v3, v2, v1, v0}},
 		},
 		Faces: []FaceSpec{
 			{
@@ -1660,21 +1259,20 @@ func TestDCELFullyOverlappingCycle(t *testing.T) {
 				First:  v0,
 				Second: v3,
 				Cycle:  []XY{v0, v3, v2, v1, v0},
-				InSet:  [2]bool{false, false},
+				InSet:  b00,
 			},
 			{
 				// f1
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v2, v3, v0},
-				InSet:  [2]bool{true, true},
+				InSet:  b11,
 			},
 		},
 	})
 }
 
 func TestDCELTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
-	t.Skip("Test expects specific DCEL structure from old spanning tree ghost algorithm. New ray-casting algorithm creates different (but valid) ghost edges to minimize crossings with input geometry.")
 	dcel := newDCELFromWKTs(t,
 		"LINESTRING(0 0,1 0)",
 		"LINESTRING(0 0,0 1)",
@@ -1696,53 +1294,21 @@ func TestDCELTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 		NumEdges: 4,
 		NumFaces: 1,
 		Vertices: []VertexSpec{
-			{
-				Vertices: []XY{v2},
-				Src:      [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-			},
-			{
-				Vertices: []XY{v0},
-				Src:      [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-			},
-			{
-				Vertices: []XY{v1},
-				Src:      [2]bool{true, true},
-				InSet:    [2]bool{true, true},
-			},
+			{Vertices: []XY{v2}, Src: b10, InSet: b10},
+			{Vertices: []XY{v0}, Src: b01, InSet: b01},
+			{Vertices: []XY{v1}, Src: b11, InSet: b11},
 		},
 		Edges: []EdgeSpec{
-			{
-				Sequence: []XY{v1, v2},
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-			},
-			{
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-				Sequence: []XY{v2, v1},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v0, v1},
-			},
-			{
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-				Sequence: []XY{v1, v0},
-			},
+			{Sequence: []XY{v1, v2}, SrcEdge: b10, SrcFace: b00, InSet: b10},
+			{SrcEdge: b10, SrcFace: b00, InSet: b10, Sequence: []XY{v2, v1}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b01, Sequence: []XY{v0, v1}},
+			{SrcEdge: b01, SrcFace: b00, InSet: b01, Sequence: []XY{v1, v0}},
 		},
 		Faces: []FaceSpec{{
 			First:  v0,
 			Second: v1,
 			Cycle:  []XY{v0, v1, v2, v1, v0},
-			InSet:  [2]bool{false, false},
+			InSet:  b00,
 		}},
 	})
 }
@@ -1783,114 +1349,114 @@ func TestDCELReproduceFaceAllocationBug(t *testing.T) {
 		Vertices: []VertexSpec{
 			{
 				Vertices: []XY{v1, v3},
-				Src:      [2]bool{true, true},
-				InSet:    [2]bool{true, true},
+				Src:      b11,
+				InSet:    b11,
 			},
 			{
 				Vertices: []XY{v0, v4, v8},
-				Src:      [2]bool{false, true},
-				InSet:    [2]bool{false, true},
+				Src:      b01,
+				InSet:    b01,
 			},
 		},
 		Edges: []EdgeSpec{
 			{
 				Sequence: []XY{v1, v3},
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, true},
+				SrcEdge:  b10,
+				SrcFace:  b00,
+				InSet:    b11,
 			},
 			{
 				Sequence: []XY{v3, v1},
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, true},
+				SrcEdge:  b10,
+				SrcFace:  b00,
+				InSet:    b11,
 			},
 			{
 				Sequence: []XY{v0, v1},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
+				SrcEdge:  b01,
+				SrcFace:  b01,
+				InSet:    b01,
 			},
 			{
 				Sequence: []XY{v1, v0},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
+				SrcEdge:  b01,
+				SrcFace:  b00,
+				InSet:    b01,
 			},
 			{
 				Sequence: []XY{v3, v0},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
+				SrcEdge:  b01,
+				SrcFace:  b01,
+				InSet:    b01,
 			},
 			{
 				Sequence: []XY{v0, v3},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
+				SrcEdge:  b01,
+				SrcFace:  b00,
+				InSet:    b01,
 			},
 			{
 				Sequence: []XY{v4, v5, v6, v7, v4},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
+				SrcEdge:  b01,
+				SrcFace:  b01,
+				InSet:    b01,
 			},
 			{
 				Sequence: []XY{v4, v7, v6, v5, v4},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
+				SrcEdge:  b01,
+				SrcFace:  b00,
+				InSet:    b01,
 			},
 
 			{
 				Sequence: []XY{v1, v8},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
+				SrcEdge:  b01,
+				SrcFace:  b01,
+				InSet:    b01,
 			},
 			{
 				Sequence: []XY{v8, v1},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
+				SrcEdge:  b01,
+				SrcFace:  b00,
+				InSet:    b01,
 			},
 
 			{
 				Sequence: []XY{v4, v8},
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, false},
+				SrcEdge:  b00,
+				SrcFace:  b00,
+				InSet:    b00,
 			},
 			{
 				Sequence: []XY{v8, v4},
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, false},
+				SrcEdge:  b00,
+				SrcFace:  b00,
+				InSet:    b00,
 			},
 
 			{
 				Sequence: []XY{v3, v8},
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
+				SrcEdge:  b00,
+				SrcFace:  b00,
+				InSet:    b01,
 			},
 			{
 				Sequence: []XY{v8, v3},
-				SrcEdge:  [2]bool{false, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
+				SrcEdge:  b00,
+				SrcFace:  b00,
+				InSet:    b01,
 			},
 			{
 				Sequence: []XY{v8, v2, v3},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
+				SrcEdge:  b01,
+				SrcFace:  b01,
+				InSet:    b01,
 			},
 			{
 				Sequence: []XY{v3, v2, v8},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
+				SrcEdge:  b01,
+				SrcFace:  b00,
+				InSet:    b01,
 			},
 		},
 		Faces: []FaceSpec{
@@ -1899,42 +1465,41 @@ func TestDCELReproduceFaceAllocationBug(t *testing.T) {
 				First:  v1,
 				Second: v0,
 				Cycle:  []XY{v1, v0, v3, v2, v8, v4, v7, v6, v5, v4, v8, v1},
-				InSet:  [2]bool{false, false},
+				InSet:  b00,
 			},
 			{
 				// f1
 				First:  v1,
 				Second: v8,
 				Cycle:  []XY{v1, v8, v3, v1},
-				InSet:  [2]bool{false, true},
+				InSet:  b01,
 			},
 			{
 				// f2
 				First:  v8,
 				Second: v2,
 				Cycle:  []XY{v8, v2, v3, v8},
-				InSet:  [2]bool{false, true},
+				InSet:  b01,
 			},
 			{
 				// f3
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v3, v0},
-				InSet:  [2]bool{false, true},
+				InSet:  b01,
 			},
 			{
 				// f4
 				First:  v4,
 				Second: v5,
 				Cycle:  []XY{v4, v5, v6, v7, v4},
-				InSet:  [2]bool{false, true},
+				InSet:  b01,
 			},
 		},
 	})
 }
 
 func TestDCELReproducePointOnLineStringPrecisionBug(t *testing.T) {
-	t.Skip("Test expects specific DCEL structure from old spanning tree ghost algorithm. New ray-casting algorithm creates different (but valid) ghost edges to minimize crossings with input geometry.")
 	dcel := newDCELFromWKTs(t,
 		"LINESTRING(0 0,1 1)",
 		"POINT(0.35355339059327373 0.35355339059327373)",
@@ -1957,56 +1522,27 @@ func TestDCELReproducePointOnLineStringPrecisionBug(t *testing.T) {
 		NumEdges: 4,
 		NumFaces: 1,
 		Vertices: []VertexSpec{
-			{
-				Vertices: []XY{v0, v2},
-				Src:      [2]bool{true, false},
-				InSet:    [2]bool{true, false},
-			},
-			{
-				Vertices: []XY{v1},
-				Src:      [2]bool{true, true},
-				InSet:    [2]bool{true, true},
-			},
+			{Vertices: []XY{v0, v2}, Src: b10, InSet: b10},
+			{Vertices: []XY{v1}, Src: b11, InSet: b11},
 		},
 		Edges: []EdgeSpec{
-			{
-				Sequence: []XY{v0, v1},
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-			},
-			{
-				Sequence: []XY{v1, v2},
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-			},
-			{
-				Sequence: []XY{v2, v1},
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-			},
-			{
-				Sequence: []XY{v1, v0},
-				SrcEdge:  [2]bool{true, false},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, false},
-			},
+			{Sequence: []XY{v0, v1}, SrcEdge: b10, SrcFace: b00, InSet: b10},
+			{Sequence: []XY{v1, v2}, SrcEdge: b10, SrcFace: b00, InSet: b10},
+			{Sequence: []XY{v2, v1}, SrcEdge: b10, SrcFace: b00, InSet: b10},
+			{Sequence: []XY{v1, v0}, SrcEdge: b10, SrcFace: b00, InSet: b10},
 		},
 		Faces: []FaceSpec{
 			{
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v2, v1, v0},
-				InSet:  [2]bool{false, false},
+				InSet:  b00,
 			},
 		},
 	})
 }
 
 func TestDCELReproduceGhostOnGeometryBug(t *testing.T) {
-	t.Skip("Test expects specific DCEL structure from old spanning tree ghost algorithm. New ray-casting algorithm creates different (but valid) ghost edges to minimize crossings with input geometry.")
 	dcel := newDCELFromWKTs(t,
 		"LINESTRING(0 1,0 0,1 0)",
 		"POLYGON((0 0,1 0,1 1,0 1,0 0.5,0 0))",
@@ -2035,62 +1571,28 @@ func TestDCELReproduceGhostOnGeometryBug(t *testing.T) {
 		NumEdges: 6,
 		NumFaces: 2,
 		Vertices: []VertexSpec{
-			{
-				Vertices: []XY{v0, v1, v3},
-				Src:      [2]bool{true, true},
-				InSet:    [2]bool{true, true},
-			},
+			{Vertices: []XY{v0, v1, v3}, Src: b11, InSet: b11},
 		},
 		Edges: []EdgeSpec{
-			{
-				Sequence: []XY{v0, v1},
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{true, true},
-			},
-			{
-				Sequence: []XY{v1, v0},
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, true},
-			},
-			{
-				Sequence: []XY{v1, v2, v3},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-			},
-			{
-				Sequence: []XY{v3, v2, v1},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-			},
-			{
-				Sequence: []XY{v3, v4, v0},
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{true, true},
-			},
-			{
-				Sequence: []XY{v0, v4, v3},
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, true},
-			},
+			{Sequence: []XY{v0, v1}, SrcEdge: b11, SrcFace: b01, InSet: b11},
+			{Sequence: []XY{v1, v0}, SrcEdge: b11, SrcFace: b00, InSet: b11},
+			{Sequence: []XY{v1, v2, v3}, SrcEdge: b01, SrcFace: b01, InSet: b01},
+			{Sequence: []XY{v3, v2, v1}, SrcEdge: b01, SrcFace: b00, InSet: b01},
+			{Sequence: []XY{v3, v4, v0}, SrcEdge: b11, SrcFace: b01, InSet: b11},
+			{Sequence: []XY{v0, v4, v3}, SrcEdge: b11, SrcFace: b00, InSet: b11},
 		},
 		Faces: []FaceSpec{
 			{
 				First:  v1,
 				Second: v0,
 				Cycle:  []XY{v1, v0, v4, v3, v2, v1},
-				InSet:  [2]bool{false, false},
+				InSet:  b00,
 			},
 			{
 				First:  v0,
 				Second: v1,
 				Cycle:  []XY{v0, v1, v2, v3, v4, v0},
-				InSet:  [2]bool{false, true},
+				InSet:  b01,
 			},
 		},
 	})
