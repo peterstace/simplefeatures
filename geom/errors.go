@@ -2,7 +2,7 @@ package geom
 
 import "fmt"
 
-func wrap(err error, format string, args ...interface{}) error {
+func wrap(err error, format string, args ...any) error {
 	if err == nil {
 		return nil
 	}

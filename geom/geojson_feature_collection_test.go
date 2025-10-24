@@ -65,11 +65,11 @@ func TestGeoJSONFeatureCollectionValidUnmarshal(t *testing.T) {
 	f1 := fc.Features[1]
 
 	expectStringEq(t, f0.ID.(string), "id0")
-	expectBoolEq(t, reflect.DeepEqual(f0.Properties, map[string]interface{}{"prop0": "value0", "prop1": "value1"}), true)
+	expectBoolEq(t, reflect.DeepEqual(f0.Properties, map[string]any{"prop0": "value0", "prop1": "value1"}), true)
 	expectGeomEq(t, f0.Geometry, geomFromWKT(t, "LINESTRING(102 0,103 1,104 0,105 1)"))
 
 	expectStringEq(t, f1.ID.(string), "id1")
-	expectBoolEq(t, reflect.DeepEqual(f1.Properties, map[string]interface{}{"prop0": "value2", "prop1": "value3"}), true)
+	expectBoolEq(t, reflect.DeepEqual(f1.Properties, map[string]any{"prop0": "value2", "prop1": "value3"}), true)
 	expectGeomEq(t, f1.Geometry, geomFromWKT(t, "POLYGON((100 0,101 0,101 1,100 1,100 0))"))
 }
 
@@ -158,7 +158,7 @@ func TestGeoJSONFeatureCollectionAndPropertiesSet(t *testing.T) {
 		Features: []geom.GeoJSONFeature{{
 			Geometry: geomFromWKT(t, "POINT(1 2)"),
 			ID:       "myid",
-			Properties: map[string]interface{}{
+			Properties: map[string]any{
 				"foo": "bar",
 			},
 		}},
@@ -170,7 +170,7 @@ func TestGeoJSONFeatureCollectionAndPropertiesSet(t *testing.T) {
 func TestGeoJSONFeatureForeignMembers(t *testing.T) {
 	for _, tc := range []struct {
 		name    string
-		members map[string]interface{}
+		members map[string]any
 		json    string
 	}{
 		{
@@ -180,22 +180,22 @@ func TestGeoJSONFeatureForeignMembers(t *testing.T) {
 		},
 		{
 			name:    "empty foreign members",
-			members: map[string]interface{}{},
+			members: map[string]any{},
 			json:    `{"type":"Feature","geometry":{"type":"Point","coordinates":[0,0]},"properties":{}}`,
 		},
 		{
 			name:    "one foreign member",
-			members: map[string]interface{}{"foo": "bar"},
+			members: map[string]any{"foo": "bar"},
 			json:    `{"type":"Feature","geometry":{"type":"Point","coordinates":[0,0]},"properties":{},"foo":"bar"}`,
 		},
 		{
 			name:    "two foreign members",
-			members: map[string]interface{}{"foo": "bar", "baz": 42.0},
+			members: map[string]any{"foo": "bar", "baz": 42.0},
 			json:    `{"type":"Feature","geometry":{"type":"Point","coordinates":[0,0]},"properties":{},"baz":42,"foo":"bar"}`,
 		},
 		{
 			name:    "nested",
-			members: map[string]interface{}{"metadata": map[string]interface{}{"foo": "bar", "baz": 42.0}},
+			members: map[string]any{"metadata": map[string]any{"foo": "bar", "baz": 42.0}},
 			json:    `{"type":"Feature","geometry":{"type":"Point","coordinates":[0,0]},"properties":{},"metadata":{"baz":42,"foo":"bar"}}`,
 		},
 	} {
@@ -224,23 +224,23 @@ func TestGeoJSONFeatureForeignMembers(t *testing.T) {
 func TestGeoJSONFeatureForeignMembersForbidden(t *testing.T) {
 	for _, tc := range []struct {
 		name    string
-		members map[string]interface{}
+		members map[string]any
 	}{
 		{
 			name:    "has type foreign member",
-			members: map[string]interface{}{"type": "dummy"},
+			members: map[string]any{"type": "dummy"},
 		},
 		{
 			name:    "has geometry foreign member",
-			members: map[string]interface{}{"geometry": "dummy"},
+			members: map[string]any{"geometry": "dummy"},
 		},
 		{
 			name:    "has properties foreign member",
-			members: map[string]interface{}{"properties": "dummy"},
+			members: map[string]any{"properties": "dummy"},
 		},
 		{
 			name:    "has id foreign member",
-			members: map[string]interface{}{"id": "dummy"},
+			members: map[string]any{"id": "dummy"},
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -256,7 +256,7 @@ func TestGeoJSONFeatureForeignMembersForbidden(t *testing.T) {
 func TestGeoJSONFeatureCollectionForeignMembers(t *testing.T) {
 	for _, tc := range []struct {
 		name    string
-		members map[string]interface{}
+		members map[string]any
 		json    string
 	}{
 		{
@@ -266,22 +266,22 @@ func TestGeoJSONFeatureCollectionForeignMembers(t *testing.T) {
 		},
 		{
 			name:    "empty foreign members",
-			members: map[string]interface{}{},
+			members: map[string]any{},
 			json:    `{"type":"FeatureCollection","features":[]}`,
 		},
 		{
 			name:    "one foreign member",
-			members: map[string]interface{}{"foo": "bar"},
+			members: map[string]any{"foo": "bar"},
 			json:    `{"type":"FeatureCollection","features":[],"foo":"bar"}`,
 		},
 		{
 			name:    "two foreign members",
-			members: map[string]interface{}{"foo": "bar", "baz": 42.0},
+			members: map[string]any{"foo": "bar", "baz": 42.0},
 			json:    `{"type":"FeatureCollection","features":[],"baz":42,"foo":"bar"}`,
 		},
 		{
 			name:    "nested",
-			members: map[string]interface{}{"metadata": map[string]interface{}{"foo": "bar", "baz": 42.0}},
+			members: map[string]any{"metadata": map[string]any{"foo": "bar", "baz": 42.0}},
 			json:    `{"type":"FeatureCollection","features":[],"metadata":{"baz":42,"foo":"bar"}}`,
 		},
 	} {
@@ -309,15 +309,15 @@ func TestGeoJSONFeatureCollectionForeignMembers(t *testing.T) {
 func TestGeoJSONFeatureCollectionForeignMembersForbidden(t *testing.T) {
 	for _, tc := range []struct {
 		name    string
-		members map[string]interface{}
+		members map[string]any
 	}{
 		{
 			name:    "has type foreign member",
-			members: map[string]interface{}{"type": "dummy"},
+			members: map[string]any{"type": "dummy"},
 		},
 		{
 			name:    "has features foreign member",
-			members: map[string]interface{}{"features": "dummy"},
+			members: map[string]any{"features": "dummy"},
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

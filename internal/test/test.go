@@ -23,7 +23,7 @@ func Err(tb testing.TB, err error) {
 	}
 }
 
-func ErrAs(tb testing.TB, err error, target interface{}) {
+func ErrAs(tb testing.TB, err error, target any) {
 	tb.Helper()
 	if !errors.As(err, target) {
 		tb.Fatalf("expected error '%v' to be 'As' of type %T", err, target)
@@ -44,14 +44,14 @@ func NotExactEquals(tb testing.TB, g1, g2 geom.Geometry, opts ...geom.ExactEqual
 	}
 }
 
-func DeepEqual(tb testing.TB, a, b interface{}) {
+func DeepEqual(tb testing.TB, a, b any) {
 	tb.Helper()
 	if !reflect.DeepEqual(a, b) {
 		tb.Fatalf("values should be deeply equal:\n  a: %#v\n  b: %#v", a, b)
 	}
 }
 
-func NotDeepEqual(tb testing.TB, a, b interface{}) {
+func NotDeepEqual(tb testing.TB, a, b any) {
 	tb.Helper()
 	if reflect.DeepEqual(a, b) {
 		tb.Fatalf("values should not be deeply equal:\n  a: %#v\n  b: %#v", a, b)

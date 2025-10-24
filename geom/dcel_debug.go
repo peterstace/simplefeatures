@@ -155,12 +155,12 @@ func lstoa(locs [2]location) string {
 }
 
 //nolint:unused
-func ptoa(ptr interface{}) string {
+func ptoa(ptr any) string {
 	return fmt.Sprintf("%p", ptr)
 }
 
 //nolint:unused
-func ptrLess(ptr1, ptr2 interface{}) bool {
+func ptrLess(ptr1, ptr2 any) bool {
 	return ptoa(ptr1) < ptoa(ptr2)
 }
 

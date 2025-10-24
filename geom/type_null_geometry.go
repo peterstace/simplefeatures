@@ -11,7 +11,7 @@ type NullGeometry struct {
 }
 
 // Scan implements the database/sql.Scanner interface.
-func (ng *NullGeometry) Scan(value interface{}) error {
+func (ng *NullGeometry) Scan(value any) error {
 	if value == nil {
 		ng.Geometry = Geometry{}
 		ng.Valid = false
