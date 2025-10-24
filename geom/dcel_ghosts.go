@@ -32,14 +32,13 @@ func findComponentRepresentatives(a, b Geometry) []XY {
 
 	// Union endpoints of all edges (since edges are connected).
 	all := NewGeometryCollection([]Geometry{a, b}).AsGeometry()
-	lines := appendLines(nil, all) // TODO: Write a walkEdges function and use that instead.
-	for _, ln := range lines {
+	walkLines(all, func(ln line) {
 		idxA, okA := pointToIdx[ln.a]
 		idxB, okB := pointToIdx[ln.b]
 		if okA && okB {
 			dset.union(idxA, idxB)
 		}
-	}
+	})
 
 	// Find the rightmost point for each component.
 	rightmost := make(map[int]XY)
