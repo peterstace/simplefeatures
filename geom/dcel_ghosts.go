@@ -230,26 +230,42 @@ func createGhostFromHit(
 	// Case B: Ray hits an edge - check endpoints for obstructions.
 	edge := hitResult.hitEdge
 
-	aObstructed := isObstructed(origin, edge.a, allPoints, allLines)
-	bObstructed := isObstructed(origin, edge.b, allPoints, allLines)
+	allowA := !isObstructed(origin, edge.a, allPoints, allLines) && edge.a.X > origin.X
+	allowB := !isObstructed(origin, edge.b, allPoints, allLines) && edge.b.X > origin.X
 
-	if !aObstructed && !bObstructed {
-		// Both endpoints unobstructed - choose the closer one.
-		if origin.distanceSquaredTo(edge.a) <= origin.distanceSquaredTo(edge.b) {
-			return line{origin, edge.a}.asLineString()
+	lineTo := func(to XY) LineString {
+		return line{origin, to}.asLineString()
+	}
+
+	if allowA && allowB {
+		// Both endpoints allowed. Choose the closer one. If they're same
+		// distance, than choose the higher one.
+		distA := origin.distanceSquaredTo(edge.a)
+		distB := origin.distanceSquaredTo(edge.b)
+		switch {
+		case distA < distB:
+			return lineTo(edge.a)
+		case distA > distB:
+			return lineTo(edge.b)
+		default:
+			if edge.a.Y >= edge.b.Y {
+				return lineTo(edge.a)
+			} else {
+				return lineTo(edge.b)
+			}
 		}
-		return line{origin, edge.b}.asLineString()
+		panic("unreachable")
 	}
 
-	if !aObstructed {
-		return line{origin, edge.a}.asLineString()
+	if allowA {
+		return lineTo(edge.a)
 	}
-	if !bObstructed {
-		return line{origin, edge.b}.asLineString()
+	if allowB {
+		return lineTo(edge.b)
 	}
 
 	// Both endpoints obstructed - connect to intersection point.
-	return line{origin, hitResult.hitPoint}.asLineString()
+	return lineTo(hitResult.hitPoint)
 }
 
 // createGhosts creates a MultiLineString that connects all components of the

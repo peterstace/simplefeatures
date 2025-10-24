@@ -1,6 +1,15 @@
 package geom
 
 func newDCELFromGeometries(a, b Geometry) *doublyConnectedEdgeList {
+	a, b, ghosts := prepareGeometriesForDCEL(a, b)
+	return newDCELFromRenodedGeometries(a, b, ghosts)
+}
+
+// prepareGeometriesForDCEL pre-processes the input geometries (A and B) such
+// that they can be used to create a DCEL. An additional "ghost"
+// MultiLineString is also returned, which provides the appropriate connections
+// such that A and B (when combined together) are fully connected.
+func prepareGeometriesForDCEL(a, b Geometry) (Geometry, Geometry, MultiLineString) {
 	// Phase 1: Initial renoding (without ghosts). This ensures that the two
 	// input geometries only interact at control points before ghost edge
 	// construction.
@@ -13,7 +22,7 @@ func newDCELFromGeometries(a, b Geometry) *doublyConnectedEdgeList {
 	// edges had to split input geometry edges.
 	a, b, ghosts = reNodeGeometries(a, b, ghosts)
 
-	return newDCELFromRenodedGeometries(a, b, ghosts)
+	return a, b, ghosts
 }
 
 func newDCELFromRenodedGeometries(a, b Geometry, ghosts MultiLineString) *doublyConnectedEdgeList {
