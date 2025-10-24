@@ -1,11 +1,8 @@
 package geom
 
 import (
-	"fmt"
 	"math"
 	"sort"
-
-	"github.com/peterstace/simplefeatures/rtree"
 )
 
 // findComponentRepresentatives identifies connected components in the input
@@ -75,8 +72,7 @@ func isMoreRightmost(p1, p2 XY) bool {
 }
 
 // sortRightmostFirst sorts points right-to-left (descending X, then
-// descending Y). This order is used for processing components during ghost
-// edge construction.
+// descending Y).
 func sortRightmostFirst(points []XY) {
 	sort.Slice(points, func(i, j int) bool {
 		if points[i].X != points[j].X {
@@ -95,7 +91,8 @@ func collectAllPoints(a, b Geometry) []XY {
 	return sortAndUniquifyXYs(points)
 }
 
-// findMaxX returns the maximum X coordinate among all points.
+// findMaxX returns the maximum X coordinate among all points. If no points are
+// supplied, then returns 0 as a special case.
 func findMaxX(points []XY) float64 {
 	if len(points) == 0 {
 		return 0
@@ -269,8 +266,7 @@ func createGhostFromHit(
 }
 
 // createGhosts creates a MultiLineString that connects all components of the
-// input Geometries using a ray-casting algorithm that minimizes crossings with
-// input geometry.
+// input Geometries using a ray-casting algorithm.
 func createGhosts(a, b Geometry) MultiLineString {
 	// Get representative points for each component.
 	representatives := findComponentRepresentatives(a, b)
@@ -339,119 +335,4 @@ func createGhosts(a, b Geometry) MultiLineString {
 	}
 
 	return NewMultiLineString(ghostEdges)
-}
-
-// spanningTree creates a near-minimum spanning tree (using the euclidean
-// distance metric) over the supplied points. The tree will consist of N-1
-// lines, where N is the number of _distinct_ xys supplied.
-//
-// It's a 'near' minimum spanning tree rather than a spanning tree, because we
-// use a simple greedy algorithm rather than a proper minimum spanning tree
-// algorithm.
-func spanningTree(xys []XY) MultiLineString {
-	if len(xys) <= 1 {
-		return MultiLineString{}
-	}
-
-	// Load points into r-tree.
-	xys = sortAndUniquifyXYs(xys)
-	items := make([]rtree.BulkItem, len(xys))
-	for i, xy := range xys {
-		items[i] = rtree.BulkItem{Box: xy.box(), RecordID: i}
-	}
-	tree := rtree.BulkLoad(items)
-
-	// The disjoint set keeps track of which points have been joined together
-	// so far. Two entries in dset are in the same set iff they are connected
-	// in the incrementally-built spanning tree.
-	dset := newDisjointSet(len(xys))
-	lss := make([]LineString, 0, len(xys)-1)
-
-	for i, xyi := range xys {
-		if i == len(xys)-1 {
-			// Skip the last point, since a tree is formed from N-1 edges
-			// rather than N edges. The last point will be included by virtue
-			// of being the closest to another point.
-			continue
-		}
-		tree.PrioritySearch(xyi.box(), func(j int) error {
-			// We don't want to include a new edge in the spanning tree if it
-			// would cause a cycle (i.e. the two endpoints are already in the
-			// same tree). This is checked via dset.
-			if i == j || dset.find(i) == dset.find(j) {
-				return nil
-			}
-			dset.union(i, j)
-			xyj := xys[j]
-			lss = append(lss, line{xyi, xyj}.asLineString())
-			return rtree.Stop
-		})
-	}
-
-	return NewMultiLineString(lss)
-}
-
-func appendXYForPoint(xys []XY, pt Point) []XY {
-	if xy, ok := pt.XY(); ok {
-		xys = append(xys, xy)
-	}
-	return xys
-}
-
-func appendXYForLineString(xys []XY, ls LineString) []XY {
-	return appendXYForPoint(xys, ls.StartPoint())
-}
-
-func appendXYsForPolygon(xys []XY, poly Polygon) []XY {
-	xys = appendXYForLineString(xys, poly.ExteriorRing())
-	n := poly.NumInteriorRings()
-	for i := 0; i < n; i++ {
-		xys = appendXYForLineString(xys, poly.InteriorRingN(i))
-	}
-	return xys
-}
-
-func appendComponentPoints(xys []XY, g Geometry) []XY {
-	switch g.Type() {
-	case TypePoint:
-		return appendXYForPoint(xys, g.MustAsPoint())
-	case TypeMultiPoint:
-		mp := g.MustAsMultiPoint()
-		n := mp.NumPoints()
-		for i := 0; i < n; i++ {
-			xys = appendXYForPoint(xys, mp.PointN(i))
-		}
-		return xys
-	case TypeLineString:
-		ls := g.MustAsLineString()
-		return appendXYForLineString(xys, ls)
-	case TypeMultiLineString:
-		mls := g.MustAsMultiLineString()
-		n := mls.NumLineStrings()
-		for i := 0; i < n; i++ {
-			ls := mls.LineStringN(i)
-			xys = appendXYForLineString(xys, ls)
-		}
-		return xys
-	case TypePolygon:
-		poly := g.MustAsPolygon()
-		return appendXYsForPolygon(xys, poly)
-	case TypeMultiPolygon:
-		mp := g.MustAsMultiPolygon()
-		n := mp.NumPolygons()
-		for i := 0; i < n; i++ {
-			poly := mp.PolygonN(i)
-			xys = appendXYsForPolygon(xys, poly)
-		}
-		return xys
-	case TypeGeometryCollection:
-		gc := g.MustAsGeometryCollection()
-		n := gc.NumGeometries()
-		for i := 0; i < n; i++ {
-			xys = appendComponentPoints(xys, gc.GeometryN(i))
-		}
-		return xys
-	default:
-		panic(fmt.Sprintf("unknown geometry type: %v", g.Type()))
-	}
 }
