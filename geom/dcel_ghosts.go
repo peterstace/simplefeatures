@@ -28,9 +28,9 @@ func findComponentRepresentatives(a, b Geometry) []XY {
 	// Initialize union-find with all points as separate components.
 	dset := newDisjointSet(len(points))
 
-	// Union endpoints of all edges to build connected components.
+	// Union endpoints of all edges (since edges are connected).
 	all := NewGeometryCollection([]Geometry{a, b}).AsGeometry()
-	lines := appendLines(nil, all)
+	lines := appendLines(nil, all) // TODO: Write a walkEdges function and use that instead.
 	for _, ln := range lines {
 		idxA, okA := pointToIdx[ln.a]
 		idxB, okB := pointToIdx[ln.b]
@@ -54,6 +54,7 @@ func findComponentRepresentatives(a, b Geometry) []XY {
 	for _, pt := range rightmost {
 		representatives = append(representatives, pt)
 	}
+	// TODO: Sort representatives for consistent output?
 
 	return representatives
 }
@@ -110,6 +111,8 @@ func findMaxX(points []XY) float64 {
 // target. Returns true if the path from origin to target is obstructed.
 func isObstructed(origin, target XY, allPoints []XY, allLines []line) bool {
 	segment := line{origin, target}
+
+	// TODO: Should use index structure here.
 
 	// Check if any point lies on the segment (excluding endpoints).
 	for _, pt := range allPoints {
