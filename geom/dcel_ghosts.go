@@ -107,52 +107,6 @@ func findMaxX(points []XY) float64 {
 	return maxX
 }
 
-// isObstructed checks if there is any control point or edge between origin and
-// target. Returns true if the path from origin to target is obstructed.
-func isObstructed(origin, target XY, pointIndex indexedPoints, lineIndex indexedLines) bool {
-	segment := line{origin, target}
-	box := segment.box()
-
-	// Check if any point lies on the segment (excluding endpoints).
-	obstructed := false
-	pointIndex.tree.RangeSearch(box, func(i int) error {
-		pt := pointIndex.points[i]
-		if pt == origin || pt == target {
-			return nil
-		}
-		if segment.intersectsXY(pt) {
-			obstructed = true
-			return rtree.Stop
-		}
-		return nil
-	})
-	if obstructed {
-		return true
-	}
-
-	// Check if any edge intersects the segment.
-	lineIndex.tree.RangeSearch(box, func(i int) error {
-		edge := lineIndex.lines[i]
-		inter := segment.intersectLine(edge)
-		if inter.empty {
-			return nil
-		}
-
-		// Check if intersection is not just at the origin or target endpoints.
-		if inter.ptA != origin && inter.ptA != target {
-			obstructed = true
-			return rtree.Stop
-		}
-		if inter.ptA != inter.ptB && inter.ptB != origin && inter.ptB != target {
-			obstructed = true
-			return rtree.Stop
-		}
-		return nil
-	})
-
-	return obstructed
-}
-
 // rayHitType represents the type of intersection found by ray casting.
 type rayHitType int
 
@@ -207,24 +161,17 @@ func findClosestRayIntersection(
 	// Check for edge intersections.
 	lineIndex.tree.RangeSearch(rayBox, func(i int) error {
 		edge := lineIndex.lines[i]
-		// Create a ray as a very long horizontal line segment.
-		ray := line{origin, XY{origin.X + 1e10, origin.Y}}
-		inter := ray.intersectLine(edge)
-		if inter.empty {
+
+		inter, ok := horizontalRayIntersection(origin, edge)
+		if !ok {
 			return nil
 		}
-
-		// Only consider intersections to the right of origin.
-		if inter.ptA.X <= origin.X {
-			return nil
-		}
-
-		dist := inter.ptA.X - origin.X
+		dist := inter.X - origin.X
 		if dist < closestDist {
 			closestDist = dist
 			result = rayHitResult{
 				hitType:  hitEdge,
-				hitPoint: inter.ptA,
+				hitPoint: inter,
 				hitEdge:  edge,
 			}
 		}
@@ -235,57 +182,9 @@ func findClosestRayIntersection(
 }
 
 // createGhostFromHit creates a ghost edge from origin to the intersection
-// found by ray casting. Handles both vertex hits and edge hits.
-func createGhostFromHit(
-	origin XY,
-	hitResult rayHitResult,
-	pointIndex indexedPoints,
-	lineIndex indexedLines,
-) line {
-	if hitResult.hitType == hitVertex {
-		// Case A: Ray hits a vertex directly.
-		return line{origin, hitResult.hitPoint}
-	}
-
-	// Case B: Ray hits an edge - check endpoints for obstructions.
-	edge := hitResult.hitEdge
-
-	allowA := !isObstructed(origin, edge.a, pointIndex, lineIndex) && edge.a.X > origin.X
-	allowB := !isObstructed(origin, edge.b, pointIndex, lineIndex) && edge.b.X > origin.X
-
-	lineTo := func(to XY) line {
-		return line{origin, to}
-	}
-
-	if allowA && allowB {
-		// Both endpoints allowed. Choose the closer one. If they're same
-		// distance, than choose the higher one.
-		distA := origin.distanceSquaredTo(edge.a)
-		distB := origin.distanceSquaredTo(edge.b)
-		switch {
-		case distA < distB:
-			return lineTo(edge.a)
-		case distA > distB:
-			return lineTo(edge.b)
-		default:
-			if edge.a.Y >= edge.b.Y {
-				return lineTo(edge.a)
-			} else {
-				return lineTo(edge.b)
-			}
-		}
-		panic("unreachable")
-	}
-
-	if allowA {
-		return lineTo(edge.a)
-	}
-	if allowB {
-		return lineTo(edge.b)
-	}
-
-	// Both endpoints obstructed - connect to intersection point.
-	return lineTo(hitResult.hitPoint)
+// found by ray casting. Always draws a horizontal ray to the hit point.
+func createGhostFromHit(origin XY, hitResult rayHitResult) line {
+	return line{origin, hitResult.hitPoint}
 }
 
 // createGhosts creates a MultiLineString that connects all components of the
@@ -326,9 +225,7 @@ func createGhosts(a, b Geometry) MultiLineString {
 		}
 
 		// Can create a ghost edge to an actual component.
-		ghostLine := createGhostFromHit(
-			origin, hitResult, pointIndex, lineIndex,
-		)
+		ghostLine := createGhostFromHit(origin, hitResult)
 		ghostLines = append(ghostLines, ghostLine)
 	}
 
@@ -364,4 +261,45 @@ func createGhosts(a, b Geometry) MultiLineString {
 		ghostEdges[i] = ln.asLineString()
 	}
 	return NewMultiLineString(ghostEdges)
+}
+
+// horizontalRayIntersection finds the intersection of a horizontal ray
+// starting at origin and continuing infinitely to the right (increasing X
+// value).
+func horizontalRayIntersection(
+	origin XY,
+	edge line,
+) (XY, bool) {
+	// Handle horizontal edge special case.
+	if edge.a.Y == edge.b.Y {
+		if edge.a.Y != origin.Y {
+			return XY{}, false
+		}
+		if edge.a.X > edge.b.X {
+			// Ensure that a is to the left of b.
+			edge.a, edge.b = edge.b, edge.a
+		}
+		if origin.X < edge.a.X {
+			return edge.a, true
+		}
+		if origin.X <= edge.b.X {
+			return origin, true
+		}
+		return XY{}, false // beyond edge.b.X
+	}
+
+	// Non-horizontal case.
+	if edge.a.Y > edge.b.Y {
+		// Ensure that a is below b.
+		edge.a, edge.b = edge.b, edge.a
+	}
+	t := (origin.Y - edge.a.Y) / (edge.b.Y - edge.a.Y)
+	if t < 0 || t > 1 {
+		return XY{}, false
+	}
+	x := edge.a.X + t*(edge.b.X-edge.a.X)
+	if x < origin.X {
+		return XY{}, false
+	}
+	return XY{x, origin.Y}, true
 }
