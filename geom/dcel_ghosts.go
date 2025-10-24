@@ -55,7 +55,6 @@ func findComponentRepresentatives(a, b Geometry) []XY {
 	for _, pt := range rightmost {
 		representatives = append(representatives, pt)
 	}
-	// TODO: Sort representatives for consistent output?
 
 	return representatives
 }
@@ -242,10 +241,10 @@ func createGhostFromHit(
 	hitResult rayHitResult,
 	pointIndex indexedPoints,
 	lineIndex indexedLines,
-) LineString {
+) line {
 	if hitResult.hitType == hitVertex {
 		// Case A: Ray hits a vertex directly.
-		return line{origin, hitResult.hitPoint}.asLineString()
+		return line{origin, hitResult.hitPoint}
 	}
 
 	// Case B: Ray hits an edge - check endpoints for obstructions.
@@ -254,8 +253,8 @@ func createGhostFromHit(
 	allowA := !isObstructed(origin, edge.a, pointIndex, lineIndex) && edge.a.X > origin.X
 	allowB := !isObstructed(origin, edge.b, pointIndex, lineIndex) && edge.b.X > origin.X
 
-	lineTo := func(to XY) LineString {
-		return line{origin, to}.asLineString()
+	lineTo := func(to XY) line {
+		return line{origin, to}
 	}
 
 	if allowA && allowB {
@@ -312,7 +311,7 @@ func createGhosts(a, b Geometry) MultiLineString {
 	lineIndex := newIndexedLines(allLines)
 
 	// Process each representative, casting rays rightward.
-	var ghostEdges []LineString // TODO: collect ghostLines instead of ghostEdges (and convert to MultiLineString at the end).
+	var ghostLines []line
 	var fallbackOrigins []XY
 
 	for _, origin := range representatives {
@@ -327,10 +326,10 @@ func createGhosts(a, b Geometry) MultiLineString {
 		}
 
 		// Can create a ghost edge to an actual component.
-		ghostEdge := createGhostFromHit(
+		ghostLine := createGhostFromHit(
 			origin, hitResult, pointIndex, lineIndex,
 		)
-		ghostEdges = append(ghostEdges, ghostEdge)
+		ghostLines = append(ghostLines, ghostLine)
 	}
 
 	// Only create vertical line connections if at least 2 components need it.
@@ -346,18 +345,23 @@ func createGhosts(a, b Geometry) MultiLineString {
 
 		// Create horizontal connections to the vertical line.
 		for _, origin := range fallbackOrigins {
-			edge := line{origin, XY{verticalLineX, origin.Y}}.asLineString()
-			ghostEdges = append(ghostEdges, edge)
+			edge := line{origin, XY{verticalLineX, origin.Y}}
+			ghostLines = append(ghostLines, edge)
 		}
 
 		// Create vertical line segments connecting consecutive horizontal endpoints.
 		for i := 0; i < len(fallbackOrigins)-1; i++ {
 			from := XY{verticalLineX, fallbackOrigins[i].Y}
 			to := XY{verticalLineX, fallbackOrigins[i+1].Y}
-			verticalSegment := line{from, to}.asLineString()
-			ghostEdges = append(ghostEdges, verticalSegment)
+			verticalSegment := line{from, to}
+			ghostLines = append(ghostLines, verticalSegment)
 		}
 	}
 
+	// Convert lines to LineStrings.
+	ghostEdges := make([]LineString, len(ghostLines))
+	for i, ln := range ghostLines {
+		ghostEdges[i] = ln.asLineString()
+	}
 	return NewMultiLineString(ghostEdges)
 }
