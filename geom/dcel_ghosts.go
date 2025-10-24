@@ -3,6 +3,8 @@ package geom
 import (
 	"math"
 	"sort"
+
+	"github.com/peterstace/simplefeatures/rtree"
 )
 
 // findComponentRepresentatives identifies connected components in the input
@@ -109,38 +111,48 @@ func findMaxX(points []XY) float64 {
 
 // isObstructed checks if there is any control point or edge between origin and
 // target. Returns true if the path from origin to target is obstructed.
-func isObstructed(origin, target XY, allPoints []XY, allLines []line) bool {
+func isObstructed(origin, target XY, pointIndex indexedPoints, lineIndex indexedLines) bool {
 	segment := line{origin, target}
-
-	// TODO: Should use index structure here.
+	box := segment.box()
 
 	// Check if any point lies on the segment (excluding endpoints).
-	for _, pt := range allPoints {
+	obstructed := false
+	pointIndex.tree.RangeSearch(box, func(i int) error {
+		pt := pointIndex.points[i]
 		if pt == origin || pt == target {
-			continue
+			return nil
 		}
 		if segment.intersectsXY(pt) {
-			return true
+			obstructed = true
+			return rtree.Stop
 		}
+		return nil
+	})
+	if obstructed {
+		return true
 	}
 
 	// Check if any edge intersects the segment.
-	for _, edge := range allLines {
+	lineIndex.tree.RangeSearch(box, func(i int) error {
+		edge := lineIndex.lines[i]
 		inter := segment.intersectLine(edge)
 		if inter.empty {
-			continue
+			return nil
 		}
 
 		// Check if intersection is not just at the origin or target endpoints.
 		if inter.ptA != origin && inter.ptA != target {
-			return true
+			obstructed = true
+			return rtree.Stop
 		}
 		if inter.ptA != inter.ptB && inter.ptB != origin && inter.ptB != target {
-			return true
+			obstructed = true
+			return rtree.Stop
 		}
-	}
+		return nil
+	})
 
-	return false
+	return obstructed
 }
 
 // rayHitType represents the type of intersection found by ray casting.
@@ -219,8 +231,8 @@ func findClosestRayIntersection(
 func createGhostFromHit(
 	origin XY,
 	hitResult rayHitResult,
-	allPoints []XY,
-	allLines []line,
+	pointIndex indexedPoints,
+	lineIndex indexedLines,
 ) LineString {
 	if hitResult.hitType == hitVertex {
 		// Case A: Ray hits a vertex directly.
@@ -230,8 +242,8 @@ func createGhostFromHit(
 	// Case B: Ray hits an edge - check endpoints for obstructions.
 	edge := hitResult.hitEdge
 
-	allowA := !isObstructed(origin, edge.a, allPoints, allLines) && edge.a.X > origin.X
-	allowB := !isObstructed(origin, edge.b, allPoints, allLines) && edge.b.X > origin.X
+	allowA := !isObstructed(origin, edge.a, pointIndex, lineIndex) && edge.a.X > origin.X
+	allowB := !isObstructed(origin, edge.b, pointIndex, lineIndex) && edge.b.X > origin.X
 
 	lineTo := func(to XY) LineString {
 		return line{origin, to}.asLineString()
@@ -307,7 +319,7 @@ func createGhosts(a, b Geometry) MultiLineString {
 
 		// Can create a ghost edge to an actual component.
 		ghostEdge := createGhostFromHit(
-			origin, hitResult, allPoints, allLines,
+			origin, hitResult, pointIndex, lineIndex,
 		)
 		ghostEdges = append(ghostEdges, ghostEdge)
 	}
