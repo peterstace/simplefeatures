@@ -272,6 +272,8 @@ func createGhosts(a, b Geometry) MultiLineString {
 	representatives := findComponentRepresentatives(a, b)
 
 	if len(representatives) <= 1 {
+		// When there are either 0 or 1 connected components, then they don't
+		// need connecting.
 		return MultiLineString{}
 	}
 
@@ -285,12 +287,9 @@ func createGhosts(a, b Geometry) MultiLineString {
 	pointIndex := newIndexedPoints(allPoints)
 	lineIndex := newIndexedLines(allLines)
 
-	// Calculate max X for vertical line fallback.
-	maxX := findMaxX(allPoints)
-
 	// Process each representative, casting rays rightward.
-	var ghostEdges []LineString
-	var verticalLineOrigins []XY
+	var ghostEdges []LineString // TODO: collect ghostLines instead of ghostEdges (and convert to MultiLineString at the end).
+	var fallbackOrigins []XY
 
 	for _, origin := range representatives {
 		hitResult := findClosestRayIntersection(
@@ -299,7 +298,7 @@ func createGhosts(a, b Geometry) MultiLineString {
 
 		if hitResult.hitType == hitNone {
 			// No intersection - would need vertical line connection.
-			verticalLineOrigins = append(verticalLineOrigins, origin)
+			fallbackOrigins = append(fallbackOrigins, origin)
 			continue
 		}
 
@@ -311,24 +310,26 @@ func createGhosts(a, b Geometry) MultiLineString {
 	}
 
 	// Only create vertical line connections if at least 2 components need it.
-	if len(verticalLineOrigins) >= 2 {
+	if len(fallbackOrigins) >= 2 {
+		// Sort vertical line origins by Y coordinate.
+		sort.Slice(fallbackOrigins, func(i, j int) bool {
+			return fallbackOrigins[i].Y < fallbackOrigins[j].Y
+		})
+
+		// Calculate max X for vertical line fallback.
+		maxX := findMaxX(allPoints)
 		verticalLineX := math.Ceil(maxX) + 1
 
 		// Create horizontal connections to the vertical line.
-		for _, origin := range verticalLineOrigins {
-			ghostEdge := line{origin, XY{verticalLineX, origin.Y}}.asLineString()
-			ghostEdges = append(ghostEdges, ghostEdge)
+		for _, origin := range fallbackOrigins {
+			edge := line{origin, XY{verticalLineX, origin.Y}}.asLineString()
+			ghostEdges = append(ghostEdges, edge)
 		}
 
-		// Sort vertical line origins by Y coordinate to create vertical segments.
-		sort.Slice(verticalLineOrigins, func(i, j int) bool {
-			return verticalLineOrigins[i].Y < verticalLineOrigins[j].Y
-		})
-
 		// Create vertical line segments connecting consecutive horizontal endpoints.
-		for i := 0; i < len(verticalLineOrigins)-1; i++ {
-			from := XY{verticalLineX, verticalLineOrigins[i].Y}
-			to := XY{verticalLineX, verticalLineOrigins[i+1].Y}
+		for i := 0; i < len(fallbackOrigins)-1; i++ {
+			from := XY{verticalLineX, fallbackOrigins[i].Y}
+			to := XY{verticalLineX, fallbackOrigins[i+1].Y}
 			verticalSegment := line{from, to}.asLineString()
 			ghostEdges = append(ghostEdges, verticalSegment)
 		}
