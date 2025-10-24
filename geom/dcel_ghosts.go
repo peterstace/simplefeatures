@@ -175,18 +175,25 @@ type rayHitResult struct {
 // direction and finds the closest intersection with any vertex or edge.
 func findClosestRayIntersection(
 	origin XY,
-	pointIndex indexedPoints, // TODO: pointIndex and lineIndex are unused
+	pointIndex indexedPoints,
 	lineIndex indexedLines,
-	allPoints []XY,
-	allLines []line,
 ) rayHitResult {
 	closestDist := math.MaxFloat64
 	result := rayHitResult{hitType: hitNone}
 
+	// Create bounding box for the rightward horizontal ray.
+	rayBox := rtree.Box{
+		MinX: origin.X,
+		MaxX: math.MaxFloat64,
+		MinY: origin.Y,
+		MaxY: origin.Y,
+	}
+
 	// Check for vertex intersections.
-	for _, pt := range allPoints {
+	pointIndex.tree.RangeSearch(rayBox, func(i int) error {
+		pt := pointIndex.points[i]
 		if pt.X <= origin.X || pt.Y != origin.Y {
-			continue
+			return nil
 		}
 		dist := pt.X - origin.X
 		if dist < closestDist {
@@ -196,20 +203,22 @@ func findClosestRayIntersection(
 				hitPoint: pt,
 			}
 		}
-	}
+		return nil
+	})
 
 	// Check for edge intersections.
-	for _, edge := range allLines {
+	lineIndex.tree.RangeSearch(rayBox, func(i int) error {
+		edge := lineIndex.lines[i]
 		// Create a ray as a very long horizontal line segment.
 		ray := line{origin, XY{origin.X + 1e10, origin.Y}}
 		inter := ray.intersectLine(edge)
 		if inter.empty {
-			continue
+			return nil
 		}
 
 		// Only consider intersections to the right of origin.
 		if inter.ptA.X <= origin.X {
-			continue
+			return nil
 		}
 
 		dist := inter.ptA.X - origin.X
@@ -221,7 +230,8 @@ func findClosestRayIntersection(
 				hitEdge:  edge,
 			}
 		}
-	}
+		return nil
+	})
 
 	return result
 }
@@ -308,7 +318,7 @@ func createGhosts(a, b Geometry) MultiLineString {
 
 	for _, origin := range representatives {
 		hitResult := findClosestRayIntersection(
-			origin, pointIndex, lineIndex, allPoints, allLines,
+			origin, pointIndex, lineIndex,
 		)
 
 		if hitResult.hitType == hitNone {
