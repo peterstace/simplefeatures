@@ -160,12 +160,12 @@ type rayHitResult struct {
 // direction and finds the closest intersection with any vertex or edge.
 func findClosestRayIntersection(
 	origin XY,
-	pointIndex indexedPoints,
+	pointIndex indexedPoints, // TODO: pointIndex and lineIndex are unused
 	lineIndex indexedLines,
 	allPoints []XY,
 	allLines []line,
 ) rayHitResult {
-	closestDist := float64(1<<63 - 1) // Max float64 approximation.
+	closestDist := math.MaxFloat64
 	result := rayHitResult{hitType: hitNone}
 
 	// Check for vertex intersections.

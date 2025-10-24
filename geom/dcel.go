@@ -20,7 +20,9 @@ func prepareGeometriesForDCEL(a, b Geometry) (Geometry, Geometry, MultiLineStrin
 
 	// Phase 3: Final renoding (with ghosts). This handles the case where ghost
 	// edges had to split input geometry edges.
-	a, b, ghosts = reNodeGeometries(a, b, ghosts)
+	if !ghosts.IsEmpty() {
+		a, b, ghosts = reNodeGeometries(a, b, ghosts)
+	}
 
 	return a, b, ghosts
 }
