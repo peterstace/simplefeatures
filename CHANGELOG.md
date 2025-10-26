@@ -9,6 +9,13 @@
   that `reflect.DeepEqual` now works correctly for exactly comparing
   geometries.
 
+- Replaces all occurrences of `interface{}` with `any` throughout the codebase.
+  This includes function parameters, return types, struct fields, and type
+  assertions.
+
+- **Breaking change:** The minimum required Go version is now 1.18 (previously
+  1.17). This is required to support the `any` keyword.
+
 ## v0.55.0
 
 2025-10-10

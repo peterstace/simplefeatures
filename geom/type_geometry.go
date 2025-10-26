@@ -261,7 +261,7 @@ func (g *Geometry) UnmarshalJSON(p []byte) error {
 // unmarshalGeoJSONAsType unmarshals GeoJSON directly into the concrete
 // geometry specified by dst (which should be a pointer to the concrete
 // geometry type).
-func unmarshalGeoJSONAsType(p []byte, dst interface{}) error {
+func unmarshalGeoJSONAsType(p []byte, dst any) error {
 	g, err := UnmarshalGeoJSON(p)
 	if err != nil {
 		return err
@@ -313,7 +313,7 @@ func (g Geometry) Value() (driver.Value, error) {
 // error will be returned if the geometry is invalid). If this validation isn't
 // needed or is undesirable, then the WKB should be scanned into a byte slice
 // and then UnmarshalWKB called manually (passing in NoValidate{}).
-func (g *Geometry) Scan(src interface{}) error {
+func (g *Geometry) Scan(src any) error {
 	var wkb []byte
 	switch src := src.(type) {
 	case []byte:
@@ -340,7 +340,7 @@ func (g *Geometry) Scan(src interface{}) error {
 // geometry types. The src should be the input to Scan, typ should be the
 // concrete geometry type, and dst should be a pointer to the concrete geometry
 // to update (e.g. *LineString).
-func scanAsType(src interface{}, dst interface{}) error {
+func scanAsType(src any, dst any) error {
 	var g Geometry
 	if err := g.Scan(src); err != nil {
 		return err
@@ -356,7 +356,7 @@ func scanAsType(src interface{}, dst interface{}) error {
 // assignToConcrete assigns the geometry stored in g to the concrete geometry
 // pointed to by dst (i.e. dst must be a pointer to a concrete geometry). It
 // panics if the type of dst doesn't match the geometry stored in g.
-func assignToConcrete(dst interface{}, g Geometry) {
+func assignToConcrete(dst any, g Geometry) {
 	switch g.Type() {
 	case TypeGeometryCollection:
 		*dst.(*GeometryCollection) = g.MustAsGeometryCollection()

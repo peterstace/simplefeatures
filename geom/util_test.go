@@ -105,7 +105,7 @@ func expectErrIs(tb testing.TB, err, want error) {
 	}
 }
 
-func expectErrAs(tb testing.TB, err error, target interface{}) {
+func expectErrAs(tb testing.TB, err error, target any) {
 	tb.Helper()
 	if !errors.As(err, target) {
 		targetType := reflect.ValueOf(target).Elem().Interface()
@@ -132,7 +132,7 @@ func expectValidity(tb testing.TB, g interface{ Validate() error }, rv geom.Rule
 	expectValidationErrWithReason(tb, err, rv)
 }
 
-func expectDeepEq(tb testing.TB, got, want interface{}) {
+func expectDeepEq(tb testing.TB, got, want any) {
 	tb.Helper()
 	if !reflect.DeepEqual(got, want) {
 		tb.Errorf("\ngot:  %v\nwant: %v\n", got, want)

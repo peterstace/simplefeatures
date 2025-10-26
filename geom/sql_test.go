@@ -71,7 +71,7 @@ func TestSQLScanConcrete(t *testing.T) {
 		wkt      string
 		concrete interface {
 			AsText() string
-			Scan(interface{}) error
+			Scan(any) error
 		}
 	}{
 		{"POINT(0 1)", new(geom.Point)},

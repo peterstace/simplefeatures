@@ -73,11 +73,11 @@ func (q *entriesQueue) Swap(i int, j int) {
 	q.entries[i], q.entries[j] = q.entries[j], q.entries[i]
 }
 
-func (q *entriesQueue) Push(x interface{}) {
+func (q *entriesQueue) Push(x any) {
 	q.entries = append(q.entries, x.(*entry))
 }
 
-func (q *entriesQueue) Pop() interface{} {
+func (q *entriesQueue) Pop() any {
 	e := q.entries[len(q.entries)-1]
 	q.entries = q.entries[:len(q.entries)-1]
 	return e

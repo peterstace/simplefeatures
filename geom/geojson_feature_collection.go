@@ -15,17 +15,17 @@ type GeoJSONFeature struct {
 	// ID is an identifier to refer to the feature. If an identifier isn't
 	// applicable, ID can be left as nil. If it's set, then its value should
 	// marshal into a JSON string or number (this is not enforced).
-	ID interface{}
+	ID any
 
 	// Properties are free-form properties that are associated with the
 	// feature. If there are no properties associated with the feature, then it
 	// can either be set to an empty map or left as nil.
-	Properties map[string]interface{}
+	Properties map[string]any
 
 	// ForeignMembers are additional fields that are not explicitly described
 	// in the GeoJSON specification, but are allowed (as per the specification)
 	// to be present at the top level of GeoJSON features nonetheless.
-	ForeignMembers map[string]interface{}
+	ForeignMembers map[string]any
 }
 
 // UnmarshalJSON implements the encoding/json Unmarshaler interface by
@@ -58,7 +58,7 @@ func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 	}
 
 	idJSON, ok := topLevel["id"]
-	var id interface{}
+	var id any
 	if ok {
 		if err := json.Unmarshal(idJSON, &id); err != nil {
 			return err
@@ -66,20 +66,20 @@ func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 	}
 
 	propsJSON, ok := topLevel["properties"]
-	var props map[string]interface{}
+	var props map[string]any
 	if ok {
 		if err := json.Unmarshal(propsJSON, &props); err != nil {
 			return err
 		}
 	}
 
-	foreignMembers := make(map[string]interface{})
+	foreignMembers := make(map[string]any)
 	for k, vJSON := range topLevel {
 		switch k {
 		case "type", "geometry", "id", "properties":
 			continue
 		default:
-			var v interface{}
+			var v any
 			if err := json.Unmarshal(vJSON, &v); err != nil {
 				return err
 			}
@@ -102,14 +102,14 @@ func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
 	props := f.Properties
 	if props == nil {
 		// As per the GeoJSON spec, the properties field must be an object (not null).
-		props = map[string]interface{}{}
+		props = map[string]any{}
 	}
 
 	buf, err := json.Marshal(struct {
-		Type       string                 `json:"type"`
-		Geometry   Geometry               `json:"geometry"`
-		ID         interface{}            `json:"id,omitempty"`
-		Properties map[string]interface{} `json:"properties"`
+		Type       string         `json:"type"`
+		Geometry   Geometry       `json:"geometry"`
+		ID         any            `json:"id,omitempty"`
+		Properties map[string]any `json:"properties"`
 	}{
 		"Feature",
 		f.Geometry,
@@ -143,7 +143,7 @@ func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
 // GeoJSON FeatureCollections.
 type GeoJSONFeatureCollection struct {
 	Features       []GeoJSONFeature
-	ForeignMembers map[string]interface{}
+	ForeignMembers map[string]any
 }
 
 // UnmarshalJSON implements the encoding/json Unmarshaler interface by
@@ -175,13 +175,13 @@ func (c *GeoJSONFeatureCollection) UnmarshalJSON(p []byte) error {
 		return fmt.Errorf("unmarshalling features field: %w", err)
 	}
 
-	foreignMembers := make(map[string]interface{})
+	foreignMembers := make(map[string]any)
 	for k, vJSON := range topLevel {
 		switch k {
 		case "type", "features":
 			continue
 		default:
-			var v interface{}
+			var v any
 			if err := json.Unmarshal(vJSON, &v); err != nil {
 				return fmt.Errorf("unmarshalling foreign member '%s': %w", k, err)
 			}

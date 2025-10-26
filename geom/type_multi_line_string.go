@@ -269,7 +269,7 @@ func (m MultiLineString) Value() (driver.Value, error) {
 // error will be returned if the geometry is invalid). If this validation isn't
 // needed or is undesirable, then the WKB should be scanned into a byte slice
 // and then UnmarshalWKB called manually (passing in NoValidate{}).
-func (m *MultiLineString) Scan(src interface{}) error {
+func (m *MultiLineString) Scan(src any) error {
 	return scanAsType(src, m)
 }
 

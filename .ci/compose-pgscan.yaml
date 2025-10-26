@@ -9,7 +9,7 @@ services:
       timeout: '1s'
       retries: 50
   tests:
-    image: golang:1.17
+    image: golang:1.18
     working_dir: /go/src/github.com/peterstace/simplefeatures
     entrypoint: go test -test.count=1 -test.timeout=30m -test.run=. ./internal/pgscan
     volumes:
