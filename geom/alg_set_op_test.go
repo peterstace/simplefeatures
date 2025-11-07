@@ -1162,7 +1162,6 @@ func TestBinaryOp(t *testing.T) {
 			input2: "POLYGON((-90.29716937546225 35.18194480113967, -90.29596586203434 35.18172958540237, -90.34543219833212 34.998800268076835, -90.41002551098103 35.01051096325925, -90.29716937546225 35.18194480113967))",
 			inter:  "POLYGON((-90.41002551098103 35.01051096325925,-90.34543219833212 34.998800268076835,-90.29596586203434 35.18172958540237,-90.29716937546225 35.18194480113967,-90.41002551098103 35.01051096325925))",
 		},
-		// Test case 71: Commented out - new ghost algorithm avoids crossing, produces topologically equivalent but structurally different output.
 		{
 			input1: "POLYGON((-149.845771 -17.472558, -149.888137 -17.477017, -149.929731 -17.480468, -149.934682 -17.50814, -149.920475 -17.541336, -149.895694 -17.571267, -149.861608 -17.600395, -149.832332 -17.611409, -149.791981 -17.611947, -149.774766 -17.577051, -149.753707 -17.535289, -149.744632 -17.494022, -149.765688 -17.465994, -149.805445 -17.46709, -149.845771 -17.472558))",
 			input2: "POLYGON((-149.8839047803303 -17.58134141150439, -149.86106842049824 -17.474168045744268, -149.85203718167833 -17.473217512441664, -149.74468306149925 -17.494254193376246, -149.753707 -17.535289, -149.774766 -17.577051, -149.791981 -17.611947, -149.832332 -17.611409, -149.861608 -17.600395, -149.8839047803303 -17.58134141150439))",
@@ -1482,25 +1481,22 @@ func TestUnaryUnionAndUnionMany(t *testing.T) {
 			inputWKTs: []string{"MULTIPOINT(1 2,2 3)", "MULTIPOINT(2 3,3 4)", "MULTIPOINT(3 4,4 5)"},
 			wantWKT:   "MULTIPOINT(1 2,2 3,3 4,4 5)",
 		},
-		// Test case 15: Commented out - new ghost algorithm avoids crossing, produces topologically equivalent but structurally different output.
-		// {
-		// 	inputWKTs: []string{"LINESTRING(0 0,0 1,1 1)", "LINESTRING(0 1,1 1,1 0)", "LINESTRING(2 1,2 2,1 2)"},
-		// 	wantWKT:   "MULTILINESTRING((0 0,0 1),(0 1,1 1),(1 1,1 0),(2 1,2 2,1 2))",
-		// },
-		// Test case 16: Commented out - new ghost algorithm avoids crossing, produces topologically equivalent but structurally different output.
-		// {
-		// 	inputWKTs: []string{"MULTILINESTRING((0 0,0 1,1 1),(0 1,1 1,1 0))", "LINESTRING(2 1,2 2,1 2)"},
-		// 	wantWKT:   "MULTILINESTRING((0 0,0 1),(0 1,1 1),(1 1,1 0),(2 1,2 2,1 2))",
-		// },
-		// Test case 17: Commented out - new ghost algorithm avoids crossing, produces topologically equivalent but structurally different output.
-		// {
-		// 	inputWKTs: []string{
-		// 		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
-		// 		"POLYGON((1 0,1 1,2 1,2 0,1 0))",
-		// 		"POLYGON((1 1,1 2,2 2,2 1,1 1))",
-		// 	},
-		// 	wantWKT: "POLYGON((0 0,1 0,2 0,2 1,2 2,1 2,1 1,0 1,0 0))",
-		// },
+		{
+			inputWKTs: []string{"LINESTRING(0 0,0 1,1 1)", "LINESTRING(0 1,1 1,1 0)", "LINESTRING(2 1,2 2,1 2)"},
+			wantWKT:   "MULTILINESTRING((0 0,0 1),(0 1,1 1),(1 1,1 0),(2 1,2 2,1 2))",
+		},
+		{
+			inputWKTs: []string{"MULTILINESTRING((0 0,0 1,1 1),(0 1,1 1,1 0))", "LINESTRING(2 1,2 2,1 2)"},
+			wantWKT:   "MULTILINESTRING((0 0,0 1),(0 1,1 1),(1 1,1 0),(2 1,2 2,1 2))",
+		},
+		{
+			inputWKTs: []string{
+				"POLYGON((0 0,0 1,1 1,1 0,0 0))",
+				"POLYGON((1 0,1 1,2 1,2 0,1 0))",
+				"POLYGON((1 1,1 2,2 2,2 1,1 1))",
+			},
+			wantWKT: "POLYGON((0 0,1 0,2 0,2 1,2 2,1 2,1 1,0 1,0 0))",
+		},
 		{
 			inputWKTs: []string{
 				"POLYGON((0 0,0 1,2 1,2 0,0 0))",
