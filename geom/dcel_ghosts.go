@@ -30,9 +30,9 @@ func spanningTree(xys []XY) MultiLineString {
 
 	// Load points into r-tree.
 	xys = sortAndUniquifyXYs(xys)
-	items := make([]rtree.BulkItem, len(xys))
+	items := make([]rtree.BulkItem[int], len(xys))
 	for i, xy := range xys {
-		items[i] = rtree.BulkItem{Box: xy.box(), RecordID: i}
+		items[i] = rtree.BulkItem[int]{Box: xy.box(), Record: i}
 	}
 	tree := rtree.BulkLoad(items)
 
@@ -49,7 +49,7 @@ func spanningTree(xys []XY) MultiLineString {
 			// of being the closest to another point.
 			continue
 		}
-		tree.PrioritySearch(xyi.box(), func(j int) error {
+		_ = tree.PrioritySearch(xyi.box(), func(j int) error {
 			// We don't want to include a new edge in the spanning tree if it
 			// would cause a cycle (i.e. the two endpoints are already in the
 			// same tree). This is checked via dset.

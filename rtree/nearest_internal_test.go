@@ -21,7 +21,7 @@ func TestNearest(t *testing.T) {
 	}
 }
 
-func checkNearest(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
+func checkNearest(t *testing.T, rt *RTree[int], boxes []Box, rnd *rand.Rand) {
 	t.Helper()
 	for i := 0; i < 10; i++ {
 		originBB := randomBox(rnd, 0.9, 0.1)
@@ -47,13 +47,13 @@ func checkNearest(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
 	}
 }
 
-func checkPrioritySearch(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
+func checkPrioritySearch(t *testing.T, rt *RTree[int], boxes []Box, rnd *rand.Rand) {
 	t.Helper()
 	for i := 0; i < 10; i++ {
 		var got []int
 		originBB := randomBox(rnd, 0.9, 0.1)
 		t.Logf("origin: %v", originBB)
-		rt.PrioritySearch(originBB, func(recordID int) error {
+		_ = rt.PrioritySearch(originBB, func(recordID int) error {
 			got = append(got, recordID)
 			return nil
 		})
@@ -79,10 +79,10 @@ func TestPrioritySearchEarlyStop(t *testing.T) {
 		boxes[i] = randomBox(rnd, 0.9, 0.1)
 	}
 
-	inserts := make([]BulkItem, len(boxes))
+	inserts := make([]BulkItem[int], len(boxes))
 	for i := range inserts {
 		inserts[i].Box = boxes[i]
-		inserts[i].RecordID = i
+		inserts[i].Record = i
 	}
 	rt := BulkLoad(inserts)
 	origin := randomBox(rnd, 0.9, 0.1)

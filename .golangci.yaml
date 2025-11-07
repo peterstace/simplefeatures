@@ -35,8 +35,6 @@ linters-settings:
   errcheck:
     exclude-functions:
       - io.Copy(os.Stdout)
-      - (*github.com/peterstace/simplefeatures/rtree.RTree).RangeSearch
-      - (*github.com/peterstace/simplefeatures/rtree.RTree).PrioritySearch
 
 # NOTE: every linter supported by golangci-lint is either explicitly included
 # or excluded.
@@ -79,7 +77,6 @@ linters:
     - importas
     - ineffassign
     - intrange
-    - ireturn
     - loggercheck
     - makezero
     - mirror
@@ -143,6 +140,7 @@ linters:
     - gomnd
     - inamedparam
     - interfacebloat
+    - ireturn
     - lll
     - maintidx
     - nestif

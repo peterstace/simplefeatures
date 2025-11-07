@@ -135,12 +135,12 @@ func TestBulkLoadGolden(t *testing.T) {
 	}
 }
 
-func checksum(n *node) uint64 {
+func checksum(n *node[int]) uint64 {
 	var entries []string
 	for i := 0; i < n.numEntries; i++ {
 		var entry string
 		if n.entries[i].child == nil {
-			entry = strconv.Itoa(n.entries[i].recordID)
+			entry = strconv.Itoa(n.entries[i].record)
 		} else {
 			entry = strconv.FormatUint(checksum(n.entries[i].child), 10)
 		}

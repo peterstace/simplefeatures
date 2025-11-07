@@ -125,7 +125,7 @@ func (m MultiLineString) IsSimple() bool {
 	for _, ls := range m.lines {
 		numItems += maxInt(0, ls.Coordinates().Length()-1)
 	}
-	items := make([]rtree.BulkItem, 0, numItems)
+	items := make([]rtree.BulkItem[int], 0, numItems)
 	for i, ls := range m.lines {
 		seq := ls.Coordinates()
 		seqLen := seq.Length()
@@ -134,9 +134,9 @@ func (m MultiLineString) IsSimple() bool {
 			if !ok {
 				continue
 			}
-			items = append(items, rtree.BulkItem{
-				Box:      ln.box(),
-				RecordID: toRecordID(i, j),
+			items = append(items, rtree.BulkItem[int]{
+				Box:    ln.box(),
+				Record: toRecordID(i, j),
 			})
 		}
 	}
@@ -151,7 +151,7 @@ func (m MultiLineString) IsSimple() bool {
 				continue
 			}
 			isSimple := true // assume simple until proven otherwise
-			tree.RangeSearch(ln.box(), func(recordID int) error {
+			_ = tree.RangeSearch(ln.box(), func(recordID int) error {
 				// Ignore the intersection if it's for the same LineString that we're currently looking up.
 				lineStringIdx, seqIdx := fromRecordID(recordID)
 				if lineStringIdx == i {

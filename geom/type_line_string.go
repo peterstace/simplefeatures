@@ -116,13 +116,13 @@ func (s LineString) IsSimple() bool {
 	}
 
 	n := s.seq.Length()
-	items := make([]rtree.BulkItem, 0, n-1)
+	items := make([]rtree.BulkItem[int], 0, n-1)
 	for i := 0; i < n; i++ {
 		ln, ok := getLine(s.seq, i)
 		if !ok {
 			continue
 		}
-		items = append(items, rtree.BulkItem{Box: ln.box(), RecordID: i})
+		items = append(items, rtree.BulkItem[int]{Box: ln.box(), Record: i})
 	}
 	tree := rtree.BulkLoad(items)
 
@@ -142,7 +142,7 @@ func (s LineString) IsSimple() bool {
 		}
 
 		simple := true // assume simple until proven otherwise
-		tree.RangeSearch(ln.box(), func(j int) error {
+		_ = tree.RangeSearch(ln.box(), func(j int) error {
 			// Skip finding the original line (i == j) or cases where we have
 			// already checked that pair (i > j).
 			if i >= j {

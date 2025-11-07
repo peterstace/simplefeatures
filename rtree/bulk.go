@@ -1,23 +1,23 @@
 package rtree
 
 // BulkItem is an item that can be inserted for bulk loading.
-type BulkItem struct {
-	Box      Box
-	RecordID int
+type BulkItem[T any] struct {
+	Box    Box
+	Record T
 }
 
 // BulkLoad bulk loads multiple items into a new R-Tree. The bulk load
 // operation is optimised for creating R-Trees with minimal node overlap. This
 // allows for fast searching.
-func BulkLoad(items []BulkItem) *RTree {
+func BulkLoad[T any](items []BulkItem[T]) *RTree[T] {
 	if len(items) == 0 {
-		return &RTree{}
+		return &RTree[T]{}
 	}
 	root := bulkInsert(items)
-	return &RTree{root, len(items)}
+	return &RTree[T]{root, len(items)}
 }
 
-func bulkInsert(items []BulkItem) *node {
+func bulkInsert[T any](items []BulkItem[T]) *node[T] {
 	if len(items) == 0 {
 		panic("should not have recursed into bulkInsert without any items")
 	}
@@ -27,11 +27,11 @@ func bulkInsert(items []BulkItem) *node {
 
 	// 4 or fewer items can fit into a single node.
 	if len(items) <= 4 {
-		n := &node{numEntries: len(items)}
+		n := &node[T]{numEntries: len(items)}
 		for i, item := range items {
-			n.entries[i] = entry{
-				box:      item.Box,
-				recordID: item.RecordID,
+			n.entries[i] = entry[T]{
+				box:    item.Box,
+				record: item.Record,
 			}
 		}
 		return n
@@ -52,8 +52,8 @@ func bulkInsert(items []BulkItem) *node {
 	return bulkNode(firstQuarter, secondQuarter, thirdQuarter, fourthQuarter)
 }
 
-func bulkNode(parts ...[]BulkItem) *node {
-	root := &node{numEntries: len(parts)}
+func bulkNode[T any](parts ...[]BulkItem[T]) *node[T] {
+	root := &node[T]{numEntries: len(parts)}
 	for i, part := range parts {
 		child := bulkInsert(part)
 		root.entries[i].child = child
@@ -62,7 +62,7 @@ func bulkNode(parts ...[]BulkItem) *node {
 	return root
 }
 
-func splitBulkItems2Ways(items []BulkItem) ([]BulkItem, []BulkItem) {
+func splitBulkItems2Ways[T any](items []BulkItem[T]) ([]BulkItem[T], []BulkItem[T]) {
 	horizontal := itemsAreHorizontal(items)
 	split := len(items) / 2
 	quickPartition(items, split, horizontal)
@@ -72,7 +72,7 @@ func splitBulkItems2Ways(items []BulkItem) ([]BulkItem, []BulkItem) {
 // quickPartition performs a partial in-place sort on the items slice. The
 // partial sort is such that items 0 through k-1 are less than or equal to item
 // k, and items k+1 through n-1 are greater than or equal to item k.
-func quickPartition(items []BulkItem, k int, horizontal bool) {
+func quickPartition[T any](items []BulkItem[T], k int, horizontal bool) {
 	// Use a custom linear congruential random number generator. This is used
 	// because we don't need high quality random numbers. Using a regular
 	// rand.Rand generator causes a significant bottleneck due to the reliance
@@ -150,7 +150,7 @@ func quickPartition(items []BulkItem, k int, horizontal bool) {
 	}
 }
 
-func itemsAreHorizontal(items []BulkItem) bool {
+func itemsAreHorizontal[T any](items []BulkItem[T]) bool {
 	box := items[0].Box
 	for _, item := range items[1:] {
 		box = combine(box, item.Box)

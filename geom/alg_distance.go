@@ -73,7 +73,7 @@ func Distance(g1, g2 Geometry) (float64, bool) {
 	}
 	for _, xy := range xys1 {
 		xyEnv := xy.uncheckedEnvelope()
-		tr.PrioritySearch(xy.box(), func(recordID int) error {
+		_ = tr.PrioritySearch(xy.box(), func(recordID int) error {
 			return searchBody(
 				xyEnv,
 				recordID,
@@ -84,7 +84,7 @@ func Distance(g1, g2 Geometry) (float64, bool) {
 	}
 	for _, ln := range lns1 {
 		lnEnv := ln.uncheckedEnvelope()
-		tr.PrioritySearch(ln.box(), func(recordID int) error {
+		_ = tr.PrioritySearch(ln.box(), func(recordID int) error {
 			return searchBody(
 				lnEnv,
 				recordID,
@@ -132,18 +132,18 @@ func extractXYsAndLines(g Geometry) ([]XY, []line) {
 // uses positive record IDs to refer to the XYs, and negative recordIDs to
 // refer to the lines. Because +0 and -0 are the same, indexing is 1-based and
 // recordID 0 is not used.
-func loadTree(xys []XY, lns []line) *rtree.RTree {
-	items := make([]rtree.BulkItem, len(xys)+len(lns))
+func loadTree(xys []XY, lns []line) *rtree.RTree[int] {
+	items := make([]rtree.BulkItem[int], len(xys)+len(lns))
 	for i, xy := range xys {
-		items[i] = rtree.BulkItem{
-			Box:      xy.box(),
-			RecordID: i + 1,
+		items[i] = rtree.BulkItem[int]{
+			Box:    xy.box(),
+			Record: i + 1,
 		}
 	}
 	for i, ln := range lns {
-		items[i+len(xys)] = rtree.BulkItem{
-			Box:      ln.box(),
-			RecordID: -(i + 1),
+		items[i+len(xys)] = rtree.BulkItem[int]{
+			Box:    ln.box(),
+			Record: -(i + 1),
 		}
 	}
 	return rtree.BulkLoad(items)
