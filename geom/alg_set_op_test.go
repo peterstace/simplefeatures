@@ -648,24 +648,23 @@ func TestBinaryOp(t *testing.T) {
 			symDiff: "POLYGON((0 0,0 1,0.5 0.5,1 0,0 0))",
 			relate:  "FF20F1FF2",
 		},
-		// Test case 31: Commented out - new ghost algorithm avoids crossing, produces topologically equivalent but structurally different output.
-		// {
-		// 	/*
-		// 	   +-------+
-		// 	   |       |
-		// 	   |   +   |
-		// 	   |       |
-		// 	   +-------+
-		// 	*/
-		// 	input1:  "LINESTRING(0 0,0 1,1 1,1 0,0 0,0 1)", // overlapping line segment
-		// 	input2:  "POINT(0.5 0.5)",
-		// 	union:   "GEOMETRYCOLLECTION(LINESTRING(0 0,0 1),LINESTRING(0 1,1 1,1 0,0 0),POINT(0.5 0.5))",
-		// 	inter:   "GEOMETRYCOLLECTION EMPTY",
-		// 	fwdDiff: "MULTILINESTRING((0 0,0 1),(0 1,1 1,1 0,0 0))",
-		// 	revDiff: "POINT(0.5 0.5)",
-		// 	symDiff: "GEOMETRYCOLLECTION(LINESTRING(0 0,0 1),LINESTRING(0 1,1 1,1 0,0 0),POINT(0.5 0.5))",
-		// 	relate:  "FF1FF00F2",
-		// },
+		{
+			/*
+			   +-------+
+			   |       |
+			   |   +   |
+			   |       |
+			   +-------+
+			*/
+			input1:  "LINESTRING(0 0,0 1,1 1,1 0,0 0,0 1)", // overlapping line segment
+			input2:  "POINT(0.5 0.5)",
+			union:   "GEOMETRYCOLLECTION(LINESTRING(0 0,0 1),LINESTRING(0 1,1 1,1 0.5),LINESTRING(1 0.5,1 0,0 0),POINT(0.5 0.5))",
+			inter:   "GEOMETRYCOLLECTION EMPTY",
+			fwdDiff: "MULTILINESTRING((0 0,0 1),(0 1,1 1,1 0.5),(1 0.5,1 0,0 0))",
+			revDiff: "POINT(0.5 0.5)",
+			symDiff: "GEOMETRYCOLLECTION(LINESTRING(0 0,0 1),LINESTRING(0 1,1 1,1 0.5),LINESTRING(1 0.5,1 0,0 0),POINT(0.5 0.5))",
+			relate:  "FF1FF00F2",
+		},
 		{
 			/*
 			       +
