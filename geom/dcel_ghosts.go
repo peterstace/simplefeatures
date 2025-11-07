@@ -13,8 +13,8 @@ import (
 func findComponentRepresentatives(a, b Geometry) []XY {
 	// Collect all control points from both geometries.
 	var points []XY
-	walk(a, func(xy XY) { points = append(points, xy) })
-	walk(b, func(xy XY) { points = append(points, xy) })
+	walkXY(a, func(xy XY) { points = append(points, xy) })
+	walkXY(b, func(xy XY) { points = append(points, xy) })
 
 	if len(points) == 0 {
 		return nil
@@ -87,8 +87,8 @@ func sortRightmostFirst(points []XY) {
 // returns them deduplicated.
 func collectAllPoints(a, b Geometry) []XY {
 	var points []XY
-	walk(a, func(xy XY) { points = append(points, xy) })
-	walk(b, func(xy XY) { points = append(points, xy) })
+	walkXY(a, func(xy XY) { points = append(points, xy) })
+	walkXY(b, func(xy XY) { points = append(points, xy) })
 	return sortAndUniquifyXYs(points)
 }
 

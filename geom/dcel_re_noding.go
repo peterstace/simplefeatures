@@ -31,7 +31,7 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 	all := func() Geometry {
 		return NewGeometryCollection([]Geometry{g1, g2, mls.AsGeometry()}).AsGeometry()
 	}
-	walk(all(), func(xy XY) {
+	walkXY(all(), func(xy XY) {
 		xyCount++
 		ulp = fastMax(ulp, fastMax(
 			ulpSize(math.Abs(xy.X)),

@@ -2,10 +2,8 @@ package geom
 
 import "fmt"
 
-// walk calls fn for each control point in the geometry.
-//
-// TODO: rename to walkXYs.
-func walk(g Geometry, fn func(XY)) {
+// walkXY calls fn for each control point (XY) in the geometry.
+func walkXY(g Geometry, fn func(XY)) {
 	switch g.Type() {
 	case TypePoint:
 		if xy, ok := g.MustAsPoint().XY(); ok {
@@ -18,7 +16,7 @@ func walk(g Geometry, fn func(XY)) {
 			fn(seq.GetXY(i))
 		}
 	case TypePolygon:
-		walk(g.Boundary(), fn)
+		walkXY(g.Boundary(), fn)
 	case TypeMultiPoint:
 		mp := g.MustAsMultiPoint()
 		n := mp.NumPoints()
@@ -31,15 +29,15 @@ func walk(g Geometry, fn func(XY)) {
 		mls := g.MustAsMultiLineString()
 		n := mls.NumLineStrings()
 		for i := 0; i < n; i++ {
-			walk(mls.LineStringN(i).AsGeometry(), fn)
+			walkXY(mls.LineStringN(i).AsGeometry(), fn)
 		}
 	case TypeMultiPolygon:
-		walk(g.Boundary(), fn)
+		walkXY(g.Boundary(), fn)
 	case TypeGeometryCollection:
 		gc := g.MustAsGeometryCollection()
 		n := gc.NumGeometries()
 		for i := 0; i < n; i++ {
-			walk(gc.GeometryN(i), fn)
+			walkXY(gc.GeometryN(i), fn)
 		}
 	default:
 		panic(fmt.Sprintf("unknown geometry type %v", g.Type()))
