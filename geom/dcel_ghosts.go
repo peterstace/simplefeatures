@@ -8,8 +8,7 @@ import (
 )
 
 // findComponentRepresentatives identifies connected components in the input
-// geometries and returns the rightmost point from each component. These
-// representative points will be used for ghost edge construction.
+// geometries and returns the rightmost point from each component.
 func findComponentRepresentatives(a, b Geometry) []XY {
 	// Collect all control points from both geometries.
 	var points []XY
@@ -27,12 +26,11 @@ func findComponentRepresentatives(a, b Geometry) []XY {
 		pointToIdx[pt] = i
 	}
 
-	// Initialize union-find with all points as separate components.
+	// Initialize union-find with all points as separate sets.
 	dset := newDisjointSet(len(points))
 
 	// Union endpoints of all edges (since edges are connected).
-	all := NewGeometryCollection([]Geometry{a, b}).AsGeometry()
-	walkLines(all, func(ln line) {
+	walkLines(NewGeometryCollection([]Geometry{a, b}).AsGeometry(), func(ln line) {
 		idxA, okA := pointToIdx[ln.a]
 		idxB, okB := pointToIdx[ln.b]
 		if okA && okB {
@@ -40,22 +38,22 @@ func findComponentRepresentatives(a, b Geometry) []XY {
 		}
 	})
 
-	// Find the rightmost point for each component.
-	rightmost := make(map[int]XY)
-	for _, pt := range points {
-		root := dset.find(pointToIdx[pt])
-		current, exists := rightmost[root]
+	// Find the right-most point for each component (identified by its root in
+	// the disjoint set).
+	rootToRightmost := make(map[int]XY)
+	for i, pt := range points {
+		root := dset.find(i)
+		current, exists := rootToRightmost[root]
 		if !exists || isMoreRightmost(pt, current) {
-			rightmost[root] = pt
+			rootToRightmost[root] = pt
 		}
 	}
 
 	// Collect representative points.
-	representatives := make([]XY, 0, len(rightmost))
-	for _, pt := range rightmost {
+	representatives := make([]XY, 0, len(rootToRightmost))
+	for _, pt := range rootToRightmost {
 		representatives = append(representatives, pt)
 	}
-
 	return representatives
 }
 
@@ -66,25 +64,14 @@ func isMoreRightmost(p1, p2 XY) bool {
 	if p1.X > p2.X {
 		return true
 	}
-	if p1.X == p2.X && p1.Y > p2.Y {
-		return true
-	}
-	return false
-}
-
-// sortRightmostFirst sorts points right-to-left (descending X, then
-// descending Y).
-func sortRightmostFirst(points []XY) {
-	sort.Slice(points, func(i, j int) bool {
-		if points[i].X != points[j].X {
-			return points[i].X > points[j].X
-		}
-		return points[i].Y > points[j].Y
-	})
+	return p1.X == p2.X && p1.Y > p2.Y
 }
 
 // collectAllPoints collects all control points from both geometries and
 // returns them deduplicated.
+//
+// TODO: The same logic is present at the start of
+// findComponentRepresentatives. This should get cleaned up.
 func collectAllPoints(a, b Geometry) []XY {
 	var points []XY
 	walkXY(a, func(xy XY) { points = append(points, xy) })
@@ -200,7 +187,9 @@ func createGhosts(a, b Geometry) MultiLineString {
 	}
 
 	// Sort right-to-left for processing.
-	sortRightmostFirst(representatives)
+	sort.Slice(representatives, func(i, j int) bool {
+		return isMoreRightmost(representatives[i], representatives[j])
+	})
 
 	// Build spatial indexes and collect geometry data.
 	allPoints := collectAllPoints(a, b)
