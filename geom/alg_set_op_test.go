@@ -1003,17 +1003,16 @@ func TestBinaryOp(t *testing.T) {
 			symDiff: "MULTILINESTRING((1 0,0 1),(0 1,1 2),(2 0,3 1),(3 1,2 2),(-1 1,1 -1))",
 			relate:  "FF1FF0102",
 		},
-		// Test case 51: Commented out - new ghost algorithm avoids crossing, produces topologically equivalent but structurally different output.
-		// {
-		// 	input1:  "LINESTRING(0 1,1 0)",
-		// 	input2:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
-		// 	union:   "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
-		// 	inter:   "LINESTRING(0 1,1 0)",
-		// 	fwdDiff: "GEOMETRYCOLLECTION EMPTY",
-		// 	revDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
-		// 	symDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
-		// 	relate:  "1FFF0F212",
-		// },
+		{
+			input1:  "LINESTRING(0 1,1 0)",
+			input2:  "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			union:   "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			inter:   "LINESTRING(0 1,1 0)",
+			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
+			revDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			symDiff: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+			relate:  "1FFF0F212",
+		},
 		{
 			input1:  "POLYGON((1 0,0 1,1 1,1 0))",
 			input2:  "POLYGON((2 0,2 1,3 1,3 0,2 0))",
