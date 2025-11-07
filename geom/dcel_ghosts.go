@@ -270,6 +270,11 @@ func horizontalRayIntersection(
 	origin XY,
 	edge line,
 ) (XY, bool) {
+	if origin == edge.a || origin == edge.b {
+		// Origin is exactly on a vertex.
+		return XY{}, false
+	}
+
 	// Handle horizontal edge special case.
 	if edge.a.Y == edge.b.Y {
 		if edge.a.Y != origin.Y {
@@ -282,7 +287,7 @@ func horizontalRayIntersection(
 		if origin.X < edge.a.X {
 			return edge.a, true
 		}
-		if origin.X <= edge.b.X {
+		if origin.X < edge.b.X {
 			return origin, true
 		}
 		return XY{}, false // beyond edge.b.X
