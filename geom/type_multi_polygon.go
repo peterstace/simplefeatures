@@ -62,11 +62,11 @@ func (m MultiPolygon) checkMultiPolygonConstraints() error {
 
 	// Construct RTree of Polygons.
 	boxes := make([]rtree.Box, len(m.polys))
-	items := make([]rtree.BulkItem, 0, len(m.polys))
+	items := make([]rtree.BulkItem[int], 0, len(m.polys))
 	for i, p := range m.polys {
 		if box, ok := p.Envelope().AsBox(); ok {
 			boxes[i] = box
-			item := rtree.BulkItem{Box: boxes[i], RecordID: i}
+			item := rtree.BulkItem[int]{Box: boxes[i], Record: i}
 			items = append(items, item)
 		}
 	}
@@ -142,7 +142,7 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 	for j := range p2.lines {
 		// Find intersection points.
 		var pts []XY
-		p1.tree.RangeSearch(p2.lines[j].box(), func(i int) error {
+		_ = p1.tree.RangeSearch(p2.lines[j].box(), func(i int) error {
 			inter := p1.lines[i].intersectLine(p2.lines[j])
 			if inter.empty {
 				return nil

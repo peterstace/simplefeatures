@@ -9,13 +9,13 @@ import (
 // as measured by the Euclidean metric. Note that there may be multiple records
 // that are equidistant from the input box, in which case one is chosen
 // arbitrarily. If the RTree is empty, then false is returned.
-func (t *RTree) Nearest(box Box) (recordID int, found bool) {
-	t.PrioritySearch(box, func(rid int) error {
-		recordID = rid
+func (t *RTree[T]) Nearest(box Box) (record T, found bool) {
+	_ = t.PrioritySearch(box, func(rec T) error {
+		record = rec
 		found = true
 		return Stop
 	})
-	return recordID, found
+	return record, found
 }
 
 // PrioritySearch iterates over the records in the RTree in priority order of
@@ -25,13 +25,13 @@ func (t *RTree) Nearest(box Box) (recordID int, found bool) {
 // error returned from the callback is returned by PrioritySearch, except for
 // the case where the special Stop sentinel error is returned (in which case
 // nil will be returned from PrioritySearch). Stop may be wrapped.
-func (t *RTree) PrioritySearch(box Box, callback func(recordID int) error) error {
+func (t *RTree[T]) PrioritySearch(box Box, callback func(record T) error) error {
 	if t.root == nil {
 		return nil
 	}
 
-	queue := entriesQueue{origin: box}
-	equeueNode := func(n *node) {
+	queue := entriesQueue[T]{origin: box}
+	equeueNode := func(n *node[T]) {
 		for i := 0; i < n.numEntries; i++ {
 			heap.Push(&queue, &n.entries[i])
 		}
@@ -39,9 +39,9 @@ func (t *RTree) PrioritySearch(box Box, callback func(recordID int) error) error
 
 	equeueNode(t.root)
 	for len(queue.entries) > 0 {
-		nearest := heap.Pop(&queue).(*entry)
+		nearest := heap.Pop(&queue).(*entry[T])
 		if nearest.child == nil {
-			if err := callback(nearest.recordID); err != nil {
+			if err := callback(nearest.record); err != nil {
 				if errors.Is(err, Stop) {
 					return nil
 				}
@@ -54,30 +54,30 @@ func (t *RTree) PrioritySearch(box Box, callback func(recordID int) error) error
 	return nil
 }
 
-type entriesQueue struct {
-	entries []*entry
+type entriesQueue[T any] struct {
+	entries []*entry[T]
 	origin  Box
 }
 
-func (q *entriesQueue) Len() int {
+func (q *entriesQueue[T]) Len() int {
 	return len(q.entries)
 }
 
-func (q *entriesQueue) Less(i int, j int) bool {
+func (q *entriesQueue[T]) Less(i int, j int) bool {
 	d1 := squaredEuclideanDistance(q.entries[i].box, q.origin)
 	d2 := squaredEuclideanDistance(q.entries[j].box, q.origin)
 	return d1 < d2
 }
 
-func (q *entriesQueue) Swap(i int, j int) {
+func (q *entriesQueue[T]) Swap(i int, j int) {
 	q.entries[i], q.entries[j] = q.entries[j], q.entries[i]
 }
 
-func (q *entriesQueue) Push(x any) {
-	q.entries = append(q.entries, x.(*entry))
+func (q *entriesQueue[T]) Push(x interface{}) {
+	q.entries = append(q.entries, x.(*entry[T]))
 }
 
-func (q *entriesQueue) Pop() any {
+func (q *entriesQueue[T]) Pop() interface{} {
 	e := q.entries[len(q.entries)-1]
 	q.entries = q.entries[:len(q.entries)-1]
 	return e

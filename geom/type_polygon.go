@@ -65,7 +65,7 @@ func (p Polygon) Validate() error {
 
 	// Construct RTree of rings.
 	boxes := make([]rtree.Box, len(p.rings))
-	items := make([]rtree.BulkItem, len(p.rings))
+	items := make([]rtree.BulkItem[int], len(p.rings))
 	for i, r := range p.rings {
 		box, ok := r.Envelope().AsBox()
 		if !ok {
@@ -74,7 +74,7 @@ func (p Polygon) Validate() error {
 			panic("unexpected empty ring")
 		}
 		boxes[i] = box
-		items[i] = rtree.BulkItem{Box: boxes[i], RecordID: i}
+		items[i] = rtree.BulkItem[int]{Box: boxes[i], Record: i}
 	}
 	tree := rtree.BulkLoad(items)
 

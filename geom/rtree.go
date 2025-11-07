@@ -7,15 +7,15 @@ import "github.com/peterstace/simplefeatures/rtree"
 // the indices of the lines slice.
 type indexedLines struct {
 	lines []line
-	tree  *rtree.RTree
+	tree  *rtree.RTree[int]
 }
 
 func newIndexedLines(lines []line) indexedLines {
-	bulk := make([]rtree.BulkItem, len(lines))
+	bulk := make([]rtree.BulkItem[int], len(lines))
 	for i, ln := range lines {
-		bulk[i] = rtree.BulkItem{
-			Box:      ln.box(),
-			RecordID: i,
+		bulk[i] = rtree.BulkItem[int]{
+			Box:    ln.box(),
+			Record: i,
 		}
 	}
 	return indexedLines{lines, rtree.BulkLoad(bulk)}
@@ -26,15 +26,15 @@ func newIndexedLines(lines []line) indexedLines {
 // the indices of the points slice.
 type indexedPoints struct {
 	points []XY
-	tree   *rtree.RTree
+	tree   *rtree.RTree[int]
 }
 
 func newIndexedPoints(points []XY) indexedPoints {
-	bulk := make([]rtree.BulkItem, len(points))
+	bulk := make([]rtree.BulkItem[int], len(points))
 	for i, pt := range points {
-		bulk[i] = rtree.BulkItem{
-			Box:      rtree.Box{MinX: pt.X, MaxX: pt.X, MinY: pt.Y, MaxY: pt.Y},
-			RecordID: i,
+		bulk[i] = rtree.BulkItem[int]{
+			Box:    rtree.Box{MinX: pt.X, MaxX: pt.X, MinY: pt.Y, MaxY: pt.Y},
+			Record: i,
 		}
 	}
 	return indexedPoints{points, rtree.BulkLoad(bulk)}
