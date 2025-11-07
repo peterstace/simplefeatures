@@ -1191,6 +1191,35 @@ func TestBinaryOp(t *testing.T) {
 				LINESTRING(0 0,1 0)
 			)`,
 		},
+
+		// This input pair used to panic before
+		// https://github.com/peterstace/simplefeatures/pull/497, which "fixed"
+		// it to give an error instead of a panic. It now works correctly (i.e.
+		// gives the correct result).
+		{
+			input1: `POLYGON((
+				-83.58253051 32.73168239,
+				-83.59843118 32.74617142,
+				-83.70048117 32.63984372,
+				-83.58253051 32.73168239
+			))`,
+			input2: `POLYGON((
+				-83.70047745 32.63984661,
+				-83.68891846 32.59896320,
+				-83.58253417 32.73167955,
+				-83.70047745 32.63984661
+			))`,
+			union: `POLYGON((
+				-83.70047745 32.63984661,
+				-83.68891846 32.5989632,
+				-83.58253419078687 32.731679524068,
+				-83.58253051 32.73168239,
+				-83.59843118 32.74617142,
+				-83.70048117 32.63984372,
+				-83.65344790247596 32.676464733694736,
+				-83.70047745 32.63984661
+			))`,
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g1 := geomFromWKT(t, geomCase.input1)
