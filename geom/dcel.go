@@ -10,21 +10,19 @@ func newDCELFromGeometries(a, b Geometry) *doublyConnectedEdgeList {
 // MultiLineString is also returned, which provides the appropriate connections
 // such that A and B (when combined together) are fully connected.
 func prepareGeometriesForDCEL(a, b Geometry) (Geometry, Geometry, MultiLineString) {
-	// Phase 1: Initial renoding (without ghosts). This ensures that the two
-	// input geometries only interact at control points before ghost edge
-	// construction.
+	// Renode just A and B. Them being noded correctly is a pre-requisite for
+	// creating the ghosts.
 	a, b, _ = reNodeGeometries(a, b, MultiLineString{})
 
-	// Phase 2: Create ghost edges to connect disjoint components.
 	ghosts := createGhosts(a, b)
 
-	// Phase 3: Final renoding (with ghosts). This handles the case where ghost
-	// edges had to split input geometry edges.
-	if !ghosts.IsEmpty() {
-		a, b, ghosts = reNodeGeometries(a, b, ghosts)
+	if ghosts.IsEmpty() {
+		return a, b, ghosts
 	}
 
-	return a, b, ghosts
+	// Renode again, since, the ghosts may have introduced new intersections
+	// with A and/or B.
+	return reNodeGeometries(a, b, ghosts)
 }
 
 func newDCELFromRenodedGeometries(a, b Geometry, ghosts MultiLineString) *doublyConnectedEdgeList {
