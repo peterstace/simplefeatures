@@ -593,24 +593,23 @@ func TestBinaryOp(t *testing.T) {
 			symDiff: "MULTIPOINT(0 0,2 2)",
 			relate:  "0F0FFF0F2",
 		},
-		// Test case 28: Commented out - new ghost algorithm avoids crossing, produces topologically equivalent but structurally different output.
-		// {
-		// 	/*
-		// 	   +-------+
-		// 	   |       |
-		// 	   |   +   |   +
-		// 	   |       |
-		// 	   +-------+
-		// 	*/
-		// 	input1:  "POLYGON((0 0,0 2,2 2,2 0,0 0))",
-		// 	input2:  "MULTIPOINT(1 1,3 1)",
-		// 	union:   "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 1,2 0,0 0)))",
-		// 	inter:   "POINT(1 1)",
-		// 	fwdDiff: "POLYGON((0 0,0 2,2 2,2 1,2 0,0 0))",
-		// 	revDiff: "POINT(3 1)",
-		// 	symDiff: "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 1,2 0,0 0)))",
-		// 	relate:  "0F2FF10F2",
-		// },
+		{
+			/*
+			   +-------+
+			   |       |
+			   |   +   |   +
+			   |       |
+			   +-------+
+			*/
+			input1:  "POLYGON((0 0,0 2,2 2,2 0,0 0))",
+			input2:  "MULTIPOINT(1 1,3 1)",
+			union:   "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 1,2 0,0 0)))",
+			inter:   "POINT(1 1)",
+			fwdDiff: "POLYGON((0 0,0 2,2 2,2 1,2 0,0 0))",
+			revDiff: "POINT(3 1)",
+			symDiff: "GEOMETRYCOLLECTION(POINT(3 1),POLYGON((0 0,0 2,2 2,2 1,2 0,0 0)))",
+			relate:  "0F2FF10F2",
+		},
 		{
 			/*
 			   +
