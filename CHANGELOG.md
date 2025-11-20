@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- **Breaking change:** The `rtree` package types and functions are now generic
+  over the record type. The `RTree` type is now `RTree[T]`, `BulkItem` is now
+  `BulkItem[T]`, and `BulkLoad` is now `BulkLoad[T]`. The `RecordID int` field
+  in `BulkItem` has been renamed to `Record T`. This allows users to store
+  their records directly in the tree rather than maintaining separate mappings
+  between integer IDs and records. Users can upgrade by adding type parameters
+  to their rtree usage (e.g., `RTree[int]` to maintain existing behavior with
+  integer IDs, or use a custom type like `RTree[MyRecord]` to store records
+  directly). The `RecordID` field in `BulkItem` should be renamed to `Record`,
+  and callback function signatures should change from `func(recordID int)` to
+  `func(record T)` where `T` is the type parameter.
+
 ## v0.56.0
 
 2025-11-21
@@ -13,18 +27,6 @@
 - Replaces all occurrences of `interface{}` with `any` throughout the codebase.
   This includes function parameters, return types, struct fields, and type
   assertions.
-
-- **Breaking change:** The `rtree` package types and functions are now generic
-  over the record type. The `RTree` type is now `RTree[T]`, `BulkItem` is now
-  `BulkItem[T]`, and `BulkLoad` is now `BulkLoad[T]`. The `RecordID int` field
-  in `BulkItem` has been renamed to `Record T`. This allows users to store
-  their records directly in the tree rather than maintaining separate mappings
-  between integer IDs and records. Users can upgrade by adding type parameters
-  to their rtree usage (e.g., `RTree[int]` to maintain existing behavior with
-  integer IDs, or use a custom type like `RTree[MyRecord]` to store records
-  directly). The `RecordID` field in `BulkItem` should be renamed to `Record`,
-  and callback function signatures should change from `func(recordID int)` to
-  `func(record T)` where `T` is the type parameter.
 
 - **Breaking change:** The minimum required Go version is now 1.18 (previously
   1.17). This is required to support the `any` keyword and generics.
