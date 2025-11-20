@@ -1,13 +1,14 @@
 # Changelog
 
-## Unreleased
+## v0.56.0
+
+2025-11-21
 
 - Refactors the internal representation of the `geom.Geometry` type to use
-  `interface{}` instead of `unsafe.Pointer`. This makes geometries compatible
-  with `reflect.DeepEqual`, which now produces the same result as `ExactEquals`
-  when called with no options. This change is not detectable externally except
-  that `reflect.DeepEqual` now works correctly for exactly comparing
-  geometries.
+  `any` instead of `unsafe.Pointer`. This makes geometries compatible with
+  `reflect.DeepEqual`, which now produces the same result as `ExactEquals` when
+  called with no options. This change is not detectable externally except that
+  `reflect.DeepEqual` now works correctly for exactly comparing geometries.
 
 - Replaces all occurrences of `interface{}` with `any` throughout the codebase.
   This includes function parameters, return types, struct fields, and type
