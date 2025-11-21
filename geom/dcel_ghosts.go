@@ -10,8 +10,11 @@ import (
 // createGhosts creates a MultiLineString that connects all components of the
 // input Geometries using a ray-casting algorithm.
 func createGhosts(a, b Geometry) MultiLineString {
+	ctrlPts := collectControlPoints(a, b)
+	lines := appendLines(nil, NewGeometryCollection([]Geometry{a, b}).AsGeometry())
+
 	// Get representative points for each component.
-	representatives := findComponentRepresentatives(a, b)
+	representatives := findComponentRepresentatives(ctrlPts, lines)
 
 	if len(representatives) <= 1 {
 		// When there are either 0 or 1 connected components, then they don't
@@ -25,20 +28,15 @@ func createGhosts(a, b Geometry) MultiLineString {
 	})
 
 	// Build spatial indexes and collect geometry data.
-	allPoints := collectAllPoints(a, b)
-	all := NewGeometryCollection([]Geometry{a, b}).AsGeometry()
-	allLines := appendLines(nil, all)
-	pointIndex := newIndexedPoints(allPoints)
-	lineIndex := newIndexedLines(allLines)
+	pointIndex := newIndexedPoints(ctrlPts)
+	lineIndex := newIndexedLines(lines)
 
 	// Process each representative, casting rays rightward.
 	var ghostLines []line
 	var fallbackOrigins []XY
 
 	for _, origin := range representatives {
-		hitResult := findClosestRayIntersection(
-			origin, pointIndex, lineIndex,
-		)
+		hitResult := findClosestRayIntersection(origin, pointIndex, lineIndex)
 
 		if !hitResult.hasHit {
 			// No intersection - would need vertical line connection.
@@ -59,7 +57,7 @@ func createGhosts(a, b Geometry) MultiLineString {
 		})
 
 		// Calculate max X for vertical line fallback.
-		maxX := findMaxX(allPoints)
+		maxX := findMaxX(ctrlPts)
 		verticalLineX := math.Ceil(maxX) + 1
 
 		// Create horizontal connections to the vertical line.
@@ -100,12 +98,9 @@ func findMaxX(points []XY) float64 {
 	return maxX
 }
 
-// collectAllPoints collects all control points from both geometries and
+// collectControlPoints collects all control points from both geometries and
 // returns them deduplicated.
-//
-// TODO: The same logic is present at the start of
-// findComponentRepresentatives. This should get cleaned up.
-func collectAllPoints(a, b Geometry) []XY {
+func collectControlPoints(a, b Geometry) []XY {
 	var points []XY
 	walkXY(a, func(xy XY) { points = append(points, xy) })
 	walkXY(b, func(xy XY) { points = append(points, xy) })
@@ -114,39 +109,33 @@ func collectAllPoints(a, b Geometry) []XY {
 
 // findComponentRepresentatives identifies connected components in the input
 // geometries and returns the rightmost point from each component.
-func findComponentRepresentatives(a, b Geometry) []XY {
-	// Collect all control points from both geometries.
-	var points []XY
-	walkXY(a, func(xy XY) { points = append(points, xy) })
-	walkXY(b, func(xy XY) { points = append(points, xy) })
-
-	if len(points) == 0 {
+func findComponentRepresentatives(ctrlPts []XY, lines []line) []XY {
+	if len(ctrlPts) == 0 {
 		return nil
 	}
 
-	// Deduplicate points and create point-to-index mapping.
-	points = sortAndUniquifyXYs(points)
-	pointToIdx := make(map[XY]int, len(points))
-	for i, pt := range points {
+	// Create point-to-index mapping.
+	pointToIdx := make(map[XY]int, len(ctrlPts))
+	for i, pt := range ctrlPts {
 		pointToIdx[pt] = i
 	}
 
 	// Initialize union-find with all points as separate sets.
-	dset := newDisjointSet(len(points))
+	dset := newDisjointSet(len(ctrlPts))
 
 	// Union endpoints of all edges (since edges are connected).
-	walkLines(NewGeometryCollection([]Geometry{a, b}).AsGeometry(), func(ln line) {
+	for _, ln := range lines {
 		idxA, okA := pointToIdx[ln.a]
 		idxB, okB := pointToIdx[ln.b]
 		if okA && okB {
 			dset.union(idxA, idxB)
 		}
-	})
+	}
 
 	// Find the right-most point for each component (identified by its root in
 	// the disjoint set).
 	rootToRightmost := make(map[int]XY)
-	for i, pt := range points {
+	for i, pt := range ctrlPts {
 		root := dset.find(i)
 		current, exists := rootToRightmost[root]
 		if !exists || isMoreRightmost(pt, current) {
@@ -226,6 +215,8 @@ type rayHitResult struct {
 
 // findClosestRayIntersection casts a horizontal ray from origin in the +X
 // direction and finds the closest intersection with any vertex or edge.
+//
+// TODO: Just return (XY, bool).
 func findClosestRayIntersection(
 	origin XY,
 	pointIndex indexedPoints,
