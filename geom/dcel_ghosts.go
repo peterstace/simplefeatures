@@ -36,16 +36,16 @@ func createGhosts(a, b Geometry) MultiLineString {
 	var fallbackOrigins []XY
 
 	for _, origin := range representatives {
-		hitResult := findClosestRayIntersection(origin, pointIndex, lineIndex)
+		hitLocation, hasHit := findClosestRayIntersection(origin, pointIndex, lineIndex)
 
-		if !hitResult.hasHit {
+		if !hasHit {
 			// No intersection - would need vertical line connection.
 			fallbackOrigins = append(fallbackOrigins, origin)
 			continue
 		}
 
 		// Can create a ghost edge to an actual component.
-		ghostLine := line{origin, hitResult.location}
+		ghostLine := line{origin, hitLocation}
 		ghostLines = append(ghostLines, ghostLine)
 	}
 
@@ -207,24 +207,13 @@ func horizontalRayIntersection(
 	return XY{x, origin.Y}, true
 }
 
-// rayHitResult contains information about a ray intersection.
-type rayHitResult struct {
-	location XY
-	hasHit   bool
-}
-
 // findClosestRayIntersection casts a horizontal ray from origin in the +X
 // direction and finds the closest intersection with any vertex or edge.
-//
-// TODO: Just return (XY, bool).
 func findClosestRayIntersection(
 	origin XY,
 	pointIndex indexedPoints,
 	lineIndex indexedLines,
-) rayHitResult {
-	closestDist := math.MaxFloat64
-	var result rayHitResult
-
+) (XY, bool) {
 	// Create bounding box for the rightward horizontal ray.
 	rayBox := rtree.Box{
 		MinX: origin.X,
@@ -232,6 +221,10 @@ func findClosestRayIntersection(
 		MinY: origin.Y,
 		MaxY: origin.Y,
 	}
+
+	closestDist := math.MaxFloat64
+	var hasHit bool
+	var hitLocation XY
 
 	// Check for vertex intersections.
 	pointIndex.tree.RangeSearch(rayBox, func(i int) error {
@@ -242,10 +235,8 @@ func findClosestRayIntersection(
 		dist := pt.X - origin.X
 		if dist < closestDist {
 			closestDist = dist
-			result = rayHitResult{
-				location: pt,
-				hasHit:   true,
-			}
+			hasHit = true
+			hitLocation = pt
 		}
 		return nil
 	})
@@ -261,13 +252,11 @@ func findClosestRayIntersection(
 		dist := inter.X - origin.X
 		if dist < closestDist {
 			closestDist = dist
-			result = rayHitResult{
-				location: inter,
-				hasHit:   true,
-			}
+			hasHit = true
+			hitLocation = inter
 		}
 		return nil
 	})
 
-	return result
+	return hitLocation, hasHit
 }
