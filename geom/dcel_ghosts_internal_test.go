@@ -65,7 +65,7 @@ func TestFindComponentRepresentatives(t *testing.T) {
 
 			xys := collectControlPoints(a, b)
 			lines := appendLines(nil, NewGeometryCollection([]Geometry{a, b}).AsGeometry())
-			got := findComponentRepresentatives(xys, lines)
+			got := findConnectedComponentRepresentatives(xys, lines)
 
 			if len(got) != len(tc.want) {
 				t.Fatalf("length mismatch: got %d, want %d", len(got), len(tc.want))

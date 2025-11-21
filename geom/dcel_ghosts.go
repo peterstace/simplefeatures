@@ -13,27 +13,24 @@ func createGhosts(a, b Geometry) MultiLineString {
 	ctrlPts := collectControlPoints(a, b)
 	lines := appendLines(nil, NewGeometryCollection([]Geometry{a, b}).AsGeometry())
 
-	// Get representative points for each component.
-	representatives := findComponentRepresentatives(ctrlPts, lines)
-
+	// Find the right-most point for each each connected component in the
+	// overlaid input geometries.
+	representatives := findConnectedComponentRepresentatives(ctrlPts, lines)
 	if len(representatives) <= 1 {
-		// When there are either 0 or 1 connected components, then they don't
-		// need connecting.
-		return MultiLineString{}
+		return MultiLineString{} // 0 or 1 components are trivially connected.
 	}
 
-	// Sort right-to-left for processing.
+	// Process in right-to-left order to so ghost lines don't interfere with
+	// each other.
 	sort.Slice(representatives, func(i, j int) bool {
 		return isMoreRightmost(representatives[i], representatives[j])
 	})
 
-	// Build spatial indexes and collect geometry data.
-	pointIndex := newIndexedPoints(ctrlPts)
-	lineIndex := newIndexedLines(lines)
-
 	// Process each representative, casting rays rightward. If rays hit other
 	// components, then we create the ghost line immediately. If they don't hit
 	// anything, then we just store the origin so it can be connected later.
+	pointIndex := newIndexedPoints(ctrlPts)
+	lineIndex := newIndexedLines(lines)
 	var ghostLines []line
 	var noHitOrigins []XY
 	for _, origin := range representatives {
@@ -50,24 +47,23 @@ func createGhosts(a, b Geometry) MultiLineString {
 	// connect them to a common vertical line that's to the right of all other
 	// components.
 	if len(noHitOrigins) >= 2 {
-		// Sort vertical line origins by Y coordinate for deterministic output.
+		// Create the common vertical line.
 		sort.Slice(noHitOrigins, func(i, j int) bool {
 			return noHitOrigins[i].Y < noHitOrigins[j].Y
 		})
-
-		// Create horizontal connections to the vertical line.
 		verticalLineX := math.Ceil(findMaxX(ctrlPts)) + 1
-		for _, origin := range noHitOrigins {
-			edge := line{origin, XY{verticalLineX, origin.Y}}
-			ghostLines = append(ghostLines, edge)
-		}
-
-		// Create the vertical line (in segments between each origin's Y value).
 		for i := 0; i < len(noHitOrigins)-1; i++ {
 			from := XY{verticalLineX, noHitOrigins[i].Y}
 			to := XY{verticalLineX, noHitOrigins[i+1].Y}
 			ghostLines = append(ghostLines, line{from, to})
 		}
+
+		// Create horizontal connections to the vertical line.
+		for _, origin := range noHitOrigins {
+			edge := line{origin, XY{verticalLineX, origin.Y}}
+			ghostLines = append(ghostLines, edge)
+		}
+
 	}
 
 	return linesToMultiLineString(ghostLines)
@@ -105,9 +101,9 @@ func collectControlPoints(a, b Geometry) []XY {
 	return sortAndUniquifyXYs(points)
 }
 
-// findComponentRepresentatives identifies connected components in the input
+// findConnectedComponentRepresentatives identifies connected components in the input
 // geometries and returns the rightmost point from each component.
-func findComponentRepresentatives(ctrlPts []XY, lines []line) []XY {
+func findConnectedComponentRepresentatives(ctrlPts []XY, lines []line) []XY {
 	if len(ctrlPts) == 0 {
 		return nil
 	}
