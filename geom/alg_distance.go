@@ -37,60 +37,42 @@ func Distance(g1, g2 Geometry) (float64, bool) {
 		lns1, lns2 = lns2, lns1
 	}
 
-	tr := loadTree(xys2, lns2)
+	xyTree := loadXYTree(xys2)
+	lnTree := loadLineTree(lns2)
 	minDist := math.Inf(+1)
 
-	searchBody := func(
-		env Envelope,
-		recordID int,
-		xyDist func(int) float64,
-		lnDist func(int) float64,
-	) error {
-		// Convert recordID back to array indexes.
-		xyIdx := recordID - 1
-		lnIdx := -recordID - 1
-
-		// Abort the search if we're gone further away compared to our best
-		// distance so far.
-		var recordEnv Envelope
-		if recordID > 0 {
-			recordEnv = xys2[xyIdx].uncheckedEnvelope()
-		} else {
-			recordEnv = lns2[lnIdx].uncheckedEnvelope()
-		}
-		if d, ok := recordEnv.Distance(env); ok && d > minDist {
-			return rtree.Stop
-		}
-
-		// See if the current item in the tree is better than our current best
-		// distance.
-		if recordID > 0 {
-			minDist = fastMin(minDist, xyDist(xyIdx))
-		} else {
-			minDist = fastMin(minDist, lnDist(lnIdx))
-		}
-		return nil
-	}
-	for _, xy := range xys1 {
-		xyEnv := xy.uncheckedEnvelope()
-		_ = tr.PrioritySearch(xy.box(), func(recordID int) error {
-			return searchBody(
-				xyEnv,
-				recordID,
-				func(i int) float64 { return distBetweenXYs(xy, xys2[i]) },
-				func(i int) float64 { return distBetweenXYAndLine(xy, lns2[i]) },
-			)
+	for _, xy1 := range xys1 {
+		xy1Env := xy1.uncheckedEnvelope()
+		_ = xyTree.PrioritySearch(xy1.box(), func(xy2 XY) error {
+			if d, ok := xy2.uncheckedEnvelope().Distance(xy1Env); ok && d > minDist {
+				return rtree.Stop
+			}
+			minDist = fastMin(minDist, distBetweenXYs(xy1, xy2))
+			return nil
+		})
+		_ = lnTree.PrioritySearch(xy1.box(), func(ln2 line) error {
+			if d, ok := ln2.uncheckedEnvelope().Distance(xy1Env); ok && d > minDist {
+				return rtree.Stop
+			}
+			minDist = fastMin(minDist, distBetweenXYAndLine(xy1, ln2))
+			return nil
 		})
 	}
-	for _, ln := range lns1 {
-		lnEnv := ln.uncheckedEnvelope()
-		_ = tr.PrioritySearch(ln.box(), func(recordID int) error {
-			return searchBody(
-				lnEnv,
-				recordID,
-				func(i int) float64 { return distBetweenXYAndLine(xys2[i], ln) },
-				func(i int) float64 { return distBetweenLineAndLine(lns2[i], ln) },
-			)
+	for _, ln1 := range lns1 {
+		ln1Env := ln1.uncheckedEnvelope()
+		_ = xyTree.PrioritySearch(ln1.box(), func(xy2 XY) error {
+			if d, ok := xy2.uncheckedEnvelope().Distance(ln1Env); ok && d > minDist {
+				return rtree.Stop
+			}
+			minDist = fastMin(minDist, distBetweenXYAndLine(xy2, ln1))
+			return nil
+		})
+		_ = lnTree.PrioritySearch(ln1.box(), func(ln2 line) error {
+			if d, ok := ln2.uncheckedEnvelope().Distance(ln1Env); ok && d > minDist {
+				return rtree.Stop
+			}
+			minDist = fastMin(minDist, distBetweenLineAndLine(ln1, ln2))
+			return nil
 		})
 	}
 
@@ -128,22 +110,23 @@ func extractXYsAndLines(g Geometry) ([]XY, []line) {
 	}
 }
 
-// loadTree creates a new RTree that indexes both the XYs and the lines. It
-// uses positive record IDs to refer to the XYs, and negative recordIDs to
-// refer to the lines. Because +0 and -0 are the same, indexing is 1-based and
-// recordID 0 is not used.
-func loadTree(xys []XY, lns []line) *rtree.RTree[int] {
-	items := make([]rtree.BulkItem[int], len(xys)+len(lns))
+func loadXYTree(xys []XY) *rtree.RTree[XY] {
+	items := make([]rtree.BulkItem[XY], len(xys))
 	for i, xy := range xys {
-		items[i] = rtree.BulkItem[int]{
+		items[i] = rtree.BulkItem[XY]{
 			Box:    xy.box(),
-			Record: i + 1,
+			Record: xy,
 		}
 	}
+	return rtree.BulkLoad(items)
+}
+
+func loadLineTree(lns []line) *rtree.RTree[line] {
+	items := make([]rtree.BulkItem[line], len(lns))
 	for i, ln := range lns {
-		items[i+len(xys)] = rtree.BulkItem[int]{
+		items[i] = rtree.BulkItem[line]{
 			Box:    ln.box(),
-			Record: -(i + 1),
+			Record: ln,
 		}
 	}
 	return rtree.BulkLoad(items)
