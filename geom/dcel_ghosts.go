@@ -100,8 +100,8 @@ func findMaxX(points []XY) float64 {
 // returns them deduplicated.
 func collectControlPoints(a, b Geometry) []XY {
 	var points []XY
-	walkXY(a, func(xy XY) { points = append(points, xy) })
-	walkXY(b, func(xy XY) { points = append(points, xy) })
+	walk(a, func(xy XY) { points = append(points, xy) })
+	walk(b, func(xy XY) { points = append(points, xy) })
 	return sortAndUniquifyXYs(points)
 }
 
