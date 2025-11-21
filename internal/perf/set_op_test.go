@@ -12,7 +12,7 @@ import (
 )
 
 func BenchmarkSetOperation(b *testing.B) {
-	for sz := range []int{10, 100, 1000} {
+	for _, sz := range []int{10, 100, 1000} {
 		p1 := regularPolygon(geom.XY{X: 0, Y: 0}, 1.0, sz).AsGeometry()
 		p2 := regularPolygon(geom.XY{X: 1, Y: 0}, 1.0, sz).AsGeometry()
 		b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
