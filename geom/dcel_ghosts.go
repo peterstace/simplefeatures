@@ -13,8 +13,8 @@ func createGhosts(a, b Geometry) MultiLineString {
 	ctrlPts := collectControlPoints(a, b)
 	lines := appendLines(nil, NewGeometryCollection([]Geometry{a, b}).AsGeometry())
 
-	// Find the right-most point for each each connected component in the
-	// overlaid input geometries.
+	// Find the right-most point for each connected component in the overlaid
+	// input geometries.
 	representatives := findConnectedComponentRepresentatives(ctrlPts, lines)
 	if len(representatives) <= 1 {
 		return MultiLineString{} // 0 or 1 components are trivially connected.
@@ -63,7 +63,6 @@ func createGhosts(a, b Geometry) MultiLineString {
 			edge := line{origin, XY{verticalLineX, origin.Y}}
 			ghostLines = append(ghostLines, edge)
 		}
-
 	}
 
 	return linesToMultiLineString(ghostLines)
