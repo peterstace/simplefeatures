@@ -40,14 +40,14 @@ func createGhosts(a, b Geometry) MultiLineString {
 			origin, pointIndex, lineIndex,
 		)
 
-		if hitResult.hitType == hitNone {
+		if !hitResult.hasHit {
 			// No intersection - would need vertical line connection.
 			fallbackOrigins = append(fallbackOrigins, origin)
 			continue
 		}
 
 		// Can create a ghost edge to an actual component.
-		ghostLine := createGhostFromHit(origin, hitResult)
+		ghostLine := line{origin, hitResult.location}
 		ghostLines = append(ghostLines, ghostLine)
 	}
 
@@ -218,19 +218,10 @@ func horizontalRayIntersection(
 	return XY{x, origin.Y}, true
 }
 
-// rayHitType represents the type of intersection found by ray casting.
-type rayHitType int
-
-const (
-	hitNone rayHitType = iota
-	hitVertex
-	hitEdge
-)
-
 // rayHitResult contains information about a ray intersection.
 type rayHitResult struct {
-	hitType  rayHitType
-	hitPoint XY
+	location XY
+	hasHit   bool
 }
 
 // findClosestRayIntersection casts a horizontal ray from origin in the +X
@@ -241,7 +232,7 @@ func findClosestRayIntersection(
 	lineIndex indexedLines,
 ) rayHitResult {
 	closestDist := math.MaxFloat64
-	result := rayHitResult{hitType: hitNone}
+	var result rayHitResult
 
 	// Create bounding box for the rightward horizontal ray.
 	rayBox := rtree.Box{
@@ -261,8 +252,8 @@ func findClosestRayIntersection(
 		if dist < closestDist {
 			closestDist = dist
 			result = rayHitResult{
-				hitType:  hitVertex,
-				hitPoint: pt,
+				location: pt,
+				hasHit:   true,
 			}
 		}
 		return nil
@@ -280,18 +271,12 @@ func findClosestRayIntersection(
 		if dist < closestDist {
 			closestDist = dist
 			result = rayHitResult{
-				hitType:  hitEdge,
-				hitPoint: inter,
+				location: inter,
+				hasHit:   true,
 			}
 		}
 		return nil
 	})
 
 	return result
-}
-
-// createGhostFromHit creates a ghost edge from origin to the intersection
-// found by ray casting. Always draws a horizontal ray to the hit point.
-func createGhostFromHit(origin XY, hitResult rayHitResult) line {
-	return line{origin, hitResult.hitPoint}
 }
