@@ -231,7 +231,6 @@ const (
 type rayHitResult struct {
 	hitType  rayHitType
 	hitPoint XY
-	hitEdge  line
 }
 
 // findClosestRayIntersection casts a horizontal ray from origin in the +X
@@ -283,7 +282,6 @@ func findClosestRayIntersection(
 			result = rayHitResult{
 				hitType:  hitEdge,
 				hitPoint: inter,
-				hitEdge:  edge,
 			}
 		}
 		return nil
