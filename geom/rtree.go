@@ -3,7 +3,7 @@ package geom
 import "github.com/peterstace/simplefeatures/rtree"
 
 // TODO: Use this instead of indexedLines/Points where possible.
-func newLineRTree(lines []line) *rtree.RTree[line] {
+func newLineRTree(lines []line) *rtree.RTree[line] { //nolint:unused
 	items := make([]rtree.BulkItem[line], len(lines))
 	for i, ln := range lines {
 		items[i] = rtree.BulkItem[line]{
@@ -15,7 +15,7 @@ func newLineRTree(lines []line) *rtree.RTree[line] {
 }
 
 // TODO: Use this instead of indexedLines/Points where possible.
-func newPointRTree(points []XY) *rtree.RTree[XY] {
+func newPointRTree(points []XY) *rtree.RTree[XY] { //nolint:unused
 	items := make([]rtree.BulkItem[XY], len(points))
 	for i, pt := range points {
 		items[i] = rtree.BulkItem[XY]{
