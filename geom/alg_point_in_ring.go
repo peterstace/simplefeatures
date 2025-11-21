@@ -61,7 +61,7 @@ func relatePointToPolygon(pt XY, polyBoundary indexedLines) side {
 	}
 	var onBound bool
 	var count int
-	polyBoundary.tree.RangeSearch(box, func(i int) error {
+	_ = polyBoundary.tree.RangeSearch(box, func(i int) error {
 		ln := polyBoundary.lines[i]
 		crossing, onLine := hasCrossing(pt, ln)
 		if onLine {

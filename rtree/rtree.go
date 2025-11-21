@@ -9,29 +9,26 @@ const (
 	maxEntries = 4
 )
 
-// node is a node in an R-Tree, holding user record IDs and/or links to deeper
+// node is a node in an R-Tree, holding user records and/or links to deeper
 // nodes in the tree.
-type node struct {
-	entries    [maxEntries]entry
+type node[T any] struct {
+	entries    [maxEntries]entry[T]
 	numEntries int
 }
 
 // entry is an entry contained inside a node. An entry can either hold a user
-// record ID, or point to a deeper node in the tree (but not both). Because 0
-// is a valid record ID, the child pointer should be used to distinguish
-// between the two types of entries.
-type entry struct {
-	box      Box
-	child    *node
-	recordID int
+// record, or point to a deeper node in the tree (but not both). The child
+// pointer should be used to distinguish between the two types of entries.
+type entry[T any] struct {
+	box    Box
+	child  *node[T]
+	record T
 }
 
-// RTree is an in-memory R-Tree data structure. It holds record ID and bounding
-// box pairs (the actual records aren't stored in the tree; the user is
-// responsible for storing their own records). Its zero value is an empty
-// R-Tree.
-type RTree struct {
-	root  *node
+// RTree is an in-memory R-Tree data structure. It holds records of type T
+// along with their bounding boxes. Its zero value is an empty R-Tree.
+type RTree[T any] struct {
+	root  *node[T]
 	count int
 }
 
@@ -40,24 +37,24 @@ type RTree struct {
 var Stop = errors.New("stop") //nolint:stylecheck,revive
 
 // RangeSearch looks for any items in the tree that overlap with the given
-// bounding box. The callback is called with the record ID for each found item.
-// If an error is returned from the callback then the search is terminated
-// early.  Any error returned from the callback is returned by RangeSearch,
-// except for the case where the special Stop sentinel error is returned (in
-// which case nil will be returned from RangeSearch). Stop may be wrapped.
-func (t *RTree) RangeSearch(box Box, callback func(recordID int) error) error {
+// bounding box. The callback is called with each found item's record. If an
+// error is returned from the callback then the search is terminated early.
+// Any error returned from the callback is returned by RangeSearch, except for
+// the case where the special Stop sentinel error is returned (in which case
+// nil will be returned from RangeSearch). Stop may be wrapped.
+func (t *RTree[T]) RangeSearch(box Box, callback func(record T) error) error {
 	if t.root == nil {
 		return nil
 	}
-	var recurse func(*node) error
-	recurse = func(n *node) error {
+	var recurse func(*node[T]) error
+	recurse = func(n *node[T]) error {
 		for i := 0; i < n.numEntries; i++ {
 			entry := n.entries[i]
 			if !overlap(entry.box, box) {
 				continue
 			}
 			if entry.child == nil {
-				if err := callback(entry.recordID); errors.Is(err, Stop) {
+				if err := callback(entry.record); errors.Is(err, Stop) {
 					return nil
 				} else if err != nil {
 					return err
@@ -75,7 +72,7 @@ func (t *RTree) RangeSearch(box Box, callback func(recordID int) error) error {
 
 // Extent gives the Box that most closely bounds the RTree. If the RTree is
 // empty, then false is returned.
-func (t *RTree) Extent() (Box, bool) {
+func (t *RTree[T]) Extent() (Box, bool) {
 	if t.root == nil || t.root.numEntries == 0 {
 		return Box{}, false
 	}
@@ -83,6 +80,6 @@ func (t *RTree) Extent() (Box, bool) {
 }
 
 // Count gives the number of entries in the RTree.
-func (t *RTree) Count() int {
+func (t *RTree[T]) Count() int {
 	return t.count
 }

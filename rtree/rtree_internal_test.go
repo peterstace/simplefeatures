@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func testBulkLoad(rnd *rand.Rand, pop int) (*RTree, []Box) {
+func testBulkLoad(rnd *rand.Rand, pop int) (*RTree[int], []Box) {
 	boxes := make([]Box, pop)
 	seenX := make(map[float64]bool)
 	seenY := make(map[float64]bool)
@@ -27,10 +27,10 @@ func testBulkLoad(rnd *rand.Rand, pop int) (*RTree, []Box) {
 		}
 		boxes[i] = box
 	}
-	inserts := make([]BulkItem, len(boxes))
+	inserts := make([]BulkItem[int], len(boxes))
 	for i := range inserts {
 		inserts[i].Box = boxes[i]
-		inserts[i].RecordID = i
+		inserts[i].Record = i
 	}
 	return BulkLoad(inserts), boxes
 }
@@ -57,12 +57,12 @@ func TestRandom(t *testing.T) {
 	}
 }
 
-func checkSearch(t *testing.T, rt *RTree, boxes []Box, rnd *rand.Rand) {
+func checkSearch(t *testing.T, rt *RTree[int], boxes []Box, rnd *rand.Rand) {
 	t.Helper()
 	for i := 0; i < 10; i++ {
 		searchBB := randomBox(rnd, 0.5, 0.5)
 		var got []int
-		rt.RangeSearch(searchBB, func(idx int) error {
+		_ = rt.RangeSearch(searchBB, func(idx int) error {
 			got = append(got, idx)
 			return nil
 		})
@@ -99,16 +99,16 @@ func randomBox(rnd *rand.Rand, maxStart, maxWidth float64) Box {
 	return box
 }
 
-func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
+func checkInvariants(t *testing.T, rt *RTree[int], boxes []Box) {
 	t.Helper()
-	var recurse func(*node, string)
-	recurse = func(current *node, indent string) {
+	var recurse func(*node[int], string)
+	recurse = func(current *node[int], indent string) {
 		t.Logf("%sNode addr=%p numEntries=%d", indent, current, current.numEntries)
 		indent += "\t"
 		for i := 0; i < current.numEntries; i++ {
 			e := current.entries[i]
 			if e.child == nil {
-				t.Logf("%sEntry[%d] recordID=%d box=%v", indent, i, e.recordID, e.box)
+				t.Logf("%sEntry[%d] recordID=%d box=%v", indent, i, e.record, e.box)
 			} else {
 				t.Logf("%sEntry[%d] box=%v", indent, i, e.box)
 				recurse(e.child, indent+"\t")
@@ -134,20 +134,20 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 
 	minLeafLevel := math.MaxInt
 	maxLeafLevel := math.MinInt
-	var check func(n *node, level int)
-	check = func(current *node, level int) {
+	var check func(n *node[int], level int)
+	check = func(current *node[int], level int) {
 		for i := 0; i < current.numEntries; i++ {
 			e := current.entries[i]
 			if e.child == nil {
 				minLeafLevel = minInt(minLeafLevel, level)
 				maxLeafLevel = maxInt(maxLeafLevel, level)
-				if _, ok := unfound[e.recordID]; !ok {
+				if _, ok := unfound[e.record]; !ok {
 					t.Fatal("record ID found in tree but wasn't in unfound map")
 				}
-				delete(unfound, e.recordID)
+				delete(unfound, e.record)
 			} else {
-				if e.recordID != 0 {
-					t.Fatal("non-leaf has recordID")
+				if e.record != 0 {
+					t.Fatal("non-leaf has record")
 				}
 				box := e.child.entries[0].box
 				for j := 1; j < e.child.numEntries; j++ {
@@ -161,7 +161,7 @@ func checkInvariants(t *testing.T, rt *RTree, boxes []Box) {
 		}
 		for i := current.numEntries; i < len(current.entries); i++ {
 			e := current.entries[i]
-			if e != (entry{}) {
+			if e != (entry[int]{}) {
 				t.Fatal("entry past numEntries is not the zero value")
 			}
 		}

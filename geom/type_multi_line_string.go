@@ -110,22 +110,16 @@ func (m MultiLineString) IsSimple() bool {
 		}
 	}
 
-	// Map between record ID in the rtree and a particular line segment:
-	toRecordID := func(lineStringIdx, seqIdx int) int {
-		return int(uint64(lineStringIdx)<<32 | uint64(seqIdx))
-	}
-	fromRecordID := func(recordID int) (lineStringIdx, seqIdx int) {
-		lineStringIdx = int(uint64(recordID) >> 32)
-		seqIdx = int((uint64(recordID) << 32) >> 32)
-		return
-	}
-
 	// Create an RTree containing all line segments.
+	type record struct {
+		lineStringIdx int
+		seqIdx        int
+	}
 	var numItems int
 	for _, ls := range m.lines {
 		numItems += maxInt(0, ls.Coordinates().Length()-1)
 	}
-	items := make([]rtree.BulkItem, 0, numItems)
+	items := make([]rtree.BulkItem[record], 0, numItems)
 	for i, ls := range m.lines {
 		seq := ls.Coordinates()
 		seqLen := seq.Length()
@@ -134,9 +128,9 @@ func (m MultiLineString) IsSimple() bool {
 			if !ok {
 				continue
 			}
-			items = append(items, rtree.BulkItem{
-				Box:      ln.box(),
-				RecordID: toRecordID(i, j),
+			items = append(items, rtree.BulkItem[record]{
+				Box:    ln.box(),
+				Record: record{lineStringIdx: i, seqIdx: j},
 			})
 		}
 	}
@@ -151,15 +145,14 @@ func (m MultiLineString) IsSimple() bool {
 				continue
 			}
 			isSimple := true // assume simple until proven otherwise
-			tree.RangeSearch(ln.box(), func(recordID int) error {
+			_ = tree.RangeSearch(ln.box(), func(rec record) error {
 				// Ignore the intersection if it's for the same LineString that we're currently looking up.
-				lineStringIdx, seqIdx := fromRecordID(recordID)
-				if lineStringIdx == i {
+				if rec.lineStringIdx == i {
 					return nil
 				}
 
-				otherLS := m.lines[lineStringIdx]
-				other, ok := getLine(otherLS.Coordinates(), seqIdx)
+				otherLS := m.lines[rec.lineStringIdx]
+				other, ok := getLine(otherLS.Coordinates(), rec.seqIdx)
 				if !ok {
 					// Shouldn't even happen, since we were able to insert this
 					// entry into the RTree.

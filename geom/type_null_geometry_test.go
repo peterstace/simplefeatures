@@ -13,7 +13,7 @@ func TestNullGeometryScan(t *testing.T) {
 
 	for _, tc := range []struct {
 		description string
-		value       interface{}
+		value       any
 		wantValid   bool
 		wantWKT     string
 	}{

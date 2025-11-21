@@ -48,7 +48,7 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 	// Create new nodes for point/line intersections.
 	ptIndex := newIndexedPoints(nodes.list())
 	appendCutsForPointXLine := func(ln line, cuts []XY) []XY {
-		ptIndex.tree.RangeSearch(ln.box(), func(i int) error {
+		_ = ptIndex.tree.RangeSearch(ln.box(), func(i int) error {
 			xy := ptIndex.points[i]
 			if !ln.hasEndpoint(xy) && distBetweenXYAndLine(xy, ln) < ulp*0x200 {
 				cuts = append(cuts, xy)
@@ -64,7 +64,7 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 	// Create new nodes for line/line intersections.
 	lnIndex := newIndexedLines(appendLines(nil, all()))
 	appendCutsLineXLine := func(ln line, cuts []XY) []XY {
-		lnIndex.tree.RangeSearch(ln.box(), func(i int) error {
+		_ = lnIndex.tree.RangeSearch(ln.box(), func(i int) error {
 			other := lnIndex.lines[i]
 
 			// TODO: This is a hacky approach (re-orders inputs, rather than
