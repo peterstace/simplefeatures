@@ -31,63 +31,61 @@ func createGhosts(a, b Geometry) MultiLineString {
 	pointIndex := newIndexedPoints(ctrlPts)
 	lineIndex := newIndexedLines(lines)
 
-	// Process each representative, casting rays rightward.
+	// Process each representative, casting rays rightward. If rays hit other
+	// components, then we create the ghost line immediately. If they don't hit
+	// anything, then we just store the origin so it can be connected later.
 	var ghostLines []line
-	var fallbackOrigins []XY
-
+	var noHitOrigins []XY
 	for _, origin := range representatives {
 		hitLocation, hasHit := findClosestRayIntersection(origin, pointIndex, lineIndex)
-
 		if !hasHit {
-			// No intersection - would need vertical line connection.
-			fallbackOrigins = append(fallbackOrigins, origin)
+			noHitOrigins = append(noHitOrigins, origin)
 			continue
 		}
-
-		// Can create a ghost edge to an actual component.
 		ghostLine := line{origin, hitLocation}
 		ghostLines = append(ghostLines, ghostLine)
 	}
 
-	// Only create vertical line connections if at least 2 components need it.
-	if len(fallbackOrigins) >= 2 {
-		// Sort vertical line origins by Y coordinate.
-		sort.Slice(fallbackOrigins, func(i, j int) bool {
-			return fallbackOrigins[i].Y < fallbackOrigins[j].Y
+	// When there are multiple components whose rays didn't hit anything, we
+	// connect them to a common vertical line that's to the right of all other
+	// components.
+	if len(noHitOrigins) >= 2 {
+		// Sort vertical line origins by Y coordinate for deterministic output.
+		sort.Slice(noHitOrigins, func(i, j int) bool {
+			return noHitOrigins[i].Y < noHitOrigins[j].Y
 		})
 
-		// Calculate max X for vertical line fallback.
-		maxX := findMaxX(ctrlPts)
-		verticalLineX := math.Ceil(maxX) + 1
-
 		// Create horizontal connections to the vertical line.
-		for _, origin := range fallbackOrigins {
+		verticalLineX := math.Ceil(findMaxX(ctrlPts)) + 1
+		for _, origin := range noHitOrigins {
 			edge := line{origin, XY{verticalLineX, origin.Y}}
 			ghostLines = append(ghostLines, edge)
 		}
 
-		// Create vertical line segments connecting consecutive horizontal endpoints.
-		for i := 0; i < len(fallbackOrigins)-1; i++ {
-			from := XY{verticalLineX, fallbackOrigins[i].Y}
-			to := XY{verticalLineX, fallbackOrigins[i+1].Y}
-			verticalSegment := line{from, to}
-			ghostLines = append(ghostLines, verticalSegment)
+		// Create the vertical line (in segments between each origin's Y value).
+		for i := 0; i < len(noHitOrigins)-1; i++ {
+			from := XY{verticalLineX, noHitOrigins[i].Y}
+			to := XY{verticalLineX, noHitOrigins[i+1].Y}
+			ghostLines = append(ghostLines, line{from, to})
 		}
 	}
 
-	// Convert lines to LineStrings.
-	ghostEdges := make([]LineString, len(ghostLines))
-	for i, ln := range ghostLines {
-		ghostEdges[i] = ln.asLineString()
-	}
-	return NewMultiLineString(ghostEdges)
+	return linesToMultiLineString(ghostLines)
 }
 
-// findMaxX returns the maximum X coordinate among all points. If no points are
-// supplied, then returns 0 as a special case.
+func linesToMultiLineString(lines []line) MultiLineString {
+	lss := make([]LineString, len(lines))
+	for i, ln := range lines {
+		lss[i] = ln.asLineString()
+	}
+	return NewMultiLineString(lss)
+}
+
+// findMaxX returns the maximum X coordinate among all points. Panics if no
+// points supplied.
 func findMaxX(points []XY) float64 {
 	if len(points) == 0 {
-		return 0
+		panic("no points supplied")
 	}
 	maxX := points[0].X
 	for i := range points {
