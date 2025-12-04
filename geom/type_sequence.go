@@ -3,7 +3,7 @@ package geom
 import "fmt"
 
 // Sequence represents a list of point locations.  It is immutable after
-// creation.  All locations in the Sequence are specified using the same
+// creation.  All locations in the [Sequence] are specified using the same
 // coordinates type.
 //
 // The zero value is an empty sequence of coordinate type DimXY.
@@ -12,16 +12,16 @@ type Sequence struct {
 	floats []float64
 }
 
-// NewSequence creates a new Sequence from a raw slice of float64 coordinates.
-// The slice will be retained by the constructed Sequence and must NOT be
+// NewSequence creates a new [Sequence] from a raw slice of float64 coordinates.
+// The slice will be retained by the constructed [Sequence] and must NOT be
 // modified by the caller after the function returns.
 //
-// The CoordinatesType indicates what type of coordinates the Sequence will
-// store (i.e. just XY, XYZ, XYM, or XYZM).
+// The [CoordinatesType] indicates what type of coordinates the [Sequence] will
+// store (i.e. just [XY], XYZ, XYM, or XYZM).
 //
 // The coordinates in the passed slice should be interleaved. That is, all of
 // the coordinates for the first point come first, followed by all of the
-// coordinates for the second point etc. Coordinates must be in the order of X
+// coordinates for the second point etc. [Coordinates] must be in the order of X
 // followed by Y, then Z (if using XYZ or XYZM), then M (if using XYM or XYZM).
 //
 // The length of the coordinates slice must be a multiple of the dimensionality
@@ -52,19 +52,19 @@ func (s Sequence) validate() error {
 }
 
 // CoordinatesType returns the coordinates type used to represent point
-// locations in the Sequence.
+// locations in the [Sequence].
 func (s Sequence) CoordinatesType() CoordinatesType {
 	return s.ctype
 }
 
-// Length returns the number of point locations represented by the Sequence.
+// Length returns the number of point locations represented by the [Sequence].
 func (s Sequence) Length() int {
 	return len(s.floats) / s.ctype.Dimension()
 }
 
-// Get returns the Coordinates of the ith point location in the Sequence. It
+// Get returns the [Coordinates] of the ith point location in the [Sequence]. It
 // panics if i is out of range with respect to the number of points in the
-// Sequence.
+// [Sequence].
 func (s Sequence) Get(i int) Coordinates {
 	stride := s.ctype.Dimension()
 	c := Coordinates{
@@ -86,8 +86,8 @@ func (s Sequence) Get(i int) Coordinates {
 	return c
 }
 
-// GetXY returns the XY of the ith point location in the Sequence. It panics if
-// i is out of range with respect to the number of points in the Sequence.
+// GetXY returns the [XY] of the ith point location in the [Sequence]. It panics if
+// i is out of range with respect to the number of points in the [Sequence].
 func (s Sequence) GetXY(i int) XY {
 	stride := s.ctype.Dimension()
 	return XY{
@@ -96,7 +96,7 @@ func (s Sequence) GetXY(i int) XY {
 	}
 }
 
-// Reverse returns a new Sequence containing the same point locations, but in
+// Reverse returns a new [Sequence] containing the same point locations, but in
 // reversed order.
 func (s Sequence) Reverse() Sequence {
 	stride := s.ctype.Dimension()
@@ -112,16 +112,16 @@ func (s Sequence) Reverse() Sequence {
 	return Sequence{s.ctype, reversed}
 }
 
-// Slice creates a new Sequence that is a subslice of this Sequence. Indexing
+// Slice creates a new [Sequence] that is a subslice of this [Sequence]. Indexing
 // rules work in the same way as Go Slices.
 func (s Sequence) Slice(i, j int) Sequence {
 	stride := s.ctype.Dimension()
 	return Sequence{s.ctype, s.floats[i*stride : j*stride]}
 }
 
-// ForceCoordinatesType returns a new Sequence with a different CoordinatesType. If a
+// ForceCoordinatesType returns a new [Sequence] with a different [CoordinatesType]. If a
 // dimension is added, then its new value is set to zero for each point
-// location in the Sequence.
+// location in the [Sequence].
 func (s Sequence) ForceCoordinatesType(newCType CoordinatesType) Sequence {
 	if s.ctype == newCType {
 		return s
@@ -150,7 +150,7 @@ func (s Sequence) ForceCoordinatesType(newCType CoordinatesType) Sequence {
 	return Sequence{newCType, flat}
 }
 
-// Force2D returns a new Sequence with Z and M values removed (if present).
+// Force2D returns a new [Sequence] with Z and M values removed (if present).
 func (s Sequence) Force2D() Sequence {
 	return s.ForceCoordinatesType(DimXY)
 }
@@ -193,7 +193,7 @@ func (s Sequence) less(o Sequence) bool {
 }
 
 // Envelope returns the axis aligned bounding box that most tightly surrounds
-// the XY values in the sequence.
+// the [XY] values in the sequence.
 func (s Sequence) Envelope() Envelope {
 	n := s.Length()
 	if n == 0 {

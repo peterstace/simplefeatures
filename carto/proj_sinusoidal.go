@@ -17,7 +17,7 @@ type Sinusoidal struct {
 	λ0     float64
 }
 
-// NewSinusoidal returns a new Sinusoidal projection with the given earth
+// NewSinusoidal returns a new [Sinusoidal] projection with the given earth
 // radius.
 func NewSinusoidal(earthRadius float64) *Sinusoidal {
 	return &Sinusoidal{

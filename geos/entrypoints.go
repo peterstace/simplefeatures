@@ -125,7 +125,7 @@ func Intersection(a, b geom.Geometry) (geom.Geometry, error) {
 	return rawgeos.Intersection(a, b)
 }
 
-// BufferOption allows the behaviour of the Buffer operation to be modified.
+// BufferOption allows the behaviour of the [Buffer] operation to be modified.
 type BufferOption func(*bufferOptionSet)
 
 type bufferOptionSet struct {
@@ -268,9 +268,9 @@ func MakeValid(g geom.Geometry) (geom.Geometry, error) {
 }
 
 // The CoverageUnion function is used to union polygonal inputs that form a
-// coverage, provided as a GeometryCollection of Polygons and/or MultiPolygons.
+// coverage, provided as a [geom.GeometryCollection] of [geom.Polygon]s and/or [geom.MultiPolygon]s.
 // This method is much faster than other unioning methods, but it relies on the
-// input being a valid coverage (see the CoverageIsValid function for details).
+// input being a valid coverage (see the [CoverageIsValid] function for details).
 //
 // CoverageUnion may detect that the input is not a coverage and return an
 // error, but this is not guaranteed (causing an invalid result to be returned
@@ -283,9 +283,9 @@ func CoverageUnion(g geom.Geometry) (geom.Geometry, error) {
 }
 
 // CoverageSimplifyVW simplifies a polygon coverage, provided as a
-// GeometryCollection of Polygons and/or MultiPolygons. It uses the
+// [geom.GeometryCollection] of [geom.Polygon]s and/or [geom.MultiPolygon]s. It uses the
 // Visvalingam–Whyatt algorithm and relies on the coverage being valid (see the
-// CoverageIsValid function for details).
+// [CoverageIsValid] function for details).
 //
 // It may not check that the input forms a valid coverage, so it's possible
 // that an incorrect result is returned without an error.
@@ -295,15 +295,15 @@ func CoverageSimplifyVW(g geom.Geometry, tolerance float64, preserveBoundary boo
 	return rawgeos.CoverageSimplifyVW(g, tolerance, preserveBoundary)
 }
 
-// CoverageIsValid checks if a coverage (provided as a GeometryCollection) is
+// CoverageIsValid checks if a coverage (provided as a [geom.GeometryCollection]) is
 // valid. Coverage validity is indicated by the boolean return value. A valid
 // coverage must have the following properties:
 //
-//  1. all input geometries are of type Polygon or MultiPolygon,
+//  1. all input geometries are of type [geom.Polygon] or [geom.MultiPolygon],
 //
 //  2. the interiors of the inputs do not intersect, and
 //
-//  3. the common boundaries of adjacent Polygons or MultiPolygons have the
+//  3. the common boundaries of adjacent [geom.Polygon]s or [geom.MultiPolygon]s have the
 //     same set of vertices.
 //
 // If the coverage is not valid, then the returned geometry shows the invalid
@@ -312,9 +312,9 @@ func CoverageIsValid(g geom.Geometry, gapWidth float64) (bool, geom.Geometry, er
 	return rawgeos.CoverageIsValid(g, gapWidth)
 }
 
-// UnaryUnion is a single argument version of Union. It is most useful when
-// supplied with a GeometryCollection, resulting in the union of the
-// GeometryCollection's child geometries.
+// UnaryUnion is a single argument version of [Union]. It is most useful when
+// supplied with a [geom.GeometryCollection], resulting in the union of the
+// [geom.GeometryCollection]'s child geometries.
 //
 // The validity of the result is not checked.
 func UnaryUnion(g geom.Geometry) (geom.Geometry, error) {
@@ -322,7 +322,7 @@ func UnaryUnion(g geom.Geometry) (geom.Geometry, error) {
 }
 
 // ConcaveHull returns a concave hull of the input. A concave hull is generally
-// a Polygon, but could also be a 2-point LineString or a Point in degenerate
+// a [geom.Polygon], but could also be a 2-point [geom.LineString] or a [geom.Point] in degenerate
 // cases. It will be made of vertices that are a subset of the input vertices.
 // The concavenessRatio parameter controls the concaveness of the hull (a value
 // of 1 will produce convex hulls, and a value of 0 will produce maximally

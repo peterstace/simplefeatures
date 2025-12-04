@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Coordinates represents a point location. Coordinates values may be
+// Coordinates represents a point location. [Coordinates] values may be
 // constructed manually using the type definition directly. Alternatively, one
 // of the New(XYZM)Coordinates constructor functions can be used.
 type Coordinates struct {
@@ -63,7 +63,7 @@ func (c Coordinates) appendFloat64s(dst []float64) []float64 {
 	}
 }
 
-// AsPoint is a convenience function to convert this Coordinates value into a Point geometry.
+// AsPoint is a convenience function to convert this [Coordinates] value into a [Point] geometry.
 func (c Coordinates) AsPoint() Point {
 	// NOTE: this function is not very useful on its own. Its main purpose is
 	// to shadow the AsPoint method on XY. If it were not shadowed, a user

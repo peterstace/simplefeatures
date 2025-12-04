@@ -15,9 +15,9 @@ import (
 // next production in the grammar.
 
 // UnmarshalWKT parses a Well Known Text (WKT), and returns the corresponding
-// Geometry.
+// [Geometry].
 //
-// NoValidate{} can be passed in to disable geometry constraint validation.
+// [NoValidate]{} can be passed in to disable geometry constraint validation.
 func UnmarshalWKT(wkt string, nv ...NoValidate) (Geometry, error) {
 	p := newParser(wkt)
 	g, err := p.nextGeometryTaggedText()

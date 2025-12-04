@@ -20,7 +20,7 @@ type WebMercator struct {
 	zoom int
 }
 
-// NewWebMercator returns a new WebMercator projection with the given zoom.
+// NewWebMercator returns a new [WebMercator] projection with the given zoom.
 func NewWebMercator(zoom int) *WebMercator {
 	return &WebMercator{zoom}
 }

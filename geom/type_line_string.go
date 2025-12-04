@@ -7,26 +7,26 @@ import (
 	"github.com/peterstace/simplefeatures/rtree"
 )
 
-// LineString is a linear geometry defined by linear interpolation between a
+// [LineString] is a linear geometry defined by linear interpolation between a
 // finite set of points. Its zero value is the empty line string. It is
 // immutable after creation.
 type LineString struct {
 	seq Sequence
 }
 
-// NewLineString creates a new LineString from a Sequence of points.
+// NewLineString creates a new [LineString] from a [Sequence] of points.
 //
-// It doesn't perform any validation on the result. The Validate method can be
-// used to check the validity of the result if needed.
+// It doesn't perform any validation on the result. The [LineString.Validate]
+// method can be used to check the validity of the result if needed.
 func NewLineString(seq Sequence) LineString {
 	return LineString{seq}
 }
 
-// Validate checks if the LineString is valid. For it to be valid, the
+// Validate checks if the [LineString] is valid. For it to be valid, the
 // following rules must hold.
 //
-//  1. The XY values must not be NaN or Inf.
-//  2. For non-empty LineStrings, there must be at least two distinct XY
+//  1. The [XY] values must not be NaN or Inf.
+//  2. For non-empty [LineString]s, there must be at least two distinct [XY]
 //     values.
 func (s LineString) Validate() error {
 	if s.seq.Length() == 0 {
@@ -55,18 +55,18 @@ func hasAtLeast2DistinctPointsInSeq(seq Sequence) bool {
 	return false
 }
 
-// Type returns the GeometryType for a LineString.
+// Type returns the [GeometryType] for a [LineString].
 func (s LineString) Type() GeometryType {
 	return TypeLineString
 }
 
-// AsGeometry converts this LineString into a Geometry.
+// AsGeometry converts this [LineString] into a [Geometry].
 func (s LineString) AsGeometry() Geometry {
 	return Geometry{impl: s}
 }
 
-// StartPoint gives the first point of the LineString. If the LineString is
-// empty then it returns the empty Point.
+// StartPoint gives the first point of the [LineString]. If the [LineString] is
+// empty then it returns the empty [Point].
 func (s LineString) StartPoint() Point {
 	if s.IsEmpty() {
 		return NewEmptyPoint(s.CoordinatesType())
@@ -75,8 +75,8 @@ func (s LineString) StartPoint() Point {
 	return NewPoint(c)
 }
 
-// EndPoint gives the last point of the LineString. If the LineString is empty
-// then it returns the empty Point.
+// EndPoint gives the last point of the [LineString]. If the [LineString] is empty
+// then it returns the empty [Point].
 func (s LineString) EndPoint() Point {
 	if s.IsEmpty() {
 		return NewEmptyPoint(s.CoordinatesType())
@@ -106,8 +106,8 @@ func (s LineString) appendWKTBody(dst []byte) []byte {
 }
 
 // IsSimple returns true if this geometry contains no anomalous geometry
-// points, such as self intersection or self tangency. LineStrings are simple
-// if and only if the curve defined by the LineString doesn't pass through the
+// points, such as self intersection or self tangency. [LineString]s are simple
+// if and only if the curve defined by the [LineString] doesn't pass through the
 // same point twice (with the except of the two endpoints being coincident).
 func (s LineString) IsSimple() bool {
 	first, last, ok := firstAndLastLines(s.seq)
@@ -198,27 +198,27 @@ func (s LineString) IsSimple() bool {
 	return true
 }
 
-// IsClosed returns true if and only if this LineString is not empty and its
+// IsClosed returns true if and only if this [LineString] is not empty and its
 // start and end points are coincident.
 func (s LineString) IsClosed() bool {
 	return !s.IsEmpty() && s.seq.GetXY(0) == s.seq.GetXY(s.seq.Length()-1)
 }
 
-// IsEmpty returns true if and only if this LineString is the empty LineString.
-// The empty LineString is defined by a zero length coordinates sequence.
+// IsEmpty returns true if and only if this [LineString] is the empty [LineString].
+// The empty [LineString] is defined by a zero length coordinates sequence.
 func (s LineString) IsEmpty() bool {
 	return s.seq.Length() == 0
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry.
+// Envelope returns the [Envelope] that most tightly surrounds the geometry.
 func (s LineString) Envelope() Envelope {
 	return s.seq.Envelope()
 }
 
-// Boundary returns the spatial boundary of this LineString. For closed
-// LineStrings (i.e. LineStrings where the start and end points have the same
-// XY value), this is the empty MultiPoint. For non-closed LineStrings, this is
-// the MultiPoint containing the two endpoints of the LineString.
+// Boundary returns the spatial boundary of this [LineString]. For closed
+// [LineString]s (i.e. [LineString]s where the start and end points have the same
+// [XY] value), this is the empty [MultiPoint]. For non-closed [LineString]s, this is
+// the [MultiPoint] containing the two endpoints of the [LineString].
 func (s LineString) Boundary() MultiPoint {
 	if s.IsEmpty() || s.IsClosed() {
 		return MultiPoint{}
@@ -229,21 +229,21 @@ func (s LineString) Boundary() MultiPoint {
 	})
 }
 
-// Value implements the database/sql/driver.Valuer interface by returning the
-// WKB (Well Known Binary) representation of this Geometry.
+// Value implements the [database/sql/driver.Valuer] interface by returning the
+// WKB (Well Known Binary) representation of this [Geometry].
 func (s LineString) Value() (driver.Value, error) {
 	return s.AsBinary(), nil
 }
 
-// Scan implements the database/sql.Scanner interface by parsing the src value
+// Scan implements the [database/sql.Scanner] interface by parsing the src value
 // as WKB (Well Known Binary).
 //
-// If the WKB doesn't represent a LineString geometry, then an error is returned.
+// If the WKB doesn't represent a [LineString] geometry, then an error is returned.
 //
-// Geometry constraint validation is performed on the resultant geometry (an
+// [Geometry] constraint validation is performed on the resultant geometry (an
 // error will be returned if the geometry is invalid). If this validation isn't
 // needed or is undesirable, then the WKB should be scanned into a byte slice
-// and then UnmarshalWKB called manually (passing in NoValidate{}).
+// and then [UnmarshalWKB] called manually (passing in [NoValidate]{}).
 func (s *LineString) Scan(src any) error {
 	return scanAsType(src, s)
 }
@@ -269,7 +269,7 @@ func (s LineString) ConvexHull() Geometry {
 	return convexHull(s.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaler interface by encoding
+// MarshalJSON implements the [encoding/json.Marshaler] interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (s LineString) MarshalJSON() ([]byte, error) {
 	var dst []byte
@@ -279,32 +279,32 @@ func (s LineString) MarshalJSON() ([]byte, error) {
 	return dst, nil
 }
 
-// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
-// the GeoJSON representation of a LineString.
+// UnmarshalJSON implements the [encoding/json.Unmarshaler] interface by decoding
+// the GeoJSON representation of a [LineString].
 func (s *LineString) UnmarshalJSON(buf []byte) error {
 	return unmarshalGeoJSONAsType(buf, s)
 }
 
-// Coordinates returns the coordinates of each point along the LineString.
+// Coordinates returns the coordinates of each point along the [LineString].
 func (s LineString) Coordinates() Sequence {
 	return s.seq
 }
 
-// TransformXY transforms this LineString into another LineString according to
+// TransformXY transforms this [LineString] into another [LineString] according to
 // fn. See [Geometry.TransformXY] for more details.
 func (s LineString) TransformXY(fn func(XY) XY) LineString {
 	transformed := transformSequence(s.seq, fn)
 	return NewLineString(transformed)
 }
 
-// Transform transforms this LineString into another LineString according to
+// Transform transforms this [LineString] into another [LineString] according to
 // fn. See [Geometry.Transform] for more details.
 func (s LineString) Transform(fn func(CoordinatesType, []float64) error) (LineString, error) {
 	transformed, err := transformSequenceAllAtOnce(s.seq, fn)
 	return NewLineString(transformed), err
 }
 
-// IsRing returns true iff this LineString is both simple and closed (i.e. is a
+// IsRing returns true iff this [LineString] is both simple and closed (i.e. is a
 // linear ring).
 func (s LineString) IsRing() bool {
 	return s.IsClosed() && s.IsSimple()
@@ -347,30 +347,30 @@ func sumCentroidAndLengthOfLineString(s LineString) (sumXY XY, sumLength float64
 	return sumXY, sumLength
 }
 
-// AsMultiLineString is a convenience function that converts this LineString
-// into a MultiLineString.
+// AsMultiLineString is a convenience function that converts this [LineString]
+// into a [MultiLineString].
 func (s LineString) AsMultiLineString() MultiLineString {
 	return NewMultiLineString([]LineString{s})
 }
 
-// Reverse in the case of LineString outputs the coordinates in reverse order.
+// Reverse in the case of [LineString] outputs the coordinates in reverse order.
 func (s LineString) Reverse() LineString {
 	return LineString{s.seq.Reverse()}
 }
 
-// CoordinatesType returns the CoordinatesType used to represent points making
+// CoordinatesType returns the [CoordinatesType] used to represent points making
 // up the geometry.
 func (s LineString) CoordinatesType() CoordinatesType {
 	return s.seq.CoordinatesType()
 }
 
-// ForceCoordinatesType returns a new LineString with a different CoordinatesType. If a
+// ForceCoordinatesType returns a new [LineString] with a different [CoordinatesType]. If a
 // dimension is added, then new values are populated with 0.
 func (s LineString) ForceCoordinatesType(newCType CoordinatesType) LineString {
 	return LineString{s.seq.ForceCoordinatesType(newCType)}
 }
 
-// Force2D returns a copy of the LineString with Z and M values removed.
+// Force2D returns a copy of the [LineString] with Z and M values removed.
 func (s LineString) Force2D() LineString {
 	return s.ForceCoordinatesType(DimXY)
 }
@@ -387,7 +387,7 @@ func (s LineString) asLines() []line {
 	return lines
 }
 
-// PointOnSurface returns a Point on the LineString.
+// PointOnSurface returns a [Point] on the [LineString].
 func (s LineString) PointOnSurface() Point {
 	// Look for the control point on the LineString (other than the first and
 	// last point) that is closest to the centroid.
@@ -407,20 +407,20 @@ func (s LineString) PointOnSurface() Point {
 	return nearest.point
 }
 
-// Summary returns a text summary of the LineString following a similar format to https://postgis.net/docs/ST_Summary.html.
+// Summary returns a text summary of the [LineString] following a similar format to https://postgis.net/docs/ST_Summary.html.
 func (s LineString) Summary() string {
 	return fmt.Sprintf("%s[%s] with %d points", s.Type(), s.CoordinatesType(), s.Coordinates().Length())
 }
 
-// String returns the string representation of the LineString.
+// String returns the string representation of the [LineString].
 func (s LineString) String() string {
 	return s.Summary()
 }
 
-// Simplify returns a simplified version of the LineString using the
+// Simplify returns a simplified version of the [LineString] using the
 // Ramer-Douglas-Peucker algorithm. If the Ramer-Douglas-Peucker algorithm were to create
-// an invalid LineString (i.e. one having only a single distinct point), then
-// the empty LineString is returned.
+// an invalid [LineString] (i.e. one having only a single distinct point), then
+// the empty [LineString] is returned.
 func (s LineString) Simplify(threshold float64) LineString {
 	seq := s.Coordinates()
 	floats := ramerDouglasPeucker(nil, seq, threshold)
@@ -432,7 +432,7 @@ func (s LineString) Simplify(threshold float64) LineString {
 	return ls
 }
 
-// InterpolatePoint returns a Point interpolated along the LineString at the
+// InterpolatePoint returns a [Point] interpolated along the [LineString] at the
 // given fraction. The fraction should be between 0 and 1, and will be clipped
 // to that range if outside of it. Z and M coordinates are also interpolated if
 // applicable.
@@ -444,12 +444,12 @@ func (s LineString) InterpolatePoint(fraction float64) Point {
 	return interp.interpolate(fraction)
 }
 
-// InterpolateEvenlySpacedPoints returns a MultiPoint consisting of n Points
-// evenly spaced along the LineString. If n is negative or 0, then an empty
-// MultiPoint is returned. If n is 1, then a MultiPoint containing the
-// LineString midpoint is returned. If n is 2 or greater, then the returned
-// MultiPoint contains the LineString start point, n - 2 evenly spaced
-// intermediate Points, and the LineString end point (in that order).
+// InterpolateEvenlySpacedPoints returns a [MultiPoint] consisting of n [Point]s
+// evenly spaced along the [LineString]. If n is negative or 0, then an empty
+// [MultiPoint] is returned. If n is 1, then a [MultiPoint] containing the
+// [LineString] midpoint is returned. If n is 2 or greater, then the returned
+// [MultiPoint] contains the [LineString] start point, n - 2 evenly spaced
+// intermediate [Point]s, and the [LineString] end point (in that order).
 func (s LineString) InterpolateEvenlySpacedPoints(n int) MultiPoint {
 	if n < 0 {
 		n = 0
@@ -481,7 +481,7 @@ func (s LineString) InterpolateEvenlySpacedPoints(n int) MultiPoint {
 	return NewMultiPoint(pts)
 }
 
-// Densify returns a new LineString with additional linearly interpolated
+// Densify returns a new [LineString] with additional linearly interpolated
 // control points such that the distance between any two consecutive control
 // points is at most the given maxDistance.
 //
@@ -490,7 +490,7 @@ func (s LineString) Densify(minDistance float64) LineString {
 	return NewLineString(densify(s.seq, minDistance))
 }
 
-// SnapToGrid returns a copy of the LineString with all coordinates snapped to
+// SnapToGrid returns a copy of the [LineString] with all coordinates snapped to
 // a base 10 grid.
 //
 // The grid spacing is specified by the number of decimal places to round to
@@ -499,13 +499,13 @@ func (s LineString) Densify(minDistance float64) LineString {
 // decimalPlaces of -1 would cause all coordinates to be rounded to the nearest
 // 10.
 //
-// Returned LineStrings may be invalid due to snapping, even if the input
+// Returned [LineString]s may be invalid due to snapping, even if the input
 // geometry was valid.
 func (s LineString) SnapToGrid(decimalPlaces int) LineString {
 	return s.TransformXY(snapToGridXY(decimalPlaces))
 }
 
-// FlipCoordinates returns a new LineString with X and Y swapped for each point.
+// FlipCoordinates returns a new [LineString] with X and Y swapped for each point.
 func (s LineString) FlipCoordinates() LineString {
 	return s.TransformXY(func(xy XY) XY {
 		return XY{xy.Y, xy.X}

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 )
 
-// PostGIS is a DB access type allowing non-batch based interactions
+// [PostGIS] is a DB access type allowing non-batch based interactions
 // with a PostGIS database.
 type PostGIS struct {
 	db *sql.DB

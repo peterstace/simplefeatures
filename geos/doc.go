@@ -5,7 +5,7 @@
 // but is not yet available natively in the simplefeatures library.
 //
 // Results from functions in this package are returned from GEOS unvalidated
-// and as-is. Users may call the Validate method on results if they wish to
+// and as-is. Users may call the [geom.Geometry.Validate] method on results if they wish to
 // check result validity.
 //
 // The operations in this package ignore Z and M values if they are present.

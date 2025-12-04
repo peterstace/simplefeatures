@@ -29,7 +29,7 @@ type entry struct {
 // RTree is an in-memory R-Tree data structure. It holds record ID and bounding
 // box pairs (the actual records aren't stored in the tree; the user is
 // responsible for storing their own records). Its zero value is an empty
-// R-Tree.
+// [RTree].
 type RTree struct {
 	root  *node
 	count int
@@ -42,9 +42,9 @@ var Stop = errors.New("stop") //nolint:stylecheck,revive
 // RangeSearch looks for any items in the tree that overlap with the given
 // bounding box. The callback is called with the record ID for each found item.
 // If an error is returned from the callback then the search is terminated
-// early.  Any error returned from the callback is returned by RangeSearch,
-// except for the case where the special Stop sentinel error is returned (in
-// which case nil will be returned from RangeSearch). Stop may be wrapped.
+// early.  Any error returned from the callback is returned by [RTree.RangeSearch],
+// except for the case where the special [Stop] sentinel error is returned (in
+// which case nil will be returned from [RTree.RangeSearch]). [Stop] may be wrapped.
 func (t *RTree) RangeSearch(box Box, callback func(recordID int) error) error {
 	if t.root == nil {
 		return nil
@@ -73,7 +73,7 @@ func (t *RTree) RangeSearch(box Box, callback func(recordID int) error) error {
 	return recurse(t.root)
 }
 
-// Extent gives the Box that most closely bounds the RTree. If the RTree is
+// Extent gives the [Box] that most closely bounds the [RTree]. If the [RTree] is
 // empty, then false is returned.
 func (t *RTree) Extent() (Box, bool) {
 	if t.root == nil || t.root.numEntries == 0 {
@@ -82,7 +82,7 @@ func (t *RTree) Extent() (Box, bool) {
 	return calculateBound(t.root), true
 }
 
-// Count gives the number of entries in the RTree.
+// Count gives the number of entries in the [RTree].
 func (t *RTree) Count() int {
 	return t.count
 }

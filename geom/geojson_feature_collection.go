@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-// GeoJSONFeature represents a Geometry with associated free-form properties.
+// GeoJSONFeature represents a [Geometry] with associated free-form properties.
 // GeoJSONFeature values have a one to one correspondence with GeoJSON Features.
 type GeoJSONFeature struct {
 	// Geometry is the geometry that is associated with the Feature.
@@ -28,7 +28,7 @@ type GeoJSONFeature struct {
 	ForeignMembers map[string]any
 }
 
-// UnmarshalJSON implements the encoding/json Unmarshaler interface by
+// UnmarshalJSON implements the [encoding/json.Unmarshaler] interface by
 // unmarshalling a GeoJSON Feature.
 func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 	var topLevel map[string]json.RawMessage
@@ -96,7 +96,7 @@ func (f *GeoJSONFeature) UnmarshalJSON(p []byte) error {
 	return nil
 }
 
-// MarshalJSON implements the encoding/json Marshaler interface by marshalling
+// MarshalJSON implements the [encoding/json.Marshaler] interface by marshalling
 // into a GeoJSON FeatureCollection object.
 func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
 	props := f.Properties
@@ -138,7 +138,7 @@ func (f GeoJSONFeature) MarshalJSON() ([]byte, error) {
 	return buf, nil
 }
 
-// GeoJSONFeatureCollection is a collection of GeoJSONFeatures.
+// GeoJSONFeatureCollection is a collection of [GeoJSONFeature]s.
 // GeoJSONFeatureCollection values have a one to one correspondence with
 // GeoJSON FeatureCollections.
 type GeoJSONFeatureCollection struct {
@@ -146,7 +146,7 @@ type GeoJSONFeatureCollection struct {
 	ForeignMembers map[string]any
 }
 
-// UnmarshalJSON implements the encoding/json Unmarshaler interface by
+// UnmarshalJSON implements the [encoding/json.Unmarshaler] interface by
 // unmarshalling a GeoJSON FeatureCollection object.
 func (c *GeoJSONFeatureCollection) UnmarshalJSON(p []byte) error {
 	var topLevel map[string]json.RawMessage
@@ -196,7 +196,7 @@ func (c *GeoJSONFeatureCollection) UnmarshalJSON(p []byte) error {
 	return nil
 }
 
-// MarshalJSON implements the encoding/json Marshaler interface by marshalling
+// MarshalJSON implements the [encoding/json.Marshaler] interface by marshalling
 // into a GeoJSON FeatureCollection object.
 func (c GeoJSONFeatureCollection) MarshalJSON() ([]byte, error) {
 	if c.Features == nil {

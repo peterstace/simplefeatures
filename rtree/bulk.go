@@ -6,7 +6,7 @@ type BulkItem struct {
 	RecordID int
 }
 
-// BulkLoad bulk loads multiple items into a new R-Tree. The bulk load
+// BulkLoad bulk loads multiple items into a new [RTree]. The bulk load
 // operation is optimised for creating R-Trees with minimal node overlap. This
 // allows for fast searching.
 func BulkLoad(items []BulkItem) *RTree {

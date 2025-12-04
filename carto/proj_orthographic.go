@@ -20,7 +20,7 @@ type Orthographic struct {
 	sinφ0  float64
 }
 
-// NewOrthographic returns a new Orthographic projection with the given earth
+// NewOrthographic returns a new [Orthographic] projection with the given earth
 // radius.
 func NewOrthographic(radius float64) *Orthographic {
 	return &Orthographic{

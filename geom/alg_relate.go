@@ -1,12 +1,12 @@
 package geom
 
-// Relate calculates the DE-9IM matrix between two geometries, describing how
-// the two geometries relate to each other.
+// Relate calculates the DE-9IM matrix between two [Geometry] values,
+// describing how they relate to each other.
 //
-// A DE-9IM matrix is a 3 by 3 matrix that describes the intersection
-// between two geometries. Specifically, it considers the Interior (I),
-// Boundary (B), and Exterior (E) of each geometry separately, and shows how
-// each part intersects with the 3 parts of the other geometry.
+// A DE-9IM matrix is a 3 by 3 matrix that describes the intersection between
+// two geometries. Specifically, it considers the Interior (I), Boundary (B),
+// and Exterior (E) of each geometry separately, and shows how each part
+// intersects with the 3 parts of the other geometry.
 //
 // Each entry in the matrix holds the dimension of the set formed when a
 // specific combination of I, B, and E (one from each geometry) are intersected
@@ -76,7 +76,7 @@ func relateMatchesAnyPattern(a, b Geometry, patterns ...string) (bool, error) {
 	return false, nil
 }
 
-// Equals returns true if and only if the input geometries are spatially equal,
+// Equals returns true if and only if the input [Geometry] values are spatially equal,
 // i.e. they represent exactly the same set of points.
 func Equals(a, b Geometry) (bool, error) {
 	if a.IsEmpty() && b.IsEmpty() {
@@ -89,13 +89,13 @@ func Equals(a, b Geometry) (bool, error) {
 	return relateMatchesAnyPattern(a, b, "T*F**FFF*")
 }
 
-// Disjoint returns true if and only if the input geometries have no points in
+// Disjoint returns true if and only if the input [Geometry] values have no points in
 // common.
 func Disjoint(a, b Geometry) (bool, error) {
 	return relateMatchesAnyPattern(a, b, "FF*FF****")
 }
 
-// Touches returns true if and only if the geometries have at least 1 point in
+// Touches returns true if and only if the [Geometry] values have at least 1 point in
 // common, but their interiors don't intersect.
 func Touches(a, b Geometry) (bool, error) {
 	return relateMatchesAnyPattern(
@@ -106,10 +106,10 @@ func Touches(a, b Geometry) (bool, error) {
 	)
 }
 
-// Contains returns true if and only if geometry A contains geometry B.
+// Contains returns true if and only if [Geometry] A contains [Geometry] B.
 // Formally, the following two conditions must hold:
 //
-// 1. No points of B lies on the exterior of geometry A. That is, B must only
+// 1. No points of B lies on the exterior of [Geometry] A. That is, B must only
 // be in the exterior or boundary of A.
 //
 // 2. At least one point of the interior of B lies on the interior of A. That
@@ -118,10 +118,10 @@ func Contains(a, b Geometry) (bool, error) {
 	return relateMatchesAnyPattern(a, b, "T*****FF*")
 }
 
-// Covers returns true if and only if geometry A covers geometry B. Formally,
+// Covers returns true if and only if [Geometry] A covers [Geometry] B. Formally,
 // the following two conditions must hold:
 //
-// 1. No points of B lies on the exterior of geometry A. That is, B must only
+// 1. No points of B lies on the exterior of [Geometry] A. That is, B must only
 // be in the exterior or boundary of A.
 //
 // 2. At least one point of B lies on A (either its interior or boundary).
@@ -135,10 +135,10 @@ func Covers(a, b Geometry) (bool, error) {
 	)
 }
 
-// Within returns true if and only if geometry A is completely within geometry
+// Within returns true if and only if [Geometry] A is completely within [Geometry]
 // B. Formally, the following two conditions must hold:
 //
-// 1. No points of A lies on the exterior of geometry B. That is, A must only
+// 1. No points of A lies on the exterior of [Geometry] B. That is, A must only
 // be in the exterior or boundary of B.
 //
 // 2.At least one point of the interior of A lies on the interior of B. That
@@ -147,10 +147,10 @@ func Within(a, b Geometry) (bool, error) {
 	return relateMatchesAnyPattern(a, b, "T*F**F***")
 }
 
-// CoveredBy returns true if and only if geometry A is covered by geometry B.
+// CoveredBy returns true if and only if [Geometry] A is covered by [Geometry] B.
 // Formally, the following two conditions must hold:
 //
-// 1. No points of A lies on the exterior of geometry B. That is, A must only
+// 1. No points of A lies on the exterior of [Geometry] B. That is, A must only
 // be in the exterior or boundary of B.
 //
 // 2. At least one point of A lies on B (either its interior or boundary).
@@ -164,7 +164,7 @@ func CoveredBy(a, b Geometry) (bool, error) {
 	)
 }
 
-// Crosses returns true if and only if geometry A and B cross each other.
+// Crosses returns true if and only if [Geometry] A and B cross each other.
 // Formally, the following conditions must hold:
 //
 // 1. The geometries must have some but not all interior points in common.
@@ -188,7 +188,7 @@ func Crosses(a, b Geometry) (bool, error) {
 	}
 }
 
-// Overlaps returns true if and only if geometry A and B overlap with each
+// Overlaps returns true if and only if [Geometry] A and B overlap with each
 // other. Formally, the following conditions must hold:
 //
 // 1. The geometries must have the same dimension.
