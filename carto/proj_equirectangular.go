@@ -17,7 +17,7 @@ type Equirectangular struct {
 	radius float64
 }
 
-// NewEquirectangular returns a new Equirectangular projection with the given
+// NewEquirectangular returns a new [Equirectangular] projection with the given
 // earth radius.
 func NewEquirectangular(earthRadius float64) *Equirectangular {
 	return &Equirectangular{

@@ -33,17 +33,17 @@ func Version() (major, minor, patch int) {
 
 // Transformation transforms coordinates from a source coordinate reference
 // system (CRS) to a target CRS. Instances of this type are not thread-safe
-// (i.e. a single instance should not be used by multiple goroutines without
+// (i.e. a single [Transformation] should not be used by multiple goroutines without
 // synchronization).
 type Transformation struct {
 	ctx *C.PJ_CONTEXT
 	pj  *C.PJ
 }
 
-// NewTransformation creates a new Transformation object that can be used to
+// NewTransformation creates a new [Transformation] object that can be used to
 // transform coordinates. It retains memory resources that aren't managed by
-// the Go runtime. The Release method must be called to free these resources.
-// The returned transformation instance is not thread-safe.
+// the Go runtime. The [Transformation.Release] method must be called to free these resources.
+// The returned [Transformation] instance is not thread-safe.
 //
 // The sourceCRS and targetCRS parameters can be in any format accepted by the
 // `proj_create_crs_to_crs` function in the PROJ library. Allowed formats
@@ -78,9 +78,9 @@ func NewTransformation(sourceCRS, targetCRS string) (*Transformation, error) {
 	return &Transformation{c, n}, nil
 }
 
-// Release releases the resources held by the Transformation object that are
+// Release releases the resources held by the [Transformation] object that are
 // managed outside the Go runtime. It should be called at least once when the
-// Transformation is no longer needed.
+// [Transformation] is no longer needed.
 func (p *Transformation) Release() {
 	if p.pj != nil {
 		C.proj_destroy(p.pj)
@@ -103,7 +103,7 @@ func (p *Transformation) Forward(ct geom.CoordinatesType, coords []float64) erro
 }
 
 // Inverse does an in-place transform of coordinates from the target CRS to the
-// source CRS. Its signature operates in the same way as the Forward method.
+// source CRS. Its signature operates in the same way as the [Transformation.Forward] method.
 func (p *Transformation) Inverse(ct geom.CoordinatesType, coords []float64) error {
 	return p.transform(C.PJ_INV, ct, coords)
 }

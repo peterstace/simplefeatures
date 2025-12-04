@@ -6,7 +6,7 @@ import (
 )
 
 // MultiPoint is a 0-dimensional geometry that is a collection of points. Its
-// zero value is the empty MultiPoint (i.e. a collection of zero points) with
+// zero value is the empty [MultiPoint] (i.e. a collection of zero points) with
 // 2D coordinates type. It is immutable after creation.
 type MultiPoint struct {
 	// Invariant: ctype matches the coordinates type of each point.
@@ -14,8 +14,8 @@ type MultiPoint struct {
 	ctype  CoordinatesType
 }
 
-// NewMultiPoint creates a MultiPoint from a list of Points. The coordinate
-// type of the MultiPoint is the lowest common coordinates type of its Points.
+// NewMultiPoint creates a [MultiPoint] from a list of [Point]s. The coordinate
+// type of the [MultiPoint] is the lowest common coordinates type of its [Point]s.
 //
 // It doesn't perform any validation on the result. The Validate method can be
 // used to check the validity of the result if needed.
@@ -33,7 +33,7 @@ func NewMultiPoint(pts []Point) MultiPoint {
 	return MultiPoint{forced, ctype}
 }
 
-// Validate checks if the MultiPoint is valid. The only validation rule is that
+// Validate checks if the [MultiPoint] is valid. The only validation rule is that
 // each point in the collection must be valid.
 func (m MultiPoint) Validate() error {
 	for i, pt := range m.points {
@@ -44,22 +44,22 @@ func (m MultiPoint) Validate() error {
 	return nil
 }
 
-// Type returns the GeometryType for a MultiPoint.
+// Type returns the [GeometryType] for a [MultiPoint].
 func (m MultiPoint) Type() GeometryType {
 	return TypeMultiPoint
 }
 
-// AsGeometry converts this MultiPoint into a Geometry.
+// AsGeometry converts this [MultiPoint] into a [Geometry].
 func (m MultiPoint) AsGeometry() Geometry {
 	return Geometry{impl: m}
 }
 
-// NumPoints gives the number of element points making up the MultiPoint.
+// NumPoints gives the number of element points making up the [MultiPoint].
 func (m MultiPoint) NumPoints() int {
 	return len(m.points)
 }
 
-// PointN gives the nth (zero indexed) Point.
+// PointN gives the nth (zero indexed) [Point].
 func (m MultiPoint) PointN(n int) Point {
 	return m.points[n]
 }
@@ -87,8 +87,8 @@ func (m MultiPoint) AppendWKT(dst []byte) []byte {
 }
 
 // IsSimple returns true if this geometry contains no anomalous geometry
-// points, such as self intersection or self tangency.  MultiPoints are simple
-// if and only if no two of its points have equal XY coordinates.
+// points, such as self intersection or self tangency.  [MultiPoint]s are simple
+// if and only if no two of its points have equal [XY] coordinates.
 func (m MultiPoint) IsSimple() bool {
 	seen := make(map[XY]bool)
 	for i := 0; i < m.NumPoints(); i++ {
@@ -104,8 +104,8 @@ func (m MultiPoint) IsSimple() bool {
 	return true
 }
 
-// IsEmpty return true if and only if this MultiPoint doesn't contain any
-// Points, or only contains empty Points.
+// IsEmpty return true if and only if this [MultiPoint] doesn't contain any
+// [Point]s, or only contains empty [Point]s.
 func (m MultiPoint) IsEmpty() bool {
 	for _, pt := range m.points {
 		if !pt.IsEmpty() {
@@ -115,7 +115,7 @@ func (m MultiPoint) IsEmpty() bool {
 	return true
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry.
+// Envelope returns the [Envelope] that most tightly surrounds the geometry.
 func (m MultiPoint) Envelope() Envelope {
 	var env Envelope
 	for _, pt := range m.points {
@@ -124,27 +124,27 @@ func (m MultiPoint) Envelope() Envelope {
 	return env
 }
 
-// Boundary returns the spatial boundary for this MultiPoint, which is always
-// the empty set. This is represented by the empty GeometryCollection.
+// Boundary returns the spatial boundary for this [MultiPoint], which is always
+// the empty set. This is represented by the empty [GeometryCollection].
 func (m MultiPoint) Boundary() GeometryCollection {
 	return GeometryCollection{}
 }
 
-// Value implements the database/sql/driver.Valuer interface by returning the
-// WKB (Well Known Binary) representation of this Geometry.
+// Value implements the [database/sql/driver.Valuer] interface by returning the
+// WKB (Well Known Binary) representation of this [Geometry].
 func (m MultiPoint) Value() (driver.Value, error) {
 	return m.AsBinary(), nil
 }
 
-// Scan implements the database/sql.Scanner interface by parsing the src value
+// Scan implements the [database/sql.Scanner] interface by parsing the src value
 // as WKB (Well Known Binary).
 //
-// If the WKB doesn't represent a MultiPoint geometry, then an error is returned.
+// If the WKB doesn't represent a [MultiPoint] geometry, then an error is returned.
 //
-// Geometry constraint validation is performed on the resultant geometry (an
+// [Geometry] constraint validation is performed on the resultant geometry (an
 // error will be returned if the geometry is invalid). If this validation isn't
 // needed or is undesirable, then the WKB should be scanned into a byte slice
-// and then UnmarshalWKB called manually (passing in NoValidate{}).
+// and then [UnmarshalWKB] called manually (passing in [NoValidate]{}).
 func (m *MultiPoint) Scan(src any) error {
 	return scanAsType(src, m)
 }
@@ -175,7 +175,7 @@ func (m MultiPoint) ConvexHull() Geometry {
 	return convexHull(m.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaler interface by encoding
+// MarshalJSON implements the [encoding/json.Marshaler] interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (m MultiPoint) MarshalJSON() ([]byte, error) {
 	var dst []byte
@@ -195,14 +195,14 @@ func (m MultiPoint) MarshalJSON() ([]byte, error) {
 	return dst, nil
 }
 
-// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
-// the GeoJSON representation of a MultiPoint.
+// UnmarshalJSON implements the [encoding/json.Unmarshaler] interface by decoding
+// the GeoJSON representation of a [MultiPoint].
 func (m *MultiPoint) UnmarshalJSON(buf []byte) error {
 	return unmarshalGeoJSONAsType(buf, m)
 }
 
 // Coordinates returns the coordinates of the non-empty points represented by
-// the MultiPoint.
+// the [MultiPoint].
 func (m MultiPoint) Coordinates() Sequence {
 	ctype := m.CoordinatesType()
 	coords := make([]float64, 0, len(m.points)*ctype.Dimension())
@@ -214,7 +214,7 @@ func (m MultiPoint) Coordinates() Sequence {
 	return NewSequence(coords, ctype)
 }
 
-// TransformXY transforms this MultiPoint into another MultiPoint according to
+// TransformXY transforms this [MultiPoint] into another [MultiPoint] according to
 // fn. See [Geometry.TransformXY] for more details.
 func (m MultiPoint) TransformXY(fn func(XY) XY) MultiPoint {
 	if len(m.points) == 0 {
@@ -232,7 +232,7 @@ func (m MultiPoint) TransformXY(fn func(XY) XY) MultiPoint {
 	return NewMultiPoint(txPoints)
 }
 
-// Transform transforms this MultiPoint into another MultiPoint according to
+// Transform transforms this [MultiPoint] into another [MultiPoint] according to
 // fn. See [Geometry.Transform] for more details.
 func (m MultiPoint) Transform(fn func(CoordinatesType, []float64) error) (MultiPoint, error) {
 	if len(m.points) == 0 {
@@ -278,7 +278,7 @@ func (m MultiPoint) Transform(fn func(CoordinatesType, []float64) error) (MultiP
 	return NewMultiPoint(txPoints), nil
 }
 
-// Centroid gives the centroid of the coordinates of the MultiPoint.
+// Centroid gives the centroid of the coordinates of the [MultiPoint].
 func (m MultiPoint) Centroid() Point {
 	var sum XY
 	var n int
@@ -295,19 +295,19 @@ func (m MultiPoint) Centroid() Point {
 	return sum.Scale(1 / float64(n)).AsPoint()
 }
 
-// Reverse in the case of MultiPoint outputs each component point in their
+// Reverse in the case of [MultiPoint] outputs each component point in their
 // original order.
 func (m MultiPoint) Reverse() MultiPoint {
 	return m
 }
 
-// CoordinatesType returns the CoordinatesType used to represent points making
+// CoordinatesType returns the [CoordinatesType] used to represent points making
 // up the geometry.
 func (m MultiPoint) CoordinatesType() CoordinatesType {
 	return m.ctype
 }
 
-// ForceCoordinatesType returns a new MultiPoint with a different CoordinatesType. If a
+// ForceCoordinatesType returns a new [MultiPoint] with a different [CoordinatesType]. If a
 // dimension is added, then new values are populated with 0.
 func (m MultiPoint) ForceCoordinatesType(newCType CoordinatesType) MultiPoint {
 	newPoints := forceCoordinatesTypeOfPointSlice(m.points, newCType)
@@ -328,12 +328,12 @@ func forceCoordinatesTypeOfPointSlice(pts []Point, ctype CoordinatesType) []Poin
 	return cp
 }
 
-// Force2D returns a copy of the MultiPoint with Z and M values removed.
+// Force2D returns a copy of the [MultiPoint] with Z and M values removed.
 func (m MultiPoint) Force2D() MultiPoint {
 	return m.ForceCoordinatesType(DimXY)
 }
 
-// PointOnSurface returns one of the Points in the Collection.
+// PointOnSurface returns one of the [Point]s in the Collection.
 func (m MultiPoint) PointOnSurface() Point {
 	nearest := newNearestPointAccumulator(m.Centroid())
 	n := m.NumPoints()
@@ -353,15 +353,15 @@ func (m MultiPoint) asXYs() []XY {
 	return xys
 }
 
-// Dump returns the MultiPoint represented as a Point slice.
+// Dump returns the [MultiPoint] represented as a [Point] slice.
 func (m MultiPoint) Dump() []Point {
 	pts := make([]Point, len(m.points))
 	copy(pts, m.points)
 	return pts
 }
 
-// DumpCoordinates returns the non-empty points in a MultiPoint represented as
-// a Sequence.
+// DumpCoordinates returns the non-empty points in a [MultiPoint] represented as
+// a [Sequence].
 func (m MultiPoint) DumpCoordinates() Sequence {
 	ctype := m.CoordinatesType()
 	nonEmpty := make([]float64, 0, len(m.points)*ctype.Dimension())
@@ -374,7 +374,7 @@ func (m MultiPoint) DumpCoordinates() Sequence {
 	return seq
 }
 
-// Summary returns a text summary of the MultiPoint following a similar format to https://postgis.net/docs/ST_Summary.html.
+// Summary returns a text summary of the [MultiPoint] following a similar format to https://postgis.net/docs/ST_Summary.html.
 func (m MultiPoint) Summary() string {
 	var pointSuffix string
 	numPoints := m.NumPoints()
@@ -384,12 +384,12 @@ func (m MultiPoint) Summary() string {
 	return fmt.Sprintf("%s[%s] with %d point%s", m.Type(), m.CoordinatesType(), numPoints, pointSuffix)
 }
 
-// String returns the string representation of the MultiPoint.
+// String returns the string representation of the [MultiPoint].
 func (m MultiPoint) String() string {
 	return m.Summary()
 }
 
-// SnapToGrid returns a copy of the MultiPoint with all coordinates snapped to
+// SnapToGrid returns a copy of the [MultiPoint] with all coordinates snapped to
 // a base 10 grid.
 //
 // The grid spacing is specified by the number of decimal places to round to
@@ -401,7 +401,7 @@ func (m MultiPoint) SnapToGrid(decimalPlaces int) MultiPoint {
 	return m.TransformXY(snapToGridXY(decimalPlaces))
 }
 
-// FlipCoordinates returns a new MultiPoint with X and Y swapped for each point.
+// FlipCoordinates returns a new [MultiPoint] with X and Y swapped for each point.
 func (m MultiPoint) FlipCoordinates() MultiPoint {
 	return m.TransformXY(func(xy XY) XY {
 		return XY{xy.Y, xy.X}

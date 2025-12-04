@@ -17,7 +17,7 @@ type LambertCylindricalEqualArea struct {
 	λ0     float64
 }
 
-// NewLambertCylindricalEqualArea returns a new LambertCylindricalEqualArea
+// NewLambertCylindricalEqualArea returns a new [LambertCylindricalEqualArea]
 // projection with the given earth radius.
 func NewLambertCylindricalEqualArea(radius float64) *LambertCylindricalEqualArea {
 	return &LambertCylindricalEqualArea{

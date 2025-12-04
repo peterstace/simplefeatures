@@ -10,13 +10,13 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-// BatchPostGIS is a DB access type allowing batch based interactions with a
+// [BatchPostGIS] is a DB access type allowing batch based interactions with a
 // PostGIS database.
 type BatchPostGIS struct {
 	db *sql.DB
 }
 
-// UnaryResult holds the result of unary (single input) PostGIS operations.
+// [UnaryResult] holds the result of unary (single input) PostGIS operations.
 type UnaryResult struct {
 	AsText     string
 	AsBinary   []byte

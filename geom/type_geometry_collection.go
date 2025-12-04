@@ -7,7 +7,7 @@ import (
 )
 
 // GeometryCollection is a non-homogeneous collection of geometries. Its zero
-// value is the empty GeometryCollection (i.e. a collection of zero
+// value is the empty [GeometryCollection] (i.e. a collection of zero
 // geometries).
 type GeometryCollection struct {
 	// Invariant: ctype matches the coordinates type of each geometry.
@@ -16,7 +16,7 @@ type GeometryCollection struct {
 }
 
 // NewGeometryCollection creates a collection of geometries. The coordinates
-// type of the GeometryCollection is the lowest common coordinates type of its
+// type of the [GeometryCollection] is the lowest common coordinates type of its
 // child geometries.
 //
 // It doesn't perform any validation on the result. The Validate method can be
@@ -37,7 +37,7 @@ func NewGeometryCollection(geoms []Geometry) GeometryCollection {
 	return GeometryCollection{geoms, ctype}
 }
 
-// Validate checks if the GeometryCollection is valid. The only validation rule
+// Validate checks if the [GeometryCollection] is valid. The only validation rule
 // is that each geometry in the collection must be valid.
 func (c GeometryCollection) Validate() error {
 	for i, g := range c.geoms {
@@ -48,12 +48,12 @@ func (c GeometryCollection) Validate() error {
 	return nil
 }
 
-// Type returns the GeometryType for a GeometryCollection.
+// Type returns the [GeometryType] for a [GeometryCollection].
 func (c GeometryCollection) Type() GeometryType {
 	return TypeGeometryCollection
 }
 
-// AsGeometry converts this GeometryCollection into a Geometry.
+// AsGeometry converts this [GeometryCollection] into a [Geometry].
 func (c GeometryCollection) AsGeometry() Geometry {
 	// Ensure consistent representation of empty GeometryCollection with DimXY
 	// to match the Geometry zero value.
@@ -63,13 +63,13 @@ func (c GeometryCollection) AsGeometry() Geometry {
 	return Geometry{impl: c}
 }
 
-// NumGeometries gives the number of Geometry elements in the GeometryCollection.
+// NumGeometries gives the number of [Geometry] elements in the [GeometryCollection].
 func (c GeometryCollection) NumGeometries() int {
 	return len(c.geoms)
 }
 
-// NumTotalGeometries gives the total number of Geometry elements in the GeometryCollection.
-// If there are GeometryCollection-type child geometries, this will recursively count its children.
+// NumTotalGeometries gives the total number of [Geometry] elements in the [GeometryCollection].
+// If there are [GeometryCollection]-type child geometries, this will recursively count its children.
 func (c GeometryCollection) NumTotalGeometries() int {
 	var n int
 	for _, geom := range c.geoms {
@@ -80,7 +80,7 @@ func (c GeometryCollection) NumTotalGeometries() int {
 	return n + c.NumGeometries()
 }
 
-// GeometryN gives the nth (zero based) Geometry in the GeometryCollection.
+// GeometryN gives the nth (zero based) [Geometry] in the [GeometryCollection].
 func (c GeometryCollection) GeometryN(n int) Geometry {
 	return c.geoms[n]
 }
@@ -107,7 +107,7 @@ func (c GeometryCollection) AppendWKT(dst []byte) []byte {
 	return append(dst, ')')
 }
 
-// IsEmpty return true if and only if this GeometryCollection doesn't contain
+// IsEmpty return true if and only if this [GeometryCollection] doesn't contain
 // any elements, or only contains empty elements.
 func (c GeometryCollection) IsEmpty() bool {
 	for _, g := range c.geoms {
@@ -119,9 +119,9 @@ func (c GeometryCollection) IsEmpty() bool {
 }
 
 // Dimension returns the maximum dimension over the collection, or 0 if the
-// collection is the empty collection. Points and MultiPoints have dimension 0,
-// LineStrings and MultiLineStrings have dimension 1, and Polygons and
-// MultiPolygons have dimension 2.
+// collection is the empty collection. [Point]s and [MultiPoint]s have dimension 0,
+// [LineString]s and [MultiLineString]s have dimension 1, and [Polygon]s and
+// [MultiPolygon]s have dimension 2.
 func (c GeometryCollection) Dimension() int {
 	dim := 0
 	for _, g := range c.geoms {
@@ -142,7 +142,7 @@ func (c GeometryCollection) walk(fn func(Geometry)) {
 	}
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry.
+// Envelope returns the [Envelope] that most tightly surrounds the geometry.
 func (c GeometryCollection) Envelope() Envelope {
 	var env Envelope
 	for _, g := range c.geoms {
@@ -151,8 +151,8 @@ func (c GeometryCollection) Envelope() Envelope {
 	return env
 }
 
-// Boundary returns the spatial boundary of this GeometryCollection. This is
-// the GeometryCollection containing the boundaries of each child geometry.
+// Boundary returns the spatial boundary of this [GeometryCollection]. This is
+// the [GeometryCollection] containing the boundaries of each child geometry.
 func (c GeometryCollection) Boundary() GeometryCollection {
 	if c.IsEmpty() {
 		return c
@@ -167,22 +167,22 @@ func (c GeometryCollection) Boundary() GeometryCollection {
 	return GeometryCollection{bounds, DimXY}
 }
 
-// Value implements the database/sql/driver.Valuer interface by returning the
-// WKB (Well Known Binary) representation of this Geometry.
+// Value implements the [database/sql/driver.Valuer] interface by returning the
+// WKB (Well Known Binary) representation of this [Geometry].
 func (c GeometryCollection) Value() (driver.Value, error) {
 	return c.AsBinary(), nil
 }
 
-// Scan implements the database/sql.Scanner interface by parsing the src value
+// Scan implements the [database/sql.Scanner] interface by parsing the src value
 // as WKB (Well Known Binary).
 //
-// If the WKB doesn't represent a GeometryCollection geometry, then an error is
+// If the WKB doesn't represent a [GeometryCollection] geometry, then an error is
 // returned.
 //
-// Geometry constraint validation is performed on the resultant geometry (an
+// [Geometry] constraint validation is performed on the resultant geometry (an
 // error will be returned if the geometry is invalid). If this validation isn't
 // needed or is undesirable, then the WKB should be scanned into a byte slice
-// and then UnmarshalWKB called manually (passing in NoValidate{}).
+// and then [UnmarshalWKB] called manually (passing in [NoValidate]{}).
 func (c *GeometryCollection) Scan(src any) error {
 	return scanAsType(src, c)
 }
@@ -213,7 +213,7 @@ func (c GeometryCollection) ConvexHull() Geometry {
 	return convexHull(c.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaler interface by encoding
+// MarshalJSON implements the [encoding/json.Marshaler] interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 	buf := []byte(`{"type":"GeometryCollection","geometries":`)
@@ -230,14 +230,14 @@ func (c GeometryCollection) MarshalJSON() ([]byte, error) {
 	return buf, nil
 }
 
-// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
-// the GeoJSON representation of a GeometryCollection.
+// UnmarshalJSON implements the [encoding/json.Unmarshaler] interface by decoding
+// the GeoJSON representation of a [GeometryCollection].
 func (c *GeometryCollection) UnmarshalJSON(buf []byte) error {
 	return unmarshalGeoJSONAsType(buf, c)
 }
 
-// TransformXY transforms this GeometryCollection into another
-// GeometryCollection according to fn. See [Geometry.TransformXY] for more
+// TransformXY transforms this [GeometryCollection] into another
+// [GeometryCollection] according to fn. See [Geometry.TransformXY] for more
 // details.
 func (c GeometryCollection) TransformXY(fn func(XY) XY) GeometryCollection {
 	transformed := make([]Geometry, len(c.geoms))
@@ -247,7 +247,7 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY) GeometryCollection {
 	return GeometryCollection{transformed, c.ctype}
 }
 
-// Transform transforms this GeometryCollection into another GeometryCollection
+// Transform transforms this [GeometryCollection] into another [GeometryCollection]
 // according to fn. See [Geometry.Transform] for more details.
 func (c GeometryCollection) Transform(fn func(CoordinatesType, []float64) error) (GeometryCollection, error) {
 	transformed := make([]Geometry, len(c.geoms))
@@ -261,7 +261,7 @@ func (c GeometryCollection) Transform(fn func(CoordinatesType, []float64) error)
 	return GeometryCollection{transformed, c.ctype}, nil
 }
 
-// Reverse in the case of GeometryCollection reverses each component and also
+// Reverse in the case of [GeometryCollection] reverses each component and also
 // returns them in the original order.
 func (c GeometryCollection) Reverse() GeometryCollection {
 	if c.IsEmpty() {
@@ -275,7 +275,7 @@ func (c GeometryCollection) Reverse() GeometryCollection {
 	return GeometryCollection{geoms, c.ctype}
 }
 
-// Length of a GeometryCollection is the sum of the lengths of its parts.
+// Length of a [GeometryCollection] is the sum of the lengths of its parts.
 func (c GeometryCollection) Length() float64 {
 	var sum float64
 	n := c.NumGeometries()
@@ -286,7 +286,7 @@ func (c GeometryCollection) Length() float64 {
 	return sum
 }
 
-// Area in the case of a GeometryCollection is the sum of the areas of its parts.
+// Area in the case of a [GeometryCollection] is the sum of the areas of its parts.
 func (c GeometryCollection) Area(opts ...AreaOption) float64 {
 	var sum float64
 	n := c.NumGeometries()
@@ -315,7 +315,7 @@ func highestDimensionIgnoreEmpties(g Geometry) int {
 	return highestDim
 }
 
-// Centroid of a GeometryCollection is the centroid of its parts' centroids.
+// Centroid of a [GeometryCollection] is the centroid of its parts' centroids.
 func (c GeometryCollection) Centroid() Point {
 	if c.IsEmpty() {
 		return NewEmptyPoint(DimXY)
@@ -413,13 +413,13 @@ func (c GeometryCollection) arealCentroid() Point {
 	return weightedCentroid.AsPoint()
 }
 
-// CoordinatesType returns the CoordinatesType used to represent points making
+// CoordinatesType returns the [CoordinatesType] used to represent points making
 // up the geometry.
 func (c GeometryCollection) CoordinatesType() CoordinatesType {
 	return c.ctype
 }
 
-// ForceCoordinatesType returns a new GeometryCollection with a different CoordinatesType. If
+// ForceCoordinatesType returns a new [GeometryCollection] with a different [CoordinatesType]. If
 // a dimension is added, then new values are populated with 0.
 func (c GeometryCollection) ForceCoordinatesType(newCType CoordinatesType) GeometryCollection {
 	gs := make([]Geometry, len(c.geoms))
@@ -429,12 +429,12 @@ func (c GeometryCollection) ForceCoordinatesType(newCType CoordinatesType) Geome
 	return GeometryCollection{gs, newCType}
 }
 
-// Force2D returns a copy of the GeometryCollection with Z and M values removed.
+// Force2D returns a copy of the [GeometryCollection] with Z and M values removed.
 func (c GeometryCollection) Force2D() GeometryCollection {
 	return c.ForceCoordinatesType(DimXY)
 }
 
-// PointOnSurface returns a Point that's on one of the geometries in the
+// PointOnSurface returns a [Point] that's on one of the geometries in the
 // collection.
 func (c GeometryCollection) PointOnSurface() Point {
 	// For collection with mixed dimension, we only consider members who have
@@ -458,10 +458,10 @@ func (c GeometryCollection) PointOnSurface() Point {
 	return nearest.point
 }
 
-// ForceCW returns the equivalent GeometryCollection that has its constituent
-// Polygons and MultiPolygons reoriented in a clockwise direction (i.e.
-// exterior rings clockwise and interior rings counter-clockwise). Geometries
-// other that Polygons and MultiPolygons are unchanged.
+// ForceCW returns the equivalent [GeometryCollection] that has its constituent
+// [Polygon]s and [MultiPolygon]s reoriented in a clockwise direction (i.e.
+// exterior rings clockwise and interior rings counter-clockwise). [Geometry]s
+// other that [Polygon]s and [MultiPolygon]s are unchanged.
 func (c GeometryCollection) ForceCW() GeometryCollection {
 	if c.IsCW() {
 		return c
@@ -469,10 +469,10 @@ func (c GeometryCollection) ForceCW() GeometryCollection {
 	return c.forceOrientation(true)
 }
 
-// ForceCCW returns the equivalent GeometryCollection that has its constituent
-// Polygons and MultiPolygons reoriented in a counter-clockwise direction (i.e.
-// exterior rings counter-clockwise and interior rings clockwise). Geometries
-// other that Polygons and MultiPolygons are unchanged.
+// ForceCCW returns the equivalent [GeometryCollection] that has its constituent
+// [Polygon]s and [MultiPolygon]s reoriented in a counter-clockwise direction (i.e.
+// exterior rings counter-clockwise and interior rings clockwise). [Geometry]s
+// other that [Polygon]s and [MultiPolygon]s are unchanged.
 func (c GeometryCollection) ForceCCW() GeometryCollection {
 	if c.IsCCW() {
 		return c
@@ -510,10 +510,10 @@ func (c GeometryCollection) IsCCW() bool {
 	return true
 }
 
-// Dump breaks this GeometryCollection into its constituent non-multi types
-// (Points, LineStrings, and Polygons).
+// Dump breaks this [GeometryCollection] into its constituent non-multi types
+// ([Point]s, [LineString]s, and [Polygon]s).
 //
-// The returned slice will only ever contain Points, LineStrings, and Polygons.
+// The returned slice will only ever contain [Point]s, [LineString]s, and [Polygon]s.
 func (c GeometryCollection) Dump() []Geometry {
 	var gs []Geometry
 	for _, g := range c.geoms {
@@ -522,8 +522,8 @@ func (c GeometryCollection) Dump() []Geometry {
 	return gs
 }
 
-// DumpCoordinates returns a Sequence holding all control points in the
-// GeometryCollection.
+// DumpCoordinates returns a [Sequence] holding all control points in the
+// [GeometryCollection].
 func (c GeometryCollection) DumpCoordinates() Sequence {
 	var coords []float64
 	for _, g := range c.geoms {
@@ -532,7 +532,7 @@ func (c GeometryCollection) DumpCoordinates() Sequence {
 	return NewSequence(coords, c.ctype)
 }
 
-// Summary returns a text summary of the GeometryCollection following a similar format to https://postgis.net/docs/ST_Summary.html.
+// Summary returns a text summary of the [GeometryCollection] following a similar format to https://postgis.net/docs/ST_Summary.html.
 func (c GeometryCollection) Summary() string {
 	var pointSuffix string
 	numPoints := c.DumpCoordinates().Length()
@@ -550,14 +550,14 @@ func (c GeometryCollection) Summary() string {
 		c.Type(), c.CoordinatesType(), numGeometries, geometrySuffix, numPoints, pointSuffix)
 }
 
-// String returns the string representation of the GeometryCollection.
+// String returns the string representation of the [GeometryCollection].
 func (c GeometryCollection) String() string {
 	return c.Summary()
 }
 
-// Simplify returns a simplified version of the GeometryCollection by applying
+// Simplify returns a simplified version of the [GeometryCollection] by applying
 // Simplify to each child geometry. If simplification causes a child geometry
-// to become invalid, then an error is returned. NoValidate{} can be passed in
+// to become invalid, then an error is returned. [NoValidate]{} can be passed in
 // to disable geometry constraint validation, potentially resulting in an
 // invalid geometry being returned.
 func (c GeometryCollection) Simplify(threshold float64, nv ...NoValidate) (GeometryCollection, error) {
@@ -573,7 +573,7 @@ func (c GeometryCollection) Simplify(threshold float64, nv ...NoValidate) (Geome
 	return NewGeometryCollection(geoms).ForceCoordinatesType(c.CoordinatesType()), nil
 }
 
-// Densify returns a new GeometryCollection with additional linearly
+// Densify returns a new [GeometryCollection] with additional linearly
 // interpolated control points such that the distance between any two
 // consecutive control points is at most the given maxDistance.
 //
@@ -586,7 +586,7 @@ func (c GeometryCollection) Densify(maxDistance float64) GeometryCollection {
 	return GeometryCollection{gs, c.ctype}
 }
 
-// SnapToGrid returns a copy of the GeometryCollection with all coordinates
+// SnapToGrid returns a copy of the [GeometryCollection] with all coordinates
 // snapped to a base 10 grid.
 //
 // The grid spacing is specified by the number of decimal places to round to
@@ -595,13 +595,13 @@ func (c GeometryCollection) Densify(maxDistance float64) GeometryCollection {
 // decimalPlaces of -1 would cause all coordinates to be rounded to the nearest
 // 10.
 //
-// Returned GeometryCollections may be invalid due to snapping, even if the
+// Returned [GeometryCollection]s may be invalid due to snapping, even if the
 // input geometry was valid.
 func (c GeometryCollection) SnapToGrid(decimalPlaces int) GeometryCollection {
 	return c.TransformXY(snapToGridXY(decimalPlaces))
 }
 
-// FlipCoordinates returns a new GeometryCollection with X and Y swapped for each point in all geometries.
+// FlipCoordinates returns a new [GeometryCollection] with X and Y swapped for each point in all geometries.
 func (c GeometryCollection) FlipCoordinates() GeometryCollection {
 	return c.TransformXY(func(xy XY) XY {
 		return XY{xy.Y, xy.X}

@@ -19,7 +19,7 @@ type EquidistantConic struct {
 	origin       geom.XY
 }
 
-// NewEquidistantConic returns a new EquidistantConic projection with the given
+// NewEquidistantConic returns a new [EquidistantConic] projection with the given
 // earth radius.
 func NewEquidistantConic(earthRadius float64) *EquidistantConic {
 	return &EquidistantConic{

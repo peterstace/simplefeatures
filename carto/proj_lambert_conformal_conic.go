@@ -17,7 +17,7 @@ type LambertConformalConic struct {
 	stdParallels [2]float64
 }
 
-// NewLambertConformalConic returns a new LambertConformalConic projection with
+// NewLambertConformalConic returns a new [LambertConformalConic] projection with
 // the given earth radius.
 func NewLambertConformalConic(earthRadius float64) *LambertConformalConic {
 	return &LambertConformalConic{
