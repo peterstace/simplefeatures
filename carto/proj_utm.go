@@ -70,7 +70,7 @@ func NewUTMFromCode(code string) (*UTM, error) {
 	}
 }
 
-// NewUTMFromLocation creates a [UTM] projection using the appropriate [UTM] zone
+// NewUTMFromLocation creates a [UTM] projection using the appropriate UTM zone
 // and hemisphere for the given location.
 func NewUTMFromLocation(lonlat geom.XY) (*UTM, error) {
 	λ := lonlat.X
