@@ -20,7 +20,7 @@ func createGhosts(a, b Geometry) MultiLineString {
 		return MultiLineString{} // 0 or 1 components are trivially connected.
 	}
 
-	// Process in right-to-left order to so ghost lines don't interfere with
+	// Process in right-to-left order so that ghost lines don't interfere with
 	// each other.
 	sort.Slice(representatives, func(i, j int) bool {
 		return isMoreRightmost(representatives[i], representatives[j])
