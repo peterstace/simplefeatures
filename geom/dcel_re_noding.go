@@ -47,10 +47,32 @@ func reNodeGeometries(g1, g2 Geometry, mls MultiLineString) (Geometry, Geometry,
 
 	// Create new nodes for point/line intersections.
 	ptIndex := newIndexedPoints(nodes.list())
+	threshold := ulp * 0x200
+	thresholdSq := threshold * threshold
 	appendCutsForPointXLine := func(ln line, cuts []XY) []XY {
 		ptIndex.tree.RangeSearch(ln.box(), func(i int) error {
 			xy := ptIndex.points[i]
-			if !ln.hasEndpoint(xy) && distBetweenXYAndLine(xy, ln) < ulp*0x200 {
+			// Skip if xy is an endpoint.
+			if ln.hasEndpoint(xy) {
+				return nil
+			}
+			// Skip if xy is very close to an endpoint relative to the line
+			// length. This prevents degenerate cuts when near-coincident
+			// points exist (e.g. a polygon with an almost-spike where two
+			// consecutive vertices are extremely close together).
+			lineLenSq := ln.a.distanceSquaredTo(ln.b)
+			distToASq := xy.distanceSquaredTo(ln.a)
+			distToBSq := xy.distanceSquaredTo(ln.b)
+			// Skip if distance to endpoint is less than 1e-3 (0.1%) of line length.
+			minEndpointDistSq := lineLenSq * 1e-6 // (1e-3)^2
+			if distToASq < minEndpointDistSq || distToBSq < minEndpointDistSq {
+				return nil
+			}
+			// Also skip based on ULP threshold.
+			if distToASq < thresholdSq || distToBSq < thresholdSq {
+				return nil
+			}
+			if distBetweenXYAndLine(xy, ln) < threshold {
 				cuts = append(cuts, xy)
 			}
 			return nil
