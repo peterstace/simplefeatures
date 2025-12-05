@@ -299,26 +299,44 @@ outer:
 	t.Errorf("XY sequences don't match:\ngot:  %v\nwant: %v", got, want)
 }
 
-func newDCELFromWKTs(t *testing.T, wktA, wktB string) *doublyConnectedEdgeList {
-	t.Helper()
-	gA, err := UnmarshalWKT(wktA)
-	if err != nil {
-		t.Fatal(err)
-	}
-	gB, err := UnmarshalWKT(wktB)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return newDCELFromGeometries(gA, gB)
+type nodedDCELInputs struct {
+	A string // required
+	B string // optional
+	G string // optional
 }
 
-func newDCELFromWKT(t *testing.T, wkt string) *doublyConnectedEdgeList {
+func newDCELFromWKTs(t *testing.T, inputs nodedDCELInputs) *doublyConnectedEdgeList {
 	t.Helper()
-	return newDCELFromWKTs(t, wkt, "GEOMETRYCOLLECTION EMPTY")
+
+	a, err := UnmarshalWKT(inputs.A)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var b Geometry
+	if inputs.B != "" {
+		b, err = UnmarshalWKT(inputs.B)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	g := MultiLineString{}.AsGeometry()
+	if inputs.G != "" {
+		g, err = UnmarshalWKT(inputs.G)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if g.Type() != TypeMultiLineString {
+		t.Fatal("only MultiLineString supported for G")
+	}
+	return newDCELFromRenodedGeometries(a, b, g.MustAsMultiLineString())
 }
 
 func TestDCELTriangle(t *testing.T) {
-	dcel := newDCELFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))")
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{A: "POLYGON((0 0,0 1,1 0,0 0))"})
 
 	/*
 
@@ -380,7 +398,10 @@ func TestDCELTriangle(t *testing.T) {
 }
 
 func TestDCELWithHoles(t *testing.T) {
-	dcel := newDCELFromWKT(t, "POLYGON((0 0,5 0,5 5,0 5,0 0),(1 1,2 1,2 2,1 2,1 1),(3 3,4 3,4 4,3 4,3 3))")
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "POLYGON((0 0,5 0,5 5,0 5,0 0),(1 1,2 1,2 2,1 2,1 1),(3 3,4 3,4 4,3 4,3 3))",
+		G: "MULTILINESTRING((0 0,1 1),(1 1,2 2),(2 2,3 3))",
+	})
 
 	/*
 	         f0
@@ -544,7 +565,10 @@ func TestDCELWithHoles(t *testing.T) {
 }
 
 func TestDCELWithMultiPolygon(t *testing.T) {
-	dcel := newDCELFromWKT(t, "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))")
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+		G: "MULTILINESTRING((1 0,2 0))",
+	})
 
 	/*
 	            f0
@@ -646,7 +670,10 @@ func TestDCELWithMultiPolygon(t *testing.T) {
 }
 
 func TestDCELMultiLineString(t *testing.T) {
-	dcel := newDCELFromWKT(t, "MULTILINESTRING((1 0,0 1,1 2),(2 0,3 1,2 2))")
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "MULTILINESTRING((1 0,0 1,1 2),(2 0,3 1,2 2))",
+		G: "MULTILINESTRING((1 0,2 0))",
+	})
 
 	/*
 	        v2    v3
@@ -726,7 +753,9 @@ func TestDCELMultiLineString(t *testing.T) {
 }
 
 func TestDCELSelfOverlappingLineString(t *testing.T) {
-	dcel := newDCELFromWKT(t, "LINESTRING(0 0,0 1,1 1,1 0,0 1,1 1,2 1)")
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "LINESTRING(0 0,0 1,1 1,1 0,0 1,1 1,2 1)",
+	})
 
 	/*
 	   v1----v2----v4
@@ -810,10 +839,11 @@ func TestDCELSelfOverlappingLineString(t *testing.T) {
 }
 
 func TestDCELDisjoint(t *testing.T) {
-	dcel := newDCELFromWKTs(t,
-		"POLYGON((0 0,1 0,1 1,0 1,0 0))",
-		"POLYGON((2 2,2 3,3 3,3 2,2 2))",
-	)
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "POLYGON((0 0,1 0,1 1,0 1,0 0))",
+		B: "POLYGON((2 2,2 3,3 3,3 2,2 2))",
+		G: "MULTILINESTRING((0 0,1 1),(1 1,2 2))",
+	})
 
 	/*
 	                v7------v6
@@ -953,10 +983,11 @@ func TestDCELDisjoint(t *testing.T) {
 }
 
 func TestDCELIntersecting(t *testing.T) {
-	dcel := newDCELFromWKTs(t,
-		"POLYGON((0 0,1 2,2 0,0 0))",
-		"POLYGON((0 1,2 1,1 3,0 1))",
-	)
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "POLYGON((0 0,0.5 1,1 2,1.5 1,2 0,0 0))",
+		B: "POLYGON((0 1,0.5 1,1.5 1,2 1,1 3,0 1))",
+		G: "MULTILINESTRING((0 0,0 1))",
+	})
 
 	/*
 	           v7
@@ -1133,10 +1164,11 @@ func TestDCELIntersecting(t *testing.T) {
 }
 
 func TestDCELInside(t *testing.T) {
-	dcel := newDCELFromWKTs(t,
-		"POLYGON((0 0,3 0,3 3,0 3,0 0))",
-		"POLYGON((1 1,2 1,2 2,1 2,1 1))",
-	)
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "POLYGON((0 0,3 0,3 3,0 3,0 0))",
+		B: "POLYGON((1 1,2 1,2 2,1 2,1 1))",
+		G: "MULTILINESTRING((0 0,1 1))",
+	})
 
 	/*
 	  v3-----------------v2
@@ -1242,10 +1274,11 @@ func TestDCELInside(t *testing.T) {
 }
 
 func TestDCELReproduceHorizontalHoleLinkageBug(t *testing.T) {
-	dcel := newDCELFromWKTs(t,
-		"MULTIPOLYGON(((4 0,4 1,5 1,5 0,4 0)),((1 0,1 2,3 2,3 0,1 0)))",
-		"MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 1,0 1)))",
-	)
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "MULTIPOLYGON(((4 0,4 1,5 1,5 0,4 0)),((1 0,1 1,1 2,2 2,3 2,3 0,1 0)))",
+		B: "MULTIPOLYGON(((0 4,0 5,1 5,1 4,0 4)),((0 1,0 3,2 3,2 2,2 1,1 1,0 1)))",
+		G: "MULTILINESTRING((1 0,0 1),(0 3,0 4),(3 0,4 0))",
+	})
 
 	/*
 	  v16---v15
@@ -1524,10 +1557,10 @@ func TestDCELReproduceHorizontalHoleLinkageBug(t *testing.T) {
 }
 
 func TestDCELFullyOverlappingEdge(t *testing.T) {
-	dcel := newDCELFromWKTs(t,
-		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
-		"POLYGON((1 0,1 1,2 1,2 0,1 0))",
-	)
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+		B: "POLYGON((1 0,1 1,2 1,2 0,1 0))",
+	})
 
 	/*
 	  v5-----v4----v3
@@ -1633,10 +1666,11 @@ func TestDCELFullyOverlappingEdge(t *testing.T) {
 }
 
 func TestDCELPartiallyOverlappingEdge(t *testing.T) {
-	dcel := newDCELFromWKTs(t,
-		"POLYGON((0 1,0 3,2 3,2 1,0 1))",
-		"POLYGON((2 0,2 2,4 2,4 0,2 0))",
-	)
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "POLYGON((0 1,0 3,2 3,2 2,2 1,0 1))",
+		B: "POLYGON((2 0,2 1,2 2,4 2,4 0,2 0))",
+		G: "MULTILINESTRING((0 1,2 0))",
+	})
 
 	/*
 	  v7-------v6    f0
@@ -1786,10 +1820,10 @@ func TestDCELPartiallyOverlappingEdge(t *testing.T) {
 }
 
 func TestDCELFullyOverlappingCycle(t *testing.T) {
-	dcel := newDCELFromWKTs(t,
-		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
-		"POLYGON((0 0,0 1,1 1,1 0,0 0))",
-	)
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+		B: "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+	})
 
 	/*
 	  v3-------v2
@@ -1847,10 +1881,10 @@ func TestDCELFullyOverlappingCycle(t *testing.T) {
 }
 
 func TestDCELTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
-	dcel := newDCELFromWKTs(t,
-		"LINESTRING(0 0,1 0)",
-		"LINESTRING(0 0,0 1)",
-	)
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "LINESTRING(0 0,1 0)",
+		B: "LINESTRING(0 0,0 1)",
+	})
 
 	/*
 	  v0 B
@@ -1920,10 +1954,11 @@ func TestDCELTwoLineStringsIntersectingAtEndpoints(t *testing.T) {
 }
 
 func TestDCELReproduceFaceAllocationBug(t *testing.T) {
-	dcel := newDCELFromWKTs(t,
-		"LINESTRING(0 1,1 0)",
-		"MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
-	)
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "LINESTRING(0 1,1 0)",
+		B: "MULTIPOLYGON(((0 0,0 1,1 1,1 0.5,1 0,0 0)),((2 0,2 1,3 1,3 0,2 0)))",
+		G: "MULTILINESTRING((0 1,1 0.5),(1 0.5,2 0))",
+	})
 
 	/*
 	  v3------v2    v7------v6
@@ -2105,10 +2140,10 @@ func TestDCELReproduceFaceAllocationBug(t *testing.T) {
 }
 
 func TestDCELReproducePointOnLineStringPrecisionBug(t *testing.T) {
-	dcel := newDCELFromWKTs(t,
-		"LINESTRING(0 0,1 1)",
-		"POINT(0.35355339059327373 0.35355339059327373)",
-	)
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "LINESTRING(0 0,0.35355339059327373 0.35355339059327373,1 1)",
+		B: "POINT(0.35355339059327373 0.35355339059327373)",
+	})
 
 	/*
 	      v2
@@ -2175,98 +2210,10 @@ func TestDCELReproducePointOnLineStringPrecisionBug(t *testing.T) {
 	})
 }
 
-func TestDCELReproduceGhostOnGeometryBug(t *testing.T) {
-	dcel := newDCELFromWKTs(t,
-		"LINESTRING(0 1,0 0,1 0)",
-		"POLYGON((0 0,1 0,1 1,0 1,0 0.5,0 0))",
-	)
-
-	/*
-	   v3        v2
-	   @----------+
-	   |          |
-	   |          |
-	 v4+    f1    |  f0
-	   |          |
-	   |          |
-	   @----------@
-	   v0        v1
-	*/
-
-	v0 := XY{0, 0}
-	v1 := XY{1, 0}
-	v2 := XY{1, 1}
-	v3 := XY{0, 1}
-	v4 := XY{0, 0.5}
-
-	CheckDCEL(t, dcel, DCELSpec{
-		NumVerts: 3,
-		NumEdges: 6,
-		NumFaces: 2,
-		Vertices: []VertexSpec{
-			{
-				Vertices: []XY{v0, v1, v3},
-				Src:      [2]bool{true, true},
-				InSet:    [2]bool{true, true},
-			},
-		},
-		Edges: []EdgeSpec{
-			{
-				Sequence: []XY{v0, v1},
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{true, true},
-			},
-			{
-				Sequence: []XY{v1, v0},
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, true},
-			},
-			{
-				Sequence: []XY{v1, v2, v3},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{false, true},
-			},
-			{
-				Sequence: []XY{v3, v2, v1},
-				SrcEdge:  [2]bool{false, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{false, true},
-			},
-			{
-				Sequence: []XY{v3, v4, v0},
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{false, true},
-				InSet:    [2]bool{true, true},
-			},
-			{
-				Sequence: []XY{v0, v4, v3},
-				SrcEdge:  [2]bool{true, true},
-				SrcFace:  [2]bool{false, false},
-				InSet:    [2]bool{true, true},
-			},
-		},
-		Faces: []FaceSpec{
-			{
-				First:  v1,
-				Second: v0,
-				Cycle:  []XY{v1, v0, v4, v3, v2, v1},
-				InSet:  [2]bool{false, false},
-			},
-			{
-				First:  v0,
-				Second: v1,
-				Cycle:  []XY{v0, v1, v2, v3, v4, v0},
-				InSet:  [2]bool{false, true},
-			},
-		},
-	})
-}
-
 func TestDECLWithEmptyGeometryCollection(t *testing.T) {
-	dcel := newDCELFromWKT(t, "GEOMETRYCOLLECTION EMPTY")
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: "GEOMETRYCOLLECTION EMPTY",
+	})
 	CheckDCEL(t, dcel, DCELSpec{
 		NumFaces: 1,
 		Faces: []FaceSpec{{
@@ -2277,11 +2224,14 @@ func TestDECLWithEmptyGeometryCollection(t *testing.T) {
 }
 
 func TestDCELWithGeometryCollection(t *testing.T) {
-	dcel := newDCELFromWKT(t, `GEOMETRYCOLLECTION(
- 		POINT(0 0),
- 		LINESTRING(0 1,1 1),
- 		POLYGON((2 0,3 0,3 1,2 1,2 0))
- 	)`)
+	dcel := newDCELFromWKTs(t, nodedDCELInputs{
+		A: `GEOMETRYCOLLECTION(
+				POINT(0 0),
+				LINESTRING(0 1,1 1),
+				POLYGON((2 0,3 0,3 1,2 1,2 0))
+			)`,
+		G: `MULTILINESTRING((0 0,0 1),(0 1,2 0))`,
+	})
 
 	/*
 	  v1---v2   v6----v5

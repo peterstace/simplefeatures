@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Improves robustness of set operations (`Union`, `Intersection`, `Difference`,
+  `SymmetricDifference`) by revamping ghost line construction. The previous
+  spanning tree approach could produce ghost lines that interfered with the
+  geometry in problematic ways. The new ray casting approach is more robust.
+
 ## v0.56.0
 
 2025-11-21
