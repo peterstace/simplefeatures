@@ -8,17 +8,17 @@ import (
 )
 
 // MultiPolygon is a planar surface geometry that consists of a collection of
-// (possibly empty) Polygons. The zero value is the empty MultiPolygon (i.e.
-// the collection of zero Polygons). It is immutable after creation.
+// (possibly empty) [Polygon]s. The zero value is the empty MultiPolygon (i.e.
+// the collection of zero [Polygon]s). It is immutable after creation.
 type MultiPolygon struct {
 	// Invariant: ctype matches the coordinates type of each polygon.
 	polys []Polygon
 	ctype CoordinatesType
 }
 
-// NewMultiPolygon creates a MultiPolygon from its constituent Polygons. The
+// NewMultiPolygon creates a MultiPolygon from its constituent [Polygon]s. The
 // coordinates type of the MultiPolygon is the lowest common coordinates type
-// of its Polygons.
+// of its [Polygon]s.
 //
 // It doesn't perform any validation on the result. The Validate method can be
 // used to check the validity of the result if needed.
@@ -39,7 +39,7 @@ func NewMultiPolygon(polys []Polygon) MultiPolygon {
 
 // Validate checks if the MultiPolygon is valid.
 //
-// The Polygons that make up a MultiPolygon are constrained by the following
+// The [Polygon]s that make up a MultiPolygon are constrained by the following
 // rules:
 //
 //  1. Each child polygon must be valid.
@@ -173,22 +173,22 @@ func validatePolyNotInsidePoly(p1, p2 indexedLines) error {
 	return nil
 }
 
-// Type returns the GeometryType for a MultiPolygon.
+// Type returns the [GeometryType] for a MultiPolygon.
 func (m MultiPolygon) Type() GeometryType {
 	return TypeMultiPolygon
 }
 
-// AsGeometry converts this MultiPolygon into a Geometry.
+// AsGeometry converts this MultiPolygon into a [Geometry].
 func (m MultiPolygon) AsGeometry() Geometry {
 	return Geometry{impl: m}
 }
 
-// NumPolygons gives the number of Polygon elements in the MultiPolygon.
+// NumPolygons gives the number of [Polygon] elements in the MultiPolygon.
 func (m MultiPolygon) NumPolygons() int {
 	return len(m.polys)
 }
 
-// PolygonN gives the nth (zero based) Polygon element.
+// PolygonN gives the nth (zero based) [Polygon] element.
 func (m MultiPolygon) PolygonN(n int) Polygon {
 	return m.polys[n]
 }
@@ -216,14 +216,14 @@ func (m MultiPolygon) AppendWKT(dst []byte) []byte {
 }
 
 // IsSimple returns true if this geometry contains no anomalous geometry
-// points, such as self intersection or self tangency. Because MultiPolygons
+// points, such as self intersection or self tangency. Because [MultiPolygon]s
 // are always simple, this method always returns true.
 func (m MultiPolygon) IsSimple() bool {
 	return true
 }
 
 // IsEmpty return true if and only if this MultiPolygon doesn't contain any
-// Polygons, or only contains empty Polygons.
+// [Polygon]s, or only contains empty [Polygon]s.
 func (m MultiPolygon) IsEmpty() bool {
 	for _, p := range m.polys {
 		if !p.IsEmpty() {
@@ -233,7 +233,7 @@ func (m MultiPolygon) IsEmpty() bool {
 	return true
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry.
+// Envelope returns the [Envelope] that most tightly surrounds the geometry.
 func (m MultiPolygon) Envelope() Envelope {
 	var env Envelope
 	for _, poly := range m.polys {
@@ -243,7 +243,7 @@ func (m MultiPolygon) Envelope() Envelope {
 }
 
 // Boundary returns the spatial boundary of this MultiPolygon. This is the
-// MultiLineString containing the boundaries of the MultiPolygon's elements.
+// [MultiLineString] containing the boundaries of the MultiPolygon's elements.
 func (m MultiPolygon) Boundary() MultiLineString {
 	var n int
 	for _, p := range m.polys {
@@ -258,13 +258,13 @@ func (m MultiPolygon) Boundary() MultiLineString {
 	return NewMultiLineString(bounds)
 }
 
-// Value implements the database/sql/driver.Valuer interface by returning the
-// WKB (Well Known Binary) representation of this Geometry.
+// Value implements the [database/sql/driver.Valuer] interface by returning the
+// WKB (Well Known Binary) representation of this [Geometry].
 func (m MultiPolygon) Value() (driver.Value, error) {
 	return m.AsBinary(), nil
 }
 
-// Scan implements the database/sql.Scanner interface by parsing the src value
+// Scan implements the [database/sql.Scanner] interface by parsing the src value
 // as WKB (Well Known Binary).
 //
 // If the WKB doesn't represent a MultiPolygon geometry, then an error is returned.
@@ -272,7 +272,7 @@ func (m MultiPolygon) Value() (driver.Value, error) {
 // Geometry constraint validation is performed on the resultant geometry (an
 // error will be returned if the geometry is invalid). If this validation isn't
 // needed or is undesirable, then the WKB should be scanned into a byte slice
-// and then UnmarshalWKB called manually (passing in NoValidate{}).
+// and then [UnmarshalWKB] called manually (passing in [NoValidate]{}).
 func (m *MultiPolygon) Scan(src any) error {
 	return scanAsType(src, m)
 }
@@ -303,7 +303,7 @@ func (m MultiPolygon) ConvexHull() Geometry {
 	return convexHull(m.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaler interface by encoding
+// MarshalJSON implements the [encoding/json.Marshaler] interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (m MultiPolygon) MarshalJSON() ([]byte, error) {
 	var dst []byte
@@ -313,13 +313,13 @@ func (m MultiPolygon) MarshalJSON() ([]byte, error) {
 	return dst, nil
 }
 
-// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
+// UnmarshalJSON implements the [encoding/json.Unmarshaler] interface by decoding
 // the GeoJSON representation of a MultiPolygon.
 func (m *MultiPolygon) UnmarshalJSON(buf []byte) error {
 	return unmarshalGeoJSONAsType(buf, m)
 }
 
-// Coordinates returns the coordinates of each constituent Polygon of the
+// Coordinates returns the coordinates of each constituent [Polygon] of the
 // MultiPolygon.
 func (m MultiPolygon) Coordinates() [][]Sequence {
 	numPolys := m.NumPolygons()
@@ -367,7 +367,7 @@ func (m MultiPolygon) Area(opts ...AreaOption) float64 {
 }
 
 // Centroid returns the multi polygon's centroid point. It returns the empty
-// Point if the multi polygon is empty.
+// [Point] if the multi polygon is empty.
 func (m MultiPolygon) Centroid() Point {
 	if m.IsEmpty() {
 		return NewEmptyPoint(DimXY)
@@ -402,13 +402,13 @@ func (m MultiPolygon) Reverse() MultiPolygon {
 	return MultiPolygon{polys, m.ctype}
 }
 
-// CoordinatesType returns the CoordinatesType used to represent points making
+// CoordinatesType returns the [CoordinatesType] used to represent points making
 // up the geometry.
 func (m MultiPolygon) CoordinatesType() CoordinatesType {
 	return m.ctype
 }
 
-// ForceCoordinatesType returns a new MultiPolygon with a different CoordinatesType. If a
+// ForceCoordinatesType returns a new MultiPolygon with a different [CoordinatesType]. If a
 // dimension is added, then new values are populated with 0.
 func (m MultiPolygon) ForceCoordinatesType(newCType CoordinatesType) MultiPolygon {
 	if len(m.polys) == 0 {
@@ -427,7 +427,7 @@ func (m MultiPolygon) Force2D() MultiPolygon {
 	return m.ForceCoordinatesType(DimXY)
 }
 
-// PointOnSurface returns a Point on the interior of the MultiPolygon.
+// PointOnSurface returns a [Point] on the interior of the MultiPolygon.
 func (m MultiPolygon) PointOnSurface() Point {
 	var (
 		bestWidth float64
@@ -505,7 +505,7 @@ func (m MultiPolygon) controlPoints() int {
 	return sum
 }
 
-// Dump returns the MultiPolygon represented as a Polygon slice.
+// Dump returns the MultiPolygon represented as a [Polygon] slice.
 func (m MultiPolygon) Dump() []Polygon {
 	ps := make([]Polygon, len(m.polys))
 	copy(ps, m.polys)
@@ -513,7 +513,7 @@ func (m MultiPolygon) Dump() []Polygon {
 }
 
 // DumpCoordinates returns the points making up the rings in a MultiPolygon as
-// a Sequence.
+// a [Sequence].
 func (m MultiPolygon) DumpCoordinates() Sequence {
 	var n int
 	for _, p := range m.polys {
@@ -564,9 +564,9 @@ func (m MultiPolygon) String() string {
 }
 
 // Simplify returns a simplified version of the MultiPolygon by applying
-// Simplify to each child Polygon and constructing a new MultiPolygon from the
+// Simplify to each child [Polygon] and constructing a new MultiPolygon from the
 // result. If the result is invalid, then an error is returned. Geometry
-// constraint validation can be skipped by passing in NoValidate{}, potentially
+// constraint validation can be skipped by passing in [NoValidate]{}, potentially
 // resulting in an invalid geometry being returned.
 func (m MultiPolygon) Simplify(threshold float64, nv ...NoValidate) (MultiPolygon, error) {
 	n := m.NumPolygons()

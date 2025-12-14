@@ -120,7 +120,7 @@ func (h *handle) release() {
 	}
 }
 
-// createGeometryHandle converts a Geometry object into a GEOS geometry handle.
+// createGeometryHandle converts a [geom.Geometry] object into a GEOS geometry handle.
 func (h *handle) createGeometryHandle(g geom.Geometry) (*C.GEOSGeometry, error) {
 	wkb := g.AsBinary()
 	return h.createGeometryHandleFromWKB(wkb)

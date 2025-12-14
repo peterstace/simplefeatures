@@ -4,14 +4,14 @@ package geom
 // is closed, i.e. its endpoints are included. An interval typically has
 // distinct endpoints (i.e. is non-degenerate). It may also be degenerate and
 // contain no elements, or degenerate and contain a single element (i.e. the
-// min and max bounds are the same). The zero value of Interval is the
+// min and max bounds are the same). The zero value of [Interval] is the
 // degenerate interval that contains no elements.
 type Interval struct {
 	min, max float64
 	nonEmpty bool
 }
 
-// NewInterval returns a new non-empty Interval with the given bounds (which
+// NewInterval returns a new non-empty [Interval] with the given bounds (which
 // may be the same).
 func NewInterval(boundA, boundB float64) Interval {
 	if boundB < boundA {

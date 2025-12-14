@@ -8,22 +8,22 @@ import (
 	"github.com/peterstace/simplefeatures/rtree"
 )
 
-// Polygon is a planar surface geometry. Its zero value is the empty Polygon.
+// [Polygon] is a planar surface geometry. Its zero value is the empty [Polygon].
 // It is immutable after creation. When not empty, it is defined by one outer
 // ring and zero or more interior rings. The outer ring defines the exterior
-// boundary of the Polygon, and each inner ring defines a hole in the polygon.
+// boundary of the [Polygon], and each inner ring defines a hole in the polygon.
 type Polygon struct {
 	rings []LineString
 	ctype CoordinatesType
 }
 
 // NewPolygon creates a polygon given its rings. The outer ring is first, and
-// any inner rings follow. If no rings are provided, then the returned Polygon
-// is the empty Polygon. The coordinate type of the polygon is the lowest
+// any inner rings follow. If no rings are provided, then the returned [Polygon]
+// is the empty [Polygon]. The coordinate type of the polygon is the lowest
 // common coordinate type of its rings.
 //
-// It doesn't perform any validation on the result. The Validate method can be
-// used to check the validity of the result if needed.
+// It doesn't perform any validation on the result. The [Polygon.Validate] method
+// can be used to check the validity of the result if needed.
 func NewPolygon(rings []LineString) Polygon {
 	ctype := DimXY
 	if len(rings) > 0 {
@@ -39,11 +39,11 @@ func NewPolygon(rings []LineString) Polygon {
 	return Polygon{rings, ctype}
 }
 
-// Validate checks if the Polygon is valid. For non-empty Polygons to be valid,
+// Validate checks if the [Polygon] is valid. For non-empty [Polygon]s to be valid,
 // the following validation rules must hold:
 //
 //  1. The rings (outer and inner) must be valid linear rings. This means that
-//     they must be valid LineStrings that are non-empty, simple, and closed.
+//     they must be valid [LineString]s that are non-empty, simple, and closed.
 //  2. Each pair of rings must at most intersect at a single point.
 //  3. The interior of the polygon must be connected.
 //  4. Any interior rings must be fully inside the exterior ring.
@@ -165,18 +165,18 @@ func validateRing(r LineString) error {
 	return nil
 }
 
-// Type returns the GeometryType for a Polygon.
+// Type returns the [GeometryType] for a [Polygon].
 func (p Polygon) Type() GeometryType {
 	return TypePolygon
 }
 
-// AsGeometry converts this Polygon into a Geometry.
+// AsGeometry converts this [Polygon] into a [Geometry].
 func (p Polygon) AsGeometry() Geometry {
 	return Geometry{impl: p}
 }
 
 // ExteriorRing gives the exterior ring of the polygon boundary. If the polygon
-// is empty, then it returns the empty LineString.
+// is empty, then it returns the empty [LineString].
 func (p Polygon) ExteriorRing() LineString {
 	if p.IsEmpty() {
 		return LineString{}.ForceCoordinatesType(p.ctype)
@@ -235,47 +235,47 @@ func (p Polygon) appendWKTBody(dst []byte) []byte {
 }
 
 // IsSimple returns true if this geometry contains no anomalous geometry
-// points, such as self intersection or self tangency. Because Polygons are
+// points, such as self intersection or self tangency. Because [Polygon]s are
 // always simple, this method always returns true.
 func (p Polygon) IsSimple() bool {
 	return true
 }
 
-// IsEmpty returns true if and only if this Polygon is the empty Polygon. The
-// empty Polygon doesn't have any rings and doesn't enclose any area.
+// IsEmpty returns true if and only if this [Polygon] is the empty [Polygon]. The
+// empty [Polygon] doesn't have any rings and doesn't enclose any area.
 func (p Polygon) IsEmpty() bool {
 	// Rings are not allowed to be empty, so we don't have to check IsEmpty on
 	// each ring.
 	return len(p.rings) == 0
 }
 
-// Envelope returns the Envelope that most tightly surrounds the geometry.
+// Envelope returns the [Envelope] that most tightly surrounds the geometry.
 func (p Polygon) Envelope() Envelope {
 	return p.ExteriorRing().Envelope()
 }
 
-// Boundary returns the spatial boundary of this Polygon. For non-empty
-// Polygons, this is the MultiLineString collection containing all of the
+// Boundary returns the spatial boundary of this [Polygon]. For non-empty
+// [Polygon]s, this is the [MultiLineString] collection containing all of the
 // rings.
 func (p Polygon) Boundary() MultiLineString {
 	return NewMultiLineString(p.rings).Force2D()
 }
 
-// Value implements the database/sql/driver.Valuer interface by returning the
-// WKB (Well Known Binary) representation of this Geometry.
+// Value implements the [database/sql/driver.Valuer] interface by returning the
+// WKB (Well Known Binary) representation of this [Geometry].
 func (p Polygon) Value() (driver.Value, error) {
 	return p.AsBinary(), nil
 }
 
-// Scan implements the database/sql.Scanner interface by parsing the src value
+// Scan implements the [database/sql.Scanner] interface by parsing the src value
 // as WKB (Well Known Binary).
 //
-// If the WKB doesn't represent a Polygon geometry, then an error is returned.
+// If the WKB doesn't represent a [Polygon] geometry, then an error is returned.
 //
-// Geometry constraint validation is performed on the resultant geometry (an
+// [Geometry] constraint validation is performed on the resultant geometry (an
 // error will be returned if the geometry is invalid). If this validation isn't
 // needed or is undesirable, then the WKB should be scanned into a byte slice
-// and then UnmarshalWKB called manually (passing in NoValidate{}).
+// and then [UnmarshalWKB] called manually (passing in [NoValidate]{}).
 func (p *Polygon) Scan(src any) error {
 	return scanAsType(src, p)
 }
@@ -305,7 +305,7 @@ func (p Polygon) ConvexHull() Geometry {
 	return convexHull(p.AsGeometry())
 }
 
-// MarshalJSON implements the encoding/json.Marshaler interface by encoding
+// MarshalJSON implements the [encoding/json.Marshaler] interface by encoding
 // this geometry as a GeoJSON geometry object.
 func (p Polygon) MarshalJSON() ([]byte, error) {
 	var dst []byte
@@ -315,13 +315,13 @@ func (p Polygon) MarshalJSON() ([]byte, error) {
 	return dst, nil
 }
 
-// UnmarshalJSON implements the encoding/json.Unmarshaler interface by decoding
-// the GeoJSON representation of a Polygon.
+// UnmarshalJSON implements the [encoding/json.Unmarshaler] interface by decoding
+// the GeoJSON representation of a [Polygon].
 func (p *Polygon) UnmarshalJSON(buf []byte) error {
 	return unmarshalGeoJSONAsType(buf, p)
 }
 
-// Coordinates returns the coordinates of the rings making up the Polygon
+// Coordinates returns the coordinates of the rings making up the [Polygon]
 // (external ring first, then internal rings after).
 func (p Polygon) Coordinates() []Sequence {
 	coords := make([]Sequence, len(p.rings))
@@ -331,7 +331,7 @@ func (p Polygon) Coordinates() []Sequence {
 	return coords
 }
 
-// TransformXY transforms this Polygon into another Polygon according to fn.
+// TransformXY transforms this [Polygon] into another [Polygon] according to fn.
 // See [Geometry.TransformXY] for more details.
 func (p Polygon) TransformXY(fn func(XY) XY) Polygon {
 	n := len(p.rings)
@@ -343,7 +343,7 @@ func (p Polygon) TransformXY(fn func(XY) XY) Polygon {
 	return poly.ForceCoordinatesType(p.ctype)
 }
 
-// Transform transforms this Polygon into another Polygon according to fn. See
+// Transform transforms this [Polygon] into another [Polygon] according to fn. See
 // [Geometry.Transform] for more details.
 func (p Polygon) Transform(fn func(CoordinatesType, []float64) error) (Polygon, error) {
 	n := len(p.rings)
@@ -376,7 +376,9 @@ func newAreaOptionSet(opts []AreaOption) areaOptionSet {
 }
 
 // WithTransform alters the behaviour of area calculations by first
-// transforming the geometry with the provided transform function.
+// transforming the geometry with the provided transform function. The
+// transformation is specified as a function that takes an [XY] and returns an
+// [XY].
 func WithTransform(tr func(XY) XY) AreaOption {
 	return func(o *areaOptionSet) {
 		o.transform = tr
@@ -392,7 +394,7 @@ func SignedArea(o *areaOptionSet) {
 	o.signed = true
 }
 
-// Area of a Polygon is the area enclosed by the polygon's boundary.
+// Area of a [Polygon] is the area enclosed by the polygon's boundary.
 func (p Polygon) Area(opts ...AreaOption) float64 {
 	os := newAreaOptionSet(opts)
 	totalArea := signedAreaOfLinearRing(p.ExteriorRing(), os.transform)
@@ -437,8 +439,8 @@ func signedAreaOfLinearRing(lr LineString, transform func(XY) XY) float64 {
 	return sum / 2
 }
 
-// Centroid returns the polygon's centroid point. If returns an empty Point if
-// the Polygon is empty.
+// Centroid returns the polygon's centroid point. It returns an empty [Point] if
+// the [Polygon] is empty.
 func (p Polygon) Centroid() Point {
 	if p.IsEmpty() {
 		return NewEmptyPoint(DimXY)
@@ -498,7 +500,7 @@ func triangleArea2(pt1, pt2, pt3 XY) float64 {
 	return (pt2.X-pt1.X)*(pt3.Y-pt1.Y) - (pt3.X-pt1.X)*(pt2.Y-pt1.Y)
 }
 
-// AsMultiPolygon is a helper that converts this Polygon into a MultiPolygon.
+// AsMultiPolygon is a helper that converts this [Polygon] into a [MultiPolygon].
 func (p Polygon) AsMultiPolygon() MultiPolygon {
 	var polys []Polygon
 	if !p.IsEmpty() {
@@ -508,7 +510,7 @@ func (p Polygon) AsMultiPolygon() MultiPolygon {
 	return mp.ForceCoordinatesType(p.ctype)
 }
 
-// Reverse in the case of Polygon outputs the coordinates of each ring in reverse order,
+// Reverse in the case of [Polygon] outputs the coordinates of each ring in reverse order,
 // but note the order of the inner rings is unchanged.
 func (p Polygon) Reverse() Polygon {
 	reversed := make([]LineString, len(p.rings))
@@ -518,13 +520,13 @@ func (p Polygon) Reverse() Polygon {
 	return Polygon{reversed, p.ctype}
 }
 
-// CoordinatesType returns the CoordinatesType used to represent points making
+// CoordinatesType returns the [CoordinatesType] used to represent points making
 // up the geometry.
 func (p Polygon) CoordinatesType() CoordinatesType {
 	return p.ctype
 }
 
-// ForceCoordinatesType returns a new Polygon with a different CoordinatesType. If a dimension
+// ForceCoordinatesType returns a new [Polygon] with a different [CoordinatesType]. If a dimension
 // is added, then new values are populated with 0.
 func (p Polygon) ForceCoordinatesType(newCType CoordinatesType) Polygon {
 	if len(p.rings) == 0 {
@@ -538,18 +540,18 @@ func (p Polygon) ForceCoordinatesType(newCType CoordinatesType) Polygon {
 	return Polygon{flatRings, newCType}
 }
 
-// Force2D returns a copy of the Polygon with Z and M values removed.
+// Force2D returns a copy of the [Polygon] with Z and M values removed.
 func (p Polygon) Force2D() Polygon {
 	return p.ForceCoordinatesType(DimXY)
 }
 
-// PointOnSurface returns a Point that lies inside the Polygon.
+// PointOnSurface returns a [Point] that lies inside the [Polygon].
 func (p Polygon) PointOnSurface() Point {
 	pt, _ := pointOnAreaSurface(p)
 	return pt
 }
 
-// ForceCW returns the equivalent Polygon that has its exterior ring in a
+// ForceCW returns the equivalent [Polygon] that has its exterior ring in a
 // clockwise orientation and any inner rings in a counter-clockwise
 // orientation.
 func (p Polygon) ForceCW() Polygon {
@@ -559,7 +561,7 @@ func (p Polygon) ForceCW() Polygon {
 	return p.forceOrientation(true)
 }
 
-// ForceCCW returns the equivalent Polygon that has its exterior ring in a
+// ForceCCW returns the equivalent [Polygon] that has its exterior ring in a
 // counter-clockwise orientation and any inner rings in a clockwise
 // orientation.
 func (p Polygon) ForceCCW() Polygon {
@@ -620,8 +622,8 @@ func (p Polygon) controlPoints() int {
 	return sum
 }
 
-// DumpCoordinates returns the points making up the rings in a Polygon as a
-// Sequence.
+// DumpCoordinates returns the points making up the rings in a [Polygon] as a
+// [Sequence].
 func (p Polygon) DumpCoordinates() Sequence {
 	var n int
 	for _, r := range p.rings {
@@ -637,8 +639,8 @@ func (p Polygon) DumpCoordinates() Sequence {
 	return seq
 }
 
-// DumpRings returns a copy of the Polygon's rings as a slice of LineStrings.
-// If the Polygon is empty, then the slice will have length zero. Otherwise,
+// DumpRings returns a copy of the [Polygon]'s rings as a slice of [LineString]s.
+// If the [Polygon] is empty, then the slice will have length zero. Otherwise,
 // the slice will consist of the exterior ring, followed by any interior rings.
 func (p Polygon) DumpRings() []LineString {
 	tmp := make([]LineString, len(p.rings))
@@ -646,7 +648,7 @@ func (p Polygon) DumpRings() []LineString {
 	return tmp
 }
 
-// Summary returns a text summary of the Polygon following a similar format to https://postgis.net/docs/ST_Summary.html.
+// Summary returns a text summary of the [Polygon] following a similar format to https://postgis.net/docs/ST_Summary.html.
 func (p Polygon) Summary() string {
 	numPoints := p.DumpCoordinates().Length()
 
@@ -659,23 +661,23 @@ func (p Polygon) Summary() string {
 		p.Type(), p.CoordinatesType(), numRings, ringSuffix, numPoints)
 }
 
-// String returns the string representation of the Polygon.
+// String returns the string representation of the [Polygon].
 func (p Polygon) String() string {
 	return p.Summary()
 }
 
-// Simplify returns a simplified version of the Polygon by applying the
+// Simplify returns a simplified version of the [Polygon] by applying the
 // Ramer-Douglas-Peucker algorithm to each constituent ring. If the exterior
-// ring collapses to a point or single linear element, the empty Polygon is
+// ring collapses to a point or single linear element, the empty [Polygon] is
 // returned. If any interior ring collapses to a point or a single linear
 // element, then it is omitted from the final output.
 //
-// The output Polygon will be invalid if any rings in the input become
+// The output [Polygon] will be invalid if any rings in the input become
 // non-rings (e.g. via self intersection) in the output, or if any two rings
-// were to interact in ways prohibited by Polygon validation rules (such as
+// were to interact in ways prohibited by [Polygon] validation rules (such as
 // intersecting at more than one point). In these cases, an error is returned.
-// These validations can be skipped by passing in NoValidate{}, potentially
-// resulting in a non-valid Polygon being returned.
+// These validations can be skipped by passing in [NoValidate]{}, potentially
+// resulting in a non-valid [Polygon] being returned.
 func (p Polygon) Simplify(threshold float64, nv ...NoValidate) (Polygon, error) {
 	exterior := p.ExteriorRing().Simplify(threshold)
 
@@ -707,7 +709,7 @@ func (p Polygon) Simplify(threshold float64, nv ...NoValidate) (Polygon, error) 
 	return simpl, nil
 }
 
-// Densify returns a new Polygon with additional linearly interpolated control
+// Densify returns a new [Polygon] with additional linearly interpolated control
 // points such that the distance between any two consecutive control points is
 // at most the given maxDistance.
 //
@@ -720,7 +722,7 @@ func (p Polygon) Densify(maxDistance float64) Polygon {
 	return Polygon{rings, p.ctype}
 }
 
-// SnapToGrid returns a copy of the Polygon with all coordinates snapped to a
+// SnapToGrid returns a copy of the [Polygon] with all coordinates snapped to a
 // base 10 grid.
 //
 // The grid spacing is specified by the number of decimal places to round to
@@ -729,13 +731,13 @@ func (p Polygon) Densify(maxDistance float64) Polygon {
 // decimalPlaces of -1 would cause all coordinates to be rounded to the nearest
 // 10.
 //
-// Returned Polygons may be invalid due to snapping, even if the input geometry
+// Returned [Polygon]s may be invalid due to snapping, even if the input geometry
 // was valid.
 func (p Polygon) SnapToGrid(decimalPlaces int) Polygon {
 	return p.TransformXY(snapToGridXY(decimalPlaces))
 }
 
-// FlipCoordinates returns a new Polygon with X and Y swapped for each point.
+// FlipCoordinates returns a new [Polygon] with X and Y swapped for each point.
 func (p Polygon) FlipCoordinates() Polygon {
 	return p.TransformXY(func(xy XY) XY {
 		return XY{xy.Y, xy.X}

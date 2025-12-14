@@ -7,7 +7,7 @@ import (
 )
 
 // XY represents a pair of X and Y coordinates. This can either represent a
-// location on the XY plane, or a 2D vector in the real vector space.
+// location on the [XY] plane, or a 2D vector in the real vector space.
 type XY struct {
 	X, Y float64
 }
@@ -23,7 +23,7 @@ func (w XY) validate() error {
 	return nil
 }
 
-// AsPoint is a convenience function to convert this XY value into a Point
+// AsPoint is a convenience function to convert this [XY] value into a [Point]
 // geometry.
 func (w XY) AsPoint() Point {
 	coords := Coordinates{XY: w, Type: DimXY}
@@ -39,7 +39,7 @@ func (w XY) uncheckedEnvelope() Envelope {
 	return newUncheckedEnvelope(w, w)
 }
 
-// Sub returns the result of subtracting the other XY from this XY (in the same
+// Sub returns the result of subtracting the other [XY] from this [XY] (in the same
 // manner as vector subtraction).
 func (w XY) Sub(o XY) XY {
 	return XY{
@@ -48,7 +48,7 @@ func (w XY) Sub(o XY) XY {
 	}
 }
 
-// Add returns the result of adding this XY to another XY (in the same manner
+// Add returns the result of adding this [XY] to another [XY] (in the same manner
 // as vector addition).
 func (w XY) Add(o XY) XY {
 	return XY{
@@ -57,7 +57,7 @@ func (w XY) Add(o XY) XY {
 	}
 }
 
-// Scale returns the XY where the X and Y have been scaled by s.
+// Scale returns the [XY] where the X and Y have been scaled by s.
 func (w XY) Scale(s float64) XY {
 	return XY{
 		w.X * s,
@@ -65,7 +65,7 @@ func (w XY) Scale(s float64) XY {
 	}
 }
 
-// Cross returns the 2D cross product of this and another XY. This is defined
+// Cross returns the 2D cross product of this and another [XY]. This is defined
 // as the 'z' coordinate of the regular 3D cross product.
 func (w XY) Cross(o XY) float64 {
 	// Avoid fused multiply-add by explicitly converting intermediate products
@@ -74,22 +74,22 @@ func (w XY) Cross(o XY) float64 {
 	return float64(w.X*o.Y) - float64(w.Y*o.X)
 }
 
-// Midpoint returns the midpoint of this and another XY.
+// Midpoint returns the midpoint of this and another [XY].
 func (w XY) Midpoint(o XY) XY {
 	return w.Add(o).Scale(0.5)
 }
 
-// Dot returns the dot product of this and another XY.
+// Dot returns the dot product of this and another [XY].
 func (w XY) Dot(o XY) float64 {
 	return w.X*o.X + w.Y*o.Y
 }
 
-// Unit treats the XY as a vector, and scales it to have unit length.
+// Unit treats the [XY] as a vector, and scales it to have unit length.
 func (w XY) Unit() XY {
 	return w.Scale(1 / w.Length())
 }
 
-// Length treats XY as a vector, and returns its length.
+// Length treats [XY] as a vector, and returns its length.
 func (w XY) Length() float64 {
 	return math.Sqrt(w.lengthSq())
 }
@@ -99,7 +99,7 @@ func (w XY) lengthSq() float64 {
 	return w.Dot(w)
 }
 
-// Less gives an ordering on XYs. If two XYs have different X values, then the
+// Less gives an ordering on [XY] values. If two [XY] values have different X values, then the
 // one with the lower X value is ordered before the one with the higher X
 // value. If the X values are then same, then the Y values are used (the lower
 // Y value comes first).

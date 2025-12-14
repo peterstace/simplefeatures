@@ -15,7 +15,7 @@ type AlbersEqualAreaConic struct {
 	stdParallels [2]float64
 }
 
-// NewAlbersEqualAreaConic returns a new AlbersEqualAreaConic projection with
+// NewAlbersEqualAreaConic returns a new [AlbersEqualAreaConic] projection with
 // the given earth radius. The standard parallels are set to 30 and 60 degrees
 // north.
 func NewAlbersEqualAreaConic(earthRadius float64) *AlbersEqualAreaConic {

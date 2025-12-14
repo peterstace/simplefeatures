@@ -18,7 +18,7 @@ type AzimuthalEquidistant struct {
 	centerLonLat geom.XY
 }
 
-// NewAzimuthalEquidistant returns a new AzimuthalEquidistant projection with
+// NewAzimuthalEquidistant returns a new [AzimuthalEquidistant] projection with
 // the given earth radius.
 func NewAzimuthalEquidistant(earthRadius float64) *AzimuthalEquidistant {
 	return &AzimuthalEquidistant{

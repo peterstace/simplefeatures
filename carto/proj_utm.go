@@ -44,7 +44,7 @@ func (e invalidUTMCodeError) Error() string {
 			"two being digits (01-60) and the last being 'N' or 'S'", e.code)
 }
 
-// NewUTMFromCode creates a UTM projection using the given UTM zone and
+// NewUTMFromCode creates a [UTM] projection using the given UTM zone and
 // hemisphere code. Codes are composed the zone (with leading zero to pad to 2
 // digits) and an N or S designator. E.g. "06N" and "56S".
 func NewUTMFromCode(code string) (*UTM, error) {
@@ -70,7 +70,7 @@ func NewUTMFromCode(code string) (*UTM, error) {
 	}
 }
 
-// NewUTMFromLocation creates a UTM projection using the appropriate UTM zone
+// NewUTMFromLocation creates a [UTM] projection using the appropriate UTM zone
 // and hemisphere for the given location.
 func NewUTMFromLocation(lonlat geom.XY) (*UTM, error) {
 	λ := lonlat.X

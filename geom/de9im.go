@@ -52,7 +52,7 @@ func (m *matrix) transpose() {
 // intersection matrix pattern. Each is a 9 character string that encodes a 3
 // by 3 matrix.
 //
-// The intersection matrix has the same format as those computed by the Relate
+// The intersection matrix has the same format as those computed by the [Relate]
 // function. That is, it must be a 9 character string consisting of 'F', '0',
 // '1', and '2' entries.
 //

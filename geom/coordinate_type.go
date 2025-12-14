@@ -23,7 +23,7 @@ const (
 	DimXYZM CoordinatesType = 0b11
 )
 
-// String gives a string representation of a CoordinatesType.
+// String gives a string representation of a [CoordinatesType].
 func (t CoordinatesType) String() string {
 	if t < 4 {
 		return [4]string{"XY", "XYZ", "XYM", "XYZM"}[t]
@@ -32,18 +32,18 @@ func (t CoordinatesType) String() string {
 }
 
 // Dimension returns the number of float64 coordinates required to encode a
-// point location using the CoordinatesType.
+// point location using the [CoordinatesType].
 func (t CoordinatesType) Dimension() int {
 	return [4]int{2, 3, 3, 4}[t]
 }
 
-// Is3D returns true if and only if the CoordinatesType includes a Z (3D)
+// Is3D returns true if and only if the [CoordinatesType] includes a Z (3D)
 // value.
 func (t CoordinatesType) Is3D() bool {
 	return (t & DimXYZ) != 0
 }
 
-// IsMeasured returns true if and only if the Coordinates type includes an M
+// IsMeasured returns true if and only if the [CoordinatesType] includes an M
 // (measure) value.
 func (t CoordinatesType) IsMeasured() bool {
 	return (t & DimXYM) != 0

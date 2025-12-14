@@ -18,15 +18,15 @@ import (
 // can only represent an empty geometry, a single point, a horizontal or
 // vertical line, or an axis aligned rectangle with some area.
 //
-// The Envelope zero value is the empty envelope. Envelopes are immutable after
+// The [Envelope] zero value is the empty envelope. [Envelope]s are immutable after
 // creation.
 type Envelope struct {
 	min, max XY
 	nonEmpty bool
 }
 
-// NewEnvelope returns the smallest envelope that contains all provided XYs.
-// It returns an error if any of the XYs contain NaN or +/- Infinity
+// NewEnvelope returns the smallest envelope that contains all provided [XY]s.
+// It returns an error if any of the [XY]s contain NaN or +/- Infinity
 // coordinates.
 func NewEnvelope(xys ...XY) Envelope {
 	var env Envelope
@@ -40,9 +40,9 @@ func newUncheckedEnvelope(minXY, maxXY XY) Envelope {
 	return Envelope{minXY, maxXY, true}
 }
 
-// Validate checks if the Envelope is valid. The only validation rule is that
-// the coordinates the Envelope was constructed from must not be NaN or +/-
-// infinity. An empty Envelope is always valid.
+// Validate checks if the [Envelope] is valid. The only validation rule is that
+// the coordinates the [Envelope] was constructed from must not be NaN or +/-
+// infinity. An empty [Envelope] is always valid.
 func (e Envelope) Validate() error {
 	if e.IsEmpty() {
 		return nil
@@ -78,12 +78,12 @@ func (e Envelope) IsRectangle() bool {
 	return !e.IsEmpty() && e.min.X != e.max.X && e.min.Y != e.max.Y
 }
 
-// AsGeometry returns the envelope as a Geometry. In the regular case where the
-// envelope covers some area, then a Polygon geometry is returned. In
+// AsGeometry returns the envelope as a [Geometry]. In the regular case where the
+// envelope covers some area, then a [Polygon] geometry is returned. In
 // degenerate cases where the envelope only covers a line or a point, a
-// LineString or Point geometry is returned. In the case of an empty envelope,
-// the zero value Geometry is returned (representing an empty
-// GeometryCollection).
+// [LineString] or [Point] geometry is returned. In the case of an empty envelope,
+// the zero value [Geometry] is returned (representing an empty
+// [GeometryCollection]).
 func (e Envelope) AsGeometry() Geometry {
 	switch {
 	case e.IsEmpty():
@@ -124,9 +124,9 @@ func (e Envelope) Max() Point {
 	return e.max.AsPoint()
 }
 
-// MinMaxXYs returns the two XY values in the envelope that contain the minimum
+// MinMaxXYs returns the two [XY] values in the envelope that contain the minimum
 // (first return value) and maximum (second return value) X and Y values in the
-// envelope. The third return value is true if and only if the Envelope is
+// envelope. The third return value is true if and only if the [Envelope] is
 // non-empty and thus the first two return values are populated.
 func (e Envelope) MinMaxXYs() (XY, XY, bool) {
 	if e.IsEmpty() {
@@ -138,7 +138,7 @@ func (e Envelope) MinMaxXYs() (XY, XY, bool) {
 // ExpandToIncludeXY returns the smallest envelope that contains all of the
 // points in this envelope along with the provided point. It will produce an
 // invalid envelope if any of the coordinates in the existing envelope or new
-// XY contain NaN or +/- infinity.
+// [XY] contain NaN or +/- infinity.
 func (e Envelope) ExpandToIncludeXY(xy XY) Envelope {
 	if e.IsEmpty() {
 		return newUncheckedEnvelope(xy, xy)
@@ -166,8 +166,8 @@ func (e Envelope) ExpandToIncludeEnvelope(o Envelope) Envelope {
 	)
 }
 
-// Contains returns true if and only if this envelope contains the given XY. It
-// always returns false in the case where the XY contains NaN or +/- Infinity
+// Contains returns true if and only if this envelope contains the given [XY]. It
+// always returns false in the case where the [XY] contains NaN or +/- Infinity
 // coordinates.
 func (e Envelope) Contains(p XY) bool {
 	return !e.IsEmpty() &&
@@ -245,7 +245,7 @@ func (e Envelope) Distance(o Envelope) (float64, bool) {
 	return math.Sqrt(dx*dx + dy*dy), true
 }
 
-// TransformXY transforms this Envelope into another Envelope according to fn.
+// TransformXY transforms this [Envelope] into another [Envelope] according to fn.
 func (e Envelope) TransformXY(fn func(XY) XY) Envelope {
 	u, v, ok := e.MinMaxXYs()
 	if !ok {
@@ -259,7 +259,7 @@ func (e Envelope) TransformXY(fn func(XY) XY) Envelope {
 	)
 }
 
-// AsBox converts this Envelope to an rtree.Box.
+// AsBox converts this [Envelope] to an [rtree.Box].
 func (e Envelope) AsBox() (rtree.Box, bool) {
 	return rtree.Box{
 		MinX: e.min.X,
@@ -269,11 +269,11 @@ func (e Envelope) AsBox() (rtree.Box, bool) {
 	}, !e.IsEmpty()
 }
 
-// BoundingDiagonal returns the LineString that goes from the point returned by
-// Min() to the point returned by Max(). If the envelope is degenerate and
-// represents a single point, then a Point is returned instead of a LineString.
-// If the Envelope is empty, then the empty Geometry (representing an empty
-// GeometryCollection) is returned.
+// BoundingDiagonal returns the [LineString] that goes from the point returned by
+// [Envelope.Min] to the point returned by [Envelope.Max]. If the envelope is degenerate and
+// represents a single point, then a [Point] is returned instead of a [LineString].
+// If the [Envelope] is empty, then the empty [Geometry] (representing an empty
+// [GeometryCollection]) is returned.
 func (e Envelope) BoundingDiagonal() Geometry {
 	if e.IsEmpty() {
 		return Geometry{}

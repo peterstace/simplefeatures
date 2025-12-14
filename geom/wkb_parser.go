@@ -8,9 +8,9 @@ import (
 )
 
 // UnmarshalWKB reads the Well Known Binary (WKB), and returns the
-// corresponding Geometry.
+// corresponding [Geometry].
 //
-// NoValidate{} can be passed in to disable geometry constraint validation.
+// [NoValidate]{} can be passed in to disable geometry constraint validation.
 func UnmarshalWKB(wkb []byte, nv ...NoValidate) (Geometry, error) {
 	// Note that we purposefully DON'T check for the presence of trailing
 	// bytes. There is nothing in the OGC spec indicating that trailing bytes
