@@ -1,0 +1,284 @@
+<run>
+
+<case>
+  <desc>PA - disjoint</desc>
+  <a>
+    POINT(20 20)
+  </a>
+  <b>
+    POLYGON(
+      (60 120, 60 40, 160 40, 160 120, 60 120))
+  </b>
+<test>
+  <op name="relate" arg3="FF0FFF212" arg1="A" arg2="B">
+    true
+  </op>
+</test>
+<test><op name="contains"   arg1="A" arg2="B"> false </op></test>
+<test><op name="coveredBy"  arg1="A" arg2="B"> false </op></test>
+<test><op name="covers"     arg1="A" arg2="B"> false </op></test>
+<test><op name="crosses"    arg1="A" arg2="B"> false </op></test>
+<test><op name="disjoint"   arg1="A" arg2="B"> true  </op></test>
+<test><op name="equalsTopo" arg1="A" arg2="B"> false </op></test>
+<test><op name="intersects" arg1="A" arg2="B"> false </op></test>
+<test><op name="overlaps"   arg1="A" arg2="B"> false </op></test>
+<test><op name="touches"    arg1="A" arg2="B"> false </op></test>
+<test><op name="within"     arg1="A" arg2="B"> false </op></test>
+</case>
+
+<case>
+  <desc>mPA - points in B: E, I</desc>
+  <a>
+    MULTIPOINT((0 20), (40 20))
+  </a>
+  <b>
+    POLYGON(
+      (20 40, 20 0, 60 0, 60 40, 20 40))
+  </b>
+<test>
+  <op name="relate" arg3="0F0FFF212" arg1="A" arg2="B">
+    true
+  </op>
+</test>
+<test><op name="contains"   arg1="A" arg2="B"> false </op></test>
+<test><op name="coveredBy"  arg1="A" arg2="B"> false </op></test>
+<test><op name="covers"     arg1="A" arg2="B"> false </op></test>
+<test><op name="crosses"    arg1="A" arg2="B"> true  </op></test>
+<test><op name="disjoint"   arg1="A" arg2="B"> false </op></test>
+<test><op name="equalsTopo" arg1="A" arg2="B"> false </op></test>
+<test><op name="intersects" arg1="A" arg2="B"> true  </op></test>
+<test><op name="overlaps"   arg1="A" arg2="B"> false </op></test>
+<test><op name="touches"    arg1="A" arg2="B"> false </op></test>
+<test><op name="within"     arg1="A" arg2="B"> false </op></test>
+</case>
+
+<case>
+  <desc>mPA - points in B: E, B</desc>
+  <a>
+    MULTIPOINT((0 20), (20 20))
+  </a>
+  <b>
+    POLYGON((20 40, 20 0, 60 0, 60 40, 20 40))
+  </b>
+<test>
+  <op name="relate" arg3="F00FFF212" arg1="A" arg2="B">
+    true
+  </op>
+</test>
+<test><op name="contains"   arg1="A" arg2="B"> false </op></test>
+<test><op name="coveredBy"  arg1="A" arg2="B"> false </op></test>
+<test><op name="covers"     arg1="A" arg2="B"> false </op></test>
+<test><op name="crosses"    arg1="A" arg2="B"> false </op></test>
+<test><op name="disjoint"   arg1="A" arg2="B"> false </op></test>
+<test><op name="equalsTopo" arg1="A" arg2="B"> false </op></test>
+<test><op name="intersects" arg1="A" arg2="B"> true  </op></test>
+<test><op name="overlaps"   arg1="A" arg2="B"> false </op></test>
+<test><op name="touches"    arg1="A" arg2="B"> true  </op></test>
+<test><op name="within"     arg1="A" arg2="B"> false </op></test>
+</case>
+
+<case>
+  <desc>mPA - points in B: B, I</desc>
+  <a>
+    MULTIPOINT((20 20), (40 20))
+  </a>
+  <b>
+    POLYGON((20 40, 20 0, 60 0, 60 40, 20 40))
+  </b>
+<test>
+  <op name="relate" arg3="00FFFF212" arg1="A" arg2="B">
+    true
+  </op>
+</test>
+<test><op name="contains"   arg1="A" arg2="B"> false </op></test>
+<test><op name="coveredBy"  arg1="A" arg2="B"> true  </op></test>
+<test><op name="covers"     arg1="A" arg2="B"> false </op></test>
+<test><op name="crosses"    arg1="A" arg2="B"> false </op></test>
+<test><op name="disjoint"   arg1="A" arg2="B"> false </op></test>
+<test><op name="equalsTopo" arg1="A" arg2="B"> false </op></test>
+<test><op name="intersects" arg1="A" arg2="B"> true  </op></test>
+<test><op name="overlaps"   arg1="A" arg2="B"> false </op></test>
+<test><op name="touches"    arg1="A" arg2="B"> false </op></test>
+<test><op name="within"     arg1="A" arg2="B"> true  </op></test>
+</case>
+
+<case>
+  <desc>mPA - points in B: I, B, E</desc>
+  <a>
+    MULTIPOINT((80 260), (140 260), (180 260))
+  </a>
+  <b>
+    POLYGON((40 320, 140 320, 140 200, 40 200, 40 320))
+  </b>
+<test>
+  <op name="relate" arg3="000FFF212" arg1="A" arg2="B">
+    true
+  </op>
+</test>
+<test><op name="contains"   arg1="A" arg2="B"> false </op></test>
+<test><op name="coveredBy"  arg1="A" arg2="B"> false </op></test>
+<test><op name="covers"     arg1="A" arg2="B"> false </op></test>
+<test><op name="crosses"    arg1="A" arg2="B"> true  </op></test>
+<test><op name="disjoint"   arg1="A" arg2="B"> false </op></test>
+<test><op name="equalsTopo" arg1="A" arg2="B"> false </op></test>
+<test><op name="intersects" arg1="A" arg2="B"> true  </op></test>
+<test><op name="overlaps"   arg1="A" arg2="B"> false </op></test>
+<test><op name="touches"    arg1="A" arg2="B"> false </op></test>
+<test><op name="within"     arg1="A" arg2="B"> false </op></test>
+</case>
+
+<case>
+  <desc>PmA - point in B: mod-2 I</desc>
+  <a>
+    POINT(40 40)
+  </a>
+  <b>
+    MULTIPOLYGON(
+      (
+        (0 40, 0 0, 40 0, 40 40, 0 40)), 
+      (
+        (40 80, 40 40, 80 40, 80 80, 40 80)))
+  </b>
+<test>
+  <op name="relate" arg3="F0FFFF212" arg1="A" arg2="B">
+    true
+  </op>
+</test>
+<test><op name="contains"   arg1="A" arg2="B"> false </op></test>
+<test><op name="coveredBy"  arg1="A" arg2="B"> true  </op></test>
+<test><op name="covers"     arg1="A" arg2="B"> false </op></test>
+<test><op name="crosses"    arg1="A" arg2="B"> false </op></test>
+<test><op name="disjoint"   arg1="A" arg2="B"> false </op></test>
+<test><op name="equalsTopo" arg1="A" arg2="B"> false </op></test>
+<test><op name="intersects" arg1="A" arg2="B"> true  </op></test>
+<test><op name="overlaps"   arg1="A" arg2="B"> false </op></test>
+<test><op name="touches"    arg1="A" arg2="B"> true  </op></test>
+<test><op name="within"     arg1="A" arg2="B"> false </op></test>
+</case>
+
+<case>
+  <desc>mPA - empty MultiPoint element for A</desc>
+  <a>
+    MULTIPOINT(EMPTY,(0 0))
+  </a>
+  <b>
+    POLYGON ((1 0,0 1,-1 0,0 -1, 1 0))
+  </b>
+<test>
+  <op name="relate" arg3="0FFFFF212" arg1="A" arg2="B">
+    true
+  </op>
+</test>
+<test><op name="contains"   arg1="A" arg2="B"> false </op></test>
+<test><op name="coveredBy"  arg1="A" arg2="B"> true  </op></test>
+<test><op name="covers"     arg1="A" arg2="B"> false </op></test>
+<test><op name="crosses"    arg1="A" arg2="B"> false </op></test>
+<test><op name="disjoint"   arg1="A" arg2="B"> false </op></test>
+<test><op name="equalsTopo" arg1="A" arg2="B"> false </op></test>
+<test><op name="intersects" arg1="A" arg2="B"> true  </op></test>
+<test><op name="overlaps"   arg1="A" arg2="B"> false </op></test>
+<test><op name="touches"    arg1="A" arg2="B"> false </op></test>
+<test><op name="within"     arg1="A" arg2="B"> true  </op></test>
+</case>
+
+<case>
+  <desc>mPA - empty MultiPoint element for A, on boundary of B</desc>
+  <a>
+    MULTIPOINT(EMPTY,(1 0))
+  </a>
+  <b>
+    POLYGON ((1 0,0 1,-1 0,0 -1, 1 0))
+  </b>
+<test>
+  <op name="relate" arg3="F0FFFF212" arg1="A" arg2="B">
+    true
+  </op>
+</test>
+<test><op name="contains"   arg1="A" arg2="B"> false </op></test>
+<test><op name="coveredBy"  arg1="A" arg2="B"> true  </op></test>
+<test><op name="covers"     arg1="A" arg2="B"> false </op></test>
+<test><op name="crosses"    arg1="A" arg2="B"> false </op></test>
+<test><op name="disjoint"   arg1="A" arg2="B"> false </op></test>
+<test><op name="equalsTopo" arg1="A" arg2="B"> false </op></test>
+<test><op name="intersects" arg1="A" arg2="B"> true  </op></test>
+<test><op name="overlaps"   arg1="A" arg2="B"> false </op></test>
+<test><op name="touches"    arg1="A" arg2="B"> true </op></test>
+<test><op name="within"     arg1="A" arg2="B"> false  </op></test>
+</case>
+
+<case>
+  <desc>mPA - empty MultiPoint element for B</desc>
+  <a>
+    POLYGON ((1 0,0 1,-1 0,0 -1, 1 0))
+  </a>
+  <b>
+    MULTIPOINT(EMPTY,(0 0))
+  </b>
+<test>
+  <op name="relate" arg3="0F2FF1FF2" arg1="A" arg2="B">
+    true
+  </op>
+</test>
+<test><op name="contains"   arg1="A" arg2="B"> true </op></test>
+<test><op name="coveredBy"  arg1="A" arg2="B"> false  </op></test>
+<test><op name="covers"     arg1="A" arg2="B"> true </op></test>
+<test><op name="crosses"    arg1="A" arg2="B"> false </op></test>
+<test><op name="disjoint"   arg1="A" arg2="B"> false </op></test>
+<test><op name="equalsTopo" arg1="A" arg2="B"> false </op></test>
+<test><op name="intersects" arg1="A" arg2="B"> true  </op></test>
+<test><op name="overlaps"   arg1="A" arg2="B"> false </op></test>
+<test><op name="touches"    arg1="A" arg2="B"> false </op></test>
+<test><op name="within"     arg1="A" arg2="B"> false  </op></test>
+</case>
+
+<case>
+  <desc>mPA - empty MultiPoint element for B, on boundary of A</desc>
+  <a>
+    POLYGON ((1 0,0 1,-1 0,0 -1, 1 0))
+  </a>
+  <b>
+    MULTIPOINT(EMPTY,(1 0))
+  </b>
+<test>
+  <op name="relate" arg3="FF20F1FF2" arg1="A" arg2="B">
+    true
+  </op>
+</test>
+<test><op name="contains"   arg1="A" arg2="B"> false </op></test>
+<test><op name="coveredBy"  arg1="A" arg2="B"> false  </op></test>
+<test><op name="covers"     arg1="A" arg2="B"> true </op></test>
+<test><op name="crosses"    arg1="A" arg2="B"> false </op></test>
+<test><op name="disjoint"   arg1="A" arg2="B"> false </op></test>
+<test><op name="equalsTopo" arg1="A" arg2="B"> false </op></test>
+<test><op name="intersects" arg1="A" arg2="B"> true  </op></test>
+<test><op name="overlaps"   arg1="A" arg2="B"> false </op></test>
+<test><op name="touches"    arg1="A" arg2="B"> true </op></test>
+<test><op name="within"     arg1="A" arg2="B"> false  </op></test>
+</case>
+
+<case>
+  <desc>PmA - empty MultiPolygon element</desc>
+  <a>
+    POINT(0 0)
+  </a>
+  <b>
+    MULTIPOLYGON (EMPTY, ((1 0,0 1,-1 0,0 -1, 1 0)))
+  </b>
+<test>
+  <op name="relate" arg3="0FFFFF212" arg1="A" arg2="B">
+    true
+  </op>
+</test>
+<test><op name="contains"   arg1="A" arg2="B"> false </op></test>
+<test><op name="coveredBy"  arg1="A" arg2="B"> true  </op></test>
+<test><op name="covers"     arg1="A" arg2="B"> false </op></test>
+<test><op name="crosses"    arg1="A" arg2="B"> false </op></test>
+<test><op name="disjoint"   arg1="A" arg2="B"> false </op></test>
+<test><op name="equalsTopo" arg1="A" arg2="B"> false </op></test>
+<test><op name="intersects" arg1="A" arg2="B"> true  </op></test>
+<test><op name="overlaps"   arg1="A" arg2="B"> false </op></test>
+<test><op name="touches"    arg1="A" arg2="B"> false </op></test>
+<test><op name="within"     arg1="A" arg2="B"> true  </op></test>
+</case>
+
+</run>

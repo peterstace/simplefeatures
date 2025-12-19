@@ -1,5 +1,7 @@
 package geom
 
+import "github.com/peterstace/simplefeatures/internal/jtsport/jts"
+
 // Relate calculates the DE-9IM matrix between two [Geometry] values,
 // describing how they relate to each other.
 //
@@ -21,42 +23,64 @@ package geom
 // The matrix is represented by a 9 character string, with entries in row-major
 // order (i.e. entries are ordered II, IB, IE, BI, BB, BE, EI, EB, EE).
 func Relate(a, b Geometry) (string, error) {
-	// TODO: don't need to return an error from this function
 	if a.IsEmpty() || b.IsEmpty() {
-		im := newMatrix()
-		im.set(imExterior, imExterior, '2')
-		if a.IsEmpty() && b.IsEmpty() {
-			return im.code(), nil
-		}
+		return relateWithEmptyInput(a, b), nil
+	}
+	// TODO: Optimize for when the envelopes don't intersect.
+	return jtsRelateNG(a, b)
+}
 
-		var flip bool
-		nonEmpty := b
-		if b.IsEmpty() {
-			nonEmpty = a
-			flip = true
-		}
-		switch nonEmpty.Dimension() {
-		case 0:
-			im.set(imExterior, imInterior, '0')
-			im.set(imExterior, imBoundary, 'F')
-		case 1:
-			im.set(imExterior, imInterior, '1')
-			if !nonEmpty.Boundary().IsEmpty() {
-				im.set(imExterior, imBoundary, '0')
-			}
-		case 2:
-			im.set(imExterior, imInterior, '2')
-			im.set(imExterior, imBoundary, '1')
-		}
-		if flip {
-			im.transpose()
-		}
-		return im.code(), nil
+// relateWithEmptyInput computes the DE-9IM matrix when at least one input is empty.
+func relateWithEmptyInput(a, b Geometry) string {
+	im := newMatrix()
+	im.set(imExterior, imExterior, '2')
+	if a.IsEmpty() && b.IsEmpty() {
+		return im.code()
 	}
 
-	overlay := newDCELFromGeometries(a, b)
-	im := overlay.extractIntersectionMatrix()
-	return im.code(), nil
+	var flip bool
+	nonEmpty := b
+	if b.IsEmpty() {
+		nonEmpty = a
+		flip = true
+	}
+	switch nonEmpty.Dimension() {
+	case 0:
+		im.set(imExterior, imInterior, '0')
+		im.set(imExterior, imBoundary, 'F')
+	case 1:
+		im.set(imExterior, imInterior, '1')
+		if !nonEmpty.Boundary().IsEmpty() {
+			im.set(imExterior, imBoundary, '0')
+		}
+	case 2:
+		im.set(imExterior, imInterior, '2')
+		im.set(imExterior, imBoundary, '1')
+	}
+	if flip {
+		im.transpose()
+	}
+	return im.code()
+}
+
+// jtsRelateNG invokes the JTS port's RelateNG operation.
+func jtsRelateNG(a, b Geometry) (string, error) {
+	var result string
+	err := catch(func() error {
+		wkbReader := jts.Io_NewWKBReader()
+		jtsA, err := wkbReader.ReadBytes(a.AsBinary())
+		if err != nil {
+			return wrap(err, "converting geometry A to JTS")
+		}
+		jtsB, err := wkbReader.ReadBytes(b.AsBinary())
+		if err != nil {
+			return wrap(err, "converting geometry B to JTS")
+		}
+		im := jts.OperationRelateng_RelateNG_RelateMatrix(jtsA, jtsB)
+		result = im.String()
+		return validateIntersectionMatrix(result)
+	})
+	return result, err
 }
 
 func relateMatchesAnyPattern(a, b Geometry, patterns ...string) (bool, error) {

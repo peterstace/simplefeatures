@@ -48,6 +48,21 @@ func (m *matrix) transpose() {
 	}
 }
 
+// validateIntersectionMatrix checks that a DE-9IM matrix string is valid.
+func validateIntersectionMatrix(mat string) error {
+	if len(mat) != 9 {
+		return intersectionMatrixError{reason: "length is not 9", matrix: mat}
+	}
+	for _, c := range mat {
+		switch c {
+		case 'F', '0', '1', '2':
+		default:
+			return intersectionMatrixError{reason: fmt.Sprintf("invalid character: %c", c), matrix: mat}
+		}
+	}
+	return nil
+}
+
 // RelateMatches checks to see if an intersection matrix matches against an
 // intersection matrix pattern. Each is a 9 character string that encodes a 3
 // by 3 matrix.
@@ -68,8 +83,8 @@ func (m *matrix) transpose() {
 func RelateMatches(intersectionMatrix, intersectionMatrixPattern string) (bool, error) {
 	mat := intersectionMatrix
 	pat := intersectionMatrixPattern
-	if len(mat) != 9 {
-		return false, errors.New("invalid matrix: length is not 9")
+	if err := validateIntersectionMatrix(mat); err != nil {
+		return false, err
 	}
 	if len(pat) != 9 {
 		return false, errors.New("invalid matrix pattern: length is not 9")
@@ -100,8 +115,6 @@ func RelateMatches(intersectionMatrix, intersectionMatrixPattern string) (bool, 
 			if p != '2' && p != 'T' && p != '*' {
 				return false, nil
 			}
-		default:
-			return false, fmt.Errorf("invalid character in intersection matrix: %c", m)
 		}
 	}
 	return true, nil

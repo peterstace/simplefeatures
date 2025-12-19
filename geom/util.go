@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"sort"
@@ -64,15 +65,6 @@ func uniquifyGroupedXYs(xys []XY) []XY {
 		}
 	}
 	return xys[:n]
-}
-
-func sequenceToXYs(seq Sequence) []XY {
-	n := seq.Length()
-	xys := make([]XY, seq.Length())
-	for i := 0; i < n; i++ {
-		xys[i] = seq.GetXY(i)
-	}
-	return xys
 }
 
 // fastMin is a faster but not functionally identical version of math.Min.
@@ -140,4 +132,26 @@ func arbitraryControlPoint(g Geometry) Point {
 	default:
 		panic(fmt.Sprintf("invalid geometry type: %d", int(typ)))
 	}
+}
+
+func catch(fn func() error) (err error) {
+	// In Go 1.21+, panic(nil) causes recover() to return a *runtime.PanicNilError
+	// rather than nil. In earlier versions, recover() returns nil for panic(nil),
+	// making it indistinguishable from "no panic". We emulate the Go 1.21+ behavior
+	// by tracking whether fn() completed normally. This logic can be simplified to
+	// just check `if r := recover(); r != nil` once we require Go 1.21 or later.
+	panicked := true
+	defer func() {
+		if panicked {
+			r := recover()
+			if r == nil {
+				err = errors.New("panic: panic called with nil argument")
+			} else {
+				err = fmt.Errorf("panic: %v", r)
+			}
+		}
+	}()
+	err = fn()
+	panicked = false
+	return
 }
