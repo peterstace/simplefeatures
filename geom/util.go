@@ -66,15 +66,6 @@ func uniquifyGroupedXYs(xys []XY) []XY {
 	return xys[:n]
 }
 
-func sequenceToXYs(seq Sequence) []XY {
-	n := seq.Length()
-	xys := make([]XY, seq.Length())
-	for i := 0; i < n; i++ {
-		xys[i] = seq.GetXY(i)
-	}
-	return xys
-}
-
 // fastMin is a faster but not functionally identical version of math.Min.
 func fastMin(a, b float64) float64 {
 	if math.IsNaN(a) || a < b {
@@ -140,4 +131,14 @@ func arbitraryControlPoint(g Geometry) Point {
 	default:
 		panic(fmt.Sprintf("invalid geometry type: %d", int(typ)))
 	}
+}
+
+func catch(fn func() error) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic: %v", r)
+		}
+	}()
+	err = fn()
+	return
 }
