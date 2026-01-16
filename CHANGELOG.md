@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add additional validation to help prevent OOMs during WKB parsing.
+
 ## v0.56.0
 
 2025-11-21
