@@ -75,6 +75,13 @@ func checkWKBParse(t *testing.T, pg PostGIS, candidates []string) {
 				}
 			}
 
+			// PostGIS uses EWKB (Extended WKB) by default, which includes SRID
+			// and extended dimension flags. Simplefeatures only supports
+			// standard WKB.
+			if isEWKB(wkb) {
+				t.Skip("PostGIS uses EWKB extensions not supported by simplefeatures")
+			}
+
 			_, sfErr := geom.UnmarshalWKB(buf)
 			isValid, reason := pg.WKBIsValidWithReason(wkb)
 			if (sfErr == nil) != isValid {
@@ -106,6 +113,31 @@ func hexStringToBytes(s string) ([]byte, error) {
 		buf = append(buf, byte(x))
 	}
 	return buf, nil
+}
+
+// isEWKB returns true if the WKB hex string uses EWKB extensions (SRID or
+// extended dimension flags). PostGIS uses EWKB by default but simplefeatures
+// only supports standard WKB.
+func isEWKB(wkbHex string) bool {
+	if len(wkbHex) < 10 {
+		return false
+	}
+	// Byte order is first byte, geometry type is next 4 bytes.
+	// EWKB flags are in the high byte of the geometry type.
+	var flagByte string
+	if wkbHex[0] == '0' && wkbHex[1] == '1' {
+		// Little endian: high byte is at positions 8-9.
+		flagByte = wkbHex[8:10]
+	} else {
+		// Big endian: high byte is at positions 2-3.
+		flagByte = wkbHex[2:4]
+	}
+	b, err := strconv.ParseUint(flagByte, 16, 8)
+	if err != nil {
+		return false
+	}
+	// Check for SRID (0x20), Z (0x80), or M (0x40) flags.
+	return b&0xE0 != 0
 }
 
 // hasImplicitHigherDimension returns true if the WKT has coordinates with more
