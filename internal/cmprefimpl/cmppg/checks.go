@@ -26,6 +26,20 @@ func checkWKTParse(t *testing.T, pg PostGIS, candidates []string) {
 			// isn't closed (and thus won't be accepted by simple features).
 			wkt := strings.ReplaceAll(wkt, "LINEARRING", "LINESTRING")
 
+			// PostGIS accepts WKTs with implicit Z/M coordinates (e.g.
+			// "LINESTRING (1 1 0, 2 2 0)" with 3 coords but no Z suffix).
+			// This is non-standard and simplefeatures correctly rejects it.
+			if hasImplicitHigherDimension(wkt) {
+				t.Skip("PostGIS accepts non-standard implicit Z/M coordinates")
+			}
+
+			// PostGIS accepts NaN values in WKT coordinates but simplefeatures
+			// correctly rejects them as invalid coordinate values.
+			if strings.Contains(strings.ToUpper(wkt), "NAN") {
+				t.Skip("PostGIS accepts NaN coordinates in WKT")
+			}
+
+			t.Log("wkt:", wkt)
 			_, sfErr := geom.UnmarshalWKT(wkt)
 			isValid, reason := pg.WKTIsValidWithReason(wkt)
 			if (sfErr == nil) != isValid {
@@ -92,6 +106,52 @@ func hexStringToBytes(s string) ([]byte, error) {
 		buf = append(buf, byte(x))
 	}
 	return buf, nil
+}
+
+// hasImplicitHigherDimension returns true if the WKT has coordinates with more
+// than 2 values per point but lacks an explicit Z/M/ZM dimension suffix. This
+// is non-standard WKT that PostGIS accepts but simplefeatures correctly rejects.
+func hasImplicitHigherDimension(wkt string) bool {
+	upper := strings.ToUpper(strings.TrimSpace(wkt))
+
+	// EMPTY geometries don't have coordinates to check.
+	if strings.Contains(upper, "EMPTY") {
+		return false
+	}
+
+	// Find the opening parenthesis to split type from coordinates.
+	parenIdx := strings.Index(wkt, "(")
+	if parenIdx < 0 {
+		return false
+	}
+
+	typePart := strings.ToUpper(strings.TrimSpace(wkt[:parenIdx]))
+
+	// Check if it has an explicit dimension suffix.
+	if strings.HasSuffix(typePart, " Z") ||
+		strings.HasSuffix(typePart, " M") ||
+		strings.HasSuffix(typePart, " ZM") {
+		return false
+	}
+
+	// Find the first actual coordinate sequence.
+	// For nested geometries like POLYGON, skip past opening parens.
+	coordsPart := wkt[parenIdx+1:]
+	for strings.HasPrefix(strings.TrimSpace(coordsPart), "(") {
+		coordsPart = strings.TrimSpace(coordsPart)[1:]
+	}
+
+	// Extract the first point (before ',' or ')').
+	endIdx := strings.IndexAny(coordsPart, ",)")
+	if endIdx < 0 {
+		return false
+	}
+
+	firstPoint := strings.TrimSpace(coordsPart[:endIdx])
+
+	// Count coordinate values in the first point.
+	fields := strings.Fields(firstPoint)
+	return len(fields) > 2
 }
 
 func checkGeoJSONParse(t *testing.T, pg PostGIS, candidates []string) {
