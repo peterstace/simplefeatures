@@ -225,11 +225,12 @@ func (p *wkbParser) parseLineString(ctype CoordinatesType) (LineString, error) {
 	if err != nil {
 		return LineString{}, err
 	}
-	floats := make([]float64, int(n)*ctype.Dimension())
-
-	if len(p.body) < 8*len(floats) {
+	// Check bounds BEFORE allocating to prevent OOM on malformed input.
+	bytesNeeded := uint64(n) * uint64(ctype.Dimension()) * 8
+	if bytesNeeded > uint64(len(p.body)) {
 		return LineString{}, wkbSyntaxError{"unexpected EOF"}
 	}
+	floats := make([]float64, int(n)*ctype.Dimension())
 
 	var seqData []byte
 	if p.no {
@@ -274,6 +275,10 @@ func (p *wkbParser) parsePolygon(ctype CoordinatesType) (Polygon, error) {
 	if n == 0 {
 		return Polygon{}.ForceCoordinatesType(ctype), nil
 	}
+	// Each ring needs at least 4 bytes for its point count.
+	if uint64(n)*4 > uint64(len(p.body)) {
+		return Polygon{}, wkbSyntaxError{"unexpected EOF"}
+	}
 	rings := make([]LineString, n)
 	for i := range rings {
 		rings[i], err = p.parseLineString(ctype)
@@ -291,6 +296,10 @@ func (p *wkbParser) parseMultiPoint(ctype CoordinatesType) (MultiPoint, error) {
 	}
 	if n == 0 {
 		return MultiPoint{}.ForceCoordinatesType(ctype), nil
+	}
+	// Each point WKB needs at least 5 bytes (1 byte order + 4 type).
+	if uint64(n)*5 > uint64(len(p.body)) {
+		return MultiPoint{}, wkbSyntaxError{"unexpected EOF"}
 	}
 	pts := make([]Point, n)
 	for i := uint32(0); i < n; i++ {
@@ -314,6 +323,10 @@ func (p *wkbParser) parseMultiLineString(ctype CoordinatesType) (MultiLineString
 	if n == 0 {
 		return MultiLineString{}.ForceCoordinatesType(ctype), nil
 	}
+	// Each linestring WKB needs at least 9 bytes (1 byte order + 4 type + 4 point count).
+	if uint64(n)*9 > uint64(len(p.body)) {
+		return MultiLineString{}, wkbSyntaxError{"unexpected EOF"}
+	}
 	lss := make([]LineString, n)
 	for i := uint32(0); i < n; i++ {
 		geom, err := p.inner()
@@ -336,6 +349,10 @@ func (p *wkbParser) parseMultiPolygon(ctype CoordinatesType) (MultiPolygon, erro
 	if n == 0 {
 		return MultiPolygon{}.ForceCoordinatesType(ctype), nil
 	}
+	// Each polygon WKB needs at least 9 bytes (1 byte order + 4 type + 4 ring count).
+	if uint64(n)*9 > uint64(len(p.body)) {
+		return MultiPolygon{}, wkbSyntaxError{"unexpected EOF"}
+	}
 	polys := make([]Polygon, n)
 	for i := uint32(0); i < n; i++ {
 		geom, err := p.inner()
@@ -357,6 +374,10 @@ func (p *wkbParser) parseGeometryCollection(ctype CoordinatesType) (GeometryColl
 	}
 	if n == 0 {
 		return GeometryCollection{}.ForceCoordinatesType(ctype), nil
+	}
+	// Each geometry needs at least 5 bytes (1 byte order + 4 type).
+	if uint64(n)*5 > uint64(len(p.body)) {
+		return GeometryCollection{}, wkbSyntaxError{"unexpected EOF"}
 	}
 	geoms := make([]Geometry, n)
 	for i := uint32(0); i < n; i++ {
