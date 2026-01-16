@@ -538,12 +538,18 @@ func checkPointOnSurface(g geom.Geometry, log *log.Logger) error {
 	}
 
 	if g.Dimension() == 2 && !g.IsEmpty() && !g.IsGeometryCollection() {
+		// Skip the contains check for degenerate polygons with near-zero area,
+		// since the Contains predicate is unreliable due to floating point
+		// precision issues.
+		if g.Area() < 1e-9 {
+			return nil
+		}
 		contains, err := rawgeos.Contains(g, pt)
 		if err != nil {
 			return err
 		}
 		if !contains {
-			log.Printf("the input doesn't contain the pt")
+			log.Printf("the input doesn't contain the pt: %v", pt.AsText())
 			return errMismatch
 		}
 	}
@@ -594,10 +600,14 @@ func checkRotatedMinimumAreaBoundingRectangle(g geom.Geometry, log *log.Logger) 
 	// for this, the comparison between the GEOS result and the simplefeatures
 	// result is broken into two parts...
 
-	// ...First, the areas are compared.
-	const areaDiffThreshold = 1e-10
-	if math.Abs(wantArea-gotArea) > areaDiffThreshold {
-		log.Printf("areas differ by more than %v", areaDiffThreshold)
+	// ...First, the areas are compared. Use both relative and absolute
+	// tolerance since the areas can vary widely in magnitude.
+	diff := math.Abs(wantArea - gotArea)
+	maxArea := math.Max(math.Abs(wantArea), math.Abs(gotArea))
+	const relTol = 1e-6
+	const absTol = 1e-9
+	if diff > relTol*maxArea && diff > absTol {
+		log.Printf("areas differ beyond tolerance (rel=%v, abs=%v)", relTol, absTol)
 		log.Printf("want: (area %v) %v", wantArea, want.AsText())
 		log.Printf("got:  (area %v) %v", gotArea, got.AsText())
 		return errMismatch
