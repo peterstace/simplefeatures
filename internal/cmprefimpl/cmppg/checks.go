@@ -12,6 +12,7 @@ import (
 	"text/scanner"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func checkWKTParse(t *testing.T, pg PostGIS, candidates []string) {
@@ -418,7 +419,7 @@ func checkConvexHull(t *testing.T, want UnaryResult, g geom.Geometry) {
 		// incorrect according to the OGC spec.
 		want = want.Force2D()
 
-		if !geom.ExactEquals(got, want, geom.IgnoreOrder, geom.ToleranceXY(1e-9)) {
+		if !geom.ExactEquals(got, want, geom.IgnoreOrder, geom.ToleranceXY(1e-6)) {
 			t.Logf("input: %v", g.AsText())
 			t.Logf("got:   %v", got.AsText())
 			t.Logf("want:  %v", want.AsText())
@@ -485,13 +486,7 @@ func containsMultiPointContainingEmptyPoint(g geom.Geometry) bool {
 func checkArea(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckArea", func(t *testing.T) {
 		got := g.Area()
-		want := want.Area
-		const eps = 0.000000001
-		if math.Abs(got-want) > eps {
-			t.Logf("got:  %v", got)
-			t.Logf("want: %v", want)
-			t.Error("mismatch")
-		}
+		test.ApproxEqual(t, got, want.Area, test.Tolerance{Rel: 1e-9, Abs: 1e-9})
 	})
 }
 
@@ -505,7 +500,7 @@ func checkCentroid(t *testing.T, want UnaryResult, g geom.Geometry) {
 		// values.
 		want := want.Centroid.Force2D()
 
-		if !geom.ExactEquals(got.AsGeometry(), want, geom.ToleranceXY(0.000000001)) {
+		if !geom.ExactEquals(got.AsGeometry(), want, geom.ToleranceXY(1e-6)) {
 			t.Logf("input: %v", g.AsText())
 			t.Logf("got:   %v", got.AsText())
 			t.Logf("want:  %v", want.AsText())

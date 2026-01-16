@@ -125,6 +125,17 @@ func (c exactEqualsComparator) geometriesEq(g1, g2 Geometry) bool {
 }
 
 func (c exactEqualsComparator) lineStringsEq(ls1, ls2 LineString) bool {
+	return c.curveEq(ls1, ls2, false)
+}
+
+// ringsEq compares two polygon rings, always treating them as rings for
+// rotation/reversal checks even if they don't pass IsRing() (e.g. due to
+// collinear points making them non-simple).
+func (c exactEqualsComparator) ringsEq(ls1, ls2 LineString) bool {
+	return c.curveEq(ls1, ls2, true)
+}
+
+func (c exactEqualsComparator) curveEq(ls1, ls2 LineString, assumeRings bool) bool {
 	c1 := ls1.Coordinates()
 	c2 := ls2.Coordinates()
 
@@ -160,7 +171,7 @@ func (c exactEqualsComparator) lineStringsEq(ls1, ls2 LineString) bool {
 
 	// Next check if one ring is just the reversal of the other.
 	reversed := func(i int) int { return n - i - 1 }
-	areRings := ls1.IsRing() && ls2.IsRing()
+	areRings := assumeRings || (ls1.IsRing() && ls2.IsRing())
 	if revEq := sameCurve(identity, reversed); revEq || !areRings {
 		return revEq
 	}
@@ -213,13 +224,13 @@ func (c exactEqualsComparator) polygonsEq(p1, p2 Polygon) bool {
 	if n != p2.NumInteriorRings() {
 		return false
 	}
-	if !c.lineStringsEq(p1.ExteriorRing(), p2.ExteriorRing()) {
+	if !c.ringsEq(p1.ExteriorRing(), p2.ExteriorRing()) {
 		return false
 	}
 	ringsEq := func(i, j int) bool {
 		ringA := p1.InteriorRingN(i)
 		ringB := p2.InteriorRingN(j)
-		return c.lineStringsEq(ringA, ringB)
+		return c.ringsEq(ringA, ringB)
 	}
 	return c.structureEq(n, ringsEq)
 }
