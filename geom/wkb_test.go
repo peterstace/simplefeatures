@@ -493,6 +493,48 @@ func TestWKBParserSyntaxError(t *testing.T) {
 				"0000000000000000", // 0
 			"MultiPolygon contains non-Polygon element",
 		},
+		{
+			"linestring with inflated point count",
+			"00" + // Big endian
+				"00000002" + // LineString XY
+				"0000FFFF", // n=65535 points, but no coordinate data
+			"unexpected EOF",
+		},
+		{
+			"polygon with inflated ring count",
+			"00" + // Big endian
+				"00000003" + // Polygon XY
+				"0000FFFF", // n=65535 rings, but no ring data
+			"unexpected EOF",
+		},
+		{
+			"multipoint with inflated point count",
+			"00" + // Big endian
+				"00000004" + // MultiPoint XY
+				"0000FFFF", // n=65535 points, but no point data
+			"unexpected EOF",
+		},
+		{
+			"multilinestring with inflated linestring count",
+			"00" + // Big endian
+				"00000005" + // MultiLineString XY
+				"0000FFFF", // n=65535 linestrings, but no data
+			"unexpected EOF",
+		},
+		{
+			"multipolygon with inflated polygon count",
+			"00" + // Big endian
+				"00000006" + // MultiPolygon XY
+				"0000FFFF", // n=65535 polygons, but no data
+			"unexpected EOF",
+		},
+		{
+			"geometrycollection with inflated geometry count",
+			"00" + // Big endian
+				"00000007" + // GeometryCollection XY
+				"0000FFFF", // n=65535 geometries, but no data
+			"unexpected EOF",
+		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
 			wkb := hexStringToBytes(t, tc.wkbHex)
