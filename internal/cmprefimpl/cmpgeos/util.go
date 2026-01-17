@@ -275,13 +275,13 @@ func linearAndNonSimple(g geom.Geometry) bool {
 // option for ExactEquals would allow these comparisons to succeed.
 func hasLargeCoordinates(g geom.Geometry) bool {
 	env := g.Envelope()
-	min, max, ok := env.MinMaxXYs()
+	lo, hi, ok := env.MinMaxXYs()
 	if !ok {
 		return false
 	}
 	const threshold = 1e6
-	return math.Abs(min.X) > threshold ||
-		math.Abs(min.Y) > threshold ||
-		math.Abs(max.X) > threshold ||
-		math.Abs(max.Y) > threshold
+	return math.Abs(lo.X) > threshold ||
+		math.Abs(lo.Y) > threshold ||
+		math.Abs(hi.X) > threshold ||
+		math.Abs(hi.Y) > threshold
 }
