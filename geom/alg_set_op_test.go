@@ -1059,7 +1059,7 @@ func TestBinaryOp(t *testing.T) {
 			input1: "MULTILINESTRING((0 0,1 1),(0 1,1 0))",
 			input2: "LINESTRING(0 1,0.3333333333 0.6666666667,1 0)",
 			union:  "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1),(0 1,0.5 0.5),(0.5 0.5,1 0),(0 1,0.3333333333 0.6666666667,0.5 0.5))", // TODO: I'm not 100% sure about this, but it's what JTS port is giving back.
-			relate: "1F1F001F2",
+			relate: "0F1F001F2",
 		},
 		{
 			input1: "POLYGON((-1 0,0 0,0 1,-1 0))",
@@ -1290,10 +1290,20 @@ func TestBinaryOp(t *testing.T) {
 			// The bug is in RelateNG.computeLineEnds() which skips lines with
 			// disjoint envelopes after finding one exterior intersection,
 			// incorrectly skipping boundary points. GEOS correctly returns
-			// FF1FF0102. TODO: update to FF1FF0102 when JTS is fixed.
+			// FF1FF0102. Now using RelateOp instead of RelateNG.
 			input1: "LINESTRING(10 10,20 20)",
 			input2: "MULTILINESTRING((0 0,1 0),(1 0,2 0),(-1 0,0 0))",
-			relate: "FF1FF01F2",
+			relate: "FF1FF0102",
+		},
+		{
+			// Polygon with a hole that touches the shell. The hole vertex
+			// (50,200) lies on the shell edge between (0,200) and (200,200).
+			// JTS RelateNG has a bug for this case, returning "21211F212"
+			// instead of "2FF11F212". We use RelateOp which handles this
+			// correctly. See docs/jts_port_relate_bug.md.
+			input1: "POLYGON((200 200,200 0,0 0,0 200,200 200),(100 100,50 100,50 200,100 100))",
+			input2: "POLYGON((-200 -200,200 -200,200 200,-200 200,-200 -200))",
+			relate: "2FF11F212",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {

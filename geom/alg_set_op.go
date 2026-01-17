@@ -4,7 +4,6 @@ import "github.com/peterstace/simplefeatures/internal/jtsport/jts"
 
 func init() {
 	jts.Geom_GeometryOverlay_SetOverlayImpl("NG")
-	jts.Geom_GeometryRelate_SetRelateImpl("NG")
 }
 
 // TODO: Optimise operations by comparing bounding boxes first.
