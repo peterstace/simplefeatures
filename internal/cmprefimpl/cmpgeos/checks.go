@@ -1012,20 +1012,46 @@ func checkRelate(g1, g2 geom.Geometry, log *log.Logger) error {
 		return nil
 	}
 
-	// There is a bug in GEOS that triggers when linear elements have no
-	// boundary (e.g. due to the mod-2 rule).  The result of the bug is that
-	// the EB (or BE) is reported as 0 rather than F.
-	if linearAndEmptyBoundary(g1) || linearAndEmptyBoundary(g2) {
-		return nil
-	}
-
 	if got != want {
+		// There is a bug in JTS (https://github.com/locationtech/jts/issues/1175)
+		// that triggers when computing Relate involving linear geometries. The
+		// bug causes JTS to report F instead of 0 for the EB (position 7) or BE
+		// (position 5) elements of the DE-9IM matrix. Accept this known
+		// difference rather than failing.
+		if isKnownJTSRelateBug(got, want, g1, g2) {
+			return nil
+		}
 		log.Printf("want: %v", want)
 		log.Printf("got:  %v", got)
 		return errMismatch
 	}
 
 	return nil
+}
+
+// isKnownJTSRelateBug returns true if the difference between got and want is
+// due to a known JTS bug where the EB (position 7) or BE (position 5) element
+// is incorrectly reported as F instead of 0 when linear geometries are involved.
+func isKnownJTSRelateBug(got, want string, g1, g2 geom.Geometry) bool {
+	if len(got) != 9 || len(want) != 9 {
+		return false
+	}
+	// At least one geometry must be linear for this bug to apply.
+	if g1.Dimension() != 1 && g2.Dimension() != 1 {
+		return false
+	}
+	for i := 0; i < 9; i++ {
+		if got[i] == want[i] {
+			continue
+		}
+		// The known bug pattern: JTS reports F where GEOS reports 0, at
+		// positions 5 (BE) or 7 (EB).
+		if (i == 5 || i == 7) && got[i] == 'F' && want[i] == '0' {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 func checkRelateMatch(log *log.Logger) error {

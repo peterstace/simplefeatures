@@ -177,7 +177,7 @@ func jtsOverlayOp(a, b Geometry, opCode int) (Geometry, error) {
 		}
 		jtsResult := jts.OperationOverlayng_OverlayNGRobust_Overlay(jtsA, jtsB, opCode)
 		wkbWriter := jts.Io_NewWKBWriter()
-		result, err = UnmarshalWKB(wkbWriter.Write(jtsResult))
+		result, err = UnmarshalWKB(wkbWriter.Write(jtsResult), NoValidate{})
 		return wrap(err, "converting JTS overlay result to simplefeatures")
 	})
 	return result, err
@@ -234,7 +234,7 @@ func jtsUnaryUnion(g Geometry) (Geometry, error) {
 		}
 		jtsResult := jts.OperationOverlayng_OverlayNGRobust_Union(jtsG)
 		wkbWriter := jts.Io_NewWKBWriter()
-		result, err = UnmarshalWKB(wkbWriter.Write(jtsResult))
+		result, err = UnmarshalWKB(wkbWriter.Write(jtsResult), NoValidate{})
 		return wrap(err, "converting JTS union result to simplefeatures")
 	})
 	return result, err

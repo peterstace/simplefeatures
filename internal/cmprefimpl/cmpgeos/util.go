@@ -267,10 +267,6 @@ func linearAndNonSimple(g geom.Geometry) bool {
 	return g.Dimension() == 1 && wellDefined && !simple
 }
 
-func linearAndEmptyBoundary(g geom.Geometry) bool {
-	return g.Dimension() == 1 && g.Boundary().IsEmpty()
-}
-
 // hasLargeCoordinates returns true if the geometry has any coordinates with
 // magnitude large enough to cause floating point precision issues when
 // comparing the results of operations performed on this geometry. The
