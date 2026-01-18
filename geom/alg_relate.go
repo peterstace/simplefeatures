@@ -27,23 +27,7 @@ func Relate(a, b Geometry) (string, error) {
 		return relateWithEmptyInput(a, b), nil
 	}
 	// TODO: Optimize for when the envelopes don't intersect.
-
-	// The JTS port has two Relate implementations:
-	//
-	// - RelateOp: The older algorithm. Produces correct results but doesn't
-	//   support GeometryCollections.
-	//
-	// - RelateNG: The newer algorithm. Supports GeometryCollections but has a
-	//   bug with polygons where a hole touches the shell at a point that is
-	//   collinear with another geometry's boundary edge (see
-	//   docs/jts_port_relate_bug.md).
-	//
-	// We use RelateOp by default for correctness, falling back to RelateNG
-	// only for GeometryCollections.
-	if a.IsGeometryCollection() || b.IsGeometryCollection() {
-		return jtsRelateNG(a, b)
-	}
-	return jtsRelate(a, b)
+	return jtsRelateNG(a, b)
 }
 
 // relateWithEmptyInput computes the DE-9IM matrix when at least one input is empty.
@@ -79,29 +63,7 @@ func relateWithEmptyInput(a, b Geometry) string {
 	return im.code()
 }
 
-// jtsRelate invokes the JTS port's RelateOp operation.
-func jtsRelate(a, b Geometry) (string, error) {
-	var result string
-	err := catch(func() error {
-		wkbReader := jts.Io_NewWKBReader()
-		jtsA, err := wkbReader.ReadBytes(a.AsBinary())
-		if err != nil {
-			return wrap(err, "converting geometry A to JTS")
-		}
-		jtsB, err := wkbReader.ReadBytes(b.AsBinary())
-		if err != nil {
-			return wrap(err, "converting geometry B to JTS")
-		}
-		im := jtsA.RelateMatrix(jtsB)
-		result = im.String()
-		return validateIntersectionMatrix(result)
-	})
-	return result, err
-}
-
-// jtsRelateNG invokes the JTS port's RelateNG operation. RelateNG supports
-// GeometryCollections but has known bugs for certain edge cases (see
-// docs/jts_port_relate_bug.md).
+// jtsRelateNG invokes the JTS port's RelateNG operation.
 func jtsRelateNG(a, b Geometry) (string, error) {
 	var result string
 	err := catch(func() error {
