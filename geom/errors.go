@@ -135,3 +135,17 @@ type forbiddenForeignMemberError struct {
 func (e forbiddenForeignMemberError) Error() string {
 	return "disallowed foreign member: " + e.memberName
 }
+
+// intersectionMatrixError is an error used to indicate that a DE-9IM
+// intersection matrix string is invalid.
+type intersectionMatrixError struct {
+	// reason should describe the invalid syntax (as opposed to describing the
+	// syntax rule that was broken).
+	reason string
+	// matrix is the invalid intersection matrix string.
+	matrix string
+}
+
+func (e intersectionMatrixError) Error() string {
+	return fmt.Sprintf("invalid intersection matrix %q: %s", e.matrix, e.reason)
+}

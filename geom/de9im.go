@@ -51,13 +51,13 @@ func (m *matrix) transpose() {
 // validateIntersectionMatrix checks that a DE-9IM matrix string is valid.
 func validateIntersectionMatrix(mat string) error {
 	if len(mat) != 9 {
-		return errors.New("invalid matrix: length is not 9")
+		return intersectionMatrixError{reason: "length is not 9", matrix: mat}
 	}
 	for _, c := range mat {
 		switch c {
 		case 'F', '0', '1', '2':
 		default:
-			return fmt.Errorf("invalid character in intersection matrix: %c", c)
+			return intersectionMatrixError{reason: fmt.Sprintf("invalid character: %c", c), matrix: mat}
 		}
 	}
 	return nil
