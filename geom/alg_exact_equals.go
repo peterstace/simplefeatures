@@ -110,7 +110,7 @@ func (c exactEqualsComparator) geometriesEq(g1, g2 Geometry) bool {
 	case TypeMultiPoint:
 		return c.multiPointsEq(g1.MustAsMultiPoint(), g2.MustAsMultiPoint())
 	case TypeLineString:
-		return c.lineStringsEq(g1.MustAsLineString(), g2.MustAsLineString())
+		return c.lineStringsEq(g1.MustAsLineString(), g2.MustAsLineString(), false)
 	case TypeMultiLineString:
 		return c.multiLineStringsEq(g1.MustAsMultiLineString(), g2.MustAsMultiLineString())
 	case TypePolygon:
@@ -124,18 +124,7 @@ func (c exactEqualsComparator) geometriesEq(g1, g2 Geometry) bool {
 	}
 }
 
-func (c exactEqualsComparator) lineStringsEq(ls1, ls2 LineString) bool {
-	return c.curveEq(ls1, ls2, false)
-}
-
-// ringsEq compares two polygon rings, always treating them as rings for
-// rotation/reversal checks even if they don't pass IsRing() (e.g. due to
-// collinear points making them non-simple).
-func (c exactEqualsComparator) ringsEq(ls1, ls2 LineString) bool {
-	return c.curveEq(ls1, ls2, true)
-}
-
-func (c exactEqualsComparator) curveEq(ls1, ls2 LineString, assumeRings bool) bool {
+func (c exactEqualsComparator) lineStringsEq(ls1, ls2 LineString, allowRotation bool) bool {
 	c1 := ls1.Coordinates()
 	c2 := ls2.Coordinates()
 
@@ -169,10 +158,10 @@ func (c exactEqualsComparator) curveEq(ls1, ls2 LineString, assumeRings bool) bo
 		return equal
 	}
 
-	// Next check if one ring is just the reversal of the other.
+	// Next check if one curve is just the reversal of the other.
 	reversed := func(i int) int { return n - i - 1 }
-	areRings := assumeRings || (ls1.IsRing() && ls2.IsRing())
-	if revEq := sameCurve(identity, reversed); revEq || !areRings {
+	areClosed := allowRotation && ls1.IsClosed() && ls2.IsClosed()
+	if revEq := sameCurve(identity, reversed); revEq || !areClosed {
 		return revEq
 	}
 
@@ -224,13 +213,13 @@ func (c exactEqualsComparator) polygonsEq(p1, p2 Polygon) bool {
 	if n != p2.NumInteriorRings() {
 		return false
 	}
-	if !c.ringsEq(p1.ExteriorRing(), p2.ExteriorRing()) {
+	if !c.lineStringsEq(p1.ExteriorRing(), p2.ExteriorRing(), true) {
 		return false
 	}
 	ringsEq := func(i, j int) bool {
 		ringA := p1.InteriorRingN(i)
 		ringB := p2.InteriorRingN(j)
-		return c.ringsEq(ringA, ringB)
+		return c.lineStringsEq(ringA, ringB, true)
 	}
 	return c.structureEq(n, ringsEq)
 }
@@ -246,7 +235,7 @@ func (c exactEqualsComparator) multiLineStringsEq(mls1, mls2 MultiLineString) bo
 	lsEq := func(i, j int) bool {
 		lsA := mls1.LineStringN(i)
 		lsB := mls2.LineStringN(j)
-		return c.lineStringsEq(lsA, lsB)
+		return c.lineStringsEq(lsA, lsB, false)
 	}
 	return c.structureEq(n, lsEq)
 }

@@ -4,6 +4,9 @@
 
 - Add additional validation to help prevent OOMs during WKB parsing.
 
+- Fix `ExactEquals` with `IgnoreOrder` incorrectly returning false for polygons
+  with non-simple rings that differ only by rotation.
+
 ## v0.56.0
 
 2025-11-21
