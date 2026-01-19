@@ -9,6 +9,27 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
+func Eq[T comparable](tb testing.TB, got, want T) {
+	tb.Helper()
+	if got != want {
+		tb.Fatalf("got:  %v\nwant: %v", got, want)
+	}
+}
+
+func True(tb testing.TB, cond bool) {
+	tb.Helper()
+	if !cond {
+		tb.Fatal("condition is false, want true")
+	}
+}
+
+func False(tb testing.TB, cond bool) {
+	tb.Helper()
+	if cond {
+		tb.Fatal("condition is true, want false")
+	}
+}
+
 func NoErr(tb testing.TB, err error) {
 	tb.Helper()
 	if err != nil {
