@@ -134,11 +134,23 @@ func arbitraryControlPoint(g Geometry) Point {
 }
 
 func catch(fn func() error) (err error) {
+	// In Go 1.21+, panic(nil) causes recover() to return a *runtime.PanicNilError
+	// rather than nil. In earlier versions, recover() returns nil for panic(nil),
+	// making it indistinguishable from "no panic". We emulate the Go 1.21+ behavior
+	// by tracking whether fn() completed normally. This logic can be simplified to
+	// just check `if r := recover(); r != nil` once we require Go 1.21 or later.
+	panicked := true
 	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("panic: %v", r)
+		if panicked {
+			r := recover()
+			if r == nil {
+				err = fmt.Errorf("panic: panic called with nil argument")
+			} else {
+				err = fmt.Errorf("panic: %v", r)
+			}
 		}
 	}()
 	err = fn()
+	panicked = false
 	return
 }
