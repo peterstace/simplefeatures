@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestExactEqualsZTolerance(t *testing.T) {
@@ -194,21 +195,12 @@ func TestExactEquals(t *testing.T) {
 		{"ln_a", "ln_d"},
 		{"ls_a", "ls_c"},
 
-		{"ls_m", "ls_n"},
-		{"ls_m", "ls_o"},
+		// ls_m/n/o are CCW rotations of each other, ls_p/q/r are CW rotations.
+		// For standalone LineStrings, only reversal is considered (not rotation),
+		// so only the reversal pairs are equal: (m,p), (n,q), (o,r).
 		{"ls_m", "ls_p"},
-		{"ls_m", "ls_q"},
-		{"ls_m", "ls_r"},
-		{"ls_n", "ls_o"},
-		{"ls_n", "ls_p"},
 		{"ls_n", "ls_q"},
-		{"ls_n", "ls_r"},
-		{"ls_o", "ls_p"},
-		{"ls_o", "ls_q"},
 		{"ls_o", "ls_r"},
-		{"ls_p", "ls_q"},
-		{"ls_p", "ls_r"},
-		{"ls_q", "ls_r"},
 
 		{"mp_2_c", "mp_2_d"},
 
@@ -318,4 +310,16 @@ func TestExactEquals(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestExactEqualsNonSimpleRing(t *testing.T) {
+	// Note: Polygons are invalid, but that shouldn't stop ExactEquals from
+	// working (in particular, the IgonreOrder option).
+	const (
+		wkt1 = "POLYGON((0 0,3 3,3 0,0 3,0 0),(1 1,2 2,2 1,1 2,1 1))"
+		wkt2 = "POLYGON((0 0,3 3,3 0,0 3,0 0),(2 2,2 1,1 2,1 1,2 2))"
+	)
+	g1 := geomFromWKT(t, wkt1, geom.NoValidate{})
+	g2 := geomFromWKT(t, wkt2, geom.NoValidate{})
+	test.True(t, geom.ExactEquals(g1, g2, geom.IgnoreOrder))
 }
