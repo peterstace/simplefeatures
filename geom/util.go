@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"sort"
@@ -144,7 +145,7 @@ func catch(fn func() error) (err error) {
 		if panicked {
 			r := recover()
 			if r == nil {
-				err = fmt.Errorf("panic: panic called with nil argument")
+				err = errors.New("panic: panic called with nil argument")
 			} else {
 				err = fmt.Errorf("panic: %v", r)
 			}
