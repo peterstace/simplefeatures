@@ -464,6 +464,44 @@ Use `java.Round()` instead of `math.Round()` when porting
 Use `java.AbsInt()` when porting `Math.abs()` calls on integer values.
 Go's `math.Abs()` only works on `float64`, so this provides the integer version.
 
+## Map Iteration Order
+
+**Go's map iteration order is randomized on each iteration**, while Java's
+`HashMap` iteration order is consistent (though unspecified) within a single JVM
+run, and Java's `TreeMap` provides sorted iteration by key.
+
+When transliterating Java code that iterates over a map and the iteration order
+affects output (e.g., building a result list), use `java.SortedKeys()` to ensure
+deterministic behavior:
+
+```java
+// Java - HashMap iteration (consistent within JVM run)
+for (Entry<Coordinate, Point> entry : map.entrySet()) {
+    resultList.add(entry.getValue());
+}
+```
+
+```go
+// Go - sort keys for consistent iteration
+for _, key := range java.SortedKeys(m) {
+    resultList = append(resultList, m[key])
+}
+```
+
+This applies to both `HashMap` and `TreeMap` translations. The sorting ensures
+the Go code produces consistent output across runs, matching the behavioral
+consistency of Java.
+
+**When to use `java.SortedKeys()`:**
+- When iteration order affects output (building result collections)
+- When iteration order affects algorithm correctness
+- When translating Java `TreeMap` (which explicitly guarantees sorted order)
+
+**When NOT needed:**
+- Read-only lookups (`map[key]`)
+- Iteration where order doesn't matter (e.g., summing all values)
+- Maps only used for membership checks
+
 ## JUnit Assertions
 
 The `internal/jtsport/junit` package provides JUnit-style assertion helpers for

@@ -1625,7 +1625,6 @@ func TestUnaryUnionAndUnionMany(t *testing.T) {
 }
 
 func TestBinaryOpOutputOrdering(t *testing.T) {
-	t.Skip("this is failing with JTS port, not sure what to do with this yet")
 	for i, tc := range []struct {
 		wkt string
 	}{

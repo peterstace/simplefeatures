@@ -1,5 +1,7 @@
 package jts
 
+import "github.com/peterstace/simplefeatures/internal/jtsport/java"
+
 // OperationOverlayng_OverlayPoints performs an overlay operation on inputs
 // which are both point geometries.
 //
@@ -66,7 +68,8 @@ func (op *OperationOverlayng_OverlayPoints) GetResult() *Geom_Geometry {
 }
 
 func (op *OperationOverlayng_OverlayPoints) computeIntersection(map0, map1 map[string]*Geom_Point) {
-	for key, pt := range map0 {
+	for _, key := range java.SortedKeys(map0) {
+		pt := map0[key]
 		if _, exists := map1[key]; exists {
 			op.resultList = append(op.resultList, op.copyPoint(pt))
 		}
@@ -74,7 +77,8 @@ func (op *OperationOverlayng_OverlayPoints) computeIntersection(map0, map1 map[s
 }
 
 func (op *OperationOverlayng_OverlayPoints) computeDifference(map0, map1 map[string]*Geom_Point) {
-	for key, pt := range map0 {
+	for _, key := range java.SortedKeys(map0) {
+		pt := map0[key]
 		if _, exists := map1[key]; !exists {
 			op.resultList = append(op.resultList, op.copyPoint(pt))
 		}
@@ -83,11 +87,12 @@ func (op *OperationOverlayng_OverlayPoints) computeDifference(map0, map1 map[str
 
 func (op *OperationOverlayng_OverlayPoints) computeUnion(map0, map1 map[string]*Geom_Point) {
 	// Copy all A points.
-	for _, p := range map0 {
-		op.resultList = append(op.resultList, op.copyPoint(p))
+	for _, key := range java.SortedKeys(map0) {
+		op.resultList = append(op.resultList, op.copyPoint(map0[key]))
 	}
 
-	for key, pt := range map1 {
+	for _, key := range java.SortedKeys(map1) {
+		pt := map1[key]
 		if _, exists := map0[key]; !exists {
 			op.resultList = append(op.resultList, op.copyPoint(pt))
 		}
