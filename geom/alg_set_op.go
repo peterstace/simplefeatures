@@ -2,10 +2,6 @@ package geom
 
 import "github.com/peterstace/simplefeatures/internal/jtsport/jts"
 
-func init() {
-	jts.Geom_GeometryOverlay_SetOverlayImpl("NG")
-}
-
 // TODO: Optimise operations by comparing bounding boxes first.
 
 // hasGC determines if any of the is a GeometryCollection. The JTS port doesn't
