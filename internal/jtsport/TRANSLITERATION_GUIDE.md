@@ -471,19 +471,20 @@ Go's `math.Abs()` only works on `float64`, so this provides the integer version.
 run, and Java's `TreeMap` provides sorted iteration by key.
 
 When transliterating Java code that iterates over a map and the iteration order
-affects output (e.g., building a result list), use `java.SortedKeys()` to ensure
-deterministic behavior:
+affects output (e.g., building a result list), use `java.SortedKeysString()` (for
+string keys) or `java.SortedKeysInt()` (for int keys) to ensure deterministic
+behavior:
 
 ```java
 // Java - HashMap iteration (consistent within JVM run)
-for (Entry<Coordinate, Point> entry : map.entrySet()) {
+for (Entry<String, Point> entry : map.entrySet()) {
     resultList.add(entry.getValue());
 }
 ```
 
 ```go
 // Go - sort keys for consistent iteration
-for _, key := range java.SortedKeys(m) {
+for _, key := range java.SortedKeysString(m) {
     resultList = append(resultList, m[key])
 }
 ```
@@ -492,7 +493,7 @@ This applies to both `HashMap` and `TreeMap` translations. The sorting ensures
 the Go code produces consistent output across runs, matching the behavioral
 consistency of Java.
 
-**When to use `java.SortedKeys()`:**
+**When to use `java.SortedKeysString()` / `java.SortedKeysInt()`:**
 - When iteration order affects output (building result collections)
 - When iteration order affects algorithm correctness
 - When translating Java `TreeMap` (which explicitly guarantees sorted order)

@@ -68,7 +68,7 @@ func (op *OperationOverlayng_OverlayPoints) GetResult() *Geom_Geometry {
 }
 
 func (op *OperationOverlayng_OverlayPoints) computeIntersection(map0, map1 map[string]*Geom_Point) {
-	for _, key := range java.SortedKeys(map0) {
+	for _, key := range java.SortedKeysString(map0) {
 		pt := map0[key]
 		if _, exists := map1[key]; exists {
 			op.resultList = append(op.resultList, op.copyPoint(pt))
@@ -77,7 +77,7 @@ func (op *OperationOverlayng_OverlayPoints) computeIntersection(map0, map1 map[s
 }
 
 func (op *OperationOverlayng_OverlayPoints) computeDifference(map0, map1 map[string]*Geom_Point) {
-	for _, key := range java.SortedKeys(map0) {
+	for _, key := range java.SortedKeysString(map0) {
 		pt := map0[key]
 		if _, exists := map1[key]; !exists {
 			op.resultList = append(op.resultList, op.copyPoint(pt))
@@ -87,11 +87,11 @@ func (op *OperationOverlayng_OverlayPoints) computeDifference(map0, map1 map[str
 
 func (op *OperationOverlayng_OverlayPoints) computeUnion(map0, map1 map[string]*Geom_Point) {
 	// Copy all A points.
-	for _, key := range java.SortedKeys(map0) {
+	for _, key := range java.SortedKeysString(map0) {
 		op.resultList = append(op.resultList, op.copyPoint(map0[key]))
 	}
 
-	for _, key := range java.SortedKeys(map1) {
+	for _, key := range java.SortedKeysString(map1) {
 		pt := map1[key]
 		if _, exists := map0[key]; !exists {
 			op.resultList = append(op.resultList, op.copyPoint(pt))
