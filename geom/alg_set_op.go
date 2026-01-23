@@ -4,8 +4,8 @@ import "github.com/peterstace/simplefeatures/internal/jtsport/jts"
 
 // TODO: Optimise operations by comparing bounding boxes first.
 
-// hasGC determines if any of the is a GeometryCollection. The JTS port doesn't
-// have full support for GeometryCollections, so we need to handle them
+// hasGC determines if either argument is a GeometryCollection. The JTS port
+// doesn't have full support for GeometryCollections, so we need to handle them
 // specially.
 //
 // Specifically, the JTS port has the following restrictions for binary overlay
@@ -48,25 +48,10 @@ func Intersection(a, b Geometry) (Geometry, error) {
 }
 
 func gcAwareIntersection(a, b Geometry) (Geometry, error) {
-	// Normalize GC inputs by unioning their parts.
-	if a.IsGeometryCollection() {
-		var err error
-		a, err = UnaryUnion(a)
-		if err != nil {
-			return Geometry{}, err
-		}
+	partsA, partsB, err := prepareOverlayInputParts(a, b)
+	if err != nil {
+		return Geometry{}, err
 	}
-	if b.IsGeometryCollection() {
-		var err error
-		b, err = UnaryUnion(b)
-		if err != nil {
-			return Geometry{}, err
-		}
-	}
-
-	// Extract non-GC parts from each input.
-	partsA := explodeGeometryCollections(nil, a)
-	partsB := explodeGeometryCollections(nil, b)
 
 	// The total result is the union of the intersections across the Cartesian
 	// product of parts.
@@ -77,13 +62,8 @@ func gcAwareIntersection(a, b Geometry) (Geometry, error) {
 			if err != nil {
 				return Geometry{}, err
 			}
-			if !result.IsEmpty() {
-				results = append(results, result)
-			}
+			results = append(results, result)
 		}
-	}
-	if len(results) == 0 {
-		return Geometry{}, nil
 	}
 	return UnaryUnion(NewGeometryCollection(results).AsGeometry())
 }
@@ -96,6 +76,29 @@ func explodeGeometryCollections(dst []Geometry, g Geometry) []Geometry {
 		return dst
 	}
 	return append(dst, g)
+}
+
+func prepareOverlayInputParts(a, b Geometry) ([]Geometry, []Geometry, error) {
+	// Normalize GC inputs by unioning their parts.
+	if a.IsGeometryCollection() {
+		var err error
+		a, err = UnaryUnion(a)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+	if b.IsGeometryCollection() {
+		var err error
+		b, err = UnaryUnion(b)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	// Extract non-GC parts from each input.
+	partsA := explodeGeometryCollections(nil, a)
+	partsB := explodeGeometryCollections(nil, b)
+	return partsA, partsB, nil
 }
 
 // Difference returns a geometry that represents the parts of input geometry A
@@ -112,25 +115,10 @@ func Difference(a, b Geometry) (Geometry, error) {
 }
 
 func gcAwareDifference(a, b Geometry) (Geometry, error) {
-	// Normalize GC inputs by unioning their parts.
-	if a.IsGeometryCollection() {
-		var err error
-		a, err = UnaryUnion(a)
-		if err != nil {
-			return Geometry{}, err
-		}
+	partsA, partsB, err := prepareOverlayInputParts(a, b)
+	if err != nil {
+		return Geometry{}, err
 	}
-	if b.IsGeometryCollection() {
-		var err error
-		b, err = UnaryUnion(b)
-		if err != nil {
-			return Geometry{}, err
-		}
-	}
-
-	// Extract non-GC parts from each input.
-	partsA := explodeGeometryCollections(nil, a)
-	partsB := explodeGeometryCollections(nil, b)
 
 	// The total result is the union of each part of A after each part of B has
 	// been removed (sequentially).
@@ -147,12 +135,7 @@ func gcAwareDifference(a, b Geometry) (Geometry, error) {
 				break
 			}
 		}
-		if !result.IsEmpty() {
-			results = append(results, result)
-		}
-	}
-	if len(results) == 0 {
-		return Geometry{}, nil
+		results = append(results, result)
 	}
 	return UnaryUnion(NewGeometryCollection(results).AsGeometry())
 }
