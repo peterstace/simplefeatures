@@ -6,7 +6,6 @@ package xmltest_test
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -15,10 +14,9 @@ import (
 )
 
 func TestXMLTestSuite(t *testing.T) {
-	jtsDir := findJTSDir(t)
 	testXMLDirs := []string{
-		filepath.Join(jtsDir, "modules/tests/src/test/resources/testxml/general"),
-		filepath.Join(jtsDir, "modules/tests/src/test/resources/testxml/validate"),
+		"testdata/general",
+		"testdata/validate",
 	}
 
 	var xmlFiles []string
@@ -111,31 +109,6 @@ func runTestWithRecovery(test *jts.JtstestTestrunner_Test) (passed bool, err err
 		return false, fmt.Errorf("%w", test.GetException()), nil
 	}
 	return test.IsPassed(), nil, nil
-}
-
-func findJTSDir(t *testing.T) string {
-	t.Helper()
-	// Try relative path from xmltest directory.
-	candidates := []string{
-		"../../../../locationtech/jts",
-		"../../../../../locationtech/jts",
-		os.Getenv("JTS_DIR"),
-	}
-
-	for _, candidate := range candidates {
-		if candidate == "" {
-			continue
-		}
-		absPath, err := filepath.Abs(candidate)
-		if err != nil {
-			continue
-		}
-		if _, err := os.Stat(filepath.Join(absPath, "modules")); err == nil {
-			return absPath
-		}
-	}
-	t.Skip("JTS directory not found; set JTS_DIR environment variable")
-	return ""
 }
 
 func isUnsupportedOp(opName string) bool {
