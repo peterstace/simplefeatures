@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/internal/jtsport/jts"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestXMLTestSuite(t *testing.T) {
@@ -22,15 +23,10 @@ func TestXMLTestSuite(t *testing.T) {
 	var xmlFiles []string
 	for _, dir := range testXMLDirs {
 		files, err := filepath.Glob(filepath.Join(dir, "*.xml"))
-		if err != nil {
-			t.Fatalf("error finding XML files in %s: %v", dir, err)
-		}
+		test.NoErr(t, err)
 		xmlFiles = append(xmlFiles, files...)
 	}
-
-	if len(xmlFiles) == 0 {
-		t.Fatal("no XML test files found")
-	}
+	test.True(t, len(xmlFiles) > 0)
 
 	reader := jts.JtstestTestrunner_NewTestReader()
 	var (
