@@ -46,39 +46,17 @@ func TestXMLTestSuite(t *testing.T) {
 								t.Skip("unsupported operation")
 							}
 
-							// Run test with panic recovery.
-							passed, err, panicked := runTestWithRecovery(tst)
-							if panicked != nil {
-								t.Fatalf("PANIC: %v", panicked)
+							tst.Run()
+							if tst.GetException() != nil {
+								t.Fatalf("error: %v", tst.GetException())
 							}
-
-							if err != nil {
-								t.Fatalf("error: %v", err)
-							}
-
-							if !passed {
-								t.Fatal("test failed")
-							}
+							test.True(t, tst.IsPassed())
 						})
 					}
 				})
 			}
 		})
 	}
-}
-
-func runTestWithRecovery(test *jts.JtstestTestrunner_Test) (passed bool, err error, panicked any) { //nolint:revive,stylecheck
-	defer func() {
-		if r := recover(); r != nil {
-			panicked = r
-		}
-	}()
-
-	test.Run()
-	if test.GetException() != nil {
-		return false, fmt.Errorf("%w", test.GetException()), nil
-	}
-	return test.IsPassed(), nil, nil
 }
 
 func isUnsupportedOp(opName string) bool {
