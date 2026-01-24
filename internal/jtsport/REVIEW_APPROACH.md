@@ -58,29 +58,6 @@ Each file must pass **both** review steps before being marked as `reviewed`:
    using vim. Only after the human confirms the file passes review should the
    status be updated to `reviewed`.
 
-## Review Order
-
-Review files in phase order, starting with foundational phases since later
-phases depend on them:
-
-| Phase | Description                              | Java Packages                          |
-| ----- | ---------------------------------------- | -------------------------------------- |
-| 1     | Foundation                               | `util/`, `math/`                       |
-| 2     | Core Geometry Types                      | `geom/`, `geom/impl/`                  |
-| 3     | Algorithms                               | `algorithm/`                           |
-| 4     | Spatial Index                            | `index/`, `index/strtree/`, `index/chain/` |
-| 5     | Point Location                           | `index/intervalrtree/`, `algorithm/locate/` |
-| 6     | Geometry Utilities                       | `geom/util/`                           |
-| 7     | Geometry Graph                           | `geomgraph/`, `geomgraph/index/`       |
-| 8     | Overlay Operations                       | `operation/overlay/`, `operation/union/` |
-| 9     | I/O                                      | `io/`                                  |
-| 10    | Relate Operations                        | `operation/relate/`                    |
-| 11    | Noding                                   | `noding/`, `index/hprtree/`            |
-| 12    | IsSimpleOp                               | `operation/valid/`                     |
-| 13    | RelateNG                                 | `operation/relateng/`                  |
-| 14    | WKB I/O                                  | `io/` (WKB files)                      |
-| 15    | OverlayNG                                | `operation/overlayng/`                 |
-
 ## Review Process
 
 For each file:
@@ -172,6 +149,4 @@ The following are not subject to 1-1 review:
 
 - Test files (`*_test.go`) should be reviewed alongside their corresponding
   implementation files.
-- Some Java files may have been intentionally modified during porting (e.g.,
-  bug fixes). Document these in the review notes.
 - The JTS repo should have tag v1.20.0 checked out for comparison.

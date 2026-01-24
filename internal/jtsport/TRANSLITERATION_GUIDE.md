@@ -8,8 +8,8 @@ Strict requirements:
    interfaces map to Go interfaces. **Each Java file maps to exactly one Go
    file, and each Go file maps to exactly one Java file.** Never combine
    multiple Java files into a single Go file, even if they seem related (e.g.,
-   multiple test classes). Each Java method maps to a Go method (not a function
-   field).
+   multiple test classes). Each Java method maps to a Go method (for Java
+   instance methods) or a Go function (for Java static methods).
 
 2. **Preserve Element Order**: The order of elements (fields, constants,
    methods, inner classes) in the Go file must match the order in the Java
@@ -237,8 +237,8 @@ a linked list from base to leaf.
 
 **Structure:**
 
-1. Every type has a `child any` field (nil for leaf types).
-2. Every type implements `GetChild() any { return x.child }`.
+1. Every type has a `child java.Polymorphic` field (nil for leaf types).
+2. Every type implements `GetChild() java.Polymorphic { return x.child }`.
 3. Child types embed **pointers** to parent types (`*Parent`, not `Parent`).
 4. Use `java.GetSelf(obj)` to get the leaf type.
 5. Use `java.InstanceOf[T](obj)` for runtime type checks.
@@ -722,11 +722,11 @@ operation/buffer/BufferOp.java,operation_buffer_buffer_op.go,pending
 
 ### Columns
 
-| Column      | Description                                           |
-| ----------- | ----------------------------------------------------- |
+| Column      | Description                                                    |
+| ----------- | -----------------------------------------------------          |
 | `java_file` | Relative path from JTS source root (e.g., `geom/Polygon.java`) |
 | `go_file`   | Go filename in the `jts` package (e.g., `geom_polygon.go`)     |
-| `status`    | One of: `pending`, `ported`, `reviewed`               |
+| `status`    | One of: `pending`, `ported`, `reviewed`                        |
 
 ### Status Values
 
