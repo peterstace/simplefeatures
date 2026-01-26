@@ -1,9 +1,9 @@
 # CLAUDE.md
 
-@README.md explains what this repo is about.
+@README.md explains what the packages in this directory are for.
 
-@TRANSLITERATION_GUIDE.md describes how Java code is ported to Go code in this
-repo.
+@TRANSLITERATION_GUIDE.md describes how Java code is ported to Go code in those
+packages.
 
 The JTS repo will be at `../../locationtech/jts/` (relative to this file) and
 have the tag that's being ported checked out. It is up to the human user to
