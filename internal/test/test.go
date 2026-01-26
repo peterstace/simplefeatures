@@ -3,6 +3,7 @@ package test
 
 import (
 	"errors"
+	"math"
 	"reflect"
 	"testing"
 
@@ -76,5 +77,23 @@ func NotDeepEqual(tb testing.TB, a, b any) {
 	tb.Helper()
 	if reflect.DeepEqual(a, b) {
 		tb.Fatalf("values should not be deeply equal:\n  a: %#v\n  b: %#v", a, b)
+	}
+}
+
+// Tolerance specifies tolerances for approximate float comparison.
+type Tolerance struct {
+	Rel float64 // Relative tolerance: diff must be <= Rel * max(|got|, |want|).
+	Abs float64 // Absolute tolerance: diff must be <= Abs.
+}
+
+// ApproxEqual asserts that two float64 values are approximately equal. The
+// comparison passes if the difference is within either the relative tolerance
+// or the absolute tolerance.
+func ApproxEqual(tb testing.TB, got, want float64, tol Tolerance) {
+	tb.Helper()
+	diff := math.Abs(got - want)
+	maxVal := math.Max(math.Abs(got), math.Abs(want))
+	if diff > tol.Rel*maxVal && diff > tol.Abs {
+		tb.Fatalf("values not approximately equal (tol=%+v):\n  got:  %v\n  want: %v\n  diff: %v", tol, got, want, diff)
 	}
 }

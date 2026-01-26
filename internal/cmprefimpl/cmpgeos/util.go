@@ -267,6 +267,21 @@ func linearAndNonSimple(g geom.Geometry) bool {
 	return g.Dimension() == 1 && wellDefined && !simple
 }
 
-func linearAndEmptyBoundary(g geom.Geometry) bool {
-	return g.Dimension() == 1 && g.Boundary().IsEmpty()
+// hasLargeCoordinates returns true if the geometry has any coordinates with
+// magnitude large enough to cause floating point precision issues when
+// comparing the results of operations performed on this geometry. The
+// operations themselves work fine, but comparing the results fails because
+// geom.ExactEquals only supports absolute tolerance. A relative tolerance
+// option for ExactEquals would allow these comparisons to succeed.
+func hasLargeCoordinates(g geom.Geometry) bool {
+	env := g.Envelope()
+	lo, hi, ok := env.MinMaxXYs()
+	if !ok {
+		return false
+	}
+	const threshold = 1e6
+	return math.Abs(lo.X) > threshold ||
+		math.Abs(lo.Y) > threshold ||
+		math.Abs(hi.X) > threshold ||
+		math.Abs(hi.Y) > threshold
 }
