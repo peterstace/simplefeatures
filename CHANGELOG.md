@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.57.0
+
+2026-01-30
+
+__Special thanks to Albert Teoh for contributing to this release.__
 
 - Port JTS[https://github.com/locationtech/jts] to Go and use for all relate
   (covers, touches, etc.) and overlay (union, intersection etc.) operations.
