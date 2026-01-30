@@ -1221,6 +1221,66 @@ func TestBinaryOp(t *testing.T) {
 			symDiff: "MULTIPOLYGON(((0 0,0 2,1 2,1 1,2 1,2 0,1 0,0 0)),((3 3,3 1,2 1,2 2,1 2,1 3,3 3)))",
 		},
 
+		// GC COMPOSITION TEST
+		{
+			// GC COMPOSITION TEST
+			input1: `
+				GEOMETRYCOLLECTION(
+					POLYGON((0 0,0 1,3 1,3 0,0 0)),
+					LINESTRING(0.5 1.5,2.5 1.5),
+					MULTIPOINT(0.5 2.5,1.5 2.5,2.5 2.5)
+				)`,
+			input2: `
+				GEOMETRYCOLLECTION(
+					POLYGON((0 0,1 0,1 3,0 3,0 0)),
+					LINESTRING(1.5 0,1.5 3),
+					MULTIPOINT(2.5 0.5,2.5 1.5,2.5 2.5)
+				)`,
+			union: `
+				GEOMETRYCOLLECTION(
+					POINT(2.5 2.5),
+					LINESTRING(1 1.5,1.5 1.5),
+					LINESTRING(1.5 1.5,2.5 1.5),
+					LINESTRING(1.5 1,1.5 1.5),
+					LINESTRING(1.5 1.5,1.5 3),
+					POLYGON((0 1,0 3,1 3,1 1.5,1 1,1.5 1,3 1,3 0,1.5 0,1 0,0 0,0 1))
+				)`,
+			inter: `
+				GEOMETRYCOLLECTION(
+					POINT(0.5 2.5),
+					POINT(1.5 1.5),
+					POINT(1.5 2.5),
+					POINT(2.5 0.5),
+					POINT(2.5 1.5),
+					POINT(2.5 2.5),
+					LINESTRING(0.5 1.5,1 1.5),
+					LINESTRING(1.5 0,1.5 1),
+					POLYGON((0 1,1 1,1 0,0 0,0 1))
+				)`,
+			fwdDiff: `
+				GEOMETRYCOLLECTION(
+					LINESTRING(1 1.5,1.5 1.5),
+					LINESTRING(1.5 1.5,2.5 1.5),
+					POLYGON((1 0,1 1,1.5 1,3 1,3 0,1.5 0,1 0))
+				)`,
+			revDiff: `
+				GEOMETRYCOLLECTION(
+					LINESTRING(1.5 1,1.5 1.5),
+					LINESTRING(1.5 1.5,1.5 3),
+					POLYGON((0 3,1 3,1 1.5,1 1,0 1,0 3))
+				)`,
+			symDiff: `
+				GEOMETRYCOLLECTION(
+					LINESTRING(1 1.5,1.5 1.5),
+					LINESTRING(1.5 1.5,2.5 1.5),
+					LINESTRING(1.5 1,1.5 1.5),
+					LINESTRING(1.5 1.5,1.5 3),
+					POLYGON((1 1,1.5 1,3 1,3 0,1.5 0,1 0,1 1)),
+					POLYGON((1 3,1 1.5,1 1,0 1,0 3,1 3))
+				)`,
+			relate: "212111212",
+		},
+
 		// Reproduces "no rings to extract" DCEL errors (reported in
 		// https://github.com/peterstace/simplefeatures/issues/569).
 		{

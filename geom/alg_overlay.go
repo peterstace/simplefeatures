@@ -2,8 +2,6 @@ package geom
 
 import "github.com/peterstace/simplefeatures/internal/jtsport/jts"
 
-// TODO: Optimise operations by comparing bounding boxes first.
-
 // hasGC determines if either argument is a GeometryCollection. The JTS port
 // doesn't have full support for GeometryCollections, so we need to handle them
 // specially.
@@ -175,6 +173,13 @@ func SymmetricDifference(a, b Geometry) (Geometry, error) {
 		return UnaryUnion(a)
 	}
 
+	if hasGC(a, b) {
+		return gcAwareSymmetricDifference(a, b)
+	}
+	return jtsOverlayOp(a, b, jts.OperationOverlayng_OverlayNG_SYMDIFFERENCE)
+}
+
+func gcAwareSymmetricDifference(a, b Geometry) (Geometry, error) {
 	diffAB, err := Difference(a, b)
 	if err != nil {
 		return Geometry{}, err

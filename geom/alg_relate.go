@@ -26,7 +26,6 @@ func Relate(a, b Geometry) (string, error) {
 	if a.IsEmpty() || b.IsEmpty() {
 		return relateWithEmptyInput(a, b), nil
 	}
-	// TODO: Optimize for when the envelopes don't intersect.
 	return jtsRelateNG(a, b)
 }
 
