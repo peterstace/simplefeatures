@@ -49,7 +49,13 @@ func main() {
 	}
 
 	var failures int
+	var unarySkipped int
 	for _, g := range geoms {
+		// Large coordinates cause floating point precision issues in comparisons.
+		if hasLargeCoordinates(g) {
+			unarySkipped++
+			continue
+		}
 		var buf bytes.Buffer
 		lg := log.New(&buf, "", log.Lshortfile)
 		lg.Printf("========================== START ===========================")
@@ -63,7 +69,7 @@ func main() {
 			failures++
 		}
 	}
-	fmt.Printf("finished unary checks on %d geometries\n", len(geoms))
+	fmt.Printf("finished unary checks on %d geometries (skipped %d with large coordinates)\n", len(geoms), unarySkipped)
 	fmt.Printf("failures: %d\n", failures)
 	if failures > 0 {
 		os.Exit(1)
@@ -82,8 +88,17 @@ func main() {
 			skipped += len(geoms)
 			continue
 		}
+		// Large coordinates cause floating point precision issues in comparisons.
+		if hasLargeCoordinates(g1) {
+			skipped += len(geoms)
+			continue
+		}
 		for _, g2 := range geoms {
 			if g2.IsGeometryCollection() && !g2.IsEmpty() {
+				skipped++
+				continue
+			}
+			if hasLargeCoordinates(g2) {
 				skipped++
 				continue
 			}

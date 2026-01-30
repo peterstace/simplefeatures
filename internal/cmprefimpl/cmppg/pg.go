@@ -174,20 +174,25 @@ func (p BatchPostGIS) tryUnary(g geom.Geometry) (UnaryResult, error) {
 		return result, err
 	}
 
+	// Use NoValidate when parsing results from PostGIS because PostGIS can
+	// produce geometries that simplefeatures considers invalid (e.g. LineStrings
+	// with only one distinct point).
+	nv := geom.NoValidate{}
+
 	if boundaryWKT.Valid {
 		result.Boundary.Valid = true
-		result.Boundary.Geometry, err = geom.UnmarshalWKT(boundaryWKT.String)
+		result.Boundary.Geometry, err = geom.UnmarshalWKT(boundaryWKT.String, nv)
 		if err != nil {
 			return result, err
 		}
 	}
 
-	result.ConvexHull, err = geom.UnmarshalWKT(convexHullWKT)
+	result.ConvexHull, err = geom.UnmarshalWKT(convexHullWKT, nv)
 	if err != nil {
 		return result, err
 	}
 
-	result.Reverse, err = geom.UnmarshalWKT(reverseWKT)
+	result.Reverse, err = geom.UnmarshalWKT(reverseWKT, nv)
 	if err != nil {
 		return result, err
 	}
@@ -196,7 +201,7 @@ func (p BatchPostGIS) tryUnary(g geom.Geometry) (UnaryResult, error) {
 	result.Type = strings.TrimPrefix(result.Type, postgisTypePrefix)
 
 	for _, wkt := range dumpWKTs {
-		dumpGeom, err := geom.UnmarshalWKT(wkt)
+		dumpGeom, err := geom.UnmarshalWKT(wkt, nv)
 		if err != nil {
 			return result, err
 		}

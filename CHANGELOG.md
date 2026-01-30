@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Port JTS[https://github.com/locationtech/jts] to Go and use for all relate
+  (covers, touches, etc.) and overlay (union, intersection etc.) operations.
+  This fixes rare numerical stabilities issues that were present with the
+  previous DCEL implementation.
+
 - Add additional validation to help prevent OOMs during WKB parsing.
 
 - Fix `ExactEquals` with `IgnoreOrder` incorrectly returning false for polygons

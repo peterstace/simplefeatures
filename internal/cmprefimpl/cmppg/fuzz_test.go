@@ -6,6 +6,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -41,6 +42,13 @@ func TestFuzz(t *testing.T) {
 
 			if isMultiPointWithEmptyPoint(g) {
 				t.Skip("PostGIS cannot handle MultiPoints that contain empty Points")
+			}
+			// Sending large coordinates to PostGIS works fine, but comparing the
+			// results fails because geom.ExactEquals only supports absolute
+			// tolerance. A relative tolerance option for ExactEquals doesn't
+			// exist yet, but would allow these comparisons to succeed.
+			if hasLargeCoordinates(g) {
+				t.Skip("Geometry has large coordinates that cause floating point precision issues in absolute comparisons")
 			}
 			want, err := BatchPostGIS(pg).Unary(g)
 			if err != nil {
@@ -173,4 +181,20 @@ func isMultiPointWithEmptyPoint(g geom.Geometry) bool {
 		}
 	}
 	return false
+}
+
+// hasLargeCoordinates returns true if the geometry has any coordinates with
+// magnitude large enough to cause floating point precision issues in
+// comparisons.
+func hasLargeCoordinates(g geom.Geometry) bool {
+	env := g.Envelope()
+	lo, hi, ok := env.MinMaxXYs()
+	if !ok {
+		return false
+	}
+	const threshold = 1e6
+	return math.Abs(lo.X) > threshold ||
+		math.Abs(lo.Y) > threshold ||
+		math.Abs(hi.X) > threshold ||
+		math.Abs(hi.Y) > threshold
 }

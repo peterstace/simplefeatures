@@ -1,0 +1,8 @@
+The XML test files in this directory are from the JTS Topology Suite project:
+https://github.com/locationtech/jts
+
+Copyright (c) 2003-2024 The JTS Topology Suite Authors
+
+These files are licensed under the Eclipse Distribution License - v 1.0,
+which can be found at:
+http://www.eclipse.org/org/documents/edl-v10.php

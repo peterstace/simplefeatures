@@ -176,22 +176,6 @@ func (s Sequence) assertNoUnusedCapacity() {
 	}
 }
 
-// less gives a lexicographical ordering between sequences, considering only
-// the XY parts of each coordinate when they have Z or M components.
-func (s Sequence) less(o Sequence) bool {
-	oLen := o.Length()
-	for i := 0; i < s.Length(); i++ {
-		if i >= oLen {
-			return true
-		}
-		sxy, oxy := s.GetXY(i), o.GetXY(i)
-		if sxy != oxy {
-			return sxy.Less(oxy)
-		}
-	}
-	return false
-}
-
 // Envelope returns the axis aligned bounding box that most tightly surrounds
 // the [XY] values in the sequence.
 func (s Sequence) Envelope() Envelope {
