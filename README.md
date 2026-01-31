@@ -1,6 +1,5 @@
 # Simple Features
 
-[![Documentation](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat)](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom?tab=doc)
 [![Build Status](https://github.com/peterstace/simplefeatures/workflows/build/badge.svg)](https://github.com/peterstace/simplefeatures/actions)
 [![Go Report
 Card](https://goreportcard.com/badge/github.com/peterstace/simplefeatures)](https://goreportcard.com/report/github.com/peterstace/simplefeatures)
@@ -18,250 +17,115 @@ specification that [GEOS](https://trac.osgeo.org/geos),
 implement, so the Simple Features API will be familiar to developers who have
 used those libraries before.
 
-#### Table of Contents
+**Table of Contents:**
+- [Native Go Packages](#native-go-packages)
+  - [Geom](#geom)
+  - [Carto](#carto)
+  - [R-Tree](#r-tree)
+- [C-Wrapper Packages](#c-wrapper-packages)
+  - [GEOS](#geos)
+  - [PROJ](#proj)
 
-- [Geometry Types](#geometry-types)
-- [Marshalling and Unmarshalling](#marshalling-and-unmarshalling)
-- [Geometry Algorithms](#geometry-algorithms)
-- [GEOS Wrapper](#geos-wrapper)
-- [PROJ Wrapper](#proj-wrapper)
-- [Examples](#examples)
+## Native Go Packages
 
-### Geometry Types
+The Simple Features library contains several packages that are implemented
+purely in Go, and do not require CGO to use. These are `geom`, `carto`, and
+`rtree`.
 
-<table>
+### Geom
 
-<thead>
-<tr>
-<th>Type</th>
-<th>Example</th>
-<th>Description</th>
-</tr>
-</thead>
+[Package
+`geom`](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom?tab=doc)
+provides types (`Point`, `MultiPoint`, `LineString`, `MultiLineString`,
+`Polygon`, `MultiPolygon`, `GeometryCollection`) representing each geometry, as
+well as algorithms that operate with/on them.
 
-<tr>
-<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Point">Point</a></td>
-<td><a href="https://commons.wikimedia.org/wiki/File:SFA_Point.svg"><img width=51 height=51 src="https://upload.wikimedia.org/wikipedia/commons/c/c2/SFA_Point.svg"></a></td>
-<td>Point is a single location in space.</td>
-</tr>
+The following operations are supported:
 
-<tr>
-<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#MultiPoint">MultiPoint</a></td>
-<td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiPoint.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/d/d6/SFA_MultiPoint.svg"></a></td>
-<td>MultiPoint is collection of points in space.</td>
-</tr>
+- **Serialisation:** WKT, WKB, GeoJSON, TWKB.
+- **Overlay operations:** union, intersection, difference, symmetric difference, unary union.
+- **Relate operations:** DE-9IM matrix, equals, intersects, disjoint, contains, covered by, covers, overlaps, touches, within, crosses.
+- **Measurements:** area, length, distance.
+- **Analysis:** centroid, convex hull, envelope, point on surface, boundary, minimum area bounding rectangle, minimum width bounding rectangle.
+- **Transformations:** simplify, densify, snap to grid, reverse, force clockwise, force counter-clockwise, affine transformation.
+- **Comparison:** exact equals.
+- **Linear Interpolation:** interpolate point, interpolate evenly spaced points.
+- **Properties:** is simple, is empty, dimension, is clockwise, is counter-clockwise, validate.
+- **Envelope operations:** intersects, contains, covers, distance, expand to include, center, width, height, area, bounding diagonal.
 
-<tr>
-<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#LineString">LineString</a></td>
-<td><a href="https://commons.wikimedia.org/wiki/File:SFA_LineString.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/b/b9/SFA_LineString.svg"></a></td>
-<td>LineString is curve defined by linear interpolation between a set of
-control points.</td>
-</tr>
+The overlay and relate operations are powered by a Go port of
+[JTS](https://locationtech.github.io/jts/). This means that it's using robust
+and battle tested algorithms that are common to JTS and its derivates (such as
+GEOS).
 
-<tr>
-<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#MultiLineString">MultiLineString</a></td>
-<td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiLineString.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/8/86/SFA_MultiLineString.svg"></a></td>
-<td>MultiLineString is a collection of LineStrings.</td>
-</tr>
+### Carto
 
-<tr>
-<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Polygon">Polygon</a></td>
-<td><a href="https://commons.wikimedia.org/wiki/File:SFA_Polygon.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"></a></td>
-<td>Polygon is a planar surface geometry that bounds some area. It may have holes.</td>
-</tr>
+[Package
+`carto`](https://pkg.go.dev/github.com/peterstace/simplefeatures/carto?tab=doc)
+provides cartographic map projections and related functionality. It can be used
+as a lite replacement for PROJ for simple cartographic projections.
 
-<tr>
-<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#MultiPolygon">MultiPolygon</a></td>
-<td><a href="https://commons.wikimedia.org/wiki/File:SFA_MultiPolygon.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/3/3b/SFA_MultiPolygon_with_hole.svg"></a></td>
-<td>MultiPolygon is collection of Polygons (with some constraints on how the Polygons interact with each other).</td>
-</tr>
+The following projections are supported:
 
-<tr>
-<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#GeometryCollection">GeometryCollection</a></td>
-<td><a href="https://commons.wikimedia.org/wiki/File:SFA_GeometryCollection.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/1/1d/SFA_GeometryCollection.svg"></a></td>
-<td>GeometryCollection is an unconstrained collection of geometries.</td>
-</tr>
+- **Conic:** Lambert conformal conic, Albers equal area conic, equidistant
+  conic.
+- **Cylindrical:** equirectangular, web mercator, Lambert cylindrical equal
+  area.
+- **Azimuthal:** orthographic, azimuthal equidistant.
+- **Pseudocylindrical:** sinusoidal.
+- **UTM:** All 60 UTM projections.
 
-<tr>
-<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry">Geometry</a></td>
-<td><a href="https://commons.wikimedia.org/wiki/File:SFA_Polygon.svg"><img width=51 height=51  src="https://upload.wikimedia.org/wikipedia/commons/5/55/SFA_Polygon_with_hole.svg"></a></td>
-<td>Geometry holds any type of geometry (Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon, or GeometryCollection). It's the type that the Simple Features library uses when it needs to represent geometries in a generic way.</td>
-</tr>
+### R-Tree
 
-<tr>
-<td><a href="https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Envelope">Envelope</a></td>
-<td><img src="./.ci/assets/envelope.svg"></td>
-<td>Envelope is an axis aligned bounding box typically used to describe the spatial extent of other geometric entities.</td>
-</tr>
+[Package
+`rtree`](https://pkg.go.dev/github.com/peterstace/simplefeatures/rtree?tab=doc)
+provides an in-memory R-Tree data structure, which can be used for fast and
+efficient spatial searches.
 
-</table>
+## C-Wrapper Packages
 
-### Marshalling and Unmarshalling
+The Simple Features library also contains several packages that depend on C
+libraries (via CGO). They are segregated into separate Go packages so users who
+don't need that functionality aren't required to install the relevant C
+dependencies.
 
-Simple features supports the following external geometry representation formats:
+### GEOS
 
-| Format  | Example                                                              | Description                                                                                                                                                                                                                                                                                                                                                        |
-| ---     | ---                                                                  | ---                                                                                                                                                                                                                                                                                                                                                                |
-| WKT     | `POLYGON((0 0,0 1,1 1,1 0,0 0))`                                     | [Well Known Text](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) is a human readable format for storing geometries. It's often the lowest common denominator geometry format, and is useful for integration with other GIS applications.                                                                                                |
-| WKB     | `<binary>`                                                           | [Well Known Binary](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry#Well-known_binary) is a machine readable format that is efficient for computers to use (both from a processing and storage space perspective). WKB is a good choice for transferring geometries to and from PostGIS and other databases that support geometric types. |
-| GeoJSON | `{"type":"Polygon","coordinates":[[[0,0],[0,1],[1,1],[1,0],[0,0]]]}` | [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON) represents geometries in a similar way to WKB, but is based on the JSON format. This makes it ideal to use with web APIs or other situations where JSON would normally be used.                                                                                                                                   |
-| TWKB    | `<binary>`                                                           | [Tiny Well Known Binary](https://github.com/TWKB/Specification) is a multi-purpose compressed binary format for serialising vector geometries into a stream of bytes. It emphasises minimising the size of the serialised representation. It's a good choice when space is at a premium (e.g. for storage within a web token).                                     |
+[Package
+`geos`](https://pkg.go.dev/github.com/peterstace/simplefeatures/geos?tab=doc)
+is a thin CGO wrapper around the [GEOS](https://www.osgeo.org/projects/geos/)
+library. It provides access to GEOS functionality that has not yet been
+implemented in the `geom` package natively in Go.
 
-### Geometry Algorithms
+To install the GEOS C library:
 
-The following algorithms are supported:
+```sh
+# Debian/Ubuntu
+apt-get install libgeos-dev
 
-| Miscellaneous Algorithms                                                                               | Description                                                                            |
-| ---                                                                                                    | ---                                                                                    |
-| [Area](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Area)                     | Finds the area of the geometry (for Polygons and MultiPolygons).                       |
-| [Centroid](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Centroid)             | Finds the centroid of the geometry.                                                    |
-| [ConvexHull](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.ConvexHull)         | Finds the convex hull of the geometry.                                                 |
-| [Distance](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Distance)                      | Finds the shortest distance between two geometries.                                    |
-| [Envelope](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Envelope)             | Finds the smallest axis-aligned bounding-box that surrounds the geometry.              |
-| [ExactEquals](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#ExactEquals)                | Determines if two geometries are structurally equal.                                   |
-| [Length](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.Length)                 | Finds the length of the geometry (for LineStrings and MultiLineStrings).               |
-| [PointOnSurface](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Geometry.PointOnSurface) | Finds a point that lies inside the geometry.                                           |
-| [Relate](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Relate)                          | Calculates the DE-9IM intersection describing the relationship between two geometries. |
-| [Simplify](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Simplify)                      | Simplifies a geometry using the Ramer–Douglas–Peucker algorithm.                       |
+# Alpine
+apk add geos-dev
 
-| Set Operations                                                                                          | Description                                                               |
-| ---                                                                                                     | ---                                                                       |
-| [Union](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Union)                             | Joins the parts from two geometries together.                             |
-| [Intersection](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Intersection)               | Finds the parts of two geometries that are in common.                     |
-| [Difference](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Difference)                   | Finds the parts of a geometry that are not also part of another geometry. |
-| [SymmetricDifference](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#SymmetricDifference) | Finds the parts of two geometries that are not in common.                 |
-
-
-| Named Spatial Predicates                                                              | Description                                             |
-| ---                                                                                   | ---                                                     |
-| [Equals](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Equals)         | Determines if two geometries are topologically equal.   |
-| [Intersects](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Intersects) | Determines if two geometries intersect with each other. |
-| [Disjoint](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Disjoint)     | Determines if two geometries have no common points.     |
-| [Contains](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Contains)     | Determines if one geometry contains another.            |
-| [CoveredBy](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#CoveredBy)   | Determines if one geometry is covered by another.       |
-| [Covers](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Covers)         | Determines if one geometry covers another.              |
-| [Overlaps](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Overlaps)     | Determines if one geometry overlaps another.            |
-| [Touches](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Touches)       | Determines if one geometry touches another.             |
-| [Within](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Within)         | Determines if one geometry is within another.           |
-| [Crosses](https://pkg.go.dev/github.com/peterstace/simplefeatures/geom#Crosses)       | Determines if one geometry crosses another.             |
-
-### GEOS Wrapper
-
-A [GEOS](https://www.osgeo.org/projects/geos/) CGO wrapper is also provided,
-giving access to functionality not yet implemented natively in Go. The [wrapper
-is implemented in a separate
-package](https://pkg.go.dev/github.com/peterstace/simplefeatures/geos?tab=doc),
-meaning that library users who don't need this additional functionality don't
-need to expose themselves to CGO.
-
-### PROJ Wrapper
-
-A [PROJ](https://proj.org/) CGO wrapper is also provided, giving access to a
-vast array of transformations between various coordinate reference systems.
-The [wrapper is implemented in a separate
-package](https://pkg.go.dev/github.com/peterstace/simplefeatures/proj?tab=doc),
-meaning that library users who don't need this additional functionality don't
-need to expose themselves to CGO.
-
-### Examples
-
-The following examples show some common operations (errors are omitted for
-brevity).
-
-#### WKT
-
-Encoding and decoding WKT:
-
-```go
-// Unmarshal from WKT
-input := "POLYGON((0 0,0 1,1 1,1 0,0 0))"
-g, _ := geom.UnmarshalWKT(input)
-
-// Marshal to WKT
-output := g.AsText()
-fmt.Println(output) // Prints: POLYGON((0 0,0 1,1 1,1 0,0 0))
+# macOS
+brew install geos
 ```
 
-#### WKB
+### PROJ
 
-Encoding and decoding WKB directly:
+[Package
+`proj`](https://pkg.go.dev/github.com/peterstace/simplefeatures/proj?tab=doc)
+is a thin CGO wrapper around the [PROJ](https://proj.org/) library. It provides
+an exhaustive set of cartographic projections and coordinate transformations.
 
-```go
-// Marshal as WKB
-coords := geom.Coordinates{XY: geom.XY{1.5, 2.5}}
-pt := geom.NewPoint(coords)
-wkb := pt.AsBinary()
-fmt.Println(wkb) // Prints: [1 1 0 0 0 0 0 0 0 0 0 248 63 0 0 0 0 0 0 4 64]
+To install the PROJ C library:
 
-// Unmarshal from WKB
-fromWKB, _ := geom.UnmarshalWKB(wkb)
-fmt.Println(fromWKB.AsText()) // POINT(1.5 2.5)
-```
+```sh
+# Debian/Ubuntu
+apt-get install libproj-dev
 
-Encoding and decoding WKB for integration with PostGIS:
+# Alpine
+apk add proj-dev
 
-```go
-db, _ := sql.Open("postgres", "postgres://...")
-
-db.Exec(`
-    CREATE TABLE my_table (
-        my_geom geometry(geometry, 4326),
-        population double precision
-    )`,
-)
-
-// Insert our geometry and population data into PostGIS via WKB.
-coords := geom.Coordinates{XY: geom.XY{-74.0, 40.7}}
-nyc := geom.NewPoint(coords)
-db.Exec(`
-    INSERT INTO my_table
-    (my_geom, population)
-    VALUES (ST_GeomFromWKB($1, 4326), $2)`,
-    nyc, 8.4e6,
-)
-
-// Get the geometry and population data back out of PostGIS via WKB.
-var location geom.Geometry
-var population float64
-db.QueryRow(`
-    SELECT ST_AsBinary(my_geom), population
-    FROM my_table LIMIT 1`,
-).Scan(&location, &population)
-fmt.Println(location.AsText(), population) // Prints: POINT(-74 40.7) 8.4e+06
-```
-
-#### GeoJSON
-
-Encoding and decoding GeoJSON directly:
-
-```go
-// Unmarshal geometry from GeoJSON.
-raw := `{"type":"Point","coordinates":[-74.0,40.7]}`
-var g geom.Geometry
-json.NewDecoder(strings.NewReader(raw)).Decode(&g)
-fmt.Println(g.AsText()) // Prints: POINT(-74 40.7)
-
-// Marshal back to GeoJSON.
-enc := json.NewEncoder(os.Stdout)
-enc.Encode(g) // Prints: {"type":"Point","coordinates":[-74,40.7]}
-```
-
-Geometries can also be part of larger structs:
-
-```go
-type CityPopulation struct {
-    Location   geom.Geometry `json:"loc"`
-    Population int           `json:"pop"`
-}
-
-// Unmarshal geometry from GeoJSON.
-raw := `{"loc":{"type":"Point","coordinates":[-74.0,40.7]},"pop":8400000}`
-var v CityPopulation
-json.NewDecoder(strings.NewReader(raw)).Decode(&v)
-fmt.Println(v.Location.AsText()) // Prints: POINT(-74 40.7)
-fmt.Println(v.Population)        // Prints: 8400000
-
-// Marshal back to GeoJSON.
-enc := json.NewEncoder(os.Stdout)
-enc.Encode(v) // Prints: {"loc":{"type":"Point","coordinates":[-74,40.7]},"pop":8400000}
+# macOS
+brew install proj
 ```
