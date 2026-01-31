@@ -1,13 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"errors"
-	"fmt"
-	"go/ast"
-	"go/parser"
-	"go/token"
 	"os"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -15,44 +11,27 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-func extractStringsFromSource(dir string) ([]string, error) {
-	var strs []string
-	if err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
+func loadStringsFromFile(path string) ([]string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	strSet := map[string]struct{}{}
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
 		}
-		if !info.IsDir() || strings.Contains(path, ".git") {
-			return nil
-		}
-		pkgs, err := parser.ParseDir(new(token.FileSet), path, nil, 0)
-		if err != nil {
-			return err
-		}
-		for _, pkg := range pkgs {
-			ast.Inspect(pkg, func(n ast.Node) bool {
-				lit, ok := n.(*ast.BasicLit)
-				if !ok || lit.Kind != token.STRING {
-					return true
-				}
-				unquoted, err := strconv.Unquote(lit.Value)
-				if !ok {
-					// Shouldn't ever happen because we've validated that it's a string literal.
-					panic(fmt.Sprintf("could not unquote string '%s'from ast: %v", lit.Value, err))
-				}
-				strs = append(strs, unquoted)
-				return true
-			})
-		}
-		return nil
-	}); err != nil {
+		strSet[line] = struct{}{}
+	}
+	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
 
-	strSet := map[string]struct{}{}
-	for _, s := range strs {
-		strSet[strings.TrimSpace(s)] = struct{}{}
-	}
-	strs = strs[:0]
+	var strs []string
 	for s := range strSet {
 		strs = append(strs, s)
 	}

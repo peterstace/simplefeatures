@@ -1,0 +1,2 @@
+# Blacklisted strings (one per line).
+# These strings will be excluded from strings.txt when running the scraper.
