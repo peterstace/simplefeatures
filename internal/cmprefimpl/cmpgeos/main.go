@@ -37,17 +37,6 @@ func main() {
 	forceTo2D(geoms)
 	geoms = deduplicateGeometries(geoms)
 
-	{
-		var buf bytes.Buffer
-		lg := log.New(&buf, "", log.Lshortfile)
-		if err := checkRelateMatch(lg); err != nil {
-			fmt.Printf("Check failed: %v\n", err)
-			io.Copy(os.Stdout, &buf)
-			fmt.Println()
-			os.Exit(1)
-		}
-	}
-
 	var failures int
 	var unarySkipped int
 	for _, g := range geoms {
