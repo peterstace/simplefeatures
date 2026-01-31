@@ -29,6 +29,10 @@ cmppg:
 cmpgeos:
 	task=cmpgeos; $(DC_RUN)
 
+.PHONY: scrapestrings
+scrapestrings:
+	go run ./internal/cmprefimpl/scraper
+
 DC_GEOS_RUN = \
 	docker compose \
 	--project-name sf-geos-$$(echo $$geos_version | sed 's/\./-/g') \

@@ -24,9 +24,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not get working dir: %v", err)
 	}
-	candidates, err := extractStringsFromSource(dir)
+	candidates, err := loadStringsFromFile(dir + "/internal/cmprefimpl/testdata/strings.txt")
 	if err != nil {
-		log.Fatalf("could not extract strings from src: %v", err)
+		log.Fatalf("could not load strings from file: %v", err)
 	}
 
 	geoms, err := convertToGeometries(candidates)
