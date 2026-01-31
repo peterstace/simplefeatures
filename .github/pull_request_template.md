@@ -13,6 +13,8 @@ Have you:
 
 - Updated release notes? (if appropriate?)
 
+- Updated the README.md (if new functionality is added?)
+
 ## Related Issue
 
 - Please link to the related issue(s).
