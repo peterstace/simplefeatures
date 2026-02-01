@@ -84,24 +84,10 @@ func checkIsValid(g geom.Geometry, log *log.Logger) (bool, error) {
 }
 
 func checkAsText(g geom.Geometry, log *log.Logger) error {
-	// Skip any geometries that have a non-empty Point within a MultiPoint.
-	// Libgeos erroneously produces WKT with missing parenthesis around each
-	// non-empty point.
-	if containsNonEmptyPointInMultiPoint(g) {
-		return nil
-	}
-
 	// Skip any geometries that are collections or contain collections that
 	// only contain empty geometries. Libgeos will render WKT for these
 	// collections as being EMPTY, however this isn't correct behaviour.
 	if containsCollectionWithOnlyEmptyElements(g) {
-		return nil
-	}
-
-	// Skip geometries that GEOS is known to produce incorrect WKT for due to numerical rounding issues.
-	if map[string]bool{
-		"POLYGON((0.9292893218813453 1.0707106781186548,1 1.1414213562373097,1.1414213562373097 1,0.07071067811865475 -0.07071067811865475,0 -0.1414213562373095,-0.1414213562373095 -0.000000000000000013877787807814457,0.9292893218813453 1.0707106781186548))": true,
-	}[g.AsText()] {
 		return nil
 	}
 
@@ -160,15 +146,6 @@ func wktsEqual(wktA, wktB string) error {
 }
 
 func checkFromText(g geom.Geometry, log *log.Logger) error {
-	// libgeos is unable to parse MultiPoints if the *first* Point is empty. It
-	// gives the following error: ParseException: Unexpected token: WORD EMPTY.
-	// Skip the check in that case.
-	if g.IsMultiPoint() &&
-		g.MustAsMultiPoint().NumPoints() > 0 &&
-		g.MustAsMultiPoint().PointN(0).IsEmpty() {
-		return nil
-	}
-
 	wkt := g.AsText()
 	want, err := rawgeos.FromText(wkt)
 	if err != nil {
@@ -189,23 +166,9 @@ func checkFromText(g geom.Geometry, log *log.Logger) error {
 }
 
 func checkAsBinary(g geom.Geometry, log *log.Logger) error {
-	var wantDefined bool
 	want, err := rawgeos.AsBinary(g)
-	if err == nil {
-		wantDefined = true
-	}
-	hAsPointEmpty := hasEmptyPoint(g)
-	if !wantDefined && !hAsPointEmpty {
-		return errors.New("AsBinary wasn't defined by libgeos and the test is " +
-			"NOT for a geometry containing a POINT EMPTY, which is unexpected",
-		)
-	}
-	if !wantDefined {
-		// Skip the test, since we don't have a WKB from libgeos to compare to.
-		// This is only for the POINT EMPTY case. Simplefeatures _does_ produce
-		// a WKB for POINT EMPTY although this is strictly an extension to the
-		// spec.
-		return nil
+	if err != nil {
+		return err
 	}
 
 	// GEOS uses a slightly different NaN representation (both are equally valid).
@@ -230,18 +193,6 @@ func checkFromBinary(g geom.Geometry, log *log.Logger) error {
 	}
 
 	wkb := g.AsBinary()
-
-	// Skip any MultiPoints that contain empty Points. Libgeos seems has
-	// trouble handling these.
-	if g.IsMultiPoint() {
-		mp := g.MustAsMultiPoint()
-		n := mp.NumPoints()
-		for i := 0; i < n; i++ {
-			if mp.PointN(i).IsEmpty() {
-				return nil
-			}
-		}
-	}
 
 	want, err := rawgeos.FromBinary(wkb)
 	if err != nil {
@@ -376,24 +327,23 @@ func checkIsSimple(g geom.Geometry, log *log.Logger) error {
 }
 
 func checkBoundary(g geom.Geometry, log *log.Logger) error {
-	if g.Type() == geom.TypeGeometryCollection {
-		// libgeos doesn't define the boundary of GeometryCollections, but
-		// simplefeatures does. So we skip the test in this case.
-		return nil
-	}
-
 	want, err := rawgeos.Boundary(g)
-	if err != nil {
-		return err
+	if g.Type() == geom.TypeGeometryCollection {
+		// libgeos doesn't define the boundary of GeometryCollections (it gives
+		// an error), but simplefeatures does define a boundary. Explicitly
+		// expect an error here, so that we can update these tests in case the
+		// behaviour of libgeos changes.
+		if err == nil {
+			return fmt.Errorf("expected error for GeometryCollection boundary, got none")
+		}
+		return nil
+	} else {
+		if err != nil {
+			return err
+		}
 	}
 
 	got := g.Boundary()
-
-	// There are some slight differences in the behaviour for empty inputs, so
-	// we don't check these cases (so long as the output is also empty).
-	if got.IsEmpty() && want.IsEmpty() {
-		return nil
-	}
 
 	if !geom.ExactEquals(want, got, geom.IgnoreOrder) {
 		log.Printf("want: %v", want.AsText())
@@ -667,35 +617,6 @@ func binaryChecks(g1, g2 geom.Geometry, lg *log.Logger) error {
 }
 
 func checkIntersects(g1, g2 geom.Geometry, log *log.Logger) error {
-	skipList := map[string]bool{
-		// postgres=# SELECT ST_Intersects(
-		//   ST_GeomFromText('LINESTRING(1 0,0.5000000000000001 0.5,0 1)'),
-		//   ST_GeomFromText('LINESTRING(0.5 0.5,1.5 1.5)')
-		// );
-		//  st_intersects
-		// ---------------
-		//  f # WRONG!!
-		// (1 row)
-		"LINESTRING(1 0,0.5000000000000001 0.5,0 1)": true,
-
-		// Simplefeatures sometimes gives an incorrect result for this due to
-		// numerical precision issues. Would be solved by
-		// https://github.com/peterstace/simplefeatures/issues/274
-		"LINESTRING(0.5 0,0.5000000000000001 0.5)":                              true,
-		"MULTILINESTRING((0 0,2 2.000000000000001),(1 0,-1 2.000000000000001))": true,
-
-		// GEOS gives the wrong result for the intersection of these two inputs:
-		"POLYGON((4.4 8.2,2.8 7.4,5.4 2.2,7 3,4.4 8.2))": true,
-		"POLYGON((1 4,3 4,3 7,1 7,1 4))":                 true,
-		"POLYGON((1.5827586206896551 -0.49310344827586206,7.575862068965518 6.589655172413793,5.424137931034483 8.410344827586208,-0.5689655172413792 1.3275862068965518,1.5827586206896551 -0.49310344827586206))": true,
-		"POLYGON((-0.057692307692307696 -0.038461538461538464,3 1.9999999999999998,2.230769230769231 3.1538461538461537,-0.826923076923077 1.1153846153846154,-0.057692307692307696 -0.038461538461538464))":        true,
-	}
-	if skipList[g1.AsText()] || skipList[g2.AsText()] {
-		// Skipping test because GEOS gives the incorrect result for *some*
-		// intersection operations involving this input.
-		return nil
-	}
-
 	want, err := rawgeos.Intersects(g1, g2)
 	if err != nil {
 		return err
@@ -726,18 +647,6 @@ func checkExactEquals(g1, g2 geom.Geometry, log *log.Logger) error {
 }
 
 func checkDistance(g1, g2 geom.Geometry, log *log.Logger) error {
-	willCauseGEOSCrash := false ||
-		containsMultiLineStringWithEmptyLineString(g1) ||
-		containsMultiLineStringWithEmptyLineString(g2) ||
-		containsMultiPointWithEmptyPoint(g1) ||
-		containsMultiPointWithEmptyPoint(g2) ||
-		containsMultiPolygonWithEmptyPolygon(g1) ||
-		containsMultiPolygonWithEmptyPolygon(g2)
-	if willCauseGEOSCrash {
-		// Skip test since attempting to calculate distance will cause a GEOS crash.
-		return nil
-	}
-
 	want, err := rawgeos.Distance(g1, g2)
 	if err != nil {
 		return err
