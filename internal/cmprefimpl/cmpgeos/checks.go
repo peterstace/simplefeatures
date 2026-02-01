@@ -334,10 +334,10 @@ func checkBoundary(g geom.Geometry, log *log.Logger) error {
 		// expect an error here, so that we can update these tests in case the
 		// behaviour of libgeos changes.
 		if err == nil {
-			return fmt.Errorf("expected error for GeometryCollection boundary, got none")
+			return errors.New("expected error for GeometryCollection boundary, got none")
 		}
 		return nil
-	} else {
+	} else { //nolint:gocritic,revive // more readable with the current structure
 		if err != nil {
 			return err
 		}
