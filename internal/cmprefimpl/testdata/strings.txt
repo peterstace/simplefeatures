@@ -4100,6 +4100,7 @@ expected empty polygon
 expected empty to be a ring
 expected error '%v' to be 'As' of type %T
 expected error but got nil
+expected error for GeometryCollection boundary, got none
 expected error, got nil
 expected exterior point not to intersect
 expected false but was true
