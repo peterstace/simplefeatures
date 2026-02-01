@@ -1,6 +1,9 @@
 package geom
 
-import "github.com/peterstace/simplefeatures/internal/jtsport/jts"
+import (
+	"github.com/peterstace/simplefeatures/internal/jtsport/jts"
+	"github.com/peterstace/simplefeatures/rtree"
+)
 
 // hasGC determines if either argument is a GeometryCollection. The JTS port
 // doesn't have full support for GeometryCollections, so we need to handle them
@@ -14,6 +17,26 @@ import "github.com/peterstace/simplefeatures/internal/jtsport/jts"
 // 2. Polygons in a GeometryCollection must not overlap.
 func hasGC(a, b Geometry) bool {
 	return a.IsGeometryCollection() || b.IsGeometryCollection()
+}
+
+// envelopesDisjoint checks if two geometries have disjoint envelopes.
+func envelopesDisjoint(a, b Geometry) bool {
+	return !a.Envelope().Intersects(b.Envelope())
+}
+
+// createEmptyResult creates an empty geometry with the given dimension.
+// dim 0 = Point, dim 1 = LineString, dim 2 = Polygon, otherwise GeometryCollection.
+func createEmptyResult(dim int) Geometry {
+	switch dim {
+	case 0:
+		return Point{}.AsGeometry()
+	case 1:
+		return LineString{}.AsGeometry()
+	case 2:
+		return Polygon{}.AsGeometry()
+	default:
+		return Geometry{}
+	}
 }
 
 // Union returns a geometry that represents the parts from either geometry A or
@@ -39,6 +62,9 @@ func Intersection(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() || b.IsEmpty() {
 		return Geometry{}, nil
 	}
+	if envelopesDisjoint(a, b) {
+		return createEmptyResult(minInt(a.Dimension(), b.Dimension())), nil
+	}
 	if hasGC(a, b) {
 		return gcAwareIntersection(a, b)
 	}
@@ -51,16 +77,33 @@ func gcAwareIntersection(a, b Geometry) (Geometry, error) {
 		return Geometry{}, err
 	}
 
+	// Build R-Tree from partsB.
+	items := make([]rtree.BulkItem, 0, len(partsB))
+	for i, part := range partsB {
+		if box, ok := part.Envelope().AsBox(); ok {
+			items = append(items, rtree.BulkItem{Box: box, RecordID: i})
+		}
+	}
+	tree := rtree.BulkLoad(items)
+
 	// The total result is the union of the intersections across the Cartesian
 	// product of parts.
 	var results []Geometry
 	for _, partA := range partsA {
-		for _, partB := range partsB {
-			result, err := jtsOverlayOp(partA, partB, jts.OperationOverlayng_OverlayNG_INTERSECTION)
+		box, ok := partA.Envelope().AsBox()
+		if !ok {
+			continue
+		}
+		err := tree.RangeSearch(box, func(i int) error {
+			result, err := jtsOverlayOp(partA, partsB[i], jts.OperationOverlayng_OverlayNG_INTERSECTION)
 			if err != nil {
-				return Geometry{}, err
+				return err
 			}
 			results = append(results, result)
+			return nil
+		})
+		if err != nil {
+			return Geometry{}, err
 		}
 	}
 	return UnaryUnion(NewGeometryCollection(results).AsGeometry())
@@ -118,20 +161,43 @@ func gcAwareDifference(a, b Geometry) (Geometry, error) {
 		return Geometry{}, err
 	}
 
+	// Build R-Tree from partsB.
+	items := make([]rtree.BulkItem, 0, len(partsB))
+	for i, part := range partsB {
+		if box, ok := part.Envelope().AsBox(); ok {
+			items = append(items, rtree.BulkItem{Box: box, RecordID: i})
+		}
+	}
+	tree := rtree.BulkLoad(items)
+
 	// The total result is the union of each part of A after each part of B has
 	// been removed (sequentially).
 	var results []Geometry
 	for _, partA := range partsA {
 		result := partA
-		for _, partB := range partsB {
+		box, ok := result.Envelope().AsBox()
+		if !ok {
+			continue
+		}
+
+		err := tree.RangeSearch(box, func(i int) error {
+			// Recheck envelope intersection: result shrinks as differences are
+			// applied, so it may no longer overlap partsB[i].
+			if envelopesDisjoint(result, partsB[i]) {
+				return nil
+			}
 			var err error
-			result, err = jtsOverlayOp(result, partB, jts.OperationOverlayng_OverlayNG_DIFFERENCE)
+			result, err = jtsOverlayOp(result, partsB[i], jts.OperationOverlayng_OverlayNG_DIFFERENCE)
 			if err != nil {
-				return Geometry{}, err
+				return err
 			}
 			if result.IsEmpty() {
-				break
+				return rtree.Stop
 			}
+			return nil
+		})
+		if err != nil {
+			return Geometry{}, err
 		}
 		results = append(results, result)
 	}

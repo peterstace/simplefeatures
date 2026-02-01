@@ -7,7 +7,14 @@ import (
 	"sort"
 )
 
-// TODO: Remove this when we require Go 1.21 (the max builtin can be used instead).
+// TODO: Remove these when we require Go 1.21 (the min/max builtins can be used instead).
+func minInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 func maxInt(a, b int) int {
 	if a > b {
 		return a
