@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Optimize Intersection to return early when input envelopes are disjoint.
+
+- Optimize overlay operations (Intersection, Difference) for GeometryCollections
+  by using R-Tree indexing to reduce O(M×N) to O(M log N) complexity.
+
 ## v0.57.0
 
 2026-01-30
