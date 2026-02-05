@@ -3,7 +3,7 @@ services:
     image: golang:1.18
     working_dir: /go/src/github.com/peterstace/simplefeatures
     entrypoint: >-
-      go test -covermode=count -coverprofile=coverage.out -test.count=1 -test.run=.
+      go test -covermode=count -coverpkg=./... -coverprofile=coverage.out -test.count=1 -test.run=.
       ./carto
       ./geom
       ./internal/jtsport/...
