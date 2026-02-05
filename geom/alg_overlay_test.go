@@ -1,10 +1,12 @@
 package geom_test
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 // Results for the following tests can be found using the following style of
@@ -963,7 +965,7 @@ func TestBinaryOp(t *testing.T) {
 			union:   "POLYGON((0 0,1 0,0.5 0.5,1 1,0 1,0 0))",
 			inter:   "MULTILINESTRING((0 0,0.5 0.5),(0.5 0.5,1 1))",
 			fwdDiff: "POLYGON((0 0,1 0,0.5 0.5,1 1,0 1,0 0))",
-			revDiff: "GEOMETRYCOLLECTION EMPTY",
+			revDiff: "LINESTRING EMPTY",
 			symDiff: "POLYGON((0 0,1 0,0.5 0.5,1 1,0 1,0 0))",
 			relate:  "1F2101FF2",
 		},
@@ -974,7 +976,7 @@ func TestBinaryOp(t *testing.T) {
 			input2:  "POLYGON((0 0,2 0,2 2,0 2,0 0))",
 			union:   "POLYGON((0 0,1 0,2 0,2 2,0 2,0 1,0 0))",
 			inter:   "POLYGON((0 0,1 0,1 1,0 1,0 0))",
-			fwdDiff: "GEOMETRYCOLLECTION EMPTY",
+			fwdDiff: "POLYGON EMPTY",
 			revDiff: "POLYGON((1 0,2 0,2 2,0 2,0 1,1 1,1 0))",
 			symDiff: "POLYGON((1 0,2 0,2 2,0 2,0 1,1 1,1 0))",
 			relate:  "2FF11F212",
@@ -1450,88 +1452,215 @@ func TestBinaryOpNoCrash(t *testing.T) {
 	}
 }
 
-func TestBinaryOpBothInputsEmpty(t *testing.T) {
-	for i, wkt := range []string{
-		"POINT EMPTY",
-		"MULTIPOINT EMPTY",
-		"MULTIPOINT(EMPTY)",
-		"LINESTRING EMPTY",
-		"MULTILINESTRING EMPTY",
-		"MULTILINESTRING(EMPTY)",
-		"POLYGON EMPTY",
-		"MULTIPOLYGON EMPTY",
-		"MULTIPOLYGON(EMPTY)",
-		"GEOMETRYCOLLECTION EMPTY",
-	} {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := geomFromWKT(t, wkt)
-			for _, opCase := range []struct {
-				opName string
-				op     func(geom.Geometry, geom.Geometry) (geom.Geometry, error)
-			}{
-				{"union", geom.Union},
-				{"inter", geom.Intersection},
-				{"fwd_diff", geom.Difference},
-				{"sym_diff", geom.SymmetricDifference},
-			} {
-				t.Run(opCase.opName, func(t *testing.T) {
-					got, err := opCase.op(g, g)
-					if err != nil {
-						t.Fatalf("could not perform op: %v", err)
-					}
-					want := geom.Geometry{}
-					if opCase.opName == "union" {
-						want = got
-					}
-					expectGeomEq(t, got, want, geom.IgnoreOrder)
-				})
-			}
-			t.Run("relate", func(t *testing.T) {
-				got, err := geom.Relate(g, g)
-				if err != nil {
-					t.Fatal("could not perform relate op")
-				}
-				if got != "FFFFFFFF2" {
-					t.Errorf("got=%v but want=FFFFFFFF2", got)
-				}
-			})
-		})
-	}
+// dimToEmpty maps a dimension to the canonical "empty" geometry for that dimension.
+var dimToEmpty = map[int]string{
+	-1: "GEOMETRYCOLLECTION EMPTY",
+	0:  "POINT EMPTY",
+	1:  "LINESTRING EMPTY",
+	2:  "POLYGON EMPTY",
 }
 
-func reverseArgs(fn func(_, _ geom.Geometry) (geom.Geometry, error)) func(_, _ geom.Geometry) (geom.Geometry, error) {
-	return func(a, b geom.Geometry) (geom.Geometry, error) {
-		return fn(b, a)
-	}
-}
-
-func TestBinaryOpOneInputEmpty(t *testing.T) {
-	for _, opCase := range []struct {
-		opName    string
-		op        func(geom.Geometry, geom.Geometry) (geom.Geometry, error)
-		wantEmpty bool
+func TestOverlayAndRelateBothInputsEmpty(t *testing.T) {
+	inputs := []struct {
+		wkt string
+		dim int
 	}{
-		{"fwd_union", geom.Union, false},
-		{"rev_union", reverseArgs(geom.Union), false},
-		{"fwd_inter", geom.Intersection, true},
-		{"rev_inter", reverseArgs(geom.Intersection), true},
-		{"fwd_diff", geom.Difference, false},
-		{"rev_diff", reverseArgs(geom.Difference), true},
-		{"fwd_sym_diff", geom.SymmetricDifference, false},
-		{"rev_sym_diff", reverseArgs(geom.SymmetricDifference), false},
-	} {
-		t.Run(opCase.opName, func(t *testing.T) {
-			poly := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))")
-			empty := geom.Polygon{}.AsGeometry()
-			got, err := opCase.op(poly, empty)
-			expectNoErr(t, err)
-			if opCase.wantEmpty {
-				expectTrue(t, got.IsEmpty())
-			} else {
-				expectGeomEq(t, got, poly, geom.IgnoreOrder)
-			}
-		})
+		{"POINT EMPTY", 0},
+		{"LINESTRING EMPTY", 1},
+		{"POLYGON EMPTY", 2},
+		{"MULTIPOINT EMPTY", 0},
+		{"MULTILINESTRING EMPTY", 1},
+		{"MULTIPOLYGON EMPTY", 2},
+		{"GEOMETRYCOLLECTION EMPTY", -1},
 	}
+
+	for i, inputA := range inputs {
+		for j, inputB := range inputs {
+			gA := geomFromWKT(t, inputA.wkt)
+			gB := geomFromWKT(t, inputB.wkt)
+			t.Run(fmt.Sprintf("%d_%d", i, j), func(t *testing.T) {
+				t.Run("union", func(t *testing.T) {
+					got, err := geom.Union(gA, gB)
+					test.NoErr(t, err)
+					test.ExactEqualsWKT(t, got, dimToEmpty[maxInt(inputA.dim, inputB.dim)])
+				})
+				t.Run("intersection", func(t *testing.T) {
+					got, err := geom.Intersection(gA, gB)
+					test.NoErr(t, err)
+					test.ExactEqualsWKT(t, got, dimToEmpty[minInt(inputA.dim, inputB.dim)])
+				})
+				t.Run("difference", func(t *testing.T) {
+					got, err := geom.Difference(gA, gB)
+					test.NoErr(t, err)
+					test.ExactEqualsWKT(t, got, dimToEmpty[inputA.dim])
+				})
+				t.Run("symmetric_difference", func(t *testing.T) {
+					got, err := geom.SymmetricDifference(gA, gB)
+					test.NoErr(t, err)
+					test.ExactEqualsWKT(t, got, dimToEmpty[maxInt(inputA.dim, inputB.dim)])
+				})
+				t.Run("relate", func(t *testing.T) {
+					got, err := geom.Relate(gA, gB)
+					test.NoErr(t, err)
+					test.Eq(t, got, "FFFFFFFF2")
+				})
+			})
+		}
+	}
+}
+
+func TestOverlayAndRelateOnlyOneInputEmpty(t *testing.T) {
+	emptyInputs := []struct {
+		wkt string
+		dim int
+	}{
+		{"POINT EMPTY", 0},
+		{"LINESTRING EMPTY", 1},
+		{"POLYGON EMPTY", 2},
+		{"MULTIPOINT EMPTY", 0},
+		{"MULTILINESTRING EMPTY", 1},
+		{"MULTIPOLYGON EMPTY", 2},
+		{"GEOMETRYCOLLECTION EMPTY", -1},
+	}
+
+	nonEmptyInputs := []struct {
+		wkt string
+		dim int
+	}{
+		{"POINT(0 0)", 0},
+		{"LINESTRING(10 10,11 11)", 1},
+		{"POLYGON((20 20,20 21,21 20,20 20))", 2},
+		{"MULTIPOINT((30 30),(31 31))", 0},
+		{"MULTILINESTRING((40 40,41 41),(42 42,43 43))", 1},
+		{"MULTIPOLYGON(((50 50,50 51,51 50,50 50)),((52 52,52 53,53 52,52 52)))", 2},
+		{"GEOMETRYCOLLECTION(POINT(60 60),LINESTRING(70 70,71 71),POLYGON((80 80,80 81,81 80,80 80)))", 2},
+	}
+
+	fwdRelate := map[int]string{
+		0: "FFFFFF0F2",
+		1: "FFFFFF102",
+		2: "FFFFFF212",
+	}
+	revRelate := map[int]string{
+		0: "FF0FFFFF2",
+		1: "FF1FF0FF2",
+		2: "FF2FF1FF2",
+	}
+
+	for i, emptyInput := range emptyInputs {
+		emptyGeom := geomFromWKT(t, emptyInput.wkt)
+		for j, nonEmptyInput := range nonEmptyInputs {
+			nonEmptyGeom := geomFromWKT(t, nonEmptyInput.wkt)
+			t.Run(fmt.Sprintf("%d_%d", i, j), func(t *testing.T) {
+				t.Run("union", func(t *testing.T) {
+					t.Run("fwd", func(t *testing.T) {
+						got, err := geom.Union(emptyGeom, nonEmptyGeom)
+						test.NoErr(t, err)
+						test.ExactEquals(t, got, nonEmptyGeom, geom.IgnoreOrder)
+					})
+					t.Run("rev", func(t *testing.T) {
+						got, err := geom.Union(nonEmptyGeom, emptyGeom)
+						test.NoErr(t, err)
+						test.ExactEquals(t, got, nonEmptyGeom, geom.IgnoreOrder)
+					})
+				})
+				t.Run("intersection", func(t *testing.T) {
+					t.Run("fwd", func(t *testing.T) {
+						got, err := geom.Intersection(emptyGeom, nonEmptyGeom)
+						test.NoErr(t, err)
+						test.ExactEqualsWKT(t, got, dimToEmpty[minInt(emptyInput.dim, nonEmptyInput.dim)])
+					})
+					t.Run("rev", func(t *testing.T) {
+						got, err := geom.Intersection(nonEmptyGeom, emptyGeom)
+						test.NoErr(t, err)
+						test.ExactEqualsWKT(t, got, dimToEmpty[minInt(emptyInput.dim, nonEmptyInput.dim)])
+					})
+				})
+				t.Run("difference", func(t *testing.T) {
+					t.Run("fwd", func(t *testing.T) {
+						got, err := geom.Difference(emptyGeom, nonEmptyGeom)
+						test.NoErr(t, err)
+						test.ExactEqualsWKT(t, got, dimToEmpty[emptyInput.dim])
+					})
+					t.Run("rev", func(t *testing.T) {
+						got, err := geom.Difference(nonEmptyGeom, emptyGeom)
+						test.NoErr(t, err)
+						test.ExactEquals(t, got, nonEmptyGeom, geom.IgnoreOrder)
+					})
+				})
+				t.Run("symmetric_difference", func(t *testing.T) {
+					t.Run("fwd", func(t *testing.T) {
+						got, err := geom.SymmetricDifference(emptyGeom, nonEmptyGeom)
+						test.NoErr(t, err)
+						test.ExactEquals(t, got, nonEmptyGeom, geom.IgnoreOrder)
+					})
+					t.Run("rev", func(t *testing.T) {
+						got, err := geom.SymmetricDifference(nonEmptyGeom, emptyGeom)
+						test.NoErr(t, err)
+						test.ExactEquals(t, got, nonEmptyGeom, geom.IgnoreOrder)
+					})
+				})
+				t.Run("relate", func(t *testing.T) {
+					t.Run("fwd", func(t *testing.T) {
+						got, err := geom.Relate(emptyGeom, nonEmptyGeom)
+						test.NoErr(t, err)
+						test.Eq(t, got, fwdRelate[nonEmptyInput.dim])
+					})
+					t.Run("rev", func(t *testing.T) {
+						got, err := geom.Relate(nonEmptyGeom, emptyGeom)
+						test.NoErr(t, err)
+						test.Eq(t, got, revRelate[nonEmptyInput.dim])
+					})
+				})
+			})
+		}
+	}
+}
+
+func TestIntersectionEnvelopesDisjoint(t *testing.T) {
+	inputs := []struct {
+		wkt string
+		dim int
+	}{
+		{"POINT(0 0)", 0},
+		{"LINESTRING(10 10,11 11)", 1},
+		{"POLYGON((20 20,20 21,21 20,20 20))", 2},
+		{"MULTIPOINT((30 30),(31 31))", 0},
+		{"MULTILINESTRING((40 40,41 41),(42 42,43 43))", 1},
+		{"MULTIPOLYGON(((50 50,50 51,51 50,50 50)),((52 52,52 53,53 52,52 52)))", 2},
+		{"GEOMETRYCOLLECTION(POINT(60 60),LINESTRING(70 70,71 71),POLYGON((80 80,80 81,81 80,80 80)))", 2},
+	}
+
+	for i, inputA := range inputs {
+		gA := geomFromWKT(t, inputA.wkt)
+		for j, inputB := range inputs {
+			gB := geomFromWKT(t, inputB.wkt).TransformXY(func(xy geom.XY) geom.XY {
+				return xy.Add(geom.XY{X: 100, Y: 100})
+			})
+			t.Run(fmt.Sprintf("%d_%d", i, j), func(t *testing.T) {
+				got, err := geom.Intersection(gA, gB)
+				test.NoErr(t, err)
+				want := dimToEmpty[minInt(inputA.dim, inputB.dim)]
+				test.ExactEqualsWKT(t, got, want)
+			})
+		}
+	}
+}
+
+func maxInt(a, b int) int {
+	// Once on Go 1.21, we can use max builtin instead.
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func minInt(a, b int) int {
+	// Once on Go 1.21, we can use min builtin instead.
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func TestUnaryUnionAndUnionMany(t *testing.T) {

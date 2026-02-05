@@ -38,7 +38,7 @@ func TestIsEmptyDimension(t *testing.T) {
 		{"MULTIPOLYGON(((0 0,1 0,1 1,0 0)))", false, 2},
 		{"MULTIPOLYGON(((0 0,1 0,1 1,0 0)))", false, 2},
 		{"MULTIPOLYGON(EMPTY)", true, 2},
-		{"GEOMETRYCOLLECTION EMPTY", true, 0},
+		{"GEOMETRYCOLLECTION EMPTY", true, -1},
 		{"GEOMETRYCOLLECTION(POINT EMPTY)", true, 0},
 		{"GEOMETRYCOLLECTION(POLYGON EMPTY)", true, 2},
 		{"GEOMETRYCOLLECTION(POINT(1 1))", false, 0},

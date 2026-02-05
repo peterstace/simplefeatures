@@ -118,12 +118,12 @@ func (c GeometryCollection) IsEmpty() bool {
 	return true
 }
 
-// Dimension returns the maximum dimension over the collection, or 0 if the
-// collection is the empty collection. [Point]s and [MultiPoint]s have dimension 0,
-// [LineString]s and [MultiLineString]s have dimension 1, and [Polygon]s and
+// Dimension returns the maximum dimension over the collection, or -1 if the
+// collection contains no elements. [Point]s and [MultiPoint]s have dimension
+// 0, [LineString]s and [MultiLineString]s have dimension 1, and [Polygon]s and
 // [MultiPolygon]s have dimension 2.
 func (c GeometryCollection) Dimension() int {
-	dim := 0
+	dim := -1
 	for _, g := range c.geoms {
 		dim = maxInt(dim, g.Dimension())
 	}

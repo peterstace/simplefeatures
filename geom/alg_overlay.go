@@ -1,6 +1,8 @@
 package geom
 
 import (
+	"fmt"
+
 	"github.com/peterstace/simplefeatures/internal/jtsport/jts"
 	"github.com/peterstace/simplefeatures/rtree"
 )
@@ -25,7 +27,7 @@ func envelopesDisjoint(a, b Geometry) bool {
 }
 
 // createEmptyResult creates an empty geometry with the given dimension.
-// dim 0 = Point, dim 1 = LineString, dim 2 = Polygon, otherwise GeometryCollection.
+// dim 0 = Point, dim 1 = LineString, dim 2 = Polygon, dim -1 = GeometryCollection.
 func createEmptyResult(dim int) Geometry {
 	switch dim {
 	case 0:
@@ -34,8 +36,10 @@ func createEmptyResult(dim int) Geometry {
 		return LineString{}.AsGeometry()
 	case 2:
 		return Polygon{}.AsGeometry()
+	case -1:
+		return GeometryCollection{}.AsGeometry()
 	default:
-		return Geometry{}
+		panic(fmt.Sprintf("unexpected dimension: %d", dim))
 	}
 }
 
@@ -43,8 +47,17 @@ func createEmptyResult(dim int) Geometry {
 // geometry B (or both). An error may be returned in pathological cases of
 // numerical degeneracy.
 func Union(a, b Geometry) (Geometry, error) {
+	if a.IsEmpty() && b.IsEmpty() {
+		return createEmptyResult(maxInt(a.Dimension(), b.Dimension())), nil
+	}
 	if hasGC(a, b) {
 		return gcAwareUnion(a, b)
+	}
+	if a.IsEmpty() {
+		return b, nil
+	}
+	if b.IsEmpty() {
+		return a, nil
 	}
 	return jtsOverlayOp(a, b, jts.OperationOverlayng_OverlayNG_UNION)
 }
@@ -59,9 +72,6 @@ func gcAwareUnion(a, b Geometry) (Geometry, error) {
 // both geometry A and geometry B. An error may be returned in pathological
 // cases of numerical degeneracy.
 func Intersection(a, b Geometry) (Geometry, error) {
-	if a.IsEmpty() || b.IsEmpty() {
-		return Geometry{}, nil
-	}
 	if envelopesDisjoint(a, b) {
 		return createEmptyResult(minInt(a.Dimension(), b.Dimension())), nil
 	}
@@ -147,7 +157,7 @@ func prepareOverlayInputParts(a, b Geometry) ([]Geometry, []Geometry, error) {
 // pathological cases of numerical degeneracy.
 func Difference(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() {
-		return Geometry{}, nil
+		return createEmptyResult(a.Dimension()), nil
 	}
 	if hasGC(a, b) {
 		return gcAwareDifference(a, b)
@@ -199,7 +209,12 @@ func gcAwareDifference(a, b Geometry) (Geometry, error) {
 		if err != nil {
 			return Geometry{}, err
 		}
-		results = append(results, result)
+		if !result.IsEmpty() {
+			results = append(results, result)
+		}
+	}
+	if len(results) == 0 {
+		return createEmptyResult(a.Dimension()), nil
 	}
 	return UnaryUnion(NewGeometryCollection(results).AsGeometry())
 }
@@ -230,15 +245,14 @@ func jtsOverlayOp(a, b Geometry, opCode int) (Geometry, error) {
 // cases of numerical degeneracy.
 func SymmetricDifference(a, b Geometry) (Geometry, error) {
 	if a.IsEmpty() && b.IsEmpty() {
-		return Geometry{}, nil
+		return createEmptyResult(maxInt(a.Dimension(), b.Dimension())), nil
 	}
 	if a.IsEmpty() {
-		return UnaryUnion(b)
+		return b, nil
 	}
 	if b.IsEmpty() {
-		return UnaryUnion(a)
+		return a, nil
 	}
-
 	if hasGC(a, b) {
 		return gcAwareSymmetricDifference(a, b)
 	}

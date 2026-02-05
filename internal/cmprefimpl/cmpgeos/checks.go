@@ -229,18 +229,9 @@ func checkIsEmpty(g geom.Geometry, log *log.Logger) error {
 }
 
 func checkDimension(g geom.Geometry, log *log.Logger) error {
-	var want int
-	if !containsOnlyGeometryCollections(g) {
-		// Libgeos gives -1 dimension for GeometryCollection trees that only
-		// contain other GeometryCollections (all the way to the leaf nodes).
-		// This is weird behaviour, and the dimension should actually be zero.
-		// So we don't get 'want' from libgeos in that case (and allow want to
-		// default to 0).
-		var err error
-		want, err = rawgeos.Dimension(g)
-		if err != nil {
-			return err
-		}
+	want, err := rawgeos.Dimension(g)
+	if err != nil {
+		return err
 	}
 	got := g.Dimension()
 

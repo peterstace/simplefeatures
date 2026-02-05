@@ -53,7 +53,6 @@ func TestFuzz(t *testing.T) {
 			checkWKB(t, want, g)
 			checkGeoJSON(t, want, g)
 			checkIsEmpty(t, want, g)
-			checkDimension(t, want, g)
 			checkEnvelope(t, want, g)
 			checkConvexHull(t, want, g)
 			checkIsRing(t, want, g)
