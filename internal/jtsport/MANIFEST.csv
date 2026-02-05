@@ -68,6 +68,7 @@ geom/GeometryOverlayTest.java,geom_geometry_overlay_test.go,ported
 geom/GeometryRelate.java,geom_geometry_relate.go,ported
 geomop/GeometryMethodOperation.java,jtstest_geomop_geometry_method_operation.go,ported
 geomop/GeometryOperation.java,jtstest_geomop_geometry_operation.go,ported
+geomop/PreparedGeometryOperation.java,jtstest_geomop_prepared_geometry_operation.go,pending
 geomop/TestCaseGeometryFunctions.java,jtstest_geomop_test_case_geometry_functions.go,ported
 geomgraph/Depth.java,geomgraph_depth.go,ported
 geomgraph/DirectedEdge.java,geomgraph_directed_edge.go,ported
@@ -123,6 +124,23 @@ geom/Polygon.java,geom_polygon.go,ported
 geom/Position.java,geom_position.go,ported
 geom/PrecisionModel.java,geom_precision_model.go,ported
 geom/PrecisionModelTest.java,geom_precision_model_test.go,ported
+geom/prep/AbstractPreparedPolygonContains.java,geom_prep_abstract_prepared_polygon_contains.go,pending
+geom/prep/BasicPreparedGeometry.java,geom_prep_basic_prepared_geometry.go,pending
+geom/prep/PreparedGeometry.java,geom_prep_prepared_geometry.go,pending
+geom/prep/PreparedGeometryFactory.java,geom_prep_prepared_geometry_factory.go,pending
+geom/prep/PreparedGeometryTest.java,geom_prep_prepared_geometry_test.go,pending
+geom/prep/PreparedLineString.java,geom_prep_prepared_line_string.go,pending
+geom/prep/PreparedLineStringIntersects.java,geom_prep_prepared_line_string_intersects.go,pending
+geom/prep/PreparedPoint.java,geom_prep_prepared_point.go,pending
+geom/prep/PreparedPolygon.java,geom_prep_prepared_polygon.go,pending
+geom/prep/PreparedPolygonContains.java,geom_prep_prepared_polygon_contains.go,pending
+geom/prep/PreparedPolygonContainsProperly.java,geom_prep_prepared_polygon_contains_properly.go,pending
+geom/prep/PreparedPolygonCovers.java,geom_prep_prepared_polygon_covers.go,pending
+geom/prep/PreparedPolygonIntersects.java,geom_prep_prepared_polygon_intersects.go,pending
+geom/prep/PreparedPolygonIntersectsStressTest.java,geom_prep_prepared_polygon_intersects_stress_test.go,pending
+geom/prep/PreparedPolygonPredicate.java,geom_prep_prepared_polygon_predicate.go,pending
+geom/prep/PreparedPolygonPredicateStressTest.java,geom_prep_prepared_polygon_predicate_stress_test.go,pending
+geom/prep/StressTestHarness.java,geom_prep_stress_test_harness.go,pending
 geom/Puntal.java,geom_puntal.go,ported
 geom/Quadrant.java,geom_quadrant.go,ported
 geom/TopologyException.java,geom_topology_exception.go,ported
@@ -207,6 +225,7 @@ math/MathUtil.java,math_math_util.go,reviewed
 noding/BasicSegmentString.java,noding_basic_segment_string.go,ported
 noding/BoundaryChainNoder.java,noding_boundary_chain_noder.go,ported
 noding/FastNodingValidator.java,noding_fast_noding_validator.go,pending
+noding/FastSegmentSetIntersectionFinder.java,noding_fast_segment_set_intersection_finder.go,pending
 noding/InteriorIntersectionFinderAdder.java,noding_interior_intersection_finder_adder.go,ported
 noding/IntersectionAdder.java,noding_intersection_adder.go,ported
 noding/IntersectionFinderAdder.java,noding_intersection_finder_adder.go,ported
@@ -220,6 +239,7 @@ noding/NodingValidator.java,noding_noding_validator.go,ported
 noding/Octant.java,noding_octant.go,ported
 noding/ScaledNoder.java,noding_scaled_noder.go,pending
 noding/SegmentExtractingNoder.java,noding_segment_extracting_noder.go,ported
+noding/SegmentIntersectionDetector.java,noding_segment_intersection_detector.go,pending
 noding/SegmentIntersector.java,noding_segment_intersector.go,ported
 noding/SegmentNode.java,noding_segment_node.go,ported
 noding/SegmentNodeList.java,noding_segment_node_list.go,ported
@@ -227,6 +247,7 @@ noding/SegmentPointComparator.java,noding_segment_point_comparator.go,ported
 noding/SegmentPointComparatorTest.java,noding_segment_point_comparator_test.go,ported
 noding/SegmentSetMutualIntersector.java,noding_segment_set_mutual_intersector.go,ported
 noding/SegmentString.java,noding_segment_string.go,ported
+noding/SegmentStringUtil.java,noding_segment_string_util.go,pending
 noding/SinglePassNoder.java,noding_single_pass_noder.go,ported
 noding/snapround/GeometryNoder.java,noding_snapround_geometry_noder.go,ported
 noding/snapround/HotPixelIndex.java,noding_snapround_hot_pixel_index.go,ported

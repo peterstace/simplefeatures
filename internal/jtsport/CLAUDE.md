@@ -5,9 +5,9 @@
 @TRANSLITERATION_GUIDE.md describes how Java code is ported to Go code in those
 packages.
 
-The JTS repo will be at `../../locationtech/jts/` (relative to this file) and
-have the tag that's being ported checked out. It is up to the human user to
-ensure this is set up correctly.
+The JTS repo will be at `$REPOS/github.com/locationtech/jts` and have the tag
+that's being ported checked out. It is up to the human user to ensure this is
+set up correctly.
 
 ## Workflow
 
