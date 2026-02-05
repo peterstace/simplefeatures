@@ -80,11 +80,10 @@ func TestGeometryOverlayOld(t *testing.T) {
 	// Must set overlay method explicitly since order of tests is not deterministic.
 	jts.Geom_GeometryOverlay_SetOverlayImpl(jts.Geom_GeometryOverlay_PropertyValueOld)
 
-	// Note: The original Java test expected this to fail with a TopologyException,
-	// but the Go SnapOverlayOp implementation handles this case successfully.
-	// This is actually better behavior - our "old" overlay is more robust.
-	// We test that the intersection completes without error.
-	checkIntersectionSucceeds(t)
+	// The original Java test expected this to fail with a TopologyException.
+	// Now that FastNodingValidator is properly ported (instead of being a stub),
+	// the Go implementation correctly throws a TopologyException as expected.
+	checkIntersectionFails(t)
 }
 
 func TestGeometryOverlayNG(t *testing.T) {
@@ -105,6 +104,21 @@ func checkIntersectionSucceeds(t *testing.T) {
 		}
 	}()
 	tryIntersection(t)
+}
+
+func checkIntersectionFails(t *testing.T) {
+	t.Helper()
+	defer func() {
+		if r := recover(); r != nil {
+			if _, ok := r.(*jts.Geom_TopologyException); ok {
+				// Expected - intersection should fail with TopologyException
+				return
+			}
+			panic(r)
+		}
+	}()
+	tryIntersection(t)
+	t.Fatal("intersection operation should have failed with TopologyException")
 }
 
 func tryIntersection(t *testing.T) {

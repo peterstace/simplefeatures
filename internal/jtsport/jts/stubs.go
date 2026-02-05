@@ -59,44 +59,6 @@ func jtstestUtilIo_wktOrWKBReader_isHexDigit(ch rune) bool {
 }
 
 // =============================================================================
-// STUB: noding package stubs for EdgeNodingValidator
-// =============================================================================
-
-// STUB: Noding_FastNodingValidator validates that a collection of
-// SegmentStrings is correctly noded.
-type Noding_FastNodingValidator struct {
-	segStrings []*Noding_BasicSegmentString
-	isValid    bool
-	checked    bool
-}
-
-// Noding_NewFastNodingValidator creates a new FastNodingValidator.
-func Noding_NewFastNodingValidator(segStrings []*Noding_BasicSegmentString) *Noding_FastNodingValidator {
-	return &Noding_FastNodingValidator{
-		segStrings: segStrings,
-		isValid:    true,
-	}
-}
-
-// CheckValid checks whether the supplied segment strings are correctly noded.
-// Panics with TopologyException if they are not.
-func (fnv *Noding_FastNodingValidator) CheckValid() {
-	if fnv.checked {
-		return
-	}
-	fnv.checked = true
-	// STUB: Full implementation would check for interior intersections using
-	// MCIndexNoder and NodingIntersectionFinder. For now, we assume valid.
-	fnv.isValid = true
-}
-
-// IsValid returns true if the segment strings are correctly noded.
-func (fnv *Noding_FastNodingValidator) IsValid() bool {
-	fnv.CheckValid()
-	return fnv.isValid
-}
-
-// =============================================================================
 // STUB: precision package stubs for SnapOverlayOp
 // The precision package is optional but needed by SnapOverlayOp for the
 // CommonBitsRemover. This stub provides a pass-through implementation that
@@ -205,29 +167,6 @@ func JtstestUtil_StringUtil_EscapeHTML(s string) string {
 }
 
 // =============================================================================
-// STUB: operation/valid package stubs
-// =============================================================================
-
-// STUB: OperationValid_IsValidOp_IsValid - operation/valid/IsValidOp not yet ported.
-func OperationValid_IsValidOp_IsValid(g *Geom_Geometry) bool {
-	panic("operation/valid/IsValidOp not yet ported")
-}
-
-// =============================================================================
-// STUB: operation/distance package stubs
-// =============================================================================
-
-// STUB: OperationDistance_DistanceOp_Distance - operation/distance/DistanceOp not yet ported.
-func OperationDistance_DistanceOp_Distance(g1, g2 *Geom_Geometry) float64 {
-	panic("operation/distance/DistanceOp not yet ported")
-}
-
-// STUB: OperationDistance_DistanceOp_IsWithinDistance - operation/distance/DistanceOp not yet ported.
-func OperationDistance_DistanceOp_IsWithinDistance(g1, g2 *Geom_Geometry, distance float64) bool {
-	panic("operation/distance/DistanceOp not yet ported")
-}
-
-// =============================================================================
 // STUB: algorithm package stubs for Centroid and InteriorPoint
 // =============================================================================
 
@@ -239,25 +178,6 @@ func Algorithm_Centroid_GetCentroid(g *Geom_Geometry) *Geom_Coordinate {
 // STUB: Algorithm_InteriorPoint_GetInteriorPoint - algorithm/InteriorPoint not yet ported.
 func Algorithm_InteriorPoint_GetInteriorPoint(g *Geom_Geometry) *Geom_Coordinate {
 	panic("algorithm/InteriorPoint not yet ported")
-}
-
-// =============================================================================
-// STUB: operation/buffer package stubs
-// =============================================================================
-
-// STUB: OperationBuffer_BufferOp_BufferOp - operation/buffer/BufferOp not yet ported.
-func OperationBuffer_BufferOp_BufferOp(g *Geom_Geometry, distance float64) *Geom_Geometry {
-	panic("operation/buffer/BufferOp not yet ported")
-}
-
-// STUB: OperationBuffer_BufferOp_BufferOpWithQuadrantSegments - operation/buffer/BufferOp not yet ported.
-func OperationBuffer_BufferOp_BufferOpWithQuadrantSegments(g *Geom_Geometry, distance float64, quadrantSegments int) *Geom_Geometry {
-	panic("operation/buffer/BufferOp not yet ported")
-}
-
-// STUB: OperationBuffer_BufferOp_BufferOpWithQuadrantSegmentsAndEndCapStyle - operation/buffer/BufferOp not yet ported.
-func OperationBuffer_BufferOp_BufferOpWithQuadrantSegmentsAndEndCapStyle(g *Geom_Geometry, distance float64, quadrantSegments, endCapStyle int) *Geom_Geometry {
-	panic("operation/buffer/BufferOp not yet ported")
 }
 
 // =============================================================================
@@ -277,32 +197,6 @@ func Algorithm_NewConvexHull(geom *Geom_Geometry) *Algorithm_ConvexHull {
 // STUB: GetConvexHull - algorithm/ConvexHull not yet ported.
 func (ch *Algorithm_ConvexHull) GetConvexHull() *Geom_Geometry {
 	panic("algorithm/ConvexHull not yet ported")
-}
-
-// =============================================================================
-// STUB: operation/buffer package stubs for BufferParameters
-// =============================================================================
-
-const OperationBuffer_BufferParameters_JOIN_MITRE = 2
-
-// STUB: OperationBuffer_BufferParameters - operation/buffer/BufferParameters not yet ported.
-type OperationBuffer_BufferParameters struct {
-	joinStyle int
-}
-
-// STUB: OperationBuffer_NewBufferParameters - operation/buffer/BufferParameters not yet ported.
-func OperationBuffer_NewBufferParameters() *OperationBuffer_BufferParameters {
-	return &OperationBuffer_BufferParameters{}
-}
-
-// STUB: SetJoinStyle - operation/buffer/BufferParameters not yet ported.
-func (bp *OperationBuffer_BufferParameters) SetJoinStyle(joinStyle int) {
-	bp.joinStyle = joinStyle
-}
-
-// STUB: OperationBuffer_BufferOp_BufferOpWithParams - operation/buffer/BufferOp not yet ported.
-func OperationBuffer_BufferOp_BufferOpWithParams(g *Geom_Geometry, distance float64, params *OperationBuffer_BufferParameters) *Geom_Geometry {
-	panic("operation/buffer/BufferOp not yet ported")
 }
 
 // =============================================================================

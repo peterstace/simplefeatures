@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add `Buffer` function that computes the buffer of a geometry at a given
+  radius. Options are available for controlling quad segments, end cap style
+  (round, flat, square), join style (round, mitre, bevel), single-sided mode,
+  and simplify factor. The implementation is based on a port of JTS.
+
 - Change `GeometryCollection.Dimension()` to return -1 for empty geometry
   collections (previously returned 0). This change is consistent with GEOS.
 

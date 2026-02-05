@@ -60,22 +60,17 @@ func TestXMLTestSuite(t *testing.T) {
 }
 
 func isUnsupportedOp(opName string) bool {
+	// Operations that are still stubbed (not yet ported).
 	unsupported := []string{
-		"buffer",
-		"buffermitredjoin",
-		"convexhull",
-		"densify",
-		"distance",
-		"getcentroid",
-		"getinteriorpoint",
-		"getlength",
-		"isvalid",
-		"iswithindistance",
-		"minclearance",
-		"minclearanceline",
-		"polygonize",
-		"simplifydp",
-		"simplifytp",
+		"convexhull",       // algorithm/ConvexHull not ported
+		"densify",          // densify/Densifier not ported
+		"getcentroid",      // algorithm/Centroid not ported
+		"getinteriorpoint", // algorithm/InteriorPoint not ported
+		"minclearance",     // precision/MinimumClearance not ported
+		"minclearanceline", // precision/MinimumClearance not ported
+		"polygonize",       // operation/polygonize/Polygonizer not ported
+		"simplifydp",       // simplify/DouglasPeuckerSimplifier not ported
+		"simplifytp",       // simplify/TopologyPreservingSimplifier not ported
 	}
 	for _, u := range unsupported {
 		if opName == u {

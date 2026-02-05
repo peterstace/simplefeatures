@@ -31,12 +31,12 @@ func (vn *Noding_ValidatingNoder) ComputeNodes(segStrings []Noding_SegmentString
 }
 
 func (vn *Noding_ValidatingNoder) validate() {
-	// Convert to BasicSegmentString slice for FastNodingValidator.
-	bssSlice := make([]*Noding_BasicSegmentString, len(vn.nodedSS))
+	// Convert to SegmentString slice for FastNodingValidator.
+	segStrings := make([]Noding_SegmentString, len(vn.nodedSS))
 	for i, ss := range vn.nodedSS {
-		bssSlice[i] = Noding_NewBasicSegmentString(ss.GetCoordinates(), ss.GetData())
+		segStrings[i] = Noding_NewBasicSegmentString(ss.GetCoordinates(), ss.GetData())
 	}
-	nv := Noding_NewFastNodingValidator(bssSlice)
+	nv := Noding_NewFastNodingValidator(segStrings)
 	nv.CheckValid()
 }
 

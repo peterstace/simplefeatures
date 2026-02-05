@@ -1,6 +1,10 @@
 package jts
 
-import "github.com/peterstace/simplefeatures/internal/jtsport/java"
+import (
+	"sort"
+
+	"github.com/peterstace/simplefeatures/internal/jtsport/java"
+)
 
 // Geomgraph_NodeMap is a map of nodes, indexed by the coordinate of the node.
 type Geomgraph_NodeMap struct {
@@ -81,6 +85,13 @@ func (nm *Geomgraph_NodeMap) Values() []*Geomgraph_Node {
 	for _, node := range nm.nodeMap {
 		result = append(result, node)
 	}
+	// TRANSLITERATION NOTE: Sort by coordinate for deterministic ordering.
+	// Go's map iteration order is randomized, while Java's HashMap iteration
+	// order is consistent within a single JVM run. This sorting ensures the
+	// Go code produces deterministic results.
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].GetCoordinate().CompareTo(result[j].GetCoordinate()) < 0
+	})
 	return result
 }
 
@@ -88,7 +99,8 @@ func (nm *Geomgraph_NodeMap) Values() []*Geomgraph_Node {
 // geometry index.
 func (nm *Geomgraph_NodeMap) GetBoundaryNodes(geomIndex int) []*Geomgraph_Node {
 	var bdyNodes []*Geomgraph_Node
-	for _, node := range nm.nodeMap {
+	// Use sorted iteration for deterministic results.
+	for _, node := range nm.Values() {
 		if node.GetLabel().GetLocationOn(geomIndex) == Geom_Location_Boundary {
 			bdyNodes = append(bdyNodes, node)
 		}

@@ -340,8 +340,56 @@ func (op *JtstestGeomop_GeometryMethodOperation) invokeTestCaseGeometryFunction(
 ) JtstestTestrunner_Result {
 	opLower := strings.ToLower(opName)
 
-	// Handle two-geometry NG operations.
+	// Handle zero-argument operations.
+	if len(args) == 0 {
+		switch opLower {
+		case "minclearance":
+			return JtstestTestrunner_NewDoubleResult(
+				JtstestGeomop_TestCaseGeometryFunctions_MinClearance(geometry))
+		case "minclearanceline":
+			return JtstestTestrunner_NewGeometryResult(
+				JtstestGeomop_TestCaseGeometryFunctions_MinClearanceLine(geometry))
+		case "polygonize":
+			return JtstestTestrunner_NewGeometryResult(
+				JtstestGeomop_TestCaseGeometryFunctions_Polygonize(geometry))
+		}
+	}
+
+	// Handle single-argument operations (geometry + distance/parameter).
 	if len(args) == 1 {
+		// Check for operations that take a distance, not a geometry.
+		switch opLower {
+		case "buffermitredjoin":
+			distance, ok := op.parseScale(args[0])
+			if !ok {
+				return nil
+			}
+			return JtstestTestrunner_NewGeometryResult(
+				JtstestGeomop_TestCaseGeometryFunctions_BufferMitredJoin(geometry, distance))
+		case "densify":
+			distance, ok := op.parseScale(args[0])
+			if !ok {
+				return nil
+			}
+			return JtstestTestrunner_NewGeometryResult(
+				JtstestGeomop_TestCaseGeometryFunctions_Densify(geometry, distance))
+		case "simplifydp":
+			distance, ok := op.parseScale(args[0])
+			if !ok {
+				return nil
+			}
+			return JtstestTestrunner_NewGeometryResult(
+				JtstestGeomop_TestCaseGeometryFunctions_SimplifyDP(geometry, distance))
+		case "simplifytp":
+			distance, ok := op.parseScale(args[0])
+			if !ok {
+				return nil
+			}
+			return JtstestTestrunner_NewGeometryResult(
+				JtstestGeomop_TestCaseGeometryFunctions_SimplifyTP(geometry, distance))
+		}
+
+		// Handle two-geometry NG operations.
 		geom1, ok := args[0].(*Geom_Geometry)
 		if !ok {
 			return nil
