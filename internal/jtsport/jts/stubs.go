@@ -268,3 +268,15 @@ func Simplify_TopologyPreservingSimplifier_Simplify(g *Geom_Geometry, distance f
 func Precision_GeometryPrecisionReducer_Reduce(g *Geom_Geometry, pm *Geom_PrecisionModel) *Geom_Geometry {
 	panic("precision/GeometryPrecisionReducer not yet ported")
 }
+
+// =============================================================================
+// STUB: geom/util/AffineTransformation
+// =============================================================================
+
+// STUB: GeomUtil_AffineTransformation - geom/util/AffineTransformation not yet ported.
+type GeomUtil_AffineTransformation struct{}
+
+// STUB: GeomUtil_AffineTransformation_RotationInstance - geom/util/AffineTransformation not yet ported.
+func GeomUtil_AffineTransformation_RotationInstance(theta, x, y float64) Geom_CoordinateSequenceFilter {
+	panic("geom/util/AffineTransformation not yet ported")
+}

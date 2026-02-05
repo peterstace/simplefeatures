@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add `PreparedGeometry` type and `Prepare` function for efficient repeated
+  spatial predicate evaluation. When a geometry is prepared, it caches spatial
+  indices so that subsequent calls to `Intersects`, `Contains`,
+  `ContainsProperly`, `CoveredBy`, `Covers`, `Crosses`, `Disjoint`, `Overlaps`,
+  `Touches`, and `Within` against different test geometries are fast. The
+  implementation is based on a port of JTS.
+
 - Add `Buffer` function that computes the buffer of a geometry at a given
   distance. Options are available for controlling quad segments, end cap style
   (round, flat, square), join style (round, mitre, bevel), single-sided mode,

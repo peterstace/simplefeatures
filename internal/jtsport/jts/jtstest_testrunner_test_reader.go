@@ -238,7 +238,11 @@ func (r *JtstestTestrunner_TestReader) parseResultMatcher(runElement *xmlRun) Jt
 
 func (r *JtstestTestrunner_TestReader) getInstance(classname string, baseClass string) any {
 	// TRANSLITERATION NOTE: Go doesn't support dynamic class loading like Java's reflection.
-	// This would need to be extended with explicit type mapping if custom operations are needed.
+	// Instead, we use explicit type mapping for known classes.
+	switch classname {
+	case "org.locationtech.jtstest.geomop.PreparedGeometryOperation":
+		return JtstestGeomop_NewPreparedGeometryOperation()
+	}
 	return nil
 }
 
