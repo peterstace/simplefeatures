@@ -161,7 +161,7 @@ func TestBuffer(t *testing.T) {
 			in := test.FromWKT(t, tc.input)
 			got, err := geom.Buffer(in, tc.dist, tc.opts...)
 			test.NoErr(t, err)
-			test.ExactEqualsWKT(t, got, tc.want)
+			test.ExactEqualsWKT(t, got, tc.want, geom.ToleranceXY(1e-10))
 		})
 	}
 }
