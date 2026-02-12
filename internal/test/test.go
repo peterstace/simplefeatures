@@ -66,17 +66,17 @@ func ExactEquals(tb testing.TB, got, want geom.Geometry, opts ...geom.ExactEqual
 	}
 }
 
-func ExactEqualsWKT(tb testing.TB, got geom.Geometry, wantWKT string, opts ...geom.ExactEqualsOption) {
-	tb.Helper()
-	want := FromWKT(tb, wantWKT)
-	ExactEquals(tb, got, want, opts...)
-}
-
 func NotExactEquals(tb testing.TB, got, doNotWant geom.Geometry, opts ...geom.ExactEqualsOption) {
 	tb.Helper()
 	if geom.ExactEquals(got, doNotWant, opts...) {
 		tb.Fatalf("geometries should not be exactly equal:\n      got: %v\ndoNotWant: %v", got.AsText(), doNotWant.AsText())
 	}
+}
+
+func ExactEqualsWKT(tb testing.TB, got geom.Geometry, wantWKT string, opts ...geom.ExactEqualsOption) {
+	tb.Helper()
+	want := FromWKT(tb, wantWKT)
+	ExactEquals(tb, got, want, opts...)
 }
 
 func DeepEqual(tb testing.TB, a, b any) {
