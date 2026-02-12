@@ -79,15 +79,6 @@ func NotExactEquals(tb testing.TB, got, doNotWant geom.Geometry, opts ...geom.Ex
 	}
 }
 
-func ExactEqualsWKT(tb testing.TB, got geom.Geometry, wantWKT string, opts ...geom.ExactEqualsOption) {
-	tb.Helper()
-	want, err := geom.UnmarshalWKT(wantWKT)
-	if err != nil {
-		tb.Fatalf("failed to unmarshal WKT '%s': %v", wantWKT, err)
-	}
-	ExactEquals(tb, got, want, opts...)
-}
-
 func DeepEqual(tb testing.TB, a, b any) {
 	tb.Helper()
 	if !reflect.DeepEqual(a, b) {
