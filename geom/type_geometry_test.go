@@ -39,7 +39,7 @@ func TestZeroGeometry(t *testing.T) {
 	_, err = z.Value()
 	expectNoErr(t, err)
 
-	expectIntEq(t, z.Dimension(), 0)
+	expectIntEq(t, z.Dimension(), -1)
 }
 
 func TestGeometryType(t *testing.T) {

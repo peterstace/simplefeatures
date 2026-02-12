@@ -52,18 +52,27 @@ func ErrAs(tb testing.TB, err error, target any) {
 	}
 }
 
-func ExactEquals(tb testing.TB, g1, g2 geom.Geometry, opts ...geom.ExactEqualsOption) {
+func ExactEquals(tb testing.TB, got, want geom.Geometry, opts ...geom.ExactEqualsOption) {
 	tb.Helper()
-	if !geom.ExactEquals(g1, g2, opts...) {
-		tb.Fatalf("geometries should be exactly equal:\n  g1: %v\n  g2: %v", g1.AsText(), g2.AsText())
+	if !geom.ExactEquals(got, want, opts...) {
+		tb.Fatalf("geometries should be exactly equal:\n got: %v\nwant: %v", got.AsText(), want.AsText())
 	}
 }
 
-func NotExactEquals(tb testing.TB, g1, g2 geom.Geometry, opts ...geom.ExactEqualsOption) {
+func NotExactEquals(tb testing.TB, got, want geom.Geometry, opts ...geom.ExactEqualsOption) {
 	tb.Helper()
-	if geom.ExactEquals(g1, g2, opts...) {
-		tb.Fatalf("geometries should not be exactly equal:\n  g1: %v\n  g2: %v", g1.AsText(), g2.AsText())
+	if geom.ExactEquals(got, want, opts...) {
+		tb.Fatalf("geometries should not be exactly equal:\n got: %v\nwant: %v", got.AsText(), want.AsText())
 	}
+}
+
+func ExactEqualsWKT(tb testing.TB, got geom.Geometry, wantWKT string, opts ...geom.ExactEqualsOption) {
+	tb.Helper()
+	want, err := geom.UnmarshalWKT(wantWKT)
+	if err != nil {
+		tb.Fatalf("failed to unmarshal WKT '%s': %v", wantWKT, err)
+	}
+	ExactEquals(tb, got, want, opts...)
 }
 
 func DeepEqual(tb testing.TB, a, b any) {

@@ -35,19 +35,6 @@ func containsCollectionWithOnlyEmptyElements(g geom.Geometry) bool {
 	}
 }
 
-func containsOnlyGeometryCollections(g geom.Geometry) bool {
-	if !g.IsGeometryCollection() {
-		return false
-	}
-	gc := g.MustAsGeometryCollection()
-	for i := 0; i < gc.NumGeometries(); i++ {
-		if !containsOnlyGeometryCollections(gc.GeometryN(i)) {
-			return false
-		}
-	}
-	return true
-}
-
 func containsMultiPolygonWithEmptyPolygon(g geom.Geometry) bool {
 	switch {
 	case g.IsMultiPolygon():

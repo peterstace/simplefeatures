@@ -378,18 +378,6 @@ func checkIsEmpty(t *testing.T, want UnaryResult, g geom.Geometry) {
 	})
 }
 
-func checkDimension(t *testing.T, want UnaryResult, g geom.Geometry) {
-	t.Run("CheckDimension", func(t *testing.T) {
-		got := g.Dimension()
-		want := want.Dimension
-		if got != want {
-			t.Logf("got:  %v", got)
-			t.Logf("want: %v", want)
-			t.Error("mismatch")
-		}
-	})
-}
-
 func checkEnvelope(t *testing.T, want UnaryResult, g geom.Geometry) {
 	t.Run("CheckEnvelope", func(t *testing.T) {
 		got := g.Envelope().AsGeometry()

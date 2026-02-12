@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Change `GeometryCollection.Dimension()` to return -1 for empty geometry
+  collections (previously returned 0). This change is consistent with GEOS.
+
+- Fix overlay operations (Union, Intersection, Difference, SymmetricDifference)
+  to return dimension-appropriate empty geometries. For example, the difference
+  of two equal polygons now returns `POLYGON EMPTY` rather than
+  `GEOMETRYCOLLECTION EMPTY`.
+
 - Optimize Intersection to return early when input envelopes are disjoint.
 
 - Optimize overlay operations (Intersection, Difference) for GeometryCollections
