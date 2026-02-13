@@ -22,15 +22,10 @@ import (
 //
 // An error may be returned in pathological cases of numerical degeneracy.
 func Buffer(g Geometry, distance float64, opts ...BufferOption) (Geometry, error) {
-	optSet := newBufferOptionSet(opts)
-
 	params := jts.OperationBuffer_NewBufferParameters()
-	params.SetQuadrantSegments(optSet.quadSegments)
-	params.SetEndCapStyle(optSet.endCapStyle)
-	params.SetJoinStyle(optSet.joinStyle)
-	params.SetMitreLimit(optSet.mitreLimit)
-	params.SetSingleSided(optSet.isSingleSided)
-	params.SetSimplifyFactor(optSet.simplifyFactor)
+	for _, opt := range opts {
+		opt(params)
+	}
 
 	var result Geometry
 	err := catch(func() error {
@@ -48,68 +43,44 @@ func Buffer(g Geometry, distance float64, opts ...BufferOption) (Geometry, error
 }
 
 // BufferOption allows the behaviour of the [Buffer] operation to be modified.
-type BufferOption func(*bufferOptionSet)
-
-type bufferOptionSet struct {
-	quadSegments   int
-	endCapStyle    int
-	joinStyle      int
-	mitreLimit     float64
-	isSingleSided  bool
-	simplifyFactor float64
-}
-
-func newBufferOptionSet(opts []BufferOption) bufferOptionSet {
-	bos := bufferOptionSet{
-		quadSegments:   jts.OperationBuffer_BufferParameters_DEFAULT_QUADRANT_SEGMENTS,
-		endCapStyle:    jts.OperationBuffer_BufferParameters_CAP_ROUND,
-		joinStyle:      jts.OperationBuffer_BufferParameters_JOIN_ROUND,
-		mitreLimit:     jts.OperationBuffer_BufferParameters_DEFAULT_MITRE_LIMIT,
-		isSingleSided:  false,
-		simplifyFactor: jts.OperationBuffer_BufferParameters_DEFAULT_SIMPLIFY_FACTOR,
-	}
-	for _, opt := range opts {
-		opt(&bos)
-	}
-	return bos
-}
+type BufferOption func(*jts.OperationBuffer_BufferParameters)
 
 // BufferQuadSegments sets the number of segments used to approximate a quarter
 // circle. It defaults to 8.
 func BufferQuadSegments(quadSegments int) BufferOption {
-	return func(bos *bufferOptionSet) {
-		bos.quadSegments = quadSegments
+	return func(p *jts.OperationBuffer_BufferParameters) {
+		p.SetQuadrantSegments(quadSegments)
 	}
 }
 
 // BufferEndCapRound sets the end cap style to 'round'. It is 'round' by
 // default.
 func BufferEndCapRound() BufferOption {
-	return func(bos *bufferOptionSet) {
-		bos.endCapStyle = jts.OperationBuffer_BufferParameters_CAP_ROUND
+	return func(p *jts.OperationBuffer_BufferParameters) {
+		p.SetEndCapStyle(jts.OperationBuffer_BufferParameters_CAP_ROUND)
 	}
 }
 
 // BufferEndCapFlat sets the end cap style to 'flat'. It is 'round' by default.
 func BufferEndCapFlat() BufferOption {
-	return func(bos *bufferOptionSet) {
-		bos.endCapStyle = jts.OperationBuffer_BufferParameters_CAP_FLAT
+	return func(p *jts.OperationBuffer_BufferParameters) {
+		p.SetEndCapStyle(jts.OperationBuffer_BufferParameters_CAP_FLAT)
 	}
 }
 
 // BufferEndCapSquare sets the end cap style to 'square'. It is 'round' by
 // default.
 func BufferEndCapSquare() BufferOption {
-	return func(bos *bufferOptionSet) {
-		bos.endCapStyle = jts.OperationBuffer_BufferParameters_CAP_SQUARE
+	return func(p *jts.OperationBuffer_BufferParameters) {
+		p.SetEndCapStyle(jts.OperationBuffer_BufferParameters_CAP_SQUARE)
 	}
 }
 
 // BufferJoinStyleRound sets the join style to 'round'. It is 'round' by
 // default.
 func BufferJoinStyleRound() BufferOption {
-	return func(bos *bufferOptionSet) {
-		bos.joinStyle = jts.OperationBuffer_BufferParameters_JOIN_ROUND
+	return func(p *jts.OperationBuffer_BufferParameters) {
+		p.SetJoinStyle(jts.OperationBuffer_BufferParameters_JOIN_ROUND)
 	}
 }
 
@@ -117,17 +88,17 @@ func BufferJoinStyleRound() BufferOption {
 // default. The mitreLimit controls how far a mitre join can extend from the
 // join point. Corners with a ratio which exceed the limit will be beveled.
 func BufferJoinStyleMitre(mitreLimit float64) BufferOption {
-	return func(bos *bufferOptionSet) {
-		bos.joinStyle = jts.OperationBuffer_BufferParameters_JOIN_MITRE
-		bos.mitreLimit = mitreLimit
+	return func(p *jts.OperationBuffer_BufferParameters) {
+		p.SetJoinStyle(jts.OperationBuffer_BufferParameters_JOIN_MITRE)
+		p.SetMitreLimit(mitreLimit)
 	}
 }
 
 // BufferJoinStyleBevel sets the join style to 'bevel'. It is 'round' by
 // default.
 func BufferJoinStyleBevel() BufferOption {
-	return func(bos *bufferOptionSet) {
-		bos.joinStyle = jts.OperationBuffer_BufferParameters_JOIN_BEVEL
+	return func(p *jts.OperationBuffer_BufferParameters) {
+		p.SetJoinStyle(jts.OperationBuffer_BufferParameters_JOIN_BEVEL)
 	}
 }
 
@@ -137,8 +108,8 @@ func BufferJoinStyleBevel() BufferOption {
 // indicates the left-hand side, negative indicates the right-hand side.
 // The end cap style is ignored for single-sided buffers and forced to flat.
 func BufferSingleSided() BufferOption {
-	return func(bos *bufferOptionSet) {
-		bos.isSingleSided = true
+	return func(p *jts.OperationBuffer_BufferParameters) {
+		p.SetSingleSided(true)
 	}
 }
 
@@ -149,11 +120,7 @@ func BufferSingleSided() BufferOption {
 // relatively good accuracy for the generated buffer. Larger values sacrifice
 // accuracy in return for performance. The default is 0.01.
 func BufferSimplifyFactor(factor float64) BufferOption {
-	return func(bos *bufferOptionSet) {
-		if factor < 0 {
-			bos.simplifyFactor = 0
-		} else {
-			bos.simplifyFactor = factor
-		}
+	return func(p *jts.OperationBuffer_BufferParameters) {
+		p.SetSimplifyFactor(factor)
 	}
 }
