@@ -4,7 +4,7 @@ import (
 	"github.com/peterstace/simplefeatures/internal/jtsport/jts"
 )
 
-// Buffer returns a geometry that contains all points within the given radius
+// Buffer returns a geometry that contains all points within the given distance
 // of the input geometry.
 //
 // In GIS, the positive (or negative) buffer of a geometry is defined as
@@ -21,7 +21,7 @@ import (
 // approximate quarter circles (via [BufferQuadSegments]).
 //
 // An error may be returned in pathological cases of numerical degeneracy.
-func Buffer(g Geometry, radius float64, opts ...BufferOption) (Geometry, error) {
+func Buffer(g Geometry, distance float64, opts ...BufferOption) (Geometry, error) {
 	optSet := newBufferOptionSet(opts)
 
 	params := jts.OperationBuffer_NewBufferParameters()
@@ -39,7 +39,7 @@ func Buffer(g Geometry, radius float64, opts ...BufferOption) (Geometry, error) 
 		if err != nil {
 			return wrap(err, "converting geometry to JTS")
 		}
-		jtsResult := jts.OperationBuffer_BufferOp_BufferOpWithParams(jtsG, radius, params)
+		jtsResult := jts.OperationBuffer_BufferOp_BufferOpWithParams(jtsG, distance, params)
 		wkbWriter := jts.Io_NewWKBWriter()
 		result, err = UnmarshalWKB(wkbWriter.Write(jtsResult), NoValidate{})
 		return wrap(err, "converting JTS buffer result to simplefeatures")
