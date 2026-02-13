@@ -61,16 +61,10 @@ func TestXMLTestSuite(t *testing.T) {
 
 func isUnsupportedOp(opName string) bool {
 	unsupported := []string{
-		"buffer",
-		"buffermitredjoin",
 		"convexhull",
 		"densify",
-		"distance",
 		"getcentroid",
 		"getinteriorpoint",
-		"getlength",
-		"isvalid",
-		"iswithindistance",
 		"minclearance",
 		"minclearanceline",
 		"polygonize",

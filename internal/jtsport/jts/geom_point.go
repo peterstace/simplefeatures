@@ -110,8 +110,8 @@ func (p *Geom_Point) GetY() float64 {
 	return p.GetCoordinate().Y
 }
 
-// GetCoordinate returns the Coordinate or nil if this Point is empty.
-func (p *Geom_Point) GetCoordinate() *Geom_Coordinate {
+// GetCoordinate_BODY returns the Coordinate or nil if this Point is empty.
+func (p *Geom_Point) GetCoordinate_BODY() *Geom_Coordinate {
 	if p.coordinates.Size() != 0 {
 		return p.coordinates.GetCoordinate(0)
 	}

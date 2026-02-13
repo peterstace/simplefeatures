@@ -532,6 +532,13 @@ junit.AssertEquals(t, 3, iar.Size())
 junit.AssertTrue(t, result.IsValid())
 ```
 
+## JTS Util Package
+
+JTS has utility classes in `org.locationtech.jts.util` (e.g., `Assert`,
+`Debug`). These are ported in `util_*.go` files. Use the ported Go functions
+(e.g., `Util_Assert_IsTrue`) wherever the Java code uses them, rather than
+reimplementing the logic inline.
+
 ## Marker Interfaces
 
 Java marker interfaces (empty interfaces for categorization) become Go

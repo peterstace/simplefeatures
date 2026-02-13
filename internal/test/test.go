@@ -10,6 +10,13 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
+func FromWKT(tb testing.TB, wkt string) geom.Geometry {
+	tb.Helper()
+	g, err := geom.UnmarshalWKT(wkt)
+	NoErr(tb, err)
+	return g
+}
+
 func Eq[T comparable](tb testing.TB, got, want T) {
 	tb.Helper()
 	if got != want {
@@ -59,19 +66,16 @@ func ExactEquals(tb testing.TB, got, want geom.Geometry, opts ...geom.ExactEqual
 	}
 }
 
-func NotExactEquals(tb testing.TB, got, want geom.Geometry, opts ...geom.ExactEqualsOption) {
+func NotExactEquals(tb testing.TB, got, doNotWant geom.Geometry, opts ...geom.ExactEqualsOption) {
 	tb.Helper()
-	if geom.ExactEquals(got, want, opts...) {
-		tb.Fatalf("geometries should not be exactly equal:\n got: %v\nwant: %v", got.AsText(), want.AsText())
+	if geom.ExactEquals(got, doNotWant, opts...) {
+		tb.Fatalf("geometries should not be exactly equal:\n      got: %v\ndoNotWant: %v", got.AsText(), doNotWant.AsText())
 	}
 }
 
 func ExactEqualsWKT(tb testing.TB, got geom.Geometry, wantWKT string, opts ...geom.ExactEqualsOption) {
 	tb.Helper()
-	want, err := geom.UnmarshalWKT(wantWKT)
-	if err != nil {
-		tb.Fatalf("failed to unmarshal WKT '%s': %v", wantWKT, err)
-	}
+	want := FromWKT(tb, wantWKT)
 	ExactEquals(tb, got, want, opts...)
 }
 

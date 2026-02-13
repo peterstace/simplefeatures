@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add `Buffer` function that computes the buffer of a geometry at a given
+  distance. Options are available for controlling quad segments, end cap style
+  (round, flat, square), join style (round, mitre, bevel), single-sided mode,
+  and simplify factor. The implementation is based on a port of JTS. This means
+  that `Buffer` is now available natively in Go without need for the GEOS
+  dependency.
+
 - Change `GeometryCollection.Dimension()` to return -1 for empty geometry
   collections (previously returned 0). This change is consistent with GEOS.
 

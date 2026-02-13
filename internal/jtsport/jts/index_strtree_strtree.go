@@ -122,6 +122,12 @@ func (t *IndexStrtree_STRtree) GetParent() java.Polymorphic {
 	return t.IndexStrtree_AbstractSTRtree
 }
 
+// Compile-time check that IndexStrtree_STRtree implements Index_SpatialIndex.
+var _ Index_SpatialIndex = (*IndexStrtree_STRtree)(nil)
+
+// IsIndex_SpatialIndex is a marker method for interface identification.
+func (t *IndexStrtree_STRtree) IsIndex_SpatialIndex() {}
+
 // IndexStrtree_NewSTRtree constructs an STRtree with the default node capacity.
 func IndexStrtree_NewSTRtree() *IndexStrtree_STRtree {
 	return IndexStrtree_NewSTRtreeWithCapacity(IndexStrtree_STRtree_DEFAULT_NODE_CAPACITY)

@@ -306,7 +306,8 @@ func (e *OperationRelateng_RelateEdge) Location(isA bool, position int) int {
 			return e.bLocLine
 		}
 	}
-	panic("should never reach here")
+	Util_Assert_ShouldNeverReachHere()
+	return operationRelateng_RelateEdge_LOC_UNKNOWN
 }
 
 func (e *OperationRelateng_RelateEdge) dimension(isA bool) int {

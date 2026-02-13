@@ -1,5 +1,7 @@
 package jts
 
+import "sort"
+
 // OperationOverlayng_OverlayGraph is a planar graph of edges, representing the
 // topology resulting from an overlay operation. Each source edge is
 // represented by a pair of OverlayEdges, with opposite (symmetric) orientation.
@@ -32,6 +34,13 @@ func (og *OperationOverlayng_OverlayGraph) GetNodeEdges() []*OperationOverlayng_
 	for _, edge := range og.nodeMap {
 		result = append(result, edge)
 	}
+	// TRANSLITERATION NOTE: Sort by coordinate for deterministic ordering.
+	// Go's map iteration order is randomized, while Java's HashMap iteration
+	// order is consistent within a single JVM run. This sorting ensures the
+	// Go code produces deterministic results.
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Orig().CompareTo(result[j].Orig()) < 0
+	})
 	return result
 }
 

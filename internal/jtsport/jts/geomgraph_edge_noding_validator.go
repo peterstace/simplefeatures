@@ -40,7 +40,11 @@ func Geomgraph_EdgeNodingValidator_ToSegmentStrings(edges []*Geomgraph_Edge) []*
 // Geomgraph_NewEdgeNodingValidator creates a new validator for the given
 // collection of Edges.
 func Geomgraph_NewEdgeNodingValidator(edges []*Geomgraph_Edge) *Geomgraph_EdgeNodingValidator {
-	segStrings := Geomgraph_EdgeNodingValidator_ToSegmentStrings(edges)
+	bssSlice := Geomgraph_EdgeNodingValidator_ToSegmentStrings(edges)
+	segStrings := make([]Noding_SegmentString, len(bssSlice))
+	for i, bss := range bssSlice {
+		segStrings[i] = bss
+	}
 	return &Geomgraph_EdgeNodingValidator{
 		nv: Noding_NewFastNodingValidator(segStrings),
 	}
