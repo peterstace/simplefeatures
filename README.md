@@ -57,7 +57,7 @@ The following operations are supported:
 
 The overlay, relate, buffer, and prepared geometry operations are powered by a Go port of
 [JTS](https://locationtech.github.io/jts/). This means that it's using robust
-and battle tested algorithms that are common to JTS and its derivates (such as
+and battle tested algorithms that are common to JTS and its derivatives (such as
 GEOS).
 
 ### Carto
