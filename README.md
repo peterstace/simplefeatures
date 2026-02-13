@@ -48,12 +48,14 @@ The following operations are supported:
 - **Measurements:** area, length, distance.
 - **Analysis:** centroid, convex hull, envelope, point on surface, boundary, minimum area bounding rectangle, minimum width bounding rectangle.
 - **Transformations:** simplify, densify, snap to grid, reverse, force clockwise, force counter-clockwise, affine transformation.
+- **Buffer:** buffer with configurable end cap styles, join styles, and single-sided mode.
+- **Prepared geometries:** preprocess a geometry for efficient repeated spatial predicate evaluation.
 - **Comparison:** exact equals.
 - **Linear Interpolation:** interpolate point, interpolate evenly spaced points.
 - **Properties:** is simple, is empty, dimension, is clockwise, is counter-clockwise, validate.
 - **Envelope operations:** intersects, contains, covers, distance, expand to include, center, width, height, area, bounding diagonal.
 
-The overlay and relate operations are powered by a Go port of
+The overlay, relate, buffer, and prepared geometry operations are powered by a Go port of
 [JTS](https://locationtech.github.io/jts/). This means that it's using robust
 and battle tested algorithms that are common to JTS and its derivates (such as
 GEOS).
