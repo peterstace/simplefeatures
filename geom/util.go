@@ -141,7 +141,7 @@ func arbitraryControlPoint(g Geometry) Point {
 	}
 }
 
-func catch(fn func() error) (err error) {
+func catch[T any](fn func() (T, error)) (result T, err error) { //nolint:ireturn
 	// In Go 1.21+, panic(nil) causes recover() to return a *runtime.PanicNilError
 	// rather than nil. In earlier versions, recover() returns nil for panic(nil),
 	// making it indistinguishable from "no panic". We emulate the Go 1.21+ behavior
@@ -158,7 +158,7 @@ func catch(fn func() error) (err error) {
 			}
 		}
 	}()
-	err = fn()
+	result, err = fn()
 	panicked = false
 	return
 }
