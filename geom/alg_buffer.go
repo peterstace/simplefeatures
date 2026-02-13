@@ -18,7 +18,7 @@ import (
 // Since true buffer curves may contain circular arcs, computed buffer polygons
 // are only approximations to the true geometry. The user can control the
 // accuracy of the approximation by specifying the number of segments used to
-// approximate quarter circles (via BufferQuadSegments).
+// approximate quarter circles (via [BufferQuadSegments]).
 //
 // An error may be returned in pathological cases of numerical degeneracy.
 func Buffer(g Geometry, radius float64, opts ...BufferOption) (Geometry, error) {
@@ -47,7 +47,7 @@ func Buffer(g Geometry, radius float64, opts ...BufferOption) (Geometry, error) 
 	return result, err
 }
 
-// BufferOption allows the behaviour of the Buffer operation to be modified.
+// BufferOption allows the behaviour of the [Buffer] operation to be modified.
 type BufferOption func(*bufferOptionSet)
 
 type bufferOptionSet struct {
