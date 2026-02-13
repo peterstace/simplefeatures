@@ -12,7 +12,7 @@ type Polymorphic interface {
 
 // GetLeaf walks the child chain to find the leaf (concrete) type. This is used
 // by dispatchers to find the most-derived implementation of a method.
-func GetLeaf(obj Polymorphic) Polymorphic { //nolint:ireturn
+func GetLeaf(obj Polymorphic) Polymorphic {
 	for {
 		child := obj.GetChild()
 		if child == nil {
@@ -77,7 +77,7 @@ func InstanceOf[T any](obj Polymorphic) bool {
 //
 // Panics with a descriptive message if obj cannot be cast to T (equivalent to
 // Java's ClassCastException).
-func Cast[T Polymorphic](obj Polymorphic) T { //nolint:ireturn
+func Cast[T Polymorphic](obj Polymorphic) T {
 	var zero T
 	if obj == nil {
 		panic(fmt.Sprintf("cannot cast nil to %T", zero))
