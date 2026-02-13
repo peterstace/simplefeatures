@@ -64,22 +64,20 @@ func relateWithEmptyInput(a, b Geometry) string {
 
 // jtsRelateNG invokes the JTS port's RelateNG operation.
 func jtsRelateNG(a, b Geometry) (string, error) {
-	var result string
-	err := catch(func() error {
+	return catch(func() (string, error) {
 		wkbReader := jts.Io_NewWKBReader()
 		jtsA, err := wkbReader.ReadBytes(a.AsBinary())
 		if err != nil {
-			return wrap(err, "converting geometry A to JTS")
+			return "", wrap(err, "converting geometry A to JTS")
 		}
 		jtsB, err := wkbReader.ReadBytes(b.AsBinary())
 		if err != nil {
-			return wrap(err, "converting geometry B to JTS")
+			return "", wrap(err, "converting geometry B to JTS")
 		}
 		im := jts.OperationRelateng_RelateNG_RelateMatrix(jtsA, jtsB)
-		result = im.String()
-		return validateIntersectionMatrix(result)
+		result := im.String()
+		return result, validateIntersectionMatrix(result)
 	})
-	return result, err
 }
 
 func relateMatchesAnyPattern(a, b Geometry, patterns ...string) (bool, error) {

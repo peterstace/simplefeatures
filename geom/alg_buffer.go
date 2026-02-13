@@ -27,19 +27,17 @@ func Buffer(g Geometry, distance float64, opts ...BufferOption) (Geometry, error
 		opt(params)
 	}
 
-	var result Geometry
-	err := catch(func() error {
+	return catch(func() (Geometry, error) {
 		wkbReader := jts.Io_NewWKBReader()
 		jtsG, err := wkbReader.ReadBytes(g.AsBinary())
 		if err != nil {
-			return wrap(err, "converting geometry to JTS")
+			return Geometry{}, wrap(err, "converting geometry to JTS")
 		}
 		jtsResult := jts.OperationBuffer_BufferOp_BufferOpWithParams(jtsG, distance, params)
 		wkbWriter := jts.Io_NewWKBWriter()
-		result, err = UnmarshalWKB(wkbWriter.Write(jtsResult), NoValidate{})
-		return wrap(err, "converting JTS buffer result to simplefeatures")
+		result, err := UnmarshalWKB(wkbWriter.Write(jtsResult), NoValidate{})
+		return result, wrap(err, "converting JTS buffer result to simplefeatures")
 	})
-	return result, err
 }
 
 // BufferOption allows the behaviour of the [Buffer] operation to be modified.

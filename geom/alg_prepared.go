@@ -15,16 +15,15 @@ type PreparedGeometry struct {
 
 // Prepare preprocesses a geometry for efficient repeated predicate evaluation.
 func Prepare(g Geometry) (PreparedGeometry, error) {
-	var pg PreparedGeometry
-	err := catch(func() error {
+	return catch(func() (PreparedGeometry, error) {
 		jtsG, err := toJTS(g)
 		if err != nil {
-			return err
+			return PreparedGeometry{}, err
 		}
-		pg.prep = jts.GeomPrep_PreparedGeometryFactory_Prepare(jtsG)
-		return nil
+		return PreparedGeometry{
+			prep: jts.GeomPrep_PreparedGeometryFactory_Prepare(jtsG),
+		}, nil
 	})
-	return pg, err
 }
 
 func toJTS(g Geometry) (*jts.Geom_Geometry, error) {
@@ -36,16 +35,13 @@ func toJTS(g Geometry) (*jts.Geom_Geometry, error) {
 }
 
 func (p PreparedGeometry) eval(g Geometry, pred func(*jts.Geom_Geometry) bool) (bool, error) {
-	var result bool
-	err := catch(func() error {
+	return catch(func() (bool, error) {
 		jtsG, err := toJTS(g)
 		if err != nil {
-			return err
+			return false, err
 		}
-		result = pred(jtsG)
-		return nil
+		return pred(jtsG), nil
 	})
-	return result, err
 }
 
 // Intersects reports whether the prepared geometry intersects g.

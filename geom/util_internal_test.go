@@ -74,42 +74,42 @@ func BenchmarkMathMax(b *testing.B) {
 func TestCatch(t *testing.T) {
 	for _, tc := range []struct {
 		name    string
-		fn      func() error
+		fn      func() (struct{}, error)
 		wantErr string
 	}{
 		{
 			name:    "function returns nil",
-			fn:      func() error { return nil },
+			fn:      func() (struct{}, error) { return struct{}{}, nil },
 			wantErr: "",
 		},
 		{
 			name:    "function returns error",
-			fn:      func() error { return errors.New("test error") },
+			fn:      func() (struct{}, error) { return struct{}{}, errors.New("test error") },
 			wantErr: "test error",
 		},
 		{
 			name:    "function panics with string",
-			fn:      func() error { panic("something went wrong") },
+			fn:      func() (struct{}, error) { panic("something went wrong") },
 			wantErr: "panic: something went wrong",
 		},
 		{
 			name:    "function panics with error",
-			fn:      func() error { panic(errors.New("panic error")) },
+			fn:      func() (struct{}, error) { panic(errors.New("panic error")) },
 			wantErr: "panic: panic error",
 		},
 		{
 			name:    "function panics with int",
-			fn:      func() error { panic(42) },
+			fn:      func() (struct{}, error) { panic(42) },
 			wantErr: "panic: 42",
 		},
 		{
 			name:    "function panics with nil",
-			fn:      func() error { panic(nil) },
+			fn:      func() (struct{}, error) { panic(nil) },
 			wantErr: "panic: panic called with nil argument",
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			err := catch(tc.fn)
+			_, err := catch(tc.fn)
 			if tc.wantErr == "" {
 				if err != nil {
 					t.Errorf("got %v, want nil", err)

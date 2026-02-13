@@ -221,23 +221,21 @@ func gcAwareDifference(a, b Geometry) (Geometry, error) {
 
 // jtsOverlayOp invokes the JTS port's overlay operation with the given opCode.
 func jtsOverlayOp(a, b Geometry, opCode int) (Geometry, error) {
-	var result Geometry
-	err := catch(func() error {
+	return catch(func() (Geometry, error) {
 		wkbReader := jts.Io_NewWKBReader()
 		jtsA, err := wkbReader.ReadBytes(a.AsBinary())
 		if err != nil {
-			return wrap(err, "converting geometry A to JTS")
+			return Geometry{}, wrap(err, "converting geometry A to JTS")
 		}
 		jtsB, err := wkbReader.ReadBytes(b.AsBinary())
 		if err != nil {
-			return wrap(err, "converting geometry B to JTS")
+			return Geometry{}, wrap(err, "converting geometry B to JTS")
 		}
 		jtsResult := jts.OperationOverlayng_OverlayNGRobust_Overlay(jtsA, jtsB, opCode)
 		wkbWriter := jts.Io_NewWKBWriter()
-		result, err = UnmarshalWKB(wkbWriter.Write(jtsResult), NoValidate{})
-		return wrap(err, "converting JTS overlay result to simplefeatures")
+		result, err := UnmarshalWKB(wkbWriter.Write(jtsResult), NoValidate{})
+		return result, wrap(err, "converting JTS overlay result to simplefeatures")
 	})
-	return result, err
 }
 
 // SymmetricDifference returns a geometry that represents the parts of geometry
@@ -288,17 +286,15 @@ func UnionMany(gs []Geometry) (Geometry, error) {
 
 // jtsUnaryUnion invokes the JTS port's unary union operation.
 func jtsUnaryUnion(g Geometry) (Geometry, error) {
-	var result Geometry
-	err := catch(func() error {
+	return catch(func() (Geometry, error) {
 		wkbReader := jts.Io_NewWKBReader()
 		jtsG, err := wkbReader.ReadBytes(g.AsBinary())
 		if err != nil {
-			return wrap(err, "converting geometry to JTS")
+			return Geometry{}, wrap(err, "converting geometry to JTS")
 		}
 		jtsResult := jts.OperationOverlayng_OverlayNGRobust_Union(jtsG)
 		wkbWriter := jts.Io_NewWKBWriter()
-		result, err = UnmarshalWKB(wkbWriter.Write(jtsResult), NoValidate{})
-		return wrap(err, "converting JTS union result to simplefeatures")
+		result, err := UnmarshalWKB(wkbWriter.Write(jtsResult), NoValidate{})
+		return result, wrap(err, "converting JTS union result to simplefeatures")
 	})
-	return result, err
 }
