@@ -40,8 +40,9 @@ linters-settings:
       - (*github.com/peterstace/simplefeatures/rtree.RTree).RangeSearch
       - (*github.com/peterstace/simplefeatures/rtree.RTree).PrioritySearch
 
-# NOTE: every linter supported by golangci-lint is either explicitly included
-# or excluded.
+# NOTE: every linter supported by golangci-lint is either explicitly enabled
+# or disabled. When adding or removing a linter, move it between the two
+# sections rather than just deleting it.
 linters:
 
   enable:
@@ -81,7 +82,6 @@ linters:
     - importas
     - ineffassign
     - intrange
-    - ireturn
     - loggercheck
     - makezero
     - mirror
@@ -145,6 +145,7 @@ linters:
     - gomnd
     - inamedparam
     - interfacebloat
+    - ireturn
     - lll
     - maintidx
     - nestif
