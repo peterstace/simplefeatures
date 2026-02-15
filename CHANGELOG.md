@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.58.0
+
+2026-02-15
 
 - Add `PreparedGeometry` type and `Prepare` function for efficient repeated
   spatial predicate evaluation. When a geometry is prepared, it caches spatial
