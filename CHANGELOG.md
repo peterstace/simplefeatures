@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## v0.58.0
 
 2026-02-15
