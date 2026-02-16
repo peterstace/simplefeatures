@@ -11,7 +11,6 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"image/png"
 	"io"
 	"math"
 	"os"
@@ -20,6 +19,7 @@ import (
 	"github.com/peterstace/simplefeatures/carto"
 	"github.com/peterstace/simplefeatures/geom"
 	"github.com/peterstace/simplefeatures/internal/cartodemo/rasterize"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 const (
@@ -229,7 +229,7 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 	for _, g := range []*geom.Geometry{&land, &lakes, &glaciers, &iceshelves} {
 		clipped, err := geom.Intersection(*g, f.worldMask.AsGeometry())
 		*g = clipped
-		expectNoErr(t, err)
+		test.NoErr(t, err)
 	}
 
 	var graticules []geom.LineString
@@ -248,7 +248,7 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 	for i := range graticules {
 		clipped, err := geom.Intersection(graticules[i].AsGeometry(), f.worldMask.AsGeometry())
 		clippedGraticules = append(clippedGraticules, extractLinearParts(clipped)...)
-		expectNoErr(t, err)
+		test.NoErr(t, err)
 	}
 	graticules = clippedGraticules
 
@@ -256,7 +256,7 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 	mapMaskRatio := mapMaskEnv.Width() / mapMaskEnv.Height()
 	pxHigh := int(pxWide / mapMaskRatio)
 	mapMaskCenter, ok := mapMaskEnv.Center().XY()
-	expectTrue(t, ok)
+	test.True(t, ok)
 
 	mapUnitsPerPixel := f.mapMask.Envelope().Width() / float64(pxWide)
 
@@ -326,28 +326,20 @@ func (f *worldProjectionFixture) build(t *testing.T, outputPath string) {
 	rast.MultiLineString(mapOutline)
 	rast.Draw(img, img.Bounds(), image.NewUniform(color.Black), image.Point{})
 
-	err := os.WriteFile(outputPath, imageToPNG(t, img), 0o600)
-	expectNoErr(t, err)
-}
-
-func imageToPNG(t *testing.T, img image.Image) []byte {
-	t.Helper()
-	buf := new(bytes.Buffer)
-	err := png.Encode(buf, img)
-	expectNoErr(t, err)
-	return buf.Bytes()
+	err := os.WriteFile(outputPath, test.ImageToPNG(t, img), 0o600)
+	test.NoErr(t, err)
 }
 
 func loadGeom(t *testing.T, filename string) geom.Geometry {
 	t.Helper()
 	zippedBuf, err := os.ReadFile(filename)
-	expectNoErr(t, err)
+	test.NoErr(t, err)
 
 	gzipReader, err := gzip.NewReader(bytes.NewReader(zippedBuf))
-	expectNoErr(t, err)
+	test.NoErr(t, err)
 
 	unzippedBuf, err := io.ReadAll(gzipReader)
-	expectNoErr(t, err)
+	test.NoErr(t, err)
 
 	// TODO: There is currently no way to disable a GeoJSON GeometryCollection
 	// without validation directly. See
@@ -359,11 +351,11 @@ func loadGeom(t *testing.T, filename string) geom.Geometry {
 		} `json:"features"`
 	}
 	err = json.Unmarshal(unzippedBuf, &collection)
-	expectNoErr(t, err)
+	test.NoErr(t, err)
 	var gs []geom.Geometry
 	for _, rawFeat := range collection.Features {
 		g, err := geom.UnmarshalGeoJSON(rawFeat.Geometry, geom.NoValidate{})
-		expectNoErr(t, err)
+		test.NoErr(t, err)
 		if err := g.Validate(); err != nil {
 			continue
 		}
@@ -371,7 +363,7 @@ func loadGeom(t *testing.T, filename string) geom.Geometry {
 	}
 
 	all, err := geom.UnionMany(gs)
-	expectNoErr(t, err)
+	test.NoErr(t, err)
 
 	return all
 }
@@ -423,18 +415,4 @@ func circle(c geom.XY, r float64) geom.Polygon {
 
 func rectangle(tl, br geom.XY) geom.Polygon {
 	return geom.NewEnvelope(tl, br).AsGeometry().MustAsPolygon()
-}
-
-func expectNoErr(tb testing.TB, err error) {
-	tb.Helper()
-	if err != nil {
-		tb.Fatalf("unexpected error: %v", err)
-	}
-}
-
-func expectTrue(tb testing.TB, b bool) {
-	tb.Helper()
-	if !b {
-		tb.Fatalf("expected true, got false")
-	}
 }

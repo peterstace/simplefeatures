@@ -2,25 +2,65 @@
 package test
 
 import (
+	"bytes"
 	"errors"
+	"image"
+	"image/png"
 	"math"
+	"os"
 	"reflect"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
 )
 
-func FromWKT(tb testing.TB, wkt string) geom.Geometry {
+func FromWKT(tb testing.TB, wkt string, nv ...geom.NoValidate) geom.Geometry {
 	tb.Helper()
-	g, err := geom.UnmarshalWKT(wkt)
+	g, err := geom.UnmarshalWKT(wkt, nv...)
 	NoErr(tb, err)
 	return g
+}
+
+func FromGeoJSON(tb testing.TB, geojson string, nv ...geom.NoValidate) geom.Geometry {
+	tb.Helper()
+	g, err := geom.UnmarshalGeoJSON([]byte(geojson), nv...)
+	NoErr(tb, err)
+	return g
+}
+
+func ReadFile(tb testing.TB, path string) string {
+	tb.Helper()
+	data, err := os.ReadFile(path)
+	NoErr(tb, err)
+	return string(data)
 }
 
 func Eq[T comparable](tb testing.TB, got, want T) {
 	tb.Helper()
 	if got != want {
 		tb.Fatalf("got:  %v\nwant: %v", got, want)
+	}
+}
+
+// ordered can be replaced with cmp.Ordered when upgrading to Go 1.21.
+type ordered interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
+		~float32 | ~float64 |
+		~string
+}
+
+func GT[T ordered](tb testing.TB, got, greaterThan T) {
+	tb.Helper()
+	if !(got > greaterThan) {
+		tb.Fatalf("got:          %v\ngreater than: %v", got, greaterThan)
+	}
+}
+
+func LT[T ordered](tb testing.TB, got, lessThan T) {
+	tb.Helper()
+	if !(got < lessThan) {
+		tb.Fatalf("got:       %v\nless than: %v", got, lessThan)
 	}
 }
 
@@ -45,10 +85,28 @@ func NoErr(tb testing.TB, err error) {
 	}
 }
 
+func Panics(tb testing.TB, fn func()) {
+	tb.Helper()
+	defer func() {
+		if r := recover(); r != nil {
+			return
+		}
+		tb.Errorf("didn't panic")
+	}()
+	fn()
+}
+
 func Err(tb testing.TB, err error) {
 	tb.Helper()
 	if err == nil {
 		tb.Fatal("expected error but got nil")
+	}
+}
+
+func ErrIs(tb testing.TB, err, want error) {
+	tb.Helper()
+	if !errors.Is(err, want) {
+		tb.Fatalf("got:  %v\nwant: %v", err, want)
 	}
 }
 
@@ -91,6 +149,14 @@ func NotDeepEqual(tb testing.TB, a, b any) {
 	if reflect.DeepEqual(a, b) {
 		tb.Fatalf("values should not be deeply equal:\n  a: %#v\n  b: %#v", a, b)
 	}
+}
+
+func ImageToPNG(tb testing.TB, img image.Image) []byte {
+	tb.Helper()
+	buf := new(bytes.Buffer)
+	err := png.Encode(buf, img)
+	NoErr(tb, err)
+	return buf.Bytes()
 }
 
 // Tolerance specifies tolerances for approximate float comparison.

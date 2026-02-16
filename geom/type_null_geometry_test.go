@@ -6,10 +6,11 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestNullGeometryScan(t *testing.T) {
-	wkb := geomFromWKT(t, "POINT(1 2)").AsBinary()
+	wkb := test.FromWKT(t, "POINT(1 2)").AsBinary()
 
 	for _, tc := range []struct {
 		description string
@@ -39,10 +40,10 @@ func TestNullGeometryScan(t *testing.T) {
 			var ng geom.NullGeometry
 			scn := sql.Scanner(&ng)
 			err := scn.Scan(tc.value)
-			expectNoErr(t, err)
-			expectBoolEq(t, tc.wantValid, ng.Valid)
+			test.NoErr(t, err)
+			test.Eq(t, tc.wantValid, ng.Valid)
 			if tc.wantValid {
-				expectGeomEq(t, ng.Geometry, geomFromWKT(t, tc.wantWKT))
+				test.ExactEquals(t, ng.Geometry, test.FromWKT(t, tc.wantWKT))
 			}
 		})
 	}
@@ -61,14 +62,14 @@ func TestNullGeometryValue(t *testing.T) {
 		},
 		{
 			description: "point geometry",
-			input:       geom.NullGeometry{Valid: true, Geometry: geomFromWKT(t, "POINT(1 2)")},
-			want:        geomFromWKT(t, "POINT(1 2)").AsBinary(),
+			input:       geom.NullGeometry{Valid: true, Geometry: test.FromWKT(t, "POINT(1 2)")},
+			want:        test.FromWKT(t, "POINT(1 2)").AsBinary(),
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
 			valuer := driver.Valuer(tc.input)
 			got, err := valuer.Value()
-			expectNoErr(t, err)
+			test.NoErr(t, err)
 			if got == nil {
 				if tc.want != nil {
 					t.Fatalf("got nil but didn't want nil")
@@ -79,7 +80,7 @@ func TestNullGeometryValue(t *testing.T) {
 			if !ok {
 				t.Fatalf("didn't get bytes")
 			}
-			expectBytesEq(t, gotBytes, tc.want)
+			test.DeepEqual(t, gotBytes, tc.want)
 		})
 	}
 }

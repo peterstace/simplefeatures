@@ -4,7 +4,39 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
+
+func expectSequenceEq(tb testing.TB, got, want geom.Sequence) {
+	tb.Helper()
+	show := func() {
+		tb.Logf("len(got): %d, ct(got): %s", got.Length(), got.CoordinatesType())
+		for i := 0; i < got.Length(); i++ {
+			tb.Logf("got[%d]: %v", i, got.Get(i))
+		}
+		tb.Logf("len(want): %d, ct(want): %s", want.Length(), want.CoordinatesType())
+		for i := 0; i < want.Length(); i++ {
+			tb.Logf("want[%d]: %v", i, want.Get(i))
+		}
+	}
+	if got.CoordinatesType() != want.CoordinatesType() {
+		tb.Errorf("mismatched coordinate type")
+		show()
+		return
+	}
+	if got.Length() != want.Length() {
+		tb.Errorf("length mismatch")
+		show()
+		return
+	}
+	for i := 0; i < got.Length(); i++ {
+		w := want.Get(i)
+		g := got.Get(i)
+		if g != w {
+			tb.Errorf("mismatch at %d: got:%v want:%v", i, g, w)
+		}
+	}
+}
 
 func TestDumpCoordinatesPoint(t *testing.T) {
 	for _, tc := range []struct {
@@ -54,7 +86,7 @@ func TestDumpCoordinatesPoint(t *testing.T) {
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
-			got := geomFromWKT(t, tc.inputWKT).MustAsPoint().DumpCoordinates()
+			got := test.FromWKT(t, tc.inputWKT).MustAsPoint().DumpCoordinates()
 			expectSequenceEq(t, got, tc.want)
 		})
 	}
@@ -108,7 +140,7 @@ func TestDumpCoordinatesMultiLineString(t *testing.T) {
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
-			got := geomFromWKT(t, tc.inputWKT).MustAsMultiLineString().DumpCoordinates()
+			got := test.FromWKT(t, tc.inputWKT).MustAsMultiLineString().DumpCoordinates()
 			expectSequenceEq(t, got, tc.want)
 		})
 	}
@@ -162,7 +194,7 @@ func TestDumpCoordinatesPolygon(t *testing.T) {
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
-			got := geomFromWKT(t, tc.inputWKT).MustAsPolygon().DumpCoordinates()
+			got := test.FromWKT(t, tc.inputWKT).MustAsPolygon().DumpCoordinates()
 			expectSequenceEq(t, got, tc.want)
 		})
 	}
@@ -216,7 +248,7 @@ func TestDumpCoordinatesMultiPolygon(t *testing.T) {
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
-			got := geomFromWKT(t, tc.inputWKT).MustAsMultiPolygon().DumpCoordinates()
+			got := test.FromWKT(t, tc.inputWKT).MustAsMultiPolygon().DumpCoordinates()
 			expectSequenceEq(t, got, tc.want)
 		})
 	}
@@ -255,7 +287,7 @@ func TestDumpCoordinatesGeometryCollection(t *testing.T) {
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
-			got := geomFromWKT(t, tc.inputWKT).MustAsGeometryCollection().DumpCoordinates()
+			got := test.FromWKT(t, tc.inputWKT).MustAsGeometryCollection().DumpCoordinates()
 			expectSequenceEq(t, got, tc.want)
 		})
 	}
@@ -304,7 +336,7 @@ func TestDumpCoordinatesGeometry(t *testing.T) {
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
-			got := geomFromWKT(t, tc.inputWKT).DumpCoordinates()
+			got := test.FromWKT(t, tc.inputWKT).DumpCoordinates()
 			expectSequenceEq(t, got, tc.want)
 		})
 	}

@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -61,7 +60,7 @@ func checkWKTParse(t *testing.T, pg PostGIS, candidates []string) {
 func checkWKBParse(t *testing.T, pg PostGIS, candidates []string) {
 	var found bool
 	for i, wkb := range candidates {
-		buf, err := hexStringToBytes(wkb)
+		buf, err := hex.DecodeString(wkb)
 		if err != nil {
 			continue
 		}
@@ -99,21 +98,6 @@ func checkWKBParse(t *testing.T, pg PostGIS, candidates []string) {
 		// something is wrong with the extraction or conversion logic.
 		t.Errorf("could not extract any WKBs")
 	}
-}
-
-func hexStringToBytes(s string) ([]byte, error) {
-	if len(s)%2 != 0 {
-		return nil, errors.New("hex string must have even length")
-	}
-	var buf []byte
-	for i := 0; i < len(s); i += 2 {
-		x, err := strconv.ParseUint(s[i:i+2], 16, 8)
-		if err != nil {
-			return nil, err
-		}
-		buf = append(buf, byte(x))
-	}
-	return buf, nil
 }
 
 // isEWKB returns true if the WKB hex string uses EWKB extensions (SRID or

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestXYUnit(t *testing.T) {
@@ -14,42 +15,42 @@ func TestXYUnit(t *testing.T) {
 	for _, tc := range []struct {
 		description string
 		input       geom.XY
-		output      geom.XY
+		want        geom.XY
 	}{
 		{
 			description: "+ve unit in X",
 			input:       geom.XY{X: 1},
-			output:      geom.XY{X: 1},
+			want:        geom.XY{X: 1},
 		},
 		{
 			description: "+ve unit in Y",
 			input:       geom.XY{Y: 1},
-			output:      geom.XY{Y: 1},
+			want:        geom.XY{Y: 1},
 		},
 		{
 			description: "-ve unit in X",
 			input:       geom.XY{X: -1},
-			output:      geom.XY{X: -1},
+			want:        geom.XY{X: -1},
 		},
 		{
 			description: "-ve unit in Y",
 			input:       geom.XY{Y: -1},
-			output:      geom.XY{Y: -1},
+			want:        geom.XY{Y: -1},
 		},
 		{
 			description: "non-aligned unit",
 			input:       geom.XY{X: -1 / sqrt2, Y: 1 / sqrt2},
-			output:      geom.XY{X: -1 / sqrt2, Y: 1 / sqrt2},
+			want:        geom.XY{X: -1 / sqrt2, Y: 1 / sqrt2},
 		},
 		{
 			description: "non-unit",
 			input:       geom.XY{X: 1, Y: -2},
-			output:      geom.XY{X: 1 / sqrt5, Y: -2 / sqrt5},
+			want:        geom.XY{X: 1 / sqrt5, Y: -2 / sqrt5},
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
 			got := tc.input.Unit()
-			expectXYWithinTolerance(t, got, tc.output, 0.0000001)
+			test.LT(t, got.Sub(tc.want).Length(), 0.0000001)
 		})
 	}
 }
@@ -80,12 +81,12 @@ func TestXYCross(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Run("fwd", func(t *testing.T) {
 				got := tc.u.Cross(tc.v)
-				expectFloat64Eq(t, got, tc.want)
+				test.Eq(t, got, tc.want)
 			})
 			t.Run("rev", func(t *testing.T) {
 				got := tc.v.Cross(tc.u)
 				want := -tc.want // Cross product is anti-commutative.
-				expectFloat64Eq(t, got, want)
+				test.Eq(t, got, want)
 			})
 		})
 	}

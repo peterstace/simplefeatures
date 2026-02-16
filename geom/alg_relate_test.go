@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 // These tests aren't exhaustive, because we are leveraging the Relate
@@ -276,11 +277,11 @@ func TestRelate(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g1 := geomFromWKT(t, tt.wkt1)
-			g2 := geomFromWKT(t, tt.wkt2)
+			g1 := test.FromWKT(t, tt.wkt1)
+			g2 := test.FromWKT(t, tt.wkt2)
 			t.Run("Equals", func(t *testing.T) {
 				got, err := geom.Equals(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.equals {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -289,7 +290,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("Disjoint", func(t *testing.T) {
 				got, err := geom.Disjoint(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.disjoint {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -298,7 +299,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("Touches", func(t *testing.T) {
 				got, err := geom.Touches(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.touches {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -307,7 +308,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("Contains", func(t *testing.T) {
 				got, err := geom.Contains(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.contains {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -316,7 +317,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("Covers", func(t *testing.T) {
 				got, err := geom.Covers(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.covers {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -325,7 +326,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("Within", func(t *testing.T) {
 				got, err := geom.Within(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.within {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -334,7 +335,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("CoveredBy", func(t *testing.T) {
 				got, err := geom.CoveredBy(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.coveredBy {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -423,13 +424,13 @@ func TestCrosses(t *testing.T) {
 			run := func(rev bool) func(*testing.T) {
 				return func(t *testing.T) {
 					t.Helper()
-					g1 := geomFromWKT(t, tt.wkt1)
-					g2 := geomFromWKT(t, tt.wkt2)
+					g1 := test.FromWKT(t, tt.wkt1)
+					g2 := test.FromWKT(t, tt.wkt2)
 					if rev {
 						g1, g2 = g2, g1
 					}
 					got, err := geom.Crosses(g1, g2)
-					expectNoErr(t, err)
+					test.NoErr(t, err)
 					if got != tt.want {
 						t.Logf("WKT1: %v", tt.wkt1)
 						t.Logf("WKT2: %v", tt.wkt2)
@@ -480,13 +481,13 @@ func TestOverlaps(t *testing.T) {
 			run := func(rev bool) func(t *testing.T) {
 				return func(t *testing.T) {
 					t.Helper()
-					g1 := geomFromWKT(t, tt.wkt1)
-					g2 := geomFromWKT(t, tt.wkt2)
+					g1 := test.FromWKT(t, tt.wkt1)
+					g2 := test.FromWKT(t, tt.wkt2)
 					if rev {
 						g1, g2 = g2, g1
 					}
 					got, err := geom.Overlaps(g1, g2)
-					expectNoErr(t, err)
+					test.NoErr(t, err)
 					if got != tt.want {
 						t.Logf("WKT1: %v", tt.wkt1)
 						t.Logf("WKT2: %v", tt.wkt2)

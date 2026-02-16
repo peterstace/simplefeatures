@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestRotatingCalipers(t *testing.T) {
@@ -135,7 +136,7 @@ func TestRotatingCalipers(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			in := geomFromWKT(t, tc.input)
+			in := test.FromWKT(t, tc.input)
 			t.Logf("input: %s", in.AsText())
 
 			opts := []geom.ExactEqualsOption{
@@ -145,12 +146,12 @@ func TestRotatingCalipers(t *testing.T) {
 
 			t.Run("RotatedMinimumAreaBoundingRectangle", func(t *testing.T) {
 				got := geom.RotatedMinimumAreaBoundingRectangle(in)
-				expectGeomEqWKT(t, got, tc.wantMinAreaRect, opts...)
+				test.ExactEqualsWKT(t, got, tc.wantMinAreaRect, opts...)
 			})
 			t.Run("MinimumWidth", func(t *testing.T) {
 				if tc.wantMinWidthRect != "" {
 					got := geom.RotatedMinimumWidthBoundingRectangle(in)
-					expectGeomEqWKT(t, got, tc.wantMinWidthRect, opts...)
+					test.ExactEqualsWKT(t, got, tc.wantMinWidthRect, opts...)
 				}
 			})
 		})

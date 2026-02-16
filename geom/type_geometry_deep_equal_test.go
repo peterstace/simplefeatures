@@ -32,8 +32,8 @@ func TestReflectDeepEqualWorks(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g1 := geomFromWKT(t, tt.wkt)
-			g2 := geomFromWKT(t, tt.wkt)
+			g1 := test.FromWKT(t, tt.wkt)
+			g2 := test.FromWKT(t, tt.wkt)
 			test.ExactEquals(t, g1, g2) // The geometries are semantically equal.
 			test.DeepEqual(t, g1, g2)   // And reflect.DeepEqual works as expected.
 		})
@@ -49,7 +49,7 @@ func TestReflectDeepEqualWorksForZeroValue(t *testing.T) {
 	var g1 geom.Geometry
 
 	// Constructed from WKT.
-	g2 := geomFromWKT(t, "GEOMETRYCOLLECTION EMPTY")
+	g2 := test.FromWKT(t, "GEOMETRYCOLLECTION EMPTY")
 
 	// Manually constructed with nil slice.
 	g3 := geom.NewGeometryCollection(nil).AsGeometry()

@@ -8,38 +8,39 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestZeroGeometry(t *testing.T) {
 	var z geom.Geometry
-	expectBoolEq(t, z.IsGeometryCollection(), true)
+	test.Eq(t, z.IsGeometryCollection(), true)
 	z.MustAsGeometryCollection() // Doesn't crash.
-	expectStringEq(t, z.AsText(), "GEOMETRYCOLLECTION EMPTY")
+	test.Eq(t, z.AsText(), "GEOMETRYCOLLECTION EMPTY")
 	gc, ok := z.AsGeometryCollection()
-	expectTrue(t, ok)
-	expectIntEq(t, gc.NumGeometries(), 0)
+	test.True(t, ok)
+	test.Eq(t, gc.NumGeometries(), 0)
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(z)
-	expectNoErr(t, err)
-	expectStringEq(t, strings.TrimSpace(buf.String()), `{"type":"GeometryCollection","geometries":[]}`)
+	test.NoErr(t, err)
+	test.Eq(t, strings.TrimSpace(buf.String()), `{"type":"GeometryCollection","geometries":[]}`)
 
 	pt := geom.XY{1, 2}.AsPoint()
 	z = pt.AsGeometry() // Set away from zero value
-	expectBoolEq(t, z.IsPoint(), true)
+	test.Eq(t, z.IsPoint(), true)
 	err = json.NewDecoder(&buf).Decode(&z)
-	expectNoErr(t, err)
-	expectBoolEq(t, z.IsPoint(), false)
-	expectBoolEq(t, z.IsGeometryCollection(), true)
-	expectBoolEq(t, z.IsEmpty(), true)
+	test.NoErr(t, err)
+	test.Eq(t, z.IsPoint(), false)
+	test.Eq(t, z.IsGeometryCollection(), true)
+	test.Eq(t, z.IsEmpty(), true)
 	z = geom.Geometry{}
 
 	_ = z.AsBinary() // Doesn't crash
 
 	_, err = z.Value()
-	expectNoErr(t, err)
+	test.NoErr(t, err)
 
-	expectIntEq(t, z.Dimension(), -1)
+	test.Eq(t, z.Dimension(), -1)
 }
 
 func TestGeometryType(t *testing.T) {
@@ -66,7 +67,7 @@ func TestGeometryType(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("wkt:", tt.wkt)
-			g := geomFromWKT(t, tt.wkt)
+			g := test.FromWKT(t, tt.wkt)
 			if tt.geoType != g.Type() {
 				t.Errorf("expect: %s, got %s", tt.geoType, g.Type())
 			}
@@ -90,7 +91,7 @@ func TestGeometryTypeString(t *testing.T) {
 	} {
 		t.Run(tc.want, func(t *testing.T) {
 			got := tc.typ.String()
-			expectStringEq(t, got, tc.want)
+			test.Eq(t, got, tc.want)
 		})
 	}
 }
@@ -106,69 +107,69 @@ func TestAsConcreteType(t *testing.T) {
 		"MULTIPOLYGON(((0 0,0 1,1 0,0 0)))",
 	} {
 		t.Run(wkt, func(t *testing.T) {
-			g := geomFromWKT(t, wkt)
+			g := test.FromWKT(t, wkt)
 
 			if g.IsGeometryCollection() {
 				concrete, ok := g.AsGeometryCollection()
-				expectTrue(t, ok)
-				expectFalse(t, concrete.IsEmpty())
+				test.True(t, ok)
+				test.False(t, concrete.IsEmpty())
 			} else {
 				_, ok := g.AsGeometryCollection()
-				expectFalse(t, ok)
+				test.False(t, ok)
 			}
 
 			if g.IsPoint() {
 				concrete, ok := g.AsPoint()
-				expectTrue(t, ok)
-				expectFalse(t, concrete.IsEmpty())
+				test.True(t, ok)
+				test.False(t, concrete.IsEmpty())
 			} else {
 				_, ok := g.AsPoint()
-				expectFalse(t, ok)
+				test.False(t, ok)
 			}
 
 			if g.IsLineString() {
 				concrete, ok := g.AsLineString()
-				expectTrue(t, ok)
-				expectFalse(t, concrete.IsEmpty())
+				test.True(t, ok)
+				test.False(t, concrete.IsEmpty())
 			} else {
 				_, ok := g.AsLineString()
-				expectFalse(t, ok)
+				test.False(t, ok)
 			}
 
 			if g.IsPolygon() {
 				concrete, ok := g.AsPolygon()
-				expectTrue(t, ok)
-				expectFalse(t, concrete.IsEmpty())
+				test.True(t, ok)
+				test.False(t, concrete.IsEmpty())
 			} else {
 				_, ok := g.AsPolygon()
-				expectFalse(t, ok)
+				test.False(t, ok)
 			}
 
 			if g.IsMultiPoint() {
 				concrete, ok := g.AsMultiPoint()
-				expectTrue(t, ok)
-				expectFalse(t, concrete.IsEmpty())
+				test.True(t, ok)
+				test.False(t, concrete.IsEmpty())
 			} else {
 				_, ok := g.AsMultiPoint()
-				expectFalse(t, ok)
+				test.False(t, ok)
 			}
 
 			if g.IsMultiLineString() {
 				concrete, ok := g.AsMultiLineString()
-				expectTrue(t, ok)
-				expectFalse(t, concrete.IsEmpty())
+				test.True(t, ok)
+				test.False(t, concrete.IsEmpty())
 			} else {
 				_, ok := g.AsMultiLineString()
-				expectFalse(t, ok)
+				test.False(t, ok)
 			}
 
 			if g.IsMultiPolygon() {
 				concrete, ok := g.AsMultiPolygon()
-				expectTrue(t, ok)
-				expectFalse(t, concrete.IsEmpty())
+				test.True(t, ok)
+				test.False(t, concrete.IsEmpty())
 			} else {
 				_, ok := g.AsMultiPolygon()
-				expectFalse(t, ok)
+				test.False(t, ok)
 			}
 		})
 	}
@@ -211,7 +212,7 @@ func TestGeometryIsCWandIsCCW(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("wkt:", tt.wkt)
-			g := geomFromWKT(t, tt.wkt)
+			g := test.FromWKT(t, tt.wkt)
 			if tt.geoType != g.Type() {
 				t.Errorf("expect: type %s, got %s", tt.geoType, g.Type())
 			}

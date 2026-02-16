@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestIsEmptyDimension(t *testing.T) {
@@ -93,16 +94,16 @@ func TestEnvelope(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("wkt:", tt.wkt)
-			g := geomFromWKT(t, tt.wkt)
+			g := test.FromWKT(t, tt.wkt)
 			env := g.Envelope()
 
 			gotMin, ok := env.Min().XY()
-			expectTrue(t, ok)
-			expectXYEq(t, gotMin, tt.min)
+			test.True(t, ok)
+			test.Eq(t, gotMin, tt.min)
 
 			gotMax, ok := env.Max().XY()
-			expectTrue(t, ok)
-			expectXYEq(t, gotMax, tt.max)
+			test.True(t, ok)
+			test.Eq(t, gotMax, tt.max)
 		})
 	}
 }
@@ -125,9 +126,9 @@ func TestNoEnvelope(t *testing.T) {
 		"GEOMETRYCOLLECTION(POINT EMPTY)",
 	} {
 		t.Run(wkt, func(t *testing.T) {
-			g := geomFromWKT(t, wkt)
+			g := test.FromWKT(t, wkt)
 			got := g.Envelope()
-			expectTrue(t, got.IsEmpty())
+			test.True(t, got.IsEmpty())
 		})
 	}
 }
@@ -196,7 +197,7 @@ func TestIsSimple(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Logf("wkt: %s", tt.wkt)
-			got, defined := geomFromWKT(t, tt.wkt).IsSimple()
+			got, defined := test.FromWKT(t, tt.wkt).IsSimple()
 			if !defined {
 				t.Fatal("not defined")
 			}
@@ -208,8 +209,8 @@ func TestIsSimple(t *testing.T) {
 }
 
 func TestIsSimpleGeometryCollection(t *testing.T) {
-	_, defined := geomFromWKT(t, "GEOMETRYCOLLECTION(POINT(1 2))").IsSimple()
-	expectBoolEq(t, defined, false)
+	_, defined := test.FromWKT(t, "GEOMETRYCOLLECTION(POINT(1 2))").IsSimple()
+	test.Eq(t, defined, false)
 }
 
 func TestBoundary(t *testing.T) {
@@ -307,9 +308,9 @@ func TestBoundary(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Logf("WKT: %v", tt.wkt)
-			want := geomFromWKT(t, tt.boundary)
-			got := geomFromWKT(t, tt.wkt).Boundary()
-			expectGeomEq(t, got, want)
+			want := test.FromWKT(t, tt.boundary)
+			got := test.FromWKT(t, tt.wkt).Boundary()
+			test.ExactEquals(t, got, want)
 		})
 	}
 }
@@ -317,67 +318,67 @@ func TestBoundary(t *testing.T) {
 func TestCoordinatesSequence(t *testing.T) {
 	t.Run("point", func(t *testing.T) {
 		t.Run("populated", func(t *testing.T) {
-			c, ok := geomFromWKT(t, "POINT(1 2)").MustAsPoint().Coordinates()
-			expectBoolEq(t, ok, true)
-			expectXYEq(t, c.XY, geom.XY{1, 2})
+			c, ok := test.FromWKT(t, "POINT(1 2)").MustAsPoint().Coordinates()
+			test.Eq(t, ok, true)
+			test.Eq(t, c.XY, geom.XY{1, 2})
 		})
 		t.Run("empty", func(t *testing.T) {
-			_, ok := geomFromWKT(t, "POINT EMPTY").MustAsPoint().Coordinates()
-			expectBoolEq(t, ok, false)
+			_, ok := test.FromWKT(t, "POINT EMPTY").MustAsPoint().Coordinates()
+			test.Eq(t, ok, false)
 		})
 	})
 	t.Run("linestring", func(t *testing.T) {
-		seq := geomFromWKT(t, "LINESTRING(0 1,2 3,4 5)").MustAsLineString().Coordinates()
-		expectIntEq(t, seq.Length(), 3)
-		expectXYEq(t, seq.GetXY(0), geom.XY{0, 1})
-		expectXYEq(t, seq.GetXY(1), geom.XY{2, 3})
-		expectXYEq(t, seq.GetXY(2), geom.XY{4, 5})
+		seq := test.FromWKT(t, "LINESTRING(0 1,2 3,4 5)").MustAsLineString().Coordinates()
+		test.Eq(t, seq.Length(), 3)
+		test.Eq(t, seq.GetXY(0), geom.XY{0, 1})
+		test.Eq(t, seq.GetXY(1), geom.XY{2, 3})
+		test.Eq(t, seq.GetXY(2), geom.XY{4, 5})
 	})
 	t.Run("linestring with dupe", func(t *testing.T) {
-		seq := geomFromWKT(t, "LINESTRING(1 5,5 2,5 2,4 9)").MustAsLineString().Coordinates()
-		expectIntEq(t, seq.Length(), 4)
-		expectXYEq(t, seq.GetXY(0), geom.XY{1, 5})
-		expectXYEq(t, seq.GetXY(1), geom.XY{5, 2})
-		expectXYEq(t, seq.GetXY(2), geom.XY{5, 2})
-		expectXYEq(t, seq.GetXY(3), geom.XY{4, 9})
+		seq := test.FromWKT(t, "LINESTRING(1 5,5 2,5 2,4 9)").MustAsLineString().Coordinates()
+		test.Eq(t, seq.Length(), 4)
+		test.Eq(t, seq.GetXY(0), geom.XY{1, 5})
+		test.Eq(t, seq.GetXY(1), geom.XY{5, 2})
+		test.Eq(t, seq.GetXY(2), geom.XY{5, 2})
+		test.Eq(t, seq.GetXY(3), geom.XY{4, 9})
 	})
 	t.Run("polygon", func(t *testing.T) {
-		seq := geomFromWKT(t, "POLYGON((0 0,0 10,10 0,0 0),(2 2,2 7,7 2,2 2))").MustAsPolygon().Coordinates()
-		expectIntEq(t, len(seq), 2)
-		expectIntEq(t, seq[0].Length(), 4)
-		expectXYEq(t, seq[0].GetXY(0), geom.XY{0, 0})
-		expectXYEq(t, seq[0].GetXY(1), geom.XY{0, 10})
-		expectXYEq(t, seq[0].GetXY(2), geom.XY{10, 0})
-		expectXYEq(t, seq[0].GetXY(3), geom.XY{0, 0})
-		expectIntEq(t, seq[1].Length(), 4)
-		expectXYEq(t, seq[1].GetXY(0), geom.XY{2, 2})
-		expectXYEq(t, seq[1].GetXY(1), geom.XY{2, 7})
-		expectXYEq(t, seq[1].GetXY(2), geom.XY{7, 2})
-		expectXYEq(t, seq[1].GetXY(3), geom.XY{2, 2})
+		seq := test.FromWKT(t, "POLYGON((0 0,0 10,10 0,0 0),(2 2,2 7,7 2,2 2))").MustAsPolygon().Coordinates()
+		test.Eq(t, len(seq), 2)
+		test.Eq(t, seq[0].Length(), 4)
+		test.Eq(t, seq[0].GetXY(0), geom.XY{0, 0})
+		test.Eq(t, seq[0].GetXY(1), geom.XY{0, 10})
+		test.Eq(t, seq[0].GetXY(2), geom.XY{10, 0})
+		test.Eq(t, seq[0].GetXY(3), geom.XY{0, 0})
+		test.Eq(t, seq[1].Length(), 4)
+		test.Eq(t, seq[1].GetXY(0), geom.XY{2, 2})
+		test.Eq(t, seq[1].GetXY(1), geom.XY{2, 7})
+		test.Eq(t, seq[1].GetXY(2), geom.XY{7, 2})
+		test.Eq(t, seq[1].GetXY(3), geom.XY{2, 2})
 	})
 	t.Run("multipoint", func(t *testing.T) {
-		seq := geomFromWKT(t, "MULTIPOINT(0 1,2 3,EMPTY,4 5)").MustAsMultiPoint().Coordinates()
-		expectIntEq(t, seq.Length(), 3)
-		expectXYEq(t, seq.GetXY(0), geom.XY{0, 1})
-		expectXYEq(t, seq.GetXY(1), geom.XY{2, 3})
-		expectXYEq(t, seq.GetXY(2), geom.XY{4, 5})
+		seq := test.FromWKT(t, "MULTIPOINT(0 1,2 3,EMPTY,4 5)").MustAsMultiPoint().Coordinates()
+		test.Eq(t, seq.Length(), 3)
+		test.Eq(t, seq.GetXY(0), geom.XY{0, 1})
+		test.Eq(t, seq.GetXY(1), geom.XY{2, 3})
+		test.Eq(t, seq.GetXY(2), geom.XY{4, 5})
 	})
 	t.Run("multilinestring", func(t *testing.T) {
-		seq := geomFromWKT(t, "MULTILINESTRING((0 0,0 10,10 0,0 0),(2 2,2 8,8 2,2 2))").MustAsMultiLineString().Coordinates()
-		expectIntEq(t, len(seq), 2)
-		expectIntEq(t, seq[0].Length(), 4)
-		expectXYEq(t, seq[0].GetXY(0), geom.XY{0, 0})
-		expectXYEq(t, seq[0].GetXY(1), geom.XY{0, 10})
-		expectXYEq(t, seq[0].GetXY(2), geom.XY{10, 0})
-		expectXYEq(t, seq[0].GetXY(3), geom.XY{0, 0})
-		expectIntEq(t, seq[1].Length(), 4)
-		expectXYEq(t, seq[1].GetXY(0), geom.XY{2, 2})
-		expectXYEq(t, seq[1].GetXY(1), geom.XY{2, 8})
-		expectXYEq(t, seq[1].GetXY(2), geom.XY{8, 2})
-		expectXYEq(t, seq[1].GetXY(3), geom.XY{2, 2})
+		seq := test.FromWKT(t, "MULTILINESTRING((0 0,0 10,10 0,0 0),(2 2,2 8,8 2,2 2))").MustAsMultiLineString().Coordinates()
+		test.Eq(t, len(seq), 2)
+		test.Eq(t, seq[0].Length(), 4)
+		test.Eq(t, seq[0].GetXY(0), geom.XY{0, 0})
+		test.Eq(t, seq[0].GetXY(1), geom.XY{0, 10})
+		test.Eq(t, seq[0].GetXY(2), geom.XY{10, 0})
+		test.Eq(t, seq[0].GetXY(3), geom.XY{0, 0})
+		test.Eq(t, seq[1].Length(), 4)
+		test.Eq(t, seq[1].GetXY(0), geom.XY{2, 2})
+		test.Eq(t, seq[1].GetXY(1), geom.XY{2, 8})
+		test.Eq(t, seq[1].GetXY(2), geom.XY{8, 2})
+		test.Eq(t, seq[1].GetXY(3), geom.XY{2, 2})
 	})
 	t.Run("multipolygon", func(t *testing.T) {
-		seq := geomFromWKT(t, `
+		seq := test.FromWKT(t, `
 			MULTIPOLYGON(
 				(
 					(0 0,0 10,10 0,0 0),
@@ -389,31 +390,31 @@ func TestCoordinatesSequence(t *testing.T) {
 				)
 			)`,
 		).MustAsMultiPolygon().Coordinates()
-		expectIntEq(t, len(seq), 2)
+		test.Eq(t, len(seq), 2)
 
-		expectIntEq(t, len(seq[0]), 2)
-		expectIntEq(t, seq[0][0].Length(), 4)
-		expectXYEq(t, seq[0][0].GetXY(0), geom.XY{0, 0})
-		expectXYEq(t, seq[0][0].GetXY(1), geom.XY{0, 10})
-		expectXYEq(t, seq[0][0].GetXY(2), geom.XY{10, 0})
-		expectXYEq(t, seq[0][0].GetXY(3), geom.XY{0, 0})
-		expectIntEq(t, seq[0][1].Length(), 4)
-		expectXYEq(t, seq[0][1].GetXY(0), geom.XY{2, 2})
-		expectXYEq(t, seq[0][1].GetXY(1), geom.XY{2, 7})
-		expectXYEq(t, seq[0][1].GetXY(2), geom.XY{7, 2})
-		expectXYEq(t, seq[0][1].GetXY(3), geom.XY{2, 2})
+		test.Eq(t, len(seq[0]), 2)
+		test.Eq(t, seq[0][0].Length(), 4)
+		test.Eq(t, seq[0][0].GetXY(0), geom.XY{0, 0})
+		test.Eq(t, seq[0][0].GetXY(1), geom.XY{0, 10})
+		test.Eq(t, seq[0][0].GetXY(2), geom.XY{10, 0})
+		test.Eq(t, seq[0][0].GetXY(3), geom.XY{0, 0})
+		test.Eq(t, seq[0][1].Length(), 4)
+		test.Eq(t, seq[0][1].GetXY(0), geom.XY{2, 2})
+		test.Eq(t, seq[0][1].GetXY(1), geom.XY{2, 7})
+		test.Eq(t, seq[0][1].GetXY(2), geom.XY{7, 2})
+		test.Eq(t, seq[0][1].GetXY(3), geom.XY{2, 2})
 
-		expectIntEq(t, len(seq[1]), 2)
-		expectIntEq(t, seq[1][0].Length(), 4)
-		expectXYEq(t, seq[1][0].GetXY(0), geom.XY{100, 100})
-		expectXYEq(t, seq[1][0].GetXY(1), geom.XY{100, 110})
-		expectXYEq(t, seq[1][0].GetXY(2), geom.XY{110, 100})
-		expectXYEq(t, seq[1][0].GetXY(3), geom.XY{100, 100})
-		expectIntEq(t, seq[1][1].Length(), 4)
-		expectXYEq(t, seq[1][1].GetXY(0), geom.XY{102, 102})
-		expectXYEq(t, seq[1][1].GetXY(1), geom.XY{102, 107})
-		expectXYEq(t, seq[1][1].GetXY(2), geom.XY{107, 102})
-		expectXYEq(t, seq[1][1].GetXY(3), geom.XY{102, 102})
+		test.Eq(t, len(seq[1]), 2)
+		test.Eq(t, seq[1][0].Length(), 4)
+		test.Eq(t, seq[1][0].GetXY(0), geom.XY{100, 100})
+		test.Eq(t, seq[1][0].GetXY(1), geom.XY{100, 110})
+		test.Eq(t, seq[1][0].GetXY(2), geom.XY{110, 100})
+		test.Eq(t, seq[1][0].GetXY(3), geom.XY{100, 100})
+		test.Eq(t, seq[1][1].Length(), 4)
+		test.Eq(t, seq[1][1].GetXY(0), geom.XY{102, 102})
+		test.Eq(t, seq[1][1].GetXY(1), geom.XY{102, 107})
+		test.Eq(t, seq[1][1].GetXY(2), geom.XY{107, 102})
+		test.Eq(t, seq[1][1].GetXY(3), geom.XY{102, 102})
 	})
 }
 
@@ -453,10 +454,10 @@ func TestTransformXY(t *testing.T) {
 		{"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1 2)))", "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(1.5 2)))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := geomFromWKT(t, tt.wktIn)
+			g := test.FromWKT(t, tt.wktIn)
 			got := g.TransformXY(transform)
-			want := geomFromWKT(t, tt.wktOut)
-			expectGeomEq(t, got, want)
+			want := test.FromWKT(t, tt.wktOut)
+			test.ExactEquals(t, got, want)
 		})
 	}
 }
@@ -539,10 +540,10 @@ func TestTransform(t *testing.T) {
 		{"GEOMETRYCOLLECTION ZM(POINT ZM(1 2 3 4))", "GEOMETRYCOLLECTION ZM(POINT ZM(1 4 9 16))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := geomFromWKT(t, tt.wktIn)
+			g := test.FromWKT(t, tt.wktIn)
 			got, err := g.Transform(transform)
-			expectNoErr(t, err)
-			expectGeomEqWKT(t, got, tt.wktOut)
+			test.NoErr(t, err)
+			test.ExactEqualsWKT(t, got, tt.wktOut)
 		})
 	}
 }
@@ -558,7 +559,7 @@ func TestIsRing(t *testing.T) {
 		{"LINESTRING(0 0,1 0,1 1,0 1)", false},     // not closed
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := geomFromWKT(t, tt.wkt).MustAsLineString().IsRing()
+			got := test.FromWKT(t, tt.wkt).MustAsLineString().IsRing()
 			if got != tt.want {
 				t.Logf("WKT: %v", tt.wkt)
 				t.Errorf("got=%v want=%v", got, tt.want)
@@ -577,7 +578,7 @@ func TestIsClosed(t *testing.T) {
 		{"LINESTRING(0 0,1 0,1 1,0 1)", false},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := geomFromWKT(t, tt.wkt).MustAsLineString().IsClosed()
+			got := test.FromWKT(t, tt.wkt).MustAsLineString().IsClosed()
 			if got != tt.want {
 				t.Logf("WKT: %v", tt.wkt)
 				t.Errorf("got=%v want=%v", got, tt.want)
@@ -613,7 +614,7 @@ func TestLength(t *testing.T) {
 		)`, 1 + math.Sqrt(5) + math.Sqrt(2) + math.Sqrt(5)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := geomFromWKT(t, tt.wkt).Length()
+			got := test.FromWKT(t, tt.wkt).Length()
 			if math.Abs(tt.want-got) > 1e-6 {
 				t.Errorf("got=%v want=%v", got, tt.want)
 			}
@@ -654,7 +655,7 @@ func TestArea(t *testing.T) {
 		))`, 8.0},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := geomFromWKT(t, tt.wkt).Area()
+			got := test.FromWKT(t, tt.wkt).Area()
 			if got != tt.want {
 				t.Errorf("got=%v want=%v", got, tt.want)
 			}
@@ -702,7 +703,7 @@ func TestSignedArea(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Logf("input: %s", tc.input)
-			g := geomFromWKT(t, tc.input)
+			g := test.FromWKT(t, tc.input)
 			got := g.Area(geom.SignedArea)
 			if got != tc.expected {
 				t.Errorf("expected: %f, got: %f", tc.expected, got)
@@ -722,7 +723,7 @@ func TestTransformedArea(t *testing.T) {
 		{"MULTIPOLYGON(((0 0,1 0,0 1,0 0)),((2 2,3 2,2 3,2 2)))", 0.125},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := geomFromWKT(t, tt.wkt).Area(geom.WithTransform(func(xy geom.XY) geom.XY {
+			got := test.FromWKT(t, tt.wkt).Area(geom.WithTransform(func(xy geom.XY) geom.XY {
 				xy.X *= 0.5
 				xy.Y *= 0.25
 				return xy
@@ -735,7 +736,7 @@ func TestTransformedArea(t *testing.T) {
 }
 
 func TestTransformedAreaInvocationCount(t *testing.T) {
-	g := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))")
+	g := test.FromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))")
 	var count int
 	g.Area(geom.WithTransform(func(xy geom.XY) geom.XY {
 		count++
@@ -743,7 +744,7 @@ func TestTransformedAreaInvocationCount(t *testing.T) {
 	}))
 
 	// Each of the 4 points making up the polygon get transformed once each.
-	expectIntEq(t, count, 4)
+	test.Eq(t, count, 4)
 }
 
 func TestCentroid(t *testing.T) {
@@ -803,8 +804,8 @@ func TestCentroid(t *testing.T) {
 		{"GEOMETRYCOLLECTION(POLYGON((151 -33,151.00001 -33,151.00001 -33.00001,151 -33.00001,151 -33)))", "POINT(151.000005 -33.000005)"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := geomFromWKT(t, tt.input).Centroid()
-			want := geomFromWKT(t, tt.output)
+			got := test.FromWKT(t, tt.input).Centroid()
+			want := test.FromWKT(t, tt.output)
 			if !geom.ExactEquals(want, got.AsGeometry(), geom.ToleranceXY(0.00000001)) {
 				t.Log(tt.input)
 				t.Errorf("got=%v want=%v", got.AsText(), tt.output)
@@ -814,16 +815,16 @@ func TestCentroid(t *testing.T) {
 }
 
 func TestLineStringToMultiLineString(t *testing.T) {
-	ls := geomFromWKT(t, "LINESTRING(1 2,3 4,5 6)").MustAsLineString()
+	ls := test.FromWKT(t, "LINESTRING(1 2,3 4,5 6)").MustAsLineString()
 	got := ls.AsMultiLineString()
-	want := geomFromWKT(t, "MULTILINESTRING((1 2,3 4,5 6))")
+	want := test.FromWKT(t, "MULTILINESTRING((1 2,3 4,5 6))")
 	if !geom.ExactEquals(got.AsGeometry(), want) {
 		t.Errorf("want=%v got=%v", want, got)
 	}
 }
 
 func TestPolygonToMultiPolygon(t *testing.T) {
-	p := geomFromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))").MustAsPolygon()
+	p := test.FromWKT(t, "POLYGON((0 0,0 1,1 0,0 0))").MustAsPolygon()
 	mp := p.AsMultiPolygon()
 	if mp.AsText() != "MULTIPOLYGON(((0 0,0 1,1 0,0 0)))" {
 		t.Errorf("got %v", mp.AsText())
@@ -961,9 +962,9 @@ func TestReverse(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("Input", tt.wkt)
-			want := geomFromWKT(t, tt.boundary)
-			got := geomFromWKT(t, tt.wkt).Reverse()
-			expectGeomEq(t, got, want)
+			want := test.FromWKT(t, tt.boundary)
+			got := test.FromWKT(t, tt.wkt).Reverse()
+			test.ExactEquals(t, got, want)
 		})
 	}
 }
@@ -1130,9 +1131,9 @@ func TestForceCoordinatesType(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log("input", tt.input)
 			t.Log("ct", tt.ct)
-			got := geomFromWKT(t, tt.input).ForceCoordinatesType(tt.ct)
-			want := geomFromWKT(t, tt.output)
-			expectGeomEq(t, got, want)
+			got := test.FromWKT(t, tt.input).ForceCoordinatesType(tt.ct)
+			want := test.FromWKT(t, tt.output)
+			test.ExactEquals(t, got, want)
 		})
 	}
 }
@@ -1255,14 +1256,14 @@ func TestForceWindingDirection(t *testing.T) {
 	} {
 		t.Run(tt.desc, func(t *testing.T) {
 			t.Run("ForceCW", func(t *testing.T) {
-				got := geomFromWKT(t, tt.input).ForceCW()
-				want := geomFromWKT(t, tt.forceCW)
-				expectGeomEq(t, got, want)
+				got := test.FromWKT(t, tt.input).ForceCW()
+				want := test.FromWKT(t, tt.forceCW)
+				test.ExactEquals(t, got, want)
 			})
 			t.Run("ForceCCW", func(t *testing.T) {
-				got := geomFromWKT(t, tt.input).ForceCCW()
-				want := geomFromWKT(t, tt.forceCCW)
-				expectGeomEq(t, got, want)
+				got := test.FromWKT(t, tt.input).ForceCCW()
+				want := test.FromWKT(t, tt.forceCCW)
+				test.ExactEquals(t, got, want)
 			})
 		})
 	}
@@ -1672,9 +1673,9 @@ func TestSummary(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			g := geomFromWKT(t, tc.wkt)
-			expectStringEq(t, g.Summary(), tc.wantSummary)
-			expectStringEq(t, g.String(), tc.wantSummary)
+			g := test.FromWKT(t, tc.wkt)
+			test.Eq(t, g.Summary(), tc.wantSummary)
+			test.Eq(t, g.String(), tc.wantSummary)
 		})
 	}
 }
@@ -1701,17 +1702,17 @@ func TestPolygonDumpRings(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			input := geomFromWKT(t, tc.inputWKT).MustAsPolygon()
+			input := test.FromWKT(t, tc.inputWKT).MustAsPolygon()
 			wantRings := make([]geom.LineString, len(tc.wantRingWKTs))
 			for j, wantRingWKT := range tc.wantRingWKTs {
-				wantRings[j] = geomFromWKT(t, wantRingWKT).MustAsLineString()
+				wantRings[j] = test.FromWKT(t, wantRingWKT).MustAsLineString()
 			}
 
 			gotRings := input.DumpRings()
 
-			expectIntEq(t, len(gotRings), len(wantRings))
+			test.Eq(t, len(gotRings), len(wantRings))
 			for j := range wantRings {
-				expectGeomEq(t,
+				test.ExactEquals(t,
 					gotRings[j].AsGeometry(),
 					wantRings[j].AsGeometry(),
 				)
@@ -1721,7 +1722,7 @@ func TestPolygonDumpRings(t *testing.T) {
 			// rather than just a copy of its header:
 			otherRings := input.DumpRings()
 			if len(otherRings) > 0 {
-				expectTrue(t, &gotRings[0] != &otherRings[0])
+				test.True(t, &gotRings[0] != &otherRings[0])
 			}
 		})
 	}
@@ -1740,10 +1741,10 @@ func TestFlipCoordinates(t *testing.T) {
 		{"GEOMETRYCOLLECTION(POINT(1 2),LINESTRING(3 4,5 6))", "GEOMETRYCOLLECTION(POINT(2 1),LINESTRING(4 3,6 5))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := geomFromWKT(t, tt.wktIn)
+			g := test.FromWKT(t, tt.wktIn)
 			got := g.FlipCoordinates()
-			want := geomFromWKT(t, tt.wktOut)
-			expectGeomEq(t, got, want)
+			want := test.FromWKT(t, tt.wktOut)
+			test.ExactEquals(t, got, want)
 		})
 	}
 }

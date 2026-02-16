@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestDistance(t *testing.T) {
@@ -113,8 +114,8 @@ func TestDistance(t *testing.T) {
 					desc = "rev"
 				}
 				t.Run(desc, func(t *testing.T) {
-					g1 := geomFromWKT(t, tt.wkt1)
-					g2 := geomFromWKT(t, tt.wkt2)
+					g1 := test.FromWKT(t, tt.wkt1)
+					g2 := test.FromWKT(t, tt.wkt2)
 					if flip {
 						g1, g2 = g2, g1
 					}

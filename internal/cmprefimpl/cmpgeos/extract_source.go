@@ -2,10 +2,10 @@ package main
 
 import (
 	"bufio"
+	"encoding/hex"
 	"errors"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/peterstace/simplefeatures/geom"
@@ -53,7 +53,7 @@ func convertToGeometries(candidates []string) ([]geom.Geometry, error) {
 
 	oldCount := len(geoms)
 	for _, c := range candidates {
-		buf, err := hexStringToBytes(c)
+		buf, err := hex.DecodeString(c)
 		if err != nil {
 			continue
 		}
@@ -78,19 +78,4 @@ func convertToGeometries(candidates []string) ([]geom.Geometry, error) {
 	}
 
 	return geoms, nil
-}
-
-func hexStringToBytes(s string) ([]byte, error) {
-	if len(s)%2 != 0 {
-		return nil, errors.New("hex string must have even length")
-	}
-	var buf []byte
-	for i := 0; i < len(s); i += 2 {
-		x, err := strconv.ParseUint(s[i:i+2], 16, 8)
-		if err != nil {
-			return nil, err
-		}
-		buf = append(buf, byte(x))
-	}
-	return buf, nil
 }

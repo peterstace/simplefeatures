@@ -1343,8 +1343,8 @@ func TestBinaryOp(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g1 := geomFromWKT(t, geomCase.input1)
-			g2 := geomFromWKT(t, geomCase.input2)
+			g1 := test.FromWKT(t, geomCase.input1)
+			g2 := test.FromWKT(t, geomCase.input2)
 			t.Logf("input1: %s", geomCase.input1)
 			t.Logf("input2: %s", geomCase.input2)
 			for _, opCase := range []struct {
@@ -1362,12 +1362,12 @@ func TestBinaryOp(t *testing.T) {
 					if opCase.want == "" {
 						t.Skip("Skipping test because it's not specified or is commented out")
 					}
-					want := geomFromWKT(t, opCase.want)
+					want := test.FromWKT(t, opCase.want)
 					got, err := opCase.op(g1, g2)
 					if err != nil {
 						t.Fatalf("could not perform op: %v", err)
 					}
-					expectGeomEq(t, got, want, geom.IgnoreOrder, geom.ToleranceXY(1e-7))
+					test.ExactEquals(t, got, want, geom.IgnoreOrder, geom.ToleranceXY(1e-7))
 				})
 			}
 			t.Run("relate", func(t *testing.T) {
@@ -1429,9 +1429,9 @@ func TestBinaryOpNoCrash(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			gA, err := geom.UnmarshalWKT(tc.inputA)
-			expectNoErr(t, err)
+			test.NoErr(t, err)
 			gB, err := geom.UnmarshalWKT(tc.inputB)
-			expectNoErr(t, err)
+			test.NoErr(t, err)
 
 			for _, op := range []struct {
 				name string
@@ -1476,8 +1476,8 @@ func TestOverlayAndRelateBothInputsEmpty(t *testing.T) {
 
 	for i, inputA := range inputs {
 		for j, inputB := range inputs {
-			gA := geomFromWKT(t, inputA.wkt)
-			gB := geomFromWKT(t, inputB.wkt)
+			gA := test.FromWKT(t, inputA.wkt)
+			gB := test.FromWKT(t, inputB.wkt)
 			t.Run(fmt.Sprintf("%d_%d", i, j), func(t *testing.T) {
 				t.Run("union", func(t *testing.T) {
 					got, err := geom.Union(gA, gB)
@@ -1548,9 +1548,9 @@ func TestOverlayAndRelateOnlyOneInputEmpty(t *testing.T) {
 	}
 
 	for i, emptyInput := range emptyInputs {
-		emptyGeom := geomFromWKT(t, emptyInput.wkt)
+		emptyGeom := test.FromWKT(t, emptyInput.wkt)
 		for j, nonEmptyInput := range nonEmptyInputs {
-			nonEmptyGeom := geomFromWKT(t, nonEmptyInput.wkt)
+			nonEmptyGeom := test.FromWKT(t, nonEmptyInput.wkt)
 			t.Run(fmt.Sprintf("%d_%d", i, j), func(t *testing.T) {
 				t.Run("union", func(t *testing.T) {
 					t.Run("fwd", func(t *testing.T) {
@@ -1632,9 +1632,9 @@ func TestIntersectionEnvelopesDisjoint(t *testing.T) {
 	}
 
 	for i, inputA := range inputs {
-		gA := geomFromWKT(t, inputA.wkt)
+		gA := test.FromWKT(t, inputA.wkt)
 		for j, inputB := range inputs {
-			gB := geomFromWKT(t, inputB.wkt).TransformXY(func(xy geom.XY) geom.XY {
+			gB := test.FromWKT(t, inputB.wkt).TransformXY(func(xy geom.XY) geom.XY {
 				return xy.Add(geom.XY{X: 100, Y: 100})
 			})
 			t.Run(fmt.Sprintf("%d_%d", i, j), func(t *testing.T) {
@@ -1804,17 +1804,17 @@ func TestUnaryUnionAndUnionMany(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var inputs []geom.Geometry
 			for _, wkt := range tc.inputWKTs {
-				inputs = append(inputs, geomFromWKT(t, wkt))
+				inputs = append(inputs, test.FromWKT(t, wkt))
 			}
 			t.Run("UnionMany", func(t *testing.T) {
 				got, err := geom.UnionMany(inputs)
-				expectNoErr(t, err)
-				expectGeomEqWKT(t, got, tc.wantWKT, geom.IgnoreOrder)
+				test.NoErr(t, err)
+				test.ExactEqualsWKT(t, got, tc.wantWKT, geom.IgnoreOrder)
 			})
 			t.Run("UnaryUnion", func(t *testing.T) {
 				got, err := geom.UnaryUnion(geom.NewGeometryCollection(inputs).AsGeometry())
-				expectNoErr(t, err)
-				expectGeomEqWKT(t, got, tc.wantWKT, geom.IgnoreOrder)
+				test.NoErr(t, err)
+				test.ExactEqualsWKT(t, got, tc.wantWKT, geom.IgnoreOrder)
 			})
 		})
 	}
@@ -1830,13 +1830,13 @@ func TestBinaryOpOutputOrdering(t *testing.T) {
 		{"MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((1 1,1 2,2 2,2 1,1 1)))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			in := geomFromWKT(t, tc.wkt)
+			in := test.FromWKT(t, tc.wkt)
 			got1, err := geom.Union(in, in)
-			expectNoErr(t, err)
+			test.NoErr(t, err)
 			got2, err := geom.Union(in, in)
-			expectNoErr(t, err)
+			test.NoErr(t, err)
 			// Ensure ordering is stable over multiple executions:
-			expectGeomEq(t, got1, got2)
+			test.ExactEquals(t, got1, got2)
 		})
 	}
 }
@@ -1864,8 +1864,8 @@ func TestNoPanic(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g1 := geomFromWKT(t, tc.input1)
-			g2 := geomFromWKT(t, tc.input2)
+			g1 := test.FromWKT(t, tc.input1)
+			g2 := test.FromWKT(t, tc.input2)
 			// Used to panic before a bug fix was put in place.
 			_, _ = tc.op(g1, g2)
 		})

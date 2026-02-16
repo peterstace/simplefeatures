@@ -58,19 +58,19 @@ func TestGeoJSONFeatureCollectionValidUnmarshal(t *testing.T) {
 
 	var fc geom.GeoJSONFeatureCollection
 	err := json.NewDecoder(strings.NewReader(input)).Decode(&fc)
-	expectNoErr(t, err)
+	test.NoErr(t, err)
 
-	expectIntEq(t, len(fc.Features), 2)
+	test.Eq(t, len(fc.Features), 2)
 	f0 := fc.Features[0]
 	f1 := fc.Features[1]
 
-	expectStringEq(t, f0.ID.(string), "id0")
-	expectBoolEq(t, reflect.DeepEqual(f0.Properties, map[string]any{"prop0": "value0", "prop1": "value1"}), true)
-	expectGeomEq(t, f0.Geometry, geomFromWKT(t, "LINESTRING(102 0,103 1,104 0,105 1)"))
+	test.Eq(t, f0.ID.(string), "id0")
+	test.Eq(t, reflect.DeepEqual(f0.Properties, map[string]any{"prop0": "value0", "prop1": "value1"}), true)
+	test.ExactEquals(t, f0.Geometry, test.FromWKT(t, "LINESTRING(102 0,103 1,104 0,105 1)"))
 
-	expectStringEq(t, f1.ID.(string), "id1")
-	expectBoolEq(t, reflect.DeepEqual(f1.Properties, map[string]any{"prop0": "value2", "prop1": "value3"}), true)
-	expectGeomEq(t, f1.Geometry, geomFromWKT(t, "POLYGON((100 0,101 0,101 1,100 1,100 0))"))
+	test.Eq(t, f1.ID.(string), "id1")
+	test.Eq(t, reflect.DeepEqual(f1.Properties, map[string]any{"prop0": "value2", "prop1": "value3"}), true)
+	test.ExactEquals(t, f1.Geometry, test.FromWKT(t, "POLYGON((100 0,101 0,101 1,100 1,100 0))"))
 }
 
 func TestGeoJSONFeatureCollectionInvalidUnmarshal(t *testing.T) {
@@ -115,7 +115,7 @@ func TestGeoJSONFeatureCollectionInvalidUnmarshal(t *testing.T) {
 			// what the other test cases are based on.
 			var fc geom.GeoJSONFeatureCollection
 			r := strings.NewReader(tt.input)
-			expectNoErr(t, json.NewDecoder(r).Decode(&fc))
+			test.NoErr(t, json.NewDecoder(r).Decode(&fc))
 			continue
 		}
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -134,8 +134,8 @@ func TestGeoJSONFeatureCollectionInvalidUnmarshal(t *testing.T) {
 
 func TestGeoJSONFeatureCollectionEmpty(t *testing.T) {
 	out, err := json.Marshal(geom.GeoJSONFeatureCollection{})
-	expectNoErr(t, err)
-	expectStringEq(t, string(out), `{"type":"FeatureCollection","features":[]}`)
+	test.NoErr(t, err)
+	test.Eq(t, string(out), `{"type":"FeatureCollection","features":[]}`)
 }
 
 func TestGeoJSONFeatureCollectionNil(t *testing.T) {
@@ -143,28 +143,28 @@ func TestGeoJSONFeatureCollectionNil(t *testing.T) {
 		Features:       nil,
 		ForeignMembers: nil,
 	})
-	expectNoErr(t, err)
-	expectStringEq(t, string(out), `{"type":"FeatureCollection","features":[]}`)
+	test.NoErr(t, err)
+	test.Eq(t, string(out), `{"type":"FeatureCollection","features":[]}`)
 }
 
 func TestGeoJSONFeatureCollectionAndPropertiesNil(t *testing.T) {
-	out, err := json.Marshal(geom.GeoJSONFeatureCollection{Features: []geom.GeoJSONFeature{{Geometry: geomFromWKT(t, "POINT(1 2)")}}})
-	expectNoErr(t, err)
-	expectStringEq(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"properties":{}}]}`)
+	out, err := json.Marshal(geom.GeoJSONFeatureCollection{Features: []geom.GeoJSONFeature{{Geometry: test.FromWKT(t, "POINT(1 2)")}}})
+	test.NoErr(t, err)
+	test.Eq(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"properties":{}}]}`)
 }
 
 func TestGeoJSONFeatureCollectionAndPropertiesSet(t *testing.T) {
 	out, err := json.Marshal(geom.GeoJSONFeatureCollection{
 		Features: []geom.GeoJSONFeature{{
-			Geometry: geomFromWKT(t, "POINT(1 2)"),
+			Geometry: test.FromWKT(t, "POINT(1 2)"),
 			ID:       "myid",
 			Properties: map[string]any{
 				"foo": "bar",
 			},
 		}},
 	})
-	expectNoErr(t, err)
-	expectStringEq(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"id":"myid","properties":{"foo":"bar"}}]}`)
+	test.NoErr(t, err)
+	test.Eq(t, string(out), `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"id":"myid","properties":{"foo":"bar"}}]}`)
 }
 
 func TestGeoJSONFeatureForeignMembers(t *testing.T) {
@@ -206,15 +206,15 @@ func TestGeoJSONFeatureForeignMembers(t *testing.T) {
 					ForeignMembers: tc.members,
 				}
 				got, err := json.Marshal(feat)
-				expectNoErr(t, err)
-				expectStringEq(t, string(got), tc.json)
+				test.NoErr(t, err)
+				test.Eq(t, string(got), tc.json)
 			})
 			t.Run("unmarshal", func(t *testing.T) {
 				var feat geom.GeoJSONFeature
 				err := json.Unmarshal([]byte(tc.json), &feat)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if len(feat.ForeignMembers) != 0 || len(tc.members) != 0 {
-					expectDeepEq(t, feat.ForeignMembers, tc.members)
+					test.DeepEqual(t, feat.ForeignMembers, tc.members)
 				}
 			})
 		})
@@ -291,15 +291,15 @@ func TestGeoJSONFeatureCollectionForeignMembers(t *testing.T) {
 					ForeignMembers: tc.members,
 				}
 				got, err := json.Marshal(fc)
-				expectNoErr(t, err)
-				expectStringEq(t, string(got), tc.json)
+				test.NoErr(t, err)
+				test.Eq(t, string(got), tc.json)
 			})
 			t.Run("unmarshal", func(t *testing.T) {
 				var fc geom.GeoJSONFeatureCollection
 				err := json.Unmarshal([]byte(tc.json), &fc)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if len(fc.ForeignMembers) != 0 || len(tc.members) != 0 {
-					expectDeepEq(t, fc.ForeignMembers, tc.members)
+					test.DeepEqual(t, fc.ForeignMembers, tc.members)
 				}
 			})
 		})

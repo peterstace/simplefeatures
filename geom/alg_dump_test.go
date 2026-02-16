@@ -3,7 +3,42 @@ package geom_test
 import (
 	"strconv"
 	"testing"
+
+	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
+
+func expectDumpEqWKT(tb testing.TB, got []geom.Geometry, wantWKTs []string) {
+	tb.Helper()
+	test.Eq(tb, len(got), len(wantWKTs))
+	for i, wkt := range wantWKTs {
+		test.ExactEquals(tb, got[i], test.FromWKT(tb, wkt))
+	}
+}
+
+func upcastPoints(ps []geom.Point) []geom.Geometry {
+	gs := make([]geom.Geometry, len(ps))
+	for i, p := range ps {
+		gs[i] = p.AsGeometry()
+	}
+	return gs
+}
+
+func upcastLineStrings(lss []geom.LineString) []geom.Geometry {
+	gs := make([]geom.Geometry, len(lss))
+	for i, ls := range lss {
+		gs[i] = ls.AsGeometry()
+	}
+	return gs
+}
+
+func upcastPolygons(ps []geom.Polygon) []geom.Geometry {
+	gs := make([]geom.Geometry, len(ps))
+	for i, p := range ps {
+		gs[i] = p.AsGeometry()
+	}
+	return gs
+}
 
 func TestDumpGeometry(t *testing.T) {
 	for i, tc := range []struct {
@@ -84,9 +119,7 @@ func TestDumpGeometry(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			want := geomsFromWKTs(t, tc.wantOutputWKT)
-			got := geomFromWKT(t, tc.inputWKT).Dump()
-			expectGeomsEq(t, got, want)
+			expectDumpEqWKT(t, test.FromWKT(t, tc.inputWKT).Dump(), tc.wantOutputWKT)
 		})
 	}
 }
@@ -118,9 +151,7 @@ func TestDumpMultiPoint(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			want := geomsFromWKTs(t, tc.wantOutputWKT)
-			got := upcastPoints(geomFromWKT(t, tc.inputWKT).MustAsMultiPoint().Dump())
-			expectGeomsEq(t, got, want)
+			expectDumpEqWKT(t, upcastPoints(test.FromWKT(t, tc.inputWKT).MustAsMultiPoint().Dump()), tc.wantOutputWKT)
 		})
 	}
 }
@@ -152,9 +183,7 @@ func TestDumpMultiLineString(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			want := geomsFromWKTs(t, tc.wantOutputWKT)
-			got := upcastLineStrings(geomFromWKT(t, tc.inputWKT).MustAsMultiLineString().Dump())
-			expectGeomsEq(t, got, want)
+			expectDumpEqWKT(t, upcastLineStrings(test.FromWKT(t, tc.inputWKT).MustAsMultiLineString().Dump()), tc.wantOutputWKT)
 		})
 	}
 }
@@ -178,9 +207,7 @@ func TestDumpMultiPolygon(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			want := geomsFromWKTs(t, tc.wantOutputWKT)
-			got := upcastPolygons(geomFromWKT(t, tc.inputWKT).MustAsMultiPolygon().Dump())
-			expectGeomsEq(t, got, want)
+			expectDumpEqWKT(t, upcastPolygons(test.FromWKT(t, tc.inputWKT).MustAsMultiPolygon().Dump()), tc.wantOutputWKT)
 		})
 	}
 }
@@ -212,9 +239,7 @@ func TestDumpGeometryCollection(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			want := geomsFromWKTs(t, tc.wantOutputWKT)
-			got := geomFromWKT(t, tc.inputWKT).MustAsGeometryCollection().Dump()
-			expectGeomsEq(t, got, want)
+			expectDumpEqWKT(t, test.FromWKT(t, tc.inputWKT).MustAsGeometryCollection().Dump(), tc.wantOutputWKT)
 		})
 	}
 }

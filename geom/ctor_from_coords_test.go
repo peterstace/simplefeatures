@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 // TODO: Test panics.
@@ -95,7 +96,36 @@ func TestCoordinateConstructors(t *testing.T) {
 		{geom.NewMultiPolygonXYM([][]float64{{0, 0, 10, 0, 1, 11, 1, 1, 12, 0, 0, 13}}, [][]float64{{2, 2, 20, 2, 1, 21, 1, 2, 22, 2, 2, 23}}), "MULTIPOLYGON M(((0 0 10,0 1 11,1 1 12,0 0 13)),((2 2 20,2 1 21,1 2 22,2 2 23)))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			expectGeomEqWKT(t, tc.got.AsGeometry(), tc.wantWKT)
+			test.ExactEqualsWKT(t, tc.got.AsGeometry(), tc.wantWKT)
 		})
 	}
+}
+
+func TestNewEnvelopeXY(t *testing.T) {
+	t.Run("no args gives empty envelope", func(t *testing.T) {
+		test.Eq(t, geom.NewEnvelopeXY(), geom.Envelope{})
+	})
+	t.Run("single point", func(t *testing.T) {
+		got := geom.NewEnvelopeXY(1, 2)
+		want := geom.Envelope{}.ExpandToIncludeXY(geom.XY{1, 2})
+		test.Eq(t, got, want)
+	})
+	t.Run("two points", func(t *testing.T) {
+		got := geom.NewEnvelopeXY(1, 2, 3, 4)
+		want := geom.Envelope{}.ExpandToIncludeXY(geom.XY{1, 2}).ExpandToIncludeXY(geom.XY{3, 4})
+		test.Eq(t, got, want)
+	})
+	t.Run("two points reverse order", func(t *testing.T) {
+		got := geom.NewEnvelopeXY(3, 4, 1, 2)
+		want := geom.NewEnvelopeXY(1, 2, 3, 4)
+		test.Eq(t, got, want)
+	})
+	t.Run("three points", func(t *testing.T) {
+		got := geom.NewEnvelopeXY(1, 2, 3, 4, 5, 6)
+		want := geom.Envelope{}.ExpandToIncludeXY(geom.XY{1, 2}).ExpandToIncludeXY(geom.XY{3, 4}).ExpandToIncludeXY(geom.XY{5, 6})
+		test.Eq(t, got, want)
+	})
+	t.Run("odd number of args panics", func(t *testing.T) {
+		test.Panics(t, func() { geom.NewEnvelopeXY(1) })
+	})
 }

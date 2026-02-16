@@ -2,6 +2,7 @@ package geom_test
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"math"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 // TWKBTestCases is outside a single test function to allow multiple
@@ -345,7 +347,8 @@ var TWKBTestCases = []struct {
 func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 	for _, tc := range TWKBTestCases {
 		t.Run(tc.description, func(t *testing.T) {
-			twkb := hexStringToBytes(t, tc.twkbHex)
+			twkb, err := hex.DecodeString(tc.twkbHex)
+			test.NoErr(t, err)
 			t.Logf("TWKB (hex): %v", tc.twkbHex)
 
 			t.Run("decode", func(t *testing.T) {
@@ -355,19 +358,19 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 
 				t.Run("geometry", func(t *testing.T) {
 					g, err := geom.UnmarshalTWKB(twkb)
-					expectNoErr(t, err)
-					expectGeomEqWKT(t, g, tc.wkt)
+					test.NoErr(t, err)
+					test.ExactEqualsWKT(t, g, tc.wkt)
 				})
 
 				t.Run("envelope", func(t *testing.T) {
 					gotExtEnv, ok, err := geom.UnmarshalTWKBEnvelope(twkb)
-					expectNoErr(t, err)
-					expectBoolEq(t, ok, tc.hasBBox)
+					test.NoErr(t, err)
+					test.Eq(t, ok, tc.hasBBox)
 					if ok {
-						wantC1, ok := geomFromWKT(t, tc.listedBBox[0]).MustAsPoint().Coordinates()
-						expectTrue(t, ok)
-						wantC2, ok := geomFromWKT(t, tc.listedBBox[1]).MustAsPoint().Coordinates()
-						expectTrue(t, ok)
+						wantC1, ok := test.FromWKT(t, tc.listedBBox[0]).MustAsPoint().Coordinates()
+						test.True(t, ok)
+						wantC2, ok := test.FromWKT(t, tc.listedBBox[1]).MustAsPoint().Coordinates()
+						test.True(t, ok)
 
 						wantC1.X, wantC2.X = minMax(wantC1.X, wantC2.X)
 						wantC1.Y, wantC2.Y = minMax(wantC1.Y, wantC2.Y)
@@ -375,34 +378,34 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 						wantC1.M, wantC2.M = minMax(wantC1.M, wantC2.M)
 
 						gotXY1, gotXY2, ok := gotExtEnv.XYEnvelope.MinMaxXYs()
-						expectTrue(t, ok)
+						test.True(t, ok)
 
 						ct := wantC1.Type
-						expectCoordinatesTypeEq(t, ct, wantC2.Type)
+						test.Eq(t, ct, wantC2.Type)
 						minZ, maxZ, hasZ := gotExtEnv.ZRange.MinMax()
 						minM, maxM, hasM := gotExtEnv.MRange.MinMax()
-						expectBoolEq(t, hasZ, ct.Is3D())
-						expectBoolEq(t, hasM, ct.IsMeasured())
+						test.Eq(t, hasZ, ct.Is3D())
+						test.Eq(t, hasM, ct.IsMeasured())
 
-						expectXYEq(t, gotXY1, wantC1.XY)
-						expectXYEq(t, gotXY2, wantC2.XY)
+						test.Eq(t, gotXY1, wantC1.XY)
+						test.Eq(t, gotXY2, wantC2.XY)
 
 						if ct.Is3D() {
-							expectFloat64Eq(t, minZ, wantC1.Z)
-							expectFloat64Eq(t, maxZ, wantC2.Z)
+							test.Eq(t, minZ, wantC1.Z)
+							test.Eq(t, maxZ, wantC2.Z)
 						}
 						if ct.IsMeasured() {
-							expectFloat64Eq(t, minM, wantC1.M)
-							expectFloat64Eq(t, maxM, wantC2.M)
+							test.Eq(t, minM, wantC1.M)
+							test.Eq(t, maxM, wantC2.M)
 						}
 					}
 				})
 
 				t.Run("id list", func(t *testing.T) {
 					got, has, err := geom.UnmarshalTWKBIDList(twkb)
-					expectNoErr(t, err)
-					expectBoolEq(t, has, tc.hasIDList)
-					expectInt64SliceEq(t, got, tc.listedIDs)
+					test.NoErr(t, err)
+					test.Eq(t, has, tc.hasIDList)
+					test.DeepEqual(t, got, tc.listedIDs)
 				})
 
 				t.Run("size", func(t *testing.T) {
@@ -411,10 +414,10 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 							buf := make([]byte, len(twkb)+extra)
 							copy(buf, twkb)
 							got, ok, err := geom.UnmarshalTWKBSize(buf)
-							expectNoErr(t, err)
-							expectBoolEq(t, ok, tc.hasSize)
+							test.NoErr(t, err)
+							test.Eq(t, ok, tc.hasSize)
 							if tc.hasSize {
-								expectIntEq(t, got, len(twkb))
+								test.Eq(t, got, len(twkb))
 							}
 						})
 					}
@@ -427,7 +430,7 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 				}
 
 				// Encode the WKT's geometry as TWKB and check its bytes match the expected TWKB bytes.
-				g := geomFromWKT(t, tc.wkt)
+				g := test.FromWKT(t, tc.wkt)
 				opts := []geom.TWKBWriterOption{}
 				if tc.hasZ {
 					opts = append(opts, geom.TWKBPrecisionZ(tc.precZ))
@@ -498,7 +501,7 @@ func TestWriteTWKBSQLFile(t *testing.T) {
 	}
 
 	err := os.WriteFile("../twkb_sql.txt", []byte(sql), 0o600)
-	expectNoErr(t, err)
+	test.NoErr(t, err)
 }
 
 func TestZigZagInt(t *testing.T) {
