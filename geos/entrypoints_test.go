@@ -1016,3 +1016,86 @@ func TestCoverageIsValid(t *testing.T) {
 		})
 	}
 }
+
+func TestClipByRect(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		input string
+		rect  geom.Envelope
+		want  string
+	}{
+		{
+			name:  "polygon fully inside rect",
+			input: "POLYGON((1 1,1 2,2 2,2 1,1 1))",
+			rect:  geom.NewEnvelope(geom.XY{X: 0, Y: 0}, geom.XY{X: 3, Y: 3}),
+			want:  "POLYGON((1 1,1 2,2 2,2 1,1 1))",
+		},
+		{
+			name:  "polygon partially overlapping rect",
+			input: "POLYGON((0 0,0 4,4 4,4 0,0 0))",
+			rect:  geom.NewEnvelope(geom.XY{X: 1, Y: 1}, geom.XY{X: 3, Y: 3}),
+			want:  "POLYGON((1 1,1 3,3 3,3 1,1 1))",
+		},
+		{
+			name:  "polygon fully outside rect",
+			input: "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			rect:  geom.NewEnvelope(geom.XY{X: 5, Y: 5}, geom.XY{X: 6, Y: 6}),
+			want:  "GEOMETRYCOLLECTION EMPTY",
+		},
+		{
+			name:  "linestring clipped by rect",
+			input: "LINESTRING(0 0,4 4)",
+			rect:  geom.NewEnvelope(geom.XY{X: 1, Y: 1}, geom.XY{X: 3, Y: 3}),
+			want:  "LINESTRING(1 1,3 3)",
+		},
+		{
+			name:  "point inside rect",
+			input: "POINT(2 2)",
+			rect:  geom.NewEnvelope(geom.XY{X: 1, Y: 1}, geom.XY{X: 3, Y: 3}),
+			want:  "POINT(2 2)",
+		},
+		{
+			name:  "point outside rect",
+			input: "POINT(0 0)",
+			rect:  geom.NewEnvelope(geom.XY{X: 1, Y: 1}, geom.XY{X: 3, Y: 3}),
+			want:  "GEOMETRYCOLLECTION EMPTY",
+		},
+		{
+			name:  "empty input geometry",
+			input: "GEOMETRYCOLLECTION EMPTY",
+			rect:  geom.NewEnvelope(geom.XY{X: 0, Y: 0}, geom.XY{X: 1, Y: 1}),
+			want:  "GEOMETRYCOLLECTION EMPTY",
+		},
+		{
+			name:  "u-shaped polygon clipped through both arms produces multipolygon",
+			input: "POLYGON((0 0,4 0,4 3,3 3,3 1,1 1,1 3,0 3,0 0))",
+			rect:  geom.NewEnvelope(geom.XY{X: 0, Y: 2}, geom.XY{X: 4, Y: 4}),
+			want:  "MULTIPOLYGON(((0 2,0 3,1 3,1 2,0 2)),((3 2,3 3,4 3,4 2,3 2)))",
+		},
+		{
+			name:  "polygon with hole inside rect",
+			input: "POLYGON((0 0,0 6,6 6,6 0,0 0),(2 2,4 2,4 4,2 4,2 2))",
+			rect:  geom.NewEnvelope(geom.XY{X: 1, Y: 1}, geom.XY{X: 5, Y: 5}),
+			want:  "POLYGON((1 1,1 5,5 5,5 1,1 1),(2 2,4 2,4 4,2 4,2 2))",
+		},
+		{
+			name:  "polygon with hole partially outside rect removes hole",
+			input: "POLYGON((0 0,0 6,6 6,6 0,0 0),(1 1,3 1,3 3,1 3,1 1))",
+			rect:  geom.NewEnvelope(geom.XY{X: 2, Y: 2}, geom.XY{X: 5, Y: 5}),
+			want:  "POLYGON((2 3,2 5,5 5,5 2,3 2,3 3,2 3))",
+		},
+		{
+			name:  "empty envelope",
+			input: "POLYGON((0 0,0 1,1 1,1 0,0 0))",
+			rect:  geom.Envelope{},
+			want:  "GEOMETRYCOLLECTION EMPTY",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := geos.ClipByRect(geomFromWKT(t, tc.input), tc.rect)
+			skipIfUnsupported(t, err)
+			expectNoErr(t, err)
+			expectGeomEq(t, got, geomFromWKT(t, tc.want), geom.IgnoreOrder)
+		})
+	}
+}
