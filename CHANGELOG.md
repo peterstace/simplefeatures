@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## v0.59.0
 
 2026-03-27
