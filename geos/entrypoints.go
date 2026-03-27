@@ -338,9 +338,9 @@ func ConcaveHull(g geom.Geometry, concavenessRatio float64, allowHoles bool) (ge
 //
 // The validity of the result is not checked.
 func ClipByRect(g geom.Geometry, rect geom.Envelope) (geom.Geometry, error) {
-	min, max, ok := rect.MinMaxXYs()
+	lo, hi, ok := rect.MinMaxXYs()
 	if !ok {
 		return geom.Geometry{}, nil
 	}
-	return rawgeos.ClipByRect(g, min.X, min.Y, max.X, max.Y)
+	return rawgeos.ClipByRect(g, lo.X, lo.Y, hi.X, hi.Y)
 }
