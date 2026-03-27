@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add `geos.ClipByRect` function that clips a geometry to an axis-aligned
+  rectangle (defined by a `geom.Envelope`). This wraps the GEOS
+  `GEOSClipByRect` operation, which is faster than computing a full
+  `Intersection` with a rectangular polygon.
+
 ## v0.58.0
 
 2026-02-15
