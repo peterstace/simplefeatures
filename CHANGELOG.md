@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.59.0
+
+2026-03-27
 
 - Add `geos.ClipByRect` function that clips a geometry to an axis-aligned
   rectangle (defined by a `geom.Envelope`). This wraps the GEOS
