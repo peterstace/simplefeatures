@@ -331,3 +331,16 @@ func UnaryUnion(g geom.Geometry) (geom.Geometry, error) {
 func ConcaveHull(g geom.Geometry, concavenessRatio float64, allowHoles bool) (geom.Geometry, error) {
 	return rawgeos.ConcaveHull(g, concavenessRatio, allowHoles)
 }
+
+// ClipByRect clips a geometry to an axis-aligned rectangle defined by the
+// given [geom.Envelope]. If the envelope is empty, then an empty
+// [geom.GeometryCollection] is returned.
+//
+// The validity of the result is not checked.
+func ClipByRect(g geom.Geometry, rect geom.Envelope) (geom.Geometry, error) {
+	min, max, ok := rect.MinMaxXYs()
+	if !ok {
+		return geom.Geometry{}, nil
+	}
+	return rawgeos.ClipByRect(g, min.X, min.Y, max.X, max.Y)
+}
