@@ -5,6 +5,15 @@
 - Add `NewEnvelopeXY` constructor for building an `Envelope` from variadic x/y
   coordinate pairs, following the existing `New*XY` constructor pattern.
 
+## v0.59.0
+
+2026-03-27
+
+- Add `geos.ClipByRect` function that clips a geometry to an axis-aligned
+  rectangle (defined by a `geom.Envelope`). This wraps the GEOS
+  `GEOSClipByRect` operation, which is faster than computing a full
+  `Intersection` with a rectangular polygon.
+
 ## v0.58.0
 
 2026-02-15

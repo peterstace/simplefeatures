@@ -44,6 +44,16 @@ GEOSGeometry *GEOSCoverageSimplifyVW_r(GEOSContextHandle_t handle, const GEOSGeo
 int GEOSCoverageIsValid_r(GEOSContextHandle_t handle, const GEOSGeometry* g, double gapWidth, GEOSGeometry** invalidEdges) { return 2; }
 #endif
 
+#define CLIP_BY_RECT_MIN_VERSION "3.5.0"
+#define CLIP_BY_RECT_MISSING ( \
+	GEOS_VERSION_MAJOR < 3 || \
+	(GEOS_VERSION_MAJOR == 3 && GEOS_VERSION_MINOR < 5) \
+)
+#if CLIP_BY_RECT_MISSING
+// This stub implementation always fails:
+GEOSGeometry *GEOSClipByRect_r(GEOSContextHandle_t handle, const GEOSGeometry* g, double xmin, double ymin, double xmax, double ymax) { return NULL; }
+#endif
+
 #define CONCAVE_HULL_MIN_VERSION "3.11.0"
 #define CONCAVE_HULL_MISSING ( \
 	GEOS_VERSION_MAJOR < 3 || \
@@ -439,6 +449,18 @@ func Envelope(g geom.Geometry) (geom.Geometry, error) {
 		return C.GEOSEnvelope_r(ctx, g)
 	})
 	return result, wrap(err, "executing GEOSEnvelope_r")
+}
+
+func ClipByRect(g geom.Geometry, xmin, ymin, xmax, ymax float64) (geom.Geometry, error) {
+	if C.CLIP_BY_RECT_MISSING != 0 {
+		return geom.Geometry{}, UnsupportedGEOSVersionError{
+			C.CLIP_BY_RECT_MIN_VERSION, "ClipByRect",
+		}
+	}
+	result, err := unaryOpG(g, func(ctx C.GEOSContextHandle_t, g *C.GEOSGeometry) *C.GEOSGeometry {
+		return C.GEOSClipByRect_r(ctx, g, C.double(xmin), C.double(ymin), C.double(xmax), C.double(ymax))
+	})
+	return result, wrap(err, "executing GEOSClipByRect_r")
 }
 
 func Area(g geom.Geometry) (float64, error) {
