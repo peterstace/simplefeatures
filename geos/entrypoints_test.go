@@ -1048,10 +1048,10 @@ func TestClipByRect(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := geos.ClipByRect(geomFromWKT(t, tc.input), tc.rect)
+			got, err := geos.ClipByRect(test.FromWKT(t, tc.input), tc.rect)
 			skipIfUnsupported(t, err)
-			expectNoErr(t, err)
-			expectGeomEq(t, got, geomFromWKT(t, tc.want), geom.IgnoreOrder)
+			test.NoErr(t, err)
+			test.ExactEquals(t, got, test.FromWKT(t, tc.want), geom.IgnoreOrder)
 		})
 	}
 }
