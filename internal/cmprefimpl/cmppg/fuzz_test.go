@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"math"
 	"os"
@@ -121,7 +122,7 @@ func convertToGeometries(t *testing.T, candidates []string) []geom.Geometry {
 
 	oldCount := len(geoms)
 	for _, c := range candidates {
-		buf, err := hexStringToBytes(c)
+		buf, err := hex.DecodeString(c)
 		if err != nil {
 			continue
 		}

@@ -9,24 +9,8 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
-
-func hexStringToBytes(tb testing.TB, s string) []byte {
-	tb.Helper()
-	s = strings.ReplaceAll(s, " ", "")
-	if len(s)%2 != 0 {
-		tb.Fatal("hex string must have even length")
-	}
-	var buf []byte
-	for i := 0; i < len(s); i += 2 {
-		x, err := strconv.ParseUint(s[i:i+2], 16, 8)
-		if err != nil {
-			tb.Fatal(err)
-		}
-		buf = append(buf, byte(x))
-	}
-	return buf
-}
 
 // Test cases generated from:
 /*
@@ -390,9 +374,11 @@ func TestWKBParseValid(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			geom, err := geom.UnmarshalWKB(hexStringToBytes(t, tt.wkb))
-			expectNoErr(t, err)
-			expectGeomEq(t, geom, geomFromWKT(t, tt.wkt))
+			buf, err := hex.DecodeString(tt.wkb)
+			test.NoErr(t, err)
+			geom, err := geom.UnmarshalWKB(buf)
+			test.NoErr(t, err)
+			test.ExactEquals(t, geom, test.FromWKT(t, tt.wkt))
 		})
 	}
 }
@@ -537,8 +523,9 @@ func TestWKBParserSyntaxError(t *testing.T) {
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
-			wkb := hexStringToBytes(t, tc.wkbHex)
-			_, err := geom.UnmarshalWKB(wkb)
+			wkb, err := hex.DecodeString(tc.wkbHex)
+			test.NoErr(t, err)
+			_, err = geom.UnmarshalWKB(wkb)
 			if err == nil {
 				t.Fatal("expected an error but got nil")
 			}
@@ -577,11 +564,11 @@ func TestWKBMarshalValid(t *testing.T) {
 		"GEOMETRYCOLLECTION(POINT(1 2),LINESTRING(1 2,3 4))",
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := geomFromWKT(t, wkt)
+			g := test.FromWKT(t, wkt)
 			buf := g.AsBinary()
 			readBackGeom, err := geom.UnmarshalWKB(buf)
-			expectNoErr(t, err)
-			expectGeomEq(t, readBackGeom, g)
+			test.NoErr(t, err)
+			test.ExactEquals(t, readBackGeom, g)
 		})
 	}
 }
@@ -669,9 +656,10 @@ func TestWKBMarshalEmptyPoint(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := geomFromWKT(t, tt.wkt)
+			g := test.FromWKT(t, tt.wkt)
 			buf := g.AsBinary()
-			want := hexStringToBytes(t, tt.hex)
+			want, err := hex.DecodeString(tt.hex)
+			test.NoErr(t, err)
 			if !bytes.Equal(want, buf) {
 				t.Logf("wkt: %v", tt.wkt)
 				t.Logf("want:\n%v", hex.Dump(want))
@@ -713,11 +701,12 @@ func TestWKBUnmarshalEndianess(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			want := geomFromWKT(t, tt.wkt)
-			wkb := hexStringToBytes(t, tt.hex)
+			want := test.FromWKT(t, tt.wkt)
+			wkb, err := hex.DecodeString(tt.hex)
+			test.NoErr(t, err)
 			got, err := geom.UnmarshalWKB(wkb)
-			expectNoErr(t, err)
-			expectGeomEq(t, got, want)
+			test.NoErr(t, err)
+			test.ExactEquals(t, got, want)
 		})
 	}
 }
@@ -748,18 +737,20 @@ func TestWKBGeometryCollectionMixedCoordinateTypes(t *testing.T) {
 			{"00000bb9", geom.DimXYZM},
 		} {
 			t.Run(fmt.Sprintf("gc_%v_point_%v", gc.ct, point.ct), func(t *testing.T) {
-				hex := bigEndian +
+				hexStr := bigEndian +
 					gc.hex +
 					u32One +
 					bigEndian +
 					point.hex +
 					strings.Repeat(f64Zero, point.ct.Dimension())
-				_, err := geom.UnmarshalWKB(hexStringToBytes(t, hex))
+				buf, err := hex.DecodeString(hexStr)
+				test.NoErr(t, err)
+				_, err = geom.UnmarshalWKB(buf)
 				if gc.ct == point.ct {
-					expectNoErr(t, err)
+					test.NoErr(t, err)
 				} else {
 					wantErr := geom.MismatchedGeometryCollectionDimsError{gc.ct, point.ct}
-					expectErrIs(t, err, wantErr)
+					test.ErrIs(t, err, wantErr)
 				}
 			})
 		}

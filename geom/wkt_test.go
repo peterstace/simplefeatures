@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestUnmarshalWKTValidGrammar(t *testing.T) {
@@ -173,26 +174,26 @@ func TestUnmarshalWKTSyntaxErrors(t *testing.T) {
 
 func TestUnmarshalWKT(t *testing.T) {
 	t.Run("multi line string containing an empty line string", func(t *testing.T) {
-		g := geomFromWKT(t, "MULTILINESTRING((1 2,3 4),EMPTY,(5 6,7 8))")
+		g := test.FromWKT(t, "MULTILINESTRING((1 2,3 4),EMPTY,(5 6,7 8))")
 		mls := g.MustAsMultiLineString()
-		expectIntEq(t, mls.NumLineStrings(), 3)
-		expectGeomEq(t,
+		test.Eq(t, mls.NumLineStrings(), 3)
+		test.ExactEquals(t,
 			mls.LineStringN(0).AsGeometry(),
-			geomFromWKT(t, "LINESTRING(1 2,3 4)"),
+			test.FromWKT(t, "LINESTRING(1 2,3 4)"),
 		)
-		expectGeomEq(t,
+		test.ExactEquals(t,
 			mls.LineStringN(1).AsGeometry(),
-			geomFromWKT(t, "LINESTRING EMPTY"),
+			test.FromWKT(t, "LINESTRING EMPTY"),
 		)
-		expectGeomEq(t,
+		test.ExactEquals(t,
 			mls.LineStringN(2).AsGeometry(),
-			geomFromWKT(t, "LINESTRING(5 6,7 8)"),
+			test.FromWKT(t, "LINESTRING(5 6,7 8)"),
 		)
 	})
 	t.Run("multipoints with and without parenthesised points", func(t *testing.T) {
-		g1 := geomFromWKT(t, "MULTIPOINT((10 40),(40 30),(20 20),(30 10))")
-		g2 := geomFromWKT(t, "MULTIPOINT(10 40,40 30,20 20,30 10)")
-		expectGeomEq(t, g1, g2)
+		g1 := test.FromWKT(t, "MULTIPOINT((10 40),(40 30),(20 20),(30 10))")
+		g2 := test.FromWKT(t, "MULTIPOINT(10 40,40 30,20 20,30 10)")
+		test.ExactEquals(t, g1, g2)
 	})
 }
 
@@ -211,7 +212,7 @@ func TestAsTextEmpty(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := tt.g.AsText()
-			expectStringEq(t, got, tt.want)
+			test.Eq(t, got, tt.want)
 		})
 	}
 }
@@ -254,11 +255,11 @@ func TestInconsistentDimensionTypeInWKT(t *testing.T) {
 		t.Run(tc.wkt, func(t *testing.T) {
 			_, err := geom.UnmarshalWKT(tc.wkt)
 			if tc.allow {
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				return
 			}
 			want := geom.MismatchedGeometryCollectionDimsError{}
-			expectErrAs(t, err, &want)
+			test.ErrAs(t, err, &want)
 		})
 	}
 }

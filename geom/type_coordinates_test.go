@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestCoordinatesString(t *testing.T) {
@@ -35,7 +36,7 @@ func TestCoordinatesString(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			got := tc.coords.String()
-			expectStringEq(t, got, tc.want)
+			test.Eq(t, got, tc.want)
 		})
 	}
 }

@@ -3,6 +3,8 @@ package geom_test
 import (
 	"strconv"
 	"testing"
+
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestPointOnSurface(t *testing.T) {
@@ -76,10 +78,10 @@ func TestPointOnSurface(t *testing.T) {
 		{"GEOMETRYCOLLECTION(LINESTRING(0 0,1 1),POINT(0.5 0.5))", "POINT(0 0)"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			input := geomFromWKT(t, tt.inputWKT)
+			input := test.FromWKT(t, tt.inputWKT)
 			got := input.PointOnSurface()
 			t.Logf("input: %v", tt.inputWKT)
-			expectGeomEq(t, got.AsGeometry(), geomFromWKT(t, tt.outputWKT))
+			test.ExactEquals(t, got.AsGeometry(), test.FromWKT(t, tt.outputWKT))
 		})
 	}
 }

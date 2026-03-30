@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add `NewEnvelopeXY` constructor for building an `Envelope` from variadic x/y
+  coordinate pairs, following the existing `New*XY` constructor pattern.
+
 ## v0.59.0
 
 2026-03-27

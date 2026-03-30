@@ -3,6 +3,8 @@ package geom_test
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestGeoJSONMarshal(t *testing.T) {
@@ -439,9 +441,9 @@ func TestGeoJSONMarshal(t *testing.T) {
 		},
 	} {
 		t.Run(tt.wkt, func(t *testing.T) {
-			geom := geomFromWKT(t, tt.wkt)
+			geom := test.FromWKT(t, tt.wkt)
 			gotJSON, err := json.Marshal(geom)
-			expectNoErr(t, err)
+			test.NoErr(t, err)
 			if string(gotJSON) != tt.want {
 				t.Error("json doesn't match")
 				t.Logf("got:  %v", string(gotJSON))

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestSimplify(t *testing.T) {
@@ -114,15 +115,15 @@ func TestSimplify(t *testing.T) {
 		{"GEOMETRYCOLLECTION EMPTY", 0.1, "GEOMETRYCOLLECTION EMPTY"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			in := geomFromWKT(t, tc.input)
-			want := geomFromWKT(t, tc.output)
+			in := test.FromWKT(t, tc.input)
+			want := test.FromWKT(t, tc.output)
 			t.Logf("input:     %v", in.AsText())
 			t.Logf("threshold: %v", tc.threshold)
 			t.Logf("want:      %v", want.AsText())
 			got, err := in.Simplify(tc.threshold)
-			expectNoErr(t, err)
+			test.NoErr(t, err)
 			t.Logf("got:       %v", got.AsText())
-			expectGeomEq(t, got, want, geom.IgnoreOrder)
+			test.ExactEquals(t, got, want, geom.IgnoreOrder)
 		})
 	}
 }
@@ -164,10 +165,10 @@ func TestSimplifyErrorCases(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			in := geomFromWKT(t, tc.wkt)
+			in := test.FromWKT(t, tc.wkt)
 			_, err := in.Simplify(tc.threshold)
 			var want geom.ValidationError
-			expectErrAs(t, err, &want)
+			test.ErrAs(t, err, &want)
 		})
 	}
 }

@@ -26,8 +26,8 @@ func TestExactEqualsZTolerance(t *testing.T) {
 				{"(1 2 5)", "(1 3 5.05)", false},
 			} {
 				t.Run(strconv.Itoa(i), func(t *testing.T) {
-					g1 := geomFromWKT(t, "POINT "+zmc.zOrM+tc.body1)
-					g2 := geomFromWKT(t, "POINT "+zmc.zOrM+tc.body2)
+					g1 := test.FromWKT(t, "POINT "+zmc.zOrM+tc.body1)
+					g2 := test.FromWKT(t, "POINT "+zmc.zOrM+tc.body2)
 					gotEq := geom.ExactEquals(g1, g2, zmc.opt)
 					if gotEq != tc.wantEq {
 						t.Errorf("got=%v want=%v", gotEq, tc.wantEq)
@@ -248,7 +248,7 @@ func TestExactEquals(t *testing.T) {
 	t.Run("reflexive", func(t *testing.T) {
 		for key, wkt := range wkts {
 			t.Run(key, func(t *testing.T) {
-				g := geomFromWKT(t, wkt)
+				g := test.FromWKT(t, wkt)
 				t.Run("no options", func(t *testing.T) {
 					if !geom.ExactEquals(g, g) {
 						t.Logf("WKT: %v", wkt)
@@ -272,8 +272,8 @@ func TestExactEquals(t *testing.T) {
 							break
 						}
 					}
-					gA := geomFromWKT(t, wkts[keyA])
-					gB := geomFromWKT(t, wkts[keyB])
+					gA := test.FromWKT(t, wkts[keyA])
+					gB := test.FromWKT(t, wkts[keyB])
 					got := geom.ExactEquals(gA, gB, geom.ToleranceXY(0.125))
 					if got != want {
 						t.Logf("WKT A: %v", wkts[keyA])
@@ -298,8 +298,8 @@ func TestExactEquals(t *testing.T) {
 							break
 						}
 					}
-					gA := geomFromWKT(t, wkts[keyA])
-					gB := geomFromWKT(t, wkts[keyB])
+					gA := test.FromWKT(t, wkts[keyA])
+					gB := test.FromWKT(t, wkts[keyB])
 					got := geom.ExactEquals(gA, gB, geom.IgnoreOrder)
 					if got != want {
 						t.Logf("WKT A: %v", wkts[keyA])
@@ -319,7 +319,7 @@ func TestExactEqualsNonSimpleRing(t *testing.T) {
 		wkt1 = "POLYGON((0 0,3 3,3 0,0 3,0 0),(1 1,2 2,2 1,1 2,1 1))"
 		wkt2 = "POLYGON((0 0,3 3,3 0,0 3,0 0),(2 2,2 1,1 2,1 1,2 2))"
 	)
-	g1 := geomFromWKT(t, wkt1, geom.NoValidate{})
-	g2 := geomFromWKT(t, wkt2, geom.NoValidate{})
+	g1 := test.FromWKT(t, wkt1, geom.NoValidate{})
+	g2 := test.FromWKT(t, wkt2, geom.NoValidate{})
 	test.True(t, geom.ExactEquals(g1, g2, geom.IgnoreOrder))
 }

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestSnapPiFloat64ToGrid(t *testing.T) {
@@ -43,8 +44,8 @@ func TestSnapPiFloat64ToGrid(t *testing.T) {
 			pt := geom.XY{0, math.Pi}.AsPoint()
 			pt = pt.SnapToGrid(tc.dp)
 			xy, ok := pt.XY()
-			expectTrue(t, ok)
-			expectFloat64Eq(t, xy.Y, tc.want)
+			test.True(t, ok)
+			test.Eq(t, xy.Y, tc.want)
 		})
 	}
 }
@@ -92,9 +93,9 @@ func TestSnapToGrid(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			in := geomFromWKT(t, tc.input)
+			in := test.FromWKT(t, tc.input)
 			got := in.SnapToGrid(1)
-			expectGeomEqWKT(t, got, tc.output)
+			test.ExactEqualsWKT(t, got, tc.output)
 		})
 	}
 }

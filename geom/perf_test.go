@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 // regularPolygon computes a regular polygon circumscribed by a circle with the
@@ -390,7 +391,7 @@ func BenchmarkForceCWandForceCCW(b *testing.B) {
 		{"MULTIPOLYGON(((40 40, 20 45, 45 30, 40 40)),((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20)))", geom.TypeMultiPolygon, false, true, "all CCW"},
 		{"GEOMETRYCOLLECTION(POLYGON((0 0,0 5,5 5,5 0,0 0)), MULTIPOLYGON(((40 40, 45 30, 20 45, 40 40)),((20 35, 45 20, 30 5, 10 10, 10 30, 20 35),(30 20, 20 25, 20 15, 30 20))))", geom.TypeGeometryCollection, true, false, "all CW"},
 	} {
-		g := geomFromWKT(b, tc.wkt)
+		g := test.FromWKT(b, tc.wkt)
 		for _, correct := range map[string]bool{
 			"correct":   true,
 			"incorrect": false,

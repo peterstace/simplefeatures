@@ -3,64 +3,20 @@ package geos_test
 import (
 	"errors"
 	"math"
-	"os"
 	"strconv"
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
 	"github.com/peterstace/simplefeatures/geos"
 	"github.com/peterstace/simplefeatures/internal/rawgeos"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
-
-func geomFromWKT(t *testing.T, wkt string, nv ...geom.NoValidate) geom.Geometry {
-	t.Helper()
-	geom, err := geom.UnmarshalWKT(wkt, nv...)
-	if err != nil {
-		t.Fatalf("could not unmarshal WKT:\n  wkt: %s\n  err: %v", wkt, err)
-	}
-	return geom
-}
-
-func geomFromWKTFile(t *testing.T, path string, nv ...geom.NoValidate) geom.Geometry {
-	t.Helper()
-	wkt, err := os.ReadFile(path)
-	expectNoErr(t, err)
-	return geomFromWKT(t, string(wkt), nv...)
-}
-
-func expectNoErr(t *testing.T, err error) {
-	t.Helper()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-}
-
-func expectErr(t *testing.T, err error) {
-	t.Helper()
-	if err == nil {
-		t.Fatal("expected error but got nil")
-	}
-}
-
-func expectGeomEq(t *testing.T, got, want geom.Geometry, opts ...geom.ExactEqualsOption) {
-	t.Helper()
-	if !geom.ExactEquals(got, want, opts...) {
-		t.Errorf("\ngot:  %v\nwant: %v\n", got.AsText(), want.AsText())
-	}
-}
 
 func skipIfUnsupported(tb testing.TB, err error) {
 	tb.Helper()
 	var verErr rawgeos.UnsupportedGEOSVersionError
 	if errors.As(err, &verErr) {
 		tb.Skip(verErr.Error())
-	}
-}
-
-func expectBoolEq(t *testing.T, got, want bool) {
-	t.Helper()
-	if got != want {
-		t.Errorf("got:  %v want: %v", got, want)
 	}
 }
 
@@ -358,11 +314,11 @@ func TestRelate(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g1 := geomFromWKT(t, tt.wkt1)
-			g2 := geomFromWKT(t, tt.wkt2)
+			g1 := test.FromWKT(t, tt.wkt1)
+			g2 := test.FromWKT(t, tt.wkt2)
 			t.Run("Equals", func(t *testing.T) {
 				got, err := geos.Equals(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.equals {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -371,7 +327,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("Disjoint", func(t *testing.T) {
 				got, err := geos.Disjoint(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.disjoint {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -380,7 +336,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("Touches", func(t *testing.T) {
 				got, err := geos.Touches(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.touches {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -389,7 +345,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("Contains", func(t *testing.T) {
 				got, err := geos.Contains(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.contains {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -398,7 +354,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("Covers", func(t *testing.T) {
 				got, err := geos.Covers(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.covers {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -407,7 +363,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("Intersects", func(t *testing.T) {
 				got, err := geos.Intersects(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.intersects {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -416,7 +372,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("Within", func(t *testing.T) {
 				got, err := geos.Within(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.within {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -425,7 +381,7 @@ func TestRelate(t *testing.T) {
 			})
 			t.Run("CoveredBy", func(t *testing.T) {
 				got, err := geos.CoveredBy(g1, g2)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				if got != tt.coveredBy {
 					t.Logf("WKT1: %v", tt.wkt1)
 					t.Logf("WKT2: %v", tt.wkt2)
@@ -514,13 +470,13 @@ func TestCrosses(t *testing.T) {
 			run := func(rev bool) func(*testing.T) {
 				return func(t *testing.T) {
 					t.Helper()
-					g1 := geomFromWKT(t, tt.wkt1)
-					g2 := geomFromWKT(t, tt.wkt2)
+					g1 := test.FromWKT(t, tt.wkt1)
+					g2 := test.FromWKT(t, tt.wkt2)
 					if rev {
 						g1, g2 = g2, g1
 					}
 					got, err := geos.Crosses(g1, g2)
-					expectNoErr(t, err)
+					test.NoErr(t, err)
 					if got != tt.want {
 						t.Logf("WKT1: %v", tt.wkt1)
 						t.Logf("WKT2: %v", tt.wkt2)
@@ -571,13 +527,13 @@ func TestOverlaps(t *testing.T) {
 			run := func(rev bool) func(t *testing.T) {
 				return func(t *testing.T) {
 					t.Helper()
-					g1 := geomFromWKT(t, tt.wkt1)
-					g2 := geomFromWKT(t, tt.wkt2)
+					g1 := test.FromWKT(t, tt.wkt1)
+					g2 := test.FromWKT(t, tt.wkt2)
 					if rev {
 						g1, g2 = g2, g1
 					}
 					got, err := geos.Overlaps(g1, g2)
-					expectNoErr(t, err)
+					test.NoErr(t, err)
 					if got != tt.want {
 						t.Logf("WKT1: %v", tt.wkt1)
 						t.Logf("WKT2: %v", tt.wkt2)
@@ -592,10 +548,10 @@ func TestOverlaps(t *testing.T) {
 }
 
 func TestRelateCode(t *testing.T) {
-	g1 := geomFromWKT(t, "POLYGON((0 0,0 2,2 2,2 0,0 0))")
-	g2 := geomFromWKT(t, "POLYGON((1 1,1 3,3 3,3 1,1 1))")
+	g1 := test.FromWKT(t, "POLYGON((0 0,0 2,2 2,2 0,0 0))")
+	g2 := test.FromWKT(t, "POLYGON((1 1,1 3,3 3,3 1,1 1))")
 	got, err := geos.Relate(g1, g2)
-	expectNoErr(t, err)
+	test.NoErr(t, err)
 	const want = "212101212"
 	if got != want {
 		t.Errorf("got: %v want: %v", got, want)
@@ -614,15 +570,15 @@ func RunBinaryOperationTest(t *testing.T, fn func(a, b geom.Geometry) (geom.Geom
 			run := func(rev bool) func(t *testing.T) {
 				return func(t *testing.T) {
 					t.Helper()
-					g1 := geomFromWKT(t, c.In1)
-					g2 := geomFromWKT(t, c.In2)
+					g1 := test.FromWKT(t, c.In1)
+					g2 := test.FromWKT(t, c.In2)
 					if rev {
 						g1, g2 = g2, g1
 					}
 					t.Logf("WKT1: %v", g1.AsText())
 					t.Logf("WKT2: %v", g2.AsText())
 					got, err := fn(g1, g2)
-					expectNoErr(t, err)
+					test.NoErr(t, err)
 
 					if got.IsEmpty() {
 						// Normalise the result to a geometry collection when
@@ -631,7 +587,7 @@ func RunBinaryOperationTest(t *testing.T, fn func(a, b geom.Geometry) (geom.Geom
 						// for empty geometries.
 						got = geom.GeometryCollection{}.AsGeometry()
 					}
-					expectGeomEq(t, got, geomFromWKT(t, c.Out), geom.IgnoreOrder)
+					test.ExactEquals(t, got, test.FromWKT(t, c.Out), geom.IgnoreOrder)
 				}
 			}
 			t.Run("Forward", run(false))
@@ -762,15 +718,15 @@ func TestBuffer(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := geomFromWKT(t, tt.wkt)
+			g := test.FromWKT(t, tt.wkt)
 			t.Logf("WKT: %v", g.AsText())
 
 			got, err := geos.Buffer(g, tt.radius, tt.opts...)
-			expectNoErr(t, err)
+			test.NoErr(t, err)
 
-			gWant := geomFromWKT(t, tt.want)
+			gWant := test.FromWKT(t, tt.want)
 			symDiff, err := geom.SymmetricDifference(gWant, got)
-			expectNoErr(t, err)
+			test.NoErr(t, err)
 			const threshold = 1e-3
 			relativeAreaDiff := symDiff.Area() / math.Min(gWant.Area(), got.Area())
 			if relativeAreaDiff > threshold {
@@ -799,11 +755,11 @@ func TestSimplify(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			g := geomFromWKT(t, tt.input)
+			g := test.FromWKT(t, tt.input)
 			t.Logf("WKT: %v", g.AsText())
 			got, err := geos.Simplify(g, tt.tolerance)
-			expectNoErr(t, err)
-			expectGeomEq(t, got, geomFromWKT(t, tt.output), geom.IgnoreOrder)
+			test.NoErr(t, err)
+			test.ExactEquals(t, got, test.FromWKT(t, tt.output), geom.IgnoreOrder)
 		})
 	}
 }
@@ -813,31 +769,31 @@ func TestTopologyPreserveSimplify(t *testing.T) {
 		input  = `POLYGON((0 0,0 1,-0.5 1.5,0 2,0 3,3 3,3 0,0 0),(-0.1 1.5,2 2,2 1,-0.1 1.5))`
 		output = `POLYGON((0 0,-0.5 1.5,0 3,3 3,3 0,0 0),(-0.1 1.5,2 2,2 1,-0.1 1.5))`
 	)
-	got, err := geos.TopologyPreserveSimplify(geomFromWKT(t, input), 0.5)
-	expectNoErr(t, err)
-	expectGeomEq(t, got, geomFromWKT(t, output), geom.IgnoreOrder)
+	got, err := geos.TopologyPreserveSimplify(test.FromWKT(t, input), 0.5)
+	test.NoErr(t, err)
+	test.ExactEquals(t, got, test.FromWKT(t, output), geom.IgnoreOrder)
 }
 
 func TestDifference(t *testing.T) {
-	a := geomFromWKT(t, "POLYGON((0 0,0 2,2 2,2 0,0 0))")
-	b := geomFromWKT(t, "POLYGON((1 1,1 3,3 3,3 1,1 1))")
+	a := test.FromWKT(t, "POLYGON((0 0,0 2,2 2,2 0,0 0))")
+	b := test.FromWKT(t, "POLYGON((1 1,1 3,3 3,3 1,1 1))")
 
 	got, err := geos.Difference(a, b)
-	expectNoErr(t, err)
-	want := geomFromWKT(t, "POLYGON((0 0,0 2,1 2,1 1,2 1,2 0,0 0))")
+	test.NoErr(t, err)
+	want := test.FromWKT(t, "POLYGON((0 0,0 2,1 2,1 1,2 1,2 0,0 0))")
 
-	expectGeomEq(t, got, want, geom.IgnoreOrder)
+	test.ExactEquals(t, got, want, geom.IgnoreOrder)
 }
 
 func TestSymmetricDifference(t *testing.T) {
-	a := geomFromWKT(t, "POLYGON((0 0,0 2,2 2,2 0,0 0))")
-	b := geomFromWKT(t, "POLYGON((1 1,1 3,3 3,3 1,1 1))")
+	a := test.FromWKT(t, "POLYGON((0 0,0 2,2 2,2 0,0 0))")
+	b := test.FromWKT(t, "POLYGON((1 1,1 3,3 3,3 1,1 1))")
 
 	got, err := geos.SymmetricDifference(a, b)
-	expectNoErr(t, err)
-	want := geomFromWKT(t, "MULTIPOLYGON(((0 0,0 2,1 2,1 1,2 1,2 0,0 0)),((2 1,3 1,3 3,1 3,1 2,2 2,2 1)))")
+	test.NoErr(t, err)
+	want := test.FromWKT(t, "MULTIPOLYGON(((0 0,0 2,1 2,1 1,2 1,2 0,0 0)),((2 1,3 1,3 3,1 3,1 2,2 2,2 1)))")
 
-	expectGeomEq(t, got, want, geom.IgnoreOrder)
+	test.ExactEquals(t, got, want, geom.IgnoreOrder)
 }
 
 func TestMakeValid(t *testing.T) {
@@ -852,13 +808,13 @@ func TestMakeValid(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			_, err := geom.UnmarshalWKT(tt.input)
-			expectErr(t, err)
-			in := geomFromWKT(t, tt.input, geom.NoValidate{})
+			test.Err(t, err)
+			in := test.FromWKT(t, tt.input, geom.NoValidate{})
 			gotGeom, err := geos.MakeValid(in)
 			skipIfUnsupported(t, err)
-			expectNoErr(t, err)
-			wantGeom := geomFromWKT(t, tt.wantOutput)
-			expectGeomEq(t, gotGeom, wantGeom, geom.IgnoreOrder)
+			test.NoErr(t, err)
+			wantGeom := test.FromWKT(t, tt.wantOutput)
+			test.ExactEquals(t, gotGeom, wantGeom, geom.IgnoreOrder)
 		})
 	}
 }
@@ -874,9 +830,9 @@ func TestUnaryUnion(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, err := geos.UnaryUnion(geomFromWKT(t, tt.input))
-			expectNoErr(t, err)
-			expectGeomEq(t, got, geomFromWKT(t, tt.wantOutput), geom.IgnoreOrder)
+			got, err := geos.UnaryUnion(test.FromWKT(t, tt.input))
+			test.NoErr(t, err)
+			test.ExactEquals(t, got, test.FromWKT(t, tt.wantOutput), geom.IgnoreOrder)
 		})
 	}
 }
@@ -934,15 +890,15 @@ func TestCoverageUnion(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			in := geomFromWKT(t, tc.input)
+			in := test.FromWKT(t, tc.input)
 			gotGeom, err := geos.CoverageUnion(in)
 			skipIfUnsupported(t, err)
 			if tc.wantErr {
-				expectErr(t, err)
+				test.Err(t, err)
 			} else {
-				expectNoErr(t, err)
-				wantGeom := geomFromWKT(t, tc.output)
-				expectGeomEq(t, gotGeom, wantGeom, geom.IgnoreOrder)
+				test.NoErr(t, err)
+				wantGeom := test.FromWKT(t, tc.output)
+				test.ExactEquals(t, gotGeom, wantGeom, geom.IgnoreOrder)
 			}
 		})
 	}
@@ -951,15 +907,15 @@ func TestCoverageUnion(t *testing.T) {
 func TestCoverageSimplifyVW(t *testing.T) {
 	input := geom.NewGeometryCollection(
 		[]geom.Geometry{
-			geomFromWKTFile(t, "testdata/coverage_simplify_input_birchgrove.wkt"),
-			geomFromWKTFile(t, "testdata/coverage_simplify_input_balmain.wkt"),
+			test.FromWKT(t, test.ReadFile(t, "testdata/coverage_simplify_input_birchgrove.wkt")),
+			test.FromWKT(t, test.ReadFile(t, "testdata/coverage_simplify_input_balmain.wkt")),
 		},
 	)
 	got, err := geos.CoverageSimplifyVW(input.AsGeometry(), 0.001, false)
 	skipIfUnsupported(t, err)
-	expectNoErr(t, err)
-	want := geomFromWKTFile(t, "testdata/coverage_simplify_output.wkt")
-	expectGeomEq(t, got, want)
+	test.NoErr(t, err)
+	want := test.FromWKT(t, test.ReadFile(t, "testdata/coverage_simplify_output.wkt"))
+	test.ExactEquals(t, got, want)
 }
 
 func TestCoverageIsValid(t *testing.T) {
@@ -1007,12 +963,12 @@ func TestCoverageIsValid(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			inputG := geomFromWKT(t, tc.input)
+			inputG := test.FromWKT(t, tc.input)
 			valid, badEdges, err := geos.CoverageIsValid(inputG, 0)
 			skipIfUnsupported(t, err)
-			expectNoErr(t, err)
-			expectBoolEq(t, valid, tc.wantValid)
-			expectGeomEq(t, badEdges, geomFromWKT(t, tc.wantBadEdges))
+			test.NoErr(t, err)
+			test.Eq(t, valid, tc.wantValid)
+			test.ExactEquals(t, badEdges, test.FromWKT(t, tc.wantBadEdges))
 		})
 	}
 }
@@ -1092,10 +1048,10 @@ func TestClipByRect(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := geos.ClipByRect(geomFromWKT(t, tc.input), tc.rect)
+			got, err := geos.ClipByRect(test.FromWKT(t, tc.input), tc.rect)
 			skipIfUnsupported(t, err)
-			expectNoErr(t, err)
-			expectGeomEq(t, got, geomFromWKT(t, tc.want), geom.IgnoreOrder)
+			test.NoErr(t, err)
+			test.ExactEquals(t, got, test.FromWKT(t, tc.want), geom.IgnoreOrder)
 		})
 	}
 }

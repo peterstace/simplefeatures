@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestConvexHull(t *testing.T) {
@@ -199,8 +200,8 @@ func TestConvexHull(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Logf("input: %s", tt.input)
-			got := geomFromWKT(t, tt.input).ConvexHull()
-			expectGeomEq(t, got, geomFromWKT(t, tt.output), geom.IgnoreOrder)
+			got := test.FromWKT(t, tt.input).ConvexHull()
+			test.ExactEquals(t, got, test.FromWKT(t, tt.output), geom.IgnoreOrder)
 		})
 	}
 }

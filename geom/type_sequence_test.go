@@ -6,12 +6,13 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestSequenceZeroValue(t *testing.T) {
 	var seq geom.Sequence
-	expectIntEq(t, seq.Length(), 0)
-	expectCoordinatesTypeEq(t, seq.CoordinatesType(), geom.DimXY)
+	test.Eq(t, seq.Length(), 0)
+	test.Eq(t, seq.CoordinatesType(), geom.DimXY)
 }
 
 func TestSequenceCoordinatesType(t *testing.T) {
@@ -23,7 +24,7 @@ func TestSequenceCoordinatesType(t *testing.T) {
 	} {
 		t.Run(ct.String(), func(t *testing.T) {
 			seq := geom.NewSequence(nil, ct)
-			expectCoordinatesTypeEq(t, seq.CoordinatesType(), ct)
+			test.Eq(t, seq.CoordinatesType(), ct)
 		})
 	}
 }
@@ -31,15 +32,15 @@ func TestSequenceCoordinatesType(t *testing.T) {
 func checkSequence(t *testing.T, seq geom.Sequence, coords []geom.Coordinates) {
 	t.Helper()
 	gotLen := seq.Length()
-	expectIntEq(t, gotLen, len(coords))
-	expectPanics(t, func() { seq.Get(-1) })
-	expectPanics(t, func() { seq.GetXY(-1) })
+	test.Eq(t, gotLen, len(coords))
+	test.Panics(t, func() { seq.Get(-1) })
+	test.Panics(t, func() { seq.GetXY(-1) })
 	for j, c := range coords {
-		expectCoordsEq(t, c, seq.Get(j))
-		expectXYEq(t, c.XY, seq.GetXY(j))
+		test.Eq(t, c, seq.Get(j))
+		test.Eq(t, c.XY, seq.GetXY(j))
 	}
-	expectPanics(t, func() { seq.Get(len(coords)) })
-	expectPanics(t, func() { seq.GetXY(len(coords)) })
+	test.Panics(t, func() { seq.Get(len(coords)) })
+	test.Panics(t, func() { seq.GetXY(len(coords)) })
 }
 
 func TestSequenceLengthAndGet(t *testing.T) {
@@ -175,7 +176,7 @@ func TestSequenceLengthAndGet(t *testing.T) {
 					}
 					forced := tt.seq.ForceCoordinatesType(ct)
 					checkSequence(t, forced, wantCoords)
-					expectCoordinatesTypeEq(t, forced.CoordinatesType(), ct)
+					test.Eq(t, forced.CoordinatesType(), ct)
 				})
 			}
 		})
@@ -189,17 +190,17 @@ func TestSequencEnvelope(t *testing.T) {
 		want   geom.Envelope
 	}{
 		{nil, geom.DimXY, geom.Envelope{}},
-		{[]float64{1, 2}, geom.DimXY, onePtEnv(1, 2)},
-		{[]float64{3, 2, 1, 4}, geom.DimXY, twoPtEnv(1, 2, 3, 4)},
-		{[]float64{3, 6, 1, 4, 5, 2}, geom.DimXY, twoPtEnv(1, 2, 5, 6)},
+		{[]float64{1, 2}, geom.DimXY, geom.NewEnvelopeXY(1, 2)},
+		{[]float64{3, 2, 1, 4}, geom.DimXY, geom.NewEnvelopeXY(1, 2, 3, 4)},
+		{[]float64{3, 6, 1, 4, 5, 2}, geom.DimXY, geom.NewEnvelopeXY(1, 2, 5, 6)},
 		{nil, geom.DimXYZ, geom.Envelope{}},
-		{[]float64{1, 2, 3}, geom.DimXYZ, onePtEnv(1, 2)},
-		{[]float64{3, 2, 0, 1, 4, 0}, geom.DimXYZ, twoPtEnv(1, 2, 3, 4)},
-		{[]float64{3, 6, -1, 1, 4, -1, 5, 2, -1}, geom.DimXYZ, twoPtEnv(1, 2, 5, 6)},
+		{[]float64{1, 2, 3}, geom.DimXYZ, geom.NewEnvelopeXY(1, 2)},
+		{[]float64{3, 2, 0, 1, 4, 0}, geom.DimXYZ, geom.NewEnvelopeXY(1, 2, 3, 4)},
+		{[]float64{3, 6, -1, 1, 4, -1, 5, 2, -1}, geom.DimXYZ, geom.NewEnvelopeXY(1, 2, 5, 6)},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			seq := geom.NewSequence(tc.floats, tc.ct)
-			expectEnvEq(t, seq.Envelope(), tc.want)
+			test.Eq(t, seq.Envelope(), tc.want)
 		})
 	}
 }

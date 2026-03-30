@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"testing"
+
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestInterpolatePointEmpty(t *testing.T) {
@@ -11,10 +13,10 @@ func TestInterpolatePointEmpty(t *testing.T) {
 		for _, ratio := range []float64{-0.5, 0, 0.5, 1, 1.5} {
 			t.Run(fmt.Sprintf("%v_%v", variant, ratio), func(t *testing.T) {
 				inputWKT := "LINESTRING " + variant + " EMPTY"
-				input := geomFromWKT(t, inputWKT).MustAsLineString()
+				input := test.FromWKT(t, inputWKT).MustAsLineString()
 				wantWKT := "POINT " + variant + " EMPTY"
 				got := input.InterpolatePoint(ratio).AsGeometry()
-				expectGeomEqWKT(t, got, wantWKT)
+				test.ExactEqualsWKT(t, got, wantWKT)
 			})
 		}
 	}
@@ -77,11 +79,11 @@ func TestInterpolatePoint(t *testing.T) {
 		{"LINESTRING(0 0,3 0,3 1)", 0.875, "POINT(3.0 0.5)"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			ls := geomFromWKT(t, tc.lsWKT).MustAsLineString()
+			ls := test.FromWKT(t, tc.lsWKT).MustAsLineString()
 			t.Logf("ls:   %v", ls.AsText())
 			t.Logf("frac: %v", tc.frac)
 			got := ls.InterpolatePoint(tc.frac).AsGeometry()
-			expectGeomEqWKT(t, got, tc.wantWKT)
+			test.ExactEqualsWKT(t, got, tc.wantWKT)
 		})
 	}
 }
@@ -96,9 +98,9 @@ func TestInterpolateEvenlySpacedPointsEmpty(t *testing.T) {
 		} {
 			t.Run(fmt.Sprintf("%v_%v", variant, n), func(t *testing.T) {
 				inputWKT := "LINESTRING " + variant + " EMPTY"
-				input := geomFromWKT(t, inputWKT).MustAsLineString()
+				input := test.FromWKT(t, inputWKT).MustAsLineString()
 				got := input.InterpolateEvenlySpacedPoints(n).AsGeometry()
-				expectGeomEqWKT(t, got, want)
+				test.ExactEqualsWKT(t, got, want)
 			})
 		}
 	}
@@ -121,9 +123,9 @@ func TestInterpolateEvenlySpacedPoints(t *testing.T) {
 		{"LINESTRING(0 0,        3 0,3 1)", 1, "MULTIPOINT(2 0)"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			ls := geomFromWKT(t, tc.lsWKT).MustAsLineString()
+			ls := test.FromWKT(t, tc.lsWKT).MustAsLineString()
 			got := ls.InterpolateEvenlySpacedPoints(tc.n).AsGeometry()
-			expectGeomEqWKT(t, got, tc.wantWKT)
+			test.ExactEqualsWKT(t, got, tc.wantWKT)
 		})
 	}
 }

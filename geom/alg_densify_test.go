@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestDensifyEmpty(t *testing.T) {
@@ -27,7 +28,7 @@ func TestDensifyEmpty(t *testing.T) {
 				t.Run(ct.String(), func(t *testing.T) {
 					input := empty.ForceCoordinatesType(ct)
 					got := input.Densify(1.0)
-					expectGeomEq(t, got, input)
+					test.ExactEquals(t, got, input)
 				})
 			}
 		})
@@ -67,9 +68,9 @@ func TestDensify(t *testing.T) {
 		{"GEOMETRYCOLLECTION(POINT(0 0),LINESTRING(0 0,1 1))", 1.0, "GEOMETRYCOLLECTION(POINT(0 0),LINESTRING(0 0,0.5 0.5,1 1))"},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			input := geomFromWKT(t, tc.input)
+			input := test.FromWKT(t, tc.input)
 			got := input.Densify(tc.maxDist)
-			expectGeomEqWKT(t, got, tc.want)
+			test.ExactEqualsWKT(t, got, tc.want)
 		})
 	}
 }
@@ -87,8 +88,8 @@ func TestDensifyInvalidMaxDist(t *testing.T) {
 		{"MULTIPOINT((0 0))", 0},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			input := geomFromWKT(t, tc.input)
-			expectPanics(t, func() { input.Densify(tc.maxDist) })
+			input := test.FromWKT(t, tc.input)
+			test.Panics(t, func() { input.Densify(tc.maxDist) })
 		})
 	}
 }

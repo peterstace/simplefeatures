@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 func TestMarshalUnmarshal(t *testing.T) {
@@ -182,8 +183,8 @@ func TestMarshalUnmarshal(t *testing.T) {
 	t.Run("wkt", func(t *testing.T) {
 		for i, wkt := range wkts {
 			t.Run(strconv.Itoa(i), func(t *testing.T) {
-				got := geomFromWKT(t, wkt).AsText()
-				expectStringEq(t, got, wkt)
+				got := test.FromWKT(t, wkt).AsText()
+				test.Eq(t, got, wkt)
 			})
 		}
 	})
@@ -191,19 +192,19 @@ func TestMarshalUnmarshal(t *testing.T) {
 	t.Run("wkb", func(t *testing.T) {
 		for i, wkt := range wkts {
 			t.Run(strconv.Itoa(i), func(t *testing.T) {
-				original := geomFromWKT(t, wkt)
+				original := test.FromWKT(t, wkt)
 				wkb := original.AsBinary()
 				reconstructed, err := geom.UnmarshalWKB(wkb)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				reconstructedWKT := reconstructed.AsText()
-				expectStringEq(t, wkt, reconstructedWKT)
+				test.Eq(t, wkt, reconstructedWKT)
 			})
 		}
 	})
 
 	t.Run("geojson", func(t *testing.T) {
 		for i, wkt := range wkts {
-			original := geomFromWKT(t, wkt)
+			original := test.FromWKT(t, wkt)
 			if original.CoordinatesType().IsMeasured() {
 				// GeoJSON will drop Measures
 				continue
@@ -234,11 +235,11 @@ func TestMarshalUnmarshal(t *testing.T) {
 
 			t.Run(strconv.Itoa(i), func(t *testing.T) {
 				geojson, err := json.Marshal(original)
-				expectNoErr(t, err)
+				test.NoErr(t, err)
 				var reconstructed geom.Geometry
-				expectNoErr(t, json.Unmarshal(geojson, &reconstructed))
+				test.NoErr(t, json.Unmarshal(geojson, &reconstructed))
 				reconstructedWKT := reconstructed.AsText()
-				expectStringEq(t, wkt, reconstructedWKT)
+				test.Eq(t, wkt, reconstructedWKT)
 			})
 		}
 	})
