@@ -26,7 +26,14 @@ func ClipByRect(g Geometry, rect Envelope) Geometry {
 }
 
 func clipPointByRect(p Point, rect Envelope) Point {
-	panic("TODO")
+	xy, ok := p.XY()
+	if !ok {
+		return p
+	}
+	if rect.Contains(xy) {
+		return p
+	}
+	return NewEmptyPoint(p.CoordinatesType())
 }
 
 func clipMultiPointByRect(mp MultiPoint, rect Envelope) MultiPoint {
