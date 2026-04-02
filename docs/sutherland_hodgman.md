@@ -499,20 +499,7 @@ resembles the edge-tracing phase of an overlay algorithm, but is constrained to
 only four possible boundary edges, which simplifies the data structures
 involved.
 
-## Unit Test Cases
-
-This section enumerates unit test cases for ClipByRect. The clipping rectangle
-is denoted R. Each test specifies the input geometry, the rectangle, and the
-expected output.
-
-Each test case is defined with concrete coordinates in a single canonical
-orientation. The test implementation systematically applies all 8 symmetry
-transformations of the dihedral group D4 (4 rotations × 2 reflections) to both
-the input geometry and the clipping rectangle, generating 8 sub-tests per case.
-This ensures every case is tested against all edges and corners of R without
-needing to list each orientation explicitly.
-
-### Output Type Rules
+## Output Type Rules
 
 Two rules govern the output geometry type:
 
@@ -544,6 +531,19 @@ were already empty) are omitted from the result. Nested GeometryCollections that
 become empty after their children are omitted are themselves omitted. The
 top-level GeometryCollection is never omitted: if all children are removed, the
 result is an empty GeometryCollection.
+
+## Unit Test Cases
+
+This section enumerates unit test cases for ClipByRect. The clipping rectangle
+is denoted R. Each test specifies the input geometry, the rectangle, and the
+expected output.
+
+Each test case is defined with concrete coordinates in a single canonical
+orientation. The test implementation systematically applies all 8 symmetry
+transformations of the dihedral group D4 (4 rotations × 2 reflections) to both
+the input geometry and the clipping rectangle, generating 8 sub-tests per case.
+This ensures every case is tested against all edges and corners of R without
+needing to list each orientation explicitly.
 
 ### Rectangle Configurations
 
