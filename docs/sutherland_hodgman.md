@@ -591,6 +591,7 @@ envelope configurations with representative geometries.
 | MP6 | Points on edges and corners of R        | All retained                        |
 | MP7 | Mix of inside, on-boundary, and outside | Inside and boundary points retained |
 | MP8 | MultiPoint containing empty points      | Empty points excluded from output   |
+| MP9 | XYZ MultiPoint, all points outside R    | Empty XYZ MultiPoint                |
 
 ### LineString
 
@@ -651,6 +652,7 @@ envelope configurations with representative geometries.
 | MLS6 | One component crosses R, another is inside R            | MultiLineString with clipped and unclipped parts |
 | MLS7 | Component that produces multiple fragments when clipped | Fragments included in output MultiLineString     |
 | MLS8 | MultiLineString containing empty LineStrings            | Empty components excluded                        |
+| MLS9 | XYZ MultiLineString, all components outside R           | Empty XYZ MultiLineString                        |
 
 ### Polygon (No Holes)
 
@@ -752,6 +754,7 @@ envelope configurations with representative geometries.
 | MPG8  | Components with holes, some holes clipped                           | MultiPolygon preserving relevant holes   |
 | MPG9  | Single component fully inside R                                     | MultiPolygon with 1 component            |
 | MPG10 | MultiPolygon containing empty Polygons                              | Empty components excluded                |
+| MPG11 | XYZ MultiPolygon, all components outside R                          | Empty XYZ MultiPolygon                   |
 
 ### GeometryCollection
 
@@ -770,6 +773,7 @@ envelope configurations with representative geometries.
 | GC11 | Contains MultiPoint, MultiLineString, MultiPolygon  | Each multi-type component clipped independently |
 | GC12 | Deeply nested GeometryCollections (3+ levels)       | Recursive clipping at all levels                |
 | GC13 | Nested GC whose children all clip to empty          | Nested GC omitted from parent                   |
+| GC14 | XYZ GeometryCollection, all children outside R      | Empty XYZ GeometryCollection                    |
 
 ### Degenerate Rectangle Cases
 

@@ -37,7 +37,19 @@ func clipPointByRect(p Point, rect Envelope) Point {
 }
 
 func clipMultiPointByRect(mp MultiPoint, rect Envelope) MultiPoint {
-	panic("TODO")
+	n := mp.NumPoints()
+	var pts []Point
+	for i := 0; i < n; i++ {
+		p := mp.PointN(i)
+		clipped := clipPointByRect(p, rect)
+		if !clipped.IsEmpty() {
+			pts = append(pts, clipped)
+		}
+	}
+	if len(pts) == 0 {
+		return NewMultiPoint(nil).ForceCoordinatesType(mp.CoordinatesType())
+	}
+	return NewMultiPoint(pts)
 }
 
 func clipLineStringByRect(ls LineString, rect Envelope) Geometry {

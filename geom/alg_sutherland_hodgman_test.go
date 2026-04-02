@@ -40,6 +40,25 @@ func TestClipByRect(t *testing.T) {
 		{"PT4", "POINT(1 3)", "POINT(1 3)"},
 		// PT5: Point on corner of R (bottom-left corner)
 		{"PT5", "POINT(1 2)", "POINT(1 2)"},
+
+		// MP1: Empty MultiPoint
+		{"MP1", "MULTIPOINT EMPTY", "MULTIPOINT EMPTY"},
+		// MP2: All points inside R
+		{"MP2", "MULTIPOINT(2 3,3 3)", "MULTIPOINT(2 3,3 3)"},
+		// MP3: All points outside R
+		{"MP3", "MULTIPOINT(0 0,6 6)", "MULTIPOINT EMPTY"},
+		// MP4: Some points inside, some outside
+		{"MP4", "MULTIPOINT(3 3,0 0)", "MULTIPOINT(3 3)"},
+		// MP5: Single point inside R
+		{"MP5", "MULTIPOINT(3 3)", "MULTIPOINT(3 3)"},
+		// MP6: Points on edges and corners of R
+		{"MP6", "MULTIPOINT(1 3,1 2)", "MULTIPOINT(1 3,1 2)"},
+		// MP7: Mix of inside, on-boundary, and outside
+		{"MP7", "MULTIPOINT(3 3,1 3,0 0)", "MULTIPOINT(3 3,1 3)"},
+		// MP8: MultiPoint containing empty points
+		{"MP8", "MULTIPOINT(3 3,EMPTY)", "MULTIPOINT(3 3)"},
+		// MP9: XYZ MultiPoint, all points outside R
+		{"MP9", "MULTIPOINT Z(0 0 7,6 6 8)", "MULTIPOINT Z EMPTY"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, tr := range d4Transforms {
