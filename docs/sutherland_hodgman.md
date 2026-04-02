@@ -505,34 +505,79 @@ This section enumerates unit test cases for ClipByRect. The clipping rectangle
 is denoted R. Each test specifies the input geometry, the rectangle, and the
 expected output.
 
+Each test case is defined with concrete coordinates in a single canonical
+orientation. The test implementation systematically applies all 8 symmetry
+transformations of the dihedral group D4 (4 rotations × 2 reflections) to both
+the input geometry and the clipping rectangle, generating 8 sub-tests per case.
+This ensures every case is tested against all edges and corners of R without
+needing to list each orientation explicitly.
+
+### Output Type Rules
+
+Two rules govern the output geometry type:
+
+1. **Dimension preservation.** The topological dimension of the output always
+   matches the input. A LineString input never produces a Point output; it
+   produces an empty LineString instead.
+
+2. **Multi-type promotion only.** A singular type may be promoted to its
+   multi-type when clipping produces multiple components (e.g. a LineString that
+   is split into multiple segments becomes a MultiLineString). However, a
+   multi-type input is never demoted: a MultiPoint input always produces a
+   MultiPoint output, even if only one point survives.
+
+The output type only ever stays the same or gets wider (singular to multi), never
+narrower. For multi-type inputs, the output type is always the same as the input
+type. For singular-type inputs, the output is the same singular type unless the
+result has multiple components, in which case it is promoted to the corresponding
+multi-type.
+
+When a child element of a multi-type is clipped away entirely, it is omitted from
+the result (not included as an empty geometry). For example, a MultiPoint with
+three points where one is outside R produces a MultiPoint with two points. In
+contrast, a singular type that is clipped away entirely becomes an empty geometry
+of the same type: a Point outside R produces an empty Point.
+
+GeometryCollections are processed recursively. Each non-GeometryCollection child
+is clipped independently per the rules above. Children that clip to empty (or
+were already empty) are omitted from the result. Nested GeometryCollections that
+become empty after their children are omitted are themselves omitted. The
+top-level GeometryCollection is never omitted: if all children are removed, the
+result is an empty GeometryCollection.
+
 ### Rectangle Configurations
 
-Before testing individual geometry types, the rectangle itself can vary:
+The clipping rectangle can take four forms:
 
-| #   | Case                                         | Notes                                                                                 |
-| --- | -------------------------------------------- | ------------------------------------------------------------------------------------- |
-| R1  | Empty envelope                               | Always return empty geometry of the input type                                        |
-| R2  | Point envelope (min = max)                   | Degenerate: output type matches input type, only same-dimension intersections survive |
-| R3  | Line envelope (zero width or zero height)    | Degenerate: output type matches input type, only same-dimension intersections survive |
-| R4  | Normal rectangle (positive width and height) | Standard case                                                                         |
+- **Normal rectangle** (positive width and height): The standard case. All
+  geometry-type tests below assume a normal rectangle.
 
-All geometry-type tests below assume a normal rectangle unless stated otherwise.
-A small set of tests should also exercise R1, R2, and R3 with representative
-geometries.
+- **Empty envelope**: Always returns an empty geometry of the input type.
+
+- **Point envelope** (min = max): Degenerate. Lower-dimensional intersections
+  are discarded. A Point at the same location survives, but a LineString passing
+  through the point produces an empty LineString (the intersection is a point,
+  which is lower-dimensional than a LineString).
+
+- **Line envelope** (zero width or zero height): Degenerate. Lower-dimensional
+  intersections are discarded. A LineString collinear with the line survives, but
+  a LineString that merely crosses it produces an empty LineString (the
+  intersection is a point). Similarly, a Polygon crossing the line produces an
+  empty Polygon (the intersection is at most a line, which is lower-dimensional
+  than a Polygon).
+
+The Degenerate Rectangle Cases section below exercises the empty, point, and line
+envelope configurations with representative geometries.
 
 ### Point
 
-| #   | Case                                    | Expected output |
-| --- | --------------------------------------- | --------------- |
-| PT1 | Empty Point                             | Empty Point     |
-| PT2 | Point strictly inside R                 | Same Point      |
-| PT3 | Point strictly outside R                | Empty Point     |
-| PT4 | Point on left edge of R                 | Same Point      |
-| PT5 | Point on right edge of R                | Same Point      |
-| PT6 | Point on bottom edge of R               | Same Point      |
-| PT7 | Point on top edge of R                  | Same Point      |
-| PT8 | Point on corner of R (e.g. bottom-left) | Same Point      |
-| PT9 | Point on corner of R (e.g. top-right)   | Same Point      |
+| #   | Case                     | Expected output |
+| --- | ------------------------ | --------------- |
+| PT1 | Empty Point              | Empty Point     |
+| PT2 | Point strictly inside R  | Same Point      |
+| PT3 | Point strictly outside R | Empty Point     |
+| PT4 | Point on edge of R       | Same Point      |
+| PT5 | Point on corner of R     | Same Point      |
 
 ### MultiPoint
 
@@ -577,83 +622,79 @@ geometries.
 
 #### Direction and shape
 
-| #    | Case                                                             | Expected output                            |
-| ---- | ---------------------------------------------------------------- | ------------------------------------------ |
-| LS17 | Diagonal line crossing all four edges of R                       | LineString with 2 intersection points      |
-| LS18 | Horizontal line crossing left and right edges                    | LineString clipped to left and right edges |
-| LS19 | Vertical line crossing bottom and top edges                      | LineString clipped to bottom and top edges |
-| LS20 | Closed LineString (ring) inside R                                | Same closed LineString                     |
-| LS21 | Closed LineString (ring) partially overlapping R                 | LineString of surviving arcs               |
-| LS22 | Multi-segment LineString with some segments inside, some outside | MultiLineString of surviving segments      |
-| LS23 | Zigzag LineString entering and exiting R many times              | MultiLineString with multiple components   |
+| #    | Case                                                             | Expected output                                   |
+| ---- | ---------------------------------------------------------------- | ------------------------------------------------- |
+| LS17 | Diagonal line crossing two edges of R                            | LineString with 2 intersection points             |
+| LS18 | Axis-aligned line crossing two opposite edges of R               | LineString clipped to opposite edge intersections |
+| LS19 | Closed LineString (ring) inside R                                | Same closed LineString                            |
+| LS20 | Closed LineString (ring) partially overlapping R                 | LineString of surviving arcs                      |
+| LS21 | Multi-segment LineString with some segments inside, some outside | MultiLineString of surviving segments             |
+| LS22 | Zigzag LineString entering and exiting R many times              | MultiLineString with multiple components          |
 
 #### Corner and edge-coincident cases
 
 | #    | Case                                                 | Expected output                              |
 | ---- | ---------------------------------------------------- | -------------------------------------------- |
-| LS24 | Vertex exactly on R boundary, adjacent edges inside  | LineString preserved through boundary vertex |
-| LS25 | Vertex exactly on R boundary, adjacent edges outside | Empty LineString                             |
-| LS26 | LineString passes through two opposite corners of R  | LineString clipped between corners           |
+| LS23 | Vertex exactly on R boundary, adjacent edges inside  | LineString preserved through boundary vertex |
+| LS24 | Vertex exactly on R boundary, adjacent edges outside | Empty LineString                             |
+| LS25 | LineString passes through two opposite corners of R  | LineString clipped between corners           |
 
 ### MultiLineString
 
-| #    | Case                                                    | Expected output                                   |
-| ---- | ------------------------------------------------------- | ------------------------------------------------- |
-| MLS1 | Empty MultiLineString                                   | Empty MultiLineString                             |
-| MLS2 | All component LineStrings inside R                      | Same MultiLineString                              |
-| MLS3 | All component LineStrings outside R                     | Empty MultiLineString                             |
-| MLS4 | Some components inside, some outside                    | MultiLineString with surviving components         |
-| MLS5 | Single component, clipped to a single segment           | MultiLineString with 1 component                  |
-| MLS6 | Multiple components, each partially clipped             | MultiLineString combining all surviving fragments |
-| MLS7 | One component crosses R, another is inside R            | MultiLineString with clipped and unclipped parts  |
-| MLS8 | Component that produces multiple fragments when clipped | Fragments included in output MultiLineString      |
-| MLS9 | MultiLineString containing empty LineStrings            | Empty components excluded                         |
+| #    | Case                                                    | Expected output                                  |
+| ---- | ------------------------------------------------------- | ------------------------------------------------ |
+| MLS1 | Empty MultiLineString                                   | Empty MultiLineString                            |
+| MLS2 | All component LineStrings inside R                      | Same MultiLineString                             |
+| MLS3 | All component LineStrings outside R                     | Empty MultiLineString                            |
+| MLS4 | Some components inside, some outside                    | MultiLineString with surviving components        |
+| MLS5 | Single component, clipped to a single segment           | MultiLineString with 1 component                 |
+| MLS6 | One component crosses R, another is inside R            | MultiLineString with clipped and unclipped parts |
+| MLS7 | Component that produces multiple fragments when clipped | Fragments included in output MultiLineString     |
+| MLS8 | MultiLineString containing empty LineStrings            | Empty components excluded                        |
 
 ### Polygon (No Holes)
 
 #### Spatial relationship to R
 
-| #   | Case                                                                                          | Expected output                |
-| --- | --------------------------------------------------------------------------------------------- | ------------------------------ |
-| PG1 | Empty Polygon                                                                                 | Empty Polygon                  |
-| PG2 | Entirely inside R                                                                             | Same Polygon                   |
-| PG3 | Entirely outside R (no overlap)                                                               | Empty Polygon                  |
-| PG4 | R entirely inside Polygon                                                                     | Polygon equal to R             |
-| PG5 | Partially overlapping one edge of R                                                           | Polygon clipped to R boundary  |
-| PG6 | Partially overlapping two adjacent edges (corner clip)                                        | Polygon clipped at corner      |
-| PG7 | Partially overlapping two opposite edges (strip through R)                                    | Polygon clipped on two sides   |
-| PG8 | Partially overlapping three edges                                                             | Polygon clipped on three sides |
-| PG9 | Partially overlapping all four edges (R fully inside polygon, polygon extends past all sides) | Polygon equal to R             |
+| #   | Case                                                       | Expected output                |
+| --- | ---------------------------------------------------------- | ------------------------------ |
+| PG1 | Empty Polygon                                              | Empty Polygon                  |
+| PG2 | Entirely inside R                                          | Same Polygon                   |
+| PG3 | Entirely outside R (no overlap)                            | Empty Polygon                  |
+| PG4 | R entirely inside Polygon                                  | Polygon equal to R             |
+| PG5 | Partially overlapping one edge of R                        | Polygon clipped to R boundary  |
+| PG6 | Partially overlapping two adjacent edges (corner clip)     | Polygon clipped at corner      |
+| PG7 | Partially overlapping two opposite edges (strip through R) | Polygon clipped on two sides   |
+| PG8 | Partially overlapping three edges                          | Polygon clipped on three sides |
 
 #### Boundary interactions
 
 | #    | Case                                                  | Expected output                     |
 | ---- | ----------------------------------------------------- | ----------------------------------- |
-| PG10 | Polygon shares an entire edge with R                  | Polygon preserved along shared edge |
-| PG11 | Polygon vertex exactly on R edge                      | Polygon with vertex on boundary     |
-| PG12 | Polygon vertex exactly on R corner                    | Polygon with vertex on corner       |
-| PG13 | Polygon edge collinear with R edge, polygon inside R  | Polygon preserved                   |
-| PG14 | Polygon edge collinear with R edge, polygon outside R | Empty Polygon                       |
-| PG15 | Polygon touches R at a single point (vertex-to-edge)  | Empty Polygon                       |
-| PG16 | Polygon touches R at a single corner point            | Empty Polygon                       |
+| PG9  | Polygon shares an entire edge with R                  | Polygon preserved along shared edge |
+| PG10 | Polygon vertex exactly on R edge                      | Polygon with vertex on boundary     |
+| PG11 | Polygon vertex exactly on R corner                    | Polygon with vertex on corner       |
+| PG12 | Polygon edge collinear with R edge, polygon inside R  | Polygon preserved                   |
+| PG13 | Polygon edge collinear with R edge, polygon outside R | Empty Polygon                       |
+| PG14 | Polygon touches R at a single point (vertex-to-edge)  | Empty Polygon                       |
+| PG15 | Polygon touches R at a single corner point            | Empty Polygon                       |
 
 #### Shape variations
 
 | #    | Case                                              | Expected output                             |
 | ---- | ------------------------------------------------- | ------------------------------------------- |
-| PG17 | Convex polygon clipped by R                       | Convex clipped polygon                      |
-| PG18 | Concave polygon, concavity inside R               | Concave clipped polygon                     |
-| PG19 | Concave polygon, concavity facing R boundary      | Clipped polygon reflecting concavity        |
-| PG20 | U-shaped polygon clipped across the opening       | MultiPolygon (two separate pieces)          |
-| PG21 | Very thin sliver polygon partially inside R       | Thin clipped polygon                        |
-| PG22 | Triangle clipped to produce various vertex counts | Polygon with 3-7 vertices depending on clip |
+| PG16 | Convex polygon clipped by R                       | Convex clipped polygon                      |
+| PG17 | Concave polygon, concavity inside R               | Concave clipped polygon                     |
+| PG18 | Concave polygon, concavity facing R boundary      | Clipped polygon reflecting concavity        |
+| PG19 | U-shaped polygon clipped across the opening       | MultiPolygon (two separate pieces)          |
+| PG20 | Very thin sliver polygon partially inside R       | Thin clipped polygon                        |
+| PG21 | Triangle clipped to produce various vertex counts | Polygon with 3-7 vertices depending on clip |
 
 #### Winding order
 
-| #    | Case                            | Expected output              |
-| ---- | ------------------------------- | ---------------------------- |
-| PG23 | Counter-clockwise exterior ring | Output preserves CCW winding |
-| PG24 | Clockwise exterior ring         | Output preserves CW winding  |
+| #    | Case                            | Expected output                                      |
+| ---- | ------------------------------- | ---------------------------------------------------- |
+| PG22 | Counter-clockwise exterior ring | Output preserves winding order (reflections test CW) |
 
 ### Polygon (With Holes)
 
@@ -674,31 +715,28 @@ geometries.
 
 #### Hole crossing R boundary
 
-| #    | Case                                                  | Expected output                       |
-| ---- | ----------------------------------------------------- | ------------------------------------- |
-| PH6  | Hole crosses one edge of R                            | Polygon with hole clipped to boundary |
-| PH7  | Hole crosses two adjacent edges of R (corner)         | Polygon or MultiPolygon               |
-| PH8  | Hole crosses two opposite edges of R (splits polygon) | MultiPolygon                          |
-| PH9  | Hole crosses all four edges of R                      | MultiPolygon, possibly empty          |
-| PH10 | Hole shares edge with R boundary                      | Polygon with hole on boundary         |
+| #    | Case                                                                 | Expected output                            |
+| ---- | -------------------------------------------------------------------- | ------------------------------------------ |
+| PH6  | Hole crosses one edge of R                                           | Polygon with concavity (no hole in output) |
+| PH7  | Hole crosses two adjacent edges of R (corner)                        | Polygon with concavity (no hole in output) |
+| PH8  | Hole crosses two opposite edges of R (splits polygon)                | MultiPolygon                               |
+| PH9  | Hole crosses all four edges of R, leaving corner fragments           | MultiPolygon                               |
+| PH10 | Hole inside R shares edge with R boundary, exterior extends beyond R | Polygon with concavity (no hole in output) |
 
 #### Multiple holes interacting with R
 
-| #    | Case                                           | Expected output               |
-| ---- | ---------------------------------------------- | ----------------------------- |
-| PH11 | One hole inside R, another outside R           | Polygon with only inside hole |
-| PH12 | One hole inside R, another crossing R boundary | Polygon or MultiPolygon       |
-| PH13 | Multiple holes crossing R boundary             | MultiPolygon                  |
-| PH14 | Two holes that merge along R boundary          | MultiPolygon                  |
+| #    | Case                                       | Expected output                         |
+| ---- | ------------------------------------------ | --------------------------------------- |
+| PH11 | One hole inside R, another outside R       | Polygon with only inside hole           |
+| PH12 | One hole inside R, another splits polygon  | MultiPolygon, hole in correct component |
+| PH13 | Multiple holes each crossing one edge of R | Polygon with multiple concavities       |
 
 #### Topology-changing cases
 
-| #    | Case                                                                                                                            | Expected output                  |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| PH15 | Hole splits polygon into two when clipped (U-shape via hole)                                                                    | MultiPolygon with two components |
-| PH16 | Hole splits polygon into three or more pieces                                                                                   | MultiPolygon                     |
-| PH17 | Hole causes exterior ring to become trivial                                                                                     | Empty Polygon                    |
-| PH18 | Nested holes (hole within a hole is not valid, but exterior ring of polygon inside a hole of another polygon in a MultiPolygon) | Handle gracefully                |
+| #    | Case                                          | Expected output |
+| ---- | --------------------------------------------- | --------------- |
+| PH14 | Hole splits polygon into three or more pieces | MultiPolygon    |
+| PH15 | Hole covers entire clipped area               | Empty Polygon   |
 
 ### MultiPolygon
 
@@ -731,37 +769,31 @@ geometries.
 | GC10 | All child geometries are empty                      | Empty GeometryCollection                        |
 | GC11 | Contains MultiPoint, MultiLineString, MultiPolygon  | Each multi-type component clipped independently |
 | GC12 | Deeply nested GeometryCollections (3+ levels)       | Recursive clipping at all levels                |
+| GC13 | Nested GC whose children all clip to empty          | Nested GC omitted from parent                   |
 
 ### Degenerate Rectangle Cases
 
 These cases test non-standard rectangles with representative geometries from
 each type.
 
-| #    | Case                     | Geometry                                | Expected output    |
-| ---- | ------------------------ | --------------------------------------- | ------------------ |
-| DR1  | Empty envelope           | Point inside would-be area              | Empty Point        |
-| DR2  | Empty envelope           | LineString                              | Empty LineString   |
-| DR3  | Empty envelope           | Polygon                                 | Empty Polygon      |
-| DR4  | Point envelope (0x0)     | Point at same location                  | Same Point         |
-| DR5  | Point envelope (0x0)     | Point at different location             | Empty Point        |
-| DR6  | Point envelope (0x0)     | MultiPoint with some points at location | Clipped MultiPoint |
-| DR7  | Point envelope (0x0)     | MultiPoint with no points at location   | Empty MultiPoint   |
-| DR8  | Point envelope (0x0)     | LineString through that point           | Empty LineString   |
-| DR9  | Point envelope (0x0)     | Polygon containing that point           | Empty Polygon      |
-| DR10 | Line envelope (0 width)  | Point on the line                       | Same Point         |
-| DR11 | Line envelope (0 width)  | Point off the line                      | Empty Point        |
-| DR12 | Line envelope (0 width)  | MultiPoint with some points on the line | Clipped MultiPoint |
-| DR13 | Line envelope (0 width)  | MultiPoint with no points on the line   | Empty MultiPoint   |
-| DR14 | Line envelope (0 width)  | LineString crossing the line            | Empty LineString   |
-| DR15 | Line envelope (0 width)  | LineString collinear with line          | Clipped LineString |
-| DR16 | Line envelope (0 width)  | Polygon crossing the line               | Empty Polygon      |
-| DR17 | Line envelope (0 height) | Point on the line                       | Same Point         |
-| DR18 | Line envelope (0 height) | Point off the line                      | Empty Point        |
-| DR19 | Line envelope (0 height) | MultiPoint with some points on the line | Clipped MultiPoint |
-| DR20 | Line envelope (0 height) | MultiPoint with no points on the line   | Empty MultiPoint   |
-| DR21 | Line envelope (0 height) | LineString crossing the line            | Empty LineString   |
-| DR22 | Line envelope (0 height) | LineString collinear with line          | Clipped LineString |
-| DR23 | Line envelope (0 height) | Polygon crossing the line               | Empty Polygon      |
+| #    | Case                 | Geometry                                | Expected output    |
+| ---- | -------------------- | --------------------------------------- | ------------------ |
+| DR1  | Empty envelope       | Point inside would-be area              | Empty Point        |
+| DR2  | Empty envelope       | LineString                              | Empty LineString   |
+| DR3  | Empty envelope       | Polygon                                 | Empty Polygon      |
+| DR4  | Point envelope (0x0) | Point at same location                  | Same Point         |
+| DR5  | Point envelope (0x0) | Point at different location             | Empty Point        |
+| DR6  | Point envelope (0x0) | MultiPoint with some points at location | Clipped MultiPoint |
+| DR7  | Point envelope (0x0) | MultiPoint with no points at location   | Empty MultiPoint   |
+| DR8  | Point envelope (0x0) | LineString through that point           | Empty LineString   |
+| DR9  | Point envelope (0x0) | Polygon containing that point           | Empty Polygon      |
+| DR10 | Line envelope        | Point on the line                       | Same Point         |
+| DR11 | Line envelope        | Point off the line                      | Empty Point        |
+| DR12 | Line envelope        | MultiPoint with some points on the line | Clipped MultiPoint |
+| DR13 | Line envelope        | MultiPoint with no points on the line   | Empty MultiPoint   |
+| DR14 | Line envelope        | LineString crossing the line            | Empty LineString   |
+| DR15 | Line envelope        | LineString collinear with line          | Clipped LineString |
+| DR16 | Line envelope        | Polygon crossing the line               | Empty Polygon      |
 
 ### Numerical Edge Cases
 
