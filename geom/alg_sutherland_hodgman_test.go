@@ -110,6 +110,25 @@ func TestClipByRect(t *testing.T) {
 		{"LS24", "LINESTRING(0 1,1 3,0 5)", "LINESTRING EMPTY"},
 		// LS25: LineString passes through two opposite corners of R
 		{"LS25", "LINESTRING(0 1.5,6 4.5)", "LINESTRING(1 2,5 4)"},
+
+		// MLS1: Empty MultiLineString
+		{"MLS1", "MULTILINESTRING EMPTY", "MULTILINESTRING EMPTY"},
+		// MLS2: All component LineStrings inside R
+		{"MLS2", "MULTILINESTRING((2 3,4 3),(3 2.5,3 3.5))", "MULTILINESTRING((2 3,4 3),(3 2.5,3 3.5))"},
+		// MLS3: All component LineStrings outside R
+		{"MLS3", "MULTILINESTRING((6 5,7 6),(0 0,0 1))", "MULTILINESTRING EMPTY"},
+		// MLS4: Some components inside, some outside
+		{"MLS4", "MULTILINESTRING((2 3,4 3),(6 5,7 6))", "MULTILINESTRING((2 3,4 3))"},
+		// MLS5: Single component, clipped to a single segment
+		{"MLS5", "MULTILINESTRING((0 3,6 3))", "MULTILINESTRING((1 3,5 3))"},
+		// MLS6: One component crosses R, another is inside R
+		{"MLS6", "MULTILINESTRING((0 3,6 3),(3 2.5,3 3.5))", "MULTILINESTRING((1 3,5 3),(3 2.5,3 3.5))"},
+		// MLS7: Component that produces multiple fragments when clipped
+		{"MLS7", "MULTILINESTRING((0 3,3 3,3 5,4 5,4 3,6 3))", "MULTILINESTRING((1 3,3 3,3 4),(4 4,4 3,5 3))"},
+		// MLS8: MultiLineString containing empty LineStrings
+		{"MLS8", "MULTILINESTRING((2 3,4 3),EMPTY)", "MULTILINESTRING((2 3,4 3))"},
+		// MLS9: XYZ MultiLineString, all components outside R
+		{"MLS9", "MULTILINESTRING Z((6 5 1,7 6 2),(0 0 3,0 1 4))", "MULTILINESTRING Z EMPTY"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, tr := range d4Transforms {

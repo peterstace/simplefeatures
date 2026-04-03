@@ -168,7 +168,26 @@ func interpolateSeqCoord(seq Sequence, i, j int, t float64) Coordinates {
 }
 
 func clipMultiLineStringByRect(mls MultiLineString, rect Envelope) MultiLineString {
-	panic("TODO")
+	n := mls.NumLineStrings()
+	var lines []LineString
+	for i := 0; i < n; i++ {
+		clipped := clipLineStringByRect(mls.LineStringN(i), rect)
+		switch clipped.Type() {
+		case TypeLineString:
+			ls := clipped.MustAsLineString()
+			if !ls.IsEmpty() {
+				lines = append(lines, ls)
+			}
+		case TypeMultiLineString:
+			lines = append(lines, clipped.MustAsMultiLineString().Dump()...)
+		default:
+			panic("unexpected type from clipLineStringByRect: " + clipped.Type().String())
+		}
+	}
+	if len(lines) == 0 {
+		return NewMultiLineString(nil).ForceCoordinatesType(mls.CoordinatesType())
+	}
+	return NewMultiLineString(lines)
 }
 
 func clipPolygonByRect(p Polygon, rect Envelope) Geometry {
