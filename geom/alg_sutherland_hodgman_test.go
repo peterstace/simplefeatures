@@ -254,6 +254,59 @@ func TestClipByRect(t *testing.T) {
 			"POLYGON((-2 -2,8 -2,8 8,-2 8,-2 -2),(0.5 1.5,0.5 4.5,5.5 4.5,5.5 1.5,0.5 1.5))",
 			"POLYGON EMPTY",
 			nil},
+
+		// MPG1: Empty MultiPolygon
+		{"MPG1", "MULTIPOLYGON EMPTY", "MULTIPOLYGON EMPTY", nil},
+		// MPG2: All component Polygons inside R
+		{"MPG2",
+			"MULTIPOLYGON(((2 2.5,3 2.5,3 3,2 3,2 2.5)),((3.5 2.5,4.5 2.5,4.5 3,3.5 3,3.5 2.5)))",
+			"MULTIPOLYGON(((2 2.5,3 2.5,3 3,2 3,2 2.5)),((3.5 2.5,4.5 2.5,4.5 3,3.5 3,3.5 2.5)))",
+			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+		// MPG3: All component Polygons outside R
+		{"MPG3",
+			"MULTIPOLYGON(((6 5,7 5,7 6,6 6,6 5)),((8 8,9 8,9 9,8 9,8 8)))",
+			"MULTIPOLYGON EMPTY",
+			nil},
+		// MPG4: Some components inside, some outside
+		{"MPG4",
+			"MULTIPOLYGON(((2 2.5,3 2.5,3 3,2 3,2 2.5)),((6 5,7 5,7 6,6 6,6 5)))",
+			"MULTIPOLYGON(((2 2.5,3 2.5,3 3,2 3,2 2.5)))",
+			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+		// MPG5: One component partially clipped, another fully inside
+		{"MPG5",
+			"MULTIPOLYGON(((0 2.5,3 2.5,3 3.5,0 3.5,0 2.5)),((3.5 2.5,4.5 2.5,4.5 3.5,3.5 3.5,3.5 2.5)))",
+			"MULTIPOLYGON(((1 2.5,3 2.5,3 3.5,1 3.5,1 2.5)),((3.5 2.5,4.5 2.5,4.5 3.5,3.5 3.5,3.5 2.5)))",
+			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+		// MPG6: One component becomes multiple polygons when clipped (C-shape)
+		{"MPG6",
+			"MULTIPOLYGON(((0 2.5,3 2.5,3 2.8,0.5 2.8,0.5 3.2,3 3.2,3 3.5,0 3.5,0 2.5)),((4 2.5,4.5 2.5,4.5 3,4 3,4 2.5)))",
+			"MULTIPOLYGON(((1 2.5,3 2.5,3 2.8,1 2.8,1 2.5)),((1 3.2,3 3.2,3 3.5,1 3.5,1 3.2)),((4 2.5,4.5 2.5,4.5 3,4 3,4 2.5)))",
+			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+		// MPG7: Multiple components, each partially clipped
+		{"MPG7",
+			"MULTIPOLYGON(((0 2.3,3 2.3,3 2.7,0 2.7,0 2.3)),((0 3.3,3 3.3,3 3.7,0 3.7,0 3.3)))",
+			"MULTIPOLYGON(((1 2.3,3 2.3,3 2.7,1 2.7,1 2.3)),((1 3.3,3 3.3,3 3.7,1 3.7,1 3.3)))",
+			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+		// MPG8: Components with holes, some holes clipped
+		{"MPG8",
+			"MULTIPOLYGON(((0 2.5,3 2.5,3 3.5,0 3.5,0 2.5),(1.5 2.8,1.5 3.2,2.5 3.2,2.5 2.8,1.5 2.8)),((3.5 2.5,4.5 2.5,4.5 3.5,3.5 3.5,3.5 2.5)))",
+			"MULTIPOLYGON(((1 2.5,3 2.5,3 3.5,1 3.5,1 2.5),(1.5 2.8,1.5 3.2,2.5 3.2,2.5 2.8,1.5 2.8)),((3.5 2.5,4.5 2.5,4.5 3.5,3.5 3.5,3.5 2.5)))",
+			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+		// MPG9: Single component fully inside R
+		{"MPG9",
+			"MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)))",
+			"MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)))",
+			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+		// MPG10: MultiPolygon containing empty Polygons
+		{"MPG10",
+			"MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)),EMPTY)",
+			"MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)))",
+			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+		// MPG11: XYZ MultiPolygon, all components outside R
+		{"MPG11",
+			"MULTIPOLYGON Z(((6 5 1,7 5 2,7 6 3,6 6 4,6 5 1)),((8 8 5,9 8 6,9 9 7,8 9 8,8 8 5)))",
+			"MULTIPOLYGON Z EMPTY",
+			nil},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, tr := range d4Transforms {

@@ -76,7 +76,26 @@ func clipMultiLineStringByRect(mls MultiLineString, rect Envelope) MultiLineStri
 }
 
 func clipMultiPolygonByRect(mp MultiPolygon, rect Envelope) MultiPolygon {
-	panic("TODO")
+	n := mp.NumPolygons()
+	var polys []Polygon
+	for i := 0; i < n; i++ {
+		clipped := clipPolygonByRect(mp.PolygonN(i), rect)
+		switch clipped.Type() {
+		case TypePolygon:
+			p := clipped.MustAsPolygon()
+			if !p.IsEmpty() {
+				polys = append(polys, p)
+			}
+		case TypeMultiPolygon:
+			polys = append(polys, clipped.MustAsMultiPolygon().Dump()...)
+		default:
+			panic("unexpected type from clipPolygonByRect: " + clipped.Type().String())
+		}
+	}
+	if len(polys) == 0 {
+		return NewMultiPolygon(nil).ForceCoordinatesType(mp.CoordinatesType())
+	}
+	return NewMultiPolygon(polys)
 }
 
 func clipGeometryCollectionByRect(gc GeometryCollection, rect Envelope) GeometryCollection {
