@@ -99,5 +99,16 @@ func clipMultiPolygonByRect(mp MultiPolygon, rect Envelope) MultiPolygon {
 }
 
 func clipGeometryCollectionByRect(gc GeometryCollection, rect Envelope) GeometryCollection {
-	panic("TODO")
+	n := gc.NumGeometries()
+	var geoms []Geometry
+	for i := 0; i < n; i++ {
+		clipped := ClipByRect(gc.GeometryN(i), rect)
+		if !clipped.IsEmpty() {
+			geoms = append(geoms, clipped)
+		}
+	}
+	if len(geoms) == 0 {
+		return NewGeometryCollection(nil).ForceCoordinatesType(gc.CoordinatesType())
+	}
+	return NewGeometryCollection(geoms)
 }

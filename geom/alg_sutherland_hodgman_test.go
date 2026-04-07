@@ -307,6 +307,68 @@ func TestClipByRect(t *testing.T) {
 			"MULTIPOLYGON Z(((6 5 1,7 5 2,7 6 3,6 6 4,6 5 1)),((8 8 5,9 8 6,9 9 7,8 9 8,8 8 5)))",
 			"MULTIPOLYGON Z EMPTY",
 			nil},
+
+		// GC1: Empty GeometryCollection
+		{"GC1", "GEOMETRYCOLLECTION EMPTY", "GEOMETRYCOLLECTION EMPTY", nil},
+		// GC2: Contains only Points, all inside R
+		{"GC2", "GEOMETRYCOLLECTION(POINT(3 3),POINT(4 3))", "GEOMETRYCOLLECTION(POINT(3 3),POINT(4 3))", nil},
+		// GC3: Contains only Points, all outside R
+		{"GC3", "GEOMETRYCOLLECTION(POINT(0 0),POINT(6 6))", "GEOMETRYCOLLECTION EMPTY", nil},
+		// GC4: Contains mixed types, all inside R
+		{"GC4",
+			"GEOMETRYCOLLECTION(POINT(3 3),LINESTRING(2 3,4 3))",
+			"GEOMETRYCOLLECTION(POINT(3 3),LINESTRING(2 3,4 3))",
+			nil},
+		// GC5: Contains mixed types, all outside R
+		{"GC5",
+			"GEOMETRYCOLLECTION(POINT(0 0),LINESTRING(6 5,7 6))",
+			"GEOMETRYCOLLECTION EMPTY",
+			nil},
+		// GC6: Contains mixed types, some inside, some outside
+		{"GC6",
+			"GEOMETRYCOLLECTION(POINT(3 3),POINT(0 0),LINESTRING(2 3,4 3))",
+			"GEOMETRYCOLLECTION(POINT(3 3),LINESTRING(2 3,4 3))",
+			nil},
+		// GC7: Contains Point, LineString, and Polygon (each clipped independently)
+		{"GC7",
+			"GEOMETRYCOLLECTION(POINT(3 3),LINESTRING(0 3,6 3),POLYGON((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)))",
+			"GEOMETRYCOLLECTION(POINT(3 3),LINESTRING(1 3,5 3),POLYGON((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)))",
+			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+		// GC8: Contains nested GeometryCollection
+		{"GC8",
+			"GEOMETRYCOLLECTION(POINT(3 3),GEOMETRYCOLLECTION(POINT(4 3)))",
+			"GEOMETRYCOLLECTION(POINT(3 3),GEOMETRYCOLLECTION(POINT(4 3)))",
+			nil},
+		// GC9: Contains nested GeometryCollection with mixed types
+		{"GC9",
+			"GEOMETRYCOLLECTION(POINT(3 3),GEOMETRYCOLLECTION(POINT(0 0),LINESTRING(2 3,4 3)))",
+			"GEOMETRYCOLLECTION(POINT(3 3),GEOMETRYCOLLECTION(LINESTRING(2 3,4 3)))",
+			nil},
+		// GC10: All child geometries are empty
+		{"GC10",
+			"GEOMETRYCOLLECTION(POINT EMPTY,LINESTRING EMPTY)",
+			"GEOMETRYCOLLECTION EMPTY",
+			nil},
+		// GC11: Contains MultiPoint, MultiLineString, MultiPolygon
+		{"GC11",
+			"GEOMETRYCOLLECTION(MULTIPOINT(3 3,0 0),MULTILINESTRING((2 3,4 3)),MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5))))",
+			"GEOMETRYCOLLECTION(MULTIPOINT(3 3),MULTILINESTRING((2 3,4 3)),MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5))))",
+			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+		// GC12: Deeply nested GeometryCollections (3+ levels)
+		{"GC12",
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(3 3))))",
+			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(3 3))))",
+			nil},
+		// GC13: Nested GC whose children all clip to empty
+		{"GC13",
+			"GEOMETRYCOLLECTION(POINT(3 3),GEOMETRYCOLLECTION(POINT(0 0),POINT(6 6)))",
+			"GEOMETRYCOLLECTION(POINT(3 3))",
+			nil},
+		// GC14: XYZ GeometryCollection, all children outside R
+		{"GC14",
+			"GEOMETRYCOLLECTION Z(POINT Z(0 0 1),LINESTRING Z(6 5 2,7 6 3))",
+			"GEOMETRYCOLLECTION Z EMPTY",
+			nil},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, tr := range d4Transforms {
