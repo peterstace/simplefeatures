@@ -6,21 +6,21 @@ import (
 	"github.com/peterstace/simplefeatures/geom"
 )
 
+var d4Transforms = []struct {
+	name string
+	fn   func(geom.XY) geom.XY
+}{
+	{"identity", func(xy geom.XY) geom.XY { return xy }},
+	{"rot90", func(xy geom.XY) geom.XY { return geom.XY{X: -xy.Y, Y: xy.X} }},
+	{"rot180", func(xy geom.XY) geom.XY { return geom.XY{X: -xy.X, Y: -xy.Y} }},
+	{"rot270", func(xy geom.XY) geom.XY { return geom.XY{X: xy.Y, Y: -xy.X} }},
+	{"reflect_x", func(xy geom.XY) geom.XY { return geom.XY{X: -xy.X, Y: xy.Y} }},
+	{"reflect_y", func(xy geom.XY) geom.XY { return geom.XY{X: xy.X, Y: -xy.Y} }},
+	{"reflect_diag", func(xy geom.XY) geom.XY { return geom.XY{X: xy.Y, Y: xy.X} }},
+	{"reflect_anti", func(xy geom.XY) geom.XY { return geom.XY{X: -xy.Y, Y: -xy.X} }},
+}
+
 func TestClipByRect(t *testing.T) {
-	type d4Transform struct {
-		name string
-		fn   func(geom.XY) geom.XY
-	}
-	d4Transforms := []d4Transform{
-		{"identity", func(xy geom.XY) geom.XY { return xy }},
-		{"rot90", func(xy geom.XY) geom.XY { return geom.XY{X: -xy.Y, Y: xy.X} }},
-		{"rot180", func(xy geom.XY) geom.XY { return geom.XY{X: -xy.X, Y: -xy.Y} }},
-		{"rot270", func(xy geom.XY) geom.XY { return geom.XY{X: xy.Y, Y: -xy.X} }},
-		{"reflect_x", func(xy geom.XY) geom.XY { return geom.XY{X: -xy.X, Y: xy.Y} }},
-		{"reflect_y", func(xy geom.XY) geom.XY { return geom.XY{X: xy.X, Y: -xy.Y} }},
-		{"reflect_diag", func(xy geom.XY) geom.XY { return geom.XY{X: xy.Y, Y: xy.X} }},
-		{"reflect_anti", func(xy geom.XY) geom.XY { return geom.XY{X: -xy.Y, Y: -xy.X} }},
-	}
 	// R is a non-square rectangle so that the D4 transforms produce distinct
 	// configurations.
 	rect := geom.NewEnvelope(geom.XY{X: 1, Y: 2}, geom.XY{X: 5, Y: 4})
@@ -369,6 +369,32 @@ func TestClipByRect(t *testing.T) {
 			"GEOMETRYCOLLECTION Z(POINT Z(0 0 1),LINESTRING Z(6 5 2,7 6 3))",
 			"GEOMETRYCOLLECTION Z EMPTY",
 			nil},
+
+		// NE1: Very large coordinates (outside R)
+		{"NE1", "LINESTRING(1000000000000000 3,1000000000000006 3)", "LINESTRING EMPTY", nil},
+		// NE2: Very small coordinates near float64 epsilon (inside R)
+		{"NE2", "POINT(3 3.0000000000000004)", "POINT(3 3.0000000000000004)", nil},
+		// NE3: Negative coordinates (outside R)
+		{"NE3", "LINESTRING(-3 -3,-1 -1)", "LINESTRING EMPTY", nil},
+		// NE4: Intersection parameter t very close to 0
+		{"NE4", "LINESTRING(0.999999 3,4 3)", "LINESTRING(1 3,4 3)", nil},
+		// NE5: Intersection parameter t very close to 1
+		{"NE5", "LINESTRING(2 3,5.000001 3)", "LINESTRING(2 3,5 3)", nil},
+		// NE6: Polygon vertex exactly at intersection point with R edge
+		{"NE6", "LINESTRING(1 3,5 3)", "LINESTRING(1 3,5 3)", nil},
+		// NE7: Segment nearly parallel to R edge (small angle)
+		{"NE7", "LINESTRING(0 2.0001,6 2.0001)", "LINESTRING(1 2.0001,5 2.0001)", nil},
+		// NE8: Zero-length segments in input (duplicate consecutive vertices)
+		{"NE8", "LINESTRING(2 3,2 3,4 3)", "LINESTRING(2 3,2 3,4 3)", nil},
+
+		// CD1: XY geometry clipped
+		{"CD1", "LINESTRING(0 3,6 3)", "LINESTRING(1 3,5 3)", nil},
+		// CD2: XYZ geometry clipped, Z interpolated at intersections
+		{"CD2", "LINESTRING Z(0 3 0,6 3 6)", "LINESTRING Z(1 3 1,5 3 5)", nil},
+		// CD3: XYM geometry clipped, M interpolated at intersections
+		{"CD3", "LINESTRING M(0 3 0,6 3 6)", "LINESTRING M(1 3 1,5 3 5)", nil},
+		// CD4: XYZM geometry clipped, Z and M interpolated at intersections
+		{"CD4", "LINESTRING ZM(0 3 0 12,6 3 6 24)", "LINESTRING ZM(1 3 1 14,5 3 5 22)", nil},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, tr := range d4Transforms {
@@ -378,6 +404,64 @@ func TestClipByRect(t *testing.T) {
 					r := rect.TransformXY(tr.fn)
 					got := geom.ClipByRect(input, r)
 					expectGeomEq(t, got, want, tt.opts...)
+				})
+			}
+		})
+	}
+}
+
+func TestClipByRectDegenerateRect(t *testing.T) {
+	emptyRect := geom.Envelope{}
+	pointRect := geom.NewEnvelope(geom.XY{X: 3, Y: 3}, geom.XY{X: 3, Y: 3})
+	lineRect := geom.NewEnvelope(geom.XY{X: 1, Y: 3}, geom.XY{X: 5, Y: 3})
+
+	for _, tt := range []struct {
+		name  string
+		rect  geom.Envelope
+		input string
+		want  string
+	}{
+		// DR1: Empty envelope, Point
+		{"DR1", emptyRect, "POINT(3 3)", "POINT EMPTY"},
+		// DR2: Empty envelope, LineString
+		{"DR2", emptyRect, "LINESTRING(2 3,4 3)", "LINESTRING EMPTY"},
+		// DR3: Empty envelope, Polygon
+		{"DR3", emptyRect, "POLYGON((2 2,4 2,4 4,2 4,2 2))", "POLYGON EMPTY"},
+		// DR4: Point envelope, Point at same location
+		{"DR4", pointRect, "POINT(3 3)", "POINT(3 3)"},
+		// DR5: Point envelope, Point at different location
+		{"DR5", pointRect, "POINT(2 2)", "POINT EMPTY"},
+		// DR6: Point envelope, MultiPoint with some points at location
+		{"DR6", pointRect, "MULTIPOINT(3 3,2 2)", "MULTIPOINT(3 3)"},
+		// DR7: Point envelope, MultiPoint with no points at location
+		{"DR7", pointRect, "MULTIPOINT(2 2,4 4)", "MULTIPOINT EMPTY"},
+		// DR8: Point envelope, LineString through that point
+		{"DR8", pointRect, "LINESTRING(0 0,6 6)", "LINESTRING EMPTY"},
+		// DR9: Point envelope, Polygon containing that point
+		{"DR9", pointRect, "POLYGON((2 2,4 2,4 4,2 4,2 2))", "POLYGON EMPTY"},
+		// DR10: Line envelope, Point on the line
+		{"DR10", lineRect, "POINT(3 3)", "POINT(3 3)"},
+		// DR11: Line envelope, Point off the line
+		{"DR11", lineRect, "POINT(3 2)", "POINT EMPTY"},
+		// DR12: Line envelope, MultiPoint with some points on the line
+		{"DR12", lineRect, "MULTIPOINT(3 3,3 2)", "MULTIPOINT(3 3)"},
+		// DR13: Line envelope, MultiPoint with no points on the line
+		{"DR13", lineRect, "MULTIPOINT(0 0,6 6)", "MULTIPOINT EMPTY"},
+		// DR14: Line envelope, LineString crossing the line
+		{"DR14", lineRect, "LINESTRING(3 0,3 6)", "LINESTRING EMPTY"},
+		// DR15: Line envelope, LineString collinear with line
+		{"DR15", lineRect, "LINESTRING(1 3,5 3)", "LINESTRING(1 3,5 3)"},
+		// DR16: Line envelope, Polygon crossing the line
+		{"DR16", lineRect, "POLYGON((0 0,6 0,6 6,0 6,0 0))", "POLYGON EMPTY"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, tr := range d4Transforms {
+				t.Run(tr.name, func(t *testing.T) {
+					input := geomFromWKT(t, tt.input).TransformXY(tr.fn)
+					want := geomFromWKT(t, tt.want).TransformXY(tr.fn)
+					r := tt.rect.TransformXY(tr.fn)
+					got := geom.ClipByRect(input, r)
+					expectGeomEq(t, got, want)
 				})
 			}
 		})
