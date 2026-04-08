@@ -255,6 +255,12 @@ func TestClipByRect(t *testing.T) {
 			"POLYGON EMPTY",
 			nil},
 
+		// PG_Z1: XYZ polygon containing R — Z values must be interpolated, not zero
+		{"PG_Z1",
+			"POLYGON Z((0 0 10,6 0 10,6 6 10,0 6 10,0 0 10))",
+			"POLYGON Z((1 2 10,5 2 10,5 4 10,1 4 10,1 2 10))",
+			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+
 		// MPG1: Empty MultiPolygon
 		{"MPG1", "MULTIPOLYGON EMPTY", "MULTIPOLYGON EMPTY", nil},
 		// MPG2: All component Polygons inside R

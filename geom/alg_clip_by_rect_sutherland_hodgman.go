@@ -145,13 +145,9 @@ func (c *polygonClipper) resolveClippedPolygon(
 	var outputRings [][]Coordinates
 	if len(allArcs) == 0 {
 		// No interior arcs: the polygon contains the entire rect.
-		// Output is the rect itself (closed ring).
-		ring := make([]Coordinates, 5)
-		for i, cp := range c.corners {
-			ring[i] = Coordinates{XY: c.paramToXY(cp), Type: c.ctype}
-		}
-		ring[4] = ring[0] // close the ring
-		outputRings = append(outputRings, ring)
+		// Use the clipped exterior directly — it is the rect with
+		// correctly interpolated Z/M values from S-H clipping.
+		outputRings = append(outputRings, clippedExterior)
 	} else {
 		outputRings = c.walkArcs(allArcs)
 	}
