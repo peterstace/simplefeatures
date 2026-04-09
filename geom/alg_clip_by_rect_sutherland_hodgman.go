@@ -74,7 +74,7 @@ func clipPolygonByRect(p Polygon, rect Envelope) Geometry {
 
 	// Classify holes.
 	var freeHoles []LineString
-	var clippedHoles [][]Coordinates
+	var clippedHoles [][]float64
 	for i := 0; i < p.NumInteriorRings(); i++ {
 		hole := p.InteriorRingN(i)
 		holeEnv := hole.Envelope()
@@ -121,9 +121,9 @@ func (c *polygonClipper) ringTouchesRectBoundary(ring LineString) bool {
 // must have been normalised to CCW (exterior CCW, holes CW) before clipping,
 // so that all clipped rings have known winding.
 func (c *polygonClipper) resolveClippedPolygon(
-	clippedExterior []Coordinates,
+	clippedExterior []float64,
 	freeHoles []LineString,
-	clippedHoles [][]Coordinates,
+	clippedHoles [][]float64,
 ) Geometry {
 	extArcs := c.extractInteriorArcs(clippedExterior)
 
@@ -142,7 +142,7 @@ func (c *polygonClipper) resolveClippedPolygon(
 		allArcs = append(allArcs, arcs...)
 	}
 
-	var outputRings [][]Coordinates
+	var outputRings [][]float64
 	if len(allArcs) == 0 {
 		// No interior arcs: the polygon contains the entire rect.
 		// Use the clipped exterior directly — it is the rect with
@@ -155,7 +155,7 @@ func (c *polygonClipper) resolveClippedPolygon(
 	// Build output polygons. Each output ring is an exterior (already closed).
 	var polys []Polygon
 	for _, ring := range outputRings {
-		seq := coordsToSeq(ring, c.ctype)
+		seq := NewSequence(ring, c.ctype)
 		exterior := NewLineString(seq)
 		polys = append(polys, NewPolygon([]LineString{exterior}))
 	}
@@ -167,7 +167,7 @@ func (c *polygonClipper) resolveClippedPolygon(
 			continue
 		}
 		for i, ring := range outputRings {
-			if pointInRingXY(holeXY, ring) {
+			if c.pointInRingXY(holeXY, ring) {
 				existingRings := polys[i].DumpRings()
 				existingRings = append(existingRings, hole)
 				polys[i] = NewPolygon(existingRings)
@@ -189,7 +189,7 @@ func (c *polygonClipper) resolveClippedPolygon(
 // walkArcs performs the topology resolution walk, producing output rings from
 // the collected interior arcs. It pairs arc endpoints along the rect boundary
 // (CCW) and traces complete rings.
-func (c *polygonClipper) walkArcs(arcs []interiorArc) [][]Coordinates {
+func (c *polygonClipper) walkArcs(arcs []interiorArc) [][]float64 {
 	// Build a sorted list of arc "end" events and a map from "end param" to
 	// the index of the arc that ends there. Also build a map from
 	// "start param" to arc index.
@@ -259,7 +259,7 @@ func (c *polygonClipper) walkArcs(arcs []interiorArc) [][]Coordinates {
 	}
 
 	used := make([]bool, len(arcs))
-	var rings [][]Coordinates
+	var rings [][]float64
 
 	for {
 		// Find first unused arc.
@@ -274,7 +274,7 @@ func (c *polygonClipper) walkArcs(arcs []interiorArc) [][]Coordinates {
 			break
 		}
 
-		var ring []Coordinates
+		var ring []float64
 		curIdx := firstIdx
 
 		for {
@@ -288,8 +288,8 @@ func (c *polygonClipper) walkArcs(arcs []interiorArc) [][]Coordinates {
 			nextStartParam, nextIdx := findNextStart(a.endParam)
 
 			// Build boundary path from this arc's end to the next arc's start.
-			endCoord := ring[len(ring)-1]
-			startCoord := arcs[nextIdx].coords[0]
+			endCoord := c.coordsGet(ring, c.coordsLen(ring)-1)
+			startCoord := c.coordsGet(arcs[nextIdx].coords, 0)
 
 			bpath := c.buildBoundaryPath(a.endParam, nextStartParam, endCoord, startCoord)
 			ring = append(ring, bpath...)
@@ -301,9 +301,9 @@ func (c *polygonClipper) walkArcs(arcs []interiorArc) [][]Coordinates {
 		}
 
 		// Close the ring.
-		ring = append(ring, ring[0])
-		ring = removeDupConsecutiveCoords(ring)
-		if len(ring) >= 4 {
+		ring = c.coordsAppend(ring, c.coordsGet(ring, 0))
+		ring = c.removeDupConsecutiveCoords(ring)
+		if c.coordsLen(ring) >= 4 {
 			rings = append(rings, ring)
 		}
 	}
@@ -317,7 +317,7 @@ func (c *polygonClipper) walkArcs(arcs []interiorArc) [][]Coordinates {
 // the last/first coordinates of the adjacent arcs). Z and M values at corners
 // are linearly interpolated between startCoord and endCoord based on boundary
 // distance.
-func (c *polygonClipper) buildBoundaryPath(startParam, endParam float64, startCoord, endCoord Coordinates) []Coordinates {
+func (c *polygonClipper) buildBoundaryPath(startParam, endParam float64, startCoord, endCoord Coordinates) []float64 {
 	// Find the first corner after startParam going CCW. The corners are in
 	// ascending parameter order, so this is the first with cp > startParam.
 	// If startParam is past the last corner (on the left edge), no corner
@@ -334,7 +334,7 @@ func (c *polygonClipper) buildBoundaryPath(startParam, endParam float64, startCo
 	// Iterate corners in CCW order from firstIdx, collecting those strictly
 	// between startParam and endParam.
 	totalDist := c.ccwDist(startParam, endParam)
-	var path []Coordinates
+	var path []float64
 	for k := 0; k < 4; k++ {
 		cp := c.corners[(firstIdx+k)%4]
 		d := c.ccwDist(startParam, cp)
@@ -344,7 +344,7 @@ func (c *polygonClipper) buildBoundaryPath(startParam, endParam float64, startCo
 		frac := d / totalDist
 		coord := interpolateCoords(startCoord, endCoord, frac)
 		coord.XY = c.paramToXY(cp)
-		path = append(path, coord)
+		path = c.coordsAppend(path, coord)
 	}
 	return path
 }
@@ -354,8 +354,8 @@ func (c *polygonClipper) buildBoundaryPath(startParam, endParam float64, startCo
 // point on the rect boundary. Returns an empty slice if the ring has no
 // interior arcs (entirely on the boundary or entirely interior with no
 // boundary contact).
-func (c *polygonClipper) extractInteriorArcs(ring []Coordinates) []interiorArc {
-	n := len(ring)
+func (c *polygonClipper) extractInteriorArcs(ring []float64) []interiorArc {
+	n := c.coordsLen(ring)
 	if n < 4 {
 		return nil
 	}
@@ -367,7 +367,7 @@ func (c *polygonClipper) extractInteriorArcs(ring []Coordinates) []interiorArc {
 	// Classify each edge as boundary (both endpoints on same rect edge) or interior.
 	isBdry := make([]bool, numEdges)
 	for i := 0; i < numEdges; i++ {
-		isBdry[i] = c.isSameRectEdge(ring[i].XY, ring[i+1].XY)
+		isBdry[i] = c.isSameRectEdge(c.coordsGetXY(ring, i), c.coordsGetXY(ring, i+1))
 	}
 
 	// Find a starting boundary edge so we can walk from there. If there are
@@ -396,25 +396,25 @@ func (c *polygonClipper) extractInteriorArcs(ring []Coordinates) []interiorArc {
 			break
 		}
 		// Start of an interior arc at ring[i%numEdges].
-		var arcCoords []Coordinates
-		arcCoords = append(arcCoords, ring[i%numEdges])
+		var arcCoords []float64
+		arcCoords = c.coordsAppend(arcCoords, c.coordsGet(ring, i%numEdges))
 		i++
 		steps++
 		for steps < numEdges && !isBdry[i%numEdges] {
-			arcCoords = append(arcCoords, ring[i%numEdges])
+			arcCoords = c.coordsAppend(arcCoords, c.coordsGet(ring, i%numEdges))
 			i++
 			steps++
 		}
 		if steps < numEdges {
 			// The arc ends at ring[i%numEdges] (the start of the next boundary edge).
-			arcCoords = append(arcCoords, ring[i%numEdges])
+			arcCoords = c.coordsAppend(arcCoords, c.coordsGet(ring, i%numEdges))
 		} else {
 			// Wrapped around; the arc ends at ring[start] (where we began).
-			arcCoords = append(arcCoords, ring[start])
+			arcCoords = c.coordsAppend(arcCoords, c.coordsGet(ring, start))
 		}
 
-		sp := c.rectBoundaryParam(arcCoords[0].XY)
-		ep := c.rectBoundaryParam(arcCoords[len(arcCoords)-1].XY)
+		sp := c.rectBoundaryParam(c.coordsGetXY(arcCoords, 0))
+		ep := c.rectBoundaryParam(c.coordsGetXY(arcCoords, c.coordsLen(arcCoords)-1))
 		arcs = append(arcs, interiorArc{
 			coords:     arcCoords,
 			startParam: sp,
@@ -426,40 +426,45 @@ func (c *polygonClipper) extractInteriorArcs(ring []Coordinates) []interiorArc {
 
 // interiorArc represents a portion of a clipped ring that passes through the
 // interior of the clipping rectangle (not along its boundary). The first and
-// last elements of coords are on the rectangle boundary; everything in between
-// is in the interior.
+// last coordinates are on the rectangle boundary; everything in between is in
+// the interior. The coords slice uses the same stride as the polygonClipper's
+// ctype.
 type interiorArc struct {
-	coords     []Coordinates
-	startParam float64 // boundary parameter of coords[0]
-	endParam   float64 // boundary parameter of coords[len(coords)-1]
+	coords     []float64
+	startParam float64 // boundary parameter of first coordinate
+	endParam   float64 // boundary parameter of last coordinate
 }
 
 // clipRingSH clips a closed ring against an axis-aligned rectangle using the
-// Sutherland-Hodgman algorithm. It returns the clipped ring as a closed slice
-// of [Coordinates] (first == last), or nil if the ring is entirely outside the
-// rectangle. The input [LineString] must be a closed ring.
-func (c *polygonClipper) clipRingSH(ring LineString) []Coordinates {
-	coords := seqToCoords(ring.Coordinates())
-	if len(coords) < 4 {
+// Sutherland-Hodgman algorithm. It returns the clipped ring as a closed
+// []float64 (first coord == last coord), or nil if the ring is entirely
+// outside the rectangle. The input [LineString] must be a closed ring.
+func (c *polygonClipper) clipRingSH(ring LineString) []float64 {
+	seq := ring.Coordinates()
+	if seq.Length() < 4 {
 		return nil
 	}
 
+	// Copy the sequence's float data so we can mutate it through the passes.
+	coords := make([]float64, len(seq.floats))
+	copy(coords, seq.floats)
+
 	// Clip against each of the 4 edges.
-	coords = clipToEdge(coords,
+	coords = c.clipToEdge(coords,
 		func(co Coordinates) bool { return co.X >= c.lo.X },
 		func(a, b Coordinates) Coordinates { return interpX(a, b, c.lo.X) })
-	coords = clipToEdge(coords,
+	coords = c.clipToEdge(coords,
 		func(co Coordinates) bool { return co.X <= c.hi.X },
 		func(a, b Coordinates) Coordinates { return interpX(a, b, c.hi.X) })
-	coords = clipToEdge(coords,
+	coords = c.clipToEdge(coords,
 		func(co Coordinates) bool { return co.Y >= c.lo.Y },
 		func(a, b Coordinates) Coordinates { return interpY(a, b, c.lo.Y) })
-	coords = clipToEdge(coords,
+	coords = c.clipToEdge(coords,
 		func(co Coordinates) bool { return co.Y <= c.hi.Y },
 		func(a, b Coordinates) Coordinates { return interpY(a, b, c.hi.Y) })
 
-	coords = removeDupConsecutiveCoords(coords)
-	if len(coords) < 4 {
+	coords = c.removeDupConsecutiveCoords(coords)
+	if c.coordsLen(coords) < 4 {
 		return nil
 	}
 	return coords
@@ -469,35 +474,38 @@ func (c *polygonClipper) clipRingSH(ring LineString) []Coordinates {
 // closed ring against a single half-plane defined by isInside. The intersect
 // function computes the intersection of segment a→b with the clipping edge.
 // The output is also an explicitly closed ring.
-func clipToEdge(
-	coords []Coordinates,
+func (c *polygonClipper) clipToEdge(
+	coords []float64,
 	isInside func(Coordinates) bool,
 	intersect func(Coordinates, Coordinates) Coordinates,
-) []Coordinates {
-	if len(coords) == 0 {
+) []float64 {
+	n := c.coordsLen(coords)
+	if n == 0 {
 		return nil
 	}
-	var output []Coordinates
-	a := coords[len(coords)-1]
-	for _, b := range coords {
+	var output []float64
+	a := c.coordsGet(coords, n-1)
+	for i := 0; i < n; i++ {
+		b := c.coordsGet(coords, i)
 		aIn := isInside(a)
 		bIn := isInside(b)
 		switch {
 		case aIn && bIn:
-			output = append(output, b)
+			output = c.coordsAppend(output, b)
 		case aIn && !bIn:
-			output = append(output, intersect(a, b))
+			output = c.coordsAppend(output, intersect(a, b))
 		case !aIn && bIn:
-			output = append(output, intersect(a, b))
-			output = append(output, b)
+			output = c.coordsAppend(output, intersect(a, b))
+			output = c.coordsAppend(output, b)
 		}
 		a = b
 	}
 	// Ensure the output is explicitly closed. When the input's closing vertex
 	// is outside the clip region, the degenerate closing edge emits nothing,
 	// leaving the output open.
-	if len(output) > 0 && output[0].XY != output[len(output)-1].XY {
-		output = append(output, output[0])
+	outLen := c.coordsLen(output)
+	if outLen > 0 && c.coordsGetXY(output, 0) != c.coordsGetXY(output, outLen-1) {
+		output = c.coordsAppend(output, c.coordsGet(output, 0))
 	}
 	return output
 }
@@ -507,9 +515,9 @@ func clipToEdge(
 // detection. Z and M are interpolated via [interpolateCoords].
 func interpX(a, b Coordinates, x float64) Coordinates {
 	t := (x - a.X) / (b.X - a.X)
-	c := interpolateCoords(a, b, t)
-	c.XY.X = x
-	return c
+	co := interpolateCoords(a, b, t)
+	co.XY.X = x
+	return co
 }
 
 // interpY returns the intersection of segment a→b with the horizontal line
@@ -517,9 +525,9 @@ func interpX(a, b Coordinates, x float64) Coordinates {
 // boundary detection. Z and M are interpolated via [interpolateCoords].
 func interpY(a, b Coordinates, y float64) Coordinates {
 	t := (y - a.Y) / (b.Y - a.Y)
-	c := interpolateCoords(a, b, t)
-	c.XY.Y = y
-	return c
+	co := interpolateCoords(a, b, t)
+	co.XY.Y = y
+	return co
 }
 
 // rectBoundaryParam returns the CCW boundary parameter for a point on the rect
@@ -576,17 +584,18 @@ func (c *polygonClipper) isSameRectEdge(a, b XY) bool {
 }
 
 // pointInRingXY returns true if xy is inside the ring defined by the given
-// closed coordinates (first == last), using the ray-casting algorithm.
-func pointInRingXY(xy XY, ring []Coordinates) bool {
+// closed []float64 (first coord == last coord), using the ray-casting
+// algorithm.
+func (c *polygonClipper) pointInRingXY(xy XY, ring []float64) bool {
 	inside := false
-	n := len(ring)
-	for i := range ring {
+	n := c.coordsLen(ring)
+	for i := 0; i < n; i++ {
 		j := (i + 1) % n
-		yi, yj := ring[i].Y, ring[j].Y
-		xi, xj := ring[i].X, ring[j].X
-		if (yi > xy.Y) != (yj > xy.Y) {
-			slope := (xy.Y - yi) / (yj - yi)
-			xIntersect := xi + slope*(xj-xi)
+		pi := c.coordsGetXY(ring, i)
+		pj := c.coordsGetXY(ring, j)
+		if (pi.Y > xy.Y) != (pj.Y > xy.Y) {
+			slope := (xy.Y - pi.Y) / (pj.Y - pi.Y)
+			xIntersect := pi.X + slope*(pj.X-pi.X)
 			if xy.X < xIntersect {
 				inside = !inside
 			}
@@ -595,37 +604,55 @@ func pointInRingXY(xy XY, ring []Coordinates) bool {
 	return inside
 }
 
-// seqToCoords extracts all Coordinates from a Sequence into a slice.
-func seqToCoords(seq Sequence) []Coordinates {
-	n := seq.Length()
-	coords := make([]Coordinates, n)
-	for i := range coords {
-		coords[i] = seq.Get(i)
-	}
-	return coords
+// coordsLen returns the number of coordinates in a []float64 slice.
+func (c *polygonClipper) coordsLen(floats []float64) int {
+	return len(floats) / c.ctype.Dimension()
 }
 
-// coordsToSeq converts a slice of Coordinates into a Sequence.
-func coordsToSeq(coords []Coordinates, ctype CoordinatesType) Sequence {
-	dim := ctype.Dimension()
-	floats := make([]float64, 0, len(coords)*dim)
-	for _, c := range coords {
-		c.Type = ctype
-		floats = c.appendFloat64s(floats)
+// coordsGet returns the Coordinates at index i in a []float64 slice.
+func (c *polygonClipper) coordsGet(floats []float64, i int) Coordinates {
+	dim := c.ctype.Dimension()
+	offset := i * dim
+	co := Coordinates{
+		XY:   XY{X: floats[offset], Y: floats[offset+1]},
+		Type: c.ctype,
 	}
-	return NewSequence(floats, ctype)
+	switch c.ctype {
+	case DimXYZ:
+		co.Z = floats[offset+2]
+	case DimXYM:
+		co.M = floats[offset+2]
+	case DimXYZM:
+		co.Z = floats[offset+2]
+		co.M = floats[offset+3]
+	}
+	return co
+}
+
+// coordsGetXY returns the XY at index i in a []float64 slice.
+func (c *polygonClipper) coordsGetXY(floats []float64, i int) XY {
+	dim := c.ctype.Dimension()
+	offset := i * dim
+	return XY{X: floats[offset], Y: floats[offset+1]}
+}
+
+// coordsAppend appends a Coordinates value to a []float64 slice.
+func (c *polygonClipper) coordsAppend(floats []float64, co Coordinates) []float64 {
+	co.Type = c.ctype
+	return co.appendFloat64s(floats)
 }
 
 // removeDupConsecutiveCoords removes consecutive vertices with identical XY.
 // For closed rings (first == last), the closing vertex is preserved.
-func removeDupConsecutiveCoords(coords []Coordinates) []Coordinates {
-	if len(coords) == 0 {
+func (c *polygonClipper) removeDupConsecutiveCoords(coords []float64) []float64 {
+	n := c.coordsLen(coords)
+	if n == 0 {
 		return nil
 	}
-	out := coords[:1]
-	for _, c := range coords[1:] {
-		if c.XY != out[len(out)-1].XY {
-			out = append(out, c)
+	out := c.coordsAppend(nil, c.coordsGet(coords, 0))
+	for i := 1; i < n; i++ {
+		if c.coordsGetXY(coords, i) != c.coordsGetXY(out, c.coordsLen(out)-1) {
+			out = c.coordsAppend(out, c.coordsGet(coords, i))
 		}
 	}
 	return out
