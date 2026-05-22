@@ -20,7 +20,7 @@ var d4Transforms = []struct {
 	{"reflect_anti", func(xy geom.XY) geom.XY { return geom.XY{X: -xy.Y, Y: -xy.X} }},
 }
 
-func TestClipByRect(t *testing.T) {
+func TestClipByRect2D(t *testing.T) {
 	// R is a non-square rectangle so that the D4 transforms produce distinct
 	// configurations.
 	rect := geom.NewEnvelope(geom.XY{X: 1, Y: 2}, geom.XY{X: 5, Y: 4})
@@ -58,8 +58,8 @@ func TestClipByRect(t *testing.T) {
 		{"MP7", "MULTIPOINT(3 3,1 3,0 0)", "MULTIPOINT(3 3,1 3)", nil},
 		// MP8: MultiPoint containing empty points
 		{"MP8", "MULTIPOINT(3 3,EMPTY)", "MULTIPOINT(3 3)", nil},
-		// MP9: XYZ MultiPoint, all points outside R
-		{"MP9", "MULTIPOINT Z(0 0 7,6 6 8)", "MULTIPOINT Z EMPTY", nil},
+		// MP9: XYZ MultiPoint, all points outside R — output is XY EMPTY
+		{"MP9", "MULTIPOINT Z(0 0 7,6 6 8)", "MULTIPOINT EMPTY", nil},
 
 		// LS1: Empty LineString
 		{"LS1", "LINESTRING EMPTY", "LINESTRING EMPTY", nil},
@@ -128,8 +128,8 @@ func TestClipByRect(t *testing.T) {
 		{"MLS7", "MULTILINESTRING((0 3,3 3,3 5,4 5,4 3,6 3))", "MULTILINESTRING((1 3,3 3,3 4),(4 4,4 3,5 3))", nil},
 		// MLS8: MultiLineString containing empty LineStrings
 		{"MLS8", "MULTILINESTRING((2 3,4 3),EMPTY)", "MULTILINESTRING((2 3,4 3))", nil},
-		// MLS9: XYZ MultiLineString, all components outside R
-		{"MLS9", "MULTILINESTRING Z((6 5 1,7 6 2),(0 0 3,0 1 4))", "MULTILINESTRING Z EMPTY", nil},
+		// MLS9: XYZ MultiLineString, all components outside R — output is XY EMPTY
+		{"MLS9", "MULTILINESTRING Z((6 5 1,7 6 2),(0 0 3,0 1 4))", "MULTILINESTRING EMPTY", nil},
 
 		// PG1: Empty Polygon
 		{"PG1", "POLYGON EMPTY", "POLYGON EMPTY", nil},
@@ -255,10 +255,10 @@ func TestClipByRect(t *testing.T) {
 			"POLYGON EMPTY",
 			nil},
 
-		// PG_Z1: XYZ polygon containing R — Z values must be interpolated, not zero
+		// PG_Z1: XYZ polygon containing R — Z is dropped, output is XY only
 		{"PG_Z1",
 			"POLYGON Z((0 0 10,6 0 10,6 6 10,0 6 10,0 0 10))",
-			"POLYGON Z((1 2 10,5 2 10,5 4 10,1 4 10,1 2 10))",
+			"POLYGON((1 2,5 2,5 4,1 4,1 2))",
 			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
 
 		// MPG1: Empty MultiPolygon
@@ -308,10 +308,10 @@ func TestClipByRect(t *testing.T) {
 			"MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)),EMPTY)",
 			"MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)))",
 			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
-		// MPG11: XYZ MultiPolygon, all components outside R
+		// MPG11: XYZ MultiPolygon, all components outside R — output is XY EMPTY
 		{"MPG11",
 			"MULTIPOLYGON Z(((6 5 1,7 5 2,7 6 3,6 6 4,6 5 1)),((8 8 5,9 8 6,9 9 7,8 9 8,8 8 5)))",
-			"MULTIPOLYGON Z EMPTY",
+			"MULTIPOLYGON EMPTY",
 			nil},
 
 		// GC1: Empty GeometryCollection
@@ -370,10 +370,10 @@ func TestClipByRect(t *testing.T) {
 			"GEOMETRYCOLLECTION(POINT(3 3),GEOMETRYCOLLECTION(POINT(0 0),POINT(6 6)))",
 			"GEOMETRYCOLLECTION(POINT(3 3))",
 			nil},
-		// GC14: XYZ GeometryCollection, all children outside R
+		// GC14: XYZ GeometryCollection, all children outside R — output is XY EMPTY
 		{"GC14",
 			"GEOMETRYCOLLECTION Z(POINT Z(0 0 1),LINESTRING Z(6 5 2,7 6 3))",
-			"GEOMETRYCOLLECTION Z EMPTY",
+			"GEOMETRYCOLLECTION EMPTY",
 			nil},
 
 		// NE1: Very large coordinates (outside R)
@@ -395,12 +395,26 @@ func TestClipByRect(t *testing.T) {
 
 		// CD1: XY geometry clipped
 		{"CD1", "LINESTRING(0 3,6 3)", "LINESTRING(1 3,5 3)", nil},
-		// CD2: XYZ geometry clipped, Z interpolated at intersections
-		{"CD2", "LINESTRING Z(0 3 0,6 3 6)", "LINESTRING Z(1 3 1,5 3 5)", nil},
-		// CD3: XYM geometry clipped, M interpolated at intersections
-		{"CD3", "LINESTRING M(0 3 0,6 3 6)", "LINESTRING M(1 3 1,5 3 5)", nil},
-		// CD4: XYZM geometry clipped, Z and M interpolated at intersections
-		{"CD4", "LINESTRING ZM(0 3 0 12,6 3 6 24)", "LINESTRING ZM(1 3 1 14,5 3 5 22)", nil},
+		// CD2: XYZ input → XY output (Z dropped)
+		{"CD2", "LINESTRING Z(0 3 0,6 3 6)", "LINESTRING(1 3,5 3)", nil},
+		// CD3: XYM input → XY output (M dropped)
+		{"CD3", "LINESTRING M(0 3 0,6 3 6)", "LINESTRING(1 3,5 3)", nil},
+		// CD4: XYZM input → XY output (Z and M dropped)
+		{"CD4", "LINESTRING ZM(0 3 0 12,6 3 6 24)", "LINESTRING(1 3,5 3)", nil},
+		// CD5: XYZ Point input → XY output
+		{"CD5", "POINT Z(3 3 7)", "POINT(3 3)", nil},
+		// CD6: XYZM Polygon input → XY output, polygon clipped
+		{"CD6",
+			"POLYGON ZM((0 2.5 1 11,6 2.5 2 12,6 3.5 3 13,0 3.5 4 14,0 2.5 1 11))",
+			"POLYGON((1 2.5,5 2.5,5 3.5,1 3.5,1 2.5))",
+			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+		// CD7: XYM MultiPoint input → XY output, partial survival
+		{"CD7", "MULTIPOINT M(3 3 1,0 0 2)", "MULTIPOINT(3 3)", nil},
+		// CD8: XYZ GeometryCollection input → XY output, mixed survival
+		{"CD8",
+			"GEOMETRYCOLLECTION Z(POINT Z(3 3 1),LINESTRING Z(0 3 0,6 3 6))",
+			"GEOMETRYCOLLECTION(POINT(3 3),LINESTRING(1 3,5 3))",
+			nil},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, tr := range d4Transforms {
@@ -408,7 +422,7 @@ func TestClipByRect(t *testing.T) {
 					input := geomFromWKT(t, tt.input).TransformXY(tr.fn)
 					want := geomFromWKT(t, tt.want).TransformXY(tr.fn)
 					r := rect.TransformXY(tr.fn)
-					got := geom.ClipByRect(input, r)
+					got := geom.ClipByRect2D(input, r)
 					expectGeomEq(t, got, want, tt.opts...)
 				})
 			}
@@ -416,7 +430,7 @@ func TestClipByRect(t *testing.T) {
 	}
 }
 
-func TestClipByRectDegenerateRect(t *testing.T) {
+func TestClipByRect2DDegenerateRect(t *testing.T) {
 	emptyRect := geom.Envelope{}
 	pointRect := geom.NewEnvelope(geom.XY{X: 3, Y: 3}, geom.XY{X: 3, Y: 3})
 	lineRect := geom.NewEnvelope(geom.XY{X: 1, Y: 3}, geom.XY{X: 5, Y: 3})
@@ -466,7 +480,7 @@ func TestClipByRectDegenerateRect(t *testing.T) {
 					input := geomFromWKT(t, tt.input).TransformXY(tr.fn)
 					want := geomFromWKT(t, tt.want).TransformXY(tr.fn)
 					r := tt.rect.TransformXY(tr.fn)
-					got := geom.ClipByRect(input, r)
+					got := geom.ClipByRect2D(input, r)
 					expectGeomEq(t, got, want)
 				})
 			}

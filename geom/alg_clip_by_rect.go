@@ -1,10 +1,23 @@
 package geom
 
-// ClipByRect clips a geometry to an axis-aligned rectangle defined by the
-// given [Envelope], returning the portion of the geometry that lies within the
-// rectangle. It uses the Sutherland-Hodgman algorithm for polygon clipping
-// and related approaches for other geometry types.
-func ClipByRect(g Geometry, rect Envelope) Geometry {
+// ClipByRect2D clips a geometry to the 2D axis-aligned rectangle defined by
+// the given [Envelope], returning the portion of the geometry that lies within
+// the rectangle. It uses the Sutherland-Hodgman algorithm for polygon clipping
+// and the Liang-Barsky algorithm for line clipping.
+//
+// The result is always 2D ([DimXY]): any Z or M values on the input are
+// discarded. Linear interpolation of Z/M at clip-edge intersections is
+// reasonably well-defined, but values that would have to be synthesised at
+// rectangle corners (where the clipped boundary must traverse the rect) are
+// not, so this function avoids the problem by reducing to two dimensions
+// throughout.
+func ClipByRect2D(g Geometry, rect Envelope) Geometry {
+	return clipByRect2D(g.Force2D(), rect)
+}
+
+// clipByRect2D dispatches by geometry type. The input must already have been
+// reduced to [DimXY] by the caller.
+func clipByRect2D(g Geometry, rect Envelope) Geometry {
 	switch g.Type() {
 	case TypePoint:
 		return clipPointByRect(g.MustAsPoint(), rect).AsGeometry()
@@ -33,21 +46,17 @@ func clipPointByRect(p Point, rect Envelope) Point {
 	if rect.Contains(xy) {
 		return p
 	}
-	return NewEmptyPoint(p.CoordinatesType())
+	return Point{}
 }
 
 func clipMultiPointByRect(mp MultiPoint, rect Envelope) MultiPoint {
 	n := mp.NumPoints()
 	var pts []Point
 	for i := 0; i < n; i++ {
-		p := mp.PointN(i)
-		clipped := clipPointByRect(p, rect)
+		clipped := clipPointByRect(mp.PointN(i), rect)
 		if !clipped.IsEmpty() {
 			pts = append(pts, clipped)
 		}
-	}
-	if len(pts) == 0 {
-		return NewMultiPoint(nil).ForceCoordinatesType(mp.CoordinatesType())
 	}
 	return NewMultiPoint(pts)
 }
@@ -69,9 +78,6 @@ func clipMultiLineStringByRect(mls MultiLineString, rect Envelope) MultiLineStri
 			panic("unexpected type from clipLineStringByRect: " + clipped.Type().String())
 		}
 	}
-	if len(lines) == 0 {
-		return NewMultiLineString(nil).ForceCoordinatesType(mls.CoordinatesType())
-	}
 	return NewMultiLineString(lines)
 }
 
@@ -92,9 +98,6 @@ func clipMultiPolygonByRect(mp MultiPolygon, rect Envelope) MultiPolygon {
 			panic("unexpected type from clipPolygonByRect: " + clipped.Type().String())
 		}
 	}
-	if len(polys) == 0 {
-		return NewMultiPolygon(nil).ForceCoordinatesType(mp.CoordinatesType())
-	}
 	return NewMultiPolygon(polys)
 }
 
@@ -102,13 +105,19 @@ func clipGeometryCollectionByRect(gc GeometryCollection, rect Envelope) Geometry
 	n := gc.NumGeometries()
 	var geoms []Geometry
 	for i := 0; i < n; i++ {
-		clipped := ClipByRect(gc.GeometryN(i), rect)
+		clipped := clipByRect2D(gc.GeometryN(i), rect)
 		if !clipped.IsEmpty() {
 			geoms = append(geoms, clipped)
 		}
 	}
-	if len(geoms) == 0 {
-		return NewGeometryCollection(nil).ForceCoordinatesType(gc.CoordinatesType())
-	}
 	return NewGeometryCollection(geoms)
+}
+
+// xysToSeq builds a [DimXY] [Sequence] from a slice of [XY].
+func xysToSeq(xys []XY) Sequence {
+	floats := make([]float64, 0, 2*len(xys))
+	for _, xy := range xys {
+		floats = append(floats, xy.X, xy.Y)
+	}
+	return NewSequence(floats, DimXY)
 }

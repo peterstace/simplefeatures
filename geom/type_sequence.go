@@ -96,6 +96,16 @@ func (s Sequence) GetXY(i int) XY {
 	}
 }
 
+// asXYs returns the [XY] of every point location in the [Sequence], in order.
+func (s Sequence) asXYs() []XY {
+	stride := s.ctype.Dimension()
+	xys := make([]XY, 0, len(s.floats)/stride)
+	for off := 0; off < len(s.floats); off += stride {
+		xys = append(xys, XY{X: s.floats[off], Y: s.floats[off+1]})
+	}
+	return xys
+}
+
 // Reverse returns a new [Sequence] containing the same point locations, but in
 // reversed order.
 func (s Sequence) Reverse() Sequence {

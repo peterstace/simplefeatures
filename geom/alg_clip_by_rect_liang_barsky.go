@@ -1,22 +1,21 @@
 package geom
 
 func clipLineStringByRect(ls LineString, rect Envelope) Geometry {
+	emptyLine := LineString{}.AsGeometry()
+
 	seq := ls.Coordinates()
 	n := seq.Length()
 	if n == 0 {
-		return ls.AsGeometry()
+		return emptyLine
 	}
 
 	min, max, ok := rect.MinMaxXYs()
 	if !ok {
-		return NewLineString(NewSequence(nil, seq.CoordinatesType())).AsGeometry()
+		return emptyLine
 	}
 
-	ctype := seq.CoordinatesType()
-	dim := ctype.Dimension()
-
-	var chains [][]float64
-	var cur []float64
+	var chains [][]XY
+	var cur []XY
 
 	for i := 0; i < n-1; i++ {
 		a := seq.GetXY(i)
@@ -31,17 +30,16 @@ func clipLineStringByRect(ls LineString, rect Envelope) Geometry {
 			continue
 		}
 
-		ca := interpolateSeqCoord(seq, i, i+1, tMin)
-		cb := interpolateSeqCoord(seq, i, i+1, tMax)
+		ca := lerpXY(a, b, tMin)
+		cb := lerpXY(a, b, tMax)
 
-		if len(cur) > 0 && cur[len(cur)-dim] == ca.X && cur[len(cur)-dim+1] == ca.Y {
-			cur = cb.appendFloat64s(cur)
+		if len(cur) > 0 && cur[len(cur)-1] == ca {
+			cur = append(cur, cb)
 		} else {
 			if len(cur) > 0 {
 				chains = append(chains, cur)
 			}
-			cur = ca.appendFloat64s(nil)
-			cur = cb.appendFloat64s(cur)
+			cur = []XY{ca, cb}
 		}
 	}
 	if len(cur) > 0 {
@@ -49,12 +47,12 @@ func clipLineStringByRect(ls LineString, rect Envelope) Geometry {
 	}
 
 	if len(chains) == 0 {
-		return NewLineString(NewSequence(nil, ctype)).AsGeometry()
+		return emptyLine
 	}
 
 	lines := make([]LineString, len(chains))
 	for i, c := range chains {
-		lines[i] = NewLineString(NewSequence(c, ctype))
+		lines[i] = NewLineString(xysToSeq(c))
 	}
 
 	if len(lines) == 1 {
@@ -100,17 +98,4 @@ func clipSegmentParams(a, b, min, max XY) (float64, float64, bool) {
 		}
 	}
 	return tMin, tMax, true
-}
-
-// interpolateSeqCoord linearly interpolates between coordinates at index i and
-// j in seq at parameter t (0=coord i, 1=coord j). Delegates to
-// [interpolateCoords] which uses a numerically robust lerp.
-func interpolateSeqCoord(seq Sequence, i, j int, t float64) Coordinates {
-	if t == 0 {
-		return seq.Get(i)
-	}
-	if t == 1 {
-		return seq.Get(j)
-	}
-	return interpolateCoords(seq.Get(i), seq.Get(j), t)
 }
