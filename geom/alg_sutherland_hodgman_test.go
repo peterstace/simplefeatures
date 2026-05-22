@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/peterstace/simplefeatures/geom"
+	"github.com/peterstace/simplefeatures/internal/test"
 )
 
 var d4Transforms = []struct {
@@ -419,11 +420,11 @@ func TestClipByRect2D(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, tr := range d4Transforms {
 				t.Run(tr.name, func(t *testing.T) {
-					input := geomFromWKT(t, tt.input).TransformXY(tr.fn)
-					want := geomFromWKT(t, tt.want).TransformXY(tr.fn)
+					input := test.FromWKT(t, tt.input).TransformXY(tr.fn)
+					want := test.FromWKT(t, tt.want).TransformXY(tr.fn)
 					r := rect.TransformXY(tr.fn)
 					got := geom.ClipByRect2D(input, r)
-					expectGeomEq(t, got, want, tt.opts...)
+					test.ExactEquals(t, got, want, tt.opts...)
 				})
 			}
 		})
@@ -477,11 +478,11 @@ func TestClipByRect2DDegenerateRect(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, tr := range d4Transforms {
 				t.Run(tr.name, func(t *testing.T) {
-					input := geomFromWKT(t, tt.input).TransformXY(tr.fn)
-					want := geomFromWKT(t, tt.want).TransformXY(tr.fn)
+					input := test.FromWKT(t, tt.input).TransformXY(tr.fn)
+					want := test.FromWKT(t, tt.want).TransformXY(tr.fn)
 					r := tt.rect.TransformXY(tr.fn)
 					got := geom.ClipByRect2D(input, r)
-					expectGeomEq(t, got, want)
+					test.ExactEquals(t, got, want)
 				})
 			}
 		})
