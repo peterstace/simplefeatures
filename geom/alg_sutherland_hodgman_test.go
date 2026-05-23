@@ -169,10 +169,12 @@ func TestClipByRect2D(t *testing.T) {
 		// PG18: Concave polygon, concavity facing left R boundary
 		{"PG18", "POLYGON((0 2.5,3 2.5,3 3,2 3,2 3.5,0 3.5,0 2.5))", "POLYGON((1 2.5,3 2.5,3 3,2 3,2 3.5,1 3.5,1 2.5))", []geom.ExactEqualsOption{geom.IgnoreOrder}},
 		// PG19: C-shaped polygon, concavity crosses left edge → MultiPolygon
-		{"PG19",
+		{
+			"PG19",
 			"POLYGON((0 2.5,3 2.5,3 2.8,0.5 2.8,0.5 3.2,3 3.2,3 3.5,0 3.5,0 2.5))",
 			"MULTIPOLYGON(((1 2.5,3 2.5,3 2.8,1 2.8,1 2.5)),((1 3.2,3 3.2,3 3.5,1 3.5,1 3.2)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PG20: Very thin sliver polygon partially inside R
 		{"PG20", "POLYGON((0 2.999,6 2.999,6 3.001,0 3.001,0 2.999))", "POLYGON((1 2.999,5 2.999,5 3.001,1 3.001,1 2.999))", []geom.ExactEqualsOption{geom.IgnoreOrder}},
 		// PG21: Triangle clipped at all 4 rect edges producing a polygon
@@ -181,139 +183,191 @@ func TestClipByRect2D(t *testing.T) {
 		{"PG22", "POLYGON((2 2.5,2 3.5,4 3.5,4 2.5,2 2.5))", "POLYGON((2 2.5,2 3.5,4 3.5,4 2.5,2 2.5))", []geom.ExactEqualsOption{geom.IgnoreOrder}},
 
 		// PH1: Exterior and hole both inside R
-		{"PH1",
+		{
+			"PH1",
 			"POLYGON((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5),(2.5 2.8,2.5 3.2,3.5 3.2,3.5 2.8,2.5 2.8))",
 			"POLYGON((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5),(2.5 2.8,2.5 3.2,3.5 3.2,3.5 2.8,2.5 2.8))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH2: Exterior clipped, hole entirely inside clipped region
-		{"PH2",
+		{
+			"PH2",
 			"POLYGON((0 2.5,4 2.5,4 3.5,0 3.5,0 2.5),(2 2.8,2 3.2,3 3.2,3 2.8,2 2.8))",
 			"POLYGON((1 2.5,4 2.5,4 3.5,1 3.5,1 2.5),(2 2.8,2 3.2,3 3.2,3 2.8,2 2.8))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH3: Multiple holes, all inside R
-		{"PH3",
+		{
+			"PH3",
 			"POLYGON((0 0,6 0,6 6,0 6,0 0),(2 2.5,2 3,3 3,3 2.5,2 2.5),(3.5 2.5,3.5 3,4.5 3,4.5 2.5,3.5 2.5))",
 			"POLYGON((1 2,5 2,5 4,1 4,1 2),(2 2.5,2 3,3 3,3 2.5,2 2.5),(3.5 2.5,3.5 3,4.5 3,4.5 2.5,3.5 2.5))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH4: Hole entirely outside R (inside exterior outside R)
-		{"PH4",
+		{
+			"PH4",
 			"POLYGON((0 0,6 0,6 6,0 6,0 0),(0.2 0.2,0.2 0.8,0.8 0.8,0.8 0.2,0.2 0.2))",
 			"POLYGON((1 2,5 2,5 4,1 4,1 2))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH5: Hole in part of exterior that is clipped away
-		{"PH5",
+		{
+			"PH5",
 			"POLYGON((2 0,4 0,4 3,2 3,2 0),(2.5 0.5,2.5 1.5,3.5 1.5,3.5 0.5,2.5 0.5))",
 			"POLYGON((2 2,4 2,4 3,2 3,2 2))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH6: Hole crosses one edge of R (left edge)
-		{"PH6",
+		{
+			"PH6",
 			"POLYGON((-2 -2,8 -2,8 8,-2 8,-2 -2),(0 2.5,0 3.5,2 3.5,2 2.5,0 2.5))",
 			"POLYGON((1 4,1 3.5,2 3.5,2 2.5,1 2.5,1 2,5 2,5 4,1 4))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH7: Hole crosses two adjacent edges of R (bottom-left corner)
-		{"PH7",
+		{
+			"PH7",
 			"POLYGON((-2 -2,8 -2,8 8,-2 8,-2 -2),(0 1,0 3,2 3,2 1,0 1))",
 			"POLYGON((1 3,2 3,2 2,5 2,5 4,1 4,1 3))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH8: Hole crosses two opposite edges of R (left and right) — splits polygon
-		{"PH8",
+		{
+			"PH8",
 			"POLYGON((-2 -2,8 -2,8 8,-2 8,-2 -2),(0 2.8,0 3.2,6 3.2,6 2.8,0 2.8))",
 			"MULTIPOLYGON(((1 2,5 2,5 2.8,1 2.8,1 2)),((1 3.2,5 3.2,5 4,1 4,1 3.2)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH9: Hole crosses all four edges of R, leaving top and bottom strips
-		{"PH9",
+		{
+			"PH9",
 			"POLYGON((-2 -2,8 -2,8 8,-2 8,-2 -2),(0.5 2.5,0.5 3.5,5.5 3.5,5.5 2.5,0.5 2.5))",
 			"MULTIPOLYGON(((1 2,5 2,5 2.5,1 2.5,1 2)),((1 3.5,5 3.5,5 4,1 4,1 3.5)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH10: Hole on R boundary, exterior extends beyond R — becomes concavity
-		{"PH10",
+		{
+			"PH10",
 			"POLYGON((-2 -2,8 -2,8 8,-2 8,-2 -2),(1 2.5,1 3.5,2 3.5,2 2.5,1 2.5))",
 			"POLYGON((1 4,1 3.5,2 3.5,2 2.5,1 2.5,1 2,5 2,5 4,1 4))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH11: One hole inside R, another outside R
-		{"PH11",
+		{
+			"PH11",
 			"POLYGON((-2 -2,8 -2,8 8,-2 8,-2 -2),(2.5 2.8,2.5 3.2,3.5 3.2,3.5 2.8,2.5 2.8),(-1.5 -1.5,-1.5 -0.5,-0.5 -0.5,-0.5 -1.5,-1.5 -1.5))",
 			"POLYGON((1 2,5 2,5 4,1 4,1 2),(2.5 2.8,2.5 3.2,3.5 3.2,3.5 2.8,2.5 2.8))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH12: One hole inside R, another splits polygon
-		{"PH12",
+		{
+			"PH12",
 			"POLYGON((-2 -2,8 -2,8 8,-2 8,-2 -2),(2.5 2.2,2.5 2.4,3.5 2.4,3.5 2.2,2.5 2.2),(0 2.5,0 3.5,6 3.5,6 2.5,0 2.5))",
 			"MULTIPOLYGON(((1 2,5 2,5 2.5,1 2.5,1 2),(2.5 2.2,2.5 2.4,3.5 2.4,3.5 2.2,2.5 2.2)),((1 3.5,5 3.5,5 4,1 4,1 3.5)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH13: Multiple holes each crossing one edge of R (left edge)
-		{"PH13",
+		{
+			"PH13",
 			"POLYGON((-2 -2,8 -2,8 8,-2 8,-2 -2),(0 2.2,0 2.6,2 2.6,2 2.2,0 2.2),(0 3.4,0 3.8,2 3.8,2 3.4,0 3.4))",
 			"POLYGON((1 4,1 3.8,2 3.8,2 3.4,1 3.4,1 2.6,2 2.6,2 2.2,1 2.2,1 2,5 2,5 4,1 4))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH14: Two holes each crossing two opposite edges, splitting into three pieces
-		{"PH14",
+		{
+			"PH14",
 			"POLYGON((-2 -2,8 -2,8 8,-2 8,-2 -2),(0 2.5,0 2.8,6 2.8,6 2.5,0 2.5),(0 3.2,0 3.5,6 3.5,6 3.2,0 3.2))",
 			"MULTIPOLYGON(((1 2,5 2,5 2.5,1 2.5,1 2)),((1 2.8,5 2.8,5 3.2,1 3.2,1 2.8)),((1 3.5,5 3.5,5 4,1 4,1 3.5)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// PH15: Hole covers entire clipped area
-		{"PH15",
+		{
+			"PH15",
 			"POLYGON((-2 -2,8 -2,8 8,-2 8,-2 -2),(0.5 1.5,0.5 4.5,5.5 4.5,5.5 1.5,0.5 1.5))",
 			"POLYGON EMPTY",
-			nil},
+			nil,
+		},
 
 		// PG_Z1: XYZ polygon containing R — Z is dropped, output is XY only
-		{"PG_Z1",
+		{
+			"PG_Z1",
 			"POLYGON Z((0 0 10,6 0 10,6 6 10,0 6 10,0 0 10))",
 			"POLYGON((1 2,5 2,5 4,1 4,1 2))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 
 		// MPG1: Empty MultiPolygon
 		{"MPG1", "MULTIPOLYGON EMPTY", "MULTIPOLYGON EMPTY", nil},
 		// MPG2: All component Polygons inside R
-		{"MPG2",
+		{
+			"MPG2",
 			"MULTIPOLYGON(((2 2.5,3 2.5,3 3,2 3,2 2.5)),((3.5 2.5,4.5 2.5,4.5 3,3.5 3,3.5 2.5)))",
 			"MULTIPOLYGON(((2 2.5,3 2.5,3 3,2 3,2 2.5)),((3.5 2.5,4.5 2.5,4.5 3,3.5 3,3.5 2.5)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// MPG3: All component Polygons outside R
-		{"MPG3",
+		{
+			"MPG3",
 			"MULTIPOLYGON(((6 5,7 5,7 6,6 6,6 5)),((8 8,9 8,9 9,8 9,8 8)))",
 			"MULTIPOLYGON EMPTY",
-			nil},
+			nil,
+		},
 		// MPG4: Some components inside, some outside
-		{"MPG4",
+		{
+			"MPG4",
 			"MULTIPOLYGON(((2 2.5,3 2.5,3 3,2 3,2 2.5)),((6 5,7 5,7 6,6 6,6 5)))",
 			"MULTIPOLYGON(((2 2.5,3 2.5,3 3,2 3,2 2.5)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// MPG5: One component partially clipped, another fully inside
-		{"MPG5",
+		{
+			"MPG5",
 			"MULTIPOLYGON(((0 2.5,3 2.5,3 3.5,0 3.5,0 2.5)),((3.5 2.5,4.5 2.5,4.5 3.5,3.5 3.5,3.5 2.5)))",
 			"MULTIPOLYGON(((1 2.5,3 2.5,3 3.5,1 3.5,1 2.5)),((3.5 2.5,4.5 2.5,4.5 3.5,3.5 3.5,3.5 2.5)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// MPG6: One component becomes multiple polygons when clipped (C-shape)
-		{"MPG6",
+		{
+			"MPG6",
 			"MULTIPOLYGON(((0 2.5,3 2.5,3 2.8,0.5 2.8,0.5 3.2,3 3.2,3 3.5,0 3.5,0 2.5)),((4 2.5,4.5 2.5,4.5 3,4 3,4 2.5)))",
 			"MULTIPOLYGON(((1 2.5,3 2.5,3 2.8,1 2.8,1 2.5)),((1 3.2,3 3.2,3 3.5,1 3.5,1 3.2)),((4 2.5,4.5 2.5,4.5 3,4 3,4 2.5)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// MPG7: Multiple components, each partially clipped
-		{"MPG7",
+		{
+			"MPG7",
 			"MULTIPOLYGON(((0 2.3,3 2.3,3 2.7,0 2.7,0 2.3)),((0 3.3,3 3.3,3 3.7,0 3.7,0 3.3)))",
 			"MULTIPOLYGON(((1 2.3,3 2.3,3 2.7,1 2.7,1 2.3)),((1 3.3,3 3.3,3 3.7,1 3.7,1 3.3)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// MPG8: Components with holes, some holes clipped
-		{"MPG8",
+		{
+			"MPG8",
 			"MULTIPOLYGON(((0 2.5,3 2.5,3 3.5,0 3.5,0 2.5),(1.5 2.8,1.5 3.2,2.5 3.2,2.5 2.8,1.5 2.8)),((3.5 2.5,4.5 2.5,4.5 3.5,3.5 3.5,3.5 2.5)))",
 			"MULTIPOLYGON(((1 2.5,3 2.5,3 3.5,1 3.5,1 2.5),(1.5 2.8,1.5 3.2,2.5 3.2,2.5 2.8,1.5 2.8)),((3.5 2.5,4.5 2.5,4.5 3.5,3.5 3.5,3.5 2.5)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// MPG9: Single component fully inside R
-		{"MPG9",
+		{
+			"MPG9",
 			"MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)))",
 			"MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// MPG10: MultiPolygon containing empty Polygons
-		{"MPG10",
+		{
+			"MPG10",
 			"MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)),EMPTY)",
 			"MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// MPG11: XYZ MultiPolygon, all components outside R — output is XY EMPTY
-		{"MPG11",
+		{
+			"MPG11",
 			"MULTIPOLYGON Z(((6 5 1,7 5 2,7 6 3,6 6 4,6 5 1)),((8 8 5,9 8 6,9 9 7,8 9 8,8 8 5)))",
 			"MULTIPOLYGON EMPTY",
-			nil},
+			nil,
+		},
 
 		// GC1: Empty GeometryCollection
 		{"GC1", "GEOMETRYCOLLECTION EMPTY", "GEOMETRYCOLLECTION EMPTY", nil},
@@ -322,60 +376,82 @@ func TestClipByRect2D(t *testing.T) {
 		// GC3: Contains only Points, all outside R
 		{"GC3", "GEOMETRYCOLLECTION(POINT(0 0),POINT(6 6))", "GEOMETRYCOLLECTION EMPTY", nil},
 		// GC4: Contains mixed types, all inside R
-		{"GC4",
+		{
+			"GC4",
 			"GEOMETRYCOLLECTION(POINT(3 3),LINESTRING(2 3,4 3))",
 			"GEOMETRYCOLLECTION(POINT(3 3),LINESTRING(2 3,4 3))",
-			nil},
+			nil,
+		},
 		// GC5: Contains mixed types, all outside R
-		{"GC5",
+		{
+			"GC5",
 			"GEOMETRYCOLLECTION(POINT(0 0),LINESTRING(6 5,7 6))",
 			"GEOMETRYCOLLECTION EMPTY",
-			nil},
+			nil,
+		},
 		// GC6: Contains mixed types, some inside, some outside
-		{"GC6",
+		{
+			"GC6",
 			"GEOMETRYCOLLECTION(POINT(3 3),POINT(0 0),LINESTRING(2 3,4 3))",
 			"GEOMETRYCOLLECTION(POINT(3 3),LINESTRING(2 3,4 3))",
-			nil},
+			nil,
+		},
 		// GC7: Contains Point, LineString, and Polygon (each clipped independently)
-		{"GC7",
+		{
+			"GC7",
 			"GEOMETRYCOLLECTION(POINT(3 3),LINESTRING(0 3,6 3),POLYGON((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)))",
 			"GEOMETRYCOLLECTION(POINT(3 3),LINESTRING(1 3,5 3),POLYGON((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5)))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// GC8: Contains nested GeometryCollection
-		{"GC8",
+		{
+			"GC8",
 			"GEOMETRYCOLLECTION(POINT(3 3),GEOMETRYCOLLECTION(POINT(4 3)))",
 			"GEOMETRYCOLLECTION(POINT(3 3),GEOMETRYCOLLECTION(POINT(4 3)))",
-			nil},
+			nil,
+		},
 		// GC9: Contains nested GeometryCollection with mixed types
-		{"GC9",
+		{
+			"GC9",
 			"GEOMETRYCOLLECTION(POINT(3 3),GEOMETRYCOLLECTION(POINT(0 0),LINESTRING(2 3,4 3)))",
 			"GEOMETRYCOLLECTION(POINT(3 3),GEOMETRYCOLLECTION(LINESTRING(2 3,4 3)))",
-			nil},
+			nil,
+		},
 		// GC10: All child geometries are empty
-		{"GC10",
+		{
+			"GC10",
 			"GEOMETRYCOLLECTION(POINT EMPTY,LINESTRING EMPTY)",
 			"GEOMETRYCOLLECTION EMPTY",
-			nil},
+			nil,
+		},
 		// GC11: Contains MultiPoint, MultiLineString, MultiPolygon
-		{"GC11",
+		{
+			"GC11",
 			"GEOMETRYCOLLECTION(MULTIPOINT(3 3,0 0),MULTILINESTRING((2 3,4 3)),MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5))))",
 			"GEOMETRYCOLLECTION(MULTIPOINT(3 3),MULTILINESTRING((2 3,4 3)),MULTIPOLYGON(((2 2.5,4 2.5,4 3.5,2 3.5,2 2.5))))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// GC12: Deeply nested GeometryCollections (3+ levels)
-		{"GC12",
+		{
+			"GC12",
 			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(3 3))))",
 			"GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POINT(3 3))))",
-			nil},
+			nil,
+		},
 		// GC13: Nested GC whose children all clip to empty
-		{"GC13",
+		{
+			"GC13",
 			"GEOMETRYCOLLECTION(POINT(3 3),GEOMETRYCOLLECTION(POINT(0 0),POINT(6 6)))",
 			"GEOMETRYCOLLECTION(POINT(3 3))",
-			nil},
+			nil,
+		},
 		// GC14: XYZ GeometryCollection, all children outside R — output is XY EMPTY
-		{"GC14",
+		{
+			"GC14",
 			"GEOMETRYCOLLECTION Z(POINT Z(0 0 1),LINESTRING Z(6 5 2,7 6 3))",
 			"GEOMETRYCOLLECTION EMPTY",
-			nil},
+			nil,
+		},
 
 		// NE1: Very large coordinates (outside R)
 		{"NE1", "LINESTRING(1000000000000000 3,1000000000000006 3)", "LINESTRING EMPTY", nil},
@@ -405,17 +481,21 @@ func TestClipByRect2D(t *testing.T) {
 		// CD5: XYZ Point input → XY output
 		{"CD5", "POINT Z(3 3 7)", "POINT(3 3)", nil},
 		// CD6: XYZM Polygon input → XY output, polygon clipped
-		{"CD6",
+		{
+			"CD6",
 			"POLYGON ZM((0 2.5 1 11,6 2.5 2 12,6 3.5 3 13,0 3.5 4 14,0 2.5 1 11))",
 			"POLYGON((1 2.5,5 2.5,5 3.5,1 3.5,1 2.5))",
-			[]geom.ExactEqualsOption{geom.IgnoreOrder}},
+			[]geom.ExactEqualsOption{geom.IgnoreOrder},
+		},
 		// CD7: XYM MultiPoint input → XY output, partial survival
 		{"CD7", "MULTIPOINT M(3 3 1,0 0 2)", "MULTIPOINT(3 3)", nil},
 		// CD8: XYZ GeometryCollection input → XY output, mixed survival
-		{"CD8",
+		{
+			"CD8",
 			"GEOMETRYCOLLECTION Z(POINT Z(3 3 1),LINESTRING Z(0 3 0,6 3 6))",
 			"GEOMETRYCOLLECTION(POINT(3 3),LINESTRING(1 3,5 3))",
-			nil},
+			nil,
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, tr := range d4Transforms {
