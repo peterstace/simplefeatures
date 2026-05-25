@@ -5,9 +5,6 @@ func clipLineStringByRect(ls LineString, rect Envelope) Geometry {
 
 	seq := ls.Coordinates()
 	n := seq.Length()
-	if n == 0 {
-		return emptyLine
-	}
 
 	lo, hi, ok := rect.MinMaxXYs()
 	if !ok {
