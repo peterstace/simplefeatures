@@ -112,12 +112,3 @@ func clipGeometryCollectionByRect(gc GeometryCollection, rect Envelope) Geometry
 	}
 	return NewGeometryCollection(geoms)
 }
-
-// xysToSeq builds a [DimXY] [Sequence] from a slice of [XY].
-func xysToSeq(xys []XY) Sequence {
-	floats := make([]float64, 0, 2*len(xys))
-	for _, xy := range xys {
-		floats = append(floats, xy.X, xy.Y)
-	}
-	return NewSequence(floats, DimXY)
-}
