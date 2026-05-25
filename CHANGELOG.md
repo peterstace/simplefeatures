@@ -12,7 +12,6 @@
   the ambiguity of synthesising Z/M values at rectangle corners introduced by
   the clip.
 
-
 ## v0.59.0
 
 2026-03-27
