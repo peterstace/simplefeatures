@@ -75,8 +75,6 @@ func lerp(a, b, t float64) float64 {
 }
 
 // lerpXY linearly interpolates between [XY] points a and b at parameter t.
-// The endpoints are returned exactly when t is 0 or 1, so a point that
-// nominally survives interpolation unchanged is bit-identical to its input.
 func lerpXY(a, b XY, t float64) XY {
 	return XY{
 		X: lerp(a.X, b.X, t),
