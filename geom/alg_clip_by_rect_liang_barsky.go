@@ -5,11 +5,8 @@ func clipLineStringByRect(ls LineString, rect Envelope) Geometry {
 
 	seq := ls.Coordinates()
 	n := seq.Length()
-	if n == 0 {
-		return emptyLine
-	}
 
-	min, max, ok := rect.MinMaxXYs()
+	lo, hi, ok := rect.MinMaxXYs()
 	if !ok {
 		return emptyLine
 	}
@@ -21,7 +18,7 @@ func clipLineStringByRect(ls LineString, rect Envelope) Geometry {
 		a := seq.GetXY(i)
 		b := seq.GetXY(i + 1)
 
-		tMin, tMax, ok := clipSegmentParams(a, b, min, max)
+		tMin, tMax, ok := clipSegmentParams(a, b, lo, hi)
 		if !ok {
 			if len(cur) > 0 {
 				chains = append(chains, cur)
@@ -63,18 +60,18 @@ func clipLineStringByRect(ls LineString, rect Envelope) Geometry {
 
 // clipSegmentParams uses the Liang-Barsky algorithm to compute the parametric
 // range [tMin, tMax] of segment a->b that lies inside the axis-aligned
-// rectangle from min to max. It returns false if no segment of positive length
+// rectangle from lo to hi. It returns false if no segment of positive length
 // survives.
-func clipSegmentParams(a, b, min, max XY) (float64, float64, bool) {
+func clipSegmentParams(a, b, lo, hi XY) (float64, float64, bool) {
 	tMin := 0.0
 	tMax := 1.0
 	dx := b.X - a.X
 	dy := b.Y - a.Y
 	for _, pq := range [4][2]float64{
-		{-dx, a.X - min.X}, // left
-		{dx, max.X - a.X},  // right
-		{-dy, a.Y - min.Y}, // bottom
-		{dy, max.Y - a.Y},  // top
+		{-dx, a.X - lo.X}, // left
+		{dx, hi.X - a.X},  // right
+		{-dy, a.Y - lo.Y}, // bottom
+		{dy, hi.Y - a.Y},  // top
 	} {
 		p, q := pq[0], pq[1]
 		if p == 0 {

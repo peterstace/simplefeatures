@@ -106,6 +106,15 @@ func (s Sequence) asXYs() []XY {
 	return xys
 }
 
+// xysToSeq builds a [DimXY] [Sequence] from a slice of [XY].
+func xysToSeq(xys []XY) Sequence {
+	floats := make([]float64, 0, 2*len(xys))
+	for _, xy := range xys {
+		floats = append(floats, xy.X, xy.Y)
+	}
+	return NewSequence(floats, DimXY)
+}
+
 // Reverse returns a new [Sequence] containing the same point locations, but in
 // reversed order.
 func (s Sequence) Reverse() Sequence {

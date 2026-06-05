@@ -1,9 +1,8 @@
 package geom
 
 import (
-	"cmp"
 	"fmt"
-	"slices"
+	"sort"
 )
 
 // polygonClipper holds precomputed values for clipping a polygon against an
@@ -200,8 +199,8 @@ func (c *polygonClipper) walkArcs(arcs []interiorArc) [][]XY {
 	}
 
 	// Sort endpoints by param.
-	slices.SortFunc(endPoints, func(a, b endpoint) int {
-		return cmp.Compare(a.param, b.param)
+	sort.Slice(endPoints, func(i, j int) bool {
+		return endPoints[i].param < endPoints[j].param
 	})
 
 	// Collect all start params sorted.
@@ -209,7 +208,7 @@ func (c *polygonClipper) walkArcs(arcs []interiorArc) [][]XY {
 	for p := range startByParam {
 		startParams = append(startParams, p)
 	}
-	slices.Sort(startParams)
+	sort.Float64s(startParams)
 
 	// For a given end param, find the next start param going CCW.
 	findNextStart := func(endParam float64) (float64, int) {
