@@ -210,9 +210,14 @@ func (c *polygonClipper) walkArcs(arcs []interiorArc) [][]XY {
 	}
 	sort.Float64s(startParams)
 
-	// For a given end param, find the next start param going CCW.
-	findNextStart := func(endParam float64) (float64, int) {
-		// Find the first start param that is strictly after endParam (CCW).
+	// For a given end param, find the next start param going CCW. The ok
+	// result is false only when no successor can be found, which requires
+	// non-finite boundary params (e.g. NaN coordinates in the input): the
+	// preference loop rejects every param and the coincident fallback can't
+	// match either. The caller closes the current ring as-is in that case,
+	// producing a nonsensical-but-bounded result rather than looping forever.
+	findNextStart := func(endParam float64) (float64, int, bool) {
+		// Prefer the nearest start param strictly ahead of endParam going CCW.
 		best := -1.0
 		bestDist := c.perim + 1
 		for _, sp := range startParams {
@@ -222,34 +227,17 @@ func (c *polygonClipper) walkArcs(arcs []interiorArc) [][]XY {
 				best = sp
 			}
 		}
-		if best < 0 {
-			// TODO: Investigate whether this fallback is reachable and
-			// whether it produces correct results.
-			//
-			// This branch is reached when every start param has ccwDist
-			// == 0 from endParam — i.e., every arc's start is at the
-			// exact same boundary parameter as the current arc's end.
-			// The d > 0 filter above rejected them all.
-			//
-			// For valid clipped polygons this shouldn't happen: an
-			// arc's end and the next arc's start should be at distinct
-			// boundary positions (separated by at least one boundary
-			// edge). Two arcs sharing the same boundary parameter would
-			// mean two ring transitions at the exact same point, which
-			// would imply a degenerate or self-touching input.
-			//
-			// If this is truly unreachable, it should be replaced with
-			// a panic. If it is reachable, the behaviour of picking an
-			// arbitrary arc at the same parameter needs validation —
-			// it's unclear whether the walking algorithm produces
-			// correct output in this case.
-			for _, sp := range startParams {
-				if sp == endParam {
-					return sp, startByParam[sp]
-				}
+		if best >= 0 {
+			return best, startByParam[best], true
+		}
+		// No start param is strictly ahead: fall back to one coincident with
+		// endParam, where the next arc begins exactly where this one ended.
+		for _, sp := range startParams {
+			if sp == endParam {
+				return sp, startByParam[sp], true
 			}
 		}
-		return best, startByParam[best]
+		return 0, 0, false
 	}
 
 	used := make([]bool, len(arcs))
@@ -279,7 +267,10 @@ func (c *polygonClipper) walkArcs(arcs []interiorArc) [][]XY {
 			ring = append(ring, a.coords...)
 
 			// Find next arc via boundary.
-			nextStartParam, nextIdx := findNextStart(a.endParam)
+			nextStartParam, nextIdx, ok := findNextStart(a.endParam)
+			if !ok {
+				break // No successor arc; close the ring as-is.
+			}
 
 			// Build boundary path from this arc's end to the next arc's start.
 			ring = c.appendBoundaryPath(ring, a.endParam, nextStartParam)
