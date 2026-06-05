@@ -18,7 +18,7 @@ func clipLineStringByRect(ls LineString, rect Envelope) Geometry {
 		a := seq.GetXY(i)
 		b := seq.GetXY(i + 1)
 
-		tMin, tMax, ok := clipSegmentParams(a, b, lo, hi)
+		ca, cb, ok := clipSegment(a, b, lo, hi)
 		if !ok {
 			if len(cur) > 0 {
 				chains = append(chains, cur)
@@ -26,9 +26,6 @@ func clipLineStringByRect(ls LineString, rect Envelope) Geometry {
 			}
 			continue
 		}
-
-		ca := lerpXY(a, b, tMin)
-		cb := lerpXY(a, b, tMax)
 
 		if len(cur) > 0 && cur[len(cur)-1] == ca {
 			cur = append(cur, cb)
@@ -58,41 +55,84 @@ func clipLineStringByRect(ls LineString, rect Envelope) Geometry {
 	return NewMultiLineString(lines).AsGeometry()
 }
 
-// clipSegmentParams uses the Liang-Barsky algorithm to compute the parametric
-// range [tMin, tMax] of segment a->b that lies inside the axis-aligned
-// rectangle from lo to hi. It returns false if no segment of positive length
+// clipSegment uses the Liang-Barsky algorithm to compute the portion of segment
+// a->b that lies inside the axis-aligned rectangle from lo to hi. It returns the
+// clipped endpoints ca and cb, and false if no segment of positive length
 // survives.
-func clipSegmentParams(a, b, lo, hi XY) (float64, float64, bool) {
+//
+// An endpoint that a rect edge introduced (i.e. where the segment was cut by
+// that edge) is snapped exactly onto the edge's coordinate, rather than being
+// left a few ULPs off by interpolation. This matches the exact-boundary
+// guarantee that the polygon clipper provides, and keeps results stable under
+// this package's zero-tolerance equality.
+func clipSegment(a, b, lo, hi XY) (ca, cb XY, ok bool) {
 	tMin := 0.0
 	tMax := 1.0
 	dx := b.X - a.X
 	dy := b.Y - a.Y
-	for _, pq := range [4][2]float64{
-		{-dx, a.X - lo.X}, // left
-		{dx, hi.X - a.X},  // right
-		{-dy, a.Y - lo.Y}, // bottom
-		{dy, hi.Y - a.Y},  // top
-	} {
-		p, q := pq[0], pq[1]
-		if p == 0 {
-			if q < 0 {
-				return 0, 0, false
+
+	// Each rect edge contributes a Liang-Barsky constraint.
+	edges := [4]clipEdge{
+		{-dx, a.X - lo.X, true, lo.X},  // left
+		{dx, hi.X - a.X, true, hi.X},   // right
+		{-dy, a.Y - lo.Y, false, lo.Y}, // bottom
+		{dy, hi.Y - a.Y, false, hi.Y},  // top
+	}
+
+	// minEdge/maxEdge record which edge last bound tMin/tMax, or -1 if the
+	// endpoint is still the original a/b (inside the rect) and must not be
+	// snapped.
+	minEdge, maxEdge := -1, -1
+	for i, e := range edges {
+		if e.p == 0 {
+			if e.q < 0 {
+				return XY{}, XY{}, false
 			}
 			continue
 		}
-		t := q / p
-		if p < 0 {
+		t := e.q / e.p
+		if e.p < 0 {
 			if t > tMin {
 				tMin = t
+				minEdge = i
 			}
 		} else {
 			if t < tMax {
 				tMax = t
+				maxEdge = i
 			}
 		}
 		if tMin >= tMax {
-			return 0, 0, false
+			return XY{}, XY{}, false
 		}
 	}
-	return tMin, tMax, true
+
+	ca = snapToEdge(lerpXY(a, b, tMin), edges, minEdge)
+	cb = snapToEdge(lerpXY(a, b, tMax), edges, maxEdge)
+	return ca, cb, true
+}
+
+// clipEdge describes one Liang-Barsky constraint, corresponding to a single rect
+// edge. p and q are the Liang-Barsky numerator/denominator for the edge. axisX
+// reports whether the edge fixes the X coordinate (left/right) or the Y
+// coordinate (bottom/top); val is the boundary coordinate to snap that axis to.
+type clipEdge struct {
+	p, q  float64
+	axisX bool
+	val   float64
+}
+
+// snapToEdge fixes the axis controlled by edge i exactly onto its boundary
+// coordinate, leaving the interpolated point xy unchanged when i is -1 (the
+// endpoint lies inside the rect and was not introduced by an edge).
+func snapToEdge(xy XY, edges [4]clipEdge, i int) XY {
+	if i < 0 {
+		return xy
+	}
+	if edges[i].axisX {
+		xy.X = edges[i].val
+	} else {
+		xy.Y = edges[i].val
+	}
+	return xy
 }
