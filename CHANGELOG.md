@@ -5,6 +5,13 @@
 - Add `NewEnvelopeXY` constructor for building an `Envelope` from variadic x/y
   coordinate pairs, following the existing `New*XY` constructor pattern.
 
+- Add `ClipByRect2D` function that clips a geometry to a 2D axis-aligned
+  rectangle (defined by an `Envelope`). It uses the Sutherland-Hodgman
+  algorithm for polygons and the Liang-Barsky algorithm for line strings. The
+  result is always 2D: any Z or M values on the input are discarded, avoiding
+  the ambiguity of synthesising Z/M values at rectangle corners introduced by
+  the clip.
+
 ## v0.59.0
 
 2026-03-27
