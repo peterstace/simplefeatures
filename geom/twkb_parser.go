@@ -346,7 +346,7 @@ func (p *twkbParser) parseBBoxHeader() (ExtendedEnvelope, error) {
 		maxM := float64(p.bbox[6]+p.bbox[7]) / p.scalings[3]
 
 		return ExtendedEnvelope{
-			XYEnvelope: NewEnvelope(XY{minX, minY}, XY{maxX, maxY}),
+			XYEnvelope: NewEnvelopeXY(minX, minY, maxX, maxY),
 			ZRange:     NewInterval(minZ, maxZ),
 			MRange:     NewInterval(minM, maxM),
 		}, nil
@@ -360,7 +360,7 @@ func (p *twkbParser) parseBBoxHeader() (ExtendedEnvelope, error) {
 		maxZ := float64(p.bbox[4]+p.bbox[5]) / p.scalings[2]
 
 		return ExtendedEnvelope{
-			XYEnvelope: NewEnvelope(XY{minX, minY}, XY{maxX, maxY}),
+			XYEnvelope: NewEnvelopeXY(minX, minY, maxX, maxY),
 			ZRange:     NewInterval(minZ, maxZ),
 		}, nil
 	case p.hasM:
@@ -373,7 +373,7 @@ func (p *twkbParser) parseBBoxHeader() (ExtendedEnvelope, error) {
 		maxM := float64(p.bbox[4]+p.bbox[5]) / p.scalings[2]
 
 		return ExtendedEnvelope{
-			XYEnvelope: NewEnvelope(XY{minX, minY}, XY{maxX, maxY}),
+			XYEnvelope: NewEnvelopeXY(minX, minY, maxX, maxY),
 			MRange:     NewInterval(minM, maxM),
 		}, nil
 	default:
@@ -384,7 +384,7 @@ func (p *twkbParser) parseBBoxHeader() (ExtendedEnvelope, error) {
 		maxY := float64(p.bbox[2]+p.bbox[3]) / p.scalings[1]
 
 		return ExtendedEnvelope{
-			XYEnvelope: NewEnvelope(XY{minX, minY}, XY{maxX, maxY}),
+			XYEnvelope: NewEnvelopeXY(minX, minY, maxX, maxY),
 		}, nil
 	}
 }
