@@ -227,20 +227,6 @@ func NewPolygonXYZM(xyzms ...[]float64) Polygon {
 	return polygonFromCoords(xyzms, DimXYZM)
 }
 
-// NewEnvelopeXY builds a new [Envelope] from x and y coordinates, x1, y1, x2,
-// y2, ..., xn, yn. If the number of coordinates is not a multiple of 2 the
-// function will panic.
-func NewEnvelopeXY(xys ...float64) Envelope {
-	if len(xys)%2 != 0 {
-		panic("geom: coordinate arguments to NewEnvelopeXY must have a length that is a multiple of 2")
-	}
-	var env Envelope
-	for i := 0; i < len(xys); i += 2 {
-		env = env.ExpandToIncludeXY(XY{xys[i], xys[i+1]})
-	}
-	return env
-}
-
 // NewSingleRingPolygonXY builds a new XY [Polygon] from the x and y coordinates
 // of its exterior ring, in the form x1, y1, x2, y2, ..., xn, yn, x1, y1 (the
 // first and last coordinates of the ring should be the same). If the number of
@@ -341,6 +327,24 @@ func NewMultiPolygonXYM(xyms ...[][]float64) MultiPolygon {
 func NewMultiPolygonXYZM(xyzms ...[][]float64) MultiPolygon {
 	xyzms = clone3DFloat64s(xyzms)
 	return multiPolygonFromCoords(xyzms, DimXYZM)
+}
+
+// NewEnvelopeXY builds a new [Envelope] from x and y coordinates, x1, y1, x2,
+// y2, ..., xn, yn. The result is the smallest [Envelope] containing all of
+// those coordinates. If the number of coordinates is not a multiple of 2 the
+// function will panic.
+//
+// It doesn't perform any validation on the result. The [Envelope.Validate] method can be
+// used to check the validity of the result if needed.
+func NewEnvelopeXY(xys ...float64) Envelope {
+	if len(xys)%2 != 0 {
+		panic("geom: coordinate arguments to NewEnvelopeXY must have a length that is a multiple of 2")
+	}
+	var env Envelope
+	for i := 0; i < len(xys); i += 2 {
+		env = env.ExpandToIncludeXY(XY{xys[i], xys[i+1]})
+	}
+	return env
 }
 
 func clone1DFloat64s(src []float64) []float64 {
