@@ -2,8 +2,13 @@
 
 ## Unreleased
 
-- Add `NewEnvelopeXY` constructor for building an `Envelope` from variadic x/y
-  coordinate pairs, following the existing `New*XY` constructor pattern.
+- Add `NewEnvelopeXY` constructor, which builds an `Envelope` from variadic x
+  and y coordinates (x1, y1, x2, y2, ..., xn, yn), where `NewEnvelope` takes
+  `XY` values. It follows the same convention as the other `XY` constructors,
+  such as `NewPointXY` and `NewLineStringXY`. The result is the smallest
+  `Envelope` containing all of the coordinates, so no arguments gives the empty
+  envelope and a single pair gives a point envelope. An odd number of arguments
+  panics.
 
 ## v0.59.0
 
