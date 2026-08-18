@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Fix a panic in `UnmarshalTWKB` when parsing a TWKB whose element count (point
+  count, ring point count, or ID list length) is far larger than the remaining
+  input. These counts are untrusted varints, so a crafted value would cause an
+  out-of-range `make` and panic (or trigger an excessive allocation). The
+  counts are now validated against the number of remaining bytes before
+  allocating.
+
 - Add `NewEnvelopeXY` constructor, which builds an `Envelope` from variadic x
   and y coordinates (x1, y1, x2, y2, ..., xn, yn), where `NewEnvelope` takes
   `XY` values. It follows the same convention as the other `XY` constructors,
