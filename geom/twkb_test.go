@@ -573,9 +573,8 @@ func TestUnmarshalTWKBHugeCount(t *testing.T) {
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
-			if _, err := geom.UnmarshalTWKB(tc.twkb); err == nil {
-				t.Fatal("expected an error, but got nil")
-			}
+			_, err := geom.UnmarshalTWKB(tc.twkb)
+			test.Err(t, err)
 		})
 	}
 }
