@@ -609,14 +609,24 @@ func (p *twkbParser) parsePointCountAndArray() ([]float64, int, error) {
 		return nil, 0, fmt.Errorf("num points varint malformed: %w", err)
 	}
 
-	coords, err := p.parsePointArray(int(numPoints))
+	coords, err := p.parsePointArray(numPoints)
 	return coords, int(numPoints), err
 }
 
 // Convert a given number of points from integer to floating point coordinates.
 // Utilise and update the running memory of the previous reference point.
 // The returned array will contain numPoints * the number of dimensions values.
-func (p *twkbParser) parsePointArray(numPoints int) ([]float64, error) {
+func (p *twkbParser) parsePointArray(count uint64) ([]float64, error) {
+	// Guard against corrupt or malicious inputs that specify a huge point
+	// count. Each coordinate is encoded as a varint of at least one byte, so a
+	// valid encoding of count points needs at least count*dimensions remaining
+	// bytes. Checking the count before narrowing it to an int keeps an
+	// untrusted value out of make().
+	remaining := len(p.twkb) - p.pos
+	if count > uint64(remaining/p.dimensions) {
+		return nil, fmt.Errorf("number of points %d exceeds remaining buffer size of %d bytes", count, remaining)
+	}
+	numPoints := int(count)
 	coords := make([]float64, numPoints*p.dimensions)
 	c := 0
 	for i := 0; i < numPoints; i++ {
@@ -635,6 +645,14 @@ func (p *twkbParser) parsePointArray(numPoints int) ([]float64, error) {
 }
 
 func (p *twkbParser) parseIDList(numIDs int) error {
+	// Guard against corrupt or malicious inputs that specify a huge ID count.
+	// Each ID is encoded as a varint of at least one byte, so a valid ID list
+	// needs at least numIDs remaining bytes. Checking this before allocating
+	// avoids a make() panic (or excessive memory allocation) driven by an
+	// untrusted count.
+	if numIDs < 0 || numIDs > len(p.twkb)-p.pos {
+		return fmt.Errorf("number of IDs %d exceeds remaining buffer size", numIDs)
+	}
 	p.idList = make([]int64, numIDs)
 	for i := 0; i < numIDs; i++ {
 		id, err := p.parseSignedVarint()

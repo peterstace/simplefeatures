@@ -541,3 +541,40 @@ func TestZigZagInt(t *testing.T) {
 func minMax(a, b float64) (float64, float64) {
 	return math.Min(a, b), math.Max(a, b)
 }
+
+// TestUnmarshalTWKBHugeCount checks that TWKBs specifying an element count that
+// is wildly larger than the remaining buffer are rejected with an error rather
+// than causing a panic (or an attempt at an enormous allocation). The counts
+// are attacker-controlled varints, so without a bound check a value such as
+// 2^64-1 casts to a negative int and panics make() with "makeslice: len out of
+// range".
+func TestUnmarshalTWKBHugeCount(t *testing.T) {
+	// A uvarint encoding of 2^64-1 (ten bytes).
+	maxUvarint := []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01}
+	for _, tc := range []struct {
+		description string
+		twkb        []byte
+	}{
+		{
+			// LineString, precision 0, no metadata flags, huge point count.
+			description: "linestring point count",
+			twkb:        append([]byte{0x02, 0x00}, maxUvarint...),
+		},
+		{
+			// Polygon, precision 0, no metadata flags, one ring with a huge
+			// point count.
+			description: "polygon ring point count",
+			twkb:        append([]byte{0x03, 0x00, 0x01}, maxUvarint...),
+		},
+		{
+			// MultiPoint, precision 0, ID list flag set, huge ID/point count.
+			description: "multipoint id list count",
+			twkb:        append([]byte{0x04, 0x04}, maxUvarint...),
+		},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			_, err := geom.UnmarshalTWKB(tc.twkb)
+			test.Err(t, err)
+		})
+	}
+}
