@@ -48,7 +48,7 @@ func UnmarshalTWKBIDList(twkb []byte) ([]int64, bool, error) {
 		return nil, false, p.annotateError(fmt.Errorf("ID list size uvarint malformed: %w", err))
 	}
 
-	if err := p.parseIDList(int(numItems)); err != nil {
+	if err := p.parseIDList(numItems); err != nil {
 		return nil, false, p.annotateError(err)
 	}
 	return p.idList, true, nil
@@ -498,7 +498,7 @@ func (p *twkbParser) nextMultiPoint() (MultiPoint, error) {
 		return MultiPoint{}, fmt.Errorf("num points varint malformed: %w", err)
 	}
 	if p.hasIDs {
-		if err := p.parseIDList(int(numPoints)); err != nil {
+		if err := p.parseIDList(numPoints); err != nil {
 			return MultiPoint{}, err
 		}
 	}
@@ -526,7 +526,7 @@ func (p *twkbParser) nextMultiLineString() (MultiLineString, error) {
 		return MultiLineString{}, fmt.Errorf("num linestrings varint malformed: %w", err)
 	}
 	if p.hasIDs {
-		if err := p.parseIDList(int(numLineStrings)); err != nil {
+		if err := p.parseIDList(numLineStrings); err != nil {
 			return MultiLineString{}, err
 		}
 	}
@@ -554,7 +554,7 @@ func (p *twkbParser) nextMultiPolygon() (MultiPolygon, error) {
 		return MultiPolygon{}, fmt.Errorf("num polygons varint malformed: %w", err)
 	}
 	if p.hasIDs {
-		if err := p.parseIDList(int(numPolygons)); err != nil {
+		if err := p.parseIDList(numPolygons); err != nil {
 			return MultiPolygon{}, err
 		}
 	}
@@ -582,7 +582,7 @@ func (p *twkbParser) nextGeometryCollection() (GeometryCollection, error) {
 		return GeometryCollection{}, fmt.Errorf("num polygons varint malformed: %w", err)
 	}
 	if p.hasIDs {
-		if err := p.parseIDList(int(numGeoms)); err != nil {
+		if err := p.parseIDList(numGeoms); err != nil {
 			return GeometryCollection{}, err
 		}
 	}
@@ -644,15 +644,16 @@ func (p *twkbParser) parsePointArray(count uint64) ([]float64, error) {
 	return coords, nil
 }
 
-func (p *twkbParser) parseIDList(numIDs int) error {
+func (p *twkbParser) parseIDList(count uint64) error {
 	// Guard against corrupt or malicious inputs that specify a huge ID count.
-	// Each ID is encoded as a varint of at least one byte, so a valid ID list
-	// needs at least numIDs remaining bytes. Checking this before allocating
-	// avoids a make() panic (or excessive memory allocation) driven by an
-	// untrusted count.
-	if numIDs < 0 || numIDs > len(p.twkb)-p.pos {
-		return fmt.Errorf("number of IDs %d exceeds remaining buffer size", numIDs)
+	// Each ID is encoded as a varint of at least one byte, so a valid encoding
+	// of count IDs needs at least count remaining bytes. Checking the count
+	// before narrowing it to an int keeps an untrusted value out of make().
+	remaining := len(p.twkb) - p.pos
+	if count > uint64(remaining) {
+		return fmt.Errorf("number of IDs %d exceeds remaining buffer size of %d bytes", count, remaining)
 	}
+	numIDs := int(count)
 	p.idList = make([]int64, numIDs)
 	for i := 0; i < numIDs; i++ {
 		id, err := p.parseSignedVarint()

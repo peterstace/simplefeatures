@@ -544,10 +544,9 @@ func minMax(a, b float64) (float64, float64) {
 
 // TestUnmarshalTWKBHugeCount checks that TWKBs specifying an element count that
 // is wildly larger than the remaining buffer are rejected with an error rather
-// than causing a panic (or an attempt at an enormous allocation). The counts
-// are attacker-controlled varints, so without a bound check a value such as
-// 2^64-1 casts to a negative int and panics make() with "makeslice: len out of
-// range".
+// than causing a panic (or an attempt at an enormous allocation). The counts are
+// attacker-controlled varints used to size allocations, so a value such as
+// 2^64-1 must be rejected before it reaches make().
 func TestUnmarshalTWKBHugeCount(t *testing.T) {
 	// A uvarint encoding of 2^64-1 (ten bytes).
 	maxUvarint := []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01}
@@ -577,4 +576,11 @@ func TestUnmarshalTWKBHugeCount(t *testing.T) {
 			test.Err(t, err)
 		})
 	}
+
+	t.Run("id list entry point", func(t *testing.T) {
+		// MultiPoint, precision 0, ID list flag set, huge ID/point count.
+		twkb := append([]byte{0x04, 0x04}, maxUvarint...)
+		_, _, err := geom.UnmarshalTWKBIDList(twkb)
+		test.Err(t, err)
+	})
 }
