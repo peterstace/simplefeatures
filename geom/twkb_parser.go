@@ -579,7 +579,7 @@ func (p *twkbParser) parseGeometryCollection() (GeometryCollection, error) {
 func (p *twkbParser) nextGeometryCollection() (GeometryCollection, error) {
 	numGeoms, err := p.parseUnsignedVarint()
 	if err != nil {
-		return GeometryCollection{}, fmt.Errorf("num polygons varint malformed: %w", err)
+		return GeometryCollection{}, fmt.Errorf("num geometries varint malformed: %w", err)
 	}
 	if p.hasIDs {
 		if err := p.parseIDList(numGeoms); err != nil {
