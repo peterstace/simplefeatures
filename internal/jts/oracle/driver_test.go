@@ -22,16 +22,21 @@ type driver struct {
 // cacheDir is where tools/setup.sh puts JTS and the compiled oracle driver.
 const cacheDir = "../tools/.cache"
 
-// startDriver compiles (if needed) and starts the Java driver, or skips the
-// test if Java or the JTS cache is unavailable.
+// startDriver compiles (if needed) and starts the Java driver. It runs
+// tools/setup.sh first if the JTS cache is missing. Java (JDK 21) must be
+// installed: the oracle tests always run.
 func startDriver(t *testing.T) *driver {
 	t.Helper()
+	for _, tool := range []string{"java", "javac"} {
+		if _, err := exec.LookPath(tool); err != nil {
+			t.Fatalf("%s not found: the oracle tests need JDK 21", tool)
+		}
+	}
 	jtsClasses := filepath.Join(cacheDir, "jts-classes")
 	if _, err := os.Stat(jtsClasses); err != nil {
-		t.Skip("JTS classes not found; run internal/jts/tools/setup.sh")
-	}
-	if _, err := exec.LookPath("java"); err != nil {
-		t.Skip("java not found")
+		if out, err := exec.Command("../tools/setup.sh").CombinedOutput(); err != nil {
+			t.Fatalf("running setup.sh: %v\n%s", err, out)
+		}
 	}
 	classes := filepath.Join(cacheDir, "oracle-classes")
 	src := "../tools/oracle/Driver.java"

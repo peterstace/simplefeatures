@@ -65,14 +65,14 @@ func (s stats) String() string {
 }
 
 func TestXML(t *testing.T) {
+	d := startDriver(t)
 	files, err := filepath.Glob(filepath.Join(testXMLDir, "*", "*.xml"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(files) == 0 {
-		t.Skip("JTS XML tests not found; run internal/jts/tools/setup.sh")
+		t.Fatal("JTS XML tests not found")
 	}
-	d := startDriver(t)
 	st := stats{}
 	for _, file := range files {
 		rel, _ := filepath.Rel(testXMLDir, file)
