@@ -327,7 +327,13 @@ operations: relate and its predicates, prepared predicates, the four overlay
 operations, distance, and Hausdorff distance.
 
 The translated JTS JUnit tests (`go test` in this directory) complement the
-oracle.
+oracle. They cover the tests that JTS's own build runs: files named
+`*Test.java`, apart from `*PerfTest.java`, `*StressTest.java`, and the
+`test.jts.perf` package.
+
+The oracle tests always run: they fetch and build JTS with `tools/setup.sh` if
+needed, and fail if there is no JDK. CI runs them in an image with Temurin JDK
+21.0.9 (`.ci/unit.Dockerfile`).
 
 ## Workflow
 
