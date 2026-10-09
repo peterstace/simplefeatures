@@ -41,20 +41,20 @@ func Algorithm_RobustLineIntersectorZTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_RobustLineIntersectorZTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 239 && p.jkind_ <= 239
+	return p != nil && p.jkind_ >= 209 && p.jkind_ <= 209
 }
 func Algorithm_RobustLineIntersectorZTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_RobustLineIntersectorZTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 239 || p.jkind_ > 239 {
+	if p.jkind_ < 209 || p.jkind_ > 209 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.RobustLineIntersectorZTest"))
 	}
 	return (*Algorithm_RobustLineIntersectorZTest)(unsafe.Pointer(p))
 }
 func Algorithm_RobustLineIntersectorZTest_new(name *java.String) *Algorithm_RobustLineIntersectorZTest {
 	this := &Algorithm_RobustLineIntersectorZTest{}
-	this.jkind_ = 239
+	this.jkind_ = 209
 	this.JSetSelf(this)
 	this.Algorithm_RobustLineIntersectorZTest_init(name)
 	return this

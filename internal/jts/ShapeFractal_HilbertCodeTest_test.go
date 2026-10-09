@@ -108,7 +108,7 @@ func (this *ShapeFractal_HilbertCodeTest) checkDecodeEncode_int_int(level int32,
 }
 func TestShapeFractal_HilbertCodeTest_testDecode(t *testing.T) {
 	junit.Run(t, func() {
-		tc := ShapeFractal_HilbertCodeTest_new(jlit_4586)
+		tc := ShapeFractal_HilbertCodeTest_new(jlit_4585)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestDecode()
@@ -116,7 +116,7 @@ func TestShapeFractal_HilbertCodeTest_testDecode(t *testing.T) {
 }
 func TestShapeFractal_HilbertCodeTest_testDecodeEncode(t *testing.T) {
 	junit.Run(t, func() {
-		tc := ShapeFractal_HilbertCodeTest_new(jlit_4587)
+		tc := ShapeFractal_HilbertCodeTest_new(jlit_4586)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestDecodeEncode()
@@ -124,7 +124,7 @@ func TestShapeFractal_HilbertCodeTest_testDecodeEncode(t *testing.T) {
 }
 func TestShapeFractal_HilbertCodeTest_testLevel(t *testing.T) {
 	junit.Run(t, func() {
-		tc := ShapeFractal_HilbertCodeTest_new(jlit_4588)
+		tc := ShapeFractal_HilbertCodeTest_new(jlit_4587)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestLevel()
@@ -132,7 +132,7 @@ func TestShapeFractal_HilbertCodeTest_testLevel(t *testing.T) {
 }
 func TestShapeFractal_HilbertCodeTest_testSize(t *testing.T) {
 	junit.Run(t, func() {
-		tc := ShapeFractal_HilbertCodeTest_new(jlit_4589)
+		tc := ShapeFractal_HilbertCodeTest_new(jlit_4588)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSize()

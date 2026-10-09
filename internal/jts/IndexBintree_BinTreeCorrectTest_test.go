@@ -55,7 +55,7 @@ func (this *IndexBintree_BinTreeCorrectTest) IndexBintree_BinTreeCorrectTest_ini
 }
 func (this *IndexBintree_BinTreeCorrectTest) Run() {
 	this.Fill()
-	java.System_out.Println_String(java.Concat(jlit_1967, java.StrOfInt(int32(this.btree.Depth())), jlit_1968, java.StrOfInt(int32(this.btree.Size()))))
+	java.System_out.Println_String(java.Concat(jlit_1966, java.StrOfInt(int32(this.btree.Depth())), jlit_1967, java.StrOfInt(int32(this.btree.Size()))))
 	this.RunQueries()
 }
 func (this *IndexBintree_BinTreeCorrectTest) Fill() {
@@ -99,7 +99,7 @@ func (this *IndexBintree_BinTreeCorrectTest) QueryGrid_int_double(nGridCells int
 			this.QueryTest_Interval(interval)
 		}
 	}
-	java.System_out.Println_String(java.Concat(jlit_1969, sw.GetTimeString()))
+	java.System_out.Println_String(java.Concat(jlit_1968, sw.GetTimeString()))
 }
 func (this *IndexBintree_BinTreeCorrectTest) QueryTime_Interval(interval *IndexBintree_Interval) {
 	var eList java.List = this.intervalList.Query_Interval(interval)
@@ -111,7 +111,7 @@ func (this *IndexBintree_BinTreeCorrectTest) QueryTest_Interval(interval *IndexB
 	var eList java.List = this.intervalList.Query_Interval(interval)
 	java.System_out.Println_int(finalList.Size())
 	if finalList.Size() != eList.Size() {
-		panic(java.Ref(java.RuntimeException_new_String(jlit_1970)))
+		panic(java.Ref(java.RuntimeException_new_String(jlit_1969)))
 	}
 }
 func (this *IndexBintree_BinTreeCorrectTest) getOverlapping_List_Interval(items java.List, searchInterval *IndexBintree_Interval) java.List {

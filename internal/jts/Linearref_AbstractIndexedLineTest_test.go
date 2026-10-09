@@ -36,13 +36,13 @@ func Linearref_AbstractIndexedLineTest_isInstance(o any) bool {
 	return ok
 }
 func Linearref_AbstractIndexedLineTest_isKind(p *Linearref_AbstractIndexedLineTest) bool {
-	return p != nil && p.jkind_ >= 134 && p.jkind_ <= 136
+	return p != nil && p.jkind_ >= 133 && p.jkind_ <= 135
 }
 func Linearref_AbstractIndexedLineTest_downcast(p *Linearref_AbstractIndexedLineTest) *Linearref_AbstractIndexedLineTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 134 || p.jkind_ > 136 {
+	if p.jkind_ < 133 || p.jkind_ > 135 {
 		panic(java.ClassCastError(Linearref_AbstractIndexedLineTest_toAny(p), "org.locationtech.jts.linearref.AbstractIndexedLineTest"))
 	}
 	return (*Linearref_AbstractIndexedLineTest)(unsafe.Pointer(p))
@@ -55,9 +55,9 @@ func Linearref_AbstractIndexedLineTest_toAny(p *Linearref_AbstractIndexedLineTes
 		return nil
 	}
 	switch p.jkind_ {
-	case 135:
+	case 134:
 		return (*Linearref_LengthIndexedLineTest)(unsafe.Pointer(p))
-	case 136:
+	case 135:
 		return (*Linearref_LocationIndexedLineTest)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
@@ -197,43 +197,43 @@ func (this *Linearref_AbstractIndexedLineTest) RunOffsetTest_String_String_doubl
 }
 func (this *Linearref_AbstractIndexedLineTest) ExtractOffsetAt_Geometry_Coordinate_double(a0 *Geom_Geometry, a1 *Geom_Coordinate, a2 float64) *Geom_Coordinate {
 	switch this.jkind_ {
-	case 135:
+	case 134:
 		return (*Linearref_LengthIndexedLineTest)(unsafe.Pointer(this)).ExtractOffsetAt_Geometry_Coordinate_double_impl(a0, a1, a2)
-	case 136:
+	case 135:
 		return (*Linearref_LocationIndexedLineTest)(unsafe.Pointer(this)).ExtractOffsetAt_Geometry_Coordinate_double_impl(a0, a1, a2)
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.linearref.AbstractIndexedLineTest.ExtractOffsetAt_Geometry_Coordinate_double"))
 }
 func (this *Linearref_AbstractIndexedLineTest) IndexOfAfterCheck_Geometry_Coordinate(a0 *Geom_Geometry, a1 *Geom_Coordinate) bool {
 	switch this.jkind_ {
-	case 135:
+	case 134:
 		return (*Linearref_LengthIndexedLineTest)(unsafe.Pointer(this)).IndexOfAfterCheck_Geometry_Coordinate_impl(a0, a1)
-	case 136:
+	case 135:
 		return (*Linearref_LocationIndexedLineTest)(unsafe.Pointer(this)).IndexOfAfterCheck_Geometry_Coordinate_impl(a0, a1)
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.linearref.AbstractIndexedLineTest.IndexOfAfterCheck_Geometry_Coordinate"))
 }
 func (this *Linearref_AbstractIndexedLineTest) IndexOfAfterCheck_Geometry_Coordinate_Coordinate(a0 *Geom_Geometry, a1 *Geom_Coordinate, a2 *Geom_Coordinate) bool {
 	switch this.jkind_ {
-	case 135:
+	case 134:
 		return (*Linearref_LengthIndexedLineTest)(unsafe.Pointer(this)).IndexOfAfterCheck_Geometry_Coordinate_Coordinate_impl(a0, a1, a2)
-	case 136:
+	case 135:
 		return (*Linearref_LocationIndexedLineTest)(unsafe.Pointer(this)).IndexOfAfterCheck_Geometry_Coordinate_Coordinate_impl(a0, a1, a2)
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.linearref.AbstractIndexedLineTest.IndexOfAfterCheck_Geometry_Coordinate_Coordinate"))
 }
 func (this *Linearref_AbstractIndexedLineTest) IndicesOfThenExtract_Geometry_Geometry(a0 *Geom_Geometry, a1 *Geom_Geometry) *Geom_Geometry {
 	switch this.jkind_ {
-	case 135:
+	case 134:
 		return (*Linearref_LengthIndexedLineTest)(unsafe.Pointer(this)).IndicesOfThenExtract_Geometry_Geometry_impl(a0, a1)
-	case 136:
+	case 135:
 		return (*Linearref_LocationIndexedLineTest)(unsafe.Pointer(this)).IndicesOfThenExtract_Geometry_Geometry_impl(a0, a1)
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.linearref.AbstractIndexedLineTest.IndicesOfThenExtract_Geometry_Geometry"))
 }
 func (this *Linearref_AbstractIndexedLineTest) TestOffsetStartPointRepeatedPoint() {
 	switch this.jkind_ {
-	case 135:
+	case 134:
 		(*Linearref_LengthIndexedLineTest)(unsafe.Pointer(this)).TestOffsetStartPointRepeatedPoint_impl()
 		return
 	}

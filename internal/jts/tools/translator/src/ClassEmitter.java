@@ -640,7 +640,7 @@ final class ClassEmitter {
     // JUnit tests
 
     private void emitTests(Model.ClassInfo c) {
-        if (c.isAbstract() || c.sym.isAnonymous() || c.sym.isDirectlyOrIndirectlyLocal()) {
+        if (c.isAbstract() || c.sym.isAnonymous() || c.sym.isDirectlyOrIndirectlyLocal() || !runByJTSBuild(c)) {
             return;
         }
         ClassSymbol testCase = findClass("junit.framework.TestCase");
@@ -700,6 +700,16 @@ final class ClassEmitter {
                         + ") }");
             }
         }
+    }
+
+    /**
+     * Whether JTS's Maven build runs the tests in c's source file: it includes
+     * **&#47;*Test.java but excludes **&#47;*PerfTest.java and **&#47;*StressTest.java.
+     */
+    private static boolean runByJTSBuild(Model.ClassInfo c) {
+        String file = c.sym.outermostClass().sourcefile.getName();
+        file = file.substring(file.lastIndexOf('/') + 1);
+        return file.endsWith("Test.java") && !file.endsWith("PerfTest.java") && !file.endsWith("StressTest.java");
     }
 
     /** Emits Go tests for a JUnit 4 class: its @Test methods. */

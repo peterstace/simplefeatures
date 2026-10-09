@@ -40,13 +40,13 @@ func OperationValid_IsSimpleTest_isInstance(o any) bool {
 	return ok
 }
 func OperationValid_IsSimpleTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 321 && p.jkind_ <= 321
+	return p != nil && p.jkind_ >= 291 && p.jkind_ <= 291
 }
 func OperationValid_IsSimpleTest_downcast(p *Testjts_GeometryTestCase) *OperationValid_IsSimpleTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 321 || p.jkind_ > 321 {
+	if p.jkind_ < 291 || p.jkind_ > 291 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.valid.IsSimpleTest"))
 	}
 	return (*OperationValid_IsSimpleTest)(unsafe.Pointer(p))
@@ -56,7 +56,7 @@ const OperationValid_IsSimpleTest_TOLERANCE float64 = float64(5.0e-5)
 
 func OperationValid_IsSimpleTest_new(name *java.String) *OperationValid_IsSimpleTest {
 	this := &OperationValid_IsSimpleTest{}
-	this.jkind_ = 321
+	this.jkind_ = 291
 	this.JSetSelf(this)
 	this.OperationValid_IsSimpleTest_init(name)
 	return this
@@ -65,17 +65,17 @@ func (this *OperationValid_IsSimpleTest) OperationValid_IsSimpleTest_init(name *
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationValid_IsSimpleTest) Test2TouchAtEndpoint() {
-	var a *java.String = jlit_4366
+	var a *java.String = jlit_4365
 	this.checkIsSimple_String_BoundaryNodeRule_boolean_Coordinate(a, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, true, Geom_Coordinate_new_double_double(float64(int32(2)), float64(int32(1))))
 	this.checkIsSimple_String_BoundaryNodeRule_boolean_Coordinate(a, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, true, Geom_Coordinate_new_double_double(float64(int32(2)), float64(int32(1))))
 }
 func (this *OperationValid_IsSimpleTest) Test3TouchAtEndpoint() {
-	var a *java.String = jlit_4367
+	var a *java.String = jlit_4366
 	this.checkIsSimple_String_BoundaryNodeRule_boolean_Coordinate(a, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, true, Geom_Coordinate_new_double_double(float64(int32(2)), float64(int32(1))))
 	this.checkIsSimple_String_BoundaryNodeRule_boolean_Coordinate(a, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, true, Geom_Coordinate_new_double_double(float64(int32(2)), float64(int32(1))))
 }
 func (this *OperationValid_IsSimpleTest) TestCross() {
-	var a *java.String = jlit_4368
+	var a *java.String = jlit_4367
 	this.checkIsSimple_String_BoundaryNodeRule_boolean_Coordinate(a, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, false, Geom_Coordinate_new_double_double(float64(int32(70)), float64(int32(70))))
 	this.checkIsSimple_String_BoundaryNodeRule_boolean_Coordinate(a, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, false, Geom_Coordinate_new_double_double(float64(int32(70)), float64(int32(70))))
 }
@@ -90,36 +90,36 @@ func (this *OperationValid_IsSimpleTest) TestRing() {
 	this.checkIsSimple_String_BoundaryNodeRule_boolean(a, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, true)
 }
 func (this *OperationValid_IsSimpleTest) TestLineRepeatedStart() {
-	var a *java.String = jlit_4369
+	var a *java.String = jlit_4368
 	this.checkIsSimple_String_BoundaryNodeRule_boolean(a, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, true)
 	this.checkIsSimple_String_BoundaryNodeRule_boolean(a, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, true)
 }
 func (this *OperationValid_IsSimpleTest) TestLineRepeatedEnd() {
-	var a *java.String = jlit_4370
+	var a *java.String = jlit_4369
 	this.checkIsSimple_String_BoundaryNodeRule_boolean(a, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, true)
 	this.checkIsSimple_String_BoundaryNodeRule_boolean(a, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, true)
 }
 func (this *OperationValid_IsSimpleTest) TestLineRepeatedBothEnds() {
-	var a *java.String = jlit_4371
+	var a *java.String = jlit_4370
 	this.checkIsSimple_String_BoundaryNodeRule_boolean(a, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, true)
 	this.checkIsSimple_String_BoundaryNodeRule_boolean(a, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, true)
 }
 func (this *OperationValid_IsSimpleTest) TestLineRepeatedAll() {
-	var a *java.String = jlit_4372
+	var a *java.String = jlit_4371
 	this.checkIsSimple_String_BoundaryNodeRule_boolean(a, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, true)
 	this.checkIsSimple_String_BoundaryNodeRule_boolean(a, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, true)
 }
 func (this *OperationValid_IsSimpleTest) TestLinesAll() {
-	this.checkIsSimpleAll_String_BoundaryNodeRule_String(jlit_4373, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4374)
+	this.checkIsSimpleAll_String_BoundaryNodeRule_String(jlit_4372, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4373)
 }
 func (this *OperationValid_IsSimpleTest) TestPolygonAll() {
-	this.checkIsSimpleAll_String_BoundaryNodeRule_String(jlit_4375, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4376)
+	this.checkIsSimpleAll_String_BoundaryNodeRule_String(jlit_4374, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4375)
 }
 func (this *OperationValid_IsSimpleTest) TestMultiPointAll() {
-	this.checkIsSimpleAll_String_BoundaryNodeRule_String(jlit_4377, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4378)
+	this.checkIsSimpleAll_String_BoundaryNodeRule_String(jlit_4376, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4377)
 }
 func (this *OperationValid_IsSimpleTest) TestGeometryCollectionAll() {
-	this.checkIsSimpleAll_String_BoundaryNodeRule_String(jlit_4379, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4380)
+	this.checkIsSimpleAll_String_BoundaryNodeRule_String(jlit_4378, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4379)
 }
 func (this *OperationValid_IsSimpleTest) checkIsSimple_String_BoundaryNodeRule_boolean(wkt *java.String, bnRule Algorithm_BoundaryNodeRule, expectedResult bool) {
 	this.checkIsSimple_String_BoundaryNodeRule_boolean_Coordinate(wkt, bnRule, expectedResult, nil)
@@ -147,7 +147,7 @@ func (this *OperationValid_IsSimpleTest) checkIsSimpleAll_String_BoundaryNodeRul
 }
 func TestOperationValid_IsSimpleTest_test2TouchAtEndpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsSimpleTest_new(jlit_4381)
+		tc := OperationValid_IsSimpleTest_new(jlit_4380)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.Test2TouchAtEndpoint()
@@ -155,7 +155,7 @@ func TestOperationValid_IsSimpleTest_test2TouchAtEndpoint(t *testing.T) {
 }
 func TestOperationValid_IsSimpleTest_test3TouchAtEndpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsSimpleTest_new(jlit_4382)
+		tc := OperationValid_IsSimpleTest_new(jlit_4381)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.Test3TouchAtEndpoint()
@@ -163,7 +163,7 @@ func TestOperationValid_IsSimpleTest_test3TouchAtEndpoint(t *testing.T) {
 }
 func TestOperationValid_IsSimpleTest_testCross(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsSimpleTest_new(jlit_4383)
+		tc := OperationValid_IsSimpleTest_new(jlit_4382)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestCross()
@@ -171,7 +171,7 @@ func TestOperationValid_IsSimpleTest_testCross(t *testing.T) {
 }
 func TestOperationValid_IsSimpleTest_testGeometryCollectionAll(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsSimpleTest_new(jlit_4384)
+		tc := OperationValid_IsSimpleTest_new(jlit_4383)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGeometryCollectionAll()
@@ -179,7 +179,7 @@ func TestOperationValid_IsSimpleTest_testGeometryCollectionAll(t *testing.T) {
 }
 func TestOperationValid_IsSimpleTest_testLineRepeatedAll(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsSimpleTest_new(jlit_4385)
+		tc := OperationValid_IsSimpleTest_new(jlit_4384)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineRepeatedAll()
@@ -187,7 +187,7 @@ func TestOperationValid_IsSimpleTest_testLineRepeatedAll(t *testing.T) {
 }
 func TestOperationValid_IsSimpleTest_testLineRepeatedBothEnds(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsSimpleTest_new(jlit_4386)
+		tc := OperationValid_IsSimpleTest_new(jlit_4385)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineRepeatedBothEnds()
@@ -195,7 +195,7 @@ func TestOperationValid_IsSimpleTest_testLineRepeatedBothEnds(t *testing.T) {
 }
 func TestOperationValid_IsSimpleTest_testLineRepeatedEnd(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsSimpleTest_new(jlit_4387)
+		tc := OperationValid_IsSimpleTest_new(jlit_4386)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineRepeatedEnd()
@@ -203,7 +203,7 @@ func TestOperationValid_IsSimpleTest_testLineRepeatedEnd(t *testing.T) {
 }
 func TestOperationValid_IsSimpleTest_testLineRepeatedStart(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsSimpleTest_new(jlit_4388)
+		tc := OperationValid_IsSimpleTest_new(jlit_4387)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineRepeatedStart()
@@ -211,7 +211,7 @@ func TestOperationValid_IsSimpleTest_testLineRepeatedStart(t *testing.T) {
 }
 func TestOperationValid_IsSimpleTest_testLinesAll(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsSimpleTest_new(jlit_4389)
+		tc := OperationValid_IsSimpleTest_new(jlit_4388)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesAll()
@@ -227,7 +227,7 @@ func TestOperationValid_IsSimpleTest_testMultiLineStringWithRingTouchAtEndpoint(
 }
 func TestOperationValid_IsSimpleTest_testMultiPointAll(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsSimpleTest_new(jlit_4390)
+		tc := OperationValid_IsSimpleTest_new(jlit_4389)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPointAll()
@@ -235,7 +235,7 @@ func TestOperationValid_IsSimpleTest_testMultiPointAll(t *testing.T) {
 }
 func TestOperationValid_IsSimpleTest_testPolygonAll(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsSimpleTest_new(jlit_4391)
+		tc := OperationValid_IsSimpleTest_new(jlit_4390)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonAll()

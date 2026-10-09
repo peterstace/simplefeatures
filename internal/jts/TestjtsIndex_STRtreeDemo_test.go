@@ -63,8 +63,8 @@ func TestjtsIndex_STRtreeDemo_initTree(t_ *TestjtsIndex_STRtreeDemo_TestTree, so
 	t_.Build()
 }
 func TestjtsIndex_STRtreeDemo_printSourceData(sourceEnvelopes java.List, out *java.PrintStream) {
-	out.Println_String(jlit_4889)
-	out.Print_String(jlit_4890)
+	out.Println_String(jlit_4881)
+	out.Print_String(jlit_4882)
 	var first bool = true
 	{
 		var i java.Iterator = sourceEnvelopes.Iterator()
@@ -79,7 +79,7 @@ func TestjtsIndex_STRtreeDemo_printSourceData(sourceEnvelopes java.List, out *ja
 			out.Print_Object(Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(g))))
 		}
 	}
-	out.Println_String(jlit_4891)
+	out.Println_String(jlit_4883)
 }
 func TestjtsIndex_STRtreeDemo_sourceData() java.List {
 	var envelopes *java.ArrayList = java.ArrayList_new()
@@ -104,13 +104,13 @@ func TestjtsIndex_STRtreeDemo_printLevels(t_ *TestjtsIndex_STRtreeDemo_TestTree,
 	{
 		var i int32 = int32(0)
 		for ; i <= t_.GetRoot_impl().GetLevel(); i++ {
-			TestjtsIndex_STRtreeDemo_printBoundables(t_.BoundablesAtLevel_int_impl(i), java.Concat(jlit_4892, java.StrOfInt(int32(i))), out)
+			TestjtsIndex_STRtreeDemo_printBoundables(t_.BoundablesAtLevel_int_impl(i), java.Concat(jlit_4884, java.StrOfInt(int32(i))), out)
 		}
 	}
 }
 func TestjtsIndex_STRtreeDemo_printBoundables(boundables java.List, title *java.String, out *java.PrintStream) {
-	out.Println_String(java.Concat(jlit_4893, title, jlit_4894))
-	out.Print_String(jlit_4890)
+	out.Println_String(java.Concat(jlit_4885, title, jlit_4886))
+	out.Print_String(jlit_4882)
 	var first bool = true
 	{
 		var i java.Iterator = boundables.Iterator()
@@ -124,10 +124,10 @@ func TestjtsIndex_STRtreeDemo_printBoundables(boundables java.List, title *java.
 			out.Print_String(TestjtsIndex_STRtreeDemo_toString(boundable))
 		}
 	}
-	out.Println_String(jlit_4891)
+	out.Println_String(jlit_4883)
 }
 func TestjtsIndex_STRtreeDemo_toString(b IndexStrtree_Boundable) *java.String {
-	return java.Concat(jlit_4895, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMinX()), jlit_2, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMinY()), jlit_39, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMinX()), jlit_2, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMaxY()), jlit_39, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMaxX()), jlit_2, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMaxY()), jlit_39, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMaxX()), jlit_2, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMinY()), jlit_51, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMinX()), jlit_2, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMinY()), jlit_4896)
+	return java.Concat(jlit_4887, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMinX()), jlit_2, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMinY()), jlit_39, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMinX()), jlit_2, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMaxY()), jlit_39, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMaxX()), jlit_2, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMaxY()), jlit_39, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMaxX()), jlit_2, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMinY()), jlit_51, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMinX()), jlit_2, java.StrOfDouble(TestjtsIndex_STRtreeDemo_envelope(b).GetMinY()), jlit_4888)
 }
 func TestjtsIndex_STRtreeDemo_envelope(b IndexStrtree_Boundable) *Geom_Envelope {
 	return Geom_Envelope_fromAny(b.GetBounds())

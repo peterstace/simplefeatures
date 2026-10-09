@@ -43,13 +43,13 @@ func Noding_BasicSegmentString_isInstance(o any) bool {
 	return ok
 }
 func Noding_BasicSegmentString_isKind(p *Noding_BasicSegmentString) bool {
-	return p != nil && p.jkind_ >= 137 && p.jkind_ <= 139
+	return p != nil && p.jkind_ >= 136 && p.jkind_ <= 138
 }
 func Noding_BasicSegmentString_downcast(p *Noding_BasicSegmentString) *Noding_BasicSegmentString {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 137 || p.jkind_ > 139 {
+	if p.jkind_ < 136 || p.jkind_ > 138 {
 		panic(java.ClassCastError(Noding_BasicSegmentString_toAny(p), "org.locationtech.jts.noding.BasicSegmentString"))
 	}
 	return (*Noding_BasicSegmentString)(unsafe.Pointer(p))
@@ -60,18 +60,18 @@ func Noding_BasicSegmentString_toAny(p *Noding_BasicSegmentString) any {
 		return nil
 	}
 	switch p.jkind_ {
-	case 137:
+	case 136:
 		return (*Noding_BasicSegmentString)(unsafe.Pointer(p))
-	case 138:
+	case 137:
 		return (*Coverage_CoverageRing)(unsafe.Pointer(p))
-	case 139:
+	case 138:
 		return (*OperationRelateng_RelateSegmentString)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
 }
 func Noding_BasicSegmentString_new(pts []*Geom_Coordinate, data any) *Noding_BasicSegmentString {
 	this := &Noding_BasicSegmentString{}
-	this.jkind_ = 137
+	this.jkind_ = 136
 	this.Noding_BasicSegmentString_init(pts, data)
 	return this
 }

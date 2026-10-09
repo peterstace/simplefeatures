@@ -60,28 +60,28 @@ func (this *Io_WKBTest) TestPointEmpty() {
 	this.runWKBTest_String(jlit_566)
 }
 func (this *Io_WKBTest) TestLineString() {
-	this.runWKBTest_String(jlit_1802)
+	this.runWKBTest_String(jlit_1801)
 }
 func (this *Io_WKBTest) TestPolygon() {
-	this.runWKBTest_String(jlit_1803)
+	this.runWKBTest_String(jlit_1802)
 }
 func (this *Io_WKBTest) TestPolygonWithHole() {
-	this.runWKBTest_String(jlit_1804)
+	this.runWKBTest_String(jlit_1803)
 }
 func (this *Io_WKBTest) TestMultiPoint() {
 	this.runWKBTest_String(jlit_2153)
 }
 func (this *Io_WKBTest) TestMultiLineString() {
-	this.runWKBTest_String(jlit_1806)
+	this.runWKBTest_String(jlit_1805)
 }
 func (this *Io_WKBTest) TestMultiPolygon() {
-	this.runWKBTest_String(jlit_1807)
+	this.runWKBTest_String(jlit_1806)
 }
 func (this *Io_WKBTest) TestGeometryCollection() {
-	this.runWKBTest_String(jlit_1808)
+	this.runWKBTest_String(jlit_1807)
 }
 func (this *Io_WKBTest) TestNestedGeometryCollection() {
-	this.runWKBTest_String(jlit_1809)
+	this.runWKBTest_String(jlit_1808)
 }
 func (this *Io_WKBTest) TestLineStringEmpty() {
 	this.runWKBTest_String(jlit_1038)
@@ -252,7 +252,7 @@ func TestIo_WKBTest_testLineString(t *testing.T) {
 }
 func TestIo_WKBTest_testLineStringEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Io_WKBTest_new(jlit_1900)
+		tc := Io_WKBTest_new(jlit_1899)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestLineStringEmpty()
@@ -260,7 +260,7 @@ func TestIo_WKBTest_testLineStringEmpty(t *testing.T) {
 }
 func TestIo_WKBTest_testMultiLineString(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Io_WKBTest_new(jlit_1814)
+		tc := Io_WKBTest_new(jlit_1813)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestMultiLineString()
@@ -300,7 +300,7 @@ func TestIo_WKBTest_testMultiPolygon(t *testing.T) {
 }
 func TestIo_WKBTest_testMultiPolygonEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Io_WKBTest_new(jlit_1923)
+		tc := Io_WKBTest_new(jlit_1922)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestMultiPolygonEmpty()
@@ -308,7 +308,7 @@ func TestIo_WKBTest_testMultiPolygonEmpty(t *testing.T) {
 }
 func TestIo_WKBTest_testNestedGeometryCollection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Io_WKBTest_new(jlit_1815)
+		tc := Io_WKBTest_new(jlit_1814)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestNestedGeometryCollection()
@@ -324,7 +324,7 @@ func TestIo_WKBTest_testPoint(t *testing.T) {
 }
 func TestIo_WKBTest_testPointEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Io_WKBTest_new(jlit_1929)
+		tc := Io_WKBTest_new(jlit_1928)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestPointEmpty()
@@ -356,7 +356,7 @@ func TestIo_WKBTest_testPolygonEmpty(t *testing.T) {
 }
 func TestIo_WKBTest_testPolygonWithHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Io_WKBTest_new(jlit_1816)
+		tc := Io_WKBTest_new(jlit_1815)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestPolygonWithHole()

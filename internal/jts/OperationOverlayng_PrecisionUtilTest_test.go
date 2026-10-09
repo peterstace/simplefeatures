@@ -40,20 +40,20 @@ func OperationOverlayng_PrecisionUtilTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_PrecisionUtilTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 302 && p.jkind_ <= 302
+	return p != nil && p.jkind_ >= 272 && p.jkind_ <= 272
 }
 func OperationOverlayng_PrecisionUtilTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_PrecisionUtilTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 302 || p.jkind_ > 302 {
+	if p.jkind_ < 272 || p.jkind_ > 272 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.PrecisionUtilTest"))
 	}
 	return (*OperationOverlayng_PrecisionUtilTest)(unsafe.Pointer(p))
 }
 func OperationOverlayng_PrecisionUtilTest_new(name *java.String) *OperationOverlayng_PrecisionUtilTest {
 	this := &OperationOverlayng_PrecisionUtilTest{}
-	this.jkind_ = 302
+	this.jkind_ = 272
 	this.JSetSelf(this)
 	this.OperationOverlayng_PrecisionUtilTest_init(name)
 	return this
@@ -68,34 +68,34 @@ func (this *OperationOverlayng_PrecisionUtilTest) TestBNull() {
 	this.checkRobustScale_String_String_double_double_double(jlit_966, nil, float64(int32(1)), float64(1.0e13), float64(int32(1)))
 }
 func (this *OperationOverlayng_PrecisionUtilTest) TestPower10() {
-	this.checkRobustScale_String_String_double_double_double(jlit_3824, jlit_3825, float64(int32(1)), float64(1.0e11), float64(int32(1)))
+	this.checkRobustScale_String_String_double_double_double(jlit_3823, jlit_3824, float64(int32(1)), float64(1.0e11), float64(int32(1)))
 }
 func (this *OperationOverlayng_PrecisionUtilTest) TestDecimalsDifferent() {
-	this.checkRobustScale_String_String_double_double_double(jlit_3826, jlit_3827, float64(100000.0), float64(1.0e12), float64(100000.0))
+	this.checkRobustScale_String_String_double_double_double(jlit_3825, jlit_3826, float64(100000.0), float64(1.0e12), float64(100000.0))
 }
 func (this *OperationOverlayng_PrecisionUtilTest) TestDecimalsShort() {
-	this.checkRobustScale_String_String_double_double_double(jlit_3828, jlit_2377, float64(100000.0), float64(1.0e12), float64(100000.0))
+	this.checkRobustScale_String_String_double_double_double(jlit_3827, jlit_2377, float64(100000.0), float64(1.0e12), float64(100000.0))
 }
 func (this *OperationOverlayng_PrecisionUtilTest) TestDecimalsMany() {
-	this.checkRobustScale_String_String_double_double_double(jlit_3829, jlit_2377, float64(1.0e12), float64(1.0e12), float64(1.0e15))
+	this.checkRobustScale_String_String_double_double_double(jlit_3828, jlit_2377, float64(1.0e12), float64(1.0e12), float64(1.0e15))
 }
 func (this *OperationOverlayng_PrecisionUtilTest) TestDecimalsAllLong() {
-	this.checkRobustScale_String_String_double_double_double(jlit_3830, jlit_3831, float64(1.0e12), float64(1.0e12), float64(1.0e15))
+	this.checkRobustScale_String_String_double_double_double(jlit_3829, jlit_3830, float64(1.0e12), float64(1.0e12), float64(1.0e15))
 }
 func (this *OperationOverlayng_PrecisionUtilTest) TestSafeScaleChosen() {
-	this.checkRobustScale_String_String_double_double_double(jlit_3832, jlit_3833, float64(1.0e8), float64(1.0e8), float64(1.0e11))
+	this.checkRobustScale_String_String_double_double_double(jlit_3831, jlit_3832, float64(1.0e8), float64(1.0e8), float64(1.0e11))
 }
 func (this *OperationOverlayng_PrecisionUtilTest) TestSafeScaleChosenLargeMagnitude() {
-	this.checkRobustScale_String_String_double_double_double(jlit_3834, jlit_3833, float64(100000.0), float64(100000.0), float64(1.0e8))
+	this.checkRobustScale_String_String_double_double_double(jlit_3833, jlit_3832, float64(100000.0), float64(100000.0), float64(1.0e8))
 }
 func (this *OperationOverlayng_PrecisionUtilTest) TestInherentWithLargeMagnitude() {
-	this.checkRobustScale_String_String_double_double_double(jlit_3835, jlit_3833, float64(100.0), float64(100000.0), float64(100.0))
+	this.checkRobustScale_String_String_double_double_double(jlit_3834, jlit_3832, float64(100.0), float64(100000.0), float64(100.0))
 }
 func (this *OperationOverlayng_PrecisionUtilTest) TestMixedMagnitude() {
-	this.checkRobustScale_String_String_double_double_double(jlit_3836, jlit_3837, float64(1.0e8), float64(1.0e8), float64(1.0e15))
+	this.checkRobustScale_String_String_double_double_double(jlit_3835, jlit_3836, float64(1.0e8), float64(1.0e8), float64(1.0e15))
 }
 func (this *OperationOverlayng_PrecisionUtilTest) TestInherentBelowSafe() {
-	this.checkRobustScale_String_String_double_double_double(jlit_3838, jlit_3837, float64(1.0e7), float64(1.0e8), float64(1.0e7))
+	this.checkRobustScale_String_String_double_double_double(jlit_3837, jlit_3836, float64(1.0e7), float64(1.0e8), float64(1.0e7))
 }
 func (this *OperationOverlayng_PrecisionUtilTest) checkRobustScale_String_String_double_double_double(wktA *java.String, wktB *java.String, scaleExpected float64, safeScaleExpected float64, inherentScaleExpected float64) {
 	var a *Geom_Geometry = this.Read_String(wktA)
@@ -104,13 +104,13 @@ func (this *OperationOverlayng_PrecisionUtilTest) checkRobustScale_String_String
 		b = this.Read_String(wktB)
 	}
 	var robustScale float64 = OperationOverlayng_PrecisionUtil_robustScale_Geometry_Geometry(a, b)
-	junit.TestCase_assertEquals_String_Object_Object(jlit_3839, any(float64(scaleExpected)), any(float64(robustScale)))
-	junit.TestCase_assertEquals_String_Object_Object(jlit_3840, any(float64(inherentScaleExpected)), any(float64(OperationOverlayng_PrecisionUtil_inherentScale_Geometry_Geometry(a, b))))
-	junit.TestCase_assertEquals_String_Object_Object(jlit_3841, any(float64(safeScaleExpected)), any(float64(OperationOverlayng_PrecisionUtil_safeScale_Geometry_Geometry(a, b))))
+	junit.TestCase_assertEquals_String_Object_Object(jlit_3838, any(float64(scaleExpected)), any(float64(robustScale)))
+	junit.TestCase_assertEquals_String_Object_Object(jlit_3839, any(float64(inherentScaleExpected)), any(float64(OperationOverlayng_PrecisionUtil_inherentScale_Geometry_Geometry(a, b))))
+	junit.TestCase_assertEquals_String_Object_Object(jlit_3840, any(float64(safeScaleExpected)), any(float64(OperationOverlayng_PrecisionUtil_safeScale_Geometry_Geometry(a, b))))
 }
 func TestOperationOverlayng_PrecisionUtilTest_testBNull(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3842)
+		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3841)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestBNull()
@@ -118,7 +118,7 @@ func TestOperationOverlayng_PrecisionUtilTest_testBNull(t *testing.T) {
 }
 func TestOperationOverlayng_PrecisionUtilTest_testDecimalsAllLong(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3843)
+		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3842)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestDecimalsAllLong()
@@ -126,7 +126,7 @@ func TestOperationOverlayng_PrecisionUtilTest_testDecimalsAllLong(t *testing.T) 
 }
 func TestOperationOverlayng_PrecisionUtilTest_testDecimalsDifferent(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3844)
+		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3843)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestDecimalsDifferent()
@@ -134,7 +134,7 @@ func TestOperationOverlayng_PrecisionUtilTest_testDecimalsDifferent(t *testing.T
 }
 func TestOperationOverlayng_PrecisionUtilTest_testDecimalsMany(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3845)
+		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3844)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestDecimalsMany()
@@ -142,7 +142,7 @@ func TestOperationOverlayng_PrecisionUtilTest_testDecimalsMany(t *testing.T) {
 }
 func TestOperationOverlayng_PrecisionUtilTest_testDecimalsShort(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3846)
+		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3845)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestDecimalsShort()
@@ -150,7 +150,7 @@ func TestOperationOverlayng_PrecisionUtilTest_testDecimalsShort(t *testing.T) {
 }
 func TestOperationOverlayng_PrecisionUtilTest_testInherentBelowSafe(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3847)
+		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3846)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInherentBelowSafe()
@@ -158,7 +158,7 @@ func TestOperationOverlayng_PrecisionUtilTest_testInherentBelowSafe(t *testing.T
 }
 func TestOperationOverlayng_PrecisionUtilTest_testInherentWithLargeMagnitude(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3848)
+		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3847)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInherentWithLargeMagnitude()
@@ -166,7 +166,7 @@ func TestOperationOverlayng_PrecisionUtilTest_testInherentWithLargeMagnitude(t *
 }
 func TestOperationOverlayng_PrecisionUtilTest_testInts(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3849)
+		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3848)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInts()
@@ -174,7 +174,7 @@ func TestOperationOverlayng_PrecisionUtilTest_testInts(t *testing.T) {
 }
 func TestOperationOverlayng_PrecisionUtilTest_testMixedMagnitude(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3850)
+		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3849)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMixedMagnitude()
@@ -182,7 +182,7 @@ func TestOperationOverlayng_PrecisionUtilTest_testMixedMagnitude(t *testing.T) {
 }
 func TestOperationOverlayng_PrecisionUtilTest_testPower10(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3851)
+		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3850)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPower10()
@@ -190,7 +190,7 @@ func TestOperationOverlayng_PrecisionUtilTest_testPower10(t *testing.T) {
 }
 func TestOperationOverlayng_PrecisionUtilTest_testSafeScaleChosen(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3852)
+		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3851)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestSafeScaleChosen()
@@ -198,7 +198,7 @@ func TestOperationOverlayng_PrecisionUtilTest_testSafeScaleChosen(t *testing.T) 
 }
 func TestOperationOverlayng_PrecisionUtilTest_testSafeScaleChosenLargeMagnitude(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3853)
+		tc := OperationOverlayng_PrecisionUtilTest_new(jlit_3852)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestSafeScaleChosenLargeMagnitude()

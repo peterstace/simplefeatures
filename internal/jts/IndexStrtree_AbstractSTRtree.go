@@ -42,13 +42,13 @@ func IndexStrtree_AbstractSTRtree_isInstance(o any) bool {
 	return ok
 }
 func IndexStrtree_AbstractSTRtree_isKind(p *IndexStrtree_AbstractSTRtree) bool {
-	return p != nil && p.jkind_ >= 129 && p.jkind_ <= 133
+	return p != nil && p.jkind_ >= 128 && p.jkind_ <= 132
 }
 func IndexStrtree_AbstractSTRtree_downcast(p *IndexStrtree_AbstractSTRtree) *IndexStrtree_AbstractSTRtree {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 129 || p.jkind_ > 133 {
+	if p.jkind_ < 128 || p.jkind_ > 132 {
 		panic(java.ClassCastError(IndexStrtree_AbstractSTRtree_toAny(p), "org.locationtech.jts.index.strtree.AbstractSTRtree"))
 	}
 	return (*IndexStrtree_AbstractSTRtree)(unsafe.Pointer(p))
@@ -61,13 +61,13 @@ func IndexStrtree_AbstractSTRtree_toAny(p *IndexStrtree_AbstractSTRtree) any {
 		return nil
 	}
 	switch p.jkind_ {
-	case 130:
+	case 129:
 		return (*IndexStrtree_SIRtree)(unsafe.Pointer(p))
-	case 131:
+	case 130:
 		return (*IndexStrtree_SIRtreeTest_TestTree)(unsafe.Pointer(p))
-	case 132:
+	case 131:
 		return (*IndexStrtree_STRtree)(unsafe.Pointer(p))
-	case 133:
+	case 132:
 		return (*TestjtsIndex_STRtreeDemo_TestTree)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
@@ -405,68 +405,68 @@ func (this *IndexStrtree_AbstractSTRtree) GetItemBoundables() *java.ArrayList {
 }
 func (this *IndexStrtree_AbstractSTRtree) BoundablesAtLevel_int(a0 int32) java.List {
 	switch this.jkind_ {
-	case 131:
+	case 130:
 		return (*IndexStrtree_SIRtreeTest_TestTree)(unsafe.Pointer(this)).BoundablesAtLevel_int_impl(a0)
-	case 133:
+	case 132:
 		return (*TestjtsIndex_STRtreeDemo_TestTree)(unsafe.Pointer(this)).BoundablesAtLevel_int_impl(a0)
 	}
 	return this.BoundablesAtLevel_int_impl(a0)
 }
 func (this *IndexStrtree_AbstractSTRtree) CreateNode_int(a0 int32) *IndexStrtree_AbstractNode {
 	switch this.jkind_ {
-	case 130, 131:
+	case 129, 130:
 		return (*IndexStrtree_SIRtree)(unsafe.Pointer(this)).CreateNode_int_impl(a0)
-	case 132, 133:
+	case 131, 132:
 		return (*IndexStrtree_STRtree)(unsafe.Pointer(this)).CreateNode_int_impl(a0)
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.index.strtree.AbstractSTRtree.CreateNode_int"))
 }
 func (this *IndexStrtree_AbstractSTRtree) CreateParentBoundables_List_int(a0 java.List, a1 int32) java.List {
 	switch this.jkind_ {
-	case 132:
+	case 131:
 		return (*IndexStrtree_STRtree)(unsafe.Pointer(this)).CreateParentBoundables_List_int_impl(a0, a1)
-	case 133:
+	case 132:
 		return (*TestjtsIndex_STRtreeDemo_TestTree)(unsafe.Pointer(this)).CreateParentBoundables_List_int_impl(a0, a1)
 	}
 	return this.CreateParentBoundables_List_int_impl(a0, a1)
 }
 func (this *IndexStrtree_AbstractSTRtree) Depth() int32 {
 	switch this.jkind_ {
-	case 132, 133:
+	case 131, 132:
 		return (*IndexStrtree_STRtree)(unsafe.Pointer(this)).Depth_impl()
 	}
 	return this.Depth_impl()
 }
 func (this *IndexStrtree_AbstractSTRtree) GetComparator() java.Comparator {
 	switch this.jkind_ {
-	case 130, 131:
+	case 129, 130:
 		return (*IndexStrtree_SIRtree)(unsafe.Pointer(this)).GetComparator_impl()
-	case 132, 133:
+	case 131, 132:
 		return (*IndexStrtree_STRtree)(unsafe.Pointer(this)).GetComparator_impl()
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.index.strtree.AbstractSTRtree.GetComparator"))
 }
 func (this *IndexStrtree_AbstractSTRtree) GetIntersectsOp() IndexStrtree_AbstractSTRtree_IntersectsOp {
 	switch this.jkind_ {
-	case 130, 131:
+	case 129, 130:
 		return (*IndexStrtree_SIRtree)(unsafe.Pointer(this)).GetIntersectsOp_impl()
-	case 132, 133:
+	case 131, 132:
 		return (*IndexStrtree_STRtree)(unsafe.Pointer(this)).GetIntersectsOp_impl()
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.index.strtree.AbstractSTRtree.GetIntersectsOp"))
 }
 func (this *IndexStrtree_AbstractSTRtree) GetRoot() *IndexStrtree_AbstractNode {
 	switch this.jkind_ {
-	case 131:
+	case 130:
 		return (*IndexStrtree_SIRtreeTest_TestTree)(unsafe.Pointer(this)).GetRoot_impl()
-	case 133:
+	case 132:
 		return (*TestjtsIndex_STRtreeDemo_TestTree)(unsafe.Pointer(this)).GetRoot_impl()
 	}
 	return this.GetRoot_impl()
 }
 func (this *IndexStrtree_AbstractSTRtree) Size() int32 {
 	switch this.jkind_ {
-	case 132, 133:
+	case 131, 132:
 		return (*IndexStrtree_STRtree)(unsafe.Pointer(this)).Size_impl()
 	}
 	return this.Size_impl()

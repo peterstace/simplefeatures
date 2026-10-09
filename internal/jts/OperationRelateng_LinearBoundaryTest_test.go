@@ -40,20 +40,20 @@ func OperationRelateng_LinearBoundaryTest_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_LinearBoundaryTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 310 && p.jkind_ <= 310
+	return p != nil && p.jkind_ >= 280 && p.jkind_ <= 280
 }
 func OperationRelateng_LinearBoundaryTest_downcast(p *Testjts_GeometryTestCase) *OperationRelateng_LinearBoundaryTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 310 || p.jkind_ > 310 {
+	if p.jkind_ < 280 || p.jkind_ > 280 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.relateng.LinearBoundaryTest"))
 	}
 	return (*OperationRelateng_LinearBoundaryTest)(unsafe.Pointer(p))
 }
 func OperationRelateng_LinearBoundaryTest_new(name *java.String) *OperationRelateng_LinearBoundaryTest {
 	this := &OperationRelateng_LinearBoundaryTest{}
-	this.jkind_ = 310
+	this.jkind_ = 280
 	this.JSetSelf(this)
 	this.OperationRelateng_LinearBoundaryTest_init(name)
 	return this
@@ -62,16 +62,16 @@ func (this *OperationRelateng_LinearBoundaryTest) OperationRelateng_LinearBounda
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationRelateng_LinearBoundaryTest) TestLineMod2() {
-	this.checkLinearBoundary_String_BoundaryNodeRule_String(jlit_2972, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4010)
+	this.checkLinearBoundary_String_BoundaryNodeRule_String(jlit_2972, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4009)
 }
 func (this *OperationRelateng_LinearBoundaryTest) TestLines2Mod2() {
-	this.checkLinearBoundary_String_BoundaryNodeRule_String(jlit_4011, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4012)
+	this.checkLinearBoundary_String_BoundaryNodeRule_String(jlit_4010, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4011)
 }
 func (this *OperationRelateng_LinearBoundaryTest) TestLines3Mod2() {
-	this.checkLinearBoundary_String_BoundaryNodeRule_String(jlit_4013, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4014)
+	this.checkLinearBoundary_String_BoundaryNodeRule_String(jlit_4012, Algorithm_BoundaryNodeRule_MOD2_BOUNDARY_RULE, jlit_4013)
 }
 func (this *OperationRelateng_LinearBoundaryTest) TestLines3Monvalent() {
-	this.checkLinearBoundary_String_BoundaryNodeRule_String(jlit_4013, Algorithm_BoundaryNodeRule_MONOVALENT_ENDPOINT_BOUNDARY_RULE, jlit_4015)
+	this.checkLinearBoundary_String_BoundaryNodeRule_String(jlit_4012, Algorithm_BoundaryNodeRule_MONOVALENT_ENDPOINT_BOUNDARY_RULE, jlit_4014)
 }
 func (this *OperationRelateng_LinearBoundaryTest) checkLinearBoundary_String_BoundaryNodeRule_String(wkt *java.String, bnr Algorithm_BoundaryNodeRule, wktBdyExpected *java.String) {
 	var geom *Geom_Geometry = this.Read_String(wkt)
@@ -82,7 +82,7 @@ func (this *OperationRelateng_LinearBoundaryTest) checkLinearBoundary_String_Bou
 		}
 		return true
 	}()
-	junit.TestCase_assertEquals_String_boolean_boolean(jlit_4016, hasBoundaryExpected, lb.HasBoundary())
+	junit.TestCase_assertEquals_String_boolean_boolean(jlit_4015, hasBoundaryExpected, lb.HasBoundary())
 	this.checkBoundaryPoints_LinearBoundary_Geometry_String(lb, geom, wktBdyExpected)
 }
 func (this *OperationRelateng_LinearBoundaryTest) checkBoundaryPoints_LinearBoundary_Geometry_String(lb *OperationRelateng_LinearBoundary, geom *Geom_Geometry, wktBdyExpected *java.String) {
@@ -116,7 +116,7 @@ func (this *OperationRelateng_LinearBoundaryTest) extractLines_Geometry(geom *Ge
 }
 func TestOperationRelateng_LinearBoundaryTest_testLineMod2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_LinearBoundaryTest_new(jlit_4017)
+		tc := OperationRelateng_LinearBoundaryTest_new(jlit_4016)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineMod2()
@@ -124,7 +124,7 @@ func TestOperationRelateng_LinearBoundaryTest_testLineMod2(t *testing.T) {
 }
 func TestOperationRelateng_LinearBoundaryTest_testLines2Mod2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_LinearBoundaryTest_new(jlit_4018)
+		tc := OperationRelateng_LinearBoundaryTest_new(jlit_4017)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLines2Mod2()
@@ -132,7 +132,7 @@ func TestOperationRelateng_LinearBoundaryTest_testLines2Mod2(t *testing.T) {
 }
 func TestOperationRelateng_LinearBoundaryTest_testLines3Mod2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_LinearBoundaryTest_new(jlit_4019)
+		tc := OperationRelateng_LinearBoundaryTest_new(jlit_4018)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLines3Mod2()
@@ -140,7 +140,7 @@ func TestOperationRelateng_LinearBoundaryTest_testLines3Mod2(t *testing.T) {
 }
 func TestOperationRelateng_LinearBoundaryTest_testLines3Monvalent(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_LinearBoundaryTest_new(jlit_4020)
+		tc := OperationRelateng_LinearBoundaryTest_new(jlit_4019)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLines3Monvalent()

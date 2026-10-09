@@ -40,13 +40,13 @@ func AlgorithmHull_ConcaveHullTest_isInstance(o any) bool {
 	return ok
 }
 func AlgorithmHull_ConcaveHullTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 218 && p.jkind_ <= 218
+	return p != nil && p.jkind_ >= 188 && p.jkind_ <= 188
 }
 func AlgorithmHull_ConcaveHullTest_downcast(p *Testjts_GeometryTestCase) *AlgorithmHull_ConcaveHullTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 218 || p.jkind_ > 218 {
+	if p.jkind_ < 188 || p.jkind_ > 188 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.hull.ConcaveHullTest"))
 	}
 	return (*AlgorithmHull_ConcaveHullTest)(unsafe.Pointer(p))
@@ -57,7 +57,7 @@ var AlgorithmHull_ConcaveHullTest_WKT_CIRCLE *java.String = jlit_914
 
 func AlgorithmHull_ConcaveHullTest_new(name *java.String) *AlgorithmHull_ConcaveHullTest {
 	this := &AlgorithmHull_ConcaveHullTest{}
-	this.jkind_ = 218
+	this.jkind_ = 188
 	this.JSetSelf(this)
 	this.AlgorithmHull_ConcaveHullTest_init(name)
 	return this

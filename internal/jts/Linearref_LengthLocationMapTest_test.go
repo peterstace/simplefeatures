@@ -40,20 +40,20 @@ func Linearref_LengthLocationMapTest_isInstance(o any) bool {
 	return ok
 }
 func Linearref_LengthLocationMapTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 269 && p.jkind_ <= 269
+	return p != nil && p.jkind_ >= 239 && p.jkind_ <= 239
 }
 func Linearref_LengthLocationMapTest_downcast(p *Testjts_GeometryTestCase) *Linearref_LengthLocationMapTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 269 || p.jkind_ > 269 {
+	if p.jkind_ < 239 || p.jkind_ > 239 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.linearref.LengthLocationMapTest"))
 	}
 	return (*Linearref_LengthLocationMapTest)(unsafe.Pointer(p))
 }
 func Linearref_LengthLocationMapTest_new(name *java.String) *Linearref_LengthLocationMapTest {
 	this := &Linearref_LengthLocationMapTest{}
-	this.jkind_ = 269
+	this.jkind_ = 239
 	this.JSetSelf(this)
 	this.Linearref_LengthLocationMapTest_init(name)
 	return this

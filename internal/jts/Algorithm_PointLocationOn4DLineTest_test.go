@@ -40,20 +40,20 @@ func Algorithm_PointLocationOn4DLineTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_PointLocationOn4DLineTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 235 && p.jkind_ <= 235
+	return p != nil && p.jkind_ >= 205 && p.jkind_ <= 205
 }
 func Algorithm_PointLocationOn4DLineTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_PointLocationOn4DLineTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 235 || p.jkind_ > 235 {
+	if p.jkind_ < 205 || p.jkind_ > 205 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.PointLocationOn4DLineTest"))
 	}
 	return (*Algorithm_PointLocationOn4DLineTest)(unsafe.Pointer(p))
 }
 func Algorithm_PointLocationOn4DLineTest_new(name *java.String) *Algorithm_PointLocationOn4DLineTest {
 	this := &Algorithm_PointLocationOn4DLineTest{}
-	this.jkind_ = 235
+	this.jkind_ = 205
 	this.JSetSelf(this)
 	this.Algorithm_PointLocationOn4DLineTest_init(name)
 	return this

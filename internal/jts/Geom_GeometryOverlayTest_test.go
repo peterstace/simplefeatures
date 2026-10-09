@@ -40,20 +40,20 @@ func Geom_GeometryOverlayTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_GeometryOverlayTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 258 && p.jkind_ <= 258
+	return p != nil && p.jkind_ >= 228 && p.jkind_ <= 228
 }
 func Geom_GeometryOverlayTest_downcast(p *Testjts_GeometryTestCase) *Geom_GeometryOverlayTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 258 || p.jkind_ > 258 {
+	if p.jkind_ < 228 || p.jkind_ > 228 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.GeometryOverlayTest"))
 	}
 	return (*Geom_GeometryOverlayTest)(unsafe.Pointer(p))
 }
 func Geom_GeometryOverlayTest_new(name *java.String) *Geom_GeometryOverlayTest {
 	this := &Geom_GeometryOverlayTest{}
-	this.jkind_ = 258
+	this.jkind_ = 228
 	this.JSetSelf(this)
 	this.Geom_GeometryOverlayTest_init(name)
 	return this

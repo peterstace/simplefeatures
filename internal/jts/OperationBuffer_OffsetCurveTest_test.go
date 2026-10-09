@@ -40,13 +40,13 @@ func OperationBuffer_OffsetCurveTest_isInstance(o any) bool {
 	return ok
 }
 func OperationBuffer_OffsetCurveTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 277 && p.jkind_ <= 277
+	return p != nil && p.jkind_ >= 247 && p.jkind_ <= 247
 }
 func OperationBuffer_OffsetCurveTest_downcast(p *Testjts_GeometryTestCase) *OperationBuffer_OffsetCurveTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 277 || p.jkind_ > 277 {
+	if p.jkind_ < 247 || p.jkind_ > 247 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.buffer.OffsetCurveTest"))
 	}
 	return (*OperationBuffer_OffsetCurveTest)(unsafe.Pointer(p))
@@ -56,7 +56,7 @@ const OperationBuffer_OffsetCurveTest_EQUALS_TOL float64 = float64(0.05)
 
 func OperationBuffer_OffsetCurveTest_new(name *java.String) *OperationBuffer_OffsetCurveTest {
 	this := &OperationBuffer_OffsetCurveTest{}
-	this.jkind_ = 277
+	this.jkind_ = 247
 	this.JSetSelf(this)
 	this.OperationBuffer_OffsetCurveTest_init(name)
 	return this
@@ -150,7 +150,7 @@ func (this *OperationBuffer_OffsetCurveTest) TestOverlapTriangleOutside() {
 	this.checkOffsetCurve_String_double_String(jlit_3004, float64(int32(-10)), jlit_3006)
 }
 func (this *OperationBuffer_OffsetCurveTest) TestMultiPoint() {
-	this.checkOffsetCurve_String_double_String(jlit_1828, float64(int32(1)), jlit_1038)
+	this.checkOffsetCurve_String_double_String(jlit_1827, float64(int32(1)), jlit_1038)
 }
 func (this *OperationBuffer_OffsetCurveTest) TestMultiLine() {
 	this.checkOffsetCurve_String_double_String(jlit_3007, float64(int32(10)), jlit_3008)
@@ -404,7 +404,7 @@ func TestOperationBuffer_OffsetCurveTest_testPolygon(t *testing.T) {
 }
 func TestOperationBuffer_OffsetCurveTest_testPolygonWithHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationBuffer_OffsetCurveTest_new(jlit_1816)
+		tc := OperationBuffer_OffsetCurveTest_new(jlit_1815)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonWithHole()

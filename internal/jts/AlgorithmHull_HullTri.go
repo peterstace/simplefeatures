@@ -38,20 +38,20 @@ func AlgorithmHull_HullTri_isInstance(o any) bool {
 	return ok
 }
 func AlgorithmHull_HullTri_isKind(p *TriangulateTri_Tri) bool {
-	return p != nil && p.jkind_ >= 346 && p.jkind_ <= 346
+	return p != nil && p.jkind_ >= 313 && p.jkind_ <= 313
 }
 func AlgorithmHull_HullTri_downcast(p *TriangulateTri_Tri) *AlgorithmHull_HullTri {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 346 || p.jkind_ > 346 {
+	if p.jkind_ < 313 || p.jkind_ > 313 {
 		panic(java.ClassCastError(TriangulateTri_Tri_toAny(p), "org.locationtech.jts.algorithm.hull.HullTri"))
 	}
 	return (*AlgorithmHull_HullTri)(unsafe.Pointer(p))
 }
 func AlgorithmHull_HullTri_new(p0 *Geom_Coordinate, p1 *Geom_Coordinate, p2 *Geom_Coordinate) *AlgorithmHull_HullTri {
 	this := &AlgorithmHull_HullTri{}
-	this.jkind_ = 346
+	this.jkind_ = 313
 	this.AlgorithmHull_HullTri_init(p0, p1, p2)
 	return this
 }

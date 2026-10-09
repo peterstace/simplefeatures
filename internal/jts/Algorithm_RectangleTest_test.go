@@ -40,13 +40,13 @@ func Algorithm_RectangleTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_RectangleTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 238 && p.jkind_ <= 238
+	return p != nil && p.jkind_ >= 208 && p.jkind_ <= 208
 }
 func Algorithm_RectangleTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_RectangleTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 238 || p.jkind_ > 238 {
+	if p.jkind_ < 208 || p.jkind_ > 208 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.RectangleTest"))
 	}
 	return (*Algorithm_RectangleTest)(unsafe.Pointer(p))
@@ -56,7 +56,7 @@ const Algorithm_RectangleTest_TOL float64 = float64(1.0e-10)
 
 func Algorithm_RectangleTest_new(name *java.String) *Algorithm_RectangleTest {
 	this := &Algorithm_RectangleTest{}
-	this.jkind_ = 238
+	this.jkind_ = 208
 	this.JSetSelf(this)
 	this.Algorithm_RectangleTest_init(name)
 	return this

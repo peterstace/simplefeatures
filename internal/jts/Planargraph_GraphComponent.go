@@ -38,13 +38,13 @@ func Planargraph_GraphComponent_isInstance(o any) bool {
 	return ok
 }
 func Planargraph_GraphComponent_isKind(p *Planargraph_GraphComponent) bool {
-	return p != nil && p.jkind_ >= 166 && p.jkind_ <= 173
+	return p != nil && p.jkind_ >= 165 && p.jkind_ <= 172
 }
 func Planargraph_GraphComponent_downcast(p *Planargraph_GraphComponent) *Planargraph_GraphComponent {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 166 || p.jkind_ > 173 {
+	if p.jkind_ < 165 || p.jkind_ > 172 {
 		panic(java.ClassCastError(Planargraph_GraphComponent_toAny(p), "org.locationtech.jts.planargraph.GraphComponent"))
 	}
 	return (*Planargraph_GraphComponent)(unsafe.Pointer(p))
@@ -55,19 +55,19 @@ func Planargraph_GraphComponent_toAny(p *Planargraph_GraphComponent) any {
 		return nil
 	}
 	switch p.jkind_ {
-	case 167:
+	case 166:
 		return (*Planargraph_DirectedEdge)(unsafe.Pointer(p))
-	case 168:
+	case 167:
 		return (*OperationLinemerge_LineMergeDirectedEdge)(unsafe.Pointer(p))
-	case 169:
+	case 168:
 		return (*OperationPolygonize_PolygonizeDirectedEdge)(unsafe.Pointer(p))
-	case 170:
+	case 169:
 		return (*Planargraph_Edge)(unsafe.Pointer(p))
-	case 171:
+	case 170:
 		return (*OperationLinemerge_LineMergeEdge)(unsafe.Pointer(p))
-	case 172:
+	case 171:
 		return (*OperationPolygonize_PolygonizeEdge)(unsafe.Pointer(p))
-	case 173:
+	case 172:
 		return (*Planargraph_Node)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
@@ -124,11 +124,11 @@ func (this *Planargraph_GraphComponent) GetData() any {
 }
 func (this *Planargraph_GraphComponent) IsRemoved() bool {
 	switch this.jkind_ {
-	case 167, 168, 169:
+	case 166, 167, 168:
 		return (*Planargraph_DirectedEdge)(unsafe.Pointer(this)).IsRemoved_impl()
-	case 170, 171, 172:
+	case 169, 170, 171:
 		return (*Planargraph_Edge)(unsafe.Pointer(this)).IsRemoved_impl()
-	case 173:
+	case 172:
 		return (*Planargraph_Node)(unsafe.Pointer(this)).IsRemoved_impl()
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.planargraph.GraphComponent.IsRemoved"))

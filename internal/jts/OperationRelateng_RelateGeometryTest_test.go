@@ -40,20 +40,20 @@ func OperationRelateng_RelateGeometryTest_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelateGeometryTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 312 && p.jkind_ <= 312
+	return p != nil && p.jkind_ >= 282 && p.jkind_ <= 282
 }
 func OperationRelateng_RelateGeometryTest_downcast(p *Testjts_GeometryTestCase) *OperationRelateng_RelateGeometryTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 312 || p.jkind_ > 312 {
+	if p.jkind_ < 282 || p.jkind_ > 282 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.relateng.RelateGeometryTest"))
 	}
 	return (*OperationRelateng_RelateGeometryTest)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelateGeometryTest_new(name *java.String) *OperationRelateng_RelateGeometryTest {
 	this := &OperationRelateng_RelateGeometryTest{}
-	this.jkind_ = 312
+	this.jkind_ = 282
 	this.JSetSelf(this)
 	this.OperationRelateng_RelateGeometryTest_init(name)
 	return this
@@ -62,31 +62,31 @@ func (this *OperationRelateng_RelateGeometryTest) OperationRelateng_RelateGeomet
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationRelateng_RelateGeometryTest) TestUniquePoints() {
-	var geom *Geom_Geometry = this.Read_String(jlit_4028)
+	var geom *Geom_Geometry = this.Read_String(jlit_4027)
 	var rgeom *OperationRelateng_RelateGeometry = OperationRelateng_RelateGeometry_new_Geometry(geom)
 	var pts java.Set = rgeom.GetUniquePoints()
-	junit.TestCase_assertEquals_String_int_int(jlit_4029, int32(3), pts.Size())
+	junit.TestCase_assertEquals_String_int_int(jlit_4028, int32(3), pts.Size())
 }
 func (this *OperationRelateng_RelateGeometryTest) TestBoundary() {
-	var geom *Geom_Geometry = this.Read_String(jlit_4011)
+	var geom *Geom_Geometry = this.Read_String(jlit_4010)
 	var rgeom *OperationRelateng_RelateGeometry = OperationRelateng_RelateGeometry_new_Geometry(geom)
-	junit.TestCase_assertTrue_String_boolean(jlit_4030, rgeom.HasBoundary())
+	junit.TestCase_assertTrue_String_boolean(jlit_4029, rgeom.HasBoundary())
 }
 func (this *OperationRelateng_RelateGeometryTest) TestHasDimension() {
-	var geom *Geom_Geometry = this.Read_String(jlit_4031)
+	var geom *Geom_Geometry = this.Read_String(jlit_4030)
 	var rgeom *OperationRelateng_RelateGeometry = OperationRelateng_RelateGeometry_new_Geometry(geom)
-	junit.TestCase_assertTrue_String_boolean(jlit_4032, rgeom.HasDimension_int(int32(0)))
-	junit.TestCase_assertTrue_String_boolean(jlit_4033, rgeom.HasDimension_int(int32(1)))
-	junit.TestCase_assertTrue_String_boolean(jlit_4034, rgeom.HasDimension_int(int32(2)))
+	junit.TestCase_assertTrue_String_boolean(jlit_4031, rgeom.HasDimension_int(int32(0)))
+	junit.TestCase_assertTrue_String_boolean(jlit_4032, rgeom.HasDimension_int(int32(1)))
+	junit.TestCase_assertTrue_String_boolean(jlit_4033, rgeom.HasDimension_int(int32(2)))
 }
 func (this *OperationRelateng_RelateGeometryTest) TestDimension() {
 	this.checkDimension_String_int_int(jlit_471, int32(0), int32(0))
 	this.checkDimension_String_int_int(jlit_2368, int32(1), int32(0))
 	this.checkDimension_String_int_int(jlit_2972, int32(1), int32(1))
-	this.checkDimension_String_int_int(jlit_4035, int32(1), int32(1))
+	this.checkDimension_String_int_int(jlit_4034, int32(1), int32(1))
 	this.checkDimension_String_int_int(jlit_1212, int32(2), int32(2))
-	this.checkDimension_String_int_int(jlit_4031, int32(2), int32(2))
-	this.checkDimension_String_int_int(jlit_4036, int32(2), int32(1))
+	this.checkDimension_String_int_int(jlit_4030, int32(2), int32(2))
+	this.checkDimension_String_int_int(jlit_4035, int32(2), int32(1))
 }
 func (this *OperationRelateng_RelateGeometryTest) checkDimension_String_int_int(wkt *java.String, expectedDim int32, expectedDimReal int32) {
 	var geom *Geom_Geometry = this.Read_String(wkt)
@@ -104,7 +104,7 @@ func TestOperationRelateng_RelateGeometryTest_testBoundary(t *testing.T) {
 }
 func TestOperationRelateng_RelateGeometryTest_testDimension(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateGeometryTest_new(jlit_4037)
+		tc := OperationRelateng_RelateGeometryTest_new(jlit_4036)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestDimension()
@@ -120,7 +120,7 @@ func TestOperationRelateng_RelateGeometryTest_testHasDimension(t *testing.T) {
 }
 func TestOperationRelateng_RelateGeometryTest_testUniquePoints(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateGeometryTest_new(jlit_4038)
+		tc := OperationRelateng_RelateGeometryTest_new(jlit_4037)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestUniquePoints()

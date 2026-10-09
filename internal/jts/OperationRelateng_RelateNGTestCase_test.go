@@ -35,13 +35,13 @@ func OperationRelateng_RelateNGTestCase_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelateNGTestCase_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 314 && p.jkind_ <= 317
+	return p != nil && p.jkind_ >= 284 && p.jkind_ <= 287
 }
 func OperationRelateng_RelateNGTestCase_downcast(p *Testjts_GeometryTestCase) *OperationRelateng_RelateNGTestCase {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 314 || p.jkind_ > 317 {
+	if p.jkind_ < 284 || p.jkind_ > 287 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.relateng.RelateNGTestCase"))
 	}
 	return (*OperationRelateng_RelateNGTestCase)(unsafe.Pointer(p))
@@ -104,7 +104,7 @@ func (this *OperationRelateng_RelateNGTestCase) CheckPrepared_String_String(wkta
 	var a *Geom_Geometry = this.Read_String(wkta)
 	var b *Geom_Geometry = this.Read_String(wktb)
 	var prep_a *OperationRelateng_RelateNG = OperationRelateng_RelateNG_prepare_Geometry(a)
-	junit.TestCase_assertEquals_String_boolean_boolean(jlit_4319, prep_a.Evaluate_Geometry_TopologyPredicate(b, OperationRelateng_RelatePredicate_equalsTopo()), OperationRelateng_RelateNG_relate_Geometry_Geometry_TopologyPredicate(a, b, OperationRelateng_RelatePredicate_equalsTopo()))
+	junit.TestCase_assertEquals_String_boolean_boolean(jlit_4318, prep_a.Evaluate_Geometry_TopologyPredicate(b, OperationRelateng_RelatePredicate_equalsTopo()), OperationRelateng_RelateNG_relate_Geometry_Geometry_TopologyPredicate(a, b, OperationRelateng_RelatePredicate_equalsTopo()))
 	junit.TestCase_assertEquals_String_boolean_boolean(jlit_354, prep_a.Evaluate_Geometry_TopologyPredicate(b, OperationRelateng_RelatePredicate_intersects()), OperationRelateng_RelateNG_relate_Geometry_Geometry_TopologyPredicate(a, b, OperationRelateng_RelatePredicate_intersects()))
 	junit.TestCase_assertEquals_String_boolean_boolean(jlit_355, prep_a.Evaluate_Geometry_TopologyPredicate(b, OperationRelateng_RelatePredicate_disjoint()), OperationRelateng_RelateNG_relate_Geometry_Geometry_TopologyPredicate(a, b, OperationRelateng_RelatePredicate_disjoint()))
 	junit.TestCase_assertEquals_String_boolean_boolean(jlit_358, prep_a.Evaluate_Geometry_TopologyPredicate(b, OperationRelateng_RelatePredicate_covers()), OperationRelateng_RelateNG_relate_Geometry_Geometry_TopologyPredicate(a, b, OperationRelateng_RelatePredicate_covers()))
@@ -113,12 +113,12 @@ func (this *OperationRelateng_RelateNGTestCase) CheckPrepared_String_String(wkta
 	junit.TestCase_assertEquals_String_boolean_boolean(jlit_356, prep_a.Evaluate_Geometry_TopologyPredicate(b, OperationRelateng_RelatePredicate_contains()), OperationRelateng_RelateNG_relate_Geometry_Geometry_TopologyPredicate(a, b, OperationRelateng_RelatePredicate_contains()))
 	junit.TestCase_assertEquals_String_boolean_boolean(jlit_360, prep_a.Evaluate_Geometry_TopologyPredicate(b, OperationRelateng_RelatePredicate_crosses()), OperationRelateng_RelateNG_relate_Geometry_Geometry_TopologyPredicate(a, b, OperationRelateng_RelatePredicate_crosses()))
 	junit.TestCase_assertEquals_String_boolean_boolean(jlit_363, prep_a.Evaluate_Geometry_TopologyPredicate(b, OperationRelateng_RelatePredicate_touches()), OperationRelateng_RelateNG_relate_Geometry_Geometry_TopologyPredicate(a, b, OperationRelateng_RelatePredicate_touches()))
-	junit.TestCase_assertEquals_String_String_String(jlit_4320, prep_a.Evaluate_Geometry(b).ToString(), OperationRelateng_RelateNG_relate_Geometry_Geometry(a, b).ToString())
+	junit.TestCase_assertEquals_String_String_String(jlit_4319, prep_a.Evaluate_Geometry(b).ToString(), OperationRelateng_RelateNG_relate_Geometry_Geometry(a, b).ToString())
 }
 func (this *OperationRelateng_RelateNGTestCase) Trace_TopologyPredicate(pred OperationRelateng_TopologyPredicate) OperationRelateng_TopologyPredicate {
 	if !this.isTrace {
 		return pred
 	}
-	java.System_out.Println_String(java.Concat(jlit_4321, pred.Name()))
+	java.System_out.Println_String(java.Concat(jlit_4320, pred.Name()))
 	return OperationRelateng_TopologyPredicateTracer_trace(pred)
 }

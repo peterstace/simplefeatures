@@ -40,20 +40,20 @@ func OperationRelate_RelateTest_isInstance(o any) bool {
 	return ok
 }
 func OperationRelate_RelateTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 308 && p.jkind_ <= 308
+	return p != nil && p.jkind_ >= 278 && p.jkind_ <= 278
 }
 func OperationRelate_RelateTest_downcast(p *Testjts_GeometryTestCase) *OperationRelate_RelateTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 308 || p.jkind_ > 308 {
+	if p.jkind_ < 278 || p.jkind_ > 278 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.relate.RelateTest"))
 	}
 	return (*OperationRelate_RelateTest)(unsafe.Pointer(p))
 }
 func OperationRelate_RelateTest_new(name *java.String) *OperationRelate_RelateTest {
 	this := &OperationRelate_RelateTest{}
-	this.jkind_ = 308
+	this.jkind_ = 278
 	this.JSetSelf(this)
 	this.OperationRelate_RelateTest_init(name)
 	return this
@@ -62,29 +62,29 @@ func (this *OperationRelate_RelateTest) OperationRelate_RelateTest_init(name *ja
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationRelate_RelateTest) TestContainsNoding() {
-	var a *java.String = jlit_3957
-	var b *java.String = jlit_3958
-	this.RunRelateTest_String_String_String(a, b, jlit_3983)
+	var a *java.String = jlit_3956
+	var b *java.String = jlit_3957
+	this.RunRelateTest_String_String_String(a, b, jlit_3982)
 }
 func (this *OperationRelate_RelateTest) TestContainsNoding2() {
-	var a *java.String = jlit_3959
+	var a *java.String = jlit_3958
 	var b *java.String = jlit_470
-	this.RunRelateTest_String_String_String(a, b, jlit_3984)
+	this.RunRelateTest_String_String_String(a, b, jlit_3983)
 }
 func (this *OperationRelate_RelateTest) TestIntersectsSnappedEndpoint1() {
-	var a *java.String = jlit_3985
-	var b *java.String = jlit_3986
-	this.RunRelateTest_String_String_String(a, b, jlit_3966)
+	var a *java.String = jlit_3984
+	var b *java.String = jlit_3985
+	this.RunRelateTest_String_String_String(a, b, jlit_3965)
 }
 func (this *OperationRelate_RelateTest) TestIntersectsSnappedEndpoint2() {
-	var a *java.String = jlit_3987
-	var b *java.String = jlit_3988
-	this.RunRelateTest_String_String_String(a, b, jlit_3989)
+	var a *java.String = jlit_3986
+	var b *java.String = jlit_3987
+	this.RunRelateTest_String_String_String(a, b, jlit_3988)
 }
 func (this *OperationRelate_RelateTest) TestMultiPointWithEmpty() {
-	var a *java.String = jlit_3990
-	var b *java.String = jlit_3991
-	this.RunRelateTest_String_String_String(a, b, jlit_3992)
+	var a *java.String = jlit_3989
+	var b *java.String = jlit_3990
+	this.RunRelateTest_String_String_String(a, b, jlit_3991)
 }
 func (this *OperationRelate_RelateTest) RunRelateTest_String_String_String(wkt1 *java.String, wkt2 *java.String, expectedIM *java.String) {
 	var g1 *Geom_Geometry = this.Read_String(wkt1)
@@ -95,7 +95,7 @@ func (this *OperationRelate_RelateTest) RunRelateTest_String_String_String(wkt1 
 }
 func TestOperationRelate_RelateTest_testContainsNoding(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelate_RelateTest_new(jlit_3993)
+		tc := OperationRelate_RelateTest_new(jlit_3992)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestContainsNoding()
@@ -103,7 +103,7 @@ func TestOperationRelate_RelateTest_testContainsNoding(t *testing.T) {
 }
 func TestOperationRelate_RelateTest_testContainsNoding2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelate_RelateTest_new(jlit_3994)
+		tc := OperationRelate_RelateTest_new(jlit_3993)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestContainsNoding2()
@@ -111,7 +111,7 @@ func TestOperationRelate_RelateTest_testContainsNoding2(t *testing.T) {
 }
 func TestOperationRelate_RelateTest_testIntersectsSnappedEndpoint1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelate_RelateTest_new(jlit_3995)
+		tc := OperationRelate_RelateTest_new(jlit_3994)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestIntersectsSnappedEndpoint1()
@@ -119,7 +119,7 @@ func TestOperationRelate_RelateTest_testIntersectsSnappedEndpoint1(t *testing.T)
 }
 func TestOperationRelate_RelateTest_testIntersectsSnappedEndpoint2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelate_RelateTest_new(jlit_3996)
+		tc := OperationRelate_RelateTest_new(jlit_3995)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestIntersectsSnappedEndpoint2()
@@ -127,7 +127,7 @@ func TestOperationRelate_RelateTest_testIntersectsSnappedEndpoint2(t *testing.T)
 }
 func TestOperationRelate_RelateTest_testMultiPointWithEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelate_RelateTest_new(jlit_1920)
+		tc := OperationRelate_RelateTest_new(jlit_1919)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPointWithEmpty()

@@ -40,20 +40,20 @@ func Geom_GeometryReverseTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_GeometryReverseTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 259 && p.jkind_ <= 259
+	return p != nil && p.jkind_ >= 229 && p.jkind_ <= 229
 }
 func Geom_GeometryReverseTest_downcast(p *Testjts_GeometryTestCase) *Geom_GeometryReverseTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 259 || p.jkind_ > 259 {
+	if p.jkind_ < 229 || p.jkind_ > 229 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.GeometryReverseTest"))
 	}
 	return (*Geom_GeometryReverseTest)(unsafe.Pointer(p))
 }
 func Geom_GeometryReverseTest_new(name *java.String) *Geom_GeometryReverseTest {
 	this := &Geom_GeometryReverseTest{}
-	this.jkind_ = 259
+	this.jkind_ = 229
 	this.JSetSelf(this)
 	this.Geom_GeometryReverseTest_init(name)
 	return this

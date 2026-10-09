@@ -55,7 +55,7 @@ func (this *IndexQuadtree_QuadtreeCorrectTest) IndexQuadtree_QuadtreeCorrectTest
 }
 func (this *IndexQuadtree_QuadtreeCorrectTest) Run() {
 	this.Fill()
-	java.System_out.Println_String(java.Concat(jlit_1967, java.StrOfInt(int32(this.q.Depth())), jlit_1968, java.StrOfInt(int32(this.q.Size()))))
+	java.System_out.Println_String(java.Concat(jlit_1966, java.StrOfInt(int32(this.q.Depth())), jlit_1967, java.StrOfInt(int32(this.q.Size()))))
 	this.RunQueries()
 }
 func (this *IndexQuadtree_QuadtreeCorrectTest) Fill() {
@@ -111,7 +111,7 @@ func (this *IndexQuadtree_QuadtreeCorrectTest) QueryGrid_int_double(nGridCells i
 			}
 		}
 	}
-	java.System_out.Println_String(java.Concat(jlit_1969, sw.GetTimeString()))
+	java.System_out.Println_String(java.Concat(jlit_1968, sw.GetTimeString()))
 }
 func (this *IndexQuadtree_QuadtreeCorrectTest) QueryTime_Envelope(env *Geom_Envelope) {
 	var eList java.List = this.envList.Query_Envelope(env)
@@ -122,7 +122,7 @@ func (this *IndexQuadtree_QuadtreeCorrectTest) QueryTest_Envelope(env *Geom_Enve
 	var finalList java.List = this.getOverlapping_List_Envelope(candidateList, env)
 	var eList java.List = this.envList.Query_Envelope(env)
 	if finalList.Size() != eList.Size() {
-		panic(java.Ref(java.RuntimeException_new_String(jlit_1970)))
+		panic(java.Ref(java.RuntimeException_new_String(jlit_1969)))
 	}
 }
 func (this *IndexQuadtree_QuadtreeCorrectTest) getOverlapping_List_Envelope(items java.List, searchEnv *Geom_Envelope) java.List {

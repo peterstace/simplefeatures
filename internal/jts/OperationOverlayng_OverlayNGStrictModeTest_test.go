@@ -40,20 +40,20 @@ func OperationOverlayng_OverlayNGStrictModeTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_OverlayNGStrictModeTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 293 && p.jkind_ <= 293
+	return p != nil && p.jkind_ >= 263 && p.jkind_ <= 263
 }
 func OperationOverlayng_OverlayNGStrictModeTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_OverlayNGStrictModeTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 293 || p.jkind_ > 293 {
+	if p.jkind_ < 263 || p.jkind_ > 263 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.OverlayNGStrictModeTest"))
 	}
 	return (*OperationOverlayng_OverlayNGStrictModeTest)(unsafe.Pointer(p))
 }
 func OperationOverlayng_OverlayNGStrictModeTest_new(name *java.String) *OperationOverlayng_OverlayNGStrictModeTest {
 	this := &OperationOverlayng_OverlayNGStrictModeTest{}
-	this.jkind_ = 293
+	this.jkind_ = 263
 	this.JSetSelf(this)
 	this.OperationOverlayng_OverlayNGStrictModeTest_init(name)
 	return this

@@ -40,20 +40,20 @@ func Coverage_CoveragePolygonValidatorTest_isInstance(o any) bool {
 	return ok
 }
 func Coverage_CoveragePolygonValidatorTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 241 && p.jkind_ <= 241
+	return p != nil && p.jkind_ >= 211 && p.jkind_ <= 211
 }
 func Coverage_CoveragePolygonValidatorTest_downcast(p *Testjts_GeometryTestCase) *Coverage_CoveragePolygonValidatorTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 241 || p.jkind_ > 241 {
+	if p.jkind_ < 211 || p.jkind_ > 211 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.coverage.CoveragePolygonValidatorTest"))
 	}
 	return (*Coverage_CoveragePolygonValidatorTest)(unsafe.Pointer(p))
 }
 func Coverage_CoveragePolygonValidatorTest_new(name *java.String) *Coverage_CoveragePolygonValidatorTest {
 	this := &Coverage_CoveragePolygonValidatorTest{}
-	this.jkind_ = 241
+	this.jkind_ = 211
 	this.JSetSelf(this)
 	this.Coverage_CoveragePolygonValidatorTest_init(name)
 	return this

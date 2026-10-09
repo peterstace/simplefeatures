@@ -44,20 +44,20 @@ func OperationValid_IsValidTest_isInstance(o any) bool {
 	return ok
 }
 func OperationValid_IsValidTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 322 && p.jkind_ <= 322
+	return p != nil && p.jkind_ >= 292 && p.jkind_ <= 292
 }
 func OperationValid_IsValidTest_downcast(p *Testjts_GeometryTestCase) *OperationValid_IsValidTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 322 || p.jkind_ > 322 {
+	if p.jkind_ < 292 || p.jkind_ > 292 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.valid.IsValidTest"))
 	}
 	return (*OperationValid_IsValidTest)(unsafe.Pointer(p))
 }
 func OperationValid_IsValidTest_new(name *java.String) *OperationValid_IsValidTest {
 	this := &OperationValid_IsValidTest{}
-	this.jkind_ = 322
+	this.jkind_ = 292
 	this.JSetSelf(this)
 	this.OperationValid_IsValidTest_init(name)
 	return this
@@ -81,82 +81,82 @@ func (this *OperationValid_IsValidTest) TestInvalidCoordinate() {
 	junit.TestCase_assertEquals_boolean_boolean(false, valid)
 }
 func (this *OperationValid_IsValidTest) TestZeroAreaPolygon() {
-	this.checkInvalid_String(jlit_4392)
+	this.checkInvalid_String(jlit_4391)
 }
 func (this *OperationValid_IsValidTest) TestValidSimplePolygon() {
-	this.checkValid_String(jlit_4393)
+	this.checkValid_String(jlit_4392)
 }
 func (this *OperationValid_IsValidTest) TestInvalidSimplePolygonRingSelfIntersection() {
-	this.checkInvalid_int_String(int32(5), jlit_1852)
+	this.checkInvalid_int_String(int32(5), jlit_1851)
 }
 func (this *OperationValid_IsValidTest) TestInvalidPolygonInverted() {
-	this.checkInvalid_int_String(int32(6), jlit_4394)
+	this.checkInvalid_int_String(int32(6), jlit_4393)
 }
 func (this *OperationValid_IsValidTest) TestInvalidPolygonSelfCrossing() {
-	this.checkInvalid_int_String(int32(5), jlit_4395)
+	this.checkInvalid_int_String(int32(5), jlit_4394)
 }
 func (this *OperationValid_IsValidTest) TestSimplePolygonHole() {
-	this.checkValid_String(jlit_4396)
+	this.checkValid_String(jlit_4395)
 }
 func (this *OperationValid_IsValidTest) TestPolygonTouchingHoleAtVertex() {
-	this.checkValid_String(jlit_4397)
+	this.checkValid_String(jlit_4396)
 }
 func (this *OperationValid_IsValidTest) TestPolygonMultipleHolesTouchAtSamePoint() {
-	this.checkValid_String(jlit_4398)
+	this.checkValid_String(jlit_4397)
 }
 func (this *OperationValid_IsValidTest) TestPolygonHoleOutsideShellAllTouch() {
-	this.checkInvalid_int_String(int32(2), jlit_4399)
+	this.checkInvalid_int_String(int32(2), jlit_4398)
 }
 func (this *OperationValid_IsValidTest) TestPolygonHoleOutsideShellDoubleTouch() {
-	this.checkInvalid_int_String(int32(2), jlit_4400)
+	this.checkInvalid_int_String(int32(2), jlit_4399)
 }
 func (this *OperationValid_IsValidTest) TestPolygonNestedHolesAllTouch() {
-	this.checkInvalid_int_String(int32(3), jlit_4401)
+	this.checkInvalid_int_String(int32(3), jlit_4400)
 }
 func (this *OperationValid_IsValidTest) TestInvalidPolygonHoleProperIntersection() {
-	this.checkInvalid_int_String(int32(5), jlit_4402)
+	this.checkInvalid_int_String(int32(5), jlit_4401)
 }
 func (this *OperationValid_IsValidTest) TestInvalidPolygonDisconnectedInterior() {
-	this.checkInvalid_int_String(int32(4), jlit_4403)
+	this.checkInvalid_int_String(int32(4), jlit_4402)
 }
 func (this *OperationValid_IsValidTest) TestValidMultiPolygonTouchAtVertices() {
-	this.checkValid_String(jlit_4404)
+	this.checkValid_String(jlit_4403)
 }
 func (this *OperationValid_IsValidTest) TestInvalidMultiPolygonHoleOverlapCrossing() {
-	this.checkInvalid_int_String(int32(5), jlit_4405)
+	this.checkInvalid_int_String(int32(5), jlit_4404)
 }
 func (this *OperationValid_IsValidTest) TestValidMultiPolygonTouchAtVerticesSegments() {
-	this.checkValid_String(jlit_4406)
+	this.checkValid_String(jlit_4405)
 }
 func (this *OperationValid_IsValidTest) TestInvalidMultiPolygonNestedAllTouchAtVertices() {
-	this.checkInvalid_int_String(int32(7), jlit_4407)
+	this.checkInvalid_int_String(int32(7), jlit_4406)
 }
 func (this *OperationValid_IsValidTest) TestValidMultiPolygonHoleTouchVertices() {
-	this.checkValid_String(jlit_4408)
+	this.checkValid_String(jlit_4407)
 }
 func (this *OperationValid_IsValidTest) TestLineString() {
-	this.checkInvalid_String(jlit_4409)
+	this.checkInvalid_String(jlit_4408)
 }
 func (this *OperationValid_IsValidTest) TestLinearRingTriangle() {
-	this.checkValid_String(jlit_4410)
+	this.checkValid_String(jlit_4409)
 }
 func (this *OperationValid_IsValidTest) TestLinearRingSelfCrossing() {
-	this.checkInvalid_int_String(int32(6), jlit_4411)
+	this.checkInvalid_int_String(int32(6), jlit_4410)
 }
 func (this *OperationValid_IsValidTest) TestLinearRingSelfCrossing2() {
-	this.checkInvalid_int_String(int32(6), jlit_4412)
+	this.checkInvalid_int_String(int32(6), jlit_4411)
 }
 func (this *OperationValid_IsValidTest) TestPolygonHoleWithRepeatedShellPointTouch() {
-	this.checkValid_String(jlit_4413)
+	this.checkValid_String(jlit_4412)
 }
 func (this *OperationValid_IsValidTest) TestPolygonHoleWithRepeatedShellPointTouchMultiple() {
-	this.checkValid_String(jlit_4414)
+	this.checkValid_String(jlit_4413)
 }
 func (this *OperationValid_IsValidTest) TestPolygonHoleWithRepeatedTouchEndPoint() {
-	this.checkValid_String(jlit_4415)
+	this.checkValid_String(jlit_4414)
 }
 func (this *OperationValid_IsValidTest) TestPolygonHoleWithRepeatedHolePointTouch() {
-	this.checkValid_String(jlit_4416)
+	this.checkValid_String(jlit_4415)
 }
 func (this *OperationValid_IsValidTest) checkValid_String(wkt *java.String) {
 	this.checkValid_boolean_String(true, wkt)
@@ -177,7 +177,7 @@ func (this *OperationValid_IsValidTest) checkInvalid_int_String(exepctedErrType 
 }
 func TestOperationValid_IsValidTest_testInvalidCoordinate(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4417)
+		tc := OperationValid_IsValidTest_new(jlit_4416)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInvalidCoordinate()
@@ -185,7 +185,7 @@ func TestOperationValid_IsValidTest_testInvalidCoordinate(t *testing.T) {
 }
 func TestOperationValid_IsValidTest_testInvalidMultiPolygonHoleOverlapCrossing(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4418)
+		tc := OperationValid_IsValidTest_new(jlit_4417)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInvalidMultiPolygonHoleOverlapCrossing()
@@ -193,7 +193,7 @@ func TestOperationValid_IsValidTest_testInvalidMultiPolygonHoleOverlapCrossing(t
 }
 func TestOperationValid_IsValidTest_testInvalidMultiPolygonNestedAllTouchAtVertices(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4419)
+		tc := OperationValid_IsValidTest_new(jlit_4418)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInvalidMultiPolygonNestedAllTouchAtVertices()
@@ -201,7 +201,7 @@ func TestOperationValid_IsValidTest_testInvalidMultiPolygonNestedAllTouchAtVerti
 }
 func TestOperationValid_IsValidTest_testInvalidPolygonDisconnectedInterior(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4420)
+		tc := OperationValid_IsValidTest_new(jlit_4419)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInvalidPolygonDisconnectedInterior()
@@ -209,7 +209,7 @@ func TestOperationValid_IsValidTest_testInvalidPolygonDisconnectedInterior(t *te
 }
 func TestOperationValid_IsValidTest_testInvalidPolygonHoleProperIntersection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4421)
+		tc := OperationValid_IsValidTest_new(jlit_4420)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInvalidPolygonHoleProperIntersection()
@@ -217,7 +217,7 @@ func TestOperationValid_IsValidTest_testInvalidPolygonHoleProperIntersection(t *
 }
 func TestOperationValid_IsValidTest_testInvalidPolygonInverted(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4422)
+		tc := OperationValid_IsValidTest_new(jlit_4421)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInvalidPolygonInverted()
@@ -225,7 +225,7 @@ func TestOperationValid_IsValidTest_testInvalidPolygonInverted(t *testing.T) {
 }
 func TestOperationValid_IsValidTest_testInvalidPolygonSelfCrossing(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4423)
+		tc := OperationValid_IsValidTest_new(jlit_4422)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInvalidPolygonSelfCrossing()
@@ -233,7 +233,7 @@ func TestOperationValid_IsValidTest_testInvalidPolygonSelfCrossing(t *testing.T)
 }
 func TestOperationValid_IsValidTest_testInvalidSimplePolygonRingSelfIntersection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4424)
+		tc := OperationValid_IsValidTest_new(jlit_4423)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInvalidSimplePolygonRingSelfIntersection()
@@ -249,7 +249,7 @@ func TestOperationValid_IsValidTest_testLineString(t *testing.T) {
 }
 func TestOperationValid_IsValidTest_testLinearRingSelfCrossing(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4425)
+		tc := OperationValid_IsValidTest_new(jlit_4424)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinearRingSelfCrossing()
@@ -257,7 +257,7 @@ func TestOperationValid_IsValidTest_testLinearRingSelfCrossing(t *testing.T) {
 }
 func TestOperationValid_IsValidTest_testLinearRingSelfCrossing2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4426)
+		tc := OperationValid_IsValidTest_new(jlit_4425)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinearRingSelfCrossing2()
@@ -265,7 +265,7 @@ func TestOperationValid_IsValidTest_testLinearRingSelfCrossing2(t *testing.T) {
 }
 func TestOperationValid_IsValidTest_testLinearRingTriangle(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4427)
+		tc := OperationValid_IsValidTest_new(jlit_4426)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinearRingTriangle()
@@ -273,7 +273,7 @@ func TestOperationValid_IsValidTest_testLinearRingTriangle(t *testing.T) {
 }
 func TestOperationValid_IsValidTest_testPolygonHoleOutsideShellAllTouch(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4428)
+		tc := OperationValid_IsValidTest_new(jlit_4427)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonHoleOutsideShellAllTouch()
@@ -281,7 +281,7 @@ func TestOperationValid_IsValidTest_testPolygonHoleOutsideShellAllTouch(t *testi
 }
 func TestOperationValid_IsValidTest_testPolygonHoleOutsideShellDoubleTouch(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4429)
+		tc := OperationValid_IsValidTest_new(jlit_4428)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonHoleOutsideShellDoubleTouch()
@@ -289,7 +289,7 @@ func TestOperationValid_IsValidTest_testPolygonHoleOutsideShellDoubleTouch(t *te
 }
 func TestOperationValid_IsValidTest_testPolygonHoleWithRepeatedHolePointTouch(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4430)
+		tc := OperationValid_IsValidTest_new(jlit_4429)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonHoleWithRepeatedHolePointTouch()
@@ -297,7 +297,7 @@ func TestOperationValid_IsValidTest_testPolygonHoleWithRepeatedHolePointTouch(t 
 }
 func TestOperationValid_IsValidTest_testPolygonHoleWithRepeatedShellPointTouch(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4431)
+		tc := OperationValid_IsValidTest_new(jlit_4430)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonHoleWithRepeatedShellPointTouch()
@@ -305,7 +305,7 @@ func TestOperationValid_IsValidTest_testPolygonHoleWithRepeatedShellPointTouch(t
 }
 func TestOperationValid_IsValidTest_testPolygonHoleWithRepeatedShellPointTouchMultiple(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4432)
+		tc := OperationValid_IsValidTest_new(jlit_4431)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonHoleWithRepeatedShellPointTouchMultiple()
@@ -313,7 +313,7 @@ func TestOperationValid_IsValidTest_testPolygonHoleWithRepeatedShellPointTouchMu
 }
 func TestOperationValid_IsValidTest_testPolygonHoleWithRepeatedTouchEndPoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4433)
+		tc := OperationValid_IsValidTest_new(jlit_4432)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonHoleWithRepeatedTouchEndPoint()
@@ -321,7 +321,7 @@ func TestOperationValid_IsValidTest_testPolygonHoleWithRepeatedTouchEndPoint(t *
 }
 func TestOperationValid_IsValidTest_testPolygonMultipleHolesTouchAtSamePoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4434)
+		tc := OperationValid_IsValidTest_new(jlit_4433)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonMultipleHolesTouchAtSamePoint()
@@ -329,7 +329,7 @@ func TestOperationValid_IsValidTest_testPolygonMultipleHolesTouchAtSamePoint(t *
 }
 func TestOperationValid_IsValidTest_testPolygonNestedHolesAllTouch(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4435)
+		tc := OperationValid_IsValidTest_new(jlit_4434)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonNestedHolesAllTouch()
@@ -337,7 +337,7 @@ func TestOperationValid_IsValidTest_testPolygonNestedHolesAllTouch(t *testing.T)
 }
 func TestOperationValid_IsValidTest_testPolygonTouchingHoleAtVertex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4436)
+		tc := OperationValid_IsValidTest_new(jlit_4435)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonTouchingHoleAtVertex()
@@ -345,7 +345,7 @@ func TestOperationValid_IsValidTest_testPolygonTouchingHoleAtVertex(t *testing.T
 }
 func TestOperationValid_IsValidTest_testSimplePolygonHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4437)
+		tc := OperationValid_IsValidTest_new(jlit_4436)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestSimplePolygonHole()
@@ -353,7 +353,7 @@ func TestOperationValid_IsValidTest_testSimplePolygonHole(t *testing.T) {
 }
 func TestOperationValid_IsValidTest_testValidMultiPolygonHoleTouchVertices(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4438)
+		tc := OperationValid_IsValidTest_new(jlit_4437)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestValidMultiPolygonHoleTouchVertices()
@@ -361,7 +361,7 @@ func TestOperationValid_IsValidTest_testValidMultiPolygonHoleTouchVertices(t *te
 }
 func TestOperationValid_IsValidTest_testValidMultiPolygonTouchAtVertices(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4439)
+		tc := OperationValid_IsValidTest_new(jlit_4438)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestValidMultiPolygonTouchAtVertices()
@@ -369,7 +369,7 @@ func TestOperationValid_IsValidTest_testValidMultiPolygonTouchAtVertices(t *test
 }
 func TestOperationValid_IsValidTest_testValidMultiPolygonTouchAtVerticesSegments(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4440)
+		tc := OperationValid_IsValidTest_new(jlit_4439)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestValidMultiPolygonTouchAtVerticesSegments()
@@ -377,7 +377,7 @@ func TestOperationValid_IsValidTest_testValidMultiPolygonTouchAtVerticesSegments
 }
 func TestOperationValid_IsValidTest_testValidSimplePolygon(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4441)
+		tc := OperationValid_IsValidTest_new(jlit_4440)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestValidSimplePolygon()
@@ -385,7 +385,7 @@ func TestOperationValid_IsValidTest_testValidSimplePolygon(t *testing.T) {
 }
 func TestOperationValid_IsValidTest_testZeroAreaPolygon(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_IsValidTest_new(jlit_4442)
+		tc := OperationValid_IsValidTest_new(jlit_4441)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestZeroAreaPolygon()

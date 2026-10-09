@@ -91,17 +91,17 @@ func (this *Io_WKTReadWriteTest) TestReadPolygon() {
 func (this *Io_WKTReadWriteTest) TestReadMultiPoint() {
 	junit.TestCase_assertEquals_String_String(jlit_569, this.writer.Write_Geometry(this.reader.Read_String(jlit_569)))
 	junit.TestCase_assertEquals_String_String(jlit_567, this.writer.Write_Geometry(this.reader.Read_String(jlit_567)))
-	junit.TestCase_assertEquals_String_String(jlit_1831, this.writer.Write_Geometry(this.reader.Read_String(jlit_1831)))
+	junit.TestCase_assertEquals_String_String(jlit_1830, this.writer.Write_Geometry(this.reader.Read_String(jlit_1830)))
 }
 func (this *Io_WKTReadWriteTest) TestReadMultiLineString() {
 	junit.TestCase_assertEquals_String_String(jlit_2193, this.writer.Write_Geometry(this.reader.Read_String(jlit_2193)))
 	junit.TestCase_assertEquals_String_String(jlit_1461, this.writer.Write_Geometry(this.reader.Read_String(jlit_1461)))
-	junit.TestCase_assertEquals_String_String(jlit_1851, this.writer.Write_Geometry(this.reader.Read_String(jlit_1851)))
+	junit.TestCase_assertEquals_String_String(jlit_1850, this.writer.Write_Geometry(this.reader.Read_String(jlit_1850)))
 }
 func (this *Io_WKTReadWriteTest) TestReadMultiPolygon() {
 	junit.TestCase_assertEquals_String_String(jlit_1607, this.writer.Write_Geometry(this.reader.Read_String(jlit_1607)))
 	junit.TestCase_assertEquals_String_String(jlit_886, this.writer.Write_Geometry(this.reader.Read_String(jlit_886)))
-	junit.TestCase_assertEquals_String_String(jlit_1869, this.writer.Write_Geometry(this.reader.Read_String(jlit_1869)))
+	junit.TestCase_assertEquals_String_String(jlit_1868, this.writer.Write_Geometry(this.reader.Read_String(jlit_1868)))
 }
 func (this *Io_WKTReadWriteTest) TestReadGeometryCollection() {
 	junit.TestCase_assertEquals_String_String(jlit_1417, this.writer.Write_Geometry(this.reader.Read_String(jlit_1417)))

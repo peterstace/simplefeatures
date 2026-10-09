@@ -40,20 +40,20 @@ func OperationOverlayng_UnaryUnionNGTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_UnaryUnionNGTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 304 && p.jkind_ <= 304
+	return p != nil && p.jkind_ >= 274 && p.jkind_ <= 274
 }
 func OperationOverlayng_UnaryUnionNGTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_UnaryUnionNGTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 304 || p.jkind_ > 304 {
+	if p.jkind_ < 274 || p.jkind_ > 274 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.UnaryUnionNGTest"))
 	}
 	return (*OperationOverlayng_UnaryUnionNGTest)(unsafe.Pointer(p))
 }
 func OperationOverlayng_UnaryUnionNGTest_new(name *java.String) *OperationOverlayng_UnaryUnionNGTest {
 	this := &OperationOverlayng_UnaryUnionNGTest{}
-	this.jkind_ = 304
+	this.jkind_ = 274
 	this.JSetSelf(this)
 	this.OperationOverlayng_UnaryUnionNGTest_init(name)
 	return this
@@ -62,10 +62,10 @@ func (this *OperationOverlayng_UnaryUnionNGTest) OperationOverlayng_UnaryUnionNG
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationOverlayng_UnaryUnionNGTest) TestMultiPolygonNarrowGap() {
-	this.checkUnaryUnion_String_double_String(jlit_3872, float64(int32(1)), jlit_3873)
+	this.checkUnaryUnion_String_double_String(jlit_3871, float64(int32(1)), jlit_3872)
 }
 func (this *OperationOverlayng_UnaryUnionNGTest) TestPolygonsRounded() {
-	this.checkUnaryUnion_String_double_String(jlit_3874, float64(int32(1)), jlit_3875)
+	this.checkUnaryUnion_String_double_String(jlit_3873, float64(int32(1)), jlit_3874)
 }
 func (this *OperationOverlayng_UnaryUnionNGTest) TestPolygonsOverlapping() {
 	this.checkUnaryUnion_String_double_String(jlit_3491, float64(int32(1)), jlit_3492)
@@ -113,7 +113,7 @@ func TestOperationOverlayng_UnaryUnionNGTest_testCollectionEmpty(t *testing.T) {
 }
 func TestOperationOverlayng_UnaryUnionNGTest_testMultiPolygonNarrowGap(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_UnaryUnionNGTest_new(jlit_3876)
+		tc := OperationOverlayng_UnaryUnionNGTest_new(jlit_3875)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolygonNarrowGap()
@@ -129,7 +129,7 @@ func TestOperationOverlayng_UnaryUnionNGTest_testPolygonsOverlapping(t *testing.
 }
 func TestOperationOverlayng_UnaryUnionNGTest_testPolygonsRounded(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_UnaryUnionNGTest_new(jlit_3877)
+		tc := OperationOverlayng_UnaryUnionNGTest_new(jlit_3876)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonsRounded()

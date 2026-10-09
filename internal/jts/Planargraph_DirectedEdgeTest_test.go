@@ -61,7 +61,7 @@ func (this *Planargraph_DirectedEdgeTest) TestDirectedEdgeToEdges() {
 }
 func TestPlanargraph_DirectedEdgeTest_testDirectedEdgeComparator(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Planargraph_DirectedEdgeTest_new(jlit_4480)
+		tc := Planargraph_DirectedEdgeTest_new(jlit_4479)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestDirectedEdgeComparator()
@@ -69,7 +69,7 @@ func TestPlanargraph_DirectedEdgeTest_testDirectedEdgeComparator(t *testing.T) {
 }
 func TestPlanargraph_DirectedEdgeTest_testDirectedEdgeToEdges(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Planargraph_DirectedEdgeTest_new(jlit_4481)
+		tc := Planargraph_DirectedEdgeTest_new(jlit_4480)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestDirectedEdgeToEdges()

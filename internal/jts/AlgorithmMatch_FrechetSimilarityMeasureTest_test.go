@@ -40,20 +40,20 @@ func AlgorithmMatch_FrechetSimilarityMeasureTest_isInstance(o any) bool {
 	return ok
 }
 func AlgorithmMatch_FrechetSimilarityMeasureTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 219 && p.jkind_ <= 219
+	return p != nil && p.jkind_ >= 189 && p.jkind_ <= 189
 }
 func AlgorithmMatch_FrechetSimilarityMeasureTest_downcast(p *Testjts_GeometryTestCase) *AlgorithmMatch_FrechetSimilarityMeasureTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 219 || p.jkind_ > 219 {
+	if p.jkind_ < 189 || p.jkind_ > 189 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.match.FrechetSimilarityMeasureTest"))
 	}
 	return (*AlgorithmMatch_FrechetSimilarityMeasureTest)(unsafe.Pointer(p))
 }
 func AlgorithmMatch_FrechetSimilarityMeasureTest_new(name *java.String) *AlgorithmMatch_FrechetSimilarityMeasureTest {
 	this := &AlgorithmMatch_FrechetSimilarityMeasureTest{}
-	this.jkind_ = 219
+	this.jkind_ = 189
 	this.JSetSelf(this)
 	this.AlgorithmMatch_FrechetSimilarityMeasureTest_init(name)
 	return this

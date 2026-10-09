@@ -37,8 +37,8 @@ func OperationRelateng_RelatePredicateTest_isInstance(o any) bool {
 	return ok
 }
 
-var OperationRelateng_RelatePredicateTest_A_EXT_B_INT *java.String = jlit_4330
-var OperationRelateng_RelatePredicateTest_A_INT_B_INT *java.String = jlit_4331
+var OperationRelateng_RelatePredicateTest_A_EXT_B_INT *java.String = jlit_4329
+var OperationRelateng_RelatePredicateTest_A_INT_B_INT *java.String = jlit_4330
 
 func OperationRelateng_RelatePredicateTest_new(name *java.String) *OperationRelateng_RelatePredicateTest {
 	this := &OperationRelateng_RelatePredicateTest{}
@@ -65,25 +65,25 @@ func OperationRelateng_RelatePredicateTest_applyIM(imIn *java.String, pred Opera
 	}
 }
 func OperationRelateng_RelatePredicateTest_cleanIM(im *java.String) *java.String {
-	var im1 *java.String = im.ReplaceAll_String_String(jlit_4332, jlit_0)
+	var im1 *java.String = im.ReplaceAll_String_String(jlit_4331, jlit_0)
 	return im1
 }
 func (this *OperationRelateng_RelatePredicateTest) TestIntersects() {
-	this.checkPredicate_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_intersects(), jlit_4331, true)
+	this.checkPredicate_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_intersects(), jlit_4330, true)
 }
 func (this *OperationRelateng_RelatePredicateTest) TestDisjoint() {
-	this.checkPredicate_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_intersects(), jlit_4330, false)
-	this.checkPredicate_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_disjoint(), jlit_4330, true)
+	this.checkPredicate_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_intersects(), jlit_4329, false)
+	this.checkPredicate_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_disjoint(), jlit_4329, true)
 }
 func (this *OperationRelateng_RelatePredicateTest) TestCovers() {
-	this.checkPredicate_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_covers(), jlit_4331, true)
-	this.checkPredicate_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_covers(), jlit_4330, false)
+	this.checkPredicate_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_covers(), jlit_4330, true)
+	this.checkPredicate_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_covers(), jlit_4329, false)
 }
 func (this *OperationRelateng_RelatePredicateTest) TestCoversFast() {
-	this.checkPredicatePartial_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_covers(), jlit_4330, false)
+	this.checkPredicatePartial_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_covers(), jlit_4329, false)
 }
 func (this *OperationRelateng_RelatePredicateTest) TestMatch() {
-	this.checkPredicate_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_matches(jlit_4333), jlit_4334, true)
+	this.checkPredicate_TopologyPredicate_String_boolean(OperationRelateng_RelatePredicate_matches(jlit_4332), jlit_4333, true)
 }
 func (this *OperationRelateng_RelatePredicateTest) checkPredicate_TopologyPredicate_String_boolean(pred OperationRelateng_TopologyPredicate, im *java.String, expected bool) {
 	OperationRelateng_RelatePredicateTest_applyIM(im, pred)
@@ -92,7 +92,7 @@ func (this *OperationRelateng_RelatePredicateTest) checkPredicate_TopologyPredic
 func (this *OperationRelateng_RelatePredicateTest) checkPredicatePartial_TopologyPredicate_String_boolean(pred OperationRelateng_TopologyPredicate, im *java.String, expected bool) {
 	OperationRelateng_RelatePredicateTest_applyIM(im, pred)
 	var isKnown bool = pred.IsKnown()
-	junit.TestCase_assertTrue_String_boolean(jlit_4335, isKnown)
+	junit.TestCase_assertTrue_String_boolean(jlit_4334, isKnown)
 	this.checkPred_TopologyPredicate_boolean(pred, expected)
 }
 func (this *OperationRelateng_RelatePredicateTest) checkPred_TopologyPredicate_boolean(pred OperationRelateng_TopologyPredicate, expected bool) {
@@ -102,7 +102,7 @@ func (this *OperationRelateng_RelatePredicateTest) checkPred_TopologyPredicate_b
 }
 func TestOperationRelateng_RelatePredicateTest_testCovers(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelatePredicateTest_new(jlit_4336)
+		tc := OperationRelateng_RelatePredicateTest_new(jlit_4335)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestCovers()
@@ -110,7 +110,7 @@ func TestOperationRelateng_RelatePredicateTest_testCovers(t *testing.T) {
 }
 func TestOperationRelateng_RelatePredicateTest_testCoversFast(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelatePredicateTest_new(jlit_4337)
+		tc := OperationRelateng_RelatePredicateTest_new(jlit_4336)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestCoversFast()
@@ -134,7 +134,7 @@ func TestOperationRelateng_RelatePredicateTest_testIntersects(t *testing.T) {
 }
 func TestOperationRelateng_RelatePredicateTest_testMatch(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelatePredicateTest_new(jlit_4338)
+		tc := OperationRelateng_RelatePredicateTest_new(jlit_4337)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestMatch()

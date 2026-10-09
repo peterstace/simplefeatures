@@ -41,20 +41,20 @@ func GeomUtil_SineStarFactory_isInstance(o any) bool {
 	return ok
 }
 func GeomUtil_SineStarFactory_isKind(p *Util_GeometricShapeFactory) bool {
-	return p != nil && p.jkind_ >= 348 && p.jkind_ <= 348
+	return p != nil && p.jkind_ >= 315 && p.jkind_ <= 315
 }
 func GeomUtil_SineStarFactory_downcast(p *Util_GeometricShapeFactory) *GeomUtil_SineStarFactory {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 348 || p.jkind_ > 348 {
+	if p.jkind_ < 315 || p.jkind_ > 315 {
 		panic(java.ClassCastError(Util_GeometricShapeFactory_toAny(p), "org.locationtech.jts.geom.util.SineStarFactory"))
 	}
 	return (*GeomUtil_SineStarFactory)(unsafe.Pointer(p))
 }
 func GeomUtil_SineStarFactory_new() *GeomUtil_SineStarFactory {
 	this := &GeomUtil_SineStarFactory{}
-	this.jkind_ = 348
+	this.jkind_ = 315
 	this.GeomUtil_SineStarFactory_init()
 	return this
 }
@@ -65,7 +65,7 @@ func (this *GeomUtil_SineStarFactory) GeomUtil_SineStarFactory_init() {
 }
 func GeomUtil_SineStarFactory_new_GeometryFactory(geomFact *Geom_GeometryFactory) *GeomUtil_SineStarFactory {
 	this := &GeomUtil_SineStarFactory{}
-	this.jkind_ = 348
+	this.jkind_ = 315
 	this.GeomUtil_SineStarFactory_init_GeometryFactory(geomFact)
 	return this
 }

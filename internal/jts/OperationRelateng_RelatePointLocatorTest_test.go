@@ -41,26 +41,26 @@ func OperationRelateng_RelatePointLocatorTest_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelatePointLocatorTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 318 && p.jkind_ <= 318
+	return p != nil && p.jkind_ >= 288 && p.jkind_ <= 288
 }
 func OperationRelateng_RelatePointLocatorTest_downcast(p *Testjts_GeometryTestCase) *OperationRelateng_RelatePointLocatorTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 318 || p.jkind_ > 318 {
+	if p.jkind_ < 288 || p.jkind_ > 288 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.relateng.RelatePointLocatorTest"))
 	}
 	return (*OperationRelateng_RelatePointLocatorTest)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelatePointLocatorTest_new(name *java.String) *OperationRelateng_RelatePointLocatorTest {
 	this := &OperationRelateng_RelatePointLocatorTest{}
-	this.jkind_ = 318
+	this.jkind_ = 288
 	this.JSetSelf(this)
 	this.OperationRelateng_RelatePointLocatorTest_init(name)
 	return this
 }
 func (this *OperationRelateng_RelatePointLocatorTest) OperationRelateng_RelatePointLocatorTest_init(name *java.String) {
-	this.gcPLA = jlit_4322
+	this.gcPLA = jlit_4321
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationRelateng_RelatePointLocatorTest) TestPoint() {
@@ -95,7 +95,7 @@ func (this *OperationRelateng_RelatePointLocatorTest) TestLineNode() {
 	this.checkNodeLocation_String_double_double_int(this.gcPLA, float64(int32(3)), float64(int32(1)), int32(1))
 }
 func (this *OperationRelateng_RelatePointLocatorTest) TestLineEndInGCLA() {
-	var wkt *java.String = jlit_4323
+	var wkt *java.String = jlit_4322
 	this.checkLineEndDimLocation_String_double_double_int(wkt, float64(int32(5)), float64(int32(5)), int32(120))
 	this.checkLineEndDimLocation_String_double_double_int(wkt, float64(int32(12)), float64(int32(2)), int32(110))
 	this.checkLineEndDimLocation_String_double_double_int(wkt, float64(int32(12)), float64(int32(10)), int32(111))
@@ -128,7 +128,7 @@ func TestOperationRelateng_RelatePointLocatorTest_testArea(t *testing.T) {
 }
 func TestOperationRelateng_RelatePointLocatorTest_testAreaInArea(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelatePointLocatorTest_new(jlit_4324)
+		tc := OperationRelateng_RelatePointLocatorTest_new(jlit_4323)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAreaInArea()
@@ -144,7 +144,7 @@ func TestOperationRelateng_RelatePointLocatorTest_testLine(t *testing.T) {
 }
 func TestOperationRelateng_RelatePointLocatorTest_testLineEndInGCLA(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelatePointLocatorTest_new(jlit_4325)
+		tc := OperationRelateng_RelatePointLocatorTest_new(jlit_4324)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineEndInGCLA()
@@ -152,7 +152,7 @@ func TestOperationRelateng_RelatePointLocatorTest_testLineEndInGCLA(t *testing.T
 }
 func TestOperationRelateng_RelatePointLocatorTest_testLineInArea(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelatePointLocatorTest_new(jlit_4326)
+		tc := OperationRelateng_RelatePointLocatorTest_new(jlit_4325)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineInArea()
@@ -160,7 +160,7 @@ func TestOperationRelateng_RelatePointLocatorTest_testLineInArea(t *testing.T) {
 }
 func TestOperationRelateng_RelatePointLocatorTest_testLineNode(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelatePointLocatorTest_new(jlit_4327)
+		tc := OperationRelateng_RelatePointLocatorTest_new(jlit_4326)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineNode()
@@ -176,7 +176,7 @@ func TestOperationRelateng_RelatePointLocatorTest_testPoint(t *testing.T) {
 }
 func TestOperationRelateng_RelatePointLocatorTest_testPointInArea(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelatePointLocatorTest_new(jlit_4328)
+		tc := OperationRelateng_RelatePointLocatorTest_new(jlit_4327)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointInArea()
@@ -184,7 +184,7 @@ func TestOperationRelateng_RelatePointLocatorTest_testPointInArea(t *testing.T) 
 }
 func TestOperationRelateng_RelatePointLocatorTest_testPointInLine(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelatePointLocatorTest_new(jlit_4329)
+		tc := OperationRelateng_RelatePointLocatorTest_new(jlit_4328)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointInLine()

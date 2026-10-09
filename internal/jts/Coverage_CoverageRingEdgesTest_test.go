@@ -40,20 +40,20 @@ func Coverage_CoverageRingEdgesTest_isInstance(o any) bool {
 	return ok
 }
 func Coverage_CoverageRingEdgesTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 242 && p.jkind_ <= 242
+	return p != nil && p.jkind_ >= 212 && p.jkind_ <= 212
 }
 func Coverage_CoverageRingEdgesTest_downcast(p *Testjts_GeometryTestCase) *Coverage_CoverageRingEdgesTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 242 || p.jkind_ > 242 {
+	if p.jkind_ < 212 || p.jkind_ > 212 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.coverage.CoverageRingEdgesTest"))
 	}
 	return (*Coverage_CoverageRingEdgesTest)(unsafe.Pointer(p))
 }
 func Coverage_CoverageRingEdgesTest_new(name *java.String) *Coverage_CoverageRingEdgesTest {
 	this := &Coverage_CoverageRingEdgesTest{}
-	this.jkind_ = 242
+	this.jkind_ = 212
 	this.JSetSelf(this)
 	this.Coverage_CoverageRingEdgesTest_init(name)
 	return this

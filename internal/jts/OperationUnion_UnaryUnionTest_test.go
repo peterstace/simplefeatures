@@ -41,20 +41,20 @@ func OperationUnion_UnaryUnionTest_isInstance(o any) bool {
 	return ok
 }
 func OperationUnion_UnaryUnionTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 320 && p.jkind_ <= 320
+	return p != nil && p.jkind_ >= 290 && p.jkind_ <= 290
 }
 func OperationUnion_UnaryUnionTest_downcast(p *Testjts_GeometryTestCase) *OperationUnion_UnaryUnionTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 320 || p.jkind_ > 320 {
+	if p.jkind_ < 290 || p.jkind_ > 290 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.union.UnaryUnionTest"))
 	}
 	return (*OperationUnion_UnaryUnionTest)(unsafe.Pointer(p))
 }
 func OperationUnion_UnaryUnionTest_new(name *java.String) *OperationUnion_UnaryUnionTest {
 	this := &OperationUnion_UnaryUnionTest{}
-	this.jkind_ = 320
+	this.jkind_ = 290
 	this.JSetSelf(this)
 	this.OperationUnion_UnaryUnionTest_init(name)
 	return this
@@ -73,13 +73,13 @@ func (this *OperationUnion_UnaryUnionTest) TestEmptyPointWithLine() {
 	this.doTest_StringArr_String([]*java.String{jlit_566, jlit_470}, jlit_470)
 }
 func (this *OperationUnion_UnaryUnionTest) TestPoints() {
-	this.doTest_StringArr_String([]*java.String{jlit_536, jlit_4357}, jlit_4358)
+	this.doTest_StringArr_String([]*java.String{jlit_536, jlit_4356}, jlit_4357)
 }
 func (this *OperationUnion_UnaryUnionTest) TestLineNoding() {
-	this.doTest_StringArr_String([]*java.String{jlit_4359}, jlit_4360)
+	this.doTest_StringArr_String([]*java.String{jlit_4358}, jlit_4359)
 }
 func (this *OperationUnion_UnaryUnionTest) TestAll() {
-	this.doTest_StringArr_String([]*java.String{jlit_4361}, jlit_4362)
+	this.doTest_StringArr_String([]*java.String{jlit_4360}, jlit_4361)
 }
 func (this *OperationUnion_UnaryUnionTest) doTest_StringArr_String(inputWKT []*java.String, expectedWKT *java.String) {
 	var result *Geom_Geometry
@@ -106,7 +106,7 @@ func TestOperationUnion_UnaryUnionTest_testAll(t *testing.T) {
 }
 func TestOperationUnion_UnaryUnionTest_testEmptyCollection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationUnion_UnaryUnionTest_new(jlit_4363)
+		tc := OperationUnion_UnaryUnionTest_new(jlit_4362)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestEmptyCollection()
@@ -114,7 +114,7 @@ func TestOperationUnion_UnaryUnionTest_testEmptyCollection(t *testing.T) {
 }
 func TestOperationUnion_UnaryUnionTest_testEmptyPointWithLine(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationUnion_UnaryUnionTest_new(jlit_4364)
+		tc := OperationUnion_UnaryUnionTest_new(jlit_4363)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestEmptyPointWithLine()
@@ -130,7 +130,7 @@ func TestOperationUnion_UnaryUnionTest_testEmptyPolygon(t *testing.T) {
 }
 func TestOperationUnion_UnaryUnionTest_testLineNoding(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationUnion_UnaryUnionTest_new(jlit_4365)
+		tc := OperationUnion_UnaryUnionTest_new(jlit_4364)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineNoding()

@@ -89,7 +89,7 @@ func TestIndexQuadtree_QuadtreeTest_testSerialization(t *testing.T) {
 }
 func TestIndexQuadtree_QuadtreeTest_testSpatialIndex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexQuadtree_QuadtreeTest_new(jlit_1980)
+		tc := IndexQuadtree_QuadtreeTest_new(jlit_1979)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSpatialIndex()

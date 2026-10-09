@@ -40,20 +40,20 @@ func OperationRelateng_RelateNGBoundaryNodeRuleTest_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelateNGBoundaryNodeRuleTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 313 && p.jkind_ <= 313
+	return p != nil && p.jkind_ >= 283 && p.jkind_ <= 283
 }
 func OperationRelateng_RelateNGBoundaryNodeRuleTest_downcast(p *Testjts_GeometryTestCase) *OperationRelateng_RelateNGBoundaryNodeRuleTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 313 || p.jkind_ > 313 {
+	if p.jkind_ < 283 || p.jkind_ > 283 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.relateng.RelateNGBoundaryNodeRuleTest"))
 	}
 	return (*OperationRelateng_RelateNGBoundaryNodeRuleTest)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelateNGBoundaryNodeRuleTest_new(name *java.String) *OperationRelateng_RelateNGBoundaryNodeRuleTest {
 	this := &OperationRelateng_RelateNGBoundaryNodeRuleTest{}
-	this.jkind_ = 313
+	this.jkind_ = 283
 	this.JSetSelf(this)
 	this.OperationRelateng_RelateNGBoundaryNodeRuleTest_init(name)
 	return this
@@ -62,61 +62,61 @@ func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) OperationRelateng_Re
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) TestMultiLineStringSelfIntTouchAtEndpoint() {
-	var a *java.String = jlit_3962
-	var b *java.String = jlit_3963
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3964)
+	var a *java.String = jlit_3961
+	var b *java.String = jlit_3962
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3963)
 }
 func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) TestLineStringSelfIntTouchAtEndpoint() {
-	var a *java.String = jlit_3965
-	var b *java.String = jlit_3963
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3966)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3966)
+	var a *java.String = jlit_3964
+	var b *java.String = jlit_3962
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3965)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3965)
 }
 func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) TestMultiLineStringTouchAtEndpoint() {
 	var a *java.String = jlit_2739
-	var b *java.String = jlit_3967
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3966)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3964)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MONOVALENT_ENDPOINT_BOUNDARY_RULE, jlit_3966)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MULTIVALENT_ENDPOINT_BOUNDARY_RULE, jlit_4039)
+	var b *java.String = jlit_3966
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3965)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3963)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MONOVALENT_ENDPOINT_BOUNDARY_RULE, jlit_3965)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MULTIVALENT_ENDPOINT_BOUNDARY_RULE, jlit_4038)
 }
 func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) TestMultiLineStringClosedTouchAtEndpoint() {
-	var a *java.String = jlit_4040
-	var b *java.String = jlit_3967
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3972)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3964)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MONOVALENT_ENDPOINT_BOUNDARY_RULE, jlit_3972)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MULTIVALENT_ENDPOINT_BOUNDARY_RULE, jlit_4041)
+	var a *java.String = jlit_4039
+	var b *java.String = jlit_3966
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3971)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3963)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MONOVALENT_ENDPOINT_BOUNDARY_RULE, jlit_3971)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MULTIVALENT_ENDPOINT_BOUNDARY_RULE, jlit_4040)
 }
 func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) TestLineRingTouchAtEndpoints() {
-	var a *java.String = jlit_3968
-	var b *java.String = jlit_3969
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3972)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_4042)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MONOVALENT_ENDPOINT_BOUNDARY_RULE, jlit_3972)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MULTIVALENT_ENDPOINT_BOUNDARY_RULE, jlit_4039)
+	var a *java.String = jlit_3967
+	var b *java.String = jlit_3968
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3971)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_4041)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MONOVALENT_ENDPOINT_BOUNDARY_RULE, jlit_3971)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MULTIVALENT_ENDPOINT_BOUNDARY_RULE, jlit_4038)
 }
 func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) TestLineRingTouchAtEndpointAndInterior() {
-	var a *java.String = jlit_3968
-	var b *java.String = jlit_3971
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3972)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3966)
+	var a *java.String = jlit_3967
+	var b *java.String = jlit_3970
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3971)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3965)
 }
 func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) TestPolygonEmptyRing() {
 	var a *java.String = jlit_534
-	var b *java.String = jlit_3968
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3973)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3974)
+	var b *java.String = jlit_3967
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3972)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3973)
 }
 func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) TestPolygonEmptyMultiLineStringClosed() {
 	var a *java.String = jlit_534
 	var b *java.String = jlit_2748
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3973)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3974)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3972)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3973)
 }
 func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) TestPolygonEqualRotated() {
-	var a *java.String = jlit_4043
-	var b *java.String = jlit_4044
+	var a *java.String = jlit_4042
+	var b *java.String = jlit_4043
 	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_1537)
 	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_1537)
 	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_MONOVALENT_ENDPOINT_BOUNDARY_RULE, jlit_1537)
@@ -125,8 +125,8 @@ func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) TestPolygonEqualRota
 func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) TestLineStringInteriorTouchMultivalent() {
 	var a *java.String = jlit_534
 	var b *java.String = jlit_2748
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3973)
-	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3974)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_OGC_SFS_BOUNDARY_RULE, jlit_3972)
+	this.RunRelate_String_String_BoundaryNodeRule_String(a, b, Algorithm_BoundaryNodeRule_ENDPOINT_BOUNDARY_RULE, jlit_3973)
 }
 func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) RunRelate_String_String_BoundaryNodeRule_String(wkt1 *java.String, wkt2 *java.String, bnRule Algorithm_BoundaryNodeRule, expectedIM *java.String) {
 	var g1 *Geom_Geometry = this.Read_String(wkt1)
@@ -134,11 +134,11 @@ func (this *OperationRelateng_RelateNGBoundaryNodeRuleTest) RunRelate_String_Str
 	var im *Geom_IntersectionMatrix = OperationRelateng_RelateNG_relate_Geometry_Geometry_BoundaryNodeRule(g1, g2, bnRule)
 	var imStr *java.String = im.ToString()
 	_ = imStr
-	junit.TestCase_assertTrue_String_boolean(java.Concat(jlit_208, expectedIM, jlit_3975, java.StrOfObject(java.Ref(im))), im.Matches_String(expectedIM))
+	junit.TestCase_assertTrue_String_boolean(java.Concat(jlit_208, expectedIM, jlit_3974, java.StrOfObject(java.Ref(im))), im.Matches_String(expectedIM))
 }
 func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testLineRingTouchAtEndpointAndInterior(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3976)
+		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3975)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineRingTouchAtEndpointAndInterior()
@@ -146,7 +146,7 @@ func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testLineRingTouchAtEndpo
 }
 func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testLineRingTouchAtEndpoints(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3977)
+		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3976)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineRingTouchAtEndpoints()
@@ -154,7 +154,7 @@ func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testLineRingTouchAtEndpo
 }
 func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testLineStringInteriorTouchMultivalent(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_4045)
+		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_4044)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineStringInteriorTouchMultivalent()
@@ -162,7 +162,7 @@ func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testLineStringInteriorTo
 }
 func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testLineStringSelfIntTouchAtEndpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3978)
+		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3977)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineStringSelfIntTouchAtEndpoint()
@@ -170,7 +170,7 @@ func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testLineStringSelfIntTou
 }
 func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testMultiLineStringClosedTouchAtEndpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_4046)
+		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_4045)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineStringClosedTouchAtEndpoint()
@@ -178,7 +178,7 @@ func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testMultiLineStringClose
 }
 func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testMultiLineStringSelfIntTouchAtEndpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3979)
+		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3978)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineStringSelfIntTouchAtEndpoint()
@@ -186,7 +186,7 @@ func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testMultiLineStringSelfI
 }
 func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testMultiLineStringTouchAtEndpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3980)
+		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3979)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineStringTouchAtEndpoint()
@@ -194,7 +194,7 @@ func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testMultiLineStringTouch
 }
 func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testPolygonEmptyMultiLineStringClosed(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3981)
+		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3980)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonEmptyMultiLineStringClosed()
@@ -202,7 +202,7 @@ func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testPolygonEmptyMultiLin
 }
 func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testPolygonEmptyRing(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3982)
+		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_3981)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonEmptyRing()
@@ -210,7 +210,7 @@ func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testPolygonEmptyRing(t *
 }
 func TestOperationRelateng_RelateNGBoundaryNodeRuleTest_testPolygonEqualRotated(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_4047)
+		tc := OperationRelateng_RelateNGBoundaryNodeRuleTest_new(jlit_4046)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonEqualRotated()

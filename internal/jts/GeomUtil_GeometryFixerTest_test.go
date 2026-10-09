@@ -41,20 +41,20 @@ func GeomUtil_GeometryFixerTest_isInstance(o any) bool {
 	return ok
 }
 func GeomUtil_GeometryFixerTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 249 && p.jkind_ <= 249
+	return p != nil && p.jkind_ >= 219 && p.jkind_ <= 219
 }
 func GeomUtil_GeometryFixerTest_downcast(p *Testjts_GeometryTestCase) *GeomUtil_GeometryFixerTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 249 || p.jkind_ > 249 {
+	if p.jkind_ < 219 || p.jkind_ > 219 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.util.GeometryFixerTest"))
 	}
 	return (*GeomUtil_GeometryFixerTest)(unsafe.Pointer(p))
 }
 func GeomUtil_GeometryFixerTest_new(name *java.String) *GeomUtil_GeometryFixerTest {
 	this := &GeomUtil_GeometryFixerTest{}
-	this.jkind_ = 249
+	this.jkind_ = 219
 	this.JSetSelf(this)
 	this.GeomUtil_GeometryFixerTest_init(name)
 	return this
@@ -66,7 +66,7 @@ func (this *GeomUtil_GeometryFixerTest) TestPoint() {
 	this.checkFix_String_String(jlit_471, jlit_471)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPointNaN() {
-	this.checkFix_String_String(jlit_1826, jlit_566)
+	this.checkFix_String_String(jlit_1825, jlit_566)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPointEmpty() {
 	this.checkFix_String_String(jlit_566, jlit_566)
@@ -83,172 +83,172 @@ func (this *GeomUtil_GeometryFixerTest) createPoint_double_double(x float64, y f
 	return pt
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiPointNaN() {
-	this.checkFix_String_String(jlit_1827, jlit_567)
+	this.checkFix_String_String(jlit_1826, jlit_567)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiPoint() {
-	this.checkFix_String_String(jlit_1828, jlit_1828)
+	this.checkFix_String_String(jlit_1827, jlit_1827)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiPointWithEmptyKeepMulti() {
-	this.checkFix_String_String_boolean(jlit_1829, jlit_1830, true)
+	this.checkFix_String_String_boolean(jlit_1828, jlit_1829, true)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiPointWithEmpty() {
-	this.checkFix_String_String_boolean(jlit_1829, jlit_471, false)
+	this.checkFix_String_String_boolean(jlit_1828, jlit_471, false)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiPointWithMultiEmpty() {
-	this.checkFix_String_String(jlit_1831, jlit_567)
+	this.checkFix_String_String(jlit_1830, jlit_567)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLineStringEmpty() {
 	this.checkFix_String_String(jlit_1038, jlit_1038)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLineStringCollapse() {
-	this.checkFix_String_String(jlit_1832, jlit_1038)
+	this.checkFix_String_String(jlit_1831, jlit_1038)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLineStringCollapseMultipleRepeated() {
-	this.checkFix_String_String(jlit_1833, jlit_1038)
+	this.checkFix_String_String(jlit_1832, jlit_1038)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLineStringKeepCollapse() {
-	this.checkFixKeepCollapse_String_String(jlit_1833, jlit_471)
+	this.checkFixKeepCollapse_String_String(jlit_1832, jlit_471)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLineStringRepeated() {
-	this.checkFix_String_String(jlit_1834, jlit_470)
+	this.checkFix_String_String(jlit_1833, jlit_470)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLineStringSelfCross() {
-	this.checkFix_String_String(jlit_1835, jlit_1835)
+	this.checkFix_String_String(jlit_1834, jlit_1834)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLinearRingEmpty() {
 	this.checkFix_String_String(jlit_1460, jlit_1460)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLinearRingCollapsePoint() {
-	this.checkFix_String_String(jlit_1836, jlit_1460)
+	this.checkFix_String_String(jlit_1835, jlit_1460)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLinearRingCollapseLine() {
-	this.checkFix_String_String(jlit_1837, jlit_1460)
+	this.checkFix_String_String(jlit_1836, jlit_1460)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLinearRingKeepCollapsePoint() {
-	this.checkFixKeepCollapse_String_String(jlit_1836, jlit_471)
+	this.checkFixKeepCollapse_String_String(jlit_1835, jlit_471)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLinearRingKeepCollapseLine() {
-	this.checkFixKeepCollapse_String_String(jlit_1837, jlit_1838)
+	this.checkFixKeepCollapse_String_String(jlit_1836, jlit_1837)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLinearRingValid() {
-	this.checkFix_String_String(jlit_1839, jlit_1839)
+	this.checkFix_String_String(jlit_1838, jlit_1838)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLinearRingFlat() {
-	this.checkFix_String_String(jlit_1840, jlit_1841)
+	this.checkFix_String_String(jlit_1839, jlit_1840)
 }
 func (this *GeomUtil_GeometryFixerTest) TestLinearRingSelfCross() {
-	this.checkFix_String_String(jlit_1842, jlit_1843)
+	this.checkFix_String_String(jlit_1841, jlit_1842)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiLineStringSelfCross() {
-	this.checkFix_String_String(jlit_1844, jlit_1844)
+	this.checkFix_String_String(jlit_1843, jlit_1843)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiLineStringWithCollapse() {
-	this.checkFix_String_String_boolean(jlit_1845, jlit_1846, false)
+	this.checkFix_String_String_boolean(jlit_1844, jlit_1845, false)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiLineStringWithCollapseKeepMulti() {
-	this.checkFix_String_String_boolean(jlit_1845, jlit_1847, true)
+	this.checkFix_String_String_boolean(jlit_1844, jlit_1846, true)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiLineStringKeepCollapse() {
-	this.checkFixKeepCollapse_String_String(jlit_1845, jlit_1848)
+	this.checkFixKeepCollapse_String_String(jlit_1844, jlit_1847)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiLineStringWithEmpty() {
-	this.checkFix_String_String(jlit_1849, jlit_1850)
+	this.checkFix_String_String(jlit_1848, jlit_1849)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiLineStringWithMultiEmpty() {
-	this.checkFix_String_String(jlit_1851, jlit_1461)
+	this.checkFix_String_String(jlit_1850, jlit_1461)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonEmpty() {
 	this.checkFix_String_String(jlit_534, jlit_534)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonBowtie() {
-	this.checkFix_String_String(jlit_1852, jlit_1853)
+	this.checkFix_String_String(jlit_1851, jlit_1852)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonHolesZeroAreaOverlapping() {
-	this.checkFix_String_String(jlit_1854, jlit_1855)
+	this.checkFix_String_String(jlit_1853, jlit_1854)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonPosAndNegOverlap() {
-	this.checkFix_String_String(jlit_1856, jlit_1857)
+	this.checkFix_String_String(jlit_1855, jlit_1856)
 }
 func (this *GeomUtil_GeometryFixerTest) TestHolesTouching() {
-	this.checkFix_String_String(jlit_1858, jlit_1859)
+	this.checkFix_String_String(jlit_1857, jlit_1858)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonNaN() {
-	this.checkFix_String_String(jlit_1860, jlit_1861)
+	this.checkFix_String_String(jlit_1859, jlit_1860)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonRepeated() {
-	this.checkFix_String_String(jlit_1862, jlit_1861)
+	this.checkFix_String_String(jlit_1861, jlit_1860)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonShellCollapse() {
-	this.checkFix_String_String(jlit_1863, jlit_534)
+	this.checkFix_String_String(jlit_1862, jlit_534)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonShellCollapseNaN() {
-	this.checkFix_String_String(jlit_1864, jlit_534)
+	this.checkFix_String_String(jlit_1863, jlit_534)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonShellKeepCollapseNaN() {
-	this.checkFixKeepCollapse_String_String(jlit_1864, jlit_568)
+	this.checkFixKeepCollapse_String_String(jlit_1863, jlit_568)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonShellKeepCollapse() {
-	this.checkFixKeepCollapse_String_String(jlit_1863, jlit_1841)
+	this.checkFixKeepCollapse_String_String(jlit_1862, jlit_1840)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonHoleCollapse() {
-	this.checkFix_String_String(jlit_1865, jlit_1866)
+	this.checkFix_String_String(jlit_1864, jlit_1865)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonHoleKeepCollapse() {
-	this.checkFixKeepCollapse_String_String(jlit_1865, jlit_1866)
+	this.checkFixKeepCollapse_String_String(jlit_1864, jlit_1865)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonHoleOverlapAndOutsideOverlap() {
-	this.checkFix_String_String(jlit_1867, jlit_1868)
+	this.checkFix_String_String(jlit_1866, jlit_1867)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiPolygonEmpty() {
 	this.checkFix_String_String(jlit_886, jlit_886)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiPolygonMultiEmpty() {
-	this.checkFix_String_String(jlit_1869, jlit_886)
+	this.checkFix_String_String(jlit_1868, jlit_886)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiPolygonWithEmpty() {
-	this.checkFix_String_String(jlit_1870, jlit_1871)
+	this.checkFix_String_String(jlit_1869, jlit_1870)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiPolygonWithCollapseKeepMulti() {
-	this.checkFix_String_String_boolean(jlit_1872, jlit_1873, true)
+	this.checkFix_String_String_boolean(jlit_1871, jlit_1872, true)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiPolygonWithCollapse() {
-	this.checkFix_String_String_boolean(jlit_1872, jlit_1874, false)
+	this.checkFix_String_String_boolean(jlit_1871, jlit_1873, false)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiPolygonKeepCollapse() {
-	this.checkFixKeepCollapse_String_String(jlit_1872, jlit_1875)
+	this.checkFixKeepCollapse_String_String(jlit_1871, jlit_1874)
 }
 func (this *GeomUtil_GeometryFixerTest) TestGCEmpty() {
 	this.checkFix_String_String(jlit_1187, jlit_1187)
 }
 func (this *GeomUtil_GeometryFixerTest) TestGCWithAllEmpty() {
-	this.checkFix_String_String(jlit_1876, jlit_1876)
+	this.checkFix_String_String(jlit_1875, jlit_1875)
 }
 func (this *GeomUtil_GeometryFixerTest) TestGCKeepCollapse() {
-	this.checkFixKeepCollapse_String_String(jlit_1877, jlit_1878)
+	this.checkFixKeepCollapse_String_String(jlit_1876, jlit_1877)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonZBowtie() {
-	this.checkFixZ_String_String(jlit_1879, jlit_1880)
+	this.checkFixZ_String_String(jlit_1878, jlit_1879)
 }
 func (this *GeomUtil_GeometryFixerTest) TestPolygonZHoleOverlap() {
-	this.checkFixZ_String_String(jlit_1881, jlit_1882)
+	this.checkFixZ_String_String(jlit_1880, jlit_1881)
 }
 func (this *GeomUtil_GeometryFixerTest) TestMultiLineStringZKeepCollapse() {
-	this.checkFixZKeepCollapse_String_String(jlit_1883, jlit_1884)
+	this.checkFixZKeepCollapse_String_String(jlit_1882, jlit_1883)
 }
 func (this *GeomUtil_GeometryFixerTest) TestIssue852Case1() {
-	this.checkFix_String(jlit_1885)
+	this.checkFix_String(jlit_1884)
 }
 func (this *GeomUtil_GeometryFixerTest) TestIssue852Case2() {
-	this.checkFix_String(jlit_1886)
+	this.checkFix_String(jlit_1885)
 }
 func (this *GeomUtil_GeometryFixerTest) TestDimensionConsistence() {
 	var reader *Io_WKTReader = Io_WKTReader_new()
 	reader.SetIsOldJtsCoordinateSyntaxAllowed_boolean(false)
-	var geom2d *Geom_Geometry = Testjts_GeometryTestCase_read_WKTReader_String(reader, jlit_1887)
+	var geom2d *Geom_Geometry = Testjts_GeometryTestCase_read_WKTReader_String(reader, jlit_1886)
 	junit.TestCase_assertEquals_int_int(int32(2), Geom_CoordinateArrays_dimension(geom2d.GetCoordinates()))
 	var fix2d *Geom_Geometry = GeomUtil_GeometryFixer_fix_Geometry(geom2d)
 	junit.TestCase_assertEquals_int_int(int32(2), Geom_CoordinateArrays_dimension(fix2d.GetCoordinates()))
-	var geom3d *Geom_Geometry = Testjts_GeometryTestCase_read_WKTReader_String(reader, jlit_1881)
+	var geom3d *Geom_Geometry = Testjts_GeometryTestCase_read_WKTReader_String(reader, jlit_1880)
 	junit.TestCase_assertEquals_int_int(int32(3), Geom_CoordinateArrays_dimension(geom3d.GetCoordinates()))
 	var fix3d *Geom_Geometry = GeomUtil_GeometryFixer_fix_Geometry(geom3d)
 	junit.TestCase_assertEquals_int_int(int32(3), Geom_CoordinateArrays_dimension(fix3d.GetCoordinates()))
@@ -256,7 +256,7 @@ func (this *GeomUtil_GeometryFixerTest) TestDimensionConsistence() {
 func (this *GeomUtil_GeometryFixerTest) checkFix_String(wkt *java.String) {
 	var geom *Geom_Geometry = this.Read_String(wkt)
 	var fix *Geom_Geometry = GeomUtil_GeometryFixer_fix_Geometry(geom)
-	junit.TestCase_assertTrue_String_boolean(jlit_1888, fix.IsValid())
+	junit.TestCase_assertTrue_String_boolean(jlit_1887, fix.IsValid())
 }
 func (this *GeomUtil_GeometryFixerTest) checkFix_String_String(wkt *java.String, wktExpected *java.String) {
 	var geom *Geom_Geometry = this.Read_String(wkt)
@@ -286,9 +286,9 @@ func (this *GeomUtil_GeometryFixerTest) checkFix_Geometry_boolean_boolean_String
 	} else {
 		actual = GeomUtil_GeometryFixer_fix_Geometry_boolean(input, keepMulti)
 	}
-	junit.TestCase_assertTrue_String_boolean(jlit_1888, actual.IsValid())
-	junit.TestCase_assertTrue_String_boolean(jlit_1889, (unsafe.Pointer(input) != unsafe.Pointer(actual)))
-	junit.TestCase_assertTrue_String_boolean(jlit_1890, this.checkDeepCopy_Geometry_Geometry(input, actual))
+	junit.TestCase_assertTrue_String_boolean(jlit_1887, actual.IsValid())
+	junit.TestCase_assertTrue_String_boolean(jlit_1888, (unsafe.Pointer(input) != unsafe.Pointer(actual)))
+	junit.TestCase_assertTrue_String_boolean(jlit_1889, this.checkDeepCopy_Geometry_Geometry(input, actual))
 	var expected *Geom_Geometry = this.Read_String(wktExpected)
 	this.CheckEqual_Geometry_Geometry(expected, actual)
 }
@@ -331,13 +331,13 @@ func (this *GeomUtil_GeometryFixerTest) checkFixZ_Geometry_boolean_String(input 
 	} else {
 		actual = GeomUtil_GeometryFixer_fix_Geometry(input)
 	}
-	junit.TestCase_assertTrue_String_boolean(jlit_1888, actual.IsValid())
+	junit.TestCase_assertTrue_String_boolean(jlit_1887, actual.IsValid())
 	var expected *Geom_Geometry = this.Read_String(wktExpected)
 	this.CheckEqualXYZ_Geometry_Geometry(expected, actual)
 }
 func TestGeomUtil_GeometryFixerTest_testDimensionConsistence(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1891)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1890)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestDimensionConsistence()
@@ -345,7 +345,7 @@ func TestGeomUtil_GeometryFixerTest_testDimensionConsistence(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testGCEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1892)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1891)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGCEmpty()
@@ -353,7 +353,7 @@ func TestGeomUtil_GeometryFixerTest_testGCEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testGCKeepCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1893)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1892)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGCKeepCollapse()
@@ -361,7 +361,7 @@ func TestGeomUtil_GeometryFixerTest_testGCKeepCollapse(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testGCWithAllEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1894)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1893)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGCWithAllEmpty()
@@ -369,7 +369,7 @@ func TestGeomUtil_GeometryFixerTest_testGCWithAllEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testHolesTouching(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1895)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1894)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestHolesTouching()
@@ -377,7 +377,7 @@ func TestGeomUtil_GeometryFixerTest_testHolesTouching(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testIssue852Case1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1896)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1895)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestIssue852Case1()
@@ -385,7 +385,7 @@ func TestGeomUtil_GeometryFixerTest_testIssue852Case1(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testIssue852Case2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1897)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1896)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestIssue852Case2()
@@ -393,7 +393,7 @@ func TestGeomUtil_GeometryFixerTest_testIssue852Case2(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testLineStringCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1898)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1897)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineStringCollapse()
@@ -401,7 +401,7 @@ func TestGeomUtil_GeometryFixerTest_testLineStringCollapse(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testLineStringCollapseMultipleRepeated(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1899)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1898)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineStringCollapseMultipleRepeated()
@@ -409,7 +409,7 @@ func TestGeomUtil_GeometryFixerTest_testLineStringCollapseMultipleRepeated(t *te
 }
 func TestGeomUtil_GeometryFixerTest_testLineStringEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1900)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1899)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineStringEmpty()
@@ -417,7 +417,7 @@ func TestGeomUtil_GeometryFixerTest_testLineStringEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testLineStringKeepCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1901)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1900)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineStringKeepCollapse()
@@ -425,7 +425,7 @@ func TestGeomUtil_GeometryFixerTest_testLineStringKeepCollapse(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testLineStringRepeated(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1902)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1901)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineStringRepeated()
@@ -433,7 +433,7 @@ func TestGeomUtil_GeometryFixerTest_testLineStringRepeated(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testLineStringSelfCross(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1903)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1902)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineStringSelfCross()
@@ -441,7 +441,7 @@ func TestGeomUtil_GeometryFixerTest_testLineStringSelfCross(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testLinearRingCollapseLine(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1904)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1903)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinearRingCollapseLine()
@@ -449,7 +449,7 @@ func TestGeomUtil_GeometryFixerTest_testLinearRingCollapseLine(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testLinearRingCollapsePoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1905)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1904)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinearRingCollapsePoint()
@@ -457,7 +457,7 @@ func TestGeomUtil_GeometryFixerTest_testLinearRingCollapsePoint(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testLinearRingEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1906)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1905)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinearRingEmpty()
@@ -465,7 +465,7 @@ func TestGeomUtil_GeometryFixerTest_testLinearRingEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testLinearRingFlat(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1907)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1906)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinearRingFlat()
@@ -473,7 +473,7 @@ func TestGeomUtil_GeometryFixerTest_testLinearRingFlat(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testLinearRingKeepCollapseLine(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1908)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1907)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinearRingKeepCollapseLine()
@@ -481,7 +481,7 @@ func TestGeomUtil_GeometryFixerTest_testLinearRingKeepCollapseLine(t *testing.T)
 }
 func TestGeomUtil_GeometryFixerTest_testLinearRingKeepCollapsePoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1909)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1908)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinearRingKeepCollapsePoint()
@@ -489,7 +489,7 @@ func TestGeomUtil_GeometryFixerTest_testLinearRingKeepCollapsePoint(t *testing.T
 }
 func TestGeomUtil_GeometryFixerTest_testLinearRingSelfCross(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1910)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1909)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinearRingSelfCross()
@@ -497,7 +497,7 @@ func TestGeomUtil_GeometryFixerTest_testLinearRingSelfCross(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testLinearRingValid(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1911)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1910)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinearRingValid()
@@ -505,7 +505,7 @@ func TestGeomUtil_GeometryFixerTest_testLinearRingValid(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testMultiLineStringKeepCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1912)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1911)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineStringKeepCollapse()
@@ -513,7 +513,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiLineStringKeepCollapse(t *testing.T
 }
 func TestGeomUtil_GeometryFixerTest_testMultiLineStringSelfCross(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1913)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1912)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineStringSelfCross()
@@ -521,7 +521,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiLineStringSelfCross(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testMultiLineStringWithCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1914)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1913)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineStringWithCollapse()
@@ -529,7 +529,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiLineStringWithCollapse(t *testing.T
 }
 func TestGeomUtil_GeometryFixerTest_testMultiLineStringWithCollapseKeepMulti(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1915)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1914)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineStringWithCollapseKeepMulti()
@@ -537,7 +537,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiLineStringWithCollapseKeepMulti(t *
 }
 func TestGeomUtil_GeometryFixerTest_testMultiLineStringWithEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1916)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1915)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineStringWithEmpty()
@@ -545,7 +545,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiLineStringWithEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testMultiLineStringWithMultiEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1917)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1916)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineStringWithMultiEmpty()
@@ -553,7 +553,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiLineStringWithMultiEmpty(t *testing
 }
 func TestGeomUtil_GeometryFixerTest_testMultiLineStringZKeepCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1918)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1917)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineStringZKeepCollapse()
@@ -569,7 +569,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiPoint(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testMultiPointNaN(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1919)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1918)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPointNaN()
@@ -577,7 +577,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiPointNaN(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testMultiPointWithEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1920)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1919)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPointWithEmpty()
@@ -585,7 +585,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiPointWithEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testMultiPointWithEmptyKeepMulti(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1921)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1920)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPointWithEmptyKeepMulti()
@@ -593,7 +593,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiPointWithEmptyKeepMulti(t *testing.
 }
 func TestGeomUtil_GeometryFixerTest_testMultiPointWithMultiEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1922)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1921)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPointWithMultiEmpty()
@@ -601,7 +601,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiPointWithMultiEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testMultiPolygonEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1923)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1922)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolygonEmpty()
@@ -609,7 +609,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiPolygonEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testMultiPolygonKeepCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1924)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1923)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolygonKeepCollapse()
@@ -617,7 +617,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiPolygonKeepCollapse(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testMultiPolygonMultiEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1925)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1924)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolygonMultiEmpty()
@@ -625,7 +625,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiPolygonMultiEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testMultiPolygonWithCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1926)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1925)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolygonWithCollapse()
@@ -633,7 +633,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiPolygonWithCollapse(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testMultiPolygonWithCollapseKeepMulti(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1927)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1926)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolygonWithCollapseKeepMulti()
@@ -641,7 +641,7 @@ func TestGeomUtil_GeometryFixerTest_testMultiPolygonWithCollapseKeepMulti(t *tes
 }
 func TestGeomUtil_GeometryFixerTest_testMultiPolygonWithEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1928)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1927)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolygonWithEmpty()
@@ -657,7 +657,7 @@ func TestGeomUtil_GeometryFixerTest_testPoint(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPointEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1929)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1928)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointEmpty()
@@ -665,7 +665,7 @@ func TestGeomUtil_GeometryFixerTest_testPointEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPointNaN(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1930)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1929)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointNaN()
@@ -673,7 +673,7 @@ func TestGeomUtil_GeometryFixerTest_testPointNaN(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPointNegInf(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1931)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1930)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointNegInf()
@@ -681,7 +681,7 @@ func TestGeomUtil_GeometryFixerTest_testPointNegInf(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPointPosInf(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1932)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1931)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointPosInf()
@@ -689,7 +689,7 @@ func TestGeomUtil_GeometryFixerTest_testPointPosInf(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonBowtie(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1933)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1932)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonBowtie()
@@ -705,7 +705,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonHoleCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1934)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1933)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonHoleCollapse()
@@ -713,7 +713,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonHoleCollapse(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonHoleKeepCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1935)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1934)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonHoleKeepCollapse()
@@ -721,7 +721,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonHoleKeepCollapse(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonHoleOverlapAndOutsideOverlap(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1936)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1935)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonHoleOverlapAndOutsideOverlap()
@@ -729,7 +729,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonHoleOverlapAndOutsideOverlap(t *t
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonHolesZeroAreaOverlapping(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1937)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1936)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonHolesZeroAreaOverlapping()
@@ -737,7 +737,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonHolesZeroAreaOverlapping(t *testi
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonNaN(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1938)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1937)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonNaN()
@@ -745,7 +745,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonNaN(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonPosAndNegOverlap(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1939)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1938)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonPosAndNegOverlap()
@@ -753,7 +753,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonPosAndNegOverlap(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonRepeated(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1940)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1939)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonRepeated()
@@ -761,7 +761,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonRepeated(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonShellCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1941)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1940)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonShellCollapse()
@@ -769,7 +769,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonShellCollapse(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonShellCollapseNaN(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1942)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1941)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonShellCollapseNaN()
@@ -777,7 +777,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonShellCollapseNaN(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonShellKeepCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1943)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1942)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonShellKeepCollapse()
@@ -785,7 +785,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonShellKeepCollapse(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonShellKeepCollapseNaN(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1944)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1943)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonShellKeepCollapseNaN()
@@ -793,7 +793,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonShellKeepCollapseNaN(t *testing.T
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonZBowtie(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1945)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1944)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonZBowtie()
@@ -801,7 +801,7 @@ func TestGeomUtil_GeometryFixerTest_testPolygonZBowtie(t *testing.T) {
 }
 func TestGeomUtil_GeometryFixerTest_testPolygonZHoleOverlap(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryFixerTest_new(jlit_1946)
+		tc := GeomUtil_GeometryFixerTest_new(jlit_1945)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonZHoleOverlap()

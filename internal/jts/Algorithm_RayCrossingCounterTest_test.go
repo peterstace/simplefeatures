@@ -41,20 +41,20 @@ func Algorithm_RayCrossingCounterTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_RayCrossingCounterTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 226 && p.jkind_ <= 226
+	return p != nil && p.jkind_ >= 196 && p.jkind_ <= 196
 }
 func Algorithm_RayCrossingCounterTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_RayCrossingCounterTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 226 || p.jkind_ > 226 {
+	if p.jkind_ < 196 || p.jkind_ > 196 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.RayCrossingCounterTest"))
 	}
 	return (*Algorithm_RayCrossingCounterTest)(unsafe.Pointer(p))
 }
 func Algorithm_RayCrossingCounterTest_new(name *java.String) *Algorithm_RayCrossingCounterTest {
 	this := &Algorithm_RayCrossingCounterTest{}
-	this.jkind_ = 226
+	this.jkind_ = 196
 	this.JSetSelf(this)
 	this.Algorithm_RayCrossingCounterTest_init(name)
 	return this

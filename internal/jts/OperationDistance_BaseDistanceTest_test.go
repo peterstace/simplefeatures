@@ -34,13 +34,13 @@ func OperationDistance_BaseDistanceTest_isInstance(o any) bool {
 	return ok
 }
 func OperationDistance_BaseDistanceTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 279 && p.jkind_ <= 281
+	return p != nil && p.jkind_ >= 249 && p.jkind_ <= 251
 }
 func OperationDistance_BaseDistanceTest_downcast(p *Testjts_GeometryTestCase) *OperationDistance_BaseDistanceTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 279 || p.jkind_ > 281 {
+	if p.jkind_ < 249 || p.jkind_ > 251 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.distance.BaseDistanceTest"))
 	}
 	return (*OperationDistance_BaseDistanceTest)(unsafe.Pointer(p))
@@ -116,34 +116,34 @@ func (this *OperationDistance_BaseDistanceTest) checkDistanceNearestPoints_Strin
 }
 func (this *OperationDistance_BaseDistanceTest) Distance_Geometry_Geometry(a0 *Geom_Geometry, a1 *Geom_Geometry) float64 {
 	switch this.jkind_ {
-	case 280:
+	case 250:
 		return (*OperationDistance_DistanceTest)(unsafe.Pointer(this)).Distance_Geometry_Geometry_impl(a0, a1)
-	case 281:
+	case 251:
 		return (*OperationDistance_IndexedFacetDistanceTest)(unsafe.Pointer(this)).Distance_Geometry_Geometry_impl(a0, a1)
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.operation.distance.BaseDistanceTest.Distance_Geometry_Geometry"))
 }
 func (this *OperationDistance_BaseDistanceTest) IsWithinDistance_Geometry_Geometry_double(a0 *Geom_Geometry, a1 *Geom_Geometry, a2 float64) bool {
 	switch this.jkind_ {
-	case 280:
+	case 250:
 		return (*OperationDistance_DistanceTest)(unsafe.Pointer(this)).IsWithinDistance_Geometry_Geometry_double_impl(a0, a1, a2)
-	case 281:
+	case 251:
 		return (*OperationDistance_IndexedFacetDistanceTest)(unsafe.Pointer(this)).IsWithinDistance_Geometry_Geometry_double_impl(a0, a1, a2)
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.operation.distance.BaseDistanceTest.IsWithinDistance_Geometry_Geometry_double"))
 }
 func (this *OperationDistance_BaseDistanceTest) NearestPoints_Geometry_Geometry(a0 *Geom_Geometry, a1 *Geom_Geometry) []*Geom_Coordinate {
 	switch this.jkind_ {
-	case 280:
+	case 250:
 		return (*OperationDistance_DistanceTest)(unsafe.Pointer(this)).NearestPoints_Geometry_Geometry_impl(a0, a1)
-	case 281:
+	case 251:
 		return (*OperationDistance_IndexedFacetDistanceTest)(unsafe.Pointer(this)).NearestPoints_Geometry_Geometry_impl(a0, a1)
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.operation.distance.BaseDistanceTest.NearestPoints_Geometry_Geometry"))
 }
 func (this *OperationDistance_BaseDistanceTest) TestClosestPoints7() {
 	switch this.jkind_ {
-	case 281:
+	case 251:
 		(*OperationDistance_IndexedFacetDistanceTest)(unsafe.Pointer(this)).TestClosestPoints7_impl()
 		return
 	}

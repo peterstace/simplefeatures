@@ -37,20 +37,20 @@ func IndexStrtree_SIRtree_isInstance(o any) bool {
 	return ok
 }
 func IndexStrtree_SIRtree_isKind(p *IndexStrtree_AbstractSTRtree) bool {
-	return p != nil && p.jkind_ >= 130 && p.jkind_ <= 131
+	return p != nil && p.jkind_ >= 129 && p.jkind_ <= 130
 }
 func IndexStrtree_SIRtree_downcast(p *IndexStrtree_AbstractSTRtree) *IndexStrtree_SIRtree {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 130 || p.jkind_ > 131 {
+	if p.jkind_ < 129 || p.jkind_ > 130 {
 		panic(java.ClassCastError(IndexStrtree_AbstractSTRtree_toAny(p), "org.locationtech.jts.index.strtree.SIRtree"))
 	}
 	return (*IndexStrtree_SIRtree)(unsafe.Pointer(p))
 }
 func IndexStrtree_SIRtree_new() *IndexStrtree_SIRtree {
 	this := &IndexStrtree_SIRtree{}
-	this.jkind_ = 130
+	this.jkind_ = 129
 	this.IndexStrtree_SIRtree_init()
 	return this
 }
@@ -61,7 +61,7 @@ func (this *IndexStrtree_SIRtree) IndexStrtree_SIRtree_init() {
 }
 func IndexStrtree_SIRtree_new_int(nodeCapacity int32) *IndexStrtree_SIRtree {
 	this := &IndexStrtree_SIRtree{}
-	this.jkind_ = 130
+	this.jkind_ = 129
 	this.IndexStrtree_SIRtree_init_int(nodeCapacity)
 	return this
 }
@@ -211,20 +211,20 @@ func IndexStrtree_SIRtree_3_isInstance(o any) bool {
 	return ok
 }
 func IndexStrtree_SIRtree_3_isKind(p *IndexStrtree_AbstractNode) bool {
-	return p != nil && p.jkind_ >= 127 && p.jkind_ <= 127
+	return p != nil && p.jkind_ >= 126 && p.jkind_ <= 126
 }
 func IndexStrtree_SIRtree_3_downcast(p *IndexStrtree_AbstractNode) *IndexStrtree_SIRtree_3 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 127 || p.jkind_ > 127 {
+	if p.jkind_ < 126 || p.jkind_ > 126 {
 		panic(java.ClassCastError(IndexStrtree_AbstractNode_toAny(p), "org.locationtech.jts.index.strtree.SIRtree$3"))
 	}
 	return (*IndexStrtree_SIRtree_3)(unsafe.Pointer(p))
 }
 func IndexStrtree_SIRtree_3_new(outer_ *IndexStrtree_SIRtree, level int32) *IndexStrtree_SIRtree_3 {
 	this := &IndexStrtree_SIRtree_3{}
-	this.jkind_ = 127
+	this.jkind_ = 126
 	this.outer_ = outer_
 	this.IndexStrtree_SIRtree_3_init(level)
 	return this

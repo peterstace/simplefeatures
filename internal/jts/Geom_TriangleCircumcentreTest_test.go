@@ -40,20 +40,20 @@ func Geom_TriangleCircumcentreTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_TriangleCircumcentreTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 262 && p.jkind_ <= 262
+	return p != nil && p.jkind_ >= 232 && p.jkind_ <= 232
 }
 func Geom_TriangleCircumcentreTest_downcast(p *Testjts_GeometryTestCase) *Geom_TriangleCircumcentreTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 262 || p.jkind_ > 262 {
+	if p.jkind_ < 232 || p.jkind_ > 232 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.TriangleCircumcentreTest"))
 	}
 	return (*Geom_TriangleCircumcentreTest)(unsafe.Pointer(p))
 }
 func Geom_TriangleCircumcentreTest_new(name *java.String) *Geom_TriangleCircumcentreTest {
 	this := &Geom_TriangleCircumcentreTest{}
-	this.jkind_ = 262
+	this.jkind_ = 232
 	this.JSetSelf(this)
 	this.Geom_TriangleCircumcentreTest_init(name)
 	return this

@@ -40,20 +40,20 @@ func TriangulatePolygon_PolygonTriangulatorTest_isInstance(o any) bool {
 	return ok
 }
 func TriangulatePolygon_PolygonTriangulatorTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 337 && p.jkind_ <= 337
+	return p != nil && p.jkind_ >= 304 && p.jkind_ <= 304
 }
 func TriangulatePolygon_PolygonTriangulatorTest_downcast(p *Testjts_GeometryTestCase) *TriangulatePolygon_PolygonTriangulatorTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 337 || p.jkind_ > 337 {
+	if p.jkind_ < 304 || p.jkind_ > 304 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.triangulate.polygon.PolygonTriangulatorTest"))
 	}
 	return (*TriangulatePolygon_PolygonTriangulatorTest)(unsafe.Pointer(p))
 }
 func TriangulatePolygon_PolygonTriangulatorTest_new(name *java.String) *TriangulatePolygon_PolygonTriangulatorTest {
 	this := &TriangulatePolygon_PolygonTriangulatorTest{}
-	this.jkind_ = 337
+	this.jkind_ = 304
 	this.JSetSelf(this)
 	this.TriangulatePolygon_PolygonTriangulatorTest_init(name)
 	return this
@@ -62,46 +62,46 @@ func (this *TriangulatePolygon_PolygonTriangulatorTest) TriangulatePolygon_Polyg
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestQuad() {
-	this.checkTri_String_String(jlit_4785, jlit_4827)
+	this.checkTri_String_String(jlit_4784, jlit_4826)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestPent() {
-	this.checkTri_String_String(jlit_4787, jlit_4828)
+	this.checkTri_String_String(jlit_4786, jlit_4827)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestHoleCW() {
-	this.checkTri_String_String(jlit_4789, jlit_4829)
+	this.checkTri_String_String(jlit_4788, jlit_4828)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestTouchingHoles() {
-	this.checkTri_String_String(jlit_4830, jlit_4831)
+	this.checkTri_String_String(jlit_4829, jlit_4830)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestRepeatedPoints() {
-	this.checkTri_String_String(jlit_4832, jlit_4833)
+	this.checkTri_String_String(jlit_4831, jlit_4832)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestEmpty() {
 	this.checkTri_String_String(jlit_534, jlit_1187)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestMultiPolygon() {
-	this.checkTri_String_String(jlit_4834, jlit_4835)
+	this.checkTri_String_String(jlit_4833, jlit_4834)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestCeeShape() {
-	this.checkTri_String(jlit_4795)
+	this.checkTri_String(jlit_4794)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestCollapsedCorner() {
-	this.checkTri_String(jlit_4836)
+	this.checkTri_String(jlit_4835)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestBadHoleJoinZeroLenCutDuplicateVertices() {
-	this.checkTri_String(jlit_4837)
+	this.checkTri_String(jlit_4836)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestBadHoleJoinTouchingHoles() {
-	this.checkTri_String(jlit_4800)
+	this.checkTri_String(jlit_4799)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestBadHoleJoinHolesTouchVertical() {
-	this.checkTri_String(jlit_4802)
+	this.checkTri_String(jlit_4801)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestBadHoleJoinHoleTouchesShellVertical() {
-	this.checkTri_String_String(jlit_4804, jlit_4838)
+	this.checkTri_String_String(jlit_4803, jlit_4837)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) TestBadHoleJoinHoleTouchesShell() {
-	this.checkTri_String_String(jlit_4808, jlit_4839)
+	this.checkTri_String_String(jlit_4807, jlit_4838)
 }
 func (this *TriangulatePolygon_PolygonTriangulatorTest) checkTri_String_String(wkt *java.String, wktExpected *java.String) {
 	var geom *Geom_Geometry = this.Read_String(wkt)
@@ -118,7 +118,7 @@ func (this *TriangulatePolygon_PolygonTriangulatorTest) checkTri_String(wkt *jav
 }
 func TestTriangulatePolygon_PolygonTriangulatorTest_testBadHoleJoinHoleTouchesShell(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4840)
+		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4839)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestBadHoleJoinHoleTouchesShell()
@@ -126,7 +126,7 @@ func TestTriangulatePolygon_PolygonTriangulatorTest_testBadHoleJoinHoleTouchesSh
 }
 func TestTriangulatePolygon_PolygonTriangulatorTest_testBadHoleJoinHoleTouchesShellVertical(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4841)
+		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4840)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestBadHoleJoinHoleTouchesShellVertical()
@@ -134,7 +134,7 @@ func TestTriangulatePolygon_PolygonTriangulatorTest_testBadHoleJoinHoleTouchesSh
 }
 func TestTriangulatePolygon_PolygonTriangulatorTest_testBadHoleJoinHolesTouchVertical(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4842)
+		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4841)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestBadHoleJoinHolesTouchVertical()
@@ -142,7 +142,7 @@ func TestTriangulatePolygon_PolygonTriangulatorTest_testBadHoleJoinHolesTouchVer
 }
 func TestTriangulatePolygon_PolygonTriangulatorTest_testBadHoleJoinTouchingHoles(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4843)
+		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4842)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestBadHoleJoinTouchingHoles()
@@ -150,7 +150,7 @@ func TestTriangulatePolygon_PolygonTriangulatorTest_testBadHoleJoinTouchingHoles
 }
 func TestTriangulatePolygon_PolygonTriangulatorTest_testBadHoleJoinZeroLenCutDuplicateVertices(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4844)
+		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4843)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestBadHoleJoinZeroLenCutDuplicateVertices()
@@ -158,7 +158,7 @@ func TestTriangulatePolygon_PolygonTriangulatorTest_testBadHoleJoinZeroLenCutDup
 }
 func TestTriangulatePolygon_PolygonTriangulatorTest_testCeeShape(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4845)
+		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4844)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestCeeShape()
@@ -166,7 +166,7 @@ func TestTriangulatePolygon_PolygonTriangulatorTest_testCeeShape(t *testing.T) {
 }
 func TestTriangulatePolygon_PolygonTriangulatorTest_testCollapsedCorner(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4846)
+		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4845)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestCollapsedCorner()
@@ -182,7 +182,7 @@ func TestTriangulatePolygon_PolygonTriangulatorTest_testEmpty(t *testing.T) {
 }
 func TestTriangulatePolygon_PolygonTriangulatorTest_testHoleCW(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4797)
+		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4796)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestHoleCW()
@@ -198,7 +198,7 @@ func TestTriangulatePolygon_PolygonTriangulatorTest_testMultiPolygon(t *testing.
 }
 func TestTriangulatePolygon_PolygonTriangulatorTest_testPent(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4798)
+		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4797)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPent()
@@ -206,7 +206,7 @@ func TestTriangulatePolygon_PolygonTriangulatorTest_testPent(t *testing.T) {
 }
 func TestTriangulatePolygon_PolygonTriangulatorTest_testQuad(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4799)
+		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4798)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestQuad()
@@ -214,7 +214,7 @@ func TestTriangulatePolygon_PolygonTriangulatorTest_testQuad(t *testing.T) {
 }
 func TestTriangulatePolygon_PolygonTriangulatorTest_testRepeatedPoints(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4847)
+		tc := TriangulatePolygon_PolygonTriangulatorTest_new(jlit_4846)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestRepeatedPoints()

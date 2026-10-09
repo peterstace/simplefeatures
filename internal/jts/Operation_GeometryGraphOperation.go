@@ -44,13 +44,13 @@ func Operation_GeometryGraphOperation_isInstance(o any) bool {
 	return ok
 }
 func Operation_GeometryGraphOperation_isKind(p *Operation_GeometryGraphOperation) bool {
-	return p != nil && p.jkind_ >= 163 && p.jkind_ <= 165
+	return p != nil && p.jkind_ >= 162 && p.jkind_ <= 164
 }
 func Operation_GeometryGraphOperation_downcast(p *Operation_GeometryGraphOperation) *Operation_GeometryGraphOperation {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 163 || p.jkind_ > 165 {
+	if p.jkind_ < 162 || p.jkind_ > 164 {
 		panic(java.ClassCastError(Operation_GeometryGraphOperation_toAny(p), "org.locationtech.jts.operation.GeometryGraphOperation"))
 	}
 	return (*Operation_GeometryGraphOperation)(unsafe.Pointer(p))
@@ -63,18 +63,18 @@ func Operation_GeometryGraphOperation_toAny(p *Operation_GeometryGraphOperation)
 		return nil
 	}
 	switch p.jkind_ {
-	case 163:
+	case 162:
 		return (*Operation_GeometryGraphOperation)(unsafe.Pointer(p))
-	case 164:
+	case 163:
 		return (*OperationOverlay_OverlayOp)(unsafe.Pointer(p))
-	case 165:
+	case 164:
 		return (*OperationRelate_RelateOp)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
 }
 func Operation_GeometryGraphOperation_new_Geometry_Geometry(g0 *Geom_Geometry, g1 *Geom_Geometry) *Operation_GeometryGraphOperation {
 	this := &Operation_GeometryGraphOperation{}
-	this.jkind_ = 163
+	this.jkind_ = 162
 	this.Operation_GeometryGraphOperation_init_Geometry_Geometry(g0, g1)
 	return this
 }
@@ -84,7 +84,7 @@ func (this *Operation_GeometryGraphOperation) Operation_GeometryGraphOperation_i
 }
 func Operation_GeometryGraphOperation_new_Geometry_Geometry_BoundaryNodeRule(g0 *Geom_Geometry, g1 *Geom_Geometry, boundaryNodeRule Algorithm_BoundaryNodeRule) *Operation_GeometryGraphOperation {
 	this := &Operation_GeometryGraphOperation{}
-	this.jkind_ = 163
+	this.jkind_ = 162
 	this.Operation_GeometryGraphOperation_init_Geometry_Geometry_BoundaryNodeRule(g0, g1, boundaryNodeRule)
 	return this
 }
@@ -102,7 +102,7 @@ func (this *Operation_GeometryGraphOperation) Operation_GeometryGraphOperation_i
 }
 func Operation_GeometryGraphOperation_new_Geometry(g0 *Geom_Geometry) *Operation_GeometryGraphOperation {
 	this := &Operation_GeometryGraphOperation{}
-	this.jkind_ = 163
+	this.jkind_ = 162
 	this.Operation_GeometryGraphOperation_init_Geometry(g0)
 	return this
 }

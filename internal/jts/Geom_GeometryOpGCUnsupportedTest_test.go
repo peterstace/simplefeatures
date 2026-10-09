@@ -40,13 +40,13 @@ func Geom_GeometryOpGCUnsupportedTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_GeometryOpGCUnsupportedTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 257 && p.jkind_ <= 257
+	return p != nil && p.jkind_ >= 227 && p.jkind_ <= 227
 }
 func Geom_GeometryOpGCUnsupportedTest_downcast(p *Testjts_GeometryTestCase) *Geom_GeometryOpGCUnsupportedTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 257 || p.jkind_ > 257 {
+	if p.jkind_ < 227 || p.jkind_ > 227 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.GeometryOpGCUnsupportedTest"))
 	}
 	return (*Geom_GeometryOpGCUnsupportedTest)(unsafe.Pointer(p))
@@ -57,7 +57,7 @@ var Geom_GeometryOpGCUnsupportedTest_WKT_POLY *java.String = jlit_1500
 
 func Geom_GeometryOpGCUnsupportedTest_new(name *java.String) *Geom_GeometryOpGCUnsupportedTest {
 	this := &Geom_GeometryOpGCUnsupportedTest{}
-	this.jkind_ = 257
+	this.jkind_ = 227
 	this.JSetSelf(this)
 	this.Geom_GeometryOpGCUnsupportedTest_init(name)
 	return this

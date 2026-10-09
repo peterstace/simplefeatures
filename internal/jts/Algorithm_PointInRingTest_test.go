@@ -41,20 +41,20 @@ func Algorithm_PointInRingTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_PointInRingTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 225 && p.jkind_ <= 225
+	return p != nil && p.jkind_ >= 195 && p.jkind_ <= 195
 }
 func Algorithm_PointInRingTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_PointInRingTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 225 || p.jkind_ > 225 {
+	if p.jkind_ < 195 || p.jkind_ > 195 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.PointInRingTest"))
 	}
 	return (*Algorithm_PointInRingTest)(unsafe.Pointer(p))
 }
 func Algorithm_PointInRingTest_new(name *java.String) *Algorithm_PointInRingTest {
 	this := &Algorithm_PointInRingTest{}
-	this.jkind_ = 225
+	this.jkind_ = 195
 	this.JSetSelf(this)
 	this.Algorithm_PointInRingTest_init(name)
 	return this

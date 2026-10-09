@@ -42,13 +42,13 @@ func TriangulateQuadedge_Vertex_isInstance(o any) bool {
 	return ok
 }
 func TriangulateQuadedge_Vertex_isKind(p *TriangulateQuadedge_Vertex) bool {
-	return p != nil && p.jkind_ >= 343 && p.jkind_ <= 344
+	return p != nil && p.jkind_ >= 310 && p.jkind_ <= 311
 }
 func TriangulateQuadedge_Vertex_downcast(p *TriangulateQuadedge_Vertex) *TriangulateQuadedge_Vertex {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 343 || p.jkind_ > 344 {
+	if p.jkind_ < 310 || p.jkind_ > 311 {
 		panic(java.ClassCastError(TriangulateQuadedge_Vertex_toAny(p), "org.locationtech.jts.triangulate.quadedge.Vertex"))
 	}
 	return (*TriangulateQuadedge_Vertex)(unsafe.Pointer(p))
@@ -59,9 +59,9 @@ func TriangulateQuadedge_Vertex_toAny(p *TriangulateQuadedge_Vertex) any {
 		return nil
 	}
 	switch p.jkind_ {
-	case 343:
+	case 310:
 		return (*TriangulateQuadedge_Vertex)(unsafe.Pointer(p))
-	case 344:
+	case 311:
 		return (*Triangulate_ConstraintVertex)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
@@ -77,7 +77,7 @@ const TriangulateQuadedge_Vertex_DESTINATION int32 = int32(6)
 
 func TriangulateQuadedge_Vertex_new_double_double(_x float64, _y float64) *TriangulateQuadedge_Vertex {
 	this := &TriangulateQuadedge_Vertex{}
-	this.jkind_ = 343
+	this.jkind_ = 310
 	this.TriangulateQuadedge_Vertex_init_double_double(_x, _y)
 	return this
 }
@@ -87,7 +87,7 @@ func (this *TriangulateQuadedge_Vertex) TriangulateQuadedge_Vertex_init_double_d
 }
 func TriangulateQuadedge_Vertex_new_double_double_double(_x float64, _y float64, _z float64) *TriangulateQuadedge_Vertex {
 	this := &TriangulateQuadedge_Vertex{}
-	this.jkind_ = 343
+	this.jkind_ = 310
 	this.TriangulateQuadedge_Vertex_init_double_double_double(_x, _y, _z)
 	return this
 }
@@ -97,7 +97,7 @@ func (this *TriangulateQuadedge_Vertex) TriangulateQuadedge_Vertex_init_double_d
 }
 func TriangulateQuadedge_Vertex_new_Coordinate(_p *Geom_Coordinate) *TriangulateQuadedge_Vertex {
 	this := &TriangulateQuadedge_Vertex{}
-	this.jkind_ = 343
+	this.jkind_ = 310
 	this.TriangulateQuadedge_Vertex_init_Coordinate(_p)
 	return this
 }

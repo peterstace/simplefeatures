@@ -54,7 +54,7 @@ func (this *OperationUnion_CascadedPolygonUnionTest) OperationUnion_CascadedPoly
 	this.TestCase.TestCase_init_String(name)
 }
 func (this *OperationUnion_CascadedPolygonUnionTest) TestBoxes() {
-	this.runTest_Collection_double(java.AnyTo[java.Collection](TestjtsUtil_IOUtil_readWKT_StringArr([]*java.String{jlit_4342, jlit_4343, jlit_4344})), float64(0.999999))
+	this.runTest_Collection_double(java.AnyTo[java.Collection](TestjtsUtil_IOUtil_readWKT_StringArr([]*java.String{jlit_4341, jlit_4342, jlit_4343})), float64(0.999999))
 }
 func (this *OperationUnion_CascadedPolygonUnionTest) TestDiscs1() {
 	var geoms java.Collection = this.createDiscs_int_double(int32(5), float64(0.7))
@@ -87,7 +87,7 @@ func (this *OperationUnion_CascadedPolygonUnionTest) createDiscs_int_double(num 
 }
 func TestOperationUnion_CascadedPolygonUnionTest_testBoxes(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationUnion_CascadedPolygonUnionTest_new(jlit_4345)
+		tc := OperationUnion_CascadedPolygonUnionTest_new(jlit_4344)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestBoxes()
@@ -95,7 +95,7 @@ func TestOperationUnion_CascadedPolygonUnionTest_testBoxes(t *testing.T) {
 }
 func TestOperationUnion_CascadedPolygonUnionTest_testDiscs1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationUnion_CascadedPolygonUnionTest_new(jlit_4346)
+		tc := OperationUnion_CascadedPolygonUnionTest_new(jlit_4345)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestDiscs1()
@@ -103,7 +103,7 @@ func TestOperationUnion_CascadedPolygonUnionTest_testDiscs1(t *testing.T) {
 }
 func TestOperationUnion_CascadedPolygonUnionTest_testDiscs2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationUnion_CascadedPolygonUnionTest_new(jlit_4347)
+		tc := OperationUnion_CascadedPolygonUnionTest_new(jlit_4346)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestDiscs2()

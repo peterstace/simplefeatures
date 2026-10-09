@@ -33,13 +33,13 @@ func IndexQuadtree_Root_isInstance(o any) bool {
 	return ok
 }
 func IndexQuadtree_Root_isKind(p *IndexQuadtree_NodeBase) bool {
-	return p != nil && p.jkind_ >= 125 && p.jkind_ <= 125
+	return p != nil && p.jkind_ >= 124 && p.jkind_ <= 124
 }
 func IndexQuadtree_Root_downcast(p *IndexQuadtree_NodeBase) *IndexQuadtree_Root {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 125 || p.jkind_ > 125 {
+	if p.jkind_ < 124 || p.jkind_ > 124 {
 		panic(java.ClassCastError(IndexQuadtree_NodeBase_toAny(p), "org.locationtech.jts.index.quadtree.Root"))
 	}
 	return (*IndexQuadtree_Root)(unsafe.Pointer(p))
@@ -49,7 +49,7 @@ var IndexQuadtree_Root_origin *Geom_Coordinate = java.StaticInit(func() *Geom_Co
 
 func IndexQuadtree_Root_new() *IndexQuadtree_Root {
 	this := &IndexQuadtree_Root{}
-	this.jkind_ = 125
+	this.jkind_ = 124
 	this.IndexQuadtree_Root_init()
 	return this
 }

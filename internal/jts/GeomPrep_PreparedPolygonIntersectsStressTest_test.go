@@ -5,7 +5,6 @@ package jts
 import (
 	"github.com/peterstace/simplefeatures/internal/jts/java"
 	"github.com/peterstace/simplefeatures/internal/jts/junit"
-	"testing"
 	"unsafe"
 )
 
@@ -119,12 +118,4 @@ func (this *GeomPrep_PreparedPolygonIntersectsStressTest) TestResultsEqual_Geome
 		java.System_out.Println_String(java.Concat(jlit_1784, java.StrOfBool(slowIntersects), jlit_1785, java.StrOfBool(fastIntersects)))
 		panic(java.Ref(java.RuntimeException_new_String(jlit_1786)))
 	}
-}
-func TestGeomPrep_PreparedPolygonIntersectsStressTest_test(t *testing.T) {
-	junit.Run(t, func() {
-		tc := GeomPrep_PreparedPolygonIntersectsStressTest_new(jlit_1787)
-		tc.SetUp()
-		defer tc.TearDown()
-		tc.Test()
-	})
 }

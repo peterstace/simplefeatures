@@ -39,20 +39,20 @@ func OperationLinemerge_LineMergeGraph_isInstance(o any) bool {
 	return ok
 }
 func OperationLinemerge_LineMergeGraph_isKind(p *Planargraph_PlanarGraph) bool {
-	return p != nil && p.jkind_ >= 175 && p.jkind_ <= 175
+	return p != nil && p.jkind_ >= 174 && p.jkind_ <= 174
 }
 func OperationLinemerge_LineMergeGraph_downcast(p *Planargraph_PlanarGraph) *OperationLinemerge_LineMergeGraph {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 175 || p.jkind_ > 175 {
+	if p.jkind_ < 174 || p.jkind_ > 174 {
 		panic(java.ClassCastError(Planargraph_PlanarGraph_toAny(p), "org.locationtech.jts.operation.linemerge.LineMergeGraph"))
 	}
 	return (*OperationLinemerge_LineMergeGraph)(unsafe.Pointer(p))
 }
 func OperationLinemerge_LineMergeGraph_new() *OperationLinemerge_LineMergeGraph {
 	this := &OperationLinemerge_LineMergeGraph{}
-	this.jkind_ = 175
+	this.jkind_ = 174
 	this.OperationLinemerge_LineMergeGraph_init()
 	return this
 }

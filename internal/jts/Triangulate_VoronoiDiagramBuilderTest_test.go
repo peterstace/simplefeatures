@@ -40,13 +40,13 @@ func Triangulate_VoronoiDiagramBuilderTest_isInstance(o any) bool {
 	return ok
 }
 func Triangulate_VoronoiDiagramBuilderTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 340 && p.jkind_ <= 340
+	return p != nil && p.jkind_ >= 307 && p.jkind_ <= 307
 }
 func Triangulate_VoronoiDiagramBuilderTest_downcast(p *Testjts_GeometryTestCase) *Triangulate_VoronoiDiagramBuilderTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 340 || p.jkind_ > 340 {
+	if p.jkind_ < 307 || p.jkind_ > 307 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.triangulate.VoronoiDiagramBuilderTest"))
 	}
 	return (*Triangulate_VoronoiDiagramBuilderTest)(unsafe.Pointer(p))
@@ -56,7 +56,7 @@ const Triangulate_VoronoiDiagramBuilderTest_TRIANGULATION_TOLERANCE float64 = fl
 
 func Triangulate_VoronoiDiagramBuilderTest_new(name *java.String) *Triangulate_VoronoiDiagramBuilderTest {
 	this := &Triangulate_VoronoiDiagramBuilderTest{}
-	this.jkind_ = 340
+	this.jkind_ = 307
 	this.JSetSelf(this)
 	this.Triangulate_VoronoiDiagramBuilderTest_init(name)
 	return this
@@ -75,20 +75,20 @@ func Triangulate_VoronoiDiagramBuilderTest_voronoiDiagram(sitesGeom *Geom_Geomet
 	return diagram
 }
 func (this *Triangulate_VoronoiDiagramBuilderTest) TestClipEnvelope() {
-	var sites *Geom_Geometry = this.Read_String(jlit_4773)
-	var clip *Geom_Geometry = this.Read_String(jlit_4774)
+	var sites *Geom_Geometry = this.Read_String(jlit_4772)
+	var clip *Geom_Geometry = this.Read_String(jlit_4773)
 	var voronoi *Geom_Geometry = Triangulate_VoronoiDiagramBuilderTest_voronoiDiagram(sites, clip)
 	junit.TestCase_assertTrue_boolean(voronoi.GetEnvelopeInternal().Equals_Object(java.Ref(clip.GetEnvelopeInternal())))
 }
 func (this *Triangulate_VoronoiDiagramBuilderTest) TestClipEnvelopeBig() {
-	var sites *Geom_Geometry = this.Read_String(jlit_4773)
-	var clip *Geom_Geometry = this.Read_String(jlit_4775)
+	var sites *Geom_Geometry = this.Read_String(jlit_4772)
+	var clip *Geom_Geometry = this.Read_String(jlit_4774)
 	var voronoi *Geom_Geometry = Triangulate_VoronoiDiagramBuilderTest_voronoiDiagram(sites, clip)
 	junit.TestCase_assertTrue_boolean(voronoi.GetEnvelopeInternal().Equals_Object(java.Ref(clip.GetEnvelopeInternal())))
 }
 func TestTriangulate_VoronoiDiagramBuilderTest_testClipEnvelope(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_VoronoiDiagramBuilderTest_new(jlit_4776)
+		tc := Triangulate_VoronoiDiagramBuilderTest_new(jlit_4775)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestClipEnvelope()
@@ -96,7 +96,7 @@ func TestTriangulate_VoronoiDiagramBuilderTest_testClipEnvelope(t *testing.T) {
 }
 func TestTriangulate_VoronoiDiagramBuilderTest_testClipEnvelopeBig(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_VoronoiDiagramBuilderTest_new(jlit_4777)
+		tc := Triangulate_VoronoiDiagramBuilderTest_new(jlit_4776)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestClipEnvelopeBig()

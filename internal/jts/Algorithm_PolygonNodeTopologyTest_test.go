@@ -40,20 +40,20 @@ func Algorithm_PolygonNodeTopologyTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_PolygonNodeTopologyTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 237 && p.jkind_ <= 237
+	return p != nil && p.jkind_ >= 207 && p.jkind_ <= 207
 }
 func Algorithm_PolygonNodeTopologyTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_PolygonNodeTopologyTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 237 || p.jkind_ > 237 {
+	if p.jkind_ < 207 || p.jkind_ > 207 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.PolygonNodeTopologyTest"))
 	}
 	return (*Algorithm_PolygonNodeTopologyTest)(unsafe.Pointer(p))
 }
 func Algorithm_PolygonNodeTopologyTest_new(name *java.String) *Algorithm_PolygonNodeTopologyTest {
 	this := &Algorithm_PolygonNodeTopologyTest{}
-	this.jkind_ = 237
+	this.jkind_ = 207
 	this.JSetSelf(this)
 	this.Algorithm_PolygonNodeTopologyTest_init(name)
 	return this

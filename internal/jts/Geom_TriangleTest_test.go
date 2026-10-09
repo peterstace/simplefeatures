@@ -31,13 +31,13 @@ func Geom_TriangleTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_TriangleTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 263 && p.jkind_ <= 263
+	return p != nil && p.jkind_ >= 233 && p.jkind_ <= 233
 }
 func Geom_TriangleTest_downcast(p *Testjts_GeometryTestCase) *Geom_TriangleTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 263 || p.jkind_ > 263 {
+	if p.jkind_ < 233 || p.jkind_ > 233 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.TriangleTest"))
 	}
 	return (*Geom_TriangleTest)(unsafe.Pointer(p))
@@ -47,7 +47,7 @@ const Geom_TriangleTest_TOLERANCE float64 = float64(1.0e-5)
 
 func Geom_TriangleTest_new(name *java.String) *Geom_TriangleTest {
 	this := &Geom_TriangleTest{}
-	this.jkind_ = 263
+	this.jkind_ = 233
 	this.JSetSelf(this)
 	this.Geom_TriangleTest_init(name)
 	return this

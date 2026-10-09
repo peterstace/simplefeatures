@@ -38,13 +38,13 @@ func IndexIntervalrtree_IntervalRTreeNode_isInstance(o any) bool {
 	return ok
 }
 func IndexIntervalrtree_IntervalRTreeNode_isKind(p *IndexIntervalrtree_IntervalRTreeNode) bool {
-	return p != nil && p.jkind_ >= 120 && p.jkind_ <= 122
+	return p != nil && p.jkind_ >= 119 && p.jkind_ <= 121
 }
 func IndexIntervalrtree_IntervalRTreeNode_downcast(p *IndexIntervalrtree_IntervalRTreeNode) *IndexIntervalrtree_IntervalRTreeNode {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 120 || p.jkind_ > 122 {
+	if p.jkind_ < 119 || p.jkind_ > 121 {
 		panic(java.ClassCastError(IndexIntervalrtree_IntervalRTreeNode_toAny(p), "org.locationtech.jts.index.intervalrtree.IntervalRTreeNode"))
 	}
 	return (*IndexIntervalrtree_IntervalRTreeNode)(unsafe.Pointer(p))
@@ -57,9 +57,9 @@ func IndexIntervalrtree_IntervalRTreeNode_toAny(p *IndexIntervalrtree_IntervalRT
 		return nil
 	}
 	switch p.jkind_ {
-	case 121:
+	case 120:
 		return (*IndexIntervalrtree_IntervalRTreeBranchNode)(unsafe.Pointer(p))
-	case 122:
+	case 121:
 		return (*IndexIntervalrtree_IntervalRTreeLeafNode)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
@@ -86,10 +86,10 @@ func (this *IndexIntervalrtree_IntervalRTreeNode) ToString() *java.String {
 }
 func (this *IndexIntervalrtree_IntervalRTreeNode) Query_double_double_ItemVisitor(a0 float64, a1 float64, a2 Index_ItemVisitor) {
 	switch this.jkind_ {
-	case 121:
+	case 120:
 		(*IndexIntervalrtree_IntervalRTreeBranchNode)(unsafe.Pointer(this)).Query_double_double_ItemVisitor_impl(a0, a1, a2)
 		return
-	case 122:
+	case 121:
 		(*IndexIntervalrtree_IntervalRTreeLeafNode)(unsafe.Pointer(this)).Query_double_double_ItemVisitor_impl(a0, a1, a2)
 		return
 	}

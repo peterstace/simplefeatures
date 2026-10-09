@@ -40,20 +40,20 @@ func OperationRelateng_RelateNGRobustnessTest_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelateNGRobustnessTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 316 && p.jkind_ <= 316
+	return p != nil && p.jkind_ >= 286 && p.jkind_ <= 286
 }
 func OperationRelateng_RelateNGRobustnessTest_downcast(p *Testjts_GeometryTestCase) *OperationRelateng_RelateNGRobustnessTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 316 || p.jkind_ > 316 {
+	if p.jkind_ < 286 || p.jkind_ > 286 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.relateng.RelateNGRobustnessTest"))
 	}
 	return (*OperationRelateng_RelateNGRobustnessTest)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelateNGRobustnessTest_new(name *java.String) *OperationRelateng_RelateNGRobustnessTest {
 	this := &OperationRelateng_RelateNGRobustnessTest{}
-	this.jkind_ = 316
+	this.jkind_ = 286
 	this.JSetSelf(this)
 	this.OperationRelateng_RelateNGRobustnessTest_init(name)
 	return this
@@ -62,111 +62,111 @@ func (this *OperationRelateng_RelateNGRobustnessTest) OperationRelateng_RelateNG
 	this.OperationRelateng_RelateNGTestCase.OperationRelateng_RelateNGTestCase_init(name)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_1033() {
-	this.CheckContainsWithin_String_String_boolean(jlit_4118, jlit_4119, true)
+	this.CheckContainsWithin_String_String_boolean(jlit_4117, jlit_4118, true)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_1027() {
-	this.CheckCoversCoveredBy_String_String_boolean(jlit_4050, jlit_4051, true)
+	this.CheckCoversCoveredBy_String_String_boolean(jlit_4049, jlit_4050, true)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_1022() {
-	this.CheckCrosses_String_String_boolean(jlit_4053, jlit_4054, false)
+	this.CheckCrosses_String_String_boolean(jlit_4052, jlit_4053, false)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_1011() {
-	var a *java.String = jlit_4120
-	var b *java.String = jlit_4121
+	var a *java.String = jlit_4119
+	var b *java.String = jlit_4120
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
 	this.CheckEquals_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_983() {
 	var a *java.String = jlit_1475
-	var b *java.String = jlit_4122
+	var b *java.String = jlit_4121
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_982() {
 	var a *java.String = jlit_1475
-	var b1 *java.String = jlit_4056
+	var b1 *java.String = jlit_4055
 	this.CheckContainsWithin_String_String_boolean(b1, a, false)
 	this.CheckCoversCoveredBy_String_String_boolean(b1, a, true)
-	var b2 *java.String = jlit_4123
+	var b2 *java.String = jlit_4122
 	this.CheckContainsWithin_String_String_boolean(b2, a, false)
 	this.CheckCoversCoveredBy_String_String_boolean(b2, a, true)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_981() {
 	var a *java.String = jlit_1475
-	var b *java.String = jlit_4124
+	var b *java.String = jlit_4123
 	this.CheckRelateMatches_String_String_String_boolean(b, a, jlit_103, false)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_1053() {
-	var a *java.String = jlit_4125
-	var b *java.String = jlit_4126
-	this.CheckRelate_String_String_String(a, b, jlit_4127)
+	var a *java.String = jlit_4124
+	var b *java.String = jlit_4125
+	this.CheckRelate_String_String_String(a, b, jlit_4126)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_968() {
-	var a2 *java.String = jlit_4128
-	var b2 *java.String = jlit_4129
+	var a2 *java.String = jlit_4127
+	var b2 *java.String = jlit_4128
 	this.CheckCoversCoveredBy_String_String_boolean(a2, b2, true)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) XtestGEOS_968_2() {
-	var a *java.String = jlit_4130
-	var b *java.String = jlit_4131
+	var a *java.String = jlit_4129
+	var b *java.String = jlit_4130
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_933() {
 	var a *java.String = jlit_470
-	var b *java.String = jlit_4132
+	var b *java.String = jlit_4131
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_740() {
-	var a *java.String = jlit_4133
-	var b *java.String = jlit_4134
+	var a *java.String = jlit_4132
+	var b *java.String = jlit_4133
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_766() {
-	var a *java.String = jlit_4135
-	var b *java.String = jlit_4136
+	var a *java.String = jlit_4134
+	var b *java.String = jlit_4135
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_1026() {
-	var a *java.String = jlit_4137
-	var b *java.String = jlit_4138
+	var a *java.String = jlit_4136
+	var b *java.String = jlit_4137
 	this.CheckTouches_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestJTS_1051() {
-	var a *java.String = jlit_4139
-	var b *java.String = jlit_4140
+	var a *java.String = jlit_4138
+	var b *java.String = jlit_4139
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestPostGIS_5362() {
-	var a *java.String = jlit_4141
-	var b *java.String = jlit_4142
-	this.CheckRelate_String_String_String(a, b, jlit_4143)
+	var a *java.String = jlit_4140
+	var b *java.String = jlit_4141
+	this.CheckRelate_String_String_String(a, b, jlit_4142)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGEOS_1064() {
-	var a *java.String = jlit_4144
-	var b *java.String = jlit_4145
-	this.CheckRelate_String_String_String(a, b, jlit_3966)
+	var a *java.String = jlit_4143
+	var b *java.String = jlit_4144
+	this.CheckRelate_String_String_String(a, b, jlit_3965)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestJTS_396() {
-	var a *java.String = jlit_3957
-	var b *java.String = jlit_3958
-	this.CheckRelate_String_String_String(a, b, jlit_3983)
+	var a *java.String = jlit_3956
+	var b *java.String = jlit_3957
+	this.CheckRelate_String_String_String(a, b, jlit_3982)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestJTS_270() {
-	var a *java.String = jlit_4146
-	var b *java.String = jlit_4147
-	this.CheckRelate_String_String_String(a, b, jlit_3989)
+	var a *java.String = jlit_4145
+	var b *java.String = jlit_4146
+	this.CheckRelate_String_String_String(a, b, jlit_3988)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGRobustnessTest) TestGISSE_484691() {
-	var a *java.String = jlit_4148
-	var b *java.String = jlit_4149
-	this.CheckRelate_String_String_String(a, b, jlit_4143)
+	var a *java.String = jlit_4147
+	var b *java.String = jlit_4148
+	this.CheckRelate_String_String_String(a, b, jlit_4142)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1011(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4150)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4149)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_1011()
@@ -174,7 +174,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1011(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1022(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4151)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4150)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_1022()
@@ -182,7 +182,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1022(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1026(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4152)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4151)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_1026()
@@ -190,7 +190,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1026(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1027(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4153)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4152)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_1027()
@@ -198,7 +198,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1027(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1033(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4154)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4153)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_1033()
@@ -206,7 +206,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1033(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1053(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4155)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4154)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_1053()
@@ -214,7 +214,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1053(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1064(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4156)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4155)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_1064()
@@ -222,7 +222,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_1064(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_740(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4157)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4156)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_740()
@@ -230,7 +230,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_740(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_766(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4158)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4157)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_766()
@@ -238,7 +238,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_766(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_933(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4159)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4158)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_933()
@@ -246,7 +246,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_933(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_968(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4160)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4159)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_968()
@@ -254,7 +254,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_968(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_981(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4161)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4160)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_981()
@@ -262,7 +262,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_981(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_982(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4162)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4161)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_982()
@@ -270,7 +270,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_982(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_983(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4163)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4162)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGEOS_983()
@@ -278,7 +278,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGEOS_983(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testGISSE_484691(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4164)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4163)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGISSE_484691()
@@ -286,7 +286,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testGISSE_484691(t *testing.T)
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testJTS_1051(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4165)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4164)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestJTS_1051()
@@ -294,7 +294,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testJTS_1051(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testJTS_270(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4166)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4165)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestJTS_270()
@@ -302,7 +302,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testJTS_270(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testJTS_396(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4167)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4166)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestJTS_396()
@@ -310,7 +310,7 @@ func TestOperationRelateng_RelateNGRobustnessTest_testJTS_396(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGRobustnessTest_testPostGIS_5362(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4168)
+		tc := OperationRelateng_RelateNGRobustnessTest_new(jlit_4167)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPostGIS_5362()

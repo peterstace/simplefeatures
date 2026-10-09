@@ -102,7 +102,7 @@ func (this *Index_VertexSequencePackedRtreeTest) createSPRtree_intArr(ords []int
 }
 func TestIndex_VertexSequencePackedRtreeTest_test1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Index_VertexSequencePackedRtreeTest_new(jlit_1962)
+		tc := Index_VertexSequencePackedRtreeTest_new(jlit_1961)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.Test1()
@@ -110,7 +110,7 @@ func TestIndex_VertexSequencePackedRtreeTest_test1(t *testing.T) {
 }
 func TestIndex_VertexSequencePackedRtreeTest_test10(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Index_VertexSequencePackedRtreeTest_new(jlit_1963)
+		tc := Index_VertexSequencePackedRtreeTest_new(jlit_1962)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.Test10()
@@ -118,7 +118,7 @@ func TestIndex_VertexSequencePackedRtreeTest_test10(t *testing.T) {
 }
 func TestIndex_VertexSequencePackedRtreeTest_test2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Index_VertexSequencePackedRtreeTest_new(jlit_1964)
+		tc := Index_VertexSequencePackedRtreeTest_new(jlit_1963)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.Test2()
@@ -126,7 +126,7 @@ func TestIndex_VertexSequencePackedRtreeTest_test2(t *testing.T) {
 }
 func TestIndex_VertexSequencePackedRtreeTest_test6(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Index_VertexSequencePackedRtreeTest_new(jlit_1965)
+		tc := Index_VertexSequencePackedRtreeTest_new(jlit_1964)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.Test6()
@@ -134,7 +134,7 @@ func TestIndex_VertexSequencePackedRtreeTest_test6(t *testing.T) {
 }
 func TestIndex_VertexSequencePackedRtreeTest_test6WithDups(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Index_VertexSequencePackedRtreeTest_new(jlit_1966)
+		tc := Index_VertexSequencePackedRtreeTest_new(jlit_1965)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.Test6WithDups()

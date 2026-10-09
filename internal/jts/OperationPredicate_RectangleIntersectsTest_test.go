@@ -40,20 +40,20 @@ func OperationPredicate_RectangleIntersectsTest_isInstance(o any) bool {
 	return ok
 }
 func OperationPredicate_RectangleIntersectsTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 306 && p.jkind_ <= 306
+	return p != nil && p.jkind_ >= 276 && p.jkind_ <= 276
 }
 func OperationPredicate_RectangleIntersectsTest_downcast(p *Testjts_GeometryTestCase) *OperationPredicate_RectangleIntersectsTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 306 || p.jkind_ > 306 {
+	if p.jkind_ < 276 || p.jkind_ > 276 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.predicate.RectangleIntersectsTest"))
 	}
 	return (*OperationPredicate_RectangleIntersectsTest)(unsafe.Pointer(p))
 }
 func OperationPredicate_RectangleIntersectsTest_new(name *java.String) *OperationPredicate_RectangleIntersectsTest {
 	this := &OperationPredicate_RectangleIntersectsTest{}
-	this.jkind_ = 306
+	this.jkind_ = 276
 	this.JSetSelf(this)
 	this.OperationPredicate_RectangleIntersectsTest_init(name)
 	return this
@@ -65,13 +65,13 @@ func (this *OperationPredicate_RectangleIntersectsTest) TestXYZM() {
 	var geomFact *Geom_GeometryFactory = Geom_GeometryFactory_new_CoordinateSequenceFactory(java.AnyTo[Geom_CoordinateSequenceFactory](java.Ref(GeomImpl_PackedCoordinateSequenceFactory_DOUBLE_FACTORY)))
 	var rdr *Io_WKTReader = Io_WKTReader_new_GeometryFactory(geomFact)
 	var rect *Geom_Polygon = Geom_Polygon_downcast((*Geom_Geometry)(unsafe.Pointer(rdr.Read_String(jlit_1521))))
-	var line *Geom_Geometry = rdr.Read_String(jlit_3955)
+	var line *Geom_Geometry = rdr.Read_String(jlit_3954)
 	var rectIntersects bool = OperationPredicate_RectangleIntersects_intersects(rect, line)
 	junit.TestCase_assertEquals_boolean_boolean(false, rectIntersects)
 }
 func TestOperationPredicate_RectangleIntersectsTest_testXYZM(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationPredicate_RectangleIntersectsTest_new(jlit_3956)
+		tc := OperationPredicate_RectangleIntersectsTest_new(jlit_3955)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestXYZM()

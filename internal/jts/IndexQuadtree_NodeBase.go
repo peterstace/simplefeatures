@@ -37,13 +37,13 @@ func IndexQuadtree_NodeBase_isInstance(o any) bool {
 	return ok
 }
 func IndexQuadtree_NodeBase_isKind(p *IndexQuadtree_NodeBase) bool {
-	return p != nil && p.jkind_ >= 123 && p.jkind_ <= 125
+	return p != nil && p.jkind_ >= 122 && p.jkind_ <= 124
 }
 func IndexQuadtree_NodeBase_downcast(p *IndexQuadtree_NodeBase) *IndexQuadtree_NodeBase {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 123 || p.jkind_ > 125 {
+	if p.jkind_ < 122 || p.jkind_ > 124 {
 		panic(java.ClassCastError(IndexQuadtree_NodeBase_toAny(p), "org.locationtech.jts.index.quadtree.NodeBase"))
 	}
 	return (*IndexQuadtree_NodeBase)(unsafe.Pointer(p))
@@ -54,9 +54,9 @@ func IndexQuadtree_NodeBase_toAny(p *IndexQuadtree_NodeBase) any {
 		return nil
 	}
 	switch p.jkind_ {
-	case 124:
+	case 123:
 		return (*IndexQuadtree_Node)(unsafe.Pointer(p))
-	case 125:
+	case 124:
 		return (*IndexQuadtree_Root)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
@@ -248,9 +248,9 @@ func (this *IndexQuadtree_NodeBase) GetNodeCount() int32 {
 }
 func (this *IndexQuadtree_NodeBase) IsSearchMatch_Envelope(a0 *Geom_Envelope) bool {
 	switch this.jkind_ {
-	case 124:
+	case 123:
 		return (*IndexQuadtree_Node)(unsafe.Pointer(this)).IsSearchMatch_Envelope_impl(a0)
-	case 125:
+	case 124:
 		return (*IndexQuadtree_Root)(unsafe.Pointer(this)).IsSearchMatch_Envelope_impl(a0)
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.index.quadtree.NodeBase.IsSearchMatch_Envelope"))

@@ -40,20 +40,20 @@ func Linearref_LocationIndexedLineTest_isInstance(o any) bool {
 	return ok
 }
 func Linearref_LocationIndexedLineTest_isKind(p *Linearref_AbstractIndexedLineTest) bool {
-	return p != nil && p.jkind_ >= 136 && p.jkind_ <= 136
+	return p != nil && p.jkind_ >= 135 && p.jkind_ <= 135
 }
 func Linearref_LocationIndexedLineTest_downcast(p *Linearref_AbstractIndexedLineTest) *Linearref_LocationIndexedLineTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 136 || p.jkind_ > 136 {
+	if p.jkind_ < 135 || p.jkind_ > 135 {
 		panic(java.ClassCastError(Linearref_AbstractIndexedLineTest_toAny(p), "org.locationtech.jts.linearref.LocationIndexedLineTest"))
 	}
 	return (*Linearref_LocationIndexedLineTest)(unsafe.Pointer(p))
 }
 func Linearref_LocationIndexedLineTest_new(name *java.String) *Linearref_LocationIndexedLineTest {
 	this := &Linearref_LocationIndexedLineTest{}
-	this.jkind_ = 136
+	this.jkind_ = 135
 	this.JSetSelf(this)
 	this.Linearref_LocationIndexedLineTest_init(name)
 	return this

@@ -40,20 +40,20 @@ func AlgorithmConstruct_LargestEmptyCircleTest_isInstance(o any) bool {
 	return ok
 }
 func AlgorithmConstruct_LargestEmptyCircleTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 214 && p.jkind_ <= 214
+	return p != nil && p.jkind_ >= 184 && p.jkind_ <= 184
 }
 func AlgorithmConstruct_LargestEmptyCircleTest_downcast(p *Testjts_GeometryTestCase) *AlgorithmConstruct_LargestEmptyCircleTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 214 || p.jkind_ > 214 {
+	if p.jkind_ < 184 || p.jkind_ > 184 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.construct.LargestEmptyCircleTest"))
 	}
 	return (*AlgorithmConstruct_LargestEmptyCircleTest)(unsafe.Pointer(p))
 }
 func AlgorithmConstruct_LargestEmptyCircleTest_new(name *java.String) *AlgorithmConstruct_LargestEmptyCircleTest {
 	this := &AlgorithmConstruct_LargestEmptyCircleTest{}
-	this.jkind_ = 214
+	this.jkind_ = 184
 	this.JSetSelf(this)
 	this.AlgorithmConstruct_LargestEmptyCircleTest_init(name)
 	return this

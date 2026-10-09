@@ -40,13 +40,13 @@ func ShapeFractal_KochSnowflakeBuilder_isInstance(o any) bool {
 	return ok
 }
 func ShapeFractal_KochSnowflakeBuilder_isKind(p *Shape_GeometricShapeBuilder) bool {
-	return p != nil && p.jkind_ >= 179 && p.jkind_ <= 179
+	return p != nil && p.jkind_ >= 178 && p.jkind_ <= 178
 }
 func ShapeFractal_KochSnowflakeBuilder_downcast(p *Shape_GeometricShapeBuilder) *ShapeFractal_KochSnowflakeBuilder {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 179 || p.jkind_ > 179 {
+	if p.jkind_ < 178 || p.jkind_ > 178 {
 		panic(java.ClassCastError(Shape_GeometricShapeBuilder_toAny(p), "org.locationtech.jts.shape.fractal.KochSnowflakeBuilder"))
 	}
 	return (*ShapeFractal_KochSnowflakeBuilder)(unsafe.Pointer(p))
@@ -62,7 +62,7 @@ const ShapeFractal_KochSnowflakeBuilder_TWO_THIRDS float64 = float64(0.666666666
 
 func ShapeFractal_KochSnowflakeBuilder_new(geomFactory *Geom_GeometryFactory) *ShapeFractal_KochSnowflakeBuilder {
 	this := &ShapeFractal_KochSnowflakeBuilder{}
-	this.jkind_ = 179
+	this.jkind_ = 178
 	this.ShapeFractal_KochSnowflakeBuilder_init(geomFactory)
 	return this
 }

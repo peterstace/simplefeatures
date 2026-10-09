@@ -42,20 +42,20 @@ func OperationRelate_ContainsTest_isInstance(o any) bool {
 	return ok
 }
 func OperationRelate_ContainsTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 307 && p.jkind_ <= 307
+	return p != nil && p.jkind_ >= 277 && p.jkind_ <= 277
 }
 func OperationRelate_ContainsTest_downcast(p *Testjts_GeometryTestCase) *OperationRelate_ContainsTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 307 || p.jkind_ > 307 {
+	if p.jkind_ < 277 || p.jkind_ > 277 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.relate.ContainsTest"))
 	}
 	return (*OperationRelate_ContainsTest)(unsafe.Pointer(p))
 }
 func OperationRelate_ContainsTest_new(name *java.String) *OperationRelate_ContainsTest {
 	this := &OperationRelate_ContainsTest{}
-	this.jkind_ = 307
+	this.jkind_ = 277
 	this.JSetSelf(this)
 	this.OperationRelate_ContainsTest_init(name)
 	return this
@@ -66,12 +66,12 @@ func (this *OperationRelate_ContainsTest) OperationRelate_ContainsTest_init(name
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationRelate_ContainsTest) TestContainsIncorrect() {
-	var a *java.String = jlit_3957
-	var b *java.String = jlit_3958
+	var a *java.String = jlit_3956
+	var b *java.String = jlit_3957
 	this.checkContains_String_String(a, b)
 }
 func (this *OperationRelate_ContainsTest) TestContainsGEOS933() {
-	var a *java.String = jlit_3959
+	var a *java.String = jlit_3958
 	var b *java.String = jlit_470
 	this.checkContains_String_String(a, b)
 }
@@ -89,7 +89,7 @@ func (this *OperationRelate_ContainsTest) checkContainsError_String_String(wktA 
 }
 func TestOperationRelate_ContainsTest_testContainsGEOS933(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelate_ContainsTest_new(jlit_3960)
+		tc := OperationRelate_ContainsTest_new(jlit_3959)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestContainsGEOS933()
@@ -97,7 +97,7 @@ func TestOperationRelate_ContainsTest_testContainsGEOS933(t *testing.T) {
 }
 func TestOperationRelate_ContainsTest_testContainsIncorrect(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelate_ContainsTest_new(jlit_3961)
+		tc := OperationRelate_ContainsTest_new(jlit_3960)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestContainsIncorrect()

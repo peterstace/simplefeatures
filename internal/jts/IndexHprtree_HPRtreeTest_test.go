@@ -170,7 +170,7 @@ func (this *IndexHprtree_HPRtreeTest) queryGrid_int_HPRtree(size int32, t_ *Inde
 }
 func TestIndexHprtree_HPRtreeTest_testDisallowedInserts(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexHprtree_HPRtreeTest_new(jlit_1971)
+		tc := IndexHprtree_HPRtreeTest_new(jlit_1970)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestDisallowedInserts()
@@ -178,7 +178,7 @@ func TestIndexHprtree_HPRtreeTest_testDisallowedInserts(t *testing.T) {
 }
 func TestIndexHprtree_HPRtreeTest_testEmptyTreeUsingItemVisitorQuery(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexHprtree_HPRtreeTest_new(jlit_1972)
+		tc := IndexHprtree_HPRtreeTest_new(jlit_1971)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestEmptyTreeUsingItemVisitorQuery()
@@ -186,7 +186,7 @@ func TestIndexHprtree_HPRtreeTest_testEmptyTreeUsingItemVisitorQuery(t *testing.
 }
 func TestIndexHprtree_HPRtreeTest_testEmptyTreeUsingListQuery(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexHprtree_HPRtreeTest_new(jlit_1973)
+		tc := IndexHprtree_HPRtreeTest_new(jlit_1972)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestEmptyTreeUsingListQuery()
@@ -194,7 +194,7 @@ func TestIndexHprtree_HPRtreeTest_testEmptyTreeUsingListQuery(t *testing.T) {
 }
 func TestIndexHprtree_HPRtreeTest_testQuery(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexHprtree_HPRtreeTest_new(jlit_1974)
+		tc := IndexHprtree_HPRtreeTest_new(jlit_1973)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestQuery()
@@ -202,7 +202,7 @@ func TestIndexHprtree_HPRtreeTest_testQuery(t *testing.T) {
 }
 func TestIndexHprtree_HPRtreeTest_testQuery10(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexHprtree_HPRtreeTest_new(jlit_1975)
+		tc := IndexHprtree_HPRtreeTest_new(jlit_1974)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestQuery10()
@@ -210,7 +210,7 @@ func TestIndexHprtree_HPRtreeTest_testQuery10(t *testing.T) {
 }
 func TestIndexHprtree_HPRtreeTest_testQuery100(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexHprtree_HPRtreeTest_new(jlit_1976)
+		tc := IndexHprtree_HPRtreeTest_new(jlit_1975)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestQuery100()
@@ -218,7 +218,7 @@ func TestIndexHprtree_HPRtreeTest_testQuery100(t *testing.T) {
 }
 func TestIndexHprtree_HPRtreeTest_testQuery100cap2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexHprtree_HPRtreeTest_new(jlit_1977)
+		tc := IndexHprtree_HPRtreeTest_new(jlit_1976)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestQuery100cap2()
@@ -226,7 +226,7 @@ func TestIndexHprtree_HPRtreeTest_testQuery100cap2(t *testing.T) {
 }
 func TestIndexHprtree_HPRtreeTest_testQuery100cap8(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexHprtree_HPRtreeTest_new(jlit_1978)
+		tc := IndexHprtree_HPRtreeTest_new(jlit_1977)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestQuery100cap8()
@@ -234,7 +234,7 @@ func TestIndexHprtree_HPRtreeTest_testQuery100cap8(t *testing.T) {
 }
 func TestIndexHprtree_HPRtreeTest_testQuery3(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexHprtree_HPRtreeTest_new(jlit_1979)
+		tc := IndexHprtree_HPRtreeTest_new(jlit_1978)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestQuery3()
@@ -242,7 +242,7 @@ func TestIndexHprtree_HPRtreeTest_testQuery3(t *testing.T) {
 }
 func TestIndexHprtree_HPRtreeTest_testSpatialIndex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexHprtree_HPRtreeTest_new(jlit_1980)
+		tc := IndexHprtree_HPRtreeTest_new(jlit_1979)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSpatialIndex()

@@ -159,7 +159,7 @@ func (this *GeomUtil_AffineTransformationBuilderTest) assertEqualPoint_Coordinat
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testDualControl_General(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1789)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1788)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestDualControl_General()
@@ -167,7 +167,7 @@ func TestGeomUtil_AffineTransformationBuilderTest_testDualControl_General(t *tes
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testDualControl_Translation(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1790)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1789)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestDualControl_Translation()
@@ -175,7 +175,7 @@ func TestGeomUtil_AffineTransformationBuilderTest_testDualControl_Translation(t 
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testLinear1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1791)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1790)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestLinear1()
@@ -183,7 +183,7 @@ func TestGeomUtil_AffineTransformationBuilderTest_testLinear1(t *testing.T) {
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testRotate1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1792)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1791)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestRotate1()
@@ -191,7 +191,7 @@ func TestGeomUtil_AffineTransformationBuilderTest_testRotate1(t *testing.T) {
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testRotate2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1793)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1792)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestRotate2()
@@ -199,7 +199,7 @@ func TestGeomUtil_AffineTransformationBuilderTest_testRotate2(t *testing.T) {
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testScale1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1794)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1793)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestScale1()
@@ -207,7 +207,7 @@ func TestGeomUtil_AffineTransformationBuilderTest_testScale1(t *testing.T) {
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testSingleControl1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1795)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1794)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSingleControl1()
@@ -215,7 +215,7 @@ func TestGeomUtil_AffineTransformationBuilderTest_testSingleControl1(t *testing.
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testSingular1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1796)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1795)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSingular1()
@@ -223,7 +223,7 @@ func TestGeomUtil_AffineTransformationBuilderTest_testSingular1(t *testing.T) {
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testSingular2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1797)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1796)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSingular2()
@@ -231,7 +231,7 @@ func TestGeomUtil_AffineTransformationBuilderTest_testSingular2(t *testing.T) {
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testSingular3(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1798)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1797)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSingular3()
@@ -239,7 +239,7 @@ func TestGeomUtil_AffineTransformationBuilderTest_testSingular3(t *testing.T) {
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testTransform1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1799)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1798)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestTransform1()
@@ -247,7 +247,7 @@ func TestGeomUtil_AffineTransformationBuilderTest_testTransform1(t *testing.T) {
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testTransform2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1800)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1799)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestTransform2()
@@ -255,7 +255,7 @@ func TestGeomUtil_AffineTransformationBuilderTest_testTransform2(t *testing.T) {
 }
 func TestGeomUtil_AffineTransformationBuilderTest_testTranslate1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1801)
+		tc := GeomUtil_AffineTransformationBuilderTest_new(jlit_1800)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestTranslate1()

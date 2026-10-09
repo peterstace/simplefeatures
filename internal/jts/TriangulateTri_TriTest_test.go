@@ -40,13 +40,13 @@ func TriangulateTri_TriTest_isInstance(o any) bool {
 	return ok
 }
 func TriangulateTri_TriTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 338 && p.jkind_ <= 338
+	return p != nil && p.jkind_ >= 305 && p.jkind_ <= 305
 }
 func TriangulateTri_TriTest_downcast(p *Testjts_GeometryTestCase) *TriangulateTri_TriTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 338 || p.jkind_ > 338 {
+	if p.jkind_ < 305 || p.jkind_ > 305 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.triangulate.tri.TriTest"))
 	}
 	return (*TriangulateTri_TriTest)(unsafe.Pointer(p))
@@ -59,7 +59,7 @@ var TriangulateTri_TriTest_tri2 *TriangulateTri_Tri
 
 func TriangulateTri_TriTest_new(name *java.String) *TriangulateTri_TriTest {
 	this := &TriangulateTri_TriTest{}
-	this.jkind_ = 338
+	this.jkind_ = 305
 	this.JSetSelf(this)
 	this.TriangulateTri_TriTest_init(name)
 	return this
@@ -109,7 +109,7 @@ func (this *TriangulateTri_TriTest) TestCoordinateIndex() {
 }
 func TestTriangulateTri_TriTest_testAdjacent(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulateTri_TriTest_new(jlit_4848)
+		tc := TriangulateTri_TriTest_new(jlit_4847)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjacent()
@@ -117,7 +117,7 @@ func TestTriangulateTri_TriTest_testAdjacent(t *testing.T) {
 }
 func TestTriangulateTri_TriTest_testCoordinateIndex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulateTri_TriTest_new(jlit_4849)
+		tc := TriangulateTri_TriTest_new(jlit_4848)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestCoordinateIndex()
@@ -125,7 +125,7 @@ func TestTriangulateTri_TriTest_testCoordinateIndex(t *testing.T) {
 }
 func TestTriangulateTri_TriTest_testMidpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulateTri_TriTest_new(jlit_4850)
+		tc := TriangulateTri_TriTest_new(jlit_4849)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMidpoint()

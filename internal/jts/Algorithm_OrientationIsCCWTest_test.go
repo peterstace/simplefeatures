@@ -40,20 +40,20 @@ func Algorithm_OrientationIsCCWTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_OrientationIsCCWTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 234 && p.jkind_ <= 234
+	return p != nil && p.jkind_ >= 204 && p.jkind_ <= 204
 }
 func Algorithm_OrientationIsCCWTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_OrientationIsCCWTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 234 || p.jkind_ > 234 {
+	if p.jkind_ < 204 || p.jkind_ > 204 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.OrientationIsCCWTest"))
 	}
 	return (*Algorithm_OrientationIsCCWTest)(unsafe.Pointer(p))
 }
 func Algorithm_OrientationIsCCWTest_new(name *java.String) *Algorithm_OrientationIsCCWTest {
 	this := &Algorithm_OrientationIsCCWTest{}
-	this.jkind_ = 234
+	this.jkind_ = 204
 	this.JSetSelf(this)
 	this.Algorithm_OrientationIsCCWTest_init(name)
 	return this

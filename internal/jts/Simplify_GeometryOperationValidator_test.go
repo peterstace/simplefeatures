@@ -98,21 +98,21 @@ func (this *Simplify_GeometryOperationValidator) TestSameStructure() *Simplify_G
 	if !this.expectedSameStructure {
 		return this
 	}
-	junit.J4_Assert_assertTrue_String_boolean(jlit_4630, Simplify_SameStructureTester_isSameStructure(this.ioGeometry[int32(0)], this.ioGeometry[int32(1)]))
+	junit.J4_Assert_assertTrue_String_boolean(jlit_4629, Simplify_SameStructureTester_isSameStructure(this.ioGeometry[int32(0)], this.ioGeometry[int32(1)]))
 	return this
 }
 func (this *Simplify_GeometryOperationValidator) TestValid() *Simplify_GeometryOperationValidator {
-	junit.J4_Assert_assertTrue_String_boolean(jlit_4631, this.ioGeometry[int32(1)].IsValid())
+	junit.J4_Assert_assertTrue_String_boolean(jlit_4630, this.ioGeometry[int32(1)].IsValid())
 	return this
 }
 func (this *Simplify_GeometryOperationValidator) TestEmpty_boolean(isEmpty bool) *Simplify_GeometryOperationValidator {
 	var failureCondition *java.String = func() *java.String {
 		if isEmpty {
-			return jlit_4632
+			return jlit_4631
 		}
-		return jlit_4633
+		return jlit_4632
 	}()
-	junit.J4_Assert_assertTrue_String_boolean(java.Concat(jlit_4634, failureCondition), (this.ioGeometry[int32(1)].IsEmpty() == isEmpty))
+	junit.J4_Assert_assertTrue_String_boolean(java.Concat(jlit_4633, failureCondition), (this.ioGeometry[int32(1)].IsEmpty() == isEmpty))
 	return this
 }
 func (this *Simplify_GeometryOperationValidator) testExpectedResult() {
@@ -122,7 +122,7 @@ func (this *Simplify_GeometryOperationValidator) testExpectedResult() {
 	var expectedGeom *Geom_Geometry = Simplify_GeometryOperationValidator_rdr.Read_String(this.wktExpected)
 	var isEqual bool = expectedGeom.EqualsExact_Geometry(this.ioGeometry[int32(1)])
 	if !isEqual {
-		java.System_out.Println_String(java.Concat(jlit_4635, java.StrOfObject(Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(this.ioGeometry[int32(1)]))))))
+		java.System_out.Println_String(java.Concat(jlit_4634, java.StrOfObject(Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(this.ioGeometry[int32(1)]))))))
 	}
-	junit.J4_Assert_assertTrue_String_boolean(jlit_4636, isEqual)
+	junit.J4_Assert_assertTrue_String_boolean(jlit_4635, isEqual)
 }

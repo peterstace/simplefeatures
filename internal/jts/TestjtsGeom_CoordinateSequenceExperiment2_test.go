@@ -75,7 +75,7 @@ func (this *TestjtsGeom_CoordinateSequenceExperiment2) Run_int(nPts int32) {
 		}
 		return java.Concat(java.StrOfDouble((float64(totalTime) / float64(1000.0))), jlit_443)
 	}()
-	java.System_out.Println_String(java.Concat(jlit_4883, totalTimeStr))
+	java.System_out.Println_String(java.Concat(jlit_4875, totalTimeStr))
 	var box *Geom_Polygon = TestjtsGeom_GeometryTestFactory_createBox_GeometryFactory_double_double_int_double(this.fact, float64(int32(0)), float64(int32(0)), int32(1), float64(100.0))
 	startTime = java.System_currentTimeMillis()
 	poly.Intersects_Geometry((*Geom_Geometry)(unsafe.Pointer(box)))
@@ -87,7 +87,7 @@ func (this *TestjtsGeom_CoordinateSequenceExperiment2) Run_int(nPts int32) {
 		}
 		return java.Concat(java.StrOfDouble((float64(totalTime) / float64(1000.0))), jlit_443)
 	}()
-	java.System_out.Println_String(java.Concat(jlit_4884, java.StrOfInt(int32(nPts)), jlit_4885, totalTimeStr))
+	java.System_out.Println_String(java.Concat(jlit_4876, java.StrOfInt(int32(nPts)), jlit_4877, totalTimeStr))
 }
 func (this *TestjtsGeom_CoordinateSequenceExperiment2) Run2_int(nPts int32) {
 	var size float64 = float64(100.0)
@@ -104,8 +104,8 @@ func (this *TestjtsGeom_CoordinateSequenceExperiment2) Run2_int(nPts int32) {
 		}
 		return java.Concat(java.StrOfDouble((float64(totalTime) / float64(1000.0))), jlit_443)
 	}()
-	java.System_out.Println_String(java.Concat(jlit_4883, totalTimeStr))
-	java.System_out.Println_String(java.Concat(jlit_4884, java.StrOfInt(int32(nPts))))
+	java.System_out.Println_String(java.Concat(jlit_4875, totalTimeStr))
+	java.System_out.Println_String(java.Concat(jlit_4876, java.StrOfInt(int32(nPts))))
 	startTime = java.System_currentTimeMillis()
 	poly.Intersects_Geometry((*Geom_Geometry)(unsafe.Pointer(box)))
 	endTime = java.System_currentTimeMillis()
@@ -116,5 +116,5 @@ func (this *TestjtsGeom_CoordinateSequenceExperiment2) Run2_int(nPts int32) {
 		}
 		return java.Concat(java.StrOfDouble((float64(totalTime) / float64(1000.0))), jlit_443)
 	}()
-	java.System_out.Println_String(java.Concat(jlit_4885, totalTimeStr))
+	java.System_out.Println_String(java.Concat(jlit_4877, totalTimeStr))
 }

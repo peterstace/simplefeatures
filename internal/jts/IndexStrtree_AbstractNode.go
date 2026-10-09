@@ -38,13 +38,13 @@ func IndexStrtree_AbstractNode_isInstance(o any) bool {
 	return ok
 }
 func IndexStrtree_AbstractNode_isKind(p *IndexStrtree_AbstractNode) bool {
-	return p != nil && p.jkind_ >= 126 && p.jkind_ <= 128
+	return p != nil && p.jkind_ >= 125 && p.jkind_ <= 127
 }
 func IndexStrtree_AbstractNode_downcast(p *IndexStrtree_AbstractNode) *IndexStrtree_AbstractNode {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 126 || p.jkind_ > 128 {
+	if p.jkind_ < 125 || p.jkind_ > 127 {
 		panic(java.ClassCastError(IndexStrtree_AbstractNode_toAny(p), "org.locationtech.jts.index.strtree.AbstractNode"))
 	}
 	return (*IndexStrtree_AbstractNode)(unsafe.Pointer(p))
@@ -55,9 +55,9 @@ func IndexStrtree_AbstractNode_toAny(p *IndexStrtree_AbstractNode) any {
 		return nil
 	}
 	switch p.jkind_ {
-	case 127:
+	case 126:
 		return (*IndexStrtree_SIRtree_3)(unsafe.Pointer(p))
-	case 128:
+	case 127:
 		return (*IndexStrtree_STRtree_STRtreeNode)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
@@ -103,9 +103,9 @@ func (this *IndexStrtree_AbstractNode) SetChildBoundables_ArrayList(childBoundab
 }
 func (this *IndexStrtree_AbstractNode) ComputeBounds() any {
 	switch this.jkind_ {
-	case 127:
+	case 126:
 		return (*IndexStrtree_SIRtree_3)(unsafe.Pointer(this)).ComputeBounds_impl()
-	case 128:
+	case 127:
 		return (*IndexStrtree_STRtree_STRtreeNode)(unsafe.Pointer(this)).ComputeBounds_impl()
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.index.strtree.AbstractNode.ComputeBounds"))

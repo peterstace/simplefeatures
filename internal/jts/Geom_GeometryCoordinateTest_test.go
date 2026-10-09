@@ -40,20 +40,20 @@ func Geom_GeometryCoordinateTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_GeometryCoordinateTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 255 && p.jkind_ <= 255
+	return p != nil && p.jkind_ >= 225 && p.jkind_ <= 225
 }
 func Geom_GeometryCoordinateTest_downcast(p *Testjts_GeometryTestCase) *Geom_GeometryCoordinateTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 255 || p.jkind_ > 255 {
+	if p.jkind_ < 225 || p.jkind_ > 225 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.GeometryCoordinateTest"))
 	}
 	return (*Geom_GeometryCoordinateTest)(unsafe.Pointer(p))
 }
 func Geom_GeometryCoordinateTest_new(name *java.String) *Geom_GeometryCoordinateTest {
 	this := &Geom_GeometryCoordinateTest{}
-	this.jkind_ = 255
+	this.jkind_ = 225
 	this.JSetSelf(this)
 	this.Geom_GeometryCoordinateTest_init(name)
 	return this

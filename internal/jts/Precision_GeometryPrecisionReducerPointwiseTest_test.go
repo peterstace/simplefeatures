@@ -40,20 +40,20 @@ func Precision_GeometryPrecisionReducerPointwiseTest_isInstance(o any) bool {
 	return ok
 }
 func Precision_GeometryPrecisionReducerPointwiseTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 326 && p.jkind_ <= 326
+	return p != nil && p.jkind_ >= 296 && p.jkind_ <= 296
 }
 func Precision_GeometryPrecisionReducerPointwiseTest_downcast(p *Testjts_GeometryTestCase) *Precision_GeometryPrecisionReducerPointwiseTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 326 || p.jkind_ > 326 {
+	if p.jkind_ < 296 || p.jkind_ > 296 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.precision.GeometryPrecisionReducerPointwiseTest"))
 	}
 	return (*Precision_GeometryPrecisionReducerPointwiseTest)(unsafe.Pointer(p))
 }
 func Precision_GeometryPrecisionReducerPointwiseTest_new(name *java.String) *Precision_GeometryPrecisionReducerPointwiseTest {
 	this := &Precision_GeometryPrecisionReducerPointwiseTest{}
-	this.jkind_ = 326
+	this.jkind_ = 296
 	this.JSetSelf(this)
 	this.Precision_GeometryPrecisionReducerPointwiseTest_init(name)
 	return this
@@ -62,22 +62,22 @@ func (this *Precision_GeometryPrecisionReducerPointwiseTest) Precision_GeometryP
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *Precision_GeometryPrecisionReducerPointwiseTest) TestLineWithCollapse() {
-	this.checkReducePointwise_String_String(jlit_4485, jlit_4486)
+	this.checkReducePointwise_String_String(jlit_4484, jlit_4485)
 }
 func (this *Precision_GeometryPrecisionReducerPointwiseTest) TestLineDuplicatePointsPreserved() {
-	this.checkReducePointwise_String_String(jlit_4487, jlit_4488)
+	this.checkReducePointwise_String_String(jlit_4486, jlit_4487)
 }
 func (this *Precision_GeometryPrecisionReducerPointwiseTest) TestLineFullCollapse() {
-	this.checkReducePointwise_String_String(jlit_4489, jlit_4490)
+	this.checkReducePointwise_String_String(jlit_4488, jlit_4489)
 }
 func (this *Precision_GeometryPrecisionReducerPointwiseTest) TestPolygonFullCollapse() {
-	this.checkReducePointwise_String_String(jlit_4491, jlit_4492)
+	this.checkReducePointwise_String_String(jlit_4490, jlit_4491)
 }
 func (this *Precision_GeometryPrecisionReducerPointwiseTest) TestPolygonWithCollapsedLine() {
-	this.checkReducePointwise_String_String(jlit_4493, jlit_4494)
+	this.checkReducePointwise_String_String(jlit_4492, jlit_4493)
 }
 func (this *Precision_GeometryPrecisionReducerPointwiseTest) TestPolygonWithCollapsedPoint() {
-	this.checkReducePointwise_String_String(jlit_4495, jlit_4496)
+	this.checkReducePointwise_String_String(jlit_4494, jlit_4495)
 }
 func (this *Precision_GeometryPrecisionReducerPointwiseTest) checkReducePointwise_String_String(wkt *java.String, wktExpected *java.String) {
 	var g *Geom_Geometry = this.Read_String(wkt)
@@ -88,11 +88,11 @@ func (this *Precision_GeometryPrecisionReducerPointwiseTest) checkReducePointwis
 }
 func (this *Precision_GeometryPrecisionReducerPointwiseTest) assertEqualsExactAndHasSameFactory_Geometry_Geometry(expected *Geom_Geometry, actual *Geom_Geometry) {
 	this.CheckEqual_Geometry_Geometry(expected, actual)
-	junit.TestCase_assertTrue_String_boolean(jlit_4497, (unsafe.Pointer(expected.GetFactory()) == unsafe.Pointer(actual.GetFactory())))
+	junit.TestCase_assertTrue_String_boolean(jlit_4496, (unsafe.Pointer(expected.GetFactory()) == unsafe.Pointer(actual.GetFactory())))
 }
 func TestPrecision_GeometryPrecisionReducerPointwiseTest_testLineDuplicatePointsPreserved(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerPointwiseTest_new(jlit_4498)
+		tc := Precision_GeometryPrecisionReducerPointwiseTest_new(jlit_4497)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineDuplicatePointsPreserved()
@@ -100,7 +100,7 @@ func TestPrecision_GeometryPrecisionReducerPointwiseTest_testLineDuplicatePoints
 }
 func TestPrecision_GeometryPrecisionReducerPointwiseTest_testLineFullCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerPointwiseTest_new(jlit_4499)
+		tc := Precision_GeometryPrecisionReducerPointwiseTest_new(jlit_4498)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineFullCollapse()
@@ -108,7 +108,7 @@ func TestPrecision_GeometryPrecisionReducerPointwiseTest_testLineFullCollapse(t 
 }
 func TestPrecision_GeometryPrecisionReducerPointwiseTest_testLineWithCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerPointwiseTest_new(jlit_4500)
+		tc := Precision_GeometryPrecisionReducerPointwiseTest_new(jlit_4499)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineWithCollapse()
@@ -116,7 +116,7 @@ func TestPrecision_GeometryPrecisionReducerPointwiseTest_testLineWithCollapse(t 
 }
 func TestPrecision_GeometryPrecisionReducerPointwiseTest_testPolygonFullCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerPointwiseTest_new(jlit_4501)
+		tc := Precision_GeometryPrecisionReducerPointwiseTest_new(jlit_4500)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonFullCollapse()
@@ -124,7 +124,7 @@ func TestPrecision_GeometryPrecisionReducerPointwiseTest_testPolygonFullCollapse
 }
 func TestPrecision_GeometryPrecisionReducerPointwiseTest_testPolygonWithCollapsedLine(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerPointwiseTest_new(jlit_4502)
+		tc := Precision_GeometryPrecisionReducerPointwiseTest_new(jlit_4501)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonWithCollapsedLine()
@@ -132,7 +132,7 @@ func TestPrecision_GeometryPrecisionReducerPointwiseTest_testPolygonWithCollapse
 }
 func TestPrecision_GeometryPrecisionReducerPointwiseTest_testPolygonWithCollapsedPoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerPointwiseTest_new(jlit_4503)
+		tc := Precision_GeometryPrecisionReducerPointwiseTest_new(jlit_4502)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonWithCollapsedPoint()

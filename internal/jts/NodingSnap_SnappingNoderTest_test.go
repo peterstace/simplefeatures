@@ -40,20 +40,20 @@ func NodingSnap_SnappingNoderTest_isInstance(o any) bool {
 	return ok
 }
 func NodingSnap_SnappingNoderTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 270 && p.jkind_ <= 270
+	return p != nil && p.jkind_ >= 240 && p.jkind_ <= 240
 }
 func NodingSnap_SnappingNoderTest_downcast(p *Testjts_GeometryTestCase) *NodingSnap_SnappingNoderTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 270 || p.jkind_ > 270 {
+	if p.jkind_ < 240 || p.jkind_ > 240 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.noding.snap.SnappingNoderTest"))
 	}
 	return (*NodingSnap_SnappingNoderTest)(unsafe.Pointer(p))
 }
 func NodingSnap_SnappingNoderTest_new(name *java.String) *NodingSnap_SnappingNoderTest {
 	this := &NodingSnap_SnappingNoderTest{}
-	this.jkind_ = 270
+	this.jkind_ = 240
 	this.JSetSelf(this)
 	this.NodingSnap_SnappingNoderTest_init(name)
 	return this

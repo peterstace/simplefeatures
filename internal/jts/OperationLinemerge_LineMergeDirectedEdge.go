@@ -39,20 +39,20 @@ func OperationLinemerge_LineMergeDirectedEdge_isInstance(o any) bool {
 	return ok
 }
 func OperationLinemerge_LineMergeDirectedEdge_isKind(p *Planargraph_GraphComponent) bool {
-	return p != nil && p.jkind_ >= 168 && p.jkind_ <= 168
+	return p != nil && p.jkind_ >= 167 && p.jkind_ <= 167
 }
 func OperationLinemerge_LineMergeDirectedEdge_downcast(p *Planargraph_GraphComponent) *OperationLinemerge_LineMergeDirectedEdge {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 168 || p.jkind_ > 168 {
+	if p.jkind_ < 167 || p.jkind_ > 167 {
 		panic(java.ClassCastError(Planargraph_GraphComponent_toAny(p), "org.locationtech.jts.operation.linemerge.LineMergeDirectedEdge"))
 	}
 	return (*OperationLinemerge_LineMergeDirectedEdge)(unsafe.Pointer(p))
 }
 func OperationLinemerge_LineMergeDirectedEdge_new(from *Planargraph_Node, to *Planargraph_Node, directionPt *Geom_Coordinate, edgeDirection bool) *OperationLinemerge_LineMergeDirectedEdge {
 	this := &OperationLinemerge_LineMergeDirectedEdge{}
-	this.jkind_ = 168
+	this.jkind_ = 167
 	this.OperationLinemerge_LineMergeDirectedEdge_init(from, to, directionPt, edgeDirection)
 	return this
 }

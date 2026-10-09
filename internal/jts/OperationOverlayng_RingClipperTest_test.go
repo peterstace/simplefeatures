@@ -40,20 +40,20 @@ func OperationOverlayng_RingClipperTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_RingClipperTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 303 && p.jkind_ <= 303
+	return p != nil && p.jkind_ >= 273 && p.jkind_ <= 273
 }
 func OperationOverlayng_RingClipperTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_RingClipperTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 303 || p.jkind_ > 303 {
+	if p.jkind_ < 273 || p.jkind_ > 273 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.RingClipperTest"))
 	}
 	return (*OperationOverlayng_RingClipperTest)(unsafe.Pointer(p))
 }
 func OperationOverlayng_RingClipperTest_new(name *java.String) *OperationOverlayng_RingClipperTest {
 	this := &OperationOverlayng_RingClipperTest{}
-	this.jkind_ = 303
+	this.jkind_ = 273
 	this.JSetSelf(this)
 	this.OperationOverlayng_RingClipperTest_init(name)
 	return this
@@ -62,28 +62,28 @@ func (this *OperationOverlayng_RingClipperTest) OperationOverlayng_RingClipperTe
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationOverlayng_RingClipperTest) TestEmptyEnv() {
-	this.checkClip_String_Envelope_String(jlit_3854, Geom_Envelope_new(), jlit_1038)
+	this.checkClip_String_Envelope_String(jlit_3853, Geom_Envelope_new(), jlit_1038)
 }
 func (this *OperationOverlayng_RingClipperTest) TestPointEnv() {
-	this.checkClip_String_Envelope_String(jlit_3854, Geom_Envelope_new_double_double_double_double(float64(int32(10)), float64(int32(10)), float64(int32(10)), float64(int32(10))), jlit_1038)
+	this.checkClip_String_Envelope_String(jlit_3853, Geom_Envelope_new_double_double_double_double(float64(int32(10)), float64(int32(10)), float64(int32(10)), float64(int32(10))), jlit_1038)
 }
 func (this *OperationOverlayng_RingClipperTest) TestClipCompletely() {
-	this.checkClip_String_Envelope_String(jlit_3854, Geom_Envelope_new_double_double_double_double(float64(int32(10)), float64(int32(20)), float64(int32(10)), float64(int32(20))), jlit_3855)
+	this.checkClip_String_Envelope_String(jlit_3853, Geom_Envelope_new_double_double_double_double(float64(int32(10)), float64(int32(20)), float64(int32(10)), float64(int32(20))), jlit_3854)
 }
 func (this *OperationOverlayng_RingClipperTest) TestInside() {
-	this.checkClip_String_Envelope_String(jlit_3856, Geom_Envelope_new_double_double_double_double(float64(int32(10)), float64(int32(20)), float64(int32(10)), float64(int32(20))), jlit_3857)
+	this.checkClip_String_Envelope_String(jlit_3855, Geom_Envelope_new_double_double_double_double(float64(int32(10)), float64(int32(20)), float64(int32(10)), float64(int32(20))), jlit_3856)
 }
 func (this *OperationOverlayng_RingClipperTest) TestStarClipped() {
-	this.checkClip_String_Envelope_String(jlit_3858, Geom_Envelope_new_double_double_double_double(float64(int32(10)), float64(int32(20)), float64(int32(10)), float64(int32(20))), jlit_3859)
+	this.checkClip_String_Envelope_String(jlit_3857, Geom_Envelope_new_double_double_double_double(float64(int32(10)), float64(int32(20)), float64(int32(10)), float64(int32(20))), jlit_3858)
 }
 func (this *OperationOverlayng_RingClipperTest) TestWrapPartial() {
-	this.checkClip_String_Envelope_String(jlit_3860, Geom_Envelope_new_double_double_double_double(float64(int32(50)), float64(int32(100)), float64(int32(50)), float64(int32(100))), jlit_3861)
+	this.checkClip_String_Envelope_String(jlit_3859, Geom_Envelope_new_double_double_double_double(float64(int32(50)), float64(int32(100)), float64(int32(50)), float64(int32(100))), jlit_3860)
 }
 func (this *OperationOverlayng_RingClipperTest) TestWrapAllSides() {
-	this.checkClip_String_Envelope_String(jlit_3862, Geom_Envelope_new_double_double_double_double(float64(int32(50)), float64(int32(100)), float64(int32(50)), float64(int32(100))), jlit_3863)
+	this.checkClip_String_Envelope_String(jlit_3861, Geom_Envelope_new_double_double_double_double(float64(int32(50)), float64(int32(100)), float64(int32(50)), float64(int32(100))), jlit_3862)
 }
 func (this *OperationOverlayng_RingClipperTest) TestWrapOverlap() {
-	this.checkClip_String_Envelope_String(jlit_3864, Geom_Envelope_new_double_double_double_double(float64(int32(50)), float64(int32(100)), float64(int32(50)), float64(int32(100))), jlit_3865)
+	this.checkClip_String_Envelope_String(jlit_3863, Geom_Envelope_new_double_double_double_double(float64(int32(50)), float64(int32(100)), float64(int32(50)), float64(int32(100))), jlit_3864)
 }
 func (this *OperationOverlayng_RingClipperTest) checkClip_String_String_String(wkt *java.String, wktBox *java.String, wktExpected *java.String) {
 	var box *Geom_Geometry = this.Read_String(wktBox)
@@ -100,7 +100,7 @@ func (this *OperationOverlayng_RingClipperTest) checkClip_String_Envelope_String
 }
 func TestOperationOverlayng_RingClipperTest_testClipCompletely(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_RingClipperTest_new(jlit_3866)
+		tc := OperationOverlayng_RingClipperTest_new(jlit_3865)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestClipCompletely()
@@ -116,7 +116,7 @@ func TestOperationOverlayng_RingClipperTest_testEmptyEnv(t *testing.T) {
 }
 func TestOperationOverlayng_RingClipperTest_testInside(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_RingClipperTest_new(jlit_3867)
+		tc := OperationOverlayng_RingClipperTest_new(jlit_3866)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInside()
@@ -132,7 +132,7 @@ func TestOperationOverlayng_RingClipperTest_testPointEnv(t *testing.T) {
 }
 func TestOperationOverlayng_RingClipperTest_testStarClipped(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_RingClipperTest_new(jlit_3868)
+		tc := OperationOverlayng_RingClipperTest_new(jlit_3867)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestStarClipped()
@@ -140,7 +140,7 @@ func TestOperationOverlayng_RingClipperTest_testStarClipped(t *testing.T) {
 }
 func TestOperationOverlayng_RingClipperTest_testWrapAllSides(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_RingClipperTest_new(jlit_3869)
+		tc := OperationOverlayng_RingClipperTest_new(jlit_3868)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestWrapAllSides()
@@ -148,7 +148,7 @@ func TestOperationOverlayng_RingClipperTest_testWrapAllSides(t *testing.T) {
 }
 func TestOperationOverlayng_RingClipperTest_testWrapOverlap(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_RingClipperTest_new(jlit_3870)
+		tc := OperationOverlayng_RingClipperTest_new(jlit_3869)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestWrapOverlap()
@@ -156,7 +156,7 @@ func TestOperationOverlayng_RingClipperTest_testWrapOverlap(t *testing.T) {
 }
 func TestOperationOverlayng_RingClipperTest_testWrapPartial(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_RingClipperTest_new(jlit_3871)
+		tc := OperationOverlayng_RingClipperTest_new(jlit_3870)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestWrapPartial()

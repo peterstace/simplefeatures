@@ -40,20 +40,20 @@ func Simplify_DouglasPeuckerSimplifierTest_isInstance(o any) bool {
 	return ok
 }
 func Simplify_DouglasPeuckerSimplifierTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 329 && p.jkind_ <= 329
+	return p != nil && p.jkind_ >= 299 && p.jkind_ <= 299
 }
 func Simplify_DouglasPeuckerSimplifierTest_downcast(p *Testjts_GeometryTestCase) *Simplify_DouglasPeuckerSimplifierTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 329 || p.jkind_ > 329 {
+	if p.jkind_ < 299 || p.jkind_ > 299 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.simplify.DouglasPeuckerSimplifierTest"))
 	}
 	return (*Simplify_DouglasPeuckerSimplifierTest)(unsafe.Pointer(p))
 }
 func Simplify_DouglasPeuckerSimplifierTest_new(name *java.String) *Simplify_DouglasPeuckerSimplifierTest {
 	this := &Simplify_DouglasPeuckerSimplifierTest{}
-	this.jkind_ = 329
+	this.jkind_ = 299
 	this.JSetSelf(this)
 	this.Simplify_DouglasPeuckerSimplifierTest_init(name)
 	return this
@@ -65,58 +65,58 @@ func (this *Simplify_DouglasPeuckerSimplifierTest) TestPoint() {
 	this.checkDPNoChange_String_double(jlit_568, float64(int32(1)))
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestPolygonEmpty() {
-	this.checkDPNoChange_String_double(jlit_4590, float64(int32(1)))
+	this.checkDPNoChange_String_double(jlit_4589, float64(int32(1)))
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestPolygonWithFlatVertices() {
-	this.checkDP_String_double_String(jlit_4591, float64(10.0), jlit_4592)
+	this.checkDP_String_double_String(jlit_4590, float64(10.0), jlit_4591)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestPolygonReductionWithSplit() {
-	this.checkDP_String_double_String(jlit_4593, float64(int32(1)), jlit_4594)
+	this.checkDP_String_double_String(jlit_4592, float64(int32(1)), jlit_4593)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestPolygonReduction() {
-	this.checkDP_String_double_String(jlit_4595, float64(int32(10)), jlit_4596)
+	this.checkDP_String_double_String(jlit_4594, float64(int32(10)), jlit_4595)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestPolygonWithTouchingHole() {
-	this.checkDP_String_double_String(jlit_4597, float64(int32(10)), jlit_4598)
+	this.checkDP_String_double_String(jlit_4596, float64(int32(10)), jlit_4597)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestPolygonFlattish() {
-	this.checkDP_String_double_String(jlit_4599, float64(int32(10)), jlit_534)
+	this.checkDP_String_double_String(jlit_4598, float64(int32(10)), jlit_534)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestPolygonTinySquare() {
-	this.checkDP_String_double_String(jlit_4600, float64(int32(10)), jlit_534)
+	this.checkDP_String_double_String(jlit_4599, float64(int32(10)), jlit_534)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestPolygonTinyHole() {
-	this.checkDP_String_double_String(jlit_4601, float64(int32(30)), jlit_4602)
+	this.checkDP_String_double_String(jlit_4600, float64(int32(30)), jlit_4601)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestLineStringTiny() {
-	this.checkDP_String_double_String(jlit_4603, float64(int32(10)), jlit_4604)
+	this.checkDP_String_double_String(jlit_4602, float64(int32(10)), jlit_4603)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestMultiPoint() {
-	this.checkDPNoChange_String_double(jlit_4605, float64(int32(10)))
+	this.checkDPNoChange_String_double(jlit_4604, float64(int32(10)))
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestMultiLineString() {
-	this.checkDP_String_double_String(jlit_4606, float64(int32(10)), jlit_4607)
+	this.checkDP_String_double_String(jlit_4605, float64(int32(10)), jlit_4606)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestMultiLineStringWithEmpty() {
-	this.checkDP_String_double_String(jlit_4608, float64(int32(10)), jlit_4607)
+	this.checkDP_String_double_String(jlit_4607, float64(int32(10)), jlit_4606)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestMultiPolygonWithEmpty() {
-	this.checkDP_String_double_String(jlit_4609, float64(int32(10)), jlit_4610)
+	this.checkDP_String_double_String(jlit_4608, float64(int32(10)), jlit_4609)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestGeometryCollection() {
-	this.checkDPNoChange_String_double(jlit_4611, float64(10.0))
+	this.checkDPNoChange_String_double(jlit_4610, float64(10.0))
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestInvalidPolygonFixed() {
-	this.checkDP_String_double_String(jlit_4612, float64(0.0036), jlit_4613)
+	this.checkDP_String_double_String(jlit_4611, float64(0.0036), jlit_4612)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestPolygonCollapseRemoved() {
-	this.checkDP_String_double_String(jlit_4614, float64(0.05), jlit_4615)
+	this.checkDP_String_double_String(jlit_4613, float64(0.05), jlit_4614)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestPolygonRemoveFlatEndpoint() {
-	this.checkDP_String_double_String(jlit_4616, float64(int32(1)), jlit_4617)
+	this.checkDP_String_double_String(jlit_4615, float64(int32(1)), jlit_4616)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) TestPolygonEndpointCollapse() {
-	this.checkDP_String_double_String(jlit_4618, float64(int32(1)), jlit_534)
+	this.checkDP_String_double_String(jlit_4617, float64(int32(1)), jlit_534)
 }
 func (this *Simplify_DouglasPeuckerSimplifierTest) checkDP_String_double_String(wkt *java.String, tolerance float64, wktExpected *java.String) {
 	var geom *Geom_Geometry = this.Read_String(wkt)
@@ -137,7 +137,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testGeometryCollection(t *testing
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testInvalidPolygonFixed(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4619)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4618)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInvalidPolygonFixed()
@@ -145,7 +145,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testInvalidPolygonFixed(t *testin
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testLineStringTiny(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4620)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4619)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineStringTiny()
@@ -153,7 +153,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testLineStringTiny(t *testing.T) 
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testMultiLineString(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_1814)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_1813)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineString()
@@ -161,7 +161,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testMultiLineString(t *testing.T)
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testMultiLineStringWithEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_1916)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_1915)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineStringWithEmpty()
@@ -177,7 +177,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testMultiPoint(t *testing.T) {
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testMultiPolygonWithEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_1928)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_1927)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolygonWithEmpty()
@@ -193,7 +193,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testPoint(t *testing.T) {
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonCollapseRemoved(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4621)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4620)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonCollapseRemoved()
@@ -209,7 +209,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonEmpty(t *testing.T) {
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonEndpointCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4622)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4621)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonEndpointCollapse()
@@ -217,7 +217,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonEndpointCollapse(t *te
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonFlattish(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4623)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4622)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonFlattish()
@@ -225,7 +225,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonFlattish(t *testing.T)
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonReduction(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4624)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4623)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonReduction()
@@ -233,7 +233,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonReduction(t *testing.T
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonReductionWithSplit(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4625)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4624)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonReductionWithSplit()
@@ -241,7 +241,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonReductionWithSplit(t *
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonRemoveFlatEndpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4626)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4625)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonRemoveFlatEndpoint()
@@ -249,7 +249,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonRemoveFlatEndpoint(t *
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonTinyHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4627)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4626)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonTinyHole()
@@ -257,7 +257,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonTinyHole(t *testing.T)
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonTinySquare(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4628)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4627)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonTinySquare()
@@ -265,7 +265,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonTinySquare(t *testing.
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonWithFlatVertices(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4629)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_4628)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonWithFlatVertices()
@@ -273,7 +273,7 @@ func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonWithFlatVertices(t *te
 }
 func TestSimplify_DouglasPeuckerSimplifierTest_testPolygonWithTouchingHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_3946)
+		tc := Simplify_DouglasPeuckerSimplifierTest_new(jlit_3945)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonWithTouchingHole()

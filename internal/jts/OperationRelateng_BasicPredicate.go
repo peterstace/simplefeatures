@@ -36,13 +36,13 @@ func OperationRelateng_BasicPredicate_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_BasicPredicate_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 149 && p.jkind_ <= 162
+	return p != nil && p.jkind_ >= 148 && p.jkind_ <= 161
 }
 func OperationRelateng_BasicPredicate_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_BasicPredicate {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 149 || p.jkind_ > 162 {
+	if p.jkind_ < 148 || p.jkind_ > 161 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.BasicPredicate"))
 	}
 	return (*OperationRelateng_BasicPredicate)(unsafe.Pointer(p))
@@ -55,29 +55,29 @@ func OperationRelateng_BasicPredicate_toAny(p *OperationRelateng_BasicPredicate)
 		return nil
 	}
 	switch p.jkind_ {
-	case 151:
+	case 150:
 		return (*OperationRelateng_IMPatternMatcher)(unsafe.Pointer(p))
-	case 152:
+	case 151:
 		return (*OperationRelateng_RelateMatrixPredicate)(unsafe.Pointer(p))
-	case 153:
+	case 152:
 		return (*OperationRelateng_RelatePredicate_10)(unsafe.Pointer(p))
-	case 154:
+	case 153:
 		return (*OperationRelateng_RelatePredicate_3)(unsafe.Pointer(p))
-	case 155:
+	case 154:
 		return (*OperationRelateng_RelatePredicate_4)(unsafe.Pointer(p))
-	case 156:
+	case 155:
 		return (*OperationRelateng_RelatePredicate_5)(unsafe.Pointer(p))
-	case 157:
+	case 156:
 		return (*OperationRelateng_RelatePredicate_6)(unsafe.Pointer(p))
-	case 158:
+	case 157:
 		return (*OperationRelateng_RelatePredicate_7)(unsafe.Pointer(p))
-	case 159:
+	case 158:
 		return (*OperationRelateng_RelatePredicate_8)(unsafe.Pointer(p))
-	case 160:
+	case 159:
 		return (*OperationRelateng_RelatePredicate_9)(unsafe.Pointer(p))
-	case 161:
+	case 160:
 		return (*OperationRelateng_RelatePredicate_1)(unsafe.Pointer(p))
-	case 162:
+	case 161:
 		return (*OperationRelateng_RelatePredicate_2)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
@@ -141,13 +141,13 @@ func (this *OperationRelateng_BasicPredicate) RequireCovers_Envelope_Envelope(a 
 }
 func (this *OperationRelateng_BasicPredicate) Finish() {
 	switch this.jkind_ {
-	case 151, 152, 153, 154, 155, 156, 157, 158, 159, 160:
+	case 150, 151, 152, 153, 154, 155, 156, 157, 158, 159:
 		(*OperationRelateng_IMPredicate)(unsafe.Pointer(this)).Finish_impl()
 		return
-	case 161:
+	case 160:
 		(*OperationRelateng_RelatePredicate_1)(unsafe.Pointer(this)).Finish_impl()
 		return
-	case 162:
+	case 161:
 		(*OperationRelateng_RelatePredicate_2)(unsafe.Pointer(this)).Finish_impl()
 		return
 	}
@@ -155,28 +155,28 @@ func (this *OperationRelateng_BasicPredicate) Finish() {
 }
 func (this *OperationRelateng_BasicPredicate) Init_Envelope_Envelope(a0 *Geom_Envelope, a1 *Geom_Envelope) {
 	switch this.jkind_ {
-	case 151:
+	case 150:
 		(*OperationRelateng_IMPatternMatcher)(unsafe.Pointer(this)).Init_Envelope_Envelope_impl(a0, a1)
 		return
-	case 154:
+	case 153:
 		(*OperationRelateng_RelatePredicate_3)(unsafe.Pointer(this)).Init_Envelope_Envelope_impl(a0, a1)
 		return
-	case 155:
+	case 154:
 		(*OperationRelateng_RelatePredicate_4)(unsafe.Pointer(this)).Init_Envelope_Envelope_impl(a0, a1)
 		return
-	case 156:
+	case 155:
 		(*OperationRelateng_RelatePredicate_5)(unsafe.Pointer(this)).Init_Envelope_Envelope_impl(a0, a1)
 		return
-	case 157:
+	case 156:
 		(*OperationRelateng_RelatePredicate_6)(unsafe.Pointer(this)).Init_Envelope_Envelope_impl(a0, a1)
 		return
-	case 159:
+	case 158:
 		(*OperationRelateng_RelatePredicate_8)(unsafe.Pointer(this)).Init_Envelope_Envelope_impl(a0, a1)
 		return
-	case 161:
+	case 160:
 		(*OperationRelateng_RelatePredicate_1)(unsafe.Pointer(this)).Init_Envelope_Envelope_impl(a0, a1)
 		return
-	case 162:
+	case 161:
 		(*OperationRelateng_RelatePredicate_2)(unsafe.Pointer(this)).Init_Envelope_Envelope_impl(a0, a1)
 		return
 	}
@@ -184,31 +184,31 @@ func (this *OperationRelateng_BasicPredicate) Init_Envelope_Envelope(a0 *Geom_En
 }
 func (this *OperationRelateng_BasicPredicate) Init_int_int(a0 int32, a1 int32) {
 	switch this.jkind_ {
-	case 151, 152:
+	case 150, 151:
 		(*OperationRelateng_IMPredicate)(unsafe.Pointer(this)).Init_int_int_impl(a0, a1)
 		return
-	case 153:
+	case 152:
 		(*OperationRelateng_RelatePredicate_10)(unsafe.Pointer(this)).Init_int_int_impl(a0, a1)
 		return
-	case 154:
+	case 153:
 		(*OperationRelateng_RelatePredicate_3)(unsafe.Pointer(this)).Init_int_int_impl(a0, a1)
 		return
-	case 155:
+	case 154:
 		(*OperationRelateng_RelatePredicate_4)(unsafe.Pointer(this)).Init_int_int_impl(a0, a1)
 		return
-	case 156:
+	case 155:
 		(*OperationRelateng_RelatePredicate_5)(unsafe.Pointer(this)).Init_int_int_impl(a0, a1)
 		return
-	case 157:
+	case 156:
 		(*OperationRelateng_RelatePredicate_6)(unsafe.Pointer(this)).Init_int_int_impl(a0, a1)
 		return
-	case 158:
+	case 157:
 		(*OperationRelateng_RelatePredicate_7)(unsafe.Pointer(this)).Init_int_int_impl(a0, a1)
 		return
-	case 159:
+	case 158:
 		(*OperationRelateng_RelatePredicate_8)(unsafe.Pointer(this)).Init_int_int_impl(a0, a1)
 		return
-	case 160:
+	case 159:
 		(*OperationRelateng_RelatePredicate_9)(unsafe.Pointer(this)).Init_int_int_impl(a0, a1)
 		return
 	}
@@ -216,101 +216,101 @@ func (this *OperationRelateng_BasicPredicate) Init_int_int(a0 int32, a1 int32) {
 }
 func (this *OperationRelateng_BasicPredicate) Name() *java.String {
 	switch this.jkind_ {
-	case 151:
+	case 150:
 		return (*OperationRelateng_IMPatternMatcher)(unsafe.Pointer(this)).Name_impl()
-	case 152:
+	case 151:
 		return (*OperationRelateng_RelateMatrixPredicate)(unsafe.Pointer(this)).Name_impl()
-	case 153:
+	case 152:
 		return (*OperationRelateng_RelatePredicate_10)(unsafe.Pointer(this)).Name_impl()
-	case 154:
+	case 153:
 		return (*OperationRelateng_RelatePredicate_3)(unsafe.Pointer(this)).Name_impl()
-	case 155:
+	case 154:
 		return (*OperationRelateng_RelatePredicate_4)(unsafe.Pointer(this)).Name_impl()
-	case 156:
+	case 155:
 		return (*OperationRelateng_RelatePredicate_5)(unsafe.Pointer(this)).Name_impl()
-	case 157:
+	case 156:
 		return (*OperationRelateng_RelatePredicate_6)(unsafe.Pointer(this)).Name_impl()
-	case 158:
+	case 157:
 		return (*OperationRelateng_RelatePredicate_7)(unsafe.Pointer(this)).Name_impl()
-	case 159:
+	case 158:
 		return (*OperationRelateng_RelatePredicate_8)(unsafe.Pointer(this)).Name_impl()
-	case 160:
+	case 159:
 		return (*OperationRelateng_RelatePredicate_9)(unsafe.Pointer(this)).Name_impl()
-	case 161:
+	case 160:
 		return (*OperationRelateng_RelatePredicate_1)(unsafe.Pointer(this)).Name_impl()
-	case 162:
+	case 161:
 		return (*OperationRelateng_RelatePredicate_2)(unsafe.Pointer(this)).Name_impl()
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.operation.relateng.BasicPredicate.Name"))
 }
 func (this *OperationRelateng_BasicPredicate) RequireCovers_boolean(a0 bool) bool {
 	switch this.jkind_ {
-	case 154:
+	case 153:
 		return (*OperationRelateng_RelatePredicate_3)(unsafe.Pointer(this)).RequireCovers_boolean_impl(a0)
-	case 155:
+	case 154:
 		return (*OperationRelateng_RelatePredicate_4)(unsafe.Pointer(this)).RequireCovers_boolean_impl(a0)
-	case 156:
+	case 155:
 		return (*OperationRelateng_RelatePredicate_5)(unsafe.Pointer(this)).RequireCovers_boolean_impl(a0)
-	case 157:
+	case 156:
 		return (*OperationRelateng_RelatePredicate_6)(unsafe.Pointer(this)).RequireCovers_boolean_impl(a0)
 	}
 	return this.RequireCovers_boolean_impl(a0)
 }
 func (this *OperationRelateng_BasicPredicate) RequireExteriorCheck_boolean(a0 bool) bool {
 	switch this.jkind_ {
-	case 154:
+	case 153:
 		return (*OperationRelateng_RelatePredicate_3)(unsafe.Pointer(this)).RequireExteriorCheck_boolean_impl(a0)
-	case 155:
+	case 154:
 		return (*OperationRelateng_RelatePredicate_4)(unsafe.Pointer(this)).RequireExteriorCheck_boolean_impl(a0)
-	case 156:
+	case 155:
 		return (*OperationRelateng_RelatePredicate_5)(unsafe.Pointer(this)).RequireExteriorCheck_boolean_impl(a0)
-	case 157:
+	case 156:
 		return (*OperationRelateng_RelatePredicate_6)(unsafe.Pointer(this)).RequireExteriorCheck_boolean_impl(a0)
-	case 161:
+	case 160:
 		return (*OperationRelateng_RelatePredicate_1)(unsafe.Pointer(this)).RequireExteriorCheck_boolean_impl(a0)
-	case 162:
+	case 161:
 		return (*OperationRelateng_RelatePredicate_2)(unsafe.Pointer(this)).RequireExteriorCheck_boolean_impl(a0)
 	}
 	return this.RequireExteriorCheck_boolean_impl(a0)
 }
 func (this *OperationRelateng_BasicPredicate) RequireInteraction() bool {
 	switch this.jkind_ {
-	case 151:
+	case 150:
 		return (*OperationRelateng_IMPatternMatcher)(unsafe.Pointer(this)).RequireInteraction_impl()
-	case 152:
+	case 151:
 		return (*OperationRelateng_RelateMatrixPredicate)(unsafe.Pointer(this)).RequireInteraction_impl()
-	case 162:
+	case 161:
 		return (*OperationRelateng_RelatePredicate_2)(unsafe.Pointer(this)).RequireInteraction_impl()
 	}
 	return this.RequireInteraction_impl()
 }
 func (this *OperationRelateng_BasicPredicate) RequireSelfNoding() bool {
 	switch this.jkind_ {
-	case 161:
+	case 160:
 		return (*OperationRelateng_RelatePredicate_1)(unsafe.Pointer(this)).RequireSelfNoding_impl()
-	case 162:
+	case 161:
 		return (*OperationRelateng_RelatePredicate_2)(unsafe.Pointer(this)).RequireSelfNoding_impl()
 	}
 	return this.RequireSelfNoding_impl()
 }
 func (this *OperationRelateng_BasicPredicate) ToString() *java.String {
 	switch this.jkind_ {
-	case 151:
+	case 150:
 		return (*OperationRelateng_IMPatternMatcher)(unsafe.Pointer(this)).ToString_impl()
-	case 152, 153, 154, 155, 156, 157, 158, 159, 160:
+	case 151, 152, 153, 154, 155, 156, 157, 158, 159:
 		return (*OperationRelateng_IMPredicate)(unsafe.Pointer(this)).ToString_impl()
 	}
 	return this.ToString_impl()
 }
 func (this *OperationRelateng_BasicPredicate) UpdateDimension_int_int_int(a0 int32, a1 int32, a2 int32) {
 	switch this.jkind_ {
-	case 151, 152, 153, 154, 155, 156, 157, 158, 159, 160:
+	case 150, 151, 152, 153, 154, 155, 156, 157, 158, 159:
 		(*OperationRelateng_IMPredicate)(unsafe.Pointer(this)).UpdateDimension_int_int_int_impl(a0, a1, a2)
 		return
-	case 161:
+	case 160:
 		(*OperationRelateng_RelatePredicate_1)(unsafe.Pointer(this)).UpdateDimension_int_int_int_impl(a0, a1, a2)
 		return
-	case 162:
+	case 161:
 		(*OperationRelateng_RelatePredicate_2)(unsafe.Pointer(this)).UpdateDimension_int_int_int_impl(a0, a1, a2)
 		return
 	}

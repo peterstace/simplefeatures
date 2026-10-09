@@ -40,20 +40,20 @@ func TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_isInstance(o any) bo
 	return ok
 }
 func TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 335 && p.jkind_ <= 335
+	return p != nil && p.jkind_ >= 302 && p.jkind_ <= 302
 }
 func TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_downcast(p *Testjts_GeometryTestCase) *TriangulatePolygon_ConstrainedDelaunayTriangulatorTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 335 || p.jkind_ > 335 {
+	if p.jkind_ < 302 || p.jkind_ > 302 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulatorTest"))
 	}
 	return (*TriangulatePolygon_ConstrainedDelaunayTriangulatorTest)(unsafe.Pointer(p))
 }
 func TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_new(name *java.String) *TriangulatePolygon_ConstrainedDelaunayTriangulatorTest {
 	this := &TriangulatePolygon_ConstrainedDelaunayTriangulatorTest{}
-	this.jkind_ = 335
+	this.jkind_ = 302
 	this.JSetSelf(this)
 	this.TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_init(name)
 	return this
@@ -62,22 +62,22 @@ func (this *TriangulatePolygon_ConstrainedDelaunayTriangulatorTest) TriangulateP
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *TriangulatePolygon_ConstrainedDelaunayTriangulatorTest) TestQuad() {
-	this.checkTri_String_String(jlit_4785, jlit_4786)
+	this.checkTri_String_String(jlit_4784, jlit_4785)
 }
 func (this *TriangulatePolygon_ConstrainedDelaunayTriangulatorTest) TestPent() {
-	this.checkTri_String_String(jlit_4787, jlit_4788)
+	this.checkTri_String_String(jlit_4786, jlit_4787)
 }
 func (this *TriangulatePolygon_ConstrainedDelaunayTriangulatorTest) TestHoleCW() {
-	this.checkTri_String_String(jlit_4789, jlit_4790)
+	this.checkTri_String_String(jlit_4788, jlit_4789)
 }
 func (this *TriangulatePolygon_ConstrainedDelaunayTriangulatorTest) TestTouchingHoles() {
-	this.checkTri_String_String(jlit_4791, jlit_4792)
+	this.checkTri_String_String(jlit_4790, jlit_4791)
 }
 func (this *TriangulatePolygon_ConstrainedDelaunayTriangulatorTest) TestMultiPolygon() {
-	this.checkTri_String_String(jlit_4793, jlit_4794)
+	this.checkTri_String_String(jlit_4792, jlit_4793)
 }
 func (this *TriangulatePolygon_ConstrainedDelaunayTriangulatorTest) TestFail() {
-	this.checkTri_String(jlit_4795)
+	this.checkTri_String(jlit_4794)
 }
 func (this *TriangulatePolygon_ConstrainedDelaunayTriangulatorTest) checkTri_String_String(wkt *java.String, wktExpected *java.String) {
 	var geom *Geom_Geometry = this.Read_String(wkt)
@@ -93,7 +93,7 @@ func (this *TriangulatePolygon_ConstrainedDelaunayTriangulatorTest) checkTri_Str
 }
 func TestTriangulatePolygon_ConstrainedDelaunayTriangulatorTest_testFail(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_new(jlit_4796)
+		tc := TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_new(jlit_4795)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestFail()
@@ -101,7 +101,7 @@ func TestTriangulatePolygon_ConstrainedDelaunayTriangulatorTest_testFail(t *test
 }
 func TestTriangulatePolygon_ConstrainedDelaunayTriangulatorTest_testHoleCW(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_new(jlit_4797)
+		tc := TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_new(jlit_4796)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestHoleCW()
@@ -117,7 +117,7 @@ func TestTriangulatePolygon_ConstrainedDelaunayTriangulatorTest_testMultiPolygon
 }
 func TestTriangulatePolygon_ConstrainedDelaunayTriangulatorTest_testPent(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_new(jlit_4798)
+		tc := TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_new(jlit_4797)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPent()
@@ -125,7 +125,7 @@ func TestTriangulatePolygon_ConstrainedDelaunayTriangulatorTest_testPent(t *test
 }
 func TestTriangulatePolygon_ConstrainedDelaunayTriangulatorTest_testQuad(t *testing.T) {
 	junit.Run(t, func() {
-		tc := TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_new(jlit_4799)
+		tc := TriangulatePolygon_ConstrainedDelaunayTriangulatorTest_new(jlit_4798)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestQuad()

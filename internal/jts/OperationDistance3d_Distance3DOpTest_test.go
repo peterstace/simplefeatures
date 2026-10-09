@@ -304,7 +304,7 @@ func TestOperationDistance3d_Distance3DOpTest_testLinePolygonSimple(t *testing.T
 }
 func TestOperationDistance3d_Distance3DOpTest_testMultiLineString(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationDistance3d_Distance3DOpTest_new(jlit_1814)
+		tc := OperationDistance3d_Distance3DOpTest_new(jlit_1813)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestMultiLineString()

@@ -40,20 +40,20 @@ func OperationValid_ValidSelfTouchingRingTest_isInstance(o any) bool {
 	return ok
 }
 func OperationValid_ValidSelfTouchingRingTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 323 && p.jkind_ <= 323
+	return p != nil && p.jkind_ >= 293 && p.jkind_ <= 293
 }
 func OperationValid_ValidSelfTouchingRingTest_downcast(p *Testjts_GeometryTestCase) *OperationValid_ValidSelfTouchingRingTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 323 || p.jkind_ > 323 {
+	if p.jkind_ < 293 || p.jkind_ > 293 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.valid.ValidSelfTouchingRingTest"))
 	}
 	return (*OperationValid_ValidSelfTouchingRingTest)(unsafe.Pointer(p))
 }
 func OperationValid_ValidSelfTouchingRingTest_new(name *java.String) *OperationValid_ValidSelfTouchingRingTest {
 	this := &OperationValid_ValidSelfTouchingRingTest{}
-	this.jkind_ = 323
+	this.jkind_ = 293
 	this.JSetSelf(this)
 	this.OperationValid_ValidSelfTouchingRingTest_init(name)
 	return this
@@ -62,71 +62,71 @@ func (this *OperationValid_ValidSelfTouchingRingTest) OperationValid_ValidSelfTo
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestShellAndHoleSelfTouch() {
-	var wkt *java.String = jlit_4452
+	var wkt *java.String = jlit_4451
 	this.checkIsValidSTR_String_boolean(wkt, true)
 	this.checkIsValidOGC_String_boolean(wkt, false)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestShellTouchAtHole() {
-	var wkt *java.String = jlit_4453
+	var wkt *java.String = jlit_4452
 	this.checkIsValidSTR_String_boolean(wkt, true)
 	this.checkIsValidOGC_String_boolean(wkt, false)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestShellTouchInChain() {
-	var wkt *java.String = jlit_4454
+	var wkt *java.String = jlit_4453
 	this.checkIsValidSTR_String_boolean(wkt, true)
 	this.checkIsValidOGC_String_boolean(wkt, false)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestHoleTouchInChain() {
-	var wkt *java.String = jlit_4455
+	var wkt *java.String = jlit_4454
 	this.checkIsValidSTR_String_boolean(wkt, true)
 	this.checkIsValidOGC_String_boolean(wkt, false)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestShellHoleAndHoleHoleTouch() {
-	var wkt *java.String = jlit_4456
+	var wkt *java.String = jlit_4455
 	this.checkIsValidSTR_String_boolean(wkt, true)
 	this.checkIsValidOGC_String_boolean(wkt, true)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestShellSelfTouchHoleOverlappingHole() {
-	var wkt *java.String = jlit_4457
+	var wkt *java.String = jlit_4456
 	this.checkIsValidSTR_String_boolean(wkt, false)
 	this.checkIsValidOGC_String_boolean(wkt, false)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestDisconnectedInteriorShellSelfTouchAtNonVertex() {
-	var wkt *java.String = jlit_4458
+	var wkt *java.String = jlit_4457
 	this.checkIsValidSTR_String_boolean(wkt, false)
 	this.checkIsValidOGC_String_boolean(wkt, false)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestDisconnectedInteriorShellSelfTouchAtVertex() {
-	var wkt *java.String = jlit_4459
+	var wkt *java.String = jlit_4458
 	this.checkIsValidSTR_String_boolean(wkt, false)
 	this.checkIsValidOGC_String_boolean(wkt, false)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestDisconnectedInteriorShellTouchAtVertices() {
-	var wkt *java.String = jlit_4460
+	var wkt *java.String = jlit_4459
 	this.checkIsValidSTR_String_boolean(wkt, false)
 	this.checkIsValidOGC_String_boolean(wkt, false)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestDisconnectedInteriorHoleTouch() {
-	var wkt *java.String = jlit_4461
+	var wkt *java.String = jlit_4460
 	this.checkIsValidSTR_String_boolean(wkt, false)
 	this.checkIsValidOGC_String_boolean(wkt, false)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestShellCross() {
-	var wkt *java.String = jlit_4462
+	var wkt *java.String = jlit_4461
 	this.checkIsValidSTR_String_boolean(wkt, false)
 	this.checkIsValidOGC_String_boolean(wkt, false)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestShellCrossAndSTR() {
-	var wkt *java.String = jlit_4463
+	var wkt *java.String = jlit_4462
 	this.checkIsValidSTR_String_boolean(wkt, false)
 	this.checkIsValidOGC_String_boolean(wkt, false)
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestExvertedHoleStarTouchHoleCycle() {
-	var wkt *java.String = jlit_4464
+	var wkt *java.String = jlit_4463
 	this.checkInvalidSTR_String_int(wkt, int32(4))
 }
 func (this *OperationValid_ValidSelfTouchingRingTest) TestExvertedHoleStarTouch() {
-	var wkt *java.String = jlit_4465
+	var wkt *java.String = jlit_4464
 	this.checkIsValidSTR_String_boolean(wkt, true)
 	this.checkIsValidOGC_String_boolean(wkt, false)
 }
@@ -152,7 +152,7 @@ func (this *OperationValid_ValidSelfTouchingRingTest) checkIsValidSTR_String_boo
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testDisconnectedInteriorHoleTouch(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4466)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4465)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestDisconnectedInteriorHoleTouch()
@@ -160,7 +160,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testDisconnectedInteriorHoleTo
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testDisconnectedInteriorShellSelfTouchAtNonVertex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4467)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4466)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestDisconnectedInteriorShellSelfTouchAtNonVertex()
@@ -168,7 +168,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testDisconnectedInteriorShellS
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testDisconnectedInteriorShellSelfTouchAtVertex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4468)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4467)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestDisconnectedInteriorShellSelfTouchAtVertex()
@@ -176,7 +176,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testDisconnectedInteriorShellS
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testDisconnectedInteriorShellTouchAtVertices(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4469)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4468)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestDisconnectedInteriorShellTouchAtVertices()
@@ -184,7 +184,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testDisconnectedInteriorShellT
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testExvertedHoleStarTouch(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4470)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4469)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestExvertedHoleStarTouch()
@@ -192,7 +192,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testExvertedHoleStarTouch(t *t
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testExvertedHoleStarTouchHoleCycle(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4471)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4470)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestExvertedHoleStarTouchHoleCycle()
@@ -200,7 +200,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testExvertedHoleStarTouchHoleC
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testHoleTouchInChain(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4472)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4471)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestHoleTouchInChain()
@@ -208,7 +208,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testHoleTouchInChain(t *testin
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testShellAndHoleSelfTouch(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4473)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4472)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestShellAndHoleSelfTouch()
@@ -216,7 +216,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testShellAndHoleSelfTouch(t *t
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testShellCross(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4474)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4473)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestShellCross()
@@ -224,7 +224,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testShellCross(t *testing.T) {
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testShellCrossAndSTR(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4475)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4474)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestShellCrossAndSTR()
@@ -232,7 +232,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testShellCrossAndSTR(t *testin
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testShellHoleAndHoleHoleTouch(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4476)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4475)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestShellHoleAndHoleHoleTouch()
@@ -240,7 +240,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testShellHoleAndHoleHoleTouch(
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testShellSelfTouchHoleOverlappingHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4477)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4476)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestShellSelfTouchHoleOverlappingHole()
@@ -248,7 +248,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testShellSelfTouchHoleOverlapp
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testShellTouchAtHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4478)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4477)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestShellTouchAtHole()
@@ -256,7 +256,7 @@ func TestOperationValid_ValidSelfTouchingRingTest_testShellTouchAtHole(t *testin
 }
 func TestOperationValid_ValidSelfTouchingRingTest_testShellTouchInChain(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4479)
+		tc := OperationValid_ValidSelfTouchingRingTest_new(jlit_4478)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestShellTouchInChain()

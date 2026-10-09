@@ -41,20 +41,20 @@ func AlgorithmLocate_IndexedPointInAreaLocatorTest_isInstance(o any) bool {
 	return ok
 }
 func AlgorithmLocate_IndexedPointInAreaLocatorTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 222 && p.jkind_ <= 222
+	return p != nil && p.jkind_ >= 192 && p.jkind_ <= 192
 }
 func AlgorithmLocate_IndexedPointInAreaLocatorTest_downcast(p *Testjts_GeometryTestCase) *AlgorithmLocate_IndexedPointInAreaLocatorTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 222 || p.jkind_ > 222 {
+	if p.jkind_ < 192 || p.jkind_ > 192 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.locate.IndexedPointInAreaLocatorTest"))
 	}
 	return (*AlgorithmLocate_IndexedPointInAreaLocatorTest)(unsafe.Pointer(p))
 }
 func AlgorithmLocate_IndexedPointInAreaLocatorTest_new(name *java.String) *AlgorithmLocate_IndexedPointInAreaLocatorTest {
 	this := &AlgorithmLocate_IndexedPointInAreaLocatorTest{}
-	this.jkind_ = 222
+	this.jkind_ = 192
 	this.JSetSelf(this)
 	this.AlgorithmLocate_IndexedPointInAreaLocatorTest_init(name)
 	return this

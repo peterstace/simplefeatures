@@ -40,20 +40,20 @@ func Geom_GeometryCompareToTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_GeometryCompareToTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 254 && p.jkind_ <= 254
+	return p != nil && p.jkind_ >= 224 && p.jkind_ <= 224
 }
 func Geom_GeometryCompareToTest_downcast(p *Testjts_GeometryTestCase) *Geom_GeometryCompareToTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 254 || p.jkind_ > 254 {
+	if p.jkind_ < 224 || p.jkind_ > 224 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.GeometryCompareToTest"))
 	}
 	return (*Geom_GeometryCompareToTest)(unsafe.Pointer(p))
 }
 func Geom_GeometryCompareToTest_new(name *java.String) *Geom_GeometryCompareToTest {
 	this := &Geom_GeometryCompareToTest{}
-	this.jkind_ = 254
+	this.jkind_ = 224
 	this.JSetSelf(this)
 	this.Geom_GeometryCompareToTest_init(name)
 	return this

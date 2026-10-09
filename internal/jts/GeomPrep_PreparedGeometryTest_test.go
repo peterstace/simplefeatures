@@ -40,20 +40,20 @@ func GeomPrep_PreparedGeometryTest_isInstance(o any) bool {
 	return ok
 }
 func GeomPrep_PreparedGeometryTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 248 && p.jkind_ <= 248
+	return p != nil && p.jkind_ >= 218 && p.jkind_ <= 218
 }
 func GeomPrep_PreparedGeometryTest_downcast(p *Testjts_GeometryTestCase) *GeomPrep_PreparedGeometryTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 248 || p.jkind_ > 248 {
+	if p.jkind_ < 218 || p.jkind_ > 218 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.prep.PreparedGeometryTest"))
 	}
 	return (*GeomPrep_PreparedGeometryTest)(unsafe.Pointer(p))
 }
 func GeomPrep_PreparedGeometryTest_new(name *java.String) *GeomPrep_PreparedGeometryTest {
 	this := &GeomPrep_PreparedGeometryTest{}
-	this.jkind_ = 248
+	this.jkind_ = 218
 	this.JSetSelf(this)
 	this.GeomPrep_PreparedGeometryTest_init(name)
 	return this

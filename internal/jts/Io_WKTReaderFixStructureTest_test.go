@@ -42,20 +42,20 @@ func Io_WKTReaderFixStructureTest_isInstance(o any) bool {
 	return ok
 }
 func Io_WKTReaderFixStructureTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 266 && p.jkind_ <= 266
+	return p != nil && p.jkind_ >= 236 && p.jkind_ <= 236
 }
 func Io_WKTReaderFixStructureTest_downcast(p *Testjts_GeometryTestCase) *Io_WKTReaderFixStructureTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 266 || p.jkind_ > 266 {
+	if p.jkind_ < 236 || p.jkind_ > 236 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.io.WKTReaderFixStructureTest"))
 	}
 	return (*Io_WKTReaderFixStructureTest)(unsafe.Pointer(p))
 }
 func Io_WKTReaderFixStructureTest_new(name *java.String) *Io_WKTReaderFixStructureTest {
 	this := &Io_WKTReaderFixStructureTest{}
-	this.jkind_ = 266
+	this.jkind_ = 236
 	this.JSetSelf(this)
 	this.Io_WKTReaderFixStructureTest_init(name)
 	return this

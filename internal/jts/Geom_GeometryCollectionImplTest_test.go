@@ -43,20 +43,20 @@ func Geom_GeometryCollectionImplTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_GeometryCollectionImplTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 252 && p.jkind_ <= 252
+	return p != nil && p.jkind_ >= 222 && p.jkind_ <= 222
 }
 func Geom_GeometryCollectionImplTest_downcast(p *Testjts_GeometryTestCase) *Geom_GeometryCollectionImplTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 252 || p.jkind_ > 252 {
+	if p.jkind_ < 222 || p.jkind_ > 222 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.GeometryCollectionImplTest"))
 	}
 	return (*Geom_GeometryCollectionImplTest)(unsafe.Pointer(p))
 }
 func Geom_GeometryCollectionImplTest_new(name *java.String) *Geom_GeometryCollectionImplTest {
 	this := &Geom_GeometryCollectionImplTest{}
-	this.jkind_ = 252
+	this.jkind_ = 222
 	this.JSetSelf(this)
 	this.Geom_GeometryCollectionImplTest_init(name)
 	return this

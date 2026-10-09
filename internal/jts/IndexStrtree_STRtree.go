@@ -36,13 +36,13 @@ func IndexStrtree_STRtree_isInstance(o any) bool {
 	return ok
 }
 func IndexStrtree_STRtree_isKind(p *IndexStrtree_AbstractSTRtree) bool {
-	return p != nil && p.jkind_ >= 132 && p.jkind_ <= 133
+	return p != nil && p.jkind_ >= 131 && p.jkind_ <= 132
 }
 func IndexStrtree_STRtree_downcast(p *IndexStrtree_AbstractSTRtree) *IndexStrtree_STRtree {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 132 || p.jkind_ > 133 {
+	if p.jkind_ < 131 || p.jkind_ > 132 {
 		panic(java.ClassCastError(IndexStrtree_AbstractSTRtree_toAny(p), "org.locationtech.jts.index.strtree.STRtree"))
 	}
 	return (*IndexStrtree_STRtree)(unsafe.Pointer(p))
@@ -60,7 +60,7 @@ const IndexStrtree_STRtree_DEFAULT_NODE_CAPACITY int32 = int32(10)
 
 func IndexStrtree_STRtree_new() *IndexStrtree_STRtree {
 	this := &IndexStrtree_STRtree{}
-	this.jkind_ = 132
+	this.jkind_ = 131
 	this.IndexStrtree_STRtree_init()
 	return this
 }
@@ -69,7 +69,7 @@ func (this *IndexStrtree_STRtree) IndexStrtree_STRtree_init() {
 }
 func IndexStrtree_STRtree_new_int(nodeCapacity int32) *IndexStrtree_STRtree {
 	this := &IndexStrtree_STRtree{}
-	this.jkind_ = 132
+	this.jkind_ = 131
 	this.IndexStrtree_STRtree_init_int(nodeCapacity)
 	return this
 }
@@ -78,7 +78,7 @@ func (this *IndexStrtree_STRtree) IndexStrtree_STRtree_init_int(nodeCapacity int
 }
 func IndexStrtree_STRtree_new_int_STRtreeNode(nodeCapacity int32, root *IndexStrtree_STRtree_STRtreeNode) *IndexStrtree_STRtree {
 	this := &IndexStrtree_STRtree{}
-	this.jkind_ = 132
+	this.jkind_ = 131
 	this.IndexStrtree_STRtree_init_int_STRtreeNode(nodeCapacity, root)
 	return this
 }
@@ -87,7 +87,7 @@ func (this *IndexStrtree_STRtree) IndexStrtree_STRtree_init_int_STRtreeNode(node
 }
 func IndexStrtree_STRtree_new_int_ArrayList(nodeCapacity int32, itemBoundables *java.ArrayList) *IndexStrtree_STRtree {
 	this := &IndexStrtree_STRtree{}
-	this.jkind_ = 132
+	this.jkind_ = 131
 	this.IndexStrtree_STRtree_init_int_ArrayList(nodeCapacity, itemBoundables)
 	return this
 }
@@ -298,14 +298,14 @@ func (this *IndexStrtree_STRtree) nearestNeighbourK_BoundablePair_double_int(ini
 }
 func (this *IndexStrtree_STRtree) CreateParentBoundablesFromVerticalSlice_List_int(a0 java.List, a1 int32) java.List {
 	switch this.jkind_ {
-	case 133:
+	case 132:
 		return (*TestjtsIndex_STRtreeDemo_TestTree)(unsafe.Pointer(this)).CreateParentBoundablesFromVerticalSlice_List_int_impl(a0, a1)
 	}
 	return this.CreateParentBoundablesFromVerticalSlice_List_int_impl(a0, a1)
 }
 func (this *IndexStrtree_STRtree) VerticalSlices_List_int(a0 java.List, a1 int32) []java.List {
 	switch this.jkind_ {
-	case 133:
+	case 132:
 		return (*TestjtsIndex_STRtreeDemo_TestTree)(unsafe.Pointer(this)).VerticalSlices_List_int_impl(a0, a1)
 	}
 	return this.VerticalSlices_List_int_impl(a0, a1)
@@ -344,20 +344,20 @@ func IndexStrtree_STRtree_STRtreeNode_isInstance(o any) bool {
 	return ok
 }
 func IndexStrtree_STRtree_STRtreeNode_isKind(p *IndexStrtree_AbstractNode) bool {
-	return p != nil && p.jkind_ >= 128 && p.jkind_ <= 128
+	return p != nil && p.jkind_ >= 127 && p.jkind_ <= 127
 }
 func IndexStrtree_STRtree_STRtreeNode_downcast(p *IndexStrtree_AbstractNode) *IndexStrtree_STRtree_STRtreeNode {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 128 || p.jkind_ > 128 {
+	if p.jkind_ < 127 || p.jkind_ > 127 {
 		panic(java.ClassCastError(IndexStrtree_AbstractNode_toAny(p), "org.locationtech.jts.index.strtree.STRtree$STRtreeNode"))
 	}
 	return (*IndexStrtree_STRtree_STRtreeNode)(unsafe.Pointer(p))
 }
 func IndexStrtree_STRtree_STRtreeNode_new(level int32) *IndexStrtree_STRtree_STRtreeNode {
 	this := &IndexStrtree_STRtree_STRtreeNode{}
-	this.jkind_ = 128
+	this.jkind_ = 127
 	this.IndexStrtree_STRtree_STRtreeNode_init(level)
 	return this
 }

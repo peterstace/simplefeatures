@@ -74,7 +74,7 @@ func (this *IndexStrtree_SIRtreeTest) TestEmptyTree() {
 }
 func TestIndexStrtree_SIRtreeTest_test(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexStrtree_SIRtreeTest_new(jlit_1787)
+		tc := IndexStrtree_SIRtreeTest_new(jlit_2006)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.Test()

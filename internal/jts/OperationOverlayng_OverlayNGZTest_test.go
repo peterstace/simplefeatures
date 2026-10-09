@@ -40,20 +40,20 @@ func OperationOverlayng_OverlayNGZTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_OverlayNGZTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 300 && p.jkind_ <= 300
+	return p != nil && p.jkind_ >= 270 && p.jkind_ <= 270
 }
 func OperationOverlayng_OverlayNGZTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_OverlayNGZTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 300 || p.jkind_ > 300 {
+	if p.jkind_ < 270 || p.jkind_ > 270 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.OverlayNGZTest"))
 	}
 	return (*OperationOverlayng_OverlayNGZTest)(unsafe.Pointer(p))
 }
 func OperationOverlayng_OverlayNGZTest_new(name *java.String) *OperationOverlayng_OverlayNGZTest {
 	this := &OperationOverlayng_OverlayNGZTest{}
-	this.jkind_ = 300
+	this.jkind_ = 270
 	this.JSetSelf(this)
 	this.OperationOverlayng_OverlayNGZTest_init(name)
 	return this
@@ -62,52 +62,52 @@ func (this *OperationOverlayng_OverlayNGZTest) OperationOverlayng_OverlayNGZTest
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestPointXYPointDifference() {
-	this.checkDifference_String_String_String(jlit_3743, jlit_3744, jlit_3745)
+	this.checkDifference_String_String_String(jlit_3742, jlit_3743, jlit_3744)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestPointPolygonIntersection() {
-	this.checkIntersection_String_String_String(jlit_3744, jlit_3746, jlit_3747)
+	this.checkIntersection_String_String_String(jlit_3743, jlit_3745, jlit_3746)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestLineIntersectionPointZInterpolated() {
-	this.checkIntersection_String_String_String(jlit_2404, jlit_3748, jlit_3749)
+	this.checkIntersection_String_String_String(jlit_2404, jlit_3747, jlit_3748)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestLineIntersectionPointZValue() {
-	this.checkIntersection_String_String_String(jlit_2404, jlit_3750, jlit_3751)
+	this.checkIntersection_String_String_String(jlit_2404, jlit_3749, jlit_3750)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestLineOverlapUnion() {
-	this.checkUnion_String_String_String(jlit_2404, jlit_3752, jlit_3753)
+	this.checkUnion_String_String_String(jlit_2404, jlit_3751, jlit_3752)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestLineLineXYDifferenceLineInterpolated() {
-	this.checkDifference_String_String_String(jlit_2404, jlit_3754, jlit_3755)
+	this.checkDifference_String_String_String(jlit_2404, jlit_3753, jlit_3754)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestLineXYLineIntersection() {
-	this.checkIntersection_String_String_String(jlit_3756, jlit_3757, jlit_3758)
+	this.checkIntersection_String_String_String(jlit_3755, jlit_3756, jlit_3757)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestLinePolygonIntersection() {
-	this.checkIntersection_String_String_String(jlit_3759, jlit_3746, jlit_3760)
+	this.checkIntersection_String_String_String(jlit_3758, jlit_3745, jlit_3759)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestLinePolygonDifference() {
-	this.checkDifference_String_String_String(jlit_3336, jlit_3746, jlit_3761)
+	this.checkDifference_String_String_String(jlit_3336, jlit_3745, jlit_3760)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestPointXYPolygonIntersection() {
-	this.checkIntersection_String_String_String(jlit_3411, jlit_3762, jlit_3763)
+	this.checkIntersection_String_String_String(jlit_3411, jlit_3761, jlit_3762)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestPointPolygonXYUnionn() {
-	this.checkUnion_String_String_String(jlit_3764, jlit_799, jlit_3765)
+	this.checkUnion_String_String_String(jlit_3763, jlit_799, jlit_3764)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestLinePolygonXYDifference() {
-	this.checkDifference_String_String_String(jlit_3336, jlit_799, jlit_3766)
+	this.checkDifference_String_String_String(jlit_3336, jlit_799, jlit_3765)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestLineXYPolygonDifference() {
-	this.checkDifference_String_String_String(jlit_3767, jlit_3762, jlit_3768)
+	this.checkDifference_String_String_String(jlit_3766, jlit_3761, jlit_3767)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestPolygonXYPolygonIntersection() {
-	this.checkIntersection_String_String_String(jlit_3769, jlit_3762, jlit_3770)
+	this.checkIntersection_String_String_String(jlit_3768, jlit_3761, jlit_3769)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestPolygonXYPolygonUnion() {
-	this.checkUnion_String_String_String(jlit_3771, jlit_3762, jlit_3772)
+	this.checkUnion_String_String_String(jlit_3770, jlit_3761, jlit_3771)
 }
 func (this *OperationOverlayng_OverlayNGZTest) TestPolygonXYPolygonXYIntersection() {
-	this.checkIntersection_String_String_String(jlit_3769, jlit_799, jlit_3773)
+	this.checkIntersection_String_String_String(jlit_3768, jlit_799, jlit_3772)
 }
 func (this *OperationOverlayng_OverlayNGZTest) checkIntersection_String_String_String(wktA *java.String, wktB *java.String, wktExpected *java.String) {
 	this.checkOverlay_int_String_String_String(int32(1), wktA, wktB, wktExpected)
@@ -127,7 +127,7 @@ func (this *OperationOverlayng_OverlayNGZTest) checkOverlay_int_String_String_St
 }
 func TestOperationOverlayng_OverlayNGZTest_testLineIntersectionPointZInterpolated(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3774)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3773)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineIntersectionPointZInterpolated()
@@ -135,7 +135,7 @@ func TestOperationOverlayng_OverlayNGZTest_testLineIntersectionPointZInterpolate
 }
 func TestOperationOverlayng_OverlayNGZTest_testLineIntersectionPointZValue(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3775)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3774)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineIntersectionPointZValue()
@@ -143,7 +143,7 @@ func TestOperationOverlayng_OverlayNGZTest_testLineIntersectionPointZValue(t *te
 }
 func TestOperationOverlayng_OverlayNGZTest_testLineLineXYDifferenceLineInterpolated(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3776)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3775)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineLineXYDifferenceLineInterpolated()
@@ -151,7 +151,7 @@ func TestOperationOverlayng_OverlayNGZTest_testLineLineXYDifferenceLineInterpola
 }
 func TestOperationOverlayng_OverlayNGZTest_testLineOverlapUnion(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3777)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3776)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineOverlapUnion()
@@ -159,7 +159,7 @@ func TestOperationOverlayng_OverlayNGZTest_testLineOverlapUnion(t *testing.T) {
 }
 func TestOperationOverlayng_OverlayNGZTest_testLinePolygonDifference(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3778)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3777)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinePolygonDifference()
@@ -167,7 +167,7 @@ func TestOperationOverlayng_OverlayNGZTest_testLinePolygonDifference(t *testing.
 }
 func TestOperationOverlayng_OverlayNGZTest_testLinePolygonIntersection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3779)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3778)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinePolygonIntersection()
@@ -175,7 +175,7 @@ func TestOperationOverlayng_OverlayNGZTest_testLinePolygonIntersection(t *testin
 }
 func TestOperationOverlayng_OverlayNGZTest_testLinePolygonXYDifference(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3780)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3779)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinePolygonXYDifference()
@@ -183,7 +183,7 @@ func TestOperationOverlayng_OverlayNGZTest_testLinePolygonXYDifference(t *testin
 }
 func TestOperationOverlayng_OverlayNGZTest_testLineXYLineIntersection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3781)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3780)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineXYLineIntersection()
@@ -191,7 +191,7 @@ func TestOperationOverlayng_OverlayNGZTest_testLineXYLineIntersection(t *testing
 }
 func TestOperationOverlayng_OverlayNGZTest_testLineXYPolygonDifference(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3782)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3781)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineXYPolygonDifference()
@@ -199,7 +199,7 @@ func TestOperationOverlayng_OverlayNGZTest_testLineXYPolygonDifference(t *testin
 }
 func TestOperationOverlayng_OverlayNGZTest_testPointPolygonIntersection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3783)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3782)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointPolygonIntersection()
@@ -207,7 +207,7 @@ func TestOperationOverlayng_OverlayNGZTest_testPointPolygonIntersection(t *testi
 }
 func TestOperationOverlayng_OverlayNGZTest_testPointPolygonXYUnionn(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3784)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3783)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointPolygonXYUnionn()
@@ -215,7 +215,7 @@ func TestOperationOverlayng_OverlayNGZTest_testPointPolygonXYUnionn(t *testing.T
 }
 func TestOperationOverlayng_OverlayNGZTest_testPointXYPointDifference(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3785)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3784)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointXYPointDifference()
@@ -223,7 +223,7 @@ func TestOperationOverlayng_OverlayNGZTest_testPointXYPointDifference(t *testing
 }
 func TestOperationOverlayng_OverlayNGZTest_testPointXYPolygonIntersection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3786)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3785)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointXYPolygonIntersection()
@@ -231,7 +231,7 @@ func TestOperationOverlayng_OverlayNGZTest_testPointXYPolygonIntersection(t *tes
 }
 func TestOperationOverlayng_OverlayNGZTest_testPolygonXYPolygonIntersection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3787)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3786)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonXYPolygonIntersection()
@@ -239,7 +239,7 @@ func TestOperationOverlayng_OverlayNGZTest_testPolygonXYPolygonIntersection(t *t
 }
 func TestOperationOverlayng_OverlayNGZTest_testPolygonXYPolygonUnion(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3788)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3787)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonXYPolygonUnion()
@@ -247,7 +247,7 @@ func TestOperationOverlayng_OverlayNGZTest_testPolygonXYPolygonUnion(t *testing.
 }
 func TestOperationOverlayng_OverlayNGZTest_testPolygonXYPolygonXYIntersection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3789)
+		tc := OperationOverlayng_OverlayNGZTest_new(jlit_3788)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonXYPolygonXYIntersection()

@@ -43,20 +43,20 @@ func Geom_LineStringImplTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_LineStringImplTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 261 && p.jkind_ <= 261
+	return p != nil && p.jkind_ >= 231 && p.jkind_ <= 231
 }
 func Geom_LineStringImplTest_downcast(p *Testjts_GeometryTestCase) *Geom_LineStringImplTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 261 || p.jkind_ > 261 {
+	if p.jkind_ < 231 || p.jkind_ > 231 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.LineStringImplTest"))
 	}
 	return (*Geom_LineStringImplTest)(unsafe.Pointer(p))
 }
 func Geom_LineStringImplTest_new(name *java.String) *Geom_LineStringImplTest {
 	this := &Geom_LineStringImplTest{}
-	this.jkind_ = 261
+	this.jkind_ = 231
 	this.JSetSelf(this)
 	this.Geom_LineStringImplTest_init(name)
 	return this

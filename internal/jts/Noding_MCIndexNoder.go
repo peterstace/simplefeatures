@@ -39,20 +39,20 @@ func Noding_MCIndexNoder_isInstance(o any) bool {
 	return ok
 }
 func Noding_MCIndexNoder_isKind(p *Noding_SinglePassNoder) bool {
-	return p != nil && p.jkind_ >= 141 && p.jkind_ <= 141
+	return p != nil && p.jkind_ >= 140 && p.jkind_ <= 140
 }
 func Noding_MCIndexNoder_downcast(p *Noding_SinglePassNoder) *Noding_MCIndexNoder {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 141 || p.jkind_ > 141 {
+	if p.jkind_ < 140 || p.jkind_ > 140 {
 		panic(java.ClassCastError(Noding_SinglePassNoder_toAny(p), "org.locationtech.jts.noding.MCIndexNoder"))
 	}
 	return (*Noding_MCIndexNoder)(unsafe.Pointer(p))
 }
 func Noding_MCIndexNoder_new() *Noding_MCIndexNoder {
 	this := &Noding_MCIndexNoder{}
-	this.jkind_ = 141
+	this.jkind_ = 140
 	this.Noding_MCIndexNoder_init()
 	return this
 }
@@ -66,7 +66,7 @@ func (this *Noding_MCIndexNoder) Noding_MCIndexNoder_init() {
 }
 func Noding_MCIndexNoder_new_SegmentIntersector(si Noding_SegmentIntersector) *Noding_MCIndexNoder {
 	this := &Noding_MCIndexNoder{}
-	this.jkind_ = 141
+	this.jkind_ = 140
 	this.Noding_MCIndexNoder_init_SegmentIntersector(si)
 	return this
 }
@@ -80,7 +80,7 @@ func (this *Noding_MCIndexNoder) Noding_MCIndexNoder_init_SegmentIntersector(si 
 }
 func Noding_MCIndexNoder_new_SegmentIntersector_double(si Noding_SegmentIntersector, overlapTolerance float64) *Noding_MCIndexNoder {
 	this := &Noding_MCIndexNoder{}
-	this.jkind_ = 141
+	this.jkind_ = 140
 	this.Noding_MCIndexNoder_init_SegmentIntersector_double(si, overlapTolerance)
 	return this
 }

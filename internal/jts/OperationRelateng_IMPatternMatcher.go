@@ -41,20 +41,20 @@ func OperationRelateng_IMPatternMatcher_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_IMPatternMatcher_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 151 && p.jkind_ <= 151
+	return p != nil && p.jkind_ >= 150 && p.jkind_ <= 150
 }
 func OperationRelateng_IMPatternMatcher_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_IMPatternMatcher {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 151 || p.jkind_ > 151 {
+	if p.jkind_ < 150 || p.jkind_ > 150 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.IMPatternMatcher"))
 	}
 	return (*OperationRelateng_IMPatternMatcher)(unsafe.Pointer(p))
 }
 func OperationRelateng_IMPatternMatcher_new(imPattern *java.String) *OperationRelateng_IMPatternMatcher {
 	this := &OperationRelateng_IMPatternMatcher{}
-	this.jkind_ = 151
+	this.jkind_ = 150
 	this.OperationRelateng_IMPatternMatcher_init(imPattern)
 	return this
 }

@@ -40,20 +40,20 @@ func AlgorithmMatch_HausdorffSimilarityMeasureTest_isInstance(o any) bool {
 	return ok
 }
 func AlgorithmMatch_HausdorffSimilarityMeasureTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 220 && p.jkind_ <= 220
+	return p != nil && p.jkind_ >= 190 && p.jkind_ <= 190
 }
 func AlgorithmMatch_HausdorffSimilarityMeasureTest_downcast(p *Testjts_GeometryTestCase) *AlgorithmMatch_HausdorffSimilarityMeasureTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 220 || p.jkind_ > 220 {
+	if p.jkind_ < 190 || p.jkind_ > 190 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.match.HausdorffSimilarityMeasureTest"))
 	}
 	return (*AlgorithmMatch_HausdorffSimilarityMeasureTest)(unsafe.Pointer(p))
 }
 func AlgorithmMatch_HausdorffSimilarityMeasureTest_new(name *java.String) *AlgorithmMatch_HausdorffSimilarityMeasureTest {
 	this := &AlgorithmMatch_HausdorffSimilarityMeasureTest{}
-	this.jkind_ = 220
+	this.jkind_ = 190
 	this.JSetSelf(this)
 	this.AlgorithmMatch_HausdorffSimilarityMeasureTest_init(name)
 	return this

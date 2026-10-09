@@ -38,13 +38,13 @@ func Planargraph_PlanarGraph_isInstance(o any) bool {
 	return ok
 }
 func Planargraph_PlanarGraph_isKind(p *Planargraph_PlanarGraph) bool {
-	return p != nil && p.jkind_ >= 174 && p.jkind_ <= 176
+	return p != nil && p.jkind_ >= 173 && p.jkind_ <= 175
 }
 func Planargraph_PlanarGraph_downcast(p *Planargraph_PlanarGraph) *Planargraph_PlanarGraph {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 174 || p.jkind_ > 176 {
+	if p.jkind_ < 173 || p.jkind_ > 175 {
 		panic(java.ClassCastError(Planargraph_PlanarGraph_toAny(p), "org.locationtech.jts.planargraph.PlanarGraph"))
 	}
 	return (*Planargraph_PlanarGraph)(unsafe.Pointer(p))
@@ -55,9 +55,9 @@ func Planargraph_PlanarGraph_toAny(p *Planargraph_PlanarGraph) any {
 		return nil
 	}
 	switch p.jkind_ {
-	case 175:
+	case 174:
 		return (*OperationLinemerge_LineMergeGraph)(unsafe.Pointer(p))
-	case 176:
+	case 175:
 		return (*OperationPolygonize_PolygonizeGraph)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")

@@ -36,13 +36,13 @@ func OperationRelateng_IMPredicate_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_IMPredicate_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 150 && p.jkind_ <= 160
+	return p != nil && p.jkind_ >= 149 && p.jkind_ <= 159
 }
 func OperationRelateng_IMPredicate_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_IMPredicate {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 150 || p.jkind_ > 160 {
+	if p.jkind_ < 149 || p.jkind_ > 159 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.IMPredicate"))
 	}
 	return (*OperationRelateng_IMPredicate)(unsafe.Pointer(p))
@@ -104,50 +104,50 @@ func (this *OperationRelateng_IMPredicate) ToString_impl() *java.String {
 }
 func (this *OperationRelateng_IMPredicate) IsDetermined() bool {
 	switch this.jkind_ {
-	case 151:
+	case 150:
 		return (*OperationRelateng_IMPatternMatcher)(unsafe.Pointer(this)).IsDetermined_impl()
-	case 152:
+	case 151:
 		return (*OperationRelateng_RelateMatrixPredicate)(unsafe.Pointer(this)).IsDetermined_impl()
-	case 153:
+	case 152:
 		return (*OperationRelateng_RelatePredicate_10)(unsafe.Pointer(this)).IsDetermined_impl()
-	case 154:
+	case 153:
 		return (*OperationRelateng_RelatePredicate_3)(unsafe.Pointer(this)).IsDetermined_impl()
-	case 155:
+	case 154:
 		return (*OperationRelateng_RelatePredicate_4)(unsafe.Pointer(this)).IsDetermined_impl()
-	case 156:
+	case 155:
 		return (*OperationRelateng_RelatePredicate_5)(unsafe.Pointer(this)).IsDetermined_impl()
-	case 157:
+	case 156:
 		return (*OperationRelateng_RelatePredicate_6)(unsafe.Pointer(this)).IsDetermined_impl()
-	case 158:
+	case 157:
 		return (*OperationRelateng_RelatePredicate_7)(unsafe.Pointer(this)).IsDetermined_impl()
-	case 159:
+	case 158:
 		return (*OperationRelateng_RelatePredicate_8)(unsafe.Pointer(this)).IsDetermined_impl()
-	case 160:
+	case 159:
 		return (*OperationRelateng_RelatePredicate_9)(unsafe.Pointer(this)).IsDetermined_impl()
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.operation.relateng.IMPredicate.IsDetermined"))
 }
 func (this *OperationRelateng_IMPredicate) ValueIM() bool {
 	switch this.jkind_ {
-	case 151:
+	case 150:
 		return (*OperationRelateng_IMPatternMatcher)(unsafe.Pointer(this)).ValueIM_impl()
-	case 152:
+	case 151:
 		return (*OperationRelateng_RelateMatrixPredicate)(unsafe.Pointer(this)).ValueIM_impl()
-	case 153:
+	case 152:
 		return (*OperationRelateng_RelatePredicate_10)(unsafe.Pointer(this)).ValueIM_impl()
-	case 154:
+	case 153:
 		return (*OperationRelateng_RelatePredicate_3)(unsafe.Pointer(this)).ValueIM_impl()
-	case 155:
+	case 154:
 		return (*OperationRelateng_RelatePredicate_4)(unsafe.Pointer(this)).ValueIM_impl()
-	case 156:
+	case 155:
 		return (*OperationRelateng_RelatePredicate_5)(unsafe.Pointer(this)).ValueIM_impl()
-	case 157:
+	case 156:
 		return (*OperationRelateng_RelatePredicate_6)(unsafe.Pointer(this)).ValueIM_impl()
-	case 158:
+	case 157:
 		return (*OperationRelateng_RelatePredicate_7)(unsafe.Pointer(this)).ValueIM_impl()
-	case 159:
+	case 158:
 		return (*OperationRelateng_RelatePredicate_8)(unsafe.Pointer(this)).ValueIM_impl()
-	case 160:
+	case 159:
 		return (*OperationRelateng_RelatePredicate_9)(unsafe.Pointer(this)).ValueIM_impl()
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.operation.relateng.IMPredicate.ValueIM"))

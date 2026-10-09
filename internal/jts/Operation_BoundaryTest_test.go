@@ -42,13 +42,13 @@ func Operation_BoundaryTest_isInstance(o any) bool {
 	return ok
 }
 func Operation_BoundaryTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 324 && p.jkind_ <= 324
+	return p != nil && p.jkind_ >= 294 && p.jkind_ <= 294
 }
 func Operation_BoundaryTest_downcast(p *Testjts_GeometryTestCase) *Operation_BoundaryTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 324 || p.jkind_ > 324 {
+	if p.jkind_ < 294 || p.jkind_ > 294 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.BoundaryTest"))
 	}
 	return (*Operation_BoundaryTest)(unsafe.Pointer(p))
@@ -58,7 +58,7 @@ const Operation_BoundaryTest_TOLERANCE float64 = float64(5.0e-5)
 
 func Operation_BoundaryTest_new(name *java.String) *Operation_BoundaryTest {
 	this := &Operation_BoundaryTest{}
-	this.jkind_ = 324
+	this.jkind_ = 294
 	this.JSetSelf(this)
 	this.Operation_BoundaryTest_init(name)
 	return this
@@ -137,7 +137,7 @@ func (this *Operation_BoundaryTest) checkHasBoundary_String_BoundaryNodeRule_boo
 }
 func TestOperation_BoundaryTest_test1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Operation_BoundaryTest_new(jlit_1962)
+		tc := Operation_BoundaryTest_new(jlit_1961)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.Test1()

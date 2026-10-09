@@ -32,20 +32,20 @@ func Algorithm_AreaTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_AreaTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 227 && p.jkind_ <= 227
+	return p != nil && p.jkind_ >= 197 && p.jkind_ <= 197
 }
 func Algorithm_AreaTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_AreaTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 227 || p.jkind_ > 227 {
+	if p.jkind_ < 197 || p.jkind_ > 197 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.AreaTest"))
 	}
 	return (*Algorithm_AreaTest)(unsafe.Pointer(p))
 }
 func Algorithm_AreaTest_new(name *java.String) *Algorithm_AreaTest {
 	this := &Algorithm_AreaTest{}
-	this.jkind_ = 227
+	this.jkind_ = 197
 	this.JSetSelf(this)
 	this.Algorithm_AreaTest_init(name)
 	return this

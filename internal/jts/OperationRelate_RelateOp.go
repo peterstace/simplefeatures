@@ -40,20 +40,20 @@ func OperationRelate_RelateOp_isInstance(o any) bool {
 	return ok
 }
 func OperationRelate_RelateOp_isKind(p *Operation_GeometryGraphOperation) bool {
-	return p != nil && p.jkind_ >= 165 && p.jkind_ <= 165
+	return p != nil && p.jkind_ >= 164 && p.jkind_ <= 164
 }
 func OperationRelate_RelateOp_downcast(p *Operation_GeometryGraphOperation) *OperationRelate_RelateOp {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 165 || p.jkind_ > 165 {
+	if p.jkind_ < 164 || p.jkind_ > 164 {
 		panic(java.ClassCastError(Operation_GeometryGraphOperation_toAny(p), "org.locationtech.jts.operation.relate.RelateOp"))
 	}
 	return (*OperationRelate_RelateOp)(unsafe.Pointer(p))
 }
 func OperationRelate_RelateOp_new_Geometry_Geometry(g0 *Geom_Geometry, g1 *Geom_Geometry) *OperationRelate_RelateOp {
 	this := &OperationRelate_RelateOp{}
-	this.jkind_ = 165
+	this.jkind_ = 164
 	this.OperationRelate_RelateOp_init_Geometry_Geometry(g0, g1)
 	return this
 }
@@ -63,7 +63,7 @@ func (this *OperationRelate_RelateOp) OperationRelate_RelateOp_init_Geometry_Geo
 }
 func OperationRelate_RelateOp_new_Geometry_Geometry_BoundaryNodeRule(g0 *Geom_Geometry, g1 *Geom_Geometry, boundaryNodeRule Algorithm_BoundaryNodeRule) *OperationRelate_RelateOp {
 	this := &OperationRelate_RelateOp{}
-	this.jkind_ = 165
+	this.jkind_ = 164
 	this.OperationRelate_RelateOp_init_Geometry_Geometry_BoundaryNodeRule(g0, g1, boundaryNodeRule)
 	return this
 }

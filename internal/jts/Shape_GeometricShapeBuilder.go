@@ -38,13 +38,13 @@ func Shape_GeometricShapeBuilder_isInstance(o any) bool {
 	return ok
 }
 func Shape_GeometricShapeBuilder_isKind(p *Shape_GeometricShapeBuilder) bool {
-	return p != nil && p.jkind_ >= 177 && p.jkind_ <= 183
+	return p != nil && p.jkind_ >= 176 && p.jkind_ <= 182
 }
 func Shape_GeometricShapeBuilder_downcast(p *Shape_GeometricShapeBuilder) *Shape_GeometricShapeBuilder {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 177 || p.jkind_ > 183 {
+	if p.jkind_ < 176 || p.jkind_ > 182 {
 		panic(java.ClassCastError(Shape_GeometricShapeBuilder_toAny(p), "org.locationtech.jts.shape.GeometricShapeBuilder"))
 	}
 	return (*Shape_GeometricShapeBuilder)(unsafe.Pointer(p))
@@ -55,17 +55,17 @@ func Shape_GeometricShapeBuilder_toAny(p *Shape_GeometricShapeBuilder) any {
 		return nil
 	}
 	switch p.jkind_ {
-	case 178:
+	case 177:
 		return (*ShapeFractal_HilbertCurveBuilder)(unsafe.Pointer(p))
-	case 179:
+	case 178:
 		return (*ShapeFractal_KochSnowflakeBuilder)(unsafe.Pointer(p))
-	case 180:
+	case 179:
 		return (*ShapeFractal_MortonCurveBuilder)(unsafe.Pointer(p))
-	case 181:
+	case 180:
 		return (*ShapeFractal_SierpinskiCarpetBuilder)(unsafe.Pointer(p))
-	case 182:
+	case 181:
 		return (*ShapeRandom_RandomPointsBuilder)(unsafe.Pointer(p))
-	case 183:
+	case 182:
 		return (*ShapeRandom_RandomPointsInGridBuilder)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
@@ -113,24 +113,24 @@ func (this *Shape_GeometricShapeBuilder) CreateCoord_double_double_impl(x float6
 }
 func (this *Shape_GeometricShapeBuilder) CreateCoord_double_double(a0 float64, a1 float64) *Geom_Coordinate {
 	switch this.jkind_ {
-	case 182:
+	case 181:
 		return (*ShapeRandom_RandomPointsBuilder)(unsafe.Pointer(this)).CreateCoord_double_double_impl(a0, a1)
 	}
 	return this.CreateCoord_double_double_impl(a0, a1)
 }
 func (this *Shape_GeometricShapeBuilder) GetGeometry() *Geom_Geometry {
 	switch this.jkind_ {
-	case 178:
+	case 177:
 		return (*ShapeFractal_HilbertCurveBuilder)(unsafe.Pointer(this)).GetGeometry_impl()
-	case 179:
+	case 178:
 		return (*ShapeFractal_KochSnowflakeBuilder)(unsafe.Pointer(this)).GetGeometry_impl()
-	case 180:
+	case 179:
 		return (*ShapeFractal_MortonCurveBuilder)(unsafe.Pointer(this)).GetGeometry_impl()
-	case 181:
+	case 180:
 		return (*ShapeFractal_SierpinskiCarpetBuilder)(unsafe.Pointer(this)).GetGeometry_impl()
-	case 182:
+	case 181:
 		return (*ShapeRandom_RandomPointsBuilder)(unsafe.Pointer(this)).GetGeometry_impl()
-	case 183:
+	case 182:
 		return (*ShapeRandom_RandomPointsInGridBuilder)(unsafe.Pointer(this)).GetGeometry_impl()
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.shape.GeometricShapeBuilder.GetGeometry"))

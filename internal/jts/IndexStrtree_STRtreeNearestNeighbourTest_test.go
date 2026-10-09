@@ -40,13 +40,13 @@ func IndexStrtree_STRtreeNearestNeighbourTest_isInstance(o any) bool {
 	return ok
 }
 func IndexStrtree_STRtreeNearestNeighbourTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 264 && p.jkind_ <= 264
+	return p != nil && p.jkind_ >= 234 && p.jkind_ <= 234
 }
 func IndexStrtree_STRtreeNearestNeighbourTest_downcast(p *Testjts_GeometryTestCase) *IndexStrtree_STRtreeNearestNeighbourTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 264 || p.jkind_ > 264 {
+	if p.jkind_ < 234 || p.jkind_ > 234 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.index.strtree.STRtreeNearestNeighbourTest"))
 	}
 	return (*IndexStrtree_STRtreeNearestNeighbourTest)(unsafe.Pointer(p))
@@ -57,7 +57,7 @@ var IndexStrtree_STRtreeNearestNeighbourTest_POINTS_A *java.String = jlit_2024
 
 func IndexStrtree_STRtreeNearestNeighbourTest_new(Name_ *java.String) *IndexStrtree_STRtreeNearestNeighbourTest {
 	this := &IndexStrtree_STRtreeNearestNeighbourTest{}
-	this.jkind_ = 264
+	this.jkind_ = 234
 	this.JSetSelf(this)
 	this.IndexStrtree_STRtreeNearestNeighbourTest_init(Name_)
 	return this

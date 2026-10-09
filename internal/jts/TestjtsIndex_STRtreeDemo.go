@@ -41,20 +41,20 @@ func TestjtsIndex_STRtreeDemo_TestTree_isInstance(o any) bool {
 	return ok
 }
 func TestjtsIndex_STRtreeDemo_TestTree_isKind(p *IndexStrtree_AbstractSTRtree) bool {
-	return p != nil && p.jkind_ >= 133 && p.jkind_ <= 133
+	return p != nil && p.jkind_ >= 132 && p.jkind_ <= 132
 }
 func TestjtsIndex_STRtreeDemo_TestTree_downcast(p *IndexStrtree_AbstractSTRtree) *TestjtsIndex_STRtreeDemo_TestTree {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 133 || p.jkind_ > 133 {
+	if p.jkind_ < 132 || p.jkind_ > 132 {
 		panic(java.ClassCastError(IndexStrtree_AbstractSTRtree_toAny(p), "test.jts.index.STRtreeDemo$TestTree"))
 	}
 	return (*TestjtsIndex_STRtreeDemo_TestTree)(unsafe.Pointer(p))
 }
 func TestjtsIndex_STRtreeDemo_TestTree_new(nodeCapacity int32) *TestjtsIndex_STRtreeDemo_TestTree {
 	this := &TestjtsIndex_STRtreeDemo_TestTree{}
-	this.jkind_ = 133
+	this.jkind_ = 132
 	this.TestjtsIndex_STRtreeDemo_TestTree_init(nodeCapacity)
 	return this
 }

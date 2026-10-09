@@ -45,20 +45,20 @@ func OperationRelateng_RelateSegmentString_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelateSegmentString_isKind(p *Noding_BasicSegmentString) bool {
-	return p != nil && p.jkind_ >= 139 && p.jkind_ <= 139
+	return p != nil && p.jkind_ >= 138 && p.jkind_ <= 138
 }
 func OperationRelateng_RelateSegmentString_downcast(p *Noding_BasicSegmentString) *OperationRelateng_RelateSegmentString {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 139 || p.jkind_ > 139 {
+	if p.jkind_ < 138 || p.jkind_ > 138 {
 		panic(java.ClassCastError(Noding_BasicSegmentString_toAny(p), "org.locationtech.jts.operation.relateng.RelateSegmentString"))
 	}
 	return (*OperationRelateng_RelateSegmentString)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelateSegmentString_new(pts []*Geom_Coordinate, isA bool, dimension int32, id int32, ringId int32, poly *Geom_Geometry, inputGeom *OperationRelateng_RelateGeometry) *OperationRelateng_RelateSegmentString {
 	this := &OperationRelateng_RelateSegmentString{}
-	this.jkind_ = 139
+	this.jkind_ = 138
 	this.OperationRelateng_RelateSegmentString_init(pts, isA, dimension, id, ringId, poly, inputGeom)
 	return this
 }

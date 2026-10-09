@@ -40,20 +40,20 @@ func OperationOverlayng_LineLimiterTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_LineLimiterTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 285 && p.jkind_ <= 285
+	return p != nil && p.jkind_ >= 255 && p.jkind_ <= 255
 }
 func OperationOverlayng_LineLimiterTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_LineLimiterTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 285 || p.jkind_ > 285 {
+	if p.jkind_ < 255 || p.jkind_ > 255 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.LineLimiterTest"))
 	}
 	return (*OperationOverlayng_LineLimiterTest)(unsafe.Pointer(p))
 }
 func OperationOverlayng_LineLimiterTest_new(name *java.String) *OperationOverlayng_LineLimiterTest {
 	this := &OperationOverlayng_LineLimiterTest{}
-	this.jkind_ = 285
+	this.jkind_ = 255
 	this.JSetSelf(this)
 	this.OperationOverlayng_LineLimiterTest_init(name)
 	return this

@@ -40,20 +40,20 @@ func OperationRelateng_AdjacentEdgeLocatorTest_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_AdjacentEdgeLocatorTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 309 && p.jkind_ <= 309
+	return p != nil && p.jkind_ >= 279 && p.jkind_ <= 279
 }
 func OperationRelateng_AdjacentEdgeLocatorTest_downcast(p *Testjts_GeometryTestCase) *OperationRelateng_AdjacentEdgeLocatorTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 309 || p.jkind_ > 309 {
+	if p.jkind_ < 279 || p.jkind_ > 279 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.relateng.AdjacentEdgeLocatorTest"))
 	}
 	return (*OperationRelateng_AdjacentEdgeLocatorTest)(unsafe.Pointer(p))
 }
 func OperationRelateng_AdjacentEdgeLocatorTest_new(name *java.String) *OperationRelateng_AdjacentEdgeLocatorTest {
 	this := &OperationRelateng_AdjacentEdgeLocatorTest{}
-	this.jkind_ = 309
+	this.jkind_ = 279
 	this.JSetSelf(this)
 	this.OperationRelateng_AdjacentEdgeLocatorTest_init(name)
 	return this
@@ -62,34 +62,34 @@ func (this *OperationRelateng_AdjacentEdgeLocatorTest) OperationRelateng_Adjacen
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationRelateng_AdjacentEdgeLocatorTest) TestAdjacent2() {
-	this.checkLocation_String_int_int_int(jlit_3997, int32(5), int32(5), int32(0))
+	this.checkLocation_String_int_int_int(jlit_3996, int32(5), int32(5), int32(0))
 }
 func (this *OperationRelateng_AdjacentEdgeLocatorTest) TestNonAdjacent() {
-	this.checkLocation_String_int_int_int(jlit_3998, int32(5), int32(5), int32(1))
+	this.checkLocation_String_int_int_int(jlit_3997, int32(5), int32(5), int32(1))
 }
 func (this *OperationRelateng_AdjacentEdgeLocatorTest) TestAdjacent6WithFilledHoles() {
-	this.checkLocation_String_int_int_int(jlit_3999, int32(6), int32(6), int32(0))
+	this.checkLocation_String_int_int_int(jlit_3998, int32(6), int32(6), int32(0))
 }
 func (this *OperationRelateng_AdjacentEdgeLocatorTest) TestAdjacent5WithEmptyHole() {
-	this.checkLocation_String_int_int_int(jlit_4000, int32(6), int32(6), int32(1))
+	this.checkLocation_String_int_int_int(jlit_3999, int32(6), int32(6), int32(1))
 }
 func (this *OperationRelateng_AdjacentEdgeLocatorTest) TestContainedAndAdjacent() {
-	var wkt *java.String = jlit_4001
+	var wkt *java.String = jlit_4000
 	this.checkLocation_String_int_int_int(wkt, int32(9), int32(5), int32(1))
 	this.checkLocation_String_int_int_int(wkt, int32(9), int32(8), int32(1))
 }
 func (this *OperationRelateng_AdjacentEdgeLocatorTest) TestDisjointCollinear() {
-	this.checkLocation_String_int_int_int(jlit_4002, int32(2), int32(4), int32(1))
+	this.checkLocation_String_int_int_int(jlit_4001, int32(2), int32(4), int32(1))
 }
 func (this *OperationRelateng_AdjacentEdgeLocatorTest) checkLocation_String_int_int_int(wkt *java.String, x int32, y int32, expectedLoc int32) {
 	var geom *Geom_Geometry = this.Read_String(wkt)
 	var ael *OperationRelateng_AdjacentEdgeLocator = OperationRelateng_AdjacentEdgeLocator_new(geom)
 	var loc int32 = ael.Locate_Coordinate(Geom_Coordinate_new_double_double(float64(x), float64(y)))
-	junit.TestCase_assertEquals_String_int_int(jlit_4003, expectedLoc, loc)
+	junit.TestCase_assertEquals_String_int_int(jlit_4002, expectedLoc, loc)
 }
 func TestOperationRelateng_AdjacentEdgeLocatorTest_testAdjacent2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_AdjacentEdgeLocatorTest_new(jlit_4004)
+		tc := OperationRelateng_AdjacentEdgeLocatorTest_new(jlit_4003)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjacent2()
@@ -97,7 +97,7 @@ func TestOperationRelateng_AdjacentEdgeLocatorTest_testAdjacent2(t *testing.T) {
 }
 func TestOperationRelateng_AdjacentEdgeLocatorTest_testAdjacent5WithEmptyHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_AdjacentEdgeLocatorTest_new(jlit_4005)
+		tc := OperationRelateng_AdjacentEdgeLocatorTest_new(jlit_4004)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjacent5WithEmptyHole()
@@ -105,7 +105,7 @@ func TestOperationRelateng_AdjacentEdgeLocatorTest_testAdjacent5WithEmptyHole(t 
 }
 func TestOperationRelateng_AdjacentEdgeLocatorTest_testAdjacent6WithFilledHoles(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_AdjacentEdgeLocatorTest_new(jlit_4006)
+		tc := OperationRelateng_AdjacentEdgeLocatorTest_new(jlit_4005)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjacent6WithFilledHoles()
@@ -113,7 +113,7 @@ func TestOperationRelateng_AdjacentEdgeLocatorTest_testAdjacent6WithFilledHoles(
 }
 func TestOperationRelateng_AdjacentEdgeLocatorTest_testContainedAndAdjacent(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_AdjacentEdgeLocatorTest_new(jlit_4007)
+		tc := OperationRelateng_AdjacentEdgeLocatorTest_new(jlit_4006)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestContainedAndAdjacent()
@@ -121,7 +121,7 @@ func TestOperationRelateng_AdjacentEdgeLocatorTest_testContainedAndAdjacent(t *t
 }
 func TestOperationRelateng_AdjacentEdgeLocatorTest_testDisjointCollinear(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_AdjacentEdgeLocatorTest_new(jlit_4008)
+		tc := OperationRelateng_AdjacentEdgeLocatorTest_new(jlit_4007)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestDisjointCollinear()
@@ -129,7 +129,7 @@ func TestOperationRelateng_AdjacentEdgeLocatorTest_testDisjointCollinear(t *test
 }
 func TestOperationRelateng_AdjacentEdgeLocatorTest_testNonAdjacent(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_AdjacentEdgeLocatorTest_new(jlit_4009)
+		tc := OperationRelateng_AdjacentEdgeLocatorTest_new(jlit_4008)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNonAdjacent()

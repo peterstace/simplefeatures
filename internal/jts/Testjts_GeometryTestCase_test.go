@@ -36,13 +36,13 @@ func Testjts_GeometryTestCase_isInstance(o any) bool {
 	return ok
 }
 func Testjts_GeometryTestCase_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 213 && p.jkind_ <= 342
+	return p != nil && p.jkind_ >= 183 && p.jkind_ <= 309
 }
 func Testjts_GeometryTestCase_downcast(p *Testjts_GeometryTestCase) *Testjts_GeometryTestCase {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 213 || p.jkind_ > 342 {
+	if p.jkind_ < 183 || p.jkind_ > 309 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "test.jts.GeometryTestCase"))
 	}
 	return (*Testjts_GeometryTestCase)(unsafe.Pointer(p))
@@ -53,264 +53,258 @@ func Testjts_GeometryTestCase_toAny(p *Testjts_GeometryTestCase) any {
 		return nil
 	}
 	switch p.jkind_ {
-	case 214:
+	case 184:
 		return (*AlgorithmConstruct_LargestEmptyCircleTest)(unsafe.Pointer(p))
-	case 215:
+	case 185:
 		return (*AlgorithmConstruct_MaximumInscribedCircleTest)(unsafe.Pointer(p))
-	case 216:
+	case 186:
 		return (*AlgorithmDistance_DiscreteFrechetDistanceTest)(unsafe.Pointer(p))
-	case 217:
+	case 187:
 		return (*AlgorithmHull_ConcaveHullOfPolygonsTest)(unsafe.Pointer(p))
-	case 218:
+	case 188:
 		return (*AlgorithmHull_ConcaveHullTest)(unsafe.Pointer(p))
-	case 219:
+	case 189:
 		return (*AlgorithmMatch_FrechetSimilarityMeasureTest)(unsafe.Pointer(p))
-	case 220:
+	case 190:
 		return (*AlgorithmMatch_HausdorffSimilarityMeasureTest)(unsafe.Pointer(p))
-	case 222:
+	case 192:
 		return (*AlgorithmLocate_IndexedPointInAreaLocatorTest)(unsafe.Pointer(p))
-	case 223:
+	case 193:
 		return (*AlgorithmLocate_SimplePointInAreaLocatorTest)(unsafe.Pointer(p))
-	case 224:
+	case 194:
 		return (*Algorithm_LocatePointInRingTest)(unsafe.Pointer(p))
-	case 225:
+	case 195:
 		return (*Algorithm_PointInRingTest)(unsafe.Pointer(p))
-	case 226:
+	case 196:
 		return (*Algorithm_RayCrossingCounterTest)(unsafe.Pointer(p))
-	case 227:
+	case 197:
 		return (*Algorithm_AreaTest)(unsafe.Pointer(p))
-	case 228:
+	case 198:
 		return (*Algorithm_ConvexHullTest)(unsafe.Pointer(p))
-	case 229:
+	case 199:
 		return (*Algorithm_DistanceTest)(unsafe.Pointer(p))
-	case 230:
+	case 200:
 		return (*Algorithm_InteriorPointTest)(unsafe.Pointer(p))
-	case 231:
+	case 201:
 		return (*Algorithm_LengthTest)(unsafe.Pointer(p))
-	case 232:
+	case 202:
 		return (*Algorithm_MinimumAreaRectanglelTest)(unsafe.Pointer(p))
-	case 233:
+	case 203:
 		return (*Algorithm_MinimumBoundingCircleTest)(unsafe.Pointer(p))
-	case 234:
+	case 204:
 		return (*Algorithm_OrientationIsCCWTest)(unsafe.Pointer(p))
-	case 235:
+	case 205:
 		return (*Algorithm_PointLocationOn4DLineTest)(unsafe.Pointer(p))
-	case 236:
+	case 206:
 		return (*Algorithm_PointLocationTest)(unsafe.Pointer(p))
-	case 237:
+	case 207:
 		return (*Algorithm_PolygonNodeTopologyTest)(unsafe.Pointer(p))
-	case 238:
+	case 208:
 		return (*Algorithm_RectangleTest)(unsafe.Pointer(p))
-	case 239:
+	case 209:
 		return (*Algorithm_RobustLineIntersectorZTest)(unsafe.Pointer(p))
-	case 240:
+	case 210:
 		return (*Coverage_CoverageGapFinderTest)(unsafe.Pointer(p))
-	case 241:
+	case 211:
 		return (*Coverage_CoveragePolygonValidatorTest)(unsafe.Pointer(p))
-	case 242:
+	case 212:
 		return (*Coverage_CoverageRingEdgesTest)(unsafe.Pointer(p))
-	case 243:
+	case 213:
 		return (*Coverage_CoverageSimplifierTest)(unsafe.Pointer(p))
-	case 244:
+	case 214:
 		return (*Coverage_CoverageUnionTest)(unsafe.Pointer(p))
-	case 245:
+	case 215:
 		return (*Coverage_CoverageValidatorTest)(unsafe.Pointer(p))
-	case 246:
+	case 216:
 		return (*Coverage_TPVWSimplifierTest)(unsafe.Pointer(p))
-	case 247:
+	case 217:
 		return (*Densify_DensifierTest)(unsafe.Pointer(p))
-	case 248:
+	case 218:
 		return (*GeomPrep_PreparedGeometryTest)(unsafe.Pointer(p))
-	case 249:
+	case 219:
 		return (*GeomUtil_GeometryFixerTest)(unsafe.Pointer(p))
-	case 250:
+	case 220:
 		return (*GeomUtil_GeometryMapperTest)(unsafe.Pointer(p))
-	case 251:
+	case 221:
 		return (*Geom_CoordinateArraysTest)(unsafe.Pointer(p))
-	case 252:
+	case 222:
 		return (*Geom_GeometryCollectionImplTest)(unsafe.Pointer(p))
-	case 253:
+	case 223:
 		return (*Geom_GeometryCollectionIteratorTest)(unsafe.Pointer(p))
-	case 254:
+	case 224:
 		return (*Geom_GeometryCompareToTest)(unsafe.Pointer(p))
-	case 255:
+	case 225:
 		return (*Geom_GeometryCoordinateTest)(unsafe.Pointer(p))
-	case 256:
+	case 226:
 		return (*Geom_GeometryCopyTest)(unsafe.Pointer(p))
-	case 257:
+	case 227:
 		return (*Geom_GeometryOpGCUnsupportedTest)(unsafe.Pointer(p))
-	case 258:
+	case 228:
 		return (*Geom_GeometryOverlayTest)(unsafe.Pointer(p))
-	case 259:
+	case 229:
 		return (*Geom_GeometryReverseTest)(unsafe.Pointer(p))
-	case 260:
+	case 230:
 		return (*Geom_GeometryXYZMTest)(unsafe.Pointer(p))
-	case 261:
+	case 231:
 		return (*Geom_LineStringImplTest)(unsafe.Pointer(p))
-	case 262:
+	case 232:
 		return (*Geom_TriangleCircumcentreTest)(unsafe.Pointer(p))
-	case 263:
+	case 233:
 		return (*Geom_TriangleTest)(unsafe.Pointer(p))
-	case 264:
+	case 234:
 		return (*IndexStrtree_STRtreeNearestNeighbourTest)(unsafe.Pointer(p))
-	case 265:
+	case 235:
 		return (*Io_WKBWriterTest)(unsafe.Pointer(p))
-	case 266:
+	case 236:
 		return (*Io_WKTReaderFixStructureTest)(unsafe.Pointer(p))
-	case 267:
+	case 237:
 		return (*Io_WKTReaderTest)(unsafe.Pointer(p))
-	case 268:
+	case 238:
 		return (*Io_WKTWriterStaticFnTest)(unsafe.Pointer(p))
-	case 269:
+	case 239:
 		return (*Linearref_LengthLocationMapTest)(unsafe.Pointer(p))
-	case 270:
+	case 240:
 		return (*NodingSnap_SnappingNoderTest)(unsafe.Pointer(p))
-	case 271:
+	case 241:
 		return (*NodingSnapround_SnapRoundingNoderTest)(unsafe.Pointer(p))
-	case 272:
+	case 242:
 		return (*Noding_FastNodingValidatorTest)(unsafe.Pointer(p))
-	case 273:
+	case 243:
 		return (*Noding_NodedSegmentStringTest)(unsafe.Pointer(p))
-	case 274:
+	case 244:
 		return (*Noding_SegmentStringTest)(unsafe.Pointer(p))
-	case 275:
+	case 245:
 		return (*OperationBuffer_BufferParameterTest)(unsafe.Pointer(p))
-	case 276:
+	case 246:
 		return (*OperationBuffer_BufferTest)(unsafe.Pointer(p))
-	case 277:
+	case 247:
 		return (*OperationBuffer_OffsetCurveTest)(unsafe.Pointer(p))
-	case 278:
+	case 248:
 		return (*OperationBuffer_VariableBufferTest)(unsafe.Pointer(p))
-	case 280:
+	case 250:
 		return (*OperationDistance_DistanceTest)(unsafe.Pointer(p))
-	case 281:
+	case 251:
 		return (*OperationDistance_IndexedFacetDistanceTest)(unsafe.Pointer(p))
-	case 282:
+	case 252:
 		return (*OperationOverlay_OverlayMiscTest)(unsafe.Pointer(p))
-	case 283:
+	case 253:
 		return (*OperationOverlayng_CoverageUnionTest)(unsafe.Pointer(p))
-	case 284:
+	case 254:
 		return (*OperationOverlayng_ElevationModelTest)(unsafe.Pointer(p))
-	case 285:
+	case 255:
 		return (*OperationOverlayng_LineLimiterTest)(unsafe.Pointer(p))
-	case 286:
+	case 256:
 		return (*OperationOverlayng_OverlayGraphTest)(unsafe.Pointer(p))
-	case 287:
+	case 257:
 		return (*OperationOverlayng_OverlayNGFloatingNoderTest)(unsafe.Pointer(p))
-	case 288:
+	case 258:
 		return (*OperationOverlayng_OverlayNGMixedPointsTest)(unsafe.Pointer(p))
-	case 289:
+	case 259:
 		return (*OperationOverlayng_OverlayNGPointsTest)(unsafe.Pointer(p))
-	case 290:
+	case 260:
 		return (*OperationOverlayng_OverlayNGRobustTest)(unsafe.Pointer(p))
-	case 291:
+	case 261:
 		return (*OperationOverlayng_OverlayNGSnappingNoderTest)(unsafe.Pointer(p))
-	case 292:
+	case 262:
 		return (*OperationOverlayng_OverlayNGSnappingTestOne)(unsafe.Pointer(p))
-	case 293:
+	case 263:
 		return (*OperationOverlayng_OverlayNGStrictModeTest)(unsafe.Pointer(p))
-	case 294:
+	case 264:
 		return (*OperationOverlayng_OverlayNGTestCase)(unsafe.Pointer(p))
-	case 295:
+	case 265:
 		return (*OperationOverlayng_OverlayNGEmptyDisjointTest)(unsafe.Pointer(p))
-	case 296:
+	case 266:
 		return (*OperationOverlayng_OverlayNGGeometryCollectionTest)(unsafe.Pointer(p))
-	case 297:
+	case 267:
 		return (*OperationOverlayng_OverlayNGInvalidTest)(unsafe.Pointer(p))
-	case 298:
+	case 268:
 		return (*OperationOverlayng_OverlayNGTest)(unsafe.Pointer(p))
-	case 299:
+	case 269:
 		return (*OperationOverlayng_OverlayNGTestOne)(unsafe.Pointer(p))
-	case 300:
+	case 270:
 		return (*OperationOverlayng_OverlayNGZTest)(unsafe.Pointer(p))
-	case 301:
+	case 271:
 		return (*OperationOverlayng_PrecisionReducerTest)(unsafe.Pointer(p))
-	case 302:
+	case 272:
 		return (*OperationOverlayng_PrecisionUtilTest)(unsafe.Pointer(p))
-	case 303:
+	case 273:
 		return (*OperationOverlayng_RingClipperTest)(unsafe.Pointer(p))
-	case 304:
+	case 274:
 		return (*OperationOverlayng_UnaryUnionNGTest)(unsafe.Pointer(p))
-	case 305:
+	case 275:
 		return (*OperationPolygonize_PolygonizerTest)(unsafe.Pointer(p))
-	case 306:
+	case 276:
 		return (*OperationPredicate_RectangleIntersectsTest)(unsafe.Pointer(p))
-	case 307:
+	case 277:
 		return (*OperationRelate_ContainsTest)(unsafe.Pointer(p))
-	case 308:
+	case 278:
 		return (*OperationRelate_RelateTest)(unsafe.Pointer(p))
-	case 309:
+	case 279:
 		return (*OperationRelateng_AdjacentEdgeLocatorTest)(unsafe.Pointer(p))
-	case 310:
+	case 280:
 		return (*OperationRelateng_LinearBoundaryTest)(unsafe.Pointer(p))
-	case 311:
+	case 281:
 		return (*OperationRelateng_PolygonNodeConverterTest)(unsafe.Pointer(p))
-	case 312:
+	case 282:
 		return (*OperationRelateng_RelateGeometryTest)(unsafe.Pointer(p))
-	case 313:
+	case 283:
 		return (*OperationRelateng_RelateNGBoundaryNodeRuleTest)(unsafe.Pointer(p))
-	case 315:
+	case 285:
 		return (*OperationRelateng_RelateNGGCTest)(unsafe.Pointer(p))
-	case 316:
+	case 286:
 		return (*OperationRelateng_RelateNGRobustnessTest)(unsafe.Pointer(p))
-	case 317:
+	case 287:
 		return (*OperationRelateng_RelateNGTest)(unsafe.Pointer(p))
-	case 318:
+	case 288:
 		return (*OperationRelateng_RelatePointLocatorTest)(unsafe.Pointer(p))
-	case 319:
+	case 289:
 		return (*OperationUnion_OverlapUnionTest)(unsafe.Pointer(p))
-	case 320:
+	case 290:
 		return (*OperationUnion_UnaryUnionTest)(unsafe.Pointer(p))
-	case 321:
+	case 291:
 		return (*OperationValid_IsSimpleTest)(unsafe.Pointer(p))
-	case 322:
+	case 292:
 		return (*OperationValid_IsValidTest)(unsafe.Pointer(p))
-	case 323:
+	case 293:
 		return (*OperationValid_ValidSelfTouchingRingTest)(unsafe.Pointer(p))
-	case 324:
+	case 294:
 		return (*Operation_BoundaryTest)(unsafe.Pointer(p))
-	case 325:
+	case 295:
 		return (*Precision_CommonBitsOpTest)(unsafe.Pointer(p))
-	case 326:
+	case 296:
 		return (*Precision_GeometryPrecisionReducerPointwiseTest)(unsafe.Pointer(p))
-	case 327:
+	case 297:
 		return (*Precision_GeometryPrecisionReducerTest)(unsafe.Pointer(p))
-	case 328:
+	case 298:
 		return (*Shape_CubicBezierCurveTest)(unsafe.Pointer(p))
-	case 329:
+	case 299:
 		return (*Simplify_DouglasPeuckerSimplifierTest)(unsafe.Pointer(p))
-	case 330:
+	case 300:
 		return (*Simplify_PolygonHullSimplifierTest)(unsafe.Pointer(p))
-	case 331:
+	case 301:
 		return (*Simplify_TopologyPreservingSimplifierTest)(unsafe.Pointer(p))
-	case 332:
-		return (*TestjtsPerfAlgorithm_DDOrientationIndexAccuracyTest)(unsafe.Pointer(p))
-	case 333:
-		return (*TestjtsPerfAlgorithm_DDOrientationIndexCorrectTest)(unsafe.Pointer(p))
-	case 334:
-		return (*TestjtsPerfAlgorithm_PointInRingRobustnessTest)(unsafe.Pointer(p))
-	case 335:
+	case 302:
 		return (*TriangulatePolygon_ConstrainedDelaunayTriangulatorTest)(unsafe.Pointer(p))
-	case 336:
+	case 303:
 		return (*TriangulatePolygon_PolygonHoleJoinerTest)(unsafe.Pointer(p))
-	case 337:
+	case 304:
 		return (*TriangulatePolygon_PolygonTriangulatorTest)(unsafe.Pointer(p))
-	case 338:
+	case 305:
 		return (*TriangulateTri_TriTest)(unsafe.Pointer(p))
-	case 339:
+	case 306:
 		return (*Triangulate_DelaunayTest)(unsafe.Pointer(p))
-	case 340:
+	case 307:
 		return (*Triangulate_VoronoiDiagramBuilderTest)(unsafe.Pointer(p))
-	case 341:
+	case 308:
 		return (*Triangulate_VoronoiTest)(unsafe.Pointer(p))
-	case 342:
+	case 309:
 		return (*Util_UniqueCoordinateArrayFilterTest)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
 }
 
-var Testjts_GeometryTestCase_CHECK_EQUAL_FAIL *java.String = jlit_4858
-var Testjts_GeometryTestCase_CHECK_EQUAL_FAIL_MSG *java.String = jlit_4859
+var Testjts_GeometryTestCase_CHECK_EQUAL_FAIL *java.String = jlit_4857
+var Testjts_GeometryTestCase_CHECK_EQUAL_FAIL_MSG *java.String = jlit_4858
 
 func (this *Testjts_GeometryTestCase) Testjts_GeometryTestCase_init_String(name *java.String) {
 	this.writerZ = Io_WKTWriter_new_int(int32(3))
@@ -437,10 +431,10 @@ func Testjts_GeometryTestCase_isEqual_CoordinateSequence_CoordinateSequence_int_
 		return false
 	}
 	if seq1.GetDimension() < dimension {
-		panic(java.Ref(java.IllegalArgumentException_new_String(jlit_4860)))
+		panic(java.Ref(java.IllegalArgumentException_new_String(jlit_4859)))
 	}
 	if seq2.GetDimension() < dimension {
-		panic(java.Ref(java.IllegalArgumentException_new_String(jlit_4861)))
+		panic(java.Ref(java.IllegalArgumentException_new_String(jlit_4860)))
 	}
 	{
 		var i int32 = int32(0)
@@ -498,14 +492,14 @@ func (this *Testjts_GeometryTestCase) CheckEqual_String_Geometry_Geometry(msg *j
 		equal = actualNorm.EqualsExact_Geometry(expectedNorm)
 	}
 	if !equal {
-		java.System_out.Format_String_ObjectArr(jlit_4859, []any{java.Ref(msg), Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(expectedNorm))), Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(actualNorm)))})
+		java.System_out.Format_String_ObjectArr(jlit_4858, []any{java.Ref(msg), Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(expectedNorm))), Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(actualNorm)))})
 	}
 	junit.TestCase_assertTrue_boolean(equal)
 }
 func (this *Testjts_GeometryTestCase) CheckEqualExact_Geometry_Geometry(expected *Geom_Geometry, actual *Geom_Geometry) {
 	var equal bool = actual.EqualsExact_Geometry(expected)
 	if !equal {
-		java.System_out.Format_String_ObjectArr(jlit_4858, []any{Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(expected))), Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(actual)))})
+		java.System_out.Format_String_ObjectArr(jlit_4857, []any{Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(expected))), Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(actual)))})
 	}
 	junit.TestCase_assertTrue_boolean(equal)
 }
@@ -514,7 +508,7 @@ func (this *Testjts_GeometryTestCase) CheckEqual_Geometry_Geometry_double(expect
 	var expectedNorm *Geom_Geometry = expected.Norm()
 	var equal bool = actualNorm.EqualsExact_Geometry_double(expectedNorm, tolerance)
 	if !equal {
-		java.System_out.Format_String_ObjectArr(jlit_4858, []any{Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(expectedNorm))), Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(actualNorm)))})
+		java.System_out.Format_String_ObjectArr(jlit_4857, []any{Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(expectedNorm))), Geom_Geometry_toAny((*Geom_Geometry)(unsafe.Pointer(actualNorm)))})
 	}
 	junit.TestCase_assertTrue_boolean(equal)
 }
@@ -523,7 +517,7 @@ func (this *Testjts_GeometryTestCase) CheckEqualXYZ_Geometry_Geometry(expected *
 	var expectedNorm *Geom_Geometry = expected.Norm()
 	var equal bool = this.equalsExactXYZ_Geometry_Geometry(actualNorm, expectedNorm)
 	if !equal {
-		java.System_out.Format_String_ObjectArr(jlit_4858, []any{java.Ref(this.writerZ.Write_Geometry(expectedNorm)), java.Ref(this.writerZ.Write_Geometry(actualNorm))})
+		java.System_out.Format_String_ObjectArr(jlit_4857, []any{java.Ref(this.writerZ.Write_Geometry(expectedNorm)), java.Ref(this.writerZ.Write_Geometry(actualNorm))})
 	}
 	junit.TestCase_assertTrue_boolean(equal)
 }
@@ -581,11 +575,11 @@ func (this *Testjts_GeometryTestCase) equalsExactXYZPolygon_Polygon_Polygon(a *G
 	return true
 }
 func (this *Testjts_GeometryTestCase) CheckEqual_GeometryArr_GeometryArr(expected []*Geom_Geometry, actual []*Geom_Geometry) {
-	junit.TestCase_assertEquals_String_int_int(jlit_4862, int32(len(expected)), int32(len(actual)))
+	junit.TestCase_assertEquals_String_int_int(jlit_4861, int32(len(expected)), int32(len(actual)))
 	{
 		var i int32 = int32(0)
 		for ; i < int32(len(expected)); i++ {
-			this.CheckEqual_String_Geometry_Geometry(java.Concat(jlit_4863, java.StrOfInt(int32(i))), expected[i], actual[i])
+			this.CheckEqual_String_Geometry_Geometry(java.Concat(jlit_4862, java.StrOfInt(int32(i))), expected[i], actual[i])
 		}
 	}
 }
@@ -596,25 +590,25 @@ func (this *Testjts_GeometryTestCase) ToGeometryCollection_Collection(geoms java
 	return this.geomFactory.CreateGeometryCollection_GeometryArr(Geom_GeometryFactory_toGeometryArray(geoms))
 }
 func (this *Testjts_GeometryTestCase) CheckEqualXY_Coordinate_Coordinate(expected *Geom_Coordinate, actual *Geom_Coordinate) {
-	junit.TestCase_assertEquals_String_Object_Object(jlit_4864, any(float64(expected.GetX())), any(float64(actual.GetX())))
-	junit.TestCase_assertEquals_String_Object_Object(jlit_4865, any(float64(expected.GetY())), any(float64(actual.GetY())))
+	junit.TestCase_assertEquals_String_Object_Object(jlit_4863, any(float64(expected.GetX())), any(float64(actual.GetX())))
+	junit.TestCase_assertEquals_String_Object_Object(jlit_4864, any(float64(expected.GetY())), any(float64(actual.GetY())))
 }
 func (this *Testjts_GeometryTestCase) CheckEqualXYZ_Coordinate_Coordinate(expected *Geom_Coordinate, actual *Geom_Coordinate) {
-	junit.TestCase_assertEquals_String_Object_Object(jlit_4864, any(float64(expected.GetX())), any(float64(actual.GetX())))
-	junit.TestCase_assertEquals_String_Object_Object(jlit_4865, any(float64(expected.GetY())), any(float64(actual.GetY())))
-	junit.TestCase_assertEquals_String_Object_Object(jlit_4866, any(float64(expected.GetZ())), any(float64(actual.GetZ())))
+	junit.TestCase_assertEquals_String_Object_Object(jlit_4863, any(float64(expected.GetX())), any(float64(actual.GetX())))
+	junit.TestCase_assertEquals_String_Object_Object(jlit_4864, any(float64(expected.GetY())), any(float64(actual.GetY())))
+	junit.TestCase_assertEquals_String_Object_Object(jlit_4865, any(float64(expected.GetZ())), any(float64(actual.GetZ())))
 }
 func (this *Testjts_GeometryTestCase) CheckEqualXY_String_Coordinate_Coordinate(message *java.String, expected *Geom_Coordinate, actual *Geom_Coordinate) {
-	junit.TestCase_assertEquals_String_Object_Object(java.Concat(message, jlit_4867), any(float64(expected.GetX())), any(float64(actual.GetX())))
-	junit.TestCase_assertEquals_String_Object_Object(java.Concat(message, jlit_4868), any(float64(expected.GetY())), any(float64(actual.GetY())))
+	junit.TestCase_assertEquals_String_Object_Object(java.Concat(message, jlit_4866), any(float64(expected.GetX())), any(float64(actual.GetX())))
+	junit.TestCase_assertEquals_String_Object_Object(java.Concat(message, jlit_4867), any(float64(expected.GetY())), any(float64(actual.GetY())))
 }
 func (this *Testjts_GeometryTestCase) CheckEqualXY_Coordinate_Coordinate_double(expected *Geom_Coordinate, actual *Geom_Coordinate, tolerance float64) {
-	junit.TestCase_assertEquals_String_double_double_double(jlit_4864, expected.GetX(), actual.GetX(), tolerance)
-	junit.TestCase_assertEquals_String_double_double_double(jlit_4865, expected.GetY(), actual.GetY(), tolerance)
+	junit.TestCase_assertEquals_String_double_double_double(jlit_4863, expected.GetX(), actual.GetX(), tolerance)
+	junit.TestCase_assertEquals_String_double_double_double(jlit_4864, expected.GetY(), actual.GetY(), tolerance)
 }
 func (this *Testjts_GeometryTestCase) CheckEqualXY_String_Coordinate_Coordinate_double(message *java.String, expected *Geom_Coordinate, actual *Geom_Coordinate, tolerance float64) {
-	junit.TestCase_assertEquals_String_double_double_double(java.Concat(message, jlit_4867), expected.GetX(), actual.GetX(), tolerance)
-	junit.TestCase_assertEquals_String_double_double_double(java.Concat(message, jlit_4868), expected.GetY(), actual.GetY(), tolerance)
+	junit.TestCase_assertEquals_String_double_double_double(java.Concat(message, jlit_4866), expected.GetX(), actual.GetX(), tolerance)
+	junit.TestCase_assertEquals_String_double_double_double(java.Concat(message, jlit_4867), expected.GetY(), actual.GetY(), tolerance)
 }
 func (this *Testjts_GeometryTestCase) Read_String(wkt *java.String) *Geom_Geometry {
 	return Testjts_WKTorBReader_read(wkt, this.geomFactory)
@@ -646,7 +640,7 @@ func (this *Testjts_GeometryTestCase) ReadArray_StringArr(wkt []*java.String) []
 }
 func (this *Testjts_GeometryTestCase) SetUp() {
 	switch this.jkind_ {
-	case 268:
+	case 238:
 		(*Io_WKTWriterStaticFnTest)(unsafe.Pointer(this)).SetUp_impl()
 		return
 	}

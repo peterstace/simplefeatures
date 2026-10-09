@@ -41,13 +41,13 @@ func OperationOverlayng_ElevationModelTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_ElevationModelTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 284 && p.jkind_ <= 284
+	return p != nil && p.jkind_ >= 254 && p.jkind_ <= 254
 }
 func OperationOverlayng_ElevationModelTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_ElevationModelTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 284 || p.jkind_ > 284 {
+	if p.jkind_ < 254 || p.jkind_ > 254 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.ElevationModelTest"))
 	}
 	return (*OperationOverlayng_ElevationModelTest)(unsafe.Pointer(p))
@@ -57,7 +57,7 @@ const OperationOverlayng_ElevationModelTest_TOLERANCE float64 = float64(1.0e-5)
 
 func OperationOverlayng_ElevationModelTest_new(name *java.String) *OperationOverlayng_ElevationModelTest {
 	this := &OperationOverlayng_ElevationModelTest{}
-	this.jkind_ = 284
+	this.jkind_ = 254
 	this.JSetSelf(this)
 	this.OperationOverlayng_ElevationModelTest_init(name)
 	return this

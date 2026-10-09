@@ -97,7 +97,7 @@ func TestjtsUtil_IOUtil_readWKBHexFile(filename *java.String) java.List {
 	return fileReader.Read()
 }
 func TestjtsUtil_IOUtil_readFile(filename *java.String) java.List {
-	if filename.EndsWith_String(jlit_5148) {
+	if filename.EndsWith_String(jlit_4889) {
 		return TestjtsUtil_IOUtil_readWKBHexFile(filename)
 	}
 	return TestjtsUtil_IOUtil_readWKTFile_String(filename)

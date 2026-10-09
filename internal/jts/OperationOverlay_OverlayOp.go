@@ -47,13 +47,13 @@ func OperationOverlay_OverlayOp_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlay_OverlayOp_isKind(p *Operation_GeometryGraphOperation) bool {
-	return p != nil && p.jkind_ >= 164 && p.jkind_ <= 164
+	return p != nil && p.jkind_ >= 163 && p.jkind_ <= 163
 }
 func OperationOverlay_OverlayOp_downcast(p *Operation_GeometryGraphOperation) *OperationOverlay_OverlayOp {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 164 || p.jkind_ > 164 {
+	if p.jkind_ < 163 || p.jkind_ > 163 {
 		panic(java.ClassCastError(Operation_GeometryGraphOperation_toAny(p), "org.locationtech.jts.operation.overlay.OverlayOp"))
 	}
 	return (*OperationOverlay_OverlayOp)(unsafe.Pointer(p))
@@ -66,7 +66,7 @@ const OperationOverlay_OverlayOp_SYMDIFFERENCE int32 = int32(4)
 
 func OperationOverlay_OverlayOp_new(g0 *Geom_Geometry, g1 *Geom_Geometry) *OperationOverlay_OverlayOp {
 	this := &OperationOverlay_OverlayOp{}
-	this.jkind_ = 164
+	this.jkind_ = 163
 	this.OperationOverlay_OverlayOp_init(g0, g1)
 	return this
 }

@@ -40,20 +40,20 @@ func Precision_CommonBitsOpTest_isInstance(o any) bool {
 	return ok
 }
 func Precision_CommonBitsOpTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 325 && p.jkind_ <= 325
+	return p != nil && p.jkind_ >= 295 && p.jkind_ <= 295
 }
 func Precision_CommonBitsOpTest_downcast(p *Testjts_GeometryTestCase) *Precision_CommonBitsOpTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 325 || p.jkind_ > 325 {
+	if p.jkind_ < 295 || p.jkind_ > 295 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.precision.CommonBitsOpTest"))
 	}
 	return (*Precision_CommonBitsOpTest)(unsafe.Pointer(p))
 }
 func Precision_CommonBitsOpTest_new(name *java.String) *Precision_CommonBitsOpTest {
 	this := &Precision_CommonBitsOpTest{}
-	this.jkind_ = 325
+	this.jkind_ = 295
 	this.JSetSelf(this)
 	this.Precision_CommonBitsOpTest_init(name)
 	return this
@@ -63,8 +63,8 @@ func (this *Precision_CommonBitsOpTest) Precision_CommonBitsOpTest_init(name *ja
 }
 func (this *Precision_CommonBitsOpTest) TestPackedCoordinateSequence() {
 	var pcsFactory *Geom_GeometryFactory = Geom_GeometryFactory_new_CoordinateSequenceFactory(java.AnyTo[Geom_CoordinateSequenceFactory](java.Ref(GeomImpl_PackedCoordinateSequenceFactory_DOUBLE_FACTORY)))
-	var geom0 *Geom_Geometry = Testjts_GeometryTestCase_read_GeometryFactory_String(pcsFactory, jlit_4482)
-	var geom1 *Geom_Geometry = this.Read_String(jlit_4483)
+	var geom0 *Geom_Geometry = Testjts_GeometryTestCase_read_GeometryFactory_String(pcsFactory, jlit_4481)
+	var geom1 *Geom_Geometry = this.Read_String(jlit_4482)
 	var cbo *Precision_CommonBitsOp = Precision_CommonBitsOp_new_boolean(true)
 	var result *Geom_Geometry = cbo.Intersection_Geometry_Geometry(geom0, geom1)
 	var expected *Geom_Geometry = geom0.Intersection_Geometry(geom1)
@@ -72,7 +72,7 @@ func (this *Precision_CommonBitsOpTest) TestPackedCoordinateSequence() {
 }
 func TestPrecision_CommonBitsOpTest_testPackedCoordinateSequence(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_CommonBitsOpTest_new(jlit_4484)
+		tc := Precision_CommonBitsOpTest_new(jlit_4483)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPackedCoordinateSequence()

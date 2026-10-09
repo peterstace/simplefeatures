@@ -41,20 +41,20 @@ func ShapeRandom_RandomPointsBuilder_isInstance(o any) bool {
 	return ok
 }
 func ShapeRandom_RandomPointsBuilder_isKind(p *Shape_GeometricShapeBuilder) bool {
-	return p != nil && p.jkind_ >= 182 && p.jkind_ <= 182
+	return p != nil && p.jkind_ >= 181 && p.jkind_ <= 181
 }
 func ShapeRandom_RandomPointsBuilder_downcast(p *Shape_GeometricShapeBuilder) *ShapeRandom_RandomPointsBuilder {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 182 || p.jkind_ > 182 {
+	if p.jkind_ < 181 || p.jkind_ > 181 {
 		panic(java.ClassCastError(Shape_GeometricShapeBuilder_toAny(p), "org.locationtech.jts.shape.random.RandomPointsBuilder"))
 	}
 	return (*ShapeRandom_RandomPointsBuilder)(unsafe.Pointer(p))
 }
 func ShapeRandom_RandomPointsBuilder_new() *ShapeRandom_RandomPointsBuilder {
 	this := &ShapeRandom_RandomPointsBuilder{}
-	this.jkind_ = 182
+	this.jkind_ = 181
 	this.ShapeRandom_RandomPointsBuilder_init()
 	return this
 }
@@ -64,7 +64,7 @@ func (this *ShapeRandom_RandomPointsBuilder) ShapeRandom_RandomPointsBuilder_ini
 }
 func ShapeRandom_RandomPointsBuilder_new_GeometryFactory(geomFact *Geom_GeometryFactory) *ShapeRandom_RandomPointsBuilder {
 	this := &ShapeRandom_RandomPointsBuilder{}
-	this.jkind_ = 182
+	this.jkind_ = 181
 	this.ShapeRandom_RandomPointsBuilder_init_GeometryFactory(geomFact)
 	return this
 }

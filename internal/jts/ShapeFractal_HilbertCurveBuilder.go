@@ -40,20 +40,20 @@ func ShapeFractal_HilbertCurveBuilder_isInstance(o any) bool {
 	return ok
 }
 func ShapeFractal_HilbertCurveBuilder_isKind(p *Shape_GeometricShapeBuilder) bool {
-	return p != nil && p.jkind_ >= 178 && p.jkind_ <= 178
+	return p != nil && p.jkind_ >= 177 && p.jkind_ <= 177
 }
 func ShapeFractal_HilbertCurveBuilder_downcast(p *Shape_GeometricShapeBuilder) *ShapeFractal_HilbertCurveBuilder {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 178 || p.jkind_ > 178 {
+	if p.jkind_ < 177 || p.jkind_ > 177 {
 		panic(java.ClassCastError(Shape_GeometricShapeBuilder_toAny(p), "org.locationtech.jts.shape.fractal.HilbertCurveBuilder"))
 	}
 	return (*ShapeFractal_HilbertCurveBuilder)(unsafe.Pointer(p))
 }
 func ShapeFractal_HilbertCurveBuilder_new(geomFactory *Geom_GeometryFactory) *ShapeFractal_HilbertCurveBuilder {
 	this := &ShapeFractal_HilbertCurveBuilder{}
-	this.jkind_ = 178
+	this.jkind_ = 177
 	this.ShapeFractal_HilbertCurveBuilder_init(geomFactory)
 	return this
 }

@@ -59,44 +59,44 @@ func (this *Precision_SimpleGeometryPrecisionReducerTest) Precision_SimpleGeomet
 	this.reducerKeepCollapse.SetRemoveCollapsedComponents_boolean(false)
 }
 func (this *Precision_SimpleGeometryPrecisionReducerTest) TestSquare() {
-	var g *Geom_Geometry = this.reader.Read_String(jlit_4517)
-	var g2 *Geom_Geometry = this.reader.Read_String(jlit_4569)
+	var g *Geom_Geometry = this.reader.Read_String(jlit_4516)
+	var g2 *Geom_Geometry = this.reader.Read_String(jlit_4568)
 	var gReduce *Geom_Geometry = this.reducer.Reduce_Geometry(g)
 	junit.TestCase_assertTrue_boolean(gReduce.EqualsExact_Geometry(g2))
 }
 func (this *Precision_SimpleGeometryPrecisionReducerTest) TestTinySquareCollapse() {
-	var g *Geom_Geometry = this.reader.Read_String(jlit_4519)
+	var g *Geom_Geometry = this.reader.Read_String(jlit_4518)
 	var g2 *Geom_Geometry = this.reader.Read_String(jlit_534)
 	var gReduce *Geom_Geometry = this.reducer.Reduce_Geometry(g)
 	junit.TestCase_assertTrue_boolean(gReduce.EqualsExact_Geometry(g2))
 }
 func (this *Precision_SimpleGeometryPrecisionReducerTest) TestSquareCollapse() {
-	var g *Geom_Geometry = this.reader.Read_String(jlit_4520)
+	var g *Geom_Geometry = this.reader.Read_String(jlit_4519)
 	var g2 *Geom_Geometry = this.reader.Read_String(jlit_534)
 	var gReduce *Geom_Geometry = this.reducer.Reduce_Geometry(g)
 	junit.TestCase_assertTrue_boolean(gReduce.EqualsExact_Geometry(g2))
 }
 func (this *Precision_SimpleGeometryPrecisionReducerTest) TestSquareKeepCollapse() {
-	var g *Geom_Geometry = this.reader.Read_String(jlit_4520)
-	var g2 *Geom_Geometry = this.reader.Read_String(jlit_4570)
+	var g *Geom_Geometry = this.reader.Read_String(jlit_4519)
+	var g2 *Geom_Geometry = this.reader.Read_String(jlit_4569)
 	var gReduce *Geom_Geometry = this.reducerKeepCollapse.Reduce_Geometry(g)
 	junit.TestCase_assertTrue_boolean(gReduce.EqualsExact_Geometry(g2))
 }
 func (this *Precision_SimpleGeometryPrecisionReducerTest) TestLine() {
-	var g *Geom_Geometry = this.reader.Read_String(jlit_4508)
-	var g2 *Geom_Geometry = this.reader.Read_String(jlit_4509)
+	var g *Geom_Geometry = this.reader.Read_String(jlit_4507)
+	var g2 *Geom_Geometry = this.reader.Read_String(jlit_4508)
 	var gReduce *Geom_Geometry = this.reducer.Reduce_Geometry(g)
 	junit.TestCase_assertTrue_boolean(gReduce.EqualsExact_Geometry(g2))
 }
 func (this *Precision_SimpleGeometryPrecisionReducerTest) TestLineRemoveCollapse() {
-	var g *Geom_Geometry = this.reader.Read_String(jlit_4514)
+	var g *Geom_Geometry = this.reader.Read_String(jlit_4513)
 	var g2 *Geom_Geometry = this.reader.Read_String(jlit_1038)
 	var gReduce *Geom_Geometry = this.reducer.Reduce_Geometry(g)
 	junit.TestCase_assertTrue_boolean(gReduce.EqualsExact_Geometry(g2))
 }
 func (this *Precision_SimpleGeometryPrecisionReducerTest) TestLineKeepCollapse() {
-	var g *Geom_Geometry = this.reader.Read_String(jlit_4514)
-	var g2 *Geom_Geometry = this.reader.Read_String(jlit_4534)
+	var g *Geom_Geometry = this.reader.Read_String(jlit_4513)
+	var g2 *Geom_Geometry = this.reader.Read_String(jlit_4533)
 	var gReduce *Geom_Geometry = this.reducerKeepCollapse.Reduce_Geometry(g)
 	junit.TestCase_assertTrue_boolean(gReduce.EqualsExact_Geometry(g2))
 }
@@ -110,7 +110,7 @@ func TestPrecision_SimpleGeometryPrecisionReducerTest_testLine(t *testing.T) {
 }
 func TestPrecision_SimpleGeometryPrecisionReducerTest_testLineKeepCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_SimpleGeometryPrecisionReducerTest_new(jlit_4571)
+		tc := Precision_SimpleGeometryPrecisionReducerTest_new(jlit_4570)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestLineKeepCollapse()
@@ -118,7 +118,7 @@ func TestPrecision_SimpleGeometryPrecisionReducerTest_testLineKeepCollapse(t *te
 }
 func TestPrecision_SimpleGeometryPrecisionReducerTest_testLineRemoveCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_SimpleGeometryPrecisionReducerTest_new(jlit_4555)
+		tc := Precision_SimpleGeometryPrecisionReducerTest_new(jlit_4554)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestLineRemoveCollapse()
@@ -134,7 +134,7 @@ func TestPrecision_SimpleGeometryPrecisionReducerTest_testSquare(t *testing.T) {
 }
 func TestPrecision_SimpleGeometryPrecisionReducerTest_testSquareCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_SimpleGeometryPrecisionReducerTest_new(jlit_4562)
+		tc := Precision_SimpleGeometryPrecisionReducerTest_new(jlit_4561)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSquareCollapse()
@@ -142,7 +142,7 @@ func TestPrecision_SimpleGeometryPrecisionReducerTest_testSquareCollapse(t *test
 }
 func TestPrecision_SimpleGeometryPrecisionReducerTest_testSquareKeepCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_SimpleGeometryPrecisionReducerTest_new(jlit_4572)
+		tc := Precision_SimpleGeometryPrecisionReducerTest_new(jlit_4571)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSquareKeepCollapse()
@@ -150,7 +150,7 @@ func TestPrecision_SimpleGeometryPrecisionReducerTest_testSquareKeepCollapse(t *
 }
 func TestPrecision_SimpleGeometryPrecisionReducerTest_testTinySquareCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_SimpleGeometryPrecisionReducerTest_new(jlit_4563)
+		tc := Precision_SimpleGeometryPrecisionReducerTest_new(jlit_4562)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestTinySquareCollapse()

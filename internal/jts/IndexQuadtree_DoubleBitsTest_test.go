@@ -52,7 +52,7 @@ func (this *IndexQuadtree_DoubleBitsTest) TestExponent() {
 }
 func TestIndexQuadtree_DoubleBitsTest_testExponent(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexQuadtree_DoubleBitsTest_new(jlit_2006)
+		tc := IndexQuadtree_DoubleBitsTest_new(jlit_2005)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestExponent()

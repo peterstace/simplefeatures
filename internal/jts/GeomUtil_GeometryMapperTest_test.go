@@ -40,13 +40,13 @@ func GeomUtil_GeometryMapperTest_isInstance(o any) bool {
 	return ok
 }
 func GeomUtil_GeometryMapperTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 250 && p.jkind_ <= 250
+	return p != nil && p.jkind_ >= 220 && p.jkind_ <= 220
 }
 func GeomUtil_GeometryMapperTest_downcast(p *Testjts_GeometryTestCase) *GeomUtil_GeometryMapperTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 250 || p.jkind_ > 250 {
+	if p.jkind_ < 220 || p.jkind_ > 220 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.util.GeometryMapperTest"))
 	}
 	return (*GeomUtil_GeometryMapperTest)(unsafe.Pointer(p))
@@ -61,7 +61,7 @@ var GeomUtil_GeometryMapperTest_BOUNDARY GeomUtil_GeometryMapper_MapOp = java.St
 
 func GeomUtil_GeometryMapperTest_new(name *java.String) *GeomUtil_GeometryMapperTest {
 	this := &GeomUtil_GeometryMapperTest{}
-	this.jkind_ = 250
+	this.jkind_ = 220
 	this.JSetSelf(this)
 	this.GeomUtil_GeometryMapperTest_init(name)
 	return this
@@ -70,21 +70,21 @@ func (this *GeomUtil_GeometryMapperTest) GeomUtil_GeometryMapperTest_init(name *
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *GeomUtil_GeometryMapperTest) TestFlatMapInputEmpty() {
-	this.checkFlatMap_String_int_MapOp_String(jlit_1947, int32(1), GeomUtil_GeometryMapperTest_KEEP_LINE, jlit_1038)
+	this.checkFlatMap_String_int_MapOp_String(jlit_1946, int32(1), GeomUtil_GeometryMapperTest_KEEP_LINE, jlit_1038)
 }
 func (this *GeomUtil_GeometryMapperTest) TestFlatMapInputMulti() {
-	this.checkFlatMap_String_int_MapOp_String(jlit_1948, int32(1), GeomUtil_GeometryMapperTest_KEEP_LINE, jlit_1949)
+	this.checkFlatMap_String_int_MapOp_String(jlit_1947, int32(1), GeomUtil_GeometryMapperTest_KEEP_LINE, jlit_1948)
 }
 func (this *GeomUtil_GeometryMapperTest) TestFlatMapResultEmpty() {
-	this.checkFlatMap_String_int_MapOp_String(jlit_1950, int32(1), GeomUtil_GeometryMapperTest_KEEP_LINE, jlit_1951)
-	this.checkFlatMap_String_int_MapOp_String(jlit_1952, int32(1), GeomUtil_GeometryMapperTest_KEEP_LINE, jlit_1953)
-	this.checkFlatMap_String_int_MapOp_String(jlit_1954, int32(1), GeomUtil_GeometryMapperTest_KEEP_LINE, jlit_1038)
+	this.checkFlatMap_String_int_MapOp_String(jlit_1949, int32(1), GeomUtil_GeometryMapperTest_KEEP_LINE, jlit_1950)
+	this.checkFlatMap_String_int_MapOp_String(jlit_1951, int32(1), GeomUtil_GeometryMapperTest_KEEP_LINE, jlit_1952)
+	this.checkFlatMap_String_int_MapOp_String(jlit_1953, int32(1), GeomUtil_GeometryMapperTest_KEEP_LINE, jlit_1038)
 }
 func (this *GeomUtil_GeometryMapperTest) TestFlatMapResultNull() {
-	this.checkFlatMap_String_int_MapOp_String(jlit_1955, int32(1), GeomUtil_GeometryMapperTest_KEEP_LINE, jlit_1953)
+	this.checkFlatMap_String_int_MapOp_String(jlit_1954, int32(1), GeomUtil_GeometryMapperTest_KEEP_LINE, jlit_1952)
 }
 func (this *GeomUtil_GeometryMapperTest) TestFlatMapBoundary() {
-	this.checkFlatMap_String_int_MapOp_String(jlit_1955, int32(0), GeomUtil_GeometryMapperTest_BOUNDARY, jlit_1956)
+	this.checkFlatMap_String_int_MapOp_String(jlit_1954, int32(0), GeomUtil_GeometryMapperTest_BOUNDARY, jlit_1955)
 	this.checkFlatMap_String_int_MapOp_String(jlit_1038, int32(0), GeomUtil_GeometryMapperTest_BOUNDARY, jlit_566)
 }
 func (this *GeomUtil_GeometryMapperTest) checkFlatMap_String_int_MapOp_String(wkt *java.String, dim int32, op GeomUtil_GeometryMapper_MapOp, wktExpected *java.String) {
@@ -95,7 +95,7 @@ func (this *GeomUtil_GeometryMapperTest) checkFlatMap_String_int_MapOp_String(wk
 }
 func TestGeomUtil_GeometryMapperTest_testFlatMapBoundary(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryMapperTest_new(jlit_1957)
+		tc := GeomUtil_GeometryMapperTest_new(jlit_1956)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestFlatMapBoundary()
@@ -103,7 +103,7 @@ func TestGeomUtil_GeometryMapperTest_testFlatMapBoundary(t *testing.T) {
 }
 func TestGeomUtil_GeometryMapperTest_testFlatMapInputEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryMapperTest_new(jlit_1958)
+		tc := GeomUtil_GeometryMapperTest_new(jlit_1957)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestFlatMapInputEmpty()
@@ -111,7 +111,7 @@ func TestGeomUtil_GeometryMapperTest_testFlatMapInputEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryMapperTest_testFlatMapInputMulti(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryMapperTest_new(jlit_1959)
+		tc := GeomUtil_GeometryMapperTest_new(jlit_1958)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestFlatMapInputMulti()
@@ -119,7 +119,7 @@ func TestGeomUtil_GeometryMapperTest_testFlatMapInputMulti(t *testing.T) {
 }
 func TestGeomUtil_GeometryMapperTest_testFlatMapResultEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryMapperTest_new(jlit_1960)
+		tc := GeomUtil_GeometryMapperTest_new(jlit_1959)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestFlatMapResultEmpty()
@@ -127,7 +127,7 @@ func TestGeomUtil_GeometryMapperTest_testFlatMapResultEmpty(t *testing.T) {
 }
 func TestGeomUtil_GeometryMapperTest_testFlatMapResultNull(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryMapperTest_new(jlit_1961)
+		tc := GeomUtil_GeometryMapperTest_new(jlit_1960)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestFlatMapResultNull()

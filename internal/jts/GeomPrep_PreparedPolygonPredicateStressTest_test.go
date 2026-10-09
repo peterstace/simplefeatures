@@ -5,7 +5,6 @@ package jts
 import (
 	"github.com/peterstace/simplefeatures/internal/jts/java"
 	"github.com/peterstace/simplefeatures/internal/jts/junit"
-	"testing"
 	"unsafe"
 )
 
@@ -71,14 +70,6 @@ func (this *GeomPrep_PreparedPolygonPredicateStressTest) CheckIntersects_Geometr
 		return false
 	}
 	return true
-}
-func TestGeomPrep_PreparedPolygonPredicateStressTest_test(t *testing.T) {
-	junit.Run(t, func() {
-		tc := GeomPrep_PreparedPolygonPredicateStressTest_new(jlit_1787)
-		tc.SetUp()
-		defer tc.TearDown()
-		tc.Test()
-	})
 }
 
 // org.locationtech.jts.geom.prep.PreparedPolygonPredicateStressTest$PredicateStressTester

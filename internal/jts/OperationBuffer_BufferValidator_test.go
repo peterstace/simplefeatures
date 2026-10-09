@@ -199,13 +199,13 @@ func OperationBuffer_BufferValidator_Test_isInstance(o any) bool {
 	return ok
 }
 func OperationBuffer_BufferValidator_Test_isKind(p *OperationBuffer_BufferValidator_Test) bool {
-	return p != nil && p.jkind_ >= 143 && p.jkind_ <= 148
+	return p != nil && p.jkind_ >= 142 && p.jkind_ <= 147
 }
 func OperationBuffer_BufferValidator_Test_downcast(p *OperationBuffer_BufferValidator_Test) *OperationBuffer_BufferValidator_Test {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 143 || p.jkind_ > 148 {
+	if p.jkind_ < 142 || p.jkind_ > 147 {
 		panic(java.ClassCastError(OperationBuffer_BufferValidator_Test_toAny(p), "org.locationtech.jts.operation.buffer.BufferValidator$Test"))
 	}
 	return (*OperationBuffer_BufferValidator_Test)(unsafe.Pointer(p))
@@ -218,15 +218,15 @@ func OperationBuffer_BufferValidator_Test_toAny(p *OperationBuffer_BufferValidat
 		return nil
 	}
 	switch p.jkind_ {
-	case 144:
+	case 143:
 		return (*OperationBuffer_BufferValidator_1)(unsafe.Pointer(p))
-	case 145:
+	case 144:
 		return (*OperationBuffer_BufferValidator_2)(unsafe.Pointer(p))
-	case 146:
+	case 145:
 		return (*OperationBuffer_BufferValidator_3)(unsafe.Pointer(p))
-	case 147:
+	case 146:
 		return (*OperationBuffer_BufferValidator_4)(unsafe.Pointer(p))
-	case 148:
+	case 147:
 		return (*OperationBuffer_BufferValidator_5)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
@@ -250,19 +250,19 @@ func (this *OperationBuffer_BufferValidator_Test) CompareTo_Object(o any) int32 
 }
 func (this *OperationBuffer_BufferValidator_Test) Test() {
 	switch this.jkind_ {
-	case 144:
+	case 143:
 		(*OperationBuffer_BufferValidator_1)(unsafe.Pointer(this)).Test_impl()
 		return
-	case 145:
+	case 144:
 		(*OperationBuffer_BufferValidator_2)(unsafe.Pointer(this)).Test_impl()
 		return
-	case 146:
+	case 145:
 		(*OperationBuffer_BufferValidator_3)(unsafe.Pointer(this)).Test_impl()
 		return
-	case 147:
+	case 146:
 		(*OperationBuffer_BufferValidator_4)(unsafe.Pointer(this)).Test_impl()
 		return
-	case 148:
+	case 147:
 		(*OperationBuffer_BufferValidator_5)(unsafe.Pointer(this)).Test_impl()
 		return
 	}
@@ -303,20 +303,20 @@ func OperationBuffer_BufferValidator_1_isInstance(o any) bool {
 	return ok
 }
 func OperationBuffer_BufferValidator_1_isKind(p *OperationBuffer_BufferValidator_Test) bool {
-	return p != nil && p.jkind_ >= 144 && p.jkind_ <= 144
+	return p != nil && p.jkind_ >= 143 && p.jkind_ <= 143
 }
 func OperationBuffer_BufferValidator_1_downcast(p *OperationBuffer_BufferValidator_Test) *OperationBuffer_BufferValidator_1 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 144 || p.jkind_ > 144 {
+	if p.jkind_ < 143 || p.jkind_ > 143 {
 		panic(java.ClassCastError(OperationBuffer_BufferValidator_Test_toAny(p), "org.locationtech.jts.operation.buffer.BufferValidator$1"))
 	}
 	return (*OperationBuffer_BufferValidator_1)(unsafe.Pointer(p))
 }
 func OperationBuffer_BufferValidator_1_new(outer_ *OperationBuffer_BufferValidator, cap_expectedArea float64, name *java.String) *OperationBuffer_BufferValidator_1 {
 	this := &OperationBuffer_BufferValidator_1{}
-	this.jkind_ = 144
+	this.jkind_ = 143
 	this.outer_ = outer_
 	this.cap_expectedArea = cap_expectedArea
 	this.OperationBuffer_BufferValidator_1_init(name)
@@ -364,20 +364,20 @@ func OperationBuffer_BufferValidator_2_isInstance(o any) bool {
 	return ok
 }
 func OperationBuffer_BufferValidator_2_isKind(p *OperationBuffer_BufferValidator_Test) bool {
-	return p != nil && p.jkind_ >= 145 && p.jkind_ <= 145
+	return p != nil && p.jkind_ >= 144 && p.jkind_ <= 144
 }
 func OperationBuffer_BufferValidator_2_downcast(p *OperationBuffer_BufferValidator_Test) *OperationBuffer_BufferValidator_2 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 145 || p.jkind_ > 145 {
+	if p.jkind_ < 144 || p.jkind_ > 144 {
 		panic(java.ClassCastError(OperationBuffer_BufferValidator_Test_toAny(p), "org.locationtech.jts.operation.buffer.BufferValidator$2"))
 	}
 	return (*OperationBuffer_BufferValidator_2)(unsafe.Pointer(p))
 }
 func OperationBuffer_BufferValidator_2_new(outer_ *OperationBuffer_BufferValidator, cap_emptyBufferExpected bool, name *java.String, priority int32) *OperationBuffer_BufferValidator_2 {
 	this := &OperationBuffer_BufferValidator_2{}
-	this.jkind_ = 145
+	this.jkind_ = 144
 	this.outer_ = outer_
 	this.cap_emptyBufferExpected = cap_emptyBufferExpected
 	this.OperationBuffer_BufferValidator_2_init(name, priority)
@@ -429,20 +429,20 @@ func OperationBuffer_BufferValidator_3_isInstance(o any) bool {
 	return ok
 }
 func OperationBuffer_BufferValidator_3_isKind(p *OperationBuffer_BufferValidator_Test) bool {
-	return p != nil && p.jkind_ >= 146 && p.jkind_ <= 146
+	return p != nil && p.jkind_ >= 145 && p.jkind_ <= 145
 }
 func OperationBuffer_BufferValidator_3_downcast(p *OperationBuffer_BufferValidator_Test) *OperationBuffer_BufferValidator_3 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 146 || p.jkind_ > 146 {
+	if p.jkind_ < 145 || p.jkind_ > 145 {
 		panic(java.ClassCastError(OperationBuffer_BufferValidator_Test_toAny(p), "org.locationtech.jts.operation.buffer.BufferValidator$3"))
 	}
 	return (*OperationBuffer_BufferValidator_3)(unsafe.Pointer(p))
 }
 func OperationBuffer_BufferValidator_3_new(outer_ *OperationBuffer_BufferValidator, cap_bufferHolesExpected bool, name *java.String) *OperationBuffer_BufferValidator_3 {
 	this := &OperationBuffer_BufferValidator_3{}
-	this.jkind_ = 146
+	this.jkind_ = 145
 	this.outer_ = outer_
 	this.cap_bufferHolesExpected = cap_bufferHolesExpected
 	this.OperationBuffer_BufferValidator_3_init(name)
@@ -511,20 +511,20 @@ func OperationBuffer_BufferValidator_4_isInstance(o any) bool {
 	return ok
 }
 func OperationBuffer_BufferValidator_4_isKind(p *OperationBuffer_BufferValidator_Test) bool {
-	return p != nil && p.jkind_ >= 147 && p.jkind_ <= 147
+	return p != nil && p.jkind_ >= 146 && p.jkind_ <= 146
 }
 func OperationBuffer_BufferValidator_4_downcast(p *OperationBuffer_BufferValidator_Test) *OperationBuffer_BufferValidator_4 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 147 || p.jkind_ > 147 {
+	if p.jkind_ < 146 || p.jkind_ > 146 {
 		panic(java.ClassCastError(OperationBuffer_BufferValidator_Test_toAny(p), "org.locationtech.jts.operation.buffer.BufferValidator$4"))
 	}
 	return (*OperationBuffer_BufferValidator_4)(unsafe.Pointer(p))
 }
 func OperationBuffer_BufferValidator_4_new(outer_ *OperationBuffer_BufferValidator, name *java.String) *OperationBuffer_BufferValidator_4 {
 	this := &OperationBuffer_BufferValidator_4{}
-	this.jkind_ = 147
+	this.jkind_ = 146
 	this.outer_ = outer_
 	this.OperationBuffer_BufferValidator_4_init(name)
 	return this
@@ -584,20 +584,20 @@ func OperationBuffer_BufferValidator_5_isInstance(o any) bool {
 	return ok
 }
 func OperationBuffer_BufferValidator_5_isKind(p *OperationBuffer_BufferValidator_Test) bool {
-	return p != nil && p.jkind_ >= 148 && p.jkind_ <= 148
+	return p != nil && p.jkind_ >= 147 && p.jkind_ <= 147
 }
 func OperationBuffer_BufferValidator_5_downcast(p *OperationBuffer_BufferValidator_Test) *OperationBuffer_BufferValidator_5 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 148 || p.jkind_ > 148 {
+	if p.jkind_ < 147 || p.jkind_ > 147 {
 		panic(java.ClassCastError(OperationBuffer_BufferValidator_Test_toAny(p), "org.locationtech.jts.operation.buffer.BufferValidator$5"))
 	}
 	return (*OperationBuffer_BufferValidator_5)(unsafe.Pointer(p))
 }
 func OperationBuffer_BufferValidator_5_new(outer_ *OperationBuffer_BufferValidator, name *java.String) *OperationBuffer_BufferValidator_5 {
 	this := &OperationBuffer_BufferValidator_5{}
-	this.jkind_ = 148
+	this.jkind_ = 147
 	this.outer_ = outer_
 	this.OperationBuffer_BufferValidator_5_init(name)
 	return this

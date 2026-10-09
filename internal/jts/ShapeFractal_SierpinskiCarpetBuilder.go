@@ -39,20 +39,20 @@ func ShapeFractal_SierpinskiCarpetBuilder_isInstance(o any) bool {
 	return ok
 }
 func ShapeFractal_SierpinskiCarpetBuilder_isKind(p *Shape_GeometricShapeBuilder) bool {
-	return p != nil && p.jkind_ >= 181 && p.jkind_ <= 181
+	return p != nil && p.jkind_ >= 180 && p.jkind_ <= 180
 }
 func ShapeFractal_SierpinskiCarpetBuilder_downcast(p *Shape_GeometricShapeBuilder) *ShapeFractal_SierpinskiCarpetBuilder {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 181 || p.jkind_ > 181 {
+	if p.jkind_ < 180 || p.jkind_ > 180 {
 		panic(java.ClassCastError(Shape_GeometricShapeBuilder_toAny(p), "org.locationtech.jts.shape.fractal.SierpinskiCarpetBuilder"))
 	}
 	return (*ShapeFractal_SierpinskiCarpetBuilder)(unsafe.Pointer(p))
 }
 func ShapeFractal_SierpinskiCarpetBuilder_new(geomFactory *Geom_GeometryFactory) *ShapeFractal_SierpinskiCarpetBuilder {
 	this := &ShapeFractal_SierpinskiCarpetBuilder{}
-	this.jkind_ = 181
+	this.jkind_ = 180
 	this.ShapeFractal_SierpinskiCarpetBuilder_init(geomFactory)
 	return this
 }

@@ -46,13 +46,13 @@ func Util_GeometricShapeFactory_isInstance(o any) bool {
 	return ok
 }
 func Util_GeometricShapeFactory_isKind(p *Util_GeometricShapeFactory) bool {
-	return p != nil && p.jkind_ >= 347 && p.jkind_ <= 348
+	return p != nil && p.jkind_ >= 314 && p.jkind_ <= 315
 }
 func Util_GeometricShapeFactory_downcast(p *Util_GeometricShapeFactory) *Util_GeometricShapeFactory {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 347 || p.jkind_ > 348 {
+	if p.jkind_ < 314 || p.jkind_ > 315 {
 		panic(java.ClassCastError(Util_GeometricShapeFactory_toAny(p), "org.locationtech.jts.util.GeometricShapeFactory"))
 	}
 	return (*Util_GeometricShapeFactory)(unsafe.Pointer(p))
@@ -63,16 +63,16 @@ func Util_GeometricShapeFactory_toAny(p *Util_GeometricShapeFactory) any {
 		return nil
 	}
 	switch p.jkind_ {
-	case 347:
+	case 314:
 		return (*Util_GeometricShapeFactory)(unsafe.Pointer(p))
-	case 348:
+	case 315:
 		return (*GeomUtil_SineStarFactory)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
 }
 func Util_GeometricShapeFactory_new() *Util_GeometricShapeFactory {
 	this := &Util_GeometricShapeFactory{}
-	this.jkind_ = 347
+	this.jkind_ = 314
 	this.Util_GeometricShapeFactory_init()
 	return this
 }
@@ -85,7 +85,7 @@ func (this *Util_GeometricShapeFactory) Util_GeometricShapeFactory_init() {
 }
 func Util_GeometricShapeFactory_new_GeometryFactory(geomFact *Geom_GeometryFactory) *Util_GeometricShapeFactory {
 	this := &Util_GeometricShapeFactory{}
-	this.jkind_ = 347
+	this.jkind_ = 314
 	this.Util_GeometricShapeFactory_init_GeometryFactory(geomFact)
 	return this
 }

@@ -50,13 +50,13 @@ func (this *Precision_MinimumClearanceTest) Precision_MinimumClearanceTest_init(
 	this.TestCase.TestCase_init_String(name)
 }
 func (this *Precision_MinimumClearanceTest) Test2IdenticalPoints() {
-	this.runTest_String_double(jlit_4564, float64(1.7976931348623157e308))
+	this.runTest_String_double(jlit_4563, float64(1.7976931348623157e308))
 }
 func (this *Precision_MinimumClearanceTest) Test3Points() {
-	this.runTest_String_double(jlit_4565, float64(int32(20)))
+	this.runTest_String_double(jlit_4564, float64(int32(20)))
 }
 func (this *Precision_MinimumClearanceTest) TestTriangle() {
-	this.runTest_String_double(jlit_4566, float64(int32(100)))
+	this.runTest_String_double(jlit_4565, float64(int32(100)))
 }
 func (this *Precision_MinimumClearanceTest) runTest_String_double(wkt *java.String, expectedValue float64) {
 	var g *Geom_Geometry = this.reader.Read_String(wkt)
@@ -65,7 +65,7 @@ func (this *Precision_MinimumClearanceTest) runTest_String_double(wkt *java.Stri
 }
 func TestPrecision_MinimumClearanceTest_test2IdenticalPoints(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_MinimumClearanceTest_new(jlit_4567)
+		tc := Precision_MinimumClearanceTest_new(jlit_4566)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.Test2IdenticalPoints()
@@ -73,7 +73,7 @@ func TestPrecision_MinimumClearanceTest_test2IdenticalPoints(t *testing.T) {
 }
 func TestPrecision_MinimumClearanceTest_test3Points(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_MinimumClearanceTest_new(jlit_4568)
+		tc := Precision_MinimumClearanceTest_new(jlit_4567)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.Test3Points()

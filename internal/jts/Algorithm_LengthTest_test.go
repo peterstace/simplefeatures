@@ -34,20 +34,20 @@ func Algorithm_LengthTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_LengthTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 231 && p.jkind_ <= 231
+	return p != nil && p.jkind_ >= 201 && p.jkind_ <= 201
 }
 func Algorithm_LengthTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_LengthTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 231 || p.jkind_ > 231 {
+	if p.jkind_ < 201 || p.jkind_ > 201 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.LengthTest"))
 	}
 	return (*Algorithm_LengthTest)(unsafe.Pointer(p))
 }
 func Algorithm_LengthTest_new(name *java.String) *Algorithm_LengthTest {
 	this := &Algorithm_LengthTest{}
-	this.jkind_ = 231
+	this.jkind_ = 201
 	this.JSetSelf(this)
 	this.Algorithm_LengthTest_init(name)
 	return this

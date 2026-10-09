@@ -40,20 +40,20 @@ func OperationUnion_OverlapUnionTest_isInstance(o any) bool {
 	return ok
 }
 func OperationUnion_OverlapUnionTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 319 && p.jkind_ <= 319
+	return p != nil && p.jkind_ >= 289 && p.jkind_ <= 289
 }
 func OperationUnion_OverlapUnionTest_downcast(p *Testjts_GeometryTestCase) *OperationUnion_OverlapUnionTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 319 || p.jkind_ > 319 {
+	if p.jkind_ < 289 || p.jkind_ > 289 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.union.OverlapUnionTest"))
 	}
 	return (*OperationUnion_OverlapUnionTest)(unsafe.Pointer(p))
 }
 func OperationUnion_OverlapUnionTest_new(name *java.String) *OperationUnion_OverlapUnionTest {
 	this := &OperationUnion_OverlapUnionTest{}
-	this.jkind_ = 319
+	this.jkind_ = 289
 	this.JSetSelf(this)
 	this.OperationUnion_OverlapUnionTest_init(name)
 	return this
@@ -62,18 +62,18 @@ func (this *OperationUnion_OverlapUnionTest) OperationUnion_OverlapUnionTest_ini
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationUnion_OverlapUnionTest) TestFixedPrecCausingBorderChange() {
-	var a *java.String = jlit_4348
-	var b *java.String = jlit_4349
+	var a *java.String = jlit_4347
+	var b *java.String = jlit_4348
 	this.checkUnionWithTopologyFailure_String_String_double(a, b, float64(int32(1)))
 }
 func (this *OperationUnion_OverlapUnionTest) TestFullPrecision() {
-	var a *java.String = jlit_4348
-	var b *java.String = jlit_4349
+	var a *java.String = jlit_4347
+	var b *java.String = jlit_4348
 	this.checkUnion_String_String(a, b)
 }
 func (this *OperationUnion_OverlapUnionTest) TestSimpleOverlap() {
-	var a *java.String = jlit_4350
-	var b *java.String = jlit_4351
+	var a *java.String = jlit_4349
+	var b *java.String = jlit_4350
 	this.checkUnionOptimized_String_String(a, b)
 }
 func (this *OperationUnion_OverlapUnionTest) checkUnionWithTopologyFailure_String_String_double(wktA *java.String, wktB *java.String, scaleFactor float64) {
@@ -107,7 +107,7 @@ func (this *OperationUnion_OverlapUnionTest) checkUnionWithTopologyFailure_Strin
 			return
 		}
 	}
-	junit.TestCase_assertTrue_String_boolean(jlit_4352, result.IsValid())
+	junit.TestCase_assertTrue_String_boolean(jlit_4351, result.IsValid())
 }
 func (this *OperationUnion_OverlapUnionTest) checkUnion_String_String(wktA *java.String, wktB *java.String) {
 	this.checkUnion_String_String_boolean(wktA, wktB, false)
@@ -125,13 +125,13 @@ func (this *OperationUnion_OverlapUnionTest) checkUnion_String_String_boolean(wk
 	var result *Geom_Geometry = union.Union()
 	if isCheckOptimized {
 		var isOptimized bool = union.IsUnionOptimized()
-		junit.TestCase_assertTrue_String_boolean(jlit_4353, isOptimized)
+		junit.TestCase_assertTrue_String_boolean(jlit_4352, isOptimized)
 	}
-	junit.TestCase_assertTrue_String_boolean(jlit_4352, result.IsValid())
+	junit.TestCase_assertTrue_String_boolean(jlit_4351, result.IsValid())
 }
 func TestOperationUnion_OverlapUnionTest_testFixedPrecCausingBorderChange(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationUnion_OverlapUnionTest_new(jlit_4354)
+		tc := OperationUnion_OverlapUnionTest_new(jlit_4353)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestFixedPrecCausingBorderChange()
@@ -139,7 +139,7 @@ func TestOperationUnion_OverlapUnionTest_testFixedPrecCausingBorderChange(t *tes
 }
 func TestOperationUnion_OverlapUnionTest_testFullPrecision(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationUnion_OverlapUnionTest_new(jlit_4355)
+		tc := OperationUnion_OverlapUnionTest_new(jlit_4354)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestFullPrecision()
@@ -147,7 +147,7 @@ func TestOperationUnion_OverlapUnionTest_testFullPrecision(t *testing.T) {
 }
 func TestOperationUnion_OverlapUnionTest_testSimpleOverlap(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationUnion_OverlapUnionTest_new(jlit_4356)
+		tc := OperationUnion_OverlapUnionTest_new(jlit_4355)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestSimpleOverlap()

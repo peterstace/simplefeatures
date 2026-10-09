@@ -228,7 +228,7 @@ func TestOperationDistance3d_WithinDistance3DTest_testLinePolygonSimple(t *testi
 }
 func TestOperationDistance3d_WithinDistance3DTest_testMultiLineString(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationDistance3d_WithinDistance3DTest_new(jlit_1814)
+		tc := OperationDistance3d_WithinDistance3DTest_new(jlit_1813)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestMultiLineString()

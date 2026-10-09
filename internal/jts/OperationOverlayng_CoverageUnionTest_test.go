@@ -40,20 +40,20 @@ func OperationOverlayng_CoverageUnionTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_CoverageUnionTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 283 && p.jkind_ <= 283
+	return p != nil && p.jkind_ >= 253 && p.jkind_ <= 253
 }
 func OperationOverlayng_CoverageUnionTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_CoverageUnionTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 283 || p.jkind_ > 283 {
+	if p.jkind_ < 253 || p.jkind_ > 253 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.CoverageUnionTest"))
 	}
 	return (*OperationOverlayng_CoverageUnionTest)(unsafe.Pointer(p))
 }
 func OperationOverlayng_CoverageUnionTest_new(name *java.String) *OperationOverlayng_CoverageUnionTest {
 	this := &OperationOverlayng_CoverageUnionTest{}
-	this.jkind_ = 283
+	this.jkind_ = 253
 	this.JSetSelf(this)
 	this.OperationOverlayng_CoverageUnionTest_init(name)
 	return this

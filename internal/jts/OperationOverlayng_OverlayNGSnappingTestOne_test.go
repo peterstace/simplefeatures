@@ -4,8 +4,6 @@ package jts
 
 import (
 	"github.com/peterstace/simplefeatures/internal/jts/java"
-	"github.com/peterstace/simplefeatures/internal/jts/junit"
-	"testing"
 	"unsafe"
 )
 
@@ -40,20 +38,20 @@ func OperationOverlayng_OverlayNGSnappingTestOne_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_OverlayNGSnappingTestOne_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 292 && p.jkind_ <= 292
+	return p != nil && p.jkind_ >= 262 && p.jkind_ <= 262
 }
 func OperationOverlayng_OverlayNGSnappingTestOne_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_OverlayNGSnappingTestOne {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 292 || p.jkind_ > 292 {
+	if p.jkind_ < 262 || p.jkind_ > 262 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.OverlayNGSnappingTestOne"))
 	}
 	return (*OperationOverlayng_OverlayNGSnappingTestOne)(unsafe.Pointer(p))
 }
 func OperationOverlayng_OverlayNGSnappingTestOne_new(name *java.String) *OperationOverlayng_OverlayNGSnappingTestOne {
 	this := &OperationOverlayng_OverlayNGSnappingTestOne{}
-	this.jkind_ = 292
+	this.jkind_ = 262
 	this.JSetSelf(this)
 	this.OperationOverlayng_OverlayNGSnappingTestOne_init(name)
 	return this
@@ -98,44 +96,4 @@ func (this *OperationOverlayng_OverlayNGSnappingTestOne) TestTrianglesBSegmentsD
 	var b *Geom_Geometry = this.Read_String(jlit_3510)
 	var expected *Geom_Geometry = this.Read_String(jlit_3512)
 	this.CheckEqual_Geometry_Geometry(expected, OperationOverlayng_OverlayNGSnappingTestOne_union(a, b, float64(0.1)))
-}
-func TestOperationOverlayng_OverlayNGSnappingTestOne_testRandomUnion(t *testing.T) {
-	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGSnappingTestOne_new(jlit_3515)
-		tc.SetUp_impl()
-		defer tc.TearDown()
-		tc.TestRandomUnion()
-	})
-}
-func TestOperationOverlayng_OverlayNGSnappingTestOne_testRectanglesBothAjarUnion(t *testing.T) {
-	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGSnappingTestOne_new(jlit_3516)
-		tc.SetUp_impl()
-		defer tc.TearDown()
-		tc.TestRectanglesBothAjarUnion()
-	})
-}
-func TestOperationOverlayng_OverlayNGSnappingTestOne_testRectanglesOneAjarUnion(t *testing.T) {
-	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGSnappingTestOne_new(jlit_3517)
-		tc.SetUp_impl()
-		defer tc.TearDown()
-		tc.TestRectanglesOneAjarUnion()
-	})
-}
-func TestOperationOverlayng_OverlayNGSnappingTestOne_testTrianglesBSegmentsDisplacedSmallTolUnion(t *testing.T) {
-	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGSnappingTestOne_new(jlit_3519)
-		tc.SetUp_impl()
-		defer tc.TearDown()
-		tc.TestTrianglesBSegmentsDisplacedSmallTolUnion()
-	})
-}
-func TestOperationOverlayng_OverlayNGSnappingTestOne_testTrianglesBSegmentsDisplacedUnion(t *testing.T) {
-	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGSnappingTestOne_new(jlit_3520)
-		tc.SetUp_impl()
-		defer tc.TearDown()
-		tc.TestTrianglesBSegmentsDisplacedUnion()
-	})
 }

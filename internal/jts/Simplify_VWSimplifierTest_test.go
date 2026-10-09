@@ -46,17 +46,17 @@ func (this *Simplify_VWSimplifierTest) Simplify_VWSimplifierTest_init(name *java
 	this.TestCase.TestCase_init_String(name)
 }
 func (this *Simplify_VWSimplifierTest) TestEmptyPolygon() {
-	var geomStr *java.String = jlit_4590
+	var geomStr *java.String = jlit_4589
 	Simplify_GeometryOperationValidator_new(Simplify_VWSimplifierResult_getResult(geomStr, float64(int32(1)))).SetExpectedResult_String(geomStr).Test()
 }
 func (this *Simplify_VWSimplifierTest) TestPolygonNoReduction() {
-	Simplify_GeometryOperationValidator_new(Simplify_VWSimplifierResult_getResult(jlit_4591, float64(1.0))).Test()
+	Simplify_GeometryOperationValidator_new(Simplify_VWSimplifierResult_getResult(jlit_4590, float64(1.0))).Test()
 }
 func (this *Simplify_VWSimplifierTest) TestPolygonSpikeInShell() {
-	Simplify_GeometryOperationValidator_new(Simplify_VWSimplifierResult_getResult(jlit_4727, float64(10.0))).SetExpectedResult_String(jlit_4726).Test()
+	Simplify_GeometryOperationValidator_new(Simplify_VWSimplifierResult_getResult(jlit_4726, float64(10.0))).SetExpectedResult_String(jlit_4725).Test()
 }
 func (this *Simplify_VWSimplifierTest) TestPolygonSpikeInHole() {
-	Simplify_GeometryOperationValidator_new(Simplify_VWSimplifierResult_getResult(jlit_4729, float64(10.0))).SetExpectedResult_String(jlit_4728).Test()
+	Simplify_GeometryOperationValidator_new(Simplify_VWSimplifierResult_getResult(jlit_4728, float64(10.0))).SetExpectedResult_String(jlit_4727).Test()
 }
 func TestSimplify_VWSimplifierTest_testEmptyPolygon(t *testing.T) {
 	junit.Run(t, func() {
@@ -68,7 +68,7 @@ func TestSimplify_VWSimplifierTest_testEmptyPolygon(t *testing.T) {
 }
 func TestSimplify_VWSimplifierTest_testPolygonNoReduction(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_VWSimplifierTest_new(jlit_4716)
+		tc := Simplify_VWSimplifierTest_new(jlit_4715)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestPolygonNoReduction()
@@ -76,7 +76,7 @@ func TestSimplify_VWSimplifierTest_testPolygonNoReduction(t *testing.T) {
 }
 func TestSimplify_VWSimplifierTest_testPolygonSpikeInHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_VWSimplifierTest_new(jlit_4730)
+		tc := Simplify_VWSimplifierTest_new(jlit_4729)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestPolygonSpikeInHole()
@@ -84,7 +84,7 @@ func TestSimplify_VWSimplifierTest_testPolygonSpikeInHole(t *testing.T) {
 }
 func TestSimplify_VWSimplifierTest_testPolygonSpikeInShell(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_VWSimplifierTest_new(jlit_4731)
+		tc := Simplify_VWSimplifierTest_new(jlit_4730)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestPolygonSpikeInShell()

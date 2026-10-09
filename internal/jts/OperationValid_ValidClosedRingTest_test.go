@@ -50,30 +50,30 @@ func (this *OperationValid_ValidClosedRingTest) OperationValid_ValidClosedRingTe
 	this.TestCase.TestCase_init_String(name)
 }
 func (this *OperationValid_ValidClosedRingTest) TestBadLinearRing() {
-	var ring *Geom_LinearRing = Geom_LinearRing_downcast((*Geom_Geometry)(unsafe.Pointer(this.FromWKT_String(jlit_4443))))
+	var ring *Geom_LinearRing = Geom_LinearRing_downcast((*Geom_Geometry)(unsafe.Pointer(this.FromWKT_String(jlit_4442))))
 	this.updateNonClosedRing_LinearRing(ring)
 	this.checkIsValid_Geometry_boolean((*Geom_Geometry)(unsafe.Pointer(ring)), false)
 }
 func (this *OperationValid_ValidClosedRingTest) TestGoodLinearRing() {
-	var ring *Geom_LinearRing = Geom_LinearRing_downcast((*Geom_Geometry)(unsafe.Pointer(this.FromWKT_String(jlit_4443))))
+	var ring *Geom_LinearRing = Geom_LinearRing_downcast((*Geom_Geometry)(unsafe.Pointer(this.FromWKT_String(jlit_4442))))
 	this.checkIsValid_Geometry_boolean((*Geom_Geometry)(unsafe.Pointer(ring)), true)
 }
 func (this *OperationValid_ValidClosedRingTest) TestBadPolygonShell() {
-	var poly *Geom_Polygon = Geom_Polygon_downcast((*Geom_Geometry)(unsafe.Pointer(this.FromWKT_String(jlit_4089))))
+	var poly *Geom_Polygon = Geom_Polygon_downcast((*Geom_Geometry)(unsafe.Pointer(this.FromWKT_String(jlit_4088))))
 	this.updateNonClosedRing_LinearRing(poly.GetExteriorRing())
 	this.checkIsValid_Geometry_boolean((*Geom_Geometry)(unsafe.Pointer(poly)), false)
 }
 func (this *OperationValid_ValidClosedRingTest) TestBadPolygonHole() {
-	var poly *Geom_Polygon = Geom_Polygon_downcast((*Geom_Geometry)(unsafe.Pointer(this.FromWKT_String(jlit_4444))))
+	var poly *Geom_Polygon = Geom_Polygon_downcast((*Geom_Geometry)(unsafe.Pointer(this.FromWKT_String(jlit_4443))))
 	this.updateNonClosedRing_LinearRing(poly.GetInteriorRingN_int(int32(0)))
 	this.checkIsValid_Geometry_boolean((*Geom_Geometry)(unsafe.Pointer(poly)), false)
 }
 func (this *OperationValid_ValidClosedRingTest) TestGoodPolygon() {
-	var poly *Geom_Polygon = Geom_Polygon_downcast((*Geom_Geometry)(unsafe.Pointer(this.FromWKT_String(jlit_4089))))
+	var poly *Geom_Polygon = Geom_Polygon_downcast((*Geom_Geometry)(unsafe.Pointer(this.FromWKT_String(jlit_4088))))
 	this.checkIsValid_Geometry_boolean((*Geom_Geometry)(unsafe.Pointer(poly)), true)
 }
 func (this *OperationValid_ValidClosedRingTest) TestBadGeometryCollection() {
-	var gc *Geom_GeometryCollection = Geom_GeometryCollection_downcast((*Geom_Geometry)(unsafe.Pointer(this.FromWKT_String(jlit_4445))))
+	var gc *Geom_GeometryCollection = Geom_GeometryCollection_downcast((*Geom_Geometry)(unsafe.Pointer(this.FromWKT_String(jlit_4444))))
 	var poly *Geom_Polygon = Geom_Polygon_downcast((*Geom_Geometry)(unsafe.Pointer(gc.GetGeometryN_int_impl(int32(0)))))
 	this.updateNonClosedRing_LinearRing(poly.GetInteriorRingN_int(int32(0)))
 	this.checkIsValid_Geometry_boolean((*Geom_Geometry)(unsafe.Pointer(poly)), false)
@@ -110,7 +110,7 @@ func (this *OperationValid_ValidClosedRingTest) updateNonClosedRing_LinearRing(r
 }
 func TestOperationValid_ValidClosedRingTest_testBadGeometryCollection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidClosedRingTest_new(jlit_4446)
+		tc := OperationValid_ValidClosedRingTest_new(jlit_4445)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestBadGeometryCollection()
@@ -118,7 +118,7 @@ func TestOperationValid_ValidClosedRingTest_testBadGeometryCollection(t *testing
 }
 func TestOperationValid_ValidClosedRingTest_testBadLinearRing(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidClosedRingTest_new(jlit_4447)
+		tc := OperationValid_ValidClosedRingTest_new(jlit_4446)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestBadLinearRing()
@@ -126,7 +126,7 @@ func TestOperationValid_ValidClosedRingTest_testBadLinearRing(t *testing.T) {
 }
 func TestOperationValid_ValidClosedRingTest_testBadPolygonHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidClosedRingTest_new(jlit_4448)
+		tc := OperationValid_ValidClosedRingTest_new(jlit_4447)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestBadPolygonHole()
@@ -134,7 +134,7 @@ func TestOperationValid_ValidClosedRingTest_testBadPolygonHole(t *testing.T) {
 }
 func TestOperationValid_ValidClosedRingTest_testBadPolygonShell(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidClosedRingTest_new(jlit_4449)
+		tc := OperationValid_ValidClosedRingTest_new(jlit_4448)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestBadPolygonShell()
@@ -142,7 +142,7 @@ func TestOperationValid_ValidClosedRingTest_testBadPolygonShell(t *testing.T) {
 }
 func TestOperationValid_ValidClosedRingTest_testGoodLinearRing(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidClosedRingTest_new(jlit_4450)
+		tc := OperationValid_ValidClosedRingTest_new(jlit_4449)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestGoodLinearRing()
@@ -150,7 +150,7 @@ func TestOperationValid_ValidClosedRingTest_testGoodLinearRing(t *testing.T) {
 }
 func TestOperationValid_ValidClosedRingTest_testGoodPolygon(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationValid_ValidClosedRingTest_new(jlit_4451)
+		tc := OperationValid_ValidClosedRingTest_new(jlit_4450)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestGoodPolygon()

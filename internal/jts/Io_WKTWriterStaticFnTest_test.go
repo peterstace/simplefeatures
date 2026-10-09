@@ -42,20 +42,20 @@ func Io_WKTWriterStaticFnTest_isInstance(o any) bool {
 	return ok
 }
 func Io_WKTWriterStaticFnTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 268 && p.jkind_ <= 268
+	return p != nil && p.jkind_ >= 238 && p.jkind_ <= 238
 }
 func Io_WKTWriterStaticFnTest_downcast(p *Testjts_GeometryTestCase) *Io_WKTWriterStaticFnTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 268 || p.jkind_ > 268 {
+	if p.jkind_ < 238 || p.jkind_ > 238 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.io.WKTWriterStaticFnTest"))
 	}
 	return (*Io_WKTWriterStaticFnTest)(unsafe.Pointer(p))
 }
 func Io_WKTWriterStaticFnTest_new(name *java.String) *Io_WKTWriterStaticFnTest {
 	this := &Io_WKTWriterStaticFnTest{}
-	this.jkind_ = 268
+	this.jkind_ = 238
 	this.JSetSelf(this)
 	this.Io_WKTWriterStaticFnTest_init(name)
 	return this

@@ -36,13 +36,13 @@ func Noding_SinglePassNoder_isInstance(o any) bool {
 	return ok
 }
 func Noding_SinglePassNoder_isKind(p *Noding_SinglePassNoder) bool {
-	return p != nil && p.jkind_ >= 140 && p.jkind_ <= 142
+	return p != nil && p.jkind_ >= 139 && p.jkind_ <= 141
 }
 func Noding_SinglePassNoder_downcast(p *Noding_SinglePassNoder) *Noding_SinglePassNoder {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 140 || p.jkind_ > 142 {
+	if p.jkind_ < 139 || p.jkind_ > 141 {
 		panic(java.ClassCastError(Noding_SinglePassNoder_toAny(p), "org.locationtech.jts.noding.SinglePassNoder"))
 	}
 	return (*Noding_SinglePassNoder)(unsafe.Pointer(p))
@@ -53,9 +53,9 @@ func Noding_SinglePassNoder_toAny(p *Noding_SinglePassNoder) any {
 		return nil
 	}
 	switch p.jkind_ {
-	case 141:
+	case 140:
 		return (*Noding_MCIndexNoder)(unsafe.Pointer(p))
-	case 142:
+	case 141:
 		return (*Noding_SimpleNoder)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
@@ -72,10 +72,10 @@ func (this *Noding_SinglePassNoder) SetSegmentIntersector_SegmentIntersector(seg
 }
 func (this *Noding_SinglePassNoder) ComputeNodes_Collection(a0 java.Collection) {
 	switch this.jkind_ {
-	case 141:
+	case 140:
 		(*Noding_MCIndexNoder)(unsafe.Pointer(this)).ComputeNodes_Collection_impl(a0)
 		return
-	case 142:
+	case 141:
 		(*Noding_SimpleNoder)(unsafe.Pointer(this)).ComputeNodes_Collection_impl(a0)
 		return
 	}
@@ -83,9 +83,9 @@ func (this *Noding_SinglePassNoder) ComputeNodes_Collection(a0 java.Collection) 
 }
 func (this *Noding_SinglePassNoder) GetNodedSubstrings() java.Collection {
 	switch this.jkind_ {
-	case 141:
+	case 140:
 		return (*Noding_MCIndexNoder)(unsafe.Pointer(this)).GetNodedSubstrings_impl()
-	case 142:
+	case 141:
 		return (*Noding_SimpleNoder)(unsafe.Pointer(this)).GetNodedSubstrings_impl()
 	}
 	panic(java.AbstractMethodError("org.locationtech.jts.noding.SinglePassNoder.GetNodedSubstrings"))

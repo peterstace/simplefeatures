@@ -41,60 +41,60 @@ func OperationPolygonize_PolygonizerTest_isInstance(o any) bool {
 	return ok
 }
 func OperationPolygonize_PolygonizerTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 305 && p.jkind_ <= 305
+	return p != nil && p.jkind_ >= 275 && p.jkind_ <= 275
 }
 func OperationPolygonize_PolygonizerTest_downcast(p *Testjts_GeometryTestCase) *OperationPolygonize_PolygonizerTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 305 || p.jkind_ > 305 {
+	if p.jkind_ < 275 || p.jkind_ > 275 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.polygonize.PolygonizerTest"))
 	}
 	return (*OperationPolygonize_PolygonizerTest)(unsafe.Pointer(p))
 }
 func OperationPolygonize_PolygonizerTest_new(name *java.String) *OperationPolygonize_PolygonizerTest {
 	this := &OperationPolygonize_PolygonizerTest{}
-	this.jkind_ = 305
+	this.jkind_ = 275
 	this.JSetSelf(this)
 	this.OperationPolygonize_PolygonizerTest_init(name)
 	return this
 }
 func (this *OperationPolygonize_PolygonizerTest) OperationPolygonize_PolygonizerTest_init(name *java.String) {
-	this.LINES_CHECKERBOARD = []*java.String{jlit_3878, jlit_3879, jlit_3880, jlit_3881, jlit_3882, jlit_3883, jlit_3533, jlit_3884, jlit_3885, jlit_3886, jlit_3887, jlit_3888, jlit_3889, jlit_3890, jlit_3891, jlit_3892, jlit_3893, jlit_3894, jlit_3895, jlit_3896}
+	this.LINES_CHECKERBOARD = []*java.String{jlit_3877, jlit_3878, jlit_3879, jlit_3880, jlit_3881, jlit_3882, jlit_3533, jlit_3883, jlit_3884, jlit_3885, jlit_3886, jlit_3887, jlit_3888, jlit_3889, jlit_3890, jlit_3891, jlit_3892, jlit_3893, jlit_3894, jlit_3895}
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationPolygonize_PolygonizerTest) TestEmptyInput() {
 	this.checkPolygonize_StringArr_StringArr([]*java.String{jlit_1038, jlit_1038}, []*java.String{})
 }
 func (this *OperationPolygonize_PolygonizerTest) TestPolygonWithTouchingHole() {
-	this.checkPolygonize_StringArr_StringArr([]*java.String{jlit_3897, jlit_3898}, []*java.String{jlit_3899, jlit_3900})
+	this.checkPolygonize_StringArr_StringArr([]*java.String{jlit_3896, jlit_3897}, []*java.String{jlit_3898, jlit_3899})
 }
 func (this *OperationPolygonize_PolygonizerTest) TestPolygonWithTouchingHoleAndNotch() {
-	this.checkPolygonize_StringArr_StringArr([]*java.String{jlit_3901, jlit_3902, jlit_3903, jlit_3904, jlit_3905, jlit_3906}, []*java.String{jlit_3907, jlit_3908, jlit_3909})
+	this.checkPolygonize_StringArr_StringArr([]*java.String{jlit_3900, jlit_3901, jlit_3902, jlit_3903, jlit_3904, jlit_3905}, []*java.String{jlit_3906, jlit_3907, jlit_3908})
 }
 func (this *OperationPolygonize_PolygonizerTest) TestPolygonal1() {
-	this.checkPolygonize_boolean_StringArr_StringArr(true, []*java.String{jlit_3910, jlit_3911}, []*java.String{jlit_3912})
+	this.checkPolygonize_boolean_StringArr_StringArr(true, []*java.String{jlit_3909, jlit_3910}, []*java.String{jlit_3911})
 }
 func (this *OperationPolygonize_PolygonizerTest) TestPolygonal2() {
-	this.checkPolygonize_boolean_StringArr_StringArr(true, []*java.String{jlit_3913, jlit_3914, jlit_3915, jlit_3916, jlit_3917, jlit_3918, jlit_3919}, []*java.String{jlit_3920, jlit_3921})
+	this.checkPolygonize_boolean_StringArr_StringArr(true, []*java.String{jlit_3912, jlit_3913, jlit_3914, jlit_3915, jlit_3916, jlit_3917, jlit_3918}, []*java.String{jlit_3919, jlit_3920})
 }
 func (this *OperationPolygonize_PolygonizerTest) TestPolygonal_OuterOnly_1() {
-	this.checkPolygonize_boolean_StringArr_StringArr(true, []*java.String{jlit_3922, jlit_3533, jlit_3923, jlit_3924}, []*java.String{jlit_3925})
+	this.checkPolygonize_boolean_StringArr_StringArr(true, []*java.String{jlit_3921, jlit_3533, jlit_3922, jlit_3923}, []*java.String{jlit_3924})
 }
 func (this *OperationPolygonize_PolygonizerTest) TestPolygonal_OuterOnly_2() {
-	this.checkPolygonize_boolean_StringArr_StringArr(true, []*java.String{jlit_3926, jlit_3644, jlit_3927, jlit_3928, jlit_3929, jlit_3930, jlit_3931}, []*java.String{jlit_3932, jlit_3933})
+	this.checkPolygonize_boolean_StringArr_StringArr(true, []*java.String{jlit_3925, jlit_3644, jlit_3926, jlit_3927, jlit_3928, jlit_3929, jlit_3930}, []*java.String{jlit_3931, jlit_3932})
 }
 func (this *OperationPolygonize_PolygonizerTest) TestPolygonal_OuterOnly_Checkerboard() {
-	this.checkPolygonize_boolean_StringArr_StringArr(true, this.LINES_CHECKERBOARD, []*java.String{jlit_3531, jlit_3934, jlit_3935, jlit_3936, jlit_3937})
+	this.checkPolygonize_boolean_StringArr_StringArr(true, this.LINES_CHECKERBOARD, []*java.String{jlit_3531, jlit_3933, jlit_3934, jlit_3935, jlit_3936})
 }
 func (this *OperationPolygonize_PolygonizerTest) TestNonNodedWithHoleNotAssignable() {
-	this.checkPolygonizeNoError_StringArr([]*java.String{jlit_3938})
+	this.checkPolygonizeNoError_StringArr([]*java.String{jlit_3937})
 }
 func (this *OperationPolygonize_PolygonizerTest) TestUniqueInvalidRings() {
-	this.checkPolygonizeInvalidRings_String_String(jlit_3939, jlit_3940)
+	this.checkPolygonizeInvalidRings_String_String(jlit_3938, jlit_3939)
 }
 func (this *OperationPolygonize_PolygonizerTest) TestUniqueInvalidRings2() {
-	this.checkPolygonizeInvalidRings_String_String(jlit_3941, jlit_3942)
+	this.checkPolygonizeInvalidRings_String_String(jlit_3940, jlit_3941)
 }
 func (this *OperationPolygonize_PolygonizerTest) checkPolygonize_StringArr_StringArr(inputWKT []*java.String, expectedWKT []*java.String) {
 	this.checkPolygonize_boolean_StringArr_StringArr(false, inputWKT, expectedWKT)
@@ -123,7 +123,7 @@ func (this *OperationPolygonize_PolygonizerTest) checkPolygonizeNoError_StringAr
 			var ex *java.Throwable = java.Throwable_fromAny(jex)
 			{
 				ex.PrintStackTrace()
-				junit.TestCase_fail_String(jlit_3943)
+				junit.TestCase_fail_String(jlit_3942)
 			}
 			return 0, true
 		}
@@ -141,7 +141,7 @@ func (this *OperationPolygonize_PolygonizerTest) checkPolygonizeInvalidRings_Str
 }
 func TestOperationPolygonize_PolygonizerTest_testEmptyInput(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationPolygonize_PolygonizerTest_new(jlit_3944)
+		tc := OperationPolygonize_PolygonizerTest_new(jlit_3943)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestEmptyInput()
@@ -149,7 +149,7 @@ func TestOperationPolygonize_PolygonizerTest_testEmptyInput(t *testing.T) {
 }
 func TestOperationPolygonize_PolygonizerTest_testNonNodedWithHoleNotAssignable(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationPolygonize_PolygonizerTest_new(jlit_3945)
+		tc := OperationPolygonize_PolygonizerTest_new(jlit_3944)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNonNodedWithHoleNotAssignable()
@@ -157,7 +157,7 @@ func TestOperationPolygonize_PolygonizerTest_testNonNodedWithHoleNotAssignable(t
 }
 func TestOperationPolygonize_PolygonizerTest_testPolygonWithTouchingHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationPolygonize_PolygonizerTest_new(jlit_3946)
+		tc := OperationPolygonize_PolygonizerTest_new(jlit_3945)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonWithTouchingHole()
@@ -165,7 +165,7 @@ func TestOperationPolygonize_PolygonizerTest_testPolygonWithTouchingHole(t *test
 }
 func TestOperationPolygonize_PolygonizerTest_testPolygonWithTouchingHoleAndNotch(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationPolygonize_PolygonizerTest_new(jlit_3947)
+		tc := OperationPolygonize_PolygonizerTest_new(jlit_3946)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonWithTouchingHoleAndNotch()
@@ -173,7 +173,7 @@ func TestOperationPolygonize_PolygonizerTest_testPolygonWithTouchingHoleAndNotch
 }
 func TestOperationPolygonize_PolygonizerTest_testPolygonal1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationPolygonize_PolygonizerTest_new(jlit_3948)
+		tc := OperationPolygonize_PolygonizerTest_new(jlit_3947)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonal1()
@@ -181,7 +181,7 @@ func TestOperationPolygonize_PolygonizerTest_testPolygonal1(t *testing.T) {
 }
 func TestOperationPolygonize_PolygonizerTest_testPolygonal2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationPolygonize_PolygonizerTest_new(jlit_3949)
+		tc := OperationPolygonize_PolygonizerTest_new(jlit_3948)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonal2()
@@ -189,7 +189,7 @@ func TestOperationPolygonize_PolygonizerTest_testPolygonal2(t *testing.T) {
 }
 func TestOperationPolygonize_PolygonizerTest_testPolygonal_OuterOnly_1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationPolygonize_PolygonizerTest_new(jlit_3950)
+		tc := OperationPolygonize_PolygonizerTest_new(jlit_3949)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonal_OuterOnly_1()
@@ -197,7 +197,7 @@ func TestOperationPolygonize_PolygonizerTest_testPolygonal_OuterOnly_1(t *testin
 }
 func TestOperationPolygonize_PolygonizerTest_testPolygonal_OuterOnly_2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationPolygonize_PolygonizerTest_new(jlit_3951)
+		tc := OperationPolygonize_PolygonizerTest_new(jlit_3950)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonal_OuterOnly_2()
@@ -205,7 +205,7 @@ func TestOperationPolygonize_PolygonizerTest_testPolygonal_OuterOnly_2(t *testin
 }
 func TestOperationPolygonize_PolygonizerTest_testPolygonal_OuterOnly_Checkerboard(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationPolygonize_PolygonizerTest_new(jlit_3952)
+		tc := OperationPolygonize_PolygonizerTest_new(jlit_3951)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonal_OuterOnly_Checkerboard()
@@ -213,7 +213,7 @@ func TestOperationPolygonize_PolygonizerTest_testPolygonal_OuterOnly_Checkerboar
 }
 func TestOperationPolygonize_PolygonizerTest_testUniqueInvalidRings(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationPolygonize_PolygonizerTest_new(jlit_3953)
+		tc := OperationPolygonize_PolygonizerTest_new(jlit_3952)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestUniqueInvalidRings()
@@ -221,7 +221,7 @@ func TestOperationPolygonize_PolygonizerTest_testUniqueInvalidRings(t *testing.T
 }
 func TestOperationPolygonize_PolygonizerTest_testUniqueInvalidRings2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationPolygonize_PolygonizerTest_new(jlit_3954)
+		tc := OperationPolygonize_PolygonizerTest_new(jlit_3953)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestUniqueInvalidRings2()

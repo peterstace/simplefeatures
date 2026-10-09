@@ -29,7 +29,10 @@ public final class Main {
 
     /** Java source directories (relative to the main or test root) that are not translated. */
     private static final List<String> EXCLUDED = List.of(
-            "org/locationtech/jts/awt/", "org/locationtech/jts/io/gml2/", "org/locationtech/jts/io/kml/");
+            "org/locationtech/jts/awt/", "org/locationtech/jts/io/gml2/", "org/locationtech/jts/io/kml/",
+            // Performance tests and tests of known failures, which JTS's
+            // build does not run either.
+            "test/jts/perf/", "test/jts/fail/");
 
     public static void main(String[] args) throws Exception {
         Map<String, String> opts = new HashMap<>();

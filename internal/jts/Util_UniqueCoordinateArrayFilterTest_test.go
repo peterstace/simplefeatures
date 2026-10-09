@@ -40,20 +40,20 @@ func Util_UniqueCoordinateArrayFilterTest_isInstance(o any) bool {
 	return ok
 }
 func Util_UniqueCoordinateArrayFilterTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 342 && p.jkind_ <= 342
+	return p != nil && p.jkind_ >= 309 && p.jkind_ <= 309
 }
 func Util_UniqueCoordinateArrayFilterTest_downcast(p *Testjts_GeometryTestCase) *Util_UniqueCoordinateArrayFilterTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 342 || p.jkind_ > 342 {
+	if p.jkind_ < 309 || p.jkind_ > 309 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.util.UniqueCoordinateArrayFilterTest"))
 	}
 	return (*Util_UniqueCoordinateArrayFilterTest)(unsafe.Pointer(p))
 }
 func Util_UniqueCoordinateArrayFilterTest_new(name *java.String) *Util_UniqueCoordinateArrayFilterTest {
 	this := &Util_UniqueCoordinateArrayFilterTest{}
-	this.jkind_ = 342
+	this.jkind_ = 309
 	this.JSetSelf(this)
 	this.Util_UniqueCoordinateArrayFilterTest_init(name)
 	return this
@@ -62,7 +62,7 @@ func (this *Util_UniqueCoordinateArrayFilterTest) Util_UniqueCoordinateArrayFilt
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *Util_UniqueCoordinateArrayFilterTest) TestFilter() {
-	var g *Geom_Geometry = this.Read_String(jlit_4856)
+	var g *Geom_Geometry = this.Read_String(jlit_4855)
 	var f *Util_UniqueCoordinateArrayFilter = Util_UniqueCoordinateArrayFilter_new()
 	g.Apply_CoordinateFilter(java.AnyTo[Geom_CoordinateFilter](java.Ref(f)))
 	junit.TestCase_assertEquals_int_int(int32(3), int32(len(f.GetCoordinates())))
@@ -72,7 +72,7 @@ func (this *Util_UniqueCoordinateArrayFilterTest) TestFilter() {
 }
 func TestUtil_UniqueCoordinateArrayFilterTest_testFilter(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Util_UniqueCoordinateArrayFilterTest_new(jlit_4857)
+		tc := Util_UniqueCoordinateArrayFilterTest_new(jlit_4856)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestFilter()

@@ -40,20 +40,20 @@ func OperationOverlayng_OverlayNGSnappingNoderTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_OverlayNGSnappingNoderTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 291 && p.jkind_ <= 291
+	return p != nil && p.jkind_ >= 261 && p.jkind_ <= 261
 }
 func OperationOverlayng_OverlayNGSnappingNoderTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_OverlayNGSnappingNoderTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 291 || p.jkind_ > 291 {
+	if p.jkind_ < 261 || p.jkind_ > 261 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.OverlayNGSnappingNoderTest"))
 	}
 	return (*OperationOverlayng_OverlayNGSnappingNoderTest)(unsafe.Pointer(p))
 }
 func OperationOverlayng_OverlayNGSnappingNoderTest_new(name *java.String) *OperationOverlayng_OverlayNGSnappingNoderTest {
 	this := &OperationOverlayng_OverlayNGSnappingNoderTest{}
-	this.jkind_ = 291
+	this.jkind_ = 261
 	this.JSetSelf(this)
 	this.OperationOverlayng_OverlayNGSnappingNoderTest_init(name)
 	return this

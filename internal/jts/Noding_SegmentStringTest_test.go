@@ -40,20 +40,20 @@ func Noding_SegmentStringTest_isInstance(o any) bool {
 	return ok
 }
 func Noding_SegmentStringTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 274 && p.jkind_ <= 274
+	return p != nil && p.jkind_ >= 244 && p.jkind_ <= 244
 }
 func Noding_SegmentStringTest_downcast(p *Testjts_GeometryTestCase) *Noding_SegmentStringTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 274 || p.jkind_ > 274 {
+	if p.jkind_ < 244 || p.jkind_ > 244 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.noding.SegmentStringTest"))
 	}
 	return (*Noding_SegmentStringTest)(unsafe.Pointer(p))
 }
 func Noding_SegmentStringTest_new(name *java.String) *Noding_SegmentStringTest {
 	this := &Noding_SegmentStringTest{}
-	this.jkind_ = 274
+	this.jkind_ = 244
 	this.JSetSelf(this)
 	this.Noding_SegmentStringTest_init(name)
 	return this

@@ -41,20 +41,20 @@ func Triangulate_ConstraintVertex_isInstance(o any) bool {
 	return ok
 }
 func Triangulate_ConstraintVertex_isKind(p *TriangulateQuadedge_Vertex) bool {
-	return p != nil && p.jkind_ >= 344 && p.jkind_ <= 344
+	return p != nil && p.jkind_ >= 311 && p.jkind_ <= 311
 }
 func Triangulate_ConstraintVertex_downcast(p *TriangulateQuadedge_Vertex) *Triangulate_ConstraintVertex {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 344 || p.jkind_ > 344 {
+	if p.jkind_ < 311 || p.jkind_ > 311 {
 		panic(java.ClassCastError(TriangulateQuadedge_Vertex_toAny(p), "org.locationtech.jts.triangulate.ConstraintVertex"))
 	}
 	return (*Triangulate_ConstraintVertex)(unsafe.Pointer(p))
 }
 func Triangulate_ConstraintVertex_new(p *Geom_Coordinate) *Triangulate_ConstraintVertex {
 	this := &Triangulate_ConstraintVertex{}
-	this.jkind_ = 344
+	this.jkind_ = 311
 	this.Triangulate_ConstraintVertex_init(p)
 	return this
 }

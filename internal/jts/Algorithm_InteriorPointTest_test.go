@@ -41,20 +41,20 @@ func Algorithm_InteriorPointTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_InteriorPointTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 230 && p.jkind_ <= 230
+	return p != nil && p.jkind_ >= 200 && p.jkind_ <= 200
 }
 func Algorithm_InteriorPointTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_InteriorPointTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 230 || p.jkind_ > 230 {
+	if p.jkind_ < 200 || p.jkind_ > 200 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.InteriorPointTest"))
 	}
 	return (*Algorithm_InteriorPointTest)(unsafe.Pointer(p))
 }
 func Algorithm_InteriorPointTest_new(name *java.String) *Algorithm_InteriorPointTest {
 	this := &Algorithm_InteriorPointTest{}
-	this.jkind_ = 230
+	this.jkind_ = 200
 	this.JSetSelf(this)
 	this.Algorithm_InteriorPointTest_init(name)
 	return this

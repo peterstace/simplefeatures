@@ -219,7 +219,7 @@ func TestIndexStrtree_STRtreeTest_testCreateParentsFromVerticalSlice(t *testing.
 }
 func TestIndexStrtree_STRtreeTest_testDisallowedInserts(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexStrtree_STRtreeTest_new(jlit_1971)
+		tc := IndexStrtree_STRtreeTest_new(jlit_1970)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestDisallowedInserts()
@@ -227,7 +227,7 @@ func TestIndexStrtree_STRtreeTest_testDisallowedInserts(t *testing.T) {
 }
 func TestIndexStrtree_STRtreeTest_testEmptyTreeUsingItemVisitorQuery(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexStrtree_STRtreeTest_new(jlit_1972)
+		tc := IndexStrtree_STRtreeTest_new(jlit_1971)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestEmptyTreeUsingItemVisitorQuery()
@@ -235,7 +235,7 @@ func TestIndexStrtree_STRtreeTest_testEmptyTreeUsingItemVisitorQuery(t *testing.
 }
 func TestIndexStrtree_STRtreeTest_testEmptyTreeUsingListQuery(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexStrtree_STRtreeTest_new(jlit_1973)
+		tc := IndexStrtree_STRtreeTest_new(jlit_1972)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestEmptyTreeUsingListQuery()
@@ -243,7 +243,7 @@ func TestIndexStrtree_STRtreeTest_testEmptyTreeUsingListQuery(t *testing.T) {
 }
 func TestIndexStrtree_STRtreeTest_testQuery(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexStrtree_STRtreeTest_new(jlit_1974)
+		tc := IndexStrtree_STRtreeTest_new(jlit_1973)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestQuery()
@@ -267,7 +267,7 @@ func TestIndexStrtree_STRtreeTest_testSerialization(t *testing.T) {
 }
 func TestIndexStrtree_STRtreeTest_testSpatialIndex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexStrtree_STRtreeTest_new(jlit_1980)
+		tc := IndexStrtree_STRtreeTest_new(jlit_1979)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSpatialIndex()

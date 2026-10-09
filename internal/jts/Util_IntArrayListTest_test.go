@@ -90,7 +90,7 @@ func (this *Util_IntArrayListTest) TestAddAll() {
 }
 func TestUtil_IntArrayListTest_testAddAll(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Util_IntArrayListTest_new(jlit_4851)
+		tc := Util_IntArrayListTest_new(jlit_4850)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestAddAll()
@@ -98,7 +98,7 @@ func TestUtil_IntArrayListTest_testAddAll(t *testing.T) {
 }
 func TestUtil_IntArrayListTest_testAddFew(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Util_IntArrayListTest_new(jlit_4852)
+		tc := Util_IntArrayListTest_new(jlit_4851)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestAddFew()
@@ -106,7 +106,7 @@ func TestUtil_IntArrayListTest_testAddFew(t *testing.T) {
 }
 func TestUtil_IntArrayListTest_testAddMany(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Util_IntArrayListTest_new(jlit_4853)
+		tc := Util_IntArrayListTest_new(jlit_4852)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestAddMany()

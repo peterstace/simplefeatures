@@ -36,20 +36,20 @@ func Coverage_CoverageRing_isInstance(o any) bool {
 	return ok
 }
 func Coverage_CoverageRing_isKind(p *Noding_BasicSegmentString) bool {
-	return p != nil && p.jkind_ >= 138 && p.jkind_ <= 138
+	return p != nil && p.jkind_ >= 137 && p.jkind_ <= 137
 }
 func Coverage_CoverageRing_downcast(p *Noding_BasicSegmentString) *Coverage_CoverageRing {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 138 || p.jkind_ > 138 {
+	if p.jkind_ < 137 || p.jkind_ > 137 {
 		panic(java.ClassCastError(Noding_BasicSegmentString_toAny(p), "org.locationtech.jts.coverage.CoverageRing"))
 	}
 	return (*Coverage_CoverageRing)(unsafe.Pointer(p))
 }
 func Coverage_CoverageRing_new(pts []*Geom_Coordinate, isInteriorOnRight bool) *Coverage_CoverageRing {
 	this := &Coverage_CoverageRing{}
-	this.jkind_ = 138
+	this.jkind_ = 137
 	this.Coverage_CoverageRing_init(pts, isInteriorOnRight)
 	return this
 }

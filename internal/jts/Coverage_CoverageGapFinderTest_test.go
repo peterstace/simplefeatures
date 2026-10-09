@@ -40,20 +40,20 @@ func Coverage_CoverageGapFinderTest_isInstance(o any) bool {
 	return ok
 }
 func Coverage_CoverageGapFinderTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 240 && p.jkind_ <= 240
+	return p != nil && p.jkind_ >= 210 && p.jkind_ <= 210
 }
 func Coverage_CoverageGapFinderTest_downcast(p *Testjts_GeometryTestCase) *Coverage_CoverageGapFinderTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 240 || p.jkind_ > 240 {
+	if p.jkind_ < 210 || p.jkind_ > 210 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.coverage.CoverageGapFinderTest"))
 	}
 	return (*Coverage_CoverageGapFinderTest)(unsafe.Pointer(p))
 }
 func Coverage_CoverageGapFinderTest_new(name *java.String) *Coverage_CoverageGapFinderTest {
 	this := &Coverage_CoverageGapFinderTest{}
-	this.jkind_ = 240
+	this.jkind_ = 210
 	this.JSetSelf(this)
 	this.Coverage_CoverageGapFinderTest_init(name)
 	return this

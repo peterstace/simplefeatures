@@ -39,20 +39,20 @@ func ShapeFractal_MortonCurveBuilder_isInstance(o any) bool {
 	return ok
 }
 func ShapeFractal_MortonCurveBuilder_isKind(p *Shape_GeometricShapeBuilder) bool {
-	return p != nil && p.jkind_ >= 180 && p.jkind_ <= 180
+	return p != nil && p.jkind_ >= 179 && p.jkind_ <= 179
 }
 func ShapeFractal_MortonCurveBuilder_downcast(p *Shape_GeometricShapeBuilder) *ShapeFractal_MortonCurveBuilder {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 180 || p.jkind_ > 180 {
+	if p.jkind_ < 179 || p.jkind_ > 179 {
 		panic(java.ClassCastError(Shape_GeometricShapeBuilder_toAny(p), "org.locationtech.jts.shape.fractal.MortonCurveBuilder"))
 	}
 	return (*ShapeFractal_MortonCurveBuilder)(unsafe.Pointer(p))
 }
 func ShapeFractal_MortonCurveBuilder_new(geomFactory *Geom_GeometryFactory) *ShapeFractal_MortonCurveBuilder {
 	this := &ShapeFractal_MortonCurveBuilder{}
-	this.jkind_ = 180
+	this.jkind_ = 179
 	this.ShapeFractal_MortonCurveBuilder_init(geomFactory)
 	return this
 }

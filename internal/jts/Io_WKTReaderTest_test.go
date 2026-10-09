@@ -37,13 +37,13 @@ func Io_WKTReaderTest_isInstance(o any) bool {
 	return ok
 }
 func Io_WKTReaderTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 267 && p.jkind_ <= 267
+	return p != nil && p.jkind_ >= 237 && p.jkind_ <= 237
 }
 func Io_WKTReaderTest_downcast(p *Testjts_GeometryTestCase) *Io_WKTReaderTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 267 || p.jkind_ > 267 {
+	if p.jkind_ < 237 || p.jkind_ > 237 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.io.WKTReaderTest"))
 	}
 	return (*Io_WKTReaderTest)(unsafe.Pointer(p))
@@ -53,7 +53,7 @@ var Io_WKTReaderTest_mpCoords [][]float64 = [][]float64{[]float64{float64(int32(
 
 func Io_WKTReaderTest_new(name *java.String) *Io_WKTReaderTest {
 	this := &Io_WKTReaderTest{}
-	this.jkind_ = 267
+	this.jkind_ = 237
 	this.JSetSelf(this)
 	this.Io_WKTReaderTest_init(name)
 	return this

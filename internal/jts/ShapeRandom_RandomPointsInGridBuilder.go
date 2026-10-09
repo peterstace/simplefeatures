@@ -41,20 +41,20 @@ func ShapeRandom_RandomPointsInGridBuilder_isInstance(o any) bool {
 	return ok
 }
 func ShapeRandom_RandomPointsInGridBuilder_isKind(p *Shape_GeometricShapeBuilder) bool {
-	return p != nil && p.jkind_ >= 183 && p.jkind_ <= 183
+	return p != nil && p.jkind_ >= 182 && p.jkind_ <= 182
 }
 func ShapeRandom_RandomPointsInGridBuilder_downcast(p *Shape_GeometricShapeBuilder) *ShapeRandom_RandomPointsInGridBuilder {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 183 || p.jkind_ > 183 {
+	if p.jkind_ < 182 || p.jkind_ > 182 {
 		panic(java.ClassCastError(Shape_GeometricShapeBuilder_toAny(p), "org.locationtech.jts.shape.random.RandomPointsInGridBuilder"))
 	}
 	return (*ShapeRandom_RandomPointsInGridBuilder)(unsafe.Pointer(p))
 }
 func ShapeRandom_RandomPointsInGridBuilder_new() *ShapeRandom_RandomPointsInGridBuilder {
 	this := &ShapeRandom_RandomPointsInGridBuilder{}
-	this.jkind_ = 183
+	this.jkind_ = 182
 	this.ShapeRandom_RandomPointsInGridBuilder_init()
 	return this
 }
@@ -65,7 +65,7 @@ func (this *ShapeRandom_RandomPointsInGridBuilder) ShapeRandom_RandomPointsInGri
 }
 func ShapeRandom_RandomPointsInGridBuilder_new_GeometryFactory(geomFact *Geom_GeometryFactory) *ShapeRandom_RandomPointsInGridBuilder {
 	this := &ShapeRandom_RandomPointsInGridBuilder{}
-	this.jkind_ = 183
+	this.jkind_ = 182
 	this.ShapeRandom_RandomPointsInGridBuilder_init_GeometryFactory(geomFact)
 	return this
 }

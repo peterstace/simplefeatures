@@ -33,13 +33,13 @@ func Algorithm_AbstractPointInRingTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_AbstractPointInRingTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 221 && p.jkind_ <= 226
+	return p != nil && p.jkind_ >= 191 && p.jkind_ <= 196
 }
 func Algorithm_AbstractPointInRingTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_AbstractPointInRingTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 221 || p.jkind_ > 226 {
+	if p.jkind_ < 191 || p.jkind_ > 196 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.AbstractPointInRingTest"))
 	}
 	return (*Algorithm_AbstractPointInRingTest)(unsafe.Pointer(p))
@@ -90,19 +90,19 @@ func (this *Algorithm_AbstractPointInRingTest) TestRobustTriangle() {
 }
 func (this *Algorithm_AbstractPointInRingTest) RunPtInRing_int_Coordinate_String(a0 int32, a1 *Geom_Coordinate, a2 *java.String) {
 	switch this.jkind_ {
-	case 222:
+	case 192:
 		(*AlgorithmLocate_IndexedPointInAreaLocatorTest)(unsafe.Pointer(this)).RunPtInRing_int_Coordinate_String_impl(a0, a1, a2)
 		return
-	case 223:
+	case 193:
 		(*AlgorithmLocate_SimplePointInAreaLocatorTest)(unsafe.Pointer(this)).RunPtInRing_int_Coordinate_String_impl(a0, a1, a2)
 		return
-	case 224:
+	case 194:
 		(*Algorithm_LocatePointInRingTest)(unsafe.Pointer(this)).RunPtInRing_int_Coordinate_String_impl(a0, a1, a2)
 		return
-	case 225:
+	case 195:
 		(*Algorithm_PointInRingTest)(unsafe.Pointer(this)).RunPtInRing_int_Coordinate_String_impl(a0, a1, a2)
 		return
-	case 226:
+	case 196:
 		(*Algorithm_RayCrossingCounterTest)(unsafe.Pointer(this)).RunPtInRing_int_Coordinate_String_impl(a0, a1, a2)
 		return
 	}

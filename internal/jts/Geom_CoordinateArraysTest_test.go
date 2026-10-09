@@ -41,13 +41,13 @@ func Geom_CoordinateArraysTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_CoordinateArraysTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 251 && p.jkind_ <= 251
+	return p != nil && p.jkind_ >= 221 && p.jkind_ <= 221
 }
 func Geom_CoordinateArraysTest_downcast(p *Testjts_GeometryTestCase) *Geom_CoordinateArraysTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 251 || p.jkind_ > 251 {
+	if p.jkind_ < 221 || p.jkind_ > 221 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.CoordinateArraysTest"))
 	}
 	return (*Geom_CoordinateArraysTest)(unsafe.Pointer(p))
@@ -60,7 +60,7 @@ var Geom_CoordinateArraysTest_COORDS_EMPTY []*Geom_Coordinate = make([]*Geom_Coo
 
 func Geom_CoordinateArraysTest_new(name *java.String) *Geom_CoordinateArraysTest {
 	this := &Geom_CoordinateArraysTest{}
-	this.jkind_ = 251
+	this.jkind_ = 221
 	this.JSetSelf(this)
 	this.Geom_CoordinateArraysTest_init(name)
 	return this

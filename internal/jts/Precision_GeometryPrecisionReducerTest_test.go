@@ -40,20 +40,20 @@ func Precision_GeometryPrecisionReducerTest_isInstance(o any) bool {
 	return ok
 }
 func Precision_GeometryPrecisionReducerTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 327 && p.jkind_ <= 327
+	return p != nil && p.jkind_ >= 297 && p.jkind_ <= 297
 }
 func Precision_GeometryPrecisionReducerTest_downcast(p *Testjts_GeometryTestCase) *Precision_GeometryPrecisionReducerTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 327 || p.jkind_ > 327 {
+	if p.jkind_ < 297 || p.jkind_ > 297 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.precision.GeometryPrecisionReducerTest"))
 	}
 	return (*Precision_GeometryPrecisionReducerTest)(unsafe.Pointer(p))
 }
 func Precision_GeometryPrecisionReducerTest_new(name *java.String) *Precision_GeometryPrecisionReducerTest {
 	this := &Precision_GeometryPrecisionReducerTest{}
-	this.jkind_ = 327
+	this.jkind_ = 297
 	this.JSetSelf(this)
 	this.Precision_GeometryPrecisionReducerTest_init(name)
 	return this
@@ -62,79 +62,79 @@ func (this *Precision_GeometryPrecisionReducerTest) Precision_GeometryPrecisionR
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestPoint() {
-	this.checkReduce_String_String(jlit_4504, jlit_4505)
+	this.checkReduce_String_String(jlit_4503, jlit_4504)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestMultiPoint() {
-	this.checkReduce_String_String(jlit_4506, jlit_4507)
+	this.checkReduce_String_String(jlit_4505, jlit_4506)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestLine() {
-	this.checkReduce_String_String(jlit_4508, jlit_4509)
+	this.checkReduce_String_String(jlit_4507, jlit_4508)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestLineNotNoded() {
-	this.checkReduce_String_String(jlit_4510, jlit_4511)
+	this.checkReduce_String_String(jlit_4509, jlit_4510)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestLineDuplicatePointsRemoved() {
-	this.checkReduce_String_String(jlit_4512, jlit_4513)
+	this.checkReduce_String_String(jlit_4511, jlit_4512)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestLineRemoveCollapse() {
-	this.checkReduce_String_String(jlit_4514, jlit_1038)
+	this.checkReduce_String_String(jlit_4513, jlit_1038)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestMultiLineRemoveCollapse() {
-	this.checkReduce_String_String(jlit_4515, jlit_4516)
+	this.checkReduce_String_String(jlit_4514, jlit_4515)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestSquare() {
-	this.checkReduce_String_String(jlit_4517, jlit_4518)
+	this.checkReduce_String_String(jlit_4516, jlit_4517)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestTinySquareCollapse() {
-	this.checkReduce_String_String(jlit_4519, jlit_534)
+	this.checkReduce_String_String(jlit_4518, jlit_534)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestSquareCollapse() {
-	this.checkReduce_String_String(jlit_4520, jlit_534)
+	this.checkReduce_String_String(jlit_4519, jlit_534)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestPolygonCollapsesCompletely() {
-	this.checkReduce_double_String_String(float64(int32(1000000)), jlit_4521, jlit_534)
+	this.checkReduce_double_String_String(float64(int32(1000000)), jlit_4520, jlit_534)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestPolygonHasValidResult() {
-	this.checkReduce_double_String_String(float64(int32(10)), jlit_4522, jlit_4523)
+	this.checkReduce_double_String_String(float64(int32(10)), jlit_4521, jlit_4522)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestPolgonWithCollapsedLine() {
-	this.checkReduce_String_String(jlit_4493, jlit_4524)
+	this.checkReduce_String_String(jlit_4492, jlit_4523)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestPolgonWithCollapsedPoint() {
-	this.checkReduce_String_String(jlit_4495, jlit_4525)
+	this.checkReduce_String_String(jlit_4494, jlit_4524)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestMultiPolgonCollapseRemoved() {
-	this.checkReduce_String_String(jlit_4526, jlit_4527)
+	this.checkReduce_String_String(jlit_4525, jlit_4526)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestGC() {
-	this.checkReduce_String_String(jlit_4528, jlit_4529)
+	this.checkReduce_String_String(jlit_4527, jlit_4528)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestGCPolygonCollapse() {
-	this.checkReduce_String_String(jlit_4530, jlit_4531)
+	this.checkReduce_String_String(jlit_4529, jlit_4530)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestGCNested() {
-	this.checkReduce_String_String(jlit_4532, jlit_4533)
+	this.checkReduce_String_String(jlit_4531, jlit_4532)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestKeepCollapsedLine() {
-	this.checkReduceKeepCollapsed_double_String_String(float64(int32(1)), jlit_4514, jlit_4534)
+	this.checkReduceKeepCollapsed_double_String_String(float64(int32(1)), jlit_4513, jlit_4533)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestKeepCollapsedLinearRing() {
-	this.checkReduceKeepCollapsed_double_String_String(float64(int32(1)), jlit_4535, jlit_4536)
+	this.checkReduceKeepCollapsed_double_String_String(float64(int32(1)), jlit_4534, jlit_4535)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestKeepCollapsedSquare() {
-	this.checkReduceKeepCollapsed_double_String_String(float64(int32(1)), jlit_4520, jlit_534)
+	this.checkReduceKeepCollapsed_double_String_String(float64(int32(1)), jlit_4519, jlit_534)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestKeepCollapsedPolygon() {
-	this.checkReduceKeepCollapsed_double_String_String(float64(int32(1)), jlit_4491, jlit_534)
+	this.checkReduceKeepCollapsed_double_String_String(float64(int32(1)), jlit_4490, jlit_534)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestKeepCollapsedMultiPolygon() {
-	this.checkReduceKeepCollapsed_double_String_String(float64(int32(1)), jlit_4537, jlit_4538)
+	this.checkReduceKeepCollapsed_double_String_String(float64(int32(1)), jlit_4536, jlit_4537)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestGridsize() {
-	this.checkReduce_double_String_String(float64(int32(-100)), jlit_4539, jlit_4540)
+	this.checkReduce_double_String_String(float64(int32(-100)), jlit_4538, jlit_4539)
 }
 func (this *Precision_GeometryPrecisionReducerTest) TestLargeGridsizeFail() {
-	this.checkReduce_double_String_String(float64(int32(-612)), jlit_4541, jlit_4542)
+	this.checkReduce_double_String_String(float64(int32(-612)), jlit_4540, jlit_4541)
 }
 func (this *Precision_GeometryPrecisionReducerTest) checkReduce_String_String(wkt *java.String, wktExpected *java.String) {
 	this.checkReduce_double_String_String(float64(int32(1)), wkt, wktExpected)
@@ -159,7 +159,7 @@ func (this *Precision_GeometryPrecisionReducerTest) checkReduce_GeometryPrecisio
 }
 func TestPrecision_GeometryPrecisionReducerTest_testGC(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4543)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4542)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGC()
@@ -167,7 +167,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testGC(t *testing.T) {
 }
 func TestPrecision_GeometryPrecisionReducerTest_testGCNested(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4544)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4543)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGCNested()
@@ -175,7 +175,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testGCNested(t *testing.T) {
 }
 func TestPrecision_GeometryPrecisionReducerTest_testGCPolygonCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4545)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4544)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGCPolygonCollapse()
@@ -183,7 +183,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testGCPolygonCollapse(t *testing
 }
 func TestPrecision_GeometryPrecisionReducerTest_testGridsize(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4546)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4545)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGridsize()
@@ -191,7 +191,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testGridsize(t *testing.T) {
 }
 func TestPrecision_GeometryPrecisionReducerTest_testKeepCollapsedLine(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4547)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4546)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestKeepCollapsedLine()
@@ -199,7 +199,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testKeepCollapsedLine(t *testing
 }
 func TestPrecision_GeometryPrecisionReducerTest_testKeepCollapsedLinearRing(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4548)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4547)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestKeepCollapsedLinearRing()
@@ -207,7 +207,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testKeepCollapsedLinearRing(t *t
 }
 func TestPrecision_GeometryPrecisionReducerTest_testKeepCollapsedMultiPolygon(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4549)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4548)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestKeepCollapsedMultiPolygon()
@@ -215,7 +215,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testKeepCollapsedMultiPolygon(t 
 }
 func TestPrecision_GeometryPrecisionReducerTest_testKeepCollapsedPolygon(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4550)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4549)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestKeepCollapsedPolygon()
@@ -223,7 +223,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testKeepCollapsedPolygon(t *test
 }
 func TestPrecision_GeometryPrecisionReducerTest_testKeepCollapsedSquare(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4551)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4550)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestKeepCollapsedSquare()
@@ -231,7 +231,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testKeepCollapsedSquare(t *testi
 }
 func TestPrecision_GeometryPrecisionReducerTest_testLargeGridsizeFail(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4552)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4551)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLargeGridsizeFail()
@@ -247,7 +247,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testLine(t *testing.T) {
 }
 func TestPrecision_GeometryPrecisionReducerTest_testLineDuplicatePointsRemoved(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4553)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4552)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineDuplicatePointsRemoved()
@@ -255,7 +255,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testLineDuplicatePointsRemoved(t
 }
 func TestPrecision_GeometryPrecisionReducerTest_testLineNotNoded(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4554)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4553)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineNotNoded()
@@ -263,7 +263,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testLineNotNoded(t *testing.T) {
 }
 func TestPrecision_GeometryPrecisionReducerTest_testLineRemoveCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4555)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4554)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineRemoveCollapse()
@@ -271,7 +271,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testLineRemoveCollapse(t *testin
 }
 func TestPrecision_GeometryPrecisionReducerTest_testMultiLineRemoveCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4556)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4555)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineRemoveCollapse()
@@ -287,7 +287,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testMultiPoint(t *testing.T) {
 }
 func TestPrecision_GeometryPrecisionReducerTest_testMultiPolgonCollapseRemoved(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4557)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4556)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolgonCollapseRemoved()
@@ -303,7 +303,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testPoint(t *testing.T) {
 }
 func TestPrecision_GeometryPrecisionReducerTest_testPolgonWithCollapsedLine(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4558)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4557)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolgonWithCollapsedLine()
@@ -311,7 +311,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testPolgonWithCollapsedLine(t *t
 }
 func TestPrecision_GeometryPrecisionReducerTest_testPolgonWithCollapsedPoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4559)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4558)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolgonWithCollapsedPoint()
@@ -319,7 +319,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testPolgonWithCollapsedPoint(t *
 }
 func TestPrecision_GeometryPrecisionReducerTest_testPolygonCollapsesCompletely(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4560)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4559)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonCollapsesCompletely()
@@ -327,7 +327,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testPolygonCollapsesCompletely(t
 }
 func TestPrecision_GeometryPrecisionReducerTest_testPolygonHasValidResult(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4561)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4560)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonHasValidResult()
@@ -343,7 +343,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testSquare(t *testing.T) {
 }
 func TestPrecision_GeometryPrecisionReducerTest_testSquareCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4562)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4561)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestSquareCollapse()
@@ -351,7 +351,7 @@ func TestPrecision_GeometryPrecisionReducerTest_testSquareCollapse(t *testing.T)
 }
 func TestPrecision_GeometryPrecisionReducerTest_testTinySquareCollapse(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4563)
+		tc := Precision_GeometryPrecisionReducerTest_new(jlit_4562)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestTinySquareCollapse()

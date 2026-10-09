@@ -40,20 +40,20 @@ func OperationPolygonize_PolygonizeGraph_isInstance(o any) bool {
 	return ok
 }
 func OperationPolygonize_PolygonizeGraph_isKind(p *Planargraph_PlanarGraph) bool {
-	return p != nil && p.jkind_ >= 176 && p.jkind_ <= 176
+	return p != nil && p.jkind_ >= 175 && p.jkind_ <= 175
 }
 func OperationPolygonize_PolygonizeGraph_downcast(p *Planargraph_PlanarGraph) *OperationPolygonize_PolygonizeGraph {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 176 || p.jkind_ > 176 {
+	if p.jkind_ < 175 || p.jkind_ > 175 {
 		panic(java.ClassCastError(Planargraph_PlanarGraph_toAny(p), "org.locationtech.jts.operation.polygonize.PolygonizeGraph"))
 	}
 	return (*OperationPolygonize_PolygonizeGraph)(unsafe.Pointer(p))
 }
 func OperationPolygonize_PolygonizeGraph_new(factory *Geom_GeometryFactory) *OperationPolygonize_PolygonizeGraph {
 	this := &OperationPolygonize_PolygonizeGraph{}
-	this.jkind_ = 176
+	this.jkind_ = 175
 	this.OperationPolygonize_PolygonizeGraph_init(factory)
 	return this
 }

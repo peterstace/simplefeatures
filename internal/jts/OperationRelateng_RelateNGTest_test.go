@@ -40,20 +40,20 @@ func OperationRelateng_RelateNGTest_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelateNGTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 317 && p.jkind_ <= 317
+	return p != nil && p.jkind_ >= 287 && p.jkind_ <= 287
 }
 func OperationRelateng_RelateNGTest_downcast(p *Testjts_GeometryTestCase) *OperationRelateng_RelateNGTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 317 || p.jkind_ > 317 {
+	if p.jkind_ < 287 || p.jkind_ > 287 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.relateng.RelateNGTest"))
 	}
 	return (*OperationRelateng_RelateNGTest)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelateNGTest_new(name *java.String) *OperationRelateng_RelateNGTest {
 	this := &OperationRelateng_RelateNGTest{}
-	this.jkind_ = 317
+	this.jkind_ = 287
 	this.JSetSelf(this)
 	this.OperationRelateng_RelateNGTest_init(name)
 	return this
@@ -67,26 +67,26 @@ func (this *OperationRelateng_RelateNGTest) TestPointsDisjoint() {
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckEquals_String_String_boolean(a, b, false)
-	this.CheckRelate_String_String_String(a, b, jlit_4169)
+	this.CheckRelate_String_String_String(a, b, jlit_4168)
 }
 func (this *OperationRelateng_RelateNGTest) TestPointsContained() {
-	var a *java.String = jlit_4170
-	var b *java.String = jlit_4171
+	var a *java.String = jlit_4169
+	var b *java.String = jlit_4170
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 	this.CheckEquals_String_String_boolean(a, b, false)
 	this.CheckRelate_String_String_String(a, b, jlit_1538)
 }
 func (this *OperationRelateng_RelateNGTest) TestPointsEqual() {
-	var a *java.String = jlit_4170
-	var b *java.String = jlit_4170
+	var a *java.String = jlit_4169
+	var b *java.String = jlit_4169
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 	this.CheckEquals_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestValidateRelatePP_13() {
-	var a *java.String = jlit_4172
-	var b *java.String = jlit_4173
+	var a *java.String = jlit_4171
+	var b *java.String = jlit_4172
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(b, a, false)
@@ -96,8 +96,8 @@ func (this *OperationRelateng_RelateNGTest) TestValidateRelatePP_13() {
 }
 func (this *OperationRelateng_RelateNGTest) TestLinePointContains() {
 	var a *java.String = jlit_1261
-	var b *java.String = jlit_4170
-	this.CheckRelate_String_String_String(a, b, jlit_4174)
+	var b *java.String = jlit_4169
+	this.CheckRelate_String_String_String(a, b, jlit_4173)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(b, a, false)
@@ -106,7 +106,7 @@ func (this *OperationRelateng_RelateNGTest) TestLinePointContains() {
 }
 func (this *OperationRelateng_RelateNGTest) TestLinePointOverlaps() {
 	var a *java.String = jlit_470
-	var b *java.String = jlit_4170
+	var b *java.String = jlit_4169
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(b, a, false)
@@ -125,7 +125,7 @@ func (this *OperationRelateng_RelateNGTest) TestZeroLengthLinePoint() {
 	this.CheckEquals_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestZeroLengthLineLine() {
-	var a *java.String = jlit_4175
+	var a *java.String = jlit_4174
 	var b *java.String = jlit_2369
 	this.CheckRelate_String_String_String(a, b, jlit_1535)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
@@ -136,9 +136,9 @@ func (this *OperationRelateng_RelateNGTest) TestZeroLengthLineLine() {
 	this.CheckEquals_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestNonZeroLengthLinePoint() {
-	var a *java.String = jlit_4035
+	var a *java.String = jlit_4034
 	var b *java.String = jlit_536
-	this.CheckRelate_String_String_String(a, b, jlit_4176)
+	this.CheckRelate_String_String_String(a, b, jlit_4175)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(b, a, false)
@@ -147,87 +147,87 @@ func (this *OperationRelateng_RelateNGTest) TestNonZeroLengthLinePoint() {
 	this.CheckEquals_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinePointIntAndExt() {
-	var a *java.String = jlit_4177
-	var b *java.String = jlit_4178
-	this.CheckRelate_String_String_String(a, b, jlit_4179)
+	var a *java.String = jlit_4176
+	var b *java.String = jlit_4177
+	this.CheckRelate_String_String_String(a, b, jlit_4178)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesCrossProper() {
 	var a *java.String = jlit_2972
-	var b *java.String = jlit_4180
+	var b *java.String = jlit_4179
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesOverlap() {
-	var a *java.String = jlit_4181
-	var b *java.String = jlit_4182
+	var a *java.String = jlit_4180
+	var b *java.String = jlit_4181
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckTouches_String_String_boolean(a, b, false)
 	this.CheckOverlaps_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesCrossVertex() {
-	var a *java.String = jlit_4183
-	var b *java.String = jlit_4184
+	var a *java.String = jlit_4182
+	var b *java.String = jlit_4183
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesTouchVertex() {
-	var a *java.String = jlit_4185
-	var b *java.String = jlit_4186
+	var a *java.String = jlit_4184
+	var b *java.String = jlit_4185
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesDisjointByEnvelope() {
 	var a *java.String = jlit_2972
-	var b *java.String = jlit_4187
+	var b *java.String = jlit_4186
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesDisjoint() {
 	var a *java.String = jlit_2972
-	var b *java.String = jlit_4188
+	var b *java.String = jlit_4187
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesClosedEmpty() {
 	var a *java.String = jlit_2748
 	var b *java.String = jlit_1038
-	this.CheckRelate_String_String_String(a, b, jlit_4189)
+	this.CheckRelate_String_String_String(a, b, jlit_4188)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesRingTouchAtNode() {
-	var a *java.String = jlit_4190
-	var b *java.String = jlit_4191
-	this.CheckRelate_String_String_String(a, b, jlit_3972)
+	var a *java.String = jlit_4189
+	var b *java.String = jlit_4190
+	this.CheckRelate_String_String_String(a, b, jlit_3971)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckTouches_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesTouchAtBdy() {
-	var a *java.String = jlit_4192
-	var b *java.String = jlit_4191
-	this.CheckRelate_String_String_String(a, b, jlit_3964)
+	var a *java.String = jlit_4191
+	var b *java.String = jlit_4190
+	this.CheckRelate_String_String_String(a, b, jlit_3963)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckTouches_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesOverlapWithDisjointLine() {
 	var a *java.String = jlit_2361
-	var b *java.String = jlit_4193
-	this.CheckRelate_String_String_String(a, b, jlit_4194)
+	var b *java.String = jlit_4192
+	this.CheckRelate_String_String_String(a, b, jlit_4193)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckOverlaps_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesDisjointOverlappingEnvelopes() {
-	var a *java.String = jlit_4195
-	var b *java.String = jlit_4196
-	this.CheckRelate_String_String_String(a, b, jlit_4197)
+	var a *java.String = jlit_4194
+	var b *java.String = jlit_4195
+	this.CheckRelate_String_String_String(a, b, jlit_4196)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckTouches_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesCross_JTS270() {
-	var a *java.String = jlit_4198
-	var b *java.String = jlit_4199
+	var a *java.String = jlit_4197
+	var b *java.String = jlit_4198
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, false)
@@ -236,8 +236,8 @@ func (this *OperationRelateng_RelateNGTest) TestLinesCross_JTS270() {
 	this.CheckTouches_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesContained_JTS396() {
-	var a *java.String = jlit_3957
-	var b *java.String = jlit_3958
+	var a *java.String = jlit_3956
+	var b *java.String = jlit_3957
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
@@ -246,8 +246,8 @@ func (this *OperationRelateng_RelateNGTest) TestLinesContained_JTS396() {
 	this.CheckTouches_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestLinesContainedWithSelfIntersection() {
-	var a *java.String = jlit_4200
-	var b *java.String = jlit_3958
+	var a *java.String = jlit_4199
+	var b *java.String = jlit_3957
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
 	this.CheckCrosses_String_String_boolean(a, b, false)
@@ -255,8 +255,8 @@ func (this *OperationRelateng_RelateNGTest) TestLinesContainedWithSelfIntersecti
 	this.CheckTouches_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestLineContainedInRing() {
-	var a *java.String = jlit_4201
-	var b *java.String = jlit_4202
+	var a *java.String = jlit_4200
+	var b *java.String = jlit_4201
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(b, a, true)
 	this.CheckCoversCoveredBy_String_String_boolean(b, a, true)
@@ -265,7 +265,7 @@ func (this *OperationRelateng_RelateNGTest) TestLineContainedInRing() {
 	this.CheckTouches_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestLineLineProperIntersection() {
-	var a *java.String = jlit_3959
+	var a *java.String = jlit_3958
 	var b *java.String = jlit_470
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
@@ -274,9 +274,9 @@ func (this *OperationRelateng_RelateNGTest) TestLineLineProperIntersection() {
 	this.CheckTouches_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestLineSelfIntersectionCollinear() {
-	var a *java.String = jlit_4203
-	var b *java.String = jlit_4204
-	this.CheckRelate_String_String_String(a, b, jlit_4205)
+	var a *java.String = jlit_4202
+	var b *java.String = jlit_4203
+	this.CheckRelate_String_String_String(a, b, jlit_4204)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonPointInside() {
 	var a *java.String = jlit_1401
@@ -285,22 +285,22 @@ func (this *OperationRelateng_RelateNGTest) TestPolygonPointInside() {
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonPointOutside() {
-	var a *java.String = jlit_4206
-	var b *java.String = jlit_4207
+	var a *java.String = jlit_4205
+	var b *java.String = jlit_4206
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonPointInBoundary() {
-	var a *java.String = jlit_4206
+	var a *java.String = jlit_4205
 	var b *java.String = jlit_1430
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestAreaPointInExterior() {
-	var a *java.String = jlit_4208
-	var b *java.String = jlit_4209
-	this.CheckRelate_String_String_String(a, b, jlit_4210)
+	var a *java.String = jlit_4207
+	var b *java.String = jlit_4208
+	this.CheckRelate_String_String_String(a, b, jlit_4209)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, false)
@@ -308,15 +308,15 @@ func (this *OperationRelateng_RelateNGTest) TestAreaPointInExterior() {
 	this.CheckOverlaps_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestAreaLineContainedAtLineVertex() {
-	var a *java.String = jlit_4208
-	var b *java.String = jlit_4211
+	var a *java.String = jlit_4207
+	var b *java.String = jlit_4210
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckTouches_String_String_boolean(a, b, false)
 	this.CheckOverlaps_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestAreaLineTouchAtLineVertex() {
-	var a *java.String = jlit_4208
-	var b *java.String = jlit_4212
+	var a *java.String = jlit_4207
+	var b *java.String = jlit_4211
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, false)
@@ -325,19 +325,19 @@ func (this *OperationRelateng_RelateNGTest) TestAreaLineTouchAtLineVertex() {
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonLineInside() {
 	var a *java.String = jlit_1401
-	var b *java.String = jlit_4212
-	this.CheckRelate_String_String_String(a, b, jlit_4086)
+	var b *java.String = jlit_4211
+	this.CheckRelate_String_String_String(a, b, jlit_4085)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonLineOutside() {
-	var a *java.String = jlit_4206
-	var b *java.String = jlit_4213
+	var a *java.String = jlit_4205
+	var b *java.String = jlit_4212
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonLineInBoundary() {
-	var a *java.String = jlit_4206
+	var a *java.String = jlit_4205
 	var b *java.String = jlit_2396
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
@@ -346,9 +346,9 @@ func (this *OperationRelateng_RelateNGTest) TestPolygonLineInBoundary() {
 	this.CheckOverlaps_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonLineCrossingContained() {
-	var a *java.String = jlit_4214
-	var b *java.String = jlit_4215
-	this.CheckRelate_String_String_String(a, b, jlit_4052)
+	var a *java.String = jlit_4213
+	var b *java.String = jlit_4214
+	this.CheckRelate_String_String_String(a, b, jlit_4051)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
@@ -356,8 +356,8 @@ func (this *OperationRelateng_RelateNGTest) TestPolygonLineCrossingContained() {
 	this.CheckOverlaps_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestValidateRelateLA_220() {
-	var a *java.String = jlit_4216
-	var b *java.String = jlit_4217
+	var a *java.String = jlit_4215
+	var b *java.String = jlit_4216
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, false)
@@ -365,9 +365,9 @@ func (this *OperationRelateng_RelateNGTest) TestValidateRelateLA_220() {
 	this.CheckOverlaps_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestLineCrossingPolygonAtShellHolePoint() {
-	var a *java.String = jlit_4218
-	var b *java.String = jlit_4219
-	this.CheckRelate_String_String_String(a, b, jlit_4055)
+	var a *java.String = jlit_4217
+	var b *java.String = jlit_4218
+	this.CheckRelate_String_String_String(a, b, jlit_4054)
 	this.CheckTouches_String_String_boolean(a, b, true)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
@@ -376,8 +376,8 @@ func (this *OperationRelateng_RelateNGTest) TestLineCrossingPolygonAtShellHolePo
 	this.CheckOverlaps_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestLineCrossingPolygonAtNonVertex() {
-	var a *java.String = jlit_4220
-	var b *java.String = jlit_4217
+	var a *java.String = jlit_4219
+	var b *java.String = jlit_4216
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, false)
@@ -385,20 +385,20 @@ func (this *OperationRelateng_RelateNGTest) TestLineCrossingPolygonAtNonVertex()
 	this.CheckOverlaps_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonLinesContainedCollinearEdge() {
-	var a *java.String = jlit_4221
-	var b *java.String = jlit_4222
-	this.CheckRelate_String_String_String(a, b, jlit_4223)
+	var a *java.String = jlit_4220
+	var b *java.String = jlit_4221
+	this.CheckRelate_String_String_String(a, b, jlit_4222)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonsEdgeAdjacent() {
 	var a *java.String = jlit_983
-	var b *java.String = jlit_4224
+	var b *java.String = jlit_4223
 	this.CheckOverlaps_String_String_boolean(a, b, false)
 	this.CheckTouches_String_String_boolean(a, b, true)
 	this.CheckOverlaps_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonsEdgeAdjacent2() {
-	var a *java.String = jlit_4225
-	var b *java.String = jlit_4226
+	var a *java.String = jlit_4224
+	var b *java.String = jlit_4225
 	this.CheckOverlaps_String_String_boolean(a, b, false)
 	this.CheckTouches_String_String_boolean(a, b, true)
 	this.CheckOverlaps_String_String_boolean(a, b, false)
@@ -413,7 +413,7 @@ func (this *OperationRelateng_RelateNGTest) TestPolygonsNested() {
 	this.CheckTouches_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonsOverlapProper() {
-	var a *java.String = jlit_4227
+	var a *java.String = jlit_4226
 	var b *java.String = jlit_3417
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
@@ -422,8 +422,8 @@ func (this *OperationRelateng_RelateNGTest) TestPolygonsOverlapProper() {
 	this.CheckTouches_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonsOverlapAtNodes() {
-	var a *java.String = jlit_4208
-	var b *java.String = jlit_4228
+	var a *java.String = jlit_4207
+	var b *java.String = jlit_4227
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, false)
@@ -431,24 +431,24 @@ func (this *OperationRelateng_RelateNGTest) TestPolygonsOverlapAtNodes() {
 	this.CheckTouches_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonsContainedAtNodes() {
-	var a *java.String = jlit_4229
-	var b *java.String = jlit_4230
+	var a *java.String = jlit_4228
+	var b *java.String = jlit_4229
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
 	this.CheckOverlaps_String_String_boolean(a, b, false)
 	this.CheckTouches_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonsNestedWithHole() {
-	var a *java.String = jlit_4231
-	var b *java.String = jlit_4232
+	var a *java.String = jlit_4230
+	var b *java.String = jlit_4231
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(b, a, false)
 	this.CheckPredicate_TopologyPredicate_String_String_boolean(OperationRelateng_RelatePredicate_contains(), a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonsOverlappingWithBoundaryInside() {
-	var a *java.String = jlit_4233
-	var b *java.String = jlit_4234
-	this.CheckRelate_String_String_String(a, b, jlit_4235)
+	var a *java.String = jlit_4232
+	var b *java.String = jlit_4233
+	this.CheckRelate_String_String_String(a, b, jlit_4234)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(b, a, false)
@@ -457,16 +457,16 @@ func (this *OperationRelateng_RelateNGTest) TestPolygonsOverlappingWithBoundaryI
 	this.CheckTouches_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestPolygonsOverlapVeryNarrow() {
-	var a *java.String = jlit_4236
-	var b *java.String = jlit_4237
-	this.CheckRelate_String_String_String(a, b, jlit_4238)
+	var a *java.String = jlit_4235
+	var b *java.String = jlit_4236
+	this.CheckRelate_String_String_String(a, b, jlit_4237)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckContainsWithin_String_String_boolean(b, a, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestValidateRelateAA_86() {
-	var a *java.String = jlit_4239
-	var b *java.String = jlit_4240
+	var a *java.String = jlit_4238
+	var b *java.String = jlit_4239
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, false)
@@ -475,8 +475,8 @@ func (this *OperationRelateng_RelateNGTest) TestValidateRelateAA_86() {
 	this.CheckTouches_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestValidateRelateAA_97() {
-	var a *java.String = jlit_4241
-	var b *java.String = jlit_4242
+	var a *java.String = jlit_4240
+	var b *java.String = jlit_4241
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, false)
@@ -485,23 +485,23 @@ func (this *OperationRelateng_RelateNGTest) TestValidateRelateAA_97() {
 	this.CheckTouches_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestAdjacentPolygons() {
-	var a *java.String = jlit_4243
-	var b *java.String = jlit_4244
+	var a *java.String = jlit_4242
+	var b *java.String = jlit_4243
 	this.CheckRelateMatches_String_String_String_boolean(a, b, jlit_343, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestAdjacentPolygonsTouchingAtPoint() {
-	var a *java.String = jlit_4243
-	var b *java.String = jlit_4245
+	var a *java.String = jlit_4242
+	var b *java.String = jlit_4244
 	this.CheckRelateMatches_String_String_String_boolean(a, b, jlit_343, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestAdjacentPolygonsOverlappping() {
-	var a *java.String = jlit_4243
-	var b *java.String = jlit_4246
+	var a *java.String = jlit_4242
+	var b *java.String = jlit_4245
 	this.CheckRelateMatches_String_String_String_boolean(a, b, jlit_343, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestContainsProperlyPolygonContained() {
 	var a *java.String = jlit_799
-	var b *java.String = jlit_4247
+	var b *java.String = jlit_4246
 	this.CheckRelateMatches_String_String_String_boolean(a, b, jlit_103, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestContainsProperlyPolygonTouching() {
@@ -510,20 +510,20 @@ func (this *OperationRelateng_RelateNGTest) TestContainsProperlyPolygonTouching(
 	this.CheckRelateMatches_String_String_String_boolean(a, b, jlit_103, false)
 }
 func (this *OperationRelateng_RelateNGTest) TestContainsProperlyPolygonsOverlapping() {
-	var a *java.String = jlit_4248
-	var b *java.String = jlit_4249
+	var a *java.String = jlit_4247
+	var b *java.String = jlit_4248
 	this.CheckRelateMatches_String_String_String_boolean(a, b, jlit_103, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestRepeatedPointLL() {
-	var a *java.String = jlit_4250
-	var b *java.String = jlit_4251
-	this.CheckRelate_String_String_String(a, b, jlit_4252)
+	var a *java.String = jlit_4249
+	var b *java.String = jlit_4250
+	this.CheckRelate_String_String_String(a, b, jlit_4251)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGTest) TestRepeatedPointAA() {
-	var a *java.String = jlit_4253
-	var b *java.String = jlit_4254
-	this.CheckRelate_String_String_String(a, b, jlit_4066)
+	var a *java.String = jlit_4252
+	var b *java.String = jlit_4253
+	this.CheckRelate_String_String_String(a, b, jlit_4065)
 }
 func (this *OperationRelateng_RelateNGTest) TestEmptyEquals() {
 	var empties []*java.String = []*java.String{jlit_566, jlit_1038, jlit_534, jlit_567, jlit_1461, jlit_886, jlit_1187}
@@ -536,7 +536,7 @@ func (this *OperationRelateng_RelateNGTest) TestEmptyEquals() {
 				for ; j < nempty; j++ {
 					var a *java.String = empties[i]
 					var b *java.String = empties[j]
-					this.CheckRelate_String_String_String(a, b, jlit_4255)
+					this.CheckRelate_String_String_String(a, b, jlit_4254)
 					this.CheckEquals_String_String_boolean(a, b, false)
 				}
 			}
@@ -544,13 +544,13 @@ func (this *OperationRelateng_RelateNGTest) TestEmptyEquals() {
 	}
 }
 func (this *OperationRelateng_RelateNGTest) TestPreparedAA() {
-	var a *java.String = jlit_4256
-	var b *java.String = jlit_4257
+	var a *java.String = jlit_4255
+	var b *java.String = jlit_4256
 	this.CheckPrepared_String_String(a, b)
 }
 func TestOperationRelateng_RelateNGTest_testAdjacentPolygons(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4258)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4257)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjacentPolygons()
@@ -558,7 +558,7 @@ func TestOperationRelateng_RelateNGTest_testAdjacentPolygons(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testAdjacentPolygonsOverlappping(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4259)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4258)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjacentPolygonsOverlappping()
@@ -566,7 +566,7 @@ func TestOperationRelateng_RelateNGTest_testAdjacentPolygonsOverlappping(t *test
 }
 func TestOperationRelateng_RelateNGTest_testAdjacentPolygonsTouchingAtPoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4260)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4259)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjacentPolygonsTouchingAtPoint()
@@ -574,7 +574,7 @@ func TestOperationRelateng_RelateNGTest_testAdjacentPolygonsTouchingAtPoint(t *t
 }
 func TestOperationRelateng_RelateNGTest_testAreaLineContainedAtLineVertex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4261)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4260)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAreaLineContainedAtLineVertex()
@@ -582,7 +582,7 @@ func TestOperationRelateng_RelateNGTest_testAreaLineContainedAtLineVertex(t *tes
 }
 func TestOperationRelateng_RelateNGTest_testAreaLineTouchAtLineVertex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4262)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4261)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAreaLineTouchAtLineVertex()
@@ -590,7 +590,7 @@ func TestOperationRelateng_RelateNGTest_testAreaLineTouchAtLineVertex(t *testing
 }
 func TestOperationRelateng_RelateNGTest_testAreaPointInExterior(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4263)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4262)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAreaPointInExterior()
@@ -598,7 +598,7 @@ func TestOperationRelateng_RelateNGTest_testAreaPointInExterior(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testContainsProperlyPolygonContained(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4264)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4263)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestContainsProperlyPolygonContained()
@@ -606,7 +606,7 @@ func TestOperationRelateng_RelateNGTest_testContainsProperlyPolygonContained(t *
 }
 func TestOperationRelateng_RelateNGTest_testContainsProperlyPolygonTouching(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4265)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4264)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestContainsProperlyPolygonTouching()
@@ -614,7 +614,7 @@ func TestOperationRelateng_RelateNGTest_testContainsProperlyPolygonTouching(t *t
 }
 func TestOperationRelateng_RelateNGTest_testContainsProperlyPolygonsOverlapping(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4266)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4265)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestContainsProperlyPolygonsOverlapping()
@@ -622,7 +622,7 @@ func TestOperationRelateng_RelateNGTest_testContainsProperlyPolygonsOverlapping(
 }
 func TestOperationRelateng_RelateNGTest_testEmptyEquals(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4267)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4266)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestEmptyEquals()
@@ -630,7 +630,7 @@ func TestOperationRelateng_RelateNGTest_testEmptyEquals(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLineContainedInRing(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4268)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4267)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineContainedInRing()
@@ -638,7 +638,7 @@ func TestOperationRelateng_RelateNGTest_testLineContainedInRing(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLineCrossingPolygonAtNonVertex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4269)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4268)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineCrossingPolygonAtNonVertex()
@@ -646,7 +646,7 @@ func TestOperationRelateng_RelateNGTest_testLineCrossingPolygonAtNonVertex(t *te
 }
 func TestOperationRelateng_RelateNGTest_testLineCrossingPolygonAtShellHolePoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4270)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4269)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineCrossingPolygonAtShellHolePoint()
@@ -654,7 +654,7 @@ func TestOperationRelateng_RelateNGTest_testLineCrossingPolygonAtShellHolePoint(
 }
 func TestOperationRelateng_RelateNGTest_testLineLineProperIntersection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4271)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4270)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineLineProperIntersection()
@@ -662,7 +662,7 @@ func TestOperationRelateng_RelateNGTest_testLineLineProperIntersection(t *testin
 }
 func TestOperationRelateng_RelateNGTest_testLinePointContains(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4272)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4271)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinePointContains()
@@ -670,7 +670,7 @@ func TestOperationRelateng_RelateNGTest_testLinePointContains(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLinePointIntAndExt(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4273)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4272)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinePointIntAndExt()
@@ -678,7 +678,7 @@ func TestOperationRelateng_RelateNGTest_testLinePointIntAndExt(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLinePointOverlaps(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4274)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4273)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinePointOverlaps()
@@ -686,7 +686,7 @@ func TestOperationRelateng_RelateNGTest_testLinePointOverlaps(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLineSelfIntersectionCollinear(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4275)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4274)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineSelfIntersectionCollinear()
@@ -694,7 +694,7 @@ func TestOperationRelateng_RelateNGTest_testLineSelfIntersectionCollinear(t *tes
 }
 func TestOperationRelateng_RelateNGTest_testLinesClosedEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4276)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4275)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesClosedEmpty()
@@ -702,7 +702,7 @@ func TestOperationRelateng_RelateNGTest_testLinesClosedEmpty(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLinesContainedWithSelfIntersection(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4277)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4276)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesContainedWithSelfIntersection()
@@ -710,7 +710,7 @@ func TestOperationRelateng_RelateNGTest_testLinesContainedWithSelfIntersection(t
 }
 func TestOperationRelateng_RelateNGTest_testLinesContained_JTS396(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4278)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4277)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesContained_JTS396()
@@ -718,7 +718,7 @@ func TestOperationRelateng_RelateNGTest_testLinesContained_JTS396(t *testing.T) 
 }
 func TestOperationRelateng_RelateNGTest_testLinesCrossProper(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4279)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4278)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesCrossProper()
@@ -726,7 +726,7 @@ func TestOperationRelateng_RelateNGTest_testLinesCrossProper(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLinesCrossVertex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4280)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4279)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesCrossVertex()
@@ -734,7 +734,7 @@ func TestOperationRelateng_RelateNGTest_testLinesCrossVertex(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLinesCross_JTS270(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4281)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4280)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesCross_JTS270()
@@ -742,7 +742,7 @@ func TestOperationRelateng_RelateNGTest_testLinesCross_JTS270(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLinesDisjoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4282)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4281)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesDisjoint()
@@ -750,7 +750,7 @@ func TestOperationRelateng_RelateNGTest_testLinesDisjoint(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLinesDisjointByEnvelope(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4283)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4282)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesDisjointByEnvelope()
@@ -758,7 +758,7 @@ func TestOperationRelateng_RelateNGTest_testLinesDisjointByEnvelope(t *testing.T
 }
 func TestOperationRelateng_RelateNGTest_testLinesDisjointOverlappingEnvelopes(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4284)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4283)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesDisjointOverlappingEnvelopes()
@@ -766,7 +766,7 @@ func TestOperationRelateng_RelateNGTest_testLinesDisjointOverlappingEnvelopes(t 
 }
 func TestOperationRelateng_RelateNGTest_testLinesOverlap(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4285)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4284)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesOverlap()
@@ -774,7 +774,7 @@ func TestOperationRelateng_RelateNGTest_testLinesOverlap(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLinesOverlapWithDisjointLine(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4286)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4285)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesOverlapWithDisjointLine()
@@ -782,7 +782,7 @@ func TestOperationRelateng_RelateNGTest_testLinesOverlapWithDisjointLine(t *test
 }
 func TestOperationRelateng_RelateNGTest_testLinesRingTouchAtNode(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4287)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4286)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesRingTouchAtNode()
@@ -790,7 +790,7 @@ func TestOperationRelateng_RelateNGTest_testLinesRingTouchAtNode(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLinesTouchAtBdy(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4288)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4287)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesTouchAtBdy()
@@ -798,7 +798,7 @@ func TestOperationRelateng_RelateNGTest_testLinesTouchAtBdy(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testLinesTouchVertex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4289)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4288)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinesTouchVertex()
@@ -806,7 +806,7 @@ func TestOperationRelateng_RelateNGTest_testLinesTouchVertex(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testNonZeroLengthLinePoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4290)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4289)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNonZeroLengthLinePoint()
@@ -814,7 +814,7 @@ func TestOperationRelateng_RelateNGTest_testNonZeroLengthLinePoint(t *testing.T)
 }
 func TestOperationRelateng_RelateNGTest_testPointsContained(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4291)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4290)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointsContained()
@@ -822,7 +822,7 @@ func TestOperationRelateng_RelateNGTest_testPointsContained(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testPointsDisjoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4292)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4291)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointsDisjoint()
@@ -830,7 +830,7 @@ func TestOperationRelateng_RelateNGTest_testPointsDisjoint(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testPointsEqual(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4293)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4292)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPointsEqual()
@@ -838,7 +838,7 @@ func TestOperationRelateng_RelateNGTest_testPointsEqual(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testPolygonLineCrossingContained(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4294)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4293)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonLineCrossingContained()
@@ -846,7 +846,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonLineCrossingContained(t *test
 }
 func TestOperationRelateng_RelateNGTest_testPolygonLineInBoundary(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4295)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4294)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonLineInBoundary()
@@ -854,7 +854,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonLineInBoundary(t *testing.T) 
 }
 func TestOperationRelateng_RelateNGTest_testPolygonLineInside(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4296)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4295)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonLineInside()
@@ -862,7 +862,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonLineInside(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testPolygonLineOutside(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4297)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4296)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonLineOutside()
@@ -870,7 +870,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonLineOutside(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testPolygonLinesContainedCollinearEdge(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4298)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4297)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonLinesContainedCollinearEdge()
@@ -878,7 +878,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonLinesContainedCollinearEdge(t
 }
 func TestOperationRelateng_RelateNGTest_testPolygonPointInBoundary(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4299)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4298)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonPointInBoundary()
@@ -886,7 +886,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonPointInBoundary(t *testing.T)
 }
 func TestOperationRelateng_RelateNGTest_testPolygonPointInside(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4300)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4299)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonPointInside()
@@ -894,7 +894,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonPointInside(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testPolygonPointOutside(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4301)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4300)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonPointOutside()
@@ -902,7 +902,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonPointOutside(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testPolygonsContainedAtNodes(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4302)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4301)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonsContainedAtNodes()
@@ -910,7 +910,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonsContainedAtNodes(t *testing.
 }
 func TestOperationRelateng_RelateNGTest_testPolygonsEdgeAdjacent(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4303)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4302)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonsEdgeAdjacent()
@@ -918,7 +918,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonsEdgeAdjacent(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testPolygonsEdgeAdjacent2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4304)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4303)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonsEdgeAdjacent2()
@@ -934,7 +934,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonsNested(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testPolygonsNestedWithHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4305)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4304)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonsNestedWithHole()
@@ -942,7 +942,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonsNestedWithHole(t *testing.T)
 }
 func TestOperationRelateng_RelateNGTest_testPolygonsOverlapAtNodes(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4306)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4305)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonsOverlapAtNodes()
@@ -950,7 +950,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonsOverlapAtNodes(t *testing.T)
 }
 func TestOperationRelateng_RelateNGTest_testPolygonsOverlapProper(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4307)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4306)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonsOverlapProper()
@@ -958,7 +958,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonsOverlapProper(t *testing.T) 
 }
 func TestOperationRelateng_RelateNGTest_testPolygonsOverlapVeryNarrow(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4308)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4307)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonsOverlapVeryNarrow()
@@ -966,7 +966,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonsOverlapVeryNarrow(t *testing
 }
 func TestOperationRelateng_RelateNGTest_testPolygonsOverlappingWithBoundaryInside(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4309)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4308)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonsOverlappingWithBoundaryInside()
@@ -974,7 +974,7 @@ func TestOperationRelateng_RelateNGTest_testPolygonsOverlappingWithBoundaryInsid
 }
 func TestOperationRelateng_RelateNGTest_testPreparedAA(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4310)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4309)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPreparedAA()
@@ -982,7 +982,7 @@ func TestOperationRelateng_RelateNGTest_testPreparedAA(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testRepeatedPointAA(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4311)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4310)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestRepeatedPointAA()
@@ -990,7 +990,7 @@ func TestOperationRelateng_RelateNGTest_testRepeatedPointAA(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testRepeatedPointLL(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4312)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4311)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestRepeatedPointLL()
@@ -998,7 +998,7 @@ func TestOperationRelateng_RelateNGTest_testRepeatedPointLL(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testValidateRelateAA_86(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4313)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4312)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestValidateRelateAA_86()
@@ -1006,7 +1006,7 @@ func TestOperationRelateng_RelateNGTest_testValidateRelateAA_86(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testValidateRelateAA_97(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4314)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4313)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestValidateRelateAA_97()
@@ -1014,7 +1014,7 @@ func TestOperationRelateng_RelateNGTest_testValidateRelateAA_97(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testValidateRelateLA_220(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4315)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4314)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestValidateRelateLA_220()
@@ -1022,7 +1022,7 @@ func TestOperationRelateng_RelateNGTest_testValidateRelateLA_220(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testValidateRelatePP_13(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4316)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4315)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestValidateRelatePP_13()
@@ -1030,7 +1030,7 @@ func TestOperationRelateng_RelateNGTest_testValidateRelatePP_13(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testZeroLengthLineLine(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4317)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4316)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestZeroLengthLineLine()
@@ -1038,7 +1038,7 @@ func TestOperationRelateng_RelateNGTest_testZeroLengthLineLine(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGTest_testZeroLengthLinePoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGTest_new(jlit_4318)
+		tc := OperationRelateng_RelateNGTest_new(jlit_4317)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestZeroLengthLinePoint()

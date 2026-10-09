@@ -33,20 +33,20 @@ func Planargraph_Node_isInstance(o any) bool {
 	return ok
 }
 func Planargraph_Node_isKind(p *Planargraph_GraphComponent) bool {
-	return p != nil && p.jkind_ >= 173 && p.jkind_ <= 173
+	return p != nil && p.jkind_ >= 172 && p.jkind_ <= 172
 }
 func Planargraph_Node_downcast(p *Planargraph_GraphComponent) *Planargraph_Node {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 173 || p.jkind_ > 173 {
+	if p.jkind_ < 172 || p.jkind_ > 172 {
 		panic(java.ClassCastError(Planargraph_GraphComponent_toAny(p), "org.locationtech.jts.planargraph.Node"))
 	}
 	return (*Planargraph_Node)(unsafe.Pointer(p))
 }
 func Planargraph_Node_new_Coordinate(pt *Geom_Coordinate) *Planargraph_Node {
 	this := &Planargraph_Node{}
-	this.jkind_ = 173
+	this.jkind_ = 172
 	this.Planargraph_Node_init_Coordinate(pt)
 	return this
 }
@@ -55,7 +55,7 @@ func (this *Planargraph_Node) Planargraph_Node_init_Coordinate(pt *Geom_Coordina
 }
 func Planargraph_Node_new_Coordinate_DirectedEdgeStar(pt *Geom_Coordinate, deStar *Planargraph_DirectedEdgeStar) *Planargraph_Node {
 	this := &Planargraph_Node{}
-	this.jkind_ = 173
+	this.jkind_ = 172
 	this.Planargraph_Node_init_Coordinate_DirectedEdgeStar(pt, deStar)
 	return this
 }

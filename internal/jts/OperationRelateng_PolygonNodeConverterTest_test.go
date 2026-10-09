@@ -40,20 +40,20 @@ func OperationRelateng_PolygonNodeConverterTest_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_PolygonNodeConverterTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 311 && p.jkind_ <= 311
+	return p != nil && p.jkind_ >= 281 && p.jkind_ <= 281
 }
 func OperationRelateng_PolygonNodeConverterTest_downcast(p *Testjts_GeometryTestCase) *OperationRelateng_PolygonNodeConverterTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 311 || p.jkind_ > 311 {
+	if p.jkind_ < 281 || p.jkind_ > 281 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.relateng.PolygonNodeConverterTest"))
 	}
 	return (*OperationRelateng_PolygonNodeConverterTest)(unsafe.Pointer(p))
 }
 func OperationRelateng_PolygonNodeConverterTest_new(name *java.String) *OperationRelateng_PolygonNodeConverterTest {
 	this := &OperationRelateng_PolygonNodeConverterTest{}
-	this.jkind_ = 311
+	this.jkind_ = 281
 	this.JSetSelf(this)
 	this.OperationRelateng_PolygonNodeConverterTest_init(name)
 	return this
@@ -80,8 +80,8 @@ func (this *OperationRelateng_PolygonNodeConverterTest) checkConversion_List_Lis
 	var actual java.List = OperationRelateng_PolygonNodeConverter_convert(input)
 	var isEqual bool = this.checkSectionsEqual_List_List(actual, expected)
 	if !isEqual {
-		java.System_out.Println_String(java.Concat(jlit_4021, this.formatSections_List(expected)))
-		java.System_out.Println_String(java.Concat(jlit_4022, this.formatSections_List(actual)))
+		java.System_out.Println_String(java.Concat(jlit_4020, this.formatSections_List(expected)))
+		java.System_out.Println_String(java.Concat(jlit_4021, this.formatSections_List(actual)))
 	}
 	junit.TestCase_assertTrue_boolean(isEqual)
 }
@@ -132,7 +132,7 @@ func (this *OperationRelateng_PolygonNodeConverterTest) sectionShell_double_doub
 }
 func TestOperationRelateng_PolygonNodeConverterTest_testHoles(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_PolygonNodeConverterTest_new(jlit_4023)
+		tc := OperationRelateng_PolygonNodeConverterTest_new(jlit_4022)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestHoles()
@@ -140,7 +140,7 @@ func TestOperationRelateng_PolygonNodeConverterTest_testHoles(t *testing.T) {
 }
 func TestOperationRelateng_PolygonNodeConverterTest_testShellAnd2Holes(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_PolygonNodeConverterTest_new(jlit_4024)
+		tc := OperationRelateng_PolygonNodeConverterTest_new(jlit_4023)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestShellAnd2Holes()
@@ -148,7 +148,7 @@ func TestOperationRelateng_PolygonNodeConverterTest_testShellAnd2Holes(t *testin
 }
 func TestOperationRelateng_PolygonNodeConverterTest_testShellAndHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_PolygonNodeConverterTest_new(jlit_4025)
+		tc := OperationRelateng_PolygonNodeConverterTest_new(jlit_4024)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestShellAndHole()
@@ -156,7 +156,7 @@ func TestOperationRelateng_PolygonNodeConverterTest_testShellAndHole(t *testing.
 }
 func TestOperationRelateng_PolygonNodeConverterTest_testShells(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_PolygonNodeConverterTest_new(jlit_4026)
+		tc := OperationRelateng_PolygonNodeConverterTest_new(jlit_4025)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestShells()
@@ -164,7 +164,7 @@ func TestOperationRelateng_PolygonNodeConverterTest_testShells(t *testing.T) {
 }
 func TestOperationRelateng_PolygonNodeConverterTest_testShellsAndHoles(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_PolygonNodeConverterTest_new(jlit_4027)
+		tc := OperationRelateng_PolygonNodeConverterTest_new(jlit_4026)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestShellsAndHoles()

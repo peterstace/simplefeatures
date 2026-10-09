@@ -41,13 +41,13 @@ func Triangulate_DelaunayTest_isInstance(o any) bool {
 	return ok
 }
 func Triangulate_DelaunayTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 339 && p.jkind_ <= 339
+	return p != nil && p.jkind_ >= 306 && p.jkind_ <= 306
 }
 func Triangulate_DelaunayTest_downcast(p *Testjts_GeometryTestCase) *Triangulate_DelaunayTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 339 || p.jkind_ > 339 {
+	if p.jkind_ < 306 || p.jkind_ > 306 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.triangulate.DelaunayTest"))
 	}
 	return (*Triangulate_DelaunayTest)(unsafe.Pointer(p))
@@ -57,7 +57,7 @@ const Triangulate_DelaunayTest_COMPARISON_TOLERANCE float64 = float64(1.0e-7)
 
 func Triangulate_DelaunayTest_new(name *java.String) *Triangulate_DelaunayTest {
 	this := &Triangulate_DelaunayTest{}
-	this.jkind_ = 339
+	this.jkind_ = 306
 	this.JSetSelf(this)
 	this.Triangulate_DelaunayTest_init(name)
 	return this
@@ -67,73 +67,73 @@ func (this *Triangulate_DelaunayTest) Triangulate_DelaunayTest_init(name *java.S
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *Triangulate_DelaunayTest) TestTriangle() {
-	var wkt *java.String = jlit_4737
-	var expected *java.String = jlit_4738
+	var wkt *java.String = jlit_4736
+	var expected *java.String = jlit_4737
 	this.CheckDelaunayEdges_String_String(wkt, expected)
-	var expectedTri *java.String = jlit_4739
+	var expectedTri *java.String = jlit_4738
 	this.CheckDelaunay_String_boolean_String(wkt, true, expectedTri)
 }
 func (this *Triangulate_DelaunayTest) TestRandom() {
-	var wkt *java.String = jlit_4740
-	var expected *java.String = jlit_4741
+	var wkt *java.String = jlit_4739
+	var expected *java.String = jlit_4740
 	this.CheckDelaunayEdges_String_String(wkt, expected)
-	var expectedTri *java.String = jlit_4742
+	var expectedTri *java.String = jlit_4741
 	this.CheckDelaunay_String_boolean_String(wkt, true, expectedTri)
 }
 func (this *Triangulate_DelaunayTest) TestGrid() {
-	var wkt *java.String = jlit_4743
-	var expected *java.String = jlit_4744
+	var wkt *java.String = jlit_4742
+	var expected *java.String = jlit_4743
 	this.CheckDelaunayEdges_String_String(wkt, expected)
-	var expectedTri *java.String = jlit_4745
+	var expectedTri *java.String = jlit_4744
 	this.CheckDelaunay_String_boolean_String(wkt, true, expectedTri)
 }
 func (this *Triangulate_DelaunayTest) TestCircle() {
-	var wkt *java.String = jlit_4746
-	var expected *java.String = jlit_4747
+	var wkt *java.String = jlit_4745
+	var expected *java.String = jlit_4746
 	this.CheckDelaunayEdges_String_String(wkt, expected)
 }
 func (this *Triangulate_DelaunayTest) TestPolygonWithChevronHoles() {
-	var wkt *java.String = jlit_4748
-	var expected *java.String = jlit_4749
+	var wkt *java.String = jlit_4747
+	var expected *java.String = jlit_4748
 	this.CheckDelaunayEdges_String_String(wkt, expected)
 }
 func (this *Triangulate_DelaunayTest) TestFrameTooSmallBug() {
-	var wkt *java.String = jlit_4750
-	var expected *java.String = jlit_4751
+	var wkt *java.String = jlit_4749
+	var expected *java.String = jlit_4750
 	this.CheckDelaunay_String_boolean_String(wkt, true, expected)
 }
 func (this *Triangulate_DelaunayTest) TestNarrow_GEOS_719() {
-	var wkt *java.String = jlit_4752
-	var expected *java.String = jlit_4753
+	var wkt *java.String = jlit_4751
+	var expected *java.String = jlit_4752
 	this.CheckDelaunay_String_boolean_String(wkt, true, expected)
 }
 func (this *Triangulate_DelaunayTest) TestNarrowTriangle() {
-	var wkt *java.String = jlit_4754
-	var expected *java.String = jlit_4755
+	var wkt *java.String = jlit_4753
+	var expected *java.String = jlit_4754
 	this.CheckDelaunay_String_boolean_String(wkt, true, expected)
 }
 func (this *Triangulate_DelaunayTest) TestNarrow_GH477_1() {
-	var wkt *java.String = jlit_4756
-	var expected *java.String = jlit_4757
+	var wkt *java.String = jlit_4755
+	var expected *java.String = jlit_4756
 	this.CheckDelaunay_String_boolean_String(wkt, true, expected)
 }
 func (this *Triangulate_DelaunayTest) TestNarrow_GH477_2() {
-	var wkt *java.String = jlit_4758
-	var expected *java.String = jlit_4759
+	var wkt *java.String = jlit_4757
+	var expected *java.String = jlit_4758
 	this.CheckDelaunay_String_boolean_String(wkt, true, expected)
 }
 func (this *Triangulate_DelaunayTest) TestNarrow_GEOS_946() {
 	var wkt *java.String = jlit_941
-	var expected *java.String = jlit_4760
+	var expected *java.String = jlit_4759
 	this.CheckDelaunay_String_boolean_String(wkt, true, expected)
 }
 func (this *Triangulate_DelaunayTest) TestNarrow_Shapely_1873() {
 	var wkt *java.String = jlit_943
-	var expected *java.String = jlit_4761
+	var expected *java.String = jlit_4760
 	this.CheckDelaunay_String_boolean_String(wkt, true, expected)
 }
 func (this *Triangulate_DelaunayTest) TestNarrowPoints() {
-	var wkt *java.String = jlit_4762
+	var wkt *java.String = jlit_4761
 	this.CheckDelaunayHull_String(wkt)
 }
 func (this *Triangulate_DelaunayTest) CheckDelaunayEdges_String_String(sitesWKT *java.String, expectedWKT *java.String) {
@@ -163,7 +163,7 @@ func (this *Triangulate_DelaunayTest) CheckDelaunayHull_String(sitesWKT *java.St
 	var ch *Algorithm_ConvexHull = Algorithm_ConvexHull_new_Geometry(result)
 	var convexHull *Geom_Geometry = ch.GetConvexHull()
 	var isEqual bool = union.EqualsTopo_Geometry(convexHull)
-	junit.TestCase_assertTrue_String_boolean(jlit_4763, isEqual)
+	junit.TestCase_assertTrue_String_boolean(jlit_4762, isEqual)
 }
 func TestTriangulate_DelaunayTest_testCircle(t *testing.T) {
 	junit.Run(t, func() {
@@ -175,7 +175,7 @@ func TestTriangulate_DelaunayTest_testCircle(t *testing.T) {
 }
 func TestTriangulate_DelaunayTest_testFrameTooSmallBug(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_DelaunayTest_new(jlit_4764)
+		tc := Triangulate_DelaunayTest_new(jlit_4763)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestFrameTooSmallBug()
@@ -191,7 +191,7 @@ func TestTriangulate_DelaunayTest_testGrid(t *testing.T) {
 }
 func TestTriangulate_DelaunayTest_testNarrowPoints(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_DelaunayTest_new(jlit_4765)
+		tc := Triangulate_DelaunayTest_new(jlit_4764)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNarrowPoints()
@@ -199,7 +199,7 @@ func TestTriangulate_DelaunayTest_testNarrowPoints(t *testing.T) {
 }
 func TestTriangulate_DelaunayTest_testNarrowTriangle(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_DelaunayTest_new(jlit_4766)
+		tc := Triangulate_DelaunayTest_new(jlit_4765)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNarrowTriangle()
@@ -207,7 +207,7 @@ func TestTriangulate_DelaunayTest_testNarrowTriangle(t *testing.T) {
 }
 func TestTriangulate_DelaunayTest_testNarrow_GEOS_719(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_DelaunayTest_new(jlit_4767)
+		tc := Triangulate_DelaunayTest_new(jlit_4766)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNarrow_GEOS_719()
@@ -215,7 +215,7 @@ func TestTriangulate_DelaunayTest_testNarrow_GEOS_719(t *testing.T) {
 }
 func TestTriangulate_DelaunayTest_testNarrow_GEOS_946(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_DelaunayTest_new(jlit_4768)
+		tc := Triangulate_DelaunayTest_new(jlit_4767)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNarrow_GEOS_946()
@@ -223,7 +223,7 @@ func TestTriangulate_DelaunayTest_testNarrow_GEOS_946(t *testing.T) {
 }
 func TestTriangulate_DelaunayTest_testNarrow_GH477_1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_DelaunayTest_new(jlit_4769)
+		tc := Triangulate_DelaunayTest_new(jlit_4768)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNarrow_GH477_1()
@@ -231,7 +231,7 @@ func TestTriangulate_DelaunayTest_testNarrow_GH477_1(t *testing.T) {
 }
 func TestTriangulate_DelaunayTest_testNarrow_GH477_2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_DelaunayTest_new(jlit_4770)
+		tc := Triangulate_DelaunayTest_new(jlit_4769)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNarrow_GH477_2()
@@ -239,7 +239,7 @@ func TestTriangulate_DelaunayTest_testNarrow_GH477_2(t *testing.T) {
 }
 func TestTriangulate_DelaunayTest_testNarrow_Shapely_1873(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_DelaunayTest_new(jlit_4771)
+		tc := Triangulate_DelaunayTest_new(jlit_4770)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNarrow_Shapely_1873()
@@ -247,7 +247,7 @@ func TestTriangulate_DelaunayTest_testNarrow_Shapely_1873(t *testing.T) {
 }
 func TestTriangulate_DelaunayTest_testPolygonWithChevronHoles(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_DelaunayTest_new(jlit_4772)
+		tc := Triangulate_DelaunayTest_new(jlit_4771)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonWithChevronHoles()
@@ -255,7 +255,7 @@ func TestTriangulate_DelaunayTest_testPolygonWithChevronHoles(t *testing.T) {
 }
 func TestTriangulate_DelaunayTest_testRandom(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_DelaunayTest_new(jlit_4736)
+		tc := Triangulate_DelaunayTest_new(jlit_4735)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestRandom()

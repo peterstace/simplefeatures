@@ -40,20 +40,20 @@ func OperationOverlay_OverlayMiscTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlay_OverlayMiscTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 282 && p.jkind_ <= 282
+	return p != nil && p.jkind_ >= 252 && p.jkind_ <= 252
 }
 func OperationOverlay_OverlayMiscTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlay_OverlayMiscTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 282 || p.jkind_ > 282 {
+	if p.jkind_ < 252 || p.jkind_ > 252 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlay.OverlayMiscTest"))
 	}
 	return (*OperationOverlay_OverlayMiscTest)(unsafe.Pointer(p))
 }
 func OperationOverlay_OverlayMiscTest_new(name *java.String) *OperationOverlay_OverlayMiscTest {
 	this := &OperationOverlay_OverlayMiscTest{}
-	this.jkind_ = 282
+	this.jkind_ = 252
 	this.JSetSelf(this)
 	this.OperationOverlay_OverlayMiscTest_init(name)
 	return this

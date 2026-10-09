@@ -38,7 +38,7 @@ func TestjtsGeom_TestSerializable_isInstance(o any) bool {
 	return ok
 }
 
-var TestjtsGeom_TestSerializable_FILENAME *java.String = jlit_4886
+var TestjtsGeom_TestSerializable_FILENAME *java.String = jlit_4878
 var TestjtsGeom_TestSerializable_fact *Geom_GeometryFactory = java.StaticInit(func() *Geom_GeometryFactory { return Geom_GeometryFactory_new() })
 
 func TestjtsGeom_TestSerializable_new() *TestjtsGeom_TestSerializable {
@@ -71,21 +71,21 @@ func (this *TestjtsGeom_TestSerializable) Compare_Object_Object(o1 any, o2 any) 
 	var matched bool = false
 	if Geom_Envelope_isInstance(o1) {
 		if !(Geom_Envelope_fromAny(o1)).Equals_Object(o2) {
-			java.System_out.Println_String(java.Concat(jlit_4887, java.StrOfObject(o1), jlit_3975, java.StrOfObject(o2)))
+			java.System_out.Println_String(java.Concat(jlit_4879, java.StrOfObject(o1), jlit_3974, java.StrOfObject(o2)))
 		} else {
 			matched = true
 		}
 	} else {
 		if Geom_Geometry_isInstance(o1) {
 			if !(Geom_Geometry_fromAny(o1)).EqualsExact_Geometry(Geom_Geometry_fromAny(o2)) {
-				java.System_out.Println_String(java.Concat(jlit_4887, java.StrOfObject(o1), jlit_3975, java.StrOfObject(o2)))
+				java.System_out.Println_String(java.Concat(jlit_4879, java.StrOfObject(o1), jlit_3974, java.StrOfObject(o2)))
 			} else {
 				matched = true
 			}
 		}
 	}
 	if matched {
-		java.System_out.Println_String(jlit_4888)
+		java.System_out.Println_String(jlit_4880)
 	}
 	return true
 }

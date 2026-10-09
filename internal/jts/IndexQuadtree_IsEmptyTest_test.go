@@ -49,16 +49,16 @@ func (this *IndexQuadtree_IsEmptyTest) TestSpatialIndex() {
 	var index *IndexQuadtree_Quadtree = IndexQuadtree_Quadtree_new()
 	junit.TestCase_assertTrue_boolean((index.Size() == int32(0)))
 	junit.TestCase_assertTrue_boolean(index.IsEmpty())
-	index.Insert_Envelope_Object(Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(0)), float64(int32(1)), float64(int32(1))), java.Ref(jlit_1787))
+	index.Insert_Envelope_Object(Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(0)), float64(int32(1)), float64(int32(1))), java.Ref(jlit_2006))
 	junit.TestCase_assertTrue_boolean((index.Size() == int32(1)))
 	junit.TestCase_assertTrue_boolean((!index.IsEmpty()))
-	index.Remove_Envelope_Object(Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(0)), float64(int32(1)), float64(int32(1))), java.Ref(jlit_1787))
+	index.Remove_Envelope_Object(Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(0)), float64(int32(1)), float64(int32(1))), java.Ref(jlit_2006))
 	junit.TestCase_assertTrue_boolean((index.Size() == int32(0)))
 	junit.TestCase_assertTrue_boolean(index.IsEmpty())
 }
 func TestIndexQuadtree_IsEmptyTest_testSpatialIndex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexQuadtree_IsEmptyTest_new(jlit_1980)
+		tc := IndexQuadtree_IsEmptyTest_new(jlit_1979)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSpatialIndex()

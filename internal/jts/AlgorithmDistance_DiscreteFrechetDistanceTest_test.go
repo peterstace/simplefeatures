@@ -40,13 +40,13 @@ func AlgorithmDistance_DiscreteFrechetDistanceTest_isInstance(o any) bool {
 	return ok
 }
 func AlgorithmDistance_DiscreteFrechetDistanceTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 216 && p.jkind_ <= 216
+	return p != nil && p.jkind_ >= 186 && p.jkind_ <= 186
 }
 func AlgorithmDistance_DiscreteFrechetDistanceTest_downcast(p *Testjts_GeometryTestCase) *AlgorithmDistance_DiscreteFrechetDistanceTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 216 || p.jkind_ > 216 {
+	if p.jkind_ < 186 || p.jkind_ > 186 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.distance.DiscreteFrechetDistanceTest"))
 	}
 	return (*AlgorithmDistance_DiscreteFrechetDistanceTest)(unsafe.Pointer(p))
@@ -56,7 +56,7 @@ const AlgorithmDistance_DiscreteFrechetDistanceTest_TOLERANCE float64 = float64(
 
 func AlgorithmDistance_DiscreteFrechetDistanceTest_new(name *java.String) *AlgorithmDistance_DiscreteFrechetDistanceTest {
 	this := &AlgorithmDistance_DiscreteFrechetDistanceTest{}
-	this.jkind_ = 216
+	this.jkind_ = 186
 	this.JSetSelf(this)
 	this.AlgorithmDistance_DiscreteFrechetDistanceTest_init(name)
 	return this

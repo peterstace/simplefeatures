@@ -40,20 +40,20 @@ func AlgorithmHull_ConcaveHullOfPolygonsTest_isInstance(o any) bool {
 	return ok
 }
 func AlgorithmHull_ConcaveHullOfPolygonsTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 217 && p.jkind_ <= 217
+	return p != nil && p.jkind_ >= 187 && p.jkind_ <= 187
 }
 func AlgorithmHull_ConcaveHullOfPolygonsTest_downcast(p *Testjts_GeometryTestCase) *AlgorithmHull_ConcaveHullOfPolygonsTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 217 || p.jkind_ > 217 {
+	if p.jkind_ < 187 || p.jkind_ > 187 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.hull.ConcaveHullOfPolygonsTest"))
 	}
 	return (*AlgorithmHull_ConcaveHullOfPolygonsTest)(unsafe.Pointer(p))
 }
 func AlgorithmHull_ConcaveHullOfPolygonsTest_new(name *java.String) *AlgorithmHull_ConcaveHullOfPolygonsTest {
 	this := &AlgorithmHull_ConcaveHullOfPolygonsTest{}
-	this.jkind_ = 217
+	this.jkind_ = 187
 	this.JSetSelf(this)
 	this.AlgorithmHull_ConcaveHullOfPolygonsTest_init(name)
 	return this

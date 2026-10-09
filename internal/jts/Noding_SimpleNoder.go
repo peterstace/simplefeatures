@@ -32,20 +32,20 @@ func Noding_SimpleNoder_isInstance(o any) bool {
 	return ok
 }
 func Noding_SimpleNoder_isKind(p *Noding_SinglePassNoder) bool {
-	return p != nil && p.jkind_ >= 142 && p.jkind_ <= 142
+	return p != nil && p.jkind_ >= 141 && p.jkind_ <= 141
 }
 func Noding_SimpleNoder_downcast(p *Noding_SinglePassNoder) *Noding_SimpleNoder {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 142 || p.jkind_ > 142 {
+	if p.jkind_ < 141 || p.jkind_ > 141 {
 		panic(java.ClassCastError(Noding_SinglePassNoder_toAny(p), "org.locationtech.jts.noding.SimpleNoder"))
 	}
 	return (*Noding_SimpleNoder)(unsafe.Pointer(p))
 }
 func Noding_SimpleNoder_new() *Noding_SimpleNoder {
 	this := &Noding_SimpleNoder{}
-	this.jkind_ = 142
+	this.jkind_ = 141
 	this.Noding_SimpleNoder_init()
 	return this
 }

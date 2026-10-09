@@ -40,20 +40,20 @@ func Coverage_CoverageUnionTest_isInstance(o any) bool {
 	return ok
 }
 func Coverage_CoverageUnionTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 244 && p.jkind_ <= 244
+	return p != nil && p.jkind_ >= 214 && p.jkind_ <= 214
 }
 func Coverage_CoverageUnionTest_downcast(p *Testjts_GeometryTestCase) *Coverage_CoverageUnionTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 244 || p.jkind_ > 244 {
+	if p.jkind_ < 214 || p.jkind_ > 214 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.coverage.CoverageUnionTest"))
 	}
 	return (*Coverage_CoverageUnionTest)(unsafe.Pointer(p))
 }
 func Coverage_CoverageUnionTest_new(name *java.String) *Coverage_CoverageUnionTest {
 	this := &Coverage_CoverageUnionTest{}
-	this.jkind_ = 244
+	this.jkind_ = 214
 	this.JSetSelf(this)
 	this.Coverage_CoverageUnionTest_init(name)
 	return this

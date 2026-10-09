@@ -40,20 +40,20 @@ func OperationOverlayng_OverlayNGEmptyDisjointTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_OverlayNGEmptyDisjointTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 295 && p.jkind_ <= 295
+	return p != nil && p.jkind_ >= 265 && p.jkind_ <= 265
 }
 func OperationOverlayng_OverlayNGEmptyDisjointTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_OverlayNGEmptyDisjointTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 295 || p.jkind_ > 295 {
+	if p.jkind_ < 265 || p.jkind_ > 265 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.OverlayNGEmptyDisjointTest"))
 	}
 	return (*OperationOverlayng_OverlayNGEmptyDisjointTest)(unsafe.Pointer(p))
 }
 func OperationOverlayng_OverlayNGEmptyDisjointTest_new(name *java.String) *OperationOverlayng_OverlayNGEmptyDisjointTest {
 	this := &OperationOverlayng_OverlayNGEmptyDisjointTest{}
-	this.jkind_ = 295
+	this.jkind_ = 265
 	this.JSetSelf(this)
 	this.OperationOverlayng_OverlayNGEmptyDisjointTest_init(name)
 	return this

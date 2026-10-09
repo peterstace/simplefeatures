@@ -40,20 +40,20 @@ func OperationBuffer_BufferParameterTest_isInstance(o any) bool {
 	return ok
 }
 func OperationBuffer_BufferParameterTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 275 && p.jkind_ <= 275
+	return p != nil && p.jkind_ >= 245 && p.jkind_ <= 245
 }
 func OperationBuffer_BufferParameterTest_downcast(p *Testjts_GeometryTestCase) *OperationBuffer_BufferParameterTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 275 || p.jkind_ > 275 {
+	if p.jkind_ < 245 || p.jkind_ > 245 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.buffer.BufferParameterTest"))
 	}
 	return (*OperationBuffer_BufferParameterTest)(unsafe.Pointer(p))
 }
 func OperationBuffer_BufferParameterTest_new(name *java.String) *OperationBuffer_BufferParameterTest {
 	this := &OperationBuffer_BufferParameterTest{}
-	this.jkind_ = 275
+	this.jkind_ = 245
 	this.JSetSelf(this)
 	this.OperationBuffer_BufferParameterTest_init(name)
 	return this

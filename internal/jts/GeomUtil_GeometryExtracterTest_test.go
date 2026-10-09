@@ -49,7 +49,7 @@ func (this *GeomUtil_GeometryExtracterTest) GeomUtil_GeometryExtracterTest_init(
 	this.TestCase.TestCase_init_String(name)
 }
 func (this *GeomUtil_GeometryExtracterTest) TestExtract() {
-	var gc *Geom_Geometry = GeomUtil_GeometryExtracterTest_reader.Read_String(jlit_1824)
+	var gc *Geom_Geometry = GeomUtil_GeometryExtracterTest_reader.Read_String(jlit_1823)
 	var lineStringsAndLinearRings java.List = GeomUtil_GeometryExtracter_extract_Geometry_String(gc, jlit_61)
 	junit.TestCase_assertEquals_int_int(int32(3), lineStringsAndLinearRings.Size())
 	var linearRings java.List = GeomUtil_GeometryExtracter_extract_Geometry_String(gc, jlit_62)
@@ -59,7 +59,7 @@ func (this *GeomUtil_GeometryExtracterTest) TestExtract() {
 }
 func TestGeomUtil_GeometryExtracterTest_testExtract(t *testing.T) {
 	junit.Run(t, func() {
-		tc := GeomUtil_GeometryExtracterTest_new(jlit_1825)
+		tc := GeomUtil_GeometryExtracterTest_new(jlit_1824)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestExtract()

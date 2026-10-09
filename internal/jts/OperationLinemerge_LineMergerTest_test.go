@@ -129,7 +129,7 @@ func (this *OperationLinemerge_LineMergerTest) doTest_StringArr_StringArr(inputW
 }
 func TestOperationLinemerge_LineMergerTest_test1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationLinemerge_LineMergerTest_new(jlit_1962)
+		tc := OperationLinemerge_LineMergerTest_new(jlit_1961)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.Test1()
@@ -137,7 +137,7 @@ func TestOperationLinemerge_LineMergerTest_test1(t *testing.T) {
 }
 func TestOperationLinemerge_LineMergerTest_test2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationLinemerge_LineMergerTest_new(jlit_1964)
+		tc := OperationLinemerge_LineMergerTest_new(jlit_1963)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.Test2()

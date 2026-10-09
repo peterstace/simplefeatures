@@ -51,10 +51,10 @@ func (this *OperationUnion_CascadedPolygonUnionFileTest) OperationUnion_Cascaded
 	this.TestCase.TestCase_init_String(name)
 }
 func (this *OperationUnion_CascadedPolygonUnionFileTest) TestAfrica2() {
-	this.runTestResource_String_double(jlit_4339, float64(0.999999))
+	this.runTestResource_String_double(jlit_4338, float64(0.999999))
 }
 func (this *OperationUnion_CascadedPolygonUnionFileTest) XtestEurope() {
-	this.runTestResource_String_double(jlit_4340, float64(0.999999))
+	this.runTestResource_String_double(jlit_4339, float64(0.999999))
 }
 func (this *OperationUnion_CascadedPolygonUnionFileTest) runTest_String_double(filename *java.String, minimumMeasure float64) {
 	var geoms java.Collection = java.AnyTo[java.Collection](TestjtsUtil_IOUtil_readWKTFile_String(filename))
@@ -65,7 +65,7 @@ func (this *OperationUnion_CascadedPolygonUnionFileTest) runTestResource_String_
 }
 func TestOperationUnion_CascadedPolygonUnionFileTest_testAfrica2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationUnion_CascadedPolygonUnionFileTest_new(jlit_4341)
+		tc := OperationUnion_CascadedPolygonUnionFileTest_new(jlit_4340)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestAfrica2()

@@ -40,20 +40,20 @@ func IndexIntervalrtree_IntervalRTreeLeafNode_isInstance(o any) bool {
 	return ok
 }
 func IndexIntervalrtree_IntervalRTreeLeafNode_isKind(p *IndexIntervalrtree_IntervalRTreeNode) bool {
-	return p != nil && p.jkind_ >= 122 && p.jkind_ <= 122
+	return p != nil && p.jkind_ >= 121 && p.jkind_ <= 121
 }
 func IndexIntervalrtree_IntervalRTreeLeafNode_downcast(p *IndexIntervalrtree_IntervalRTreeNode) *IndexIntervalrtree_IntervalRTreeLeafNode {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 122 || p.jkind_ > 122 {
+	if p.jkind_ < 121 || p.jkind_ > 121 {
 		panic(java.ClassCastError(IndexIntervalrtree_IntervalRTreeNode_toAny(p), "org.locationtech.jts.index.intervalrtree.IntervalRTreeLeafNode"))
 	}
 	return (*IndexIntervalrtree_IntervalRTreeLeafNode)(unsafe.Pointer(p))
 }
 func IndexIntervalrtree_IntervalRTreeLeafNode_new(min_ float64, max_ float64, item any) *IndexIntervalrtree_IntervalRTreeLeafNode {
 	this := &IndexIntervalrtree_IntervalRTreeLeafNode{}
-	this.jkind_ = 122
+	this.jkind_ = 121
 	this.IndexIntervalrtree_IntervalRTreeLeafNode_init(min_, max_, item)
 	return this
 }

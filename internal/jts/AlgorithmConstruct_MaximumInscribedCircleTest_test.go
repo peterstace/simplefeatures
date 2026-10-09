@@ -40,20 +40,20 @@ func AlgorithmConstruct_MaximumInscribedCircleTest_isInstance(o any) bool {
 	return ok
 }
 func AlgorithmConstruct_MaximumInscribedCircleTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 215 && p.jkind_ <= 215
+	return p != nil && p.jkind_ >= 185 && p.jkind_ <= 185
 }
 func AlgorithmConstruct_MaximumInscribedCircleTest_downcast(p *Testjts_GeometryTestCase) *AlgorithmConstruct_MaximumInscribedCircleTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 215 || p.jkind_ > 215 {
+	if p.jkind_ < 185 || p.jkind_ > 185 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.construct.MaximumInscribedCircleTest"))
 	}
 	return (*AlgorithmConstruct_MaximumInscribedCircleTest)(unsafe.Pointer(p))
 }
 func AlgorithmConstruct_MaximumInscribedCircleTest_new(name *java.String) *AlgorithmConstruct_MaximumInscribedCircleTest {
 	this := &AlgorithmConstruct_MaximumInscribedCircleTest{}
-	this.jkind_ = 215
+	this.jkind_ = 185
 	this.JSetSelf(this)
 	this.AlgorithmConstruct_MaximumInscribedCircleTest_init(name)
 	return this

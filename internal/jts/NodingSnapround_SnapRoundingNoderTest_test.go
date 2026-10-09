@@ -40,20 +40,20 @@ func NodingSnapround_SnapRoundingNoderTest_isInstance(o any) bool {
 	return ok
 }
 func NodingSnapround_SnapRoundingNoderTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 271 && p.jkind_ <= 271
+	return p != nil && p.jkind_ >= 241 && p.jkind_ <= 241
 }
 func NodingSnapround_SnapRoundingNoderTest_downcast(p *Testjts_GeometryTestCase) *NodingSnapround_SnapRoundingNoderTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 271 || p.jkind_ > 271 {
+	if p.jkind_ < 241 || p.jkind_ > 241 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.noding.snapround.SnapRoundingNoderTest"))
 	}
 	return (*NodingSnapround_SnapRoundingNoderTest)(unsafe.Pointer(p))
 }
 func NodingSnapround_SnapRoundingNoderTest_new(name *java.String) *NodingSnapround_SnapRoundingNoderTest {
 	this := &NodingSnapround_SnapRoundingNoderTest{}
-	this.jkind_ = 271
+	this.jkind_ = 241
 	this.JSetSelf(this)
 	this.NodingSnapround_SnapRoundingNoderTest_init(name)
 	return this

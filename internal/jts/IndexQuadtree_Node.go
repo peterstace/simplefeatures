@@ -37,20 +37,20 @@ func IndexQuadtree_Node_isInstance(o any) bool {
 	return ok
 }
 func IndexQuadtree_Node_isKind(p *IndexQuadtree_NodeBase) bool {
-	return p != nil && p.jkind_ >= 124 && p.jkind_ <= 124
+	return p != nil && p.jkind_ >= 123 && p.jkind_ <= 123
 }
 func IndexQuadtree_Node_downcast(p *IndexQuadtree_NodeBase) *IndexQuadtree_Node {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 124 || p.jkind_ > 124 {
+	if p.jkind_ < 123 || p.jkind_ > 123 {
 		panic(java.ClassCastError(IndexQuadtree_NodeBase_toAny(p), "org.locationtech.jts.index.quadtree.Node"))
 	}
 	return (*IndexQuadtree_Node)(unsafe.Pointer(p))
 }
 func IndexQuadtree_Node_new(env *Geom_Envelope, level int32) *IndexQuadtree_Node {
 	this := &IndexQuadtree_Node{}
-	this.jkind_ = 124
+	this.jkind_ = 123
 	this.IndexQuadtree_Node_init(env, level)
 	return this
 }

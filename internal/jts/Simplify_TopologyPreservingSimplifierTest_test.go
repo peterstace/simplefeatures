@@ -40,20 +40,20 @@ func Simplify_TopologyPreservingSimplifierTest_isInstance(o any) bool {
 	return ok
 }
 func Simplify_TopologyPreservingSimplifierTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 331 && p.jkind_ <= 331
+	return p != nil && p.jkind_ >= 301 && p.jkind_ <= 301
 }
 func Simplify_TopologyPreservingSimplifierTest_downcast(p *Testjts_GeometryTestCase) *Simplify_TopologyPreservingSimplifierTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 331 || p.jkind_ > 331 {
+	if p.jkind_ < 301 || p.jkind_ > 301 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.simplify.TopologyPreservingSimplifierTest"))
 	}
 	return (*Simplify_TopologyPreservingSimplifierTest)(unsafe.Pointer(p))
 }
 func Simplify_TopologyPreservingSimplifierTest_new(name *java.String) *Simplify_TopologyPreservingSimplifierTest {
 	this := &Simplify_TopologyPreservingSimplifierTest{}
-	this.jkind_ = 331
+	this.jkind_ = 301
 	this.JSetSelf(this)
 	this.Simplify_TopologyPreservingSimplifierTest_init(name)
 	return this
@@ -65,97 +65,97 @@ func (this *Simplify_TopologyPreservingSimplifierTest) TestPoint() {
 	this.checkTPSNoChange_String_double(jlit_568, float64(int32(1)))
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonEmpty() {
-	this.checkTPSNoChange_String_double(jlit_4590, float64(int32(1)))
+	this.checkTPSNoChange_String_double(jlit_4589, float64(int32(1)))
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonFlatVertices() {
-	this.checkTPS_String_double_String(jlit_4670, float64(int32(10)), jlit_4592)
+	this.checkTPS_String_double_String(jlit_4669, float64(int32(10)), jlit_4591)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonNoReduction() {
-	this.checkTPSNoChange_String_double(jlit_4592, float64(int32(10)))
+	this.checkTPSNoChange_String_double(jlit_4591, float64(int32(10)))
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonNoReductionWithConflicts() {
-	this.checkTPSNoChange_String_double(jlit_4593, float64(int32(10)))
+	this.checkTPSNoChange_String_double(jlit_4592, float64(int32(10)))
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonWithTouchingHole() {
-	this.checkTPS_String_double_String(jlit_4671, float64(int32(10)), jlit_4671)
+	this.checkTPS_String_double_String(jlit_4670, float64(int32(10)), jlit_4670)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestFlattishPolygon() {
-	this.checkTPS_String_double_String(jlit_4599, float64(int32(10)), jlit_4672)
+	this.checkTPS_String_double_String(jlit_4598, float64(int32(10)), jlit_4671)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonWithFlattishHole() {
-	this.checkTPS_String_double_String(jlit_4673, float64(int32(20)), jlit_4673)
+	this.checkTPS_String_double_String(jlit_4672, float64(int32(20)), jlit_4672)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestTinySquare() {
-	this.checkTPS_String_double_String(jlit_4600, float64(int32(10)), jlit_4674)
+	this.checkTPS_String_double_String(jlit_4599, float64(int32(10)), jlit_4673)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestTinyLineString() {
-	this.checkTPS_String_double_String(jlit_4603, float64(int32(10)), jlit_4604)
+	this.checkTPS_String_double_String(jlit_4602, float64(int32(10)), jlit_4603)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestTinyClosedLineString() {
-	this.checkTPSNoChange_String_double(jlit_4675, float64(int32(10)))
+	this.checkTPSNoChange_String_double(jlit_4674, float64(int32(10)))
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestMultiPoint() {
-	this.checkTPSNoChange_String_double(jlit_4605, float64(int32(10)))
+	this.checkTPSNoChange_String_double(jlit_4604, float64(int32(10)))
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestMultiLineString() {
-	this.checkTPS_String_double_String(jlit_4676, float64(int32(10)), jlit_4677)
+	this.checkTPS_String_double_String(jlit_4675, float64(int32(10)), jlit_4676)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestMultiLineStringWithEmpty() {
-	this.checkTPS_String_double_String(jlit_4678, float64(int32(10)), jlit_4677)
+	this.checkTPS_String_double_String(jlit_4677, float64(int32(10)), jlit_4676)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestMultiPolygonWithEmpty() {
-	this.checkTPS_String_double_String(jlit_4609, float64(int32(10)), jlit_4679)
+	this.checkTPS_String_double_String(jlit_4608, float64(int32(10)), jlit_4678)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestGeometryCollection() {
-	this.checkTPSNoChange_String_double(jlit_4611, float64(int32(10)))
+	this.checkTPSNoChange_String_double(jlit_4610, float64(int32(10)))
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestNoCollapse_mL() {
-	this.checkTPS_String_double_String(jlit_4680, float64(10.0), jlit_4680)
+	this.checkTPS_String_double_String(jlit_4679, float64(10.0), jlit_4679)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestNoCollapseMany_mL() {
-	this.checkTPS_String_double_String(jlit_4681, float64(100.0), jlit_4682)
+	this.checkTPS_String_double_String(jlit_4680, float64(100.0), jlit_4681)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestNoCollapseSmallSquare() {
-	this.checkTPS_String_double_String(jlit_4600, float64(int32(100)), jlit_4674)
+	this.checkTPS_String_double_String(jlit_4599, float64(int32(100)), jlit_4673)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonRemoveEndpoint() {
-	this.checkTPS_String_double_String(jlit_4683, float64(int32(40)), jlit_4684)
+	this.checkTPS_String_double_String(jlit_4682, float64(int32(40)), jlit_4683)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestLinearRingRemoveEndpoint() {
-	this.checkTPS_String_double_String(jlit_4685, float64(int32(40)), jlit_4686)
+	this.checkTPS_String_double_String(jlit_4684, float64(int32(40)), jlit_4685)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonKeepFlatEndpointWithTouch() {
-	this.checkTPSNoChange_String_double(jlit_4687, float64(0.1))
+	this.checkTPSNoChange_String_double(jlit_4686, float64(0.1))
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonKeepEndpointWithCross() {
-	this.checkTPS_String_double_String(jlit_4688, float64(int32(10)), jlit_4689)
+	this.checkTPS_String_double_String(jlit_4687, float64(int32(10)), jlit_4688)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonRemoveFlatEndpoint() {
-	this.checkTPS_String_double_String(jlit_4616, float64(int32(1)), jlit_4617)
+	this.checkTPS_String_double_String(jlit_4615, float64(int32(1)), jlit_4616)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonManyFlatSegments() {
-	this.checkTPS_String_double_String(jlit_4690, float64(int32(1)), jlit_4691)
+	this.checkTPS_String_double_String(jlit_4689, float64(int32(1)), jlit_4690)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonSize5NotSimplfied() {
-	this.checkTPS_String_double_String(jlit_4692, float64(int32(10)), jlit_4692)
+	this.checkTPS_String_double_String(jlit_4691, float64(int32(10)), jlit_4691)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestMultiPolygonWithSmallComponents() {
-	this.checkTPS_String_double_String(jlit_4693, float64(0.0057), jlit_4694)
+	this.checkTPS_String_double_String(jlit_4692, float64(0.0057), jlit_4693)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonWithSpike() {
-	this.checkTPS_String_double_String(jlit_4695, float64(int32(2)), jlit_4696)
+	this.checkTPS_String_double_String(jlit_4694, float64(int32(2)), jlit_4695)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestLineComponentCross() {
-	this.checkTPS_String_double_String(jlit_4697, float64(int32(4)), jlit_4697)
+	this.checkTPS_String_double_String(jlit_4696, float64(int32(4)), jlit_4696)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonComponentCrossAtEndpoint() {
-	this.checkTPS_String_double_String(jlit_4698, float64(int32(30)), jlit_4699)
+	this.checkTPS_String_double_String(jlit_4697, float64(int32(30)), jlit_4698)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestPolygonIntersectingSegments() {
-	this.checkTPS_String_double_String(jlit_4700, float64(int32(10)), jlit_4700)
+	this.checkTPS_String_double_String(jlit_4699, float64(int32(10)), jlit_4699)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) TestRingEndpointRemoval() {
-	this.checkTPS_String_double_String(jlit_4701, float64(int32(20)), jlit_4702)
+	this.checkTPS_String_double_String(jlit_4700, float64(int32(20)), jlit_4701)
 }
 func (this *Simplify_TopologyPreservingSimplifierTest) checkTPS_String_double_String(wkt *java.String, tolerance float64, wktExpected *java.String) {
 	var geom *Geom_Geometry = this.Read_String(wkt)
@@ -168,7 +168,7 @@ func (this *Simplify_TopologyPreservingSimplifierTest) checkTPSNoChange_String_d
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testFlattishPolygon(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4703)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4702)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestFlattishPolygon()
@@ -184,7 +184,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testGeometryCollection(t *tes
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testLineComponentCross(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4704)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4703)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineComponentCross()
@@ -192,7 +192,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testLineComponentCross(t *tes
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testLinearRingRemoveEndpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4705)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4704)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLinearRingRemoveEndpoint()
@@ -200,7 +200,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testLinearRingRemoveEndpoint(
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testMultiLineString(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_1814)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_1813)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineString()
@@ -208,7 +208,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testMultiLineString(t *testin
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testMultiLineStringWithEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_1916)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_1915)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiLineStringWithEmpty()
@@ -224,7 +224,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testMultiPoint(t *testing.T) 
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testMultiPolygonWithEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_1928)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_1927)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolygonWithEmpty()
@@ -232,7 +232,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testMultiPolygonWithEmpty(t *
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testMultiPolygonWithSmallComponents(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4706)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4705)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolygonWithSmallComponents()
@@ -240,7 +240,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testMultiPolygonWithSmallComp
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testNoCollapseMany_mL(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4707)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4706)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNoCollapseMany_mL()
@@ -248,7 +248,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testNoCollapseMany_mL(t *test
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testNoCollapseSmallSquare(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4708)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4707)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNoCollapseSmallSquare()
@@ -256,7 +256,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testNoCollapseSmallSquare(t *
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testNoCollapse_mL(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4709)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4708)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestNoCollapse_mL()
@@ -272,7 +272,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPoint(t *testing.T) {
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonComponentCrossAtEndpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4710)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4709)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonComponentCrossAtEndpoint()
@@ -288,7 +288,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonEmpty(t *testing.T
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonFlatVertices(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4711)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4710)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonFlatVertices()
@@ -296,7 +296,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonFlatVertices(t *te
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonIntersectingSegments(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4712)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4711)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonIntersectingSegments()
@@ -304,7 +304,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonIntersectingSegmen
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonKeepEndpointWithCross(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4713)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4712)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonKeepEndpointWithCross()
@@ -312,7 +312,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonKeepEndpointWithCr
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonKeepFlatEndpointWithTouch(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4714)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4713)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonKeepFlatEndpointWithTouch()
@@ -320,7 +320,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonKeepFlatEndpointWi
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonManyFlatSegments(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4715)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4714)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonManyFlatSegments()
@@ -328,7 +328,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonManyFlatSegments(t
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonNoReduction(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4716)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4715)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonNoReduction()
@@ -336,7 +336,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonNoReduction(t *tes
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonNoReductionWithConflicts(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4717)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4716)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonNoReductionWithConflicts()
@@ -344,7 +344,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonNoReductionWithCon
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonRemoveEndpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4718)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4717)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonRemoveEndpoint()
@@ -352,7 +352,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonRemoveEndpoint(t *
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonRemoveFlatEndpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4626)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4625)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonRemoveFlatEndpoint()
@@ -360,7 +360,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonRemoveFlatEndpoint
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonSize5NotSimplfied(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4719)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4718)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonSize5NotSimplfied()
@@ -368,7 +368,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonSize5NotSimplfied(
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonWithFlattishHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4720)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4719)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonWithFlattishHole()
@@ -376,7 +376,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonWithFlattishHole(t
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonWithSpike(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4721)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4720)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonWithSpike()
@@ -384,7 +384,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonWithSpike(t *testi
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testPolygonWithTouchingHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_3946)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_3945)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonWithTouchingHole()
@@ -392,7 +392,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testPolygonWithTouchingHole(t
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testRingEndpointRemoval(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4722)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4721)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestRingEndpointRemoval()
@@ -400,7 +400,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testRingEndpointRemoval(t *te
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testTinyClosedLineString(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4723)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4722)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestTinyClosedLineString()
@@ -408,7 +408,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testTinyClosedLineString(t *t
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testTinyLineString(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4724)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4723)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestTinyLineString()
@@ -416,7 +416,7 @@ func TestSimplify_TopologyPreservingSimplifierTest_testTinyLineString(t *testing
 }
 func TestSimplify_TopologyPreservingSimplifierTest_testTinySquare(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4725)
+		tc := Simplify_TopologyPreservingSimplifierTest_new(jlit_4724)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestTinySquare()

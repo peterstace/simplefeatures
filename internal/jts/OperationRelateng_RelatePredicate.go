@@ -78,20 +78,20 @@ func OperationRelateng_RelatePredicate_1_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelatePredicate_1_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 161 && p.jkind_ <= 161
+	return p != nil && p.jkind_ >= 160 && p.jkind_ <= 160
 }
 func OperationRelateng_RelatePredicate_1_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_RelatePredicate_1 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 161 || p.jkind_ > 161 {
+	if p.jkind_ < 160 || p.jkind_ > 160 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.RelatePredicate$1"))
 	}
 	return (*OperationRelateng_RelatePredicate_1)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelatePredicate_1_new() *OperationRelateng_RelatePredicate_1 {
 	this := &OperationRelateng_RelatePredicate_1{}
-	this.jkind_ = 161
+	this.jkind_ = 160
 	this.OperationRelateng_RelatePredicate_1_init()
 	return this
 }
@@ -149,20 +149,20 @@ func OperationRelateng_RelatePredicate_2_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelatePredicate_2_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 162 && p.jkind_ <= 162
+	return p != nil && p.jkind_ >= 161 && p.jkind_ <= 161
 }
 func OperationRelateng_RelatePredicate_2_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_RelatePredicate_2 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 162 || p.jkind_ > 162 {
+	if p.jkind_ < 161 || p.jkind_ > 161 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.RelatePredicate$2"))
 	}
 	return (*OperationRelateng_RelatePredicate_2)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelatePredicate_2_new() *OperationRelateng_RelatePredicate_2 {
 	this := &OperationRelateng_RelatePredicate_2{}
-	this.jkind_ = 162
+	this.jkind_ = 161
 	this.OperationRelateng_RelatePredicate_2_init()
 	return this
 }
@@ -223,20 +223,20 @@ func OperationRelateng_RelatePredicate_3_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelatePredicate_3_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 154 && p.jkind_ <= 154
+	return p != nil && p.jkind_ >= 153 && p.jkind_ <= 153
 }
 func OperationRelateng_RelatePredicate_3_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_RelatePredicate_3 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 154 || p.jkind_ > 154 {
+	if p.jkind_ < 153 || p.jkind_ > 153 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.RelatePredicate$3"))
 	}
 	return (*OperationRelateng_RelatePredicate_3)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelatePredicate_3_new() *OperationRelateng_RelatePredicate_3 {
 	this := &OperationRelateng_RelatePredicate_3{}
-	this.jkind_ = 154
+	this.jkind_ = 153
 	this.OperationRelateng_RelatePredicate_3_init()
 	return this
 }
@@ -298,20 +298,20 @@ func OperationRelateng_RelatePredicate_4_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelatePredicate_4_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 155 && p.jkind_ <= 155
+	return p != nil && p.jkind_ >= 154 && p.jkind_ <= 154
 }
 func OperationRelateng_RelatePredicate_4_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_RelatePredicate_4 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 155 || p.jkind_ > 155 {
+	if p.jkind_ < 154 || p.jkind_ > 154 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.RelatePredicate$4"))
 	}
 	return (*OperationRelateng_RelatePredicate_4)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelatePredicate_4_new() *OperationRelateng_RelatePredicate_4 {
 	this := &OperationRelateng_RelatePredicate_4{}
-	this.jkind_ = 155
+	this.jkind_ = 154
 	this.OperationRelateng_RelatePredicate_4_init()
 	return this
 }
@@ -373,20 +373,20 @@ func OperationRelateng_RelatePredicate_5_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelatePredicate_5_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 156 && p.jkind_ <= 156
+	return p != nil && p.jkind_ >= 155 && p.jkind_ <= 155
 }
 func OperationRelateng_RelatePredicate_5_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_RelatePredicate_5 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 156 || p.jkind_ > 156 {
+	if p.jkind_ < 155 || p.jkind_ > 155 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.RelatePredicate$5"))
 	}
 	return (*OperationRelateng_RelatePredicate_5)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelatePredicate_5_new() *OperationRelateng_RelatePredicate_5 {
 	this := &OperationRelateng_RelatePredicate_5{}
-	this.jkind_ = 156
+	this.jkind_ = 155
 	this.OperationRelateng_RelatePredicate_5_init()
 	return this
 }
@@ -448,20 +448,20 @@ func OperationRelateng_RelatePredicate_6_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelatePredicate_6_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 157 && p.jkind_ <= 157
+	return p != nil && p.jkind_ >= 156 && p.jkind_ <= 156
 }
 func OperationRelateng_RelatePredicate_6_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_RelatePredicate_6 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 157 || p.jkind_ > 157 {
+	if p.jkind_ < 156 || p.jkind_ > 156 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.RelatePredicate$6"))
 	}
 	return (*OperationRelateng_RelatePredicate_6)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelatePredicate_6_new() *OperationRelateng_RelatePredicate_6 {
 	this := &OperationRelateng_RelatePredicate_6{}
-	this.jkind_ = 157
+	this.jkind_ = 156
 	this.OperationRelateng_RelatePredicate_6_init()
 	return this
 }
@@ -523,20 +523,20 @@ func OperationRelateng_RelatePredicate_7_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelatePredicate_7_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 158 && p.jkind_ <= 158
+	return p != nil && p.jkind_ >= 157 && p.jkind_ <= 157
 }
 func OperationRelateng_RelatePredicate_7_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_RelatePredicate_7 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 158 || p.jkind_ > 158 {
+	if p.jkind_ < 157 || p.jkind_ > 157 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.RelatePredicate$7"))
 	}
 	return (*OperationRelateng_RelatePredicate_7)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelatePredicate_7_new() *OperationRelateng_RelatePredicate_7 {
 	this := &OperationRelateng_RelatePredicate_7{}
-	this.jkind_ = 158
+	this.jkind_ = 157
 	this.OperationRelateng_RelatePredicate_7_init()
 	return this
 }
@@ -607,20 +607,20 @@ func OperationRelateng_RelatePredicate_8_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelatePredicate_8_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 159 && p.jkind_ <= 159
+	return p != nil && p.jkind_ >= 158 && p.jkind_ <= 158
 }
 func OperationRelateng_RelatePredicate_8_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_RelatePredicate_8 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 159 || p.jkind_ > 159 {
+	if p.jkind_ < 158 || p.jkind_ > 158 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.RelatePredicate$8"))
 	}
 	return (*OperationRelateng_RelatePredicate_8)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelatePredicate_8_new() *OperationRelateng_RelatePredicate_8 {
 	this := &OperationRelateng_RelatePredicate_8{}
-	this.jkind_ = 159
+	this.jkind_ = 158
 	this.OperationRelateng_RelatePredicate_8_init()
 	return this
 }
@@ -677,20 +677,20 @@ func OperationRelateng_RelatePredicate_9_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelatePredicate_9_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 160 && p.jkind_ <= 160
+	return p != nil && p.jkind_ >= 159 && p.jkind_ <= 159
 }
 func OperationRelateng_RelatePredicate_9_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_RelatePredicate_9 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 160 || p.jkind_ > 160 {
+	if p.jkind_ < 159 || p.jkind_ > 159 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.RelatePredicate$9"))
 	}
 	return (*OperationRelateng_RelatePredicate_9)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelatePredicate_9_new() *OperationRelateng_RelatePredicate_9 {
 	this := &OperationRelateng_RelatePredicate_9{}
-	this.jkind_ = 160
+	this.jkind_ = 159
 	this.OperationRelateng_RelatePredicate_9_init()
 	return this
 }
@@ -753,20 +753,20 @@ func OperationRelateng_RelatePredicate_10_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelatePredicate_10_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 153 && p.jkind_ <= 153
+	return p != nil && p.jkind_ >= 152 && p.jkind_ <= 152
 }
 func OperationRelateng_RelatePredicate_10_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_RelatePredicate_10 {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 153 || p.jkind_ > 153 {
+	if p.jkind_ < 152 || p.jkind_ > 152 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.RelatePredicate$10"))
 	}
 	return (*OperationRelateng_RelatePredicate_10)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelatePredicate_10_new() *OperationRelateng_RelatePredicate_10 {
 	this := &OperationRelateng_RelatePredicate_10{}
-	this.jkind_ = 153
+	this.jkind_ = 152
 	this.OperationRelateng_RelatePredicate_10_init()
 	return this
 }

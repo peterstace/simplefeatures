@@ -40,13 +40,13 @@ func Noding_FastNodingValidatorTest_isInstance(o any) bool {
 	return ok
 }
 func Noding_FastNodingValidatorTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 272 && p.jkind_ <= 272
+	return p != nil && p.jkind_ >= 242 && p.jkind_ <= 242
 }
 func Noding_FastNodingValidatorTest_downcast(p *Testjts_GeometryTestCase) *Noding_FastNodingValidatorTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 272 || p.jkind_ > 272 {
+	if p.jkind_ < 242 || p.jkind_ > 242 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.noding.FastNodingValidatorTest"))
 	}
 	return (*Noding_FastNodingValidatorTest)(unsafe.Pointer(p))
@@ -60,7 +60,7 @@ var Noding_FastNodingValidatorTest_SELF_VERTEX_INT []*java.String = []*java.Stri
 
 func Noding_FastNodingValidatorTest_new(name *java.String) *Noding_FastNodingValidatorTest {
 	this := &Noding_FastNodingValidatorTest{}
-	this.jkind_ = 272
+	this.jkind_ = 242
 	this.JSetSelf(this)
 	this.Noding_FastNodingValidatorTest_init(name)
 	return this

@@ -39,20 +39,20 @@ func OperationRelateng_RelateMatrixPredicate_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelateMatrixPredicate_isKind(p *OperationRelateng_BasicPredicate) bool {
-	return p != nil && p.jkind_ >= 152 && p.jkind_ <= 152
+	return p != nil && p.jkind_ >= 151 && p.jkind_ <= 151
 }
 func OperationRelateng_RelateMatrixPredicate_downcast(p *OperationRelateng_BasicPredicate) *OperationRelateng_RelateMatrixPredicate {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 152 || p.jkind_ > 152 {
+	if p.jkind_ < 151 || p.jkind_ > 151 {
 		panic(java.ClassCastError(OperationRelateng_BasicPredicate_toAny(p), "org.locationtech.jts.operation.relateng.RelateMatrixPredicate"))
 	}
 	return (*OperationRelateng_RelateMatrixPredicate)(unsafe.Pointer(p))
 }
 func OperationRelateng_RelateMatrixPredicate_new() *OperationRelateng_RelateMatrixPredicate {
 	this := &OperationRelateng_RelateMatrixPredicate{}
-	this.jkind_ = 152
+	this.jkind_ = 151
 	this.OperationRelateng_RelateMatrixPredicate_init()
 	return this
 }

@@ -40,20 +40,20 @@ func OperationOverlayng_OverlayNGGeometryCollectionTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_OverlayNGGeometryCollectionTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 296 && p.jkind_ <= 296
+	return p != nil && p.jkind_ >= 266 && p.jkind_ <= 266
 }
 func OperationOverlayng_OverlayNGGeometryCollectionTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_OverlayNGGeometryCollectionTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 296 || p.jkind_ > 296 {
+	if p.jkind_ < 266 || p.jkind_ > 266 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.OverlayNGGeometryCollectionTest"))
 	}
 	return (*OperationOverlayng_OverlayNGGeometryCollectionTest)(unsafe.Pointer(p))
 }
 func OperationOverlayng_OverlayNGGeometryCollectionTest_new(name *java.String) *OperationOverlayng_OverlayNGGeometryCollectionTest {
 	this := &OperationOverlayng_OverlayNGGeometryCollectionTest{}
-	this.jkind_ = 296
+	this.jkind_ = 266
 	this.JSetSelf(this)
 	this.OperationOverlayng_OverlayNGGeometryCollectionTest_init(name)
 	return this

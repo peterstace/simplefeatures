@@ -40,20 +40,20 @@ func Shape_CubicBezierCurveTest_isInstance(o any) bool {
 	return ok
 }
 func Shape_CubicBezierCurveTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 328 && p.jkind_ <= 328
+	return p != nil && p.jkind_ >= 298 && p.jkind_ <= 298
 }
 func Shape_CubicBezierCurveTest_downcast(p *Testjts_GeometryTestCase) *Shape_CubicBezierCurveTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 328 || p.jkind_ > 328 {
+	if p.jkind_ < 298 || p.jkind_ > 298 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.shape.CubicBezierCurveTest"))
 	}
 	return (*Shape_CubicBezierCurveTest)(unsafe.Pointer(p))
 }
 func Shape_CubicBezierCurveTest_new(name *java.String) *Shape_CubicBezierCurveTest {
 	this := &Shape_CubicBezierCurveTest{}
-	this.jkind_ = 328
+	this.jkind_ = 298
 	this.JSetSelf(this)
 	this.Shape_CubicBezierCurveTest_init(name)
 	return this
@@ -62,16 +62,16 @@ func (this *Shape_CubicBezierCurveTest) Shape_CubicBezierCurveTest_init(name *ja
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *Shape_CubicBezierCurveTest) TestAlphaSquare() {
-	this.checkCurve_String_double_String(jlit_4573, float64(int32(1)), jlit_4574)
+	this.checkCurve_String_double_String(jlit_4572, float64(int32(1)), jlit_4573)
 }
 func (this *Shape_CubicBezierCurveTest) TestAlphaRightAngle() {
-	this.checkCurve_String_double_String(jlit_4575, float64(int32(1)), jlit_4576)
+	this.checkCurve_String_double_String(jlit_4574, float64(int32(1)), jlit_4575)
 }
 func (this *Shape_CubicBezierCurveTest) TestAlphaRightZigzag() {
-	this.checkCurve_String_double_String(jlit_4577, float64(int32(1)), jlit_4578)
+	this.checkCurve_String_double_String(jlit_4576, float64(int32(1)), jlit_4577)
 }
 func (this *Shape_CubicBezierCurveTest) TestCtrlRightZigzag() {
-	this.checkCurve_String_String_String(jlit_4579, jlit_4580, jlit_4581)
+	this.checkCurve_String_String_String(jlit_4578, jlit_4579, jlit_4580)
 }
 func (this *Shape_CubicBezierCurveTest) checkCurve_String_double_String(wkt *java.String, alpha float64, wktExpected *java.String) {
 	var geom *Geom_Geometry = this.Read_String(wkt)
@@ -88,7 +88,7 @@ func (this *Shape_CubicBezierCurveTest) checkCurve_String_String_String(wkt *jav
 }
 func TestShape_CubicBezierCurveTest_testAlphaRightAngle(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Shape_CubicBezierCurveTest_new(jlit_4582)
+		tc := Shape_CubicBezierCurveTest_new(jlit_4581)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAlphaRightAngle()
@@ -96,7 +96,7 @@ func TestShape_CubicBezierCurveTest_testAlphaRightAngle(t *testing.T) {
 }
 func TestShape_CubicBezierCurveTest_testAlphaRightZigzag(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Shape_CubicBezierCurveTest_new(jlit_4583)
+		tc := Shape_CubicBezierCurveTest_new(jlit_4582)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAlphaRightZigzag()
@@ -104,7 +104,7 @@ func TestShape_CubicBezierCurveTest_testAlphaRightZigzag(t *testing.T) {
 }
 func TestShape_CubicBezierCurveTest_testAlphaSquare(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Shape_CubicBezierCurveTest_new(jlit_4584)
+		tc := Shape_CubicBezierCurveTest_new(jlit_4583)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAlphaSquare()
@@ -112,7 +112,7 @@ func TestShape_CubicBezierCurveTest_testAlphaSquare(t *testing.T) {
 }
 func TestShape_CubicBezierCurveTest_testCtrlRightZigzag(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Shape_CubicBezierCurveTest_new(jlit_4585)
+		tc := Shape_CubicBezierCurveTest_new(jlit_4584)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestCtrlRightZigzag()

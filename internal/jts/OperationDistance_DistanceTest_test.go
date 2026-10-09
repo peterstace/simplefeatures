@@ -40,20 +40,20 @@ func OperationDistance_DistanceTest_isInstance(o any) bool {
 	return ok
 }
 func OperationDistance_DistanceTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 280 && p.jkind_ <= 280
+	return p != nil && p.jkind_ >= 250 && p.jkind_ <= 250
 }
 func OperationDistance_DistanceTest_downcast(p *Testjts_GeometryTestCase) *OperationDistance_DistanceTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 280 || p.jkind_ > 280 {
+	if p.jkind_ < 250 || p.jkind_ > 250 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.distance.DistanceTest"))
 	}
 	return (*OperationDistance_DistanceTest)(unsafe.Pointer(p))
 }
 func OperationDistance_DistanceTest_new(name *java.String) *OperationDistance_DistanceTest {
 	this := &OperationDistance_DistanceTest{}
-	this.jkind_ = 280
+	this.jkind_ = 250
 	this.JSetSelf(this)
 	this.OperationDistance_DistanceTest_init(name)
 	return this

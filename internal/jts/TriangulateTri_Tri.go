@@ -41,13 +41,13 @@ func TriangulateTri_Tri_isInstance(o any) bool {
 	return ok
 }
 func TriangulateTri_Tri_isKind(p *TriangulateTri_Tri) bool {
-	return p != nil && p.jkind_ >= 345 && p.jkind_ <= 346
+	return p != nil && p.jkind_ >= 312 && p.jkind_ <= 313
 }
 func TriangulateTri_Tri_downcast(p *TriangulateTri_Tri) *TriangulateTri_Tri {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 345 || p.jkind_ > 346 {
+	if p.jkind_ < 312 || p.jkind_ > 313 {
 		panic(java.ClassCastError(TriangulateTri_Tri_toAny(p), "org.locationtech.jts.triangulate.tri.Tri"))
 	}
 	return (*TriangulateTri_Tri)(unsafe.Pointer(p))
@@ -58,9 +58,9 @@ func TriangulateTri_Tri_toAny(p *TriangulateTri_Tri) any {
 		return nil
 	}
 	switch p.jkind_ {
-	case 345:
+	case 312:
 		return (*TriangulateTri_Tri)(unsafe.Pointer(p))
-	case 346:
+	case 313:
 		return (*AlgorithmHull_HullTri)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
@@ -70,7 +70,7 @@ var TriangulateTri_Tri_INVALID_TRI_INDEX *java.String = jlit_419
 
 func TriangulateTri_Tri_new(p0 *Geom_Coordinate, p1 *Geom_Coordinate, p2 *Geom_Coordinate) *TriangulateTri_Tri {
 	this := &TriangulateTri_Tri{}
-	this.jkind_ = 345
+	this.jkind_ = 312
 	this.TriangulateTri_Tri_init(p0, p1, p2)
 	return this
 }

@@ -41,20 +41,20 @@ func IndexStrtree_SIRtreeTest_TestTree_isInstance(o any) bool {
 	return ok
 }
 func IndexStrtree_SIRtreeTest_TestTree_isKind(p *IndexStrtree_AbstractSTRtree) bool {
-	return p != nil && p.jkind_ >= 131 && p.jkind_ <= 131
+	return p != nil && p.jkind_ >= 130 && p.jkind_ <= 130
 }
 func IndexStrtree_SIRtreeTest_TestTree_downcast(p *IndexStrtree_AbstractSTRtree) *IndexStrtree_SIRtreeTest_TestTree {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 131 || p.jkind_ > 131 {
+	if p.jkind_ < 130 || p.jkind_ > 130 {
 		panic(java.ClassCastError(IndexStrtree_AbstractSTRtree_toAny(p), "org.locationtech.jts.index.strtree.SIRtreeTest$TestTree"))
 	}
 	return (*IndexStrtree_SIRtreeTest_TestTree)(unsafe.Pointer(p))
 }
 func IndexStrtree_SIRtreeTest_TestTree_new(nodeCapacity int32) *IndexStrtree_SIRtreeTest_TestTree {
 	this := &IndexStrtree_SIRtreeTest_TestTree{}
-	this.jkind_ = 131
+	this.jkind_ = 130
 	this.IndexStrtree_SIRtreeTest_TestTree_init(nodeCapacity)
 	return this
 }

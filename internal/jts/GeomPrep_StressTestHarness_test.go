@@ -123,7 +123,7 @@ func (this *GeomPrep_StressTestHarness) Run_int_Geometry(nIter int32, target *Ge
 		var test *Geom_Geometry = this.CreateRandomTestGeometry_Envelope_double_int(target.GetEnvelopeInternal(), float64(int32(10)), int32(20))
 		var isResultCorrect bool = this.CheckResult_Geometry_Geometry(target, test)
 		if !isResultCorrect {
-			panic(java.Ref(java.RuntimeException_new_String(jlit_1788)))
+			panic(java.Ref(java.RuntimeException_new_String(jlit_1787)))
 		}
 	}
 }

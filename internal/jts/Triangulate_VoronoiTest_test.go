@@ -40,13 +40,13 @@ func Triangulate_VoronoiTest_isInstance(o any) bool {
 	return ok
 }
 func Triangulate_VoronoiTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 341 && p.jkind_ <= 341
+	return p != nil && p.jkind_ >= 308 && p.jkind_ <= 308
 }
 func Triangulate_VoronoiTest_downcast(p *Testjts_GeometryTestCase) *Triangulate_VoronoiTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 341 || p.jkind_ > 341 {
+	if p.jkind_ < 308 || p.jkind_ > 308 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.triangulate.VoronoiTest"))
 	}
 	return (*Triangulate_VoronoiTest)(unsafe.Pointer(p))
@@ -56,7 +56,7 @@ const Triangulate_VoronoiTest_COMPARISON_TOLERANCE float64 = float64(1.0e-7)
 
 func Triangulate_VoronoiTest_new(name *java.String) *Triangulate_VoronoiTest {
 	this := &Triangulate_VoronoiTest{}
-	this.jkind_ = 341
+	this.jkind_ = 308
 	this.JSetSelf(this)
 	this.Triangulate_VoronoiTest_init(name)
 	return this
@@ -65,16 +65,16 @@ func (this *Triangulate_VoronoiTest) Triangulate_VoronoiTest_init(name *java.Str
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *Triangulate_VoronoiTest) TestSimple() {
-	var wkt *java.String = jlit_4778
-	var expected *java.String = jlit_4779
+	var wkt *java.String = jlit_4777
+	var expected *java.String = jlit_4778
 	this.RunVoronoi_String_boolean_String(wkt, true, expected)
 }
 func (this *Triangulate_VoronoiTest) TestSitesWithPointsOnSquareGrid() {
-	var wkt *java.String = jlit_4780
+	var wkt *java.String = jlit_4779
 	this.runVoronoi_String(wkt)
 }
 func (this *Triangulate_VoronoiTest) TestFrameDisableForceConvex() {
-	var wkt *java.String = jlit_4781
+	var wkt *java.String = jlit_4780
 	this.runVoronoi_String(wkt)
 }
 func (this *Triangulate_VoronoiTest) runVoronoi_String(sitesWKT *java.String) {
@@ -85,7 +85,7 @@ func (this *Triangulate_VoronoiTest) RunVoronoi_String_boolean_String(sitesWKT *
 	var builder *Triangulate_VoronoiDiagramBuilder = Triangulate_VoronoiDiagramBuilder_new()
 	builder.SetSites_Geometry(sites)
 	var result *Geom_Geometry = builder.GetDiagram_GeometryFactory(sites.GetFactory())
-	junit.TestCase_assertTrue_String_boolean(jlit_4782, result.IsValid())
+	junit.TestCase_assertTrue_String_boolean(jlit_4781, result.IsValid())
 	if expectedWKT == nil {
 		return
 	}
@@ -96,7 +96,7 @@ func (this *Triangulate_VoronoiTest) RunVoronoi_String_boolean_String(sitesWKT *
 }
 func TestTriangulate_VoronoiTest_testFrameDisableForceConvex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_VoronoiTest_new(jlit_4783)
+		tc := Triangulate_VoronoiTest_new(jlit_4782)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestFrameDisableForceConvex()
@@ -112,7 +112,7 @@ func TestTriangulate_VoronoiTest_testSimple(t *testing.T) {
 }
 func TestTriangulate_VoronoiTest_testSitesWithPointsOnSquareGrid(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_VoronoiTest_new(jlit_4784)
+		tc := Triangulate_VoronoiTest_new(jlit_4783)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestSitesWithPointsOnSquareGrid()

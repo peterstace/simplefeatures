@@ -41,20 +41,20 @@ func AlgorithmLocate_SimplePointInAreaLocatorTest_isInstance(o any) bool {
 	return ok
 }
 func AlgorithmLocate_SimplePointInAreaLocatorTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 223 && p.jkind_ <= 223
+	return p != nil && p.jkind_ >= 193 && p.jkind_ <= 193
 }
 func AlgorithmLocate_SimplePointInAreaLocatorTest_downcast(p *Testjts_GeometryTestCase) *AlgorithmLocate_SimplePointInAreaLocatorTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 223 || p.jkind_ > 223 {
+	if p.jkind_ < 193 || p.jkind_ > 193 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.locate.SimplePointInAreaLocatorTest"))
 	}
 	return (*AlgorithmLocate_SimplePointInAreaLocatorTest)(unsafe.Pointer(p))
 }
 func AlgorithmLocate_SimplePointInAreaLocatorTest_new(name *java.String) *AlgorithmLocate_SimplePointInAreaLocatorTest {
 	this := &AlgorithmLocate_SimplePointInAreaLocatorTest{}
-	this.jkind_ = 223
+	this.jkind_ = 193
 	this.JSetSelf(this)
 	this.AlgorithmLocate_SimplePointInAreaLocatorTest_init(name)
 	return this

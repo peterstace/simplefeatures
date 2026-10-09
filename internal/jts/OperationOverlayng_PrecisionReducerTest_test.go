@@ -40,20 +40,20 @@ func OperationOverlayng_PrecisionReducerTest_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_PrecisionReducerTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 301 && p.jkind_ <= 301
+	return p != nil && p.jkind_ >= 271 && p.jkind_ <= 271
 }
 func OperationOverlayng_PrecisionReducerTest_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_PrecisionReducerTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 301 || p.jkind_ > 301 {
+	if p.jkind_ < 271 || p.jkind_ > 271 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.PrecisionReducerTest"))
 	}
 	return (*OperationOverlayng_PrecisionReducerTest)(unsafe.Pointer(p))
 }
 func OperationOverlayng_PrecisionReducerTest_new(name *java.String) *OperationOverlayng_PrecisionReducerTest {
 	this := &OperationOverlayng_PrecisionReducerTest{}
-	this.jkind_ = 301
+	this.jkind_ = 271
 	this.JSetSelf(this)
 	this.OperationOverlayng_PrecisionReducerTest_init(name)
 	return this
@@ -62,43 +62,43 @@ func (this *OperationOverlayng_PrecisionReducerTest) OperationOverlayng_Precisio
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestPolygonBoxEmpty() {
-	this.checkReduce_String_double_String(jlit_3790, float64(int32(1)), jlit_534)
+	this.checkReduce_String_double_String(jlit_3789, float64(int32(1)), jlit_534)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestPolygonThinEmpty() {
-	this.checkReduce_String_double_String(jlit_3791, float64(int32(1)), jlit_534)
+	this.checkReduce_String_double_String(jlit_3790, float64(int32(1)), jlit_534)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestPolygonGore() {
-	this.checkReduce_String_double_String(jlit_3792, float64(int32(1)), jlit_3793)
+	this.checkReduce_String_double_String(jlit_3791, float64(int32(1)), jlit_3792)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestPolygonGore2() {
-	this.checkReduce_String_double_String(jlit_3794, float64(int32(1)), jlit_3795)
+	this.checkReduce_String_double_String(jlit_3793, float64(int32(1)), jlit_3794)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestPolygonGoreToHole() {
-	this.checkReduce_String_double_String(jlit_3796, float64(int32(1)), jlit_3797)
+	this.checkReduce_String_double_String(jlit_3795, float64(int32(1)), jlit_3796)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestPolygonSpike() {
-	this.checkReduce_String_double_String(jlit_3798, float64(int32(1)), jlit_3799)
+	this.checkReduce_String_double_String(jlit_3797, float64(int32(1)), jlit_3798)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestPolygonNarrowHole() {
-	this.checkReduce_String_double_String(jlit_3800, float64(int32(1)), jlit_3801)
+	this.checkReduce_String_double_String(jlit_3799, float64(int32(1)), jlit_3800)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestPolygonWideHole() {
-	this.checkReduce_String_double_String(jlit_3802, float64(int32(1)), jlit_3803)
+	this.checkReduce_String_double_String(jlit_3801, float64(int32(1)), jlit_3802)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestMultiPolygonGap() {
-	this.checkReduce_String_double_String(jlit_3804, float64(int32(1)), jlit_3805)
+	this.checkReduce_String_double_String(jlit_3803, float64(int32(1)), jlit_3804)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestMultiPolygonGapToHole() {
-	this.checkReduce_String_double_String(jlit_3806, float64(int32(1)), jlit_3807)
+	this.checkReduce_String_double_String(jlit_3805, float64(int32(1)), jlit_3806)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestLine() {
-	this.checkReduce_String_double_String(jlit_3808, float64(0.5), jlit_3809)
+	this.checkReduce_String_double_String(jlit_3807, float64(0.5), jlit_3808)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestCollapsedLine() {
-	this.checkReduce_String_double_String(jlit_3810, float64(int32(1)), jlit_540)
+	this.checkReduce_String_double_String(jlit_3809, float64(int32(1)), jlit_540)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) TestCollapsedNodedLine() {
-	this.checkReduce_String_double_String(jlit_3811, float64(int32(1)), jlit_3812)
+	this.checkReduce_String_double_String(jlit_3810, float64(int32(1)), jlit_3811)
 }
 func (this *OperationOverlayng_PrecisionReducerTest) checkReduce_String_double_String(wkt *java.String, scaleFactor float64, wktExpected *java.String) {
 	var geom *Geom_Geometry = this.Read_String(wkt)
@@ -117,7 +117,7 @@ func TestOperationOverlayng_PrecisionReducerTest_testCollapsedLine(t *testing.T)
 }
 func TestOperationOverlayng_PrecisionReducerTest_testCollapsedNodedLine(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3813)
+		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3812)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestCollapsedNodedLine()
@@ -133,7 +133,7 @@ func TestOperationOverlayng_PrecisionReducerTest_testLine(t *testing.T) {
 }
 func TestOperationOverlayng_PrecisionReducerTest_testMultiPolygonGap(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3814)
+		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3813)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolygonGap()
@@ -141,7 +141,7 @@ func TestOperationOverlayng_PrecisionReducerTest_testMultiPolygonGap(t *testing.
 }
 func TestOperationOverlayng_PrecisionReducerTest_testMultiPolygonGapToHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3815)
+		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3814)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMultiPolygonGapToHole()
@@ -149,7 +149,7 @@ func TestOperationOverlayng_PrecisionReducerTest_testMultiPolygonGapToHole(t *te
 }
 func TestOperationOverlayng_PrecisionReducerTest_testPolygonBoxEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3816)
+		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3815)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonBoxEmpty()
@@ -157,7 +157,7 @@ func TestOperationOverlayng_PrecisionReducerTest_testPolygonBoxEmpty(t *testing.
 }
 func TestOperationOverlayng_PrecisionReducerTest_testPolygonGore(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3817)
+		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3816)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonGore()
@@ -165,7 +165,7 @@ func TestOperationOverlayng_PrecisionReducerTest_testPolygonGore(t *testing.T) {
 }
 func TestOperationOverlayng_PrecisionReducerTest_testPolygonGore2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3818)
+		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3817)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonGore2()
@@ -173,7 +173,7 @@ func TestOperationOverlayng_PrecisionReducerTest_testPolygonGore2(t *testing.T) 
 }
 func TestOperationOverlayng_PrecisionReducerTest_testPolygonGoreToHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3819)
+		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3818)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonGoreToHole()
@@ -181,7 +181,7 @@ func TestOperationOverlayng_PrecisionReducerTest_testPolygonGoreToHole(t *testin
 }
 func TestOperationOverlayng_PrecisionReducerTest_testPolygonNarrowHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3820)
+		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3819)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonNarrowHole()
@@ -189,7 +189,7 @@ func TestOperationOverlayng_PrecisionReducerTest_testPolygonNarrowHole(t *testin
 }
 func TestOperationOverlayng_PrecisionReducerTest_testPolygonSpike(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3821)
+		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3820)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonSpike()
@@ -197,7 +197,7 @@ func TestOperationOverlayng_PrecisionReducerTest_testPolygonSpike(t *testing.T) 
 }
 func TestOperationOverlayng_PrecisionReducerTest_testPolygonThinEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3822)
+		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3821)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonThinEmpty()
@@ -205,7 +205,7 @@ func TestOperationOverlayng_PrecisionReducerTest_testPolygonThinEmpty(t *testing
 }
 func TestOperationOverlayng_PrecisionReducerTest_testPolygonWideHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3823)
+		tc := OperationOverlayng_PrecisionReducerTest_new(jlit_3822)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonWideHole()

@@ -28,20 +28,20 @@ func Io_WKBWriterTest_isInstance(o any) bool {
 	return ok
 }
 func Io_WKBWriterTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 265 && p.jkind_ <= 265
+	return p != nil && p.jkind_ >= 235 && p.jkind_ <= 235
 }
 func Io_WKBWriterTest_downcast(p *Testjts_GeometryTestCase) *Io_WKBWriterTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 265 || p.jkind_ > 265 {
+	if p.jkind_ < 235 || p.jkind_ > 235 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.io.WKBWriterTest"))
 	}
 	return (*Io_WKBWriterTest)(unsafe.Pointer(p))
 }
 func Io_WKBWriterTest_new(name *java.String) *Io_WKBWriterTest {
 	this := &Io_WKBWriterTest{}
-	this.jkind_ = 265
+	this.jkind_ = 235
 	this.JSetSelf(this)
 	this.Io_WKBWriterTest_init(name)
 	return this

@@ -40,23 +40,23 @@ func OperationRelateng_RelateNGGCTest_isInstance(o any) bool {
 	return ok
 }
 func OperationRelateng_RelateNGGCTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 315 && p.jkind_ <= 315
+	return p != nil && p.jkind_ >= 285 && p.jkind_ <= 285
 }
 func OperationRelateng_RelateNGGCTest_downcast(p *Testjts_GeometryTestCase) *OperationRelateng_RelateNGGCTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 315 || p.jkind_ > 315 {
+	if p.jkind_ < 285 || p.jkind_ > 285 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.relateng.RelateNGGCTest"))
 	}
 	return (*OperationRelateng_RelateNGGCTest)(unsafe.Pointer(p))
 }
 
-var OperationRelateng_RelateNGGCTest_wktAdjacentPolys *java.String = jlit_4048
+var OperationRelateng_RelateNGGCTest_wktAdjacentPolys *java.String = jlit_4047
 
 func OperationRelateng_RelateNGGCTest_new(name *java.String) *OperationRelateng_RelateNGGCTest {
 	this := &OperationRelateng_RelateNGGCTest{}
-	this.jkind_ = 315
+	this.jkind_ = 285
 	this.JSetSelf(this)
 	this.OperationRelateng_RelateNGGCTest_init(name)
 	return this
@@ -65,24 +65,24 @@ func (this *OperationRelateng_RelateNGGCTest) OperationRelateng_RelateNGGCTest_i
 	this.OperationRelateng_RelateNGTestCase.OperationRelateng_RelateNGTestCase_init(name)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestDimensionWithEmpty() {
-	var a *java.String = jlit_1953
-	var b *java.String = jlit_4049
+	var a *java.String = jlit_1952
+	var b *java.String = jlit_4048
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
 	this.CheckEquals_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestMP_GLP_GEOS1027() {
-	var a *java.String = jlit_4050
-	var b *java.String = jlit_4051
-	this.CheckRelate_String_String_String(a, b, jlit_4052)
+	var a *java.String = jlit_4049
+	var b *java.String = jlit_4050
+	this.CheckRelate_String_String_String(a, b, jlit_4051)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 	this.CheckCrosses_String_String_boolean(a, b, false)
 	this.CheckEquals_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestGPL_A() {
-	var a *java.String = jlit_4053
-	var b *java.String = jlit_4054
-	this.CheckRelate_String_String_String(a, b, jlit_4055)
+	var a *java.String = jlit_4052
+	var b *java.String = jlit_4053
+	this.CheckRelate_String_String_String(a, b, jlit_4054)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckCrosses_String_String_boolean(a, b, false)
@@ -91,8 +91,8 @@ func (this *OperationRelateng_RelateNGGCTest) TestGPL_A() {
 }
 func (this *OperationRelateng_RelateNGGCTest) TestP_GPL() {
 	var a *java.String = jlit_1475
-	var b *java.String = jlit_4056
-	this.CheckRelate_String_String_String(a, b, jlit_4057)
+	var b *java.String = jlit_4055
+	this.CheckRelate_String_String_String(a, b, jlit_4056)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckCrosses_String_String_boolean(a, b, false)
@@ -100,148 +100,148 @@ func (this *OperationRelateng_RelateNGGCTest) TestP_GPL() {
 	this.CheckEquals_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestLineInOverlappingPolygonsTouchingInteriorEdge() {
-	var a *java.String = jlit_4058
-	var b *java.String = jlit_4059
-	this.CheckRelate_String_String_String(a, b, jlit_4060)
+	var a *java.String = jlit_4057
+	var b *java.String = jlit_4058
+	this.CheckRelate_String_String_String(a, b, jlit_4059)
 	this.CheckContainsWithin_String_String_boolean(b, a, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestLineInOverlappingPolygonsCrossingInteriorEdgeAtVertex() {
-	var a *java.String = jlit_4061
-	var b *java.String = jlit_4062
-	this.CheckRelate_String_String_String(a, b, jlit_4060)
+	var a *java.String = jlit_4060
+	var b *java.String = jlit_4061
+	this.CheckRelate_String_String_String(a, b, jlit_4059)
 	this.CheckContainsWithin_String_String_boolean(b, a, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestLineInOverlappingPolygonsCrossingInteriorEdgeProper() {
-	var a *java.String = jlit_4063
-	var b *java.String = jlit_4062
-	this.CheckRelate_String_String_String(a, b, jlit_4060)
+	var a *java.String = jlit_4062
+	var b *java.String = jlit_4061
+	this.CheckRelate_String_String_String(a, b, jlit_4059)
 	this.CheckContainsWithin_String_String_boolean(b, a, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestPolygonInOverlappingPolygonsTouchingBoundaries() {
-	var a *java.String = jlit_4064
-	var b *java.String = jlit_4065
-	this.CheckRelate_String_String_String(a, b, jlit_4066)
+	var a *java.String = jlit_4063
+	var b *java.String = jlit_4064
+	this.CheckRelate_String_String_String(a, b, jlit_4065)
 	this.CheckContainsWithin_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestLineInOverlappingPolygonsBoundaries() {
-	var a *java.String = jlit_4067
-	var b *java.String = jlit_4068
-	this.CheckRelate_String_String_String(a, b, jlit_4069)
+	var a *java.String = jlit_4066
+	var b *java.String = jlit_4067
+	this.CheckRelate_String_String_String(a, b, jlit_4068)
 	this.CheckContainsWithin_String_String_boolean(a, b, false)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, false)
 	this.CheckCoversCoveredBy_String_String_boolean(b, a, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestLineCoversOverlappingPolygonsBoundaries() {
-	var a *java.String = jlit_4067
-	var b *java.String = jlit_4068
-	this.CheckRelate_String_String_String(a, b, jlit_4069)
+	var a *java.String = jlit_4066
+	var b *java.String = jlit_4067
+	this.CheckRelate_String_String_String(a, b, jlit_4068)
 	this.CheckContainsWithin_String_String_boolean(b, a, false)
 	this.CheckCoversCoveredBy_String_String_boolean(b, a, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestAdjacentPolygonsContainedInAdjacentPolygons() {
-	var a *java.String = jlit_4070
-	var b *java.String = jlit_4071
-	this.CheckRelate_String_String_String(a, b, jlit_4072)
+	var a *java.String = jlit_4069
+	var b *java.String = jlit_4070
+	this.CheckRelate_String_String_String(a, b, jlit_4071)
 	this.CheckContainsWithin_String_String_boolean(b, a, true)
 	this.CheckCoversCoveredBy_String_String_boolean(b, a, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestGCMultiPolygonIntersectsPolygon() {
-	var a *java.String = jlit_4073
-	var b *java.String = jlit_4002
+	var a *java.String = jlit_4072
+	var b *java.String = jlit_4001
 	this.CheckRelate_String_String_String(a, b, jlit_334)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(b, a, false)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestPolygonContainsGCMultiPolygonElement() {
-	var a *java.String = jlit_4074
-	var b *java.String = jlit_4075
-	this.CheckRelate_String_String_String(a, b, jlit_4076)
+	var a *java.String = jlit_4073
+	var b *java.String = jlit_4074
+	this.CheckRelate_String_String_String(a, b, jlit_4075)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(b, a, false)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestPolygonOverlappingGCPolygon() {
-	var a *java.String = jlit_4077
-	var b *java.String = jlit_4078
+	var a *java.String = jlit_4076
+	var b *java.String = jlit_4077
 	this.CheckRelate_String_String_String(b, a, jlit_334)
 	this.CheckRelate_String_String_String(a, b, jlit_334)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestAdjPolygonsCoverPolygonWithEndpointInside() {
-	var a *java.String = jlit_4048
+	var a *java.String = jlit_4047
 	var b *java.String = jlit_1018
-	this.CheckRelate_String_String_String(b, a, jlit_4072)
-	this.CheckRelate_String_String_String(a, b, jlit_4079)
+	this.CheckRelate_String_String_String(b, a, jlit_4071)
+	this.CheckRelate_String_String_String(a, b, jlit_4078)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestAdjPolygonsCoverPointAtNode() {
-	var a *java.String = jlit_4048
+	var a *java.String = jlit_4047
 	var b *java.String = jlit_3411
-	this.CheckRelate_String_String_String(b, a, jlit_3992)
-	this.CheckRelate_String_String_String(a, b, jlit_4080)
-	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
-	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
-}
-func (this *OperationRelateng_RelateNGGCTest) TestAdjPolygonsCoverPointOnEdge() {
-	var a *java.String = jlit_4048
-	var b *java.String = jlit_4081
-	this.CheckRelate_String_String_String(b, a, jlit_3992)
-	this.CheckRelate_String_String_String(a, b, jlit_4080)
-	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
-	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
-}
-func (this *OperationRelateng_RelateNGGCTest) TestAdjPolygonsContainingPolygonTouchingInteriorEndpoint() {
-	var a *java.String = jlit_4048
-	var b *java.String = jlit_4082
+	this.CheckRelate_String_String_String(b, a, jlit_3991)
 	this.CheckRelate_String_String_String(a, b, jlit_4079)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
 }
+func (this *OperationRelateng_RelateNGGCTest) TestAdjPolygonsCoverPointOnEdge() {
+	var a *java.String = jlit_4047
+	var b *java.String = jlit_4080
+	this.CheckRelate_String_String_String(b, a, jlit_3991)
+	this.CheckRelate_String_String_String(a, b, jlit_4079)
+	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
+	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
+}
+func (this *OperationRelateng_RelateNGGCTest) TestAdjPolygonsContainingPolygonTouchingInteriorEndpoint() {
+	var a *java.String = jlit_4047
+	var b *java.String = jlit_4081
+	this.CheckRelate_String_String_String(a, b, jlit_4078)
+	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
+	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
+}
 func (this *OperationRelateng_RelateNGGCTest) TestAdjPolygonsOverlappedByPolygonWithHole() {
-	var a *java.String = jlit_4048
-	var b *java.String = jlit_4083
-	this.CheckRelate_String_String_String(a, b, jlit_4084)
+	var a *java.String = jlit_4047
+	var b *java.String = jlit_4082
+	this.CheckRelate_String_String_String(a, b, jlit_4083)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, false)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestAdjPolygonsContainingLine() {
-	var a *java.String = jlit_4048
-	var b *java.String = jlit_4085
-	this.CheckRelate_String_String_String(a, b, jlit_4086)
+	var a *java.String = jlit_4047
+	var b *java.String = jlit_4084
+	this.CheckRelate_String_String_String(a, b, jlit_4085)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestAdjPolygonsContainingLineAndPoint() {
-	var a *java.String = jlit_4048
-	var b *java.String = jlit_4087
-	this.CheckRelate_String_String_String(a, b, jlit_4086)
+	var a *java.String = jlit_4047
+	var b *java.String = jlit_4086
+	this.CheckRelate_String_String_String(a, b, jlit_4085)
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 	this.CheckCoversCoveredBy_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestEmptyMultiPointElements() {
 	var a *java.String = jlit_1018
-	var b *java.String = jlit_4088
+	var b *java.String = jlit_4087
 	this.CheckIntersectsDisjoint_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestPolygonContainingPointsInBoundary() {
-	var a *java.String = jlit_4089
-	var b *java.String = jlit_4090
+	var a *java.String = jlit_4088
+	var b *java.String = jlit_4089
 	this.CheckEquals_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestPolygonContainingLineInBoundary() {
-	var a *java.String = jlit_4089
-	var b *java.String = jlit_4091
+	var a *java.String = jlit_4088
+	var b *java.String = jlit_4090
 	this.CheckEquals_String_String_boolean(a, b, true)
 }
 func (this *OperationRelateng_RelateNGGCTest) TestPolygonContainingLineInBoundaryAndInterior() {
-	var a *java.String = jlit_4089
-	var b *java.String = jlit_4092
+	var a *java.String = jlit_4088
+	var b *java.String = jlit_4091
 	this.CheckEquals_String_String_boolean(a, b, true)
 }
 func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsContainingLine(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4093)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4092)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjPolygonsContainingLine()
@@ -249,7 +249,7 @@ func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsContainingLine(t *testi
 }
 func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsContainingLineAndPoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4094)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4093)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjPolygonsContainingLineAndPoint()
@@ -257,7 +257,7 @@ func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsContainingLineAndPoint(
 }
 func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsContainingPolygonTouchingInteriorEndpoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4095)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4094)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjPolygonsContainingPolygonTouchingInteriorEndpoint()
@@ -265,7 +265,7 @@ func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsContainingPolygonTouchi
 }
 func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsCoverPointAtNode(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4096)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4095)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjPolygonsCoverPointAtNode()
@@ -273,7 +273,7 @@ func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsCoverPointAtNode(t *tes
 }
 func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsCoverPointOnEdge(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4097)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4096)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjPolygonsCoverPointOnEdge()
@@ -281,7 +281,7 @@ func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsCoverPointOnEdge(t *tes
 }
 func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsCoverPolygonWithEndpointInside(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4098)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4097)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjPolygonsCoverPolygonWithEndpointInside()
@@ -289,7 +289,7 @@ func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsCoverPolygonWithEndpoin
 }
 func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsOverlappedByPolygonWithHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4099)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4098)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjPolygonsOverlappedByPolygonWithHole()
@@ -297,7 +297,7 @@ func TestOperationRelateng_RelateNGGCTest_testAdjPolygonsOverlappedByPolygonWith
 }
 func TestOperationRelateng_RelateNGGCTest_testAdjacentPolygonsContainedInAdjacentPolygons(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4100)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4099)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestAdjacentPolygonsContainedInAdjacentPolygons()
@@ -305,7 +305,7 @@ func TestOperationRelateng_RelateNGGCTest_testAdjacentPolygonsContainedInAdjacen
 }
 func TestOperationRelateng_RelateNGGCTest_testDimensionWithEmpty(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4101)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4100)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestDimensionWithEmpty()
@@ -313,7 +313,7 @@ func TestOperationRelateng_RelateNGGCTest_testDimensionWithEmpty(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGGCTest_testEmptyMultiPointElements(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4102)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4101)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestEmptyMultiPointElements()
@@ -321,7 +321,7 @@ func TestOperationRelateng_RelateNGGCTest_testEmptyMultiPointElements(t *testing
 }
 func TestOperationRelateng_RelateNGGCTest_testGCMultiPolygonIntersectsPolygon(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4103)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4102)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGCMultiPolygonIntersectsPolygon()
@@ -329,7 +329,7 @@ func TestOperationRelateng_RelateNGGCTest_testGCMultiPolygonIntersectsPolygon(t 
 }
 func TestOperationRelateng_RelateNGGCTest_testGPL_A(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4104)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4103)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGPL_A()
@@ -337,7 +337,7 @@ func TestOperationRelateng_RelateNGGCTest_testGPL_A(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGGCTest_testLineCoversOverlappingPolygonsBoundaries(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4105)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4104)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineCoversOverlappingPolygonsBoundaries()
@@ -345,7 +345,7 @@ func TestOperationRelateng_RelateNGGCTest_testLineCoversOverlappingPolygonsBound
 }
 func TestOperationRelateng_RelateNGGCTest_testLineInOverlappingPolygonsBoundaries(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4106)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4105)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineInOverlappingPolygonsBoundaries()
@@ -353,7 +353,7 @@ func TestOperationRelateng_RelateNGGCTest_testLineInOverlappingPolygonsBoundarie
 }
 func TestOperationRelateng_RelateNGGCTest_testLineInOverlappingPolygonsCrossingInteriorEdgeAtVertex(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4107)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4106)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineInOverlappingPolygonsCrossingInteriorEdgeAtVertex()
@@ -361,7 +361,7 @@ func TestOperationRelateng_RelateNGGCTest_testLineInOverlappingPolygonsCrossingI
 }
 func TestOperationRelateng_RelateNGGCTest_testLineInOverlappingPolygonsCrossingInteriorEdgeProper(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4108)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4107)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineInOverlappingPolygonsCrossingInteriorEdgeProper()
@@ -369,7 +369,7 @@ func TestOperationRelateng_RelateNGGCTest_testLineInOverlappingPolygonsCrossingI
 }
 func TestOperationRelateng_RelateNGGCTest_testLineInOverlappingPolygonsTouchingInteriorEdge(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4109)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4108)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestLineInOverlappingPolygonsTouchingInteriorEdge()
@@ -377,7 +377,7 @@ func TestOperationRelateng_RelateNGGCTest_testLineInOverlappingPolygonsTouchingI
 }
 func TestOperationRelateng_RelateNGGCTest_testMP_GLP_GEOS1027(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4110)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4109)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestMP_GLP_GEOS1027()
@@ -385,7 +385,7 @@ func TestOperationRelateng_RelateNGGCTest_testMP_GLP_GEOS1027(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGGCTest_testP_GPL(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4111)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4110)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestP_GPL()
@@ -393,7 +393,7 @@ func TestOperationRelateng_RelateNGGCTest_testP_GPL(t *testing.T) {
 }
 func TestOperationRelateng_RelateNGGCTest_testPolygonContainingLineInBoundary(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4112)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4111)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonContainingLineInBoundary()
@@ -401,7 +401,7 @@ func TestOperationRelateng_RelateNGGCTest_testPolygonContainingLineInBoundary(t 
 }
 func TestOperationRelateng_RelateNGGCTest_testPolygonContainingLineInBoundaryAndInterior(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4113)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4112)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonContainingLineInBoundaryAndInterior()
@@ -409,7 +409,7 @@ func TestOperationRelateng_RelateNGGCTest_testPolygonContainingLineInBoundaryAnd
 }
 func TestOperationRelateng_RelateNGGCTest_testPolygonContainingPointsInBoundary(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4114)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4113)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonContainingPointsInBoundary()
@@ -417,7 +417,7 @@ func TestOperationRelateng_RelateNGGCTest_testPolygonContainingPointsInBoundary(
 }
 func TestOperationRelateng_RelateNGGCTest_testPolygonContainsGCMultiPolygonElement(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4115)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4114)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonContainsGCMultiPolygonElement()
@@ -425,7 +425,7 @@ func TestOperationRelateng_RelateNGGCTest_testPolygonContainsGCMultiPolygonEleme
 }
 func TestOperationRelateng_RelateNGGCTest_testPolygonInOverlappingPolygonsTouchingBoundaries(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4116)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4115)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonInOverlappingPolygonsTouchingBoundaries()
@@ -433,7 +433,7 @@ func TestOperationRelateng_RelateNGGCTest_testPolygonInOverlappingPolygonsTouchi
 }
 func TestOperationRelateng_RelateNGGCTest_testPolygonOverlappingGCPolygon(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationRelateng_RelateNGGCTest_new(jlit_4117)
+		tc := OperationRelateng_RelateNGGCTest_new(jlit_4116)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestPolygonOverlappingGCPolygon()

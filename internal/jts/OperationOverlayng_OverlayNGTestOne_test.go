@@ -4,8 +4,6 @@ package jts
 
 import (
 	"github.com/peterstace/simplefeatures/internal/jts/java"
-	"github.com/peterstace/simplefeatures/internal/jts/junit"
-	"testing"
 	"unsafe"
 )
 
@@ -40,20 +38,20 @@ func OperationOverlayng_OverlayNGTestOne_isInstance(o any) bool {
 	return ok
 }
 func OperationOverlayng_OverlayNGTestOne_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 299 && p.jkind_ <= 299
+	return p != nil && p.jkind_ >= 269 && p.jkind_ <= 269
 }
 func OperationOverlayng_OverlayNGTestOne_downcast(p *Testjts_GeometryTestCase) *OperationOverlayng_OverlayNGTestOne {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 299 || p.jkind_ > 299 {
+	if p.jkind_ < 269 || p.jkind_ > 269 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.overlayng.OverlayNGTestOne"))
 	}
 	return (*OperationOverlayng_OverlayNGTestOne)(unsafe.Pointer(p))
 }
 func OperationOverlayng_OverlayNGTestOne_new(name *java.String) *OperationOverlayng_OverlayNGTestOne {
 	this := &OperationOverlayng_OverlayNGTestOne{}
-	this.jkind_ = 299
+	this.jkind_ = 269
 	this.JSetSelf(this)
 	this.OperationOverlayng_OverlayNGTestOne_init(name)
 	return this
@@ -430,12 +428,4 @@ func (this *OperationOverlayng_OverlayNGTestOne) XtestBCollapsedHoleEdgeLabelled
 	var expected *Geom_Geometry = this.Read_String(jlit_3622)
 	var actual *Geom_Geometry = OperationOverlayng_OverlayNGTestOne_intersection(a, b, float64(int32(100)))
 	this.CheckEqual_Geometry_Geometry(expected, actual)
-}
-func TestOperationOverlayng_OverlayNGTestOne_testCollapseTriBoxesIntersection(t *testing.T) {
-	junit.Run(t, func() {
-		tc := OperationOverlayng_OverlayNGTestOne_new(jlit_3742)
-		tc.SetUp_impl()
-		defer tc.TearDown()
-		tc.TestCollapseTriBoxesIntersection()
-	})
 }

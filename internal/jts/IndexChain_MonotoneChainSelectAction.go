@@ -42,13 +42,13 @@ func IndexChain_MonotoneChainSelectAction_isInstance(o any) bool {
 	return ok
 }
 func IndexChain_MonotoneChainSelectAction_isKind(p *IndexChain_MonotoneChainSelectAction) bool {
-	return p != nil && p.jkind_ >= 116 && p.jkind_ <= 119
+	return p != nil && p.jkind_ >= 116 && p.jkind_ <= 118
 }
 func IndexChain_MonotoneChainSelectAction_downcast(p *IndexChain_MonotoneChainSelectAction) *IndexChain_MonotoneChainSelectAction {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 116 || p.jkind_ > 119 {
+	if p.jkind_ < 116 || p.jkind_ > 118 {
 		panic(java.ClassCastError(IndexChain_MonotoneChainSelectAction_toAny(p), "org.locationtech.jts.index.chain.MonotoneChainSelectAction"))
 	}
 	return (*IndexChain_MonotoneChainSelectAction)(unsafe.Pointer(p))
@@ -67,8 +67,6 @@ func IndexChain_MonotoneChainSelectAction_toAny(p *IndexChain_MonotoneChainSelec
 		return (*NodingSnapround_MCIndexPointSnapper_HotPixelSnapAction)(unsafe.Pointer(p))
 	case 118:
 		return (*OperationBuffer_OffsetCurve_MatchCurveSegmentAction)(unsafe.Pointer(p))
-	case 119:
-		return (*TestjtsPerfAlgorithm_MCIndexedPointInAreaLocator_MCSegmentCounter)(unsafe.Pointer(p))
 	}
 	panic("jts: bad kind")
 }
@@ -86,15 +84,7 @@ func (this *IndexChain_MonotoneChainSelectAction) Select_MonotoneChain_int_impl(
 	mc.GetLineSegment_int_LineSegment(startIndex, this.selectedSegment)
 	this.Select_LineSegment(this.selectedSegment)
 }
-func (this *IndexChain_MonotoneChainSelectAction) Select_LineSegment_impl(seg *Geom_LineSegment) {
-}
-func (this *IndexChain_MonotoneChainSelectAction) Select_LineSegment(a0 *Geom_LineSegment) {
-	switch this.jkind_ {
-	case 119:
-		(*TestjtsPerfAlgorithm_MCIndexedPointInAreaLocator_MCSegmentCounter)(unsafe.Pointer(this)).Select_LineSegment_impl(a0)
-		return
-	}
-	this.Select_LineSegment_impl(a0)
+func (this *IndexChain_MonotoneChainSelectAction) Select_LineSegment(seg *Geom_LineSegment) {
 }
 func (this *IndexChain_MonotoneChainSelectAction) Select_MonotoneChain_int(a0 *IndexChain_MonotoneChain, a1 int32) {
 	switch this.jkind_ {

@@ -32,20 +32,20 @@ func Planargraph_Edge_isInstance(o any) bool {
 	return ok
 }
 func Planargraph_Edge_isKind(p *Planargraph_GraphComponent) bool {
-	return p != nil && p.jkind_ >= 170 && p.jkind_ <= 172
+	return p != nil && p.jkind_ >= 169 && p.jkind_ <= 171
 }
 func Planargraph_Edge_downcast(p *Planargraph_GraphComponent) *Planargraph_Edge {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 170 || p.jkind_ > 172 {
+	if p.jkind_ < 169 || p.jkind_ > 171 {
 		panic(java.ClassCastError(Planargraph_GraphComponent_toAny(p), "org.locationtech.jts.planargraph.Edge"))
 	}
 	return (*Planargraph_Edge)(unsafe.Pointer(p))
 }
 func Planargraph_Edge_new() *Planargraph_Edge {
 	this := &Planargraph_Edge{}
-	this.jkind_ = 170
+	this.jkind_ = 169
 	this.Planargraph_Edge_init()
 	return this
 }
@@ -54,7 +54,7 @@ func (this *Planargraph_Edge) Planargraph_Edge_init() {
 }
 func Planargraph_Edge_new_DirectedEdge_DirectedEdge(de0 *Planargraph_DirectedEdge, de1 *Planargraph_DirectedEdge) *Planargraph_Edge {
 	this := &Planargraph_Edge{}
-	this.jkind_ = 170
+	this.jkind_ = 169
 	this.Planargraph_Edge_init_DirectedEdge_DirectedEdge(de0, de1)
 	return this
 }

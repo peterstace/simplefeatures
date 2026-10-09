@@ -51,11 +51,11 @@ func (this *Triangulate_ConformingDelaunayTest) Triangulate_ConformingDelaunayTe
 	this.TestCase.TestCase_init_String(name)
 }
 func (this *Triangulate_ConformingDelaunayTest) TestRandom() {
-	var wkt *java.String = jlit_4732
-	var lineWKT *java.String = jlit_4733
-	var expected *java.String = jlit_4734
+	var wkt *java.String = jlit_4731
+	var lineWKT *java.String = jlit_4732
+	var expected *java.String = jlit_4733
 	this.RunDelaunay_String_String_boolean_String(wkt, lineWKT, false, expected)
-	var expectedTri *java.String = jlit_4735
+	var expectedTri *java.String = jlit_4734
 	this.RunDelaunay_String_String_boolean_String(wkt, lineWKT, true, expectedTri)
 }
 func (this *Triangulate_ConformingDelaunayTest) RunDelaunay_String_String_boolean_String(sitesWKT *java.String, constraintsWKT *java.String, computeTriangles bool, expectedWKT *java.String) {
@@ -78,7 +78,7 @@ func (this *Triangulate_ConformingDelaunayTest) RunDelaunay_String_String_boolea
 }
 func TestTriangulate_ConformingDelaunayTest_testRandom(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Triangulate_ConformingDelaunayTest_new(jlit_4736)
+		tc := Triangulate_ConformingDelaunayTest_new(jlit_4735)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestRandom()

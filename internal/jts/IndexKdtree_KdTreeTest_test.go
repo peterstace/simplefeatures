@@ -50,7 +50,7 @@ func (this *IndexKdtree_KdTreeTest) TestSinglePoint() {
 	var index *IndexKdtree_KdTree = IndexKdtree_KdTree_new_double(float64(0.001))
 	var node1 *IndexKdtree_KdNode = index.Insert_Coordinate(Geom_Coordinate_new_double_double(float64(int32(1)), float64(int32(1))))
 	var node2 *IndexKdtree_KdNode = index.Insert_Coordinate(Geom_Coordinate_new_double_double(float64(int32(1)), float64(int32(1))))
-	junit.TestCase_assertTrue_String_boolean(jlit_1981, (unsafe.Pointer(node1) == unsafe.Pointer(node2)))
+	junit.TestCase_assertTrue_String_boolean(jlit_1980, (unsafe.Pointer(node1) == unsafe.Pointer(node2)))
 	var queryEnv *Geom_Envelope = Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(10)), float64(int32(0)), float64(int32(10)))
 	var result java.List = index.Query_Envelope(queryEnv)
 	junit.TestCase_assertTrue_boolean((result.Size() == int32(1)))
@@ -59,25 +59,25 @@ func (this *IndexKdtree_KdTreeTest) TestSinglePoint() {
 	junit.TestCase_assertTrue_boolean(node.IsRepeated())
 }
 func (this *IndexKdtree_KdTreeTest) TestMultiplePoint() {
-	this.testQuery_String_double_Envelope_String(jlit_1982, float64(int32(0)), Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(10)), float64(int32(0)), float64(int32(10))), jlit_1982)
+	this.testQuery_String_double_Envelope_String(jlit_1981, float64(int32(0)), Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(10)), float64(int32(0)), float64(int32(10))), jlit_1981)
 }
 func (this *IndexKdtree_KdTreeTest) TestSubset() {
-	this.testQuery_String_double_Envelope_String(jlit_1983, float64(int32(0)), Geom_Envelope_new_double_double_double_double(float64(1.5), float64(3.4), float64(1.5), float64(3.5)), jlit_1984)
+	this.testQuery_String_double_Envelope_String(jlit_1982, float64(int32(0)), Geom_Envelope_new_double_double_double_double(float64(1.5), float64(3.4), float64(1.5), float64(3.5)), jlit_1983)
 }
 func (this *IndexKdtree_KdTreeTest) TestToleranceFailure() {
-	this.testQuery_String_double_Envelope_String(jlit_1985, float64(int32(1)), Geom_Envelope_new_double_double_double_double(float64(int32(-9)), float64(int32(9)), float64(int32(-9)), float64(int32(9))), jlit_1986)
+	this.testQuery_String_double_Envelope_String(jlit_1984, float64(int32(1)), Geom_Envelope_new_double_double_double_double(float64(int32(-9)), float64(int32(9)), float64(int32(-9)), float64(int32(9))), jlit_1985)
 }
 func (this *IndexKdtree_KdTreeTest) TestTolerance2() {
-	this.testQuery_String_double_Envelope_String(jlit_1987, float64(int32(9)), Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(99)), float64(int32(0)), float64(int32(99))), jlit_1988)
+	this.testQuery_String_double_Envelope_String(jlit_1986, float64(int32(9)), Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(99)), float64(int32(0)), float64(int32(99))), jlit_1987)
 }
 func (this *IndexKdtree_KdTreeTest) TestTolerance2_perturbedY() {
-	this.testQuery_String_double_Envelope_String(jlit_1989, float64(int32(9)), Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(99)), float64(int32(0)), float64(int32(99))), jlit_1990)
+	this.testQuery_String_double_Envelope_String(jlit_1988, float64(int32(9)), Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(99)), float64(int32(0)), float64(int32(99))), jlit_1989)
 }
 func (this *IndexKdtree_KdTreeTest) TestSnapToNearest() {
-	this.testQueryRepeated_String_double_Envelope_String(jlit_1991, float64(int32(5)), Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(99)), float64(int32(0)), float64(int32(99))), jlit_1992)
+	this.testQueryRepeated_String_double_Envelope_String(jlit_1990, float64(int32(5)), Geom_Envelope_new_double_double_double_double(float64(int32(0)), float64(int32(99)), float64(int32(0)), float64(int32(99))), jlit_1991)
 }
 func (this *IndexKdtree_KdTreeTest) TestSizeDepth() {
-	var index *IndexKdtree_KdTree = this.build_String_double(jlit_1993, float64(int32(0)))
+	var index *IndexKdtree_KdTree = this.build_String_double(jlit_1992, float64(int32(0)))
 	var size int32 = index.Size()
 	junit.TestCase_assertEquals_int_int(int32(5), size)
 	var depth int32 = index.Depth()
@@ -96,23 +96,23 @@ func (this *IndexKdtree_KdTreeTest) testQuery_KdTree_Envelope_CoordinateArr(inde
 	var result []*Geom_Coordinate = IndexKdtree_KdTree_toCoordinates_Collection(java.AnyTo[java.Collection](index.Query_Envelope(queryEnv)))
 	java.Arrays_sort_ObjectArr(java.ArrRef(result))
 	java.Arrays_sort_ObjectArr(java.ArrRef(expectedCoord))
-	junit.TestCase_assertTrue_String_boolean(java.Concat(jlit_1994, java.StrOfInt(int32(int32(len(result)))), jlit_1995, java.StrOfInt(int32(int32(len(expectedCoord))))), (int32(len(result)) == int32(len(expectedCoord))))
+	junit.TestCase_assertTrue_String_boolean(java.Concat(jlit_1993, java.StrOfInt(int32(int32(len(result)))), jlit_1994, java.StrOfInt(int32(int32(len(expectedCoord))))), (int32(len(result)) == int32(len(expectedCoord))))
 	var isMatch bool = Geom_CoordinateArrays_equals_CoordinateArr_CoordinateArr(result, expectedCoord)
-	junit.TestCase_assertTrue_String_boolean(jlit_1996, isMatch)
+	junit.TestCase_assertTrue_String_boolean(jlit_1995, isMatch)
 }
 func (this *IndexKdtree_KdTreeTest) testQuery_KdTree_Envelope_boolean_CoordinateArr(index *IndexKdtree_KdTree, queryEnv *Geom_Envelope, includeRepeated bool, expectedCoord []*Geom_Coordinate) {
 	var result []*Geom_Coordinate = IndexKdtree_KdTree_toCoordinates_Collection_boolean(java.AnyTo[java.Collection](index.Query_Envelope(queryEnv)), includeRepeated)
 	java.Arrays_sort_ObjectArr(java.ArrRef(result))
 	java.Arrays_sort_ObjectArr(java.ArrRef(expectedCoord))
-	junit.TestCase_assertTrue_String_boolean(java.Concat(jlit_1994, java.StrOfInt(int32(int32(len(result)))), jlit_1995, java.StrOfInt(int32(int32(len(expectedCoord))))), (int32(len(result)) == int32(len(expectedCoord))))
+	junit.TestCase_assertTrue_String_boolean(java.Concat(jlit_1993, java.StrOfInt(int32(int32(len(result)))), jlit_1994, java.StrOfInt(int32(int32(len(expectedCoord))))), (int32(len(result)) == int32(len(expectedCoord))))
 	var isMatch bool = Geom_CoordinateArrays_equals_CoordinateArr_CoordinateArr(result, expectedCoord)
-	junit.TestCase_assertTrue_String_boolean(jlit_1996, isMatch)
+	junit.TestCase_assertTrue_String_boolean(jlit_1995, isMatch)
 	{
 		var i int32 = int32(0)
 		for ; i < int32(len(expectedCoord)); i++ {
 			var p *Geom_Coordinate = expectedCoord[i]
 			var node *IndexKdtree_KdNode = index.Query_Coordinate(p)
-			junit.TestCase_assertEquals_String_Object_Object(jlit_1997, Geom_Coordinate_toAny((*Geom_Coordinate)(unsafe.Pointer(node.GetCoordinate()))), Geom_Coordinate_toAny((*Geom_Coordinate)(unsafe.Pointer(p))))
+			junit.TestCase_assertEquals_String_Object_Object(jlit_1996, Geom_Coordinate_toAny((*Geom_Coordinate)(unsafe.Pointer(node.GetCoordinate()))), Geom_Coordinate_toAny((*Geom_Coordinate)(unsafe.Pointer(p))))
 		}
 	}
 }
@@ -129,7 +129,7 @@ func (this *IndexKdtree_KdTreeTest) build_String_double(wktInput *java.String, t
 }
 func TestIndexKdtree_KdTreeTest_testMultiplePoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexKdtree_KdTreeTest_new(jlit_1998)
+		tc := IndexKdtree_KdTreeTest_new(jlit_1997)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestMultiplePoint()
@@ -137,7 +137,7 @@ func TestIndexKdtree_KdTreeTest_testMultiplePoint(t *testing.T) {
 }
 func TestIndexKdtree_KdTreeTest_testSinglePoint(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexKdtree_KdTreeTest_new(jlit_1999)
+		tc := IndexKdtree_KdTreeTest_new(jlit_1998)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSinglePoint()
@@ -145,7 +145,7 @@ func TestIndexKdtree_KdTreeTest_testSinglePoint(t *testing.T) {
 }
 func TestIndexKdtree_KdTreeTest_testSizeDepth(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexKdtree_KdTreeTest_new(jlit_2000)
+		tc := IndexKdtree_KdTreeTest_new(jlit_1999)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSizeDepth()
@@ -153,7 +153,7 @@ func TestIndexKdtree_KdTreeTest_testSizeDepth(t *testing.T) {
 }
 func TestIndexKdtree_KdTreeTest_testSnapToNearest(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexKdtree_KdTreeTest_new(jlit_2001)
+		tc := IndexKdtree_KdTreeTest_new(jlit_2000)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSnapToNearest()
@@ -161,7 +161,7 @@ func TestIndexKdtree_KdTreeTest_testSnapToNearest(t *testing.T) {
 }
 func TestIndexKdtree_KdTreeTest_testSubset(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexKdtree_KdTreeTest_new(jlit_2002)
+		tc := IndexKdtree_KdTreeTest_new(jlit_2001)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestSubset()
@@ -169,7 +169,7 @@ func TestIndexKdtree_KdTreeTest_testSubset(t *testing.T) {
 }
 func TestIndexKdtree_KdTreeTest_testTolerance2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexKdtree_KdTreeTest_new(jlit_2003)
+		tc := IndexKdtree_KdTreeTest_new(jlit_2002)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestTolerance2()
@@ -177,7 +177,7 @@ func TestIndexKdtree_KdTreeTest_testTolerance2(t *testing.T) {
 }
 func TestIndexKdtree_KdTreeTest_testTolerance2_perturbedY(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexKdtree_KdTreeTest_new(jlit_2004)
+		tc := IndexKdtree_KdTreeTest_new(jlit_2003)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestTolerance2_perturbedY()
@@ -185,7 +185,7 @@ func TestIndexKdtree_KdTreeTest_testTolerance2_perturbedY(t *testing.T) {
 }
 func TestIndexKdtree_KdTreeTest_testToleranceFailure(t *testing.T) {
 	junit.Run(t, func() {
-		tc := IndexKdtree_KdTreeTest_new(jlit_2005)
+		tc := IndexKdtree_KdTreeTest_new(jlit_2004)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestToleranceFailure()

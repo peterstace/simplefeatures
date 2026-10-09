@@ -40,20 +40,20 @@ func Geom_GeometryCollectionIteratorTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_GeometryCollectionIteratorTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 253 && p.jkind_ <= 253
+	return p != nil && p.jkind_ >= 223 && p.jkind_ <= 223
 }
 func Geom_GeometryCollectionIteratorTest_downcast(p *Testjts_GeometryTestCase) *Geom_GeometryCollectionIteratorTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 253 || p.jkind_ > 253 {
+	if p.jkind_ < 223 || p.jkind_ > 223 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.GeometryCollectionIteratorTest"))
 	}
 	return (*Geom_GeometryCollectionIteratorTest)(unsafe.Pointer(p))
 }
 func Geom_GeometryCollectionIteratorTest_new(name *java.String) *Geom_GeometryCollectionIteratorTest {
 	this := &Geom_GeometryCollectionIteratorTest{}
-	this.jkind_ = 253
+	this.jkind_ = 223
 	this.JSetSelf(this)
 	this.Geom_GeometryCollectionIteratorTest_init(name)
 	return this

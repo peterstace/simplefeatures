@@ -80,7 +80,7 @@ func (this *Util_PriorityQueueTest) checkOrder_PriorityQueue(q *Util_PriorityQue
 }
 func TestUtil_PriorityQueueTest_testOrder1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Util_PriorityQueueTest_new(jlit_4854)
+		tc := Util_PriorityQueueTest_new(jlit_4853)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestOrder1()
@@ -88,7 +88,7 @@ func TestUtil_PriorityQueueTest_testOrder1(t *testing.T) {
 }
 func TestUtil_PriorityQueueTest_testOrderRandom1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Util_PriorityQueueTest_new(jlit_4855)
+		tc := Util_PriorityQueueTest_new(jlit_4854)
 		tc.SetUp()
 		defer tc.TearDown()
 		tc.TestOrderRandom1()

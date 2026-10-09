@@ -34,13 +34,13 @@ func Densify_DensifierTest_isInstance(o any) bool {
 	return ok
 }
 func Densify_DensifierTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 247 && p.jkind_ <= 247
+	return p != nil && p.jkind_ >= 217 && p.jkind_ <= 217
 }
 func Densify_DensifierTest_downcast(p *Testjts_GeometryTestCase) *Densify_DensifierTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 247 || p.jkind_ > 247 {
+	if p.jkind_ < 217 || p.jkind_ > 217 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.densify.DensifierTest"))
 	}
 	return (*Densify_DensifierTest)(unsafe.Pointer(p))
@@ -50,7 +50,7 @@ const Densify_DensifierTest_TOLERANCE float64 = float64(1.0e-6)
 
 func Densify_DensifierTest_new(name *java.String) *Densify_DensifierTest {
 	this := &Densify_DensifierTest{}
-	this.jkind_ = 247
+	this.jkind_ = 217
 	this.JSetSelf(this)
 	this.Densify_DensifierTest_init(name)
 	return this

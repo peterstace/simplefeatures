@@ -43,13 +43,13 @@ func Algorithm_MinimumBoundingCircleTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_MinimumBoundingCircleTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 233 && p.jkind_ <= 233
+	return p != nil && p.jkind_ >= 203 && p.jkind_ <= 203
 }
 func Algorithm_MinimumBoundingCircleTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_MinimumBoundingCircleTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 233 || p.jkind_ > 233 {
+	if p.jkind_ < 203 || p.jkind_ > 203 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.MinimumBoundingCircleTest"))
 	}
 	return (*Algorithm_MinimumBoundingCircleTest)(unsafe.Pointer(p))
@@ -59,7 +59,7 @@ const Algorithm_MinimumBoundingCircleTest_TOLERANCE float64 = float64(1.0e-5)
 
 func Algorithm_MinimumBoundingCircleTest_new(name *java.String) *Algorithm_MinimumBoundingCircleTest {
 	this := &Algorithm_MinimumBoundingCircleTest{}
-	this.jkind_ = 233
+	this.jkind_ = 203
 	this.JSetSelf(this)
 	this.Algorithm_MinimumBoundingCircleTest_init(name)
 	return this

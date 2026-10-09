@@ -34,20 +34,20 @@ func Geom_GeometryCopyTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_GeometryCopyTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 256 && p.jkind_ <= 256
+	return p != nil && p.jkind_ >= 226 && p.jkind_ <= 226
 }
 func Geom_GeometryCopyTest_downcast(p *Testjts_GeometryTestCase) *Geom_GeometryCopyTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 256 || p.jkind_ > 256 {
+	if p.jkind_ < 226 || p.jkind_ > 226 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.GeometryCopyTest"))
 	}
 	return (*Geom_GeometryCopyTest)(unsafe.Pointer(p))
 }
 func Geom_GeometryCopyTest_new(name *java.String) *Geom_GeometryCopyTest {
 	this := &Geom_GeometryCopyTest{}
-	this.jkind_ = 256
+	this.jkind_ = 226
 	this.JSetSelf(this)
 	this.Geom_GeometryCopyTest_init(name)
 	return this

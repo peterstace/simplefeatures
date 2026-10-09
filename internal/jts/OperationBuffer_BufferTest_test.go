@@ -40,20 +40,20 @@ func OperationBuffer_BufferTest_isInstance(o any) bool {
 	return ok
 }
 func OperationBuffer_BufferTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 276 && p.jkind_ <= 276
+	return p != nil && p.jkind_ >= 246 && p.jkind_ <= 246
 }
 func OperationBuffer_BufferTest_downcast(p *Testjts_GeometryTestCase) *OperationBuffer_BufferTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 276 || p.jkind_ > 276 {
+	if p.jkind_ < 246 || p.jkind_ > 246 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.operation.buffer.BufferTest"))
 	}
 	return (*OperationBuffer_BufferTest)(unsafe.Pointer(p))
 }
 func OperationBuffer_BufferTest_new(name *java.String) *OperationBuffer_BufferTest {
 	this := &OperationBuffer_BufferTest{}
-	this.jkind_ = 276
+	this.jkind_ = 246
 	this.JSetSelf(this)
 	this.OperationBuffer_BufferTest_init(name)
 	return this
@@ -401,7 +401,7 @@ func (this *OperationBuffer_BufferTest) hasHole_Geometry(geom *Geom_Geometry) bo
 }
 func TestOperationBuffer_BufferTest_test1(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationBuffer_BufferTest_new(jlit_1962)
+		tc := OperationBuffer_BufferTest_new(jlit_1961)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.Test1()
@@ -409,7 +409,7 @@ func TestOperationBuffer_BufferTest_test1(t *testing.T) {
 }
 func TestOperationBuffer_BufferTest_test10(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationBuffer_BufferTest_new(jlit_1963)
+		tc := OperationBuffer_BufferTest_new(jlit_1962)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.Test10()
@@ -497,7 +497,7 @@ func TestOperationBuffer_BufferTest_test1a(t *testing.T) {
 }
 func TestOperationBuffer_BufferTest_test2(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationBuffer_BufferTest_new(jlit_1964)
+		tc := OperationBuffer_BufferTest_new(jlit_1963)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.Test2()
@@ -697,7 +697,7 @@ func TestOperationBuffer_BufferTest_test5(t *testing.T) {
 }
 func TestOperationBuffer_BufferTest_test6(t *testing.T) {
 	junit.Run(t, func() {
-		tc := OperationBuffer_BufferTest_new(jlit_1965)
+		tc := OperationBuffer_BufferTest_new(jlit_1964)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.Test6()

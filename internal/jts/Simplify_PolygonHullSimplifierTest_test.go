@@ -40,20 +40,20 @@ func Simplify_PolygonHullSimplifierTest_isInstance(o any) bool {
 	return ok
 }
 func Simplify_PolygonHullSimplifierTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 330 && p.jkind_ <= 330
+	return p != nil && p.jkind_ >= 300 && p.jkind_ <= 300
 }
 func Simplify_PolygonHullSimplifierTest_downcast(p *Testjts_GeometryTestCase) *Simplify_PolygonHullSimplifierTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 330 || p.jkind_ > 330 {
+	if p.jkind_ < 300 || p.jkind_ > 300 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.simplify.PolygonHullSimplifierTest"))
 	}
 	return (*Simplify_PolygonHullSimplifierTest)(unsafe.Pointer(p))
 }
 func Simplify_PolygonHullSimplifierTest_new(name *java.String) *Simplify_PolygonHullSimplifierTest {
 	this := &Simplify_PolygonHullSimplifierTest{}
-	this.jkind_ = 330
+	this.jkind_ = 300
 	this.JSetSelf(this)
 	this.Simplify_PolygonHullSimplifierTest_init(name)
 	return this
@@ -62,45 +62,45 @@ func (this *Simplify_PolygonHullSimplifierTest) Simplify_PolygonHullSimplifierTe
 	this.Testjts_GeometryTestCase.Testjts_GeometryTestCase_init_String(name)
 }
 func (this *Simplify_PolygonHullSimplifierTest) TestOuterSimple() {
-	var wkt *java.String = jlit_4637
-	this.checkHullOuter_String_double_String(wkt, float64(int32(0)), jlit_4638)
-	this.checkHullOuter_String_double_String(wkt, float64(0.8), jlit_4639)
-	this.checkHullOuter_String_double_String(wkt, float64(int32(1)), jlit_4637)
+	var wkt *java.String = jlit_4636
+	this.checkHullOuter_String_double_String(wkt, float64(int32(0)), jlit_4637)
+	this.checkHullOuter_String_double_String(wkt, float64(0.8), jlit_4638)
+	this.checkHullOuter_String_double_String(wkt, float64(int32(1)), jlit_4636)
 }
 func (this *Simplify_PolygonHullSimplifierTest) TestOuterZGore() {
-	var wkt *java.String = jlit_4640
-	this.checkHullOuter_String_double_String(wkt, float64(0.5), jlit_4641)
-	this.checkHullOuter_String_double_String(wkt, float64(0.6), jlit_4642)
-	this.checkHullOuter_String_double_String(wkt, float64(0.7), jlit_4643)
+	var wkt *java.String = jlit_4639
+	this.checkHullOuter_String_double_String(wkt, float64(0.5), jlit_4640)
+	this.checkHullOuter_String_double_String(wkt, float64(0.6), jlit_4641)
+	this.checkHullOuter_String_double_String(wkt, float64(0.7), jlit_4642)
 }
 func (this *Simplify_PolygonHullSimplifierTest) TestOuterFlat() {
-	this.checkHullOuter_String_double_String(jlit_4644, float64(0.4), jlit_1866)
+	this.checkHullOuter_String_double_String(jlit_4643, float64(0.4), jlit_1865)
 }
 func (this *Simplify_PolygonHullSimplifierTest) TestInner() {
-	this.checkHullInner_String_double_String(jlit_4645, float64(0.5), jlit_4646)
+	this.checkHullInner_String_double_String(jlit_4644, float64(0.5), jlit_4645)
 }
 func (this *Simplify_PolygonHullSimplifierTest) TestOuterWithHole() {
-	this.checkHullOuter_String_double_String(jlit_4647, float64(0.1), jlit_4648)
+	this.checkHullOuter_String_double_String(jlit_4646, float64(0.1), jlit_4647)
 }
 func (this *Simplify_PolygonHullSimplifierTest) TestInnerWithHoles() {
-	this.checkHullInner_String_double_String(jlit_4649, float64(0.1), jlit_4650)
+	this.checkHullInner_String_double_String(jlit_4648, float64(0.1), jlit_4649)
 }
 func (this *Simplify_PolygonHullSimplifierTest) TestInnerMultiWithHoles() {
-	this.checkHullInner_String_double_String(jlit_4651, float64(0.1), jlit_4652)
+	this.checkHullInner_String_double_String(jlit_4650, float64(0.1), jlit_4651)
 }
 func (this *Simplify_PolygonHullSimplifierTest) TestOuterMultiWithHoles() {
-	this.checkHullOuter_String_double_String(jlit_4653, float64(0.1), jlit_4654)
+	this.checkHullOuter_String_double_String(jlit_4652, float64(0.1), jlit_4653)
 }
 func (this *Simplify_PolygonHullSimplifierTest) TestByAreaOuterSimple() {
-	var wkt *java.String = jlit_4637
-	this.checkHullByAreaDelta_String_double_String(wkt, float64(int32(0)), jlit_4655)
-	this.checkHullByAreaDelta_String_double_String(wkt, float64(0.01), jlit_4655)
-	this.checkHullByAreaDelta_String_double_String(wkt, float64(0.1), jlit_4656)
-	this.checkHullByAreaDelta_String_double_String(wkt, float64(0.2), jlit_4657)
-	this.checkHullByAreaDelta_String_double_String(wkt, float64(int32(1)), jlit_4638)
+	var wkt *java.String = jlit_4636
+	this.checkHullByAreaDelta_String_double_String(wkt, float64(int32(0)), jlit_4654)
+	this.checkHullByAreaDelta_String_double_String(wkt, float64(0.01), jlit_4654)
+	this.checkHullByAreaDelta_String_double_String(wkt, float64(0.1), jlit_4655)
+	this.checkHullByAreaDelta_String_double_String(wkt, float64(0.2), jlit_4656)
+	this.checkHullByAreaDelta_String_double_String(wkt, float64(int32(1)), jlit_4637)
 }
 func (this *Simplify_PolygonHullSimplifierTest) TestGoreRemoval() {
-	this.checkHullByAreaDelta_String_double_String(jlit_4658, float64(0.01), jlit_4659)
+	this.checkHullByAreaDelta_String_double_String(jlit_4657, float64(0.01), jlit_4658)
 }
 func (this *Simplify_PolygonHullSimplifierTest) checkHullOuter_String_double_String(wkt *java.String, vertexNumFraction float64, wktExpected *java.String) {
 	this.checkHull_String_boolean_double_String(wkt, true, vertexNumFraction, wktExpected)
@@ -124,7 +124,7 @@ func (this *Simplify_PolygonHullSimplifierTest) checkHullByAreaDelta_String_doub
 }
 func TestSimplify_PolygonHullSimplifierTest_testByAreaOuterSimple(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4660)
+		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4659)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestByAreaOuterSimple()
@@ -132,7 +132,7 @@ func TestSimplify_PolygonHullSimplifierTest_testByAreaOuterSimple(t *testing.T) 
 }
 func TestSimplify_PolygonHullSimplifierTest_testGoreRemoval(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4661)
+		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4660)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestGoreRemoval()
@@ -140,7 +140,7 @@ func TestSimplify_PolygonHullSimplifierTest_testGoreRemoval(t *testing.T) {
 }
 func TestSimplify_PolygonHullSimplifierTest_testInner(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4662)
+		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4661)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInner()
@@ -148,7 +148,7 @@ func TestSimplify_PolygonHullSimplifierTest_testInner(t *testing.T) {
 }
 func TestSimplify_PolygonHullSimplifierTest_testInnerMultiWithHoles(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4663)
+		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4662)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInnerMultiWithHoles()
@@ -156,7 +156,7 @@ func TestSimplify_PolygonHullSimplifierTest_testInnerMultiWithHoles(t *testing.T
 }
 func TestSimplify_PolygonHullSimplifierTest_testInnerWithHoles(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4664)
+		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4663)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestInnerWithHoles()
@@ -164,7 +164,7 @@ func TestSimplify_PolygonHullSimplifierTest_testInnerWithHoles(t *testing.T) {
 }
 func TestSimplify_PolygonHullSimplifierTest_testOuterFlat(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4665)
+		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4664)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestOuterFlat()
@@ -172,7 +172,7 @@ func TestSimplify_PolygonHullSimplifierTest_testOuterFlat(t *testing.T) {
 }
 func TestSimplify_PolygonHullSimplifierTest_testOuterMultiWithHoles(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4666)
+		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4665)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestOuterMultiWithHoles()
@@ -180,7 +180,7 @@ func TestSimplify_PolygonHullSimplifierTest_testOuterMultiWithHoles(t *testing.T
 }
 func TestSimplify_PolygonHullSimplifierTest_testOuterSimple(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4667)
+		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4666)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestOuterSimple()
@@ -188,7 +188,7 @@ func TestSimplify_PolygonHullSimplifierTest_testOuterSimple(t *testing.T) {
 }
 func TestSimplify_PolygonHullSimplifierTest_testOuterWithHole(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4668)
+		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4667)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestOuterWithHole()
@@ -196,7 +196,7 @@ func TestSimplify_PolygonHullSimplifierTest_testOuterWithHole(t *testing.T) {
 }
 func TestSimplify_PolygonHullSimplifierTest_testOuterZGore(t *testing.T) {
 	junit.Run(t, func() {
-		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4669)
+		tc := Simplify_PolygonHullSimplifierTest_new(jlit_4668)
 		tc.SetUp_impl()
 		defer tc.TearDown()
 		tc.TestOuterZGore()

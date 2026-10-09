@@ -34,13 +34,13 @@ func Geom_GeometryXYZMTest_isInstance(o any) bool {
 	return ok
 }
 func Geom_GeometryXYZMTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 260 && p.jkind_ <= 260
+	return p != nil && p.jkind_ >= 230 && p.jkind_ <= 230
 }
 func Geom_GeometryXYZMTest_downcast(p *Testjts_GeometryTestCase) *Geom_GeometryXYZMTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 260 || p.jkind_ > 260 {
+	if p.jkind_ < 230 || p.jkind_ > 230 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.geom.GeometryXYZMTest"))
 	}
 	return (*Geom_GeometryXYZMTest)(unsafe.Pointer(p))
@@ -52,7 +52,7 @@ var Geom_GeometryXYZMTest_geomFact *Geom_GeometryFactory = java.StaticInit(func(
 
 func Geom_GeometryXYZMTest_new(name *java.String) *Geom_GeometryXYZMTest {
 	this := &Geom_GeometryXYZMTest{}
-	this.jkind_ = 260
+	this.jkind_ = 230
 	this.JSetSelf(this)
 	this.Geom_GeometryXYZMTest_init(name)
 	return this

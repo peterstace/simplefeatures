@@ -40,13 +40,13 @@ func Algorithm_MinimumAreaRectanglelTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_MinimumAreaRectanglelTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 232 && p.jkind_ <= 232
+	return p != nil && p.jkind_ >= 202 && p.jkind_ <= 202
 }
 func Algorithm_MinimumAreaRectanglelTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_MinimumAreaRectanglelTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 232 || p.jkind_ > 232 {
+	if p.jkind_ < 202 || p.jkind_ > 202 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.MinimumAreaRectanglelTest"))
 	}
 	return (*Algorithm_MinimumAreaRectanglelTest)(unsafe.Pointer(p))
@@ -56,7 +56,7 @@ const Algorithm_MinimumAreaRectanglelTest_TOL float64 = float64(1.0e-10)
 
 func Algorithm_MinimumAreaRectanglelTest_new(name *java.String) *Algorithm_MinimumAreaRectanglelTest {
 	this := &Algorithm_MinimumAreaRectanglelTest{}
-	this.jkind_ = 232
+	this.jkind_ = 202
 	this.JSetSelf(this)
 	this.Algorithm_MinimumAreaRectanglelTest_init(name)
 	return this

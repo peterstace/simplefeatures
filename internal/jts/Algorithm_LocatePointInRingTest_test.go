@@ -41,20 +41,20 @@ func Algorithm_LocatePointInRingTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_LocatePointInRingTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 224 && p.jkind_ <= 224
+	return p != nil && p.jkind_ >= 194 && p.jkind_ <= 194
 }
 func Algorithm_LocatePointInRingTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_LocatePointInRingTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 224 || p.jkind_ > 224 {
+	if p.jkind_ < 194 || p.jkind_ > 194 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.LocatePointInRingTest"))
 	}
 	return (*Algorithm_LocatePointInRingTest)(unsafe.Pointer(p))
 }
 func Algorithm_LocatePointInRingTest_new(name *java.String) *Algorithm_LocatePointInRingTest {
 	this := &Algorithm_LocatePointInRingTest{}
-	this.jkind_ = 224
+	this.jkind_ = 194
 	this.JSetSelf(this)
 	this.Algorithm_LocatePointInRingTest_init(name)
 	return this

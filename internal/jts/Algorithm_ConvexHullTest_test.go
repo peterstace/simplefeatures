@@ -43,20 +43,20 @@ func Algorithm_ConvexHullTest_isInstance(o any) bool {
 	return ok
 }
 func Algorithm_ConvexHullTest_isKind(p *Testjts_GeometryTestCase) bool {
-	return p != nil && p.jkind_ >= 228 && p.jkind_ <= 228
+	return p != nil && p.jkind_ >= 198 && p.jkind_ <= 198
 }
 func Algorithm_ConvexHullTest_downcast(p *Testjts_GeometryTestCase) *Algorithm_ConvexHullTest {
 	if p == nil {
 		return nil
 	}
-	if p.jkind_ < 228 || p.jkind_ > 228 {
+	if p.jkind_ < 198 || p.jkind_ > 198 {
 		panic(java.ClassCastError(Testjts_GeometryTestCase_toAny(p), "org.locationtech.jts.algorithm.ConvexHullTest"))
 	}
 	return (*Algorithm_ConvexHullTest)(unsafe.Pointer(p))
 }
 func Algorithm_ConvexHullTest_new(name *java.String) *Algorithm_ConvexHullTest {
 	this := &Algorithm_ConvexHullTest{}
-	this.jkind_ = 228
+	this.jkind_ = 198
 	this.JSetSelf(this)
 	this.Algorithm_ConvexHullTest_init(name)
 	return this
