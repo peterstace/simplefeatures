@@ -1,0 +1,6122 @@
+WCASE string
+wc "\u00e9\ud83d\ude00" 1 3 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 3) out of bounds for length 3"
+RESULT ""
+WCASE log
+wsr "" 4 3 = !java.lang.StringIndexOutOfBoundsException "Range [4, 7) out of bounds for length 0"
+wi 120065 = ok
+wca "hello" = ok
+wi 160065 = ok
+RESULT "w(\ud501)w(hello)w(\u7141)"
+WCASE string
+wsr "\u00e9\ud83d\ude00" 4 3 = !java.lang.IndexOutOfBoundsException "Range [4, 7) out of bounds for length 3"
+wc null 3 3 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+acr "a" 2 1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 1) out of bounds for length 1"
+ws "\u00e9\ud83d\ude00" = ok
+wi 160065 = ok
+wi 80065 = ok
+RESULT "\u00e9\ud83d\ude00\u7141\u38c1"
+WCASE log
+wc null 4 -1 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+acr "" 5 3 = !java.lang.StringIndexOutOfBoundsException "Range [5, 3) out of bounds for length 0"
+wc null 0 0 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+wi 65 = ok
+wi 40065 = ok
+RESULT "w(w(w(A)w(\u9c81)"
+WCASE string
+wi 65 = ok
+wi 120065 = ok
+RESULT "A\ud501"
+WCASE log
+wi -39935 = ok
+acr "a" 5 2 = !java.lang.StringIndexOutOfBoundsException "Range [5, 2) out of bounds for length 1"
+ac null = true
+fl = ok
+ws "\u00e9\ud83d\ude00" = ok
+RESULT "w(\u6401)w(null)fw(\u00e9\ud83d\ude00)"
+WCASE string
+ach 71 = true
+wi 120065 = ok
+ach 67 = true
+ws "hello" = ok
+wca "\u00e9\ud83d\ude00" = ok
+wc null -1 0 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+RESULT "G\ud501Chello\u00e9\ud83d\ude00"
+WCASE log
+fl = ok
+ac null = true
+wc "a" -1 4 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1 + 4) out of bounds for length 1"
+wi 160065 = ok
+wi 160065 = ok
+acr "" 0 2 = !java.lang.StringIndexOutOfBoundsException "Range [0, 2) out of bounds for length 0"
+RESULT "fw(null)w(w(\u7141)w(\u7141)"
+WCASE string
+ws "" = ok
+ac "\u00e9\ud83d\ude00" = true
+wi 65 = ok
+RESULT "\u00e9\ud83d\ude00A"
+WCASE log
+ac "hello" = true
+wca "hello" = ok
+wsr "" 2 4 = !java.lang.StringIndexOutOfBoundsException "Range [2, 6) out of bounds for length 0"
+RESULT "w(hello)w(hello)"
+WCASE string
+ac "a" = true
+acr "" -1 0 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 0) out of bounds for length 0"
+fl = ok
+RESULT "a"
+WCASE log
+wca "\u00e9\ud83d\ude00" = ok
+wca "" = ok
+wi -39935 = ok
+wi 65 = ok
+wc "hello" 5 -1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + -1) out of bounds for length 5"
+wsr "a" 1 5 = !java.lang.StringIndexOutOfBoundsException "Range [1, 6) out of bounds for length 1"
+RESULT "w(\u00e9\ud83d\ude00)w()w(\u6401)w(A)w("
+WCASE string
+wi 65 = ok
+ach 67 = true
+wsr "a" 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, -1) out of bounds for length 1"
+ac "" = true
+wc "" 4 -1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + -1) out of bounds for length 0"
+ac "" = true
+RESULT "AC"
+WCASE log
+ac null = true
+wi 160065 = ok
+wc null 3 0 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+wca "" = ok
+wc "" -1 5 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1 + 5) out of bounds for length 0"
+RESULT "w(null)w(\u7141)w(w()w("
+WCASE string
+wsr null -1 3 = !java.lang.IndexOutOfBoundsException "Range [-1, 2) out of bounds for length 4"
+ac "" = true
+ac null = true
+fl = ok
+ac "" = true
+RESULT "null"
+WCASE log
+wi 65 = ok
+acr null 0 2 = true
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+wsr "a" 1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [1, 0) out of bounds for length 1"
+RESULT "w(A)w(nu)"
+WCASE string
+ach 68 = true
+ach 68 = true
+wsr "" 2 2 = !java.lang.IndexOutOfBoundsException "Range [2, 4) out of bounds for length 0"
+wi -39935 = ok
+ac "a" = true
+RESULT "DD\u6401a"
+WCASE log
+wi -39935 = ok
+wc null 3 5 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+wi 40065 = ok
+RESULT "w(\u6401)w(w(\u9c81)"
+WCASE string
+fl = ok
+ws "\u00e9\ud83d\ude00" = ok
+wc null 4 3 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+acr "hello" 3 0 = !java.lang.StringIndexOutOfBoundsException "Range [3, 0) out of bounds for length 5"
+wsr null 0 0 = ok
+RESULT "\u00e9\ud83d\ude00"
+WCASE log
+ws "" = ok
+ach 66 = true
+wsr null 5 0 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+wi 40065 = ok
+ach 71 = true
+ach 65 = true
+RESULT "w()w(B)w(\u9c81)w(G)w(A)"
+WCASE string
+wi 40065 = ok
+ach 71 = true
+RESULT "\u9c81G"
+WCASE log
+ws "" = ok
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+ach 71 = true
+wc "\u00e9\ud83d\ude00" 3 4 = !java.lang.StringIndexOutOfBoundsException "Range [3, 3 + 4) out of bounds for length 3"
+wca "" = ok
+RESULT "w()w(G)w(w()"
+WCASE string
+ws "a" = ok
+fl = ok
+RESULT "a"
+WCASE log
+wc "\u00e9\ud83d\ude00" 0 1 = ok
+RESULT "w(\u00e9)"
+WCASE string
+wsr null 5 3 = !java.lang.IndexOutOfBoundsException "Range [5, 8) out of bounds for length 4"
+wc "a" 0 4 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 4) out of bounds for length 1"
+wc "\u00e9\ud83d\ude00" 5 0 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + 0) out of bounds for length 3"
+acr "" 3 0 = !java.lang.StringIndexOutOfBoundsException "Range [3, 0) out of bounds for length 0"
+wca "a" = ok
+RESULT "a"
+WCASE log
+wi 120065 = ok
+wsr "hello" 3 0 = ok
+wca "hello" = ok
+ac null = true
+RESULT "w(\ud501)w()w(hello)w(null)"
+WCASE string
+acr null 3 0 = !java.lang.StringIndexOutOfBoundsException "Range [3, 0) out of bounds for length 4"
+RESULT ""
+WCASE log
+acr "" 5 5 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5) out of bounds for length 0"
+wca "" = ok
+wc null 4 -1 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+fl = ok
+acr null 1 2 = true
+wsr "a" 3 4 = !java.lang.StringIndexOutOfBoundsException "Range [3, 7) out of bounds for length 1"
+RESULT "w()w(fw(u)"
+WCASE string
+wi -39935 = ok
+ac "" = true
+wsr "" 1 1 = !java.lang.IndexOutOfBoundsException "Range [1, 2) out of bounds for length 0"
+ac null = true
+RESULT "\u6401null"
+WCASE log
+fl = ok
+acr null 1 1 = true
+RESULT "fw()"
+WCASE string
+wc "a" 4 2 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 1"
+wi 40065 = ok
+ach 66 = true
+ws "\u00e9\ud83d\ude00" = ok
+wi 160065 = ok
+wi -39935 = ok
+RESULT "\u9c81B\u00e9\ud83d\ude00\u7141\u6401"
+WCASE log
+ac "\u00e9\ud83d\ude00" = true
+ws "\u00e9\ud83d\ude00" = ok
+wca "a" = ok
+ac "" = true
+RESULT "w(\u00e9\ud83d\ude00)w(\u00e9\ud83d\ude00)w(a)w()"
+WCASE string
+wc "hello" 4 3 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 3) out of bounds for length 5"
+ac "a" = true
+acr "\u00e9\ud83d\ude00" 5 0 = !java.lang.StringIndexOutOfBoundsException "Range [5, 0) out of bounds for length 3"
+acr "a" 3 0 = !java.lang.StringIndexOutOfBoundsException "Range [3, 0) out of bounds for length 1"
+RESULT "a"
+WCASE log
+ws "hello" = ok
+wsr "" 4 -1 = !java.lang.StringIndexOutOfBoundsException "Range [4, 3) out of bounds for length 0"
+ac "hello" = true
+acr "a" 2 2 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2) out of bounds for length 1"
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+ach 71 = true
+RESULT "w(hello)w(hello)w(G)"
+WCASE string
+wc "hello" 5 5 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + 5) out of bounds for length 5"
+RESULT ""
+WCASE log
+acr null 0 -1 = !java.lang.StringIndexOutOfBoundsException "Range [0, -1) out of bounds for length 4"
+wc null 1 4 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+fl = ok
+RESULT "w(f"
+WCASE string
+wi 160065 = ok
+acr "" 2 -1 = !java.lang.StringIndexOutOfBoundsException "Range [2, -1) out of bounds for length 0"
+wsr "\u00e9\ud83d\ude00" 5 5 = !java.lang.IndexOutOfBoundsException "Range [5, 10) out of bounds for length 3"
+acr "" 2 1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 1) out of bounds for length 0"
+RESULT "\u7141"
+WCASE log
+ws "" = ok
+ach 69 = true
+ac null = true
+ws "\u00e9\ud83d\ude00" = ok
+wsr "a" 4 4 = !java.lang.StringIndexOutOfBoundsException "Range [4, 8) out of bounds for length 1"
+ws "\u00e9\ud83d\ude00" = ok
+RESULT "w()w(E)w(null)w(\u00e9\ud83d\ude00)w(\u00e9\ud83d\ude00)"
+WCASE string
+wca "\u00e9\ud83d\ude00" = ok
+ws "a" = ok
+ac "a" = true
+fl = ok
+acr "hello" 5 2 = !java.lang.StringIndexOutOfBoundsException "Range [5, 2) out of bounds for length 5"
+RESULT "\u00e9\ud83d\ude00aa"
+WCASE log
+ach 71 = true
+acr "a" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 4) out of bounds for length 1"
+acr "\u00e9\ud83d\ude00" 2 1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 1) out of bounds for length 3"
+wsr "hello" 2 4 = !java.lang.StringIndexOutOfBoundsException "Range [2, 6) out of bounds for length 5"
+ws "\u00e9\ud83d\ude00" = ok
+wsr "a" 0 -1 = !java.lang.StringIndexOutOfBoundsException "Range [0, -1) out of bounds for length 1"
+RESULT "w(G)w(\u00e9\ud83d\ude00)"
+WCASE string
+wc null 4 1 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wsr null 2 -1 = !java.lang.IndexOutOfBoundsException "Range [2, 1) out of bounds for length 4"
+ach 68 = true
+ws "\u00e9\ud83d\ude00" = ok
+ach 69 = true
+RESULT "D\u00e9\ud83d\ude00E"
+WCASE log
+wi 40065 = ok
+wc "" 0 -1 = !java.lang.StringIndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 0"
+ac "" = true
+fl = ok
+RESULT "w(\u9c81)w(w()f"
+WCASE string
+ac "a" = true
+ac "hello" = true
+wi 65 = ok
+RESULT "ahelloA"
+WCASE log
+ac null = true
+wc "hello" 1 1 = ok
+wsr "" 5 0 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5) out of bounds for length 0"
+ws "" = ok
+ach 70 = true
+RESULT "w(null)w(e)w()w(F)"
+WCASE string
+ws "\u00e9\ud83d\ude00" = ok
+ws "hello" = ok
+ach 70 = true
+RESULT "\u00e9\ud83d\ude00helloF"
+WCASE log
+fl = ok
+RESULT "f"
+WCASE string
+ws "a" = ok
+RESULT "a"
+WCASE log
+wsr "\u00e9\ud83d\ude00" 5 1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 6) out of bounds for length 3"
+acr null 4 5 = !java.lang.StringIndexOutOfBoundsException "Range [4, 5) out of bounds for length 4"
+RESULT ""
+WCASE string
+acr "" 4 2 = !java.lang.StringIndexOutOfBoundsException "Range [4, 2) out of bounds for length 0"
+ach 67 = true
+wi 120065 = ok
+ach 69 = true
+ws "" = ok
+RESULT "C\ud501E"
+WCASE log
+wca "a" = ok
+RESULT "w(a)"
+WCASE string
+wsr "a" 3 5 = !java.lang.IndexOutOfBoundsException "Range [3, 8) out of bounds for length 1"
+ac "a" = true
+wca "hello" = ok
+acr "hello" 3 -1 = !java.lang.StringIndexOutOfBoundsException "Range [3, -1) out of bounds for length 5"
+wca "a" = ok
+ws null = ok
+RESULT "ahelloanull"
+WCASE log
+wsr null 0 4 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+ac "hello" = true
+ws "a" = ok
+wca "\u00e9\ud83d\ude00" = ok
+ac "hello" = true
+RESULT "w(hello)w(a)w(\u00e9\ud83d\ude00)w(hello)"
+WCASE string
+ac null = true
+wi 120065 = ok
+wi 200065 = ok
+fl = ok
+ws "a" = ok
+fl = ok
+RESULT "null\ud501\u0d81a"
+WCASE log
+fl = ok
+fl = ok
+wc "" 4 2 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 0"
+wc null 3 2 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+ws "a" = ok
+ach 69 = true
+RESULT "ffw(w(w(a)w(E)"
+WCASE string
+wca "" = ok
+RESULT ""
+WCASE log
+acr "" 3 2 = !java.lang.StringIndexOutOfBoundsException "Range [3, 2) out of bounds for length 0"
+wsr "\u00e9\ud83d\ude00" -1 4 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 3) out of bounds for length 3"
+ach 65 = true
+ws "" = ok
+RESULT "w(A)w()"
+WCASE string
+ws "hello" = ok
+RESULT "hello"
+WCASE log
+ac null = true
+wi 80065 = ok
+wca "" = ok
+wi 120065 = ok
+ac null = true
+RESULT "w(null)w(\u38c1)w()w(\ud501)w(null)"
+WCASE string
+acr "\u00e9\ud83d\ude00" 3 1 = !java.lang.StringIndexOutOfBoundsException "Range [3, 1) out of bounds for length 3"
+acr "a" 2 4 = !java.lang.StringIndexOutOfBoundsException "Range [2, 4) out of bounds for length 1"
+ws null = ok
+ws null = ok
+ach 71 = true
+RESULT "nullnullG"
+WCASE log
+fl = ok
+wc "a" 2 1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2 + 1) out of bounds for length 1"
+ac "a" = true
+wsr null 1 4 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wc null 1 -1 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+RESULT "fw(w(a)w("
+WCASE string
+ws "" = ok
+wca "a" = ok
+RESULT "a"
+WCASE log
+wi 80065 = ok
+wca "hello" = ok
+wsr null -1 0 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+wc "" 1 0 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1 + 0) out of bounds for length 0"
+wi 120065 = ok
+ac null = true
+RESULT "w(\u38c1)w(hello)w(w(\ud501)w(null)"
+WCASE string
+acr "\u00e9\ud83d\ude00" 1 5 = !java.lang.StringIndexOutOfBoundsException "Range [1, 5) out of bounds for length 3"
+fl = ok
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wsr null 0 1 = ok
+wsr "\u00e9\ud83d\ude00" -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1) out of bounds for length 3"
+RESULT "n"
+WCASE log
+wc "a" -1 1 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1 + 1) out of bounds for length 1"
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wsr null -1 3 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+wi 80065 = ok
+ac "a" = true
+RESULT "w(w(\u38c1)w(a)"
+WCASE string
+acr "hello" 0 5 = true
+ac "" = true
+ach 66 = true
+wc "hello" 1 3 = ok
+RESULT "helloBell"
+WCASE log
+wsr "" 1 2 = !java.lang.StringIndexOutOfBoundsException "Range [1, 3) out of bounds for length 0"
+ac null = true
+acr null 1 1 = true
+acr "" 2 5 = !java.lang.StringIndexOutOfBoundsException "Range [2, 5) out of bounds for length 0"
+wc "\u00e9\ud83d\ude00" 2 1 = ok
+wc "hello" -1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 5"
+RESULT "w(null)w()w(\ude00)w("
+WCASE string
+ac "a" = true
+wi 80065 = ok
+ws "hello" = ok
+wi 40065 = ok
+ws "hello" = ok
+RESULT "a\u38c1hello\u9c81hello"
+WCASE log
+ac "" = true
+acr null 2 4 = true
+RESULT "w()w(ll)"
+WCASE string
+fl = ok
+ac "hello" = true
+RESULT "hello"
+WCASE log
+fl = ok
+ach 70 = true
+RESULT "fw(F)"
+WCASE string
+wca "hello" = ok
+ws "a" = ok
+wc "\u00e9\ud83d\ude00" -1 3 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 3) out of bounds for length 3"
+RESULT "helloa"
+WCASE log
+ac "hello" = true
+ach 67 = true
+RESULT "w(hello)w(C)"
+WCASE string
+fl = ok
+wsr "hello" 5 5 = !java.lang.IndexOutOfBoundsException "Range [5, 10) out of bounds for length 5"
+fl = ok
+RESULT ""
+WCASE log
+ach 71 = true
+RESULT "w(G)"
+WCASE string
+ach 67 = true
+ac "\u00e9\ud83d\ude00" = true
+ach 66 = true
+ach 66 = true
+acr "" 4 5 = !java.lang.StringIndexOutOfBoundsException "Range [4, 5) out of bounds for length 0"
+RESULT "C\u00e9\ud83d\ude00BB"
+WCASE log
+wi 160065 = ok
+wi -39935 = ok
+RESULT "w(\u7141)w(\u6401)"
+WCASE string
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+acr "hello" 2 5 = true
+ach 68 = true
+wca "\u00e9\ud83d\ude00" = ok
+ac null = true
+wi 80065 = ok
+RESULT "lloD\u00e9\ud83d\ude00null\u38c1"
+WCASE log
+ach 71 = true
+ach 71 = true
+ach 66 = true
+fl = ok
+RESULT "w(G)w(G)w(B)f"
+WCASE string
+wi 200065 = ok
+ach 69 = true
+ac "a" = true
+wc "hello" 0 5 = ok
+wca "\u00e9\ud83d\ude00" = ok
+wi 160065 = ok
+RESULT "\u0d81Eahello\u00e9\ud83d\ude00\u7141"
+WCASE log
+ac "a" = true
+fl = ok
+wsr "" 1 4 = !java.lang.StringIndexOutOfBoundsException "Range [1, 5) out of bounds for length 0"
+wca "" = ok
+wi -39935 = ok
+RESULT "w(a)fw()w(\u6401)"
+WCASE string
+wsr null 1 5 = !java.lang.IndexOutOfBoundsException "Range [1, 6) out of bounds for length 4"
+acr "\u00e9\ud83d\ude00" 0 2 = true
+wca "\u00e9\ud83d\ude00" = ok
+ac "a" = true
+RESULT "\u00e9\ud83d\u00e9\ud83d\ude00a"
+WCASE log
+wca "a" = ok
+wsr "" 3 -1 = !java.lang.StringIndexOutOfBoundsException "Range [3, 2) out of bounds for length 0"
+RESULT "w(a)"
+WCASE string
+wsr null 0 0 = ok
+wsr "" 4 0 = !java.lang.IndexOutOfBoundsException "Range [4, 4) out of bounds for length 0"
+RESULT ""
+WCASE log
+wc "" 1 4 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1 + 4) out of bounds for length 0"
+wc "\u00e9\ud83d\ude00" 4 -1 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + -1) out of bounds for length 3"
+ws "hello" = ok
+RESULT "w(w(w(hello)"
+WCASE string
+ws null = ok
+wi -39935 = ok
+ac null = true
+RESULT "null\u6401null"
+WCASE log
+fl = ok
+wi 40065 = ok
+ach 67 = true
+RESULT "fw(\u9c81)w(C)"
+WCASE string
+wi 40065 = ok
+wi -39935 = ok
+wca "\u00e9\ud83d\ude00" = ok
+fl = ok
+wca "hello" = ok
+wi 80065 = ok
+RESULT "\u9c81\u6401\u00e9\ud83d\ude00hello\u38c1"
+WCASE log
+wsr "" 4 5 = !java.lang.StringIndexOutOfBoundsException "Range [4, 9) out of bounds for length 0"
+ac "hello" = true
+fl = ok
+ac "hello" = true
+ws "hello" = ok
+ac null = true
+RESULT "w(hello)fw(hello)w(hello)w(null)"
+WCASE string
+wi 65 = ok
+wi 160065 = ok
+fl = ok
+wca "hello" = ok
+RESULT "A\u7141hello"
+WCASE log
+wc "hello" 4 2 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 5"
+wca "\u00e9\ud83d\ude00" = ok
+RESULT "w(w(\u00e9\ud83d\ude00)"
+WCASE string
+wc "a" 5 2 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + 2) out of bounds for length 1"
+ws "hello" = ok
+acr "a" 1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [1, -1) out of bounds for length 1"
+acr "a" -1 3 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 3) out of bounds for length 1"
+RESULT "hello"
+WCASE log
+wsr "hello" 5 3 = !java.lang.StringIndexOutOfBoundsException "Range [5, 8) out of bounds for length 5"
+wsr "\u00e9\ud83d\ude00" 3 4 = !java.lang.StringIndexOutOfBoundsException "Range [3, 7) out of bounds for length 3"
+RESULT ""
+WCASE string
+ac "hello" = true
+RESULT "hello"
+WCASE log
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+wi 200065 = ok
+acr null -1 2 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 2) out of bounds for length 4"
+fl = ok
+wi 80065 = ok
+RESULT "w(\u0d81)fw(\u38c1)"
+WCASE string
+ws "hello" = ok
+ach 70 = true
+wca "\u00e9\ud83d\ude00" = ok
+ach 70 = true
+wc "\u00e9\ud83d\ude00" 4 5 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 5) out of bounds for length 3"
+ach 66 = true
+RESULT "helloF\u00e9\ud83d\ude00FB"
+WCASE log
+acr "\u00e9\ud83d\ude00" 0 2 = true
+fl = ok
+acr "" 0 -1 = !java.lang.StringIndexOutOfBoundsException "Range [0, -1) out of bounds for length 0"
+wsr "a" 1 0 = ok
+wca "\u00e9\ud83d\ude00" = ok
+wsr "a" 3 -1 = !java.lang.StringIndexOutOfBoundsException "Range [3, 2) out of bounds for length 1"
+RESULT "w(\u00e9\ud83d)fw()w(\u00e9\ud83d\ude00)"
+WCASE string
+fl = ok
+wsr "" 1 5 = !java.lang.IndexOutOfBoundsException "Range [1, 6) out of bounds for length 0"
+ac "a" = true
+fl = ok
+ac "" = true
+RESULT "a"
+WCASE log
+fl = ok
+wi 120065 = ok
+wca "\u00e9\ud83d\ude00" = ok
+acr "\u00e9\ud83d\ude00" 0 2 = true
+RESULT "fw(\ud501)w(\u00e9\ud83d\ude00)w(\u00e9\ud83d)"
+WCASE string
+wsr "\u00e9\ud83d\ude00" -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1) out of bounds for length 3"
+RESULT ""
+WCASE log
+ws "\u00e9\ud83d\ude00" = ok
+wc "" -1 2 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1 + 2) out of bounds for length 0"
+fl = ok
+RESULT "w(\u00e9\ud83d\ude00)w(f"
+WCASE string
+ac "a" = true
+wsr "hello" 5 2 = !java.lang.IndexOutOfBoundsException "Range [5, 7) out of bounds for length 5"
+fl = ok
+ac "\u00e9\ud83d\ude00" = true
+ac "a" = true
+RESULT "a\u00e9\ud83d\ude00a"
+WCASE log
+ws "" = ok
+ac "\u00e9\ud83d\ude00" = true
+wsr "\u00e9\ud83d\ude00" -1 1 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 0) out of bounds for length 3"
+wsr null 2 -1 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+RESULT "w()w(\u00e9\ud83d\ude00)"
+WCASE string
+wca "a" = ok
+wsr "" 3 3 = !java.lang.IndexOutOfBoundsException "Range [3, 6) out of bounds for length 0"
+acr null 2 5 = !java.lang.StringIndexOutOfBoundsException "Range [2, 5) out of bounds for length 4"
+ws "" = ok
+RESULT "a"
+WCASE log
+wi 80065 = ok
+fl = ok
+wsr null 3 3 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+wc "\u00e9\ud83d\ude00" 0 3 = ok
+wsr "a" 0 -1 = !java.lang.StringIndexOutOfBoundsException "Range [0, -1) out of bounds for length 1"
+ws "\u00e9\ud83d\ude00" = ok
+RESULT "w(\u38c1)fw(\u00e9\ud83d\ude00)w(\u00e9\ud83d\ude00)"
+WCASE string
+ws "a" = ok
+wsr "" 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 2) out of bounds for length 0"
+wca "\u00e9\ud83d\ude00" = ok
+wc null 0 -1 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+ach 66 = true
+ac null = true
+RESULT "a\u00e9\ud83d\ude00Bnull"
+WCASE log
+ac "" = true
+wc null 2 2 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+acr "\u00e9\ud83d\ude00" -1 4 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 4) out of bounds for length 3"
+wi 65 = ok
+RESULT "w()w(w(A)"
+WCASE string
+ach 67 = true
+acr "a" 3 2 = !java.lang.StringIndexOutOfBoundsException "Range [3, 2) out of bounds for length 1"
+RESULT "C"
+WCASE log
+wc "\u00e9\ud83d\ude00" 2 -1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2 + -1) out of bounds for length 3"
+RESULT "w("
+WCASE string
+acr null 3 -1 = !java.lang.StringIndexOutOfBoundsException "Range [3, -1) out of bounds for length 4"
+wi 120065 = ok
+ac "hello" = true
+acr "" 1 5 = !java.lang.StringIndexOutOfBoundsException "Range [1, 5) out of bounds for length 0"
+ach 70 = true
+RESULT "\ud501helloF"
+WCASE log
+ach 71 = true
+ach 66 = true
+RESULT "w(G)w(B)"
+WCASE string
+wi 120065 = ok
+wsr "" -1 3 = !java.lang.IndexOutOfBoundsException "Range [-1, 2) out of bounds for length 0"
+ws "a" = ok
+ac "a" = true
+RESULT "\ud501aa"
+WCASE log
+wc "\u00e9\ud83d\ude00" 0 4 = !java.lang.StringIndexOutOfBoundsException "Range [0, 0 + 4) out of bounds for length 3"
+ach 67 = true
+acr "\u00e9\ud83d\ude00" 5 1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 1) out of bounds for length 3"
+fl = ok
+RESULT "w(w(C)f"
+WCASE string
+wc "a" 3 5 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 5) out of bounds for length 1"
+wc "hello" 5 0 = ok
+ws "hello" = ok
+RESULT "hello"
+WCASE log
+acr "hello" 2 -1 = !java.lang.StringIndexOutOfBoundsException "Range [2, -1) out of bounds for length 5"
+RESULT ""
+WCASE string
+ac null = true
+wsr "\u00e9\ud83d\ude00" 5 5 = !java.lang.IndexOutOfBoundsException "Range [5, 10) out of bounds for length 3"
+ws "\u00e9\ud83d\ude00" = ok
+fl = ok
+RESULT "null\u00e9\ud83d\ude00"
+WCASE log
+ac "\u00e9\ud83d\ude00" = true
+ac "\u00e9\ud83d\ude00" = true
+wsr "" 3 3 = !java.lang.StringIndexOutOfBoundsException "Range [3, 6) out of bounds for length 0"
+RESULT "w(\u00e9\ud83d\ude00)w(\u00e9\ud83d\ude00)"
+WCASE string
+ach 70 = true
+wsr "\u00e9\ud83d\ude00" 1 2 = ok
+ws "hello" = ok
+wca "hello" = ok
+wca "" = ok
+wca "\u00e9\ud83d\ude00" = ok
+RESULT "F\ud83d\ude00hellohello\u00e9\ud83d\ude00"
+WCASE log
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+fl = ok
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+wsr "" -1 1 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 0) out of bounds for length 0"
+RESULT "f"
+WCASE string
+ws "hello" = ok
+wca "" = ok
+wc "a" 4 0 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 0) out of bounds for length 1"
+fl = ok
+RESULT "hello"
+WCASE log
+wc "hello" 4 5 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + 5) out of bounds for length 5"
+wi 120065 = ok
+wc "\u00e9\ud83d\ude00" 4 2 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 3"
+fl = ok
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+RESULT "w(w(\ud501)w(f"
+WCASE string
+wsr "hello" 4 1 = ok
+ac "a" = true
+acr "a" 5 0 = !java.lang.StringIndexOutOfBoundsException "Range [5, 0) out of bounds for length 1"
+acr "a" 4 4 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4) out of bounds for length 1"
+RESULT "oa"
+WCASE log
+fl = ok
+ach 71 = true
+ac "\u00e9\ud83d\ude00" = true
+RESULT "fw(G)w(\u00e9\ud83d\ude00)"
+WCASE string
+wca "hello" = ok
+wsr "a" 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 2) out of bounds for length 1"
+RESULT "hello"
+WCASE log
+ach 65 = true
+RESULT "w(A)"
+WCASE string
+wsr "a" 5 0 = !java.lang.IndexOutOfBoundsException "Range [5, 5) out of bounds for length 1"
+acr null 4 -1 = !java.lang.StringIndexOutOfBoundsException "Range [4, -1) out of bounds for length 4"
+RESULT ""
+WCASE log
+fl = ok
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+RESULT "f"
+WCASE string
+ws "a" = ok
+wsr "" -1 2 = !java.lang.IndexOutOfBoundsException "Range [-1, 1) out of bounds for length 0"
+wsr "" 4 5 = !java.lang.IndexOutOfBoundsException "Range [4, 9) out of bounds for length 0"
+ws null = ok
+acr null 2 3 = true
+ach 66 = true
+RESULT "anulllB"
+WCASE log
+ach 66 = true
+fl = ok
+acr "" 4 3 = !java.lang.StringIndexOutOfBoundsException "Range [4, 3) out of bounds for length 0"
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+RESULT "w(B)f"
+WCASE string
+ach 67 = true
+fl = ok
+wi 80065 = ok
+wsr "\u00e9\ud83d\ude00" 5 3 = !java.lang.IndexOutOfBoundsException "Range [5, 8) out of bounds for length 3"
+RESULT "C\u38c1"
+WCASE log
+wsr "a" 2 0 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2) out of bounds for length 1"
+RESULT ""
+WCASE string
+ws "\u00e9\ud83d\ude00" = ok
+acr "hello" 3 1 = !java.lang.StringIndexOutOfBoundsException "Range [3, 1) out of bounds for length 5"
+wca "hello" = ok
+acr "\u00e9\ud83d\ude00" 0 5 = !java.lang.StringIndexOutOfBoundsException "Range [0, 5) out of bounds for length 3"
+RESULT "\u00e9\ud83d\ude00hello"
+WCASE log
+wsr null 2 2 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+ach 68 = true
+fl = ok
+RESULT "w(D)f"
+WCASE string
+ach 66 = true
+wi 120065 = ok
+wsr "\u00e9\ud83d\ude00" 0 2 = ok
+wsr null 1 4 = !java.lang.IndexOutOfBoundsException "Range [1, 5) out of bounds for length 4"
+RESULT "B\ud501\u00e9\ud83d"
+WCASE log
+ac "\u00e9\ud83d\ude00" = true
+RESULT "w(\u00e9\ud83d\ude00)"
+WCASE string
+acr "" 1 1 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1) out of bounds for length 0"
+RESULT ""
+WCASE log
+wsr "\u00e9\ud83d\ude00" -1 5 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 4) out of bounds for length 3"
+ws "hello" = ok
+ws "\u00e9\ud83d\ude00" = ok
+wsr "hello" 3 4 = !java.lang.StringIndexOutOfBoundsException "Range [3, 7) out of bounds for length 5"
+ach 70 = true
+wc "hello" 0 -1 = !java.lang.StringIndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 5"
+RESULT "w(hello)w(\u00e9\ud83d\ude00)w(F)w("
+WCASE string
+ach 68 = true
+acr "hello" 3 1 = !java.lang.StringIndexOutOfBoundsException "Range [3, 1) out of bounds for length 5"
+wc "\u00e9\ud83d\ude00" -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 3"
+wi 120065 = ok
+wsr "\u00e9\ud83d\ude00" 5 5 = !java.lang.IndexOutOfBoundsException "Range [5, 10) out of bounds for length 3"
+ach 67 = true
+RESULT "D\ud501C"
+WCASE log
+wsr "" -1 3 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 2) out of bounds for length 0"
+wca "" = ok
+wca "" = ok
+wca "" = ok
+wc "hello" 1 5 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1 + 5) out of bounds for length 5"
+RESULT "w()w()w()w("
+WCASE string
+ac "a" = true
+RESULT "a"
+WCASE log
+ws "\u00e9\ud83d\ude00" = ok
+wc "" 3 1 = !java.lang.StringIndexOutOfBoundsException "Range [3, 3 + 1) out of bounds for length 0"
+ws "hello" = ok
+RESULT "w(\u00e9\ud83d\ude00)w(w(hello)"
+WCASE string
+ac "a" = true
+ach 67 = true
+ac "hello" = true
+acr null 2 -1 = !java.lang.StringIndexOutOfBoundsException "Range [2, -1) out of bounds for length 4"
+acr "a" 2 5 = !java.lang.StringIndexOutOfBoundsException "Range [2, 5) out of bounds for length 1"
+RESULT "aChello"
+WCASE log
+wc null -1 -1 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+RESULT "w("
+WCASE string
+ws "" = ok
+acr "\u00e9\ud83d\ude00" 4 0 = !java.lang.StringIndexOutOfBoundsException "Range [4, 0) out of bounds for length 3"
+ws "\u00e9\ud83d\ude00" = ok
+ws "" = ok
+RESULT "\u00e9\ud83d\ude00"
+WCASE log
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+acr null 5 0 = !java.lang.StringIndexOutOfBoundsException "Range [5, 0) out of bounds for length 4"
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wi 200065 = ok
+RESULT "w(\u0d81)"
+WCASE string
+fl = ok
+ach 65 = true
+wi 40065 = ok
+wsr "\u00e9\ud83d\ude00" 1 0 = ok
+wi 40065 = ok
+RESULT "A\u9c81\u9c81"
+WCASE log
+wi 65 = ok
+ac null = true
+RESULT "w(A)w(null)"
+WCASE string
+wc "hello" -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 5"
+fl = ok
+fl = ok
+ach 65 = true
+fl = ok
+wi 200065 = ok
+RESULT "A\u0d81"
+WCASE log
+wc "hello" 2 0 = ok
+wsr "a" 3 3 = !java.lang.StringIndexOutOfBoundsException "Range [3, 6) out of bounds for length 1"
+acr "" 1 1 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1) out of bounds for length 0"
+wi 80065 = ok
+RESULT "w()w(\u38c1)"
+WCASE string
+ws "" = ok
+wc "" 1 -1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 0"
+wsr "a" 5 5 = !java.lang.IndexOutOfBoundsException "Range [5, 10) out of bounds for length 1"
+wsr "" -1 5 = !java.lang.IndexOutOfBoundsException "Range [-1, 4) out of bounds for length 0"
+ws "hello" = ok
+wc "\u00e9\ud83d\ude00" 5 5 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + 5) out of bounds for length 3"
+RESULT "hello"
+WCASE log
+wi 120065 = ok
+wi -39935 = ok
+wca "" = ok
+RESULT "w(\ud501)w(\u6401)w()"
+WCASE string
+wsr "" 4 2 = !java.lang.IndexOutOfBoundsException "Range [4, 6) out of bounds for length 0"
+RESULT ""
+WCASE log
+ac "a" = true
+wc null 4 0 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+wca "hello" = ok
+wc "a" 4 2 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 1"
+RESULT "w(a)w(w(hello)w("
+WCASE string
+wsr "hello" 3 4 = !java.lang.IndexOutOfBoundsException "Range [3, 7) out of bounds for length 5"
+ach 69 = true
+ac "a" = true
+RESULT "Ea"
+WCASE log
+wsr "a" 5 3 = !java.lang.StringIndexOutOfBoundsException "Range [5, 8) out of bounds for length 1"
+wc "" 1 2 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1 + 2) out of bounds for length 0"
+wsr "hello" 1 1 = ok
+ac "hello" = true
+wsr "hello" 3 1 = ok
+wi 200065 = ok
+RESULT "w(w(e)w(hello)w(l)w(\u0d81)"
+WCASE string
+ac null = true
+wi 200065 = ok
+RESULT "null\u0d81"
+WCASE log
+ach 69 = true
+wc "hello" 1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 5"
+ach 66 = true
+acr "" 0 1 = !java.lang.StringIndexOutOfBoundsException "Range [0, 1) out of bounds for length 0"
+wc "\u00e9\ud83d\ude00" 4 3 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + 3) out of bounds for length 3"
+wca "\u00e9\ud83d\ude00" = ok
+RESULT "w(E)w(w(B)w(w(\u00e9\ud83d\ude00)"
+WCASE string
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+ach 68 = true
+ws null = ok
+ac null = true
+RESULT "Dnullnull"
+WCASE log
+wsr null 1 3 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+wsr null 4 1 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+wca "" = ok
+RESULT "w()"
+WCASE string
+wc "hello" 1 1 = ok
+ach 67 = true
+wc "a" 1 0 = ok
+wc "hello" 0 4 = ok
+acr "hello" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 4) out of bounds for length 5"
+RESULT "eChell"
+WCASE log
+acr "a" 4 0 = !java.lang.StringIndexOutOfBoundsException "Range [4, 0) out of bounds for length 1"
+wi 65 = ok
+acr "a" 1 4 = !java.lang.StringIndexOutOfBoundsException "Range [1, 4) out of bounds for length 1"
+ws "" = ok
+RESULT "w(A)w()"
+WCASE string
+fl = ok
+ws "a" = ok
+acr "\u00e9\ud83d\ude00" 3 0 = !java.lang.StringIndexOutOfBoundsException "Range [3, 0) out of bounds for length 3"
+wc "\u00e9\ud83d\ude00" 2 3 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 3) out of bounds for length 3"
+wsr "hello" 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, -1) out of bounds for length 5"
+RESULT "a"
+WCASE log
+ws "\u00e9\ud83d\ude00" = ok
+fl = ok
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+ac "hello" = true
+RESULT "w(\u00e9\ud83d\ude00)fw(hello)"
+WCASE string
+acr null 5 0 = !java.lang.StringIndexOutOfBoundsException "Range [5, 0) out of bounds for length 4"
+ws "a" = ok
+RESULT "a"
+WCASE log
+wsr "a" 0 3 = !java.lang.StringIndexOutOfBoundsException "Range [0, 3) out of bounds for length 1"
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+ac "hello" = true
+ach 68 = true
+RESULT "w(hello)w(D)"
+WCASE string
+ach 71 = true
+RESULT "G"
+WCASE log
+wsr "\u00e9\ud83d\ude00" 5 -1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 4) out of bounds for length 3"
+ach 66 = true
+ac null = true
+wca "" = ok
+ac null = true
+RESULT "w(B)w(null)w()w(null)"
+WCASE string
+wc "hello" 4 3 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 3) out of bounds for length 5"
+fl = ok
+wsr "a" 3 4 = !java.lang.IndexOutOfBoundsException "Range [3, 7) out of bounds for length 1"
+ac null = true
+RESULT "null"
+WCASE log
+wc "\u00e9\ud83d\ude00" -1 0 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 3"
+ws "" = ok
+wsr "\u00e9\ud83d\ude00" 0 2 = ok
+wi 40065 = ok
+RESULT "w(w()w(\u00e9\ud83d)w(\u9c81)"
+WCASE string
+wsr "hello" 0 1 = ok
+wsr "hello" 4 -1 = !java.lang.IndexOutOfBoundsException "Range [4, 3) out of bounds for length 5"
+RESULT "h"
+WCASE log
+wca "\u00e9\ud83d\ude00" = ok
+ach 67 = true
+wi 80065 = ok
+ws "\u00e9\ud83d\ude00" = ok
+RESULT "w(\u00e9\ud83d\ude00)w(C)w(\u38c1)w(\u00e9\ud83d\ude00)"
+WCASE string
+acr null 2 3 = true
+wi 200065 = ok
+wi 65 = ok
+acr "hello" 4 2 = !java.lang.StringIndexOutOfBoundsException "Range [4, 2) out of bounds for length 5"
+ac "a" = true
+ac "a" = true
+RESULT "l\u0d81Aaa"
+WCASE log
+ws "hello" = ok
+acr "" 4 -1 = !java.lang.StringIndexOutOfBoundsException "Range [4, -1) out of bounds for length 0"
+fl = ok
+RESULT "w(hello)f"
+WCASE string
+fl = ok
+acr "hello" 2 3 = true
+ws "\u00e9\ud83d\ude00" = ok
+wi -39935 = ok
+RESULT "l\u00e9\ud83d\ude00\u6401"
+WCASE log
+wca "hello" = ok
+wi -39935 = ok
+wca "a" = ok
+wsr "" 1 2 = !java.lang.StringIndexOutOfBoundsException "Range [1, 3) out of bounds for length 0"
+wsr "\u00e9\ud83d\ude00" 1 5 = !java.lang.StringIndexOutOfBoundsException "Range [1, 6) out of bounds for length 3"
+RESULT "w(hello)w(\u6401)w(a)"
+WCASE string
+fl = ok
+wca "a" = ok
+ws "" = ok
+ach 69 = true
+wsr "\u00e9\ud83d\ude00" 0 3 = ok
+RESULT "aE\u00e9\ud83d\ude00"
+WCASE log
+ac "a" = true
+wca "" = ok
+ac "a" = true
+wi 160065 = ok
+ach 71 = true
+RESULT "w(a)w()w(a)w(\u7141)w(G)"
+WCASE string
+fl = ok
+ac "" = true
+fl = ok
+wi -39935 = ok
+RESULT "\u6401"
+WCASE log
+wc "a" -1 3 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1 + 3) out of bounds for length 1"
+RESULT "w("
+WCASE string
+ach 66 = true
+wi 65 = ok
+wi 200065 = ok
+wca "a" = ok
+fl = ok
+wc "\u00e9\ud83d\ude00" 4 1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 1) out of bounds for length 3"
+RESULT "BA\u0d81a"
+WCASE log
+ws "a" = ok
+ach 67 = true
+ach 68 = true
+wc null 5 -1 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+wca "\u00e9\ud83d\ude00" = ok
+RESULT "w(a)w(C)w(D)w(w(\u00e9\ud83d\ude00)"
+WCASE string
+ach 68 = true
+ws "hello" = ok
+wca "\u00e9\ud83d\ude00" = ok
+wca "" = ok
+RESULT "Dhello\u00e9\ud83d\ude00"
+WCASE log
+acr "\u00e9\ud83d\ude00" 2 4 = !java.lang.StringIndexOutOfBoundsException "Range [2, 4) out of bounds for length 3"
+wca "" = ok
+RESULT "w()"
+WCASE string
+wi 200065 = ok
+fl = ok
+ws "hello" = ok
+RESULT "\u0d81hello"
+WCASE log
+fl = ok
+wc "\u00e9\ud83d\ude00" 1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 3"
+fl = ok
+ac null = true
+acr "hello" 2 2 = true
+RESULT "fw(fw(null)w()"
+WCASE string
+ws "\u00e9\ud83d\ude00" = ok
+ach 67 = true
+RESULT "\u00e9\ud83d\ude00C"
+WCASE log
+wi 200065 = ok
+RESULT "w(\u0d81)"
+WCASE string
+wc "\u00e9\ud83d\ude00" 4 3 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 3) out of bounds for length 3"
+wc "" 0 2 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 2) out of bounds for length 0"
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+acr null 1 3 = true
+wca "" = ok
+RESULT "ul"
+WCASE log
+ach 67 = true
+RESULT "w(C)"
+WCASE string
+wca "" = ok
+RESULT ""
+WCASE log
+ac "hello" = true
+RESULT "w(hello)"
+WCASE string
+ws "\u00e9\ud83d\ude00" = ok
+wc "a" 2 2 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 2) out of bounds for length 1"
+RESULT "\u00e9\ud83d\ude00"
+WCASE log
+fl = ok
+RESULT "f"
+WCASE string
+wc "\u00e9\ud83d\ude00" 0 4 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 4) out of bounds for length 3"
+wsr "" 1 4 = !java.lang.IndexOutOfBoundsException "Range [1, 5) out of bounds for length 0"
+ws "a" = ok
+ws "\u00e9\ud83d\ude00" = ok
+wc null -1 0 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+RESULT "a\u00e9\ud83d\ude00"
+WCASE log
+acr "a" 5 3 = !java.lang.StringIndexOutOfBoundsException "Range [5, 3) out of bounds for length 1"
+RESULT ""
+WCASE string
+ac null = true
+ach 65 = true
+ws "" = ok
+RESULT "nullA"
+WCASE log
+wi 120065 = ok
+ac "hello" = true
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+wc "hello" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + 4) out of bounds for length 5"
+wc "hello" 0 3 = ok
+fl = ok
+RESULT "w(\ud501)w(hello)w(w(hel)f"
+WCASE string
+ws "\u00e9\ud83d\ude00" = ok
+wc "a" 0 2 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 2) out of bounds for length 1"
+RESULT "\u00e9\ud83d\ude00"
+WCASE log
+wsr "" 2 0 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2) out of bounds for length 0"
+fl = ok
+ac "" = true
+RESULT "fw()"
+WCASE string
+acr "a" 1 5 = !java.lang.StringIndexOutOfBoundsException "Range [1, 5) out of bounds for length 1"
+wca "hello" = ok
+ws "hello" = ok
+wsr "hello" 2 2 = ok
+ac "a" = true
+ach 66 = true
+RESULT "hellohellollaB"
+WCASE log
+ac "\u00e9\ud83d\ude00" = true
+acr "" -1 5 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 5) out of bounds for length 0"
+fl = ok
+RESULT "w(\u00e9\ud83d\ude00)f"
+WCASE string
+wi 160065 = ok
+ach 71 = true
+ac "\u00e9\ud83d\ude00" = true
+fl = ok
+wi 65 = ok
+RESULT "\u7141G\u00e9\ud83d\ude00A"
+WCASE log
+wca "a" = ok
+ac "\u00e9\ud83d\ude00" = true
+wc "hello" 3 -1 = !java.lang.StringIndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 5"
+wsr "" -1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -2) out of bounds for length 0"
+RESULT "w(a)w(\u00e9\ud83d\ude00)w("
+WCASE string
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+RESULT ""
+WCASE log
+ac "\u00e9\ud83d\ude00" = true
+wsr "hello" 5 0 = ok
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wsr "a" 1 3 = !java.lang.StringIndexOutOfBoundsException "Range [1, 4) out of bounds for length 1"
+RESULT "w(\u00e9\ud83d\ude00)w()"
+WCASE string
+wca "a" = ok
+RESULT "a"
+WCASE log
+wsr null 4 5 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+wc "hello" 3 4 = !java.lang.StringIndexOutOfBoundsException "Range [3, 3 + 4) out of bounds for length 5"
+RESULT "w("
+WCASE string
+wc "a" -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 1"
+wc null 0 1 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+ac "" = true
+acr null 0 3 = true
+RESULT "nul"
+WCASE log
+fl = ok
+ws "a" = ok
+fl = ok
+fl = ok
+RESULT "fw(a)ff"
+WCASE string
+wca "" = ok
+ach 71 = true
+wi 80065 = ok
+acr "\u00e9\ud83d\ude00" 1 0 = !java.lang.StringIndexOutOfBoundsException "Range [1, 0) out of bounds for length 3"
+ach 71 = true
+fl = ok
+RESULT "G\u38c1G"
+WCASE log
+ac "" = true
+fl = ok
+wca "a" = ok
+ac "a" = true
+acr "a" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 4) out of bounds for length 1"
+wi 80065 = ok
+RESULT "w()fw(a)w(a)w(\u38c1)"
+WCASE string
+wc "" 5 -1 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + -1) out of bounds for length 0"
+acr null 2 5 = !java.lang.StringIndexOutOfBoundsException "Range [2, 5) out of bounds for length 4"
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+acr "hello" 3 5 = true
+fl = ok
+RESULT "lo"
+WCASE log
+ac "hello" = true
+wc "\u00e9\ud83d\ude00" 2 4 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2 + 4) out of bounds for length 3"
+wi 65 = ok
+wca "\u00e9\ud83d\ude00" = ok
+ach 69 = true
+RESULT "w(hello)w(w(A)w(\u00e9\ud83d\ude00)w(E)"
+WCASE string
+acr null 5 -1 = !java.lang.StringIndexOutOfBoundsException "Range [5, -1) out of bounds for length 4"
+ws "" = ok
+ws "\u00e9\ud83d\ude00" = ok
+fl = ok
+ws "\u00e9\ud83d\ude00" = ok
+RESULT "\u00e9\ud83d\ude00\u00e9\ud83d\ude00"
+WCASE log
+fl = ok
+ac "hello" = true
+wc "\u00e9\ud83d\ude00" 5 0 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + 0) out of bounds for length 3"
+RESULT "fw(hello)w("
+WCASE string
+wca "hello" = ok
+acr "\u00e9\ud83d\ude00" -1 0 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 0) out of bounds for length 3"
+wc "" 5 -1 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + -1) out of bounds for length 0"
+wsr "a" 2 2 = !java.lang.IndexOutOfBoundsException "Range [2, 4) out of bounds for length 1"
+wca "\u00e9\ud83d\ude00" = ok
+RESULT "hello\u00e9\ud83d\ude00"
+WCASE log
+wc "\u00e9\ud83d\ude00" 4 4 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + 4) out of bounds for length 3"
+RESULT "w("
+WCASE string
+wsr "hello" 5 2 = !java.lang.IndexOutOfBoundsException "Range [5, 7) out of bounds for length 5"
+wca "\u00e9\ud83d\ude00" = ok
+wca "" = ok
+ac "\u00e9\ud83d\ude00" = true
+acr "hello" 3 1 = !java.lang.StringIndexOutOfBoundsException "Range [3, 1) out of bounds for length 5"
+ws "" = ok
+RESULT "\u00e9\ud83d\ude00\u00e9\ud83d\ude00"
+WCASE log
+wca "a" = ok
+wi 80065 = ok
+acr "hello" 1 3 = true
+wc "\u00e9\ud83d\ude00" 1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 3"
+RESULT "w(a)w(\u38c1)w(el)w("
+WCASE string
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wca "hello" = ok
+RESULT "hello"
+WCASE log
+wca "" = ok
+wi 80065 = ok
+wc "" 0 -1 = !java.lang.StringIndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 0"
+acr null 0 0 = true
+RESULT "w()w(\u38c1)w(w()"
+WCASE string
+wsr null -1 3 = !java.lang.IndexOutOfBoundsException "Range [-1, 2) out of bounds for length 4"
+ach 68 = true
+ws "a" = ok
+ws "a" = ok
+acr "hello" 0 0 = true
+RESULT "Daa"
+WCASE log
+wca "a" = ok
+acr "hello" -1 4 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 4) out of bounds for length 5"
+acr "" 2 1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 1) out of bounds for length 0"
+RESULT "w(a)"
+WCASE string
+ac "\u00e9\ud83d\ude00" = true
+wc null 4 5 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+fl = ok
+acr "hello" 5 -1 = !java.lang.StringIndexOutOfBoundsException "Range [5, -1) out of bounds for length 5"
+RESULT "\u00e9\ud83d\ude00"
+WCASE log
+wi 80065 = ok
+wca "a" = ok
+wsr null 1 1 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+wca "a" = ok
+RESULT "w(\u38c1)w(a)w(a)"
+WCASE string
+fl = ok
+wi -39935 = ok
+ach 66 = true
+fl = ok
+fl = ok
+wca "a" = ok
+RESULT "\u6401Ba"
+WCASE log
+wi 200065 = ok
+wca "hello" = ok
+acr "" 5 1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 1) out of bounds for length 0"
+ac "a" = true
+wsr "a" 5 1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 6) out of bounds for length 1"
+RESULT "w(\u0d81)w(hello)w(a)"
+WCASE string
+wc "" 0 1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 1) out of bounds for length 0"
+fl = ok
+wsr "a" -1 4 = !java.lang.IndexOutOfBoundsException "Range [-1, 3) out of bounds for length 1"
+RESULT ""
+WCASE log
+wc "\u00e9\ud83d\ude00" 5 1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + 1) out of bounds for length 3"
+RESULT "w("
+WCASE string
+wsr "\u00e9\ud83d\ude00" 0 3 = ok
+fl = ok
+ac null = true
+fl = ok
+wsr "\u00e9\ud83d\ude00" 2 4 = !java.lang.IndexOutOfBoundsException "Range [2, 6) out of bounds for length 3"
+wca "\u00e9\ud83d\ude00" = ok
+RESULT "\u00e9\ud83d\ude00null\u00e9\ud83d\ude00"
+WCASE log
+ach 65 = true
+acr "\u00e9\ud83d\ude00" 3 0 = !java.lang.StringIndexOutOfBoundsException "Range [3, 0) out of bounds for length 3"
+wsr null 0 5 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+ach 68 = true
+ws "a" = ok
+ws "a" = ok
+RESULT "w(A)w(D)w(a)w(a)"
+WCASE string
+fl = ok
+wi 160065 = ok
+wca "a" = ok
+acr "hello" 1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [1, -1) out of bounds for length 5"
+RESULT "\u7141a"
+WCASE log
+acr "hello" 5 2 = !java.lang.StringIndexOutOfBoundsException "Range [5, 2) out of bounds for length 5"
+ac null = true
+RESULT "w(null)"
+WCASE string
+ac null = true
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+acr "" -1 2 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 2) out of bounds for length 0"
+ach 65 = true
+RESULT "nullA"
+WCASE log
+wsr "hello" 2 4 = !java.lang.StringIndexOutOfBoundsException "Range [2, 6) out of bounds for length 5"
+ac "\u00e9\ud83d\ude00" = true
+wi 160065 = ok
+wca "a" = ok
+ac "\u00e9\ud83d\ude00" = true
+ac "\u00e9\ud83d\ude00" = true
+RESULT "w(\u00e9\ud83d\ude00)w(\u7141)w(a)w(\u00e9\ud83d\ude00)w(\u00e9\ud83d\ude00)"
+WCASE string
+acr "\u00e9\ud83d\ude00" 4 4 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4) out of bounds for length 3"
+ws "\u00e9\ud83d\ude00" = ok
+wsr "a" 2 2 = !java.lang.IndexOutOfBoundsException "Range [2, 4) out of bounds for length 1"
+ach 69 = true
+ac "a" = true
+RESULT "\u00e9\ud83d\ude00Ea"
+WCASE log
+wi 160065 = ok
+wca "hello" = ok
+wi 80065 = ok
+wc "hello" -1 2 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1 + 2) out of bounds for length 5"
+RESULT "w(\u7141)w(hello)w(\u38c1)w("
+WCASE string
+wc "hello" 1 -1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 5"
+fl = ok
+ach 66 = true
+ach 66 = true
+RESULT "BB"
+WCASE log
+wi 120065 = ok
+acr "\u00e9\ud83d\ude00" -1 1 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 1) out of bounds for length 3"
+ach 71 = true
+wsr "hello" 3 2 = ok
+ach 71 = true
+RESULT "w(\ud501)w(G)w(lo)w(G)"
+WCASE string
+fl = ok
+RESULT ""
+WCASE log
+ach 65 = true
+RESULT "w(A)"
+WCASE string
+wca "a" = ok
+wca "\u00e9\ud83d\ude00" = ok
+RESULT "a\u00e9\ud83d\ude00"
+WCASE log
+wsr "\u00e9\ud83d\ude00" 1 0 = ok
+wi 200065 = ok
+acr "hello" 2 -1 = !java.lang.StringIndexOutOfBoundsException "Range [2, -1) out of bounds for length 5"
+wsr "a" 2 3 = !java.lang.StringIndexOutOfBoundsException "Range [2, 5) out of bounds for length 1"
+acr "hello" 1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [1, -1) out of bounds for length 5"
+ac "hello" = true
+RESULT "w()w(\u0d81)w(hello)"
+WCASE string
+ws "hello" = ok
+wi 160065 = ok
+wsr null 0 0 = ok
+fl = ok
+RESULT "hello\u7141"
+WCASE log
+wc "" 2 5 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2 + 5) out of bounds for length 0"
+wsr "" 0 -1 = !java.lang.StringIndexOutOfBoundsException "Range [0, -1) out of bounds for length 0"
+ws "a" = ok
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+ac "hello" = true
+ach 67 = true
+RESULT "w(w(a)w(hello)w(C)"
+WCASE string
+wi 40065 = ok
+wsr "\u00e9\ud83d\ude00" 0 5 = !java.lang.IndexOutOfBoundsException "Range [0, 5) out of bounds for length 3"
+RESULT "\u9c81"
+WCASE log
+wca "" = ok
+ach 66 = true
+RESULT "w()w(B)"
+WCASE string
+wc "hello" -1 1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 1) out of bounds for length 5"
+wi 40065 = ok
+RESULT "\u9c81"
+WCASE log
+ac "\u00e9\ud83d\ude00" = true
+wsr "a" 0 3 = !java.lang.StringIndexOutOfBoundsException "Range [0, 3) out of bounds for length 1"
+RESULT "w(\u00e9\ud83d\ude00)"
+WCASE string
+wc "\u00e9\ud83d\ude00" 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 3"
+fl = ok
+ach 71 = true
+ac "hello" = true
+RESULT "Ghello"
+WCASE log
+ach 65 = true
+wi 120065 = ok
+wsr "" 1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [1, 0) out of bounds for length 0"
+RESULT "w(A)w(\ud501)"
+WCASE string
+acr null 2 5 = !java.lang.StringIndexOutOfBoundsException "Range [2, 5) out of bounds for length 4"
+wi -39935 = ok
+wca "\u00e9\ud83d\ude00" = ok
+wsr "\u00e9\ud83d\ude00" 5 -1 = !java.lang.IndexOutOfBoundsException "Range [5, 4) out of bounds for length 3"
+RESULT "\u6401\u00e9\ud83d\ude00"
+WCASE log
+wsr "" 2 5 = !java.lang.StringIndexOutOfBoundsException "Range [2, 7) out of bounds for length 0"
+wsr "a" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 9) out of bounds for length 1"
+fl = ok
+RESULT "f"
+WCASE string
+wca "hello" = ok
+wi 40065 = ok
+RESULT "hello\u9c81"
+WCASE log
+ach 67 = true
+wi 80065 = ok
+ac "hello" = true
+RESULT "w(C)w(\u38c1)w(hello)"
+WCASE string
+ws "\u00e9\ud83d\ude00" = ok
+RESULT "\u00e9\ud83d\ude00"
+WCASE log
+wca "\u00e9\ud83d\ude00" = ok
+wsr "" -1 2 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 1) out of bounds for length 0"
+fl = ok
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+ac null = true
+RESULT "w(\u00e9\ud83d\ude00)fw(null)"
+WCASE string
+fl = ok
+ac "\u00e9\ud83d\ude00" = true
+wc null 0 5 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+RESULT "\u00e9\ud83d\ude00"
+WCASE log
+fl = ok
+wsr "hello" 3 4 = !java.lang.StringIndexOutOfBoundsException "Range [3, 7) out of bounds for length 5"
+fl = ok
+RESULT "ff"
+WCASE string
+wsr "" 5 4 = !java.lang.IndexOutOfBoundsException "Range [5, 9) out of bounds for length 0"
+ws "" = ok
+wc null 5 -1 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wca "a" = ok
+RESULT "a"
+WCASE log
+wca "\u00e9\ud83d\ude00" = ok
+acr "hello" 0 5 = true
+wsr "\u00e9\ud83d\ude00" 1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [1, 0) out of bounds for length 3"
+wc "" 2 2 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2 + 2) out of bounds for length 0"
+RESULT "w(\u00e9\ud83d\ude00)w(hello)w("
+WCASE string
+wsr "hello" 2 2 = ok
+wi 120065 = ok
+acr "a" 3 0 = !java.lang.StringIndexOutOfBoundsException "Range [3, 0) out of bounds for length 1"
+RESULT "ll\ud501"
+WCASE log
+wc "" 1 1 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1 + 1) out of bounds for length 0"
+RESULT "w("
+WCASE string
+wi 120065 = ok
+wca "\u00e9\ud83d\ude00" = ok
+RESULT "\ud501\u00e9\ud83d\ude00"
+WCASE log
+ws "hello" = ok
+fl = ok
+RESULT "w(hello)f"
+WCASE string
+fl = ok
+RESULT ""
+WCASE log
+wsr "\u00e9\ud83d\ude00" 3 5 = !java.lang.StringIndexOutOfBoundsException "Range [3, 8) out of bounds for length 3"
+ac "" = true
+ach 67 = true
+fl = ok
+ach 67 = true
+RESULT "w()w(C)fw(C)"
+WCASE string
+acr null 2 1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 1) out of bounds for length 4"
+ac "" = true
+ac "a" = true
+wsr "\u00e9\ud83d\ude00" 3 0 = ok
+fl = ok
+RESULT "a"
+WCASE log
+wi 40065 = ok
+ac "hello" = true
+wi 160065 = ok
+wi -39935 = ok
+ac "" = true
+RESULT "w(\u9c81)w(hello)w(\u7141)w(\u6401)w()"
+WCASE string
+wi 160065 = ok
+RESULT "\u7141"
+WCASE log
+ac "a" = true
+wi 200065 = ok
+ach 70 = true
+acr "\u00e9\ud83d\ude00" 3 1 = !java.lang.StringIndexOutOfBoundsException "Range [3, 1) out of bounds for length 3"
+ach 68 = true
+RESULT "w(a)w(\u0d81)w(F)w(D)"
+WCASE string
+wsr null 4 0 = ok
+wi 120065 = ok
+ws null = ok
+acr "" 2 1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 1) out of bounds for length 0"
+ach 67 = true
+RESULT "\ud501nullC"
+WCASE log
+ach 71 = true
+fl = ok
+RESULT "w(G)f"
+WCASE string
+wi 65 = ok
+ac "hello" = true
+RESULT "Ahello"
+WCASE log
+wi 80065 = ok
+ac null = true
+wc "\u00e9\ud83d\ude00" 5 5 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + 5) out of bounds for length 3"
+RESULT "w(\u38c1)w(null)w("
+WCASE string
+wsr null 4 3 = !java.lang.IndexOutOfBoundsException "Range [4, 7) out of bounds for length 4"
+wi -39935 = ok
+ach 67 = true
+ac "a" = true
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+RESULT "\u6401Ca"
+WCASE log
+wca "a" = ok
+fl = ok
+ac "hello" = true
+ac "hello" = true
+RESULT "w(a)fw(hello)w(hello)"
+WCASE string
+ws "\u00e9\ud83d\ude00" = ok
+RESULT "\u00e9\ud83d\ude00"
+WCASE log
+acr "" 1 2 = !java.lang.StringIndexOutOfBoundsException "Range [1, 2) out of bounds for length 0"
+wi 160065 = ok
+acr "a" 5 -1 = !java.lang.StringIndexOutOfBoundsException "Range [5, -1) out of bounds for length 1"
+wi 40065 = ok
+RESULT "w(\u7141)w(\u9c81)"
+WCASE string
+wc "hello" 1 5 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 5) out of bounds for length 5"
+ach 67 = true
+ac "\u00e9\ud83d\ude00" = true
+ws "hello" = ok
+wi 80065 = ok
+RESULT "C\u00e9\ud83d\ude00hello\u38c1"
+WCASE log
+ws "a" = ok
+acr "a" -1 3 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 3) out of bounds for length 1"
+RESULT "w(a)"
+WCASE string
+ac "\u00e9\ud83d\ude00" = true
+wc "a" 4 4 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 4) out of bounds for length 1"
+ach 69 = true
+wc "hello" -1 2 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 2) out of bounds for length 5"
+ac "hello" = true
+wc "a" 4 1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 1) out of bounds for length 1"
+RESULT "\u00e9\ud83d\ude00Ehello"
+WCASE log
+ach 65 = true
+ach 67 = true
+wsr null 3 1 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+RESULT "w(A)w(C)"
+WCASE string
+ac null = true
+wc "" 5 4 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + 4) out of bounds for length 0"
+ach 66 = true
+RESULT "nullB"
+WCASE log
+ac "hello" = true
+RESULT "w(hello)"
+WCASE string
+wsr null 0 0 = ok
+RESULT ""
+WCASE log
+ach 69 = true
+wc "a" 3 5 = !java.lang.StringIndexOutOfBoundsException "Range [3, 3 + 5) out of bounds for length 1"
+wsr "\u00e9\ud83d\ude00" 0 5 = !java.lang.StringIndexOutOfBoundsException "Range [0, 5) out of bounds for length 3"
+fl = ok
+RESULT "w(E)w(f"
+WCASE string
+fl = ok
+ach 65 = true
+acr "\u00e9\ud83d\ude00" 4 0 = !java.lang.StringIndexOutOfBoundsException "Range [4, 0) out of bounds for length 3"
+wc "" 0 3 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 3) out of bounds for length 0"
+RESULT "A"
+WCASE log
+wsr "" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 9) out of bounds for length 0"
+wi 120065 = ok
+RESULT "w(\ud501)"
+WCASE string
+wca "\u00e9\ud83d\ude00" = ok
+ach 71 = true
+wsr "a" 0 2 = !java.lang.IndexOutOfBoundsException "Range [0, 2) out of bounds for length 1"
+acr "hello" -1 0 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 0) out of bounds for length 5"
+RESULT "\u00e9\ud83d\ude00G"
+WCASE log
+wc "a" 5 -1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + -1) out of bounds for length 1"
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wi 40065 = ok
+ac "\u00e9\ud83d\ude00" = true
+wca "" = ok
+wi -39935 = ok
+RESULT "w(w(\u9c81)w(\u00e9\ud83d\ude00)w()w(\u6401)"
+WCASE string
+wca "hello" = ok
+wsr "" 1 1 = !java.lang.IndexOutOfBoundsException "Range [1, 2) out of bounds for length 0"
+wsr "" 4 5 = !java.lang.IndexOutOfBoundsException "Range [4, 9) out of bounds for length 0"
+RESULT "hello"
+WCASE log
+ac "a" = true
+ac "" = true
+ach 69 = true
+RESULT "w(a)w()w(E)"
+WCASE string
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wi 200065 = ok
+ws "\u00e9\ud83d\ude00" = ok
+fl = ok
+wsr "hello" -1 1 = !java.lang.IndexOutOfBoundsException "Range [-1, 0) out of bounds for length 5"
+ac "a" = true
+RESULT "\u0d81\u00e9\ud83d\ude00a"
+WCASE log
+wi 200065 = ok
+acr "\u00e9\ud83d\ude00" -1 2 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 2) out of bounds for length 3"
+acr "\u00e9\ud83d\ude00" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 4) out of bounds for length 3"
+RESULT "w(\u0d81)"
+WCASE string
+ac "" = true
+wc "" -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 0"
+ach 68 = true
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wc "hello" 3 1 = ok
+RESULT "Dl"
+WCASE log
+fl = ok
+ach 69 = true
+RESULT "fw(E)"
+WCASE string
+ws "hello" = ok
+fl = ok
+ach 70 = true
+wsr "\u00e9\ud83d\ude00" 0 5 = !java.lang.IndexOutOfBoundsException "Range [0, 5) out of bounds for length 3"
+ach 67 = true
+ac "a" = true
+RESULT "helloFCa"
+WCASE log
+ac "hello" = true
+RESULT "w(hello)"
+WCASE string
+ach 69 = true
+RESULT "E"
+WCASE log
+wsr "" 1 5 = !java.lang.StringIndexOutOfBoundsException "Range [1, 6) out of bounds for length 0"
+fl = ok
+fl = ok
+wca "" = ok
+acr "\u00e9\ud83d\ude00" -1 4 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 4) out of bounds for length 3"
+fl = ok
+RESULT "ffw()f"
+WCASE string
+ach 67 = true
+RESULT "C"
+WCASE log
+ws "\u00e9\ud83d\ude00" = ok
+wsr "\u00e9\ud83d\ude00" 0 3 = ok
+RESULT "w(\u00e9\ud83d\ude00)w(\u00e9\ud83d\ude00)"
+WCASE string
+ac null = true
+RESULT "null"
+WCASE log
+ac "\u00e9\ud83d\ude00" = true
+ws "a" = ok
+wi 80065 = ok
+RESULT "w(\u00e9\ud83d\ude00)w(a)w(\u38c1)"
+WCASE string
+wi 120065 = ok
+wsr null 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, -1) out of bounds for length 4"
+wi 200065 = ok
+fl = ok
+RESULT "\ud501\u0d81"
+WCASE log
+wi 80065 = ok
+wca "\u00e9\ud83d\ude00" = ok
+wc "\u00e9\ud83d\ude00" -1 2 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1 + 2) out of bounds for length 3"
+wc null 0 0 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+wi 40065 = ok
+RESULT "w(\u38c1)w(\u00e9\ud83d\ude00)w(w(w(\u9c81)"
+WCASE string
+ach 71 = true
+ach 71 = true
+RESULT "GG"
+WCASE log
+wi 65 = ok
+acr "" 4 1 = !java.lang.StringIndexOutOfBoundsException "Range [4, 1) out of bounds for length 0"
+fl = ok
+RESULT "w(A)f"
+WCASE string
+wca "" = ok
+RESULT ""
+WCASE log
+wc null 5 3 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+ach 71 = true
+wi 65 = ok
+ac "" = true
+RESULT "w(w(G)w(A)w()"
+WCASE string
+fl = ok
+wsr "hello" 0 2 = ok
+ws "hello" = ok
+wsr "\u00e9\ud83d\ude00" 3 1 = !java.lang.IndexOutOfBoundsException "Range [3, 4) out of bounds for length 3"
+RESULT "hehello"
+WCASE log
+ac "hello" = true
+ac "a" = true
+ws "hello" = ok
+fl = ok
+ac "hello" = true
+ws "a" = ok
+RESULT "w(hello)w(a)w(hello)fw(hello)w(a)"
+WCASE string
+wsr "\u00e9\ud83d\ude00" 0 1 = ok
+RESULT "\u00e9"
+WCASE log
+wc "a" 2 -1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2 + -1) out of bounds for length 1"
+RESULT "w("
+WCASE string
+ach 71 = true
+fl = ok
+ac null = true
+acr "hello" 5 -1 = !java.lang.StringIndexOutOfBoundsException "Range [5, -1) out of bounds for length 5"
+wca "a" = ok
+acr "" -1 0 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 0) out of bounds for length 0"
+RESULT "Gnulla"
+WCASE log
+fl = ok
+RESULT "f"
+WCASE string
+wc "\u00e9\ud83d\ude00" 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 3"
+ach 70 = true
+fl = ok
+wi 120065 = ok
+RESULT "F\ud501"
+WCASE log
+wi 40065 = ok
+wsr "a" -1 5 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 4) out of bounds for length 1"
+fl = ok
+RESULT "w(\u9c81)f"
+WCASE string
+ach 69 = true
+ac "a" = true
+wsr "\u00e9\ud83d\ude00" 3 1 = !java.lang.IndexOutOfBoundsException "Range [3, 4) out of bounds for length 3"
+RESULT "Ea"
+WCASE log
+wsr null 4 3 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+RESULT ""
+WCASE string
+wi 160065 = ok
+ws "" = ok
+acr "\u00e9\ud83d\ude00" 2 1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 1) out of bounds for length 3"
+wi 120065 = ok
+acr null 2 -1 = !java.lang.StringIndexOutOfBoundsException "Range [2, -1) out of bounds for length 4"
+RESULT "\u7141\ud501"
+WCASE log
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wi 80065 = ok
+wi 120065 = ok
+wi 80065 = ok
+ac "a" = true
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+RESULT "w(\u38c1)w(\ud501)w(\u38c1)w(a)"
+WCASE string
+fl = ok
+wc "a" 4 1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 1) out of bounds for length 1"
+acr "\u00e9\ud83d\ude00" 0 3 = true
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+ach 65 = true
+wsr "a" 4 1 = !java.lang.IndexOutOfBoundsException "Range [4, 5) out of bounds for length 1"
+RESULT "\u00e9\ud83d\ude00A"
+WCASE log
+acr "\u00e9\ud83d\ude00" 1 2 = true
+wsr "\u00e9\ud83d\ude00" 5 -1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 4) out of bounds for length 3"
+ac "\u00e9\ud83d\ude00" = true
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+RESULT "w(\ud83d)w(\u00e9\ud83d\ude00)"
+WCASE string
+wsr "\u00e9\ud83d\ude00" 3 4 = !java.lang.IndexOutOfBoundsException "Range [3, 7) out of bounds for length 3"
+ach 71 = true
+ac "\u00e9\ud83d\ude00" = true
+wc "\u00e9\ud83d\ude00" 5 0 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + 0) out of bounds for length 3"
+wsr null 0 4 = ok
+wc "" 0 2 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 2) out of bounds for length 0"
+RESULT "G\u00e9\ud83d\ude00null"
+WCASE log
+fl = ok
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+ac "\u00e9\ud83d\ude00" = true
+acr "a" 4 0 = !java.lang.StringIndexOutOfBoundsException "Range [4, 0) out of bounds for length 1"
+wsr "a" 0 0 = ok
+RESULT "fw(\u00e9\ud83d\ude00)w()"
+WCASE string
+wsr "a" 5 5 = !java.lang.IndexOutOfBoundsException "Range [5, 10) out of bounds for length 1"
+ws null = ok
+acr "" 4 1 = !java.lang.StringIndexOutOfBoundsException "Range [4, 1) out of bounds for length 0"
+wi -39935 = ok
+fl = ok
+RESULT "null\u6401"
+WCASE log
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+RESULT ""
+WCASE string
+fl = ok
+wca "hello" = ok
+ws "a" = ok
+RESULT "helloa"
+WCASE log
+wi -39935 = ok
+fl = ok
+acr null 5 5 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5) out of bounds for length 4"
+ach 71 = true
+ws "\u00e9\ud83d\ude00" = ok
+wca "hello" = ok
+RESULT "w(\u6401)fw(G)w(\u00e9\ud83d\ude00)w(hello)"
+WCASE string
+ws "\u00e9\ud83d\ude00" = ok
+ac "a" = true
+RESULT "\u00e9\ud83d\ude00a"
+WCASE log
+ach 69 = true
+ac "\u00e9\ud83d\ude00" = true
+wsr "a" 4 3 = !java.lang.StringIndexOutOfBoundsException "Range [4, 7) out of bounds for length 1"
+acr null 5 0 = !java.lang.StringIndexOutOfBoundsException "Range [5, 0) out of bounds for length 4"
+wca "" = ok
+RESULT "w(E)w(\u00e9\ud83d\ude00)w()"
+WCASE string
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+ws "a" = ok
+ws "hello" = ok
+ac null = true
+wi 160065 = ok
+RESULT "ahellonull\u7141"
+WCASE log
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wi 40065 = ok
+wi 40065 = ok
+RESULT "w(\u9c81)w(\u9c81)"
+WCASE string
+wsr "a" 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 2) out of bounds for length 1"
+ac "\u00e9\ud83d\ude00" = true
+ac "" = true
+RESULT "\u00e9\ud83d\ude00"
+WCASE log
+wi 160065 = ok
+acr "" 2 2 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2) out of bounds for length 0"
+wca "a" = ok
+RESULT "w(\u7141)w(a)"
+WCASE string
+fl = ok
+fl = ok
+fl = ok
+ac "" = true
+ws "" = ok
+wc "a" 5 3 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + 3) out of bounds for length 1"
+RESULT ""
+WCASE log
+wca "a" = ok
+ac null = true
+RESULT "w(a)w(null)"
+WCASE string
+wc "" 3 2 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 2) out of bounds for length 0"
+wca "hello" = ok
+acr "hello" 3 -1 = !java.lang.StringIndexOutOfBoundsException "Range [3, -1) out of bounds for length 5"
+RESULT "hello"
+WCASE log
+ws "" = ok
+acr "" 1 0 = !java.lang.StringIndexOutOfBoundsException "Range [1, 0) out of bounds for length 0"
+wca "\u00e9\ud83d\ude00" = ok
+RESULT "w()w(\u00e9\ud83d\ude00)"
+WCASE string
+fl = ok
+RESULT ""
+WCASE log
+acr "" 4 2 = !java.lang.StringIndexOutOfBoundsException "Range [4, 2) out of bounds for length 0"
+wca "\u00e9\ud83d\ude00" = ok
+fl = ok
+RESULT "w(\u00e9\ud83d\ude00)f"
+WCASE string
+fl = ok
+ac null = true
+wc "" 2 4 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 4) out of bounds for length 0"
+ws "a" = ok
+ac "\u00e9\ud83d\ude00" = true
+RESULT "nulla\u00e9\ud83d\ude00"
+WCASE log
+wi 40065 = ok
+ac "a" = true
+wi 160065 = ok
+wi 65 = ok
+RESULT "w(\u9c81)w(a)w(\u7141)w(A)"
+WCASE string
+ac null = true
+RESULT "null"
+WCASE log
+ach 69 = true
+RESULT "w(E)"
+WCASE string
+ach 66 = true
+wc "hello" 5 0 = ok
+wca "" = ok
+RESULT "B"
+WCASE log
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wi -39935 = ok
+RESULT "w(\u6401)"
+WCASE string
+wc "hello" 3 1 = ok
+ach 66 = true
+fl = ok
+ac "hello" = true
+RESULT "lBhello"
+WCASE log
+fl = ok
+RESULT "f"
+WCASE string
+fl = ok
+wc "hello" 1 1 = ok
+acr null 1 3 = true
+wc "hello" -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 5"
+acr "a" 1 1 = true
+wc "" 0 4 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 4) out of bounds for length 0"
+RESULT "eul"
+WCASE log
+wi 160065 = ok
+ws "hello" = ok
+ac null = true
+wca "hello" = ok
+acr "a" 5 5 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5) out of bounds for length 1"
+RESULT "w(\u7141)w(hello)w(null)w(hello)"
+WCASE string
+fl = ok
+ac "hello" = true
+RESULT "hello"
+WCASE log
+wi -39935 = ok
+ac null = true
+ach 65 = true
+RESULT "w(\u6401)w(null)w(A)"
+WCASE string
+fl = ok
+RESULT ""
+WCASE log
+wi 65 = ok
+acr null 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 4) out of bounds for length 4"
+wc "" 3 2 = !java.lang.StringIndexOutOfBoundsException "Range [3, 3 + 2) out of bounds for length 0"
+ac "\u00e9\ud83d\ude00" = true
+ac "\u00e9\ud83d\ude00" = true
+ws "\u00e9\ud83d\ude00" = ok
+RESULT "w(A)w(w(\u00e9\ud83d\ude00)w(\u00e9\ud83d\ude00)w(\u00e9\ud83d\ude00)"
+WCASE string
+ach 65 = true
+fl = ok
+acr "hello" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 4) out of bounds for length 5"
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wsr "" 0 4 = !java.lang.IndexOutOfBoundsException "Range [0, 4) out of bounds for length 0"
+wi 120065 = ok
+RESULT "A\ud501"
+WCASE log
+wc null 2 1 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+wi -39935 = ok
+wsr "a" -1 2 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 1) out of bounds for length 1"
+RESULT "w(w(\u6401)"
+WCASE string
+wc "a" -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 1"
+acr "hello" 3 3 = true
+wsr "\u00e9\ud83d\ude00" 2 3 = !java.lang.IndexOutOfBoundsException "Range [2, 5) out of bounds for length 3"
+acr "\u00e9\ud83d\ude00" 3 4 = !java.lang.StringIndexOutOfBoundsException "Range [3, 4) out of bounds for length 3"
+wca "hello" = ok
+wca "hello" = ok
+RESULT "hellohello"
+WCASE log
+ach 69 = true
+RESULT "w(E)"
+WCASE string
+ws "a" = ok
+fl = ok
+wc null 1 4 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+RESULT "a"
+WCASE log
+wi 65 = ok
+RESULT "w(A)"
+WCASE string
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+ac "" = true
+acr "\u00e9\ud83d\ude00" 3 1 = !java.lang.StringIndexOutOfBoundsException "Range [3, 1) out of bounds for length 3"
+RESULT ""
+WCASE log
+acr "\u00e9\ud83d\ude00" 5 0 = !java.lang.StringIndexOutOfBoundsException "Range [5, 0) out of bounds for length 3"
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+acr "\u00e9\ud83d\ude00" -1 3 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 3) out of bounds for length 3"
+ws "" = ok
+wc null 5 4 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+RESULT "w()w("
+WCASE string
+acr "a" 0 4 = !java.lang.StringIndexOutOfBoundsException "Range [0, 4) out of bounds for length 1"
+ac null = true
+RESULT "null"
+WCASE log
+fl = ok
+wsr "\u00e9\ud83d\ude00" 2 4 = !java.lang.StringIndexOutOfBoundsException "Range [2, 6) out of bounds for length 3"
+fl = ok
+fl = ok
+acr null 0 5 = !java.lang.StringIndexOutOfBoundsException "Range [0, 5) out of bounds for length 4"
+RESULT "fff"
+WCASE string
+ac null = true
+ach 69 = true
+wc "hello" 2 5 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 5) out of bounds for length 5"
+RESULT "nullE"
+WCASE log
+fl = ok
+RESULT "f"
+WCASE string
+ws "a" = ok
+acr "\u00e9\ud83d\ude00" 3 -1 = !java.lang.StringIndexOutOfBoundsException "Range [3, -1) out of bounds for length 3"
+ac "hello" = true
+ach 70 = true
+RESULT "ahelloF"
+WCASE log
+wsr "" 3 5 = !java.lang.StringIndexOutOfBoundsException "Range [3, 8) out of bounds for length 0"
+RESULT ""
+WCASE string
+ac null = true
+wca "hello" = ok
+RESULT "nullhello"
+WCASE log
+wc "a" 4 2 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 1"
+wc "a" 1 3 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1 + 3) out of bounds for length 1"
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wca "hello" = ok
+acr "a" 4 3 = !java.lang.StringIndexOutOfBoundsException "Range [4, 3) out of bounds for length 1"
+fl = ok
+RESULT "w(w(w(hello)f"
+WCASE string
+wc null -1 4 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+ac "\u00e9\ud83d\ude00" = true
+RESULT "\u00e9\ud83d\ude00"
+WCASE log
+wc "a" 5 -1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + -1) out of bounds for length 1"
+wsr "\u00e9\ud83d\ude00" 2 -1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 1) out of bounds for length 3"
+ac null = true
+RESULT "w(w(null)"
+WCASE string
+ws "a" = ok
+wca "\u00e9\ud83d\ude00" = ok
+ac "" = true
+acr "a" 1 1 = true
+wi 40065 = ok
+RESULT "a\u00e9\ud83d\ude00\u9c81"
+WCASE log
+wc "a" 3 0 = !java.lang.StringIndexOutOfBoundsException "Range [3, 3 + 0) out of bounds for length 1"
+acr "hello" 2 4 = true
+ws "hello" = ok
+RESULT "w(w(ll)w(hello)"
+WCASE string
+acr "hello" 5 0 = !java.lang.StringIndexOutOfBoundsException "Range [5, 0) out of bounds for length 5"
+fl = ok
+RESULT ""
+WCASE log
+wsr "\u00e9\ud83d\ude00" 2 1 = ok
+ws "a" = ok
+wc "hello" 0 3 = ok
+wi 200065 = ok
+RESULT "w(\ude00)w(a)w(hel)w(\u0d81)"
+WCASE string
+wc "\u00e9\ud83d\ude00" 3 2 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 2) out of bounds for length 3"
+ac "" = true
+RESULT ""
+WCASE log
+fl = ok
+fl = ok
+wsr "" 3 5 = !java.lang.StringIndexOutOfBoundsException "Range [3, 8) out of bounds for length 0"
+wi 80065 = ok
+wsr null 1 0 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+acr "a" 1 0 = !java.lang.StringIndexOutOfBoundsException "Range [1, 0) out of bounds for length 1"
+RESULT "ffw(\u38c1)"
+WCASE string
+wi 40065 = ok
+wsr "a" 5 4 = !java.lang.IndexOutOfBoundsException "Range [5, 9) out of bounds for length 1"
+acr "\u00e9\ud83d\ude00" 0 3 = true
+fl = ok
+wca "\u00e9\ud83d\ude00" = ok
+RESULT "\u9c81\u00e9\ud83d\ude00\u00e9\ud83d\ude00"
+WCASE log
+acr "hello" 4 0 = !java.lang.StringIndexOutOfBoundsException "Range [4, 0) out of bounds for length 5"
+ws "\u00e9\ud83d\ude00" = ok
+acr null 1 5 = !java.lang.StringIndexOutOfBoundsException "Range [1, 5) out of bounds for length 4"
+RESULT "w(\u00e9\ud83d\ude00)"
+WCASE string
+wsr "" 1 4 = !java.lang.IndexOutOfBoundsException "Range [1, 5) out of bounds for length 0"
+RESULT ""
+WCASE log
+acr "hello" 5 0 = !java.lang.StringIndexOutOfBoundsException "Range [5, 0) out of bounds for length 5"
+wc "" 5 3 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + 3) out of bounds for length 0"
+RESULT "w("
+WCASE string
+wi 160065 = ok
+ach 71 = true
+RESULT "\u7141G"
+WCASE log
+ach 71 = true
+wc "" 1 4 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1 + 4) out of bounds for length 0"
+wc "" 2 4 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2 + 4) out of bounds for length 0"
+fl = ok
+wc "\u00e9\ud83d\ude00" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + 4) out of bounds for length 3"
+RESULT "w(G)w(w(fw("
+WCASE string
+fl = ok
+RESULT ""
+WCASE log
+wca "hello" = ok
+fl = ok
+ac "hello" = true
+RESULT "w(hello)fw(hello)"
+WCASE string
+wi 160065 = ok
+ach 71 = true
+ws "\u00e9\ud83d\ude00" = ok
+RESULT "\u7141G\u00e9\ud83d\ude00"
+WCASE log
+acr null 2 5 = !java.lang.StringIndexOutOfBoundsException "Range [2, 5) out of bounds for length 4"
+RESULT ""
+WCASE string
+fl = ok
+wc "" 0 3 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 3) out of bounds for length 0"
+wc "\u00e9\ud83d\ude00" 2 4 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 4) out of bounds for length 3"
+wi 80065 = ok
+ach 67 = true
+RESULT "\u38c1C"
+WCASE log
+wc null 3 1 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+ach 71 = true
+wc "a" 2 2 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2 + 2) out of bounds for length 1"
+RESULT "w(w(G)w("
+WCASE string
+wsr "" 0 3 = !java.lang.IndexOutOfBoundsException "Range [0, 3) out of bounds for length 0"
+wsr "hello" 3 0 = ok
+fl = ok
+wsr "a" 0 1 = ok
+acr "" 1 0 = !java.lang.StringIndexOutOfBoundsException "Range [1, 0) out of bounds for length 0"
+RESULT "a"
+WCASE log
+wc "" 5 2 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + 2) out of bounds for length 0"
+wsr "a" -1 1 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 0) out of bounds for length 1"
+acr null 5 1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 1) out of bounds for length 4"
+wc "a" 0 5 = !java.lang.StringIndexOutOfBoundsException "Range [0, 0 + 5) out of bounds for length 1"
+ach 67 = true
+ach 69 = true
+RESULT "w(w(w(C)w(E)"
+WCASE string
+ws "\u00e9\ud83d\ude00" = ok
+ach 70 = true
+wc "" 4 5 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 5) out of bounds for length 0"
+acr "" 1 2 = !java.lang.StringIndexOutOfBoundsException "Range [1, 2) out of bounds for length 0"
+RESULT "\u00e9\ud83d\ude00F"
+WCASE log
+wi 80065 = ok
+wc "\u00e9\ud83d\ude00" 4 1 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + 1) out of bounds for length 3"
+RESULT "w(\u38c1)w("
+WCASE string
+wi 80065 = ok
+RESULT "\u38c1"
+WCASE log
+ach 65 = true
+wsr "a" 1 4 = !java.lang.StringIndexOutOfBoundsException "Range [1, 5) out of bounds for length 1"
+wc "hello" 5 2 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + 2) out of bounds for length 5"
+wsr "" -1 1 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 0) out of bounds for length 0"
+ac null = true
+wi 160065 = ok
+RESULT "w(A)w(w(null)w(\u7141)"
+WCASE string
+acr "" 4 -1 = !java.lang.StringIndexOutOfBoundsException "Range [4, -1) out of bounds for length 0"
+RESULT ""
+WCASE log
+fl = ok
+wc "hello" 3 1 = ok
+RESULT "fw(l)"
+WCASE string
+acr "\u00e9\ud83d\ude00" 4 -1 = !java.lang.StringIndexOutOfBoundsException "Range [4, -1) out of bounds for length 3"
+wca "\u00e9\ud83d\ude00" = ok
+RESULT "\u00e9\ud83d\ude00"
+WCASE log
+fl = ok
+RESULT "f"
+WCASE string
+ws "a" = ok
+RESULT "a"
+WCASE log
+wi 40065 = ok
+acr "a" 5 1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 1) out of bounds for length 1"
+ach 70 = true
+ach 66 = true
+RESULT "w(\u9c81)w(F)w(B)"
+WCASE string
+acr null 0 4 = true
+wsr "\u00e9\ud83d\ude00" 0 2 = ok
+wsr "hello" 2 3 = ok
+ws "" = ok
+ws "hello" = ok
+wsr "\u00e9\ud83d\ude00" -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -2) out of bounds for length 3"
+RESULT "null\u00e9\ud83dllohello"
+WCASE log
+acr null -1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1) out of bounds for length 4"
+ach 66 = true
+acr "\u00e9\ud83d\ude00" 4 5 = !java.lang.StringIndexOutOfBoundsException "Range [4, 5) out of bounds for length 3"
+ach 66 = true
+RESULT "w(B)w(B)"
+WCASE string
+fl = ok
+fl = ok
+ac "a" = true
+wca "a" = ok
+wsr "a" 0 2 = !java.lang.IndexOutOfBoundsException "Range [0, 2) out of bounds for length 1"
+RESULT "aa"
+WCASE log
+ach 70 = true
+ws "hello" = ok
+RESULT "w(F)w(hello)"
+WCASE string
+ach 68 = true
+RESULT "D"
+WCASE log
+ac null = true
+ach 71 = true
+wi -39935 = ok
+RESULT "w(null)w(G)w(\u6401)"
+WCASE string
+ach 67 = true
+ach 66 = true
+ws "" = ok
+wi 80065 = ok
+wsr "\u00e9\ud83d\ude00" 2 0 = ok
+RESULT "CB\u38c1"
+WCASE log
+ws "\u00e9\ud83d\ude00" = ok
+wca "hello" = ok
+wca "" = ok
+ac "\u00e9\ud83d\ude00" = true
+wsr "\u00e9\ud83d\ude00" 5 5 = !java.lang.StringIndexOutOfBoundsException "Range [5, 10) out of bounds for length 3"
+wsr "hello" -1 2 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 1) out of bounds for length 5"
+RESULT "w(\u00e9\ud83d\ude00)w(hello)w()w(\u00e9\ud83d\ude00)"
+WCASE string
+wca "" = ok
+wsr "" 5 1 = !java.lang.IndexOutOfBoundsException "Range [5, 6) out of bounds for length 0"
+ac "hello" = true
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wsr "hello" 0 5 = ok
+acr "\u00e9\ud83d\ude00" 4 2 = !java.lang.StringIndexOutOfBoundsException "Range [4, 2) out of bounds for length 3"
+RESULT "hellohello"
+WCASE log
+wca "hello" = ok
+wsr "" 1 4 = !java.lang.StringIndexOutOfBoundsException "Range [1, 5) out of bounds for length 0"
+RESULT "w(hello)"
+WCASE string
+fl = ok
+RESULT ""
+WCASE log
+wsr null 0 -1 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+ws "" = ok
+ws "\u00e9\ud83d\ude00" = ok
+RESULT "w()w(\u00e9\ud83d\ude00)"
+WCASE string
+ach 69 = true
+ac "hello" = true
+RESULT "Ehello"
+WCASE log
+ach 71 = true
+ac "" = true
+wca "\u00e9\ud83d\ude00" = ok
+wsr "a" 4 1 = !java.lang.StringIndexOutOfBoundsException "Range [4, 5) out of bounds for length 1"
+ac "a" = true
+ac "\u00e9\ud83d\ude00" = true
+RESULT "w(G)w()w(\u00e9\ud83d\ude00)w(a)w(\u00e9\ud83d\ude00)"
+WCASE string
+ws null = ok
+ach 66 = true
+wsr "hello" 3 1 = ok
+RESULT "nullBl"
+WCASE log
+wc "a" 3 3 = !java.lang.StringIndexOutOfBoundsException "Range [3, 3 + 3) out of bounds for length 1"
+RESULT "w("
+WCASE string
+wca "" = ok
+acr null -1 2 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 2) out of bounds for length 4"
+ach 65 = true
+ach 71 = true
+ach 66 = true
+RESULT "AGB"
+WCASE log
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+acr "hello" -1 5 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 5) out of bounds for length 5"
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+RESULT ""
+WCASE string
+acr "\u00e9\ud83d\ude00" -1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1) out of bounds for length 3"
+RESULT ""
+WCASE log
+ws "" = ok
+fl = ok
+acr null 5 3 = !java.lang.StringIndexOutOfBoundsException "Range [5, 3) out of bounds for length 4"
+RESULT "w()f"
+WCASE string
+ws "a" = ok
+fl = ok
+ac "\u00e9\ud83d\ude00" = true
+wc "" 1 4 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 4) out of bounds for length 0"
+wi 80065 = ok
+RESULT "a\u00e9\ud83d\ude00\u38c1"
+WCASE log
+ach 65 = true
+ac "a" = true
+wi 120065 = ok
+wc "a" 4 0 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + 0) out of bounds for length 1"
+RESULT "w(A)w(a)w(\ud501)w("
+WCASE string
+ws "hello" = ok
+ws null = ok
+ws null = ok
+RESULT "hellonullnull"
+WCASE log
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+acr null 0 4 = true
+wc "" 1 2 = !java.lang.StringIndexOutOfBoundsException "Range [1, 1 + 2) out of bounds for length 0"
+ws "" = ok
+wc "" 2 2 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2 + 2) out of bounds for length 0"
+RESULT "w(null)w(w()w("
+WCASE string
+ws "" = ok
+fl = ok
+wi 40065 = ok
+wca "a" = ok
+ws null = ok
+wsr "a" 5 3 = !java.lang.IndexOutOfBoundsException "Range [5, 8) out of bounds for length 1"
+RESULT "\u9c81anull"
+WCASE log
+ach 66 = true
+RESULT "w(B)"
+WCASE string
+ac "\u00e9\ud83d\ude00" = true
+ach 70 = true
+acr "a" -1 4 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 4) out of bounds for length 1"
+wi 120065 = ok
+fl = ok
+RESULT "\u00e9\ud83d\ude00F\ud501"
+WCASE log
+wca "a" = ok
+RESULT "w(a)"
+WCASE string
+wi 65 = ok
+wi 200065 = ok
+wi 80065 = ok
+acr "hello" -1 2 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 2) out of bounds for length 5"
+RESULT "A\u0d81\u38c1"
+WCASE log
+wsr "a" 3 5 = !java.lang.StringIndexOutOfBoundsException "Range [3, 8) out of bounds for length 1"
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+ac null = true
+ac "a" = true
+RESULT "w(null)w(a)"
+WCASE string
+ac "hello" = true
+acr "\u00e9\ud83d\ude00" 4 2 = !java.lang.StringIndexOutOfBoundsException "Range [4, 2) out of bounds for length 3"
+acr null 2 3 = true
+ws "" = ok
+wsr "a" 0 1 = ok
+RESULT "hellola"
+WCASE log
+wc "" -1 0 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 0"
+fl = ok
+RESULT "w(f"
+WCASE string
+wsr "hello" 4 1 = ok
+wc "" 1 0 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 0) out of bounds for length 0"
+RESULT "o"
+WCASE log
+fl = ok
+ach 67 = true
+wc null -1 3 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+RESULT "fw(C)w("
+WCASE string
+fl = ok
+ach 71 = true
+RESULT "G"
+WCASE log
+ws "" = ok
+ach 71 = true
+wca "\u00e9\ud83d\ude00" = ok
+ach 68 = true
+acr "a" 2 4 = !java.lang.StringIndexOutOfBoundsException "Range [2, 4) out of bounds for length 1"
+RESULT "w()w(G)w(\u00e9\ud83d\ude00)w(D)"
+WCASE string
+wc "\u00e9\ud83d\ude00" 1 5 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 5) out of bounds for length 3"
+ac "" = true
+wsr "a" 3 4 = !java.lang.IndexOutOfBoundsException "Range [3, 7) out of bounds for length 1"
+wi 40065 = ok
+RESULT "\u9c81"
+WCASE log
+wi 40065 = ok
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+RESULT "w(\u9c81)"
+WCASE string
+wc "\u00e9\ud83d\ude00" 2 0 = ok
+RESULT ""
+WCASE log
+wsr "hello" 0 3 = ok
+wi -39935 = ok
+wc "" 3 4 = !java.lang.StringIndexOutOfBoundsException "Range [3, 3 + 4) out of bounds for length 0"
+wsr "\u00e9\ud83d\ude00" 3 0 = ok
+acr "a" 0 4 = !java.lang.StringIndexOutOfBoundsException "Range [0, 4) out of bounds for length 1"
+RESULT "w(hel)w(\u6401)w(w()"
+WCASE string
+wc "" 5 5 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + 5) out of bounds for length 0"
+RESULT ""
+WCASE log
+wc "hello" 1 3 = ok
+fl = ok
+ac "" = true
+ac "a" = true
+ac "a" = true
+RESULT "w(ell)fw()w(a)w(a)"
+WCASE string
+ac "a" = true
+wc "\u00e9\ud83d\ude00" 4 2 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 3"
+wc null 1 3 = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+fl = ok
+RESULT "a"
+WCASE log
+ac "" = true
+wi 80065 = ok
+RESULT "w()w(\u38c1)"
+WCASE string
+ws null = ok
+wca "\u00e9\ud83d\ude00" = ok
+wc "\u00e9\ud83d\ude00" 4 1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 1) out of bounds for length 3"
+wi 65 = ok
+wsr null 4 4 = !java.lang.IndexOutOfBoundsException "Range [4, 8) out of bounds for length 4"
+RESULT "null\u00e9\ud83d\ude00A"
+WCASE log
+ac "a" = true
+RESULT "w(a)"
+WCASE string
+ws null = ok
+fl = ok
+wc "\u00e9\ud83d\ude00" 2 -1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + -1) out of bounds for length 3"
+ws "\u00e9\ud83d\ude00" = ok
+fl = ok
+wca "a" = ok
+RESULT "null\u00e9\ud83d\ude00a"
+WCASE log
+wca "hello" = ok
+fl = ok
+RESULT "w(hello)f"
+WCASE string
+wsr "hello" 2 2 = ok
+RESULT "ll"
+WCASE log
+ws "" = ok
+ws "a" = ok
+wc null 5 5 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+wc "\u00e9\ud83d\ude00" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + 4) out of bounds for length 3"
+RESULT "w()w(a)w(w("
+WCASE string
+wsr "hello" 2 1 = ok
+RESULT "l"
+WCASE log
+ach 65 = true
+acr "hello" 1 2 = true
+ac "\u00e9\ud83d\ude00" = true
+wca "hello" = ok
+wc null 0 -1 = !java.lang.NullPointerException "Cannot read the array length because \u0022value\u0022 is null"
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+RESULT "w(A)w(e)w(\u00e9\ud83d\ude00)w(hello)w("
+WCASE string
+ws "hello" = ok
+wca "a" = ok
+RESULT "helloa"
+WCASE log
+ach 71 = true
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wsr null 1 3 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+ac "hello" = true
+wc "a" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + 4) out of bounds for length 1"
+RESULT "w(G)w(hello)w("
+WCASE string
+ach 71 = true
+ws "a" = ok
+wi 80065 = ok
+RESULT "Ga\u38c1"
+WCASE log
+wc "a" 4 3 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + 3) out of bounds for length 1"
+ach 67 = true
+wc "" 4 -1 = !java.lang.StringIndexOutOfBoundsException "Range [4, 4 + -1) out of bounds for length 0"
+ws "" = ok
+wc "a" 5 1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + 1) out of bounds for length 1"
+RESULT "w(w(C)w(w()w("
+WCASE string
+acr "hello" 4 0 = !java.lang.StringIndexOutOfBoundsException "Range [4, 0) out of bounds for length 5"
+RESULT ""
+WCASE log
+ac "\u00e9\ud83d\ude00" = true
+wsr "hello" 4 0 = ok
+RESULT "w(\u00e9\ud83d\ude00)w()"
+WCASE string
+fl = ok
+acr "hello" 3 5 = true
+acr "a" 4 -1 = !java.lang.StringIndexOutOfBoundsException "Range [4, -1) out of bounds for length 1"
+wsr "" 1 5 = !java.lang.IndexOutOfBoundsException "Range [1, 6) out of bounds for length 0"
+ws "a" = ok
+RESULT "loa"
+WCASE log
+wsr "a" 5 -1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 4) out of bounds for length 1"
+ws "\u00e9\ud83d\ude00" = ok
+wsr null 5 3 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+ach 67 = true
+wca "a" = ok
+RESULT "w(\u00e9\ud83d\ude00)w(C)w(a)"
+WCASE string
+wsr "hello" -1 4 = !java.lang.IndexOutOfBoundsException "Range [-1, 3) out of bounds for length 5"
+wsr "" 4 3 = !java.lang.IndexOutOfBoundsException "Range [4, 7) out of bounds for length 0"
+RESULT ""
+WCASE log
+ac "a" = true
+ac "" = true
+ac "\u00e9\ud83d\ude00" = true
+fl = ok
+RESULT "w(a)w()w(\u00e9\ud83d\ude00)f"
+WCASE string
+fl = ok
+RESULT ""
+WCASE log
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+wc "" -1 4 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1 + 4) out of bounds for length 0"
+fl = ok
+RESULT "w(f"
+WCASE string
+ach 65 = true
+RESULT "A"
+WCASE log
+wi 200065 = ok
+wi 160065 = ok
+RESULT "w(\u0d81)w(\u7141)"
+WCASE string
+wc "hello" 2 0 = ok
+fl = ok
+wsr "hello" 1 3 = ok
+wi 40065 = ok
+wsr "hello" -1 3 = !java.lang.IndexOutOfBoundsException "Range [-1, 2) out of bounds for length 5"
+RESULT "ell\u9c81"
+WCASE log
+wc "hello" 1 0 = ok
+fl = ok
+ws "\u00e9\ud83d\ude00" = ok
+wc "" -1 2 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1 + 2) out of bounds for length 0"
+wi 200065 = ok
+RESULT "w()fw(\u00e9\ud83d\ude00)w(w(\u0d81)"
+WCASE string
+wc "hello" 2 5 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 5) out of bounds for length 5"
+RESULT ""
+WCASE log
+wsr "hello" 5 0 = ok
+wca "a" = ok
+ach 69 = true
+ach 70 = true
+wi -39935 = ok
+acr "\u00e9\ud83d\ude00" 4 -1 = !java.lang.StringIndexOutOfBoundsException "Range [4, -1) out of bounds for length 3"
+RESULT "w()w(a)w(E)w(F)w(\u6401)"
+WCASE string
+fl = ok
+wi 40065 = ok
+RESULT "\u9c81"
+WCASE log
+wca "" = ok
+ach 67 = true
+wi 65 = ok
+wsr "\u00e9\ud83d\ude00" 0 4 = !java.lang.StringIndexOutOfBoundsException "Range [0, 4) out of bounds for length 3"
+ach 66 = true
+ac "" = true
+RESULT "w()w(C)w(A)w(B)w()"
+WCASE string
+wca "hello" = ok
+acr null 5 1 = !java.lang.StringIndexOutOfBoundsException "Range [5, 1) out of bounds for length 4"
+RESULT "hello"
+WCASE log
+wsr "hello" 3 2 = ok
+RESULT "w(lo)"
+WCASE string
+wsr "\u00e9\ud83d\ude00" 0 2 = ok
+ws "a" = ok
+ws "a" = ok
+ac "" = true
+wsr "\u00e9\ud83d\ude00" 0 0 = ok
+RESULT "\u00e9\ud83daa"
+WCASE log
+wsr null 0 3 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+wi 65 = ok
+ws "\u00e9\ud83d\ude00" = ok
+ac "" = true
+wc "" 2 1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2 + 1) out of bounds for length 0"
+RESULT "w(A)w(\u00e9\ud83d\ude00)w()w("
+WCASE string
+wi 40065 = ok
+wi 80065 = ok
+RESULT "\u9c81\u38c1"
+WCASE log
+ws "hello" = ok
+fl = ok
+ach 68 = true
+acr "\u00e9\ud83d\ude00" 1 5 = !java.lang.StringIndexOutOfBoundsException "Range [1, 5) out of bounds for length 3"
+ws null = !java.lang.NullPointerException "Cannot invoke \u0022String.length()\u0022 because \u0022str\u0022 is null"
+ac "a" = true
+RESULT "w(hello)fw(D)w(a)"
+WCASE string
+fl = ok
+wca "a" = ok
+wi 80065 = ok
+ws "\u00e9\ud83d\ude00" = ok
+wi 40065 = ok
+RESULT "a\u38c1\u00e9\ud83d\ude00\u9c81"
+WCASE log
+wc "hello" 2 -1 = !java.lang.StringIndexOutOfBoundsException "Range [2, 2 + -1) out of bounds for length 5"
+wsr null 2 -1 = !java.lang.NullPointerException "Cannot invoke \u0022String.getChars(int, int, char[], int)\u0022 because \u0022str\u0022 is null"
+ac "hello" = true
+wc "hello" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 5 + 4) out of bounds for length 5"
+ws "a" = ok
+RESULT "w(w(hello)w(w(a)"
+WCASE string
+fl = ok
+ws "" = ok
+wsr null 0 5 = !java.lang.IndexOutOfBoundsException "Range [0, 5) out of bounds for length 4"
+RESULT ""
+WCASE log
+wi -39935 = ok
+wi 200065 = ok
+ac "a" = true
+RESULT "w(\u6401)w(\u0d81)w(a)"
+WCASE string
+wca "a" = ok
+ach 69 = true
+fl = ok
+RESULT "aE"
+WCASE log
+wsr "hello" 4 4 = !java.lang.StringIndexOutOfBoundsException "Range [4, 8) out of bounds for length 5"
+RESULT ""
+WCASE string
+wc "a" 5 2 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + 2) out of bounds for length 1"
+wca "\u00e9\ud83d\ude00" = ok
+ach 68 = true
+ac "\u00e9\ud83d\ude00" = true
+fl = ok
+ws "a" = ok
+RESULT "\u00e9\ud83d\ude00D\u00e9\ud83d\ude00a"
+WCASE log
+ws "" = ok
+acr "" 2 4 = !java.lang.StringIndexOutOfBoundsException "Range [2, 4) out of bounds for length 0"
+RESULT "w()"
+WCASE string
+acr "a" -1 -1 = !java.lang.StringIndexOutOfBoundsException "Range [-1, -1) out of bounds for length 1"
+fl = ok
+wsr "" 0 1 = !java.lang.IndexOutOfBoundsException "Range [0, 1) out of bounds for length 0"
+wsr null 4 5 = !java.lang.IndexOutOfBoundsException "Range [4, 9) out of bounds for length 4"
+RESULT ""
+WCASE log
+ws "" = ok
+wca "a" = ok
+fl = ok
+ac "a" = true
+wca null = !java.lang.NullPointerException "Cannot read the array length because \u0022cbuf\u0022 is null"
+ach 65 = true
+RESULT "w()w(a)fw(a)w(A)"
+WCASE string
+ws "a" = ok
+ach 67 = true
+RESULT "aC"
+WCASE log
+wsr "a" -1 3 = !java.lang.StringIndexOutOfBoundsException "Range [-1, 2) out of bounds for length 1"
+fl = ok
+wsr "\u00e9\ud83d\ude00" 5 4 = !java.lang.StringIndexOutOfBoundsException "Range [5, 9) out of bounds for length 3"
+ach 68 = true
+RESULT "fw(D)"
+WCASE string
+ac "a" = true
+fl = ok
+ac "a" = true
+RESULT "aa"
+WCASE log
+ac null = true
+wi 160065 = ok
+ac "" = true
+ac "a" = true
+fl = ok
+RESULT "w(null)w(\u7141)w()w(a)f"
+WCASE string
+wca "" = ok
+ac "a" = true
+wca "" = ok
+ac "a" = true
+ws "" = ok
+RESULT "aa"
+WCASE log
+ws "\u00e9\ud83d\ude00" = ok
+wi -39935 = ok
+fl = ok
+wi -39935 = ok
+ac "\u00e9\ud83d\ude00" = true
+ach 71 = true
+RESULT "w(\u00e9\ud83d\ude00)w(\u6401)fw(\u6401)w(\u00e9\ud83d\ude00)w(G)"
+WCASE string
+fl = ok
+acr null 4 0 = !java.lang.StringIndexOutOfBoundsException "Range [4, 0) out of bounds for length 4"
+wi 80065 = ok
+RESULT "\u38c1"
+WCASE log
+fl = ok
+acr null 3 5 = !java.lang.StringIndexOutOfBoundsException "Range [3, 5) out of bounds for length 4"
+ach 70 = true
+ac "" = true
+RESULT "fw(F)w()"
+OCASE bytes
+wi 307 = ok
+wa x = ok
+fl = ok
+wa x4b31c63f = ok
+RESULT x334b31c63f 5 "3K1\ufffd?" "\u0133\u014b\u0131\u01c6\u013f"
+OCASE log
+wa xef = ok
+fl = ok
+war x 4 3 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 3) out of bounds for length 0"
+fl = ok
+wi 107 = ok
+wi 7 = ok
+RESULT "-17;107;7;"
+OCASE bytes
+war x06 1 -1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 1"
+war xcee676c9 4 3 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 3) out of bounds for length 4"
+reset
+RESULT x 0 "" ""
+OCASE log
+wa x = ok
+wa x7eea98 = ok
+wa x = ok
+RESULT "126;-22;-104;"
+OCASE bytes
+fl = ok
+war x 4 1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 1) out of bounds for length 0"
+RESULT x 0 "" ""
+OCASE log
+fl = ok
+war x2107c0 0 0 = ok
+fl = ok
+wi 107 = ok
+RESULT "107;"
+OCASE bytes
+wi 107 = ok
+wa xbad051f8 = ok
+fl = ok
+RESULT x6bbad051f8 5 "k\ufffd\ufffdQ\ufffd" "\u016b\u01ba\u01d0\u0151\u01f8"
+OCASE log
+wa xf1 = ok
+RESULT "-15;"
+OCASE bytes
+war xe6 4 2 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 1"
+RESULT x 0 "" ""
+OCASE log
+wa x = ok
+wi 407 = ok
+fl = ok
+RESULT "407;"
+OCASE bytes
+wa xf4309034 = ok
+wi 407 = ok
+wa x = ok
+wi 407 = ok
+war x1d25bc 0 4 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 4) out of bounds for length 3"
+RESULT xf43090349797 6 "\ufffd0\ufffd4\ufffd\ufffd" "\u01f4\u0130\u0190\u0134\u0197\u0197"
+OCASE log
+wa x = ok
+RESULT ""
+OCASE bytes
+war xf960 2 0 = ok
+wa xb59b65a5 = ok
+fl = ok
+war x 4 0 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 0) out of bounds for length 0"
+war x9011d375 -1 3 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 3) out of bounds for length 4"
+war xca 4 -1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + -1) out of bounds for length 1"
+RESULT xb59b65a5 4 "\ufffd\ufffde\ufffd" "\u01b5\u019b\u0165\u01a5"
+OCASE log
+fl = ok
+fl = ok
+war xbeaebee6 1 0 = ok
+war x1f 3 2 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 2) out of bounds for length 1"
+wi 107 = ok
+war x9ab788 0 1 = ok
+RESULT "107;-102;"
+OCASE bytes
+wa x5239919b = ok
+reset
+fl = ok
+wa x1536aa = ok
+RESULT x1536aa 3 "\u00156\ufffd" "\u0115\u0136\u01aa"
+OCASE log
+wi 307 = ok
+wi 307 = ok
+war x 4 0 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 0) out of bounds for length 0"
+wi 307 = ok
+wa x8160e9 = ok
+fl = ok
+RESULT "307;307;307;-127;96;-23;"
+OCASE bytes
+war xcf2eca 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 3"
+wi 307 = ok
+reset
+RESULT x 0 "" ""
+OCASE log
+war xf5 4 4 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 4) out of bounds for length 1"
+RESULT ""
+OCASE bytes
+wi 107 = ok
+reset
+RESULT x 0 "" ""
+OCASE log
+wa x6482 = ok
+war x59591deb 0 2 = ok
+war x12e4e6a6 -1 4 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 4) out of bounds for length 4"
+RESULT "100;-126;89;89;"
+OCASE bytes
+wi -93 = ok
+wa x6a45fc50 = ok
+fl = ok
+wi 307 = ok
+wa x = ok
+RESULT xa36a45fc5033 6 "\ufffdjE\ufffdP3" "\u01a3\u016a\u0145\u01fc\u0150\u0133"
+OCASE log
+fl = ok
+fl = ok
+wi -93 = ok
+RESULT "-93;"
+OCASE bytes
+wi 7 = ok
+wa x80 = ok
+wa xc332d2 = ok
+reset
+RESULT x 0 "" ""
+OCASE log
+war x1f 1 2 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 2) out of bounds for length 1"
+fl = ok
+RESULT ""
+OCASE bytes
+wi 407 = ok
+wi 307 = ok
+war x 0 2 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 2) out of bounds for length 0"
+wa xdef21e = ok
+war x7af4 0 4 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 4) out of bounds for length 2"
+war x5044 -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 2"
+RESULT x9733def21e 5 "\ufffd3\ufffd\ufffd\u001e" "\u0197\u0133\u01de\u01f2\u011e"
+OCASE log
+war x1969e6 0 2 = ok
+war x 0 2 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 2) out of bounds for length 0"
+wi 407 = ok
+war xb195 1 -1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 2"
+wa x90 = ok
+fl = ok
+RESULT "25;105;407;-112;"
+OCASE bytes
+wi 7 = ok
+reset
+war xb8 4 4 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 4) out of bounds for length 1"
+war x 4 4 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 4) out of bounds for length 0"
+war x2794ec4f 0 0 = ok
+RESULT x 0 "" ""
+OCASE log
+wi 307 = ok
+war x 2 4 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 4) out of bounds for length 0"
+war x27 0 2 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 2) out of bounds for length 1"
+fl = ok
+fl = ok
+wa x8a5099 = ok
+RESULT "307;-118;80;-103;"
+OCASE bytes
+wi 7 = ok
+wa x7cbde946 = ok
+RESULT x077cbde946 5 "\u0007|\ufffd\ufffdF" "\u0107\u017c\u01bd\u01e9\u0146"
+OCASE log
+war x 0 0 = ok
+fl = ok
+wi -93 = ok
+wi 7 = ok
+wa xed143a = ok
+RESULT "-93;7;-19;20;58;"
+OCASE bytes
+reset
+wi -93 = ok
+RESULT xa3 1 "\ufffd" "\u01a3"
+OCASE log
+wi -93 = ok
+wa x165c = ok
+wi 107 = ok
+wi 107 = ok
+wi -93 = ok
+RESULT "-93;22;92;107;107;-93;"
+OCASE bytes
+wi 207 = ok
+RESULT xcf 1 "\ufffd" "\u01cf"
+OCASE log
+war xcb493de3 3 2 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 2) out of bounds for length 4"
+war x4fdd3765 0 1 = ok
+fl = ok
+wa x21746d = ok
+wa xa9f1 = ok
+wa x = ok
+RESULT "79;33;116;109;-87;-15;"
+OCASE bytes
+wa xaf54 = ok
+reset
+wa x0223a1 = ok
+fl = ok
+wa xbb10 = ok
+fl = ok
+RESULT x0223a1bb10 5 "\u0002#\ufffd\ufffd\u0010" "\u0102\u0123\u01a1\u01bb\u0110"
+OCASE log
+wi 407 = ok
+fl = ok
+war x6efa31 1 -1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 3"
+RESULT "407;"
+OCASE bytes
+war x5fba 3 1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 1) out of bounds for length 2"
+wa xdc = ok
+RESULT xdc 1 "\ufffd" "\u01dc"
+OCASE log
+wi 7 = ok
+wa xf99b0128 = ok
+wi 207 = ok
+RESULT "7;-7;-101;1;40;207;"
+OCASE bytes
+reset
+wa xe84cd1 = ok
+RESULT xe84cd1 3 "\ufffdL\ufffd" "\u01e8\u014c\u01d1"
+OCASE log
+wa x01 = ok
+fl = ok
+wa x3d = ok
+fl = ok
+war x 2 1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 1) out of bounds for length 0"
+RESULT "1;61;"
+OCASE bytes
+war xfeeee9 1 3 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 3) out of bounds for length 3"
+wa x148a = ok
+wa x = ok
+fl = ok
+reset
+RESULT x 0 "" ""
+OCASE log
+fl = ok
+war x135a 3 4 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 4) out of bounds for length 2"
+fl = ok
+wi 7 = ok
+wa x = ok
+war x20ed5ee7 -1 4 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 4) out of bounds for length 4"
+RESULT "7;"
+OCASE bytes
+wa x6c1e47 = ok
+RESULT x6c1e47 3 "l\u001eG" "\u016c\u011e\u0147"
+OCASE log
+fl = ok
+RESULT ""
+OCASE bytes
+wa x07 = ok
+war xa0721aa9 4 2 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 4"
+war xebe8b2 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 3"
+war xfd 2 4 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 4) out of bounds for length 1"
+wa x29956db6 = ok
+RESULT x0729956db6 5 "\u0007)\ufffdm\ufffd" "\u0107\u0129\u0195\u016d\u01b6"
+OCASE log
+wi 207 = ok
+wa x = ok
+wa x6e = ok
+wa x = ok
+war x 3 1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 1) out of bounds for length 0"
+war xcec51890 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 4"
+RESULT "207;110;"
+OCASE bytes
+wi 107 = ok
+fl = ok
+wi 407 = ok
+fl = ok
+RESULT x6b97 2 "k\ufffd" "\u016b\u0197"
+OCASE log
+war xdead56a3 -1 1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 1) out of bounds for length 4"
+wa x = ok
+wa x2a = ok
+wi -93 = ok
+wa xb554e160 = ok
+RESULT "42;-93;-75;84;-31;96;"
+OCASE bytes
+wi 307 = ok
+war x 4 2 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 0"
+RESULT x33 1 "3" "\u0133"
+OCASE log
+wi 107 = ok
+wa x89 = ok
+fl = ok
+wi 307 = ok
+wi 407 = ok
+fl = ok
+RESULT "107;-119;307;407;"
+OCASE bytes
+war x 3 3 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 3) out of bounds for length 0"
+wi 407 = ok
+wa xc5 = ok
+wa x = ok
+RESULT x97c5 2 "\ufffd\ufffd" "\u0197\u01c5"
+OCASE log
+fl = ok
+wa x = ok
+war x60d4 4 1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 1) out of bounds for length 2"
+war xfa13acce -1 4 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 4) out of bounds for length 4"
+wi 207 = ok
+wa x8ba3 = ok
+RESULT "207;-117;-93;"
+OCASE bytes
+wi -93 = ok
+war x54febac7 0 4 = ok
+war x4cf038 2 2 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 2) out of bounds for length 3"
+RESULT xa354febac7 5 "\ufffdT\ufffd\ufffd\ufffd" "\u01a3\u0154\u01fe\u01ba\u01c7"
+OCASE log
+wa x9aac88 = ok
+wa x98 = ok
+war x19 0 3 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 3) out of bounds for length 1"
+fl = ok
+RESULT "-102;-84;-120;-104;"
+OCASE bytes
+fl = ok
+wi 307 = ok
+wi 307 = ok
+reset
+war x 1 -1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 0"
+RESULT x 0 "" ""
+OCASE log
+wa x5eea458b = ok
+RESULT "94;-22;69;-117;"
+OCASE bytes
+reset
+RESULT x 0 "" ""
+OCASE log
+war x 2 0 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 0) out of bounds for length 0"
+war xd71f36 2 2 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 2) out of bounds for length 3"
+wa xd377fa20 = ok
+war x43e83092 -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 4"
+RESULT "-45;119;-6;32;"
+OCASE bytes
+reset
+wi 207 = ok
+fl = ok
+wa x9ce721c1 = ok
+war xf73e 0 4 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 4) out of bounds for length 2"
+RESULT xcf9ce721c1 5 "\u03dc\ufffd!\ufffd" "\u01cf\u019c\u01e7\u0121\u01c1"
+OCASE log
+fl = ok
+fl = ok
+wi 207 = ok
+fl = ok
+wi -93 = ok
+RESULT "207;-93;"
+OCASE bytes
+wa x8028660e = ok
+wi 207 = ok
+RESULT x8028660ecf 5 "\ufffd(f\u000e\ufffd" "\u0180\u0128\u0166\u010e\u01cf"
+OCASE log
+fl = ok
+wa x8a3310f5 = ok
+RESULT "-118;51;16;-11;"
+OCASE bytes
+fl = ok
+war x27e7b59d 1 -1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 4"
+wi 407 = ok
+RESULT x97 1 "\ufffd" "\u0197"
+OCASE log
+wi 207 = ok
+wi -93 = ok
+wa x2f47d584 = ok
+war x 2 0 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 0) out of bounds for length 0"
+RESULT "207;-93;47;71;-43;-124;"
+OCASE bytes
+fl = ok
+war x34 1 4 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 4) out of bounds for length 1"
+RESULT x 0 "" ""
+OCASE log
+wi 307 = ok
+RESULT "307;"
+OCASE bytes
+wa x = ok
+fl = ok
+reset
+wa x0fe6 = ok
+reset
+RESULT x 0 "" ""
+OCASE log
+fl = ok
+wa xb9 = ok
+war xf7 4 4 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 4) out of bounds for length 1"
+RESULT "-71;"
+OCASE bytes
+war x2761 -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 2"
+fl = ok
+war x6f5c3962 4 2 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 4"
+reset
+war x -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 0"
+fl = ok
+RESULT x 0 "" ""
+OCASE log
+fl = ok
+wa x923b = ok
+RESULT "-110;59;"
+OCASE bytes
+reset
+wi 207 = ok
+fl = ok
+wi 307 = ok
+fl = ok
+wi 407 = ok
+RESULT xcf3397 3 "\ufffd3\ufffd" "\u01cf\u0133\u0197"
+OCASE log
+war xded5cd24 3 1 = ok
+RESULT "36;"
+OCASE bytes
+fl = ok
+wi 307 = ok
+war x 2 -1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + -1) out of bounds for length 0"
+fl = ok
+RESULT x33 1 "3" "\u0133"
+OCASE log
+war x 0 4 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 4) out of bounds for length 0"
+war x066cac 4 3 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 3) out of bounds for length 3"
+RESULT ""
+OCASE bytes
+wi 207 = ok
+wi 7 = ok
+wi 407 = ok
+war x 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 0"
+wa x2427e543 = ok
+RESULT xcf07972427e543 7 "\ufffd\u0007\ufffd$'\ufffdC" "\u01cf\u0107\u0197\u0124\u0127\u01e5\u0143"
+OCASE log
+fl = ok
+wi 7 = ok
+fl = ok
+war xeef35c76 2 3 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 3) out of bounds for length 4"
+RESULT "7;"
+OCASE bytes
+wa x14ac6588 = ok
+reset
+RESULT x 0 "" ""
+OCASE log
+war x28 1 2 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 2) out of bounds for length 1"
+war x07 -1 1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 1) out of bounds for length 1"
+fl = ok
+fl = ok
+fl = ok
+wi 7 = ok
+RESULT "7;"
+OCASE bytes
+fl = ok
+wi 7 = ok
+wi 307 = ok
+war x8e5e8079 0 1 = ok
+fl = ok
+RESULT x07338e 3 "\u00073\ufffd" "\u0107\u0133\u018e"
+OCASE log
+war x3983 4 -1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + -1) out of bounds for length 2"
+war x 4 0 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 0) out of bounds for length 0"
+wi 307 = ok
+war x5ecc81 1 1 = ok
+wi -93 = ok
+fl = ok
+RESULT "307;-52;-93;"
+OCASE bytes
+wa x0dd3 = ok
+war xead996 3 1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 1) out of bounds for length 3"
+RESULT x0dd3 2 "\u000d\ufffd" "\u010d\u01d3"
+OCASE log
+wa x633b1e82 = ok
+war x9057da4b 0 1 = ok
+fl = ok
+war xf4 0 4 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 4) out of bounds for length 1"
+wi 207 = ok
+wa xc9b464be = ok
+RESULT "99;59;30;-126;-112;207;-55;-76;100;-66;"
+OCASE bytes
+wa x5bf5be = ok
+reset
+RESULT x 0 "" ""
+OCASE log
+fl = ok
+wi 107 = ok
+wi 107 = ok
+war xb7fbc8be 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 4"
+wa x15be48a5 = ok
+RESULT "107;107;21;-66;72;-91;"
+OCASE bytes
+reset
+wi -93 = ok
+wi 7 = ok
+wi 407 = ok
+RESULT xa30797 3 "\ufffd\u0007\ufffd" "\u01a3\u0107\u0197"
+OCASE log
+war x7cd9 3 3 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 3) out of bounds for length 2"
+war x75 2 1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 1) out of bounds for length 1"
+wa x132dc266 = ok
+war x82 -1 3 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 3) out of bounds for length 1"
+RESULT "19;45;-62;102;"
+OCASE bytes
+wi 7 = ok
+war x 3 1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 1) out of bounds for length 0"
+wi -93 = ok
+wi 207 = ok
+fl = ok
+RESULT x07a3cf 3 "\u0007\ufffd\ufffd" "\u0107\u01a3\u01cf"
+OCASE log
+fl = ok
+war x 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 0"
+wi -93 = ok
+RESULT "-93;"
+OCASE bytes
+wi 407 = ok
+wi 207 = ok
+wi -93 = ok
+war x6f5c 2 0 = ok
+RESULT x97cfa3 3 "\ufffd\u03e3" "\u0197\u01cf\u01a3"
+OCASE log
+war x77f6 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 2"
+wa x = ok
+war xbe 2 0 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 0) out of bounds for length 1"
+RESULT ""
+OCASE bytes
+reset
+fl = ok
+wa x30 = ok
+wa xc3ee9bde = ok
+wa x4ef367 = ok
+wi 7 = ok
+RESULT x30c3ee9bde4ef36707 9 "0\ufffd\ufffd\ufffdN\ufffdg\u0007" "\u0130\u01c3\u01ee\u019b\u01de\u014e\u01f3\u0167\u0107"
+OCASE log
+wa xe2ae = ok
+fl = ok
+fl = ok
+war x27 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 1"
+RESULT "-30;-82;"
+OCASE bytes
+war xfd330f81 3 3 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 3) out of bounds for length 4"
+war x 2 2 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 2) out of bounds for length 0"
+wa x = ok
+war x 3 2 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 2) out of bounds for length 0"
+reset
+wi 107 = ok
+RESULT x6b 1 "k" "\u016b"
+OCASE log
+fl = ok
+wa xc2a61ac3 = ok
+RESULT "-62;-90;26;-61;"
+OCASE bytes
+war x25c4d02b 0 4 = ok
+wi -93 = ok
+wi -93 = ok
+wa x84c601 = ok
+war x3999ef 1 1 = ok
+RESULT x25c4d02ba3a384c60199 10 "%\ufffd\ufffd+\ufffd\ufffd\ufffd\ufffd\u0001\ufffd" "\u0125\u01c4\u01d0\u012b\u01a3\u01a3\u0184\u01c6\u0101\u0199"
+OCASE log
+wa xfe677c = ok
+wi 407 = ok
+fl = ok
+RESULT "-2;103;124;407;"
+OCASE bytes
+wi -93 = ok
+wi 407 = ok
+RESULT xa397 2 "\ufffd\ufffd" "\u01a3\u0197"
+OCASE log
+wa xdf61 = ok
+RESULT "-33;97;"
+OCASE bytes
+fl = ok
+RESULT x 0 "" ""
+OCASE log
+war x 2 0 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 0) out of bounds for length 0"
+war x -1 2 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 2) out of bounds for length 0"
+war xfbfb614f 1 1 = ok
+wa x77 = ok
+war xb06c 4 4 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 4) out of bounds for length 2"
+fl = ok
+RESULT "-5;119;"
+OCASE bytes
+reset
+wi -93 = ok
+wi 107 = ok
+RESULT xa36b 2 "\ufffdk" "\u01a3\u016b"
+OCASE log
+fl = ok
+war x070ea8 -1 2 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 2) out of bounds for length 3"
+fl = ok
+fl = ok
+RESULT ""
+OCASE bytes
+reset
+wi 107 = ok
+RESULT x6b 1 "k" "\u016b"
+OCASE log
+wa x009973 = ok
+RESULT "0;-103;115;"
+OCASE bytes
+wa x7594f61e = ok
+wi 107 = ok
+war x 4 0 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 0) out of bounds for length 0"
+fl = ok
+wa x73 = ok
+RESULT x7594f61e6b73 6 "u\ufffd\ufffd\u001eks" "\u0175\u0194\u01f6\u011e\u016b\u0173"
+OCASE log
+wi 207 = ok
+fl = ok
+fl = ok
+war xe5 3 2 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 2) out of bounds for length 1"
+wi 107 = ok
+fl = ok
+RESULT "207;107;"
+OCASE bytes
+fl = ok
+fl = ok
+war x 2 3 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 3) out of bounds for length 0"
+wi 107 = ok
+wi 207 = ok
+wi 407 = ok
+RESULT x6bcf97 3 "k\u03d7" "\u016b\u01cf\u0197"
+OCASE log
+wi 207 = ok
+wi 207 = ok
+wa xa48b = ok
+wa x6f = ok
+wa xe6 = ok
+RESULT "207;207;-92;-117;111;-26;"
+OCASE bytes
+war x34 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 1"
+RESULT x 0 "" ""
+OCASE log
+fl = ok
+wi 107 = ok
+war x2f8428 -1 2 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 2) out of bounds for length 3"
+RESULT "107;"
+OCASE bytes
+wi -93 = ok
+war x2a33 4 1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 1) out of bounds for length 2"
+fl = ok
+wa x = ok
+RESULT xa3 1 "\ufffd" "\u01a3"
+OCASE log
+fl = ok
+RESULT ""
+OCASE bytes
+wa x = ok
+wi 207 = ok
+RESULT xcf 1 "\ufffd" "\u01cf"
+OCASE log
+wi 7 = ok
+fl = ok
+wa xce2f = ok
+RESULT "7;-50;47;"
+OCASE bytes
+wi 207 = ok
+war xb9 1 1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 1) out of bounds for length 1"
+RESULT xcf 1 "\ufffd" "\u01cf"
+OCASE log
+war x71 3 4 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 4) out of bounds for length 1"
+war x9fb594 2 1 = ok
+fl = ok
+war x 0 4 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 4) out of bounds for length 0"
+fl = ok
+RESULT "-108;"
+OCASE bytes
+wa xedf4 = ok
+war xc8caacae 0 1 = ok
+war x5d 0 1 = ok
+RESULT xedf4c85d 4 "\ufffd\ufffd\ufffd]" "\u01ed\u01f4\u01c8\u015d"
+OCASE log
+wi 207 = ok
+wi 207 = ok
+wi 7 = ok
+wa xfb = ok
+wa x7d = ok
+RESULT "207;207;7;-5;125;"
+OCASE bytes
+wa x3596f7dc = ok
+war x36dac7 0 2 = ok
+reset
+wa x = ok
+reset
+war x55 2 1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 1) out of bounds for length 1"
+RESULT x 0 "" ""
+OCASE log
+war xc749 1 1 = ok
+wa x4a = ok
+wi 107 = ok
+fl = ok
+wi -93 = ok
+fl = ok
+RESULT "73;74;107;-93;"
+OCASE bytes
+wi 207 = ok
+war x9b 2 -1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + -1) out of bounds for length 1"
+wi 307 = ok
+wi 207 = ok
+fl = ok
+RESULT xcf33cf 3 "\ufffd3\ufffd" "\u01cf\u0133\u01cf"
+OCASE log
+war x5a3d64 2 2 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 2) out of bounds for length 3"
+fl = ok
+fl = ok
+war x944c -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 2"
+war xeecc34 1 1 = ok
+fl = ok
+RESULT "-52;"
+OCASE bytes
+war x88e57eca 2 4 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 4) out of bounds for length 4"
+RESULT x 0 "" ""
+OCASE log
+war x2d 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 1"
+war x5d3e 0 3 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 3) out of bounds for length 2"
+wi -93 = ok
+fl = ok
+RESULT "-93;"
+OCASE bytes
+wa xd9b8 = ok
+wi -93 = ok
+fl = ok
+war x55 2 1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 1) out of bounds for length 1"
+wi 307 = ok
+RESULT xd9b8a333 4 "\u0678\ufffd3" "\u01d9\u01b8\u01a3\u0133"
+OCASE log
+wi 7 = ok
+RESULT "7;"
+OCASE bytes
+wi 7 = ok
+RESULT x07 1 "\u0007" "\u0107"
+OCASE log
+wa x0d935f = ok
+RESULT "13;-109;95;"
+OCASE bytes
+war x 1 2 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 2) out of bounds for length 0"
+war x7b3df1f8 0 1 = ok
+RESULT x7b 1 "{" "\u017b"
+OCASE log
+fl = ok
+war x1e5441a1 4 -1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + -1) out of bounds for length 4"
+fl = ok
+fl = ok
+fl = ok
+wi 307 = ok
+RESULT "307;"
+OCASE bytes
+wi 307 = ok
+RESULT x33 1 "3" "\u0133"
+OCASE log
+war x379d 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 2"
+RESULT ""
+OCASE bytes
+war xca1fac 3 1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 1) out of bounds for length 3"
+wa xa156 = ok
+wi 107 = ok
+reset
+wa x = ok
+wi 407 = ok
+RESULT x97 1 "\ufffd" "\u0197"
+OCASE log
+war x 1 -1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 0"
+wa x7d4e7d18 = ok
+fl = ok
+wi 107 = ok
+wa x9b29 = ok
+RESULT "125;78;125;24;107;-101;41;"
+OCASE bytes
+wa x17480b = ok
+RESULT x17480b 3 "\u0017H\u000b" "\u0117\u0148\u010b"
+OCASE log
+fl = ok
+RESULT ""
+OCASE bytes
+wi 7 = ok
+war xd1b8c5 2 1 = ok
+wi 307 = ok
+war x746b29 3 2 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 2) out of bounds for length 3"
+war x 2 2 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 2) out of bounds for length 0"
+RESULT x07c533 3 "\u0007\ufffd3" "\u0107\u01c5\u0133"
+OCASE log
+wi 307 = ok
+wa x671c = ok
+fl = ok
+war xb6f780 1 0 = ok
+war x 3 4 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 4) out of bounds for length 0"
+RESULT "307;103;28;"
+OCASE bytes
+war x97 0 1 = ok
+wi 107 = ok
+war x9074 0 0 = ok
+wa x = ok
+RESULT x976b 2 "\ufffdk" "\u0197\u016b"
+OCASE log
+war x2ac5 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 2"
+fl = ok
+RESULT ""
+OCASE bytes
+wi 107 = ok
+RESULT x6b 1 "k" "\u016b"
+OCASE log
+fl = ok
+wi 107 = ok
+RESULT "107;"
+OCASE bytes
+reset
+wa xa891282e = ok
+fl = ok
+wi 7 = ok
+wi 407 = ok
+RESULT xa891282e0797 6 "\ufffd\ufffd(.\u0007\ufffd" "\u01a8\u0191\u0128\u012e\u0107\u0197"
+OCASE log
+war xfd064d10 4 2 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 4"
+fl = ok
+fl = ok
+RESULT ""
+OCASE bytes
+wa x = ok
+wi 107 = ok
+wa x636a = ok
+wa x47c6 = ok
+fl = ok
+RESULT x6b636a47c6 5 "kcjG\ufffd" "\u016b\u0163\u016a\u0147\u01c6"
+OCASE log
+fl = ok
+fl = ok
+fl = ok
+wi 407 = ok
+wa x = ok
+RESULT "407;"
+OCASE bytes
+wi 407 = ok
+fl = ok
+war x -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 0"
+wa x1f = ok
+RESULT x971f 2 "\ufffd\u001f" "\u0197\u011f"
+OCASE log
+wa x21 = ok
+RESULT "33;"
+OCASE bytes
+wa x5d9e = ok
+wa xb2ef = ok
+wa xcbb16a = ok
+RESULT x5d9eb2efcbb16a 7 "]\ufffd\ufffd\ufffd\u02f1j" "\u015d\u019e\u01b2\u01ef\u01cb\u01b1\u016a"
+OCASE log
+fl = ok
+wi 7 = ok
+RESULT "7;"
+OCASE bytes
+fl = ok
+wa x35 = ok
+reset
+fl = ok
+wa xd296ad = ok
+wi 207 = ok
+RESULT xd296adcf 4 "\u0496\ufffd\ufffd" "\u01d2\u0196\u01ad\u01cf"
+OCASE log
+wi 307 = ok
+war x24ff361a 2 -1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + -1) out of bounds for length 4"
+RESULT "307;"
+OCASE bytes
+wi -93 = ok
+RESULT xa3 1 "\ufffd" "\u01a3"
+OCASE log
+wi 307 = ok
+RESULT "307;"
+OCASE bytes
+wi 307 = ok
+wa xb3ef = ok
+fl = ok
+wi 307 = ok
+war x -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 0"
+reset
+RESULT x 0 "" ""
+OCASE log
+wi 7 = ok
+fl = ok
+fl = ok
+wi 307 = ok
+RESULT "7;307;"
+OCASE bytes
+wa xa1361187 = ok
+war xbf6e 4 -1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + -1) out of bounds for length 2"
+reset
+RESULT x 0 "" ""
+OCASE log
+wi 107 = ok
+war x60c3 2 3 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 3) out of bounds for length 2"
+RESULT "107;"
+OCASE bytes
+reset
+RESULT x 0 "" ""
+OCASE log
+fl = ok
+RESULT ""
+OCASE bytes
+wi 107 = ok
+fl = ok
+wi 7 = ok
+wa x6d3c0deb = ok
+wa x828e = ok
+RESULT x6b076d3c0deb828e 8 "k\u0007m<\u000d\ub08e" "\u016b\u0107\u016d\u013c\u010d\u01eb\u0182\u018e"
+OCASE log
+wi 107 = ok
+fl = ok
+wi 307 = ok
+wa x = ok
+RESULT "107;307;"
+OCASE bytes
+war x661373 4 4 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 4) out of bounds for length 3"
+wa x = ok
+wi 7 = ok
+wi 407 = ok
+war xeb 0 2 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 2) out of bounds for length 1"
+RESULT x0797 2 "\u0007\ufffd" "\u0107\u0197"
+OCASE log
+wa x = ok
+war x 1 0 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 0) out of bounds for length 0"
+wa x = ok
+wi 107 = ok
+wa x74c5 = ok
+wi 7 = ok
+RESULT "107;116;-59;7;"
+OCASE bytes
+wa x238a = ok
+fl = ok
+wi 207 = ok
+RESULT x238acf 3 "#\ufffd\ufffd" "\u0123\u018a\u01cf"
+OCASE log
+fl = ok
+war x8502 -1 3 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 3) out of bounds for length 2"
+wa x815bbeb1 = ok
+RESULT "-127;91;-66;-79;"
+OCASE bytes
+wi 307 = ok
+war x 2 -1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + -1) out of bounds for length 0"
+wa x99f8 = ok
+reset
+wa x = ok
+RESULT x 0 "" ""
+OCASE log
+wa x67ca25 = ok
+fl = ok
+wa x = ok
+wi 207 = ok
+fl = ok
+wi 207 = ok
+RESULT "103;-54;37;207;207;"
+OCASE bytes
+wi 407 = ok
+wa xa9c5 = ok
+war x 1 4 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 4) out of bounds for length 0"
+fl = ok
+RESULT x97a9c5 3 "\ufffd\ufffd\ufffd" "\u0197\u01a9\u01c5"
+OCASE log
+wi -93 = ok
+RESULT "-93;"
+OCASE bytes
+war x3c0b8d 2 1 = ok
+war xeba7026e 0 2 = ok
+wa x64f1 = ok
+wi 7 = ok
+fl = ok
+RESULT x8deba764f107 6 "\ufffd\ufffdd\ufffd\u0007" "\u018d\u01eb\u01a7\u0164\u01f1\u0107"
+OCASE log
+wa x0b = ok
+wa x4b5b9f = ok
+wi 107 = ok
+wa xef = ok
+wi 107 = ok
+RESULT "11;75;91;-97;107;-17;107;"
+OCASE bytes
+wi 407 = ok
+war x1c 1 1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 1) out of bounds for length 1"
+wi 207 = ok
+war x 2 0 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 0) out of bounds for length 0"
+RESULT x97cf 2 "\ufffd\ufffd" "\u0197\u01cf"
+OCASE log
+fl = ok
+fl = ok
+RESULT ""
+OCASE bytes
+reset
+wa xa24a5dfe = ok
+wa x6f7f46 = ok
+war x81 -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 1"
+RESULT xa24a5dfe6f7f46 7 "\ufffdJ]\ufffdo\u007fF" "\u01a2\u014a\u015d\u01fe\u016f\u017f\u0146"
+OCASE log
+war x30eb 2 4 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 4) out of bounds for length 2"
+fl = ok
+war x5e 2 3 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 3) out of bounds for length 1"
+RESULT ""
+OCASE bytes
+fl = ok
+war x 3 0 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 0) out of bounds for length 0"
+war x 0 0 = ok
+reset
+reset
+reset
+RESULT x 0 "" ""
+OCASE log
+war x55 3 3 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 3) out of bounds for length 1"
+wa x = ok
+wi 207 = ok
+wi 7 = ok
+wa xb379f5fe = ok
+RESULT "207;7;-77;121;-11;-2;"
+OCASE bytes
+war xcf4df0 4 -1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + -1) out of bounds for length 3"
+wa xba355364 = ok
+RESULT xba355364 4 "\ufffd5Sd" "\u01ba\u0135\u0153\u0164"
+OCASE log
+wi 107 = ok
+war xc323 0 1 = ok
+fl = ok
+wi -93 = ok
+RESULT "107;-61;-93;"
+OCASE bytes
+wa x7e5c084a = ok
+RESULT x7e5c084a 4 "~\u005c\u0008J" "\u017e\u015c\u0108\u014a"
+OCASE log
+fl = ok
+RESULT ""
+OCASE bytes
+war xff8ba4 3 3 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 3) out of bounds for length 3"
+fl = ok
+war x 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 0"
+fl = ok
+wi 207 = ok
+RESULT xcf 1 "\ufffd" "\u01cf"
+OCASE log
+war x53 0 1 = ok
+RESULT "83;"
+OCASE bytes
+war x 2 3 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 3) out of bounds for length 0"
+fl = ok
+wi 407 = ok
+wi -93 = ok
+RESULT x97a3 2 "\ufffd\ufffd" "\u0197\u01a3"
+OCASE log
+war x 2 3 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 3) out of bounds for length 0"
+wi 107 = ok
+fl = ok
+war x 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 0"
+RESULT "107;"
+OCASE bytes
+war x3c -1 4 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 4) out of bounds for length 1"
+wi -93 = ok
+fl = ok
+war x8f6e5bf5 4 4 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 4) out of bounds for length 4"
+RESULT xa3 1 "\ufffd" "\u01a3"
+OCASE log
+war xec6f 0 1 = ok
+wa x8b = ok
+war x 2 0 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 0) out of bounds for length 0"
+RESULT "-20;-117;"
+OCASE bytes
+wa x1e5e3b5c = ok
+war x0e7149 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 3"
+wi -93 = ok
+RESULT x1e5e3b5ca3 5 "\u001e^;\u005c\ufffd" "\u011e\u015e\u013b\u015c\u01a3"
+OCASE log
+war xae8d01 0 0 = ok
+wi 407 = ok
+RESULT "407;"
+OCASE bytes
+war x 0 2 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + 2) out of bounds for length 0"
+RESULT x 0 "" ""
+OCASE log
+fl = ok
+wi 107 = ok
+wa x4129 = ok
+war x433e11 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 3"
+war x3d78 3 3 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 3) out of bounds for length 2"
+RESULT "107;65;41;"
+OCASE bytes
+fl = ok
+war xfa 3 1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 1) out of bounds for length 1"
+war x8765 2 0 = ok
+war x557720 0 3 = ok
+wi 207 = ok
+RESULT x557720cf 4 "Uw \ufffd" "\u0155\u0177\u0120\u01cf"
+OCASE log
+war x 4 3 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 3) out of bounds for length 0"
+wa xf0173930 = ok
+wi 407 = ok
+RESULT "-16;23;57;48;407;"
+OCASE bytes
+war xa52a 1 0 = ok
+reset
+reset
+RESULT x 0 "" ""
+OCASE log
+wa x7abe3f4d = ok
+wi -93 = ok
+wi 107 = ok
+wi 207 = ok
+fl = ok
+war x92 -1 4 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 4) out of bounds for length 1"
+RESULT "122;-66;63;77;-93;107;207;"
+OCASE bytes
+wa xb4 = ok
+wi 407 = ok
+wi 307 = ok
+RESULT xb49733 3 "\ufffd\ufffd3" "\u01b4\u0197\u0133"
+OCASE log
+wi 107 = ok
+fl = ok
+RESULT "107;"
+OCASE bytes
+wa x5f35 = ok
+reset
+wa x4a26c10d = ok
+RESULT x4a26c10d 4 "J&\ufffd\u000d" "\u014a\u0126\u01c1\u010d"
+OCASE log
+war xb9f3 1 -1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 2"
+wi 407 = ok
+RESULT "407;"
+ICASE 0 1 xdfdad6ab90eda639 3 0
+r = 0
+rar 2 2 -1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + -1) out of bounds for length 2"
+av = 0
+s 6 = 0
+r = -1
+rar 5 5 3 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + 3) out of bounds for length 5"
+END
+ICASE 1 5 x 0 1
+R = ok
+s -3 = 0
+R = ok
+s 3 = 0
+R = ok
+R = ok
+END
+ICASE 2 0 xbf011bc5e39507dbe1 3 12
+m = ok true
+r = 197
+s -3 = 0
+R = ok
+END
+ICASE 0 7 x9f5af33da5f0969c09c0fe 3 10
+rar 4 2 2 = 2 x00000025
+r = 74
+av = 0
+r = 111
+r = 148
+rar 2 2 1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 1) out of bounds for length 2"
+av = 0
+END
+ICASE 1 12 xf159 2 9
+R = ok
+R = ok
+r = 241
+END
+ICASE 2 1 x973c99f33f70 3 8
+r = 243
+ra 5 = 2 x3f70000000
+m = ok true
+r = -1
+R = ok
+av = 0
+m = ok true
+END
+ICASE 0 -12 x9d1c049a864622 0 10
+r = 0
+rar 3 2 -1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + -1) out of bounds for length 3"
+R = !java.io.IOException "mark/reset not supported"
+R = !java.io.IOException "mark/reset not supported"
+rar 2 1 2 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 2) out of bounds for length 2"
+r = 37
+r = 74
+r = 111
+END
+ICASE 1 7 x3935126b046d30258d78ad 3 3
+rar 5 5 0 = 0 x0000000000
+ra 3 = 3 x393512
+m = ok true
+END
+ICASE 2 -12 xda1680f0 2 11
+rar 0 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 0"
+END
+ICASE 0 14 xbd8995c52e8033083d 1 2
+r = 0
+END
+ICASE 1 0 x390820dc500b 2 1
+rar 4 0 4 = 4 x390820dc
+s 3 = 2
+s 0 = 0
+s 12 = 0
+END
+ICASE 2 11 xea5a24e9f41eb9df49dceb 1 2
+R = ok
+ra 0 = 0 x
+m = ok true
+r = 90
+av = 1
+m = ok true
+END
+ICASE 0 6 xe5 0 -1
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 0 x6dc8b54c 1 9
+rar 5 -1 1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 1) out of bounds for length 5"
+m = ok true
+s 6 = 4
+m = ok true
+av = 0
+END
+ICASE 2 6 x5933311420 1 12
+av = 4
+ra 4 = 4 x33311420
+R = ok
+r = 51
+m = ok true
+r = 49
+END
+ICASE 0 1 x64f151a2e5fd6386 1 1
+av = 0
+av = 0
+m = ok false
+r = 0
+END
+ICASE 1 -1 xaeed 0 1
+r = 174
+rar 1 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 1"
+rar 1 -1 1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 1) out of bounds for length 1"
+r = 237
+r = -1
+END
+ICASE 2 4 x79018f2c 3 4
+rar 3 2 -1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + -1) out of bounds for length 3"
+rar 0 -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 0"
+r = 44
+av = 0
+s -3 = 0
+m = ok true
+r = -1
+END
+ICASE 0 9 x260a4dd6309f85 3 1
+r = 0
+rar 0 -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 0"
+m = ok false
+R = !java.io.IOException "mark/reset not supported"
+av = 0
+r = 37
+r = 74
+r = 111
+END
+ICASE 1 2 x65 0 9
+r = 101
+rar 3 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 3"
+rar 4 0 2 = -1 x00000000
+r = -1
+s 0 = 0
+r = -1
+r = -1
+r = -1
+END
+ICASE 2 12 xcc538d4dd29ea46a 2 7
+rar 5 1 3 = 3 x008d4dd200
+r = 158
+m = ok true
+m = ok true
+END
+ICASE 0 4 x1d0f1a559af30609 1 4
+av = 0
+s 3 = 3
+av = 0
+END
+ICASE 1 8 x18dd8e 3 2
+m = ok true
+ra 3 = 3 x18dd8e
+s 0 = 0
+END
+ICASE 2 10 x2531d3d5074c391a7b42 2 -1
+r = -1
+m = ok true
+av = -1
+r = -1
+rar 1 -1 1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 1) out of bounds for length 1"
+r = -1
+END
+ICASE 0 4 x9e54f12b 2 5
+s 3 = 3
+R = !java.io.IOException "mark/reset not supported"
+r = 111
+s 0 = 0
+rar 5 3 4 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 4) out of bounds for length 5"
+m = ok false
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 8 xc7c3a79ae827a65ed20c 2 11
+R = ok
+rar 5 0 5 = 5 xc7c3a79ae8
+r = 39
+END
+ICASE 2 4 xda7ee93e6d1d 3 4
+r = 62
+END
+ICASE 0 0 xa224e596f6 2 7
+rar 1 0 1 = -1 x00
+r = -1
+r = -1
+R = !java.io.IOException "mark/reset not supported"
+m = ok false
+END
+ICASE 1 14 xde20fb427651a4 0 12
+ra 4 = 4 xde20fb42
+av = 3
+END
+ICASE 2 1 x4c850124cf14a6afa31724 1 2
+s 3 = 2
+r = -1
+m = ok true
+r = -1
+m = ok true
+rar 4 -1 4 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 4) out of bounds for length 4"
+END
+ICASE 0 13 x3d3ef02e36bb7e 1 8
+av = 0
+R = !java.io.IOException "mark/reset not supported"
+ra 4 = 4 x00254a6f
+av = 0
+R = !java.io.IOException "mark/reset not supported"
+m = ok false
+ra 5 = 5 x94b9de0328
+END
+ICASE 1 1 x67bccbb8dcc0 3 9
+R = ok
+END
+ICASE 2 -8 x3dadcc7406f8 3 11
+ra 1 = 1 x74
+END
+ICASE 0 9 x47db0650a575c8869e 3 7
+rar 3 2 3 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 3) out of bounds for length 3"
+rar 5 1 0 = 0 x0000000000
+r = 0
+ra 0 = 0 x
+r = 37
+END
+ICASE 1 -14 xff4fca37 0 8
+r = 255
+rar 1 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 1"
+rar 5 3 5 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 5) out of bounds for length 5"
+END
+ICASE 2 0 xba2c805c 1 0
+r = -1
+av = 0
+m = ok true
+av = 0
+r = -1
+END
+ICASE 0 11 x78d33c5d71a15945f7ebd9 0 10
+rar 3 2 3 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 3) out of bounds for length 3"
+ra 1 = 1 x00
+rar 4 0 2 = 2 x254a0000
+ra 4 = 4 x6f94b9de
+av = 0
+s 6 = 4
+END
+ICASE 1 1 x16 1 4
+ra 2 = 1 x1600
+m = ok true
+m = ok true
+av = 0
+END
+ICASE 2 4 x227cf464e7b0eadb 1 3
+ra 2 = 2 x7cf4
+r = 100
+ra 2 = -1 x0000
+rar 1 1 1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 1) out of bounds for length 1"
+r = -1
+ra 3 = -1 x000000
+END
+ICASE 0 1 xa2aff397049adbf6 2 2
+rar 2 0 2 = 1 x0000
+r = -1
+r = -1
+ra 4 = -1 x00000000
+m = ok false
+END
+ICASE 1 5 x132555138fc795 2 8
+rar 0 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 0"
+END
+ICASE 2 4 x316361ddb1e5a7 1 10
+R = ok
+r = 99
+R = ok
+END
+ICASE 0 0 x0888eb 2 0
+ra 4 = -1 x00000000
+R = !java.io.IOException "mark/reset not supported"
+ra 1 = -1 x00
+s -3 = 0
+END
+ICASE 1 0 x3a351c866dfdd7d7 3 12
+ra 5 = 5 x3a351c866d
+r = 253
+rar 3 1 3 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 3) out of bounds for length 3"
+r = 215
+s 0 = 0
+m = ok true
+r = 215
+r = -1
+END
+ICASE 2 4 x5216ea 2 2
+r = 234
+r = -1
+r = -1
+END
+ICASE 0 0 x83ed198bfce0 3 11
+R = !java.io.IOException "mark/reset not supported"
+rar 3 2 -1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + -1) out of bounds for length 3"
+r = -1
+s -3 = 0
+END
+ICASE 1 8 xfe6adf322677f8 2 3
+r = 254
+ra 3 = 3 x6adf32
+s 0 = 0
+ra 2 = 2 x2677
+R = ok
+R = ok
+ra 0 = 0 x
+END
+ICASE 2 4 x91fde9 2 2
+rar 2 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 2"
+r = 233
+rar 1 1 0 = -1 x00
+ra 1 = -1 x00
+m = ok true
+av = 0
+m = ok true
+END
+ICASE 0 7 x4e795958abc1 1 5
+m = ok false
+av = 0
+rar 3 2 0 = 0 x000000
+r = 0
+r = 37
+rar 0 0 0 = 0 x
+s 6 = 5
+END
+ICASE 1 6 x18c7153abe94 1 10
+r = 24
+r = 199
+R = ok
+rar 3 -1 2 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 2) out of bounds for length 3"
+r = 24
+ra 1 = 1 xc7
+r = 21
+rar 1 0 1 = 1 x3a
+END
+ICASE 2 0 xc6a02589809a0a30 0 10
+r = 198
+av = 7
+R = ok
+END
+ICASE 0 -2 x6f7c 2 -1
+R = !java.io.IOException "mark/reset not supported"
+av = 0
+s 0 = 0
+s -3 = 0
+rar 5 0 5 = 2 x0025000000
+r = -1
+rar 4 0 3 = -1 x00000000
+rar 0 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 0"
+END
+ICASE 1 4 x 0 2
+r = -1
+r = -1
+ra 0 = -1 x
+END
+ICASE 2 0 x 0 12
+m = ok true
+END
+ICASE 0 10 x2f68 2 1
+r = 0
+m = ok false
+ra 1 = 1 x25
+r = 74
+r = 111
+m = ok false
+r = 148
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 13 x7c8622 0 5
+s 3 = 3
+s -3 = 0
+END
+ICASE 2 12 x1a0b7abaac456197 1 2
+r = 11
+END
+ICASE 0 14 x7a724509 2 4
+r = 0
+R = !java.io.IOException "mark/reset not supported"
+ra 3 = 3 x254a6f
+av = 0
+R = !java.io.IOException "mark/reset not supported"
+r = 148
+END
+ICASE 1 2 x87 1 11
+R = ok
+m = ok true
+s -3 = 0
+END
+ICASE 2 -10 xd5c63e203f82ed603f 1 4
+R = ok
+s 9 = 4
+rar 5 5 4 = !java.lang.IndexOutOfBoundsException "Range [5, 5 + 4) out of bounds for length 5"
+m = ok true
+r = -1
+r = -1
+END
+ICASE 0 3 xdf3cbf21306ad9 0 3
+ra 5 = 3 x00254a0000
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 -1 xa126b7a04f50a7213c 0 5
+R = ok
+ra 2 = 2 xa126
+ra 4 = 4 xb7a04f50
+END
+ICASE 2 4 xd8b9a206c473 1 8
+rar 4 -1 4 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 4) out of bounds for length 4"
+rar 5 1 5 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 5) out of bounds for length 5"
+R = ok
+ra 4 = 4 xb9a206c4
+ra 0 = 0 x
+s 6 = 1
+av = 0
+END
+ICASE 0 8 xf2 1 4
+R = !java.io.IOException "mark/reset not supported"
+s 9 = 8
+ra 0 = 0 x
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 3 x18eb182d2fb394 2 7
+m = ok true
+ra 5 = 5 x18eb182d2f
+rar 1 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 1"
+END
+ICASE 2 4 x05339272 2 2
+s -3 = 0
+rar 2 2 1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 1) out of bounds for length 2"
+R = ok
+s 0 = 0
+END
+ICASE 0 -7 x582f58254923c398d40f38 0 10
+m = ok false
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 5 x732d602481a7dbb36d 0 12
+s -3 = 0
+r = 115
+ra 5 = 5 x2d602481a7
+s 15 = 3
+rar 2 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 2"
+END
+ICASE 2 2 x28862ad368314d 0 5
+R = ok
+R = ok
+R = ok
+s 6 = 5
+r = -1
+R = ok
+r = 40
+r = 134
+END
+ICASE 0 8 xde2642 2 3
+r = 0
+ra 2 = 2 x254a
+r = 111
+END
+ICASE 1 13 x6d6964e84bb5965cbc50 0 4
+s 0 = 0
+rar 0 -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 0"
+END
+ICASE 2 -3 xfca26f38a0e4ade0a9 3 4
+s -3 = 0
+END
+ICASE 0 5 xc09136c814a9b57a4b01 1 0
+ra 1 = 1 x00
+r = 37
+av = 0
+rar 3 2 1 = 1 x00004a
+av = 0
+rar 4 1 1 = 1 x006f0000
+av = 0
+END
+ICASE 1 13 xf6 1 9
+R = ok
+s 0 = 0
+av = 1
+R = ok
+s -3 = 0
+R = ok
+m = ok true
+av = 1
+END
+ICASE 2 -7 xc11c6e4dbf490c 0 7
+m = ok true
+END
+ICASE 0 -13 x 0 11
+r = 0
+END
+ICASE 1 14 xee584bebf376fe 3 2
+r = 238
+r = 88
+m = ok true
+ra 0 = 0 x
+r = 75
+R = ok
+r = 75
+m = ok true
+END
+ICASE 2 5 x4a4c57281aee 2 -1
+ra 3 = -1 x000000
+ra 1 = -1 x00
+m = ok true
+END
+ICASE 0 7 xefa4dceb1ef13d 1 5
+r = 0
+r = 37
+r = 74
+s 12 = 4
+r = -1
+r = -1
+rar 2 2 1 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 1) out of bounds for length 2"
+END
+ICASE 1 -9 xa0f555 1 -1
+rar 3 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 3"
+END
+ICASE 2 0 x040ad9f8a2599b 3 1
+r = 248
+m = ok true
+ra 1 = -1 x00
+END
+ICASE 0 -7 xefe46d90b895f0cc6db0 2 10
+r = 0
+rar 3 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 3"
+END
+ICASE 1 10 x 0 -1
+R = ok
+r = -1
+END
+ICASE 2 1 x9df1f556192a8c5b 1 12
+av = 7
+rar 3 1 -1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 3"
+END
+ICASE 0 2 x 0 8
+rar 5 1 2 = 2 x0000250000
+m = ok false
+r = -1
+av = 0
+av = 0
+m = ok false
+rar 0 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 0"
+END
+ICASE 1 7 x8ecdcb 1 -1
+s 0 = 0
+s 6 = 3
+av = 0
+m = ok true
+s 3 = 0
+av = 0
+av = 0
+r = -1
+END
+ICASE 2 -2 x03 1 1
+ra 3 = -1 x000000
+rar 0 -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 0"
+END
+ICASE 0 5 x 0 0
+r = 0
+ra 2 = 2 x254a
+ra 1 = 1 x6f
+END
+ICASE 1 13 xe335 0 9
+r = 227
+av = 1
+av = 1
+R = ok
+END
+ICASE 2 7 x68c092afe3ea60 0 10
+ra 4 = 4 x68c092af
+r = 227
+m = ok true
+END
+ICASE 0 7 x 0 11
+s 6 = 6
+av = 0
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 1 xf6 1 4
+r = 246
+END
+ICASE 2 -10 x972d46299ccadb95b3e1f3 2 -1
+m = ok true
+ra 0 = -1 x
+av = -1
+R = ok
+rar 2 0 1 = -1 x0000
+R = ok
+r = -1
+END
+ICASE 0 2 xc2043d84f7fa82e84d 3 4
+rar 3 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 3"
+av = 0
+rar 5 1 5 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 5) out of bounds for length 5"
+av = 0
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 4 xd63632b239 0 -1
+R = ok
+r = 214
+R = ok
+m = ok true
+END
+ICASE 2 10 x1273f916b9f7b8fc9f8aff 0 3
+m = ok true
+m = ok true
+av = 3
+rar 2 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 2"
+av = 3
+END
+ICASE 0 1 xc0aa06f2 3 11
+r = 0
+ra 0 = 0 x
+s -3 = 0
+END
+ICASE 1 -11 x92a0da238f8f 2 3
+r = 146
+ra 3 = 3 xa0da23
+r = 143
+r = 143
+r = -1
+R = ok
+s 0 = 0
+END
+ICASE 2 10 xf42aebd9 1 12
+rar 3 3 2 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 2) out of bounds for length 3"
+av = 3
+av = 3
+av = 3
+END
+ICASE 0 2 x51b1909dc54f0567 0 6
+R = !java.io.IOException "mark/reset not supported"
+r = 0
+r = 37
+R = !java.io.IOException "mark/reset not supported"
+m = ok false
+R = !java.io.IOException "mark/reset not supported"
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 4 x8426 1 0
+rar 4 2 1 = 1 x00008400
+r = 38
+m = ok true
+r = -1
+rar 3 0 3 = -1 x000000
+ra 1 = -1 x00
+R = ok
+s -3 = 0
+END
+ICASE 2 14 x 0 2
+s -3 = 0
+ra 3 = -1 x000000
+s 6 = 0
+R = ok
+END
+ICASE 0 10 x2b 1 5
+r = 0
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 -3 x4b7f8a27e74877 2 10
+rar 1 1 0 = 0 x00
+END
+ICASE 2 12 x15037ae0344e6415104a3c 0 11
+ra 3 = 3 x15037a
+ra 1 = 1 xe0
+s 9 = 7
+END
+ICASE 0 11 xe76d51 1 3
+rar 0 -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 0"
+m = ok false
+r = 0
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 12 x0bee77 1 7
+rar 0 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 0"
+END
+ICASE 2 9 x055e267e40b6be9f 0 3
+m = ok true
+av = 3
+r = 5
+av = 2
+END
+ICASE 0 4 x7353087a3c17 0 9
+rar 0 0 0 = 0 x
+r = 0
+av = 0
+r = 37
+av = 0
+r = 74
+s 9 = 1
+END
+ICASE 1 10 xeeb64afa6fd2264d 0 11
+ra 4 = 4 xeeb64afa
+r = 111
+END
+ICASE 2 11 x0226db11 0 12
+ra 5 = 4 x0226db1100
+m = ok true
+END
+ICASE 0 10 xc6f3e9 1 1
+s 6 = 6
+r = 222
+s 0 = 0
+END
+ICASE 1 5 x7eb65549329c4ff625 0 6
+R = ok
+s 9 = 9
+r = -1
+av = 0
+END
+ICASE 2 13 xd4 1 1
+av = 0
+rar 5 -1 2 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 2) out of bounds for length 5"
+rar 5 4 -1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + -1) out of bounds for length 5"
+s 3 = 0
+r = -1
+s 0 = 0
+av = 0
+s 3 = 0
+END
+ICASE 0 8 x2d92994e 2 12
+R = !java.io.IOException "mark/reset not supported"
+av = 0
+r = 0
+m = ok false
+m = ok false
+END
+ICASE 1 9 xcf90ff37da29b3bbc9b6ab 2 6
+r = 207
+END
+ICASE 2 6 x 0 7
+rar 2 0 0 = -1 x0000
+R = ok
+ra 0 = -1 x
+END
+ICASE 0 -3 x45ec72d4164716e1 1 12
+r = 0
+m = ok false
+r = 37
+END
+ICASE 1 0 xc999afa404479ad0 2 11
+r = 201
+R = ok
+m = ok true
+r = 201
+r = 153
+r = 175
+END
+ICASE 2 -11 x7885f92257a6eff42dd4 2 4
+ra 2 = 2 xf922
+END
+ICASE 0 4 x52bd49ee5ba04f3c72b2 0 0
+m = ok false
+rar 3 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 3"
+r = 0
+av = 0
+m = ok false
+s 6 = 3
+m = ok false
+ra 3 = -1 x000000
+END
+ICASE 1 4 x 0 8
+m = ok true
+r = -1
+s 0 = 0
+END
+ICASE 2 5 xc263b06c 3 5
+R = ok
+av = 1
+ra 0 = 0 x
+av = 1
+rar 5 0 4 = 1 x6c00000000
+m = ok true
+END
+ICASE 0 7 xc51632049a2ea019 1 10
+r = 0
+END
+ICASE 1 0 x6ccfe3dd1e066696b26b30 2 0
+ra 0 = 0 x
+R = ok
+ra 0 = 0 x
+r = 108
+av = 10
+R = ok
+s 9 = 9
+ra 1 = 1 x6b
+END
+ICASE 2 -9 xcd608d 3 4
+s 3 = 0
+END
+ICASE 0 -6 x2c88b86b2756f1 3 7
+r = 0
+ra 5 = 5 x254a6f94b9
+ra 5 = -1 x0000000000
+rar 3 -1 3 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 3) out of bounds for length 3"
+R = !java.io.IOException "mark/reset not supported"
+ra 2 = -1 x0000
+r = -1
+END
+ICASE 1 -1 xb04da7a9ca8f1c1b559ec1 2 9
+m = ok true
+R = ok
+ra 3 = 3 xb04da7
+s 0 = 0
+s -3 = 0
+r = 169
+rar 2 0 1 = 1 xca00
+m = ok true
+END
+ICASE 2 10 x44b4545282f6780d5205f2 3 2
+r = 82
+s 0 = 0
+av = 1
+m = ok true
+av = 1
+av = 1
+ra 2 = 1 x8200
+END
+ICASE 0 10 x8a750994 3 5
+s 9 = 9
+r = 77
+r = -1
+END
+ICASE 1 10 xbbbc1a 2 4
+s -3 = 0
+END
+ICASE 2 -7 xe79068ae524527 3 2
+r = 174
+R = ok
+s 9 = 2
+r = -1
+m = ok true
+s 3 = 0
+m = ok true
+ra 5 = -1 x0000000000
+END
+ICASE 0 -2 xaebe 2 7
+m = ok false
+av = 0
+av = 0
+END
+ICASE 1 8 x532fb5e20640216a 1 0
+R = ok
+av = 8
+END
+ICASE 2 9 x8f2e2fc53f23d91cff 0 8
+r = 143
+s -3 = 0
+END
+ICASE 0 2 x4a9c95 3 3
+r = 0
+END
+ICASE 1 -11 x1f350dd2c99d 0 0
+av = 6
+s 6 = 6
+r = -1
+ra 3 = -1 x000000
+av = 0
+s 0 = 0
+END
+ICASE 2 1 xdf3fe3146095259ac5bf 2 2
+av = 2
+m = ok true
+s 9 = 2
+END
+ICASE 0 -7 x8de1 1 11
+rar 0 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 0"
+av = 0
+rar 0 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 0"
+rar 4 4 1 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 1) out of bounds for length 4"
+r = 0
+s 6 = 6
+r = !java.io.IOException "boom"
+END
+ICASE 1 6 x7f9c4313c2c072f41f0c 2 9
+m = ok true
+m = ok true
+av = 10
+R = ok
+m = ok true
+r = 127
+ra 4 = 4 x9c4313c2
+END
+ICASE 2 13 x 0 4
+m = ok true
+s 6 = 0
+R = ok
+R = ok
+r = -1
+r = -1
+r = -1
+END
+ICASE 0 10 xff174a1bba501d0fc476 3 4
+m = ok false
+r = 0
+s 0 = 0
+ra 0 = 0 x
+rar 5 4 5 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 5) out of bounds for length 5"
+END
+ICASE 1 12 x9a7432ef52756a 3 10
+ra 1 = 1 x9a
+R = ok
+r = 154
+ra 3 = 3 x7432ef
+ra 4 = 3 x52756a00
+m = ok true
+av = 0
+END
+ICASE 2 -14 xdae148d5bd7158de 3 5
+R = ok
+s -3 = 0
+rar 4 4 0 = 0 x00000000
+R = ok
+r = 213
+r = 189
+END
+ICASE 0 11 x52 1 6
+r = 0
+s 0 = 0
+ra 4 = 4 x254a6f94
+END
+ICASE 1 6 x 0 6
+ra 1 = -1 x00
+r = -1
+av = 0
+m = ok true
+ra 4 = -1 x00000000
+rar 3 1 1 = -1 x000000
+END
+ICASE 2 0 x5aad7b822d5587 2 5
+av = 5
+m = ok true
+END
+ICASE 0 -6 x06 1 9
+R = !java.io.IOException "mark/reset not supported"
+rar 1 -1 1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 1) out of bounds for length 1"
+END
+ICASE 1 -4 xd81549bc7b430e55 0 7
+ra 2 = 2 xd815
+av = 6
+m = ok true
+av = 6
+r = 73
+av = 5
+ra 4 = 4 xbc7b430e
+END
+ICASE 2 11 x6eafcf4fd5 1 6
+m = ok true
+R = ok
+END
+ICASE 0 -9 x 0 5
+av = 0
+END
+ICASE 1 1 x8fa878b932474027 0 11
+ra 1 = 1 x8f
+END
+ICASE 2 4 x29029103cb69bced 0 12
+r = 41
+r = 2
+rar 1 1 0 = 0 x00
+r = 145
+av = 5
+END
+ICASE 0 10 x86dc5cef9b14af 0 10
+r = 0
+s 0 = 0
+m = ok false
+r = 37
+s 0 = 0
+s 15 = 8
+ra 2 = -1 x0000
+rar 5 2 3 = -1 x0000000000
+END
+ICASE 1 3 x7dc37b0fdf 0 10
+av = 5
+r = 125
+r = 195
+R = ok
+END
+ICASE 2 5 xa3a87cde33c66bab55d4 0 -1
+m = ok true
+rar 4 4 2 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 4"
+m = ok true
+rar 4 4 2 = !java.lang.IndexOutOfBoundsException "Range [4, 4 + 2) out of bounds for length 4"
+r = -1
+END
+ICASE 0 7 x51af0dcc 1 9
+av = 0
+r = 0
+m = ok false
+END
+ICASE 1 7 x402c680311ace88256e9fe 0 5
+s 15 = 11
+ra 1 = -1 x00
+m = ok true
+r = -1
+END
+ICASE 2 5 x70eb754426 1 3
+av = 3
+r = 235
+r = 117
+END
+ICASE 0 12 x48e16e5ceb 0 8
+R = !java.io.IOException "mark/reset not supported"
+rar 0 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 0"
+r = 0
+r = 37
+r = 74
+rar 0 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 0"
+r = 111
+m = ok false
+END
+ICASE 1 2 x3faae1a9c94a1d78f1e2 1 0
+s 6 = 6
+rar 3 2 3 = !java.lang.IndexOutOfBoundsException "Range [2, 2 + 3) out of bounds for length 3"
+END
+ICASE 2 0 x87557388 0 -1
+ra 0 = -1 x
+s 0 = -1
+r = -1
+s 3 = 0
+av = 0
+R = ok
+s 0 = -1
+ra 3 = -1 x000000
+END
+ICASE 0 4 x87e30c9b18de8236f8 2 3
+rar 1 1 -1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 1"
+rar 3 3 -1 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + -1) out of bounds for length 3"
+s 12 = 4
+m = ok false
+ra 5 = -1 x0000000000
+END
+ICASE 1 -5 x 0 4
+r = -1
+s 0 = 0
+ra 5 = -1 x0000000000
+m = ok true
+av = 0
+s -3 = 0
+rar 1 -1 1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 1) out of bounds for length 1"
+END
+ICASE 2 -5 xce6259c259452b 2 7
+s 9 = 5
+END
+ICASE 0 2 x4c9bd30b2879c8eb04 0 1
+ra 5 = 2 x0025000000
+END
+ICASE 1 13 x1fe308338621d911656f 0 4
+R = ok
+rar 1 1 1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + 1) out of bounds for length 1"
+av = 10
+rar 2 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 2"
+r = 31
+av = 9
+s -3 = 0
+rar 2 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 2"
+END
+ICASE 2 -4 x45d93db2a518ef 3 0
+m = ok true
+END
+ICASE 0 0 xd7d790285bf9 3 2
+ra 0 = 0 x
+m = ok false
+ra 5 = -1 x0000000000
+m = ok false
+END
+ICASE 1 7 x 0 4
+r = -1
+r = -1
+av = 0
+ra 3 = -1 x000000
+r = -1
+R = ok
+s 3 = 0
+ra 0 = -1 x
+END
+ICASE 2 13 x54e07350 3 2
+ra 1 = 1 x50
+s 3 = 0
+m = ok true
+s -3 = 0
+r = -1
+R = ok
+ra 2 = -1 x0000
+s 0 = 0
+END
+ICASE 0 9 x3616047a671b98bcb5149c 2 6
+r = 0
+R = !java.io.IOException "mark/reset not supported"
+rar 0 0 0 = 0 x
+END
+ICASE 1 12 x009271754285 2 -1
+r = 0
+s 0 = 0
+ra 5 = 5 x9271754285
+s 0 = 0
+av = 0
+m = ok true
+r = -1
+m = ok true
+END
+ICASE 2 8 x03ec7e50fd 1 12
+r = 236
+R = ok
+r = 236
+m = ok true
+END
+ICASE 0 12 x5b03544a82 1 5
+r = 0
+ra 0 = 0 x
+rar 0 0 0 = 0 x
+m = ok false
+rar 3 -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 3"
+r = 37
+ra 5 = 5 x4a6f94b9de
+END
+ICASE 1 5 x47c4590b9d377b80 3 6
+ra 1 = 1 x47
+R = ok
+s 9 = 8
+m = ok true
+rar 1 1 0 = -1 x00
+ra 2 = -1 x0000
+r = -1
+END
+ICASE 2 5 x0404a6 1 8
+s 0 = 0
+END
+ICASE 0 11 xa5f7e525541aff0928 1 8
+ra 1 = 1 x00
+m = ok false
+R = !java.io.IOException "mark/reset not supported"
+r = 37
+m = ok false
+r = 74
+ra 4 = 4 x6f94b9de
+ra 5 = 4 x03284d7200
+END
+ICASE 1 7 xf303fc904f 1 9
+rar 3 -1 1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 1) out of bounds for length 3"
+s 6 = 5
+r = -1
+m = ok true
+rar 3 0 1 = -1 x000000
+rar 1 -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 1"
+END
+ICASE 2 -8 xe8063f 3 1
+R = ok
+s 12 = 0
+END
+ICASE 0 12 xe5dc 2 12
+r = 0
+rar 3 1 -1 = !java.lang.IndexOutOfBoundsException "Range [1, 1 + -1) out of bounds for length 3"
+m = ok false
+m = ok false
+END
+ICASE 1 1 x7ba29a 1 -1
+r = 123
+ra 0 = 0 x
+ra 4 = 2 xa29a0000
+s 12 = 0
+r = -1
+r = -1
+R = ok
+r = 123
+END
+ICASE 2 1 x377170c8b14d 0 12
+r = 55
+END
+ICASE 0 13 x3eb541f5fd 0 7
+s 0 = 0
+rar 0 -1 0 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 0) out of bounds for length 0"
+m = ok false
+av = 0
+s 3 = 3
+END
+ICASE 1 2 xabfd09eaeb63ff517c61 1 1
+s -3 = 0
+m = ok true
+R = ok
+END
+ICASE 2 6 xfec115524a89391ad235 0 10
+rar 0 0 0 = 0 x
+s 15 = 10
+m = ok true
+ra 5 = -1 x0000000000
+END
+ICASE 0 3 xdfb0b7d9aa 1 7
+s 12 = 3
+r = -1
+s 9 = 0
+END
+ICASE 1 1 xc9e651460eda951d 3 12
+rar 4 -1 4 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 4) out of bounds for length 4"
+rar 5 1 0 = 0 x0000000000
+av = 8
+s 0 = 0
+ra 3 = 3 xc9e651
+END
+ICASE 2 4 x131f993a74c448881b30 0 10
+ra 4 = 4 x131f993a
+END
+ICASE 0 5 xf3d8b73aafcb 0 -1
+av = 0
+R = !java.io.IOException "mark/reset not supported"
+s 3 = 3
+m = ok false
+r = 111
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 -7 x 0 3
+m = ok true
+rar 0 0 -1 = !java.lang.IndexOutOfBoundsException "Range [0, 0 + -1) out of bounds for length 0"
+rar 5 -1 4 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + 4) out of bounds for length 5"
+m = ok true
+rar 5 3 3 = !java.lang.IndexOutOfBoundsException "Range [3, 3 + 3) out of bounds for length 5"
+ra 4 = -1 x00000000
+R = ok
+s -3 = 0
+END
+ICASE 2 3 xdb46cc4f 1 -1
+av = -1
+R = ok
+r = -1
+m = ok true
+END
+ICASE 0 13 x 0 2
+r = 0
+r = 37
+m = ok false
+ra 2 = 2 x4a6f
+r = 148
+r = 185
+rar 0 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 0"
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 11 x1fb65b 0 8
+av = 3
+av = 3
+s -3 = 0
+m = ok true
+END
+ICASE 2 14 xd110c1e4 0 0
+ra 5 = -1 x0000000000
+rar 3 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 3"
+END
+ICASE 0 11 x17c0b10dfbb9a94c61 2 7
+r = 0
+m = ok false
+R = !java.io.IOException "mark/reset not supported"
+END
+ICASE 1 3 x298d 2 8
+R = ok
+s 0 = 0
+R = ok
+END
+ICASE 2 9 x28 1 12
+s -3 = 0
+r = -1
+r = -1
+r = -1
+rar 1 -1 -1 = !java.lang.IndexOutOfBoundsException "Range [-1, -1 + -1) out of bounds for length 1"
+r = -1
+rar 0 0 0 = -1 x
+END
+ICASE 0 3 x46 1 1
+ra 4 = 3 x00254a00
+r = -1
+ra 1 = -1 x00
+av = 0
+av = 0
+END
+ICASE 1 3 x 0 3
+r = -1
+m = ok true
+s 15 = 0
+R = ok
+END
+BCASE "ax\u000abxz"
+m = !java.io.IOException "mark() not supported"
+m = !java.io.IOException "mark() not supported"
+m = !java.io.IOException "mark() not supported"
+s 0 = 0
+y = false false
+y = false false
+s 0 = 0
+END
+BCASE "\u00e9bx"
+R = !java.io.IOException "reset() not supported"
+m = !java.io.IOException "mark() not supported"
+ra = 2 "\u00e9b\u0000"
+END
+BCASE "xyaa"
+R = !java.io.IOException "reset() not supported"
+y = false false
+R = !java.io.IOException "reset() not supported"
+s 3 = 3
+END
+BCASE "ybazc"
+m = !java.io.IOException "mark() not supported"
+y = false false
+r = 121
+r = 98
+ra = 2 "az\u0000"
+r = 99
+R = !java.io.IOException "reset() not supported"
+r = -1
+END
+BCASE "yy\u00e9"
+R = !java.io.IOException "reset() not supported"
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "cy"
+y = false false
+R = !java.io.IOException "reset() not supported"
+m = !java.io.IOException "mark() not supported"
+r = 99
+y = false false
+r = 121
+END
+BCASE "\u00e9y\u00e9azx"
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "xzb\u00e9\u00e9"
+y = false false
+r = 120
+y = false false
+s 0 = 0
+END
+BCASE "a\u000azaayc"
+m = !java.io.IOException "mark() not supported"
+r = 97
+r = 10
+r = 122
+s 0 = 0
+R = !java.io.IOException "reset() not supported"
+y = false false
+END
+BCASE "\u000a\u000acacz"
+s 4 = 4
+r = 99
+r = 122
+y = false false
+ra = -1 "\u0000\u0000\u0000"
+r = -1
+ra = -1 "\u0000\u0000\u0000"
+END
+BCASE "ccbax"
+r = 99
+y = false false
+y = false false
+END
+BCASE "yyaab\u000a"
+r = 121
+r = 121
+END
+BCASE "z\u00e9cb"
+R = !java.io.IOException "reset() not supported"
+y = false false
+s 2 = 2
+m = !java.io.IOException "mark() not supported"
+s 4 = 2
+s 1 = 0
+END
+BCASE "c\u00e9xyy"
+r = 99
+R = !java.io.IOException "reset() not supported"
+r = 233
+R = !java.io.IOException "reset() not supported"
+r = 120
+END
+BCASE "xcxa"
+y = false false
+s 3 = 3
+END
+BCASE "yac\u00e9z"
+s 2 = 2
+m = !java.io.IOException "mark() not supported"
+r = 99
+y = false false
+y = false false
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "ab\u00e9z"
+r = 97
+s 2 = 2
+r = 122
+y = false false
+r = -1
+y = false false
+END
+BCASE "c\u00e9\u00e9bcbc"
+ra = 2 "c\u00e9\u0000"
+r = 233
+R = !java.io.IOException "reset() not supported"
+r = 98
+s 2 = 2
+m = !java.io.IOException "mark() not supported"
+y = false false
+s -1 = !java.lang.IllegalArgumentException "skip value is negative"
+END
+BCASE "\u000a\u00e9zy\u00e9"
+s 4 = 4
+r = 233
+r = -1
+END
+BCASE "xz\u000a\u000a"
+r = 120
+m = !java.io.IOException "mark() not supported"
+ra = 2 "z\u000a\u0000"
+m = !java.io.IOException "mark() not supported"
+END
+BCASE "z"
+ra = 1 "z\u0000\u0000"
+s 0 = 0
+m = !java.io.IOException "mark() not supported"
+ra = -1 "\u0000\u0000\u0000"
+m = !java.io.IOException "mark() not supported"
+y = false false
+s -1 = !java.lang.IllegalArgumentException "skip value is negative"
+END
+BCASE "bzyy\u000a"
+m = !java.io.IOException "mark() not supported"
+END
+BCASE "zxc"
+s 2 = 2
+ra = 1 "c\u0000\u0000"
+r = -1
+END
+BCASE "\u000ay\u00e9"
+y = false false
+m = !java.io.IOException "mark() not supported"
+m = !java.io.IOException "mark() not supported"
+r = 10
+m = !java.io.IOException "mark() not supported"
+R = !java.io.IOException "reset() not supported"
+r = 121
+END
+BCASE "cyy\u00e9"
+ra = 2 "cy\u0000"
+r = 121
+r = 233
+ra = -1 "\u0000\u0000\u0000"
+r = -1
+END
+BCASE "xz\u000a"
+m = !java.io.IOException "mark() not supported"
+r = 120
+r = 122
+y = false false
+ra = 1 "\u000a\u0000\u0000"
+y = false false
+END
+BCASE "\u00e9\u000abbz\u00e9a"
+y = false false
+ra = 2 "\u00e9\u000a\u0000"
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "\u000ayc\u000ab\u000ax"
+r = 10
+m = !java.io.IOException "mark() not supported"
+END
+BCASE "xcb"
+m = !java.io.IOException "mark() not supported"
+ra = 2 "xc\u0000"
+ra = 1 "b\u0000\u0000"
+R = !java.io.IOException "reset() not supported"
+R = !java.io.IOException "reset() not supported"
+ra = -1 "\u0000\u0000\u0000"
+r = -1
+r = -1
+END
+BCASE "cxzx"
+s 4 = 4
+R = !java.io.IOException "reset() not supported"
+s 1 = 0
+END
+BCASE "\u00e9\u000ayxy\u00e9cc"
+r = 233
+m = !java.io.IOException "mark() not supported"
+y = false false
+END
+BCASE "\u000a\u00e9bb\u000a\u000a"
+r = 10
+s 4 = 4
+r = 10
+END
+BCASE "yyx"
+s 3 = 3
+m = !java.io.IOException "mark() not supported"
+ra = -1 "\u0000\u0000\u0000"
+R = !java.io.IOException "reset() not supported"
+r = -1
+r = -1
+s 4 = 0
+m = !java.io.IOException "mark() not supported"
+END
+BCASE "c"
+y = false false
+y = false false
+ra = 1 "c\u0000\u0000"
+s 0 = 0
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "\u00e9yy\u00e9x\u00e9a"
+s 4 = 4
+ra = 2 "x\u00e9\u0000"
+s 2 = 1
+ra = -1 "\u0000\u0000\u0000"
+R = !java.io.IOException "reset() not supported"
+m = !java.io.IOException "mark() not supported"
+r = -1
+END
+BCASE "x\u000a"
+y = false false
+ra = 2 "x\u000a\u0000"
+r = -1
+m = !java.io.IOException "mark() not supported"
+r = -1
+y = false false
+r = -1
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "bxz"
+R = !java.io.IOException "reset() not supported"
+ra = 2 "bx\u0000"
+y = false false
+m = !java.io.IOException "mark() not supported"
+r = 122
+r = -1
+ra = -1 "\u0000\u0000\u0000"
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "\u000aba"
+ra = 2 "\u000ab\u0000"
+r = 97
+R = !java.io.IOException "reset() not supported"
+m = !java.io.IOException "mark() not supported"
+r = -1
+ra = -1 "\u0000\u0000\u0000"
+ra = -1 "\u0000\u0000\u0000"
+ra = -1 "\u0000\u0000\u0000"
+END
+BCASE "ab\u000axb"
+m = !java.io.IOException "mark() not supported"
+r = 97
+s 4 = 4
+r = -1
+r = -1
+r = -1
+ra = -1 "\u0000\u0000\u0000"
+END
+BCASE "\u000a\u00e9\u000ax"
+r = 10
+s 0 = 0
+END
+BCASE "zax"
+r = 122
+r = 97
+r = 120
+m = !java.io.IOException "mark() not supported"
+y = false false
+y = false false
+END
+BCASE "x"
+s 0 = 0
+r = 120
+ra = -1 "\u0000\u0000\u0000"
+END
+BCASE ""
+y = false false
+ra = -1 "\u0000\u0000\u0000"
+END
+BCASE "zxbbzb"
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "xybc\u000ab"
+ra = 2 "xy\u0000"
+ra = 2 "bc\u0000"
+ra = 2 "\u000ab\u0000"
+r = -1
+ra = -1 "\u0000\u0000\u0000"
+y = false false
+m = !java.io.IOException "mark() not supported"
+m = !java.io.IOException "mark() not supported"
+END
+BCASE "ycb\u000az"
+r = 121
+END
+BCASE "z\u000a"
+ra = 2 "z\u000a\u0000"
+m = !java.io.IOException "mark() not supported"
+y = false false
+r = -1
+r = -1
+y = false false
+m = !java.io.IOException "mark() not supported"
+END
+BCASE "czb"
+s 0 = 0
+ra = 2 "cz\u0000"
+r = 98
+END
+BCASE "\u00e9z\u00e9\u000abac"
+s -1 = !java.lang.IllegalArgumentException "skip value is negative"
+y = false false
+m = !java.io.IOException "mark() not supported"
+END
+BCASE "byac"
+R = !java.io.IOException "reset() not supported"
+ra = 2 "by\u0000"
+m = !java.io.IOException "mark() not supported"
+r = 97
+m = !java.io.IOException "mark() not supported"
+r = 99
+s 3 = 0
+END
+BCASE ""
+m = !java.io.IOException "mark() not supported"
+m = !java.io.IOException "mark() not supported"
+r = -1
+r = -1
+END
+BCASE "c\u000ayyz\u000aby"
+R = !java.io.IOException "reset() not supported"
+r = 99
+y = false false
+r = 10
+END
+BCASE "c"
+y = false false
+y = false false
+END
+BCASE "xc\u00e9x"
+m = !java.io.IOException "mark() not supported"
+ra = 2 "xc\u0000"
+END
+BCASE "xaz\u000a"
+s 2 = 2
+r = 122
+ra = 1 "\u000a\u0000\u0000"
+R = !java.io.IOException "reset() not supported"
+R = !java.io.IOException "reset() not supported"
+ra = -1 "\u0000\u0000\u0000"
+END
+BCASE "\u00e9"
+s 1 = 1
+m = !java.io.IOException "mark() not supported"
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "xaca\u00e9\u000a"
+r = 120
+m = !java.io.IOException "mark() not supported"
+s 2 = 2
+s 1 = 1
+END
+BCASE "ba\u000ay"
+y = false false
+m = !java.io.IOException "mark() not supported"
+y = false false
+ra = 2 "ba\u0000"
+END
+BCASE "xaccc"
+s -1 = !java.lang.IllegalArgumentException "skip value is negative"
+y = false false
+END
+BCASE "b\u00e9ca"
+r = 98
+END
+BCASE "\u00e9bczc"
+R = !java.io.IOException "reset() not supported"
+r = 233
+y = false false
+r = 98
+END
+BCASE "yzz"
+R = !java.io.IOException "reset() not supported"
+m = !java.io.IOException "mark() not supported"
+y = false false
+R = !java.io.IOException "reset() not supported"
+y = false false
+END
+BCASE ""
+s -1 = !java.lang.IllegalArgumentException "skip value is negative"
+ra = -1 "\u0000\u0000\u0000"
+END
+BCASE "\u00e9a"
+ra = 2 "\u00e9a\u0000"
+R = !java.io.IOException "reset() not supported"
+ra = -1 "\u0000\u0000\u0000"
+m = !java.io.IOException "mark() not supported"
+r = -1
+r = -1
+END
+BCASE "y\u00e9a"
+r = 121
+s 2 = 2
+m = !java.io.IOException "mark() not supported"
+y = false false
+y = false false
+s 1 = 0
+r = -1
+r = -1
+END
+BCASE "xcx"
+ra = 2 "xc\u0000"
+r = 120
+m = !java.io.IOException "mark() not supported"
+s 1 = 0
+y = false false
+r = -1
+END
+BCASE "\u00e9y"
+m = !java.io.IOException "mark() not supported"
+m = !java.io.IOException "mark() not supported"
+s 3 = 2
+R = !java.io.IOException "reset() not supported"
+r = -1
+r = -1
+END
+BCASE "y"
+s 4 = 1
+r = -1
+m = !java.io.IOException "mark() not supported"
+ra = -1 "\u0000\u0000\u0000"
+r = -1
+END
+BCASE "xxax\u00e9"
+s 2 = 2
+s 1 = 1
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "cb"
+s -1 = !java.lang.IllegalArgumentException "skip value is negative"
+y = false false
+r = 99
+s 4 = 1
+y = false false
+END
+BCASE "xx\u00e9c"
+ra = 2 "xx\u0000"
+y = false false
+END
+BCASE "aacb"
+s -1 = !java.lang.IllegalArgumentException "skip value is negative"
+m = !java.io.IOException "mark() not supported"
+ra = 2 "aa\u0000"
+r = 99
+s 1 = 1
+y = false false
+s 4 = 0
+END
+BCASE "xza\u000aa"
+y = false false
+r = 120
+r = 122
+r = 97
+m = !java.io.IOException "mark() not supported"
+END
+BCASE "\u00e9cyc\u00e9"
+s 1 = 1
+ra = 2 "cy\u0000"
+ra = 2 "c\u00e9\u0000"
+R = !java.io.IOException "reset() not supported"
+y = false false
+m = !java.io.IOException "mark() not supported"
+y = false false
+ra = -1 "\u0000\u0000\u0000"
+END
+BCASE "xcz\u000a\u000a"
+m = !java.io.IOException "mark() not supported"
+y = false false
+END
+BCASE "c\u00e9x\u00e9aa"
+R = !java.io.IOException "reset() not supported"
+r = 99
+END
+BCASE "zab\u00e9aby"
+m = !java.io.IOException "mark() not supported"
+s 1 = 1
+y = false false
+R = !java.io.IOException "reset() not supported"
+r = 97
+y = false false
+R = !java.io.IOException "reset() not supported"
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "ayza\u000a\u00e9z"
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "b\u000axc"
+r = 98
+r = 10
+END
+BCASE "y\u00e9"
+r = 121
+ra = 1 "\u00e9\u0000\u0000"
+r = -1
+r = -1
+ra = -1 "\u0000\u0000\u0000"
+r = -1
+END
+BCASE "\u00e9ayyz"
+s 1 = 1
+s 3 = 3
+r = 122
+r = -1
+END
+BCASE "xa"
+ra = 2 "xa\u0000"
+r = -1
+r = -1
+y = false false
+ra = -1 "\u0000\u0000\u0000"
+END
+BCASE "z\u000ac"
+ra = 2 "z\u000a\u0000"
+m = !java.io.IOException "mark() not supported"
+END
+BCASE "\u00e9x\u00e9aac"
+s -1 = !java.lang.IllegalArgumentException "skip value is negative"
+y = false false
+y = false false
+ra = 2 "\u00e9x\u0000"
+r = 233
+R = !java.io.IOException "reset() not supported"
+m = !java.io.IOException "mark() not supported"
+r = 97
+END
+BCASE "abc"
+R = !java.io.IOException "reset() not supported"
+y = false false
+s 4 = 3
+s 4 = 0
+r = -1
+y = false false
+s -1 = !java.lang.IllegalArgumentException "skip value is negative"
+END
+BCASE "zxx\u000a"
+s -1 = !java.lang.IllegalArgumentException "skip value is negative"
+r = 122
+r = 120
+R = !java.io.IOException "reset() not supported"
+y = false false
+y = false false
+ra = 2 "x\u000a\u0000"
+END
+BCASE "\u00e9y"
+R = !java.io.IOException "reset() not supported"
+s 0 = 0
+y = false false
+m = !java.io.IOException "mark() not supported"
+ra = 2 "\u00e9y\u0000"
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "bz\u000ab"
+r = 98
+ra = 2 "z\u000a\u0000"
+s 4 = 1
+y = false false
+r = -1
+y = false false
+s 2 = 0
+END
+BCASE "ayzc\u000a"
+y = false false
+R = !java.io.IOException "reset() not supported"
+R = !java.io.IOException "reset() not supported"
+m = !java.io.IOException "mark() not supported"
+R = !java.io.IOException "reset() not supported"
+s 1 = 1
+m = !java.io.IOException "mark() not supported"
+r = 121
+END
+BCASE ""
+y = false false
+m = !java.io.IOException "mark() not supported"
+s 3 = 0
+r = -1
+END
+BCASE "\u000azby"
+y = false false
+R = !java.io.IOException "reset() not supported"
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "\u000a\u000aa"
+y = false false
+R = !java.io.IOException "reset() not supported"
+r = 10
+END
+BCASE "z\u000a"
+R = !java.io.IOException "reset() not supported"
+ra = 2 "z\u000a\u0000"
+y = false false
+r = -1
+s 2 = 0
+y = false false
+END
+BCASE "ybz\u000a"
+r = 121
+s -1 = !java.lang.IllegalArgumentException "skip value is negative"
+m = !java.io.IOException "mark() not supported"
+m = !java.io.IOException "mark() not supported"
+ra = 2 "bz\u0000"
+END
+BCASE "ybz"
+s 0 = 0
+y = false false
+m = !java.io.IOException "mark() not supported"
+R = !java.io.IOException "reset() not supported"
+y = false false
+r = 121
+ra = 2 "bz\u0000"
+ra = -1 "\u0000\u0000\u0000"
+END
+BCASE "cxzz"
+ra = 2 "cx\u0000"
+r = 122
+R = !java.io.IOException "reset() not supported"
+r = 122
+m = !java.io.IOException "mark() not supported"
+END
+BCASE "y\u00e9b\u000ayax"
+ra = 2 "y\u00e9\u0000"
+R = !java.io.IOException "reset() not supported"
+m = !java.io.IOException "mark() not supported"
+R = !java.io.IOException "reset() not supported"
+m = !java.io.IOException "mark() not supported"
+R = !java.io.IOException "reset() not supported"
+END
+BCASE "\u00e9c"
+ra = 2 "\u00e9c\u0000"
+s 0 = 0
+END
+BCASE "xz\u00e9a"
+r = 120
+R = !java.io.IOException "reset() not supported"
+ra = 2 "z\u00e9\u0000"
+r = 97
+r = -1
+m = !java.io.IOException "mark() not supported"
+END
+BCASE "zy"
+ra = 2 "zy\u0000"
+r = -1
+R = !java.io.IOException "reset() not supported"
+R = !java.io.IOException "reset() not supported"
+ra = -1 "\u0000\u0000\u0000"
+s 3 = 0
+END
+PCASE true pd 3ff8000000000000 pl pca "hello" ap "a" pc 70 = x312e350a68656c6c6f6146 false
+PCASE false pz true pd 3fc0000000000000 pj 4000012 po 0 po 8 = x74727565302e313235343030303031326e756c6c2d33 false
+PCASE true pli 2147483647 plo 1 plo 4 pls null pld 4014800000000000 pld 4004000000000000 = x323134373438333634370a7374720a630a6e756c6c0a352e3132350a322e350a false
+PCASE false po 0 pz true pld 419dd8cf5bf78a2b pca "a" pf 4d5edabe = x6e756c6c74727565312e323531383730333039393137333845380a61322e333336373938344538 false
+PCASE true wi 0 flush plo 0 pl pz false = x006e756c6c0a0a66616c7365 false
+PCASE false pca "" pz true plo 6 pli 5 pf 41220000 = x74727565312e350a350a31302e313235 false
+PCASE true po 7 wi 1 pls "\u00e9\ud83d\ude00" flush po 6 pd 41e9b3e7992b8efd = x302e3101c3a9f09f98800a312e35332e343439373635303635333631323034364539 false
+PCASE false close wi 0 pls "hello" = x true
+PCASE true ap "hello" pz true plo 3 flush ps "a" po 1 = x68656c6c6f747275652d370a61737472 false
+PCASE false ap "hello" = x68656c6c6f false
+PCASE true pl ps "\u00e9\ud83d\ude00" ps null = x0ac3a9f09f98806e756c6c false
+PCASE false ps "\u00e9\ud83d\ude00" flush pl po 0 pc -2147483584 po 5 = xc3a9f09f98800a6e756c6c4074727565 false
+PCASE true pli 2 po 3 = x320a2d37 false
+PCASE false pz true pl = x747275650a false
+PCASE true pz false pc 66 ap null wi 11 = x66616c7365426e756c6c0b false
+PCASE false pc 65 ap "hello" = x4168656c6c6f false
+PCASE true pli 3 ps "a" pz true flush plo 6 pj 3000009 = x330a6174727565312e350a33303030303039 false
+PCASE false pls null wi 12 pf 4f1d2ede pz true ps "\u00e9\ud83d\ude00" = x6e756c6c0a0c322e36333730393434453974727565c3a9f09f9880 false
+PCASE true ap null plo 5 = x6e756c6c747275650a false
+PCASE false pls "" pls "\u00e9\ud83d\ude00" po 0 = x0ac3a9f09f98800a6e756c6c false
+PCASE true po 6 pca "\u00e9\ud83d\ude00" pls "\u00e9\ud83d\ude00" = x312e35c3a9f09f9880c3a9f09f98800a false
+PCASE false pls "hello" po 3 pld 401a800000000000 pls "" pli 4 = x68656c6c6f0a2d37362e3632350a0a340a false
+PCASE true pl pl plo 0 = x0a0a6e756c6c0a false
+PCASE false pl pd 4005000000000000 pf 41200000 wi 1 pf 3f000000 pc 69 = x0a322e36323531302e3001302e3545 false
+PCASE true pls "" = x0a false
+PCASE false plo 4 pli 10 pj 7000021 pls null wi 2147483647 plo 2 = x630a31300a373030303032316e756c6c0aff34320a false
+PCASE true pld 41fe484777fac93b = x382e31323838353338383736373431323945390a false
+PCASE false pd 4022c00000000000 pli 9 pld 4017000000000000 plo 4 flush = x392e333735390a352e37350a630a false
+PCASE true flush ps "" pca "hello" plo 9 pd 4025000000000000 = x68656c6c6f390a31302e35 false
+PCASE false pls null = x6e756c6c0a false
+PCASE true wi 3 = x03 false
+PCASE false wi 8 = x08 false
+PCASE true pd 400c000000000000 plo 9 ps "a" plo 9 ap "hello" = x332e35390a61390a68656c6c6f false
+PCASE false wi 7 ps "a" pld 4007000000000000 po 1 = x0761322e3837350a737472 false
+PCASE true ap "hello" = x68656c6c6f false
+PCASE false pli 11 = x31310a false
+PCASE true pf 41320000 pca "\u00e9\ud83d\ude00" pl = x31312e313235c3a9f09f98800a false
+PCASE false pld 42014a14d3745b5b pc -2147483584 po 2 pca "" pz true pf 41180000 = x392e32383231363533353835343436303745390a40343274727565392e35 false
+PCASE true pd 41d3982732938dcb pc 69 pca "a" pc 75 pf 4f1290bb = x312e33313439353434343233303535323934453945614b322e343538393538364539 false
+PCASE false pc 70 ps "hello" pc 70 pls "a" ap "" pz true = x4668656c6c6f46610a74727565 false
+PCASE true pld 4021800000000000 = x382e37350a false
+PCASE false pca "a" pca "" = x61 false
+PCASE true pld 41d7ca0ba5b5c546 = x312e3539363436383838363834303136353645390a false
+PCASE false plo 0 po 6 pz true close pl = x6e756c6c0a312e3574727565 true
+PCASE true pld 4015800000000000 pli 8 pf 40840000 = x352e3337350a380a342e313235 false
+PCASE false pd 41f7eed502af3664 pca "" pls null ap "\u00e9\ud83d\ude00" close pl = x362e34323434343930363639353037373945396e756c6c0ac3a9f09f9880 true
+PCASE true pf 40380000 pd 4002000000000000 flush = x322e383735322e3235 false
+PCASE false pld 3fe4000000000000 po 3 pj 2229173322499905 = x302e3632350a2d3732323239313733333232343939393035 false
+PCASE true po 0 pc 65 pc 76 pc 66 plo 2 = x6e756c6c414c4234320a false
+PCASE false pc -2147483584 pls null pc 76 pca "a" = x406e756c6c0a4c61 false
+PCASE true wi 1 = x01 false
+PCASE false pz true pl = x747275650a false
+PCASE true ap "\u00e9\ud83d\ude00" wi 4 pld 4001000000000000 = xc3a9f09f988004322e3132350a false
+PCASE false pca "" pz true pd 3ffa000000000000 pc 66 pz false po 7 = x74727565312e3632354266616c7365302e31 false
+PCASE true pc 1960052799 pz true pl = xe0a0bf747275650a false
+PCASE false pd 400a000000000000 pl pf 40800000 pz true pd 41f417f35c8551ea pl = x332e32350a342e3074727565352e33393338323331373633333234393945390a false
+PCASE true pl pld 401d000000000000 = x0a372e32350a false
+PCASE false plo 8 pf 4f452018 pld 4021000000000000 pl pls null = x2d330a332e333037323134384539382e350a0a6e756c6c0a false
+PCASE true pl ap "a" pc 73 ap "hello" pl po 7 = x0a614968656c6c6f0a302e31 false
+PCASE false pca "" = x false
+PCASE true pj 7000021 pf 411c0000 po 4 plo 6 pl = x37303030303231392e373563312e350a0a false
+PCASE false pl pli 1 wi 10 pd 401c000000000000 = x0a310a0a372e30 false
+PCASE true pl ps "a" pj 10000030 pz true = x0a61313030303030333074727565 false
+PCASE false ap null pd 4019000000000000 plo 8 = x6e756c6c362e32352d330a false
+PCASE true pj 3000009 = x33303030303039 false
+PCASE false plo 9 pz false pz false po 5 flush = x390a66616c736566616c736574727565 false
+PCASE true pls "hello" pz true plo 8 pd 4019000000000000 ps "\u00e9\ud83d\ude00" = x68656c6c6f0a747275652d330a362e3235c3a9f09f9880 false
+PCASE false wi 2147483647 ap "" pli 4 pf 4fc31531 = xff340a362e3534353839324539 false
+PCASE true pld 401f800000000000 ap null pz true = x372e3837350a6e756c6c74727565 false
+PCASE false pld 41ed903eaa5b40a9 plo 6 pld 401e000000000000 plo 8 = x332e39363739333939323238353136343345390a312e350a372e350a2d330a false
+PCASE true wi 1971983801 pj 735811016426427 pf 410a0000 pls "\u00e9\ud83d\ude00" plo 2 pz true = xb9373335383131303136343236343237382e363235c3a9f09f98800a34320a74727565 false
+PCASE false plo 7 pf 3f000000 pj 11000033 ps "hello" pz true pl = x302e310a302e35313130303030333368656c6c6f747275650a false
+PCASE true pli 11 po 8 = x31310a2d33 false
+PCASE false pls "\u00e9\ud83d\ude00" pz false pli 2 = xc3a9f09f98800a66616c7365320a false
+PCASE true pca "a" pls "a" = x61610a false
+PCASE false plo 1 pj 7000021 pld 4022400000000000 = x7374720a37303030303231392e3132350a false
+PCASE true pl pz true pf 409c0000 ps "hello" ps "" = x0a74727565342e38373568656c6c6f false
+PCASE false pc 69 pc 76 pd 4017800000000000 = x454c352e383735 false
+PCASE true pls "a" pld 4021400000000000 = x610a382e3632350a false
+PCASE false pld 420176971dddafe3 ps "" pls "" pf 40e00000 pl = x392e33373535303733383737313038383245390a0a372e300a false
+PCASE true pf 40100000 plo 8 plo 1 pca "\u00e9\ud83d\ude00" pli 3 = x322e32352d330a7374720ac3a9f09f9880330a false
+PCASE false ps "hello" pj 6723642931868283 pl pl po 5 = x68656c6c6f363732333634323933313836383238330a0a74727565 false
+PCASE true pli 9 pca "a" pj 2000006 pf 4fb33e59 = x390a6132303030303036362e303134343135344539 false
+PCASE false pd 401c800000000000 ps null po 2 pld 4026400000000000 pd 41f5928cd21c50ff = x372e3132356e756c6c343231312e3132350a352e3739303831333437333736393737344539 false
+PCASE true pj 11000033 ps "a" = x313130303030333361 false
+PCASE false pf 40600000 pld 401a800000000000 = x332e35362e3632350a false
+PCASE true ap "\u00e9\ud83d\ude00" = xc3a9f09f9880 false
+PCASE false pz true pj 7282344760968742 pca "" pli 11 po 6 = x747275653732383233343437363039363837343231310a312e35 false
+PCASE true wi 2147483647 ps "\u00e9\ud83d\ude00" pls null pli 10 = xffc3a9f09f98806e756c6c0a31300a false
+PCASE false wi 7 = x07 false
+PCASE true pf 41320000 pf 41360000 pls "a" pls "" = x31312e31323531312e333735610a0a false
+PCASE false pld 4021000000000000 = x382e350a false
+PCASE true pl pld 3fd8000000000000 = x0a302e3337350a false
+PCASE false pd 41dd5daa5ef6c5e4 pl pca "hello" pc 74 pf 40ac0000 pf 41300000 = x312e3937303731303930373835353832383345390a68656c6c6f4a352e33373531312e30 false
+PCASE true wi 2147483647 = xff false
+PCASE false pld 41f062a3c22d5917 flush pld 41fb766abbd4d346 ps "" = x342e333938333938343938383334323545390a372e333731393236343631333031353845390a false
+PCASE true pf 41260000 po 6 = x31302e333735312e35 false
+PCASE false pz true po 0 pc 1053397172 pld 4007000000000000 ap "a" pl = x747275656e756c6ce982b4322e3837350a610a false
+PCASE true pls "\u00e9\ud83d\ude00" wi 8 pd 3ff8000000000000 pf 40e00000 pli 2147483647 = xc3a9f09f98800a08312e35372e30323134373438333634370a false
+PCASE false plo 7 pf 41140000 ps "" wi 1 ap "\u00e9\ud83d\ude00" plo 0 = x302e310a392e323501c3a9f09f98806e756c6c0a false
+PCASE true plo 0 = x6e756c6c0a false
+PCASE false pj 10000030 plo 4 ap "a" pc -2147483584 = x3130303030303330630a6140 false
+PCASE true pli 11 flush pj 1000003 = x31310a31303030303033 false
+PCASE false po 2 pj 3150264238764364 plo 8 pz false pca "hello" = x3432333135303236343233383736343336342d330a66616c736568656c6c6f false
+PCASE true close ap "\u00e9\ud83d\ude00" po 7 ap "a" wi 2147483647 ps "a" = x true
+PCASE false po 2 wi 5 pls null pld 41f9504fcdfc665f close pj 3850959949845191 = x3432056e756c6c0a362e37393530393933353937373439393345390a true
+PCASE true pca "" po 4 pf 40d40000 flush wi 2147483647 close = x63362e363235ff false
+PCASE false pz false flush plo 8 = x66616c73652d330a false
+PCASE true ap null pld 4026000000000000 pld 41f10d1169c92a69 pca "" pld 4020000000000000 pls "" = x6e756c6c31312e300a342e35373731303535363435373238353445390a382e300a0a false
+PCASE false pli 2 pl pli 10 ap "hello" flush pj 11000033 = x320a0a31300a68656c6c6f3131303030303333 false
+PCASE true pld 41f11b4bad98aaf2 = x342e35393230323432383135343137333545390a false
+PCASE false pc 67 pld 42029c5ed9614ca6 = x43392e39393136303931333231363234323645390a false
+PCASE true ap null pli 2147483647 = x6e756c6c323134373438333634370a false
+PCASE false pld 400b000000000000 wi 2147483647 pld 3ffe000000000000 po 6 wi 10 pld 4026c00000000000 = x332e3337350aff312e3837350a312e350a31312e3337350a false
+PCASE true pz true wi 6 ap "hello" close pc -2147483584 po 9 = x747275650668656c6c6f true
+PCASE false pca "\u00e9\ud83d\ude00" po 9 pca "hello" = xc3a9f09f98803968656c6c6f false
+PCASE true pls "a" pc -2147483584 po 4 = x610a4063 false
+PCASE false flush pd 4011800000000000 wi 3 = x342e33373503 false
+PCASE true pl = x0a false
+PCASE false ps "a" = x61 false
+PCASE true pc 67 pc 70 pf 4ed90c6f pd 4020c00000000000 pd 4002000000000000 = x4346312e383230373335344539382e333735322e3235 false
+PCASE false pc 67 pls "hello" ap "" pz false wi 2147483647 = x4368656c6c6f0a66616c7365ff false
+PCASE true pld 4020800000000000 pld 401b000000000000 pz true pls "hello" pld 3ff2000000000000 = x382e32350a362e37350a7472756568656c6c6f0a312e3132350a false
+PCASE false pd 4021c00000000000 pl pc 74 pli 2147483647 wi 1 = x382e3837350a4a323134373438333634370a01 false
+PCASE true pli 2 pc -2147483584 pld 4026c00000000000 = x320a4031312e3337350a false
+PCASE false pli 2147483647 pz true ps null ps "\u00e9\ud83d\ude00" pj 2000006 = x323134373438333634370a747275656e756c6cc3a9f09f988032303030303036 false
+PCASE true pj 11000033 = x3131303030303333 false
+PCASE false pc 73 = x49 false
+PCASE true pca "a" pl ap "hello" pl = x610a68656c6c6f0a false
+PCASE false pc 69 = x45 false
+PCASE true pls "hello" wi 2 pls "" po 1 pl = x68656c6c6f0a020a7374720a false
+PCASE false po 1 pf 40000000 ap null pd 41fac086a0908818 pf 40c80000 pli 5 = x737472322e306e756c6c372e3138313139393838313033333232364539362e3235350a false
+PCASE true ps "\u00e9\ud83d\ude00" plo 4 pli 10 close wi 3 = xc3a9f09f9880630a31300a true
+PCASE false pd 4027800000000000 flush pli 2147483647 pls null = x31312e3735323134373438333634370a6e756c6c0a false
+PCASE true ps "hello" pca "hello" pca "hello" pd 4007000000000000 = x68656c6c6f68656c6c6f68656c6c6f322e383735 false
+PCASE false plo 9 wi 2147483647 pd 4021400000000000 pf 40fc0000 = x390aff382e363235372e383735 false
+PCASE true pz false = x66616c7365 false
+PCASE false pf 41400000 pf 41080000 pz true pca "\u00e9\ud83d\ude00" pli 3 = x31322e30382e3574727565c3a9f09f9880330a false
+PCASE true pd 4001000000000000 pl pls "hello" pc 2038580828 = x322e3132350a68656c6c6f0ae4999c false
+PCASE false pc 68 pz false = x4466616c7365 false
+PCASE true pd 42005251d47f7f3e pc 806894391 pf 40980000 = x382e37363235373134303739333731334539e3acb7342e3735 false
+PCASE false pls "hello" po 8 wi 11 pd 4004000000000000 pca "" = x68656c6c6f0a2d330b322e35 false
+PCASE true pca "hello" pli 12 pf 4ed981e3 pld 400a000000000000 flush pd 4020800000000000 = x68656c6c6f31320a312e383234353834314539332e32350a382e3235 false
+PCASE false ap "hello" wi 0 po 4 pca "a" ps "a" pc 66 = x68656c6c6f0063616142 false
+PCASE true pd 41e5668681c92254 pl wi 5 plo 2 = x322e3837323332353133343238353434303445390a0534320a false
+PCASE false pj 11000033 pl pls "\u00e9\ud83d\ude00" pd 42026c5d9baf6ca0 = x31313030303033330ac3a9f09f98800a392e38393039333536363939323830344539 false
+PCASE true pd 42009e8b7170d1ea pls "a" flush ps "a" wi 342787833 pl = x382e3932323432363932363130323439374539610a61f90a false
+PCASE false flush pz true = x74727565 false
+PCASE true pls "a" pld 41fcb783579ea003 plo 1 pl pz false pc -2147483584 = x610a372e37303836323031353339313430363545390a7374720a0a66616c736540 false
+PCASE false pf 41000000 pf 3fe00000 ps null wi 2147483647 po 3 = x382e30312e37356e756c6cff2d37 false
+PCASE true pd 4010800000000000 = x342e313235 false
+PCASE false pl pz true pl po 4 pj 6180798042338500 pd 4024c00000000000 = x0a747275650a633631383037393830343233333835303031302e333735 false
+PCASE true po 8 = x2d33 false
+PCASE false pj 5000015 po 3 pc 68 pz true pj 0 = x353030303031352d37447472756530 false
+PCASE true pl pj 0 = x0a30 false
+PCASE false pls "hello" po 6 pj 4000012 = x68656c6c6f0a312e3534303030303132 false
+PCASE true pz false ap "" pj 1000003 = x66616c736531303030303033 false
+PCASE false pls "" = x0a false
+PCASE true flush ap "\u00e9\ud83d\ude00" close = xc3a9f09f9880 false
+PCASE false pf 41420000 pls null = x31322e3132356e756c6c0a false
+PCASE true ps "a" pca "hello" = x6168656c6c6f false
+PCASE false wi 2147483647 ps "a" = xff61 false
+PCASE true pd 401b800000000000 pc 76 pd 4009000000000000 po 2 pli 2147483647 ps "\u00e9\ud83d\ude00" = x362e3837354c332e3132353432323134373438333634370ac3a9f09f9880 false
+PCASE false pld 41e2bfac6e0fc2f7 pc 74 = x322e3531363431313234383439323534393445390a4a false
+PCASE true ps "" po 5 po 0 plo 3 plo 5 = x747275656e756c6c2d370a747275650a false
+PCASE false pz false plo 6 pca "\u00e9\ud83d\ude00" = x66616c7365312e350ac3a9f09f9880 false
+PCASE true pz true pc 77 plo 5 ps "\u00e9\ud83d\ude00" plo 4 = x747275654d747275650ac3a9f09f9880630a false
+PCASE false pl pf 40880000 flush ap "\u00e9\ud83d\ude00" pld 4011800000000000 = x0a342e3235c3a9f09f9880342e3337350a false
+PCASE true pls null plo 6 pli 11 ap "\u00e9\ud83d\ude00" = x6e756c6c0a312e350a31310ac3a9f09f9880 false
+PCASE false ps "hello" wi 9 pli 8 = x68656c6c6f09380a false
+PCASE true pli 2147483647 pf 500890b7 = x323134373438333634370a392e3136343734324539 false
+PCASE false ps null pli 2147483647 po 1 po 9 pls "a" = x6e756c6c323134373438333634370a73747239610a false
+PCASE true flush pld 3fc0000000000000 pf 4dd8cd84 pls "\u00e9\ud83d\ude00" = x302e3132350a342e3534363638344538c3a9f09f98800a false
+PCASE false plo 6 = x312e350a false
+PCASE true pj 0 wi 2147483647 = x30ff false
+PCASE false pld 4027400000000000 pf 40000000 pli 4 = x31312e3632350a322e30340a false
+PCASE true pca "hello" pf 40080000 pld 4022800000000000 = x68656c6c6f322e313235392e32350a false
+PCASE false pc 70 pc 75 wi 4 = x464b04 false
+PCASE true pf 41160000 pld 41e378f021e959e4 = x392e333735322e36313335343331383332393232323345390a false
+PCASE false pl pd 4023c00000000000 = x0a392e383735 false
+PCASE true wi 12 wi 0 ap "\u00e9\ud83d\ude00" = x0c00c3a9f09f9880 false
+PCASE false pz true pj 6000018 pj 1000003 pli 4 plo 0 pz true = x747275653630303030313831303030303033340a6e756c6c0a74727565 false
+PCASE true pj 6000018 pca "" pf 41220000 pli 10 pf 4f61bbe9 = x3630303030313831302e31323531300a332e373837313838354539 false
+PCASE false close pca "hello" pl flush pj 2000006 pj 11000033 = x true
+PCASE true ps "a" pls "hello" ap null = x6168656c6c6f0a6e756c6c false
+PCASE false plo 0 = x6e756c6c0a false
+PCASE true pld 4022800000000000 pz true pj 10000030 pl pld 41dbac59d407e3e5 pca "" = x392e32350a7472756531303030303033300a312e3835373132303038303132333238343645390a false
+PCASE false pli 2147483647 ap "a" = x323134373438333634370a61 false
+PCASE true pj 6000018 pli 2147483647 = x36303030303138323134373438333634370a false
+PCASE false ap "a" = x61 false
+PCASE true pd 4015000000000000 pj 10000030 wi 8 pc 69 pj 10000030 = x352e3235313030303030333008453130303030303330 false
+PCASE false pl = x0a false
+PCASE true pli 2147483647 pf 40400000 ap "a" pj 6000018 = x323134373438333634370a332e306136303030303138 false
+PCASE false pca "hello" pd 4025400000000000 = x68656c6c6f31302e363235 false
+PCASE true po 4 = x63 false
+PCASE false ap "hello" = x68656c6c6f false
+PCASE true plo 3 pca "" ap "\u00e9\ud83d\ude00" pli 0 flush pc 72 = x2d370ac3a9f09f9880300a48 false
+PCASE false pls null ap "hello" pc -2147483584 pj 11000033 = x6e756c6c0a68656c6c6f403131303030303333 false
+PCASE true ps "hello" = x68656c6c6f false
+PCASE false pj 2000006 pl po 3 = x323030303030360a2d37 false
+PCASE true pl pls null = x0a6e756c6c0a false
+PCASE false pl ps null = x0a6e756c6c false
+PCASE true pli 2147483647 plo 1 pf 40a80000 = x323134373438333634370a7374720a352e3235 false
+PCASE false pls "" = x0a false
+PCASE true flush po 0 pl = x6e756c6c0a false
+PCASE false po 1 = x737472 false
+PCASE true wi 12 = x0c false
+PCASE false pf 4f857710 plo 6 pd 41d3ef219c71268d pl ap null = x342e3437383334354539312e350a312e33333737353532343937363739373845390a6e756c6c false
+PCASE true flush = x false
+PCASE false pli 4 = x340a false
+PCASE true po 3 ps null = x2d376e756c6c false
+PCASE false pl plo 7 pl = x0a302e310a0a false
+PCASE true pd 4018000000000000 pca "" pc 77 pf 41100000 ap "\u00e9\ud83d\ude00" pld 41e354f6cfe9eec0 = x362e304d392e30c3a9f09f9880322e3539343638323439353331303339343345390a false
+PCASE false pli 2 = x320a false
+PCASE true pl = x0a false
+PCASE false pj 11000033 pld 3ffe000000000000 wi 8 pd 3fd0000000000000 = x3131303030303333312e3837350a08302e3235 false
+PCASE true po 6 pj 5086552085610478 po 1 pli 2147483647 pj 2000006 = x312e3535303836353532303835363130343738737472323134373438333634370a32303030303036 false
+PCASE false plo 0 pca "\u00e9\ud83d\ude00" pca "\u00e9\ud83d\ude00" ap "hello" pz true = x6e756c6c0ac3a9f09f9880c3a9f09f988068656c6c6f74727565 false
+PCASE true pca "" pca "" pj 11000033 pld 4016800000000000 pc 73 = x3131303030303333352e3632350a49 false
+PCASE false pls "\u00e9\ud83d\ude00" po 0 pd 400e000000000000 = xc3a9f09f98800a6e756c6c332e3735 false
+PCASE true ps "a" pz true pz true pj 511812964434287 wi 11 flush = x6174727565747275653531313831323936343433343238370b false
+PCASE false pl = x0a false
+PCASE true pd 401f000000000000 pli 2147483647 pd 4016800000000000 = x372e3735323134373438333634370a352e363235 false
+PCASE false pca "" pf 40e00000 pl pd 401c000000000000 pli 9 flush = x372e300a372e30390a false
+PCASE true ps "" = x false
+PCASE false pd 4020800000000000 ps "\u00e9\ud83d\ude00" = x382e3235c3a9f09f9880 false
+PCASE true pf 40cc0000 ps "hello" = x362e33373568656c6c6f false
+PCASE false ap "" pd 4026400000000000 ps "hello" flush pca "hello" pls "hello" = x31312e31323568656c6c6f68656c6c6f68656c6c6f0a false
+PCASE true pli 0 pld 4027400000000000 pf 40a80000 = x300a31312e3632350a352e3235 false
+PCASE false pc 69 pca "" pd 0 pli 5 = x45302e30350a false
+PCASE true pc -2147483584 pl = x400a false
+PCASE false pd 4021800000000000 ap "hello" pls "\u00e9\ud83d\ude00" pl plo 0 = x382e373568656c6c6fc3a9f09f98800a0a6e756c6c0a false
+PCASE true pl pz false po 1 pls "" po 8 = x0a66616c73657374720a2d33 false
+PCASE false pf 41020000 pd 4021800000000000 ap null flush pd 4016800000000000 wi 8 = x382e313235382e37356e756c6c352e36323508 false
+PCASE true pz true = x74727565 false
+PCASE false po 7 pld 400c000000000000 pf 409c0000 = x302e31332e350a342e383735 false
+PCASE true pj 1705069583193404 pca "" pc 72 pca "a" pld 4021c00000000000 plo 8 = x313730353036393538333139333430344861382e3837350a2d330a false
+PCASE false pf 40000000 wi 0 pc 68 pd 4002000000000000 pl = x322e300044322e32350a false
+PCASE true pf 41080000 pj 3000009 pl pls "a" = x382e35333030303030390a610a false
+PCASE false ap "" po 5 ps "" pls "hello" pz true pld 3fd8000000000000 = x7472756568656c6c6f0a74727565302e3337350a false
+PCASE true pf 4edabb1f = x312e383334383438314539 false
+PCASE false pf 40ac0000 po 6 pz true = x352e333735312e3574727565 false
+PCASE true pc 70 pz true wi 906149983 pl pls "\u00e9\ud83d\ude00" pl = x46747275655f0ac3a9f09f98800a0a false
+PCASE false pj 6193147098385557 pli 10 pj 3000009 po 0 pd 4020800000000000 wi 7 = x3631393331343730393833383535353731300a333030303030396e756c6c382e323507 false
+PCASE true ap "a" pls null pl pz true pls "hello" wi 2147483647 = x616e756c6c0a0a7472756568656c6c6f0aff false
+PCASE false flush ap null pli 5 ap null = x6e756c6c350a6e756c6c false
+PCASE true pc -2147483584 pca "\u00e9\ud83d\ude00" = x40c3a9f09f9880 false
+PCASE false po 3 pc 68 = x2d3744 false
+PCASE true pc 71 pd 4020c00000000000 pz true plo 6 = x47382e33373574727565312e350a false
+PCASE false pca "" pf 40300000 plo 3 = x322e37352d370a false
+PCASE true po 7 = x302e31 false
+PCASE false plo 1 plo 0 pli 6 wi 4 pls "a" pls "" = x7374720a6e756c6c0a360a04610a0a false
+PCASE true close ap "a" ap "\u00e9\ud83d\ude00" pli 2147483647 flush = x true
+PCASE false ap "" ap "" plo 7 ps "a" pca "a" pj 11000033 = x302e310a61613131303030303333 false
+PCASE true pj 3000009 pld 4019000000000000 pj 3000009 = x33303030303039362e32350a33303030303039 false
+PCASE false pca "hello" ps "" = x68656c6c6f false
+PCASE true po 6 = x312e35 false
+PCASE false po 8 pld 4012800000000000 pld 4025800000000000 = x2d33342e3632350a31302e37350a false
+PCASE true ps "a" pld 41e622db777f729c close = x61322e3937313036353237353938323734303445390a false
+PCASE false pz true pc 69 pld 401d800000000000 ps "hello" pd 3ffe000000000000 = x7472756545372e3337350a68656c6c6f312e383735 false
+PCASE true pf 40f80000 pl pf 40b40000 pd 4025000000000000 = x372e37350a352e36323531302e35 false
+PCASE false pf 41240000 pc 74 pz false pz false po 0 = x31302e32354a66616c736566616c73656e756c6c false
+PCASE true plo 1 = x7374720a false
+PCASE false pca "a" = x61 false
+PCASE true ap "\u00e9\ud83d\ude00" pls "hello" pca "a" ap "\u00e9\ud83d\ude00" pli 2147483647 pld 400c000000000000 = xc3a9f09f988068656c6c6f0a61c3a9f09f9880323134373438333634370a332e350a false
+PCASE false flush pl pl = x0a0a false
+PCASE true ap "\u00e9\ud83d\ude00" = xc3a9f09f9880 false
+PCASE false pli 8 pld 3ffa000000000000 pz true = x380a312e3632350a74727565 false
+PCASE true pd 4023800000000000 = x392e3735 false
+PCASE false pl ap "a" pl pld 4201748fe4b961fe = x0a610a392e33373132353339313131373238343845390a false
+PCASE true pld 3ffc000000000000 flush pc 66 = x312e37350a42 false
+PCASE false pj 0 ps "hello" po 7 flush = x3068656c6c6f302e31 false
+PCASE true pl pd 4026000000000000 pc 65 pl flush pld 3ff2000000000000 = x0a31312e30410a312e3132350a false
+PCASE false ap "\u00e9\ud83d\ude00" pli 7 = xc3a9f09f9880370a false
+PCASE true pli 2147483647 pld 4024c00000000000 = x323134373438333634370a31302e3337350a false
+PCASE false pca "hello" pf 4f30f2ad ps "hello" pj 1798806851404365 po 6 = x68656c6c6f322e393638363934453968656c6c6f31373938383036383531343034333635312e35 false
+PCASE true ps "" pc 72 pf 41340000 pls "\u00e9\ud83d\ude00" pls "" = x4831312e3235c3a9f09f98800a0a false
+PCASE false pd 3fec000000000000 pld 4018000000000000 po 0 = x302e383735362e300a6e756c6c false
+PCASE true pj 7000021 plo 7 = x37303030303231302e310a false
+PCASE false pd 4024000000000000 = x31302e30 false
+PCASE true pz true = x74727565 false
+PCASE false pf 4f07150c po 9 pf 40480000 pca "hello" pj 3326269990780036 = x322e32363633303335453939332e31323568656c6c6f33333236323639393930373830303336 false
+PCASE true pca "\u00e9\ud83d\ude00" pz true pld 4011800000000000 pc 65 = xc3a9f09f988074727565342e3337350a41 false
+PCASE false pd 41f0fa38e63d940d pz true plo 7 = x342e353537333434333535383438363435453974727565302e310a false
+PCASE true pca "hello" pc -2147483584 pf 4fbb5d22 pc 69 po 8 pd 4017800000000000 = x68656c6c6f40362e3238363838364539452d33352e383735 false
+PCASE false close pld 4016000000000000 pls "\u00e9\ud83d\ude00" pd 41ffb5f2569cbe6d ps "\u00e9\ud83d\ude00" = x true
+PCASE true wi 2147483647 = xff false
+PCASE false pls null pf 411e0000 = x6e756c6c0a392e383735 false
+PCASE true pz true pj 0 flush pca "\u00e9\ud83d\ude00" = x7472756530c3a9f09f9880 false
+PCASE false pl pf 413e0000 pca "hello" pls "\u00e9\ud83d\ude00" = x0a31312e38373568656c6c6fc3a9f09f98800a false
+PCASE true pli 10 ap "\u00e9\ud83d\ude00" pld 4013800000000000 pj 8000024 = x31300ac3a9f09f9880342e3837350a38303030303234 false
+PCASE false pli 8 wi 4 = x380a04 false
+PCASE true pc 69 = x45 false
+PCASE false pli 2147483647 close = x323134373438333634370a false
+PCASE true ps "" = x false
+PCASE false pli 3 pd 3ffc000000000000 = x330a312e3735 false
+PCASE true pf 3f600000 plo 4 pf 4fb447bd wi 2147483647 flush pc 65 = x302e383735630a362e303439323030364539ff41 false
+PCASE false pli 1139764475 pd 4025000000000000 = x313133393736343437350a31302e35 false
+PCASE true pld 401a000000000000 ap "a" pc 75 pl ap "\u00e9\ud83d\ude00" close = x362e350a614b0ac3a9f09f9880 false
+PCASE false pz true = x74727565 false

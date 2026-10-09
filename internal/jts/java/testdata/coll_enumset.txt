@@ -1,0 +1,1253 @@
+new EnumSet ord of AL[eZ] => [eZ]
+remove eB => false | [eZ] | 0:0
+clone => RegularEnumSet:[eZ] | = | 0:0
+isEmpty => false | = | 0:0
+toArrayT 5 => same:A[eZ,null,i-1,i-1,i-1] | = | 0:0
+containsAll EM[] => true | = | 0:0
+iter n/h/n => eZ/false/!NoSuchElementException | = | 0:0
+containsInt => false | = | 0:0
+containsAll EM[eY,eZ,eX,eA,eB,eM] => false | = | 0:0
+isEmpty => false | = | 0:0
+isEmpty => false | = | 0:0
+cme eB => eZ/true/false/!NoSuchElementException | [eZ,eB] | 0:0
+toString => [Z,_B] | = | 0:0
+copyOf LL[eB,eB,eZ,eX] => [eX,eZ,eB] | = | 0:0
+iter n/n/n/n/h => eZ/eB/!NoSuchElementException/!NoSuchElementException/false | = | 0:0
+toString => [Z,_B] | = | 0:0
+toArray => A[eZ,eB] | = | 0:0
+equals LL[] => false | = | 0:0
+equals EM[] => false | = | 0:0
+addAll LL[eY,eA,eM,eZ,eM] => true | [eY,eZ,eM,eA,eB] | 0:0
+isEmpty => false | = | 0:0
+toArray => A[eY,eZ,eM,eA,eB] | = | 0:0
+remove eM => true | [eY,eZ,eA,eB] | 0:0
+toString => [Y,_Z,_A,_B] | = | 0:0
+containsAll LL[eB,eA,eY,eX,eX] => false | = | 0:0
+remove eA => true | [eY,eZ,eB] | 0:0
+isEmpty => false | = | 0:0
+clone => RegularEnumSet:[eY,eZ,eB] | = | 0:0
+retainAll AL[eA,eA] => true | [] | 0:0
+toString => [] | = | 0:0
+toString => [] | = | 0:0
+remove eX => false | = | 0:0
+toArray => A[] | = | 0:0
+retainAll EM[eZ,eZ,eA,eM,eB,eX] => false | = | 0:0
+toArray => A[] | = | 0:0
+toArray => A[] | = | 0:0
+removeAll EM[eX,eM,eY,eY,eX,eX] => false | = | 0:0
+cme eA => !NoSuchElementException/true/false/!NoSuchElementException | [eA] | 0:0
+new EnumSet ord of AL[eB,eY,eY] => [eY,eB]
+containsAll LL[eY] => true | [eY,eB] | 0:0
+isEmpty => false | = | 0:0
+isEmpty => false | = | 0:0
+retainAll EM[eX,eZ,eX] => true | [] | 0:0
+toArrayT 1 => same:A[null] | = | 0:0
+copyOf LL[eB,eB] => [eB] | = | 0:0
+toString => [] | = | 0:0
+add eM => true | [eM] | 0:0
+equals LL[eA] => false | = | 0:0
+containsInt => false | = | 0:0
+size => 1 | = | 0:0
+toString => [M] | = | 0:0
+toArray => A[eM] | = | 0:0
+addAll LL[] => false | = | 0:0
+toArray => A[eM] | = | 0:0
+retainAll AL[eX,eB] => true | [] | 0:0
+toArray => A[] | = | 0:0
+toString => [] | = | 0:0
+toArray => A[] | = | 0:0
+add eZ => true | [eZ] | 0:0
+containsAll EM[eB,eY,eX,eY,eM] => false | = | 0:0
+toArray => A[eZ] | = | 0:0
+removeAll EM[eZ] => true | [] | 0:0
+copyOf AL[eZ,eB,eB,eZ] => [eZ,eB] | = | 0:0
+toString => [] | = | 0:0
+toString => [] | = | 0:0
+size => 0 | = | 0:0
+addAll EM[eB,eA,eA,eZ,eX] => true | [eX,eZ,eA,eB] | 0:0
+toString => [X,_Z,_A,_B] | = | 0:0
+cme eB => eX/false/true/eZ | = | 0:0
+removeAll LL[] => false | = | 0:0
+clone => RegularEnumSet:[eX,eZ,eA,eB] | = | 0:0
+contains eX => true | = | 0:0
+toString => [X,_Z,_A,_B] | = | 0:0
+cme eZ => eX/false/true/eZ | = | 0:0
+copyOfSet => [eX,eZ,eA,eB] | = | 0:0
+retainAll AL[eY,eY,eZ,eB,eY,eB] => true | [eZ,eB] | 0:0
+remove eX => false | = | 0:0
+size => 2 | = | 0:0
+remove eB => true | [eZ] | 0:0
+clear => ok | [] | 0:0
+addAll EM[eZ] => true | [eZ] | 0:0
+toString => [Z] | = | 0:0
+size => 1 | = | 0:0
+toString => [Z] | = | 0:0
+new EnumSet ord of AL[eY,eZ,eZ] => [eY,eZ]
+isEmpty => false | [eY,eZ] | 0:0
+copyOf AL[eB,eM,eA,eX,eA] => [eX,eM,eA,eB] | = | 0:0
+toString => [Y,_Z] | = | 0:0
+contains eB => false | = | 0:0
+iter n/r/n/r/n/n => eY/ok/eZ/ok/!NoSuchElementException/!NoSuchElementException | [] | 0:0
+size => 0 | = | 0:0
+toString => [] | = | 0:0
+add eB => true | [eB] | 0:0
+cme eX => eB/true/false/!NoSuchElementException | [eX,eB] | 0:0
+iter r/r/n/n/n/n => !IllegalStateException/!IllegalStateException/eX/eB/!NoSuchElementException/!NoSuchElementException | = | 0:0
+toArrayT 2 => same:A[eX,eB] | = | 0:0
+iter n/n/n/h => eX/eB/!NoSuchElementException/false | = | 0:0
+addAll EM[eM,eA,eB,eA] => true | [eX,eM,eA,eB] | 0:0
+toString => [X,_M,_A,_B] | = | 0:0
+retainAll LL[eY,eY,eX,eY,eA,eX] => true | [eX,eA] | 0:0
+toString => [X,_A] | = | 0:0
+toString => [X,_A] | = | 0:0
+toString => [X,_A] | = | 0:0
+containsAll EM[] => true | = | 0:0
+size => 2 | = | 0:0
+cme eB => eX/true/true/eA | [eX,eA,eB] | 0:0
+clone => RegularEnumSet:[eX,eA,eB] | = | 0:0
+equals LL[eY,eA,eA,eY,eY] => false | = | 0:0
+containsAll EM[eY,eA,eM,eY,eX] => false | = | 0:0
+addAll EM[eM,eY,eY,eM,eX] => true | [eX,eY,eM,eA,eB] | 0:0
+copyOfSet => [eX,eY,eM,eA,eB] | = | 0:0
+iter n/n/r/n/r/n/n/r => eX/eY/ok/eM/ok/eA/eB/ok | [eX,eA] | 0:0
+isEmpty => false | = | 0:0
+retainAll EM[eM,eY,eB,eM] => true | [] | 0:0
+retainAll EM[eA,eX] => false | = | 0:0
+remove eM => false | = | 0:0
+add eB => true | [eB] | 0:0
+new EnumSet ord of AL[eM,eM,eM,eZ,eM] => [eZ,eM]
+copyOf EM[eM,eM,eY,eY] => [eY,eM] | [eZ,eM] | 0:0
+containsInt => false | = | 0:0
+iter r/n/n/r/r/n => !IllegalStateException/eZ/eM/ok/!IllegalStateException/!NoSuchElementException | [eZ] | 0:0
+equals EM[eX,eZ,eX,eA,eY] => false | = | 0:0
+containsAll LL[] => true | = | 0:0
+clone => RegularEnumSet:[eZ] | = | 0:0
+equals EM[eA,eZ,eY] => false | = | 0:0
+size => 1 | = | 0:0
+size => 1 | = | 0:0
+remove eA => false | = | 0:0
+copyOf AL[eZ,eB] => [eZ,eB] | = | 0:0
+toArray => A[eZ] | = | 0:0
+copyOf LL[eA] => [eA] | = | 0:0
+containsInt => false | = | 0:0
+addAll LL[eY,eY,eY,eA,eM] => true | [eY,eZ,eM,eA] | 0:0
+add eM => false | = | 0:0
+retainAll LL[] => true | [] | 0:0
+size => 0 | = | 0:0
+add eM => true | [eM] | 0:0
+isEmpty => false | = | 0:0
+new EnumSet ord of AL[eZ,eY,eM] => [eY,eZ,eM]
+containsAll LL[eX,eB,eA] => false | [eY,eZ,eM] | 0:0
+cme eB => eY/true/true/eZ | [eY,eZ,eM,eB] | 0:0
+copyOf EM[eM,eZ,eB,eA] => [eZ,eM,eA,eB] | = | 0:0
+size => 4 | = | 0:0
+retainAll AL[eX] => true | [] | 0:0
+addAll EM[eZ,eY] => true | [eY,eZ] | 0:0
+toString => [Y,_Z] | = | 0:0
+toString => [Y,_Z] | = | 0:0
+addAll LL[eB,eX,eB] => true | [eX,eY,eZ,eB] | 0:0
+remove eA => false | = | 0:0
+toArrayT 2 => new:A[eX,eY,eZ,eB] | = | 0:0
+isEmpty => false | = | 0:0
+copyOf AL[eM,eB,eA,eB,eZ,eX] => [eX,eZ,eM,eA,eB] | = | 0:0
+add eM => true | [eX,eY,eZ,eM,eB] | 0:0
+addAll LL[eY,eZ,eZ] => false | = | 0:0
+toString => [X,_Y,_Z,_M,_B] | = | 0:0
+containsAll EM[eA,eB,eY,eX] => false | = | 0:0
+retainAll AL[eY,eX,eX] => true | [eX,eY] | 0:0
+remove eB => false | = | 0:0
+containsAll EM[eB,eB,eX,eZ,eM,eZ] => false | = | 0:0
+cme eY => eX/false/true/eY | = | 0:0
+copyOf EM[eX,eB,eM,eB] => [eX,eM,eB] | = | 0:0
+remove eZ => false | = | 0:0
+clone => RegularEnumSet:[eX,eY] | = | 0:0
+addAll EM[eZ,eY,eB,eX,eA,eB] => true | [eX,eY,eZ,eA,eB] | 0:0
+size => 5 | = | 0:0
+isEmpty => false | = | 0:0
+toString => [X,_Y,_Z,_A,_B] | = | 0:0
+remove eB => true | [eX,eY,eZ,eA] | 0:0
+toString => [X,_Y,_Z,_A] | = | 0:0
+isEmpty => false | = | 0:0
+clone => RegularEnumSet:[eX,eY,eZ,eA] | = | 0:0
+toString => [X,_Y,_Z,_A] | = | 0:0
+iter n/n/r/n/n/n/n => eX/eY/ok/eZ/eA/!NoSuchElementException/!NoSuchElementException | [eX,eZ,eA] | 0:0
+retainAll EM[] => true | [] | 0:0
+isEmpty => true | = | 0:0
+toArrayT 5 => same:A[null,i-1,i-1,i-1,i-1] | = | 0:0
+copyOf EM[eM,eZ,eB,eZ,eZ] => [eZ,eM,eB] | = | 0:0
+cme eY => !NoSuchElementException/true/false/!NoSuchElementException | [eY] | 0:0
+new EnumSet ord of AL[eM,eB,eY] => [eY,eM,eB]
+contains eM => true | [eY,eM,eB] | 0:0
+cme eA => eY/true/true/eM | [eY,eM,eA,eB] | 0:0
+retainAll AL[eB,eY,eY] => true | [eY,eB] | 0:0
+add eM => true | [eY,eM,eB] | 0:0
+removeAll EM[eY,eY,eB,eZ,eX,eM] => true | [] | 0:0
+removeAll EM[eX,eX,eZ,eM,eZ] => false | = | 0:0
+copyOfSet => [] | = | 0:0
+removeAll AL[eM,eZ,eX,eZ] => false | = | 0:0
+containsAll EM[] => true | = | 0:0
+addAll EM[eB,eB,eA,eZ,eA,eM] => true | [eZ,eM,eA,eB] | 0:0
+isEmpty => false | = | 0:0
+toString => [Z,_M,_A,_B] | = | 0:0
+addAll EM[eM,eZ,eZ,eY,eX,eY] => true | [eX,eY,eZ,eM,eA,eB] | 0:0
+toArray => A[eX,eY,eZ,eM,eA,eB] | = | 0:0
+containsAll EM[eX,eX,eM,eZ,eX] => true | = | 0:0
+equals AL[eY] => false | = | 0:0
+add null => !NullPointerException | = | 0:0
+removeAll LL[] => false | = | 0:0
+contains eA => true | = | 0:0
+clone => RegularEnumSet:[eX,eY,eZ,eM,eA,eB] | = | 0:0
+isEmpty => false | = | 0:0
+new EnumSet ord of AL[eM,eZ,eA,eM,eY] => [eY,eZ,eM,eA]
+size => 4 | [eY,eZ,eM,eA] | 0:0
+containsAll LL[] => true | = | 0:0
+toString => [Y,_Z,_M,_A] | = | 0:0
+toArray => A[eY,eZ,eM,eA] | = | 0:0
+contains eM => true | = | 0:0
+clone => RegularEnumSet:[eY,eZ,eM,eA] | = | 0:0
+containsAll EM[eZ] => true | = | 0:0
+toString => [Y,_Z,_M,_A] | = | 0:0
+toString => [Y,_Z,_M,_A] | = | 0:0
+contains eY => true | = | 0:0
+clone => RegularEnumSet:[eY,eZ,eM,eA] | = | 0:0
+clone => RegularEnumSet:[eY,eZ,eM,eA] | = | 0:0
+cme eM => eY/false/true/eZ | = | 0:0
+retainAll LL[eY,eY,eA] => true | [eY,eA] | 0:0
+toString => [Y,_A] | = | 0:0
+containsInt => false | = | 0:0
+isEmpty => false | = | 0:0
+removeAll EM[eA] => true | [eY] | 0:0
+toString => [Y] | = | 0:0
+copyOf AL[eZ,eY,eY,eA,eX,eX] => [eX,eY,eZ,eA] | = | 0:0
+toArray => A[eY] | = | 0:0
+isEmpty => false | = | 0:0
+toArray => A[eY] | = | 0:0
+toString => [Y] | = | 0:0
+toString => [Y] | = | 0:0
+toArray => A[eY] | = | 0:0
+removeAll LL[eM,eB,eM,eY,eA] => true | [] | 0:0
+size => 0 | = | 0:0
+toArrayT 4 => same:A[null,i-1,i-1,i-1] | = | 0:0
+remove eX => false | = | 0:0
+new EnumSet ord of AL[eZ,eM,eZ,eZ] => [eZ,eM]
+toArrayT 2 => same:A[eZ,eM] | [eZ,eM] | 0:0
+addAll LL[eX,eM,eB,eZ] => true | [eX,eZ,eM,eB] | 0:0
+contains eB => true | = | 0:0
+removeAll AL[eB] => true | [eX,eZ,eM] | 0:0
+toString => [X,_Z,_M] | = | 0:0
+size => 3 | = | 0:0
+copyOf EM[eY,eM,eX] => [eX,eY,eM] | = | 0:0
+size => 3 | = | 0:0
+toArray => A[eX,eZ,eM] | = | 0:0
+cme eZ => eX/false/true/eZ | = | 0:0
+equals EM[eM,eZ] => false | = | 0:0
+iter r/n/n/n/n/n/n => !IllegalStateException/eX/eZ/eM/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException | = | 0:0
+toArrayT 4 => same:A[eX,eZ,eM,null] | = | 0:0
+isEmpty => false | = | 0:0
+size => 3 | = | 0:0
+removeAll EM[] => false | = | 0:0
+iter xaeA/n/n/xaeA/n => true/eX/eZ/false/eM | [eX,eZ,eM,eA] | 0:0
+retainAll AL[eB,eA,eM] => true | [eM,eA] | 0:0
+containsAll LL[eB,eM] => false | = | 0:0
+remove eM => true | [eA] | 0:0
+retainAll EM[eZ,eA] => false | = | 0:0
+toString => [A] | = | 0:0
+size => 1 | = | 0:0
+retainAll LL[eA,eX] => false | = | 0:0
+toString => [A] | = | 0:0
+add eM => true | [eM,eA] | 0:0
+toString => [M,_A] | = | 0:0
+clone => RegularEnumSet:[eM,eA] | = | 0:0
+isEmpty => false | = | 0:0
+clone => RegularEnumSet:[eM,eA] | = | 0:0
+addAll EM[eY,eZ,eB,eX] => true | [eX,eY,eZ,eM,eA,eB] | 0:0
+containsInt => false | = | 0:0
+add eY => false | = | 0:0
+containsInt => false | = | 0:0
+remove eY => true | [eX,eZ,eM,eA,eB] | 0:0
+clone => RegularEnumSet:[eX,eZ,eM,eA,eB] | = | 0:0
+remove eZ => true | [eX,eM,eA,eB] | 0:0
+toArrayT 4 => same:A[eX,eM,eA,eB] | = | 0:0
+isEmpty => false | = | 0:0
+addAll AL[eZ,eM] => true | [eX,eZ,eM,eA,eB] | 0:0
+iter n/n/n/n/n/n/n/n => eX/eZ/eM/eA/eB/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException | = | 0:0
+contains eY => false | = | 0:0
+cme eB => eX/false/true/eZ | = | 0:0
+toArrayT 2 => new:A[eX,eZ,eM,eA,eB] | = | 0:0
+remove eZ => true | [eX,eM,eA,eB] | 0:0
+retainAll EM[eB,eX,eX] => true | [eX,eB] | 0:0
+new EnumSet ord of AL[eA,eA] => [eA]
+contains eY => false | [eA] | 0:0
+isEmpty => false | = | 0:0
+size => 1 | = | 0:0
+containsInt => false | = | 0:0
+equals LL[eY] => false | = | 0:0
+toString => [A] | = | 0:0
+addAll LL[eB] => true | [eA,eB] | 0:0
+contains eY => false | = | 0:0
+copyOfSet => [eA,eB] | = | 0:0
+removeAll LL[eX,eY] => false | = | 0:0
+containsAll AL[] => true | = | 0:0
+cme eA => eA/false/true/eB | = | 0:0
+removeAll EM[eB,eM] => true | [eA] | 0:0
+iter n/n/r/n/r => eA/!NoSuchElementException/ok/!NoSuchElementException/!IllegalStateException | [] | 0:0
+containsAll LL[] => true | = | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+toArrayT 6 => same:A[null,i-1,i-1,i-1,i-1,i-1] | = | 0:0
+contains eZ => false | = | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+toString => [] | = | 0:0
+iter r/r => !IllegalStateException/!IllegalStateException | = | 0:0
+containsAll EM[eX] => false | = | 0:0
+containsInt => false | = | 0:0
+new EnumSet ord of AL[eX,eA,eZ] => [eX,eZ,eA]
+size => 3 | [eX,eZ,eA] | 0:0
+containsAll AL[eM] => false | = | 0:0
+removeAll AL[eA,eB,eY,eZ,eM] => true | [eX] | 0:0
+toArray => A[eX] | = | 0:0
+isEmpty => false | = | 0:0
+iter n/n/n => eX/!NoSuchElementException/!NoSuchElementException | = | 0:0
+toString => [X] | = | 0:0
+clear => ok | [] | 0:0
+retainAll EM[eY,eA,eM,eY] => false | = | 0:0
+copyOf EM[eY,eX] => [eX,eY] | = | 0:0
+equals EM[eZ,eY,eZ,eA,eB] => false | = | 0:0
+contains eX => false | = | 0:0
+iter r/n/n/h => !IllegalStateException/!NoSuchElementException/!NoSuchElementException/false | = | 0:0
+contains eY => false | = | 0:0
+toArrayT 1 => same:A[null] | = | 0:0
+cme eB => !NoSuchElementException/true/false/!NoSuchElementException | [eB] | 0:0
+toArray => A[eB] | = | 0:0
+retainAll AL[eY,eA,eZ,eB,eY,eA] => false | = | 0:0
+removeAll EM[eX] => false | = | 0:0
+cme eY => eB/true/false/!NoSuchElementException | [eY,eB] | 0:0
+cme eY => eY/false/true/eB | = | 0:0
+add eA => true | [eY,eA,eB] | 0:0
+size => 3 | = | 0:0
+toString => [Y,_A,_B] | = | 0:0
+toArray => A[eY,eA,eB] | = | 0:0
+remove eA => true | [eY,eB] | 0:0
+toString => [Y,_B] | = | 0:0
+addAll EM[eX,eZ,eZ,eB,eY] => true | [eX,eY,eZ,eB] | 0:0
+toArrayT 2 => new:A[eX,eY,eZ,eB] | = | 0:0
+clone => RegularEnumSet:[eX,eY,eZ,eB] | = | 0:0
+toString => [X,_Y,_Z,_B] | = | 0:0
+toString => [X,_Y,_Z,_B] | = | 0:0
+retainAll EM[eX,eX,eX,eZ,eZ] => true | [eX,eZ] | 0:0
+remove eB => false | = | 0:0
+contains eA => false | = | 0:0
+add eM => true | [eX,eZ,eM] | 0:0
+toString => [X,_Z,_M] | = | 0:0
+contains eA => false | = | 0:0
+equals EM[eA,eX,eZ,eM,eX,eM] => false | = | 0:0
+toArrayT 5 => same:A[eX,eZ,eM,null,i-1] | = | 0:0
+add eM => false | = | 0:0
+copyOf EM[eY,eM,eZ,eB,eB] => [eY,eZ,eM,eB] | = | 0:0
+new EnumSet ord of AL[eM,eZ,eB,eM] => [eZ,eM,eB]
+copyOf AL[eX,eX,eZ,eM,eM,eZ] => [eX,eZ,eM] | [eZ,eM,eB] | 0:0
+clone => RegularEnumSet:[eZ,eM,eB] | = | 0:0
+size => 3 | = | 0:0
+clone => RegularEnumSet:[eZ,eM,eB] | = | 0:0
+size => 3 | = | 0:0
+clear => ok | [] | 0:0
+toArray => A[] | = | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+toString => [] | = | 0:0
+size => 0 | = | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+toString => [] | = | 0:0
+retainAll EM[eM,eZ,eA] => false | = | 0:0
+add eX => true | [eX] | 0:0
+cme eY => eX/true/false/!NoSuchElementException | [eX,eY] | 0:0
+contains eB => false | = | 0:0
+isEmpty => false | = | 0:0
+equals EM[] => false | = | 0:0
+containsInt => false | = | 0:0
+clear => ok | [] | 0:0
+removeAll EM[eB,eA,eM] => false | = | 0:0
+add eB => true | [eB] | 0:0
+toArray => A[eB] | = | 0:0
+copyOfSet => [eB] | = | 0:0
+equals EM[eB,eB,eZ] => false | = | 0:0
+toString => [B] | = | 0:0
+clone => RegularEnumSet:[eB] | = | 0:0
+cme eZ => eB/true/false/!NoSuchElementException | [eZ,eB] | 0:0
+containsAll EM[eA,eM] => false | = | 0:0
+remove eX => false | = | 0:0
+new EnumSet ord of AL[eA] => [eA]
+toArrayT 4 => same:A[eA,null,i-1,i-1] | [eA] | 0:0
+contains eB => false | = | 0:0
+toString => [A] | = | 0:0
+contains eB => false | = | 0:0
+add eZ => true | [eZ,eA] | 0:0
+isEmpty => false | = | 0:0
+toString => [Z,_A] | = | 0:0
+add eB => true | [eZ,eA,eB] | 0:0
+removeAll LL[] => false | = | 0:0
+clear => ok | [] | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+toArray => A[] | = | 0:0
+equals EM[eA,eX,eZ] => false | = | 0:0
+equals AL[] => false | = | 0:0
+toArray => A[] | = | 0:0
+cme eB => !NoSuchElementException/true/false/!NoSuchElementException | [eB] | 0:0
+remove eB => true | [] | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+copyOf LL[eB,eX] => [eX,eB] | = | 0:0
+copyOf EM[] => [] | = | 0:0
+toString => [] | = | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+toArrayT 6 => same:A[null,i-1,i-1,i-1,i-1,i-1] | = | 0:0
+new EnumSet ord of AL[eZ,eZ,eY,eY,eA] => [eY,eZ,eA]
+toString => [Y,_Z,_A] | [eY,eZ,eA] | 0:0
+containsAll EM[] => true | = | 0:0
+cme eY => eY/false/true/eZ | = | 0:0
+removeAll AL[eX,eA] => true | [eY,eZ] | 0:0
+containsAll EM[] => true | = | 0:0
+retainAll LL[eZ,eZ,eX,eX] => true | [eZ] | 0:0
+retainAll LL[eA,eA] => true | [] | 0:0
+toArrayT 2 => same:A[null,i-1] | = | 0:0
+copyOf AL[eY] => [eY] | = | 0:0
+contains eZ => false | = | 0:0
+toString => [] | = | 0:0
+retainAll LL[] => false | = | 0:0
+isEmpty => true | = | 0:0
+toArrayT 3 => same:A[null,i-1,i-1] | = | 0:0
+add eX => true | [eX] | 0:0
+size => 1 | = | 0:0
+copyOf EM[eA,eB,eB] => [eA,eB] | = | 0:0
+containsInt => false | = | 0:0
+iter h/n/n/n/r/r => true/eX/!NoSuchElementException/!NoSuchElementException/ok/!IllegalStateException | [] | 0:0
+addAll LL[eZ,eZ] => true | [eZ] | 0:0
+addAll AL[eX] => true | [eX,eZ] | 0:0
+new EnumSet ord of AL[eZ,eZ,eZ,eY,eY] => [eY,eZ]
+clone => RegularEnumSet:[eY,eZ] | [eY,eZ] | 0:0
+remove eY => true | [eZ] | 0:0
+toArray => A[eZ] | = | 0:0
+equals EM[eB,eX,eB,eM,eB,eM] => false | = | 0:0
+contains eA => false | = | 0:0
+iter r/n/h/r/n/h => !IllegalStateException/eZ/false/ok/!NoSuchElementException/false | [] | 0:0
+cme eY => !NoSuchElementException/true/false/!NoSuchElementException | [eY] | 0:0
+addAll AL[] => false | = | 0:0
+equals EM[] => false | = | 0:0
+size => 1 | = | 0:0
+clone => RegularEnumSet:[eY] | = | 0:0
+toArray => A[eY] | = | 0:0
+containsAll LL[eY,eB,eM] => false | = | 0:0
+cme eA => eY/true/false/!NoSuchElementException | [eY,eA] | 0:0
+remove eM => false | = | 0:0
+containsAll EM[eY,null,eA] => true | = | 0:0
+containsInt => false | = | 0:0
+toArrayT 3 => same:A[eY,eA,null] | = | 0:0
+toString => [Y,_A] | = | 0:0
+toArray => A[eY,eA] | = | 0:0
+equals EM[eM,eM,eY,eX,eA] => false | = | 0:0
+copyOf LL[eY,eB] => [eY,eB] | = | 0:0
+equals AL[eY,eX,eX] => false | = | 0:0
+cme eZ => eY/true/true/eA | [eY,eZ,eA] | 0:0
+addAll LL[eX,eA,eY,eX,eM] => true | [eX,eY,eZ,eM,eA] | 0:0
+clone => RegularEnumSet:[eX,eY,eZ,eM,eA] | = | 0:0
+toString => [X,_Y,_Z,_M,_A] | = | 0:0
+cme eY => eX/false/true/eY | = | 0:0
+retainAll EM[eZ,eZ,eB,null] => true | [eZ] | 0:0
+new EnumSet ord of AL[eB,eZ,eZ,eZ,eB] => [eZ,eB]
+retainAll EM[] => true | [] | 0:0
+addAll EM[eM,eA,eZ,eZ,eM] => true | [eZ,eM,eA] | 0:0
+toArray => A[eZ,eM,eA] | = | 0:0
+toArrayT 7 => same:A[eZ,eM,eA,null,i-1,i-1,i-1] | = | 0:0
+contains eZ => true | = | 0:0
+contains eA => true | = | 0:0
+containsAll LL[eY,eX,eA,eB] => false | = | 0:0
+toString => [Z,_M,_A] | = | 0:0
+copyOf EM[] => [] | = | 0:0
+isEmpty => false | = | 0:0
+retainAll EM[eM] => true | [eM] | 0:0
+isEmpty => false | = | 0:0
+iter n/n/h => eM/!NoSuchElementException/false | = | 0:0
+copyOfSet => [eM] | = | 0:0
+toArray => A[eM] | = | 0:0
+size => 1 | = | 0:0
+addAll EM[] => false | = | 0:0
+copyOf EM[eX,eX,eB] => [eX,eB] | = | 0:0
+clone => RegularEnumSet:[eM] | = | 0:0
+equals EM[eB] => false | = | 0:0
+toArrayT 3 => same:A[eM,null,i-1] | = | 0:0
+copyOf LL[eM,eB,eX,eZ,eZ] => [eX,eZ,eM,eB] | = | 0:0
+addAll EM[] => false | = | 0:0
+equals EM[eA,eY,eX,eX,eA] => false | = | 0:0
+isEmpty => false | = | 0:0
+cme eM => eM/false/false/!NoSuchElementException | = | 0:0
+contains eB => false | = | 0:0
+remove eZ => false | = | 0:0
+copyOf EM[eX,eZ] => [eX,eZ] | = | 0:0
+toString => [M] | = | 0:0
+iter n/n/n/n/r => eM/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException/ok | [] | 0:0
+isEmpty => true | = | 0:0
+remove eY => false | = | 0:0
+removeAll EM[] => false | = | 0:0
+new EnumSet ord of AL[eA] => [eA]
+clone => RegularEnumSet:[eA] | [eA] | 0:0
+toString => [A] | = | 0:0
+equals AL[] => false | = | 0:0
+toString => [A] | = | 0:0
+toString => [A] | = | 0:0
+containsAll EM[eX,eB] => false | = | 0:0
+containsAll LL[eB,eA,eY,eM,eA,eX] => false | = | 0:0
+contains eZ => false | = | 0:0
+copyOfSet => [eA] | = | 0:0
+iter n/n/n/n/n/n => eA/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException | = | 0:0
+retainAll EM[eZ,eZ,eM,eZ,eM,eB] => true | [] | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+size => 0 | = | 0:0
+toArray => A[] | = | 0:0
+iter n/n/n/h/n => !NoSuchElementException/!NoSuchElementException/!NoSuchElementException/false/!NoSuchElementException | = | 0:0
+addAll AL[eZ,eX] => true | [eX,eZ] | 0:0
+cme eX => eX/false/true/eZ | = | 0:0
+new EnumSet ord of AL[eY] => [eY]
+cme eY => eY/false/false/!NoSuchElementException | [eY] | 0:0
+retainAll AL[eM,eM] => true | [] | 0:0
+toArrayT 2 => same:A[null,i-1] | = | 0:0
+remove eB => false | = | 0:0
+copyOf LL[] => !IllegalArgumentException | = | 0:0
+toString => [] | = | 0:0
+containsAll LL[eB,eY,eY,null,eX] => false | = | 0:0
+containsAll EM[eM,eB,eZ,eM] => false | = | 0:0
+isEmpty => true | = | 0:0
+containsInt => false | = | 0:0
+toString => [] | = | 0:0
+removeAll LL[eY,eB,eX,eA,eB] => false | = | 0:0
+retainAll EM[eM,eA,null] => false | = | 0:0
+contains eX => false | = | 0:0
+isEmpty => true | = | 0:0
+addAll EM[] => false | = | 0:0
+remove eX => false | = | 0:0
+addAll EM[eY,eZ,eM,eY,null] => true | [eY,eZ,eM] | 0:0
+equals EM[] => false | = | 0:0
+equals AL[eY] => false | = | 0:0
+add eB => true | [eY,eZ,eM,eB] | 0:0
+toString => [Y,_Z,_M,_B] | = | 0:0
+size => 4 | = | 0:0
+cme eM => eY/false/true/eZ | = | 0:0
+retainAll EM[] => true | [] | 0:0
+containsAll EM[] => true | = | 0:0
+removeAll LL[eM] => false | = | 0:0
+removeAll LL[eA,eX,eZ,eZ,eA] => false | = | 0:0
+cme eZ => !NoSuchElementException/true/false/!NoSuchElementException | [eZ] | 0:0
+containsAll EM[eB,eM,eB,eY,eX] => false | = | 0:0
+containsAll LL[] => true | = | 0:0
+remove eX => false | = | 0:0
+retainAll EM[eX,eX,eY,eX,eY] => true | [] | 0:0
+iter n/n/n => !NoSuchElementException/!NoSuchElementException/!NoSuchElementException | = | 0:0
+addAll LL[eZ,eM,eB,eZ,eX,eB] => true | [eX,eZ,eM,eB] | 0:0
+copyOf AL[eM,null,null,eY,eB,eM] => !NullPointerException | = | 0:0
+copyOfSet => [eX,eZ,eM,eB] | = | 0:0
+retainAll LL[eM,eZ,eZ,eX] => true | [eX,eZ,eM] | 0:0
+clone => RegularEnumSet:[eX,eZ,eM] | = | 0:0
+iter r/r/n/r/n/r/n/r => !IllegalStateException/!IllegalStateException/eX/ok/eZ/ok/eM/ok | [] | 0:0
+removeAll EM[eY,eA,eY,eM,eM] => false | = | 0:0
+cme eX => !NoSuchElementException/true/false/!NoSuchElementException | [eX] | 0:0
+contains eX => true | = | 0:0
+removeAll EM[eB,eX,eY] => true | [] | 0:0
+isEmpty => true | = | 0:0
+new EnumSet ord of AL[eM,eX] => [eX,eM]
+equals LL[eM,eB] => false | [eX,eM] | 0:0
+iter n/n/n/n/n => eX/eM/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException | = | 0:0
+size => 2 | = | 0:0
+toArrayT 4 => same:A[eX,eM,null,i-1] | = | 0:0
+toArrayT 0 => new:A[eX,eM] | = | 0:0
+containsInt => false | = | 0:0
+remove eZ => false | = | 0:0
+copyOfSet => [eX,eM] | = | 0:0
+add eY => true | [eX,eY,eM] | 0:0
+contains eM => true | = | 0:0
+removeAll LL[eZ,eM] => true | [eX,eY] | 0:0
+iter r/n/r/n/n/n => !IllegalStateException/eX/ok/eY/!NoSuchElementException/!NoSuchElementException | [eY] | 0:0
+add eM => true | [eY,eM] | 0:0
+retainAll EM[] => true | [] | 0:0
+toArrayT 5 => same:A[null,i-1,i-1,i-1,i-1] | = | 0:0
+toArray => A[] | = | 0:0
+toArray => A[] | = | 0:0
+toArrayT 2 => same:A[null,i-1] | = | 0:0
+copyOf EM[eA,eY,eX,eX,eM] => [eX,eY,eM,eA] | = | 0:0
+removeAll LL[eA,eM,eX,eM,eY] => false | = | 0:0
+iter n/r => !NoSuchElementException/!IllegalStateException | = | 0:0
+toString => [] | = | 0:0
+new EnumSet ord of AL[eA,eM,eX,eY,eY] => [eX,eY,eM,eA]
+cme eZ => eX/true/true/eY | [eX,eY,eZ,eM,eA] | 0:0
+isEmpty => false | = | 0:0
+toString => [X,_Y,_Z,_M,_A] | = | 0:0
+size => 5 | = | 0:0
+toArray => A[eX,eY,eZ,eM,eA] | = | 0:0
+containsAll EM[eZ,eA,eX] => true | = | 0:0
+isEmpty => false | = | 0:0
+toString => [X,_Y,_Z,_M,_A] | = | 0:0
+size => 5 | = | 0:0
+toArray => A[eX,eY,eZ,eM,eA] | = | 0:0
+copyOf EM[eX,eY,eM] => [eX,eY,eM] | = | 0:0
+add eY => false | = | 0:0
+size => 5 | = | 0:0
+add eM => false | = | 0:0
+size => 5 | = | 0:0
+addAll LL[eZ,eY,eY,eB,eB] => true | [eX,eY,eZ,eM,eA,eB] | 0:0
+toArrayT 2 => new:A[eX,eY,eZ,eM,eA,eB] | = | 0:0
+isEmpty => false | = | 0:0
+containsAll EM[eB] => true | = | 0:0
+clone => RegularEnumSet:[eX,eY,eZ,eM,eA,eB] | = | 0:0
+equals EM[eZ,eY,eM] => false | = | 0:0
+toArray => A[eX,eY,eZ,eM,eA,eB] | = | 0:0
+retainAll LL[eZ,eY,eB] => true | [eY,eZ,eB] | 0:0
+copyOf LL[eY,eM,eY,eA,eB,eZ] => [eY,eZ,eM,eA,eB] | = | 0:0
+new EnumSet ord of AL[eA,eM,eA,eY,eA] => [eY,eM,eA]
+contains eA => true | [eY,eM,eA] | 0:0
+size => 3 | = | 0:0
+size => 3 | = | 0:0
+equals EM[] => false | = | 0:0
+toArray => A[eY,eM,eA] | = | 0:0
+addAll LL[] => false | = | 0:0
+removeAll AL[eM] => true | [eY,eA] | 0:0
+copyOf AL[] => !IllegalArgumentException | = | 0:0
+copyOf LL[] => !IllegalArgumentException | = | 0:0
+removeAll EM[eB,eY] => true | [eA] | 0:0
+toString => [A] | = | 0:0
+containsInt => false | = | 0:0
+add eM => true | [eM,eA] | 0:0
+toString => [M,_A] | = | 0:0
+toString => [M,_A] | = | 0:0
+containsAll EM[] => true | = | 0:0
+equals EM[eZ,eA,eM,eY,eZ] => false | = | 0:0
+toArray => A[eM,eA] | = | 0:0
+contains eM => true | = | 0:0
+equals EM[eM,eM,eB] => false | = | 0:0
+containsAll EM[eM] => true | = | 0:0
+cme eY => eM/true/true/eA | [eY,eM,eA] | 0:0
+copyOf EM[] => [] | = | 0:0
+iter n/h/r/n/n/h => eY/true/ok/eM/eA/false | [eM,eA] | 0:0
+toString => [M,_A] | = | 0:0
+size => 2 | = | 0:0
+add eZ => true | [eZ,eM,eA] | 0:0
+toArray => A[eZ,eM,eA] | = | 0:0
+addAll LL[eX] => true | [eX,eZ,eM,eA] | 0:0
+isEmpty => false | = | 0:0
+new EnumSet ord of AL[eY,eM,eA,eA,eY,eA] => [eY,eM,eA]
+copyOfSet => [eY,eM,eA] | [eY,eM,eA] | 0:0
+toArray => A[eY,eM,eA] | = | 0:0
+clone => RegularEnumSet:[eY,eM,eA] | = | 0:0
+remove eY => true | [eM,eA] | 0:0
+containsInt => false | = | 0:0
+toString => [M,_A] | = | 0:0
+copyOfSet => [eM,eA] | = | 0:0
+contains eX => false | = | 0:0
+toArrayT 7 => same:A[eM,eA,null,i-1,i-1,i-1,i-1] | = | 0:0
+toArrayT 6 => same:A[eM,eA,null,i-1,i-1,i-1] | = | 0:0
+retainAll EM[eB] => true | [] | 0:0
+toString => [] | = | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+cme eA => !NoSuchElementException/true/false/!NoSuchElementException | [eA] | 0:0
+equals EM[eB] => false | = | 0:0
+cme eM => eA/true/false/!NoSuchElementException | [eM,eA] | 0:0
+copyOfSet => [eM,eA] | = | 0:0
+toString => [M,_A] | = | 0:0
+equals EM[eZ,eZ] => false | = | 0:0
+new EnumSet ord of AL[eA,eB] => [eA,eB]
+toString => [A,_B] | [eA,eB] | 0:0
+toArrayT 4 => same:A[eA,eB,null,i-1] | = | 0:0
+size => 2 | = | 0:0
+equals EM[eY,eZ] => false | = | 0:0
+equals EM[eX,eA,eX,eA] => false | = | 0:0
+toArray => A[eA,eB] | = | 0:0
+equals EM[eZ,eM,eM] => false | = | 0:0
+containsInt => false | = | 0:0
+copyOf EM[] => [] | = | 0:0
+toString => [A,_B] | = | 0:0
+toArrayT 4 => same:A[eA,eB,null,i-1] | = | 0:0
+containsInt => false | = | 0:0
+containsAll AL[eA,eM,eZ,eZ] => false | = | 0:0
+toArray => A[eA,eB] | = | 0:0
+remove eM => false | = | 0:0
+remove eM => false | = | 0:0
+toArrayT 0 => new:A[eA,eB] | = | 0:0
+copyOfSet => [eA,eB] | = | 0:0
+add eB => false | = | 0:0
+cme eX => eA/true/true/eB | [eX,eA,eB] | 0:0
+iter n/r/n/n/r/n/n => eX/ok/eA/eB/ok/!NoSuchElementException/!NoSuchElementException | [eA] | 0:0
+add eA => false | = | 0:0
+copyOfSet => [eA] | = | 0:0
+add eY => true | [eY,eA] | 0:0
+size => 2 | = | 0:0
+contains eB => false | = | 0:0
+add eB => true | [eY,eA,eB] | 0:0
+iter n/n/n/n/n/r/n => eY/eA/eB/!NoSuchElementException/!NoSuchElementException/ok/!NoSuchElementException | [eY,eA] | 0:0
+addAll EM[eY] => false | = | 0:0
+new EnumSet ord of AL[eY] => [eY]
+iter h/r/n/n/n/n => true/!IllegalStateException/eY/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException | [eY] | 0:0
+clone => RegularEnumSet:[eY] | = | 0:0
+toArrayT 4 => same:A[eY,null,i-1,i-1] | = | 0:0
+removeAll EM[eZ,eY,eB] => true | [] | 0:0
+toString => [] | = | 0:0
+equals EM[eX,eM,eA] => false | = | 0:0
+iter n/n/n/n => !NoSuchElementException/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException | = | 0:0
+contains eX => false | = | 0:0
+equals EM[eZ] => false | = | 0:0
+size => 0 | = | 0:0
+cme eX => !NoSuchElementException/true/false/!NoSuchElementException | [eX] | 0:0
+clear => ok | [] | 0:0
+retainAll EM[eM,eX,eZ,eM,eB,eB] => false | = | 0:0
+equals LL[] => false | = | 0:0
+toString => [] | = | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+copyOf AL[eZ,eM,eB] => [eZ,eM,eB] | = | 0:0
+copyOf EM[eM,eM,eA,eY] => [eY,eM,eA] | = | 0:0
+remove eM => false | = | 0:0
+contains eB => false | = | 0:0
+contains eA => false | = | 0:0
+equals EM[eY,eY,eA,eB,eX,eZ] => false | = | 0:0
+equals AL[eB,eY] => false | = | 0:0
+contains eX => false | = | 0:0
+equals EM[eA,eB,eM] => false | = | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+retainAll AL[] => false | = | 0:0
+toArray => A[] | = | 0:0
+isEmpty => true | = | 0:0
+isEmpty => true | = | 0:0
+toString => [] | = | 0:0
+toArray => A[] | = | 0:0
+add eM => true | [eM] | 0:0
+clone => RegularEnumSet:[eM] | = | 0:0
+toArrayT 5 => same:A[eM,null,i-1,i-1,i-1] | = | 0:0
+cme eA => eM/true/false/!NoSuchElementException | [eM,eA] | 0:0
+toString => [M,_A] | = | 0:0
+containsAll EM[eY,eY,eX,eM] => false | = | 0:0
+copyOf AL[eM,eX,eM] => [eX,eM] | = | 0:0
+toArray => A[eM,eA] | = | 0:0
+copyOf AL[eY,eB] => [eY,eB] | = | 0:0
+isEmpty => false | = | 0:0
+new EnumSet ord of AL[eX,eY,eX] => [eX,eY]
+equals LL[eA] => false | [eX,eY] | 0:0
+isEmpty => false | = | 0:0
+equals EM[eB,eB,eA,eZ,eA,eX] => false | = | 0:0
+toString => [X,_Y] | = | 0:0
+toArray => A[eX,eY] | = | 0:0
+clone => RegularEnumSet:[eX,eY] | = | 0:0
+toArrayT 3 => same:A[eX,eY,null] | = | 0:0
+addAll EM[eX,eB,eB,eA] => true | [eX,eY,eA,eB] | 0:0
+remove eZ => false | = | 0:0
+retainAll EM[eX,eY,eB,eM,eA,eX] => false | = | 0:0
+remove eB => true | [eX,eY,eA] | 0:0
+toArray => A[eX,eY,eA] | = | 0:0
+toArrayT 4 => same:A[eX,eY,eA,null] | = | 0:0
+contains eB => false | = | 0:0
+copyOf EM[eZ,eY,eM,eX,eA,eM] => [eX,eY,eZ,eM,eA] | = | 0:0
+copyOf EM[eX,eZ,eM,eZ] => [eX,eZ,eM] | = | 0:0
+iter n/n/r/h/n/n/n/n => eX/eY/ok/true/eA/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException | [eX,eA] | 0:0
+iter n/n/n/n => eX/eA/!NoSuchElementException/!NoSuchElementException | = | 0:0
+isEmpty => false | = | 0:0
+removeAll LL[eX,eB,eM,eZ,eB,eZ] => true | [eA] | 0:0
+copyOf EM[eX] => [eX] | = | 0:0
+toString => [A] | = | 0:0
+clone => RegularEnumSet:[eA] | = | 0:0
+equals AL[] => false | = | 0:0
+containsInt => false | = | 0:0
+containsInt => false | = | 0:0
+equals LL[eB,eX] => false | = | 0:0
+removeAll LL[eZ,eA,eA,eY,eB] => true | [] | 0:0
+containsInt => false | = | 0:0
+new EnumSet ord of AL[eZ,eY] => [eY,eZ]
+toString => [Y,_Z] | [eY,eZ] | 0:0
+clone => RegularEnumSet:[eY,eZ] | = | 0:0
+toArrayT 5 => same:A[eY,eZ,null,i-1,i-1] | = | 0:0
+containsAll EM[eZ,eX,eZ,eZ,eM,eA] => false | = | 0:0
+equals AL[] => false | = | 0:0
+containsAll EM[eA,eZ,eM,eY,eZ,eA] => false | = | 0:0
+cme eM => eY/true/true/eZ | [eY,eZ,eM] | 0:0
+addAll LL[] => false | = | 0:0
+clone => RegularEnumSet:[eY,eZ,eM] | = | 0:0
+contains eY => true | = | 0:0
+retainAll EM[] => true | [] | 0:0
+equals LL[eB,eM] => false | = | 0:0
+size => 0 | = | 0:0
+contains eZ => false | = | 0:0
+toArrayT 3 => same:A[null,i-1,i-1] | = | 0:0
+equals LL[eB,eZ,eA,eB,eB,eB] => false | = | 0:0
+size => 0 | = | 0:0
+contains eZ => false | = | 0:0
+cme eM => !NoSuchElementException/true/false/!NoSuchElementException | [eM] | 0:0
+add eZ => true | [eZ,eM] | 0:0
+equals AL[eX,eX,eA,eY,eA,eX] => false | = | 0:0
+toArrayT 7 => same:A[eZ,eM,null,i-1,i-1,i-1,i-1] | = | 0:0
+containsInt => false | = | 0:0
+isEmpty => false | = | 0:0
+contains eA => false | = | 0:0
+toArray => A[eZ,eM] | = | 0:0
+addAll EM[eM,eY,eX] => true | [eX,eY,eZ,eM] | 0:0
+containsAll AL[eB,eA,eA,eM,eM] => false | = | 0:0
+clone => RegularEnumSet:[eX,eY,eZ,eM] | = | 0:0
+contains eY => true | = | 0:0
+containsAll LL[eB,eX,eA,eA,eM] => false | = | 0:0
+retainAll EM[eZ,eB,eB,eB] => true | [eZ] | 0:0
+toString => [Z] | = | 0:0
+removeAll EM[eZ,eM,eB,eX] => true | [] | 0:0
+toString => [] | = | 0:0
+cme eX => !NoSuchElementException/true/false/!NoSuchElementException | [eX] | 0:0
+isEmpty => false | = | 0:0
+toArray => A[eX] | = | 0:0
+new EnumSet ord of AL[eB,eM] => [eM,eB]
+toString => [M,_B] | [eM,eB] | 0:0
+removeAll AL[] => false | = | 0:0
+contains eX => false | = | 0:0
+copyOf AL[eX,eB] => [eX,eB] | = | 0:0
+toArray => A[eM,eB] | = | 0:0
+remove eZ => false | = | 0:0
+equals EM[eX,eZ,eA,eA,eY,eA] => false | = | 0:0
+add eA => true | [eM,eA,eB] | 0:0
+contains eM => true | = | 0:0
+equals AL[eB,eB,eB,eX] => false | = | 0:0
+iter n/n/r/n/n/n/r => eM/eA/ok/eB/!NoSuchElementException/!NoSuchElementException/ok | [eM] | 0:0
+removeAll EM[eZ] => false | = | 0:0
+size => 1 | = | 0:0
+remove eA => false | = | 0:0
+iter n/r/n/n/n => eM/ok/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException | [] | 0:0
+equals EM[eX,eB,eM,eA,eM] => false | = | 0:0
+isEmpty => true | = | 0:0
+contains eY => false | = | 0:0
+iter r/n/n => !IllegalStateException/!NoSuchElementException/!NoSuchElementException | = | 0:0
+toArray => A[] | = | 0:0
+toString => [] | = | 0:0
+copyOf EM[eB] => [eB] | = | 0:0
+equals EM[eY] => false | = | 0:0
+remove eA => false | = | 0:0
+toString => [] | = | 0:0
+toArrayT 5 => same:A[null,i-1,i-1,i-1,i-1] | = | 0:0
+removeAll EM[eX,eY,eY,eM,eM] => false | = | 0:0
+toString => [] | = | 0:0
+copyOf LL[eA,eZ,eB,eX] => [eX,eZ,eA,eB] | = | 0:0
+add eB => true | [eB] | 0:0
+copyOf EM[eM,eX,eB,eM,eA] => [eX,eM,eA,eB] | = | 0:0
+containsAll EM[eB,eY,eZ,eB,eM,eM] => false | = | 0:0
+contains eB => true | = | 0:0
+toString => [B] | = | 0:0
+toArrayT 2 => same:A[eB,null] | = | 0:0
+add eY => true | [eY,eB] | 0:0
+retainAll LL[eA,eZ,eB] => true | [eB] | 0:0
+addAll EM[eZ] => true | [eZ,eB] | 0:0
+clone => RegularEnumSet:[eZ,eB] | = | 0:0
+toArrayT 6 => same:A[eZ,eB,null,i-1,i-1,i-1] | = | 0:0
+toString => [Z,_B] | = | 0:0
+add eX => true | [eX,eZ,eB] | 0:0
+clone => RegularEnumSet:[eX,eZ,eB] | = | 0:0
+addAll AL[eX,eZ,eX,eY,eM,eZ] => true | [eX,eY,eZ,eM,eB] | 0:0
+toString => [X,_Y,_Z,_M,_B] | = | 0:0
+copyOf EM[eA,eZ,eZ] => [eZ,eA] | = | 0:0
+new EnumSet ord of AL[eM,eM,eY] => [eY,eM]
+iter n/n/n/r/h => eY/eM/!NoSuchElementException/ok/false | [eY] | 0:0
+addAll LL[eM] => true | [eY,eM] | 0:0
+addAll EM[] => false | = | 0:0
+toString => [Y,_M] | = | 0:0
+remove eB => false | = | 0:0
+removeAll LL[eB,eM] => true | [eY] | 0:0
+clone => RegularEnumSet:[eY] | = | 0:0
+clone => RegularEnumSet:[eY] | = | 0:0
+remove eX => false | = | 0:0
+toString => [Y] | = | 0:0
+size => 1 | = | 0:0
+containsInt => false | = | 0:0
+containsAll EM[eA,eA,eA,eA,eX] => false | = | 0:0
+contains eM => false | = | 0:0
+retainAll AL[eZ,eZ,eX] => true | [] | 0:0
+toArray => A[] | = | 0:0
+toString => [] | = | 0:0
+retainAll EM[] => false | = | 0:0
+isEmpty => true | = | 0:0
+containsAll EM[eY,eM] => false | = | 0:0
+contains eZ => false | = | 0:0
+cme eX => !NoSuchElementException/true/false/!NoSuchElementException | [eX] | 0:0
+toString => [X] | = | 0:0
+equals LL[] => false | = | 0:0
+toArray => A[eX] | = | 0:0
+toArrayT 5 => same:A[eX,null,i-1,i-1,i-1] | = | 0:0
+remove eX => true | [] | 0:0
+isEmpty => true | = | 0:0
+containsInt => false | = | 0:0
+iter r/r/n/n/n => !IllegalStateException/!IllegalStateException/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException | = | 0:0
+toString => [] | = | 0:0
+toString => [] | = | 0:0
+add eB => true | [eB] | 0:0
+removeAll LL[eA] => false | = | 0:0
+equals EM[eA,eZ] => false | = | 0:0
+isEmpty => false | = | 0:0
+new EnumSet ord of AL[eM,eM,eY,eA,eX,eB] => [eX,eY,eM,eA,eB]
+size => 5 | [eX,eY,eM,eA,eB] | 0:0
+remove eM => true | [eX,eY,eA,eB] | 0:0
+copyOfSet => [eX,eY,eA,eB] | = | 0:0
+addAll AL[eX] => false | = | 0:0
+removeAll LL[eM,eZ,eZ] => false | = | 0:0
+addAll AL[eX,eZ,eX,eM,eM] => true | [eX,eY,eZ,eM,eA,eB] | 0:0
+toString => [X,_Y,_Z,_M,_A,_B] | = | 0:0
+toString => [X,_Y,_Z,_M,_A,_B] | = | 0:0
+retainAll EM[eA,eY,eY,eY,eM,eX] => true | [eX,eY,eM,eA] | 0:0
+clone => RegularEnumSet:[eX,eY,eM,eA] | = | 0:0
+toString => [X,_Y,_M,_A] | = | 0:0
+contains eA => true | = | 0:0
+toString => [X,_Y,_M,_A] | = | 0:0
+toArray => A[eX,eY,eM,eA] | = | 0:0
+removeAll LL[eX,eY,eM,eM,eY] => true | [eA] | 0:0
+toString => [A] | = | 0:0
+containsAll LL[] => true | = | 0:0
+toString => [A] | = | 0:0
+isEmpty => false | = | 0:0
+retainAll AL[eM,eX] => true | [] | 0:0
+copyOf EM[eY,eY,eY,eY] => [eY] | = | 0:0
+iter n/n/n/n => !NoSuchElementException/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException | = | 0:0
+copyOfSet => [] | = | 0:0
+addAll LL[eA,eX,eM] => true | [eX,eM,eA] | 0:0
+remove eX => true | [eM,eA] | 0:0
+copyOfSet => [eM,eA] | = | 0:0
+containsAll EM[eB,eX,eX,eM] => false | = | 0:0
+clone => RegularEnumSet:[eM,eA] | = | 0:0
+contains eX => false | = | 0:0
+toArrayT 3 => same:A[eM,eA,null] | = | 0:0
+toString => [M,_A] | = | 0:0
+cme eA => eM/false/true/eA | = | 0:0
+copyOfSet => [eM,eA] | = | 0:0
+toArray => A[eM,eA] | = | 0:0
+toArray => A[eM,eA] | = | 0:0
+remove eZ => false | = | 0:0
+clone => RegularEnumSet:[eM,eA] | = | 0:0
+remove eA => true | [eM] | 0:0
+cme eX => eM/true/false/!NoSuchElementException | [eX,eM] | 0:0
+size => 2 | = | 0:0
+retainAll EM[] => true | [] | 0:0
+retainAll EM[eX,eA,eZ,eY,eX] => false | = | 0:0
+toArrayT 2 => same:A[null,i-1] | = | 0:0
+new EnumSet ord of AL[eB,eZ,eM,eZ,eB] => [eZ,eM,eB]
+equals LL[eZ,eY] => false | [eZ,eM,eB] | 0:0
+toString => [Z,_M,_B] | = | 0:0
+equals EM[] => false | = | 0:0
+toString => [Z,_M,_B] | = | 0:0
+size => 3 | = | 0:0
+toArrayT 4 => same:A[eZ,eM,eB,null] | = | 0:0
+toString => [Z,_M,_B] | = | 0:0
+add eZ => false | = | 0:0
+size => 3 | = | 0:0
+remove eM => true | [eZ,eB] | 0:0
+isEmpty => false | = | 0:0
+containsAll EM[eA,eM] => false | = | 0:0
+contains eB => true | = | 0:0
+cme eB => eZ/false/true/eB | = | 0:0
+size => 2 | = | 0:0
+add eM => true | [eZ,eM,eB] | 0:0
+removeAll EM[eM,eM] => true | [eZ,eB] | 0:0
+retainAll EM[eZ,eZ,eM,eY] => true | [eZ] | 0:0
+toString => [Z] | = | 0:0
+copyOf EM[] => [] | = | 0:0
+copyOf EM[eA,eM,eZ,eA] => [eZ,eM,eA] | = | 0:0
+copyOf LL[] => !IllegalArgumentException | = | 0:0
+addAll EM[] => false | = | 0:0
+add eX => true | [eX,eZ] | 0:0
+retainAll EM[eY,eA,eX,eY,eA,eB] => true | [eX] | 0:0
+removeAll EM[] => false | = | 0:0
+size => 1 | = | 0:0
+new EnumSet ord of AL[eB,eY,eM,eZ] => [eY,eZ,eM,eB]
+copyOf EM[eZ,eY,eX,eM,eA] => [eX,eY,eZ,eM,eA] | [eY,eZ,eM,eB] | 0:0
+cme eM => eY/false/true/eZ | = | 0:0
+isEmpty => false | = | 0:0
+addAll EM[eX] => true | [eX,eY,eZ,eM,eB] | 0:0
+toString => [X,_Y,_Z,_M,_B] | = | 0:0
+contains eY => true | = | 0:0
+size => 5 | = | 0:0
+retainAll LL[] => true | [] | 0:0
+cme eM => !NoSuchElementException/true/false/!NoSuchElementException | [eM] | 0:0
+copyOf EM[eB,eZ,eM,eX] => [eX,eZ,eM,eB] | = | 0:0
+remove eX => false | = | 0:0
+clone => RegularEnumSet:[eM] | = | 0:0
+cme eB => eM/true/false/!NoSuchElementException | [eM,eB] | 0:0
+toString => [M,_B] | = | 0:0
+addAll LL[eY,eZ,eB,eY] => true | [eY,eZ,eM,eB] | 0:0
+removeAll EM[] => false | = | 0:0
+copyOfSet => [eY,eZ,eM,eB] | = | 0:0
+clone => RegularEnumSet:[eY,eZ,eM,eB] | = | 0:0
+toString => [Y,_Z,_M,_B] | = | 0:0
+cme eA => eY/true/true/eZ | [eY,eZ,eM,eA,eB] | 0:0
+add eB => false | = | 0:0
+containsAll LL[eZ,eA,eA,eY,eB,eY] => true | = | 0:0
+contains eA => true | = | 0:0
+add eY => false | = | 0:0
+new EnumSet ord of AL[eZ,eX,eY,eM,eZ] => [eX,eY,eZ,eM]
+remove eY => true | [eX,eZ,eM] | 0:0
+toString => [X,_Z,_M] | = | 0:0
+copyOf EM[eM,eX,eM,eX,eA] => [eX,eM,eA] | = | 0:0
+copyOfSet => [eX,eZ,eM] | = | 0:0
+addAll EM[eB,eY,eB] => true | [eX,eY,eZ,eM,eB] | 0:0
+contains eB => true | = | 0:0
+size => 5 | = | 0:0
+equals EM[] => false | = | 0:0
+add eA => true | [eX,eY,eZ,eM,eA,eB] | 0:0
+remove eA => true | [eX,eY,eZ,eM,eB] | 0:0
+equals EM[eM,eZ] => false | = | 0:0
+toString => [X,_Y,_Z,_M,_B] | = | 0:0
+add eB => false | = | 0:0
+toString => [X,_Y,_Z,_M,_B] | = | 0:0
+containsInt => false | = | 0:0
+removeAll EM[eZ,eX,eY,eM,eB,eY] => true | [] | 0:0
+size => 0 | = | 0:0
+add eY => true | [eY] | 0:0
+cme eZ => eY/true/false/!NoSuchElementException | [eY,eZ] | 0:0
+toString => [Y,_Z] | = | 0:0
+isEmpty => false | = | 0:0
+iter h/r/n/n => true/!IllegalStateException/eY/eZ | = | 0:0
+retainAll EM[eA,eZ,eZ,eM,eM,null] => true | [eZ] | 0:0
+removeAll LL[eY,eX,eM] => false | = | 0:0
+clear => ok | [] | 0:0
+removeAll EM[eY,eB,eX,eB,eZ] => false | = | 0:0
+toArrayT 5 => same:A[null,i-1,i-1,i-1,i-1] | = | 0:0
+toString => [] | = | 0:0
+contains eA => false | = | 0:0
+copyOf LL[eB,eA,eX,eY,eZ] => [eX,eY,eZ,eA,eB] | = | 0:0
+size => 0 | = | 0:0
+retainAll EM[eA,eB,eB,eB,eA] => false | = | 0:0
+new EnumSet ord of AL[eM,eY,eB,eA,eY,eA] => [eY,eM,eA,eB]
+removeAll LL[eB,eB,eM] => true | [eY,eA] | 0:0
+cme eY => eY/false/true/eA | = | 0:0
+isEmpty => false | = | 0:0
+toString => [Y,_A] | = | 0:0
+toString => [Y,_A] | = | 0:0
+containsInt => false | = | 0:0
+addAll AL[eA,eB,eX,eY,eA,eM] => true | [eX,eY,eM,eA,eB] | 0:0
+remove eA => true | [eX,eY,eM,eB] | 0:0
+containsAll EM[eX,eZ,eB] => false | = | 0:0
+toArrayT 5 => same:A[eX,eY,eM,eB,null] | = | 0:0
+iter n/n/n/n/r/r => eX/eY/eM/eB/ok/!IllegalStateException | [eX,eY,eM] | 0:0
+removeAll EM[eY,eX,eB,eM,eY] => true | [] | 0:0
+toString => [] | = | 0:0
+copyOf EM[eX,eM,eM] => [eX,eM] | = | 0:0
+size => 0 | = | 0:0
+retainAll EM[eM,eY,eA,eM,eB] => false | = | 0:0
+cme eY => !NoSuchElementException/true/false/!NoSuchElementException | [eY] | 0:0
+addAll EM[] => false | = | 0:0
+toString => [Y] | = | 0:0
+copyOf LL[eM] => [eM] | = | 0:0
+toArrayT 4 => same:A[eY,null,i-1,i-1] | = | 0:0
+removeAll EM[eZ,eZ,eA,eB,eA] => false | = | 0:0
+copyOf LL[eY,eZ,eA] => [eY,eZ,eA] | = | 0:0
+remove eZ => false | = | 0:0
+remove eB => false | = | 0:0
+toString => [Y] | = | 0:0
+clone => RegularEnumSet:[eY] | = | 0:0
+add eB => true | [eY,eB] | 0:0
+contains eB => true | = | 0:0
+contains eY => true | = | 0:0
+containsInt => false | = | 0:0
+contains eY => true | = | 0:0
+clone => RegularEnumSet:[eY,eB] | = | 0:0
+copyOf EM[eY,eA,eY,eY,eX] => [eX,eY,eA] | = | 0:0
+size => 2 | = | 0:0
+new EnumSet ord of AL[eX,eY,eM,eB] => [eX,eY,eM,eB]
+removeAll EM[eA,eX,eA] => true | [eY,eM,eB] | 0:0
+retainAll EM[eX,eA,eA,eM,eX,eX] => true | [eM] | 0:0
+contains eA => false | = | 0:0
+remove eY => false | = | 0:0
+containsAll AL[eA] => false | = | 0:0
+add eB => true | [eM,eB] | 0:0
+isEmpty => false | = | 0:0
+size => 2 | = | 0:0
+equals AL[eZ,eY,eA,eY,eB,null] => false | = | 0:0
+add eZ => true | [eZ,eM,eB] | 0:0
+remove eA => false | = | 0:0
+toArray => A[eZ,eM,eB] | = | 0:0
+cme eY => eZ/true/true/eM | [eY,eZ,eM,eB] | 0:0
+toString => [Y,_Z,_M,_B] | = | 0:0
+copyOf LL[eM,eX] => [eX,eM] | = | 0:0
+add eB => false | = | 0:0
+contains eA => false | = | 0:0
+containsAll AL[] => true | = | 0:0
+remove eA => false | = | 0:0
+isEmpty => false | = | 0:0
+add eZ => false | = | 0:0
+new EnumSet ord of AL[eB,eZ,eB] => [eZ,eB]
+equals LL[] => false | [eZ,eB] | 0:0
+toArrayT 4 => same:A[eZ,eB,null,i-1] | = | 0:0
+copyOf LL[eM] => [eM] | = | 0:0
+iter r/n/r/n/n/n => !IllegalStateException/eZ/ok/eB/!NoSuchElementException/!NoSuchElementException | [eB] | 0:0
+contains eM => false | = | 0:0
+addAll AL[] => false | = | 0:0
+copyOf EM[] => [] | = | 0:0
+clone => RegularEnumSet:[eB] | = | 0:0
+size => 1 | = | 0:0
+iter n/r/n => eB/ok/!NoSuchElementException | [] | 0:0
+containsAll LL[eZ] => false | = | 0:0
+toString => [] | = | 0:0
+containsAll EM[eY,eB,eM,eB,eZ] => false | = | 0:0
+removeAll EM[eM,eB,eM,eA,eB] => false | = | 0:0
+add eM => true | [eM] | 0:0
+equals EM[eZ,eM,eM] => false | = | 0:0
+contains eZ => false | = | 0:0
+iter n/r/n/r/h => eM/ok/!NoSuchElementException/!IllegalStateException/false | [] | 0:0
+toArray => A[] | = | 0:0
+cme eM => !NoSuchElementException/true/false/!NoSuchElementException | [eM] | 0:0
+copyOf EM[eM] => [eM] | = | 0:0
+size => 1 | = | 0:0
+isEmpty => false | = | 0:0
+size => 1 | = | 0:0
+addAll AL[eB,eM,eM] => true | [eM,eB] | 0:0
+clone => RegularEnumSet:[eM,eB] | = | 0:0
+copyOf AL[eY,eA,eM,eB,eM] => [eY,eM,eA,eB] | = | 0:0
+toArrayT 1 => new:A[eM,eB] | = | 0:0
+retainAll LL[] => true | [] | 0:0
+containsAll EM[] => true | = | 0:0
+addAll AL[eB,eX] => true | [eX,eB] | 0:0
+toString => [X,_B] | = | 0:0
+containsAll EM[eZ,eB,eA,eA] => false | = | 0:0
+remove eB => true | [eX] | 0:0
+copyOf EM[eA,eM] => [eM,eA] | = | 0:0
+removeAll AL[eZ] => false | = | 0:0
+toString => [X] | = | 0:0
+retainAll EM[] => true | [] | 0:0
+contains eX => false | = | 0:0
+cme eB => !NoSuchElementException/true/false/!NoSuchElementException | [eB] | 0:0
+contains eB => true | = | 0:0
+add eM => true | [eM,eB] | 0:0
+equals AL[eZ,eB,eX,eX] => false | = | 0:0
+new EnumSet ord of AL[eX,eZ,eZ,eM] => [eX,eZ,eM]
+add eY => true | [eX,eY,eZ,eM] | 0:0
+toArray => A[eX,eY,eZ,eM] | = | 0:0
+copyOf EM[eM] => [eM] | = | 0:0
+iter n/n/n/n/n/n/n => eX/eY/eZ/eM/!NoSuchElementException/!NoSuchElementException/!NoSuchElementException | = | 0:0
+retainAll EM[eA,eY,eZ,eA,eZ] => true | [eY,eZ] | 0:0
+copyOfSet => [eY,eZ] | = | 0:0
+add eM => true | [eY,eZ,eM] | 0:0
+cme eB => eY/true/true/eZ | [eY,eZ,eM,eB] | 0:0
+cme eX => eY/true/true/eZ | [eX,eY,eZ,eM,eB] | 0:0
+retainAll AL[] => true | [] | 0:0
+copyOf AL[eM,eB,eA,eZ,eZ,eY] => [eY,eZ,eM,eA,eB] | = | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+equals EM[eX,eB,eB,eZ,eX] => false | = | 0:0
+toArrayT 7 => same:A[null,i-1,i-1,i-1,i-1,i-1,i-1] | = | 0:0
+addAll LL[eX] => true | [eX] | 0:0
+retainAll AL[eB] => true | [] | 0:0
+toString => [] | = | 0:0
+toString => [] | = | 0:0
+contains eZ => false | = | 0:0
+copyOf EM[null,eY,eZ,eZ] => [eY,eZ] | = | 0:0
+toArray => A[] | = | 0:0
+new EnumSet ord of AL[eA,eA,eX,eM,eB] => [eX,eM,eA,eB]
+contains eY => false | [eX,eM,eA,eB] | 0:0
+toArrayT 6 => same:A[eX,eM,eA,eB,null,i-1] | = | 0:0
+remove eA => true | [eX,eM,eB] | 0:0
+toArrayT 3 => same:A[eX,eM,eB] | = | 0:0
+size => 3 | = | 0:0
+iter n/h/r/n/n/r => eX/true/ok/eM/eB/ok | [eM] | 0:0
+toArrayT 0 => new:A[eM] | = | 0:0
+containsInt => false | = | 0:0
+contains eB => false | = | 0:0
+remove eB => false | = | 0:0
+add eZ => true | [eZ,eM] | 0:0
+toString => [Z,_M] | = | 0:0
+isEmpty => false | = | 0:0
+equals AL[eM,eA] => false | = | 0:0
+containsAll EM[eX,eY,eX,eX,eB,eX] => false | = | 0:0
+cme eZ => eZ/false/true/eM | = | 0:0
+retainAll EM[eX,eZ,eM,eB] => false | = | 0:0
+contains eA => false | = | 0:0
+clone => RegularEnumSet:[eZ,eM] | = | 0:0
+addAll AL[eZ,eA] => true | [eZ,eM,eA] | 0:0
+copyOfSet => [eZ,eM,eA] | = | 0:0
+toString => [Z,_M,_A] | = | 0:0
+toArrayT 7 => same:A[eZ,eM,eA,null,i-1,i-1,i-1] | = | 0:0
+toArray => A[eZ,eM,eA] | = | 0:0
+new EnumSet ord of AL[eA,eY,eB,eM,eM,eB] => [eY,eM,eA,eB]
+copyOf EM[eM,eB,eM] => [eM,eB] | [eY,eM,eA,eB] | 0:0
+clone => RegularEnumSet:[eY,eM,eA,eB] | = | 0:0
+copyOfSet => [eY,eM,eA,eB] | = | 0:0
+toString => [Y,_M,_A,_B] | = | 0:0
+equals EM[eM,eA,eX] => false | = | 0:0
+addAll EM[eY,eZ,eM,eX,eB,eZ] => true | [eX,eY,eZ,eM,eA,eB] | 0:0
+clone => RegularEnumSet:[eX,eY,eZ,eM,eA,eB] | = | 0:0
+addAll LL[eM,eX,eX,eM,eM] => false | = | 0:0
+copyOf EM[eM,eY,eX] => [eX,eY,eM] | = | 0:0
+size => 6 | = | 0:0
+isEmpty => false | = | 0:0
+add eM => false | = | 0:0
+removeAll AL[eB,eZ] => true | [eX,eY,eM,eA] | 0:0
+toString => [X,_Y,_M,_A] | = | 0:0
+equals AL[eY,eM,eB] => false | = | 0:0
+toString => [X,_Y,_M,_A] | = | 0:0
+remove eY => true | [eX,eM,eA] | 0:0
+toArray => A[eX,eM,eA] | = | 0:0
+remove eM => true | [eX,eA] | 0:0
+isEmpty => false | = | 0:0
+toArray => A[eX,eA] | = | 0:0
+retainAll AL[eB,eX,eA,eY,eX] => false | = | 0:0
+equals AL[eB] => false | = | 0:0
+copyOf EM[eB,eM,eX,eA,eZ] => [eX,eZ,eM,eA,eB] | = | 0:0
+iter n/n/r/n/n => eX/eA/ok/!NoSuchElementException/!NoSuchElementException | [eX] | 0:0
+new EnumSet ord of AL[eX,eM,eA,eB,eA,eM] => [eX,eM,eA,eB]
+isEmpty => false | [eX,eM,eA,eB] | 0:0
+cme eY => eX/true/true/eM | [eX,eY,eM,eA,eB] | 0:0
+retainAll EM[] => true | [] | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+toString => [] | = | 0:0
+toString => [] | = | 0:0
+remove eZ => false | = | 0:0
+copyOf EM[eM,eX] => [eX,eM] | = | 0:0
+size => 0 | = | 0:0
+contains eX => false | = | 0:0
+toString => [] | = | 0:0
+clone => RegularEnumSet:[] | = | 0:0
+copyOf AL[eX] => [eX] | = | 0:0
+toString => [] | = | 0:0
+toString => [] | = | 0:0
+retainAll EM[eZ,eX] => false | = | 0:0
+retainAll EM[] => false | = | 0:0
+toArrayT 5 => same:A[null,i-1,i-1,i-1,i-1] | = | 0:0
+copyOf EM[eM] => [eM] | = | 0:0
+retainAll EM[eB,eA] => false | = | 0:0
+add eZ => true | [eZ] | 0:0
+new EnumSet ord of AL[eY,eX,eA] => [eX,eY,eA]
+toArrayT 6 => same:A[eX,eY,eA,null,i-1,i-1] | [eX,eY,eA] | 0:0
+retainAll EM[] => true | [] | 0:0
+retainAll EM[eZ,eB,eA,eX,eX] => false | = | 0:0
+contains eM => false | = | 0:0
+cme eA => !NoSuchElementException/true/false/!NoSuchElementException | [eA] | 0:0
+contains eX => false | = | 0:0
+copyOfSet => [eA] | = | 0:0
+cme eB => eA/true/false/!NoSuchElementException | [eA,eB] | 0:0
+containsAll LL[eZ,eY,eA] => false | = | 0:0
+addAll EM[eM,eY,eB] => true | [eY,eM,eA,eB] | 0:0
+toString => [Y,_M,_A,_B] | = | 0:0
+toArray => A[eY,eM,eA,eB] | = | 0:0
+removeAll EM[eZ] => false | = | 0:0
+containsInt => false | = | 0:0
+copyOf EM[eM,eY] => [eY,eM] | = | 0:0
+isEmpty => false | = | 0:0
+cme eA => eY/false/true/eM | = | 0:0
+retainAll LL[eA,eB,eY] => true | [eY,eA,eB] | 0:0
+toArrayT 7 => same:A[eY,eA,eB,null,i-1,i-1,i-1] | = | 0:0
+toString => [Y,_A,_B] | = | 0:0
+toString => [Y,_A,_B] | = | 0:0
+copyOfSet => [eY,eA,eB] | = | 0:0
+add eM => true | [eY,eM,eA,eB] | 0:0
+toArrayT 6 => same:A[eY,eM,eA,eB,null,i-1] | = | 0:0
+new EnumSet ord of AL[eM,eA,eZ] => [eZ,eM,eA]
+add eX => true | [eX,eZ,eM,eA] | 0:0
+toArrayT 5 => same:A[eX,eZ,eM,eA,null] | = | 0:0
+toString => [X,_Z,_M,_A] | = | 0:0
+addAll EM[eZ,eX,eM,eM,eX,eA] => false | = | 0:0
+addAll LL[eZ,eA,eZ,eM,eX,eZ] => false | = | 0:0
+remove eX => true | [eZ,eM,eA] | 0:0
+toString => [Z,_M,_A] | = | 0:0
+containsInt => false | = | 0:0
+copyOf EM[eZ,eZ] => [eZ] | = | 0:0
+cme eZ => eZ/false/true/eM | = | 0:0
+isEmpty => false | = | 0:0
+removeAll EM[eY] => false | = | 0:0
+toString => [Z,_M,_A] | = | 0:0
+contains eB => false | = | 0:0
+containsInt => false | = | 0:0
+containsInt => false | = | 0:0
+iter n/n/n/n/r/r => eZ/eM/eA/!NoSuchElementException/ok/!IllegalStateException | [eZ,eM] | 0:0
+toString => [Z,_M] | = | 0:0
+containsAll EM[eY,eY,eM,eX,eA] => false | = | 0:0
+equals EM[] => false | = | 0:0
+addAll AL[eX,eM,eZ] => true | [eX,eZ,eM] | 0:0
+removeAll EM[eM] => true | [eX,eZ] | 0:0
+contains eX => true | = | 0:0
+contains eX => true | = | 0:0
