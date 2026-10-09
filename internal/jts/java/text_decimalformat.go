@@ -732,17 +732,19 @@ func (this *DecimalFormat) applyPattern(pattern []uint16) {
 				*affix = append(*affix, ch)
 			case 1:
 				if j == 0 {
+				skip:
 					for pos < len(pattern) {
 						c := pattern[pos]
-						if c == digit || c == zeroDigit || c == groupingSeparator || c == decimalSeparator {
+						switch {
+						case c == digit || c == zeroDigit || c == groupingSeparator || c == decimalSeparator:
 							pos++
-						} else if regionMatches(pos) {
+						case regionMatches(pos):
 							pos += len(exponent)
-						} else {
+						default:
 							pos--
 							phase = 2
 							affix = &suffix
-							break
+							break skip
 						}
 					}
 					continue
@@ -981,11 +983,11 @@ func (this *DecimalFormat) formatLong(number int64, out []uint16) []uint16 {
 	minFraDigits := this.NumberFormat.minFracDigits
 	var dl digitList
 	dl.roundingMode = this.roundingMode.ordinal
-	max := 0
+	maximumDigits := 0
 	if this.useExponentialNotation {
-		max = int(maxIntDigits + maxFraDigits)
+		maximumDigits = int(maxIntDigits + maxFraDigits)
 	}
-	dl.setLong(isNegative, number, max)
+	dl.setLong(isNegative, number, maximumDigits)
 	return this.subformat(out, &dl, isNegative, true, maxIntDigits, minIntDigits, maxFraDigits, minFraDigits)
 }
 
@@ -1006,11 +1008,11 @@ func (this *DecimalFormat) formatBigInteger(number *big.Int, out []uint16) []uin
 	minFraDigits := this.NumberFormat.minFracDigits
 	var dl digitList
 	dl.roundingMode = this.roundingMode.ordinal
-	max := 0
+	maximumDigits := 0
 	if this.useExponentialNotation {
-		max = int(maxIntDigits + maxFraDigits)
+		maximumDigits = int(maxIntDigits + maxFraDigits)
 	}
-	dl.setBigInteger(isNegative, n, max)
+	dl.setBigInteger(isNegative, n, maximumDigits)
 	return this.subformat(out, &dl, isNegative, true, maxIntDigits, minIntDigits, maxFraDigits, minFraDigits)
 }
 
@@ -1228,7 +1230,7 @@ func (this *DecimalFormat) fastFormat(d float64) []uint16 {
 	exactFractionalPart := d - float64(integralPartAsInt)
 	scaledFractional := float64(exactFractionalPart * fractionalScaleFactor)
 	fractionalPartAsInt := int32(scaledFractional)
-	scaledFractional = scaledFractional - float64(fractionalPartAsInt)
+	scaledFractional -= float64(fractionalPartAsInt)
 	if scaledFractional >= 0.5 {
 		roundItUp := true
 		if scaledFractional == 0.5 {
@@ -1368,8 +1370,10 @@ func (d *digitList) setDouble(isNegative bool, source float64, maximumDigits int
 	d.setString(isNegative, fd.javaFormatString(), fd.roundedUp, fd.exact, maximumDigits, fixedPoint)
 }
 
-// setString implements DigitList.set(boolean, String, boolean, boolean, int,
-// boolean), which parses digits in the format of fdDecimal.javaFormatString.
+// setString implements DigitList.set(boolean isNegative, String s, boolean
+// roundedUp, boolean valueExactAsDecimal, int maximumDigits, boolean
+// fixedPoint), which parses digits in the format of
+// fdDecimal.javaFormatString.
 func (d *digitList) setString(isNegative bool, s string, roundedUp, valueExactAsDecimal bool, maximumDigits int, fixedPoint bool) {
 	d.isNegative = isNegative
 	d.digits = d.digits[:0]
@@ -1378,15 +1382,17 @@ func (d *digitList) setString(isNegative bool, s string, roundedUp, valueExactAs
 	exponent := 0
 	leadingZerosAfterDecimal := 0
 	nonZeroDigitSeen := false
+digits:
 	for i := 0; i < len(s); {
 		c := s[i]
 		i++
-		if c == '.' {
+		switch {
+		case c == '.':
 			d.decimalAt = d.count
-		} else if c == 'e' || c == 'E' {
+		case c == 'e' || c == 'E':
 			exponent = digitListParseInt(s[i:])
-			break
-		} else {
+			break digits
+		default:
 			if !nonZeroDigitSeen {
 				nonZeroDigitSeen = c != '0'
 				if !nonZeroDigitSeen && d.decimalAt != -1 {

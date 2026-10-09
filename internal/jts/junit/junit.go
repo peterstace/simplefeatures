@@ -204,7 +204,8 @@ func J4_Assert_assertEquals_Object_Object(a, b any) {
 }
 
 // J4_Assert_assertEquals_String_double_double_double is
-// org.junit.Assert.assertEquals(String, double, double, double).
+// org.junit.Assert.assertEquals(String message, double expected, double
+// actual, double delta).
 func J4_Assert_assertEquals_String_double_double_double(msg *java.String, a, b, delta float64) {
 	TestCase_assertEquals_String_double_double_double(msg, a, b, delta)
 }

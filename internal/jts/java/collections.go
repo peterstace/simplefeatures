@@ -452,7 +452,7 @@ func fillPointerArray(out reflect.Value, et reflect.Type, elems []any) {
 				}
 				checked = t
 			}
-			p = (*eface)(unsafe.Pointer(&e)).data
+			p = (*eface)(unsafe.Pointer(&elems[i])).data
 		}
 		*(*unsafe.Pointer)(unsafe.Add(base, uintptr(i)*unsafe.Sizeof(p))) = p
 	}
@@ -912,6 +912,6 @@ func entryToString(key, value any) *String {
 }
 
 // Iterator_default_Remove is the default method Iterator.remove.
-func Iterator_default_Remove(this any) {
+func Iterator_default_Remove(_ any) {
 	panic(UnsupportedOperationException_new_String(Lit("remove")))
 }

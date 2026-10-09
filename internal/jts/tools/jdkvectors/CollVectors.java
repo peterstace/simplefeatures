@@ -7,8 +7,8 @@
  *
  *   java internal/jts/tools/jdkvectors/CollVectors.java internal/jts/java/testdata
  *
- * which writes coll_*.txt in that directory. The Go test coll_test.go replays
- * them.
+ * which writes coll_*.txt in that directory. The Go test
+ * coll_internal_test.go replays them.
  *
  * Each file holds scenarios. A scenario starts with a line
  *

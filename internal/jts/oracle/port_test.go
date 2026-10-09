@@ -1,4 +1,4 @@
-package oracle
+package oracle_test
 
 import (
 	"fmt"
@@ -271,7 +271,7 @@ func dbl(hexBits string) float64 {
 }
 
 func atoi(s string) int32 {
-	i, err := strconv.Atoi(s)
+	i, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
 		panic(err)
 	}

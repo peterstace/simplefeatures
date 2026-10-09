@@ -140,7 +140,8 @@ func (p *rxParser) sequence() *rxNode {
 				p.cursor = len(p.pat) + 1
 				panic(p.error("Unescaped trailing backslash"))
 			}
-			if p.peek() == 'p' || p.peek() == 'P' {
+			switch {
+			case p.peek() == 'p' || p.peek() == 'P':
 				comp := p.peek() == 'P'
 				p.cursor++
 				oneLetter := true
@@ -149,7 +150,7 @@ func (p *rxParser) sequence() *rxNode {
 					p.cursor++
 				}
 				node = &rxNode{kind: rxChar, pred: p.family(oneLetter, comp)}
-			} else if p.peek() == 'Q' {
+			case p.peek() == 'Q':
 				p.cursor++
 				for !p.atEnd() {
 					if p.peek() == '\\' && p.cursor+1 < len(p.pat) && p.pat[p.cursor+1] == 'E' {
@@ -160,7 +161,7 @@ func (p *rxParser) sequence() *rxNode {
 					seq.children = append(seq.children, p.closure(literalNode(c)))
 				}
 				continue
-			} else {
+			default:
 				node = p.escapeNode()
 			}
 		case '^':
@@ -176,7 +177,7 @@ func (p *rxParser) sequence() *rxNode {
 			}}
 		case '?', '*', '+':
 			p.cursor++
-			panic(p.error("Dangling meta character '" + string(rune(ch)) + "'"))
+			panic(p.error("Dangling meta character '" + string(ch) + "'"))
 		case '{':
 			// The JDK applies a quantifier here to an empty node.
 			node = &rxNode{kind: rxConcat}
@@ -256,7 +257,7 @@ func (p *rxParser) groupName(ch int32) string {
 	}
 	var sb strings.Builder
 	for isLetter(ch) || isDigit(ch) {
-		sb.WriteRune(rune(ch))
+		sb.WriteRune(ch)
 		ch = p.read()
 	}
 	if ch != '>' {
@@ -270,16 +271,16 @@ func (p *rxParser) closure(node *rxNode) *rxNode {
 	if p.atEnd() {
 		return node
 	}
-	var min, max int
+	var cmin, cmax int
 	switch p.peek() {
 	case '?':
-		min, max = 0, 1
+		cmin, cmax = 0, 1
 		p.cursor++
 	case '*':
-		min, max = 0, -1
+		cmin, cmax = 0, -1
 		p.cursor++
 	case '+':
-		min, max = 1, -1
+		cmin, cmax = 1, -1
 		p.cursor++
 	case '{':
 		p.cursor++
@@ -298,15 +299,15 @@ func (p *rxParser) closure(node *rxNode) *rxNode {
 			}
 			return n
 		}
-		min = readInt()
-		max = min
+		cmin = readInt()
+		cmax = cmin
 		if ch == ',' {
 			p.cursor++
 			ch = p.peek()
 			if ch == '}' {
-				max = -1
+				cmax = -1
 			} else {
-				max = readInt()
+				cmax = readInt()
 			}
 		}
 		if p.peek() != '}' {
@@ -314,13 +315,13 @@ func (p *rxParser) closure(node *rxNode) *rxNode {
 			panic(p.error("Unclosed counted closure"))
 		}
 		p.cursor++
-		if max != -1 && max < min {
+		if cmax != -1 && cmax < cmin {
 			panic(p.error("Illegal repetition range"))
 		}
 	default:
 		return node
 	}
-	r := &rxNode{kind: rxRepeat, children: []*rxNode{node}, min: min, max: max}
+	r := &rxNode{kind: rxRepeat, children: []*rxNode{node}, min: cmin, max: cmax}
 	if !p.atEnd() {
 		switch p.peek() {
 		case '?':
@@ -357,7 +358,7 @@ func (p *rxParser) escapeNode() *rxNode {
 		p.cursor++
 		return &rxNode{kind: rxBound, negate: true}
 	case 'G', 'R', 'X', 'N':
-		panic(Unsupported("regex \\" + string(rune(ch))))
+		panic(Unsupported("regex \\" + string(ch)))
 	case 'k':
 		p.cursor++
 		if p.read() != '<' {
@@ -388,7 +389,7 @@ func (p *rxParser) escapeNode() *rxNode {
 		}
 		return &rxNode{kind: rxBackRef, index: ref}
 	}
-	pred, c := p.escape(false)
+	pred, c := p.escape()
 	if pred != nil {
 		return &rxNode{kind: rxChar, pred: pred}
 	}
@@ -397,7 +398,7 @@ func (p *rxParser) escapeNode() *rxNode {
 
 // escape parses an escape (after the backslash) that denotes a character
 // or a predefined class; it returns either a predicate or a code point.
-func (p *rxParser) escape(inclass bool) (func(int32) bool, int32) {
+func (p *rxParser) escape() (func(int32) bool, int32) {
 	ch := p.read()
 	switch ch {
 	case '0':
@@ -514,7 +515,7 @@ func (p *rxParser) unicode() int32 {
 	n := p.uxxxx()
 	if Character_isHighSurrogate(uint16(n)) {
 		cur := p.cursor
-		if p.read() == '\\' && p.read() == 'u' {
+		if c := p.read(); c == '\\' && p.read() == 'u' {
 			n2 := p.uxxxx()
 			if Character_isLowSurrogate(uint16(n2)) {
 				return Character_toCodePoint(uint16(n), uint16(n2))
@@ -658,7 +659,7 @@ func (p *rxParser) rangeItem() func(int32) bool {
 		if e == 'Q' {
 			panic(Unsupported("regex \\Q in a character class"))
 		}
-		pred, v := p.escape(true)
+		pred, v := p.escape()
 		if pred != nil {
 			return pred
 		}
@@ -674,7 +675,7 @@ func (p *rxParser) rangeItem() func(int32) bool {
 			m := p.peek()
 			if m == '\\' {
 				p.cursor++
-				pred, v := p.escape(true)
+				pred, v := p.escape()
 				if pred != nil {
 					panic(p.error("Illegal character range"))
 				}
@@ -696,7 +697,7 @@ func (p *rxParser) rangeItem() func(int32) bool {
 func (p *rxParser) family(oneLetter, negate bool) func(int32) bool {
 	var name string
 	if oneLetter {
-		name = string(rune(p.read()))
+		name = string(p.read())
 	} else {
 		start := p.cursor
 		for !p.atEnd() && p.peek() != '}' {
@@ -707,7 +708,7 @@ func (p *rxParser) family(oneLetter, negate bool) func(int32) bool {
 		}
 		var sb strings.Builder
 		for _, c := range p.pat[start:p.cursor] {
-			sb.WriteRune(rune(c))
+			sb.WriteRune(c)
 		}
 		name = sb.String()
 		p.cursor++
@@ -951,7 +952,7 @@ func (m *rxMatcher) match(n *rxNode, i int, k func(int) bool) bool {
 		}
 		left := false
 		if i > 0 {
-			cp := codePointBeforeUnits(m.text, i, 0)
+			cp := codePointBeforeUnits(m.text, i)
 			left = isWord(i - int(Character_charCount(cp)))
 		}
 		right := i < len(m.text) && isWord(i)

@@ -44,11 +44,11 @@ func newAbstractListItr(l List, modCount *int32, index int32) *abstractListItr {
 }
 
 // abstractListIterator is AbstractList.listIterator(int).
-func abstractListIterator(l List, modCount *int32, index int32) ListIterator {
+func abstractListIterator(l List, index int32) ListIterator {
 	if index < 0 || index > l.Size() {
 		panic(outOfBounds(index, l.Size()))
 	}
-	return newAbstractListItr(l, modCount, index)
+	return newAbstractListItr(l, nil, index)
 }
 
 func (it *abstractListItr) checkForComodification() {

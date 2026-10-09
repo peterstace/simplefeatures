@@ -657,15 +657,16 @@ func (f *formatter) printInteger(fs *formatSpec, arg any) {
 }
 
 func (f *formatter) leadingSign(fs *formatSpec, sb []uint16, neg bool) []uint16 {
-	if !neg {
+	switch {
+	case !neg:
 		if hasFlags(fs.flags, ffPlus) {
 			sb = append(sb, '+')
 		} else if hasFlags(fs.flags, ffLeadingSpace) {
 			sb = append(sb, ' ')
 		}
-	} else if hasFlags(fs.flags, ffParentheses) {
+	case hasFlags(fs.flags, ffParentheses):
 		sb = append(sb, '(')
-	} else {
+	default:
 		sb = append(sb, '-')
 	}
 	return sb
@@ -737,11 +738,12 @@ func (f *formatter) localizedMagnitude(sb []uint16, value []byte, offset int, fl
 		}
 	}
 	if width > len(sb) && hasFlags(flags, ffZeroPad) {
-		pad := make([]uint16, width-len(sb))
-		for i := range pad {
-			pad[i] = zero
+		padded := make([]uint16, 0, width)
+		padded = append(padded, sb[:begin]...)
+		for i := len(sb); i < width; i++ {
+			padded = append(padded, zero)
 		}
-		sb = append(sb[:begin], append(pad, sb[begin:]...)...)
+		sb = append(padded, sb[begin:]...)
 	}
 	return sb
 }
@@ -764,20 +766,22 @@ func (f *formatter) printFloat(fs *formatSpec, arg any) {
 func (f *formatter) printDouble(fs *formatSpec, value float64) {
 	var sb []uint16
 	neg := Double_compare(value, 0) == -1
-	if value == value {
+	switch {
+	case value == value:
 		v := math.Abs(value)
 		sb = f.leadingSign(fs, sb, neg)
-		if !math.IsInf(v, 0) {
+		switch {
+		case !math.IsInf(v, 0):
 			sb = f.printFinite(fs, sb, v, neg)
-		} else if hasFlags(fs.flags, ffUppercase) {
+		case hasFlags(fs.flags, ffUppercase):
 			sb = append(sb, FromGo("INFINITY").units...)
-		} else {
+		default:
 			sb = append(sb, FromGo("Infinity").units...)
 		}
 		sb = trailingSign(fs, sb, neg)
-	} else if hasFlags(fs.flags, ffUppercase) {
+	case hasFlags(fs.flags, ffUppercase):
 		sb = append(sb, 'N', 'A', 'N')
-	} else {
+	default:
 		sb = append(sb, 'N', 'a', 'N')
 	}
 	f.appendJustified(fs, sb)
@@ -975,7 +979,6 @@ func hexDouble(d float64, prec int) string {
 	subnormal := exponent == -1023
 	if subnormal {
 		d *= 0x1p54
-		exponent = mathGetExponent(d)
 	}
 	precision := 1 + prec*4
 	shiftDistance := uint(53 - precision)

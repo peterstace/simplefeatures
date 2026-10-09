@@ -404,10 +404,11 @@ func TestTextParse(t *testing.T) {
 
 // dfSetup implements TextVectors.dfSetup.
 func dfSetup(t *testing.T, setup string) *NumberFormat {
+	t.Helper()
 	kind, arg, _ := strings.Cut(setup, ":")
 	switch kind {
 	case "ordinate":
-		n, _ := strconv.Atoi(arg)
+		n, _ := strconv.ParseInt(arg, 10, 32)
 		f := DecimalFormat_fromAny(Ref(NumberFormat_getInstance_Locale(Locale_US)))
 		f.ApplyPattern_String(Lit("0"))
 		f.SetMaximumFractionDigits_int(int32(n))
@@ -434,7 +435,7 @@ func dfSetup(t *testing.T, setup string) *NumberFormat {
 		f.SetMaximumFractionDigits_int(2)
 		return f
 	case "maxint", "minint", "minfrac":
-		n, _ := strconv.Atoi(arg)
+		n, _ := strconv.ParseInt(arg, 10, 32)
 		f := NumberFormat_getInstance_Locale(Locale_US)
 		switch kind {
 		case "maxint":
@@ -512,6 +513,7 @@ func TestTextDecimalFormat(t *testing.T) {
 
 // decodeArg reverses TextVectors.encodeArg.
 func decodeArg(t *testing.T, s string) any {
+	t.Helper()
 	kind, val, _ := strings.Cut(s, ":")
 	switch kind {
 	case "n":
@@ -706,21 +708,21 @@ func runBuilderScript(script *String) *String {
 			case "ensureCapacity":
 				sb.EnsureCapacity_int(atoi(a[1]))
 			case "length":
-				return fmt.Sprint(sb.Length())
+				return istr(sb.Length())
 			case "capacity":
-				return fmt.Sprint(sb.Capacity())
+				return istr(sb.Capacity())
 			case "charAt":
-				return fmt.Sprint(sb.CharAt_int(atoi(a[1])))
+				return strconv.FormatUint(uint64(sb.CharAt_int(atoi(a[1]))), 10)
 			case "codePointAt":
-				return fmt.Sprint(sb.CodePointAt_int(atoi(a[1])))
+				return istr(sb.CodePointAt_int(atoi(a[1])))
 			case "indexOf":
-				return fmt.Sprint(sb.IndexOf_String(a[1]))
+				return istr(sb.IndexOf_String(a[1]))
 			case "lastIndexOf":
-				return fmt.Sprint(sb.LastIndexOf_String(a[1]))
+				return istr(sb.LastIndexOf_String(a[1]))
 			case "indexOffrom":
-				return fmt.Sprint(sb.IndexOf_String_int(a[1], atoi(a[2])))
+				return istr(sb.IndexOf_String_int(a[1], atoi(a[2])))
 			case "lastIndexOffrom":
-				return fmt.Sprint(sb.LastIndexOf_String_int(a[1], atoi(a[2])))
+				return istr(sb.LastIndexOf_String_int(a[1], atoi(a[2])))
 			case "substring":
 				if len(a) == 2 {
 					return esc(sb.Substring_int(atoi(a[1])))
@@ -762,7 +764,7 @@ func TestTextMisc(t *testing.T) {
 				s = unesc(v[1])
 			}
 			radix := int32(0)
-			if r, err := strconv.Atoi(v[2]); err == nil {
+			if r, err := strconv.ParseInt(v[2], 10, 32); err == nil {
 				radix = int32(r)
 			}
 			got := attempt(func() string {
@@ -797,12 +799,12 @@ func TestTextMisc(t *testing.T) {
 			check(v, got, v[2])
 		case "tsi":
 			i, _ := strconv.ParseInt(v[1], 10, 32)
-			radix, _ := strconv.Atoi(v[2])
+			radix, _ := strconv.ParseInt(v[2], 10, 32)
 			check(v, esc(Integer_toString_int_int(int32(i), int32(radix)))+"\t"+
 				esc(Integer_toUnsignedString_int_int(int32(i), int32(radix))), v[3]+"\t"+v[4])
 		case "tsl":
 			l, _ := strconv.ParseInt(v[1], 10, 64)
-			radix, _ := strconv.Atoi(v[2])
+			radix, _ := strconv.ParseInt(v[2], 10, 32)
 			check(v, esc(Long_toString_long_int(l, int32(radix)))+"\t"+
 				esc(Long_toUnsignedString_long_int(l, int32(radix))), v[3]+"\t"+v[4])
 		case "bits":
@@ -821,7 +823,7 @@ func TestTextMisc(t *testing.T) {
 			}
 			check(v, strings.Join(got, "\t"), strings.Join(v[1:], "\t"))
 		case "chr":
-			block, _ := strconv.Atoi(v[1])
+			block, _ := strconv.ParseInt(v[1], 10, 32)
 			h := uint64(fnvOffset)
 			for cp := int32(block) << 12; cp < int32(block+1)<<12; cp++ {
 				h = fnvString(h, FromGo(charProps(cp)))
@@ -863,7 +865,7 @@ func TestTextMisc(t *testing.T) {
 			check(v, attempt(func() string { return str(s.Matches_String(re)) }), v[3])
 		case "rxsplit":
 			re, s := unesc(v[1]), unesc(v[2])
-			limit, _ := strconv.Atoi(v[3])
+			limit, _ := strconv.ParseInt(v[3], 10, 32)
 			check(v, attempt(func() string { return renderSplit(s.Split_String_int(re, int32(limit))) }),
 				strings.Join(v[4:], "\t"))
 		case "replace":
@@ -932,7 +934,7 @@ func TestTextMisc(t *testing.T) {
 			check(v, strconv.FormatUint(h, 16), v[2])
 		case "bdround":
 			s := FromGo(v[1])
-			mode, _ := strconv.Atoi(v[2])
+			mode, _ := strconv.ParseInt(v[2], 10, 32)
 			got := []string{
 				attempt(func() string { return BigDecimal_new_String(s).SetScale_int_int(0, int32(mode)).ToString().Go() }),
 				attempt(func() string { return BigDecimal_new_String(s).SetScale_int_int(1, int32(mode)).ToString().Go() }),

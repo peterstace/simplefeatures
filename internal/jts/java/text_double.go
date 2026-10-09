@@ -493,11 +493,13 @@ func scanJavaFloat(str *String) javaFloatLiteral {
 	decPt := 0
 	nLeadZero := 0
 	nTrailZero := 0
+skipLeadingZerosLoop:
 	for ; i < n; i++ {
 		c = in[i]
-		if c == '0' {
+		switch {
+		case c == '0':
 			nLeadZero++
-		} else if c == '.' {
+		case c == '.':
 			if decSeen {
 				multiplePoints()
 			}
@@ -506,19 +508,21 @@ func scanJavaFloat(str *String) javaFloatLiteral {
 				decPt--
 			}
 			decSeen = true
-		} else {
-			break
+		default:
+			break skipLeadingZerosLoop
 		}
 	}
+digitLoop:
 	for ; i < n; i++ {
 		c = in[i]
-		if c >= '1' && c <= '9' {
+		switch {
+		case c >= '1' && c <= '9':
 			digits = append(digits, byte(c))
 			nTrailZero = 0
-		} else if c == '0' {
+		case c == '0':
 			digits = append(digits, '0')
 			nTrailZero++
-		} else if c == '.' {
+		case c == '.':
 			if decSeen {
 				multiplePoints()
 			}
@@ -527,8 +531,8 @@ func scanJavaFloat(str *String) javaFloatLiteral {
 				decPt--
 			}
 			decSeen = true
-		} else {
-			break
+		default:
+			break digitLoop
 		}
 	}
 	nDigits := len(digits) - nTrailZero

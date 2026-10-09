@@ -81,11 +81,11 @@ func (b *strBuf) checkOffset(offset int32) {
 
 // ensureCapacityInternal grows the capacity as the JDK does: to the larger of
 // the minimum and twice the old capacity plus two.
-func (b *strBuf) ensureCapacityInternal(min int) {
-	if min > b.capacity {
+func (b *strBuf) ensureCapacityInternal(minimumCapacity int) {
+	if minimumCapacity > b.capacity {
 		c := 2*b.capacity + 2
-		if c < min {
-			c = min
+		if c < minimumCapacity {
+			c = minimumCapacity
 		}
 		b.capacity = c
 	}
@@ -256,7 +256,7 @@ func (b *strBuf) codePointAt(index int32) int32 {
 
 func (b *strBuf) codePointBefore(index int32) int32 {
 	b.checkIndex(index - 1)
-	return codePointBeforeUnits(b.units, int(index), 0)
+	return codePointBeforeUnits(b.units, int(index))
 }
 
 func (b *strBuf) codePointCount(begin, end int32) int32 {
@@ -309,9 +309,9 @@ func (b *strBuf) getChars(srcBegin, srcEnd int32, dst []uint16, dstBegin int32) 
 	copy(dst[dstBegin:], b.units[srcBegin:srcEnd])
 }
 
-func (b *strBuf) ensureCapacity(min int32) {
-	if min > 0 {
-		b.ensureCapacityInternal(int(min))
+func (b *strBuf) ensureCapacity(minimumCapacity int32) {
+	if minimumCapacity > 0 {
+		b.ensureCapacityInternal(int(minimumCapacity))
 	}
 }
 
@@ -623,12 +623,14 @@ func (this *StringBuilder) SetCharAt_int_char(index int32, c uint16) {
 	this.b.units[index] = c
 }
 
-func (this *StringBuilder) SetLength_int(n int32)        { this.b.setLength(n) }
-func (this *StringBuilder) Length() int32                { return int32(len(this.b.units)) }
-func (this *StringBuilder) Capacity() int32              { return int32(this.b.capacity) }
-func (this *StringBuilder) EnsureCapacity_int(min int32) { this.b.ensureCapacity(min) }
-func (this *StringBuilder) TrimToSize()                  { this.b.trimToSize() }
-func (this *StringBuilder) ToString() *String            { return this.b.toString() }
+func (this *StringBuilder) SetLength_int(n int32) { this.b.setLength(n) }
+func (this *StringBuilder) Length() int32         { return int32(len(this.b.units)) }
+func (this *StringBuilder) Capacity() int32       { return int32(this.b.capacity) }
+func (this *StringBuilder) EnsureCapacity_int(minimumCapacity int32) {
+	this.b.ensureCapacity(minimumCapacity)
+}
+func (this *StringBuilder) TrimToSize()       { this.b.trimToSize() }
+func (this *StringBuilder) ToString() *String { return this.b.toString() }
 func (this *StringBuilder) Substring_int(start int32) *String {
 	return this.b.substring(start, int32(len(this.b.units)))
 }
@@ -896,12 +898,14 @@ func (this *StringBuffer) SetCharAt_int_char(index int32, c uint16) {
 	this.b.units[index] = c
 }
 
-func (this *StringBuffer) SetLength_int(n int32)        { this.b.setLength(n) }
-func (this *StringBuffer) Length() int32                { return int32(len(this.b.units)) }
-func (this *StringBuffer) Capacity() int32              { return int32(this.b.capacity) }
-func (this *StringBuffer) EnsureCapacity_int(min int32) { this.b.ensureCapacity(min) }
-func (this *StringBuffer) TrimToSize()                  { this.b.trimToSize() }
-func (this *StringBuffer) ToString() *String            { return this.b.toString() }
+func (this *StringBuffer) SetLength_int(n int32) { this.b.setLength(n) }
+func (this *StringBuffer) Length() int32         { return int32(len(this.b.units)) }
+func (this *StringBuffer) Capacity() int32       { return int32(this.b.capacity) }
+func (this *StringBuffer) EnsureCapacity_int(minimumCapacity int32) {
+	this.b.ensureCapacity(minimumCapacity)
+}
+func (this *StringBuffer) TrimToSize()       { this.b.trimToSize() }
+func (this *StringBuffer) ToString() *String { return this.b.toString() }
 func (this *StringBuffer) Substring_int(start int32) *String {
 	return this.b.substring(start, int32(len(this.b.units)))
 }

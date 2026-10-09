@@ -108,8 +108,9 @@ func BigDecimal_valueOf_long_int(l int64, scale int32) *BigDecimal {
 	return newBigDecimal(big.NewInt(l), scale)
 }
 
-// parseBigDecimal implements the BigDecimal(char[], int, int, MathContext)
-// constructor with unlimited precision, including its error messages.
+// parseBigDecimal implements the BigDecimal(char[] in, int offset, int len,
+// MathContext mc) constructor with unlimited precision, including its error
+// messages.
 func parseBigDecimal(in []uint16) *BigDecimal {
 	if len(in) == 0 {
 		panic(NumberFormatException_new())

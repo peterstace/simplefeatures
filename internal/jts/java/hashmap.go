@@ -249,11 +249,12 @@ func (this *HashMap) putVal(hash int32, key, value any, onlyIfAbsent bool) any {
 		tab[i] = this.newNode(hash, key, value, nil)
 	} else {
 		var e *hashNode
-		if p.hash == hash && keyMatches(p.key, key) {
+		switch {
+		case p.hash == hash && keyMatches(p.key, key):
 			e = p
-		} else if p.kind == nodeTree {
+		case p.kind == nodeTree:
 			e = asTree(p).putTreeVal(this, tab, hash, key, value).node()
-		} else {
+		default:
 			for binCount := 0; ; binCount++ {
 				e = p.next
 				if e == nil {
@@ -293,7 +294,8 @@ func (this *HashMap) resize() []*hashNode {
 	oldCap := int32(len(oldTab))
 	oldThr := this.threshold
 	var newCap, newThr int32
-	if oldCap > 0 {
+	switch {
+	case oldCap > 0:
 		if oldCap >= hashMapMaximumCapacity {
 			this.threshold = math.MaxInt32
 			return oldTab
@@ -302,9 +304,9 @@ func (this *HashMap) resize() []*hashNode {
 		if newCap < hashMapMaximumCapacity && oldCap >= hashMapDefaultInitialCapacity {
 			newThr = oldThr << 1
 		}
-	} else if oldThr > 0 {
+	case oldThr > 0:
 		newCap = oldThr
-	} else {
+	default:
 		newCap = hashMapDefaultInitialCapacity
 		newThr = int32(hashMapDefaultLoadFactor * hashMapDefaultInitialCapacity)
 	}
@@ -325,11 +327,12 @@ func (this *HashMap) resize() []*hashNode {
 			continue
 		}
 		oldTab[j] = nil
-		if e.next == nil {
+		switch {
+		case e.next == nil:
 			newTab[e.hash&(newCap-1)] = e
-		} else if e.kind == nodeTree {
+		case e.kind == nodeTree:
 			asTree(e).split(this, newTab, j, oldCap)
-		} else {
+		default:
 			var loHead, loTail, hiHead, hiTail *hashNode
 			for e != nil {
 				next := e.next
@@ -448,11 +451,12 @@ func (this *HashMap) removeNode(hash int32, key, value any, matchValue, movable 
 			return nil
 		}
 	}
-	if node.kind == nodeTree {
+	switch {
+	case node.kind == nodeTree:
 		asTree(node).removeTreeNode(this, tab, movable)
-	} else if node == p {
+	case node == p:
 		tab[index] = node.next
-	} else {
+	default:
 		p.next = node.next
 	}
 	this.modCount++
@@ -808,13 +812,13 @@ type linkedNode struct {
 	after  *hashNode
 }
 
-// links returns n's LinkedHashMap.Entry links. All nodes of a LinkedHashMap
+// links returns e's LinkedHashMap.Entry links. All nodes of a LinkedHashMap
 // have them.
-func (n *hashNode) links() *linkedNode {
-	if n.kind == nodePlain {
+func (e *hashNode) links() *linkedNode {
+	if e.kind == nodePlain {
 		panic("java: HashMap node is not a LinkedHashMap entry")
 	}
-	return (*linkedNode)(unsafe.Pointer(n))
+	return (*linkedNode)(unsafe.Pointer(e))
 }
 
 func (e *hashNode) JIface_Map_Entry() {}
@@ -970,17 +974,20 @@ func (t *treeNode) find(h int32, k any, kc string) *treeNode {
 	for p != nil {
 		pl := p.left
 		pr := p.right
-		if ph := p.hash; ph > h {
+		ph := p.hash
+		pk := p.key
+		switch {
+		case ph > h:
 			p = pl
-		} else if ph < h {
+		case ph < h:
 			p = pr
-		} else if pk := p.key; sameRef(pk, k) || (k != nil && Object_Equals_Object(k, pk)) {
+		case sameRef(pk, k) || (k != nil && Object_Equals_Object(k, pk)):
 			return p
-		} else if pl == nil {
+		case pl == nil:
 			p = pr
-		} else if pr == nil {
+		case pr == nil:
 			p = pl
-		} else {
+		default:
 			if kc == "" {
 				kc = comparableClassFor(k)
 			}
@@ -1185,7 +1192,8 @@ func (t *treeNode) removeTreeNode(m *HashMap, tab []*hashNode, movable bool) {
 	pl := t.left
 	pr := t.right
 	var replacement *treeNode
-	if pl != nil && pr != nil {
+	switch {
+	case pl != nil && pr != nil:
 		s := pr
 		for s.left != nil {
 			s = s.left
@@ -1221,11 +1229,12 @@ func (t *treeNode) removeTreeNode(m *HashMap, tab []*hashNode, movable bool) {
 			pl.parent = s
 		}
 		s.parent = pp
-		if pp == nil {
+		switch {
+		case pp == nil:
 			root = s
-		} else if p == pp.left {
+		case p == pp.left:
 			pp.left = s
-		} else {
+		default:
 			pp.right = s
 		}
 		if sr != nil {
@@ -1233,22 +1242,23 @@ func (t *treeNode) removeTreeNode(m *HashMap, tab []*hashNode, movable bool) {
 		} else {
 			replacement = p
 		}
-	} else if pl != nil {
+	case pl != nil:
 		replacement = pl
-	} else if pr != nil {
+	case pr != nil:
 		replacement = pr
-	} else {
+	default:
 		replacement = p
 	}
 	if replacement != p {
 		pp := p.parent
 		replacement.parent = pp
-		if pp == nil {
+		switch {
+		case pp == nil:
 			root = replacement
 			root.red = false
-		} else if p == pp.left {
+		case p == pp.left:
 			pp.left = replacement
-		} else {
+		default:
 			pp.right = replacement
 		}
 		p.left = nil
@@ -1345,12 +1355,13 @@ func treeRotateLeft(root, p *treeNode) *treeNode {
 	}
 	pp := p.parent
 	r.parent = pp
-	if pp == nil {
+	switch {
+	case pp == nil:
 		root = r
 		root.red = false
-	} else if pp.left == p {
+	case pp.left == p:
 		pp.left = r
-	} else {
+	default:
 		pp.right = r
 	}
 	r.left = p
@@ -1373,12 +1384,13 @@ func treeRotateRight(root, p *treeNode) *treeNode {
 	}
 	pp := p.parent
 	l.parent = pp
-	if pp == nil {
+	switch {
+	case pp == nil:
 		root = l
 		root.red = false
-	} else if pp.right == p {
+	case pp.right == p:
 		pp.right = l
-	} else {
+	default:
 		pp.left = l
 	}
 	l.right = p

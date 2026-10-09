@@ -166,7 +166,7 @@ func checkRadix(s *String, radix int32) {
 
 // parseSigned implements Long.parseLong(String, int), and
 // Integer.parseInt(String, int) for the int range.
-func parseSigned(s *String, radix int32, min, max int64) int64 {
+func parseSigned(s *String, radix int32, minValue, maxValue int64) int64 {
 	checkRadix(s, radix)
 	u := s.units
 	if len(u) == 0 {
@@ -174,12 +174,12 @@ func parseSigned(s *String, radix int32, min, max int64) int64 {
 	}
 	neg := false
 	i := 0
-	limit := -max
+	limit := -maxValue
 	if u[0] < '0' {
 		switch u[0] {
 		case '-':
 			neg = true
-			limit = min
+			limit = minValue
 		case '+':
 		default:
 			panic(numberFormatForInput(s, radix))
@@ -258,8 +258,8 @@ func parseUnsignedLong(s *String, radix int32) int64 {
 	return result
 }
 
-// parseLongRange implements Long.parseLong(CharSequence, int, int, int) on
-// u[begin:end], with its "Error at index" messages.
+// parseLongRange implements Long.parseLong(CharSequence s, int beginIndex, int
+// endIndex, int radix) on u[begin:end], with its "Error at index" messages.
 func parseLongRange(u []uint16, begin, end int, radix int32) int64 {
 	fail := func(i int) {
 		panic(NumberFormatException_new_String(Concat(Lit("Error at index "), StrOfInt(int32(i-begin)),
@@ -311,7 +311,7 @@ func parseLongRange(u []uint16, begin, end int, radix int32) int64 {
 }
 
 // decode implements Integer.decode and Long.decode.
-func decode(nm *String, min, max int64) int64 {
+func decode(nm *String, minValue, maxValue int64) int64 {
 	u := nm.units
 	if len(u) == 0 {
 		panic(NumberFormatException_new_String(Lit("Zero length string")))
@@ -353,10 +353,10 @@ func decode(nm *String, min, max int64) int64 {
 				if neg {
 					constant = Concat(Lit("-"), digits)
 				}
-				result = parseSigned(constant, radix, min, max)
+				result = parseSigned(constant, radix, minValue, maxValue)
 			}
 		}()
-		result = parseSigned(digits, radix, min, max)
+		result = parseSigned(digits, radix, minValue, maxValue)
 		if neg {
 			result = -result
 		}
@@ -753,17 +753,17 @@ func Long_ToString(recv any) *String { return StrOfLong(Long_LongValue(recv)) }
 // ---------------------------------------------------------------------------
 // Short and Byte
 
-func parseNarrow(s *String, radix int32, min, max int32) int32 {
+func parseNarrow(s *String, radix int32, minValue, maxValue int32) int32 {
 	i := Integer_parseInt_String_int(s, radix)
-	if i < min || i > max {
+	if i < minValue || i > maxValue {
 		panic(NumberFormatException_new_String(Concat(Lit("Value out of range. Value:\""), s, Lit("\" Radix:"), StrOfInt(radix))))
 	}
 	return i
 }
 
-func decodeNarrow(s *String, min, max int32) int32 {
+func decodeNarrow(s *String, minValue, maxValue int32) int32 {
 	i := int32(decode(s, math.MinInt32, math.MaxInt32))
-	if i < min || i > max {
+	if i < minValue || i > maxValue {
 		panic(NumberFormatException_new_String(Concat(Lit("Value "), StrOfInt(i), Lit(" out of range from input "), s)))
 	}
 	return i
@@ -1378,7 +1378,7 @@ func systemProperty(name *String) (v *String) {
 
 // decodeProperty decodes the system property name with Integer.decode or
 // Long.decode, returning ok false when it is unset or malformed.
-func decodeProperty(name *String, min, max int64) (v int64, ok bool) {
+func decodeProperty(name *String, minValue, maxValue int64) (v int64, ok bool) {
 	s := systemProperty(name)
 	if s == nil {
 		return 0, false
@@ -1391,7 +1391,7 @@ func decodeProperty(name *String, min, max int64) (v int64, ok bool) {
 			ok = false
 		}
 	}()
-	return decode(s, min, max), true
+	return decode(s, minValue, maxValue), true
 }
 
 // Boolean_getBoolean implements Boolean.getBoolean.

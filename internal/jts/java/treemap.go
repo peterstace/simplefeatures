@@ -16,9 +16,13 @@ type TreeMap struct {
 	values          *treeMapValues
 }
 
+// treeColor is the colour of a red-black tree node. TreeMap stores it as a
+// boolean: RED is false and BLACK is true.
+type treeColor bool
+
 const (
-	treeRed   = false
-	treeBlack = true
+	treeRed   treeColor = false
+	treeBlack treeColor = true
 )
 
 // treeMapEntry is TreeMap.Entry, a node of the tree. Iterating a TreeMap's
@@ -29,7 +33,7 @@ type treeMapEntry struct {
 	left   *treeMapEntry
 	right  *treeMapEntry
 	parent *treeMapEntry
-	color  bool
+	color  treeColor
 }
 
 func (this *TreeMap) JClass_TreeMap() *TreeMap { return this }
@@ -537,7 +541,7 @@ func treePredecessor(t *treeMapEntry) *treeMapEntry {
 	return p
 }
 
-func treeColorOf(p *treeMapEntry) bool {
+func treeColorOf(p *treeMapEntry) treeColor {
 	if p == nil {
 		return treeBlack
 	}
@@ -551,7 +555,7 @@ func treeParentOf(p *treeMapEntry) *treeMapEntry {
 	return p.parent
 }
 
-func treeSetColor(p *treeMapEntry, c bool) {
+func treeSetColor(p *treeMapEntry, c treeColor) {
 	if p != nil {
 		p.color = c
 	}

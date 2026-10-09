@@ -257,8 +257,8 @@ func Locale_forLanguageTag(tag *String) *Locale {
 	return l
 }
 
-func isAlphaLen(s string, min, max int) bool {
-	if len(s) < min || len(s) > max {
+func isAlphaLen(s string, minLen, maxLen int) bool {
+	if len(s) < minLen || len(s) > maxLen {
 		return false
 	}
 	for i := 0; i < len(s); i++ {
@@ -279,8 +279,8 @@ func isDigitString(s string) bool {
 	return true
 }
 
-func isAlnumLen(s string, min, max int) bool {
-	if len(s) < min || len(s) > max {
+func isAlnumLen(s string, minLen, maxLen int) bool {
+	if len(s) < minLen || len(s) > maxLen {
 		return false
 	}
 	for i := 0; i < len(s); i++ {

@@ -1,4 +1,4 @@
-package oracle
+package oracle_test
 
 import (
 	"sync"

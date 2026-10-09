@@ -288,7 +288,7 @@ func (this *singletonList) AddAll_int_Collection(i int32, c Collection) bool {
 func (this *singletonList) ListIterator() ListIterator { return this.ListIterator_int(0) }
 
 func (this *singletonList) ListIterator_int(i int32) ListIterator {
-	return abstractListIterator(this, nil, i)
+	return abstractListIterator(this, i)
 }
 
 func (this *singletonList) SubList_int_int(from, to int32) List {
@@ -420,7 +420,7 @@ func (this *emptyList) AddAll_int_Collection(i int32, c Collection) bool {
 }
 
 func (this *emptyList) ListIterator_int(i int32) ListIterator {
-	return abstractListIterator(this, nil, i)
+	return abstractListIterator(this, i)
 }
 
 func (this *emptyList) SubList_int_int(from, to int32) List {
@@ -618,7 +618,7 @@ func (this *copiesList) Iterator() Iterator         { return newAbstractListItr(
 func (this *copiesList) ListIterator() ListIterator { return this.ListIterator_int(0) }
 
 func (this *copiesList) ListIterator_int(i int32) ListIterator {
-	return abstractListIterator(this, nil, i)
+	return abstractListIterator(this, i)
 }
 
 func (this *copiesList) Sort_Comparator(c Comparator)             { listSortDefault(this, c) }

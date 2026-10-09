@@ -186,6 +186,7 @@ func sameResult(got, want string) bool {
 // StreamTokenizer
 
 func applyTokenizerConfig(t *testing.T, st *StreamTokenizer, ops string) {
+	t.Helper()
 	for _, op := range strings.Fields(ops) {
 		k, rest := op[0], op[1:]
 		var a, b int32
@@ -892,6 +893,7 @@ func TestWriterVectors(t *testing.T) {
 }
 
 func runWriterOp(t *testing.T, f []string, w *Writer) string {
+	t.Helper()
 	arg := func(i int) int32 { return int32(atoi(t, f[i])) }
 	chars := func() []uint16 {
 		if s := unq(f[1]); s != nil {
@@ -928,6 +930,7 @@ func runWriterOp(t *testing.T, f []string, w *Writer) string {
 }
 
 func runOutputStreamOp(t *testing.T, f []string, out *OutputStream) string {
+	t.Helper()
 	arg := func(i int) int32 { return int32(atoi(t, f[i])) }
 	switch f[0] {
 	case "wi":
@@ -944,6 +947,7 @@ func runOutputStreamOp(t *testing.T, f []string, out *OutputStream) string {
 }
 
 func runInputStreamOp(t *testing.T, f []string, is *InputStream) string {
+	t.Helper()
 	arg := func(i int) int32 { return int32(atoi(t, f[i])) }
 	switch f[0] {
 	case "r":
@@ -974,6 +978,7 @@ func runInputStreamOp(t *testing.T, f []string, is *InputStream) string {
 }
 
 func runBaseReaderOp(t *testing.T, f []string, rd *Reader) string {
+	t.Helper()
 	switch f[0] {
 	case "r":
 		return attemptJava(func() string { return strconv.Itoa(int(rd.Read())) })
@@ -999,6 +1004,7 @@ func runBaseReaderOp(t *testing.T, f []string, rd *Reader) string {
 }
 
 func runPrintCase(t *testing.T, f []string) (string, string) {
+	t.Helper()
 	bos := ByteArrayOutputStream_new()
 	ps := PrintStream_new_OutputStream_boolean(&bos.OutputStream, f[1] == "true")
 	i := 2
@@ -1372,7 +1378,7 @@ func TestPrintStackTrace(t *testing.T) {
 }
 
 func TestMiscRuntime(t *testing.T) {
-	if Random_new().NextLong() == Random_new().NextLong() {
+	if a, b := Random_new().NextLong(), Random_new().NextLong(); a == b {
 		t.Fatal("unseeded Randoms repeat")
 	}
 	rt := Runtime_getRuntime()
@@ -1403,7 +1409,7 @@ func TestMiscRuntime(t *testing.T) {
 	if got != any(int32(4)) {
 		t.Fatal("ConsumerFunc")
 	}
-	if System_identityHashCode(ref) != System_identityHashCode(ref) || System_identityHashCode(nil) != 0 {
+	if h1, h2 := System_identityHashCode(ref), System_identityHashCode(ref); h1 != h2 || System_identityHashCode(nil) != 0 {
 		t.Fatal("identityHashCode")
 	}
 	if !CloneNotSupportedException_isInstance(CloneNotSupportedException_new()) ||

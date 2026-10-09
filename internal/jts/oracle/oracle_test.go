@@ -1,4 +1,4 @@
-package oracle
+package oracle_test
 
 import (
 	"encoding/xml"
@@ -84,6 +84,7 @@ func TestXML(t *testing.T) {
 }
 
 func runXMLFile(t *testing.T, d *driver, file string, st stats) {
+	t.Helper()
 	buf, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatal(err)
@@ -200,12 +201,16 @@ func battery(names []string) [][]string {
 	if len(names) == 2 {
 		a, b := names[0], names[1]
 		f("relate", a, b)
-		for _, p := range []string{"intersects", "contains", "within", "covers", "coveredBy", "crosses",
-			"disjoint", "equalsTopo", "overlaps", "touches"} {
+		for _, p := range []string{
+			"intersects", "contains", "within", "covers", "coveredBy", "crosses",
+			"disjoint", "equalsTopo", "overlaps", "touches",
+		} {
 			f("relatePredicate", a, b, p)
 		}
-		for _, p := range []string{"intersects", "contains", "containsProperly", "covers", "coveredBy",
-			"crosses", "disjoint", "overlaps", "touches", "within"} {
+		for _, p := range []string{
+			"intersects", "contains", "containsProperly", "covers", "coveredBy",
+			"crosses", "disjoint", "overlaps", "touches", "within",
+		} {
 			f("prepared", a, b, p)
 		}
 		for opCode := 1; opCode <= 4; opCode++ {

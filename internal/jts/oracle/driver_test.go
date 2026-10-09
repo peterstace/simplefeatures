@@ -1,4 +1,4 @@
-package oracle
+package oracle_test
 
 import (
 	"bufio"
@@ -46,7 +46,7 @@ func startDriver(t *testing.T) *driver {
 			t.Fatalf("compiling driver: %v\n%s", err, out)
 		}
 	}
-	cmd := exec.Command("java",
+	cmd := exec.Command("java", //nolint:gosec // A fixed command whose arguments are built from constants.
 		// The runtime's default locale is en-US.
 		"-Duser.language=en", "-Duser.country=US",
 		"-XX:+UnlockDiagnosticVMOptions", "-XX:-InlineMathNatives",

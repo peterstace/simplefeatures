@@ -91,7 +91,7 @@ type hvXKey struct {
 }
 
 func (k *hvXKey) HashCode() int32          { return k.hash }
-func (k *hvXKey) Equals_Object(o any) bool { return false }
+func (k *hvXKey) Equals_Object(_ any) bool { return false }
 func (k *hvXKey) JClassName() string       { return "HashVectors$XKey" }
 func (k *hvXKey) JIdentityHash() *int32    { return &k.jhash }
 func (k *hvXKey) ToString() *String        { return FromGo(fmt.Sprintf("x%d", k.idx)) }
@@ -127,6 +127,7 @@ type hvStep struct {
 }
 
 func readHashVectors(t *testing.T) []*hvSeq {
+	t.Helper()
 	f, err := os.Open("testdata/hash.txt")
 	if err != nil {
 		t.Fatal(err)
@@ -170,6 +171,7 @@ func readHashVectors(t *testing.T) []*hvSeq {
 }
 
 func hvAtoi(t *testing.T, s string) int32 {
+	t.Helper()
 	v, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
 		t.Fatal(err)
@@ -263,6 +265,7 @@ func hvRun(t *testing.T, s *hvSeq, lazy bool) bool {
 }
 
 func hvKey(t *testing.T, idx int32, f []string) any {
+	t.Helper()
 	switch f[0] {
 	case "z":
 		return nil

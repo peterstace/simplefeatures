@@ -639,10 +639,10 @@ func FileOutputStream_new_String(name *String) *FileOutputStream {
 	return FileOutputStream_new_String_boolean(name, false)
 }
 
-func FileOutputStream_new_String_boolean(name *String, append bool) *FileOutputStream {
+func FileOutputStream_new_String_boolean(name *String, append_ bool) *FileOutputStream {
 	this := &FileOutputStream{}
 	this.jself = this
-	this.FileOutputStream_init_String_boolean(name, append)
+	this.FileOutputStream_init_String_boolean(name, append_)
 	return this
 }
 
@@ -650,10 +650,10 @@ func FileOutputStream_new_File(file *File) *FileOutputStream {
 	return FileOutputStream_new_File_boolean(file, false)
 }
 
-func FileOutputStream_new_File_boolean(file *File, append bool) *FileOutputStream {
+func FileOutputStream_new_File_boolean(file *File, append_ bool) *FileOutputStream {
 	this := &FileOutputStream{}
 	this.jself = this
-	this.FileOutputStream_init_File_boolean(file, append)
+	this.FileOutputStream_init_File_boolean(file, append_)
 	return this
 }
 
@@ -661,19 +661,19 @@ func (this *FileOutputStream) FileOutputStream_init_String(name *String) {
 	this.FileOutputStream_init_String_boolean(name, false)
 }
 
-func (this *FileOutputStream) FileOutputStream_init_String_boolean(name *String, append bool) {
+func (this *FileOutputStream) FileOutputStream_init_String_boolean(name *String, append_ bool) {
 	var file *File
 	if name != nil {
 		file = File_new_String(name)
 	}
-	this.FileOutputStream_init_File_boolean(file, append)
+	this.FileOutputStream_init_File_boolean(file, append_)
 }
 
 func (this *FileOutputStream) FileOutputStream_init_File(file *File) {
 	this.FileOutputStream_init_File_boolean(file, false)
 }
 
-func (this *FileOutputStream) FileOutputStream_init_File_boolean(file *File, append bool) {
+func (this *FileOutputStream) FileOutputStream_init_File_boolean(file *File, append_ bool) {
 	this.OutputStream.OutputStream_init()
 	if file == nil {
 		panic(NullPointerException_new())
@@ -683,7 +683,7 @@ func (this *FileOutputStream) FileOutputStream_init_File_boolean(file *File, app
 	}
 	name := file.path.Go()
 	flags := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
-	if append {
+	if append_ {
 		flags = os.O_WRONLY | os.O_CREATE | os.O_APPEND
 	}
 	f, err := os.OpenFile(name, flags, 0o666)

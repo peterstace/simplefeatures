@@ -412,11 +412,11 @@ func codePointAtUnits(u []uint16, index, limit int) int32 {
 	return int32(c1)
 }
 
-// codePointBeforeUnits implements Character.codePointBefore on u with start.
-func codePointBeforeUnits(u []uint16, index, start int) int32 {
+// codePointBeforeUnits implements Character.codePointBefore on u.
+func codePointBeforeUnits(u []uint16, index int) int32 {
 	index--
 	c2 := u[index]
-	if Character_isLowSurrogate(c2) && index > start {
+	if Character_isLowSurrogate(c2) && index > 0 {
 		if c1 := u[index-1]; Character_isHighSurrogate(c1) {
 			return Character_toCodePoint(c1, c2)
 		}
@@ -457,7 +457,7 @@ func Character_codePointBefore_charArr_int(a []uint16, index int32) int32 {
 	if index-1 < 0 || int(index-1) >= len(a) {
 		panic(arrayIndexOutOfBounds(int(index-1), len(a)))
 	}
-	return codePointBeforeUnits(a, int(index), 0)
+	return codePointBeforeUnits(a, int(index))
 }
 
 // Character_codePointBefore_CharSequence_int implements
@@ -468,7 +468,7 @@ func Character_codePointBefore_CharSequence_int(seq any, index int32) int32 {
 		panic(StringIndexOutOfBoundsException_new_String(FromGo(fmt.Sprintf(
 			"index %d, length %d", index-1, len(u)))))
 	}
-	return codePointBeforeUnits(u, int(index), 0)
+	return codePointBeforeUnits(u, int(index))
 }
 
 // codePointCountUnits counts the code points in u[begin:end].

@@ -461,19 +461,20 @@ func fdlibmKernelRemPio2(x, y []float64, e0, nx, prec int32, ipio2 []int32) int3
 		n = F2I(z)
 		z -= float64(n)
 		ih = 0
-		if q0 > 0 { // need iq[jz-1] to determine n
+		switch {
+		case q0 > 0: // need iq[jz-1] to determine n
 			i = iq[jz-1] >> (24 - q0)
 			n += i
 			iq[jz-1] -= i << (24 - q0)
 			ih = iq[jz-1] >> (23 - q0)
-		} else if q0 == 0 {
+		case q0 == 0:
 			ih = iq[jz-1] >> 23
-		} else if z >= 0.5 {
+		case z >= 0.5:
 			ih = 2
 		}
 
 		if ih > 0 { // q > 0.5
-			n += 1
+			n++
 			carry := int32(0)
 			for i = 0; i < jz; i++ { // compute 1-q
 				j = iq[i]
@@ -509,7 +510,9 @@ func fdlibmKernelRemPio2(x, y []float64, e0, nx, prec int32, ipio2 []int32) int3
 				j |= iq[i]
 			}
 			if j == 0 { // need recomputation
-				for k = 1; iq[jk-k] == 0; k++ { // k = no. of terms needed
+				k = 1
+				for iq[jk-k] == 0 { // k = no. of terms needed
+					k++
 				}
 				for i = jz + 1; i <= jz+k; i++ { // add q[jz+1] to q[jz+k]
 					f[jx+i] = float64(ipio2[jv+i])
@@ -528,7 +531,7 @@ func fdlibmKernelRemPio2(x, y []float64, e0, nx, prec int32, ipio2 []int32) int3
 
 	// Chop off zero terms.
 	if z == 0.0 {
-		jz -= 1
+		jz--
 		q0 -= 24
 		for iq[jz] == 0 {
 			jz--
@@ -539,7 +542,7 @@ func fdlibmKernelRemPio2(x, y []float64, e0, nx, prec int32, ipio2 []int32) int3
 		if z >= fdlibmTwo24 {
 			fw = float64(F2I(float64(twon24 * z)))
 			iq[jz] = F2I(z - float64(fdlibmTwo24*fw))
-			jz += 1
+			jz++
 			q0 += 24
 			iq[jz] = F2I(fw)
 		} else {
@@ -916,11 +919,12 @@ func fdlibmAtan2(y, x float64) float64 {
 
 	// Compute y/x.
 	k := (iy - ix) >> 20
-	if k > 60 { // |y/x| > 2**60
+	switch {
+	case k > 60: // |y/x| > 2**60
 		z = pi_o_2 + 0.5*pi_lo
-	} else if hx < 0 && k < -60 { // |y|/x < -2**60
+	case hx < 0 && k < -60: // |y|/x < -2**60
 		z = 0.0
-	} else { // safe to do y/x
+	default: // safe to do y/x
 		z = fdlibmAtan(math.Abs(y / x))
 	}
 	switch m {
@@ -980,7 +984,7 @@ func fdlibmCbrt(x float64) float64 {
 	r = x / s
 	w := t + t
 	r = (r - t) / (w + r) // r-s is exact
-	t = t + float64(t*r)
+	t += float64(t * r)
 
 	// Restore the original sign bit.
 	return float64(sign * t)
@@ -1047,7 +1051,7 @@ func fdlibmHypot(x, y float64) float64 {
 		t2 = a - t1
 		w = math.Sqrt(float64(t1*t1) - (float64(b*(-b)) - float64(t2*(a+t1))))
 	} else {
-		a = a + a
+		a += a
 		y1 := fdlibmSetHI(0.0, hb)
 		y2 := b - y1
 		t1 = fdlibmSetHI(0.0, ha+0x00100000)
@@ -1078,26 +1082,28 @@ func fdlibmPow(x, y float64) float64 {
 	yAbs := math.Abs(y)
 	xAbs := math.Abs(x)
 	// Special values of y.
-	if y == 2.0 {
+	switch {
+	case y == 2.0:
 		return float64(x * x)
-	} else if y == 0.5 {
+	case y == 0.5:
 		if x >= -math.MaxFloat64 { // handle x == -infinity later
 			return math.Sqrt(x + 0.0) // add 0.0 to properly handle x == -0.0
 		}
-	} else if yAbs == 1.0 { // y is +/-1
+	case yAbs == 1.0: // y is +/-1
 		if y == 1.0 {
 			return x
 		}
 		return 1.0 / x
-	} else if math.IsInf(yAbs, 1) { // y is +/-infinity
-		if xAbs == 1.0 {
+	case math.IsInf(yAbs, 1): // y is +/-infinity
+		switch {
+		case xAbs == 1.0:
 			return y - y // inf**+/-1 is NaN
-		} else if xAbs > 1.0 { // (|x| > 1)**+/-inf = inf, 0
+		case xAbs > 1.0: // (|x| > 1)**+/-inf = inf, 0
 			if y >= 0 {
 				return y
 			}
 			return 0.0
-		} else { // (|x| < 1)**-/+inf = inf, 0
+		default: // (|x| < 1)**-/+inf = inf, 0
 			if y < 0 {
 				return -y
 			}
@@ -1209,13 +1215,14 @@ func fdlibmPow(x, y float64) float64 {
 		j = ix & 0x000fffff
 		// Determine interval.
 		ix = j | 0x3ff00000 // normalize ix
-		if j <= 0x3988E {
+		switch {
+		case j <= 0x3988E:
 			k = 0 // |x| <sqrt(3/2)
-		} else if j < 0xBB67A {
+		case j < 0xBB67A:
 			k = 1 // |x| <sqrt(3)
-		} else {
+		default:
 			k = 0
-			n += 1
+			n++
 			ix -= 0x00100000
 		}
 		xAbs = fdlibmSetHI(xAbs, ix)
@@ -1380,7 +1387,8 @@ func fdlibmExp(x float64) float64 {
 	}
 
 	// Argument reduction.
-	if hx > 0x3fd62e42 { // if  |x| > 0.5 ln2
+	switch {
+	case hx > 0x3fd62e42: // if  |x| > 0.5 ln2
 		if hx < 0x3FF0A2B2 { // and |x| < 1.5 ln2
 			hi = x - ln2HI[xsb]
 			lo = ln2LO[xsb]
@@ -1392,11 +1400,11 @@ func fdlibmExp(x float64) float64 {
 			lo = float64(t * ln2LO[0])
 		}
 		x = hi - lo
-	} else if hx < 0x3e300000 { // when |x|<2**-28
+	case hx < 0x3e300000: // when |x|<2**-28
 		if fdlibmHuge+x > 1.0 {
 			return 1.0 + x // trigger inexact
 		}
-	} else {
+	default:
 		k = 0
 	}
 
@@ -1600,7 +1608,7 @@ func fdlibmLog1p(x float64) float64 {
 		if hu < 0x6a09e {
 			u = fdlibmSetHI(u, hu|0x3ff00000) // normalize u
 		} else {
-			k += 1
+			k++
 			u = fdlibmSetHI(u, hu|0x3fe00000) // normalize u/2
 			hu = (0x00100000 - hu) >> 2
 		}
@@ -1677,7 +1685,8 @@ func fdlibmExpm1(x float64) float64 {
 	}
 
 	// Argument reduction.
-	if hx > 0x3fd62e42 { // if  |x| > 0.5 ln2
+	switch {
+	case hx > 0x3fd62e42: // if  |x| > 0.5 ln2
 		if hx < 0x3FF0A2B2 { // and |x| < 1.5 ln2
 			if xsb == 0 {
 				hi = x - ln2_hi
@@ -1700,10 +1709,10 @@ func fdlibmExpm1(x float64) float64 {
 		}
 		x = hi - lo
 		c = (hi - x) - lo
-	} else if hx < 0x3c900000 { // when |x| < 2**-54, return x
+	case hx < 0x3c900000: // when |x| < 2**-54, return x
 		t = fdlibmHuge + x // return x with inexact flags when x != 0
 		return x - (t - (fdlibmHuge + x))
-	} else {
+	default:
 		k = 0
 	}
 
@@ -1982,11 +1991,11 @@ func fdlibmFmod(x, y float64) float64 {
 		hz = hx - hy
 		lz = lx - ly
 		if uint32(lx) < uint32(ly) {
-			hz -= 1
+			hz--
 		}
 		if hz < 0 {
 			hx = hx + hx + int32(uint32(lx)>>31)
-			lx = lx + lx
+			lx += lx
 		} else {
 			if (hz | lz) == 0 { // return sign(x)*0
 				return fdlibmSignedZero(sx)
@@ -1998,7 +2007,7 @@ func fdlibmFmod(x, y float64) float64 {
 	hz = hx - hy
 	lz = lx - ly
 	if uint32(lx) < uint32(ly) {
-		hz -= 1
+		hz--
 	}
 	if hz >= 0 {
 		hx = hz
@@ -2011,21 +2020,22 @@ func fdlibmFmod(x, y float64) float64 {
 	}
 	for hx < 0x00100000 { // normalize x
 		hx = hx + hx + int32(uint32(lx)>>31)
-		lx = lx + lx
-		iy -= 1
+		lx += lx
+		iy--
 	}
 	if iy >= -1022 { // normalize output
 		hx = (hx - 0x00100000) | ((iy + 1023) << 20)
 		x = fdlibmHILO(hx|sx, lx)
 	} else { // subnormal output
 		n = -1022 - iy
-		if n <= 20 {
+		switch {
+		case n <= 20:
 			lx = int32(uint32(lx)>>n) | (hx << (32 - n))
 			hx >>= n
-		} else if n <= 31 {
+		case n <= 31:
 			lx = (hx << (32 - n)) | int32(uint32(lx)>>n)
 			hx = sx
-		} else {
+		default:
 			lx = hx >> (n - 32)
 			hx = sx
 		}
@@ -2047,11 +2057,11 @@ func fdlibmIlogb(hz, lz int32) int32 {
 	if hz < 0x00100000 { // subnormal z
 		if hz == 0 {
 			for iz, i = -1043, lz; i > 0; i <<= 1 {
-				iz -= 1
+				iz--
 			}
 		} else {
 			for iz, i = -1022, hz<<11; i > 0; i <<= 1 {
-				iz -= 1
+				iz--
 			}
 		}
 	} else {

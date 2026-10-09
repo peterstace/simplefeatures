@@ -126,7 +126,7 @@ func (this *arraysArrayList) AddAll_int_Collection(i int32, c Collection) bool {
 func (this *arraysArrayList) ListIterator() ListIterator { return this.ListIterator_int(0) }
 
 func (this *arraysArrayList) ListIterator_int(i int32) ListIterator {
-	return abstractListIterator(this, nil, i)
+	return abstractListIterator(this, i)
 }
 
 func (this *arraysArrayList) SubList_int_int(from, to int32) List {
@@ -239,7 +239,7 @@ func sortFloating[T float32 | float64](a []T, low, high int32) {
 		if ak == 0 && math.Signbit(float64(ak)) {
 			numNegativeZero++
 			a[k] = 0
-		} else if ak != ak {
+		} else if math.IsNaN(float64(ak)) {
 			high--
 			a[k] = a[high]
 			a[high] = ak

@@ -1,4 +1,4 @@
-package oracle
+package oracle_test
 
 import (
 	"fmt"
@@ -78,7 +78,7 @@ func compareBattery(t *testing.T, d *driver, p *port, st stats, desc string, nam
 		if !ok {
 			t.Fatalf("driver reply: %s", reply)
 		}
-		seq, err := strconv.Atoi(hseq)
+		seq, err := strconv.ParseInt(hseq, 10, 32)
 		if err != nil {
 			t.Fatalf("driver reply: %s", reply)
 		}
@@ -102,6 +102,7 @@ var wktLiteral = regexp.MustCompile(
 
 // scrapeWKT collects the WKT literals in simplefeatures' geom tests.
 func scrapeWKT(t *testing.T) []string {
+	t.Helper()
 	files, err := filepath.Glob("../../../geom/*_test.go")
 	if err != nil {
 		t.Fatal(err)

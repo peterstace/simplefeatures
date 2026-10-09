@@ -132,7 +132,7 @@ func combiningClassKind(cp int32) int {
 // isAfterI implements ConditionalSpecialCasing.isAfterI.
 func isAfterI(u []uint16, index int) bool {
 	for i := index; i > 0; {
-		ch := codePointBeforeUnits(u, i, 0)
+		ch := codePointBeforeUnits(u, i)
 		if ch == 'I' {
 			return true
 		}
@@ -162,7 +162,7 @@ func isBeforeDot(u []uint16, index int) bool {
 // isAfterSoftDotted implements ConditionalSpecialCasing.isAfterSoftDotted.
 func isAfterSoftDotted(u []uint16, index int) bool {
 	for i := index; i > 0; {
-		ch := codePointBeforeUnits(u, i, 0)
+		ch := codePointBeforeUnits(u, i)
 		switch ch {
 		case 0x69, 0x6a, 0x12f, 0x268, 0x456, 0x458, 0x1e2d, 0x1ecb:
 			return true
@@ -214,7 +214,7 @@ func isFinalCased(u []uint16, index int) bool {
 			t == charCombiningSpacingMark || t == charDecimalDigitNumber
 	}
 	for i := index; i > 0; {
-		ch := codePointBeforeUnits(u, i, 0)
+		ch := codePointBeforeUnits(u, i)
 		if !isWordChar(ch) {
 			return false
 		}
@@ -250,7 +250,7 @@ func (s *String) CodePointBefore_int(index int32) int32 {
 	if i < 0 || int(i) >= len(s.units) {
 		panic(indexOutOfBounds(int(i), len(s.units)))
 	}
-	return codePointBeforeUnits(s.units, int(index), 0)
+	return codePointBeforeUnits(s.units, int(index))
 }
 
 // CodePointCount_int_int implements String.codePointCount.

@@ -140,6 +140,7 @@ type collTester struct {
 }
 
 func newCollTester(t *testing.T, file string) *collTester {
+	t.Helper()
 	log := &collCmpLog{}
 	return &collTester{t: t, file: file, log: log, mod: &collModCmp{log: log}, ords: newCollOrds()}
 }
@@ -211,7 +212,7 @@ func (ct *collTester) parse(s string) any {
 	}
 	switch s[0] {
 	case 'i':
-		v, err := strconv.Atoi(s[1:])
+		v, err := strconv.ParseInt(s[1:], 10, 32)
 		if err != nil {
 			ct.t.Fatalf("%s:%d: bad int %q", ct.file, ct.line, s)
 		}
@@ -361,7 +362,7 @@ func (ct *collTester) try(f func() string) (res string) {
 }
 
 func atoi32(s string) int32 {
-	v, err := strconv.Atoi(s)
+	v, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
 		panic(err)
 	}
@@ -1307,6 +1308,7 @@ func TestCollVectors(t *testing.T) {
 }
 
 func runCollVectors(t *testing.T, path string) {
+	t.Helper()
 	f, err := os.Open(path)
 	if err != nil {
 		t.Fatal(err)
@@ -1374,17 +1376,17 @@ func parseHexBits(s string) uint64 {
 	return v
 }
 
-func primLit(s string) (string, []string) {
+func primLit(s string) []string {
 	open := strings.IndexByte(s, '[')
 	body := s[open+1 : len(s)-1]
 	if body == "" {
-		return s[:open], nil
+		return nil
 	}
-	return s[:open], strings.Split(body, ",")
+	return strings.Split(body, ",")
 }
 
 func doublesLit(s string) []float64 {
-	_, p := primLit(s)
+	p := primLit(s)
 	out := make([]float64, len(p))
 	for i, x := range p {
 		out[i] = math.Float64frombits(parseHexBits(x))
@@ -1393,7 +1395,7 @@ func doublesLit(s string) []float64 {
 }
 
 func floatsLit(s string) []float32 {
-	_, p := primLit(s)
+	p := primLit(s)
 	out := make([]float32, len(p))
 	for i, x := range p {
 		out[i] = math.Float32frombits(uint32(parseHexBits(x)))
@@ -1402,7 +1404,7 @@ func floatsLit(s string) []float32 {
 }
 
 func intsLit[T int8 | int16 | uint16 | int32 | int64](s string) []T {
-	_, p := primLit(s)
+	p := primLit(s)
 	out := make([]T, len(p))
 	for i, x := range p {
 		v, err := strconv.ParseInt(x, 10, 64)
@@ -1422,11 +1424,12 @@ func renderPrims[T any](tag string, a []T, f func(T) string) string {
 	return tag + "[" + strings.Join(parts, ",") + "]"
 }
 
-func collMax32(a, b int32) int32 {
-	if a > b {
+// collNonNegative returns a, or 0 if a is negative.
+func collNonNegative(a int32) int32 {
+	if a > 0 {
 		return a
 	}
-	return b
+	return 0
 }
 
 func zLit(a []bool) string {
@@ -1696,20 +1699,21 @@ func (ct *collTester) staticOp(name string, args []string) string {
 		return bstr(a.Equals_Object(b))
 	case "primj":
 		j := intsLit[int64](args[0])
-		newLen, key := atoi32(args[1]), int64(atoi32(args[2]))
-		if k, err := strconv.ParseInt(args[2], 10, 64); err == nil {
-			key = k
+		newLen := atoi32(args[1])
+		key, err := strconv.ParseInt(args[2], 10, 64)
+		if err != nil {
+			panic(err)
 		}
 		sorted := append([]int64(nil), j...)
 		Arrays_sort_longArr(sorted)
 		return strings.ReplaceAll(Arrays_toString_longArr(j).Go(), " ", "_") + ";" + istr(Arrays_hashCode_longArr(j)) + ";" +
 			bstr(Arrays_equals_longArr_longArr(j, append([]int64{}, j...))) + ";" + istr(Arrays_binarySearch_longArr_long(sorted, key)) +
-			";" + intLit("J", Arrays_copyOf_longArr_int(j, collMax32(newLen, 0)))
+			";" + intLit("J", Arrays_copyOf_longArr_int(j, collNonNegative(newLen)))
 	case "prims":
 		a := intsLit[int16](args[0])
 		newLen := atoi32(args[1])
 		return strings.ReplaceAll(Arrays_toString_shortArr(a).Go(), " ", "_") + ";" + istr(Arrays_hashCode_shortArr(a)) + ";" +
-			intLit("S", Arrays_copyOf_shortArr_int(a, collMax32(newLen, 0)))
+			intLit("S", Arrays_copyOf_shortArr_int(a, collNonNegative(newLen)))
 	case "primc":
 		a := intsLit[uint16](args[0])
 		newLen := atoi32(args[1])
@@ -1719,15 +1723,15 @@ func (ct *collTester) staticOp(name string, args []string) string {
 		if len(a) > 0 {
 			key = a[0]
 		}
-		return istr(Arrays_hashCode_charArr(a)) + ";" + intLit("C", Arrays_copyOf_charArr_int(a, collMax32(newLen, 0))) + ";" +
+		return istr(Arrays_hashCode_charArr(a)) + ";" + intLit("C", Arrays_copyOf_charArr_int(a, collNonNegative(newLen))) + ";" +
 			istr(Arrays_binarySearch_charArr_char(sorted, key))
 	case "primb":
 		a := intsLit[int8](args[0])
 		newLen := atoi32(args[1])
 		return strings.ReplaceAll(Arrays_toString_byteArr(a).Go(), " ", "_") + ";" + istr(Arrays_hashCode_byteArr(a)) + ";" +
-			intLit("B", Arrays_copyOf_byteArr_int(a, collMax32(newLen, 0)))
+			intLit("B", Arrays_copyOf_byteArr_int(a, collNonNegative(newLen)))
 	case "primz":
-		_, p := primLit(args[0])
+		p := primLit(args[0])
 		z := make([]bool, len(p))
 		for i, x := range p {
 			z[i] = x == "1"
@@ -1736,7 +1740,7 @@ func (ct *collTester) staticOp(name string, args []string) string {
 		filled := append([]bool{}, z...)
 		Arrays_fill_booleanArr_boolean(filled, true)
 		return strings.ReplaceAll(Arrays_toString_booleanArr(z).Go(), " ", "_") + ";" + istr(Arrays_hashCode_booleanArr(z)) + ";" +
-			zLit(Arrays_copyOf_booleanArr_int(z, collMax32(newLen, 0))) + ";" + zLit(filled) + ";" + bstr(Arrays_equals_booleanArr_booleanArr(z, filled))
+			zLit(Arrays_copyOf_booleanArr_int(z, collNonNegative(newLen))) + ";" + zLit(filled) + ";" + bstr(Arrays_equals_booleanArr_booleanArr(z, filled))
 	case "primf":
 		f, g := floatsLit(args[0]), floatsLit(args[1])
 		return strings.ReplaceAll(Arrays_toString_floatArr(f).Go(), " ", "_") + ";" + istr(Arrays_hashCode_floatArr(f)) + ";" +
@@ -1862,9 +1866,12 @@ type CollTestList struct {
 
 func (l *CollTestList) JClassName() string { return "CollTestList" }
 
+// JShallowCopy copies every field, as the generated JShallowCopy's *c = *l
+// does. It copies through reflect because vet rejects copying the
+// ArrayList's monitor, which ArrayList.Clone resets in the copy.
 func (l *CollTestList) JShallowCopy() any {
 	c := new(CollTestList)
-	*c = *l
+	reflect.ValueOf(c).Elem().Set(reflect.ValueOf(l).Elem())
 	return c
 }
 

@@ -249,14 +249,16 @@ func (this *StreamTokenizer) NextToken() int32 {
 		v := 0.0
 		decexp := int32(0)
 		seendot := int32(0)
+	digits:
 		for {
-			if c == '.' && seendot == 0 {
+			switch {
+			case c == '.' && seendot == 0:
 				seendot = 1
-			} else if '0' <= c && c <= '9' {
+			case '0' <= c && c <= '9':
 				v = float64(v*10) + float64(c-'0')
 				decexp += seendot
-			} else {
-				break
+			default:
+				break digits
 			}
 			c = this.read()
 		}
@@ -268,7 +270,7 @@ func (this *StreamTokenizer) NextToken() int32 {
 				denom *= 10
 				decexp--
 			}
-			v = v / denom
+			v /= denom
 		}
 		if neg {
 			v = -v
@@ -316,7 +318,7 @@ func (this *StreamTokenizer) NextToken() int32 {
 				c = this.read()
 				first := c
 				if c >= '0' && c <= '7' {
-					c = c - '0'
+					c -= '0'
 					c2 := this.read()
 					if '0' <= c2 && c2 <= '7' {
 						c = c<<3 + (c2 - '0')
