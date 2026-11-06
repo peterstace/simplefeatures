@@ -272,7 +272,7 @@ func TestStreamTokenizerVectors(t *testing.T) {
 			}
 			prevNval = want
 			if ttype != int32(atoi(t, f[1])) || st.F_ttype != ttype || st.Lineno() != int32(atoi(t, f[2])) ||
-				nvalBits != want || quote(st.F_sval) != f[4] {
+				!sameNval(nvalBits, want) || quote(st.F_sval) != f[4] {
 				t.Fatalf("line %d (case at %d): got T %d %d %x %s, want %v", l.no, caseLine,
 					ttype, st.Lineno(), nvalBits, quote(st.F_sval), f[1:])
 			}
@@ -289,6 +289,16 @@ func TestStreamTokenizerVectors(t *testing.T) {
 		}
 	}
 	t.Logf("%d cases, %d tokens", cases, tokens)
+}
+
+// sameNval reports whether two nval bit patterns match, treating any NaN as
+// equal to any other NaN. StreamTokenizer gets NaN from inf/inf, and the CPU
+// sets its sign: positive on arm64, negative on amd64.
+func sameNval(got, want uint64) bool {
+	if math.IsNaN(math.Float64frombits(got)) && math.IsNaN(math.Float64frombits(want)) {
+		return true
+	}
+	return got == want
 }
 
 // TestStreamTokenizerWKTReaderUse checks the calls JTS's WKTReader makes.
