@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **Breaking change:** The minimum required Go version is now 1.19 (previously
+  1.18).
+
 - Fix a panic in `UnmarshalTWKB` when parsing a TWKB whose element count (point
   count, ring point count, or ID list length) is far larger than the remaining
   input. These counts are untrusted varints, so a crafted value would cause an
