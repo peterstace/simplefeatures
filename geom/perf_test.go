@@ -41,6 +41,39 @@ func BenchmarkMarshalWKB(b *testing.B) {
 			})
 		}
 	})
+	b.Run("multipoint", func(b *testing.B) {
+		for _, sz := range []int{10, 100, 1000, 10000} {
+			b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+				rnd := rand.New(rand.NewSource(0))
+				pts := make([]geom.Point, sz)
+				for i := range pts {
+					pts[i] = geom.XY{X: rnd.Float64(), Y: rnd.Float64()}.AsPoint()
+				}
+				mp := geom.NewMultiPoint(pts)
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					mp.AsBinary()
+				}
+			})
+		}
+	})
+}
+
+func BenchmarkMarshalTWKB(b *testing.B) {
+	b.Run("polygon", func(b *testing.B) {
+		for _, sz := range []int{10, 100, 1000, 10000} {
+			b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
+				poly := regularPolygon(geom.XY{}, 1.0, sz).AsGeometry()
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					_, err := geom.MarshalTWKB(poly, 6, geom.TWKBBoundingBoxHeader(), geom.TWKBSizeHeader())
+					if err != nil {
+						b.Fatal(err)
+					}
+				}
+			})
+		}
+	})
 }
 
 func BenchmarkUnmarshalWKB(b *testing.B) {

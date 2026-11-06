@@ -7,7 +7,9 @@ import (
 	"unsafe"
 )
 
-var nativeOrder binary.ByteOrder
+// nativeOrder is the byte order of the host. It's safe to share because it's
+// only assigned in init.
+var nativeOrder binary.AppendByteOrder
 
 func init() {
 	var buf [2]byte
@@ -41,21 +43,15 @@ func (m *wkbMarshaler) writeByteOrder() {
 
 func (m *wkbMarshaler) writeGeomType(geomType GeometryType, ctype CoordinatesType) {
 	gt := [...]uint32{7, 1, 2, 3, 4, 5, 6}[geomType]
-	var buf [4]byte
-	nativeOrder.PutUint32(buf[:], uint32(ctype)*1000+gt)
-	m.buf = append(m.buf, buf[:]...)
+	m.buf = nativeOrder.AppendUint32(m.buf, uint32(ctype)*1000+gt)
 }
 
 func (m *wkbMarshaler) writeFloat64(f float64) {
-	var buf [8]byte
-	nativeOrder.PutUint64(buf[:], math.Float64bits(f))
-	m.buf = append(m.buf, buf[:]...)
+	m.buf = nativeOrder.AppendUint64(m.buf, math.Float64bits(f))
 }
 
 func (m *wkbMarshaler) writeCount(n int) {
-	var buf [4]byte
-	nativeOrder.PutUint32(buf[:], uint32(n))
-	m.buf = append(m.buf, buf[:]...)
+	m.buf = nativeOrder.AppendUint32(m.buf, uint32(n))
 }
 
 func (m *wkbMarshaler) writeCoordinates(c Coordinates) {

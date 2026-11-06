@@ -516,7 +516,6 @@ func (w *twkbWriter) writeSinglePointArray(coords ...float64) {
 // Utilise and update the running memory of the previous reference point.
 // The input coords must contain numPoints * the number of dimensions values.
 func (w *twkbWriter) writePointArray(numPoints int, coords []float64) {
-	var buf [binary.MaxVarintLen64]byte
 	c := 0
 	for i := 0; i < numPoints; i++ {
 		for d := 0; d < w.dimensions; d++ {
@@ -534,9 +533,7 @@ func (w *twkbWriter) writePointArray(numPoints int, coords []float64) {
 			}
 			// Perform coord differencing to find the int value.
 			ival -= w.refpoint[d]
-			n := binary.PutVarint(buf[:], ival)
-
-			w.twkbContents = append(w.twkbContents, buf[:n]...)
+			w.twkbContents = binary.AppendVarint(w.twkbContents, ival)
 			w.refpoint[d] += ival
 			c++
 		}
@@ -560,23 +557,17 @@ func (w *twkbWriter) writeAdditionalHeaders() {
 
 func (w *twkbWriter) writeBBoxHeader() {
 	// Store bbox min and delta for each dimension.
-	var buf [twkbMaxDimensions * 2 * binary.MaxVarintLen64]byte
-	n := 0
+	w.twkbBBox = make([]byte, 0, 2*w.dimensions*binary.MaxVarintLen64)
 	for d := 0; d < w.dimensions; d++ {
-		n += binary.PutVarint(buf[n:], w.bboxMin[d])
-		n += binary.PutVarint(buf[n:], w.bboxMax[d]-w.bboxMin[d])
+		w.twkbBBox = binary.AppendVarint(w.twkbBBox, w.bboxMin[d])
+		w.twkbBBox = binary.AppendVarint(w.twkbBBox, w.bboxMax[d]-w.bboxMin[d])
 	}
-	// Insert the bbox varints into the appropriate header.
-	w.twkbBBox = append(w.twkbBBox, buf[:n]...)
 }
 
 func (w *twkbWriter) writeSizeHeader(bboxLength, contentsLength int) {
-	// Form size header as a varint covering all data after
-	var buf [binary.MaxVarintLen64]byte
-	n := binary.PutUvarint(buf[:], uint64(bboxLength+contentsLength))
-
-	// Insert the size header after any other headers.
-	w.twkbHeaders = append(w.twkbHeaders, buf[:n]...)
+	// The size header covers all data after the headers, and goes after any
+	// other headers.
+	w.twkbHeaders = binary.AppendUvarint(w.twkbHeaders, uint64(bboxLength+contentsLength))
 }
 
 func (w *twkbWriter) writeIDList(num int) error {
@@ -593,15 +584,11 @@ func (w *twkbWriter) writeIDList(num int) error {
 }
 
 func (w *twkbWriter) writeSignedVarint(val int64) {
-	var buf [binary.MaxVarintLen64]byte
-	n := binary.PutVarint(buf[:], val)
-	w.twkbContents = append(w.twkbContents, buf[:n]...)
+	w.twkbContents = binary.AppendVarint(w.twkbContents, val)
 }
 
 func (w *twkbWriter) writeUnsignedVarint(val uint64) {
-	var buf [binary.MaxVarintLen64]byte
-	n := binary.PutUvarint(buf[:], val)
-	w.twkbContents = append(w.twkbContents, buf[:n]...)
+	w.twkbContents = binary.AppendUvarint(w.twkbContents, val)
 }
 
 func (w *twkbWriter) writeHeaderByte(b byte) {
