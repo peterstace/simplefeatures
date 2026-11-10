@@ -91,6 +91,25 @@ func BenchmarkUnmarshalWKB(b *testing.B) {
 			})
 		}
 	})
+	b.Run("nested_collection", func(b *testing.B) {
+		xys := make([]float64, 2*1000)
+		for i := range xys {
+			xys[i] = float64(i)
+		}
+		leaf := geom.NewMultiPointXY(xys...).AsGeometry()
+		for _, depth := range []int{1, 10, 100} {
+			b.Run(fmt.Sprintf("depth=%d", depth), func(b *testing.B) {
+				wkb := nestInCollections(leaf, depth).AsBinary()
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					_, err := geom.UnmarshalWKB(wkb, geom.NoValidate{})
+					if err != nil {
+						b.Fatal(err)
+					}
+				}
+			})
+		}
+	})
 }
 
 func BenchmarkIntersectsLineStringWithLineString(b *testing.B) {

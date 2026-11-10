@@ -32,7 +32,9 @@ func NewGeometryCollection(geoms []Geometry) GeometryCollection {
 	}
 	geoms = append([]Geometry(nil), geoms...)
 	for i := range geoms {
-		geoms[i] = geoms[i].ForceCoordinatesType(ctype)
+		if geoms[i].CoordinatesType() != ctype {
+			geoms[i] = geoms[i].ForceCoordinatesType(ctype)
+		}
 	}
 	return GeometryCollection{geoms, ctype}
 }
@@ -422,6 +424,9 @@ func (c GeometryCollection) CoordinatesType() CoordinatesType {
 // ForceCoordinatesType returns a new [GeometryCollection] with a different [CoordinatesType]. If
 // a dimension is added, then new values are populated with 0.
 func (c GeometryCollection) ForceCoordinatesType(newCType CoordinatesType) GeometryCollection {
+	if c.ctype == newCType {
+		return c
+	}
 	gs := make([]Geometry, len(c.geoms))
 	for i := range c.geoms {
 		gs[i] = c.geoms[i].ForceCoordinatesType(newCType)
