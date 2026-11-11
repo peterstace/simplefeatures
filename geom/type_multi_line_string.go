@@ -275,7 +275,17 @@ func (m *MultiLineString) Scan(src any) error {
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
 func (m MultiLineString) AsBinary() []byte {
-	return m.AppendWKB(nil)
+	return m.AppendWKB(make([]byte, 0, m.bytesInWKB()))
+}
+
+// bytesInWKB returns the number of bytes in the WKB representation of the
+// geometry.
+func (m MultiLineString) bytesInWKB() int {
+	n := wkbHeaderBytes + wkbCountBytes
+	for _, ls := range m.lines {
+		n += ls.bytesInWKB()
+	}
+	return n
 }
 
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry

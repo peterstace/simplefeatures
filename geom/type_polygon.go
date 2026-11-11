@@ -282,7 +282,17 @@ func (p *Polygon) Scan(src any) error {
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
 func (p Polygon) AsBinary() []byte {
-	return p.AppendWKB(nil)
+	return p.AppendWKB(make([]byte, 0, p.bytesInWKB()))
+}
+
+// bytesInWKB returns the number of bytes in the WKB representation of the
+// geometry.
+func (p Polygon) bytesInWKB() int {
+	n := wkbHeaderBytes + wkbCountBytes
+	for _, ring := range p.rings {
+		n += wkbSequenceBytes(ring.seq)
+	}
+	return n
 }
 
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry

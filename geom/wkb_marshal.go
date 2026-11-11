@@ -25,6 +25,18 @@ func init() {
 	}
 }
 
+// wkbHeaderBytes is the size of the byte order and geometry type fields that
+// prefix every WKB geometry.
+const wkbHeaderBytes = 1 + 4
+
+// wkbCountBytes is the size of a uint32 count field.
+const wkbCountBytes = 4
+
+// wkbSequenceBytes is the number of bytes written by writeSequence for seq.
+func wkbSequenceBytes(seq Sequence) int {
+	return wkbCountBytes + 8*len(seq.floats)
+}
+
 type wkbMarshaler struct {
 	buf []byte
 }

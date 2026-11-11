@@ -191,7 +191,17 @@ func (c *GeometryCollection) Scan(src any) error {
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
 func (c GeometryCollection) AsBinary() []byte {
-	return c.AppendWKB(nil)
+	return c.AppendWKB(make([]byte, 0, c.bytesInWKB()))
+}
+
+// bytesInWKB returns the number of bytes in the WKB representation of the
+// geometry.
+func (c GeometryCollection) bytesInWKB() int {
+	n := wkbHeaderBytes + wkbCountBytes
+	for i := 0; i < c.NumGeometries(); i++ {
+		n += c.GeometryN(i).bytesInWKB()
+	}
+	return n
 }
 
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry

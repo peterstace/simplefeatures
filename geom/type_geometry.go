@@ -17,6 +17,7 @@ type Geometry struct {
 		MarshalJSON() ([]byte, error)
 		AppendWKT(dst []byte) []byte
 		AppendWKB(dst []byte) []byte
+		bytesInWKB() int
 		IsEmpty() bool
 		Envelope() Envelope
 		Centroid() Point
@@ -288,7 +289,16 @@ func (g Geometry) AppendWKT(dst []byte) []byte {
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
 func (g Geometry) AsBinary() []byte {
-	return g.AppendWKB(nil)
+	return g.AppendWKB(make([]byte, 0, g.bytesInWKB()))
+}
+
+// bytesInWKB returns the number of bytes in the WKB representation of the
+// geometry.
+func (g Geometry) bytesInWKB() int {
+	if g.impl == nil {
+		return GeometryCollection{}.bytesInWKB()
+	}
+	return g.impl.bytesInWKB()
 }
 
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry
