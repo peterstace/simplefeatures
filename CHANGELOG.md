@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fix quadratic time and memory (in the nesting depth) when building nested
+  `GeometryCollection`s, including when parsing them from WKB, WKT, GeoJSON
+  and TWKB.
+
 - **Breaking change:** The minimum required Go version is now 1.19 (previously
   1.18).
 
