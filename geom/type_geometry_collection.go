@@ -242,6 +242,10 @@ func (c *GeometryCollection) UnmarshalJSON(buf []byte) error {
 // [GeometryCollection] according to fn. See [Geometry.TransformXY] for more
 // details.
 func (c GeometryCollection) TransformXY(fn func(XY) XY) GeometryCollection {
+	if len(c.geoms) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		return GeometryCollection{nil, c.ctype}
+	}
 	transformed := make([]Geometry, len(c.geoms))
 	for i := range c.geoms {
 		transformed[i] = c.geoms[i].TransformXY(fn)
@@ -252,6 +256,10 @@ func (c GeometryCollection) TransformXY(fn func(XY) XY) GeometryCollection {
 // Transform transforms this [GeometryCollection] into another [GeometryCollection]
 // according to fn. See [Geometry.Transform] for more details.
 func (c GeometryCollection) Transform(fn func(CoordinatesType, []float64) error) (GeometryCollection, error) {
+	if len(c.geoms) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		return GeometryCollection{nil, c.ctype}, nil
+	}
 	transformed := make([]Geometry, len(c.geoms))
 	for i := range c.geoms {
 		var err error
@@ -427,6 +435,10 @@ func (c GeometryCollection) ForceCoordinatesType(newCType CoordinatesType) Geome
 	if c.ctype == newCType {
 		return c
 	}
+	if len(c.geoms) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		return GeometryCollection{nil, newCType}
+	}
 	gs := make([]Geometry, len(c.geoms))
 	for i := range c.geoms {
 		gs[i] = c.geoms[i].ForceCoordinatesType(newCType)
@@ -584,6 +596,10 @@ func (c GeometryCollection) Simplify(threshold float64, nv ...NoValidate) (Geome
 //
 // Panics if maxDistance is zero or negative.
 func (c GeometryCollection) Densify(maxDistance float64) GeometryCollection {
+	if len(c.geoms) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		return GeometryCollection{nil, c.ctype}
+	}
 	gs := make([]Geometry, len(c.geoms))
 	for i, g := range c.geoms {
 		gs[i] = g.Densify(maxDistance)

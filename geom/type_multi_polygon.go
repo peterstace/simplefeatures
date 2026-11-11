@@ -394,6 +394,10 @@ func (m MultiPolygon) Centroid() Point {
 // Reverse in the case of MultiPolygon outputs the component polygons in their original order,
 // each individually reversed.
 func (m MultiPolygon) Reverse() MultiPolygon {
+	if len(m.polys) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		return MultiPolygon{nil, m.ctype}
+	}
 	polys := make([]Polygon, len(m.polys))
 	// Form the reversed slice.
 	for i := 0; i < len(m.polys); i++ {
@@ -595,6 +599,10 @@ func (m MultiPolygon) Simplify(threshold float64, nv ...NoValidate) (MultiPolygo
 //
 // Panics if maxDistance is zero or negative.
 func (m MultiPolygon) Densify(maxDistance float64) MultiPolygon {
+	if len(m.polys) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		return MultiPolygon{nil, m.ctype}
+	}
 	ps := make([]Polygon, len(m.polys))
 	for i, p := range m.polys {
 		ps[i] = p.Densify(maxDistance)

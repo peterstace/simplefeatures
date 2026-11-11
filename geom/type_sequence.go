@@ -99,6 +99,10 @@ func (s Sequence) GetXY(i int) XY {
 // Reverse returns a new [Sequence] containing the same point locations, but in
 // reversed order.
 func (s Sequence) Reverse() Sequence {
+	if len(s.floats) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		return Sequence{s.ctype, nil}
+	}
 	stride := s.ctype.Dimension()
 	n := s.Length()
 	reversed := make([]float64, len(s.floats))
@@ -116,7 +120,12 @@ func (s Sequence) Reverse() Sequence {
 // rules work in the same way as Go Slices.
 func (s Sequence) Slice(i, j int) Sequence {
 	stride := s.ctype.Dimension()
-	return Sequence{s.ctype, s.floats[i*stride : j*stride]}
+	floats := s.floats[i*stride : j*stride]
+	if len(floats) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		floats = nil
+	}
+	return Sequence{s.ctype, floats}
 }
 
 // ForceCoordinatesType returns a new [Sequence] with a different [CoordinatesType]. If a
