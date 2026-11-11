@@ -513,6 +513,10 @@ func (p Polygon) AsMultiPolygon() MultiPolygon {
 // Reverse in the case of [Polygon] outputs the coordinates of each ring in reverse order,
 // but note the order of the inner rings is unchanged.
 func (p Polygon) Reverse() Polygon {
+	if len(p.rings) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		return Polygon{nil, p.ctype}
+	}
 	reversed := make([]LineString, len(p.rings))
 	for i := range reversed {
 		reversed[i] = p.rings[i].Reverse()
@@ -572,6 +576,10 @@ func (p Polygon) ForceCCW() Polygon {
 }
 
 func (p Polygon) forceOrientation(forceCW bool) Polygon {
+	if len(p.rings) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		return Polygon{nil, p.ctype}
+	}
 	orientedRings := make([]LineString, len(p.rings))
 	for i, ring := range p.rings {
 		alreadyCW := signedAreaOfLinearRing(ring, nil) < 0
@@ -715,6 +723,10 @@ func (p Polygon) Simplify(threshold float64, nv ...NoValidate) (Polygon, error) 
 //
 // Panics if maxDistance is zero or negative.
 func (p Polygon) Densify(maxDistance float64) Polygon {
+	if len(p.rings) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		return Polygon{nil, p.ctype}
+	}
 	rings := make([]LineString, len(p.rings))
 	for i, r := range p.rings {
 		rings[i] = r.Densify(maxDistance)

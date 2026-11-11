@@ -387,6 +387,10 @@ func (m MultiLineString) Centroid() Point {
 // Reverse in the case of MultiLineString outputs each component line string in their
 // original order, each individually reversed.
 func (m MultiLineString) Reverse() MultiLineString {
+	if len(m.lines) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		return MultiLineString{nil, m.ctype}
+	}
 	linestrings := make([]LineString, len(m.lines))
 	// Form the reversed slice.
 	for i := 0; i < len(m.lines); i++ {
@@ -538,6 +542,10 @@ func (m MultiLineString) Simplify(threshold float64) MultiLineString {
 //
 // Panics if maxDistance is zero or negative.
 func (m MultiLineString) Densify(maxDistance float64) MultiLineString {
+	if len(m.lines) == 0 {
+		// Use nil rather than an empty slice so that reflect.DeepEqual works correctly.
+		return MultiLineString{nil, m.ctype}
+	}
 	lss := make([]LineString, len(m.lines))
 	for i := range m.lines {
 		lss[i] = m.lines[i].Densify(maxDistance)

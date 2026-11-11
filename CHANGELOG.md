@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Fix `reflect.DeepEqual` returning false for some pairs of geometries that
+  `ExactEquals` reports as equal. Some operations gave an empty geometry (or
+  an empty member of a geometry) an empty slice where it should have a nil
+  one. These included `Reverse`, `Densify`, `ForceCW`, `ForceCCW`,
+  `TransformXY`, `Transform` and `ForceCoordinatesType`, and parsing an empty
+  Z, M or ZM `GeometryCollection` from WKT or WKB. `Sequence.Slice` had the
+  same problem when given equal indices.
+
 - Fix quadratic time and memory (in the nesting depth) when building nested
   `GeometryCollection`s, including when parsing them from WKB, WKT, GeoJSON
   and TWKB.
