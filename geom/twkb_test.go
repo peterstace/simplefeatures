@@ -469,6 +469,23 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 // in particular some will always close polygon rings by duplicating
 // the first point as the final point. So some test cases listed
 // in this file may not agree with all PostGIS implementations.
+
+func TestTWKBBBoxOfGeometryCollection(t *testing.T) {
+	// The bounding box of a collection has to cover its sub-geometries.
+	g := test.FromWKT(t, "GEOMETRYCOLLECTION(POINT(-1 -2))")
+	twkb, err := geom.MarshalTWKB(g, 0, geom.TWKBBoundingBoxHeader())
+	test.NoErr(t, err)
+
+	env, ok, err := geom.UnmarshalTWKBEnvelope(twkb)
+	test.NoErr(t, err)
+	test.True(t, ok)
+
+	min, max, ok := env.XYEnvelope.MinMaxXYs()
+	test.True(t, ok)
+	test.Eq(t, min, geom.XY{X: -1, Y: -2})
+	test.Eq(t, max, geom.XY{X: -1, Y: -2})
+}
+
 func TestWriteTWKBSQLFile(t *testing.T) {
 	t.Skip("this test was only used during initial development")
 	sql := ""

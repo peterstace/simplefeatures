@@ -448,10 +448,33 @@ func (w *twkbWriter) writeGeometryCollection(gc GeometryCollection) error {
 		if err := subWriter.writeGeometry(g); err != nil {
 			return err
 		}
+		w.widenBBox(subWriter)
 		subTWKB := subWriter.formTWKB()
 		w.twkbContents = append(w.twkbContents, subTWKB...)
 	}
 	return nil
+}
+
+// widenBBox widens the bounding box of the writer with the bounding box of
+// the given writer. The sub-geometries of a collection are written by their
+// own writers, so their coordinates do not reach the box of the collection
+// otherwise.
+func (w *twkbWriter) widenBBox(other *twkbWriter) {
+	if !other.bboxValid {
+		return
+	}
+	for d := 0; d < w.dimensions; d++ {
+		switch {
+		case !w.bboxValid:
+			w.bboxMin[d] = other.bboxMin[d]
+			w.bboxMax[d] = other.bboxMax[d]
+		case other.bboxMin[d] < w.bboxMin[d]:
+			w.bboxMin[d] = other.bboxMin[d]
+		case other.bboxMax[d] > w.bboxMax[d]:
+			w.bboxMax[d] = other.bboxMax[d]
+		}
+	}
+	w.bboxValid = true
 }
 
 func (w *twkbWriter) writeTypeAndPrecision(kind twkbGeometryType) {
