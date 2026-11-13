@@ -35,7 +35,8 @@ func TestZeroGeometry(t *testing.T) {
 	test.Eq(t, z.IsEmpty(), true)
 	z = geom.Geometry{}
 
-	_ = z.AsBinary() // Doesn't crash
+	zWKB := z.AsBinary() // Doesn't crash
+	test.Eq(t, cap(zWKB), len(zWKB))
 
 	_, err = z.Value()
 	test.NoErr(t, err)

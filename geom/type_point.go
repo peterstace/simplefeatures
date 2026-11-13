@@ -128,7 +128,13 @@ func (p *Point) Scan(src any) error {
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
 func (p Point) AsBinary() []byte {
-	return p.AppendWKB(nil)
+	return p.AppendWKB(make([]byte, 0, p.bytesInWKB()))
+}
+
+// bytesInWKB returns the number of bytes in the WKB representation of the
+// geometry.
+func (p Point) bytesInWKB() int {
+	return wkbHeaderBytes + 8*p.coords.Type.Dimension()
 }
 
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry

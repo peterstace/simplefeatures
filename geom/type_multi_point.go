@@ -151,7 +151,14 @@ func (m *MultiPoint) Scan(src any) error {
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
 func (m MultiPoint) AsBinary() []byte {
-	return m.AppendWKB(nil)
+	return m.AppendWKB(make([]byte, 0, m.bytesInWKB()))
+}
+
+// bytesInWKB returns the number of bytes in the WKB representation of the
+// geometry.
+func (m MultiPoint) bytesInWKB() int {
+	ptBytes := wkbHeaderBytes + 8*m.ctype.Dimension()
+	return wkbHeaderBytes + wkbCountBytes + len(m.points)*ptBytes
 }
 
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry
