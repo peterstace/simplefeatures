@@ -480,10 +480,10 @@ func TestTWKBBBoxOfGeometryCollection(t *testing.T) {
 	test.NoErr(t, err)
 	test.True(t, ok)
 
-	min, max, ok := env.XYEnvelope.MinMaxXYs()
+	gotMin, gotMax, ok := env.XYEnvelope.MinMaxXYs()
 	test.True(t, ok)
-	test.Eq(t, min, geom.XY{X: -1, Y: -2})
-	test.Eq(t, max, geom.XY{X: -1, Y: -2})
+	test.Eq(t, gotMin, geom.XY{X: -1, Y: -2})
+	test.Eq(t, gotMax, geom.XY{X: -1, Y: -2})
 }
 
 func TestWriteTWKBSQLFile(t *testing.T) {
