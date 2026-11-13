@@ -342,6 +342,27 @@ var TWKBTestCases = []struct {
 		hasIDList:   true,
 		listedIDs:   []int64{0, 1},
 	},
+	{
+		description: "geometry collection with bbox",
+		twkbHex:     "0701010003000101000103",
+		wkt:         "GEOMETRYCOLLECTION(POINT(-1 -2))",
+		hasBBox:     true,
+		listedBBox:  [2]string{"POINT(-1 -2)", "POINT(-1 -2)"},
+	},
+	{
+		description: "geometry collection with bbox widened on both sides by a later child",
+		twkbHex:     "0701001400140201000a0a02000200001414",
+		wkt:         "GEOMETRYCOLLECTION(POINT(5 5),LINESTRING(0 0,10 10))",
+		hasBBox:     true,
+		listedBBox:  [2]string{"POINT(0 0)", "POINT(10 10)"},
+	},
+	{
+		description: "nested geometry collection with bbox",
+		twkbHex:     "07010004000402010002020700020100000001000404",
+		wkt:         "GEOMETRYCOLLECTION(POINT(1 1),GEOMETRYCOLLECTION(POINT(0 0),POINT(2 2)))",
+		hasBBox:     true,
+		listedBBox:  [2]string{"POINT(0 0)", "POINT(2 2)"},
+	},
 }
 
 func TestTWKBUnmarshalMarshalValid(t *testing.T) {
@@ -469,23 +490,6 @@ func TestTWKBUnmarshalMarshalValid(t *testing.T) {
 // in particular some will always close polygon rings by duplicating
 // the first point as the final point. So some test cases listed
 // in this file may not agree with all PostGIS implementations.
-
-func TestTWKBBBoxOfGeometryCollection(t *testing.T) {
-	// The bounding box of a collection has to cover its sub-geometries.
-	g := test.FromWKT(t, "GEOMETRYCOLLECTION(POINT(-1 -2))")
-	twkb, err := geom.MarshalTWKB(g, 0, geom.TWKBBoundingBoxHeader())
-	test.NoErr(t, err)
-
-	env, ok, err := geom.UnmarshalTWKBEnvelope(twkb)
-	test.NoErr(t, err)
-	test.True(t, ok)
-
-	gotMin, gotMax, ok := env.XYEnvelope.MinMaxXYs()
-	test.True(t, ok)
-	test.Eq(t, gotMin, geom.XY{X: -1, Y: -2})
-	test.Eq(t, gotMax, geom.XY{X: -1, Y: -2})
-}
-
 func TestWriteTWKBSQLFile(t *testing.T) {
 	t.Skip("this test was only used during initial development")
 	sql := ""

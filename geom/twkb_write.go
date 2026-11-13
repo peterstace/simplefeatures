@@ -464,13 +464,10 @@ func (w *twkbWriter) widenBBox(other *twkbWriter) {
 		return
 	}
 	for d := 0; d < w.dimensions; d++ {
-		switch {
-		case !w.bboxValid:
+		if !w.bboxValid || other.bboxMin[d] < w.bboxMin[d] {
 			w.bboxMin[d] = other.bboxMin[d]
-			w.bboxMax[d] = other.bboxMax[d]
-		case other.bboxMin[d] < w.bboxMin[d]:
-			w.bboxMin[d] = other.bboxMin[d]
-		case other.bboxMax[d] > w.bboxMax[d]:
+		}
+		if !w.bboxValid || other.bboxMax[d] > w.bboxMax[d] {
 			w.bboxMax[d] = other.bboxMax[d]
 		}
 	}
