@@ -13,8 +13,9 @@
   values directly to the output buffer using the `encoding/binary` append
   functions added in Go 1.19. `AsBinary` and `AppendWKB` make fewer heap
   allocations (previously, each coordinate of a `Point` or `MultiPoint` and each
-  WKB header field caused an allocation), and `MarshalTWKB` is around 20% to 30%
-  faster for geometries with 1,000 or more points.
+  WKB header field caused an allocation), and `AsBinary` now allocates its
+  output buffer once, at the exact size of the WKB. `MarshalTWKB` is around 20%
+  to 30% faster for geometries with 1,000 or more points.
 
 - Fix a panic in `UnmarshalTWKB` when parsing a TWKB whose element count (point
   count, ring point count, or ID list length) is far larger than the remaining

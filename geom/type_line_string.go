@@ -250,7 +250,13 @@ func (s *LineString) Scan(src any) error {
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
 func (s LineString) AsBinary() []byte {
-	return s.AppendWKB(nil)
+	return s.AppendWKB(make([]byte, 0, s.bytesInWKB()))
+}
+
+// bytesInWKB returns the number of bytes in the WKB representation of the
+// geometry.
+func (s LineString) bytesInWKB() int {
+	return wkbHeaderBytes + wkbSequenceBytes(s.seq)
 }
 
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry

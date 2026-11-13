@@ -34,6 +34,7 @@ func BenchmarkMarshalWKB(b *testing.B) {
 		for _, sz := range []int{10, 100, 1000, 10000} {
 			b.Run(fmt.Sprintf("n=%d", sz), func(b *testing.B) {
 				poly := regularPolygon(geom.XY{}, 1.0, sz)
+				b.ReportAllocs()
 				b.ResetTimer()
 				for i := 0; i < b.N; i++ {
 					poly.AsBinary()
@@ -50,6 +51,7 @@ func BenchmarkMarshalWKB(b *testing.B) {
 					pts[i] = geom.XY{X: rnd.Float64(), Y: rnd.Float64()}.AsPoint()
 				}
 				mp := geom.NewMultiPoint(pts)
+				b.ReportAllocs()
 				b.ResetTimer()
 				for i := 0; i < b.N; i++ {
 					mp.AsBinary()

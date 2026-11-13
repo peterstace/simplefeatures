@@ -279,7 +279,17 @@ func (m *MultiPolygon) Scan(src any) error {
 
 // AsBinary returns the WKB (Well Known Text) representation of the geometry.
 func (m MultiPolygon) AsBinary() []byte {
-	return m.AppendWKB(nil)
+	return m.AppendWKB(make([]byte, 0, m.bytesInWKB()))
+}
+
+// bytesInWKB returns the number of bytes in the WKB representation of the
+// geometry.
+func (m MultiPolygon) bytesInWKB() int {
+	n := wkbHeaderBytes + wkbCountBytes
+	for i := 0; i < m.NumPolygons(); i++ {
+		n += m.PolygonN(i).bytesInWKB()
+	}
+	return n
 }
 
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry

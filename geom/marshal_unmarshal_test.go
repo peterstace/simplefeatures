@@ -194,6 +194,7 @@ func TestMarshalUnmarshal(t *testing.T) {
 			t.Run(strconv.Itoa(i), func(t *testing.T) {
 				original := test.FromWKT(t, wkt)
 				wkb := original.AsBinary()
+				test.Eq(t, cap(wkb), len(wkb))
 				reconstructed, err := geom.UnmarshalWKB(wkb)
 				test.NoErr(t, err)
 				reconstructedWKT := reconstructed.AsText()
