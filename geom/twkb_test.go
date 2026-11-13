@@ -342,6 +342,27 @@ var TWKBTestCases = []struct {
 		hasIDList:   true,
 		listedIDs:   []int64{0, 1},
 	},
+	{
+		description: "geometry collection with bbox",
+		twkbHex:     "0701010003000101000103",
+		wkt:         "GEOMETRYCOLLECTION(POINT(-1 -2))",
+		hasBBox:     true,
+		listedBBox:  [2]string{"POINT(-1 -2)", "POINT(-1 -2)"},
+	},
+	{
+		description: "geometry collection with bbox widened on both sides by a later child",
+		twkbHex:     "0701001400140201000a0a02000200001414",
+		wkt:         "GEOMETRYCOLLECTION(POINT(5 5),LINESTRING(0 0,10 10))",
+		hasBBox:     true,
+		listedBBox:  [2]string{"POINT(0 0)", "POINT(10 10)"},
+	},
+	{
+		description: "nested geometry collection with bbox",
+		twkbHex:     "07010004000402010002020700020100000001000404",
+		wkt:         "GEOMETRYCOLLECTION(POINT(1 1),GEOMETRYCOLLECTION(POINT(0 0),POINT(2 2)))",
+		hasBBox:     true,
+		listedBBox:  [2]string{"POINT(0 0)", "POINT(2 2)"},
+	},
 }
 
 func TestTWKBUnmarshalMarshalValid(t *testing.T) {
