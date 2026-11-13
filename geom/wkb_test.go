@@ -566,6 +566,7 @@ func TestWKBMarshalValid(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			g := test.FromWKT(t, wkt)
 			buf := g.AsBinary()
+			test.Eq(t, cap(buf), len(buf))
 			readBackGeom, err := geom.UnmarshalWKB(buf)
 			test.NoErr(t, err)
 			test.ExactEquals(t, readBackGeom, g)

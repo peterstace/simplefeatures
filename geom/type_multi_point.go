@@ -157,11 +157,8 @@ func (m MultiPoint) AsBinary() []byte {
 // bytesInWKB returns the number of bytes in the WKB representation of the
 // geometry.
 func (m MultiPoint) bytesInWKB() int {
-	n := wkbHeaderBytes + wkbCountBytes
-	for _, pt := range m.points {
-		n += pt.bytesInWKB()
-	}
-	return n
+	ptBytes := wkbHeaderBytes + 8*m.ctype.Dimension()
+	return wkbHeaderBytes + wkbCountBytes + len(m.points)*ptBytes
 }
 
 // AppendWKB appends the WKB (Well Known Text) representation of the geometry
