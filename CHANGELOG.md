@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Fix the bounding box of a `GeometryCollection` in the TWKB output. The
+  sub-geometries of a collection are written by their own writers, so their
+  coordinates never reached the bounding box of the collection, and a
+  collection was written with an all-zero box. A consumer that filters a
+  TWKB stream by its bounding boxes never found a collection.
+
 - Fix quadratic time and memory (in the nesting depth) when building nested
   `GeometryCollection`s, including when parsing them from WKB, WKT, GeoJSON
   and TWKB.
