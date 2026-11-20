@@ -154,6 +154,12 @@ var TWKBTestCases = []struct {
 		wkt:         "POLYGON EMPTY",
 	},
 	{
+		description: "polygon z lacking data",
+		twkbHex:     "031801",
+		wkt:         "POLYGON Z EMPTY",
+		skipEncode:  true,
+	},
+	{
 		description: "polygon no rings",
 		twkbHex:     "030000",
 		wkt:         "POLYGON EMPTY",
@@ -191,6 +197,12 @@ var TWKBTestCases = []struct {
 		description: "multipoint lacking data",
 		twkbHex:     "0410",
 		wkt:         "MULTIPOINT EMPTY",
+	},
+	{
+		description: "multipoint m lacking data",
+		twkbHex:     "041802",
+		wkt:         "MULTIPOINT M EMPTY",
+		skipEncode:  true,
 	},
 	{
 		description: "multipoint no contents",
@@ -264,6 +276,12 @@ var TWKBTestCases = []struct {
 		wkt:         "MULTILINESTRING EMPTY",
 	},
 	{
+		description: "multilinestring zm lacking data",
+		twkbHex:     "051803",
+		wkt:         "MULTILINESTRING ZM EMPTY",
+		skipEncode:  true,
+	},
+	{
 		description: "multilinestring no contents",
 		twkbHex:     "050000",
 		wkt:         "MULTILINESTRING EMPTY",
@@ -278,6 +296,12 @@ var TWKBTestCases = []struct {
 		description: "multipolygon lacking data",
 		twkbHex:     "0610",
 		wkt:         "MULTIPOLYGON EMPTY",
+	},
+	{
+		description: "multipolygon z lacking data",
+		twkbHex:     "061801",
+		wkt:         "MULTIPOLYGON Z EMPTY",
+		skipEncode:  true,
 	},
 	{
 		description: "multipolygon no contents",
@@ -317,6 +341,18 @@ var TWKBTestCases = []struct {
 		description: "geometry collection lacking data",
 		twkbHex:     "0710",
 		wkt:         "GEOMETRYCOLLECTION EMPTY",
+	},
+	{
+		description: "geometry collection z lacking data",
+		twkbHex:     "071801",
+		wkt:         "GEOMETRYCOLLECTION Z EMPTY",
+		skipEncode:  true,
+	},
+	{
+		description: "geometry collection z with polygon z lacking data",
+		twkbHex:     "07080102031801010801020406",
+		wkt:         "GEOMETRYCOLLECTION Z (POLYGON Z EMPTY,POINT Z (1 2 3))",
+		skipEncode:  true,
 	},
 	{
 		description: "geometry collection no contents",
