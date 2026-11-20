@@ -437,7 +437,7 @@ func (p *twkbParser) nextLineString() (LineString, error) {
 
 func (p *twkbParser) parsePolygon() (Polygon, error) {
 	if p.isEmpty {
-		return NewPolygon(nil), nil
+		return Polygon{}.ForceCoordinatesType(p.ctype), nil
 	}
 	return p.nextPolygon()
 }
@@ -487,7 +487,7 @@ func (p *twkbParser) nextPolygon() (Polygon, error) {
 
 func (p *twkbParser) parseMultiPoint() (MultiPoint, error) {
 	if p.isEmpty {
-		return NewMultiPoint(nil), nil
+		return MultiPoint{}.ForceCoordinatesType(p.ctype), nil
 	}
 	return p.nextMultiPoint()
 }
@@ -515,7 +515,7 @@ func (p *twkbParser) nextMultiPoint() (MultiPoint, error) {
 
 func (p *twkbParser) parseMultiLineString() (MultiLineString, error) {
 	if p.isEmpty {
-		return NewMultiLineString(nil), nil
+		return MultiLineString{}.ForceCoordinatesType(p.ctype), nil
 	}
 	return p.nextMultiLineString()
 }
@@ -543,7 +543,7 @@ func (p *twkbParser) nextMultiLineString() (MultiLineString, error) {
 
 func (p *twkbParser) parseMultiPolygon() (MultiPolygon, error) {
 	if p.isEmpty {
-		return NewMultiPolygon(nil), nil
+		return MultiPolygon{}.ForceCoordinatesType(p.ctype), nil
 	}
 	return p.nextMultiPolygon()
 }
@@ -571,7 +571,7 @@ func (p *twkbParser) nextMultiPolygon() (MultiPolygon, error) {
 
 func (p *twkbParser) parseGeometryCollection() (GeometryCollection, error) {
 	if p.isEmpty {
-		return NewGeometryCollection(nil), nil
+		return GeometryCollection{}.ForceCoordinatesType(p.ctype), nil
 	}
 	return p.nextGeometryCollection()
 }
