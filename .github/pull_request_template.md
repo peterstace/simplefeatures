@@ -3,6 +3,12 @@
 Please describe at a high level what the change is and why it is useful or
 required.
 
+## Author Motivation
+
+What prompted you to raise this PR? Common reasons include hitting a problem as
+a user of simplefeatures, or contributing to the project by picking up an issue
+from the tracker. If your reason is something else, please describe it.
+
 ## Check List
 
 Have you:
