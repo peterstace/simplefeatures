@@ -447,6 +447,9 @@ func (p *twkbParser) nextPolygon() (Polygon, error) {
 	if err != nil {
 		return Polygon{}, fmt.Errorf("num rings varint malformed: %w", err)
 	}
+	if numRings == 0 {
+		return Polygon{}.ForceCoordinatesType(p.ctype), nil
+	}
 
 	var rings []LineString
 	for r := uint64(0); r < numRings; r++ {
@@ -502,6 +505,9 @@ func (p *twkbParser) nextMultiPoint() (MultiPoint, error) {
 			return MultiPoint{}, err
 		}
 	}
+	if numPoints == 0 {
+		return MultiPoint{}.ForceCoordinatesType(p.ctype), nil
+	}
 	var pts []Point
 	for i := 0; i < int(numPoints); i++ {
 		pt, err := p.nextPoint()
@@ -529,6 +535,9 @@ func (p *twkbParser) nextMultiLineString() (MultiLineString, error) {
 		if err := p.parseIDList(numLineStrings); err != nil {
 			return MultiLineString{}, err
 		}
+	}
+	if numLineStrings == 0 {
+		return MultiLineString{}.ForceCoordinatesType(p.ctype), nil
 	}
 	var lines []LineString
 	for i := 0; i < int(numLineStrings); i++ {
@@ -558,6 +567,9 @@ func (p *twkbParser) nextMultiPolygon() (MultiPolygon, error) {
 			return MultiPolygon{}, err
 		}
 	}
+	if numPolygons == 0 {
+		return MultiPolygon{}.ForceCoordinatesType(p.ctype), nil
+	}
 	var polys []Polygon
 	for i := 0; i < int(numPolygons); i++ {
 		poly, err := p.nextPolygon()
@@ -585,6 +597,9 @@ func (p *twkbParser) nextGeometryCollection() (GeometryCollection, error) {
 		if err := p.parseIDList(numGeoms); err != nil {
 			return GeometryCollection{}, err
 		}
+	}
+	if numGeoms == 0 {
+		return GeometryCollection{}.ForceCoordinatesType(p.ctype), nil
 	}
 	var geoms []Geometry
 	for i := 0; i < int(numGeoms); i++ {

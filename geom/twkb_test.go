@@ -166,6 +166,12 @@ var TWKBTestCases = []struct {
 		skipEncode:  true,
 	},
 	{
+		description: "polygon z no rings",
+		twkbHex:     "03080100",
+		wkt:         "POLYGON Z EMPTY",
+		skipEncode:  true,
+	},
+	{
 		description: "polygon unclosed rings",
 		twkbHex:     "030002040000060000060500040203000202000001",
 		wkt:         "POLYGON((0 0,3 0,3 3,0 3,0 0),(1 1,1 2,2 2,2 1,1 1))",
@@ -208,6 +214,12 @@ var TWKBTestCases = []struct {
 		description: "multipoint no contents",
 		twkbHex:     "040000",
 		wkt:         "MULTIPOINT EMPTY",
+		skipEncode:  true,
+	},
+	{
+		description: "multipoint z no contents",
+		twkbHex:     "04080100",
+		wkt:         "MULTIPOINT Z EMPTY",
 		skipEncode:  true,
 	},
 	{
@@ -288,6 +300,12 @@ var TWKBTestCases = []struct {
 		skipEncode:  true,
 	},
 	{
+		description: "multilinestring z no contents",
+		twkbHex:     "05080100",
+		wkt:         "MULTILINESTRING Z EMPTY",
+		skipEncode:  true,
+	},
+	{
 		description: "multilinestring",
 		twkbHex:     "050002020000020203020202020202",
 		wkt:         "MULTILINESTRING((0 0,1 1),(2 2,3 3,4 4))",
@@ -310,6 +328,12 @@ var TWKBTestCases = []struct {
 		skipEncode:  true,
 	},
 	{
+		description: "multipolygon z no contents",
+		twkbHex:     "06080100",
+		wkt:         "MULTIPOLYGON Z EMPTY",
+		skipEncode:  true,
+	},
+	{
 		description: "multipolygon with polygon lacking data",
 		twkbHex:     "06000100",
 		wkt:         "MULTIPOLYGON(EMPTY)",
@@ -325,6 +349,11 @@ var TWKBTestCases = []struct {
 		description: "multipolygon unclosed rings with various contents",
 		twkbHex:     "0600020001040000060000060500",
 		wkt:         "MULTIPOLYGON(EMPTY,((0 0,3 0,3 3,0 3,0 0)))",
+	},
+	{
+		description: "multipolygon z unclosed rings with various contents",
+		twkbHex:     "06080102000104000002060000000600050000",
+		wkt:         "MULTIPOLYGON Z (EMPTY,((0 0 1,3 0 1,3 3 1,0 3 1,0 0 1)))",
 	},
 	{
 		description: "multipolygon unclosed rings",
@@ -358,6 +387,24 @@ var TWKBTestCases = []struct {
 		description: "geometry collection no contents",
 		twkbHex:     "070000",
 		wkt:         "GEOMETRYCOLLECTION EMPTY",
+		skipEncode:  true,
+	},
+	{
+		description: "geometry collection z no contents",
+		twkbHex:     "07080100",
+		wkt:         "GEOMETRYCOLLECTION Z EMPTY",
+		skipEncode:  true,
+	},
+	{
+		description: "geometry collection z with multipoint z no contents",
+		twkbHex:     "0708010204080100010801020406",
+		wkt:         "GEOMETRYCOLLECTION Z (MULTIPOINT Z EMPTY,POINT Z (1 2 3))",
+		skipEncode:  true,
+	},
+	{
+		description: "geometry collection without extended dimensions holding a point z",
+		twkbHex:     "070001010801020406",
+		wkt:         "GEOMETRYCOLLECTION Z (POINT Z (1 2 3))",
 		skipEncode:  true,
 	},
 	{

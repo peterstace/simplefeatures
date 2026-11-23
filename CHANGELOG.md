@@ -3,8 +3,9 @@
 ## Unreleased
 
 - Fix `UnmarshalTWKB` dropping the Z and M of an empty `Polygon`,
-  `MultiPoint`, `MultiLineString`, `MultiPolygon` or `GeometryCollection`. A
-  collection containing one of them lost the Z and M of its other members too.
+  `MultiPoint`, `MultiLineString`, `MultiPolygon` or `GeometryCollection`,
+  whether written with the empty flag or with a count of zero. A collection
+  containing one of them lost the Z and M of its other members too.
 
 - Fix the bounding box of a `GeometryCollection` in the TWKB output. The
   sub-geometries of a collection are written by their own writers, so their
