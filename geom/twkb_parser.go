@@ -437,7 +437,7 @@ func (p *twkbParser) nextLineString() (LineString, error) {
 
 func (p *twkbParser) parsePolygon() (Polygon, error) {
 	if p.isEmpty {
-		return NewPolygon(nil), nil
+		return Polygon{}.ForceCoordinatesType(p.ctype), nil
 	}
 	return p.nextPolygon()
 }
@@ -482,12 +482,12 @@ func (p *twkbParser) nextPolygon() (Polygon, error) {
 		ls := NewLineString(NewSequence(coords, p.ctype))
 		rings = append(rings, ls)
 	}
-	return NewPolygon(rings), nil
+	return Polygon{rings, p.ctype}, nil
 }
 
 func (p *twkbParser) parseMultiPoint() (MultiPoint, error) {
 	if p.isEmpty {
-		return NewMultiPoint(nil), nil
+		return MultiPoint{}.ForceCoordinatesType(p.ctype), nil
 	}
 	return p.nextMultiPoint()
 }
@@ -510,12 +510,12 @@ func (p *twkbParser) nextMultiPoint() (MultiPoint, error) {
 		}
 		pts = append(pts, pt)
 	}
-	return NewMultiPoint(pts), nil
+	return MultiPoint{pts, p.ctype}, nil
 }
 
 func (p *twkbParser) parseMultiLineString() (MultiLineString, error) {
 	if p.isEmpty {
-		return NewMultiLineString(nil), nil
+		return MultiLineString{}.ForceCoordinatesType(p.ctype), nil
 	}
 	return p.nextMultiLineString()
 }
@@ -538,12 +538,12 @@ func (p *twkbParser) nextMultiLineString() (MultiLineString, error) {
 		}
 		lines = append(lines, ls)
 	}
-	return NewMultiLineString(lines), nil
+	return MultiLineString{lines, p.ctype}, nil
 }
 
 func (p *twkbParser) parseMultiPolygon() (MultiPolygon, error) {
 	if p.isEmpty {
-		return NewMultiPolygon(nil), nil
+		return MultiPolygon{}.ForceCoordinatesType(p.ctype), nil
 	}
 	return p.nextMultiPolygon()
 }
@@ -566,12 +566,12 @@ func (p *twkbParser) nextMultiPolygon() (MultiPolygon, error) {
 		}
 		polys = append(polys, poly)
 	}
-	return NewMultiPolygon(polys), nil
+	return MultiPolygon{polys, p.ctype}, nil
 }
 
 func (p *twkbParser) parseGeometryCollection() (GeometryCollection, error) {
 	if p.isEmpty {
-		return NewGeometryCollection(nil), nil
+		return GeometryCollection{}.ForceCoordinatesType(p.ctype), nil
 	}
 	return p.nextGeometryCollection()
 }
@@ -585,6 +585,9 @@ func (p *twkbParser) nextGeometryCollection() (GeometryCollection, error) {
 		if err := p.parseIDList(numGeoms); err != nil {
 			return GeometryCollection{}, err
 		}
+	}
+	if numGeoms == 0 {
+		return GeometryCollection{}.ForceCoordinatesType(p.ctype), nil
 	}
 	var geoms []Geometry
 	for i := 0; i < int(numGeoms); i++ {
