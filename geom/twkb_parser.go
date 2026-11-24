@@ -447,9 +447,6 @@ func (p *twkbParser) nextPolygon() (Polygon, error) {
 	if err != nil {
 		return Polygon{}, fmt.Errorf("num rings varint malformed: %w", err)
 	}
-	if numRings == 0 {
-		return Polygon{}.ForceCoordinatesType(p.ctype), nil
-	}
 
 	var rings []LineString
 	for r := uint64(0); r < numRings; r++ {
@@ -485,7 +482,7 @@ func (p *twkbParser) nextPolygon() (Polygon, error) {
 		ls := NewLineString(NewSequence(coords, p.ctype))
 		rings = append(rings, ls)
 	}
-	return NewPolygon(rings), nil
+	return Polygon{rings, p.ctype}, nil
 }
 
 func (p *twkbParser) parseMultiPoint() (MultiPoint, error) {
@@ -505,9 +502,6 @@ func (p *twkbParser) nextMultiPoint() (MultiPoint, error) {
 			return MultiPoint{}, err
 		}
 	}
-	if numPoints == 0 {
-		return MultiPoint{}.ForceCoordinatesType(p.ctype), nil
-	}
 	var pts []Point
 	for i := 0; i < int(numPoints); i++ {
 		pt, err := p.nextPoint()
@@ -516,7 +510,7 @@ func (p *twkbParser) nextMultiPoint() (MultiPoint, error) {
 		}
 		pts = append(pts, pt)
 	}
-	return NewMultiPoint(pts), nil
+	return MultiPoint{pts, p.ctype}, nil
 }
 
 func (p *twkbParser) parseMultiLineString() (MultiLineString, error) {
@@ -536,9 +530,6 @@ func (p *twkbParser) nextMultiLineString() (MultiLineString, error) {
 			return MultiLineString{}, err
 		}
 	}
-	if numLineStrings == 0 {
-		return MultiLineString{}.ForceCoordinatesType(p.ctype), nil
-	}
 	var lines []LineString
 	for i := 0; i < int(numLineStrings); i++ {
 		ls, err := p.nextLineString()
@@ -547,7 +538,7 @@ func (p *twkbParser) nextMultiLineString() (MultiLineString, error) {
 		}
 		lines = append(lines, ls)
 	}
-	return NewMultiLineString(lines), nil
+	return MultiLineString{lines, p.ctype}, nil
 }
 
 func (p *twkbParser) parseMultiPolygon() (MultiPolygon, error) {
@@ -567,9 +558,6 @@ func (p *twkbParser) nextMultiPolygon() (MultiPolygon, error) {
 			return MultiPolygon{}, err
 		}
 	}
-	if numPolygons == 0 {
-		return MultiPolygon{}.ForceCoordinatesType(p.ctype), nil
-	}
 	var polys []Polygon
 	for i := 0; i < int(numPolygons); i++ {
 		poly, err := p.nextPolygon()
@@ -578,7 +566,7 @@ func (p *twkbParser) nextMultiPolygon() (MultiPolygon, error) {
 		}
 		polys = append(polys, poly)
 	}
-	return NewMultiPolygon(polys), nil
+	return MultiPolygon{polys, p.ctype}, nil
 }
 
 func (p *twkbParser) parseGeometryCollection() (GeometryCollection, error) {
