@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fix spurious holes in buffers of closed lines when the inward offset is
+  fully eroded.
+
 - Fix the bounding box of a `GeometryCollection` in the TWKB output. The
   sub-geometries of a collection are written by their own writers, so their
   coordinates never reached the bounding box of the collection, and a

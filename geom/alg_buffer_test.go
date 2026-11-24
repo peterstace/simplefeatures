@@ -165,3 +165,35 @@ func TestBuffer(t *testing.T) {
 		})
 	}
 }
+
+func TestBufferClosedLineHoleErosion(t *testing.T) {
+	// Regression case from JTS #1117 (GEOS #1223).
+	line := test.FromWKT(t, "LINESTRING (25 44, 31 44, 32 38, 29 37, 25 37, 25 38, 24 40, 24 44, 25 44)")
+	for _, tc := range []struct {
+		name     string
+		input    geom.Geometry
+		distance float64
+		holes    int
+	}{
+		{"hole eroded", line, 100, 0},
+		{"hole eroded in reverse", line.Reverse(), 100, 0},
+		{"hole preserved", line, 2, 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := geom.Buffer(tc.input, tc.distance)
+			test.NoErr(t, err)
+			test.NoErr(t, got.Validate())
+			if !got.IsPolygon() {
+				t.Fatalf("got %s, want Polygon", got.Type())
+			}
+			if holes := got.MustAsPolygon().NumInteriorRings(); holes != tc.holes {
+				t.Errorf("got %d interior rings, want %d", holes, tc.holes)
+			}
+			covers, err := geom.Covers(got, tc.input)
+			test.NoErr(t, err)
+			if !covers {
+				t.Error("buffer does not cover the input line")
+			}
+		})
+	}
+}

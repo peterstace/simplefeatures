@@ -166,7 +166,7 @@ func (bcsb *OperationBuffer_BufferCurveSetBuilder) addPolygon(p *Geom_Polygon) {
 	shellCoord := operationBuffer_bufferCurveSetBuilder_clean(shell.GetCoordinates())
 	// optimization - don't bother computing buffer
 	// if the polygon would be completely eroded
-	if bcsb.distance < 0.0 && operationBuffer_bufferCurveSetBuilder_isErodedCompletely(shell, bcsb.distance) {
+	if bcsb.distance < 0.0 && operationBuffer_bufferCurveSetBuilder_isRingFullyEroded(shell.GetCoordinates(), shell.GetEnvelopeInternal(), -bcsb.distance) {
 		return
 	}
 	// don't attempt to buffer a polygon with too few distinct vertices
@@ -187,7 +187,7 @@ func (bcsb *OperationBuffer_BufferCurveSetBuilder) addPolygon(p *Geom_Polygon) {
 
 		// optimization - don't bother computing buffer for this hole
 		// if the hole would be completely covered
-		if bcsb.distance > 0.0 && operationBuffer_bufferCurveSetBuilder_isErodedCompletely(hole, -bcsb.distance) {
+		if bcsb.distance > 0.0 && operationBuffer_bufferCurveSetBuilder_isRingFullyEroded(hole.GetCoordinates(), hole.GetEnvelopeInternal(), bcsb.distance) {
 			continue
 		}
 
@@ -204,13 +204,17 @@ func (bcsb *OperationBuffer_BufferCurveSetBuilder) addPolygon(p *Geom_Polygon) {
 }
 
 func (bcsb *OperationBuffer_BufferCurveSetBuilder) addRingBothSides(coord []*Geom_Coordinate, distance float64) {
+	// addRingSide interprets sides relative to a clockwise ring, so left is outward.
 	bcsb.addRingSide(coord, distance,
 		Geom_Position_Left,
 		Geom_Location_Exterior, Geom_Location_Interior)
-	// Add the opposite side of the ring
-	bcsb.addRingSide(coord, distance,
-		Geom_Position_Right,
-		Geom_Location_Interior, Geom_Location_Exterior)
+
+	// Skip the inward offset if erosion would eliminate it (JTS #1117).
+	if !operationBuffer_bufferCurveSetBuilder_isRingFullyEroded(coord, Geom_CoordinateArrays_Envelope(coord), distance) {
+		bcsb.addRingSide(coord, distance,
+			Geom_Position_Right,
+			Geom_Location_Interior, Geom_Location_Exterior)
+	}
 }
 
 // addRingSide adds an offset curve for one side of a ring.
@@ -323,33 +327,18 @@ func operationBuffer_bufferCurveSetBuilder_hasPointOnBuffer(inputRing []*Geom_Co
 	return false
 }
 
-// operationBuffer_bufferCurveSetBuilder_isErodedCompletely tests whether a ring buffer is eroded completely (is empty)
-// based on simple heuristics.
-//
-// The ringCoord is assumed to contain no repeated points.
-// It may be degenerate (i.e. contain only 1, 2, or 3 points).
-// In this case it has no area, and hence has a minimum diameter of 0.
-func operationBuffer_bufferCurveSetBuilder_isErodedCompletely(ring *Geom_LinearRing, bufferDistance float64) bool {
-	ringCoord := ring.GetCoordinates()
-	// degenerate ring has no area
+// operationBuffer_bufferCurveSetBuilder_isRingFullyEroded tests whether an
+// inward offset by a positive distance would completely erode the ring.
+func operationBuffer_bufferCurveSetBuilder_isRingFullyEroded(ringCoord []*Geom_Coordinate, env *Geom_Envelope, distance float64) bool {
+	// A degenerate ring has no area.
 	if len(ringCoord) < 4 {
-		return bufferDistance < 0
-	}
-
-	// important test to eliminate inverted triangle bug
-	// also optimizes erosion test for triangles
-	if len(ringCoord) == 4 {
-		return operationBuffer_bufferCurveSetBuilder_isTriangleErodedCompletely(ringCoord, bufferDistance)
-	}
-
-	// if envelope is narrower than twice the buffer distance, ring is eroded
-	env := ring.GetEnvelopeInternal()
-	envMinDimension := math.Min(env.GetHeight(), env.GetWidth())
-	if bufferDistance < 0.0 && 2*math.Abs(bufferDistance) > envMinDimension {
 		return true
 	}
-
-	return false
+	if len(ringCoord) == 4 {
+		return operationBuffer_bufferCurveSetBuilder_isTriangleErodedCompletely(ringCoord, distance)
+	}
+	// The ring is eroded if its envelope is narrower than twice the distance.
+	return 2*distance > math.Min(env.GetHeight(), env.GetWidth())
 }
 
 // operationBuffer_bufferCurveSetBuilder_isTriangleErodedCompletely tests whether a triangular ring would be eroded completely by the given
